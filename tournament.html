@@ -1,0 +1,1899 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewTon - Tournament Manager</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .header-top {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .header h1 {
+            color: #000000;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+
+        .logo-placeholder {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, #000000 0%, #333333 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: bold;
+            font-size: 14px;
+            border: 3px solid #ddd;
+            text-align: center;
+            line-height: 1.2;
+        }
+
+        .nav {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+        }
+
+        .nav button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background: #000000;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+
+        .nav button:hover {
+            background: #333333;
+        }
+
+        .nav button.active {
+            background: #ff6b35;
+        }
+
+        .page {
+            display: none;
+            background: white;
+            border-radius: 10px;
+            padding: 30px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #000000;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 10px;
+            border: 2px solid #ddd;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #000000;
+        }
+
+        .btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 5px;
+            background: #000000;
+            color: white;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 16px;
+            transition: all 0.3s;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            background: #333333;
+            transform: translateY(-2px);
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .btn-danger {
+            background: #dc3545;
+        }
+
+        .btn-danger:hover {
+            background: #c82333;
+        }
+
+        .btn-warning {
+            background: #ffc107;
+            color: #212529;
+        }
+
+        .btn-warning:hover {
+            background: #e0a800;
+        }
+
+        .players-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .player-card {
+            background: #f8f9fa;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            padding: 15px;
+            transition: all 0.3s;
+        }
+
+        .player-card:hover {
+            border-color: #000000;
+        }
+
+        .player-card.paid {
+            border-color: #28a745;
+            background: #d4edda;
+        }
+
+        .player-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+
+        .player-name {
+            font-weight: bold;
+            font-size: 18px;
+            color: #000000;
+        }
+
+        .paid-checkbox {
+            transform: scale(1.2);
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .stat-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .tournament-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        /* BRACKET STYLES */
+        .bracket-container {
+            position: relative;
+            width: 100%;
+            height: 80vh;
+            background: #f5f5f5;
+            border: 8px solid #333333;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.3);
+        }
+
+        .bracket-viewport {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            position: relative;
+            cursor: grab;
+        }
+
+        .bracket-viewport:active {
+            cursor: grabbing;
+        }
+
+        .bracket-canvas {
+            position: relative;
+            width: 2000px;
+            height: 1200px;
+            background: #f5f5f5;
+            transform-origin: 0 0;
+            transition: transform 0.1s ease-out;
+        }
+
+        .bracket-controls {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 100;
+        }
+
+        .zoom-btn {
+            width: 40px;
+            height: 40px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.8);
+            color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .zoom-btn:hover {
+            background: rgba(0,0,0,0.9);
+        }
+
+        .bracket-title {
+            position: absolute;
+            top: 50px;
+            font-size: 48px;
+            font-weight: bold;
+            color: #333333;
+            letter-spacing: 8px;
+            text-transform: uppercase;
+        }
+
+        .bracket-title.back {
+            left: 200px;
+        }
+
+        .bracket-title.front {
+            right: 200px;
+        }
+
+        .bracket-match {
+            position: absolute;
+            width: 180px;
+            height: 80px;
+            background: white;
+            border: 2px solid #ddd;
+            border-radius: 6px;
+            display: flex;
+            flex-direction: column;
+            font-size: 11px;
+            transition: all 0.3s;
+            cursor: pointer;
+            z-index: 10;
+        }
+
+        .bracket-match:hover {
+            border-color: #ff6b35;
+            box-shadow: 0 4px 12px rgba(255,107,53,0.3);
+            z-index: 20;
+        }
+
+        .bracket-match.active {
+            border-color: #ff6b35;
+            background: #fff8f0;
+        }
+
+        .bracket-match.completed {
+            background: #f0f8ff;
+            border-color: #28a745;
+        }
+
+        .match-header {
+            background: #f8f9fa;
+            padding: 3px 8px;
+            font-weight: bold;
+            font-size: 10px;
+            text-align: center;
+            border-bottom: 1px solid #ddd;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .match-info {
+            font-size: 9px;
+            color: #666;
+        }
+
+        .match-players {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .match-player {
+            flex: 1;
+            padding: 6px 8px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid #eee;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .match-player:last-child {
+            border-bottom: none;
+        }
+
+        .match-player:hover {
+            background: #f8f9fa;
+        }
+
+        .match-player.winner {
+            background: #d4edda;
+            font-weight: bold;
+        }
+
+        .match-player.first-throw {
+            border-left: 3px solid #ff6b35;
+        }
+
+        .match-player.bye {
+            background: #f8f9fa;
+            color: #666;
+            font-style: italic;
+            cursor: default;
+        }
+
+        .player-name-short {
+            font-size: 11px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 100px;
+        }
+
+        .winner-check {
+            color: #28a745;
+            font-weight: bold;
+            font-size: 14px;
+        }
+
+        .match-controls {
+            padding: 3px 8px;
+            background: #f8f9fa;
+            border-top: 1px solid #ddd;
+            font-size: 9px;
+            display: flex;
+            justify-content: space-between;
+        }
+
+        .bracket-line {
+            position: absolute;
+            background: #333333;
+            z-index: 1;
+        }
+
+        .bracket-line.horizontal {
+            height: 3px;
+        }
+
+        .bracket-line.vertical {
+            width: 3px;
+        }
+
+        .config-section {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+
+        .config-section h3 {
+            color: #000000;
+            margin-bottom: 15px;
+        }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .results-table th,
+        .results-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #ddd;
+        }
+
+        .results-table th {
+            background: #000000;
+            color: white;
+            font-weight: bold;
+        }
+
+        .results-table tr:nth-child(even) {
+            background: #f8f9fa;
+        }
+
+        .results-table tr:hover {
+            background: #e9ecef;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0,0,0,0.5);
+        }
+
+        .modal-content {
+            background-color: white;
+            margin: 5% auto;
+            padding: 30px;
+            border-radius: 10px;
+            width: 80%;
+            max-width: 600px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.3);
+        }
+
+        .close {
+            color: #aaa;
+            float: right;
+            font-size: 28px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: -10px;
+        }
+
+        .close:hover {
+            color: #000;
+        }
+
+        .alert {
+            padding: 15px;
+            margin: 15px 0;
+            border: 1px solid transparent;
+            border-radius: 5px;
+        }
+
+        .alert-info {
+            color: #0c5460;
+            background-color: #d1ecf1;
+            border-color: #bee5eb;
+        }
+
+        .alert-success {
+            color: #155724;
+            background-color: #d4edda;
+            border-color: #c3e6cb;
+        }
+
+        .alert-warning {
+            color: #856404;
+            background-color: #fff3cd;
+            border-color: #ffeaa7;
+        }
+
+        @media (max-width: 768px) {
+            .tournament-info {
+                grid-template-columns: 1fr;
+            }
+            
+            .players-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>
+                    <div class="logo-placeholder">
+                        CLUB<br>LOGO
+                    </div>
+                    NewTon - Tournament Manager
+                </h1>
+            </div>
+            <div class="nav">
+                <button class="nav-btn active" data-page="setup">Setup</button>
+                <button class="nav-btn" data-page="registration">Registration</button>
+                <button class="nav-btn" data-page="tournament">Tournament</button>
+                <button class="nav-btn" data-page="config">Config</button>
+            </div>
+        </div>
+
+        <!-- Setup Page -->
+        <div id="setup" class="page active">
+            <h2>Tournament Setup</h2>
+            <div class="tournament-info">
+                <div class="form-group">
+                    <label for="tournamentName">Tournament Name</label>
+                    <input type="text" id="tournamentName" placeholder="Enter tournament name">
+                </div>
+                <div class="form-group">
+                    <label for="tournamentDate">Tournament Date</label>
+                    <input type="date" id="tournamentDate">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-success" onclick="createTournament()">Create New Tournament</button>
+                <button class="btn" onclick="loadTournament()">Load Existing Tournament</button>
+                <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
+            </div>
+
+            <div id="tournamentStatus" class="alert alert-info" style="display: none;">
+                No active tournament
+            </div>
+
+            <div class="config-section">
+                <h3>Recent Tournaments</h3>
+                <div id="recentTournaments">
+                    <p>No tournaments found</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Page -->
+        <div id="registration" class="page">
+            <h2>Player Registration</h2>
+            
+            <div class="form-group">
+                <label for="playerName">Add New Player</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="playerName" placeholder="Enter player name" style="flex: 1;">
+                    <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+                <h3>Players (<span id="playerCount">0</span> total, <span id="paidCount">0</span> paid)</h3>
+                <div>
+                    <button class="btn" onclick="generateBracket()">Generate Bracket</button>
+                    <button class="btn btn-danger" onclick="clearAllPlayers()">Clear All</button>
+                </div>
+            </div>
+
+            <div id="playersContainer" class="players-grid">
+                <!-- Players will be added here -->
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" style="margin-top: 40px; display: none;">
+                <h3>Tournament Results</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Points</th>
+                            <th>Short Legs</th>
+                            <th>High Outs</th>
+                            <th>Tons</th>
+                            <th>180s</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tournament Page -->
+        <div id="tournament" class="page">
+            <h2>Double Elimination Bracket</h2>
+            
+            <div id="tournamentControls" style="margin-bottom: 20px;">
+                <button class="btn" onclick="autoAssignReferees()">Auto-Assign Referees</button>
+                <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
+                <button class="btn" onclick="showMatchDetails()">Match Details</button>
+            </div>
+
+            <div class="bracket-container">
+                <div class="bracket-controls">
+                    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                    <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
+                    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                </div>
+                
+                <div class="bracket-viewport" id="bracketViewport">
+                    <div class="bracket-canvas" id="bracketCanvas">
+                        <div class="bracket-title back">BACKSIDE</div>
+                        <div class="bracket-title front">FRONTSIDE</div>
+                        
+                        <div id="bracketMatches">
+                            <!-- Bracket matches will be rendered here -->
+                        </div>
+                        
+                        <div id="bracketLines">
+                            <!-- Connection lines will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Page -->
+        <div id="config" class="page">
+            <h2>Tournament Configuration</h2>
+            
+            <div class="config-section">
+                <h3>Point Values</h3>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="participationPoints">Participation Points</label>
+                        <input type="number" id="participationPoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstPlacePoints">1st Place Points</label>
+                        <input type="number" id="firstPlacePoints" value="3" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="secondPlacePoints">2nd Place Points</label>
+                        <input type="number" id="secondPlacePoints" value="2" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="thirdPlacePoints">3rd Place Points</label>
+                        <input type="number" id="thirdPlacePoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="highOutPoints">High Out Points (101+)</label>
+                        <input type="number" id="highOutPoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="tonPoints">Ton Points (100+)</label>
+                        <input type="number" id="tonPoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="oneEightyPoints">180 Points</label>
+                        <input type="number" id="oneEightyPoints" value="1" min="0">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="saveConfiguration()">Save Configuration</button>
+            </div>
+
+            <div class="config-section">
+                <h3>Match Configuration</h3>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="round1Legs">Round 1 Legs</label>
+                        <select id="round1Legs">
+                            <option value="3">Best of 3</option>
+                            <option value="5">Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="round2Legs">Round 2 Legs</label>
+                        <select id="round2Legs">
+                            <option value="3">Best of 3</option>
+                            <option value="5">Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="semifinalLegs">Semi-Final Legs</label>
+                        <select id="semifinalLegs">
+                            <option value="3">Best of 3</option>
+                            <option value="5" selected>Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="finalLegs">Final Legs</label>
+                        <select id="finalLegs">
+                            <option value="3">Best of 3</option>
+                            <option value="5" selected>Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStatsModal()">&times;</span>
+            <h3 id="statsPlayerName">Player Statistics</h3>
+            <div class="form-group">
+                <label>Short Legs (max 21 darts)</label>
+                <input type="number" id="statsShortLegs" min="0" max="21">
+            </div>
+            <div class="form-group">
+                <label>High Out Score (101+)</label>
+                <input type="number" id="statsHighOut" min="101" max="170">
+                <button class="btn" onclick="addHighOut()">Add High Out</button>
+            </div>
+            <div class="form-group">
+                <label>Tons (100+)</label>
+                <input type="number" id="statsTons" min="0">
+            </div>
+            <div class="form-group">
+                <label>180s</label>
+                <input type="number" id="stats180s" min="0">
+            </div>
+            <div id="highOutsList" style="margin-top: 10px;"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
+                <button class="btn" onclick="closeStatsModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Global variables
+        let tournament = null;
+        let players = [];
+        let matches = [];
+        let config = {
+            points: {
+                participation: 1,
+                first: 3,
+                second: 2,
+                third: 1,
+                highOut: 1,
+                ton: 1,
+                oneEighty: 1
+            },
+            legs: {
+                round1: 3,
+                round2: 3,
+                semifinal: 5,
+                final: 5
+            }
+        };
+        let currentStatsPlayer = null;
+        let zoomLevel = 0.6; // Start zoomed out to show full tournament
+        let isDragging = false;
+        let dragStart = { x: 0, y: 0 };
+        let panOffset = { x: 0, y: 0 };
+
+        // Initialize application
+        document.addEventListener('DOMContentLoaded', function() {
+            loadConfiguration();
+            loadRecentTournaments();
+            setupEventListeners();
+            setTodayDate();
+        });
+
+        function setTodayDate() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('tournamentDate').value = today;
+        }
+
+        function setupEventListeners() {
+            // Navigation
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const page = this.dataset.page;
+                    showPage(page);
+                });
+            });
+
+            // Enter key handlers
+            document.getElementById('playerName').addEventListener('keypress', function(e) {
+                if (e.key === 'Enter') {
+                    addPlayer();
+                }
+            });
+
+            // Auto-save configuration
+            ['participationPoints', 'firstPlacePoints', 'secondPlacePoints', 'thirdPlacePoints', 
+             'highOutPoints', 'tonPoints', 'oneEightyPoints'].forEach(id => {
+                document.getElementById(id).addEventListener('change', function() {
+                    config.points[id.replace('Points', '')] = parseInt(this.value);
+                    saveConfiguration();
+                });
+            });
+
+            // Bracket zoom and pan controls
+            const viewport = document.getElementById('bracketViewport');
+            if (viewport) {
+                viewport.addEventListener('wheel', handleZoom);
+                viewport.addEventListener('mousedown', startDrag);
+                viewport.addEventListener('mousemove', handleDrag);
+                viewport.addEventListener('mouseup', endDrag);
+                viewport.addEventListener('mouseleave', endDrag);
+            }
+        }
+
+        function showPage(pageId) {
+            document.querySelectorAll('.page').forEach(page => {
+                page.classList.remove('active');
+            });
+            document.querySelectorAll('.nav-btn').forEach(btn => {
+                btn.classList.remove('active');
+            });
+            
+            document.getElementById(pageId).classList.add('active');
+            document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+        }
+
+        function createTournament() {
+            const name = document.getElementById('tournamentName').value.trim();
+            const date = document.getElementById('tournamentDate').value;
+            
+            if (!name || !date) {
+                alert('Please enter both tournament name and date');
+                return;
+            }
+
+            tournament = {
+                id: Date.now(),
+                name: name,
+                date: date,
+                created: new Date().toISOString(),
+                status: 'setup',
+                players: [],
+                matches: [],
+                bracket: null
+            };
+
+            players = [];
+            matches = [];
+            
+            saveTournament();
+            updateTournamentStatus();
+            showPage('registration');
+            
+            alert('Tournament created successfully!');
+        }
+
+        function loadTournament() {
+            const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+            if (tournaments.length === 0) {
+                alert('No tournaments found');
+                return;
+            }
+
+            const tournamentList = tournaments.map(t => 
+                `${t.id}: ${t.name} (${t.date})`
+            ).join('\n');
+            
+            const selectedId = prompt('Select tournament by ID:\n' + tournamentList);
+            if (!selectedId) return;
+
+            const selectedTournament = tournaments.find(t => t.id == selectedId);
+            if (!selectedTournament) {
+                alert('Tournament not found');
+                return;
+            }
+
+            tournament = selectedTournament;
+            players = tournament.players || [];
+            matches = tournament.matches || [];
+            
+            document.getElementById('tournamentName').value = tournament.name;
+            document.getElementById('tournamentDate').value = tournament.date;
+            
+            updateTournamentStatus();
+            updatePlayersDisplay();
+            updatePlayerCount();
+            
+            if (tournament.bracket) {
+                renderBracket();
+            }
+            
+            showPage('registration');
+            alert('Tournament loaded successfully!');
+        }
+
+        function exportTournament() {
+            if (!tournament) {
+                alert('No active tournament to export');
+                return;
+            }
+
+            const dataStr = JSON.stringify(tournament, null, 2);
+            const dataBlob = new Blob([dataStr], {type: 'application/json'});
+            const url = URL.createObjectURL(dataBlob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `${tournament.name}_${tournament.date}.json`;
+            link.click();
+        }
+
+        function saveTournament() {
+            if (!tournament) return;
+
+            tournament.players = players;
+            tournament.matches = matches;
+            tournament.lastSaved = new Date().toISOString();
+
+            let tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+            const index = tournaments.findIndex(t => t.id === tournament.id);
+            
+            if (index >= 0) {
+                tournaments[index] = tournament;
+            } else {
+                tournaments.push(tournament);
+            }
+            
+            localStorage.setItem('dartsTournaments', JSON.stringify(tournaments));
+            localStorage.setItem('currentTournament', JSON.stringify(tournament));
+        }
+
+        function updateTournamentStatus() {
+            const statusDiv = document.getElementById('tournamentStatus');
+            if (tournament) {
+                statusDiv.innerHTML = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
+                statusDiv.className = 'alert alert-success';
+                statusDiv.style.display = 'block';
+            } else {
+                statusDiv.innerHTML = 'No active tournament';
+                statusDiv.className = 'alert alert-info';
+                statusDiv.style.display = 'block';
+            }
+        }
+
+        function loadRecentTournaments() {
+            const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+            const container = document.getElementById('recentTournaments');
+            
+            if (tournaments.length === 0) {
+                container.innerHTML = '<p>No tournaments found</p>';
+                return;
+            }
+
+            const html = tournaments.slice(-5).reverse().map(t => `
+                <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
+                    <strong>${t.name}</strong> (${t.date}) 
+                    <button class="btn" style="padding: 5px 10px; font-size: 14px;" onclick="loadSpecificTournament(${t.id})">Load</button>
+                </div>
+            `).join('');
+            
+            container.innerHTML = html;
+        }
+
+        function loadSpecificTournament(id) {
+            const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+            const selectedTournament = tournaments.find(t => t.id === id);
+            
+            if (!selectedTournament) {
+                alert('Tournament not found');
+                return;
+            }
+
+            tournament = selectedTournament;
+            players = tournament.players || [];
+            matches = tournament.matches || [];
+            
+            document.getElementById('tournamentName').value = tournament.name;
+            document.getElementById('tournamentDate').value = tournament.date;
+            
+            updateTournamentStatus();
+            updatePlayersDisplay();
+            updatePlayerCount();
+            
+            if (tournament.bracket) {
+                renderBracket();
+            }
+            
+            showPage('registration');
+        }
+
+        function addPlayer() {
+            const nameInput = document.getElementById('playerName');
+            const name = nameInput.value.trim();
+            
+            if (!name) {
+                alert('Please enter a player name');
+                return;
+            }
+
+            if (players.find(p => p.name.toLowerCase() === name.toLowerCase())) {
+                alert('Player already exists');
+                return;
+            }
+
+            const player = {
+                id: Date.now(),
+                name: name,
+                paid: false,
+                stats: {
+                    shortLegs: 0,
+                    highOuts: [],
+                    tons: 0,
+                    oneEighties: 0
+                },
+                placement: null,
+                eliminated: false
+            };
+
+            players.push(player);
+            nameInput.value = '';
+            
+            updatePlayersDisplay();
+            updatePlayerCount();
+            saveTournament();
+        }
+
+        function removePlayer(playerId) {
+            if (confirm('Are you sure you want to remove this player?')) {
+                players = players.filter(p => p.id !== playerId);
+                updatePlayersDisplay();
+                updatePlayerCount();
+                saveTournament();
+            }
+        }
+
+        function togglePaid(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (player) {
+                player.paid = !player.paid;
+                updatePlayersDisplay();
+                updatePlayerCount();
+                saveTournament();
+            }
+        }
+
+        function openStatsModal(playerId) {
+            const player = players.find(p => p.id === playerId);
+            if (!player) return;
+
+            currentStatsPlayer = player;
+            document.getElementById('statsPlayerName').textContent = `${player.name} - Statistics`;
+            document.getElementById('statsShortLegs').value = player.stats.shortLegs || 0;
+            document.getElementById('statsTons').value = player.stats.tons || 0;
+            document.getElementById('stats180s').value = player.stats.oneEighties || 0;
+            
+            updateHighOutsList();
+            document.getElementById('statsModal').style.display = 'block';
+        }
+
+        function addHighOut() {
+            const score = parseInt(document.getElementById('statsHighOut').value);
+            if (!score || score < 101 || score > 170) {
+                alert('Please enter a valid high out score (101-170)');
+                return;
+            }
+
+            if (!currentStatsPlayer.stats.highOuts) {
+                currentStatsPlayer.stats.highOuts = [];
+            }
+
+            currentStatsPlayer.stats.highOuts.push(score);
+            document.getElementById('statsHighOut').value = '';
+            updateHighOutsList();
+        }
+
+        function updateHighOutsList() {
+            const container = document.getElementById('highOutsList');
+            if (!currentStatsPlayer || !currentStatsPlayer.stats.highOuts) {
+                container.innerHTML = '';
+                return;
+            }
+
+            const html = currentStatsPlayer.stats.highOuts.map((score, index) => `
+                <span style="background: #f8f9fa; padding: 5px 10px; margin: 2px; border-radius: 3px; display: inline-block;">
+                    ${score} <button onclick="removeHighOut(${index})" style="background: none; border: none; color: red; cursor: pointer;">×</button>
+                </span>
+            `).join('');
+            
+            container.innerHTML = `<div style="margin-top: 10px;"><strong>High Outs:</strong><br>${html}</div>`;
+        }
+
+        function removeHighOut(index) {
+            if (currentStatsPlayer && currentStatsPlayer.stats.highOuts) {
+                currentStatsPlayer.stats.highOuts.splice(index, 1);
+                updateHighOutsList();
+            }
+        }
+
+        function saveStats() {
+            if (!currentStatsPlayer) return;
+
+            currentStatsPlayer.stats.shortLegs = parseInt(document.getElementById('statsShortLegs').value) || 0;
+            currentStatsPlayer.stats.tons = parseInt(document.getElementById('statsTons').value) || 0;
+            currentStatsPlayer.stats.oneEighties = parseInt(document.getElementById('stats180s').value) || 0;
+
+            updatePlayersDisplay();
+            saveTournament();
+            closeStatsModal();
+        }
+
+        function closeStatsModal() {
+            document.getElementById('statsModal').style.display = 'none';
+            currentStatsPlayer = null;
+        }
+
+        function updatePlayersDisplay() {
+            const container = document.getElementById('playersContainer');
+            
+            if (players.length === 0) {
+                container.innerHTML = '<p style="text-align: center; color: #666;">No players added yet</p>';
+                return;
+            }
+
+            const html = players.map(player => `
+                <div class="player-card ${player.paid ? 'paid' : ''}">
+                    <div class="player-header">
+                        <span class="player-name">${player.name}</span>
+                        <div>
+                            <label style="margin-right: 10px;">
+                                <input type="checkbox" class="paid-checkbox" ${player.paid ? 'checked' : ''} 
+                                       onchange="togglePaid(${player.id})"> Paid
+                            </label>
+                            <button onclick="removePlayer(${player.id})" style="background: #dc3545; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer;">×</button>
+                        </div>
+                    </div>
+                    <div class="stats-grid">
+                        <div class="stat-item">
+                            <span>Short Legs:</span>
+                            <span>${player.stats.shortLegs || 0}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>High Outs:</span>
+                            <span>${(player.stats.highOuts || []).length}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>Tons:</span>
+                            <span>${player.stats.tons || 0}</span>
+                        </div>
+                        <div class="stat-item">
+                            <span>180s:</span>
+                            <span>${player.stats.oneEighties || 0}</span>
+                        </div>
+                    </div>
+                    <button class="btn" style="width: 100%; margin-top: 10px; padding: 8px;" onclick="openStatsModal(${player.id})">
+                        Edit Statistics
+                    </button>
+                </div>
+            `).join('');
+
+            container.innerHTML = html;
+        }
+
+        function updatePlayerCount() {
+            const totalPlayers = players.length;
+            const paidPlayers = players.filter(p => p.paid).length;
+            
+            document.getElementById('playerCount').textContent = totalPlayers;
+            document.getElementById('paidCount').textContent = paidPlayers;
+        }
+
+        function clearAllPlayers() {
+            if (confirm('Are you sure you want to remove all players? This cannot be undone.')) {
+                players = [];
+                updatePlayersDisplay();
+                updatePlayerCount();
+                saveTournament();
+            }
+        }
+
+        function generateBracket() {
+            if (!tournament) {
+                alert('Please create a tournament first');
+                return;
+            }
+
+            const paidPlayers = players.filter(p => p.paid);
+            if (paidPlayers.length < 2) {
+                alert('Need at least 2 paid players to generate bracket');
+                return;
+            }
+
+            // Determine bracket size
+            let bracketSize;
+            if (paidPlayers.length <= 8) bracketSize = 8;
+            else if (paidPlayers.length <= 16) bracketSize = 16;
+            else if (paidPlayers.length <= 32) bracketSize = 32;
+            else bracketSize = 48;
+
+            // Shuffle players randomly
+            const shuffledPlayers = [...paidPlayers].sort(() => Math.random() - 0.5);
+            
+            // Create bracket - fill first round completely with players and walkovers
+            const bracket = [];
+            
+            // Add all real players
+            shuffledPlayers.forEach(player => {
+                bracket.push(player);
+            });
+            
+            // Fill remaining first round spots with walkovers
+            for (let i = shuffledPlayers.length; i < bracketSize; i++) {
+                bracket.push({ id: `walkover-${i}`, name: 'Walkover', isBye: true });
+            }
+
+            tournament.bracket = bracket;
+            tournament.bracketSize = bracketSize;
+            tournament.status = 'active';
+            
+            generateMatches();
+            saveTournament();
+            renderBracket();
+            showPage('tournament');
+            
+            alert(`Bracket generated with ${bracketSize} positions for ${paidPlayers.length} players`);
+        }
+
+        function generateMatches() {
+            matches = [];
+            const bracket = tournament.bracket;
+            const bracketSize = tournament.bracketSize;
+            const rounds = Math.ceil(Math.log2(bracketSize));
+
+            // Generate frontside matches with proper tournament tree structure
+            generateFrontsideTree(bracket, rounds);
+            
+            // Generate backside matches with proper losers bracket structure
+            generateBacksideTree(rounds);
+            
+            // Generate final match
+            generateFinalMatch();
+        }
+
+        function generateFrontsideTree(bracket, rounds) {
+            let matchId = 1;
+            let currentRoundPlayers = [...bracket];
+
+            // Generate each round of the frontside bracket
+            for (let round = 1; round <= rounds; round++) {
+                const roundMatches = [];
+                
+                // Create matches for this round
+                for (let i = 0; i < currentRoundPlayers.length; i += 2) {
+                    const player1 = currentRoundPlayers[i];
+                    const player2 = currentRoundPlayers[i + 1];
+                    
+                    const match = {
+                        id: matchId++,
+                        round: round,
+                        side: 'frontside',
+                        player1: player1,
+                        player2: player2,
+                        winner: null,
+                        loser: null,
+                        lane: Math.floor(i / 2) + 1,
+                        legs: round >= rounds - 1 ? config.legs.semifinal : config.legs.round1,
+                        referee: null,
+                        active: false,
+                        completed: false,
+                        positionInRound: Math.floor(i / 2)
+                    };
+                    
+                    // Auto-complete matches with walkovers
+                    if (player1?.isBye && !player2?.isBye) {
+                        match.winner = player2;
+                        match.completed = true;
+                    } else if (player2?.isBye && !player1?.isBye) {
+                        match.winner = player1;
+                        match.completed = true;
+                    }
+                    
+                    matches.push(match);
+                    roundMatches.push(match);
+                }
+                
+                // Prepare players for next round
+                currentRoundPlayers = [];
+                roundMatches.forEach(match => {
+                    currentRoundPlayers.push(match.winner || { name: 'TBD', id: `frontside-winner-${match.id}` });
+                });
+                
+                // Stop when we reach the final frontside match
+                if (currentRoundPlayers.length === 1) break;
+            }
+        }
+
+        function generateBacksideTree(frontsideRounds) {
+            let matchId = matches.length + 1;
+            
+            // Backside bracket has specific structure for double elimination
+            const backsideRounds = (frontsideRounds - 1) * 2;
+            
+            for (let round = 1; round <= backsideRounds; round++) {
+                // Calculate how many matches in this backside round
+                let matchesInRound;
+                if (round === 1) {
+                    // First backside round gets half the losers from frontside round 1
+                    matchesInRound = Math.floor(tournament.bracketSize / 4);
+                } else {
+                    // Subsequent rounds get progressively fewer matches
+                    matchesInRound = Math.max(1, Math.floor(matchesInRound / 2));
+                }
+                
+                for (let i = 0; i < matchesInRound; i++) {
+                    const match = {
+                        id: matchId++,
+                        round: round,
+                        side: 'backside',
+                        player1: { name: 'TBD', id: `backside-tbd-${round}-${i}-1` },
+                        player2: { name: 'TBD', id: `backside-tbd-${round}-${i}-2` },
+                        winner: null,
+                        loser: null,
+                        lane: i + 1,
+                        legs: config.legs.round1,
+                        referee: null,
+                        active: false,
+                        completed: false,
+                        positionInRound: i
+                    };
+                    
+                    matches.push(match);
+                }
+            }
+        }
+
+        function generateFinalMatch() {
+            const finalMatch = {
+                id: 'FINAL',
+                round: 'final',
+                side: 'final',
+                player1: { name: 'Frontside Winner', id: 'frontside-winner' },
+                player2: { name: 'Backside Winner', id: 'backside-winner' },
+                winner: null,
+                loser: null,
+                lane: 1,
+                legs: config.legs.final,
+                referee: null,
+                active: false,
+                completed: false
+            };
+            
+            matches.push(finalMatch);
+        }
+
+        // BRACKET RENDERING SYSTEM
+        function renderBracket() {
+            const canvas = document.getElementById('bracketCanvas');
+            if (!canvas) return;
+            
+            if (!tournament || !tournament.bracket) {
+                document.getElementById('bracketMatches').innerHTML = '<p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #333;">No bracket generated yet</p>';
+                return;
+            }
+
+            clearBracket();
+            renderDoubleEliminationBracket();
+        }
+
+        function clearBracket() {
+            document.getElementById('bracketMatches').innerHTML = '';
+            document.getElementById('bracketLines').innerHTML = '';
+        }
+
+        function renderDoubleEliminationBracket() {
+            const bracketSize = tournament.bracketSize;
+            const rounds = Math.ceil(Math.log2(bracketSize));
+
+            // Clear any existing connection lines
+            renderBracketConnections();
+            
+            // Render frontside bracket with proper tree structure
+            renderFrontsideTree(rounds);
+            
+            // Render backside bracket with proper tree structure
+            renderBacksideTree(rounds);
+            
+            // Render final match
+            renderFinalMatch();
+        }
+
+        function renderFrontsideTree(rounds) {
+            const frontsideMatches = matches.filter(m => m.side === 'frontside');
+            
+            // Group matches by round
+            const roundGroups = {};
+            frontsideMatches.forEach(match => {
+                if (!roundGroups[match.round]) {
+                    roundGroups[match.round] = [];
+                }
+                roundGroups[match.round].push(match);
+            });
+
+            // Render each round with proper tournament tree positioning
+            Object.keys(roundGroups).sort((a, b) => a - b).forEach((round, roundIndex) => {
+                const roundMatches = roundGroups[round];
+                const roundNum = parseInt(round);
+                
+                // Position: Start from right side, move left each round
+                const roundX = 1400 - (roundIndex * 300);
+                
+                // Vertical positioning: Create tournament tree structure
+                const baseY = 250;
+                const bracketHeight = 500;
+                
+                if (roundMatches.length === 1) {
+                    // Single match (semi-final) - center it
+                    const matchY = baseY + bracketHeight / 2;
+                    renderBracketMatch(roundMatches[0], roundX, matchY);
+                } else {
+                    // Multiple matches - space them evenly in tournament tree pattern
+                    const spacing = bracketHeight / (roundMatches.length + 1);
+                    roundMatches.forEach((match, matchIndex) => {
+                        const matchY = baseY + spacing * (matchIndex + 1);
+                        renderBracketMatch(match, roundX, matchY);
+                    });
+                }
+            });
+        }
+
+        function renderBacksideTree(rounds) {
+            const backsideMatches = matches.filter(m => m.side === 'backside');
+            
+            if (backsideMatches.length === 0) return;
+            
+            // Group matches by round
+            const roundGroups = {};
+            backsideMatches.forEach(match => {
+                if (!roundGroups[match.round]) {
+                    roundGroups[match.round] = [];
+                }
+                roundGroups[match.round].push(match);
+            });
+
+            // Render backside bracket below frontside
+            Object.keys(roundGroups).sort((a, b) => a - b).forEach((round, roundIndex) => {
+                const roundMatches = roundGroups[round];
+                
+                // Position: Start from left side, move right each round  
+                const roundX = 200 + (roundIndex * 300);
+                
+                // Vertical positioning: Below frontside bracket
+                const baseY = 800;
+                const spacing = 100;
+                
+                roundMatches.forEach((match, matchIndex) => {
+                    const matchY = baseY + (matchIndex * spacing);
+                    renderBracketMatch(match, roundX, matchY);
+                });
+            });
+        }
+
+        function renderFinalMatch() {
+            // Position final match in center where both brackets converge
+            const finalX = 800;  // Center horizontally
+            const finalY = 600;  // Between frontside and backside
+            
+            const finalMatch = matches.find(m => m.side === 'final');
+            if (finalMatch) {
+                renderBracketMatch(finalMatch, finalX, finalY);
+            }
+        }
+
+        function renderBracketMatch(match, x, y) {
+            const matchElement = document.createElement('div');
+            matchElement.className = `bracket-match ${match.active ? 'active' : ''} ${match.completed ? 'completed' : ''}`;
+            matchElement.style.left = x + 'px';
+            matchElement.style.top = y + 'px';
+            matchElement.id = `bracket-match-${match.id}`;
+
+            const refereeInfo = match.referee ? match.referee.name : 'No ref';
+            const availableReferees = getAvailableReferees(match.id);
+            const refereeOptions = availableReferees.map(ref => 
+                `<option value="${ref.id}" ${match.referee?.id === ref.id ? 'selected' : ''}>${ref.name}</option>`
+            ).join('');
+            
+            matchElement.innerHTML = `
+                <div class="match-header">
+                    <span>M${match.id}</span>
+                    <span class="match-info">
+                        L<select onchange="updateMatchLane(${match.id}, this.value)" style="background: white; border: 1px solid #ddd; font-size: 11px; width: 40px; padding: 2px;">
+                            ${Array.from({length: 10}, (_, i) => i + 1).map(lane => 
+                                `<option value="${lane}" ${match.lane === lane ? 'selected' : ''}>${lane}</option>`
+                            ).join('')}
+                        </select> | Bo${match.legs}
+                    </span>
+                </div>
+                <div class="match-players">
+                    <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${match.winner?.id === match.player1?.id ? 'winner' : ''}" 
+                         onclick="${match.player1?.isBye ? '' : `selectWinner('${match.id}', 1)`}">
+                        <span class="player-name-short">${match.player1?.name || 'TBD'}</span>
+                        ${match.winner?.id === match.player1?.id ? '<span class="winner-check">✓</span>' : ''}
+                    </div>
+                    <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${match.winner?.id === match.player2?.id ? 'winner' : ''}" 
+                         onclick="${match.player2?.isBye ? '' : `selectWinner('${match.id}', 2)`}">
+                        <span class="player-name-short">${match.player2?.name || 'TBD'}</span>
+                        ${match.winner?.id === match.player2?.id ? '<span class="winner-check">✓</span>' : ''}
+                    </div>
+                </div>
+                <div class="match-controls">
+                    <select onchange="updateReferee('${match.id}', this.value)" style="font-size: 11px; max-width: 80px; padding: 2px; background: white; border: 1px solid #ddd;">
+                        <option value="">No ref</option>
+                        ${refereeOptions}
+                    </select>
+                    <button onclick="toggleActive('${match.id}')" style="font-size: 8px; padding: 2px 4px; border: none; border-radius: 2px; background: ${match.active ? '#ff6b35' : '#ddd'}; color: ${match.active ? 'white' : 'black'};">
+                        ${match.active ? 'LIVE' : 'Start'}
+                    </button>
+                </div>
+            `;
+
+            document.getElementById('bracketMatches').appendChild(matchElement);
+        }
+
+        function renderBracketConnections() {
+            // Clear existing lines
+            document.getElementById('bracketLines').innerHTML = '';
+            
+            // Draw connection lines for frontside bracket
+            drawFrontsideConnections();
+            
+            // Draw connection lines for backside bracket  
+            drawBacksideConnections();
+        }
+
+        function drawFrontsideConnections() {
+            const frontsideMatches = matches.filter(m => m.side === 'frontside');
+            const roundGroups = {};
+            
+            // Group matches by round
+            frontsideMatches.forEach(match => {
+                if (!roundGroups[match.round]) {
+                    roundGroups[match.round] = [];
+                }
+                roundGroups[match.round].push(match);
+            });
+
+            // Draw lines between rounds
+            const rounds = Object.keys(roundGroups).sort((a, b) => a - b);
+            for (let i = 0; i < rounds.length - 1; i++) {
+                const currentRound = roundGroups[rounds[i]];
+                const nextRound = roundGroups[rounds[i + 1]];
+                
+                // Draw lines from current round matches to next round
+                for (let j = 0; j < nextRound.length; j++) {
+                    const nextMatch = nextRound[j];
+                    const match1 = currentRound[j * 2];
+                    const match2 = currentRound[j * 2 + 1];
+                    
+                    if (match1 && match2 && nextMatch) {
+                        drawTournamentConnection(match1, match2, nextMatch);
+                    }
+                }
+            }
+        }
+
+        function drawBacksideConnections() {
+            // Simplified backside connections for now
+            const backsideMatches = matches.filter(m => m.side === 'backside');
+            // TODO: Implement backside connection logic
+        }
+
+        function drawTournamentConnection(match1, match2, nextMatch) {
+            const linesContainer = document.getElementById('bracketLines');
+            
+            // Get positions from DOM elements
+            const match1Element = document.getElementById(`bracket-match-${match1.id}`);
+            const match2Element = document.getElementById(`bracket-match-${match2.id}`);
+            const nextMatchElement = document.getElementById(`bracket-match-${nextMatch.id}`);
+            
+            if (!match1Element || !match2Element || !nextMatchElement) return;
+            
+            const match1Rect = match1Element.getBoundingClientRect();
+            const match2Rect = match2Element.getBoundingClientRect();
+            const nextMatchRect = nextMatchElement.getBoundingClientRect();
+            const canvasRect = document.getElementById('bracketCanvas').getBoundingClientRect();
+            
+            // Calculate relative positions
+            const match1Y = match1Rect.top - canvasRect.top + match1Rect.height / 2;
+            const match2Y = match2Rect.top - canvasRect.top + match2Rect.height / 2;
+            const nextMatchY = nextMatchRect.top - canvasRect.top + nextMatchRect.height / 2;
+            const match1X = match1Rect.left - canvasRect.left + match1Rect.width;
+            const nextMatchX = nextMatchRect.left - canvasRect.left;
+            
+            // Draw horizontal lines from matches
+            const hLine1 = document.createElement('div');
+            hLine1.className = 'bracket-line horizontal';
+            hLine1.style.left = match1X + 'px';
+            hLine1.style.top = match1Y + 'px';
+            hLine1.style.width = '50px';
+            linesContainer.appendChild(hLine1);
+            
+            const hLine2 = document.createElement('div');
+            hLine2.className = 'bracket-line horizontal';
+            hLine2.style.left = match1X + 'px';
+            hLine2.style.top = match2Y + 'px';
+            hLine2.style.width = '50px';
+            linesContainer.appendChild(hLine2);
+            
+            // Draw vertical connector
+            const vLine = document.createElement('div');
+            vLine.className = 'bracket-line vertical';
+            vLine.style.left = (match1X + 50) + 'px';
+            vLine.style.top = Math.min(match1Y, match2Y) + 'px';
+            vLine.style.height = Math.abs(match2Y - match1Y) + 'px';
+            linesContainer.appendChild(vLine);
+            
+            // Draw line to next match
+            const finalLine = document.createElement('div');
+            finalLine.className = 'bracket-line horizontal';
+            finalLine.style.left = (match1X + 50) + 'px';
+            finalLine.style.top = nextMatchY + 'px';
+            finalLine.style.width = (nextMatchX - match1X - 50) + 'px';
+            linesContainer.appendChild(finalLine);
+        }
+
+        function selectWinner(matchId, playerNumber) {
+            const match = matches.find(m => m.id == matchId);
+            if (!match) return;
+
+            const winner = playerNumber === 1 ? match.player1 : match.player2;
+            const loser = playerNumber === 1 ? match.player2 : match.player1;
+
+            if (winner.isBye || winner.name === 'TBD') return;
+
+            // Toggle winner selection - if clicking same player, clear the winner
+            if (match.winner?.id === winner.id) {
+                match.winner = null;
+                match.loser = null;
+                match.completed = false;
+            } else {
+                // Set new winner
+                match.winner = winner;
+                match.loser = loser;
+                match.completed = true;
+                match.active = false;
+
+                // Handle bracket progression logic
+                advanceWinner(match);
+            }
+            
+            saveTournament();
+            renderBracket();
+        }
+
+        function updateMatchLane(matchId, newLane) {
+            const match = matches.find(m => m.id == matchId);
+            if (!match) return;
+
+            match.lane = parseInt(newLane);
+            saveTournament();
+        }
+
+        function updateReferee(matchId, refereeId) {
+            const match = matches.find(m => m.id == matchId);
+            if (!match) return;
+
+            if (refereeId === '') {
+                match.referee = null;
+            } else {
+                const referee = players.find(p => p.id == refereeId);
+                match.referee = referee || null;
+            }
+            
+            saveTournament();
+            renderBracket();
+        }
+
+        function getAvailableReferees(matchId) {
+            const match = matches.find(m => m.id == matchId);
+            if (!match) return [];
+
+            return players.filter(player => 
+                !player.eliminated && 
+                player.paid &&
+                player.id !== match.player1?.id && 
+                player.id !== match.player2?.id &&
+                !player.isBye &&
+                player.name !== 'TBD'
+            );
+        }
+
+        function toggleActive(matchId) {
+            const match = matches.find(m => m.id == matchId);
+            if (!match) return;
+
+            match.active = !match.active;
+            saveTournament();
+            renderBracket();
+        }
+
+        // Zoom and pan functionality
+        function handleZoom(e) {
+            e.preventDefault();
+            
+            // Get mouse position relative to viewport
+            const viewport = document.getElementById('bracketViewport');
+            const rect = viewport.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            const mouseY = e.clientY - rect.top;
+            
+            // Calculate mouse position in canvas coordinates
+            const canvasMouseX = (mouseX - panOffset.x) / zoomLevel;
+            const canvasMouseY = (mouseY - panOffset.y) / zoomLevel;
+            
+            // Small zoom increments
+            const delta = e.deltaY > 0 ? -0.05 : 0.05;
+            const newZoom = Math.max(0.3, Math.min(2, zoomLevel + delta));
+            
+            if (newZoom !== zoomLevel) {
+                // Calculate new pan offset to keep mouse position centered
+                panOffset.x = mouseX - canvasMouseX * newZoom;
+                panOffset.y = mouseY - canvasMouseY * newZoom;
+                
+                zoomLevel = newZoom;
+                updateCanvasTransform();
+            }
+        }
+
+        function zoomIn() {
+            const viewport = document.getElementById('bracketViewport');
+            const centerX = viewport.clientWidth / 2;
+            const centerY = viewport.clientHeight / 2;
+            
+            const canvasCenterX = (centerX - panOffset.x) / zoomLevel;
+            const canvasCenterY = (centerY - panOffset.y) / zoomLevel;
+            
+            zoomLevel = Math.min(2, zoomLevel + 0.1);
+            
+            panOffset.x = centerX - canvasCenterX * zoomLevel;
+            panOffset.y = centerY - canvasCenterY * zoomLevel;
+            
+            updateCanvasTransform();
+        }
+
+        function zoomOut() {
+            const viewport = document.getElementById('bracketViewport');
+            const centerX = viewport.clientWidth / 2;
+            const centerY = viewport.clientHeight / 2;
+            
+            const canvasCenterX = (centerX - panOffset.x) / zoomLevel;
+            const canvasCenterY = (centerY - panOffset.y) / zoomLevel;
+            
+            zoomLevel = Math.max(0.3, zoomLevel - 0.1);
+            
+            panOffset.x = centerX - canvasCenterX * zoomLevel;
+            panOffset.y = centerY - canvasCenterY * zoomLevel;
+            
+            updateCanvasTransform();
+        }
+
+        function resetZoom() {
+            zoomLevel = 0.6; // Start more zoomed out to show full tournament
+            panOffset = { x: 0, y: 0 };
+            updateCanvasTransform();
+        }
+
+        function updateCanvasTransform() {
+            const canvas = document.getElementById('bracketCanvas');
+            if (canvas) {
+                canvas.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`;
+            }
+        }
+
+        function startDrag(e) {
+            if (e.target.closest('.bracket-match')) return; // Don't drag when clicking matches
+            isDragging = true;
+            dragStart.x = e.clientX - panOffset.x;
+            dragStart.y = e.clientY - panOffset.y;
+            e.preventDefault();
+        }
+
+        function handleDrag(e) {
+            if (!isDragging) return;
+            panOffset.x = e.clientX - dragStart.x;
+            panOffset.y = e.clientY - dragStart.y;
+            updateCanvasTransform();
+        }
+
+        function endDrag() {
+            isDragging = false;
+        }
+
+        function autoAssignReferees() {
+            alert('Auto-assign referees functionality will be implemented');
+        }
+
+        function resetTournament() {
+            if (confirm('Are you sure you want to reset the tournament? This will clear all matches and results.')) {
+                matches = [];
+                tournament.bracket = null;
+                tournament.status = 'setup';
+                
+                players.forEach(player => {
+                    player.eliminated = false;
+                    player.placement = null;
+                });
+
+                saveTournament();
+                renderBracket();
+                alert('Tournament reset successfully');
+            }
+        }
+
+        function showMatchDetails() {
+            alert('Match details panel will be implemented');
+        }
+
+        function loadConfiguration() {
+            const savedConfig = localStorage.getItem('dartsConfig');
+            if (savedConfig) {
+                config = JSON.parse(savedConfig);
+                
+                document.getElementById('participationPoints').value = config.points.participation;
+                document.getElementById('firstPlacePoints').value = config.points.first;
+                document.getElementById('secondPlacePoints').value = config.points.second;
+                document.getElementById('thirdPlacePoints').value = config.points.third;
+                document.getElementById('highOutPoints').value = config.points.highOut;
+                document.getElementById('tonPoints').value = config.points.ton;
+                document.getElementById('oneEightyPoints').value = config.points.oneEighty;
+            }
+        }
+
+        function saveConfiguration() {
+            config.points.participation = parseInt(document.getElementById('participationPoints').value);
+            config.points.first = parseInt(document.getElementById('firstPlacePoints').value);
+            config.points.second = parseInt(document.getElementById('secondPlacePoints').value);
+            config.points.third = parseInt(document.getElementById('thirdPlacePoints').value);
+            config.points.highOut = parseInt(document.getElementById('highOutPoints').value);
+            config.points.ton = parseInt(document.getElementById('tonPoints').value);
+            config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value);
+            
+            localStorage.setItem('dartsConfig', JSON.stringify(config));
+            alert('Configuration saved successfully!');
+        }
+    </script>
+</body>
+</html>
