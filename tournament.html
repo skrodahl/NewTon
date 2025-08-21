@@ -850,10 +850,14 @@
             // Auto-save configuration
             ['participationPoints', 'firstPlacePoints', 'secondPlacePoints', 'thirdPlacePoints', 
              'highOutPoints', 'tonPoints', 'oneEightyPoints'].forEach(id => {
-                document.getElementById(id).addEventListener('change', function() {
-                    config.points[id.replace('Points', '')] = parseInt(this.value);
-                    saveConfiguration();
-                });
+                const element = document.getElementById(id);
+                if (element) {
+                    element.addEventListener('change', function() {
+                        const key = id.replace('Points', '').replace('first', 'first').replace('second', 'second').replace('third', 'third').replace('oneEighty', 'oneEighty');
+                        config.points[key] = parseInt(this.value);
+                        saveConfiguration();
+                    });
+                }
             });
 
             // Bracket zoom and pan controls
@@ -1282,130 +1286,216 @@
             matches = [];
             const bracket = tournament.bracket;
             const bracketSize = tournament.bracketSize;
-            const rounds = Math.ceil(Math.log2(bracketSize));
-
-            // Generate frontside matches with proper tournament tree structure
-            generateFrontsideTree(bracket, rounds);
             
-            // Generate backside matches with proper losers bracket structure
-            generateBacksideTree(rounds);
+            // Calculate bracket structure
+            const structure = calculateBracketStructure(bracketSize);
             
-            // Generate final match
-            generateFinalMatch();
+            // Generate complete double elimination bracket
+            generateCompleteBracket(bracket, structure);
         }
 
-        function generateFrontsideTree(bracket, rounds) {
-            let matchId = 1;
-            let currentRoundPlayers = [...bracket];
-
-            // Generate each round of the frontside bracket
-            for (let round = 1; round <= rounds; round++) {
-                const roundMatches = [];
+        function calculateBracketStructure(bracketSize) {
+            const frontsideRounds = Math.ceil(Math.log2(bracketSize));
+            
+            // Double elimination backside structure
+            const backsideRounds = (frontsideRounds - 1) * 2;
+            
+            // Calculate matches per round for frontside
+            const frontsideStructure = [];
+            for (let round = 1; round <= frontsideRounds; round++) {
+                const matchesInRound = Math.pow(2, frontsideRounds - round);
+                frontsideStructure.push({
+                    round: round,
+                    matches: matchesInRound,
+                    isLast: round === frontsideRounds
+                });
+            }
+            
+            // Calculate matches per round for backside
+            const backsideStructure = [];
+            for (let round = 1; round <= backsideRounds; round++) {
+                let matchesInRound;
                 
-                // Create matches for this round
-                for (let i = 0; i < currentRoundPlayers.length; i += 2) {
-                    const player1 = currentRoundPlayers[i];
-                    const player2 = currentRoundPlayers[i + 1];
+                if (round === 1) {
+                    // First backside round: half of first frontside losers
+                    matchesInRound = Math.pow(2, frontsideRounds - 2);
+                } else if (round % 2 === 0) {
+                    // Even rounds: merge with frontside losers
+                    const frontsideRoundLosers = Math.floor((round / 2) + 1);
+                    matchesInRound = Math.pow(2, frontsideRounds - frontsideRoundLosers - 1);
+                } else {
+                    // Odd rounds: advance backside winners
+                    matchesInRound = Math.pow(2, frontsideRounds - Math.ceil(round / 2) - 1);
+                }
+                
+                matchesInRound = Math.max(1, matchesInRound);
+                backsideStructure.push({
+                    round: round,
+                    matches: matchesInRound,
+                    receivesFromFrontside: round % 2 === 0
+                });
+            }
+            
+            return {
+                frontside: frontsideStructure,
+                backside: backsideStructure,
+                frontsideRounds: frontsideRounds,
+                backsideRounds: backsideRounds
+            };
+        }
+
+        function generateCompleteBracket(bracket, structure) {
+            let matchId = 1;
+            
+            // Generate frontside matches
+            generateFrontsideMatches(bracket, structure, matchId);
+            matchId = matches.length + 1;
+            
+            // Generate backside matches
+            generateBacksideMatches(structure, matchId);
+            matchId = matches.length + 1;
+            
+            // Generate final matches
+            generateFinalMatches(matchId);
+        }
+
+        function generateFrontsideMatches(bracket, structure, startId) {
+            let matchId = startId;
+            
+            structure.frontside.forEach((roundInfo, roundIndex) => {
+                for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
+                    let player1, player2;
+                    
+                    if (roundIndex === 0) {
+                        // First round: use actual players
+                        const playerIndex = matchIndex * 2;
+                        player1 = bracket[playerIndex] || { name: 'BYE', id: `bye-${playerIndex}`, isBye: true };
+                        player2 = bracket[playerIndex + 1] || { name: 'BYE', id: `bye-${playerIndex + 1}`, isBye: true };
+                    } else {
+                        // Later rounds: TBD players from previous matches
+                        player1 = { name: 'TBD', id: `fs-${roundInfo.round}-${matchIndex}-1` };
+                        player2 = { name: 'TBD', id: `fs-${roundInfo.round}-${matchIndex}-2` };
+                    }
                     
                     const match = {
-                        id: matchId++,
-                        round: round,
+                        id: `FS-${roundInfo.round}-${matchIndex + 1}`,
+                        numericId: matchId++,
+                        round: roundInfo.round,
                         side: 'frontside',
                         player1: player1,
                         player2: player2,
                         winner: null,
                         loser: null,
-                        lane: Math.floor(i / 2) + 1,
-                        legs: round >= rounds - 1 ? config.legs.semifinal : config.legs.round1,
+                        lane: matchIndex + 1,
+                        legs: roundInfo.isLast ? config.legs.semifinal : config.legs.round1,
                         referee: null,
                         active: false,
                         completed: false,
-                        positionInRound: Math.floor(i / 2)
+                        positionInRound: matchIndex,
+                        gridPosition: {
+                            side: 'frontside',
+                            round: roundInfo.round,
+                            position: matchIndex
+                        }
                     };
                     
-                    // Auto-complete matches with walkovers
-                    if (player1?.isBye && !player2?.isBye) {
+                    // Auto-complete BYE matches
+                    if (player1.isBye && !player2.isBye) {
                         match.winner = player2;
                         match.completed = true;
-                    } else if (player2?.isBye && !player1?.isBye) {
+                    } else if (player2.isBye && !player1.isBye) {
                         match.winner = player1;
                         match.completed = true;
                     }
                     
                     matches.push(match);
-                    roundMatches.push(match);
                 }
-                
-                // Prepare players for next round
-                currentRoundPlayers = [];
-                roundMatches.forEach(match => {
-                    currentRoundPlayers.push(match.winner || { name: 'TBD', id: `frontside-winner-${match.id}` });
-                });
-                
-                // Stop when we reach the final frontside match
-                if (currentRoundPlayers.length === 1) break;
-            }
+            });
         }
 
-        function generateBacksideTree(frontsideRounds) {
-            let matchId = matches.length + 1;
+        function generateBacksideMatches(structure, startId) {
+            let matchId = startId;
             
-            // Backside bracket has specific structure for double elimination
-            const backsideRounds = (frontsideRounds - 1) * 2;
-            
-            for (let round = 1; round <= backsideRounds; round++) {
-                // Calculate how many matches in this backside round
-                let matchesInRound;
-                if (round === 1) {
-                    // First backside round gets half the losers from frontside round 1
-                    matchesInRound = Math.floor(tournament.bracketSize / 4);
-                } else {
-                    // Subsequent rounds get progressively fewer matches
-                    matchesInRound = Math.max(1, Math.floor(matchesInRound / 2));
-                }
-                
-                for (let i = 0; i < matchesInRound; i++) {
+            structure.backside.forEach((roundInfo, roundIndex) => {
+                for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
                     const match = {
-                        id: matchId++,
-                        round: round,
+                        id: `BS-${roundInfo.round}-${matchIndex + 1}`,
+                        numericId: matchId++,
+                        round: roundInfo.round,
                         side: 'backside',
-                        player1: { name: 'TBD', id: `backside-tbd-${round}-${i}-1` },
-                        player2: { name: 'TBD', id: `backside-tbd-${round}-${i}-2` },
+                        player1: { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-1` },
+                        player2: { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-2` },
                         winner: null,
                         loser: null,
-                        lane: i + 1,
+                        lane: matchIndex + 1,
                         legs: config.legs.round1,
                         referee: null,
                         active: false,
                         completed: false,
-                        positionInRound: i
+                        positionInRound: matchIndex,
+                        receivesFromFrontside: roundInfo.receivesFromFrontside,
+                        gridPosition: {
+                            side: 'backside',
+                            round: roundInfo.round,
+                            position: matchIndex
+                        }
                     };
                     
                     matches.push(match);
                 }
-            }
+            });
         }
 
-        function generateFinalMatch() {
-            const finalMatch = {
-                id: 'FINAL',
-                round: 'final',
-                side: 'final',
-                player1: { name: 'Frontside Winner', id: 'frontside-winner' },
-                player2: { name: 'Backside Winner', id: 'backside-winner' },
+        function generateFinalMatches(startId) {
+            // Backside Final (if needed)
+            const backsideFinal = {
+                id: 'BS-FINAL',
+                numericId: startId,
+                round: 'backside-final',
+                side: 'backside-final',
+                player1: { name: 'Frontside Runner-up', id: 'fs-runnerup' },
+                player2: { name: 'Backside Winner', id: 'bs-winner' },
+                winner: null,
+                loser: null,
+                lane: 1,
+                legs: config.legs.semifinal,
+                referee: null,
+                active: false,
+                completed: false,
+                gridPosition: {
+                    side: 'backside-final',
+                    round: 1,
+                    position: 0
+                }
+            };
+            
+            // Grand Final
+            const grandFinal = {
+                id: 'GRAND-FINAL',
+                numericId: startId + 1,
+                round: 'grand-final',
+                side: 'grand-final',
+                player1: { name: 'Frontside Winner', id: 'fs-champion' },
+                player2: { name: 'Backside Champion', id: 'bs-champion' },
                 winner: null,
                 loser: null,
                 lane: 1,
                 legs: config.legs.final,
                 referee: null,
                 active: false,
-                completed: false
+                completed: false,
+                gridPosition: {
+                    side: 'grand-final',
+                    round: 1,
+                    position: 0
+                }
             };
             
-            matches.push(finalMatch);
+            matches.push(backsideFinal);
+            matches.push(grandFinal);
         }
 
-        // BRACKET RENDERING SYSTEM
+        // BRACKET RENDERING SYSTEM - Complete Rewrite
         function renderBracket() {
             const canvas = document.getElementById('bracketCanvas');
             if (!canvas) return;
@@ -1416,7 +1506,7 @@
             }
 
             clearBracket();
-            renderDoubleEliminationBracket();
+            renderCompleteDoubleElimination();
         }
 
         function clearBracket() {
@@ -1424,113 +1514,95 @@
             document.getElementById('bracketLines').innerHTML = '';
         }
 
-        function renderDoubleEliminationBracket() {
+        function renderCompleteDoubleElimination() {
             const bracketSize = tournament.bracketSize;
-            const rounds = Math.ceil(Math.log2(bracketSize));
-
-            // Clear any existing connection lines
-            renderBracketConnections();
+            const structure = calculateBracketStructure(bracketSize);
             
-            // Render frontside bracket with proper tree structure
-            renderFrontsideTree(rounds);
+            // Define grid parameters
+            const grid = {
+                matchWidth: 180,
+                matchHeight: 80,
+                horizontalSpacing: 80,
+                verticalSpacing: 100,
+                canvasWidth: 2000,
+                canvasHeight: 1200,
+                centerX: 1000,
+                centerY: 600
+            };
             
-            // Render backside bracket with proper tree structure
-            renderBacksideTree(rounds);
-            
-            // Render final match
-            renderFinalMatch();
+            // Render all bracket sections
+            renderFrontsideGrid(structure.frontside, grid);
+            renderBacksideGrid(structure.backside, grid);
+            renderFinalGrid(grid);
+            renderAllConnections(structure, grid);
         }
 
-        function renderFrontsideTree(rounds) {
-            const frontsideMatches = matches.filter(m => m.side === 'frontside');
+        function renderFrontsideGrid(frontsideStructure, grid) {
+            const totalRounds = frontsideStructure.length;
             
-            // Group matches by round
-            const roundGroups = {};
-            frontsideMatches.forEach(match => {
-                if (!roundGroups[match.round]) {
-                    roundGroups[match.round] = [];
-                }
-                roundGroups[match.round].push(match);
-            });
-
-            // Render each round with proper tournament tree positioning
-            Object.keys(roundGroups).sort((a, b) => a - b).forEach((round, roundIndex) => {
-                const roundMatches = roundGroups[round];
-                const roundNum = parseInt(round);
+            frontsideStructure.forEach((roundInfo, roundIndex) => {
+                const frontsideMatches = matches.filter(m => 
+                    m.side === 'frontside' && m.round === roundInfo.round
+                );
                 
-                // Position: Start from right side, move left each round
-                const roundX = 1400 - (roundIndex * 300);
+                // Position: Right side, flowing left
+                const roundX = grid.centerX + 200 + (totalRounds - roundIndex - 1) * (grid.matchWidth + grid.horizontalSpacing);
                 
-                // Vertical positioning: Create tournament tree structure
-                const baseY = 250;
-                const bracketHeight = 500;
+                // Calculate vertical centering for this round
+                const totalHeight = roundInfo.matches * (grid.matchHeight + grid.verticalSpacing);
+                const startY = grid.centerY - (totalHeight / 2);
                 
-                if (roundMatches.length === 1) {
-                    // Single match (semi-final) - center it
-                    const matchY = baseY + bracketHeight / 2;
-                    renderBracketMatch(roundMatches[0], roundX, matchY);
-                } else {
-                    // Multiple matches - space them evenly in tournament tree pattern
-                    const spacing = bracketHeight / (roundMatches.length + 1);
-                    roundMatches.forEach((match, matchIndex) => {
-                        const matchY = baseY + spacing * (matchIndex + 1);
-                        renderBracketMatch(match, roundX, matchY);
-                    });
-                }
-            });
-        }
-
-        function renderBacksideTree(rounds) {
-            const backsideMatches = matches.filter(m => m.side === 'backside');
-            
-            if (backsideMatches.length === 0) return;
-            
-            // Group matches by round
-            const roundGroups = {};
-            backsideMatches.forEach(match => {
-                if (!roundGroups[match.round]) {
-                    roundGroups[match.round] = [];
-                }
-                roundGroups[match.round].push(match);
-            });
-
-            // Render backside bracket below frontside
-            Object.keys(roundGroups).sort((a, b) => a - b).forEach((round, roundIndex) => {
-                const roundMatches = roundGroups[round];
-                
-                // Position: Start from left side, move right each round  
-                const roundX = 200 + (roundIndex * 300);
-                
-                // Vertical positioning: Below frontside bracket
-                const baseY = 800;
-                const spacing = 100;
-                
-                roundMatches.forEach((match, matchIndex) => {
-                    const matchY = baseY + (matchIndex * spacing);
-                    renderBracketMatch(match, roundX, matchY);
+                frontsideMatches.forEach((match, matchIndex) => {
+                    const matchY = startY + matchIndex * (grid.matchHeight + grid.verticalSpacing);
+                    renderGridMatch(match, roundX, matchY);
                 });
             });
         }
 
-        function renderFinalMatch() {
-            // Position final match in center where both brackets converge
-            const finalX = 800;  // Center horizontally
-            const finalY = 600;  // Between frontside and backside
+        function renderBacksideGrid(backsideStructure, grid) {
+            let yOffset = 0;
             
-            const finalMatch = matches.find(m => m.side === 'final');
-            if (finalMatch) {
-                renderBracketMatch(finalMatch, finalX, finalY);
+            backsideStructure.forEach((roundInfo, roundIndex) => {
+                const backsideMatches = matches.filter(m => 
+                    m.side === 'backside' && m.round === roundInfo.round
+                );
+                
+                // Position: Left side, flowing right
+                const roundX = 200 + roundIndex * (grid.matchWidth + grid.horizontalSpacing);
+                
+                // Vertical positioning: Below frontside, with proper spacing
+                const baseY = grid.centerY + 200;
+                
+                backsideMatches.forEach((match, matchIndex) => {
+                    const matchY = baseY + yOffset + matchIndex * (grid.matchHeight + grid.verticalSpacing);
+                    renderGridMatch(match, roundX, matchY);
+                });
+                
+                // Update y offset for next round
+                yOffset += roundInfo.matches * (grid.matchHeight + grid.verticalSpacing) + 50;
+            });
+        }
+
+        function renderFinalGrid(grid) {
+            const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
+            const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+            
+            if (backsideFinal) {
+                renderGridMatch(backsideFinal, grid.centerX - 150, grid.centerY + 100);
+            }
+            
+            if (grandFinal) {
+                renderGridMatch(grandFinal, grid.centerX, grid.centerY - 50);
             }
         }
 
-        function renderBracketMatch(match, x, y) {
+        function renderGridMatch(match, x, y) {
             const matchElement = document.createElement('div');
             matchElement.className = `bracket-match ${match.active ? 'active' : ''} ${match.completed ? 'completed' : ''}`;
             matchElement.style.left = x + 'px';
             matchElement.style.top = y + 'px';
             matchElement.id = `bracket-match-${match.id}`;
 
-            const refereeInfo = match.referee ? match.referee.name : 'No ref';
             const availableReferees = getAvailableReferees(match.id);
             const refereeOptions = availableReferees.map(ref => 
                 `<option value="${ref.id}" ${match.referee?.id === ref.id ? 'selected' : ''}>${ref.name}</option>`
@@ -1538,9 +1610,9 @@
             
             matchElement.innerHTML = `
                 <div class="match-header">
-                    <span>M${match.id}</span>
+                    <span>${match.id}</span>
                     <span class="match-info">
-                        L<select onchange="updateMatchLane(${match.id}, this.value)" style="background: white; border: 1px solid #ddd; font-size: 11px; width: 40px; padding: 2px;">
+                        L<select onchange="updateMatchLane('${match.id}', this.value)" style="background: white; border: 1px solid #ddd; font-size: 11px; width: 40px; padding: 2px;">
                             ${Array.from({length: 10}, (_, i) => i + 1).map(lane => 
                                 `<option value="${lane}" ${match.lane === lane ? 'selected' : ''}>${lane}</option>`
                             ).join('')}
@@ -1573,110 +1645,237 @@
             document.getElementById('bracketMatches').appendChild(matchElement);
         }
 
-        function renderBracketConnections() {
+        function renderAllConnections(structure, grid) {
             // Clear existing lines
             document.getElementById('bracketLines').innerHTML = '';
             
-            // Draw connection lines for frontside bracket
-            drawFrontsideConnections();
+            // Draw frontside connections
+            drawFrontsideConnections(structure.frontside, grid);
             
-            // Draw connection lines for backside bracket  
-            drawBacksideConnections();
+            // Draw backside connections
+            drawBacksideConnections(structure.backside, grid);
+            
+            // Draw loser drop connections
+            drawLoserDropConnections(structure, grid);
+            
+            // Draw final connections
+            drawFinalConnections(grid);
         }
 
-        function drawFrontsideConnections() {
-            const frontsideMatches = matches.filter(m => m.side === 'frontside');
-            const roundGroups = {};
-            
-            // Group matches by round
-            frontsideMatches.forEach(match => {
-                if (!roundGroups[match.round]) {
-                    roundGroups[match.round] = [];
-                }
-                roundGroups[match.round].push(match);
-            });
-
-            // Draw lines between rounds
-            const rounds = Object.keys(roundGroups).sort((a, b) => a - b);
-            for (let i = 0; i < rounds.length - 1; i++) {
-                const currentRound = roundGroups[rounds[i]];
-                const nextRound = roundGroups[rounds[i + 1]];
+        function drawFrontsideConnections(frontsideStructure, grid) {
+            // Connect each round to the next in frontside bracket
+            for (let roundIndex = 0; roundIndex < frontsideStructure.length - 1; roundIndex++) {
+                const currentRound = frontsideStructure[roundIndex];
+                const nextRound = frontsideStructure[roundIndex + 1];
                 
-                // Draw lines from current round matches to next round
-                for (let j = 0; j < nextRound.length; j++) {
-                    const nextMatch = nextRound[j];
-                    const match1 = currentRound[j * 2];
-                    const match2 = currentRound[j * 2 + 1];
+                const currentMatches = matches.filter(m => 
+                    m.side === 'frontside' && m.round === currentRound.round
+                );
+                const nextMatches = matches.filter(m => 
+                    m.side === 'frontside' && m.round === nextRound.round
+                );
+                
+                // Draw connections between pairs of current matches to next match
+                for (let i = 0; i < nextMatches.length; i++) {
+                    const match1 = currentMatches[i * 2];
+                    const match2 = currentMatches[i * 2 + 1];
+                    const nextMatch = nextMatches[i];
                     
                     if (match1 && match2 && nextMatch) {
-                        drawTournamentConnection(match1, match2, nextMatch);
+                        drawTournamentConnection(match1.id, match2.id, nextMatch.id);
                     }
                 }
             }
         }
 
-        function drawBacksideConnections() {
-            // Simplified backside connections for now
-            const backsideMatches = matches.filter(m => m.side === 'backside');
-            // TODO: Implement backside connection logic
+        function drawBacksideConnections(backsideStructure, grid) {
+            // Connect backside matches within their own flow
+            for (let roundIndex = 0; roundIndex < backsideStructure.length - 1; roundIndex++) {
+                const currentRound = backsideStructure[roundIndex];
+                const nextRound = backsideStructure[roundIndex + 1];
+                
+                const currentMatches = matches.filter(m => 
+                    m.side === 'backside' && m.round === currentRound.round
+                );
+                const nextMatches = matches.filter(m => 
+                    m.side === 'backside' && m.round === nextRound.round
+                );
+                
+                // Simple left-to-right flow for backside
+                currentMatches.forEach((currentMatch, index) => {
+                    const nextMatch = nextMatches[Math.floor(index / 2)];
+                    if (nextMatch) {
+                        drawSimpleConnection(currentMatch.id, nextMatch.id);
+                    }
+                });
+            }
         }
 
-        function drawTournamentConnection(match1, match2, nextMatch) {
-            const linesContainer = document.getElementById('bracketLines');
+        function drawLoserDropConnections(structure, grid) {
+            // Draw connections from frontside losers to backside
+            // This is where the double elimination magic happens
             
-            // Get positions from DOM elements
-            const match1Element = document.getElementById(`bracket-match-${match1.id}`);
-            const match2Element = document.getElementById(`bracket-match-${match2.id}`);
-            const nextMatchElement = document.getElementById(`bracket-match-${nextMatch.id}`);
+            structure.frontside.forEach((frontsideRound, index) => {
+                if (index === structure.frontside.length - 1) return; // Skip final frontside round for now
+                
+                const frontsideMatches = matches.filter(m => 
+                    m.side === 'frontside' && m.round === frontsideRound.round
+                );
+                
+                // Find corresponding backside round that receives these losers
+                const targetBacksideRound = index * 2 + 2; // Simplified logic
+                const backsideMatches = matches.filter(m => 
+                    m.side === 'backside' && m.round === targetBacksideRound
+                );
+                
+                // Draw loser drop lines (simplified for now)
+                frontsideMatches.forEach((fsMatch, fsIndex) => {
+                    const bsMatch = backsideMatches[Math.floor(fsIndex / 2)];
+                    if (bsMatch) {
+                        drawLoserDropLine(fsMatch.id, bsMatch.id);
+                    }
+                });
+            });
+        }
+
+        function drawFinalConnections(grid) {
+            // Connect frontside winner to grand final
+            const frontsideWinnerMatch = matches.find(m => 
+                m.side === 'frontside' && m.round === Math.max(...matches.filter(m => m.side === 'frontside').map(m => m.round))
+            );
+            const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+            
+            if (frontsideWinnerMatch && grandFinal) {
+                drawSimpleConnection(frontsideWinnerMatch.id, grandFinal.id);
+            }
+            
+            // Connect backside final to grand final
+            const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
+            if (backsideFinal && grandFinal) {
+                drawSimpleConnection(backsideFinal.id, grandFinal.id);
+            }
+        }
+
+        function drawTournamentConnection(match1Id, match2Id, nextMatchId) {
+            const match1Element = document.getElementById(`bracket-match-${match1Id}`);
+            const match2Element = document.getElementById(`bracket-match-${match2Id}`);
+            const nextMatchElement = document.getElementById(`bracket-match-${nextMatchId}`);
             
             if (!match1Element || !match2Element || !nextMatchElement) return;
             
+            const linesContainer = document.getElementById('bracketLines');
+            const canvasRect = document.getElementById('bracketCanvas').getBoundingClientRect();
+            
+            // Get positions
             const match1Rect = match1Element.getBoundingClientRect();
             const match2Rect = match2Element.getBoundingClientRect();
             const nextMatchRect = nextMatchElement.getBoundingClientRect();
-            const canvasRect = document.getElementById('bracketCanvas').getBoundingClientRect();
             
-            // Calculate relative positions
             const match1Y = match1Rect.top - canvasRect.top + match1Rect.height / 2;
             const match2Y = match2Rect.top - canvasRect.top + match2Rect.height / 2;
             const nextMatchY = nextMatchRect.top - canvasRect.top + nextMatchRect.height / 2;
             const match1X = match1Rect.left - canvasRect.left + match1Rect.width;
             const nextMatchX = nextMatchRect.left - canvasRect.left;
             
-            // Draw horizontal lines from matches
-            const hLine1 = document.createElement('div');
-            hLine1.className = 'bracket-line horizontal';
-            hLine1.style.left = match1X + 'px';
-            hLine1.style.top = match1Y + 'px';
-            hLine1.style.width = '50px';
-            linesContainer.appendChild(hLine1);
+            const connectorX = match1X + 40;
             
-            const hLine2 = document.createElement('div');
-            hLine2.className = 'bracket-line horizontal';
-            hLine2.style.left = match1X + 'px';
-            hLine2.style.top = match2Y + 'px';
-            hLine2.style.width = '50px';
-            linesContainer.appendChild(hLine2);
+            // Horizontal lines from matches
+            createLine(match1X, match1Y, connectorX, match1Y);
+            createLine(match1X, match2Y, connectorX, match2Y);
             
-            // Draw vertical connector
-            const vLine = document.createElement('div');
-            vLine.className = 'bracket-line vertical';
-            vLine.style.left = (match1X + 50) + 'px';
-            vLine.style.top = Math.min(match1Y, match2Y) + 'px';
-            vLine.style.height = Math.abs(match2Y - match1Y) + 'px';
-            linesContainer.appendChild(vLine);
+            // Vertical connector
+            createLine(connectorX, Math.min(match1Y, match2Y), connectorX, Math.max(match1Y, match2Y));
             
-            // Draw line to next match
-            const finalLine = document.createElement('div');
-            finalLine.className = 'bracket-line horizontal';
-            finalLine.style.left = (match1X + 50) + 'px';
-            finalLine.style.top = nextMatchY + 'px';
-            finalLine.style.width = (nextMatchX - match1X - 50) + 'px';
-            linesContainer.appendChild(finalLine);
+            // Line to next match
+            createLine(connectorX, (match1Y + match2Y) / 2, nextMatchX, nextMatchY);
+        }
+
+        function drawSimpleConnection(fromMatchId, toMatchId) {
+            const fromElement = document.getElementById(`bracket-match-${fromMatchId}`);
+            const toElement = document.getElementById(`bracket-match-${toMatchId}`);
+            
+            if (!fromElement || !toElement) return;
+            
+            const canvasRect = document.getElementById('bracketCanvas').getBoundingClientRect();
+            const fromRect = fromElement.getBoundingClientRect();
+            const toRect = toElement.getBoundingClientRect();
+            
+            const fromX = fromRect.left - canvasRect.left + fromRect.width;
+            const fromY = fromRect.top - canvasRect.top + fromRect.height / 2;
+            const toX = toRect.left - canvasRect.left;
+            const toY = toRect.top - canvasRect.top + toRect.height / 2;
+            
+            createLine(fromX, fromY, toX, toY);
+        }
+
+        function drawLoserDropLine(fromMatchId, toMatchId) {
+            // Draw dashed line for loser drops
+            const fromElement = document.getElementById(`bracket-match-${fromMatchId}`);
+            const toElement = document.getElementById(`bracket-match-${toMatchId}`);
+            
+            if (!fromElement || !toElement) return;
+            
+            const canvasRect = document.getElementById('bracketCanvas').getBoundingClientRect();
+            const fromRect = fromElement.getBoundingClientRect();
+            const toRect = toElement.getBoundingClientRect();
+            
+            const fromX = fromRect.left - canvasRect.left + fromRect.width / 2;
+            const fromY = fromRect.top - canvasRect.top + fromRect.height;
+            const toX = toRect.left - canvasRect.left + toRect.width / 2;
+            const toY = toRect.top - canvasRect.top;
+            
+            const line = document.createElement('div');
+            line.className = 'bracket-line';
+            line.style.position = 'absolute';
+            line.style.background = '#ff6b35';
+            line.style.borderStyle = 'dashed';
+            line.style.borderWidth = '2px';
+            line.style.borderColor = '#ff6b35';
+            
+            // Calculate line properties
+            const dx = toX - fromX;
+            const dy = toY - fromY;
+            const length = Math.sqrt(dx * dx + dy * dy);
+            const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+            
+            line.style.width = length + 'px';
+            line.style.height = '0px';
+            line.style.borderBottom = '2px dashed #ff6b35';
+            line.style.left = fromX + 'px';
+            line.style.top = fromY + 'px';
+            line.style.transformOrigin = '0 0';
+            line.style.transform = `rotate(${angle}deg)`;
+            line.style.zIndex = '1';
+            
+            document.getElementById('bracketLines').appendChild(line);
+        }
+
+        function createLine(x1, y1, x2, y2) {
+            const line = document.createElement('div');
+            line.className = 'bracket-line';
+            line.style.position = 'absolute';
+            line.style.background = '#333333';
+            line.style.zIndex = '1';
+            
+            if (Math.abs(x2 - x1) > Math.abs(y2 - y1)) {
+                // Horizontal line
+                line.style.left = Math.min(x1, x2) + 'px';
+                line.style.top = y1 + 'px';
+                line.style.width = Math.abs(x2 - x1) + 'px';
+                line.style.height = '3px';
+            } else {
+                // Vertical line
+                line.style.left = x1 + 'px';
+                line.style.top = Math.min(y1, y2) + 'px';
+                line.style.width = '3px';
+                line.style.height = Math.abs(y2 - y1) + 'px';
+            }
+            
+            document.getElementById('bracketLines').appendChild(line);
         }
 
         function selectWinner(matchId, playerNumber) {
-            const match = matches.find(m => m.id == matchId);
+            const match = matches.find(m => m.id === matchId);
             if (!match) return;
 
             const winner = playerNumber === 1 ? match.player1 : match.player2;
@@ -1689,6 +1888,8 @@
                 match.winner = null;
                 match.loser = null;
                 match.completed = false;
+                
+                // TODO: Implement reverse advancement logic
             } else {
                 // Set new winner
                 match.winner = winner;
@@ -1704,8 +1905,213 @@
             renderBracket();
         }
 
+        function advanceWinner(completedMatch) {
+            const winner = completedMatch.winner;
+            const loser = completedMatch.loser;
+            
+            if (!winner || !loser) return;
+            
+            // Handle different bracket advancement scenarios
+            if (completedMatch.side === 'frontside') {
+                advanceFrontsideWinner(completedMatch, winner);
+                dropFrontsideLoser(completedMatch, loser);
+            } else if (completedMatch.side === 'backside') {
+                advanceBacksideWinner(completedMatch, winner);
+                eliminateBacksideLoser(completedMatch, loser);
+            } else if (completedMatch.side === 'backside-final') {
+                advanceBacksideFinalWinner(completedMatch, winner);
+            } else if (completedMatch.side === 'grand-final') {
+                crownChampion(completedMatch, winner);
+            }
+        }
+
+        function advanceFrontsideWinner(completedMatch, winner) {
+            // Find next frontside match
+            const currentRound = completedMatch.round;
+            const nextRound = currentRound + 1;
+            const positionInRound = completedMatch.positionInRound;
+            const nextPosition = Math.floor(positionInRound / 2);
+            
+            const nextMatch = matches.find(m => 
+                m.side === 'frontside' && 
+                m.round === nextRound && 
+                m.positionInRound === nextPosition
+            );
+            
+            if (nextMatch) {
+                // Determine if this winner goes to player1 or player2 slot
+                const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
+                nextMatch[slot] = winner;
+            } else {
+                // This is the frontside champion
+                const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+                if (grandFinal) {
+                    grandFinal.player1 = winner;
+                }
+            }
+        }
+
+        function dropFrontsideLoser(completedMatch, loser) {
+            // Calculate which backside round should receive this loser
+            const frontsideRound = completedMatch.round;
+            const structure = calculateBracketStructure(tournament.bracketSize);
+            
+            // Simplified logic - needs refinement based on exact double elimination rules
+            let targetBacksideRound;
+            if (frontsideRound === 1) {
+                targetBacksideRound = 1; // First round losers go to backside round 1
+            } else {
+                targetBacksideRound = (frontsideRound - 1) * 2; // Approximate
+            }
+            
+            // Find available slot in target backside round
+            const targetMatches = matches.filter(m => 
+                m.side === 'backside' && 
+                m.round === targetBacksideRound &&
+                (m.player1.name === 'TBD' || m.player2.name === 'TBD')
+            );
+            
+            if (targetMatches.length > 0) {
+                const targetMatch = targetMatches[0];
+                if (targetMatch.player1.name === 'TBD') {
+                    targetMatch.player1 = loser;
+                } else if (targetMatch.player2.name === 'TBD') {
+                    targetMatch.player2 = loser;
+                }
+            }
+        }
+
+        function advanceBacksideWinner(completedMatch, winner) {
+            // Find next backside match
+            const currentRound = completedMatch.round;
+            const nextRound = currentRound + 1;
+            const positionInRound = completedMatch.positionInRound;
+            const nextPosition = Math.floor(positionInRound / 2);
+            
+            const nextMatch = matches.find(m => 
+                m.side === 'backside' && 
+                m.round === nextRound && 
+                m.positionInRound === nextPosition
+            );
+            
+            if (nextMatch) {
+                const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
+                nextMatch[slot] = winner;
+            } else {
+                // This might be the backside champion
+                const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
+                if (backsideFinal) {
+                    backsideFinal.player2 = winner; // Backside winner
+                }
+            }
+        }
+
+        function eliminateBacksideLoser(completedMatch, loser) {
+            // Mark player as eliminated
+            const player = players.find(p => p.id === loser.id);
+            if (player) {
+                player.eliminated = true;
+                // Assign placement based on current tournament state
+                assignPlacement(player);
+            }
+        }
+
+        function advanceBacksideFinalWinner(completedMatch, winner) {
+            const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+            if (grandFinal) {
+                grandFinal.player2 = winner; // Backside champion to grand final
+            }
+        }
+
+        function crownChampion(completedMatch, winner) {
+            const loser = completedMatch.loser;
+            
+            // Assign final placements
+            const winnerPlayer = players.find(p => p.id === winner.id);
+            const loserPlayer = players.find(p => p.id === loser.id);
+            
+            if (winnerPlayer) {
+                winnerPlayer.placement = 1;
+            }
+            if (loserPlayer) {
+                loserPlayer.placement = 2;
+            }
+            
+            // Tournament is complete
+            tournament.status = 'completed';
+            displayResults();
+        }
+
+        function assignPlacement(player) {
+            // Simple placement logic - could be more sophisticated
+            const eliminatedCount = players.filter(p => p.eliminated).length;
+            player.placement = eliminatedCount;
+        }
+
+        function displayResults() {
+            // Show results section
+            const resultsSection = document.getElementById('resultsSection');
+            if (resultsSection) {
+                resultsSection.style.display = 'block';
+                updateResultsTable();
+            }
+        }
+
+        function updateResultsTable() {
+            const tbody = document.getElementById('resultsTableBody');
+            if (!tbody) return;
+            
+            // Sort players by placement
+            const sortedPlayers = [...players].sort((a, b) => {
+                if (a.placement && b.placement) {
+                    return a.placement - b.placement;
+                }
+                if (a.placement) return -1;
+                if (b.placement) return 1;
+                return 0;
+            });
+            
+            tbody.innerHTML = sortedPlayers.map(player => {
+                const points = calculatePlayerPoints(player);
+                return `
+                    <tr>
+                        <td>${player.placement || 'TBD'}</td>
+                        <td>${player.name}</td>
+                        <td>${points}</td>
+                        <td>${player.stats.shortLegs || 0}</td>
+                        <td>${(player.stats.highOuts || []).length}</td>
+                        <td>${player.stats.tons || 0}</td>
+                        <td>${player.stats.oneEighties || 0}</td>
+                    </tr>
+                `;
+            }).join('');
+        }
+
+        function calculatePlayerPoints(player) {
+            let points = 0;
+            
+            // Participation points
+            points += config.points.participation;
+            
+            // Placement points
+            if (player.placement === 1) {
+                points += config.points.first;
+            } else if (player.placement === 2) {
+                points += config.points.second;
+            } else if (player.placement === 3) {
+                points += config.points.third;
+            }
+            
+            // Statistics points
+            points += (player.stats.highOuts || []).length * config.points.highOut;
+            points += (player.stats.tons || 0) * config.points.ton;
+            points += (player.stats.oneEighties || 0) * config.points.oneEighty;
+            
+            return points;
+        }
+
         function updateMatchLane(matchId, newLane) {
-            const match = matches.find(m => m.id == matchId);
+            const match = matches.find(m => m.id === matchId);
             if (!match) return;
 
             match.lane = parseInt(newLane);
@@ -1713,7 +2119,7 @@
         }
 
         function updateReferee(matchId, refereeId) {
-            const match = matches.find(m => m.id == matchId);
+            const match = matches.find(m => m.id === matchId);
             if (!match) return;
 
             if (refereeId === '') {
@@ -1728,7 +2134,7 @@
         }
 
         function getAvailableReferees(matchId) {
-            const match = matches.find(m => m.id == matchId);
+            const match = matches.find(m => m.id === matchId);
             if (!match) return [];
 
             return players.filter(player => 
@@ -1742,7 +2148,7 @@
         }
 
         function toggleActive(matchId) {
-            const match = matches.find(m => m.id == matchId);
+            const match = matches.find(m => m.id === matchId);
             if (!match) return;
 
             match.active = !match.active;
@@ -1843,7 +2249,42 @@
         }
 
         function autoAssignReferees() {
-            alert('Auto-assign referees functionality will be implemented');
+            // Get all active matches that need referees
+            const activeMatches = matches.filter(m => 
+                !m.completed && 
+                (m.player1.name !== 'TBD' && m.player2.name !== 'TBD') &&
+                !m.referee
+            );
+            
+            if (activeMatches.length === 0) {
+                alert('No matches need referee assignment');
+                return;
+            }
+            
+            // Get available referees (eliminated players first)
+            const eliminatedRefs = players.filter(p => p.eliminated && p.paid);
+            const activeRefs = players.filter(p => !p.eliminated && p.paid);
+            
+            // Prioritize eliminated players as referees
+            const availableRefs = [...eliminatedRefs, ...activeRefs];
+            
+            let refIndex = 0;
+            activeMatches.forEach(match => {
+                // Find referee who is not playing in this match
+                const availableForMatch = availableRefs.filter(ref => 
+                    ref.id !== match.player1.id && 
+                    ref.id !== match.player2.id
+                );
+                
+                if (availableForMatch.length > 0) {
+                    match.referee = availableForMatch[refIndex % availableForMatch.length];
+                    refIndex++;
+                }
+            });
+            
+            saveTournament();
+            renderBracket();
+            alert(`Assigned referees to ${activeMatches.filter(m => m.referee).length} matches`);
         }
 
         function resetTournament() {
@@ -1858,13 +2299,38 @@
                 });
 
                 saveTournament();
-                renderBracket();
+                clearBracket();
+                
+                // Hide results section
+                const resultsSection = document.getElementById('resultsSection');
+                if (resultsSection) {
+                    resultsSection.style.display = 'none';
+                }
+                
                 alert('Tournament reset successfully');
             }
         }
 
         function showMatchDetails() {
-            alert('Match details panel will be implemented');
+            const activeMatches = matches.filter(m => m.active);
+            const upcomingMatches = matches.filter(m => 
+                !m.completed && 
+                m.player1.name !== 'TBD' && 
+                m.player2.name !== 'TBD'
+            );
+            
+            let details = `Active Matches: ${activeMatches.length}\n`;
+            details += `Upcoming Matches: ${upcomingMatches.length}\n`;
+            details += `Completed Matches: ${matches.filter(m => m.completed).length}\n\n`;
+            
+            if (activeMatches.length > 0) {
+                details += 'Active Matches:\n';
+                activeMatches.forEach(match => {
+                    details += `${match.id}: ${match.player1.name} vs ${match.player2.name} (Lane ${match.lane})\n`;
+                });
+            }
+            
+            alert(details);
         }
 
         function loadConfiguration() {
@@ -1872,6 +2338,7 @@
             if (savedConfig) {
                 config = JSON.parse(savedConfig);
                 
+                // Update UI elements
                 document.getElementById('participationPoints').value = config.points.participation;
                 document.getElementById('firstPlacePoints').value = config.points.first;
                 document.getElementById('secondPlacePoints').value = config.points.second;
@@ -1879,10 +2346,16 @@
                 document.getElementById('highOutPoints').value = config.points.highOut;
                 document.getElementById('tonPoints').value = config.points.ton;
                 document.getElementById('oneEightyPoints').value = config.points.oneEighty;
+                
+                document.getElementById('round1Legs').value = config.legs.round1;
+                document.getElementById('round2Legs').value = config.legs.round2;
+                document.getElementById('semifinalLegs').value = config.legs.semifinal;
+                document.getElementById('finalLegs').value = config.legs.final;
             }
         }
 
         function saveConfiguration() {
+            // Update config object
             config.points.participation = parseInt(document.getElementById('participationPoints').value);
             config.points.first = parseInt(document.getElementById('firstPlacePoints').value);
             config.points.second = parseInt(document.getElementById('secondPlacePoints').value);
@@ -1891,9 +2364,44 @@
             config.points.ton = parseInt(document.getElementById('tonPoints').value);
             config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value);
             
+            config.legs.round1 = parseInt(document.getElementById('round1Legs').value);
+            config.legs.round2 = parseInt(document.getElementById('round2Legs').value);
+            config.legs.semifinal = parseInt(document.getElementById('semifinalLegs').value);
+            config.legs.final = parseInt(document.getElementById('finalLegs').value);
+            
             localStorage.setItem('dartsConfig', JSON.stringify(config));
             alert('Configuration saved successfully!');
         }
+
+        // Auto-load current tournament on page load
+        window.addEventListener('load', function() {
+            const currentTournament = localStorage.getItem('currentTournament');
+            if (currentTournament) {
+                try {
+                    tournament = JSON.parse(currentTournament);
+                    players = tournament.players || [];
+                    matches = tournament.matches || [];
+                    
+                    if (tournament.name && tournament.date) {
+                        document.getElementById('tournamentName').value = tournament.name;
+                        document.getElementById('tournamentDate').value = tournament.date;
+                        updateTournamentStatus();
+                        updatePlayersDisplay();
+                        updatePlayerCount();
+                        
+                        if (tournament.bracket && matches.length > 0) {
+                            renderBracket();
+                        }
+                        
+                        if (tournament.status === 'completed') {
+                            displayResults();
+                        }
+                    }
+                } catch (e) {
+                    console.error('Error loading current tournament:', e);
+                }
+            }
+        });
     </script>
 </body>
 </html>
