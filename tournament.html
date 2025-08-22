@@ -1518,16 +1518,17 @@
             const bracketSize = tournament.bracketSize;
             const structure = calculateBracketStructure(bracketSize);
             
-            // Define grid parameters
+            // Define grid parameters with doubled vertical spacing
             const grid = {
                 matchWidth: 180,
                 matchHeight: 80,
-                horizontalSpacing: 80,
-                verticalSpacing: 100,
+                horizontalSpacing: 100, 
+                verticalSpacing: 60,   // Doubled from 30 to 60
                 canvasWidth: 2000,
                 canvasHeight: 1200,
                 centerX: 1000,
-                centerY: 600
+                centerY: 600,
+                centerBuffer: 250       
             };
             
             // Render all bracket sections
@@ -1545,41 +1546,51 @@
                     m.side === 'frontside' && m.round === roundInfo.round
                 );
                 
-                // Position: Right side, flowing left
-                const roundX = grid.centerX + 200 + (totalRounds - roundIndex - 1) * (grid.matchWidth + grid.horizontalSpacing);
+                // Position: Center flowing RIGHT with buffer zone
+                const roundX = grid.centerX + grid.centerBuffer + roundIndex * (grid.matchWidth + grid.horizontalSpacing);
                 
-                // Calculate vertical centering for this round
-                const totalHeight = roundInfo.matches * (grid.matchHeight + grid.verticalSpacing);
-                const startY = grid.centerY - (totalHeight / 2);
-                
-                frontsideMatches.forEach((match, matchIndex) => {
-                    const matchY = startY + matchIndex * (grid.matchHeight + grid.verticalSpacing);
-                    renderGridMatch(match, roundX, matchY);
-                });
+                // Calculate much better vertical spacing for frontside
+                if (frontsideMatches.length === 1) {
+                    // Final/semi-final match - center it vertically
+                    const matchY = grid.centerY - (grid.matchHeight / 2);
+                    renderGridMatch(frontsideMatches[0], roundX, matchY);
+                } else {
+                    // Multiple matches - use much more generous spacing
+                    const totalNeededHeight = frontsideMatches.length * grid.matchHeight + (frontsideMatches.length - 1) * grid.verticalSpacing;
+                    const startY = grid.centerY - (totalNeededHeight / 2);
+                    
+                    frontsideMatches.forEach((match, matchIndex) => {
+                        const matchY = startY + matchIndex * (grid.matchHeight + grid.verticalSpacing);
+                        renderGridMatch(match, roundX, matchY);
+                    });
+                }
             });
         }
 
         function renderBacksideGrid(backsideStructure, grid) {
-            let yOffset = 0;
-            
             backsideStructure.forEach((roundInfo, roundIndex) => {
                 const backsideMatches = matches.filter(m => 
                     m.side === 'backside' && m.round === roundInfo.round
                 );
                 
-                // Position: Left side, flowing right
-                const roundX = 200 + roundIndex * (grid.matchWidth + grid.horizontalSpacing);
+                // Position: Center flowing LEFT with buffer zone
+                const roundX = grid.centerX - grid.centerBuffer - roundIndex * (grid.matchWidth + grid.horizontalSpacing);
                 
-                // Vertical positioning: Below frontside, with proper spacing
-                const baseY = grid.centerY + 200;
-                
-                backsideMatches.forEach((match, matchIndex) => {
-                    const matchY = baseY + yOffset + matchIndex * (grid.matchHeight + grid.verticalSpacing);
-                    renderGridMatch(match, roundX, matchY);
-                });
-                
-                // Update y offset for next round
-                yOffset += roundInfo.matches * (grid.matchHeight + grid.verticalSpacing) + 50;
+                // Use the same improved vertical spacing logic as frontside
+                if (backsideMatches.length === 1) {
+                    // Single match in round - center it vertically
+                    const matchY = grid.centerY - (grid.matchHeight / 2);
+                    renderGridMatch(backsideMatches[0], roundX, matchY);
+                } else {
+                    // Multiple matches - use the same generous spacing as frontside
+                    const totalNeededHeight = backsideMatches.length * grid.matchHeight + (backsideMatches.length - 1) * grid.verticalSpacing;
+                    const startY = grid.centerY - (totalNeededHeight / 2);
+                    
+                    backsideMatches.forEach((match, matchIndex) => {
+                        const matchY = startY + matchIndex * (grid.matchHeight + grid.verticalSpacing);
+                        renderGridMatch(match, roundX, matchY);
+                    });
+                }
             });
         }
 
@@ -1587,12 +1598,17 @@
             const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
             const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
             
+            // Position finals at bottom center with better spacing
+            const finalY = grid.centerY + 350; // A bit lower to give more space from brackets
+            
             if (backsideFinal) {
-                renderGridMatch(backsideFinal, grid.centerX - 150, grid.centerY + 100);
+                // Backside final positioned left of center, aligned with backside bracket
+                renderGridMatch(backsideFinal, grid.centerX - 150, finalY);
             }
             
             if (grandFinal) {
-                renderGridMatch(grandFinal, grid.centerX, grid.centerY - 50);
+                // Grand final centered horizontally and below backside final
+                renderGridMatch(grandFinal, grid.centerX - (grid.matchWidth / 2), finalY + 150);
             }
         }
 
