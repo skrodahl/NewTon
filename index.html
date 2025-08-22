@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewTon - Tournament Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>
+                    <div class="logo-placeholder">
+                        CLUB<br>LOGO
+                    </div>
+                    NewTon - Tournament Manager
+                </h1>
+            </div>
+            <div class="nav">
+                <button class="nav-btn active" data-page="setup">Setup</button>
+                <button class="nav-btn" data-page="registration">Registration</button>
+                <button class="nav-btn" data-page="tournament">Tournament</button>
+                <button class="nav-btn" data-page="config">Config</button>
+            </div>
+        </div>
+
+        <!-- Setup Page -->
+        <div id="setup" class="page active">
+            <h2>Tournament Setup</h2>
+            <div class="tournament-info">
+                <div class="form-group">
+                    <label for="tournamentName">Tournament Name</label>
+                    <input type="text" id="tournamentName" placeholder="Enter tournament name">
+                </div>
+                <div class="form-group">
+                    <label for="tournamentDate">Tournament Date</label>
+                    <input type="date" id="tournamentDate">
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <button class="btn btn-success" onclick="createTournament()">Create New Tournament</button>
+                <button class="btn" onclick="loadTournament()">Load Existing Tournament</button>
+                <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
+            </div>
+
+            <div id="tournamentStatus" class="alert alert-info" style="display: none;">
+                No active tournament
+            </div>
+
+            <div class="config-section">
+                <h3>Recent Tournaments</h3>
+                <div id="recentTournaments">
+                    <p>No tournaments found</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Registration Page -->
+        <div id="registration" class="page">
+            <h2>Player Registration</h2>
+            
+            <div class="form-group">
+                <label for="playerName">Add New Player</label>
+                <div style="display: flex; gap: 10px;">
+                    <input type="text" id="playerName" placeholder="Enter player name" style="flex: 1;">
+                    <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
+                </div>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+                <h3>Players (<span id="playerCount">0</span> total, <span id="paidCount">0</span> paid)</h3>
+                <div>
+                    <button class="btn" onclick="generateBracket()">Generate Bracket</button>
+                    <button class="btn btn-danger" onclick="clearAllPlayers()">Clear All</button>
+                </div>
+            </div>
+
+            <div id="playersContainer" class="players-grid">
+                <!-- Players will be added here -->
+            </div>
+
+            <!-- Results Section -->
+            <div id="resultsSection" style="margin-top: 40px; display: none;">
+                <h3>Tournament Results</h3>
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Points</th>
+                            <th>Short Legs</th>
+                            <th>High Outs</th>
+                            <th>Tons</th>
+                            <th>180s</th>
+                        </tr>
+                    </thead>
+                    <tbody id="resultsTableBody">
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Tournament Page -->
+        <div id="tournament" class="page">
+            <h2>Double Elimination Bracket</h2>
+            
+            <div id="tournamentControls" style="margin-bottom: 20px;">
+                <button class="btn" onclick="autoAssignReferees()">Auto-Assign Referees</button>
+                <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
+                <button class="btn" onclick="showMatchDetails()">Match Details</button>
+            </div>
+
+            <div class="bracket-container">
+                <div class="bracket-controls">
+                    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                    <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
+                    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                </div>
+                
+                <div class="bracket-viewport" id="bracketViewport">
+                    <div class="bracket-canvas" id="bracketCanvas">
+                        <div class="bracket-title back">BACKSIDE</div>
+                        <div class="bracket-title front">FRONTSIDE</div>
+                        
+                        <div id="bracketMatches">
+                            <!-- Bracket matches will be rendered here -->
+                        </div>
+                        
+                        <div id="bracketLines">
+                            <!-- Connection lines will be rendered here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Page -->
+        <div id="config" class="page">
+            <h2>Tournament Configuration</h2>
+            
+            <div class="config-section">
+                <h3>Point Values</h3>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="participationPoints">Participation Points</label>
+                        <input type="number" id="participationPoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="firstPlacePoints">1st Place Points</label>
+                        <input type="number" id="firstPlacePoints" value="3" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="secondPlacePoints">2nd Place Points</label>
+                        <input type="number" id="secondPlacePoints" value="2" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="thirdPlacePoints">3rd Place Points</label>
+                        <input type="number" id="thirdPlacePoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="highOutPoints">High Out Points (101+)</label>
+                        <input type="number" id="highOutPoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="tonPoints">Ton Points (100+)</label>
+                        <input type="number" id="tonPoints" value="1" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="oneEightyPoints">180 Points</label>
+                        <input type="number" id="oneEightyPoints" value="1" min="0">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="saveConfiguration()">Save Configuration</button>
+            </div>
+
+            <div class="config-section">
+                <h3>Match Configuration</h3>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="round1Legs">Round 1 Legs</label>
+                        <select id="round1Legs">
+                            <option value="3">Best of 3</option>
+                            <option value="5">Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="round2Legs">Round 2 Legs</label>
+                        <select id="round2Legs">
+                            <option value="3">Best of 3</option>
+                            <option value="5">Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="semifinalLegs">Semi-Final Legs</label>
+                        <select id="semifinalLegs">
+                            <option value="3">Best of 3</option>
+                            <option value="5" selected>Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="finalLegs">Final Legs</label>
+                        <select id="finalLegs">
+                            <option value="3">Best of 3</option>
+                            <option value="5" selected>Best of 5</option>
+                            <option value="7">Best of 7</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="statsModal" class="modal">
+        <div class="modal-content">
+            <span class="close" onclick="closeStatsModal()">&times;</span>
+            <h3 id="statsPlayerName">Player Statistics</h3>
+            <div class="form-group">
+                <label>Short Legs (max 21 darts)</label>
+                <input type="number" id="statsShortLegs" min="0" max="21">
+            </div>
+            <div class="form-group">
+                <label>High Out Score (101+)</label>
+                <input type="number" id="statsHighOut" min="101" max="170">
+                <button class="btn" onclick="addHighOut()">Add High Out</button>
+            </div>
+            <div class="form-group">
+                <label>Tons (100+)</label>
+                <input type="number" id="statsTons" min="0">
+            </div>
+            <div class="form-group">
+                <label>180s</label>
+                <input type="number" id="stats180s" min="0">
+            </div>
+            <div id="highOutsList" style="margin-top: 10px;"></div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
+                <button class="btn" onclick="closeStatsModal()">Cancel</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
