@@ -16,4 +16,4 @@ Supports:
 - Walkovers don't meet each other
 - Configurable bonus points for attendance, high out shots, short legs, 180s and Tons
 - Configure lanes
-- Auto-designate referres, which can be overriddden
+- Auto-designate referees, which can be overriddden
