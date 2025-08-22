@@ -1,6 +1,7 @@
 # NewTon Tournament
 
-Double Bracket Darts tournament.  
+Double Bracket Darts tournament.
+
 Download the files `index.html`, `styles.css` and `script.js` and save to a folder on your computer.   
 Double-click on `index.html` and the web app is running.
 
