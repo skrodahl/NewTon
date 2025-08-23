@@ -129,16 +129,45 @@ function updateTournamentStatus() {
     }
 }
 
+let showingAllTournaments = false;
+
 function loadRecentTournaments() {
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const container = document.getElementById('recentTournaments');
     
     if (tournaments.length === 0) {
         container.innerHTML = '<p>No tournaments found</p>';
+        // Hide toggle button
+        const toggleBtn = document.getElementById('toggleTournamentsBtn');
+        if (toggleBtn) {
+            toggleBtn.style.display = 'none';
+        }
         return;
     }
 
-    const html = tournaments.slice(-5).reverse().map(t => `
+    // Sort tournaments by creation timestamp (newest first) - this includes time
+    const sortedTournaments = tournaments.sort((a, b) => {
+        // Use created timestamp if available, fall back to date comparison
+        if (a.created && b.created) {
+            return new Date(b.created) - new Date(a.created); // Newest first
+        } else if (a.created) {
+            return -1; // a is newer (has timestamp)
+        } else if (b.created) {
+            return 1; // b is newer (has timestamp)
+        } else {
+            // Fall back to date comparison for older tournaments without created timestamp
+            const dateA = new Date(a.date + 'T00:00:00');
+            const dateB = new Date(b.date + 'T00:00:00');
+            return dateB - dateA; // Newest first
+        }
+    });
+
+    // Determine which tournaments to show
+    const tournamentsToShow = showingAllTournaments ? 
+        sortedTournaments : // All tournaments, newest first
+        sortedTournaments.slice(0, 5); // First 5 tournaments (newest)
+
+    const html = tournamentsToShow.map(t => `
         <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
             <strong>${t.name}</strong> (${t.date}) 
             <button class="btn" style="padding: 5px 10px; font-size: 14px;" onclick="loadSpecificTournament(${t.id})">Load</button>
@@ -146,6 +175,26 @@ function loadRecentTournaments() {
     `).join('');
     
     container.innerHTML = html;
+
+    // Update the toggle button text and visibility
+    const toggleBtn = document.getElementById('toggleTournamentsBtn');
+    if (toggleBtn) {
+        if (tournaments.length <= 5) {
+            // Hide button if we have 5 or fewer tournaments
+            toggleBtn.style.display = 'none';
+        } else {
+            // Show button if we have more than 5 tournaments
+            toggleBtn.style.display = 'inline-block';
+            toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
+        }
+    }
+
+    console.log(`Loaded tournaments: ${tournaments.length} total, showing ${tournamentsToShow.length}, toggle button: ${tournaments.length > 5 ? 'visible' : 'hidden'}`);
+}
+
+function toggleTournamentView() {
+    showingAllTournaments = !showingAllTournaments;
+    loadRecentTournaments();
 }
 
 function loadSpecificTournament(id) {
