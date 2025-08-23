@@ -20,14 +20,26 @@ function createTournament() {
         bracket: null
     };
 
+    // Clear all existing data for a fresh start
     players = [];
     matches = [];
+    
+    // Clear the UI
+    updatePlayersDisplay();
+    updatePlayerCount();
+    clearBracket();
+    
+    // Hide results section if visible
+    const resultsSection = document.getElementById('resultsSection');
+    if (resultsSection) {
+        resultsSection.style.display = 'none';
+    }
     
     saveTournament();
     updateTournamentStatus();
     showPage('registration');
     
-    alert('Tournament created successfully!');
+    alert('New tournament created successfully! Start by adding players.');
 }
 
 function loadTournament() {
