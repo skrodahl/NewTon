@@ -19,7 +19,8 @@ let config = {
         round2: 3,
         semifinal: 5,
         final: 5
-    }
+    },
+    applicationTitle: "NewTon DC - Tournament Manager"
 };
 let currentStatsPlayer = null;
 

@@ -167,12 +167,23 @@ function loadRecentTournaments() {
         sortedTournaments : // All tournaments, newest first
         sortedTournaments.slice(0, 5); // First 5 tournaments (newest)
 
-    const html = tournamentsToShow.map(t => `
-        <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px;">
-            <strong>${t.name}</strong> (${t.date}) 
-            <button class="btn" style="padding: 5px 10px; font-size: 14px;" onclick="loadSpecificTournament(${t.id})">Load</button>
-        </div>
-    `).join('');
+    const html = tournamentsToShow.map(t => {
+        const isActiveTournament = tournament && tournament.id === t.id;
+        return `
+            <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>
+                        <strong>${t.name}</strong> (${t.date})
+                        ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
+                    </span>
+                    <div>
+                        <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
+                        <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
     
     container.innerHTML = html;
 
@@ -195,6 +206,44 @@ function loadRecentTournaments() {
 function toggleTournamentView() {
     showingAllTournaments = !showingAllTournaments;
     loadRecentTournaments();
+}
+
+function deleteTournament(tournamentId) {
+    // Find the tournament to get its name
+    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
+    
+    if (!tournamentToDelete) {
+        alert('Tournament not found.');
+        return;
+    }
+
+    // Check if trying to delete the currently active tournament
+    if (tournament && tournament.id === tournamentId) {
+        alert('Cannot delete the currently active tournament.\n\nPlease create a new tournament or load a different one first.');
+        return;
+    }
+
+    // Confirmation dialog
+    const confirmDelete = confirm(
+        `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
+        `Are you sure you want to permanently delete:\n` +
+        `"${tournamentToDelete.name}"\n\n` +
+        `This action cannot be undone.`
+    );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    // Remove the tournament and save back
+    const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
+    localStorage.setItem('dartsTournaments', JSON.stringify(updatedTournaments));
+
+    // Refresh the display
+    loadRecentTournaments();
+
+    alert(`Tournament "${tournamentToDelete.name}" has been deleted successfully.`);
 }
 
 function loadSpecificTournament(id) {

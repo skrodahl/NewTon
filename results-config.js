@@ -74,6 +74,12 @@ function loadConfiguration() {
         document.getElementById('round2Legs').value = config.legs.round2;
         document.getElementById('semifinalLegs').value = config.legs.semifinal;
         document.getElementById('finalLegs').value = config.legs.final;
+
+        // Load application title
+        if (config.applicationTitle) {
+            document.getElementById('applicationTitle').value = config.applicationTitle;
+            updateApplicationTitle(config.applicationTitle);
+        }
     }
 }
 
@@ -93,4 +99,35 @@ function saveConfiguration() {
 
     localStorage.setItem('dartsConfig', JSON.stringify(config));
     alert('Configuration saved successfully!');
+}
+
+function saveApplicationSettings() {
+    const newTitle = document.getElementById('applicationTitle').value.trim();
+    
+    if (!newTitle) {
+        alert('Application title cannot be empty');
+        return;
+    }
+
+    config.applicationTitle = newTitle;
+    updateApplicationTitle(newTitle);
+    
+    localStorage.setItem('dartsConfig', JSON.stringify(config));
+    alert('Application settings saved successfully!');
+}
+
+function updateApplicationTitle(title) {
+    // Update page title (browser tab)
+    document.title = title;
+    
+    // Update main header
+    const headerElement = document.querySelector('.header h1');
+    if (headerElement) {
+        const logoPlaceholder = headerElement.querySelector('.logo-placeholder');
+        headerElement.innerHTML = '';
+        if (logoPlaceholder) {
+            headerElement.appendChild(logoPlaceholder);
+        }
+        headerElement.appendChild(document.createTextNode(title));
+    }
 }
