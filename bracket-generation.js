@@ -6,6 +6,12 @@ function generateBracket() {
         return;
     }
 
+    // Check if bracket already exists (tournament in progress)
+    if (tournament.bracket && matches.length > 0) {
+        alert('Tournament is already in progress!\n\nTo start a new bracket, you must first reset the current tournament.\n\nGo to the Tournament page and use "Reset Tournament" to clear the current bracket and results.');
+        return;
+    }
+
     const paidPlayers = players.filter(p => p.paid);
     if (paidPlayers.length < 2) {
         alert('Need at least 2 paid players to generate bracket');

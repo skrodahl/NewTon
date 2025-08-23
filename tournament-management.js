@@ -176,24 +176,63 @@ function loadSpecificTournament(id) {
 }
 
 function resetTournament() {
-    if (confirm('Are you sure you want to reset the tournament? This will clear all matches and results.')) {
-        matches = [];
-        tournament.bracket = null;
-        tournament.status = 'setup';
-
-        players.forEach(player => {
-            player.eliminated = false;
-            player.placement = null;
-        });
-
-        saveTournament();
-        clearBracket();
-
-        const resultsSection = document.getElementById('resultsSection');
-        if (resultsSection) {
-            resultsSection.style.display = 'none';
-        }
-
-        alert('Tournament reset successfully');
+    if (!tournament || !tournament.bracket) {
+        alert('No active tournament to reset.');
+        return;
     }
+
+    // More conscious reset process
+    const tournamentName = tournament.name;
+    const completedMatches = matches.filter(m => m.completed).length;
+    const totalMatches = matches.length;
+    
+    // First confirmation with tournament details
+    const confirmMessage = `⚠️ RESET TOURNAMENT WARNING ⚠️\n\n` +
+        `Tournament: "${tournamentName}"\n` +
+        `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
+        `Players: ${players.length} registered\n\n` +
+        `This will permanently delete:\n` +
+        `• All match results\n` +
+        `• All bracket progress\n` +
+        `• All tournament standings\n\n` +
+        `Are you sure you want to continue?`;
+
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+    // Second confirmation - requires typing tournament name
+    const tournamentNameConfirm = prompt(
+        `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
+        `To confirm the reset, please type the tournament name exactly:\n\n` +
+        `"${tournamentName}"\n\n` +
+        `Type the tournament name below:`
+    );
+
+    if (tournamentNameConfirm !== tournamentName) {
+        if (tournamentNameConfirm !== null) { // User didn't cancel
+            alert('Tournament name did not match. Reset cancelled for your protection.');
+        }
+        return;
+    }
+
+    // Perform the reset
+    matches = [];
+    tournament.bracket = null;
+    tournament.status = 'setup';
+
+    players.forEach(player => {
+        player.eliminated = false;
+        player.placement = null;
+    });
+
+    saveTournament();
+    clearBracket();
+
+    const resultsSection = document.getElementById('resultsSection');
+    if (resultsSection) {
+        resultsSection.style.display = 'none';
+    }
+
+    alert(`Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Registration page.`);
 }
