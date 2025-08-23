@@ -2,8 +2,8 @@
 
 Double Bracket Darts tournament.
 
-Download the files `tournament.html`, `styles.css` and all files ending with `.js` and save to a folder on your computer.   
-Double-click on `index.html` and the web app is running.
+Download all the files and save them to a folder on your computer.   
+Double-click on `tournament.html` and the web app is running.
 
 Completely self-contained. Saving tournaments and their states makes it resilient to browser/computer crashes. Tournaments are saved as JSON in your computer's Downloads folder.
 
