@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NewTon - Tournament Manager</title>
+    <title>NewTon DC - Tournament Manager</title>
     <link rel="stylesheet" href="styles.css">
 </head>
 <body>
@@ -14,7 +14,7 @@
                     <div class="logo-placeholder">
                         CLUB<br>LOGO
                     </div>
-                    NewTon - Tournament Manager
+                    NewTon DC - Tournament Manager
                 </h1>
             </div>
             <div class="nav">
@@ -165,7 +165,7 @@
                     </div>
                     <div class="form-group">
                         <label for="tonPoints">Ton Points (100+)</label>
-                        <input type="number" id="tonPoints" value="1" min="0">
+                        <input type="number" id="tonPoints" value="0" min="0">
                     </div>
                     <div class="form-group">
                         <label for="oneEightyPoints">180 Points</label>
@@ -245,6 +245,14 @@
         </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Load JavaScript files in the correct order -->
+    <script src="main.js"></script>
+    <script src="tournament-management.js"></script>
+    <script src="player-management.js"></script>
+    <script src="bracket-generation.js"></script>
+    <script src="match-progression.js"></script>
+    <script src="bracket-rendering.js"></script>
+    <script src="tournament-controls.js"></script>
+    <script src="results-config.js"></script>
 </body>
 </html>
