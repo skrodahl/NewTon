@@ -177,12 +177,12 @@ function renderGridMatch(match, x, y) {
         <div class="match-players">
             <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${match.winner?.id === match.player1?.id ? 'winner' : ''}"
                  onclick="${match.player1?.isBye ? '' : `selectWinner('${match.id}', 1)`}">
-                <span class="player-name-short">${match.player1?.name || 'TBD'}</span>
+                <span class="player-name-short">${getDisplayName(match.player1)}</span>
                 ${match.winner?.id === match.player1?.id ? '<span class="winner-check">✓</span>' : ''}
             </div>
             <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${match.winner?.id === match.player2?.id ? 'winner' : ''}"
                  onclick="${match.player2?.isBye ? '' : `selectWinner('${match.id}', 2)`}">
-                <span class="player-name-short">${match.player2?.name || 'TBD'}</span>
+                <span class="player-name-short">${getDisplayName(match.player2)}</span>
                 ${match.winner?.id === match.player2?.id ? '<span class="winner-check">✓</span>' : ''}
             </div>
         </div>
@@ -560,4 +560,24 @@ function renderSmartTitles(bounds, grid) {
     // Add to the bracket canvas
     document.getElementById('bracketCanvas').appendChild(frontsideTitle);
     document.getElementById('bracketCanvas').appendChild(backsideTitle);
+}
+
+function getDisplayName(player) {
+    if (!player) return 'TBD';
+    if (player.name === 'TBD') return 'TBD';
+    if (player.isBye) return 'Walkover';
+    
+    // Handle placeholder text cases - show actual player name instead
+    if (player.name === 'Frontside Runner-up' || player.name === 'Backside Winner' || 
+        player.name === 'Frontside Winner' || player.name === 'Backside Champion') {
+        // If it's a placeholder but we have an actual player, show the player name
+        if (player.id && typeof player.id === 'number') {
+            // This is an actual player with placeholder text - return their real name
+            const actualPlayer = players.find(p => p.id === player.id);
+            return actualPlayer ? actualPlayer.name : player.name;
+        }
+        return player.name; // Keep placeholder if no real player found
+    }
+    
+    return player.name;
 }

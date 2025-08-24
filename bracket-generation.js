@@ -574,12 +574,13 @@ function advanceWinner(completedMatch) {
     }
 }
 
-// Improved frontside winner advancement
 function advanceFrontsideWinner(completedMatch, winner) {
     const currentRound = completedMatch.round;
     const nextRound = currentRound + 1;
     const positionInRound = completedMatch.positionInRound;
     const nextPosition = Math.floor(positionInRound / 2);
+
+    console.log(`Advancing frontside winner ${winner.name} from round ${currentRound} position ${positionInRound}`);
 
     const nextMatch = matches.find(m =>
         m.side === 'frontside' &&
@@ -592,13 +593,26 @@ function advanceFrontsideWinner(completedMatch, winner) {
         const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
         nextMatch[slot] = winner;
         
-        console.log(`Placed ${winner.name} in ${nextMatch.id} as ${slot}`);
+        console.log(`✓ Placed ${winner.name} in ${nextMatch.id} as ${slot}`);
     } else {
-        // This is the frontside champion
-        const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
-        if (grandFinal) {
-            grandFinal.player1 = winner;
-            console.log(`${winner.name} advanced to Grand Final as frontside champion`);
+        // This is the frontside champion - check if it's the final
+        const frontsideRounds = Math.ceil(Math.log2(tournament.bracketSize));
+        const isFrontsideFinal = currentRound === frontsideRounds;
+        
+        if (isFrontsideFinal) {
+            console.log(`${winner.name} won the frontside final - advancing to Grand Final`);
+            const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+            if (grandFinal) {
+                grandFinal.player1 = winner;
+                console.log(`✓ ${winner.name} placed in Grand Final as frontside champion`);
+            }
+        } else {
+            // Semi-final or earlier winner
+            const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+            if (grandFinal) {
+                grandFinal.player1 = winner;
+                console.log(`✓ ${winner.name} advanced to Grand Final as frontside champion`);
+            }
         }
     }
 }
@@ -634,20 +648,28 @@ function advanceBacksideWinner(completedMatch, winner) {
 function dropFrontsideLoser(completedMatch, loser) {
     console.log(`Dropping frontside loser: ${loser.name} from match ${completedMatch.id}`);
     
+    const frontsideRounds = Math.ceil(Math.log2(tournament.bracketSize));
+    const isFrontsideFinal = completedMatch.round === frontsideRounds;
+    
+    if (isFrontsideFinal) {
+        // SPECIAL CASE: Frontside final loser goes directly to BS-FINAL
+        console.log(`${loser.name} lost the frontside final - going to BS-FINAL`);
+        const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
+        if (backsideFinal) {
+            backsideFinal.player1 = loser; // Frontside runner-up
+            console.log(`✓ ${loser.name} placed in BS-FINAL as frontside runner-up`);
+        }
+        return; // Exit early - don't use normal backside drop logic
+    }
+    
+    // NORMAL CASE: Earlier round losers use the existing logic
     const frontsideRound = completedMatch.round;
     const matchPositionInRound = completedMatch.positionInRound;
     
-    // Calculate which backside round should receive this loser
     let targetBacksideRound;
     
     if (frontsideRound === 1) {
-        // First round losers go to backside round 1
         targetBacksideRound = 1;
-        
-        // For first round, each loser should go to their own backside match
-        // Match FS-1-1 (position 0) -> BS-1-1 (position 0)  
-        // Match FS-1-2 (position 1) -> BS-1-2 (position 1)
-        // Match FS-1-3 (position 2) -> BS-1-3 (position 2) etc.
         
         const targetBacksideMatch = matches.find(m =>
             m.side === 'backside' &&
@@ -656,7 +678,6 @@ function dropFrontsideLoser(completedMatch, loser) {
         );
         
         if (targetBacksideMatch) {
-            // Place the loser in the first available slot of their designated match
             if (targetBacksideMatch.player1.name === 'TBD') {
                 targetBacksideMatch.player1 = loser;
                 console.log(`✓ Placed ${loser.name} in ${targetBacksideMatch.id} as player1`);
@@ -669,13 +690,10 @@ function dropFrontsideLoser(completedMatch, loser) {
         } else {
             console.error(`ERROR: Could not find target backside match for ${loser.name}`);
         }
-        
     } else {
-        // For later rounds, use more complex logic (implement as needed)
-        // For now, use simplified approach
+        // Semi-final and other round losers
         targetBacksideRound = (frontsideRound - 1) * 2;
         
-        // Find the next available slot in any match of the target round
         const targetMatches = matches.filter(m =>
             m.side === 'backside' &&
             m.round === targetBacksideRound &&
