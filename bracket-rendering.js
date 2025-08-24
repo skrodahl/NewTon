@@ -106,13 +106,19 @@ function renderBacksideGrid(backsideStructure, grid) {
             m.side === 'backside' && m.round === roundInfo.round
         );
 
-        // Position: Center flowing LEFT with buffer zone
+        if (backsideMatches.length === 0) return;
+
+        // CORRECTED: Backside flows CENTER → LEFT (toward outside)
+        // Round 1 starts near center, later rounds move further left
         const roundX = grid.centerX - grid.centerBuffer - roundIndex * (grid.matchWidth + grid.horizontalSpacing);
 
+        // Calculate Y position - simpler approach
         if (backsideMatches.length === 1) {
+            // Single match - center it vertically
             const matchY = grid.centerY - (grid.matchHeight / 2);
             renderGridMatch(backsideMatches[0], roundX, matchY);
         } else {
+            // Multiple matches - distribute vertically around center
             const totalNeededHeight = backsideMatches.length * grid.matchHeight + (backsideMatches.length - 1) * grid.verticalSpacing;
             const startY = grid.centerY - (totalNeededHeight / 2);
 
@@ -128,14 +134,20 @@ function renderFinalGrid(grid) {
     const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
     const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
 
-    const finalY = grid.centerY + 350;
+    // Position finals in the center area, below the main bracket
+    const finalY = grid.centerY + 200; // Moved up from 350 to 200
+    const grandFinalY = finalY + 120;   // Closer spacing
 
     if (backsideFinal) {
-        renderGridMatch(backsideFinal, grid.centerX - 150, finalY);
+        // Position backside final in the center-left
+        const backsideFinalX = grid.centerX - (grid.matchWidth / 2) - 100;
+        renderGridMatch(backsideFinal, backsideFinalX, finalY);
     }
 
     if (grandFinal) {
-        renderGridMatch(grandFinal, grid.centerX - (grid.matchWidth / 2), finalY + 150);
+        // Position grand final in the center
+        const grandFinalX = grid.centerX - (grid.matchWidth / 2);
+        renderGridMatch(grandFinal, grandFinalX, grandFinalY);
     }
 }
 
@@ -476,7 +488,7 @@ function calculateMatchBounds(structure, grid) {
         backside: { minY: Infinity, maxY: -Infinity, minX: Infinity, maxX: -Infinity }
     };
 
-    // Calculate frontside bounds
+    // Calculate frontside bounds (unchanged)
     structure.frontside.forEach((roundInfo, roundIndex) => {
         const roundX = grid.centerX + grid.centerBuffer + roundIndex * (grid.matchWidth + grid.horizontalSpacing);
         
@@ -495,7 +507,7 @@ function calculateMatchBounds(structure, grid) {
         bounds.frontside.maxX = Math.max(bounds.frontside.maxX, roundX + grid.matchWidth);
     });
 
-    // Calculate backside bounds
+    // Calculate backside bounds (simplified)
     structure.backside.forEach((roundInfo, roundIndex) => {
         const roundX = grid.centerX - grid.centerBuffer - roundIndex * (grid.matchWidth + grid.horizontalSpacing);
         

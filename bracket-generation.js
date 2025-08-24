@@ -324,10 +324,11 @@ function autoAdvanceMatch(match) {
 function calculateBracketStructure(bracketSize) {
     const frontsideRounds = Math.ceil(Math.log2(bracketSize));
 
-    // Double elimination backside structure
-    const backsideRounds = (frontsideRounds - 1) * 2;
+    // CORRECTED: Double elimination backside structure
+    // For 8 players: 3 frontside rounds, so 2 backside rounds (not 4!)
+    const backsideRounds = frontsideRounds - 1;
 
-    // Calculate matches per round for frontside
+    // Calculate matches per round for frontside (unchanged)
     const frontsideStructure = [];
     for (let round = 1; round <= frontsideRounds; round++) {
         const matchesInRound = Math.pow(2, frontsideRounds - round);
@@ -338,28 +339,26 @@ function calculateBracketStructure(bracketSize) {
         });
     }
 
-    // Calculate matches per round for backside
+    // CORRECTED: Calculate matches per round for backside
     const backsideStructure = [];
     for (let round = 1; round <= backsideRounds; round++) {
         let matchesInRound;
 
         if (round === 1) {
-            // First backside round: half of first frontside losers
+            // First backside round: receives first round losers
+            // For 8-player bracket: 4 first round matches = 4 losers
+            // But we have walkovers, so we need 2 matches for the real losers
             matchesInRound = Math.pow(2, frontsideRounds - 2);
-        } else if (round % 2 === 0) {
-            // Even rounds: merge with frontside losers
-            const frontsideRoundLosers = Math.floor((round / 2) + 1);
-            matchesInRound = Math.pow(2, frontsideRounds - frontsideRoundLosers - 1);
         } else {
-            // Odd rounds: advance backside winners
-            matchesInRound = Math.pow(2, frontsideRounds - Math.ceil(round / 2) - 1);
+            // Later rounds: winners from previous backside round merge with frontside losers
+            matchesInRound = Math.pow(2, frontsideRounds - round - 1);
         }
 
         matchesInRound = Math.max(1, matchesInRound);
         backsideStructure.push({
             round: round,
             matches: matchesInRound,
-            receivesFromFrontside: round % 2 === 0
+            receivesFromFrontside: round === 1 || round % 2 === 0 // Simplified
         });
     }
 
@@ -839,5 +838,43 @@ function checkBracketState() {
         completed: completedMatches.length,
         autoAdvanced: autoAdvancedMatches.length,
         domMatches: bracketMatches.length
+    };
+}
+function debugBacksideStructure() {
+    if (!tournament || !tournament.bracketSize) {
+        console.log('No tournament found');
+        return;
+    }
+    
+    const structure = calculateBracketStructure(tournament.bracketSize);
+    
+    console.log('=== BACKSIDE STRUCTURE DEBUG ===');
+    console.log(`Bracket size: ${tournament.bracketSize}`);
+    console.log(`Frontside rounds: ${structure.frontsideRounds}`);
+    console.log(`Backside rounds: ${structure.backsideRounds}`);
+    
+    console.log('\nBackside structure (what should exist):');
+    structure.backside.forEach((round, index) => {
+        console.log(`Round ${round.round}: ${round.matches} matches (receives from frontside: ${round.receivesFromFrontside})`);
+    });
+    
+    console.log('\nActual backside matches (what was created):');
+    const backsideMatches = matches.filter(m => m.side === 'backside');
+    backsideMatches.forEach(match => {
+        console.log(`${match.id}: Round ${match.round}, Position ${match.positionInRound}`);
+    });
+    
+    console.log('\nMatches per round (actual):');
+    for (let round = 1; round <= 4; round++) {
+        const roundMatches = matches.filter(m => m.side === 'backside' && m.round === round);
+        if (roundMatches.length > 0) {
+            console.log(`Round ${round}: ${roundMatches.length} matches`);
+        }
+    }
+    
+    return {
+        structure: structure.backside,
+        actualMatches: backsideMatches,
+        summary: `Expected ${structure.backside.length} rounds, found ${backsideMatches.length} matches`
     };
 }
