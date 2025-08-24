@@ -656,13 +656,21 @@ function dropFrontsideLoser(completedMatch, loser) {
         console.log(`${loser.name} lost the frontside final - going to BS-FINAL`);
         const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
         if (backsideFinal) {
-            backsideFinal.player1 = loser; // Frontside runner-up
-            console.log(`✓ ${loser.name} placed in BS-FINAL as frontside runner-up`);
+            // CRITICAL FIX: Replace the entire player object, not just assign reference
+            backsideFinal.player1 = {
+                id: loser.id,
+                name: loser.name,  // Use the actual player name
+                paid: loser.paid,
+                stats: loser.stats,
+                placement: loser.placement,
+                eliminated: loser.eliminated
+            };
+            console.log(`✓ ${loser.name} placed in BS-FINAL as frontside runner-up with actual name`);
         }
         return; // Exit early - don't use normal backside drop logic
     }
     
-    // NORMAL CASE: Earlier round losers use the existing logic
+    // NORMAL CASE: Earlier round losers use the existing logic (unchanged)
     const frontsideRound = completedMatch.round;
     const matchPositionInRound = completedMatch.positionInRound;
     

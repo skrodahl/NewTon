@@ -177,12 +177,12 @@ function renderGridMatch(match, x, y) {
         <div class="match-players">
             <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${match.winner?.id === match.player1?.id ? 'winner' : ''}"
                  onclick="${match.player1?.isBye ? '' : `selectWinner('${match.id}', 1)`}">
-                <span class="player-name-short">${getDisplayName(match.player1)}</span>
+                <span class="player-name-short">${getPlayerDisplayName(match.player1)}</span>
                 ${match.winner?.id === match.player1?.id ? '<span class="winner-check">✓</span>' : ''}
             </div>
             <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${match.winner?.id === match.player2?.id ? 'winner' : ''}"
                  onclick="${match.player2?.isBye ? '' : `selectWinner('${match.id}', 2)`}">
-                <span class="player-name-short">${getDisplayName(match.player2)}</span>
+                <span class="player-name-short">${getPlayerDisplayName(match.player2)}</span>
                 ${match.winner?.id === match.player2?.id ? '<span class="winner-check">✓</span>' : ''}
             </div>
         </div>
@@ -202,55 +202,77 @@ function renderGridMatch(match, x, y) {
 
 function renderAllConnections(structure, grid) {
     document.getElementById('bracketLines').innerHTML = '';
-    drawFrontsideConnections(structure.frontside, grid);
-    drawBacksideConnections(structure.backside, grid);
-    drawLoserDropConnections(structure, grid);
-    drawFinalConnections(grid);
+    
+    // Add small delay to ensure DOM elements are fully rendered
+    setTimeout(() => {
+        drawFrontsideConnections(structure.frontside);
+        drawBacksideConnections(structure.backside);
+        drawFinalConnections();
+    }, 100);
 }
 
-function drawFrontsideConnections(frontsideStructure, grid) {
-    for (let roundIndex = 0; roundIndex < frontsideStructure.length - 1; roundIndex++) {
-        const currentRound = frontsideStructure[roundIndex];
-        const nextRound = frontsideStructure[roundIndex + 1];
-
+function drawFrontsideConnections(frontsideStructure) {
+    frontsideStructure.forEach((roundInfo, roundIndex) => {
+        // Skip the last round (it connects to finals)
+        if (roundIndex === frontsideStructure.length - 1) return;
+        
         const currentMatches = matches.filter(m =>
-            m.side === 'frontside' && m.round === currentRound.round
-        );
-        const nextMatches = matches.filter(m =>
-            m.side === 'frontside' && m.round === nextRound.round
-        );
+            m.side === 'frontside' && m.round === roundInfo.round
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+        
+        const nextRoundMatches = matches.filter(m =>
+            m.side === 'frontside' && m.round === (roundInfo.round + 1)
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
 
-        for (let i = 0; i < nextMatches.length; i++) {
+        // Connect pairs of current matches to next match
+        for (let i = 0; i < nextRoundMatches.length; i++) {
             const match1 = currentMatches[i * 2];
             const match2 = currentMatches[i * 2 + 1];
-            const nextMatch = nextMatches[i];
+            const nextMatch = nextRoundMatches[i];
 
-            if (match1 && match2 && nextMatch) {
-                drawTournamentConnection(match1.id, match2.id, nextMatch.id);
+            if (match1 && nextMatch) {
+                if (match2) {
+                    // Two matches connecting to one
+                    drawBracketConnection(match1.id, match2.id, nextMatch.id, 'frontside');
+                } else {
+                    // One match connecting to next
+                    drawDirectConnection(match1.id, nextMatch.id);
+                }
             }
         }
-    }
+    });
 }
 
-function drawBacksideConnections(backsideStructure, grid) {
-    for (let roundIndex = 0; roundIndex < backsideStructure.length - 1; roundIndex++) {
-        const currentRound = backsideStructure[roundIndex];
-        const nextRound = backsideStructure[roundIndex + 1];
-
+function drawBacksideConnections(backsideStructure) {
+    backsideStructure.forEach((roundInfo, roundIndex) => {
+        // Skip the last round (it connects to finals)
+        if (roundIndex === backsideStructure.length - 1) return;
+        
         const currentMatches = matches.filter(m =>
-            m.side === 'backside' && m.round === currentRound.round
-        );
-        const nextMatches = matches.filter(m =>
-            m.side === 'backside' && m.round === nextRound.round
-        );
+            m.side === 'backside' && m.round === roundInfo.round
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+        
+        const nextRoundMatches = matches.filter(m =>
+            m.side === 'backside' && m.round === (roundInfo.round + 1)
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
 
-        currentMatches.forEach((currentMatch, index) => {
-            const nextMatch = nextMatches[Math.floor(index / 2)];
-            if (nextMatch) {
-                drawSimpleConnection(currentMatch.id, nextMatch.id);
+        // Connect pairs of current matches to next match
+        for (let i = 0; i < nextRoundMatches.length; i++) {
+            const match1 = currentMatches[i * 2];
+            const match2 = currentMatches[i * 2 + 1];
+            const nextMatch = nextRoundMatches[i];
+
+            if (match1 && nextMatch) {
+                if (match2) {
+                    // Two matches connecting to one
+                    drawBracketConnection(match1.id, match2.id, nextMatch.id, 'backside');
+                } else {
+                    // One match connecting to next
+                    drawDirectConnection(match1.id, nextMatch.id);
+                }
             }
-        });
-    }
+        }
+    });
 }
 
 function drawLoserDropConnections(structure, grid) {
@@ -275,47 +297,96 @@ function drawLoserDropConnections(structure, grid) {
     });
 }
 
-function drawFinalConnections(grid) {
-    const frontsideWinnerMatch = matches.find(m =>
-        m.side === 'frontside' && m.round === Math.max(...matches.filter(m => m.side === 'frontside').map(m => m.round))
+function drawFinalConnections() {
+    // Find the final matches
+    const frontsideRounds = Math.ceil(Math.log2(tournament.bracketSize));
+    const backsideRounds = frontsideRounds - 1;
+    
+    const frontsideFinal = matches.find(m =>
+        m.side === 'frontside' && m.round === frontsideRounds
     );
-    const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+    
+    const backsideFinal = matches.find(m =>
+        m.side === 'backside' && m.round === backsideRounds
+    );
+    
+    const bsFinalMatch = matches.find(m => m.id === 'BS-FINAL');
+    const grandFinalMatch = matches.find(m => m.id === 'GRAND-FINAL');
 
-    if (frontsideWinnerMatch && grandFinal) {
-        drawSimpleConnection(frontsideWinnerMatch.id, grandFinal.id);
+    // Connect frontside final to grand final
+    if (frontsideFinal && grandFinalMatch) {
+        drawDirectConnection(frontsideFinal.id, grandFinalMatch.id);
     }
 
-    const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
-    if (backsideFinal && grandFinal) {
-        drawSimpleConnection(backsideFinal.id, grandFinal.id);
+    // Connect backside final to BS-FINAL
+    if (backsideFinal && bsFinalMatch) {
+        drawDirectConnection(backsideFinal.id, bsFinalMatch.id);
+    }
+
+    // Connect BS-FINAL to grand final
+    if (bsFinalMatch && grandFinalMatch) {
+        drawDirectConnection(bsFinalMatch.id, grandFinalMatch.id);
     }
 }
 
 function drawTournamentConnection(match1Id, match2Id, nextMatchId) {
+    // Handle single match to next match (when match2Id is undefined)
+    if (!match2Id) {
+        if (match1Id && nextMatchId) {
+            drawSimpleConnection(match1Id, nextMatchId);
+        }
+        return;
+    }
+
+    // Handle pair of matches to next match
     const match1Element = document.getElementById(`bracket-match-${match1Id}`);
     const match2Element = document.getElementById(`bracket-match-${match2Id}`);
     const nextMatchElement = document.getElementById(`bracket-match-${nextMatchId}`);
 
-    if (!match1Element || !match2Element || !nextMatchElement) return;
+    if (!match1Element || !match2Element || !nextMatchElement) {
+        // Fallback to simple connection if elements missing
+        if (match1Element && nextMatchElement) {
+            drawSimpleConnection(match1Id, nextMatchId);
+        }
+        return;
+    }
 
     const canvasRect = document.getElementById('bracketCanvas').getBoundingClientRect();
 
+    // Get positions of all three matches
     const match1Rect = match1Element.getBoundingClientRect();
     const match2Rect = match2Element.getBoundingClientRect();
     const nextMatchRect = nextMatchElement.getBoundingClientRect();
 
+    // Calculate connection points
     const match1Y = match1Rect.top - canvasRect.top + match1Rect.height / 2;
     const match2Y = match2Rect.top - canvasRect.top + match2Rect.height / 2;
     const nextMatchY = nextMatchRect.top - canvasRect.top + nextMatchRect.height / 2;
+    
     const match1X = match1Rect.left - canvasRect.left + match1Rect.width;
+    const match2X = match2Rect.left - canvasRect.left + match2Rect.width;
     const nextMatchX = nextMatchRect.left - canvasRect.left;
 
-    const connectorX = match1X + 40;
-
-    createLine(match1X, match1Y, connectorX, match1Y);
-    createLine(match1X, match2Y, connectorX, match2Y);
-    createLine(connectorX, Math.min(match1Y, match2Y), connectorX, Math.max(match1Y, match2Y));
-    createLine(connectorX, (match1Y + match2Y) / 2, nextMatchX, nextMatchY);
+    // Determine connection style based on bracket side
+    const isBackside = nextMatchX < Math.max(match1X, match2X);
+    
+    if (isBackside) {
+        // Backside connections (right to left)
+        const connectorX = Math.min(match1X, match2X) - 40;
+        
+        createLine(match1X, match1Y, connectorX, match1Y);
+        createLine(match2X, match2Y, connectorX, match2Y);
+        createLine(connectorX, Math.min(match1Y, match2Y), connectorX, Math.max(match1Y, match2Y));
+        createLine(connectorX, (match1Y + match2Y) / 2, nextMatchX + match1Rect.width, nextMatchY);
+    } else {
+        // Frontside connections (left to right)
+        const connectorX = Math.max(match1X, match2X) + 40;
+        
+        createLine(match1X, match1Y, connectorX, match1Y);
+        createLine(match2X, match2Y, connectorX, match2Y);
+        createLine(connectorX, Math.min(match1Y, match2Y), connectorX, Math.max(match1Y, match2Y));
+        createLine(connectorX, (match1Y + match2Y) / 2, nextMatchX, nextMatchY);
+    }
 }
 
 function drawSimpleConnection(fromMatchId, toMatchId) {
@@ -328,10 +399,24 @@ function drawSimpleConnection(fromMatchId, toMatchId) {
     const fromRect = fromElement.getBoundingClientRect();
     const toRect = toElement.getBoundingClientRect();
 
-    const fromX = fromRect.left - canvasRect.left + fromRect.width;
-    const fromY = fromRect.top - canvasRect.top + fromRect.height / 2;
-    const toX = toRect.left - canvasRect.left;
-    const toY = toRect.top - canvasRect.top + toRect.height / 2;
+    // Determine connection points based on relative positions
+    let fromX, fromY, toX, toY;
+    
+    const fromCenterX = fromRect.left - canvasRect.left + fromRect.width / 2;
+    const toCenterX = toRect.left - canvasRect.left + toRect.width / 2;
+    
+    if (fromCenterX < toCenterX) {
+        // Left to right (frontside)
+        fromX = fromRect.left - canvasRect.left + fromRect.width;
+        toX = toRect.left - canvasRect.left;
+    } else {
+        // Right to left (backside)
+        fromX = fromRect.left - canvasRect.left;
+        toX = toRect.left - canvasRect.left + toRect.width;
+    }
+    
+    fromY = fromRect.top - canvasRect.top + fromRect.height / 2;
+    toY = toRect.top - canvasRect.top + toRect.height / 2;
 
     createLine(fromX, fromY, toX, toY);
 }
@@ -373,27 +458,28 @@ function drawLoserDropLine(fromMatchId, toMatchId) {
     document.getElementById('bracketLines').appendChild(line);
 }
 
-function createLine(x1, y1, x2, y2) {
+function drawLine(x1, y1, x2, y2) {
     const line = document.createElement('div');
     line.className = 'bracket-line';
     line.style.position = 'absolute';
     line.style.background = '#333333';
     line.style.zIndex = '1';
 
-    if (Math.abs(x2 - x1) > Math.abs(y2 - y1)) {
-        line.style.left = Math.min(x1, x2) + 'px';
-        line.style.top = y1 + 'px';
-        line.style.width = Math.abs(x2 - x1) + 'px';
-        line.style.height = '3px';
-    } else {
-        line.style.left = x1 + 'px';
-        line.style.top = Math.min(y1, y2) + 'px';
-        line.style.width = '3px';
-        line.style.height = Math.abs(y2 - y1) + 'px';
-    }
+    const dx = x2 - x1;
+    const dy = y2 - y1;
+    const length = Math.sqrt(dx * dx + dy * dy);
+    const angle = Math.atan2(dy, dx) * 180 / Math.PI;
+
+    line.style.width = length + 'px';
+    line.style.height = '2px';
+    line.style.left = x1 + 'px';
+    line.style.top = y1 + 'px';
+    line.style.transformOrigin = '0 0';
+    line.style.transform = `rotate(${angle}deg)`;
 
     document.getElementById('bracketLines').appendChild(line);
 }
+
 
 // ZOOM AND PAN FUNCTIONALITY
 function handleZoom(e) {
@@ -580,4 +666,145 @@ function getDisplayName(player) {
     }
     
     return player.name;
+}
+
+function getPlayerDisplayName(player) {
+    if (!player) return 'TBD';
+    if (player.name === 'TBD') return 'TBD';
+    if (player.isBye) return 'Walkover';
+    
+    // Handle placeholder names - look up the actual player by ID
+    if (player.name === 'Frontside Runner-up' || player.name === 'Backside Winner' || 
+        player.name === 'Frontside Winner' || player.name === 'Backside Champion' ||
+        player.name.includes('Frontside') || player.name.includes('Backside')) {
+        
+        // Check for numeric ID (real player with placeholder name)
+        if (player.id && typeof player.id === 'number') {
+            const realPlayer = players.find(p => p.id === player.id);
+            if (realPlayer) {
+                return realPlayer.name;
+            }
+        }
+        
+        // Check for string placeholder IDs like 'fs-runnerup'
+        if (player.id === 'fs-runnerup' || player.id === 'bs-winner' || 
+            player.id === 'fs-champion' || player.id === 'bs-champion') {
+            
+            // For frontside runner-up, find the player who lost the frontside final
+            if (player.id === 'fs-runnerup') {
+                const frontsideRounds = Math.ceil(Math.log2(tournament.bracketSize));
+                const frontsideFinal = matches.find(m => 
+                    m.side === 'frontside' && 
+                    m.round === frontsideRounds &&
+                    m.completed === true
+                );
+                
+                if (frontsideFinal && frontsideFinal.loser) {
+                    return frontsideFinal.loser.name;
+                }
+            }
+            
+            // For backside winner, find the winner of the last backside match
+            if (player.id === 'bs-winner') {
+                const backsideRounds = Math.ceil(Math.log2(tournament.bracketSize)) - 1;
+                const backsideFinal = matches.find(m => 
+                    m.side === 'backside' && 
+                    m.round === backsideRounds &&
+                    m.completed === true
+                );
+                
+                if (backsideFinal && backsideFinal.winner) {
+                    return backsideFinal.winner.name;
+                }
+            }
+        }
+        
+        // If no real player found, return the placeholder (truncated for display)
+        if (player.name.length > 12) {
+            return player.name.substring(0, 12) + '...';
+        }
+        return player.name;
+    }
+    
+    return player.name;
+}
+
+function drawBracketConnection(match1Id, match2Id, nextMatchId, side) {
+    const match1El = document.getElementById(`bracket-match-${match1Id}`);
+    const match2El = document.getElementById(`bracket-match-${match2Id}`);
+    const nextMatchEl = document.getElementById(`bracket-match-${nextMatchId}`);
+
+    if (!match1El || !match2El || !nextMatchEl) {
+        // Fallback to direct connection
+        if (match1El && nextMatchEl) {
+            drawDirectConnection(match1Id, nextMatchId);
+        }
+        return;
+    }
+
+    const canvas = document.getElementById('bracketCanvas');
+    const canvasRect = canvas.getBoundingClientRect();
+
+    // Get match positions relative to canvas
+    const match1Rect = match1El.getBoundingClientRect();
+    const match2Rect = match2El.getBoundingClientRect();
+    const nextMatchRect = nextMatchEl.getBoundingClientRect();
+
+    const match1Y = match1Rect.top - canvasRect.top + match1Rect.height / 2;
+    const match2Y = match2Rect.top - canvasRect.top + match2Rect.height / 2;
+    const nextMatchY = nextMatchRect.top - canvasRect.top + nextMatchRect.height / 2;
+
+    let match1X, match2X, nextMatchX, connectorX;
+
+    if (side === 'frontside') {
+        // Frontside: matches connect from right side, next match receives on left
+        match1X = match1Rect.left - canvasRect.left + match1Rect.width;
+        match2X = match2Rect.left - canvasRect.left + match2Rect.width;
+        nextMatchX = nextMatchRect.left - canvasRect.left;
+        connectorX = Math.max(match1X, match2X) + 30;
+    } else {
+        // Backside: matches connect from left side, next match receives on right
+        match1X = match1Rect.left - canvasRect.left;
+        match2X = match2Rect.left - canvasRect.left;
+        nextMatchX = nextMatchRect.left - canvasRect.left + nextMatchRect.width;
+        connectorX = Math.min(match1X, match2X) - 30;
+    }
+
+    // Draw the bracket connection
+    drawLine(match1X, match1Y, connectorX, match1Y);
+    drawLine(match2X, match2Y, connectorX, match2Y);
+    drawLine(connectorX, Math.min(match1Y, match2Y), connectorX, Math.max(match1Y, match2Y));
+    drawLine(connectorX, (match1Y + match2Y) / 2, nextMatchX, nextMatchY);
+}
+
+function drawDirectConnection(fromMatchId, toMatchId) {
+    const fromEl = document.getElementById(`bracket-match-${fromMatchId}`);
+    const toEl = document.getElementById(`bracket-match-${toMatchId}`);
+
+    if (!fromEl || !toEl) return;
+
+    const canvas = document.getElementById('bracketCanvas');
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+
+    const fromCenterX = fromRect.left - canvasRect.left + fromRect.width / 2;
+    const toCenterX = toRect.left - canvasRect.left + toRect.width / 2;
+
+    let fromX, toX;
+    if (fromCenterX < toCenterX) {
+        // Left to right
+        fromX = fromRect.left - canvasRect.left + fromRect.width;
+        toX = toRect.left - canvasRect.left;
+    } else {
+        // Right to left
+        fromX = fromRect.left - canvasRect.left;
+        toX = toRect.left - canvasRect.left + toRect.width;
+    }
+
+    const fromY = fromRect.top - canvasRect.top + fromRect.height / 2;
+    const toY = toRect.top - canvasRect.top + toRect.height / 2;
+
+    drawLine(fromX, fromY, toX, toY);
 }
