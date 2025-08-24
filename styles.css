@@ -287,20 +287,22 @@ body {
 
 .bracket-title {
     position: absolute;
-    top: 50px;
-    font-size: 48px;
+    font-size: 32px; /* Reduced from 48px */
     font-weight: bold;
     color: #333333;
-    letter-spacing: 8px;
+    letter-spacing: 4px; /* Reduced from 8px */
     text-transform: uppercase;
+    z-index: 5; /* Lower than matches but above lines */
+    text-shadow: 2px 2px 4px rgba(255,255,255,0.8); /* Subtle shadow for readability */
+    pointer-events: none; /* Prevents interference with match clicks */
 }
 
 .bracket-title.back {
-    left: 200px;
+    /* No specific left positioning - handled by JavaScript now */
 }
 
 .bracket-title.front {
-    right: 200px;
+    /* No specific right positioning - handled by JavaScript now */
 }
 
 .bracket-match {

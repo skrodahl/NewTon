@@ -50,7 +50,7 @@ function renderCompleteDoubleElimination() {
     // Define grid parameters
     const grid = {
         matchWidth: 180,
-        matchHeight: 80,
+        matchHeight: 90, // Updated to match our new sizing
         horizontalSpacing: 100,
         verticalSpacing: 60,
         canvasWidth: 3000,
@@ -60,10 +60,17 @@ function renderCompleteDoubleElimination() {
         centerBuffer: 250
     };
 
+    // Calculate the actual bounds of where matches will be placed
+    const bounds = calculateMatchBounds(structure, grid);
+
     // Render all bracket sections
     renderFrontsideGrid(structure.frontside, grid);
     renderBacksideGrid(structure.backside, grid);
     renderFinalGrid(grid);
+    
+    // Render title text with smart positioning based on actual match positions
+    renderSmartTitles(bounds, grid);
+    
     renderAllConnections(structure, grid);
 }
 
@@ -461,4 +468,84 @@ function handleDrag(e) {
 
 function endDrag() {
     isDragging = false;
+}
+
+function calculateMatchBounds(structure, grid) {
+    const bounds = {
+        frontside: { minY: Infinity, maxY: -Infinity, minX: Infinity, maxX: -Infinity },
+        backside: { minY: Infinity, maxY: -Infinity, minX: Infinity, maxX: -Infinity }
+    };
+
+    // Calculate frontside bounds
+    structure.frontside.forEach((roundInfo, roundIndex) => {
+        const roundX = grid.centerX + grid.centerBuffer + roundIndex * (grid.matchWidth + grid.horizontalSpacing);
+        
+        if (roundInfo.matches === 1) {
+            const matchY = grid.centerY - (grid.matchHeight / 2);
+            bounds.frontside.minY = Math.min(bounds.frontside.minY, matchY);
+            bounds.frontside.maxY = Math.max(bounds.frontside.maxY, matchY + grid.matchHeight);
+        } else {
+            const totalNeededHeight = roundInfo.matches * grid.matchHeight + (roundInfo.matches - 1) * grid.verticalSpacing;
+            const startY = grid.centerY - (totalNeededHeight / 2);
+            bounds.frontside.minY = Math.min(bounds.frontside.minY, startY);
+            bounds.frontside.maxY = Math.max(bounds.frontside.maxY, startY + totalNeededHeight);
+        }
+        
+        bounds.frontside.minX = Math.min(bounds.frontside.minX, roundX);
+        bounds.frontside.maxX = Math.max(bounds.frontside.maxX, roundX + grid.matchWidth);
+    });
+
+    // Calculate backside bounds
+    structure.backside.forEach((roundInfo, roundIndex) => {
+        const roundX = grid.centerX - grid.centerBuffer - roundIndex * (grid.matchWidth + grid.horizontalSpacing);
+        
+        if (roundInfo.matches === 1) {
+            const matchY = grid.centerY - (grid.matchHeight / 2);
+            bounds.backside.minY = Math.min(bounds.backside.minY, matchY);
+            bounds.backside.maxY = Math.max(bounds.backside.maxY, matchY + grid.matchHeight);
+        } else {
+            const totalNeededHeight = roundInfo.matches * grid.matchHeight + (roundInfo.matches - 1) * grid.verticalSpacing;
+            const startY = grid.centerY - (totalNeededHeight / 2);
+            bounds.backside.minY = Math.min(bounds.backside.minY, startY);
+            bounds.backside.maxY = Math.max(bounds.backside.maxY, startY + totalNeededHeight);
+        }
+        
+        bounds.backside.minX = Math.min(bounds.backside.minX, roundX);
+        bounds.backside.maxX = Math.max(bounds.backside.maxX, roundX + grid.matchWidth);
+    });
+
+    return bounds;
+}
+
+function renderSmartTitles(bounds, grid) {
+    // Remove any existing titles
+    document.querySelectorAll('.bracket-title').forEach(title => title.remove());
+
+    // Create new title elements with smart positioning
+    const frontsideTitle = document.createElement('div');
+    frontsideTitle.className = 'bracket-title front';
+    frontsideTitle.textContent = 'FRONTSIDE';
+    
+    const backsideTitle = document.createElement('div');
+    backsideTitle.className = 'bracket-title back';
+    backsideTitle.textContent = 'BACKSIDE';
+
+    // Position titles above the matches, but not too high
+    const titleY = Math.max(50, bounds.frontside.minY - 80); // At least 50px from top, 80px above matches
+    
+    // Frontside title - positioned above the rightmost part of frontside matches
+    const frontsideCenterX = (bounds.frontside.minX + bounds.frontside.maxX) / 2;
+    frontsideTitle.style.position = 'absolute';
+    frontsideTitle.style.left = (frontsideCenterX - 100) + 'px'; // Center the text (approximate)
+    frontsideTitle.style.top = titleY + 'px';
+    
+    // Backside title - positioned above the leftmost part of backside matches  
+    const backsideCenterX = (bounds.backside.minX + bounds.backside.maxX) / 2;
+    backsideTitle.style.position = 'absolute';
+    backsideTitle.style.left = (backsideCenterX - 100) + 'px'; // Center the text (approximate)
+    backsideTitle.style.top = titleY + 'px';
+
+    // Add to the bracket canvas
+    document.getElementById('bracketCanvas').appendChild(frontsideTitle);
+    document.getElementById('bracketCanvas').appendChild(backsideTitle);
 }

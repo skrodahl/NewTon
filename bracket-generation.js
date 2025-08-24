@@ -450,13 +450,34 @@ function generateBacksideMatches(structure, startId) {
 
     structure.backside.forEach((roundInfo, roundIndex) => {
         for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
+            
+            // For first round of backside, we want to set up matches that will receive losers
+            // Each first round backside match should have one slot for a frontside loser
+            // and one slot for a walkover (so the loser auto-advances)
+            
+            let player1, player2;
+            
+            if (roundInfo.round === 1) {
+                // First backside round: Set up for frontside losers + walkovers
+                player1 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-1` }; // Will receive frontside loser
+                player2 = { 
+                    id: `bs-walkover-${matchIndex}`, 
+                    name: 'Walkover', 
+                    isBye: true 
+                }; // Walkover so loser auto-advances
+            } else {
+                // Later rounds: Normal TBD setup
+                player1 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-1` };
+                player2 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-2` };
+            }
+
             const match = {
                 id: `BS-${roundInfo.round}-${matchIndex + 1}`,
                 numericId: matchId++,
                 round: roundInfo.round,
                 side: 'backside',
-                player1: { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-1` },
-                player2: { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-2` },
+                player1: player1,
+                player2: player2,
                 winner: null,
                 loser: null,
                 lane: matchIndex + 1,
@@ -612,30 +633,67 @@ function advanceBacksideWinner(completedMatch, winner) {
 }
 
 function dropFrontsideLoser(completedMatch, loser) {
-    // Calculate which backside round should receive this loser
+    console.log(`Dropping frontside loser: ${loser.name} from match ${completedMatch.id}`);
+    
     const frontsideRound = completedMatch.round;
-
-    // Simplified logic - needs refinement based on exact double elimination rules
+    const matchPositionInRound = completedMatch.positionInRound;
+    
+    // Calculate which backside round should receive this loser
     let targetBacksideRound;
+    
     if (frontsideRound === 1) {
-        targetBacksideRound = 1; // First round losers go to backside round 1
+        // First round losers go to backside round 1
+        targetBacksideRound = 1;
+        
+        // For first round, each loser should go to their own backside match
+        // Match FS-1-1 (position 0) -> BS-1-1 (position 0)  
+        // Match FS-1-2 (position 1) -> BS-1-2 (position 1)
+        // Match FS-1-3 (position 2) -> BS-1-3 (position 2) etc.
+        
+        const targetBacksideMatch = matches.find(m =>
+            m.side === 'backside' &&
+            m.round === targetBacksideRound &&
+            m.positionInRound === matchPositionInRound
+        );
+        
+        if (targetBacksideMatch) {
+            // Place the loser in the first available slot of their designated match
+            if (targetBacksideMatch.player1.name === 'TBD') {
+                targetBacksideMatch.player1 = loser;
+                console.log(`✓ Placed ${loser.name} in ${targetBacksideMatch.id} as player1`);
+            } else if (targetBacksideMatch.player2.name === 'TBD') {
+                targetBacksideMatch.player2 = loser;
+                console.log(`✓ Placed ${loser.name} in ${targetBacksideMatch.id} as player2`);
+            } else {
+                console.error(`ERROR: No available slot in ${targetBacksideMatch.id} for ${loser.name}`);
+            }
+        } else {
+            console.error(`ERROR: Could not find target backside match for ${loser.name}`);
+        }
+        
     } else {
-        targetBacksideRound = (frontsideRound - 1) * 2; // Approximate
-    }
+        // For later rounds, use more complex logic (implement as needed)
+        // For now, use simplified approach
+        targetBacksideRound = (frontsideRound - 1) * 2;
+        
+        // Find the next available slot in any match of the target round
+        const targetMatches = matches.filter(m =>
+            m.side === 'backside' &&
+            m.round === targetBacksideRound &&
+            (m.player1.name === 'TBD' || m.player2.name === 'TBD')
+        );
 
-    // Find available slot in target backside round
-    const targetMatches = matches.filter(m =>
-        m.side === 'backside' &&
-        m.round === targetBacksideRound &&
-        (m.player1.name === 'TBD' || m.player2.name === 'TBD')
-    );
-
-    if (targetMatches.length > 0) {
-        const targetMatch = targetMatches[0];
-        if (targetMatch.player1.name === 'TBD') {
-            targetMatch.player1 = loser;
-        } else if (targetMatch.player2.name === 'TBD') {
-            targetMatch.player2 = loser;
+        if (targetMatches.length > 0) {
+            const targetMatch = targetMatches[0];
+            if (targetMatch.player1.name === 'TBD') {
+                targetMatch.player1 = loser;
+                console.log(`✓ Placed ${loser.name} in ${targetMatch.id} as player1`);
+            } else if (targetMatch.player2.name === 'TBD') {
+                targetMatch.player2 = loser;
+                console.log(`✓ Placed ${loser.name} in ${targetMatch.id} as player2`);
+            }
+        } else {
+            console.error(`ERROR: No available slots in backside round ${targetBacksideRound} for ${loser.name}`);
         }
     }
 }
