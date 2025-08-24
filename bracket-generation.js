@@ -25,6 +25,12 @@ function generateBracket() {
     else if (paidPlayers.length <= 32) bracketSize = 32;
     else bracketSize = 48;
 
+    // For 8-player bracket, we need at least 4 real players to ensure each first round match has at least one real player
+    if (bracketSize === 8 && paidPlayers.length < 4) {
+        alert('For an 8-player bracket, you need at least 4 paid players to ensure proper tournament flow.\n\nCurrently you have ' + paidPlayers.length + ' paid players.\n\nPlease add more players or mark more players as paid.');
+        return;
+    }
+
     // Create optimized bracket placement to avoid walkover vs walkover matches
     const bracket = createOptimizedBracket(paidPlayers, bracketSize);
 

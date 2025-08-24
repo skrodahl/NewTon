@@ -116,8 +116,18 @@ function saveStats() {
     currentStatsPlayer.stats.oneEighties = parseInt(document.getElementById('stats180s').value) || 0;
 
     updatePlayersDisplay();
-    saveTournament();
+    // Call saveTournament if it exists, otherwise just continue
+    if (typeof saveTournament === 'function') {
+        saveTournament();
+    }
     closeStatsModal();
+}
+
+// Simple fallback functions to prevent errors
+function safeSaveTournament() {
+    if (typeof saveTournament === 'function') {
+        saveTournament();
+    }
 }
 
 function closeStatsModal() {

@@ -32,8 +32,15 @@ function renderBracket() {
 }
 
 function clearBracket() {
-    document.getElementById('bracketMatches').innerHTML = '';
-    document.getElementById('bracketLines').innerHTML = '';
+    const matchesContainer = document.getElementById('bracketMatches');
+    const linesContainer = document.getElementById('bracketLines');
+    
+    if (matchesContainer) {
+        matchesContainer.innerHTML = '';
+    }
+    if (linesContainer) {
+        linesContainer.innerHTML = '';
+    }
 }
 
 function renderCompleteDoubleElimination() {

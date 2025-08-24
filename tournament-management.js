@@ -1,5 +1,7 @@
 // tournament-management.js - Tournament Creation, Loading, and Management
 
+let showingAllTournaments = false;
+
 function createTournament() {
     const name = document.getElementById('tournamentName').value.trim();
     const date = document.getElementById('tournamentDate').value;
@@ -27,7 +29,9 @@ function createTournament() {
     // Clear the UI
     updatePlayersDisplay();
     updatePlayerCount();
-    clearBracket();
+    if (typeof clearBracket === 'function') {
+        clearBracket();
+    }
     
     // Hide results section if visible
     const resultsSection = document.getElementById('resultsSection');
@@ -40,45 +44,6 @@ function createTournament() {
     showPage('registration');
     
     alert('New tournament created successfully! Start by adding players.');
-}
-
-function loadTournament() {
-    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
-    if (tournaments.length === 0) {
-        alert('No tournaments found');
-        return;
-    }
-
-    const tournamentList = tournaments.map(t => 
-        `${t.id}: ${t.name} (${t.date})`
-    ).join('\n');
-    
-    const selectedId = prompt('Select tournament by ID:\n' + tournamentList);
-    if (!selectedId) return;
-
-    const selectedTournament = tournaments.find(t => t.id == selectedId);
-    if (!selectedTournament) {
-        alert('Tournament not found');
-        return;
-    }
-
-    tournament = selectedTournament;
-    players = tournament.players || [];
-    matches = tournament.matches || [];
-    
-    document.getElementById('tournamentName').value = tournament.name;
-    document.getElementById('tournamentDate').value = tournament.date;
-    
-    updateTournamentStatus();
-    updatePlayersDisplay();
-    updatePlayerCount();
-    
-    if (tournament.bracket) {
-        renderBracket();
-    }
-    
-    showPage('registration');
-    alert('Tournament loaded successfully!');
 }
 
 function exportTournament() {
@@ -129,8 +94,6 @@ function updateTournamentStatus() {
     }
 }
 
-let showingAllTournaments = false;
-
 function loadRecentTournaments() {
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const container = document.getElementById('recentTournaments');
@@ -145,27 +108,25 @@ function loadRecentTournaments() {
         return;
     }
 
-    // Sort tournaments by creation timestamp (newest first) - this includes time
+    // Sort tournaments by creation timestamp (newest first)
     const sortedTournaments = tournaments.sort((a, b) => {
-        // Use created timestamp if available, fall back to date comparison
         if (a.created && b.created) {
-            return new Date(b.created) - new Date(a.created); // Newest first
+            return new Date(b.created) - new Date(a.created);
         } else if (a.created) {
-            return -1; // a is newer (has timestamp)
+            return -1;
         } else if (b.created) {
-            return 1; // b is newer (has timestamp)
+            return 1;
         } else {
-            // Fall back to date comparison for older tournaments without created timestamp
             const dateA = new Date(a.date + 'T00:00:00');
             const dateB = new Date(b.date + 'T00:00:00');
-            return dateB - dateA; // Newest first
+            return dateB - dateA;
         }
     });
 
     // Determine which tournaments to show
     const tournamentsToShow = showingAllTournaments ? 
-        sortedTournaments : // All tournaments, newest first
-        sortedTournaments.slice(0, 5); // First 5 tournaments (newest)
+        sortedTournaments : 
+        sortedTournaments.slice(0, 5);
 
     const html = tournamentsToShow.map(t => {
         const isActiveTournament = tournament && tournament.id === t.id;
@@ -187,63 +148,21 @@ function loadRecentTournaments() {
     
     container.innerHTML = html;
 
-    // Update the toggle button text and visibility
+    // Update the toggle button
     const toggleBtn = document.getElementById('toggleTournamentsBtn');
     if (toggleBtn) {
         if (tournaments.length <= 5) {
-            // Hide button if we have 5 or fewer tournaments
             toggleBtn.style.display = 'none';
         } else {
-            // Show button if we have more than 5 tournaments
             toggleBtn.style.display = 'inline-block';
             toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
         }
     }
-
-    console.log(`Loaded tournaments: ${tournaments.length} total, showing ${tournamentsToShow.length}, toggle button: ${tournaments.length > 5 ? 'visible' : 'hidden'}`);
 }
 
 function toggleTournamentView() {
     showingAllTournaments = !showingAllTournaments;
     loadRecentTournaments();
-}
-
-function deleteTournament(tournamentId) {
-    // Find the tournament to get its name
-    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
-    const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
-    
-    if (!tournamentToDelete) {
-        alert('Tournament not found.');
-        return;
-    }
-
-    // Check if trying to delete the currently active tournament
-    if (tournament && tournament.id === tournamentId) {
-        alert('Cannot delete the currently active tournament.\n\nPlease create a new tournament or load a different one first.');
-        return;
-    }
-
-    // Confirmation dialog
-    const confirmDelete = confirm(
-        `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
-        `Are you sure you want to permanently delete:\n` +
-        `"${tournamentToDelete.name}"\n\n` +
-        `This action cannot be undone.`
-    );
-
-    if (!confirmDelete) {
-        return;
-    }
-
-    // Remove the tournament and save back
-    const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
-    localStorage.setItem('dartsTournaments', JSON.stringify(updatedTournaments));
-
-    // Refresh the display
-    loadRecentTournaments();
-
-    alert(`Tournament "${tournamentToDelete.name}" has been deleted successfully.`);
 }
 
 function loadSpecificTournament(id) {
@@ -266,11 +185,43 @@ function loadSpecificTournament(id) {
     updatePlayersDisplay();
     updatePlayerCount();
     
-    if (tournament.bracket) {
+    if (tournament.bracket && typeof renderBracket === 'function') {
         renderBracket();
     }
     
     showPage('registration');
+}
+
+function deleteTournament(tournamentId) {
+    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
+    
+    if (!tournamentToDelete) {
+        alert('Tournament not found.');
+        return;
+    }
+
+    if (tournament && tournament.id === tournamentId) {
+        alert('Cannot delete the currently active tournament.\n\nPlease create a new tournament or load a different one first.');
+        return;
+    }
+
+    const confirmDelete = confirm(
+        `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
+        `Are you sure you want to permanently delete:\n` +
+        `"${tournamentToDelete.name}"\n\n` +
+        `This action cannot be undone.`
+    );
+
+    if (!confirmDelete) {
+        return;
+    }
+
+    const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
+    localStorage.setItem('dartsTournaments', JSON.stringify(updatedTournaments));
+
+    loadRecentTournaments();
+    alert(`Tournament "${tournamentToDelete.name}" has been deleted successfully.`);
 }
 
 function resetTournament() {
@@ -279,12 +230,10 @@ function resetTournament() {
         return;
     }
 
-    // More conscious reset process
     const tournamentName = tournament.name;
     const completedMatches = matches.filter(m => m.completed).length;
     const totalMatches = matches.length;
     
-    // First confirmation with tournament details
     const confirmMessage = `⚠️ RESET TOURNAMENT WARNING ⚠️\n\n` +
         `Tournament: "${tournamentName}"\n` +
         `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
@@ -299,7 +248,6 @@ function resetTournament() {
         return;
     }
 
-    // Second confirmation - requires typing tournament name
     const tournamentNameConfirm = prompt(
         `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
         `To confirm the reset, please type the tournament name exactly:\n\n` +
@@ -308,13 +256,12 @@ function resetTournament() {
     );
 
     if (tournamentNameConfirm !== tournamentName) {
-        if (tournamentNameConfirm !== null) { // User didn't cancel
+        if (tournamentNameConfirm !== null) {
             alert('Tournament name did not match. Reset cancelled for your protection.');
         }
         return;
     }
 
-    // Perform the reset
     matches = [];
     tournament.bracket = null;
     tournament.status = 'setup';
@@ -325,7 +272,9 @@ function resetTournament() {
     });
 
     saveTournament();
-    clearBracket();
+    if (typeof clearBracket === 'function') {
+        clearBracket();
+    }
 
     const resultsSection = document.getElementById('resultsSection');
     if (resultsSection) {
@@ -333,4 +282,96 @@ function resetTournament() {
     }
 
     alert(`Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Registration page.`);
+}
+
+function endTournament() {
+    if (!tournament) {
+        alert('No active tournament to end.');
+        return;
+    }
+
+    if (!tournament.bracket) {
+        alert('Tournament has no bracket yet. Use "Reset Tournament" to clear the tournament instead.');
+        return;
+    }
+
+    const tournamentName = tournament.name;
+    const completedMatches = matches.filter(m => m.completed).length;
+    const totalMatches = matches.length;
+    
+    const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+    const tournamentComplete = grandFinal && grandFinal.completed;
+    
+    if (!tournamentComplete) {
+        const confirmEnd = confirm(
+            `⚠️ END TOURNAMENT ⚠️\n\n` +
+            `Tournament: "${tournamentName}"\n` +
+            `Progress: ${completedMatches}/${totalMatches} matches completed\n\n` +
+            `This tournament is not yet complete!\n` +
+            `The Grand Final has not been played.\n\n` +
+            `Are you sure you want to end it anyway?\n` +
+            `This will finalize all current standings.`
+        );
+
+        if (!confirmEnd) {
+            return;
+        }
+    }
+
+    const finalConfirm = confirm(
+        `Final confirmation to end tournament "${tournamentName}".\n\n` +
+        `This will:\n` +
+        `• Mark the tournament as completed\n` +
+        `• Finalize all player standings\n` +
+        `• Show final results\n` +
+        `• Prevent further changes\n\n` +
+        `Continue?`
+    );
+
+    if (!finalConfirm) {
+        return;
+    }
+
+    tournament.status = 'completed';
+    tournament.endedAt = new Date().toISOString();
+
+    assignFinalPlacements();
+    saveTournament();
+    
+    if (typeof displayResults === 'function') {
+        displayResults();
+    }
+
+    alert(`Tournament "${tournamentName}" has been ended.\n\nFinal results are now displayed on the Registration page.`);
+}
+
+function assignFinalPlacements() {
+    const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+    const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
+    
+    if (grandFinal && grandFinal.completed) {
+        return;
+    }
+
+    let currentPlacement = 1;
+
+    if (grandFinal && grandFinal.winner) {
+        const winner = players.find(p => p.id === grandFinal.winner.id);
+        if (winner) winner.placement = currentPlacement++;
+    }
+
+    if (grandFinal && grandFinal.loser) {
+        const runnerUp = players.find(p => p.id === grandFinal.loser.id);
+        if (runnerUp) runnerUp.placement = currentPlacement++;
+    }
+
+    if (backsideFinal && backsideFinal.loser) {
+        const third = players.find(p => p.id === backsideFinal.loser.id);
+        if (third) third.placement = currentPlacement++;
+    }
+
+    const eliminatedPlayers = players.filter(p => p.eliminated && !p.placement);
+    eliminatedPlayers.forEach(player => {
+        player.placement = currentPlacement++;
+    });
 }

@@ -27,7 +27,22 @@ let currentStatsPlayer = null;
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
     loadConfiguration();
-    loadRecentTournaments();
+    
+    // Try to load recent tournaments, but don't fail if function isn't available yet
+    try {
+        loadRecentTournaments();
+    } catch (error) {
+        console.log('loadRecentTournaments not available yet, will retry');
+        // Retry after a short delay to ensure all JS files are loaded
+        setTimeout(() => {
+            try {
+                loadRecentTournaments();
+            } catch (e) {
+                console.error('Failed to load recent tournaments:', e);
+            }
+        }, 100);
+    }
+    
     setupEventListeners();
     setTodayDate();
 });
@@ -94,15 +109,23 @@ window.addEventListener('load', function() {
             if (tournament.name && tournament.date) {
                 document.getElementById('tournamentName').value = tournament.name;
                 document.getElementById('tournamentDate').value = tournament.date;
-                updateTournamentStatus();
-                updatePlayersDisplay();
-                updatePlayerCount();
+                
+                // Make sure updateTournamentStatus exists before calling
+                if (typeof updateTournamentStatus === 'function') {
+                    updateTournamentStatus();
+                }
+                
+                // Make sure updatePlayersDisplay exists before calling  
+                if (typeof updatePlayersDisplay === 'function') {
+                    updatePlayersDisplay();
+                    updatePlayerCount();
+                }
 
-                if (tournament.bracket && matches.length > 0) {
+                if (tournament.bracket && matches.length > 0 && typeof renderBracket === 'function') {
                     renderBracket();
                 }
 
-                if (tournament.status === 'completed') {
+                if (tournament.status === 'completed' && typeof displayResults === 'function') {
                     displayResults();
                 }
             }
