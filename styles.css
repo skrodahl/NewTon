@@ -306,7 +306,7 @@ body {
 .bracket-match {
     position: absolute;
     width: 180px;
-    height: 80px;
+    height: 90px; /* Increased from 80px to 90px */
     background: white;
     border: 2px solid #ddd;
     border-radius: 6px;
@@ -336,7 +336,7 @@ body {
 
 .match-header {
     background: #f8f9fa;
-    padding: 3px 8px;
+    padding: 4px 8px; /* Slightly more padding */
     font-weight: bold;
     font-size: 10px;
     text-align: center;
@@ -344,6 +344,7 @@ body {
     display: flex;
     justify-content: space-between;
     align-items: center;
+    min-height: 20px;
 }
 
 .match-info {
@@ -359,13 +360,14 @@ body {
 
 .match-player {
     flex: 1;
-    padding: 6px 8px;
+    padding: 8px; /* Increased from 6px to 8px */
     display: flex;
     justify-content: space-between;
     align-items: center;
     border-bottom: 1px solid #eee;
     transition: background 0.2s;
     cursor: pointer;
+    min-height: 32px; /* Added minimum height */
 }
 
 .match-player:last-child {
@@ -379,6 +381,7 @@ body {
 .match-player.winner {
     background: #d4edda;
     font-weight: bold;
+    min-height: 36px; /* Slightly more space for winners */
 }
 
 .match-player.first-throw {
@@ -393,26 +396,30 @@ body {
 }
 
 .player-name-short {
-    font-size: 11px;
+    font-size: 12px; /* Slightly larger font */
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 100px;
+    max-width: 110px; /* Adjusted for checkmark space */
 }
 
 .winner-check {
     color: #28a745;
     font-weight: bold;
-    font-size: 14px;
+    font-size: 16px; /* Slightly larger checkmark */
+    margin-left: 8px;
+    min-width: 16px; /* Reserve space for checkmark */
 }
 
 .match-controls {
-    padding: 3px 8px;
+    padding: 4px 8px; /* Slightly more padding */
     background: #f8f9fa;
     border-top: 1px solid #ddd;
     font-size: 9px;
     display: flex;
     justify-content: space-between;
+    min-height: 24px; /* Added minimum height */
+    align-items: center;
 }
 
 .bracket-line {
