@@ -134,18 +134,18 @@ function renderFinalGrid(grid) {
     const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
     const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
 
-    // Position finals in the center area, below the main bracket
-    const finalY = grid.centerY + 200; // Moved up from 350 to 200
-    const grandFinalY = finalY + 120;   // Closer spacing
+    // Position finals BELOW the main bracket area, centered
+    const finalsY = grid.centerY + 300; // Further below the main bracket
+    const grandFinalY = finalsY + 120;   // Grand final below backside final
 
     if (backsideFinal) {
-        // Position backside final in the center-left
-        const backsideFinalX = grid.centerX - (grid.matchWidth / 2) - 100;
-        renderGridMatch(backsideFinal, backsideFinalX, finalY);
+        // Position backside final centered horizontally
+        const backsideFinalX = grid.centerX - (grid.matchWidth / 2);
+        renderGridMatch(backsideFinal, backsideFinalX, finalsY);
     }
 
     if (grandFinal) {
-        // Position grand final in the center
+        // Position grand final centered horizontally, below backside final
         const grandFinalX = grid.centerX - (grid.matchWidth / 2);
         renderGridMatch(grandFinal, grandFinalX, grandFinalY);
     }
@@ -205,10 +205,8 @@ function renderAllConnections(structure, grid) {
     
     // Add small delay to ensure DOM elements are fully rendered
     setTimeout(() => {
-        drawFrontsideConnections(structure.frontside);
-        drawBacksideConnections(structure.backside);
-        drawFinalConnections();
-    }, 100);
+        drawBracketStructureLines(structure);
+    }, 150);
 }
 
 function drawFrontsideConnections(frontsideStructure) {
@@ -790,21 +788,256 @@ function drawDirectConnection(fromMatchId, toMatchId) {
     const toRect = toEl.getBoundingClientRect();
 
     const fromCenterX = fromRect.left - canvasRect.left + fromRect.width / 2;
+    const fromCenterY = fromRect.top - canvasRect.top + fromRect.height / 2;
     const toCenterX = toRect.left - canvasRect.left + toRect.width / 2;
+    const toCenterY = toRect.top - canvasRect.top + toRect.height / 2;
 
-    let fromX, toX;
-    if (fromCenterX < toCenterX) {
-        // Left to right
-        fromX = fromRect.left - canvasRect.left + fromRect.width;
-        toX = toRect.left - canvasRect.left;
+    let fromX, fromY, toX, toY;
+
+    // Special handling for connections to finals (which are positioned below)
+    const isToFinal = toMatchId === 'BS-FINAL' || toMatchId === 'GRAND-FINAL';
+    const isFromFinal = fromMatchId === 'BS-FINAL' || fromMatchId === 'GRAND-FINAL';
+    
+    if (isToFinal && fromCenterY < toCenterY) {
+        // Connection from above to finals below
+        fromX = fromCenterX;
+        fromY = fromRect.top - canvasRect.top + fromRect.height;
+        toX = toCenterX;
+        toY = toRect.top - canvasRect.top;
+    } else if (isFromFinal && fromCenterY > toCenterY) {
+        // Connection from finals below to above
+        fromX = fromCenterX;
+        fromY = fromRect.top - canvasRect.top;
+        toX = toCenterX;
+        toY = toRect.top - canvasRect.top + toRect.height;
     } else {
-        // Right to left
-        fromX = fromRect.left - canvasRect.left;
-        toX = toRect.left - canvasRect.left + toRect.width;
+        // Normal left-right connections
+        if (fromCenterX < toCenterX) {
+            // Left to right
+            fromX = fromRect.left - canvasRect.left + fromRect.width;
+            toX = toRect.left - canvasRect.left;
+        } else {
+            // Right to left
+            fromX = fromRect.left - canvasRect.left;
+            toX = toRect.left - canvasRect.left + toRect.width;
+        }
+        fromY = fromCenterY;
+        toY = toCenterY;
     }
 
-    const fromY = fromRect.top - canvasRect.top + fromRect.height / 2;
-    const toY = toRect.top - canvasRect.top + toRect.height / 2;
+    drawLine(fromX, fromY, toX, toY);
+}
 
+function drawBracketStructureLines(structure) {
+    // Draw frontside bracket structure
+    drawFrontsideStructure(structure.frontside);
+    
+    // Draw backside bracket structure  
+    drawBacksideStructure(structure.backside);
+    
+    // Draw finals connections
+    drawFinalsStructure();
+}
+
+function drawFrontsideStructure(frontsideStructure) {
+    frontsideStructure.forEach((roundInfo, roundIndex) => {
+        // Skip the last round (connects to finals differently)
+        if (roundIndex === frontsideStructure.length - 1) return;
+        
+        const currentMatches = matches.filter(m =>
+            m.side === 'frontside' && m.round === roundInfo.round
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+        
+        const nextRoundMatches = matches.filter(m =>
+            m.side === 'frontside' && m.round === (roundInfo.round + 1)
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+
+        // Connect pairs of current matches to next match
+        for (let i = 0; i < nextRoundMatches.length; i++) {
+            const match1 = currentMatches[i * 2];
+            const match2 = currentMatches[i * 2 + 1];
+            const nextMatch = nextRoundMatches[i];
+
+            if (match1 && nextMatch) {
+                if (match2) {
+                    // Two matches connecting to one (standard bracket)
+                    drawBracketConnection(match1.id, match2.id, nextMatch.id, 'frontside');
+                } else {
+                    // Single match to next (fallback)
+                    drawDirectConnection(match1.id, nextMatch.id);
+                }
+            }
+        }
+    });
+}
+
+function drawBacksideStructure(backsideStructure) {
+    backsideStructure.forEach((roundInfo, roundIndex) => {
+        // Skip the last round (connects to finals)
+        if (roundIndex === backsideStructure.length - 1) return;
+        
+        const currentMatches = matches.filter(m =>
+            m.side === 'backside' && m.round === roundInfo.round
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+        
+        const nextRoundMatches = matches.filter(m =>
+            m.side === 'backside' && m.round === (roundInfo.round + 1)
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+
+        // Connect current round to next round
+        for (let i = 0; i < nextRoundMatches.length; i++) {
+            const match1 = currentMatches[i * 2];
+            const match2 = currentMatches[i * 2 + 1];
+            const nextMatch = nextRoundMatches[i];
+
+            if (match1 && nextMatch) {
+                if (match2) {
+                    // Two matches to one
+                    drawBracketConnection(match1.id, match2.id, nextMatch.id, 'backside');
+                } else {
+                    // Single match to next
+                    drawDirectConnection(match1.id, nextMatch.id);
+                }
+            }
+        }
+    });
+}
+
+function drawFinalsStructure() {
+    console.log('=== FINALS CONNECTION DEBUG ===');
+    
+    // Let's see what finals matches actually exist
+    const allFinals = matches.filter(m => 
+        m.id === 'BS-FINAL' || m.id === 'GRAND-FINAL' ||
+        m.side === 'backside-final' || m.side === 'grand-final'
+    );
+    
+    console.log('All finals matches found:', allFinals.map(m => ({id: m.id, side: m.side})));
+    
+    // Check if DOM elements exist
+    allFinals.forEach(match => {
+        const element = document.getElementById(`bracket-match-${match.id}`);
+        console.log(`Element for ${match.id}:`, element ? 'EXISTS' : 'MISSING');
+        if (element) {
+            const rect = element.getBoundingClientRect();
+            console.log(`${match.id} position:`, {x: rect.left, y: rect.top, width: rect.width, height: rect.height});
+        }
+    });
+    
+    // For now, let's try to connect ONLY the most obvious connections
+    // Find the frontside final (highest round frontside match)
+    const frontsideRounds = Math.ceil(Math.log2(tournament.bracketSize));
+    const frontsideFinal = matches.find(m =>
+        m.side === 'frontside' && m.round === frontsideRounds
+    );
+    
+    const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
+    
+    console.log('Trying to connect:', {
+        from: frontsideFinal?.id,
+        to: grandFinal?.id
+    });
+    
+    // Try just ONE connection to see if it works
+    if (frontsideFinal && grandFinal) {
+        console.log('Attempting frontside to grand final connection...');
+        drawSimpleVerticalConnection(frontsideFinal.id, grandFinal.id);
+    }
+}
+
+function drawFinalsConnection(fromMatchId, toMatchId) {
+    const fromEl = document.getElementById(`bracket-match-${fromMatchId}`);
+    const toEl = document.getElementById(`bracket-match-${toMatchId}`);
+
+    if (!fromEl || !toEl) {
+        console.log(`Missing element: ${fromMatchId} or ${toMatchId}`);
+        return;
+    }
+
+    const canvas = document.getElementById('bracketCanvas');
+    const canvasRect = canvas.getBoundingClientRect();
+
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+
+    // For finals, we want mostly vertical connections
+    const fromCenterX = fromRect.left - canvasRect.left + fromRect.width / 2;
+    const fromCenterY = fromRect.top - canvasRect.top + fromRect.height / 2;
+    const toCenterX = toRect.left - canvasRect.left + toRect.width / 2;
+    const toCenterY = toRect.top - canvasRect.top + toRect.height / 2;
+
+    let fromX, fromY, toX, toY;
+
+    if (Math.abs(fromCenterY - toCenterY) > Math.abs(fromCenterX - toCenterX)) {
+        // Primarily vertical connection
+        if (fromCenterY < toCenterY) {
+            // From top to bottom
+            fromX = fromCenterX;
+            fromY = fromRect.top - canvasRect.top + fromRect.height;
+            toX = toCenterX;
+            toY = toRect.top - canvasRect.top;
+        } else {
+            // From bottom to top  
+            fromX = fromCenterX;
+            fromY = fromRect.top - canvasRect.top;
+            toX = toCenterX; 
+            toY = toRect.top - canvasRect.top + toRect.height;
+        }
+    } else {
+        // Primarily horizontal connection
+        if (fromCenterX < toCenterX) {
+            // Left to right
+            fromX = fromRect.left - canvasRect.left + fromRect.width;
+            fromY = fromCenterY;
+            toX = toRect.left - canvasRect.left;
+            toY = toCenterY;
+        } else {
+            // Right to left
+            fromX = fromRect.left - canvasRect.left;
+            fromY = fromCenterY;
+            toX = toRect.left - canvasRect.left + toRect.width;
+            toY = toCenterY;
+        }
+    }
+
+    console.log(`Drawing finals connection from ${fromMatchId} to ${toMatchId}:`, {
+        from: {x: fromX, y: fromY},
+        to: {x: toX, y: toY}
+    });
+
+    drawLine(fromX, fromY, toX, toY);
+}
+
+function drawSimpleVerticalConnection(fromId, toId) {
+    const fromEl = document.getElementById(`bracket-match-${fromId}`);
+    const toEl = document.getElementById(`bracket-match-${toId}`);
+    
+    console.log('Elements found:', {
+        fromEl: !!fromEl,
+        toEl: !!toEl
+    });
+    
+    if (!fromEl || !toEl) {
+        console.log('Missing elements for connection');
+        return;
+    }
+    
+    const canvas = document.getElementById('bracketCanvas');
+    const canvasRect = canvas.getBoundingClientRect();
+    
+    const fromRect = fromEl.getBoundingClientRect();
+    const toRect = toEl.getBoundingClientRect();
+    
+    // Simple vertical line from bottom of first match to top of second match
+    const fromX = fromRect.left - canvasRect.left + fromRect.width / 2;
+    const fromY = fromRect.top - canvasRect.top + fromRect.height;
+    const toX = toRect.left - canvasRect.left + toRect.width / 2;
+    const toY = toRect.top - canvasRect.top;
+    
+    console.log('Drawing line:', {
+        from: {x: fromX, y: fromY},
+        to: {x: toX, y: toY}
+    });
+    
     drawLine(fromX, fromY, toX, toY);
 }
