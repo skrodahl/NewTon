@@ -254,7 +254,7 @@ body {
     height: 3000px;
     background: #f5f5f5;
     transform-origin: 0 0;
-    transition: transform 0.1s ease-out;
+    transition: all 0.7s linear;
 }
 
 .bracket-controls {
