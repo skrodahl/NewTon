@@ -260,27 +260,52 @@ function shouldAutoAdvanceMatch(match) {
         return false;
     }
 
-    // Both players must be defined (not TBD)
-    if (!match.player1 || !match.player2 || 
-        match.player1.name === 'TBD' || match.player2.name === 'TBD') {
+    // Both players must be defined (not null/undefined)
+    if (!match.player1 || !match.player2) {
         return false;
     }
+    
+    // IMPORTANT: Allow TBD vs Real Player matches to auto-advance
+    // But NOT TBD vs TBD matches
+    if (match.player1.name === 'TBD' && match.player2.name === 'TBD') {
+        return false; // Both TBD, can't auto-advance
+    }
 
-    // Check if exactly one player is a bye/walkover
+    // Check if exactly one player is a bye/walkover/TBD
     const player1IsBye = isPlayerBye(match.player1);
     const player2IsBye = isPlayerBye(match.player2);
 
-    // We can auto-advance if exactly one player is a bye
-    return (player1IsBye && !player2IsBye) || (!player1IsBye && player2IsBye);
+    // We can auto-advance if exactly one player is a bye/TBD
+    const shouldAdvance = (player1IsBye && !player2IsBye) || (!player1IsBye && player2IsBye);
+    
+    if (shouldAdvance) {
+        console.log(`Match ${match.id} should auto-advance: ${match.player1.name} vs ${match.player2.name}`);
+    }
+    
+    return shouldAdvance;
 }
 
 function isPlayerBye(player) {
     if (!player) return false;
-    return player.isBye === true || 
-           player.name === 'Walkover' || 
-           player.name === 'BYE' ||
-           (player.id && player.id.toString().startsWith('walkover-')) ||
-           (player.id && player.id.toString().startsWith('bye-'));
+    
+    // Regular byes and walkovers
+    if (player.isBye === true || 
+        player.name === 'Walkover' || 
+        player.name === 'BYE' ||
+        (player.id && player.id.toString().startsWith('walkover-')) ||
+        (player.id && player.id.toString().startsWith('bye-'))) {
+        return true;
+    }
+    
+    // CRITICAL FIX: Only treat TBD as bye in BACKSIDE matches
+    // Frontside TBD players represent future winners, not byes
+    if (player.name === 'TBD' && player.id && player.id.toString().startsWith('bs-')) {
+        return true; // Backside TBD players are effectively byes
+    }
+    
+    // Frontside TBD players (fs-X-X-X) should NOT be treated as byes
+    // They represent winners from previous rounds
+    return false;
 }
 
 function autoAdvanceMatch(match) {
@@ -323,10 +348,11 @@ function autoAdvanceMatch(match) {
 
 function calculateBracketStructure(bracketSize) {
     const frontsideRounds = Math.ceil(Math.log2(bracketSize));
-
-    // CORRECTED: Double elimination backside structure
-    // For 8 players: 3 frontside rounds, so 2 backside rounds (not 4!)
-    const backsideRounds = frontsideRounds - 1;
+    
+    // CORRECTED: Backside has more rounds than we were calculating
+    // For 8-player: 3 frontside rounds → 4 backside rounds (not 2!)
+    // For 16-player: 4 frontside rounds → 6 backside rounds (not 3!)
+    const backsideRounds = (frontsideRounds - 1) * 2;
 
     // Calculate matches per round for frontside (unchanged)
     const frontsideStructure = [];
@@ -339,28 +365,41 @@ function calculateBracketStructure(bracketSize) {
         });
     }
 
-    // CORRECTED: Calculate matches per round for backside
+    // CORRECTED: Use the actual double elimination advancement pattern
     const backsideStructure = [];
+    
     for (let round = 1; round <= backsideRounds; round++) {
         let matchesInRound;
-
+        
         if (round === 1) {
-            // First backside round: receives first round losers
-            // For 8-player bracket: 4 first round matches = 4 losers
-            // But we have walkovers, so we need 2 matches for the real losers
+            // First backside round: frontside first round losers
             matchesInRound = Math.pow(2, frontsideRounds - 2);
+        } else if (round % 2 === 0) {
+            // Even rounds: backside winners meet frontside losers
+            const frontsideRoundThatDropsLosers = Math.ceil(round / 2) + 1;
+            if (frontsideRoundThatDropsLosers <= frontsideRounds) {
+                matchesInRound = Math.pow(2, frontsideRounds - frontsideRoundThatDropsLosers);
+            } else {
+                matchesInRound = 1;
+            }
         } else {
-            // Later rounds: winners from previous backside round merge with frontside losers
-            matchesInRound = Math.pow(2, frontsideRounds - round - 1);
+            // Odd rounds after 1: backside winners fight each other
+            matchesInRound = Math.pow(2, frontsideRounds - Math.ceil(round / 2) - 1);
         }
-
+        
         matchesInRound = Math.max(1, matchesInRound);
+        
         backsideStructure.push({
             round: round,
             matches: matchesInRound,
-            receivesFromFrontside: round === 1 || round % 2 === 0 // Simplified
+            receivesFromFrontside: round % 2 === 0 || round === 1
         });
     }
+
+    console.log('=== BRACKET STRUCTURE DEBUG ===');
+    console.log(`Bracket size: ${bracketSize}, Frontside rounds: ${frontsideRounds}, Backside rounds: ${backsideRounds}`);
+    console.log('Frontside structure:', frontsideStructure);
+    console.log('Backside structure:', backsideStructure);
 
     return {
         frontside: frontsideStructure,
@@ -450,25 +489,14 @@ function generateBacksideMatches(structure, startId) {
     structure.backside.forEach((roundInfo, roundIndex) => {
         for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
             
-            // For first round of backside, we want to set up matches that will receive losers
-            // Each first round backside match should have one slot for a frontside loser
-            // and one slot for a walkover (so the loser auto-advances)
-            
             let player1, player2;
             
-            if (roundInfo.round === 1) {
-                // First backside round: Set up for frontside losers + walkovers
-                player1 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-1` }; // Will receive frontside loser
-                player2 = { 
-                    id: `bs-walkover-${matchIndex}`, 
-                    name: 'Walkover', 
-                    isBye: true 
-                }; // Walkover so loser auto-advances
-            } else {
-                // Later rounds: Normal TBD setup
-                player1 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-1` };
-                player2 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-2` };
-            }
+            // ALL backside matches should start with TBD players
+            // The frontside losers will be placed into these TBD slots
+            // No walkovers should be pre-placed in backside matches
+            
+            player1 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-1` };
+            player2 = { name: 'TBD', id: `bs-${roundInfo.round}-${matchIndex}-2` };
 
             const match = {
                 id: `BS-${roundInfo.round}-${matchIndex + 1}`,
@@ -547,7 +575,7 @@ function generateFinalMatches(startId) {
     matches.push(grandFinal);
 }
 
-// Enhanced version of advanceWinner - this ensures proper cascading of auto-advancements
+// Modified advanceWinner function that calls the force function
 function advanceWinner(completedMatch) {
     const winner = completedMatch.winner;
     const loser = completedMatch.loser;
@@ -559,8 +587,20 @@ function advanceWinner(completedMatch) {
     // Handle different bracket advancement scenarios
     if (completedMatch.side === 'frontside') {
         advanceFrontsideWinner(completedMatch, winner);
+        
+        // CRITICAL FIX: Always drop frontside losers (unless it's a bye)
         if (loser && !isPlayerBye(loser)) {
             dropFrontsideLoser(completedMatch, loser);
+            
+            // FORCE CHECK: After dropping loser, force check all backside matches
+            setTimeout(() => {
+                forceBacksideAutoAdvancement();
+                
+                // Re-render bracket to show changes
+                if (typeof renderBracket === 'function') {
+                    renderBracket();
+                }
+            }, 100);
         }
     } else if (completedMatch.side === 'backside') {
         advanceBacksideWinner(completedMatch, winner);
@@ -649,58 +689,100 @@ function dropFrontsideLoser(completedMatch, loser) {
     console.log(`Dropping frontside loser: ${loser.name} from match ${completedMatch.id}`);
     
     const frontsideRounds = Math.ceil(Math.log2(tournament.bracketSize));
-    const isFrontsideFinal = completedMatch.round === frontsideRounds;
+    const frontsideRound = completedMatch.round;
+    const isFrontsideFinal = frontsideRound === frontsideRounds;
     
     if (isFrontsideFinal) {
         // SPECIAL CASE: Frontside final loser goes directly to BS-FINAL
         console.log(`${loser.name} lost the frontside final - going to BS-FINAL`);
         const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
         if (backsideFinal) {
-            // CRITICAL FIX: Replace the entire player object, not just assign reference
             backsideFinal.player1 = {
                 id: loser.id,
-                name: loser.name,  // Use the actual player name
+                name: loser.name,
                 paid: loser.paid,
                 stats: loser.stats,
                 placement: loser.placement,
                 eliminated: loser.eliminated
             };
-            console.log(`✓ ${loser.name} placed in BS-FINAL as frontside runner-up with actual name`);
+            console.log(`✓ ${loser.name} placed in BS-FINAL as frontside runner-up`);
         }
-        return; // Exit early - don't use normal backside drop logic
+        return; // Exit early
     }
     
-    // NORMAL CASE: Earlier round losers use the existing logic (unchanged)
-    const frontsideRound = completedMatch.round;
-    const matchPositionInRound = completedMatch.positionInRound;
-    
-    let targetBacksideRound;
+    // CORRECT LOGIC FOR 8-PLAYER DOUBLE ELIMINATION:
+    // Round 1 losers → Backside Round 1
+    // Round 2 losers → Backside Round 2 (to play against R1 backside winners)
+    // Round 3 (final) loser → BS-FINAL (handled above)
     
     if (frontsideRound === 1) {
-        targetBacksideRound = 1;
+        // First round losers go to backside round 1
+        console.log(`${loser.name} lost in frontside round 1, going to backside round 1`);
         
-        const targetBacksideMatch = matches.find(m =>
-            m.side === 'backside' &&
-            m.round === targetBacksideRound &&
-            m.positionInRound === matchPositionInRound
-        );
+        // Find available backside round 1 matches
+        const backsideRound1Matches = matches.filter(m =>
+            m.side === 'backside' && 
+            m.round === 1 &&
+            (m.player1.name === 'TBD' || m.player2.name === 'TBD')
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
         
-        if (targetBacksideMatch) {
-            if (targetBacksideMatch.player1.name === 'TBD') {
-                targetBacksideMatch.player1 = loser;
-                console.log(`✓ Placed ${loser.name} in ${targetBacksideMatch.id} as player1`);
-            } else if (targetBacksideMatch.player2.name === 'TBD') {
-                targetBacksideMatch.player2 = loser;
-                console.log(`✓ Placed ${loser.name} in ${targetBacksideMatch.id} as player2`);
-            } else {
-                console.error(`ERROR: No available slot in ${targetBacksideMatch.id} for ${loser.name}`);
+        // Find the first available slot
+        for (let match of backsideRound1Matches) {
+            if (match.player1.name === 'TBD') {
+                match.player1 = loser;
+                console.log(`✓ Placed ${loser.name} in ${match.id} as player1`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
+                processAutoAdvancementForMatch(match);
+                return;
+            } else if (match.player2.name === 'TBD') {
+                match.player2 = loser;
+                console.log(`✓ Placed ${loser.name} in ${match.id} as player2`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
+                processAutoAdvancementForMatch(match);
+                return;
             }
-        } else {
-            console.error(`ERROR: Could not find target backside match for ${loser.name}`);
         }
+        
+        console.error(`ERROR: No available slots in backside round 1 for ${loser.name}`);
+        
+    } else if (frontsideRound === 2) {
+        // Second round losers go to backside round 2
+        console.log(`${loser.name} lost in frontside round 2, going to backside round 2`);
+        
+        // Find available backside round 2 matches
+        const backsideRound2Matches = matches.filter(m =>
+            m.side === 'backside' && 
+            m.round === 2 &&
+            (m.player1.name === 'TBD' || m.player2.name === 'TBD')
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+        
+        // Find the first available slot
+        for (let match of backsideRound2Matches) {
+            if (match.player1.name === 'TBD') {
+                match.player1 = loser;
+                console.log(`✓ Placed ${loser.name} in ${match.id} as player1`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
+                processAutoAdvancementForMatch(match);
+                return;
+            } else if (match.player2.name === 'TBD') {
+                match.player2 = loser;
+                console.log(`✓ Placed ${loser.name} in ${match.id} as player2`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
+                processAutoAdvancementForMatch(match);
+                return;
+            }
+        }
+        
+        console.error(`ERROR: No available slots in backside round 2 for ${loser.name}`);
+        
     } else {
-        // Semi-final and other round losers
-        targetBacksideRound = (frontsideRound - 1) * 2;
+        // Handle other rounds (shouldn't happen in 8-player bracket, but just in case)
+        const targetBacksideRound = frontsideRound;
+        console.log(`${loser.name} lost in frontside round ${frontsideRound}, going to backside round ${targetBacksideRound}`);
         
         const targetMatches = matches.filter(m =>
             m.side === 'backside' &&
@@ -717,9 +799,23 @@ function dropFrontsideLoser(completedMatch, loser) {
                 targetMatch.player2 = loser;
                 console.log(`✓ Placed ${loser.name} in ${targetMatch.id} as player2`);
             }
+            
+            // CRITICAL: Check for auto-advancement after placing loser
+            processAutoAdvancementForMatch(targetMatch);
         } else {
             console.error(`ERROR: No available slots in backside round ${targetBacksideRound} for ${loser.name}`);
         }
+    }
+}
+
+// New helper function to process auto-advancement for a specific match
+function processAutoAdvancementForMatch(match) {
+    if (shouldAutoAdvanceMatch(match)) {
+        console.log(`Auto-advancing match ${match.id} after placing loser`);
+        autoAdvanceMatch(match);
+        
+        // Process any cascading auto-advancements
+        processAllAutoAdvancements();
     }
 }
 
@@ -903,4 +999,76 @@ function debugBacksideStructure() {
         actualMatches: backsideMatches,
         summary: `Expected ${structure.backside.length} rounds, found ${backsideMatches.length} matches`
     };
+}
+
+// DEBUGGING FUNCTION: Call this to see current bracket state
+function debugBracketState() {
+    console.log('=== BRACKET STATE DEBUG ===');
+    
+    // Show all frontside matches
+    const frontsideMatches = matches.filter(m => m.side === 'frontside');
+    console.log('FRONTSIDE MATCHES:');
+    frontsideMatches.forEach(match => {
+        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
+    });
+    
+    // Show all backside matches
+    const backsideMatches = matches.filter(m => m.side === 'backside');
+    console.log('BACKSIDE MATCHES:');
+    backsideMatches.forEach(match => {
+        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
+    });
+    
+    // Show finals
+    const finals = matches.filter(m => m.id === 'BS-FINAL' || m.id === 'GRAND-FINAL');
+    console.log('FINALS:');
+    finals.forEach(match => {
+        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
+    });
+}
+
+function forceBacksideAutoAdvancement() {
+    console.log('=== FORCING BACKSIDE AUTO-ADVANCEMENT CHECK ===');
+    
+    const backsideMatches = matches.filter(m => 
+        m.side === 'backside' && 
+        !m.completed &&
+        (m.player1.name === 'TBD' || m.player2.name === 'TBD') &&
+        m.player1.name !== 'TBD' || m.player2.name !== 'TBD' // At least one is not TBD
+    );
+    
+    console.log(`Found ${backsideMatches.length} backside matches that should auto-advance`);
+    
+    backsideMatches.forEach(match => {
+        console.log(`Processing match ${match.id}: ${match.player1.name} vs ${match.player2.name}`);
+        
+        if (shouldAutoAdvanceMatch(match)) {
+            console.log(`Auto-advancing match ${match.id}`);
+            autoAdvanceMatch(match);
+        }
+    });
+    
+    // Process any cascading effects
+    processAllAutoAdvancements();
+}
+
+function debugBacksideMatches() {
+    console.log('=== BACKSIDE MATCHES DEBUG ===');
+    
+    const backsideMatches = matches.filter(m => m.side === 'backside');
+    backsideMatches.forEach(match => {
+        console.log(`\n--- Match ${match.id} ---`);
+        console.log('Player1:', match.player1);
+        console.log('Player2:', match.player2);
+        console.log('Player1 is bye?', isPlayerBye(match.player1));
+        console.log('Player2 is bye?', isPlayerBye(match.player2));
+        console.log('Should auto-advance?', shouldAutoAdvanceMatch(match));
+        console.log('Match completed?', match.completed);
+        console.log('Match winner:', match.winner);
+        
+        // Check specifically for TBD
+        if (match.player1.name === 'TBD' || match.player2.name === 'TBD') {
+            console.log('*** HAS TBD PLAYER - SHOULD AUTO ADVANCE ***');
+        }
+    });
 }
