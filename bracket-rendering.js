@@ -48,16 +48,18 @@ function renderCleanDoubleElimination() {
 
     // Define grid parameters - reduced center buffer for tighter layout
     const grid = {
-        matchWidth: 200,      // Slightly wider cards
-        matchHeight: 100,     // Slightly taller cards
-        horizontalSpacing: 150, // More space between rounds
-        verticalSpacing: 80,   // More space between matches
-        canvasWidth: 3000,
+        matchWidth: 200,
+        matchHeight: 100,
+        horizontalSpacing: bracketSize >= 32 ? 100 : 150,  // Reduced spacing for 32+ players
+        verticalSpacing: 80,
+        canvasWidth: bracketSize >= 32 ? 5000 : 3000,
         canvasHeight: 1200,
-        centerX: 1500,
+        centerX: bracketSize >= 32 ? 2500 : 1500,
         centerY: 600,
-        centerBuffer: 75      // Reduced for tight, compact layout
+        centerBuffer: 75
     };
+
+    console.log("Grid config:", grid.horizontalSpacing, "Center:", grid.centerX);
 
     // Render all bracket sections
     renderFrontsideGrid(structure.frontside, grid);
@@ -103,8 +105,27 @@ function renderBacksideGrid(backsideStructure, grid) {
 
         if (backsideMatches.length === 0) return;
 
-        // Backside flows CENTER → LEFT
-        const roundX = grid.centerX - grid.centerBuffer - (roundIndex + 1) * (grid.matchWidth + grid.horizontalSpacing);
+        // FIXED: Different positioning logic for different bracket sizes
+        let roundX;
+        
+        if (tournament.bracketSize === 8) {
+            const positions = [1, 2, 3]; // 3 rounds
+            roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
+        } else if (tournament.bracketSize === 16) {
+            const positions = [1, 2, 3, 4]; // 4 rounds
+            roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
+        } else if (tournament.bracketSize === 32) {
+            // Simple systematic positioning for 8 rounds
+            const positions = [1, 2, 3, 4, 5, 6, 7, 8];
+            roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
+        } else if (tournament.bracketSize === 48) {
+            // 10 rounds for 48 players
+            const positions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
+        } else {
+            // Fallback
+            roundX = grid.centerX - grid.centerBuffer - (roundIndex + 1) * (grid.matchWidth + grid.horizontalSpacing);
+        }
 
         if (backsideMatches.length === 1) {
             const matchY = grid.centerY - (grid.matchHeight / 2);

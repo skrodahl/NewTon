@@ -1,11 +1,10 @@
 // bracket-generation.js - Tournament Bracket Generation and Logic
 
 function getMaxBacksideRounds(playerCount) {
-    // Hardcoded values based on double_elimination_all.md
-    if (playerCount <= 8) return 3;   // 3 backside rounds + BS-FINAL
-    if (playerCount <= 16) return 4;  // 4 backside rounds + BS-FINAL  
-    if (playerCount <= 32) return 8;  // 8 backside rounds + BS-FINAL
-    return 10; // 48+ players: 10 backside rounds + BS-FINAL
+    if (playerCount <= 8) return 3;
+    if (playerCount <= 16) return 4;
+    if (playerCount <= 32) return 5;  // Fixed: use playerCount, not bracketSize
+    return 10;
 }
 
 function generateBracket() {
@@ -386,15 +385,11 @@ function calculateBracketStructure(bracketSize) {
         backsideStructure.push({ round: 4, matches: 1, receivesFromFrontside: false });
     }
     else if (bracketSize === 32) {
-        // 32-player pattern - CORRECTED
-        backsideStructure.push({ round: 1, matches: 8, receivesFromFrontside: true });
-        backsideStructure.push({ round: 2, matches: 4, receivesFromFrontside: true });
-        backsideStructure.push({ round: 3, matches: 2, receivesFromFrontside: false });
-        backsideStructure.push({ round: 4, matches: 2, receivesFromFrontside: true });
-        backsideStructure.push({ round: 5, matches: 1, receivesFromFrontside: false });
-        backsideStructure.push({ round: 6, matches: 1, receivesFromFrontside: true });
-        backsideStructure.push({ round: 7, matches: 1, receivesFromFrontside: true });
-        backsideStructure.push({ round: 8, matches: 1, receivesFromFrontside: false });
+        backsideStructure.push({ round: 1, matches: 8, receivesFromFrontside: true });  // BS-1-1 to BS-1-8
+        backsideStructure.push({ round: 2, matches: 4, receivesFromFrontside: false }); // BS-2-1 to BS-2-4
+        backsideStructure.push({ round: 3, matches: 4, receivesFromFrontside: true });  // BS-3-1 to BS-3-4 
+        backsideStructure.push({ round: 4, matches: 2, receivesFromFrontside: false }); // BS-4-1, BS-4-2
+        backsideStructure.push({ round: 5, matches: 1, receivesFromFrontside: false }); // BS-5-1
     }
     else if (bracketSize === 48) {
         // 48-player pattern 
