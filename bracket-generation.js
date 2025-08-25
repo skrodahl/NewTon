@@ -1,5 +1,10 @@
 // bracket-generation.js - Tournament Bracket Generation and Logic
 
+
+function getMaxBacksideRounds(playerCount) {
+    return Math.ceil(Math.log2(playerCount));
+}
+
 function generateBracket() {
     if (!tournament) {
         alert('Please create a tournament first');
@@ -352,7 +357,7 @@ function calculateBracketStructure(bracketSize) {
     // CORRECTED: Backside has more rounds than we were calculating
     // For 8-player: 3 frontside rounds → 4 backside rounds (not 2!)
     // For 16-player: 4 frontside rounds → 6 backside rounds (not 3!)
-    const backsideRounds = (frontsideRounds - 1) * 2;
+    const backsideRounds = Math.min((frontsideRounds - 1) * 2, getMaxBacksideRounds(bracketSize));
 
     // Calculate matches per round for frontside (unchanged)
     const frontsideStructure = [];
