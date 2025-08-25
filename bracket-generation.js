@@ -1,8 +1,11 @@
 // bracket-generation.js - Tournament Bracket Generation and Logic
 
-
 function getMaxBacksideRounds(playerCount) {
-    return Math.ceil(Math.log2(playerCount));
+    // Hardcoded values based on double_elimination_all.md
+    if (playerCount <= 8) return 3;   // 3 backside rounds + BS-FINAL
+    if (playerCount <= 16) return 4;  // 4 backside rounds + BS-FINAL  
+    if (playerCount <= 32) return 8;  // 8 backside rounds + BS-FINAL
+    return 10; // 48+ players: 10 backside rounds + BS-FINAL
 }
 
 function generateBracket() {
@@ -353,11 +356,7 @@ function autoAdvanceMatch(match) {
 
 function calculateBracketStructure(bracketSize) {
     const frontsideRounds = Math.ceil(Math.log2(bracketSize));
-    
-    // CORRECTED: Backside has more rounds than we were calculating
-    // For 8-player: 3 frontside rounds → 4 backside rounds (not 2!)
-    // For 16-player: 4 frontside rounds → 6 backside rounds (not 3!)
-    const backsideRounds = Math.min((frontsideRounds - 1) * 2, getMaxBacksideRounds(bracketSize));
+    const backsideRounds = getMaxBacksideRounds(bracketSize);
 
     // Calculate matches per round for frontside (unchanged)
     const frontsideStructure = [];
@@ -370,40 +369,49 @@ function calculateBracketStructure(bracketSize) {
         });
     }
 
-    // CORRECTED: Use the actual double elimination advancement pattern
+    // HARDCODED structures based on double_elimination_all.md
     const backsideStructure = [];
     
-    for (let round = 1; round <= backsideRounds; round++) {
-        let matchesInRound;
-        
-        if (round === 1) {
-            // First backside round: frontside first round losers
-            matchesInRound = Math.pow(2, frontsideRounds - 2);
-        } else if (round % 2 === 0) {
-            // Even rounds: backside winners meet frontside losers
-            const frontsideRoundThatDropsLosers = Math.ceil(round / 2) + 1;
-            if (frontsideRoundThatDropsLosers <= frontsideRounds) {
-                matchesInRound = Math.pow(2, frontsideRounds - frontsideRoundThatDropsLosers);
-            } else {
-                matchesInRound = 1;
-            }
-        } else {
-            // Odd rounds after 1: backside winners fight each other
-            matchesInRound = Math.pow(2, frontsideRounds - Math.ceil(round / 2) - 1);
-        }
-        
-        matchesInRound = Math.max(1, matchesInRound);
-        
-        backsideStructure.push({
-            round: round,
-            matches: matchesInRound,
-            receivesFromFrontside: round % 2 === 0 || round === 1
-        });
+    if (bracketSize === 8) {
+        // 8-player pattern from reference document:
+        backsideStructure.push({ round: 1, matches: 2, receivesFromFrontside: true });
+        backsideStructure.push({ round: 2, matches: 2, receivesFromFrontside: true });
+        backsideStructure.push({ round: 3, matches: 1, receivesFromFrontside: false });
+    } 
+    else if (bracketSize === 16) {
+        // 16-player pattern from reference document:
+        backsideStructure.push({ round: 1, matches: 4, receivesFromFrontside: true });
+        backsideStructure.push({ round: 2, matches: 2, receivesFromFrontside: true });
+        backsideStructure.push({ round: 3, matches: 2, receivesFromFrontside: false });
+        backsideStructure.push({ round: 4, matches: 1, receivesFromFrontside: false });
+    }
+    else if (bracketSize === 32) {
+        // 32-player pattern - CORRECTED
+        backsideStructure.push({ round: 1, matches: 8, receivesFromFrontside: true });
+        backsideStructure.push({ round: 2, matches: 4, receivesFromFrontside: true });
+        backsideStructure.push({ round: 3, matches: 2, receivesFromFrontside: false });
+        backsideStructure.push({ round: 4, matches: 2, receivesFromFrontside: true });
+        backsideStructure.push({ round: 5, matches: 1, receivesFromFrontside: false });
+        backsideStructure.push({ round: 6, matches: 1, receivesFromFrontside: true });
+        backsideStructure.push({ round: 7, matches: 1, receivesFromFrontside: true });
+        backsideStructure.push({ round: 8, matches: 1, receivesFromFrontside: false });
+    }
+    else if (bracketSize === 48) {
+        // 48-player pattern 
+        backsideStructure.push({ round: 1, matches: 12, receivesFromFrontside: true });
+        backsideStructure.push({ round: 2, matches: 6, receivesFromFrontside: true });
+        backsideStructure.push({ round: 3, matches: 6, receivesFromFrontside: false });
+        backsideStructure.push({ round: 4, matches: 3, receivesFromFrontside: true });
+        backsideStructure.push({ round: 5, matches: 3, receivesFromFrontside: false });
+        backsideStructure.push({ round: 6, matches: 2, receivesFromFrontside: true });
+        backsideStructure.push({ round: 7, matches: 2, receivesFromFrontside: false });
+        backsideStructure.push({ round: 8, matches: 1, receivesFromFrontside: true });
+        backsideStructure.push({ round: 9, matches: 1, receivesFromFrontside: false });
+        backsideStructure.push({ round: 10, matches: 1, receivesFromFrontside: false });
     }
 
-    console.log('=== BRACKET STRUCTURE DEBUG ===');
+    console.log('=== HARDCODED BRACKET STRUCTURE ===');
     console.log(`Bracket size: ${bracketSize}, Frontside rounds: ${frontsideRounds}, Backside rounds: ${backsideRounds}`);
-    console.log('Frontside structure:', frontsideStructure);
     console.log('Backside structure:', backsideStructure);
 
     return {
@@ -492,6 +500,8 @@ function generateBacksideMatches(structure, startId) {
     let matchId = startId;
 
     structure.backside.forEach((roundInfo, roundIndex) => {
+        console.log(`Generating backside round ${roundInfo.round} with ${roundInfo.matches} matches`);
+        
         for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
             
             let player1, player2;
@@ -527,6 +537,7 @@ function generateBacksideMatches(structure, startId) {
             };
 
             matches.push(match);
+            console.log(`Created backside match: ${match.id}`);
         }
     });
 }
@@ -715,10 +726,10 @@ function dropFrontsideLoser(completedMatch, loser) {
         return; // Exit early
     }
     
-    // CORRECT LOGIC FOR 8-PLAYER DOUBLE ELIMINATION:
+    // CORRECT LOGIC FOR DOUBLE ELIMINATION:
     // Round 1 losers → Backside Round 1
     // Round 2 losers → Backside Round 2 (to play against R1 backside winners)
-    // Round 3 (final) loser → BS-FINAL (handled above)
+    // etc.
     
     if (frontsideRound === 1) {
         // First round losers go to backside round 1
@@ -736,15 +747,11 @@ function dropFrontsideLoser(completedMatch, loser) {
             if (match.player1.name === 'TBD') {
                 match.player1 = loser;
                 console.log(`✓ Placed ${loser.name} in ${match.id} as player1`);
-                
-                // CRITICAL: Check for auto-advancement after placing loser
                 processAutoAdvancementForMatch(match);
                 return;
             } else if (match.player2.name === 'TBD') {
                 match.player2 = loser;
                 console.log(`✓ Placed ${loser.name} in ${match.id} as player2`);
-                
-                // CRITICAL: Check for auto-advancement after placing loser
                 processAutoAdvancementForMatch(match);
                 return;
             }
@@ -752,40 +759,8 @@ function dropFrontsideLoser(completedMatch, loser) {
         
         console.error(`ERROR: No available slots in backside round 1 for ${loser.name}`);
         
-    } else if (frontsideRound === 2) {
-        // Second round losers go to backside round 2
-        console.log(`${loser.name} lost in frontside round 2, going to backside round 2`);
-        
-        // Find available backside round 2 matches
-        const backsideRound2Matches = matches.filter(m =>
-            m.side === 'backside' && 
-            m.round === 2 &&
-            (m.player1.name === 'TBD' || m.player2.name === 'TBD')
-        ).sort((a, b) => a.positionInRound - b.positionInRound);
-        
-        // Find the first available slot
-        for (let match of backsideRound2Matches) {
-            if (match.player1.name === 'TBD') {
-                match.player1 = loser;
-                console.log(`✓ Placed ${loser.name} in ${match.id} as player1`);
-                
-                // CRITICAL: Check for auto-advancement after placing loser
-                processAutoAdvancementForMatch(match);
-                return;
-            } else if (match.player2.name === 'TBD') {
-                match.player2 = loser;
-                console.log(`✓ Placed ${loser.name} in ${match.id} as player2`);
-                
-                // CRITICAL: Check for auto-advancement after placing loser
-                processAutoAdvancementForMatch(match);
-                return;
-            }
-        }
-        
-        console.error(`ERROR: No available slots in backside round 2 for ${loser.name}`);
-        
     } else {
-        // Handle other rounds (shouldn't happen in 8-player bracket, but just in case)
+        // Later round losers go to corresponding backside rounds
         const targetBacksideRound = frontsideRound;
         console.log(`${loser.name} lost in frontside round ${frontsideRound}, going to backside round ${targetBacksideRound}`);
         
@@ -805,7 +780,6 @@ function dropFrontsideLoser(completedMatch, loser) {
                 console.log(`✓ Placed ${loser.name} in ${targetMatch.id} as player2`);
             }
             
-            // CRITICAL: Check for auto-advancement after placing loser
             processAutoAdvancementForMatch(targetMatch);
         } else {
             console.error(`ERROR: No available slots in backside round ${targetBacksideRound} for ${loser.name}`);
@@ -931,107 +905,6 @@ function testAutoAdvancement() {
     console.log('Auto-advancement test complete');
 }
 
-// Test function to check bracket state
-function checkBracketState() {
-    console.log('=== BRACKET STATE CHECK ===');
-    
-    if (!tournament || !tournament.bracket) {
-        console.log('No bracket generated');
-        return;
-    }
-    
-    console.log('Tournament bracket:', tournament.bracket);
-    console.log('Total matches:', matches.length);
-    
-    const byMatches = matches.filter(m => 
-        isPlayerBye(m.player1) || isPlayerBye(m.player2)
-    );
-    console.log('Matches with byes:', byMatches.length);
-    
-    const completedMatches = matches.filter(m => m.completed);
-    console.log('Completed matches:', completedMatches.length);
-    
-    const autoAdvancedMatches = matches.filter(m => m.autoAdvanced);
-    console.log('Auto-advanced matches:', autoAdvancedMatches.length);
-    
-    // Check if any DOM elements exist
-    const bracketMatches = document.querySelectorAll('.bracket-match');
-    console.log('Rendered bracket matches in DOM:', bracketMatches.length);
-    
-    return {
-        tournament,
-        matches: matches.length,
-        byMatches: byMatches.length,
-        completed: completedMatches.length,
-        autoAdvanced: autoAdvancedMatches.length,
-        domMatches: bracketMatches.length
-    };
-}
-function debugBacksideStructure() {
-    if (!tournament || !tournament.bracketSize) {
-        console.log('No tournament found');
-        return;
-    }
-    
-    const structure = calculateBracketStructure(tournament.bracketSize);
-    
-    console.log('=== BACKSIDE STRUCTURE DEBUG ===');
-    console.log(`Bracket size: ${tournament.bracketSize}`);
-    console.log(`Frontside rounds: ${structure.frontsideRounds}`);
-    console.log(`Backside rounds: ${structure.backsideRounds}`);
-    
-    console.log('\nBackside structure (what should exist):');
-    structure.backside.forEach((round, index) => {
-        console.log(`Round ${round.round}: ${round.matches} matches (receives from frontside: ${round.receivesFromFrontside})`);
-    });
-    
-    console.log('\nActual backside matches (what was created):');
-    const backsideMatches = matches.filter(m => m.side === 'backside');
-    backsideMatches.forEach(match => {
-        console.log(`${match.id}: Round ${match.round}, Position ${match.positionInRound}`);
-    });
-    
-    console.log('\nMatches per round (actual):');
-    for (let round = 1; round <= 4; round++) {
-        const roundMatches = matches.filter(m => m.side === 'backside' && m.round === round);
-        if (roundMatches.length > 0) {
-            console.log(`Round ${round}: ${roundMatches.length} matches`);
-        }
-    }
-    
-    return {
-        structure: structure.backside,
-        actualMatches: backsideMatches,
-        summary: `Expected ${structure.backside.length} rounds, found ${backsideMatches.length} matches`
-    };
-}
-
-// DEBUGGING FUNCTION: Call this to see current bracket state
-function debugBracketState() {
-    console.log('=== BRACKET STATE DEBUG ===');
-    
-    // Show all frontside matches
-    const frontsideMatches = matches.filter(m => m.side === 'frontside');
-    console.log('FRONTSIDE MATCHES:');
-    frontsideMatches.forEach(match => {
-        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
-    });
-    
-    // Show all backside matches
-    const backsideMatches = matches.filter(m => m.side === 'backside');
-    console.log('BACKSIDE MATCHES:');
-    backsideMatches.forEach(match => {
-        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
-    });
-    
-    // Show finals
-    const finals = matches.filter(m => m.id === 'BS-FINAL' || m.id === 'GRAND-FINAL');
-    console.log('FINALS:');
-    finals.forEach(match => {
-        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
-    });
-}
-
 function forceBacksideAutoAdvancement() {
     console.log('=== FORCING BACKSIDE AUTO-ADVANCEMENT CHECK ===');
     
@@ -1055,25 +928,4 @@ function forceBacksideAutoAdvancement() {
     
     // Process any cascading effects
     processAllAutoAdvancements();
-}
-
-function debugBacksideMatches() {
-    console.log('=== BACKSIDE MATCHES DEBUG ===');
-    
-    const backsideMatches = matches.filter(m => m.side === 'backside');
-    backsideMatches.forEach(match => {
-        console.log(`\n--- Match ${match.id} ---`);
-        console.log('Player1:', match.player1);
-        console.log('Player2:', match.player2);
-        console.log('Player1 is bye?', isPlayerBye(match.player1));
-        console.log('Player2 is bye?', isPlayerBye(match.player2));
-        console.log('Should auto-advance?', shouldAutoAdvanceMatch(match));
-        console.log('Match completed?', match.completed);
-        console.log('Match winner:', match.winner);
-        
-        // Check specifically for TBD
-        if (match.player1.name === 'TBD' || match.player2.name === 'TBD') {
-            console.log('*** HAS TBD PLAYER - SHOULD AUTO ADVANCE ***');
-        }
-    });
 }
