@@ -1120,7 +1120,7 @@ function generateMatchesWithAutoAdvancement() {
     }
 }
 
-**
+/**
  * Enhanced generateBracket function
  */
 function generateBracketWithAutoAdvancement() {
