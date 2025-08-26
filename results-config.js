@@ -80,6 +80,11 @@ function loadConfiguration() {
             document.getElementById('applicationTitle').value = config.applicationTitle;
             updateApplicationTitle(config.applicationTitle);
         }
+        
+        if (config.lanes) {
+            document.getElementById('maxLanes').value = config.lanes.maxLanes || 10;
+            document.getElementById('requireLaneForStart').checked = config.lanes.requireLaneForStart || false;
+        }
     }
 }
 

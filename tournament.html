@@ -225,6 +225,40 @@
                     </div>
                 </div>
             </div>
+            <div class="config-section">
+                <h3>Lane Management</h3>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="maxLanes">Maximum Number of Lanes</label>
+                        <select id="maxLanes">
+                            <option value="1">1 Lane</option>
+                            <option value="2">2 Lanes</option>
+                            <option value="3">3 Lanes</option>
+                            <option value="4" selected>4 Lanes</option>
+                            <option value="5">5 Lanes</option>
+                            <option value="6">6 Lanes</option>
+                            <option value="7">7 Lanes</option>
+                            <option value="8">8 Lanes</option>
+                            <option value="9">9 Lanes</option>
+                            <option value="10">10 Lanes</option>
+                            <option value="11">11 Lanes</option>
+                            <option value="12">12 Lanes</option>
+                            <option value="13">13 Lanes</option>
+                            <option value="14">14 Lanes</option>
+                            <option value="15">15 Lanes</option>
+                            <option value="16">16 Lanes</option>
+                            <option value="17">17 Lanes</option>
+                            <option value="18">18 Lanes</option>
+                            <option value="19">19 Lanes</option>
+                            <option value="20">20 Lanes</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+        </div>
+    <button class="btn btn-success" onclick="updateLaneConfiguration()">Save Lane Settings</button>
+    <button class="btn" onclick="showLaneUsage()">Show Current Lane Usage</button>
+</div>
         </div>
     </div>
 
@@ -260,6 +294,8 @@
 
     <!-- Load JavaScript files in the correct order -->
     <script src="main.js"></script>
+    <script src="match-state-system.js"></script>
+    <script src="lane-management.js"></script>
     <script src="tournament-management.js"></script>
     <script src="player-management.js"></script>
     <script src="bracket-generation.js"></script>

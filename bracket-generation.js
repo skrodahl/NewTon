@@ -1,11 +1,12 @@
 // bracket-generation.js - Tournament Bracket Generation and Logic
-// FIXED 48-PLAYER IMPLEMENTATION
+
 
 function getMaxBacksideRounds(playerCount) {
-    if (playerCount <= 8) return 4;   // BS-1, BS-2, BS-3, BS-FINAL
-    if (playerCount <= 16) return 5;  // BS-1, BS-2, BS-3, BS-4, BS-FINAL
-    if (playerCount <= 32) return 6;  // BS-1, BS-2, BS-3, BS-4, BS-5, BS-FINAL
-    return 7; // For 48 players: BS-1, BS-2, BS-3, BS-4, BS-5, BS-6, BS-FINAL
+    // Hardcoded values based on double_elimination_all.md
+    if (playerCount <= 8) return 3;   // 3 backside rounds + BS-FINAL
+    if (playerCount <= 16) return 4;  // 4 backside rounds + BS-FINAL  
+    if (playerCount <= 32) return 8;  // 8 backside rounds + BS-FINAL
+    return 10; // 48+ players: 10 backside rounds + BS-FINAL
 }
 
 function generateBracket() {
@@ -369,41 +370,56 @@ function calculateBracketStructure(bracketSize) {
         });
     }
 
-    // CORRECTED structures based on double_elimination_all.md and double-elim-48p-complete.md
+    // HARDCODED structures based on double_elimination_all.md
     const backsideStructure = [];
     
     if (bracketSize === 8) {
         // 8-player pattern from reference document:
-        backsideStructure.push({ round: 1, matches: 2, receivesFromFrontside: true, frontsideRound: 1 });
-        backsideStructure.push({ round: 2, matches: 2, receivesFromFrontside: true, frontsideRound: 2 });
+        // R1: BS-1-1, BS-1-2 (2 matches) - losers from FS-1-1/FS-1-2 vs FS-1-3/FS-1-4
+        // R2: BS-2-1, BS-2-2 (2 matches) - BS-1 winners vs losers from FS-2-1/FS-2-2
+        // R3: BS-3-1 (1 match) - BS-2-1 winner vs BS-2-2 winner
+        backsideStructure.push({ round: 1, matches: 2, receivesFromFrontside: true });
+        backsideStructure.push({ round: 2, matches: 2, receivesFromFrontside: true });
         backsideStructure.push({ round: 3, matches: 1, receivesFromFrontside: false });
     } 
     else if (bracketSize === 16) {
         // 16-player pattern from reference document:
-        backsideStructure.push({ round: 1, matches: 4, receivesFromFrontside: true, frontsideRound: 1 });
-        backsideStructure.push({ round: 2, matches: 2, receivesFromFrontside: true, frontsideRound: 2 });
+        // R1: BS-1-1 to BS-1-4 (4 matches) - frontside R1 losers
+        // R2: BS-2-1, BS-2-2 (2 matches) - BS-1 winners vs frontside R2 losers  
+        // R3: BS-3-1, BS-3-2 (2 matches) - BS-2 winners vs frontside R3 losers
+        // R4: BS-4-1 (1 match) - BS-3-1 winner vs BS-3-2 winner
+        backsideStructure.push({ round: 1, matches: 4, receivesFromFrontside: true });
+        backsideStructure.push({ round: 2, matches: 2, receivesFromFrontside: true });
         backsideStructure.push({ round: 3, matches: 2, receivesFromFrontside: false });
         backsideStructure.push({ round: 4, matches: 1, receivesFromFrontside: false });
     }
     else if (bracketSize === 32) {
-        backsideStructure.push({ round: 1, matches: 8, receivesFromFrontside: true, frontsideRound: 1 });  // R1 losers
-        backsideStructure.push({ round: 2, matches: 4, receivesFromFrontside: false }); // BS-1 winners
-        backsideStructure.push({ round: 3, matches: 4, receivesFromFrontside: true, frontsideRound: 2 });  // BS-2 winners + R2 losers
-        backsideStructure.push({ round: 4, matches: 2, receivesFromFrontside: false }); // BS-3 winners
-        backsideStructure.push({ round: 5, matches: 1, receivesFromFrontside: false }); // BS-4 winners
+        backsideStructure.push({ round: 1, matches: 8, receivesFromFrontside: true });
+        backsideStructure.push({ round: 2, matches: 4, receivesFromFrontside: true });
+        backsideStructure.push({ round: 3, matches: 2, receivesFromFrontside: false });
+        backsideStructure.push({ round: 4, matches: 2, receivesFromFrontside: true });
+        backsideStructure.push({ round: 5, matches: 1, receivesFromFrontside: false });
+        backsideStructure.push({ round: 6, matches: 1, receivesFromFrontside: true });
+        backsideStructure.push({ round: 7, matches: 1, receivesFromFrontside: true });
+        backsideStructure.push({ round: 8, matches: 1, receivesFromFrontside: false });
     }
     else if (bracketSize === 48) {
-        // CORRECTED 48-player pattern based on double-elim-48p-complete.md
-        backsideStructure.push({ round: 1, matches: 12, receivesFromFrontside: true, frontsideRound: 1 }); // R1 losers (24 players → 12 matches)
-        backsideStructure.push({ round: 2, matches: 8, receivesFromFrontside: true, frontsideRound: 2 });  // BS-1 winners (12) + R2 losers (4) → 16 players → 8 matches  
-        backsideStructure.push({ round: 3, matches: 6, receivesFromFrontside: true, frontsideRound: 3 });  // BS-2 winners (8) + R3 losers (4) → 12 players → 6 matches
-        backsideStructure.push({ round: 4, matches: 4, receivesFromFrontside: true, frontsideRound: 4 });  // BS-3 winners (6) + R4 losers (2) → 8 players → 4 matches
-        backsideStructure.push({ round: 5, matches: 3, receivesFromFrontside: true, frontsideRound: 5 });  // BS-4 winners (4) + R5 losers (2) → 6 players → 3 matches
-        backsideStructure.push({ round: 6, matches: 2, receivesFromFrontside: false }); // BS-5 winners (3) → BS-6-1, BS-6-2
-        backsideStructure.push({ round: 7, matches: 1, receivesFromFrontside: false }); // BS-6 winners → BS-7-1
+        // 48-player pattern (6 frontside rounds: 24→12→6→3→2→1)
+        // Note: 48 players requires special handling as it's not a power of 2
+        // Using 48-player bracket structure (similar to 32 but extended)
+        backsideStructure.push({ round: 1, matches: 12, receivesFromFrontside: true }); // FS R1 losers
+        backsideStructure.push({ round: 2, matches: 6, receivesFromFrontside: true });  // BS R1 winners vs FS R2 losers
+        backsideStructure.push({ round: 3, matches: 6, receivesFromFrontside: false }); // BS R2 winners fight
+        backsideStructure.push({ round: 4, matches: 3, receivesFromFrontside: true });  // BS R3 winners vs FS R3 losers
+        backsideStructure.push({ round: 5, matches: 3, receivesFromFrontside: false }); // BS R4 winners fight
+        backsideStructure.push({ round: 6, matches: 2, receivesFromFrontside: true });  // BS R5 winners vs FS R4 losers
+        backsideStructure.push({ round: 7, matches: 2, receivesFromFrontside: false }); // BS R6 winners fight
+        backsideStructure.push({ round: 8, matches: 1, receivesFromFrontside: true });  // BS R7 winners vs FS R5 losers
+        backsideStructure.push({ round: 9, matches: 1, receivesFromFrontside: false }); // BS R8 winner fights
+        backsideStructure.push({ round: 10, matches: 1, receivesFromFrontside: false }); // Final backside match
     }
 
-    console.log('=== CORRECTED BRACKET STRUCTURE ===');
+    console.log('=== HARDCODED BRACKET STRUCTURE ===');
     console.log(`Bracket size: ${bracketSize}, Frontside rounds: ${frontsideRounds}, Backside rounds: ${backsideRounds}`);
     console.log('Backside structure:', backsideStructure);
 
@@ -522,7 +538,6 @@ function generateBacksideMatches(structure, startId) {
                 completed: false,
                 positionInRound: matchIndex,
                 receivesFromFrontside: roundInfo.receivesFromFrontside,
-                frontsideRound: roundInfo.frontsideRound || null,
                 gridPosition: {
                     side: 'backside',
                     round: roundInfo.round,
@@ -720,40 +735,101 @@ function dropFrontsideLoser(completedMatch, loser) {
         return; // Exit early
     }
     
-    // Find the appropriate backside round for this frontside loser
-    // Based on the corrected double elimination logic
-    const targetBacksideMatches = matches.filter(m =>
-        m.side === 'backside' &&
-        m.receivesFromFrontside === true &&
-        m.frontsideRound === frontsideRound &&
-        (m.player1.name === 'TBD' || m.player2.name === 'TBD')
-    );
-
-    console.log(`Looking for backside matches that receive R${frontsideRound} losers:`, targetBacksideMatches.map(m => m.id));
-
-    if (targetBacksideMatches.length > 0) {
-        // Sort by position to ensure consistent placement
-        targetBacksideMatches.sort((a, b) => a.positionInRound - b.positionInRound);
+    // CORRECT LOGIC FOR 8-PLAYER DOUBLE ELIMINATION:
+    // Round 1 losers → Backside Round 1
+    // Round 2 losers → Backside Round 2 (to play against R1 backside winners)
+    // Round 3 (final) loser → BS-FINAL (handled above)
+    
+    if (frontsideRound === 1) {
+        // First round losers go to backside round 1
+        console.log(`${loser.name} lost in frontside round 1, going to backside round 1`);
+        
+        // Find available backside round 1 matches
+        const backsideRound1Matches = matches.filter(m =>
+            m.side === 'backside' && 
+            m.round === 1 &&
+            (m.player1.name === 'TBD' || m.player2.name === 'TBD')
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
         
         // Find the first available slot
-        for (let match of targetBacksideMatches) {
+        for (let match of backsideRound1Matches) {
             if (match.player1.name === 'TBD') {
                 match.player1 = loser;
                 console.log(`✓ Placed ${loser.name} in ${match.id} as player1`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
                 processAutoAdvancementForMatch(match);
                 return;
             } else if (match.player2.name === 'TBD') {
                 match.player2 = loser;
                 console.log(`✓ Placed ${loser.name} in ${match.id} as player2`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
                 processAutoAdvancementForMatch(match);
                 return;
             }
         }
         
-        console.error(`ERROR: No available slots in backside matches for R${frontsideRound} loser ${loser.name}`);
+        console.error(`ERROR: No available slots in backside round 1 for ${loser.name}`);
+        
+    } else if (frontsideRound === 2) {
+        // Second round losers go to backside round 2
+        console.log(`${loser.name} lost in frontside round 2, going to backside round 2`);
+        
+        // Find available backside round 2 matches
+        const backsideRound2Matches = matches.filter(m =>
+            m.side === 'backside' && 
+            m.round === 2 &&
+            (m.player1.name === 'TBD' || m.player2.name === 'TBD')
+        ).sort((a, b) => a.positionInRound - b.positionInRound);
+        
+        // Find the first available slot
+        for (let match of backsideRound2Matches) {
+            if (match.player1.name === 'TBD') {
+                match.player1 = loser;
+                console.log(`✓ Placed ${loser.name} in ${match.id} as player1`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
+                processAutoAdvancementForMatch(match);
+                return;
+            } else if (match.player2.name === 'TBD') {
+                match.player2 = loser;
+                console.log(`✓ Placed ${loser.name} in ${match.id} as player2`);
+                
+                // CRITICAL: Check for auto-advancement after placing loser
+                processAutoAdvancementForMatch(match);
+                return;
+            }
+        }
+        
+        console.error(`ERROR: No available slots in backside round 2 for ${loser.name}`);
         
     } else {
-        console.error(`ERROR: No backside matches found to receive R${frontsideRound} losers for ${loser.name}`);
+        // Handle other rounds (shouldn't happen in 8-player bracket, but just in case)
+        const targetBacksideRound = frontsideRound;
+        console.log(`${loser.name} lost in frontside round ${frontsideRound}, going to backside round ${targetBacksideRound}`);
+        
+        const targetMatches = matches.filter(m =>
+            m.side === 'backside' &&
+            m.round === targetBacksideRound &&
+            (m.player1.name === 'TBD' || m.player2.name === 'TBD')
+        );
+
+        if (targetMatches.length > 0) {
+            const targetMatch = targetMatches[0];
+            if (targetMatch.player1.name === 'TBD') {
+                targetMatch.player1 = loser;
+                console.log(`✓ Placed ${loser.name} in ${targetMatch.id} as player1`);
+            } else if (targetMatch.player2.name === 'TBD') {
+                targetMatch.player2 = loser;
+                console.log(`✓ Placed ${loser.name} in ${targetMatch.id} as player2`);
+            }
+            
+            // CRITICAL: Check for auto-advancement after placing loser
+            processAutoAdvancementForMatch(targetMatch);
+        } else {
+            console.error(`ERROR: No available slots in backside round ${targetBacksideRound} for ${loser.name}`);
+        }
     }
 }
 
@@ -875,6 +951,107 @@ function testAutoAdvancement() {
     console.log('Auto-advancement test complete');
 }
 
+// Test function to check bracket state
+function checkBracketState() {
+    console.log('=== BRACKET STATE CHECK ===');
+    
+    if (!tournament || !tournament.bracket) {
+        console.log('No bracket generated');
+        return;
+    }
+    
+    console.log('Tournament bracket:', tournament.bracket);
+    console.log('Total matches:', matches.length);
+    
+    const byMatches = matches.filter(m => 
+        isPlayerBye(m.player1) || isPlayerBye(m.player2)
+    );
+    console.log('Matches with byes:', byMatches.length);
+    
+    const completedMatches = matches.filter(m => m.completed);
+    console.log('Completed matches:', completedMatches.length);
+    
+    const autoAdvancedMatches = matches.filter(m => m.autoAdvanced);
+    console.log('Auto-advanced matches:', autoAdvancedMatches.length);
+    
+    // Check if any DOM elements exist
+    const bracketMatches = document.querySelectorAll('.bracket-match');
+    console.log('Rendered bracket matches in DOM:', bracketMatches.length);
+    
+    return {
+        tournament,
+        matches: matches.length,
+        byMatches: byMatches.length,
+        completed: completedMatches.length,
+        autoAdvanced: autoAdvancedMatches.length,
+        domMatches: bracketMatches.length
+    };
+}
+function debugBacksideStructure() {
+    if (!tournament || !tournament.bracketSize) {
+        console.log('No tournament found');
+        return;
+    }
+    
+    const structure = calculateBracketStructure(tournament.bracketSize);
+    
+    console.log('=== BACKSIDE STRUCTURE DEBUG ===');
+    console.log(`Bracket size: ${tournament.bracketSize}`);
+    console.log(`Frontside rounds: ${structure.frontsideRounds}`);
+    console.log(`Backside rounds: ${structure.backsideRounds}`);
+    
+    console.log('\nBackside structure (what should exist):');
+    structure.backside.forEach((round, index) => {
+        console.log(`Round ${round.round}: ${round.matches} matches (receives from frontside: ${round.receivesFromFrontside})`);
+    });
+    
+    console.log('\nActual backside matches (what was created):');
+    const backsideMatches = matches.filter(m => m.side === 'backside');
+    backsideMatches.forEach(match => {
+        console.log(`${match.id}: Round ${match.round}, Position ${match.positionInRound}`);
+    });
+    
+    console.log('\nMatches per round (actual):');
+    for (let round = 1; round <= 4; round++) {
+        const roundMatches = matches.filter(m => m.side === 'backside' && m.round === round);
+        if (roundMatches.length > 0) {
+            console.log(`Round ${round}: ${roundMatches.length} matches`);
+        }
+    }
+    
+    return {
+        structure: structure.backside,
+        actualMatches: backsideMatches,
+        summary: `Expected ${structure.backside.length} rounds, found ${backsideMatches.length} matches`
+    };
+}
+
+// DEBUGGING FUNCTION: Call this to see current bracket state
+function debugBracketState() {
+    console.log('=== BRACKET STATE DEBUG ===');
+    
+    // Show all frontside matches
+    const frontsideMatches = matches.filter(m => m.side === 'frontside');
+    console.log('FRONTSIDE MATCHES:');
+    frontsideMatches.forEach(match => {
+        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
+    });
+    
+    // Show all backside matches
+    const backsideMatches = matches.filter(m => m.side === 'backside');
+    console.log('BACKSIDE MATCHES:');
+    backsideMatches.forEach(match => {
+        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
+    });
+    
+    // Show finals
+    const finals = matches.filter(m => m.id === 'BS-FINAL' || m.id === 'GRAND-FINAL');
+    console.log('FINALS:');
+    finals.forEach(match => {
+        console.log(`${match.id}: ${match.player1?.name} vs ${match.player2?.name} | Winner: ${match.winner?.name || 'None'} | Completed: ${match.completed}`);
+    });
+}
+
 function forceBacksideAutoAdvancement() {
     console.log('=== FORCING BACKSIDE AUTO-ADVANCEMENT CHECK ===');
     
@@ -898,4 +1075,25 @@ function forceBacksideAutoAdvancement() {
     
     // Process any cascading effects
     processAllAutoAdvancements();
+}
+
+function debugBacksideMatches() {
+    console.log('=== BACKSIDE MATCHES DEBUG ===');
+    
+    const backsideMatches = matches.filter(m => m.side === 'backside');
+    backsideMatches.forEach(match => {
+        console.log(`\n--- Match ${match.id} ---`);
+        console.log('Player1:', match.player1);
+        console.log('Player2:', match.player2);
+        console.log('Player1 is bye?', isPlayerBye(match.player1));
+        console.log('Player2 is bye?', isPlayerBye(match.player2));
+        console.log('Should auto-advance?', shouldAutoAdvanceMatch(match));
+        console.log('Match completed?', match.completed);
+        console.log('Match winner:', match.winner);
+        
+        // Check specifically for TBD
+        if (match.player1.name === 'TBD' || match.player2.name === 'TBD') {
+            console.log('*** HAS TBD PLAYER - SHOULD AUTO ADVANCE ***');
+        }
+    });
 }

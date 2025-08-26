@@ -48,18 +48,16 @@ function renderCleanDoubleElimination() {
 
     // Define grid parameters - reduced center buffer for tighter layout
     const grid = {
-        matchWidth: 200,
-        matchHeight: 100,
-        horizontalSpacing: bracketSize >= 32 ? 100 : 150,  // Reduced spacing for 32+ players
-        verticalSpacing: 80,
-        canvasWidth: bracketSize >= 32 ? 5000 : 3000,
+        matchWidth: 200,      // Slightly wider cards
+        matchHeight: 100,     // Slightly taller cards
+        horizontalSpacing: 150, // More space between rounds
+        verticalSpacing: 80,   // More space between matches
+        canvasWidth: 3000,
         canvasHeight: 1200,
-        centerX: bracketSize >= 32 ? 2500 : 1500,
+        centerX: 1500,
         centerY: 600,
-        centerBuffer: 75
+        centerBuffer: 75      // Reduced for tight, compact layout
     };
-
-    console.log("Grid config:", grid.horizontalSpacing, "Center:", grid.centerX);
 
     // Render all bracket sections
     renderFrontsideGrid(structure.frontside, grid);
@@ -105,25 +103,19 @@ function renderBacksideGrid(backsideStructure, grid) {
 
         if (backsideMatches.length === 0) return;
 
-        // FIXED: Different positioning logic for different bracket sizes
+        // FIXED: Use proper positioning for double elimination backside
         let roundX;
         
         if (tournament.bracketSize === 8) {
-            const positions = [1, 2, 3]; // 3 rounds
+            // 8-player: 4 rounds total
+            const positions = [1, 2, 3, 4]; 
             roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
         } else if (tournament.bracketSize === 16) {
-            const positions = [1, 2, 3, 4]; // 4 rounds
-            roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
-        } else if (tournament.bracketSize === 32) {
-            // Simple systematic positioning for 8 rounds
-            const positions = [1, 2, 3, 4, 5, 6, 7, 8];
-            roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
-        } else if (tournament.bracketSize === 48) {
-            // 10 rounds for 48 players
-            const positions = [1, 2, 3, 4, 5, 6, 7, 8, 9, 10];
+            // 16-player: 5 rounds total - the 5th round feeds into BS-FINAL
+            const positions = [1, 2, 3, 4, 5]; 
             roundX = grid.centerX - grid.centerBuffer - positions[roundIndex] * (grid.matchWidth + grid.horizontalSpacing);
         } else {
-            // Fallback
+            // Fallback for larger brackets
             roundX = grid.centerX - grid.centerBuffer - (roundIndex + 1) * (grid.matchWidth + grid.horizontalSpacing);
         }
 
@@ -163,6 +155,10 @@ function renderFinalGrid(grid) {
 function renderEnhancedMatch(match, x, y, section, roundIndex) {
     const matchElement = document.createElement('div');
     
+    // Use new state-based CSS classes
+    const stateClasses = getMatchStateClasses ? getMatchStateClasses(match) : 
+        `bracket-match ${match.active ? 'active' : ''} ${match.completed ? 'completed' : ''}`;
+    
     // Enhanced styling based on match importance and section
     let extraClasses = '';
     if (match.id === 'GRAND-FINAL') {
@@ -173,7 +169,7 @@ function renderEnhancedMatch(match, x, y, section, roundIndex) {
         extraClasses = 'important-match';
     }
 
-    matchElement.className = `bracket-match ${match.active ? 'active' : ''} ${match.completed ? 'completed' : ''} ${extraClasses}`;
+    matchElement.className = `${stateClasses} ${extraClasses}`;
     matchElement.style.left = x + 'px';
     matchElement.style.top = y + 'px';
     matchElement.id = `bracket-match-${match.id}`;
@@ -195,26 +191,52 @@ function renderEnhancedMatch(match, x, y, section, roundIndex) {
         roundIndicator = `<span class="round-indicator grand">GRAND FINAL</span>`;
     }
 
+    // Get current match state for UI decisions
+    const matchState = getMatchState ? getMatchState(match) : 
+        (match.completed ? 'completed' : match.active ? 'live' : 'ready');
+    
+    const buttonText = getMatchButtonText ? getMatchButtonText(match) : 
+        (match.active ? 'LIVE' : 'Start');
+    
+    const buttonDisabled = matchState === 'pending' || matchState === 'completed';
+    const buttonColor = matchState === 'live' ? '#ff6b35' : 
+                       matchState === 'completed' ? '#28a745' : 
+                       matchState === 'pending' ? '#6c757d' : '#ddd';
+    const buttonTextColor = matchState === 'live' || matchState === 'completed' ? 'white' : 'black';
+
+    // Generate lane options using new lane management system
+    const laneOptions = typeof generateLaneOptions === 'function' ? 
+        generateLaneOptions(match.id, match.lane) :
+        // Fallback to old system if lane management not available
+        Array.from({length: 10}, (_, i) => i + 1).map(lane =>
+            `<option value="${lane}" ${match.lane === lane ? 'selected' : ''}>${lane}</option>`
+        ).join('');
+
+    // Lane conflict warning
+    const hasLaneConflict = match.lane && typeof isLaneInUse === 'function' && 
+                           isLaneInUse(match.lane, match.id) && matchState === 'live';
+    const laneWarning = hasLaneConflict ? 
+        '<span style="color: red; font-size: 8px;">⚠️</span>' : '';
+
     matchElement.innerHTML = `
         <div class="match-header">
             <span>${match.id}</span>
             ${roundIndicator}
             <span class="match-info">
-                L<select onchange="updateMatchLane('${match.id}', this.value)" style="background: white; border: 1px solid #ddd; font-size: 11px; width: 40px; padding: 2px;">
-                    ${Array.from({length: 10}, (_, i) => i + 1).map(lane =>
-                        `<option value="${lane}" ${match.lane === lane ? 'selected' : ''}>${lane}</option>`
-                    ).join('')}
-                </select> | Bo${match.legs}
+                L<select onchange="updateMatchLaneEnhanced('${match.id}', this.value)" 
+                         style="background: white; border: 1px solid #ddd; font-size: 11px; width: 40px; padding: 2px; ${hasLaneConflict ? 'border-color: red;' : ''}">
+                    ${laneOptions}
+                </select>${laneWarning} | Bo${match.legs}
             </span>
         </div>
         <div class="match-players">
-            <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${match.winner?.id === match.player1?.id ? 'winner' : ''}"
-                 onclick="${match.player1?.isBye ? '' : `selectWinner('${match.id}', 1)`}">
+            <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${match.winner?.id === match.player1?.id ? 'winner' : ''} ${canSelectWinner && !canSelectWinner(match, 1) ? 'disabled' : ''}"
+                 onclick="${getPlayerClickHandler(match, 1, matchState)}">
                 <span class="player-name-short">${getPlayerDisplayName(match.player1)}</span>
                 ${match.winner?.id === match.player1?.id ? '<span class="winner-check">✓</span>' : ''}
             </div>
-            <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${match.winner?.id === match.player2?.id ? 'winner' : ''}"
-                 onclick="${match.player2?.isBye ? '' : `selectWinner('${match.id}', 2)`}">
+            <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${match.winner?.id === match.player2?.id ? 'winner' : ''} ${canSelectWinner && !canSelectWinner(match, 2) ? 'disabled' : ''}"
+                 onclick="${getPlayerClickHandler(match, 2, matchState)}">
                 <span class="player-name-short">${getPlayerDisplayName(match.player2)}</span>
                 ${match.winner?.id === match.player2?.id ? '<span class="winner-check">✓</span>' : ''}
             </div>
@@ -224,8 +246,12 @@ function renderEnhancedMatch(match, x, y, section, roundIndex) {
                 <option value="">No ref</option>
                 ${refereeOptions}
             </select>
-            <button onclick="toggleActive('${match.id}')" style="font-size: 9px; padding: 3px 6px; border: none; border-radius: 3px; background: ${match.active ? '#ff6b35' : '#ddd'}; color: ${match.active ? 'white' : 'black'};">
-                ${match.active ? 'LIVE' : 'Start'}
+            <button onclick="${getButtonClickHandlerEnhanced(matchState, match.id)}" 
+                    style="font-size: 9px; padding: 3px 6px; border: none; border-radius: 3px; 
+                           background: ${buttonColor}; color: ${buttonTextColor}; 
+                           ${buttonDisabled ? 'opacity: 0.6; cursor: not-allowed;' : 'cursor: pointer;'}"
+                    ${buttonDisabled ? 'disabled' : ''}>
+                ${buttonText}
             </button>
         </div>
     `;
@@ -390,4 +416,68 @@ function handleDrag(e) {
 
 function endDrag() {
     isDragging = false;
+}
+
+/**
+ * Get the appropriate click handler for player selection based on match state
+ */
+function getPlayerClickHandler(match, playerNumber, matchState) {
+    if (matchState === 'live') {
+        // Use new validation function if available, fallback to old function
+        const functionName = typeof selectWinnerWithValidation !== 'undefined' ? 
+            'selectWinnerWithValidation' : 'selectWinner';
+        return `${functionName}('${match.id}', ${playerNumber})`;
+    }
+    return ''; // No click handler for non-live matches
+}
+
+/**
+ * Get the appropriate click handler for the match button based on state
+ */
+function getButtonClickHandler(matchState, matchId) {
+    if (matchState === 'pending' || matchState === 'completed') {
+        return ''; // No action for pending or completed matches
+    }
+    
+    // Use new validation function if available, fallback to old function
+    const functionName = typeof toggleActiveWithValidation !== 'undefined' ? 
+        'toggleActiveWithValidation' : 'toggleActive';
+    return `${functionName}('${matchId}')`;
+}
+
+/**
+ * Enhanced lane update function wrapper
+ */
+function updateMatchLaneEnhanced(matchId, newLane) {
+    // Use new validation function if available
+    if (typeof updateMatchLaneWithValidation === 'function') {
+        return updateMatchLaneWithValidation(matchId, newLane);
+    } else {
+        // Fallback to original function
+        return updateMatchLane(matchId, newLane);
+    }
+}
+
+/**
+ * Enhanced button click handler
+ */
+function getButtonClickHandlerEnhanced(matchState, matchId) {
+    if (matchState === 'pending' || matchState === 'completed') {
+        return ''; // No action for pending or completed matches
+    }
+    
+    // Use lane validation function if available
+    if (typeof toggleActiveWithLaneValidation === 'function') {
+        return `toggleActiveWithLaneValidation('${matchId}')`;
+    } else if (typeof toggleActiveWithValidation === 'function') {
+        return `toggleActiveWithValidation('${matchId}')`;
+    } else {
+        return `toggleActive('${matchId}')`;
+    }
+}
+
+// Add these global functions to make them available
+if (typeof window !== 'undefined') {
+    window.updateMatchLaneEnhanced = updateMatchLaneEnhanced;
+    window.getButtonClickHandlerEnhanced = getButtonClickHandlerEnhanced;
 }
