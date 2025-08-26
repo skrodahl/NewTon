@@ -423,12 +423,16 @@ function endDrag() {
  */
 function getPlayerClickHandler(match, playerNumber, matchState) {
     if (matchState === 'live') {
-        // Use new validation function if available, fallback to old function
-        const functionName = typeof selectWinnerWithValidation !== 'undefined' ? 
-            'selectWinnerWithValidation' : 'selectWinner';
-        return `${functionName}('${match.id}', ${playerNumber})`;
+        // Use Phase 3 function if available
+        if (typeof selectWinnerWithAutoAdvancement === 'function') {
+            return `selectWinnerWithAutoAdvancement('${match.id}', ${playerNumber})`;
+        } else if (typeof selectWinnerWithValidation !== 'function') {
+            return `selectWinnerWithValidation('${match.id}', ${playerNumber})`;
+        } else {
+            return `selectWinner('${match.id}', ${playerNumber})`;
+        }
     }
-    return ''; // No click handler for non-live matches
+    return '';
 }
 
 /**

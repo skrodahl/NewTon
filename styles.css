@@ -807,3 +807,73 @@ footer {
     background: white;
     border-radius: 0 0 10px 10px;
 }
+
+const newMatchStateCSS = `
+/* New match state styles */
+.match-pending {
+    background: #f8f9fa;
+    border-color: #6c757d;
+    opacity: 0.8;
+}
+
+.match-pending .match-player {
+    color: #6c757d;
+    cursor: default;
+}
+
+.match-ready {
+    background: #fff3cd;
+    border-color: #ffc107;
+}
+
+.match-live {
+    background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
+    border-color: #ff6b35;
+    animation: pulse 2s infinite;
+}
+
+.match-completed {
+    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+    border-color: #28a745;
+}
+
+.match-player.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.match-player.disabled:hover {
+    background: none;
+}
+
+/* State indicator badges */
+.match-state-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 8px;
+    font-weight: bold;
+    color: white;
+    z-index: 20;
+}
+
+.match-state-badge.pending {
+    background: #6c757d;
+}
+
+.match-state-badge.ready {
+    background: #ffc107;
+    color: #212529;
+}
+
+.match-state-badge.live {
+    background: #ff6b35;
+    animation: pulse 2s infinite;
+}
+
+.match-state-badge.completed {
+    background: #28a745;
+}
+`;

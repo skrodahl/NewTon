@@ -283,3 +283,74 @@ if (typeof module !== 'undefined' && module.exports) {
 
 // Make debug function globally available
 window.debugMatchStates = debugMatchStates;
+
+/**
+ * Enhanced winner selection with auto-advancement
+ */
+function selectWinnerWithAutoAdvancement(matchId, playerNumber) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        console.error(`Match ${matchId} not found`);
+        return false;
+    }
+
+    const currentState = getMatchState(match);
+    
+    // Can only select winner if match is LIVE
+    if (currentState !== 'live') {
+        alert(`Cannot select winner: Match must be LIVE (currently ${currentState})`);
+        return false;
+    }
+
+    const winner = playerNumber === 1 ? match.player1 : match.player2;
+    const loser = playerNumber === 1 ? match.player2 : match.player1;
+
+    // Validate winner is not a bye/walkover
+    if (!winner || (typeof isPlayerWalkover === 'function' && isPlayerWalkover(winner))) {
+        alert('Cannot select a bye or TBD player as winner');
+        return false;
+    }
+
+    // Toggle winner selection - if clicking same player, clear the winner (undo)
+    if (match.winner?.id === winner.id) {
+        // Undo - this will be handled in Phase 6
+        console.log('Undo functionality - Phase 6 implementation needed');
+        alert('Undo functionality will be implemented in Phase 6');
+        return false;
+        
+    } else {
+        // Complete match with advancement
+        if (typeof completeMatchWithAdvancement === 'function') {
+            const success = completeMatchWithAdvancement(matchId, playerNumber);
+            
+            if (success) {
+                saveTournament();
+                
+                // Refresh bracket display
+                if (typeof renderBracket === 'function') {
+                    renderBracket();
+                }
+                
+                // Refresh lane dropdowns if available
+                if (typeof refreshAllLaneDropdowns === 'function') {
+                    setTimeout(refreshAllLaneDropdowns, 100);
+                }
+                
+                return true;
+            }
+        } else {
+            // Fallback to old system
+            match.winner = winner;
+            match.loser = loser;
+            match.completed = true;
+            transitionMatchState(match, 'completed');
+            
+            console.log(`Winner selected: ${winner.name} defeats ${loser.name} in ${matchId}`);
+            
+            saveTournament();
+            renderBracket();
+        }
+    }
+
+    return false;
+}

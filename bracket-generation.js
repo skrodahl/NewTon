@@ -1097,3 +1097,96 @@ function debugBacksideMatches() {
         }
     });
 }
+
+/**
+ * Enhanced generateMatches function that triggers auto-advancement
+ */
+function generateMatchesWithAutoAdvancement() {
+    // Use existing generateMatches logic
+    generateMatches();
+    
+    console.log('Matches generated, processing auto-advancements...');
+    
+    // Process all auto-advancements after bracket generation
+    if (typeof processAllAutoAdvancements === 'function') {
+        processAllAutoAdvancements();
+        
+        // Save tournament after auto-advancement
+        saveTournament();
+        
+        console.log('Auto-advancement processing complete');
+    } else {
+        console.warn('Auto-advancement system not available');
+    }
+}
+
+**
+ * Enhanced generateBracket function
+ */
+function generateBracketWithAutoAdvancement() {
+    if (!tournament) {
+        alert('Please create a tournament first');
+        return;
+    }
+
+    // Check if bracket already exists (tournament in progress)
+    if (tournament.bracket && matches.length > 0) {
+        alert('Tournament is already in progress!\n\nTo start a new bracket, you must first reset the current tournament.\n\nGo to the Tournament page and use "Reset Tournament" to clear the current bracket and results.');
+        return;
+    }
+
+    const paidPlayers = players.filter(p => p.paid);
+    if (paidPlayers.length < 2) {
+        alert('Need at least 2 paid players to generate bracket');
+        return;
+    }
+
+    // Determine bracket size
+    let bracketSize;
+    if (paidPlayers.length <= 8) bracketSize = 8;
+    else if (paidPlayers.length <= 16) bracketSize = 16;
+    else if (paidPlayers.length <= 32) bracketSize = 32;
+    else bracketSize = 48;
+
+    // For 8-player bracket, we need at least 4 real players to ensure each first round match has at least one real player
+    if (bracketSize === 8 && paidPlayers.length < 4) {
+        alert('For an 8-player bracket, you need at least 4 paid players to ensure proper tournament flow.\n\nCurrently you have ' + paidPlayers.length + ' paid players.\n\nPlease add more players or mark more players as paid.');
+        return;
+    }
+
+    // Create optimized bracket placement to avoid walkover vs walkover matches
+    const bracket = createOptimizedBracket(paidPlayers, bracketSize);
+
+    // Validate the bracket
+    if (!validateBracket(bracket, bracketSize)) {
+        alert('Bracket generation failed validation. Please try again.');
+        return;
+    }
+
+    tournament.bracket = bracket;
+    tournament.bracketSize = bracketSize;
+    tournament.status = 'active';
+
+    console.log('=== STEP 1: Generate Matches ===');
+    generateMatchesWithAutoAdvancement(); // Use enhanced version
+    
+    console.log('=== STEP 2: Save Tournament ===');
+    saveTournament();
+    
+    console.log('=== STEP 3: Render Bracket ===');
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    } else {
+        console.error('renderBracket function not available');
+    }
+    
+    showPage('tournament');
+    
+    // Show auto-advancement summary
+    if (typeof debugAutoAdvancement === 'function') {
+        const summary = debugAutoAdvancement();
+        alert(`Bracket generated with ${bracketSize} positions for ${paidPlayers.length} players\n\nAuto-advancement summary:\n- ${summary.autoCompleted} matches auto-completed\n- ${summary.completed} total matches completed`);
+    } else {
+        alert(`Bracket generated with ${bracketSize} positions for ${paidPlayers.length} players`);
+    }
+}
