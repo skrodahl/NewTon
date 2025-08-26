@@ -321,14 +321,6 @@ body {
     pointer-events: none;
 }
 
-.bracket-title.back {
-    /* Positioned by JavaScript */
-}
-
-.bracket-title.front {
-    /* Positioned by JavaScript */
-}
-
 .bracket-title.finals {
     font-size: 24px;
     color: #ff6b35;
@@ -808,7 +800,7 @@ footer {
     border-radius: 0 0 10px 10px;
 }
 
-const newMatchStateCSS = `
+const newMatchStateCSS {
 /* New match state styles */
 .match-pending {
     background: #f8f9fa;
@@ -876,4 +868,4 @@ const newMatchStateCSS = `
 .match-state-badge.completed {
     background: #28a745;
 }
-`;
+}
