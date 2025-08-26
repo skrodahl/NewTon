@@ -263,37 +263,6 @@ function processAllAutoAdvancements() {
     console.log(`Auto-advancement processing complete after ${iterations} iterations`);
 }
 
-function shouldAutoAdvanceMatch(match) {
-    // Don't process already completed matches
-    if (match.completed) {
-        return false;
-    }
-
-    // Both players must be defined (not null/undefined)
-    if (!match.player1 || !match.player2) {
-        return false;
-    }
-    
-    // IMPORTANT: Allow TBD vs Real Player matches to auto-advance
-    // But NOT TBD vs TBD matches
-    if (match.player1.name === 'TBD' && match.player2.name === 'TBD') {
-        return false; // Both TBD, can't auto-advance
-    }
-
-    // Check if exactly one player is a bye/walkover/TBD
-    const player1IsBye = isPlayerBye(match.player1);
-    const player2IsBye = isPlayerBye(match.player2);
-
-    // We can auto-advance if exactly one player is a bye/TBD
-    const shouldAdvance = (player1IsBye && !player2IsBye) || (!player1IsBye && player2IsBye);
-    
-    if (shouldAdvance) {
-        console.log(`Match ${match.id} should auto-advance: ${match.player1.name} vs ${match.player2.name}`);
-    }
-    
-    return shouldAdvance;
-}
-
 function isPlayerBye(player) {
     if (!player) return false;
     
@@ -315,44 +284,6 @@ function isPlayerBye(player) {
     // Frontside TBD players (fs-X-X-X) should NOT be treated as byes
     // They represent winners from previous rounds
     return false;
-}
-
-function autoAdvanceMatch(match) {
-    const player1IsBye = isPlayerBye(match.player1);
-    const player2IsBye = isPlayerBye(match.player2);
-
-    if (player1IsBye && player2IsBye) {
-        console.error(`ERROR: Both players are byes in match ${match.id}! This should not happen.`);
-        // Emergency fallback - advance the first player
-        match.winner = match.player1;
-        match.completed = true;
-        match.autoAdvanced = true;
-        advanceWinner(match);
-        return;
-    }
-
-    let winner, loser;
-    
-    if (player1IsBye && !player2IsBye) {
-        winner = match.player2;
-        loser = match.player1;
-    } else if (player2IsBye && !player1IsBye) {
-        winner = match.player1;
-        loser = match.player2;
-    } else {
-        // Neither is a bye, shouldn't auto-advance
-        return;
-    }
-
-    console.log(`Auto-advancing ${winner.name} in match ${match.id} (opponent: ${loser.name})`);
-    
-    match.winner = winner;
-    match.loser = loser;
-    match.completed = true;
-    match.autoAdvanced = true;
-    
-    // Advance the winner to the next round
-    advanceWinner(match);
 }
 
 function calculateBracketStructure(bracketSize) {

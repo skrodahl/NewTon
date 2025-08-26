@@ -1,4 +1,4 @@
-// walkover-advancement.js - Phase 3: Walkover Auto-Advancement System
+// walkover-advancement.js - Phase 3: Fixed Walkover Auto-Advancement System
 
 /**
  * Hardcoded advancement rules for all bracket sizes
@@ -128,31 +128,55 @@ const ADVANCEMENT_RULES = {
 };
 
 /**
- * Check if a player is a walkover/bye
+ * FIXED: Check if a player is a walkover/bye
+ * TBD players are NEVER byes - they represent future players or waiting opponents
  */
 function isPlayerWalkover(player) {
-    if (!player) return true;
+    if (!player) return true;  // No player = bye
     
+    // Only actual walkover/bye players should trigger auto-advancement
     return player.isBye === true || 
            player.name === 'Walkover' || 
            player.name === 'BYE' ||
-           player.name === 'TBD' ||
            (player.id && player.id.toString().startsWith('walkover-')) ||
            (player.id && player.id.toString().startsWith('bye-'));
+    
+    // CRITICAL FIX: TBD players are NEVER treated as byes
+    // TBD means "To Be Determined" - represents a future player, not a walkover
 }
 
 /**
  * Check if a match should auto-advance due to walkover
+ * FIXED: Only auto-advance against actual walkovers, never against TBD players
  */
 function shouldAutoAdvanceMatch(match) {
     if (!match || match.completed) return false;
     
+    // Both players must be defined
+    if (!match.player1 || !match.player2) return false;
+    
+    // NEVER auto-advance TBD vs TBD matches - they need real players
+    if (match.player1.name === 'TBD' && match.player2.name === 'TBD') {
+        return false;
+    }
+    
+    // NEVER auto-advance Real Player vs TBD - TBD represents a future opponent
+    if (match.player1.name === 'TBD' || match.player2.name === 'TBD') {
+        return false;
+    }
+    
+    // Only auto-advance if exactly one player is an actual walkover/bye
     const player1IsWalkover = isPlayerWalkover(match.player1);
     const player2IsWalkover = isPlayerWalkover(match.player2);
     
-    // Auto-advance if exactly one player is a walkover
-    return (player1IsWalkover && !player2IsWalkover) || 
-           (!player1IsWalkover && player2IsWalkover);
+    const shouldAdvance = (player1IsWalkover && !player2IsWalkover) || 
+                         (!player1IsWalkover && player2IsWalkover);
+    
+    if (shouldAdvance) {
+        console.log(`Auto-advancing match ${match.id}: ${match.player1.name} vs ${match.player2.name}`);
+    }
+    
+    return shouldAdvance;
 }
 
 /**
@@ -173,16 +197,16 @@ function autoAdvanceMatch(match) {
         winner = match.player1;
         loser = match.player2;
     } else {
-        return false; // Should not happen
+        return false; // Should not happen with fixed logic
     }
+    
+    console.log(`Auto-advancing ${winner.name} in ${match.id} (defeated ${loser.name})`);
     
     // Set match as completed with auto-advancement flag
     match.winner = winner;
     match.loser = loser;
     match.completed = true;
     match.autoAdvanced = true;
-    
-    console.log(`Auto-advanced ${winner.name} in ${match.id} (defeated ${loser.name})`);
     
     // Process advancement using hardcoded rules
     processMatchAdvancement(match);
@@ -221,6 +245,7 @@ function processMatchAdvancement(completedMatch) {
 
 /**
  * Advance a player to a specific match and slot
+ * FIXED: Only auto-advance if facing actual walkovers, not TBD players
  */
 function advancePlayerToMatch(player, targetMatchId, slot) {
     const targetMatch = matches.find(m => m.id === targetMatchId);
@@ -242,9 +267,13 @@ function advancePlayerToMatch(player, targetMatchId, slot) {
     
     console.log(`Advanced ${player.name} to ${targetMatchId} as ${slot}`);
     
-    // Check if this creates a new auto-advancement opportunity
+    // FIXED: Only check for auto-advancement if facing actual walkovers
+    // Do NOT auto-advance against TBD players - they represent future opponents
     if (shouldAutoAdvanceMatch(targetMatch)) {
+        console.log(`Auto-advancing ${targetMatchId} because opponent is walkover`);
         autoAdvanceMatch(targetMatch);
+    } else {
+        console.log(`Match ${targetMatchId} ready but waiting for opponent (not auto-advancing)`);
     }
 }
 
@@ -322,7 +351,7 @@ function completeMatchWithAdvancement(matchId, winnerPlayerNumber) {
     // Process advancement
     processMatchAdvancement(match);
     
-    // Trigger cascading auto-advancements
+    // Trigger cascading auto-advancements (only against actual walkovers)
     processAllAutoAdvancements();
     
     return true;
@@ -347,6 +376,7 @@ function debugAutoAdvancement() {
     let autoAdvanceable = 0;
     let completed = 0;
     let autoCompleted = 0;
+    let waitingForOpponent = 0;
     
     matches.forEach(match => {
         if (match.completed) {
@@ -357,18 +387,25 @@ function debugAutoAdvancement() {
         } else if (shouldAutoAdvanceMatch(match)) {
             autoAdvanceable++;
             console.log(`Can auto-advance: ${match.id} (${match.player1?.name} vs ${match.player2?.name})`);
+        } else if ((match.player1?.name === 'TBD') !== (match.player2?.name === 'TBD')) {
+            // One TBD, one real player = waiting for opponent
+            waitingForOpponent++;
+            const waitingPlayer = match.player1?.name === 'TBD' ? match.player2?.name : match.player1?.name;
+            console.log(`Waiting for opponent: ${match.id} (${waitingPlayer} vs TBD)`);
         }
     });
     
     console.log(`Completed matches: ${completed} (${autoCompleted} auto-advanced)`);
     console.log(`Matches ready for auto-advancement: ${autoAdvanceable}`);
+    console.log(`Matches waiting for opponents: ${waitingForOpponent}`);
     
     return {
         bracketSize,
         totalMatches: matches.length,
         completed,
         autoCompleted,
-        autoAdvanceable
+        autoAdvanceable,
+        waitingForOpponent
     };
 }
 
