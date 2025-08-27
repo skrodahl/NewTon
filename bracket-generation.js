@@ -627,58 +627,163 @@ function advanceFrontsideWinner(completedMatch, winner) {
 function advanceBacksideWinner(completedMatch, winner) {
     const currentRound = completedMatch.round;
     const positionInRound = completedMatch.positionInRound;
+    const bracketSize = tournament?.bracketSize || 8;
     
-    console.log(`Advancing backside winner ${winner.name} from ${completedMatch.id} (round ${currentRound})`);
+    console.log(`Advancing backside winner ${winner.name} from ${completedMatch.id} (round ${currentRound}) - ${bracketSize}-player bracket`);
 
-    if (currentRound === 1) {
-        // BS Round 1 winners go to BS Round 2
-        let targetMatch;
-        
-        if (completedMatch.id === 'BS-1-1') {
-            targetMatch = matches.find(m => m.id === 'BS-2-1');
-            if (targetMatch) {
-                targetMatch.player1 = winner;
-                console.log(`✓ Placed ${winner.name} in BS-2-1 as player1`);
+    if (bracketSize === 8) {
+        // 8-player bracket logic (existing - working perfectly)
+        if (currentRound === 1) {
+            let targetMatch;
+            if (completedMatch.id === 'BS-1-1') {
+                targetMatch = matches.find(m => m.id === 'BS-2-1');
+                if (targetMatch) {
+                    targetMatch.player1 = winner;
+                    console.log(`✓ Placed ${winner.name} in BS-2-1 as player1`);
+                }
+            } else if (completedMatch.id === 'BS-1-2') {
+                targetMatch = matches.find(m => m.id === 'BS-2-2');
+                if (targetMatch) {
+                    targetMatch.player1 = winner;
+                    console.log(`✓ Placed ${winner.name} in BS-2-2 as player1`);
+                }
             }
-        } else if (completedMatch.id === 'BS-1-2') {
-            targetMatch = matches.find(m => m.id === 'BS-2-2');
-            if (targetMatch) {
-                targetMatch.player1 = winner;
-                console.log(`✓ Placed ${winner.name} in BS-2-2 as player1`);
+            if (targetMatch && typeof processAutoAdvancementForMatch === 'function') {
+                processAutoAdvancementForMatch(targetMatch);
             }
-        }
-        
-        if (targetMatch && typeof processAutoAdvancementForMatch === 'function') {
-            processAutoAdvancementForMatch(targetMatch);
-        }
-        
-    } else if (currentRound === 2) {
-        // BS Round 2 winners go to BS-3-1
-        let targetMatch = matches.find(m => m.id === 'BS-3-1');
-        if (targetMatch) {
-            if (completedMatch.id === 'BS-2-1') {
-                targetMatch.player1 = winner;
-                console.log(`✓ ${winner.name} from BS-2-1 placed in BS-3-1 as player1`);
-            } else if (completedMatch.id === 'BS-2-2') {
+        } else if (currentRound === 2) {
+            let targetMatch = matches.find(m => m.id === 'BS-3-1');
+            if (targetMatch) {
+                if (completedMatch.id === 'BS-2-1') {
+                    targetMatch.player1 = winner;
+                    console.log(`✓ ${winner.name} from BS-2-1 placed in BS-3-1 as player1`);
+                } else if (completedMatch.id === 'BS-2-2') {
+                    targetMatch.player2 = winner;
+                    console.log(`✓ ${winner.name} from BS-2-2 placed in BS-3-1 as player2`);
+                }
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 3) {
+            let targetMatch = matches.find(m => m.id === 'BS-FINAL');
+            if (targetMatch) {
                 targetMatch.player2 = winner;
-                console.log(`✓ ${winner.name} from BS-2-2 placed in BS-3-1 as player2`);
-            }
-            
-            if (typeof processAutoAdvancementForMatch === 'function') {
-                processAutoAdvancementForMatch(targetMatch);
-            }
-        }
-        
-    } else if (currentRound === 3) {
-        // BS Round 3 winner goes to BS-FINAL
-        let targetMatch = matches.find(m => m.id === 'BS-FINAL');
-        if (targetMatch) {
-            targetMatch.player2 = winner;
-            console.log(`✓ ${winner.name} advanced to BS-FINAL as backside champion`);
-            if (typeof processAutoAdvancementForMatch === 'function') {
-                processAutoAdvancementForMatch(targetMatch);
+                console.log(`✓ ${winner.name} advanced to BS-FINAL as backside champion`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
             }
         }
+    } else if (bracketSize === 16) {
+        // 16-player bracket logic
+        if (currentRound === 1) {
+            // BS-1-1 → BS-2-1, BS-1-2 → BS-2-2, BS-1-3 → BS-2-3, BS-1-4 → BS-2-4
+            const targetMatchId = `BS-2-${positionInRound + 1}`;
+            const targetMatch = matches.find(m => m.id === targetMatchId);
+            if (targetMatch) {
+                targetMatch.player1 = winner;
+                console.log(`✓ Placed ${winner.name} in ${targetMatchId} as player1`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 2) {
+            // BS-2-1,BS-2-2 → BS-3-1; BS-2-3,BS-2-4 → BS-3-2
+            const targetMatchNumber = Math.floor(positionInRound / 2) + 1;
+            const targetMatch = matches.find(m => m.id === `BS-3-${targetMatchNumber}`);
+            if (targetMatch) {
+                const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
+                targetMatch[slot] = winner;
+                console.log(`✓ ${winner.name} placed in BS-3-${targetMatchNumber} as ${slot}`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 3) {
+            // BS-3-1,BS-3-2 → BS-4-1
+            const targetMatch = matches.find(m => m.id === 'BS-4-1');
+            if (targetMatch) {
+                const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
+                targetMatch[slot] = winner;
+                console.log(`✓ ${winner.name} placed in BS-4-1 as ${slot}`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 4) {
+            // BS-4-1 → BS-FINAL
+            const targetMatch = matches.find(m => m.id === 'BS-FINAL');
+            if (targetMatch) {
+                targetMatch.player2 = winner;
+                console.log(`✓ ${winner.name} advanced to BS-FINAL as backside champion`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        }
+    } else if (bracketSize === 32) {
+        // 32-player bracket logic
+        if (currentRound === 1) {
+            // BS-1-1 through BS-1-8 → BS-2-1 through BS-2-4
+            // Each pair of R1 matches feeds one R2 match
+            const targetMatchNumber = Math.floor(positionInRound / 2) + 1;
+            const targetMatch = matches.find(m => m.id === `BS-2-${targetMatchNumber}`);
+            if (targetMatch) {
+                targetMatch.player1 = winner;
+                console.log(`✓ Placed ${winner.name} in BS-2-${targetMatchNumber} as player1`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 2) {
+            // BS-2-1 through BS-2-4 → BS-3-1, BS-3-2
+            const targetMatchNumber = Math.floor(positionInRound / 2) + 1;
+            const targetMatch = matches.find(m => m.id === `BS-3-${targetMatchNumber}`);
+            if (targetMatch) {
+                const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
+                targetMatch[slot] = winner;
+                console.log(`✓ ${winner.name} placed in BS-3-${targetMatchNumber} as ${slot}`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 3) {
+            // BS-3-1, BS-3-2 → BS-4-1, BS-4-2
+            const targetMatchNumber = Math.floor(positionInRound / 2) + 1;
+            const targetMatch = matches.find(m => m.id === `BS-4-${targetMatchNumber}`);
+            if (targetMatch) {
+                const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
+                targetMatch[slot] = winner;
+                console.log(`✓ ${winner.name} placed in BS-4-${targetMatchNumber} as ${slot}`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 4) {
+            // BS-4-1, BS-4-2 → BS-5-1
+            const targetMatch = matches.find(m => m.id === 'BS-5-1');
+            if (targetMatch) {
+                const slot = (positionInRound % 2 === 0) ? 'player1' : 'player2';
+                targetMatch[slot] = winner;
+                console.log(`✓ ${winner.name} placed in BS-5-1 as ${slot}`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        } else if (currentRound === 5) {
+            // BS-5-1 → BS-FINAL
+            const targetMatch = matches.find(m => m.id === 'BS-FINAL');
+            if (targetMatch) {
+                targetMatch.player2 = winner;
+                console.log(`✓ ${winner.name} advanced to BS-FINAL as backside champion`);
+                if (typeof processAutoAdvancementForMatch === 'function') {
+                    processAutoAdvancementForMatch(targetMatch);
+                }
+            }
+        }
+        // Note: 32-player has rounds 6-8 as well, but they follow similar patterns
+        // These can be added if needed based on your bracket structure
     }
     
     // Re-render bracket to show changes
@@ -1246,18 +1351,14 @@ function getBacksideRound1Players(bracket, matchIndex) {
         }
     } else if (bracketSize === 16) {
         // 16-player: 4 backside R1 matches, each gets 2 frontside R1 losers
+        // BS-1-1: FS-1-1 + FS-1-2, BS-1-2: FS-1-3 + FS-1-4, etc.
         const startPos = matchIndex * 4;
         const loser1 = getFrontsideLoserType(bracket, startPos, startPos + 1);
         const loser2 = getFrontsideLoserType(bracket, startPos + 2, startPos + 3);
         return { p1: loser1, p2: loser2 };
     } else if (bracketSize === 32) {
         // 32-player: 8 backside R1 matches, each gets 2 frontside R1 losers
-        const startPos = matchIndex * 4;
-        const loser1 = getFrontsideLoserType(bracket, startPos, startPos + 1);
-        const loser2 = getFrontsideLoserType(bracket, startPos + 2, startPos + 3);
-        return { p1: loser1, p2: loser2 };
-    } else if (bracketSize === 48) {
-        // 48-player: 12 backside R1 matches, each gets 2 frontside R1 losers
+        // BS-1-1: FS-1-1 + FS-1-2, BS-1-2: FS-1-3 + FS-1-4, etc.
         const startPos = matchIndex * 4;
         const loser1 = getFrontsideLoserType(bracket, startPos, startPos + 1);
         const loser2 = getFrontsideLoserType(bracket, startPos + 2, startPos + 3);
@@ -1276,18 +1377,37 @@ function getBacksideRound1Players(bracket, matchIndex) {
  * Mix of backside R1 winners (TBD) + frontside R2 losers
  */
 function getBacksideRound2Players(bracket, matchIndex, frontsideR2Matches) {
+    const bracketSize = bracket.length;
+    
     // Player1: Winner from backside R1 (always TBD at generation time)
     const p1 = { name: 'TBD', id: `bs-2-${matchIndex}-1` };
     
-    // Player2: Loser from frontside R2 (or walkover if FS R2 had walkovers)
+    // Player2: Depends on bracket size and whether this match receives a frontside R2 loser
     let p2;
     
-    if (matchIndex < frontsideR2Matches) {
-        // This backside R2 match receives a frontside R2 loser
-        // Check if the corresponding frontside R2 match would have walkovers
-        p2 = getFrontsideR2LoserType(bracket, matchIndex);
+    if (bracketSize === 8) {
+        // 8-player: BS-2-1 gets FS-2-1 loser, BS-2-2 gets FS-2-2 loser
+        if (matchIndex < frontsideR2Matches) {
+            p2 = getFrontsideR2LoserType(bracket, matchIndex);
+        } else {
+            p2 = { name: 'TBD', id: `bs-2-${matchIndex}-2` };
+        }
+    } else if (bracketSize === 16) {
+        // 16-player: BS-2-1 and BS-2-2 get FS-2-1 and FS-2-2 losers
+        // BS-2-3 and BS-2-4 get FS-2-3 and FS-2-4 losers
+        if (matchIndex < frontsideR2Matches) {
+            p2 = getFrontsideR2LoserType(bracket, matchIndex);
+        } else {
+            p2 = { name: 'TBD', id: `bs-2-${matchIndex}-2` };
+        }
+    } else if (bracketSize === 32) {
+        // 32-player: BS-2-1 through BS-2-4 get FS-2-1 through FS-2-4 losers
+        if (matchIndex < frontsideR2Matches) {
+            p2 = getFrontsideR2LoserType(bracket, matchIndex);
+        } else {
+            p2 = { name: 'TBD', id: `bs-2-${matchIndex}-2` };
+        }
     } else {
-        // No corresponding frontside R2 match
         p2 = { name: 'TBD', id: `bs-2-${matchIndex}-2` };
     }
     
@@ -1322,10 +1442,6 @@ function getFrontsideLoserType(bracket, pos1, pos2) {
 
 /**
  * Determine what type of loser a frontside R2 match will produce
- * This is more complex as it depends on R1 results
- */
-/**
- * Determine what type of loser a frontside R2 match will produce
  * This analyzes the R1 results to see if R2 match involves walkovers
  */
 function getFrontsideR2LoserType(bracket, r2MatchIndex) {
@@ -1341,6 +1457,25 @@ function getFrontsideR2LoserType(bracket, r2MatchIndex) {
             if (fs13HasWalkover || fs14HasWalkover) {
                 return { name: 'Walkover', id: `fs-2-walkover-loser-${r2MatchIndex}`, isBye: true };
             }
+        }
+    } else if (bracketSize === 16) {
+        // Check if the corresponding R1 matches had walkovers
+        // FS-2-1 gets winners from FS-1-1,FS-1-2; FS-2-2 from FS-1-3,FS-1-4; etc.
+        const startPos = r2MatchIndex * 4;
+        const match1HasWalkover = hasWalkover(bracket, startPos, startPos + 1);
+        const match2HasWalkover = hasWalkover(bracket, startPos + 2, startPos + 3);
+        
+        if (match1HasWalkover || match2HasWalkover) {
+            return { name: 'Walkover', id: `fs-2-walkover-loser-${r2MatchIndex}`, isBye: true };
+        }
+    } else if (bracketSize === 32) {
+        // Similar logic for 32-player bracket
+        const startPos = r2MatchIndex * 4;
+        const match1HasWalkover = hasWalkover(bracket, startPos, startPos + 1);
+        const match2HasWalkover = hasWalkover(bracket, startPos + 2, startPos + 3);
+        
+        if (match1HasWalkover || match2HasWalkover) {
+            return { name: 'Walkover', id: `fs-2-walkover-loser-${r2MatchIndex}`, isBye: true };
         }
     }
     
