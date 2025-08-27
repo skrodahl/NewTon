@@ -62,28 +62,55 @@ function loadConfiguration() {
     if (savedConfig) {
         config = JSON.parse(savedConfig);
 
-        document.getElementById('participationPoints').value = config.points.participation;
-        document.getElementById('firstPlacePoints').value = config.points.first;
-        document.getElementById('secondPlacePoints').value = config.points.second;
-        document.getElementById('thirdPlacePoints').value = config.points.third;
-        document.getElementById('highOutPoints').value = config.points.highOut;
-        document.getElementById('tonPoints').value = config.points.ton;
-        document.getElementById('oneEightyPoints').value = config.points.oneEighty;
+        // Load point configuration
+        const participationEl = document.getElementById('participationPoints');
+        if (participationEl) participationEl.value = config.points.participation;
+        
+        const firstPlaceEl = document.getElementById('firstPlacePoints');
+        if (firstPlaceEl) firstPlaceEl.value = config.points.first;
+        
+        const secondPlaceEl = document.getElementById('secondPlacePoints');
+        if (secondPlaceEl) secondPlaceEl.value = config.points.second;
+        
+        const thirdPlaceEl = document.getElementById('thirdPlacePoints');
+        if (thirdPlaceEl) thirdPlaceEl.value = config.points.third;
+        
+        const highOutEl = document.getElementById('highOutPoints');
+        if (highOutEl) highOutEl.value = config.points.highOut;
+        
+        const tonEl = document.getElementById('tonPoints');
+        if (tonEl) tonEl.value = config.points.ton;
+        
+        const oneEightyEl = document.getElementById('oneEightyPoints');
+        if (oneEightyEl) oneEightyEl.value = config.points.oneEighty;
 
-        document.getElementById('round1Legs').value = config.legs.round1;
-        document.getElementById('round2Legs').value = config.legs.round2;
-        document.getElementById('semifinalLegs').value = config.legs.semifinal;
-        document.getElementById('finalLegs').value = config.legs.final;
+        // Load leg configuration
+        const round1LegsEl = document.getElementById('round1Legs');
+        if (round1LegsEl) round1LegsEl.value = config.legs.round1;
+        
+        const round2LegsEl = document.getElementById('round2Legs');
+        if (round2LegsEl) round2LegsEl.value = config.legs.round2;
+        
+        const semifinalLegsEl = document.getElementById('semifinalLegs');
+        if (semifinalLegsEl) semifinalLegsEl.value = config.legs.semifinal;
+        
+        const finalLegsEl = document.getElementById('finalLegs');
+        if (finalLegsEl) finalLegsEl.value = config.legs.final;
 
         // Load application title
         if (config.applicationTitle) {
-            document.getElementById('applicationTitle').value = config.applicationTitle;
+            const appTitleEl = document.getElementById('applicationTitle');
+            if (appTitleEl) appTitleEl.value = config.applicationTitle;
             updateApplicationTitle(config.applicationTitle);
         }
         
+        // Load lane configuration (with null checks)
         if (config.lanes) {
-            document.getElementById('maxLanes').value = config.lanes.maxLanes || 10;
-            document.getElementById('requireLaneForStart').checked = config.lanes.requireLaneForStart || false;
+            const maxLanesEl = document.getElementById('maxLanes');
+            if (maxLanesEl) maxLanesEl.value = config.lanes.maxLanes || 10;
+            
+            const requireLaneEl = document.getElementById('requireLaneForStart');
+            if (requireLaneEl) requireLaneEl.checked = config.lanes.requireLaneForStart || false;
         }
     }
 }

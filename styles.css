@@ -1,5 +1,5 @@
 /* Complete styles.css - Darts Tournament Manager */
-/* Enhanced design with clean, line-free bracket layout */
+/* Enhanced design with clean, line-free bracket layout and proper match states */
 
 * {
     margin: 0;
@@ -327,7 +327,7 @@ body {
     text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
 }
 
-/* MATCH CARDS */
+/* MATCH CARDS - Base Styles */
 .bracket-match {
     position: absolute;
     width: 200px;
@@ -351,15 +351,65 @@ body {
     z-index: 20;
 }
 
+/* MATCH STATE STYLES - This is what was broken! */
+
+/* PENDING - Not ready to play (missing players/TBD) */
+.bracket-match.match-pending {
+    background: #f8f9fa;
+    border-color: #6c757d;
+    opacity: 0.7;
+}
+
+.bracket-match.match-pending .match-player {
+    color: #6c757d;
+    cursor: default;
+}
+
+.bracket-match.match-pending:hover {
+    border-color: #6c757d;
+    transform: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+}
+
+/* READY - Both players known, can be started */
+.bracket-match.match-ready {
+    background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
+    border-color: #ffc107;
+    border-width: 3px;
+}
+
+.bracket-match.match-ready:hover {
+    border-color: #e0a800;
+    box-shadow: 0 6px 20px rgba(255,193,7,0.4);
+}
+
+/* LIVE - Currently being played */
+.bracket-match.match-live,
 .bracket-match.active {
-    border-color: #ff6b35;
     background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
+    border-color: #ff6b35;
+    border-width: 3px;
     animation: pulse 2s infinite;
 }
 
+.bracket-match.match-live:hover,
+.bracket-match.active:hover {
+    border-color: #e55a2b;
+    box-shadow: 0 8px 25px rgba(255,107,53,0.5);
+}
+
+/* COMPLETED - Finished with winner */
+.bracket-match.match-completed,
 .bracket-match.completed {
-    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
+    background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
     border-color: #28a745;
+    border-width: 2px;
+}
+
+.bracket-match.match-completed:hover,
+.bracket-match.completed:hover {
+    border-color: #218838;
+    box-shadow: 0 6px 20px rgba(40,167,69,0.4);
 }
 
 /* Special styling for important matches */
@@ -423,6 +473,16 @@ body {
 
 .match-player:hover {
     background: rgba(255,107,53,0.1);
+}
+
+/* Disabled player selection */
+.match-player.disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.match-player.disabled:hover {
+    background: none;
 }
 
 .match-player.winner {
@@ -495,6 +555,37 @@ body {
 .round-indicator.grand {
     background: #dc3545;
     animation: glow 2s infinite alternate;
+}
+
+/* State indicator badges */
+.match-state-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    font-size: 8px;
+    font-weight: bold;
+    color: white;
+    z-index: 20;
+}
+
+.match-state-badge.pending {
+    background: #6c757d;
+}
+
+.match-state-badge.ready {
+    background: #ffc107;
+    color: #212529;
+}
+
+.match-state-badge.live {
+    background: #ff6b35;
+    animation: pulse 2s infinite;
+}
+
+.match-state-badge.completed {
+    background: #28a745;
 }
 
 /* Visual flow enhancements */
@@ -798,74 +889,4 @@ footer {
     margin-top: 20px;
     background: white;
     border-radius: 0 0 10px 10px;
-}
-
-const newMatchStateCSS {
-/* New match state styles */
-.match-pending {
-    background: #f8f9fa;
-    border-color: #6c757d;
-    opacity: 0.8;
-}
-
-.match-pending .match-player {
-    color: #6c757d;
-    cursor: default;
-}
-
-.match-ready {
-    background: #fff3cd;
-    border-color: #ffc107;
-}
-
-.match-live {
-    background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
-    border-color: #ff6b35;
-    animation: pulse 2s infinite;
-}
-
-.match-completed {
-    background: linear-gradient(135deg, #f0f8ff 0%, #e6f3ff 100%);
-    border-color: #28a745;
-}
-
-.match-player.disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.match-player.disabled:hover {
-    background: none;
-}
-
-/* State indicator badges */
-.match-state-badge {
-    position: absolute;
-    top: -8px;
-    right: -8px;
-    padding: 2px 6px;
-    border-radius: 10px;
-    font-size: 8px;
-    font-weight: bold;
-    color: white;
-    z-index: 20;
-}
-
-.match-state-badge.pending {
-    background: #6c757d;
-}
-
-.match-state-badge.ready {
-    background: #ffc107;
-    color: #212529;
-}
-
-.match-state-badge.live {
-    background: #ff6b35;
-    animation: pulse 2s infinite;
-}
-
-.match-state-badge.completed {
-    background: #28a745;
-}
 }
