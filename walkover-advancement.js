@@ -208,72 +208,42 @@ function autoAdvanceMatch(match) {
     match.completed = true;
     match.autoAdvanced = true;
     
-    // Process advancement using hardcoded rules
+    // Process advancement using hardcoded rules or new bracket-specific advancement
     processMatchAdvancement(match);
     
     return true;
 }
 
 /**
- * Process match advancement using hardcoded rules
+ * Process match advancement - connects to the bracket-specific advancement system
  */
 function processMatchAdvancement(completedMatch) {
-    const bracketSize = tournament?.bracketSize || 8;
-    const rules = ADVANCEMENT_RULES[bracketSize];
+    console.log('Processing advancement for', completedMatch.id);
     
-    if (!rules || !rules[completedMatch.id]) {
-        console.warn(`No advancement rule found for match ${completedMatch.id} in ${bracketSize}-player bracket`);
-        return;
-    }
-    
-    const rule = rules[completedMatch.id];
-    const winner = completedMatch.winner;
-    const loser = completedMatch.loser;
-    
-    // Advance winner
-    if (winner && rule.winner) {
-        const [targetMatchId, slot] = rule.winner;
-        advancePlayerToMatch(winner, targetMatchId, slot);
-    }
-    
-    // Drop loser (if not a walkover)
-    if (loser && !isPlayerWalkover(loser) && rule.loser) {
-        const [targetMatchId, slot] = rule.loser;
-        advancePlayerToMatch(loser, targetMatchId, slot);
-    }
-}
-
-/**
- * Advance a player to a specific match and slot
- * FIXED: Only auto-advance if facing actual walkovers, not TBD players
- */
-function advancePlayerToMatch(player, targetMatchId, slot) {
-    const targetMatch = matches.find(m => m.id === targetMatchId);
-    
-    if (!targetMatch) {
-        console.error(`Target match ${targetMatchId} not found for player ${player.name}`);
-        return;
-    }
-    
-    // Place player in correct slot
-    if (slot === 'player1') {
-        targetMatch.player1 = player;
-    } else if (slot === 'player2') {
-        targetMatch.player2 = player;
-    } else {
-        console.error(`Invalid slot ${slot} for match ${targetMatchId}`);
-        return;
-    }
-    
-    console.log(`Advanced ${player.name} to ${targetMatchId} as ${slot}`);
-    
-    // FIXED: Only check for auto-advancement if facing actual walkovers
-    // Do NOT auto-advance against TBD players - they represent future opponents
-    if (shouldAutoAdvanceMatch(targetMatch)) {
-        console.log(`Auto-advancing ${targetMatchId} because opponent is walkover`);
-        autoAdvanceMatch(targetMatch);
-    } else {
-        console.log(`Match ${targetMatchId} ready but waiting for opponent (not auto-advancing)`);
+    if (completedMatch.side === 'frontside') {
+        // Use the advanceWinner function from bracket-generation.js
+        if (typeof advanceWinner === 'function') {
+            advanceWinner(completedMatch);
+        } else {
+            console.error('advanceWinner function not found');
+        }
+    } else if (completedMatch.side === 'backside') {
+        // Use the advanceBacksideWinner function from bracket-generation.js
+        if (typeof advanceBacksideWinner === 'function') {
+            advanceBacksideWinner(completedMatch, completedMatch.winner);
+        } else {
+            console.error('advanceBacksideWinner function not found');
+        }
+    } else if (completedMatch.side === 'backside-final') {
+        // Handle backside final advancement
+        if (typeof advanceBacksideFinalWinner === 'function') {
+            advanceBacksideFinalWinner(completedMatch, completedMatch.winner);
+        }
+    } else if (completedMatch.side === 'grand-final') {
+        // Handle grand final
+        if (typeof crownChampion === 'function') {
+            crownChampion(completedMatch, completedMatch.winner);
+        }
     }
 }
 
@@ -417,4 +387,5 @@ if (typeof window !== 'undefined') {
     window.processAllAutoAdvancements = processAllAutoAdvancements;
     window.completeMatchWithAdvancement = completeMatchWithAdvancement;
     window.debugAutoAdvancement = debugAutoAdvancement;
+    window.processMatchAdvancement = processMatchAdvancement;
 }
