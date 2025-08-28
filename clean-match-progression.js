@@ -438,8 +438,9 @@ function generateCleanBracket() {
     }
 
     const paidPlayers = players.filter(p => p.paid);
-    if (paidPlayers.length < 2) {
-        alert('Need at least 2 paid players to generate bracket');
+    if (paidPlayers.length < 4) {
+        alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
+        console.error('Bracket generation blocked: fewer than 4 paid players');
         return false;
     }
 
@@ -450,10 +451,27 @@ function generateCleanBracket() {
     else if (paidPlayers.length <= 32) bracketSize = 32;
     else bracketSize = 48;
 
-    console.log(`Generating ${bracketSize}-player bracket for ${paidPlayers.length} players`);
+    if (bracketSize === 8 && paidPlayers.length < 4) {
+        alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
+        console.error('Bracket generation blocked for 8-player bracket: fewer than 4 paid players');
+        return false;
+    }
 
     // Create optimized bracket: real players first, walkovers strategically placed
+    console.log(`Generating ${bracketSize}-player bracket for ${paidPlayers.length} players`);
+
     const bracket = createOptimizedBracketV2(paidPlayers, bracketSize);
+    if (!bracket) {
+        alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
+        console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
+        return false;
+    }
+
+    if (!bracket) {
+    alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
+    console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
+    return false;
+    }
     
     // Store bracket info
     tournament.bracket = bracket;
@@ -485,74 +503,71 @@ function generateCleanBracket() {
 }
 
 /**
- * CREATE OPTIMIZED BRACKET: Real players first, strategic walkover placement
+ * CREATE OPTIMIZED BRACKET: Two-pass seeding to avoid bye-vs-bye in FS Round 1
+ * - Pass 1: Fill first seat of each FS-1 match (indices 0,2,4,...)
+ * - Pass 2: Fill second seat of each FS-1 match (indices 1,3,5,...)
+ * - Remaining slots become walkovers
+ * Works for bracketSize 8, 16, 32
  */
 function createOptimizedBracketV2(players, bracketSize) {
-    const bracket = new Array(bracketSize);
-    const numWalkovers = bracketSize - players.length;
-    
-    console.log(`Creating bracket: ${players.length} real players, ${numWalkovers} walkovers`);
-    
-    // Shuffle real players randomly
-    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
-    
-    // STRATEGY: Fill positions to ensure no walkover vs walkover in first round
-    // Phase 1: Place all real players first
-    for (let i = 0; i < shuffledPlayers.length; i++) {
-        bracket[i] = shuffledPlayers[i];
+  // Defensive checks
+  if (!Array.isArray(players)) {
+    console.error('createOptimizedBracketV2: players must be an array');
+    return null;
+  }
+  if (![8, 16, 32].includes(bracketSize)) {
+    console.warn(`createOptimizedBracketV2: unexpected bracketSize=${bracketSize}; proceeding with two-pass seeding`);
+  }
+
+  const P = players.length;
+  const K = bracketSize;
+  const numWalkovers = Math.max(0, K - P);
+
+  console.log(`Creating bracket: ${P} real players, ${numWalkovers} walkovers, size=${K}`);
+
+  // Shuffle players to ensure perceived randomness
+  const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
+
+  // Two-pass fill
+  const bracket = new Array(K);
+
+  // Pass 1: fill first seats (one real in every FS-1 match if P >= K/2)
+  let idx = 0;
+  for (let pos = 0; pos < K && idx < shuffledPlayers.length; pos += 2) {
+    bracket[pos] = shuffledPlayers[idx++];
+  }
+
+  // Pass 2: fill second seats
+  for (let pos = 1; pos < K && idx < shuffledPlayers.length; pos += 2) {
+    bracket[pos] = shuffledPlayers[idx++];
+  }
+
+  // Fill remaining with walkovers
+  for (let i = 0; i < K; i++) {
+    if (!bracket[i]) {
+      bracket[i] = createWalkoverPlayer(i);
     }
-    
-    // Phase 2: Place walkovers in remaining positions
-    for (let i = shuffledPlayers.length; i < bracketSize; i++) {
-        bracket[i] = createWalkoverPlayer(i - shuffledPlayers.length);
-    }
-    
-    // Phase 3: Validate no walkover vs walkover matches in first round
-    const firstRoundMatches = bracketSize / 2;
-    for (let matchIndex = 0; matchIndex < firstRoundMatches; matchIndex++) {
-        const pos1 = matchIndex * 2;
-        const pos2 = matchIndex * 2 + 1;
-        const player1 = bracket[pos1];
-        const player2 = bracket[pos2];
-        
-        if (isWalkover(player1) && isWalkover(player2)) {
-            // Fix: swap a walkover with a real player from earlier position
-            console.log(`Fixing walkover vs walkover at match ${matchIndex + 1}`);
-            
-            // Find the last real player and swap with one of the walkovers
-            for (let i = pos1 - 1; i >= 0; i--) {
-                if (!isWalkover(bracket[i])) {
-                    // Swap real player with walkover
-                    const temp = bracket[i];
-                    bracket[i] = bracket[pos1];
-                    bracket[pos1] = temp;
-                    console.log(`Swapped positions ${i} and ${pos1}`);
-                    break;
-                }
-            }
-        }
-    }
-    
-    // Final validation
-    let walkoverPairs = 0;
-    for (let matchIndex = 0; matchIndex < firstRoundMatches; matchIndex++) {
-        const pos1 = matchIndex * 2;
-        const pos2 = matchIndex * 2 + 1;
-        const player1 = bracket[pos1];
-        const player2 = bracket[pos2];
-        
-        if (isWalkover(player1) && isWalkover(player2)) {
-            walkoverPairs++;
-        }
-    }
-    
-    if (walkoverPairs > 0) {
-        console.error(`STILL INVALID: ${walkoverPairs} walkover vs walkover matches remain`);
-        return null;
-    }
-    
-    console.log('✓ Bracket validated: No walkover vs walkover matches');
-    return bracket;
+  }
+
+  // Sanity validation: ensure no FS-1 bye-vs-bye
+  const firstRoundMatches = K / 2;
+  let invalidPairs = 0;
+  for (let m = 0; m < firstRoundMatches; m++) {
+    const a = bracket[m * 2];
+    const b = bracket[m * 2 + 1];
+    const aIsBye = isWalkover ? isWalkover(a) : a?.isBye === true || a?.name === 'Walkover';
+    const bIsBye = isWalkover ? isWalkover(b) : b?.isBye === true || b?.name === 'Walkover';
+    if (aIsBye && bIsBye) invalidPairs++;
+  }
+
+  if (invalidPairs > 0) {
+    // This should never happen with two-pass + your upstream minimums
+    console.error(`createOptimizedBracketV2: unexpected ${invalidPairs} bye-vs-bye pairs in FS-1`);
+    return null;
+  }
+
+  console.log('✓ Two-pass seeding completed (no FS-1 bye-vs-bye)');
+  return bracket;
 }
 
 /**
