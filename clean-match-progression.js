@@ -20,8 +20,9 @@ const MATCH_PROGRESSION = {
         // === BACKSIDE ===
         'BS-1-1': { winner: ['BS-2-1', 'player1'] },
         'BS-1-2': { winner: ['BS-2-2', 'player1'] },
-        'BS-2-1': { winner: ['BS-FINAL', 'player2'] },
-        'BS-2-2': { winner: ['BS-FINAL', 'player2'] },
+	'BS-2-1': { winner: ['BS-3-1', 'player1'] },
+	'BS-2-2': { winner: ['BS-3-1', 'player2'] },
+	'BS-3-1': { winner: ['BS-FINAL', 'player2'] },
         'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
     },
 
@@ -762,12 +763,99 @@ function createTBDPlayer(id) {
 }
 
 /**
+ * TOGGLE MATCH ACTIVE STATE - Simple match activation/deactivation
+ */
+function toggleActive(matchId) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        console.error(`Match ${matchId} not found`);
+        return false;
+    }
+    
+    const currentState = getMatchState(match);
+    
+    // Can only toggle between READY and LIVE states
+    if (currentState === 'pending') {
+        alert('Cannot start match: Players not yet determined');
+        return false;
+    }
+    
+    if (currentState === 'completed') {
+        alert('Match is already completed');
+        return false;
+    }
+    
+    // Toggle active state
+    match.active = !match.active;
+    
+    console.log(`Match ${matchId} ${match.active ? 'activated' : 'deactivated'}`);
+    
+    // Save and render
+    if (typeof saveTournament === 'function') {
+        saveTournament();
+    }
+    
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    }
+    
+    return true;
+}
+
+/**
+ * SIMPLE MATCH STATE GETTER - Determines current match state
+ */
+function getMatchState(match) {
+    if (!match) return 'pending';
+    
+    if (match.completed) return 'completed';
+    if (match.active) return 'live';
+    
+    // Check if both players are ready (not TBD or walkover)
+    if (canMatchStart(match)) return 'ready';
+    
+    return 'pending';
+}
+
+/**
+ * CHECK IF MATCH CAN START - Both players must be real
+ */
+function canMatchStart(match) {
+    if (!match || !match.player1 || !match.player2) return false;
+    
+    const player1Valid = match.player1.name !== 'TBD' && !match.player1.isBye;
+    const player2Valid = match.player2.name !== 'TBD' && !match.player2.isBye;
+    
+    return player1Valid && player2Valid;
+}
+
+/**
+ * UPDATE MATCH LANE - Simple lane assignment
+ */
+function updateMatchLane(matchId, newLane) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        console.error(`Match ${matchId} not found`);
+        return false;
+    }
+    
+    match.lane = newLane ? parseInt(newLane) : null;
+    
+    console.log(`Lane updated for ${matchId}: ${match.lane || 'none'}`);
+    
+    if (typeof saveTournament === 'function') {
+        saveTournament();
+    }
+    
+    return true;
+}
+
+/**
  * DEBUG: Show bracket generation results
  */
 function debugBracketGeneration() {
     if (!tournament || !tournament.bracket) {
         console.log('No bracket generated yet');
-        return;
     }
     
     console.log('=== BRACKET GENERATION DEBUG ===');
@@ -802,6 +890,9 @@ if (typeof window !== 'undefined') {
     window.debugProgression = debugProgression;
     window.generateCleanBracket = generateCleanBracket;
     window.debugBracketGeneration = debugBracketGeneration;
+    window.toggleActive = toggleActive;
+    window.getMatchState = getMatchState;
+    window.updateMatchLane = updateMatchLane;
     window.MATCH_PROGRESSION = MATCH_PROGRESSION;
     
     // OVERRIDE OLD FUNCTIONS - Replace with clean versions
