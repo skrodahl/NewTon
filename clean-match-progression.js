@@ -722,7 +722,7 @@ function generateFrontsideMatches(bracket, structure, startId) {
                 winner: null,
                 loser: null,
                 lane: null,
-                legs: roundInfo.round >= 3 ? config.legs.semifinal : config.legs.regularRounds,
+                legs: roundInfo.round === structure.frontsideRounds ? config.legs.semifinal : config.legs.regularRounds,
                 referee: null,
                 active: false,
                 completed: false,
@@ -745,6 +745,7 @@ function generateBacksideMatches(structure, startId) {
             // All backside matches start with TBD players
             const player1 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-1`);
             const player2 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-2`);
+	    const isLastBacksideRound = roundInfo.round === Math.max(...structure.backside.map(r => r.round));
             
             const match = {
                 id: `BS-${roundInfo.round}-${matchIndex + 1}`,
@@ -756,7 +757,7 @@ function generateBacksideMatches(structure, startId) {
                 winner: null,
                 loser: null,
                 lane: null,
-                legs: config.legs.regularRounds,
+                legs: isLastBacksideRound ? config.legs.semifinal : config.legs.regularRounds,
                 referee: null,
                 active: false,
                 completed: false,
