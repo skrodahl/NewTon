@@ -15,10 +15,10 @@ let config = {
         oneEighty: 1
     },
     legs: {
-        round1: 3,
-        round2: 3,
-        semifinal: 5,
-        final: 5
+        regularRounds: 3,
+        semifinal: 3,
+        backsideFinal: 5,
+        grandFinal: 5
     },
     applicationTitle: "NewTon DC - Tournament Manager"
 };

@@ -84,18 +84,17 @@ function loadConfiguration() {
         const oneEightyEl = document.getElementById('oneEightyPoints');
         if (oneEightyEl) oneEightyEl.value = config.points.oneEighty;
 
-        // Load leg configuration
-        const round1LegsEl = document.getElementById('round1Legs');
-        if (round1LegsEl) round1LegsEl.value = config.legs.round1;
-        
-        const round2LegsEl = document.getElementById('round2Legs');
-        if (round2LegsEl) round2LegsEl.value = config.legs.round2;
-        
-        const semifinalLegsEl = document.getElementById('semifinalLegs');
-        if (semifinalLegsEl) semifinalLegsEl.value = config.legs.semifinal;
-        
-        const finalLegsEl = document.getElementById('finalLegs');
-        if (finalLegsEl) finalLegsEl.value = config.legs.final;
+	const regularRoundsLegsEl = document.getElementById('regularRoundsLegs');
+	if (regularRoundsLegsEl) regularRoundsLegsEl.value = config.legs.regularRounds;
+
+	const semifinalLegsEl = document.getElementById('semifinalLegs');
+	if (semifinalLegsEl) semifinalLegsEl.value = config.legs.semifinal;
+
+	const backsideFinalLegsEl = document.getElementById('backsideFinalLegs');
+	if (backsideFinalLegsEl) backsideFinalLegsEl.value = config.legs.backsideFinal;
+
+	const grandFinalLegsEl = document.getElementById('grandFinalLegs');
+	if (grandFinalLegsEl) grandFinalLegsEl.value = config.legs.grandFinal;
 
         // Load application title
         if (config.applicationTitle) {
@@ -124,10 +123,10 @@ function saveConfiguration() {
     config.points.ton = parseInt(document.getElementById('tonPoints').value);
     config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value);
 
-    config.legs.round1 = parseInt(document.getElementById('round1Legs').value);
-    config.legs.round2 = parseInt(document.getElementById('round2Legs').value);
+    config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value);
     config.legs.semifinal = parseInt(document.getElementById('semifinalLegs').value);
-    config.legs.final = parseInt(document.getElementById('finalLegs').value);
+    config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value);
+    config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value);
 
     localStorage.setItem('dartsConfig', JSON.stringify(config));
     alert('Configuration saved successfully!');
