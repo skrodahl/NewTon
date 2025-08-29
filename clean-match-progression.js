@@ -8,22 +8,22 @@
  */
 const MATCH_PROGRESSION = {
     8: {
-        // === FRONTSIDE ===
-        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-2', 'player1'] },
-        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-2', 'player2'] },
-        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-1', 'player1'] },
-        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-1', 'player2'] },
-        'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-2', 'player2'] },
-        'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-1', 'player2'] },
-        'FS-3-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
+    // === FRONTSIDE ===
+    'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-2', 'player1'] },
+    'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-2', 'player2'] },
+    'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-1', 'player1'] },
+    'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-1', 'player2'] },
+    'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-2', 'player2'] },
+    'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-1', 'player2'] },
+    'FS-3-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
 
-        // === BACKSIDE ===
-        'BS-1-1': { winner: ['BS-2-1', 'player1'] },
-        'BS-1-2': { winner: ['BS-2-2', 'player1'] },
+    // === BACKSIDE ===
+    'BS-1-1': { winner: ['BS-2-1', 'player1'] },
+    'BS-1-2': { winner: ['BS-2-2', 'player1'] },
 	'BS-2-1': { winner: ['BS-3-1', 'player1'] },
 	'BS-2-2': { winner: ['BS-3-1', 'player2'] },
 	'BS-3-1': { winner: ['BS-FINAL', 'player2'] },
-        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
+    'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
     },
 
 16: {
@@ -167,58 +167,58 @@ const MATCH_PROGRESSION = {
  */
 function advancePlayer(matchId, winner, loser) {
     if (!tournament || !tournament.bracketSize) {
-        console.error('No tournament or bracket size available');
-        return false;
+    console.error('No tournament or bracket size available');
+    return false;
     }
     
     const progression = MATCH_PROGRESSION[tournament.bracketSize];
     if (!progression) {
-        console.error(`No progression rules for ${tournament.bracketSize}-player bracket`);
-        return false;
+    console.error(`No progression rules for ${tournament.bracketSize}-player bracket`);
+    return false;
     }
     
     const rule = progression[matchId];
     if (!rule) {
-        console.log(`No progression rule found for match ${matchId} (probably grand final)`);
-        return true; // Grand final has no further progression
+    // No further progression (e.g., GRAND-FINAL)  just stop silently
+    return true;
     }
     
     console.log(`Advancing from ${matchId}: Winner=${winner?.name}, Loser=${loser?.name}`);
     
     // Place winner
     if (rule.winner) {
-        const [targetMatchId, slot] = rule.winner;
-        const targetMatch = matches.find(m => m.id === targetMatchId);
-        
-        if (targetMatch) {
-            targetMatch[slot] = {
-                id: winner.id,
-                name: winner.name,
-                paid: winner.paid,
-                stats: winner.stats
-            };
-            console.log(`✓ Winner ${winner.name} → ${targetMatchId}.${slot}`);
-        } else {
-            console.error(`Target match ${targetMatchId} not found for winner`);
-        }
+    const [targetMatchId, slot] = rule.winner;
+    const targetMatch = matches.find(m => m.id === targetMatchId);
+    
+    if (targetMatch) {
+    targetMatch[slot] = {
+    id: winner.id,
+    name: winner.name,
+    paid: winner.paid,
+    stats: winner.stats
+    };
+    console.log(`✓ Winner ${winner.name} → ${targetMatchId}.${slot}`);
+    } else {
+    console.error(`Target match ${targetMatchId} not found for winner`);
+    }
     }
     
     // Place loser (if rule exists)
     if (rule.loser && loser) {
-        const [targetMatchId, slot] = rule.loser;
-        const targetMatch = matches.find(m => m.id === targetMatchId);
-        
-        if (targetMatch) {
-            targetMatch[slot] = {
-                id: loser.id,
-                name: loser.name,
-                paid: loser.paid,
-                stats: loser.stats
-            };
-            console.log(`✓ Loser ${loser.name} → ${targetMatchId}.${slot}`);
-        } else {
-            console.error(`Target match ${targetMatchId} not found for loser`);
-        }
+    const [targetMatchId, slot] = rule.loser;
+    const targetMatch = matches.find(m => m.id === targetMatchId);
+    
+    if (targetMatch) {
+    targetMatch[slot] = {
+    id: loser.id,
+    name: loser.name,
+    paid: loser.paid,
+    stats: loser.stats
+    };
+    console.log(`✓ Loser ${loser.name} → ${targetMatchId}.${slot}`);
+    } else {
+    console.error(`Target match ${targetMatchId} not found for loser`);
+    }
     }
     
     return true;
@@ -228,46 +228,82 @@ function advancePlayer(matchId, winner, loser) {
  * SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
  */
 function completeMatch(matchId, winnerPlayerNumber) {
-    const match = matches.find(m => m.id === matchId);
-    if (!match) {
-        console.error(`Match ${matchId} not found`);
-        return false;
+const match = matches.find(m => m.id === matchId);
+if (!match) {
+console.error('Match ' + matchId + ' not found');
+return false;
+}
+
+// Determine winner and loser
+const winner = winnerPlayerNumber === 1 ? match.player1 : match.player2;
+const loser = winnerPlayerNumber === 1 ? match.player2 : match.player1;
+
+if (!winner || !loser) {
+    console.error('Invalid player selection');
+    return false;
+}
+
+// Set match as completed
+match.winner = winner;
+match.loser = loser;
+match.completed = true;
+match.active = false;
+
+// Use lookup table to advance players
+const success = advancePlayer(matchId, winner, loser);
+
+if (success) {
+    console.log(`✓ Match ${matchId} completed: ${winner.name} defeats ${loser.name}`);
+
+    // Save tournament (general save after each match)
+    if (typeof saveTournament === 'function') {
+        saveTournament();
     }
-    
-    // Determine winner and loser
-    const winner = winnerPlayerNumber === 1 ? match.player1 : match.player2;
-    const loser = winnerPlayerNumber === 1 ? match.player2 : match.player1;
-    
-    if (!winner || !loser) {
-        console.error('Invalid player selection');
-        return false;
-    }
-    
-    // Set match as completed
-    match.winner = winner;
-    match.loser = loser;
-    match.completed = true;
-    match.active = false;
-    
-    // Use lookup table to advance players
-    const success = advancePlayer(matchId, winner, loser);
-    
-    if (success) {
-        console.log(`✓ Match ${matchId} completed: ${winner.name} defeats ${loser.name}`);
-        
-        // Save tournament
-        if (typeof saveTournament === 'function') {
-            saveTournament();
+
+    // Grand Final completion hook: set placements and complete tournament
+    try {
+        if (matchId === 'GRAND-FINAL') {
+            // Standardize placements as playerId -> placement mapping
+            if (!tournament.placements) tournament.placements = {};
+            const winnerKey = String(winner.id);
+            const loserKey = String(loser.id);
+            tournament.placements[winnerKey] = 1;
+            tournament.placements[loserKey] = 2;
+            
+            // Set 3rd place = BS-FINAL loser (if that match is completed)
+            const bsFinal = matches.find(m => m.id === 'BS-FINAL');
+            if (bsFinal && bsFinal.completed && bsFinal.loser && bsFinal.loser.id) {
+                tournament.placements[String(bsFinal.loser.id)] = 3;
+            }
+
+            // Remove legacy placement->playerId keys if present
+            delete tournament.placements[1];
+            delete tournament.placements[2];
+
+            tournament.status = 'completed';
+            console.log(`✓ Tournament completed — Grand Final: ${winner.name} defeats ${loser.name}`);
+
+            if (typeof saveTournament === 'function') saveTournament();
+
+            // Proactively refresh results UI after completion
+            if (typeof displayResults === 'function') {
+                try { displayResults(); } catch (e) {
+                    console.warn('displayResults failed after completion', e);
+                }
+            }
         }
-        
-        // Trigger auto-advancement check (Phase 3)
-        processAutoAdvancements();
-        
-        return true;
-    } else {
-        console.error(`Failed to advance players from ${matchId}`);
-        return false;
+    } catch (e) {
+        console.error('Grand-final completion error', { matchId, winner, loser, error: e });
     }
+
+    // Trigger auto-advancement check (Phase 3)
+    processAutoAdvancements();
+
+    return true;
+} else {
+    console.error(`Failed to advance players from ${matchId}`);
+    return false;
+}
 }
 
 /**
@@ -277,8 +313,8 @@ function isWalkover(player) {
     if (!player) return false;
     
     return player.isBye === true || 
-           player.name === 'Walkover' || 
-           (player.id && player.id.toString().startsWith('walkover-'));
+    player.name === 'Walkover' || 
+    (player.id && player.id.toString().startsWith('walkover-'));
 }
 
 /**
@@ -291,7 +327,7 @@ function shouldAutoAdvance(match) {
     
     // Never auto-advance TBD vs anything (TBD = waiting for opponent)
     if (match.player1.name === 'TBD' || match.player2.name === 'TBD') {
-        return false;
+    return false;
     }
     
     const p1IsWalkover = isWalkover(match.player1);
@@ -313,19 +349,19 @@ function processAutoAdvancement(match) {
     let winnerPlayerNumber;
     
     if (p1IsWalkover && p2IsWalkover) {
-        // Both are walkovers - pick player1 as winner arbitrarily
-        winnerPlayerNumber = 1;
-        console.log(`Auto-advancing walkover vs walkover: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 1 wins`);
+    // Both are walkovers - pick player1 as winner arbitrarily
+    winnerPlayerNumber = 1;
+    console.log(`Auto-advancing walkover vs walkover: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 1 wins`);
     } else if (p1IsWalkover && !p2IsWalkover) {
-        // Player 2 wins
-        winnerPlayerNumber = 2;
-        console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 2 wins`);
+    // Player 2 wins
+    winnerPlayerNumber = 2;
+    console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 2 wins`);
     } else if (!p1IsWalkover && p2IsWalkover) {
-        // Player 1 wins
-        winnerPlayerNumber = 1;
-        console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 1 wins`);
+    // Player 1 wins
+    winnerPlayerNumber = 1;
+    console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 1 wins`);
     } else {
-        return false; // Should not reach here
+    return false; // Should not reach here
     }
     
     // Mark as auto-advanced and complete
@@ -346,27 +382,27 @@ function processAutoAdvancements() {
     console.log('Processing auto-advancements...');
     
     while (foundAdvancement && iterations < maxIterations) {
-        foundAdvancement = false;
-        iterations++;
-        
-        matches.forEach(match => {
-            if (shouldAutoAdvance(match)) {
-                // Determine automatic winner
-                const p1IsWalkover = isWalkover(match.player1);
-                const winnerPlayerNumber = p1IsWalkover ? 2 : 1;
-                
-                console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name})`);
-                
-                // Mark as auto-advanced and complete
-                match.autoAdvanced = true;
-                completeMatch(match.id, winnerPlayerNumber);
-                foundAdvancement = true;
-            }
-        });
-        
-        if (foundAdvancement) {
-            console.log(`Auto-advancement iteration ${iterations} completed`);
-        }
+    foundAdvancement = false;
+    iterations++;
+    
+    matches.forEach(match => {
+    if (shouldAutoAdvance(match)) {
+    // Determine automatic winner
+    const p1IsWalkover = isWalkover(match.player1);
+    const winnerPlayerNumber = p1IsWalkover ? 2 : 1;
+    
+    console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name})`);
+    
+    // Mark as auto-advanced and complete
+    match.autoAdvanced = true;
+    completeMatch(match.id, winnerPlayerNumber);
+    foundAdvancement = true;
+    }
+    });
+    
+    if (foundAdvancement) {
+    console.log(`Auto-advancement iteration ${iterations} completed`);
+    }
     }
     
     console.log(`Auto-advancement finished after ${iterations} iterations`);
@@ -378,37 +414,37 @@ function processAutoAdvancements() {
 function selectWinnerClean(matchId, playerNumber) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
-        console.error(`Match ${matchId} not found`);
-        return false;
+    console.error(`Match ${matchId} not found`);
+    return false;
     }
     
     // Can only select winner if match is active/live
     if (!match.active) {
-        alert('Match must be active to select winner');
-        return false;
+    alert('Match must be active to select winner');
+    return false;
     }
     
     const winner = playerNumber === 1 ? match.player1 : match.player2;
     
     // Cannot select walkover or TBD as winner
     if (isWalkover(winner) || winner.name === 'TBD') {
-        alert('Cannot select walkover or TBD as winner');
-        return false;
+    alert('Cannot select walkover or TBD as winner');
+    return false;
     }
     
     // Complete the match using ONLY our lookup table system
     const success = completeMatch(matchId, playerNumber);
     
     if (success) {
-        // Re-render bracket
-        if (typeof renderBracket === 'function') {
-            renderBracket();
-        }
-        
-        // Refresh lane dropdowns if available
-        if (typeof refreshAllLaneDropdowns === 'function') {
-            setTimeout(refreshAllLaneDropdowns, 100);
-        }
+    // Re-render bracket
+    if (typeof renderBracket === 'function') {
+    renderBracket();
+    }
+    
+    // Refresh lane dropdowns if available
+    if (typeof refreshAllLaneDropdowns === 'function') {
+    setTimeout(refreshAllLaneDropdowns, 100);
+    }
     }
     
     return success;
@@ -419,19 +455,19 @@ function selectWinnerClean(matchId, playerNumber) {
  */
 function debugProgression(matchId) {
     if (!tournament || !tournament.bracketSize) {
-        console.log('No tournament active');
-        return;
+    console.log('No tournament active');
+    return;
     }
     
     const progression = MATCH_PROGRESSION[tournament.bracketSize];
     const rule = progression?.[matchId];
     
     if (rule) {
-        console.log(`=== PROGRESSION FOR ${matchId} ===`);
-        console.log(`Winner goes to: ${rule.winner?.[0]}.${rule.winner?.[1]}`);
-        console.log(`Loser goes to: ${rule.loser?.[0]}.${rule.loser?.[1] || 'eliminated'}`);
+    console.log(`=== PROGRESSION FOR ${matchId} ===`);
+    console.log(`Winner goes to: ${rule.winner?.[0]}.${rule.winner?.[1]}`);
+    console.log(`Loser goes to: ${rule.loser?.[0]}.${rule.loser?.[1] || 'eliminated'}`);
     } else {
-        console.log(`No progression rule for ${matchId}`);
+    console.log(`No progression rule for ${matchId}`);
     }
 }
 
@@ -441,21 +477,21 @@ function debugProgression(matchId) {
 function disableOldProgressionSystem() {
     // Override old functions to prevent conflicts
     if (typeof window !== 'undefined') {
-        window.advanceWinner = function() { 
-            console.log('Old advanceWinner disabled - using new lookup system'); 
-        };
-        window.advanceBacksideWinner = function() { 
-            console.log('Old advanceBacksideWinner disabled - using new lookup system'); 
-        };
-        window.dropFrontsideLoser = function() { 
-            console.log('Old dropFrontsideLoser disabled - using new lookup system'); 
-        };
-        window.processAutoAdvancementForMatch = function() { 
-            console.log('Old processAutoAdvancementForMatch disabled'); 
-        };
-        window.forceBacksideAutoAdvancement = function() { 
-            console.log('Old forceBacksideAutoAdvancement disabled'); 
-        };
+    window.advanceWinner = function() { 
+    console.log('Old advanceWinner disabled - using new lookup system'); 
+    };
+    window.advanceBacksideWinner = function() { 
+    console.log('Old advanceBacksideWinner disabled - using new lookup system'); 
+    };
+    window.dropFrontsideLoser = function() { 
+    console.log('Old dropFrontsideLoser disabled - using new lookup system'); 
+    };
+    window.processAutoAdvancementForMatch = function() { 
+    console.log('Old processAutoAdvancementForMatch disabled'); 
+    };
+    window.forceBacksideAutoAdvancement = function() { 
+    console.log('Old forceBacksideAutoAdvancement disabled'); 
+    };
     }
 }
 
@@ -467,21 +503,21 @@ disableOldProgressionSystem();
  */
 function generateCleanBracket() {
     if (!tournament) {
-        alert('Please create a tournament first');
-        return false;
+    alert('Please create a tournament first');
+    return false;
     }
 
     // Check if bracket already exists
     if (tournament.bracket && matches.length > 0) {
-        alert('Tournament is already in progress! Use "Reset Tournament" to start over.');
-        return false;
+    alert('Tournament is already in progress! Use "Reset Tournament" to start over.');
+    return false;
     }
 
     const paidPlayers = players.filter(p => p.paid);
     if (paidPlayers.length < 4) {
-        alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
-        console.error('Bracket generation blocked: fewer than 4 paid players');
-        return false;
+    alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
+    console.error('Bracket generation blocked: fewer than 4 paid players');
+    return false;
     }
 
     // Determine bracket size
@@ -492,9 +528,9 @@ function generateCleanBracket() {
     else bracketSize = 48;
 
     if (bracketSize === 8 && paidPlayers.length < 4) {
-        alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
-        console.error('Bracket generation blocked for 8-player bracket: fewer than 4 paid players');
-        return false;
+    alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
+    console.error('Bracket generation blocked for 8-player bracket: fewer than 4 paid players');
+    return false;
     }
 
     // Create optimized bracket: real players first, walkovers strategically placed
@@ -502,9 +538,9 @@ function generateCleanBracket() {
 
     const bracket = createOptimizedBracketV2(paidPlayers, bracketSize);
     if (!bracket) {
-        alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
-        console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
-        return false;
+    alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
+    console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
+    return false;
     }
 
     if (!bracket) {
@@ -526,17 +562,17 @@ function generateCleanBracket() {
     
     // Save and render
     if (typeof saveTournament === 'function') {
-        saveTournament();
+    saveTournament();
     }
     
     if (typeof renderBracket === 'function') {
-        renderBracket();
+    renderBracket();
     }
     
     console.log(`✓ Clean bracket generated: ${bracketSize} positions, ${paidPlayers.length} real players`);
     
     if (typeof showPage === 'function') {
-        showPage('tournament');
+    showPage('tournament');
     }
     
     return true;
@@ -585,7 +621,7 @@ function createOptimizedBracketV2(players, bracketSize) {
   // Fill remaining with walkovers
   for (let i = 0; i < K; i++) {
     if (!bracket[i]) {
-      bracket[i] = createWalkoverPlayer(i);
+    bracket[i] = createWalkoverPlayer(i);
     }
   }
 
@@ -615,9 +651,9 @@ function createOptimizedBracketV2(players, bracketSize) {
  */
 function createWalkoverPlayer(index) {
     return {
-        id: `walkover-${index}`,
-        name: 'Walkover',
-        isBye: true
+    id: `walkover-${index}`,
+    name: 'Walkover',
+    isBye: true
     };
 }
 
@@ -653,37 +689,37 @@ function calculateCleanBracketStructure(bracketSize) {
     // Frontside structure
     const frontside = [];
     for (let round = 1; round <= frontsideRounds; round++) {
-        const matchesInRound = Math.pow(2, frontsideRounds - round);
-        frontside.push({
-            round: round,
-            matches: matchesInRound
-        });
+    const matchesInRound = Math.pow(2, frontsideRounds - round);
+    frontside.push({
+    round: round,
+    matches: matchesInRound
+    });
     }
     
     // Backside structure (hardcoded based on bracket size)
     let backside = [];
     if (bracketSize === 8) {
-        backside = [
-            { round: 1, matches: 2 },
-            { round: 2, matches: 2 },
-            { round: 3, matches: 1 }
-        ];
+    backside = [
+    { round: 1, matches: 2 },
+    { round: 2, matches: 2 },
+    { round: 3, matches: 1 }
+    ];
     } else if (bracketSize === 16) {
-        backside = [
-            { round: 1, matches: 4 },
-            { round: 2, matches: 4 },
-            { round: 3, matches: 2 },
-            { round: 4, matches: 2 },
-            { round: 5, matches: 1 }
-        ];
+    backside = [
+    { round: 1, matches: 4 },
+    { round: 2, matches: 4 },
+    { round: 3, matches: 2 },
+    { round: 4, matches: 2 },
+    { round: 5, matches: 1 }
+    ];
 } else if (bracketSize === 32) {
     backside = [
-        { round: 1, matches: 8 },
-        { round: 2, matches: 8 },
-        { round: 3, matches: 6 },
-        { round: 4, matches: 4 },
-        { round: 5, matches: 2 },
-        { round: 6, matches: 1 } // The hump - only 1 match
+    { round: 1, matches: 8 },
+    { round: 2, matches: 8 },
+    { round: 3, matches: 6 },
+    { round: 4, matches: 4 },
+    { round: 5, matches: 2 },
+    { round: 6, matches: 1 } // The hump - only 1 match
 
     ];
 }
@@ -698,39 +734,39 @@ function generateFrontsideMatches(bracket, structure, startId) {
     let matchId = startId;
     
     structure.frontside.forEach((roundInfo, roundIndex) => {
-        for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
-            let player1, player2;
-            
-            if (roundIndex === 0) {
-                // First round: use actual players from bracket
-                const playerIndex = matchIndex * 2;
-                player1 = bracket[playerIndex] || createTBDPlayer(`fs-1-${matchIndex}-1`);
-                player2 = bracket[playerIndex + 1] || createTBDPlayer(`fs-1-${matchIndex}-2`);
-            } else {
-                // Later rounds: TBD players (winners from previous rounds)
-                player1 = createTBDPlayer(`fs-${roundInfo.round}-${matchIndex}-1`);
-                player2 = createTBDPlayer(`fs-${roundInfo.round}-${matchIndex}-2`);
-            }
-            
-            const match = {
-                id: `FS-${roundInfo.round}-${matchIndex + 1}`,
-                numericId: matchId++,
-                round: roundInfo.round,
-                side: 'frontside',
-                player1: player1,
-                player2: player2,
-                winner: null,
-                loser: null,
-                lane: null,
-                legs: roundInfo.round === structure.frontsideRounds ? config.legs.semifinal : config.legs.regularRounds,
-                referee: null,
-                active: false,
-                completed: false,
-                positionInRound: matchIndex
-            };
-            
-            matches.push(match);
-        }
+    for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
+    let player1, player2;
+    
+    if (roundIndex === 0) {
+    // First round: use actual players from bracket
+    const playerIndex = matchIndex * 2;
+    player1 = bracket[playerIndex] || createTBDPlayer(`fs-1-${matchIndex}-1`);
+    player2 = bracket[playerIndex + 1] || createTBDPlayer(`fs-1-${matchIndex}-2`);
+    } else {
+    // Later rounds: TBD players (winners from previous rounds)
+    player1 = createTBDPlayer(`fs-${roundInfo.round}-${matchIndex}-1`);
+    player2 = createTBDPlayer(`fs-${roundInfo.round}-${matchIndex}-2`);
+    }
+    
+    const match = {
+    id: `FS-${roundInfo.round}-${matchIndex + 1}`,
+    numericId: matchId++,
+    round: roundInfo.round,
+    side: 'frontside',
+    player1: player1,
+    player2: player2,
+    winner: null,
+    loser: null,
+    lane: null,
+    legs: roundInfo.round === structure.frontsideRounds ? config.legs.semifinal : config.legs.regularRounds,
+    referee: null,
+    active: false,
+    completed: false,
+    positionInRound: matchIndex
+    };
+    
+    matches.push(match);
+    }
     });
 }
 
@@ -741,31 +777,31 @@ function generateBacksideMatches(structure, startId) {
     let matchId = startId;
     
     structure.backside.forEach((roundInfo) => {
-        for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
-            // All backside matches start with TBD players
-            const player1 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-1`);
-            const player2 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-2`);
+    for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
+    // All backside matches start with TBD players
+    const player1 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-1`);
+    const player2 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-2`);
 	    const isLastBacksideRound = roundInfo.round === Math.max(...structure.backside.map(r => r.round));
-            
-            const match = {
-                id: `BS-${roundInfo.round}-${matchIndex + 1}`,
-                numericId: matchId++,
-                round: roundInfo.round,
-                side: 'backside',
-                player1: player1,
-                player2: player2,
-                winner: null,
-                loser: null,
-                lane: null,
-                legs: isLastBacksideRound ? config.legs.semifinal : config.legs.regularRounds,
-                referee: null,
-                active: false,
-                completed: false,
-                positionInRound: matchIndex
-            };
-            
-            matches.push(match);
-        }
+    
+    const match = {
+    id: `BS-${roundInfo.round}-${matchIndex + 1}`,
+    numericId: matchId++,
+    round: roundInfo.round,
+    side: 'backside',
+    player1: player1,
+    player2: player2,
+    winner: null,
+    loser: null,
+    lane: null,
+    legs: isLastBacksideRound ? config.legs.semifinal : config.legs.regularRounds,
+    referee: null,
+    active: false,
+    completed: false,
+    positionInRound: matchIndex
+    };
+    
+    matches.push(match);
+    }
     });
 }
 
@@ -775,36 +811,36 @@ function generateBacksideMatches(structure, startId) {
 function generateFinalMatches(startId) {
     // Backside Final
     const backsideFinal = {
-        id: 'BS-FINAL',
-        numericId: startId,
-        round: 'final',
-        side: 'backside-final',
-        player1: createTBDPlayer('bs-final-1'),
-        player2: createTBDPlayer('bs-final-2'),
-        winner: null,
-        loser: null,
-        lane: null,
-        legs: config.legs.backsideFinal,
-        referee: null,
-        active: false,
-        completed: false
+    id: 'BS-FINAL',
+    numericId: startId,
+    round: 'final',
+    side: 'backside-final',
+    player1: createTBDPlayer('bs-final-1'),
+    player2: createTBDPlayer('bs-final-2'),
+    winner: null,
+    loser: null,
+    lane: null,
+    legs: config.legs.backsideFinal,
+    referee: null,
+    active: false,
+    completed: false
     };
     
     // Grand Final
     const grandFinal = {
-        id: 'GRAND-FINAL',
-        numericId: startId + 1,
-        round: 'grand-final',
-        side: 'grand-final',
-        player1: createTBDPlayer('grand-final-1'),
-        player2: createTBDPlayer('grand-final-2'),
-        winner: null,
-        loser: null,
-        lane: null,
-        legs: config.legs.grandFinal,
-        referee: null,
-        active: false,
-        completed: false
+    id: 'GRAND-FINAL',
+    numericId: startId + 1,
+    round: 'grand-final',
+    side: 'grand-final',
+    player1: createTBDPlayer('grand-final-1'),
+    player2: createTBDPlayer('grand-final-2'),
+    winner: null,
+    loser: null,
+    lane: null,
+    legs: config.legs.grandFinal,
+    referee: null,
+    active: false,
+    completed: false
     };
     
     matches.push(backsideFinal);
@@ -816,8 +852,8 @@ function generateFinalMatches(startId) {
  */
 function createTBDPlayer(id) {
     return {
-        id: id,
-        name: 'TBD'
+    id: id,
+    name: 'TBD'
     };
 }
 
@@ -827,21 +863,21 @@ function createTBDPlayer(id) {
 function toggleActive(matchId) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
-        console.error(`Match ${matchId} not found`);
-        return false;
+    console.error(`Match ${matchId} not found`);
+    return false;
     }
     
     const currentState = getMatchState(match);
     
     // Can only toggle between READY and LIVE states
     if (currentState === 'pending') {
-        alert('Cannot start match: Players not yet determined');
-        return false;
+    alert('Cannot start match: Players not yet determined');
+    return false;
     }
     
     if (currentState === 'completed') {
-        alert('Match is already completed');
-        return false;
+    alert('Match is already completed');
+    return false;
     }
     
     // Toggle active state
@@ -851,11 +887,11 @@ function toggleActive(matchId) {
     
     // Save and render
     if (typeof saveTournament === 'function') {
-        saveTournament();
+    saveTournament();
     }
     
     if (typeof renderBracket === 'function') {
-        renderBracket();
+    renderBracket();
     }
     
     return true;
@@ -894,8 +930,8 @@ function canMatchStart(match) {
 function updateMatchLane(matchId, newLane) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
-        console.error(`Match ${matchId} not found`);
-        return false;
+    console.error(`Match ${matchId} not found`);
+    return false;
     }
     
     match.lane = newLane ? parseInt(newLane) : null;
@@ -903,7 +939,7 @@ function updateMatchLane(matchId, newLane) {
     console.log(`Lane updated for ${matchId}: ${match.lane || 'none'}`);
     
     if (typeof saveTournament === 'function') {
-        saveTournament();
+    saveTournament();
     }
     
     return true;
@@ -914,7 +950,7 @@ function updateMatchLane(matchId, newLane) {
  */
 function debugBracketGeneration() {
     if (!tournament || !tournament.bracket) {
-        console.log('No bracket generated yet');
+    console.log('No bracket generated yet');
     }
     
     console.log('=== BRACKET GENERATION DEBUG ===');
@@ -926,12 +962,12 @@ function debugBracketGeneration() {
     console.log(`First round matches: ${firstRound.length}`);
     
     firstRound.forEach(match => {
-        const p1 = match.player1?.name || 'Empty';
-        const p2 = match.player2?.name || 'Empty';
-        const p1Type = isWalkover(match.player1) ? 'WALKOVER' : 'REAL';
-        const p2Type = isWalkover(match.player2) ? 'WALKOVER' : 'REAL';
-        
-        console.log(`${match.id}: ${p1} (${p1Type}) vs ${p2} (${p2Type})`);
+    const p1 = match.player1?.name || 'Empty';
+    const p2 = match.player2?.name || 'Empty';
+    const p1Type = isWalkover(match.player1) ? 'WALKOVER' : 'REAL';
+    const p2Type = isWalkover(match.player2) ? 'WALKOVER' : 'REAL';
+    
+    console.log(`${match.id}: ${p1} (${p1Type}) vs ${p2} (${p2Type})`);
     });
     
     // Check for auto-advancement opportunities

@@ -6,19 +6,19 @@ let players = [];
 let matches = [];
 let config = {
     points: {
-        participation: 1,
-        first: 3,
-        second: 2,
-        third: 1,
-        highOut: 1,
-        ton: 0,
-        oneEighty: 1
+    participation: 1,
+    first: 3,
+    second: 2,
+    third: 1,
+    highOut: 1,
+    ton: 0,
+    oneEighty: 1
     },
     legs: {
-        regularRounds: 3,
-        semifinal: 3,
-        backsideFinal: 5,
-        grandFinal: 5
+    regularRounds: 3,
+    semifinal: 3,
+    backsideFinal: 5,
+    grandFinal: 5
     },
     applicationTitle: "NewTon DC - Tournament Manager"
 };
@@ -30,17 +30,17 @@ document.addEventListener('DOMContentLoaded', function() {
     
     // Try to load recent tournaments, but don't fail if function isn't available yet
     try {
-        loadRecentTournaments();
+    loadRecentTournaments();
     } catch (error) {
-        console.log('loadRecentTournaments not available yet, will retry');
-        // Retry after a short delay to ensure all JS files are loaded
-        setTimeout(() => {
-            try {
-                loadRecentTournaments();
-            } catch (e) {
-                console.error('Failed to load recent tournaments:', e);
-            }
-        }, 100);
+    console.log('loadRecentTournaments not available yet, will retry');
+    // Retry after a short delay to ensure all JS files are loaded
+    setTimeout(() => {
+    try {
+    loadRecentTournaments();
+    } catch (e) {
+    console.error('Failed to load recent tournaments:', e);
+    }
+    }, 100);
     }
     
     setupEventListeners();
@@ -55,30 +55,30 @@ function setTodayDate() {
 function setupEventListeners() {
     // Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
-            const page = this.dataset.page;
-            showPage(page);
-        });
+    btn.addEventListener('click', function() {
+    const page = this.dataset.page;
+    showPage(page);
+    });
     });
 
     // Enter key handlers
     document.getElementById('playerName').addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') {
-            addPlayer();
-        }
+    if (e.key === 'Enter') {
+    addPlayer();
+    }
     });
 
     // Auto-save configuration
     ['participationPoints', 'firstPlacePoints', 'secondPlacePoints', 'thirdPlacePoints', 
-     'highOutPoints', 'tonPoints', 'oneEightyPoints'].forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('change', function() {
-                const key = id.replace('Points', '').replace('oneEighty', 'oneEighty');
-                config.points[key] = parseInt(this.value);
-                saveConfiguration();
-            });
-        }
+    'highOutPoints', 'tonPoints', 'oneEightyPoints'].forEach(id => {
+    const element = document.getElementById(id);
+    if (element) {
+    element.addEventListener('change', function() {
+    const key = id.replace('Points', '').replace('oneEighty', 'oneEighty');
+    config.points[key] = parseInt(this.value);
+    saveConfiguration();
+    });
+    }
     });
 
     // Initialize bracket controls
@@ -87,10 +87,10 @@ function setupEventListeners() {
 
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
-        page.classList.remove('active');
+    page.classList.remove('active');
     });
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.classList.remove('active');
+    btn.classList.remove('active');
     });
     
     document.getElementById(pageId).classList.add('active');
@@ -101,36 +101,36 @@ function showPage(pageId) {
 window.addEventListener('load', function() {
     const currentTournament = localStorage.getItem('currentTournament');
     if (currentTournament) {
-        try {
-            tournament = JSON.parse(currentTournament);
-            players = tournament.players || [];
-            matches = tournament.matches || [];
+    try {
+    tournament = JSON.parse(currentTournament);
+    players = tournament.players || [];
+    matches = tournament.matches || [];
 
-            if (tournament.name && tournament.date) {
-                document.getElementById('tournamentName').value = tournament.name;
-                document.getElementById('tournamentDate').value = tournament.date;
-                
-                // Make sure updateTournamentStatus exists before calling
-                if (typeof updateTournamentStatus === 'function') {
-                    updateTournamentStatus();
-                }
-                
-                // Make sure updatePlayersDisplay exists before calling  
-                if (typeof updatePlayersDisplay === 'function') {
-                    updatePlayersDisplay();
-                    updatePlayerCount();
-                }
+    if (tournament.name && tournament.date) {
+    document.getElementById('tournamentName').value = tournament.name;
+    document.getElementById('tournamentDate').value = tournament.date;
+    
+    // Make sure updateTournamentStatus exists before calling
+    if (typeof updateTournamentStatus === 'function') {
+    updateTournamentStatus();
+    }
+    
+    // Make sure updatePlayersDisplay exists before calling  
+    if (typeof updatePlayersDisplay === 'function') {
+    updatePlayersDisplay();
+    updatePlayerCount();
+    }
 
-                if (tournament.bracket && matches.length > 0 && typeof renderBracket === 'function') {
-                    renderBracket();
-                }
+    if (tournament.bracket && matches.length > 0 && typeof renderBracket === 'function') {
+    renderBracket();
+    }
 
-                if (tournament.status === 'completed' && typeof displayResults === 'function') {
-                    displayResults();
-                }
-            }
-        } catch (e) {
-            console.error('Error loading current tournament:', e);
-        }
+    if (typeof displayResults === 'function') {
+    displayResults();
+    }
+    }
+    } catch (e) {
+    console.error('Error loading current tournament:', e);
+    }
     }
 });

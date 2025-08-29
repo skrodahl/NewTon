@@ -7,19 +7,19 @@ function createTournament() {
     const date = document.getElementById('tournamentDate').value;
     
     if (!name || !date) {
-        alert('Please enter both tournament name and date');
-        return;
+    alert('Please enter both tournament name and date');
+    return;
     }
 
     tournament = {
-        id: Date.now(),
-        name: name,
-        date: date,
-        created: new Date().toISOString(),
-        status: 'setup',
-        players: [],
-        matches: [],
-        bracket: null
+    id: Date.now(),
+    name: name,
+    date: date,
+    created: new Date().toISOString(),
+    status: 'setup',
+    players: [],
+    matches: [],
+    bracket: null
     };
 
     // Clear all existing data for a fresh start
@@ -30,26 +30,31 @@ function createTournament() {
     updatePlayersDisplay();
     updatePlayerCount();
     if (typeof clearBracket === 'function') {
-        clearBracket();
+    clearBracket();
     }
     
     // Hide results section if visible
     const resultsSection = document.getElementById('resultsSection');
     if (resultsSection) {
-        resultsSection.style.display = 'none';
+    resultsSection.style.display = 'none';
     }
     
     saveTournament();
     updateTournamentStatus();
     showPage('registration');
+    // Ensure results table is populated by default
+    if (typeof displayResults === 'function') {
+    displayResults();
+    }
+
     
     alert('New tournament created successfully! Start by adding players.');
 }
 
 function exportTournament() {
     if (!tournament) {
-        alert('No active tournament to export');
-        return;
+    alert('No active tournament to export');
+    return;
     }
 
     const dataStr = JSON.stringify(tournament, null, 2);
@@ -72,9 +77,9 @@ function saveTournament() {
     const index = tournaments.findIndex(t => t.id === tournament.id);
     
     if (index >= 0) {
-        tournaments[index] = tournament;
+    tournaments[index] = tournament;
     } else {
-        tournaments.push(tournament);
+    tournaments.push(tournament);
     }
     
     localStorage.setItem('dartsTournaments', JSON.stringify(tournaments));
@@ -84,13 +89,13 @@ function saveTournament() {
 function updateTournamentStatus() {
     const statusDiv = document.getElementById('tournamentStatus');
     if (tournament) {
-        statusDiv.innerHTML = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
-        statusDiv.className = 'alert alert-success';
-        statusDiv.style.display = 'block';
+    statusDiv.innerHTML = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
+    statusDiv.className = 'alert alert-success';
+    statusDiv.style.display = 'block';
     } else {
-        statusDiv.innerHTML = 'No active tournament';
-        statusDiv.className = 'alert alert-info';
-        statusDiv.style.display = 'block';
+    statusDiv.innerHTML = 'No active tournament';
+    statusDiv.className = 'alert alert-info';
+    statusDiv.style.display = 'block';
     }
 }
 
@@ -99,51 +104,51 @@ function loadRecentTournaments() {
     const container = document.getElementById('recentTournaments');
     
     if (tournaments.length === 0) {
-        container.innerHTML = '<p>No tournaments found</p>';
-        // Hide toggle button
-        const toggleBtn = document.getElementById('toggleTournamentsBtn');
-        if (toggleBtn) {
-            toggleBtn.style.display = 'none';
-        }
-        return;
+    container.innerHTML = '<p>No tournaments found</p>';
+    // Hide toggle button
+    const toggleBtn = document.getElementById('toggleTournamentsBtn');
+    if (toggleBtn) {
+    toggleBtn.style.display = 'none';
+    }
+    return;
     }
 
     // Sort tournaments by creation timestamp (newest first)
     const sortedTournaments = tournaments.sort((a, b) => {
-        if (a.created && b.created) {
-            return new Date(b.created) - new Date(a.created);
-        } else if (a.created) {
-            return -1;
-        } else if (b.created) {
-            return 1;
-        } else {
-            const dateA = new Date(a.date + 'T00:00:00');
-            const dateB = new Date(b.date + 'T00:00:00');
-            return dateB - dateA;
-        }
+    if (a.created && b.created) {
+    return new Date(b.created) - new Date(a.created);
+    } else if (a.created) {
+    return -1;
+    } else if (b.created) {
+    return 1;
+    } else {
+    const dateA = new Date(a.date + 'T00:00:00');
+    const dateB = new Date(b.date + 'T00:00:00');
+    return dateB - dateA;
+    }
     });
 
     // Determine which tournaments to show
     const tournamentsToShow = showingAllTournaments ? 
-        sortedTournaments : 
-        sortedTournaments.slice(0, 5);
+    sortedTournaments : 
+    sortedTournaments.slice(0, 5);
 
     const html = tournamentsToShow.map(t => {
-        const isActiveTournament = tournament && tournament.id === t.id;
-        return `
-            <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>
-                        <strong>${t.name}</strong> (${t.date})
-                        ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
-                    </span>
-                    <div>
-                        <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
-                        <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
-                    </div>
-                </div>
-            </div>
-        `;
+    const isActiveTournament = tournament && tournament.id === t.id;
+    return `
+    <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
+    <div style="display: flex; justify-content: space-between; align-items: center;">
+    <span>
+    <strong>${t.name}</strong> (${t.date})
+    ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
+    </span>
+    <div>
+    <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
+    <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
+    </div>
+    </div>
+    </div>
+    `;
     }).join('');
     
     container.innerHTML = html;
@@ -151,12 +156,12 @@ function loadRecentTournaments() {
     // Update the toggle button
     const toggleBtn = document.getElementById('toggleTournamentsBtn');
     if (toggleBtn) {
-        if (tournaments.length <= 5) {
-            toggleBtn.style.display = 'none';
-        } else {
-            toggleBtn.style.display = 'inline-block';
-            toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
-        }
+    if (tournaments.length <= 5) {
+    toggleBtn.style.display = 'none';
+    } else {
+    toggleBtn.style.display = 'inline-block';
+    toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
+    }
     }
 }
 
@@ -170,8 +175,8 @@ function loadSpecificTournament(id) {
     const selectedTournament = tournaments.find(t => t.id === id);
     
     if (!selectedTournament) {
-        alert('Tournament not found');
-        return;
+    alert('Tournament not found');
+    return;
     }
 
     tournament = selectedTournament;
@@ -185,8 +190,13 @@ function loadSpecificTournament(id) {
     updatePlayersDisplay();
     updatePlayerCount();
     
+    // Populate results table by default when a tournament is loaded
+    if (typeof displayResults === 'function') {
+    displayResults();
+    }
+
     if (tournament.bracket && typeof renderBracket === 'function') {
-        renderBracket();
+    renderBracket();
     }
     
     showPage('registration');
@@ -197,24 +207,24 @@ function deleteTournament(tournamentId) {
     const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
     
     if (!tournamentToDelete) {
-        alert('Tournament not found.');
-        return;
+    alert('Tournament not found.');
+    return;
     }
 
     if (tournament && tournament.id === tournamentId) {
-        alert('Cannot delete the currently active tournament.\n\nPlease create a new tournament or load a different one first.');
-        return;
+    alert('Cannot delete the currently active tournament.\n\nPlease create a new tournament or load a different one first.');
+    return;
     }
 
     const confirmDelete = confirm(
-        `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
-        `Are you sure you want to permanently delete:\n` +
-        `"${tournamentToDelete.name}"\n\n` +
-        `This action cannot be undone.`
+    `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
+    `Are you sure you want to permanently delete:\n` +
+    `"${tournamentToDelete.name}"\n\n` +
+    `This action cannot be undone.`
     );
 
     if (!confirmDelete) {
-        return;
+    return;
     }
 
     const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
@@ -226,8 +236,8 @@ function deleteTournament(tournamentId) {
 
 function resetTournament() {
     if (!tournament || !tournament.bracket) {
-        alert('No active tournament to reset.');
-        return;
+    alert('No active tournament to reset.');
+    return;
     }
 
     const tournamentName = tournament.name;
@@ -235,31 +245,31 @@ function resetTournament() {
     const totalMatches = matches.length;
     
     const confirmMessage = `⚠️ RESET TOURNAMENT WARNING ⚠️\n\n` +
-        `Tournament: "${tournamentName}"\n` +
-        `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
-        `Players: ${players.length} registered\n\n` +
-        `This will permanently delete:\n` +
-        `• All match results\n` +
-        `• All bracket progress\n` +
-        `• All tournament standings\n\n` +
-        `Are you sure you want to continue?`;
+    `Tournament: "${tournamentName}"\n` +
+    `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
+    `Players: ${players.length} registered\n\n` +
+    `This will permanently delete:\n` +
+    `• All match results\n` +
+    `• All bracket progress\n` +
+    `• All tournament standings\n\n` +
+    `Are you sure you want to continue?`;
 
     if (!confirm(confirmMessage)) {
-        return;
+    return;
     }
 
     const tournamentNameConfirm = prompt(
-        `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
-        `To confirm the reset, please type the tournament name exactly:\n\n` +
-        `"${tournamentName}"\n\n` +
-        `Type the tournament name below:`
+    `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
+    `To confirm the reset, please type the tournament name exactly:\n\n` +
+    `"${tournamentName}"\n\n` +
+    `Type the tournament name below:`
     );
 
     if (tournamentNameConfirm !== tournamentName) {
-        if (tournamentNameConfirm !== null) {
-            alert('Tournament name did not match. Reset cancelled for your protection.');
-        }
-        return;
+    if (tournamentNameConfirm !== null) {
+    alert('Tournament name did not match. Reset cancelled for your protection.');
+    }
+    return;
     }
 
     matches = [];
@@ -267,18 +277,18 @@ function resetTournament() {
     tournament.status = 'setup';
 
     players.forEach(player => {
-        player.eliminated = false;
-        player.placement = null;
+    player.eliminated = false;
+    player.placement = null;
     });
 
     saveTournament();
     if (typeof clearBracket === 'function') {
-        clearBracket();
+    clearBracket();
     }
 
     const resultsSection = document.getElementById('resultsSection');
     if (resultsSection) {
-        resultsSection.style.display = 'none';
+    resultsSection.style.display = 'none';
     }
 
     alert(`Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Registration page.`);
