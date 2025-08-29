@@ -58,9 +58,9 @@ const MATCH_PROGRESSION = {
 
   // BS-R2 winners → BS-R3.player1
   'BS-2-1': { winner: ['BS-3-1', 'player1'] },
-  'BS-2-2': { winner: ['BS-3-1', 'player1'] }, // player2 supplied later by FS-3-2 loser
+  'BS-2-2': { winner: ['BS-3-1', 'player2'] }, // player2 supplied later by FS-3-2 loser
   'BS-2-3': { winner: ['BS-3-2', 'player1'] },
-  'BS-2-4': { winner: ['BS-3-2', 'player1'] }, // player2 supplied later by FS-3-1 loser
+  'BS-2-4': { winner: ['BS-3-2', 'player2'] }, // player2 supplied later by FS-3-1 loser
 
   // BS-R3 winners go straight to BS-R4 player1
   'BS-3-1': { winner: ['BS-4-1', 'player1'] },
