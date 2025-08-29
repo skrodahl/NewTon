@@ -40,22 +40,36 @@ const MATCH_PROGRESSION = {
         'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-3', 'player2'] },
         'FS-2-3': { winner: ['FS-3-2', 'player1'], loser: ['BS-2-2', 'player2'] },
         'FS-2-4': { winner: ['FS-3-2', 'player2'], loser: ['BS-2-1', 'player2'] },
-        'FS-3-1': { winner: ['FS-4-1', 'player1'], loser: ['BS-3-2', 'player2'] },
-        'FS-3-2': { winner: ['FS-4-1', 'player2'], loser: ['BS-3-1', 'player2'] },
+        'FS-3-1': { winner: ['FS-4-1', 'player1'], loser: ['BS-4-2', 'player2'] },
+        'FS-3-2': { winner: ['FS-4-1', 'player2'], loser: ['BS-4-1', 'player2'] },
         'FS-4-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
 
-        // === BACKSIDE ===
-        'BS-1-1': { winner: ['BS-2-1', 'player1'] },
-        'BS-1-2': { winner: ['BS-2-2', 'player1'] },
-        'BS-1-3': { winner: ['BS-2-3', 'player1'] },
-        'BS-1-4': { winner: ['BS-2-4', 'player1'] },
-        'BS-2-1': { winner: ['BS-3-1', 'player1'] },
-        'BS-2-2': { winner: ['BS-3-1', 'player1'] },
-        'BS-2-3': { winner: ['BS-3-2', 'player1'] },
-        'BS-2-4': { winner: ['BS-3-2', 'player1'] },
-        'BS-3-1': { winner: ['BS-FINAL', 'player2'] },
-        'BS-3-2': { winner: ['BS-FINAL', 'player2'] },
-        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
+	// === BACKSIDE (16) ===
+	// R1 winners → R2.x.player1
+	'BS-1-1': { winner: ['BS-2-1', 'player1'] },
+	'BS-1-2': { winner: ['BS-2-2', 'player1'] },
+	'BS-1-3': { winner: ['BS-2-3', 'player1'] },
+	'BS-1-4': { winner: ['BS-2-4', 'player1'] },
+
+	// R2 winners → R3.x.player1
+	'BS-2-1': { winner: ['BS-3-1', 'player1'] },
+	'BS-2-2': { winner: ['BS-3-1', 'player1'] }, // keep to player1; FS-3-2 loser fills player2
+	'BS-2-3': { winner: ['BS-3-2', 'player1'] },
+	'BS-2-4': { winner: ['BS-3-2', 'player1'] }, // keep to player1; FS-3-1 loser fills player2
+
+	// R3 winners → R4 straight over; FS-3 losers mirror into R4
+	'BS-3-1': { winner: ['BS-4-1', 'player1'] }, // counterpart FS-3-2 loser → BS-4-1.player2 (from FS mapping)
+	'BS-3-2': { winner: ['BS-4-2', 'player1'] }, // counterpart FS-3-1 loser → BS-4-2.player2 (from FS mapping)
+
+	// R4 winners meet in R5
+	'BS-4-1': { winner: ['BS-5-1', 'player1'] },
+	'BS-4-2': { winner: ['BS-5-1', 'player2'] },
+
+	// R5 winner advances to BS-FINAL.player2
+	'BS-5-1': { winner: ['BS-FINAL', 'player2'] },
+
+	// BS champion → GRAND-FINAL.player2
+	'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
     },
 
     32: {
