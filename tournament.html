@@ -83,9 +83,9 @@
     <!-- Players will be added here -->
     </div>
 
-    <!-- Results Section -->
-    <div id="resultsSection" style="margin-top: 40px; display: none;">
-    <h3>Tournament Results</h3>
+    <!-- Results Section - NOW VISIBLE -->
+    <div id="resultsSection" style="margin-top: 40px;">
+    <h3 id="resultsTitle">Current Points</h3>
     <table class="results-table">
     <thead>
     <tr>
@@ -181,6 +181,10 @@
     <input type="number" id="tonPoints" value="0" min="0">
     </div>
     <div class="form-group">
+    <label for="shortLegPoints">Short Leg Points</label>
+    <input type="number" id="shortLegPoints" value="1" min="0">
+    </div>
+    <div class="form-group">
     <label for="oneEightyPoints">180 Points</label>
     <input type="number" id="oneEightyPoints" value="1" min="0">
     </div>
@@ -191,7 +195,7 @@
     <h3>Match Configuration</h3>
     <div class="config-grid">
     <div class="form-group">
-    <label for="regularRoundsLegs">Regular Rounds Legs</label>
+    <label for="regularRoundsLegs">Regular Rounds</label>
     <select id="regularRoundsLegs">
     <option value="3" selected>Best of 3</option>
     <option value="5">Best of 5</option>
@@ -199,15 +203,15 @@
     </select>
     </div>
     <div class="form-group">
-    <label for="semifinalLegs">Semi-Finals Legs</label>
-    <select id="semifinalLegs">
+    <label for="semiFinalsLegs">Semi-Finals</label>
+    <select id="semiFinalsLegs">
     <option value="3" selected>Best of 3</option>
     <option value="5">Best of 5</option>
     <option value="7">Best of 7</option>
     </select>
     </div>
     <div class="form-group">
-    <label for="backsideFinalLegs">Backside Final Legs</label>
+    <label for="backsideFinalLegs">Backside Final</label>
     <select id="backsideFinalLegs">
     <option value="3">Best of 3</option>
     <option value="5" selected>Best of 5</option>
@@ -215,7 +219,7 @@
     </select>
     </div>
     <div class="form-group">
-    <label for="grandFinalLegs">Grand Final Legs</label>
+    <label for="grandFinalLegs">Grand Final</label>
     <select id="grandFinalLegs">
     <option value="3">Best of 3</option>
     <option value="5" selected>Best of 5</option>
