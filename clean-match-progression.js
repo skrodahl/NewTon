@@ -26,50 +26,55 @@ const MATCH_PROGRESSION = {
         'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
     },
 
-    16: {
-        // === FRONTSIDE ===
-        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-4', 'player1'] },
-        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-4', 'player2'] },
-        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-3', 'player1'] },
-        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-3', 'player2'] },
-        'FS-1-5': { winner: ['FS-2-3', 'player1'], loser: ['BS-1-2', 'player1'] },
-        'FS-1-6': { winner: ['FS-2-3', 'player2'], loser: ['BS-1-2', 'player2'] },
-        'FS-1-7': { winner: ['FS-2-4', 'player1'], loser: ['BS-1-1', 'player1'] },
-        'FS-1-8': { winner: ['FS-2-4', 'player2'], loser: ['BS-1-1', 'player2'] },
-        'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-4', 'player2'] },
-        'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-3', 'player2'] },
-        'FS-2-3': { winner: ['FS-3-2', 'player1'], loser: ['BS-2-2', 'player2'] },
-        'FS-2-4': { winner: ['FS-3-2', 'player2'], loser: ['BS-2-1', 'player2'] },
-        'FS-3-1': { winner: ['FS-4-1', 'player1'], loser: ['BS-4-2', 'player2'] },
-        'FS-3-2': { winner: ['FS-4-1', 'player2'], loser: ['BS-4-1', 'player2'] },
-        'FS-4-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
+16: {
+  // === FRONTSIDE ===
+  'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-4', 'player1'] },
+  'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-4', 'player2'] },
+  'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-3', 'player1'] },
+  'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-3', 'player2'] },
+  'FS-1-5': { winner: ['FS-2-3', 'player1'], loser: ['BS-1-2', 'player1'] },
+  'FS-1-6': { winner: ['FS-2-3', 'player2'], loser: ['BS-1-2', 'player2'] },
+  'FS-1-7': { winner: ['FS-2-4', 'player1'], loser: ['BS-1-1', 'player1'] },
+  'FS-1-8': { winner: ['FS-2-4', 'player2'], loser: ['BS-1-1', 'player2'] },
 
-	// === BACKSIDE (16) ===
-	// R1 winners → R2.x.player1
-	'BS-1-1': { winner: ['BS-2-1', 'player1'] },
-	'BS-1-2': { winner: ['BS-2-2', 'player1'] },
-	'BS-1-3': { winner: ['BS-2-3', 'player1'] },
-	'BS-1-4': { winner: ['BS-2-4', 'player1'] },
+  'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-4', 'player2'] },
+  'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-3', 'player2'] },
+  'FS-2-3': { winner: ['FS-3-2', 'player1'], loser: ['BS-2-2', 'player2'] },
+  'FS-2-4': { winner: ['FS-3-2', 'player2'], loser: ['BS-2-1', 'player2'] },
 
-	// R2 winners → R3.x.player1
-	'BS-2-1': { winner: ['BS-3-1', 'player1'] },
-	'BS-2-2': { winner: ['BS-3-1', 'player1'] }, // keep to player1; FS-3-2 loser fills player2
-	'BS-2-3': { winner: ['BS-3-2', 'player1'] },
-	'BS-2-4': { winner: ['BS-3-2', 'player1'] }, // keep to player1; FS-3-1 loser fills player2
+  // Winners side semis
+  'FS-3-1': { winner: ['FS-4-1', 'player1'], loser: ['BS-4-2', 'player2'] }, // mirror into BS-4
+  'FS-3-2': { winner: ['FS-4-1', 'player2'], loser: ['BS-4-1', 'player2'] },
 
-	// R3 winners → R4 straight over; FS-3 losers mirror into R4
-	'BS-3-1': { winner: ['BS-4-1', 'player1'] }, // counterpart FS-3-2 loser → BS-4-1.player2 (from FS mapping)
-	'BS-3-2': { winner: ['BS-4-2', 'player1'] }, // counterpart FS-3-1 loser → BS-4-2.player2 (from FS mapping)
+  // Winners side final
+  'FS-4-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
 
-	// R4 winners meet in R5
-	'BS-4-1': { winner: ['BS-5-1', 'player1'] },
-	'BS-4-2': { winner: ['BS-5-1', 'player2'] },
+  // === BACKSIDE (16) ===
+  // BS-R1 (4 matches) winners → BS-R2.player1
+  'BS-1-1': { winner: ['BS-2-1', 'player1'] },
+  'BS-1-2': { winner: ['BS-2-2', 'player1'] },
+  'BS-1-3': { winner: ['BS-2-3', 'player1'] },
+  'BS-1-4': { winner: ['BS-2-4', 'player1'] },
 
-	// R5 winner advances to BS-FINAL.player2
-	'BS-5-1': { winner: ['BS-FINAL', 'player2'] },
+  // BS-R2 winners → BS-R3.player1
+  'BS-2-1': { winner: ['BS-3-1', 'player1'] },
+  'BS-2-2': { winner: ['BS-3-1', 'player1'] }, // player2 supplied later by FS-3-2 loser
+  'BS-2-3': { winner: ['BS-3-2', 'player1'] },
+  'BS-2-4': { winner: ['BS-3-2', 'player1'] }, // player2 supplied later by FS-3-1 loser
 
-	// BS champion → GRAND-FINAL.player2
-	'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
+  // BS-R3 winners go straight to BS-R4 player1
+  'BS-3-1': { winner: ['BS-4-1', 'player1'] },
+  'BS-3-2': { winner: ['BS-4-2', 'player1'] },
+
+  // BS-R4 winners meet in BS-R5-1
+  'BS-4-1': { winner: ['BS-5-1', 'player1'] },
+  'BS-4-2': { winner: ['BS-5-1', 'player2'] },
+
+  // BS-R5 winner → BS-FINAL.player2
+  'BS-5-1': { winner: ['BS-FINAL', 'player2'] },
+
+  // BS champion → GRAND-FINAL.player2
+  'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
     },
 
     32: {
@@ -106,30 +111,43 @@ const MATCH_PROGRESSION = {
         'FS-4-2': { winner: ['FS-5-1', 'player2'], loser: ['BS-4-1', 'player2'] },
         'FS-5-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
 
-        // === BACKSIDE ===
-        'BS-1-1': { winner: ['BS-2-1', 'player1'] },
-        'BS-1-2': { winner: ['BS-2-2', 'player1'] },
-        'BS-1-3': { winner: ['BS-2-3', 'player1'] },
-        'BS-1-4': { winner: ['BS-2-4', 'player1'] },
-        'BS-1-5': { winner: ['BS-2-5', 'player1'] },
-        'BS-1-6': { winner: ['BS-2-6', 'player1'] },
-        'BS-1-7': { winner: ['BS-2-7', 'player1'] },
-        'BS-1-8': { winner: ['BS-2-8', 'player1'] },
-        'BS-2-1': { winner: ['BS-3-1', 'player1'] },
-        'BS-2-2': { winner: ['BS-3-1', 'player1'] },
-        'BS-2-3': { winner: ['BS-3-2', 'player1'] },
-        'BS-2-4': { winner: ['BS-3-2', 'player1'] },
-        'BS-2-5': { winner: ['BS-3-3', 'player1'] },
-        'BS-2-6': { winner: ['BS-3-3', 'player1'] },
-        'BS-2-7': { winner: ['BS-3-4', 'player1'] },
-        'BS-2-8': { winner: ['BS-3-4', 'player1'] },
-        'BS-3-1': { winner: ['BS-4-1', 'player1'] },
-        'BS-3-2': { winner: ['BS-4-1', 'player1'] },
-        'BS-3-3': { winner: ['BS-4-2', 'player1'] },
-        'BS-3-4': { winner: ['BS-4-2', 'player1'] },
-        'BS-4-1': { winner: ['BS-FINAL', 'player2'] },
-        'BS-4-2': { winner: ['BS-FINAL', 'player2'] },
-        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
+	// === BACKSIDE (32) ===
+	// R1 winners → R2.x.player1
+	'BS-1-1': { winner: ['BS-2-1', 'player1'] },
+	'BS-1-2': { winner: ['BS-2-2', 'player1'] },
+	'BS-1-3': { winner: ['BS-2-3', 'player1'] },
+	'BS-1-4': { winner: ['BS-2-4', 'player1'] },
+	'BS-1-5': { winner: ['BS-2-5', 'player1'] },
+	'BS-1-6': { winner: ['BS-2-6', 'player1'] },
+	'BS-1-7': { winner: ['BS-2-7', 'player1'] },
+	'BS-1-8': { winner: ['BS-2-8', 'player1'] },
+
+	// R2 winners → R3.x.player1 (only player1; player2 will come from FS-4 losers later)
+	'BS-2-1': { winner: ['BS-3-1', 'player1'] },
+	'BS-2-2': { winner: ['BS-3-1', 'player1'] }, // keep to player1; FS-4-? losers fill R4
+	'BS-2-3': { winner: ['BS-3-2', 'player1'] },
+	'BS-2-4': { winner: ['BS-3-2', 'player1'] },
+	'BS-2-5': { winner: ['BS-3-3', 'player1'] },
+	'BS-2-6': { winner: ['BS-3-3', 'player1'] },
+	'BS-2-7': { winner: ['BS-3-4', 'player1'] },
+	'BS-2-8': { winner: ['BS-3-4', 'player1'] },
+
+	// R3 winners go straight over into BS-4 player1 slots.
+	// The player2 slots of BS-4 will be filled by FS-4 losers via mirroring (from FS mapping).
+	'BS-3-1': { winner: ['BS-4-1', 'player1'] },
+	'BS-3-2': { winner: ['BS-4-1', 'player1'] }, // consolidated to player1
+	'BS-3-3': { winner: ['BS-4-2', 'player1'] },
+	'BS-3-4': { winner: ['BS-4-2', 'player1'] }, // consolidated to player1
+
+	// R4 winners meet in R5
+	'BS-4-1': { winner: ['BS-5-1', 'player1'] },
+	'BS-4-2': { winner: ['BS-5-1', 'player2'] },
+
+	// R5 winner → BS-FINAL.player2
+	'BS-5-1': { winner: ['BS-FINAL', 'player2'] },
+
+	// BS champion → GRAND-FINAL.player2
+	'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
     }
     
     // TODO: Add 48-player progression when needed
@@ -647,7 +665,8 @@ function calculateCleanBracketStructure(bracketSize) {
             { round: 1, matches: 4 },
             { round: 2, matches: 4 },
             { round: 3, matches: 2 },
-            { round: 4, matches: 1 }
+            { round: 4, matches: 2 },
+            { round: 5, matches: 1 }
         ];
     } else if (bracketSize === 32) {
         backside = [
