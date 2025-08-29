@@ -179,7 +179,7 @@ function renderFinalMatches(grid) {
     const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
 
     // Position finals to the FAR RIGHT
-    const finalsX = grid.centerX + grid.centerBuffer + 4 * (grid.matchWidth + grid.horizontalSpacing);
+    const finalsX = grid.centerX + grid.centerBuffer + 4 * (grid.matchWidth + grid.horizontalSpacing) + 1.5 * grid.matchWidth;
     const backsideFinalY = grid.centerY - 80;
     const grandFinalY = grid.centerY + 80;
 
