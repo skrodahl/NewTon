@@ -120,6 +120,12 @@ function saveStats() {
     if (typeof saveTournament === 'function') {
         saveTournament();
     }
+
+    // Refresh the results table dynamically
+    if (typeof updateResultsTable === 'function') {
+        updateResultsTable();
+    }
+
     closeStatsModal();
 }
 

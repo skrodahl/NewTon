@@ -12,7 +12,8 @@ let config = {
     third: 1,
     highOut: 1,
     ton: 0,
-    oneEighty: 1
+    oneEighty: 1,
+    shortLeg: 1 
     },
     legs: {
     regularRounds: 3,
@@ -20,7 +21,10 @@ let config = {
     backsideFinal: 5,
     grandFinal: 5
     },
-    applicationTitle: "NewTon DC - Tournament Manager"
+    applicationTitle: "NewTon DC - Tournament Manager",
+        ui: {
+        confirmWinnerSelection: true  // Default to true for safety
+    }
 };
 let currentStatsPlayer = null;
 

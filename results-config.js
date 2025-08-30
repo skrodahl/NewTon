@@ -102,21 +102,24 @@ function loadConfiguration() {
     
     const tonEl = document.getElementById('tonPoints');
     if (tonEl) tonEl.value = config.points.ton;
+
+    const shortLegEl = document.getElementById('shortLegPoints');
+    if (shortLegEl) shortLegEl.value = config.points.shortLeg;
     
     const oneEightyEl = document.getElementById('oneEightyPoints');
     if (oneEightyEl) oneEightyEl.value = config.points.oneEighty;
 
-	const regularRoundsLegsEl = document.getElementById('regularRoundsLegs');
-	if (regularRoundsLegsEl) regularRoundsLegsEl.value = config.legs.regularRounds;
+    const regularRoundsLegsEl = document.getElementById('regularRoundsLegs');
+    if (regularRoundsLegsEl) regularRoundsLegsEl.value = config.legs.regularRounds;
 
-	const semifinalLegsEl = document.getElementById('semiFinalsLegs');
-	if (semifinalLegsEl) semifinalLegsEl.value = config.legs.semifinal;
+    const semifinalLegsEl = document.getElementById('semiFinalsLegs');
+    if (semifinalLegsEl) semifinalLegsEl.value = config.legs.semifinal;
 
-	const backsideFinalLegsEl = document.getElementById('backsideFinalLegs');
-	if (backsideFinalLegsEl) backsideFinalLegsEl.value = config.legs.backsideFinal;
+    const backsideFinalLegsEl = document.getElementById('backsideFinalLegs');
+    if (backsideFinalLegsEl) backsideFinalLegsEl.value = config.legs.backsideFinal;
 
-	const grandFinalLegsEl = document.getElementById('grandFinalLegs');
-	if (grandFinalLegsEl) grandFinalLegsEl.value = config.legs.grandFinal;
+    const grandFinalLegsEl = document.getElementById('grandFinalLegs');
+    if (grandFinalLegsEl) grandFinalLegsEl.value = config.legs.grandFinal;
 
     // Load application title
     if (config.applicationTitle) {
@@ -133,22 +136,74 @@ function loadConfiguration() {
     const requireLaneEl = document.getElementById('requireLaneForStart');
     if (requireLaneEl) requireLaneEl.checked = config.lanes.requireLaneForStart || false;
     }
+
+    // Load UI configuration (with null checks)
+    if (config.ui) {
+        const confirmWinnerEl = document.getElementById('confirmWinnerSelection');
+        if (confirmWinnerEl) confirmWinnerEl.checked = config.ui.confirmWinnerSelection !== false; // Default to true
+    }
     }
 }
 
-function saveConfiguration() {
-    config.points.participation = parseInt(document.getElementById('participationPoints').value);
-    config.points.first = parseInt(document.getElementById('firstPlacePoints').value);
-    config.points.second = parseInt(document.getElementById('secondPlacePoints').value);
-    config.points.third = parseInt(document.getElementById('thirdPlacePoints').value);
-    config.points.highOut = parseInt(document.getElementById('highOutPoints').value);
-    config.points.ton = parseInt(document.getElementById('tonPoints').value);
-    config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value);
+//function saveConfiguration() {
+//    config.points.participation = parseInt(document.getElementById('participationPoints').value);
+//    config.points.first = parseInt(document.getElementById('firstPlacePoints').value);
+//    config.points.second = parseInt(document.getElementById('secondPlacePoints').value);
+//    config.points.third = parseInt(document.getElementById('thirdPlacePoints').value);
+//    config.points.highOut = parseInt(document.getElementById('highOutPoints').value);
+//    config.points.ton = parseInt(document.getElementById('tonPoints').value);
+//    config.points.shortLeg = parseInt(document.getElementById('shortLegPoints').value);
+//    config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value);
+//
+//    config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value);
+//    config.legs.semifinal = parseInt(document.getElementById('semiFinalsLegs').value);
+//    config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value);
+//    config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value);
+//
+//    localStorage.setItem('dartsConfig', JSON.stringify(config));
+//    alert('Configuration saved successfully!');
+//}
 
-    config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value);
-    config.legs.semifinal = parseInt(document.getElementById('semifinalLegs').value);
-    config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value);
-    config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value);
+function saveConfiguration() {
+    // Debug each element to find which one is null
+    const elements = {
+        'participationPoints': document.getElementById('participationPoints'),
+        'firstPlacePoints': document.getElementById('firstPlacePoints'),
+        'secondPlacePoints': document.getElementById('secondPlacePoints'),
+        'thirdPlacePoints': document.getElementById('thirdPlacePoints'),
+        'highOutPoints': document.getElementById('highOutPoints'),
+        'tonPoints': document.getElementById('tonPoints'),
+        'shortLegPoints': document.getElementById('shortLegPoints'),
+        'oneEightyPoints': document.getElementById('oneEightyPoints'),
+        'regularRoundsLegs': document.getElementById('regularRoundsLegs'),
+        'semiFinalsLegs': document.getElementById('semiFinalsLegs'),
+        'backsideFinalLegs': document.getElementById('backsideFinalLegs'),
+        'grandFinalLegs': document.getElementById('grandFinalLegs')
+    };
+    
+    // Check which elements are null
+    for (const [id, element] of Object.entries(elements)) {
+        if (!element) {
+            console.error(`Element with id '${id}' not found!`);
+            alert(`Element with id '${id}' not found!`);
+            return;
+        }
+    }
+    
+    // If we get here, all elements exist
+    config.points.participation = parseInt(elements.participationPoints.value);
+    config.points.first = parseInt(elements.firstPlacePoints.value);
+    config.points.second = parseInt(elements.secondPlacePoints.value);
+    config.points.third = parseInt(elements.thirdPlacePoints.value);
+    config.points.highOut = parseInt(elements.highOutPoints.value);
+    config.points.ton = parseInt(elements.tonPoints.value);
+    config.points.shortLeg = parseInt(elements.shortLegPoints.value);
+    config.points.oneEighty = parseInt(elements.oneEightyPoints.value);
+    
+    config.legs.regularRounds = parseInt(elements.regularRoundsLegs.value);
+    config.legs.semifinal = parseInt(elements.semiFinalsLegs.value);
+    config.legs.backsideFinal = parseInt(elements.backsideFinalLegs.value);
+    config.legs.grandFinal = parseInt(elements.grandFinalLegs.value);
 
     localStorage.setItem('dartsConfig', JSON.stringify(config));
     alert('Configuration saved successfully!');
@@ -183,4 +238,17 @@ function updateApplicationTitle(title) {
     }
     headerElement.appendChild(document.createTextNode(title));
     }
+}
+
+function saveUIConfiguration() {
+    const confirmWinnerChecked = document.getElementById('confirmWinnerSelection').checked;
+    
+    if (!config.ui) {
+        config.ui = {};
+    }
+    
+    config.ui.confirmWinnerSelection = confirmWinnerChecked;
+    
+    localStorage.setItem('dartsConfig', JSON.stringify(config));
+    alert('UI settings saved successfully!');
 }
