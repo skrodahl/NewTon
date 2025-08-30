@@ -44,11 +44,17 @@
             <div class="form-group">
                 <button class="btn btn-success" onclick="createTournament()">Create New Tournament</button>
                 <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
+		    <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
+    		    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTournament(event)">
             </div>
 
             <div id="tournamentStatus" class="alert alert-info"">
-    No active tournament
-    </div>
+    		No active tournament
+    	    </div>
+
+	    <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">
+    		<!-- Import status messages will appear here -->
+	    </div>
 
     <div class=" config-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">

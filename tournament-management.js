@@ -293,3 +293,182 @@ function resetTournament() {
 
     alert(`Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Registration page.`);
 }
+
+function importTournament(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    // Reset file input for future imports
+    event.target.value = '';
+
+    if (!file.name.endsWith('.json')) {
+        showImportStatus('error', 'Please select a valid JSON file');
+        return;
+    }
+
+    const reader = new FileReader();
+    
+    reader.onload = function(e) {
+        try {
+            const importedData = JSON.parse(e.target.result);
+            processImportedTournament(importedData);
+        } catch (error) {
+            showImportStatus('error', 'Invalid JSON file. Please check the file format.');
+            console.error('JSON parse error:', error);
+        }
+    };
+
+    reader.onerror = function() {
+        showImportStatus('error', 'Error reading file. Please try again.');
+    };
+
+    reader.readAsText(file);
+}
+
+function processImportedTournament(importedData) {
+    // Validate tournament structure
+    const validation = validateTournamentData(importedData);
+    if (!validation.valid) {
+        showImportStatus('error', `Invalid tournament data: ${validation.error}`);
+        return;
+    }
+
+    // Check if tournament already exists
+    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const existingTournament = tournaments.find(t => t.id === importedData.id);
+
+    if (existingTournament) {
+        const overwrite = confirm(
+            `Tournament "${importedData.name}" (${importedData.date}) already exists.\n\n` +
+            `Do you want to overwrite it with the imported version?`
+        );
+        
+        if (!overwrite) {
+            showImportStatus('warning', 'Import cancelled by user');
+            return;
+        }
+    }
+
+    // Import the tournament
+    try {
+        // Set as current tournament
+        tournament = importedData;
+        players = tournament.players || [];
+        matches = tournament.matches || [];
+
+        // Update UI fields
+        document.getElementById('tournamentName').value = tournament.name;
+        document.getElementById('tournamentDate').value = tournament.date;
+
+        // Save to localStorage
+        saveTournament();
+
+        // Update displays
+        updateTournamentStatus();
+        updatePlayersDisplay();
+        updatePlayerCount();
+
+        // Load recent tournaments to show the updated list
+        loadRecentTournaments();
+
+        // Render bracket if exists
+        if (tournament.bracket && typeof renderBracket === 'function') {
+            renderBracket();
+        }
+
+        // Display results
+        if (typeof displayResults === 'function') {
+            displayResults();
+        }
+
+        showImportStatus('success', 
+            `Tournament "${tournament.name}" imported successfully! ` +
+            `${players.length} players and ${matches.filter(m => m.completed).length} completed matches loaded.`
+        );
+
+        // Auto-switch to registration page
+        setTimeout(() => {
+            showPage('registration');
+        }, 1500);
+
+    } catch (error) {
+        showImportStatus('error', 'Error importing tournament data. Please try again.');
+        console.error('Import error:', error);
+    }
+}
+
+function validateTournamentData(data) {
+    // Check required fields
+    if (!data || typeof data !== 'object') {
+        return { valid: false, error: 'Data must be a valid tournament object' };
+    }
+
+    if (!data.name || typeof data.name !== 'string') {
+        return { valid: false, error: 'Tournament name is required' };
+    }
+
+    if (!data.date || typeof data.date !== 'string') {
+        return { valid: false, error: 'Tournament date is required' };
+    }
+
+    // Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(data.date)) {
+        return { valid: false, error: 'Tournament date must be in YYYY-MM-DD format' };
+    }
+
+    // Ensure ID exists (generate if missing)
+    if (!data.id) {
+        data.id = Date.now();
+        console.warn('Generated new ID for imported tournament:', data.id);
+    }
+
+    // Validate players array
+    if (data.players && !Array.isArray(data.players)) {
+        return { valid: false, error: 'Players must be an array' };
+    }
+
+    // Validate matches array
+    if (data.matches && !Array.isArray(data.matches)) {
+        return { valid: false, error: 'Matches must be an array' };
+    }
+
+    // Set default values for missing optional fields
+    if (!data.status) data.status = 'setup';
+    if (!data.players) data.players = [];
+    if (!data.matches) data.matches = [];
+    if (!data.created) data.created = new Date().toISOString();
+
+    // Validate each player has required fields
+    if (data.players.length > 0) {
+        for (let i = 0; i < data.players.length; i++) {
+            const player = data.players[i];
+            if (!player.name || !player.id) {
+                return { valid: false, error: `Player ${i + 1} is missing required fields (name, id)` };
+            }
+            
+            // Set default player values
+            if (typeof player.paid === 'undefined') player.paid = false;
+            if (!player.stats) player.stats = { shortLegs: 0, highOuts: [], tons: 0, oneEighties: 0 };
+        }
+    }
+
+    return { valid: true };
+}
+
+function showImportStatus(type, message) {
+    const statusDiv = document.getElementById('importStatus');
+    if (!statusDiv) return;
+
+    // Set styling based on type
+    statusDiv.className = `alert alert-${type}`;
+    statusDiv.innerHTML = message;
+    statusDiv.style.display = 'block';
+
+    // Auto-hide success/warning messages after 5 seconds
+    if (type === 'success' || type === 'warning') {
+        setTimeout(() => {
+            statusDiv.style.display = 'none';
+        }, 5000);
+    }
+}
