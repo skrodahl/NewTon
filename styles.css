@@ -589,10 +589,53 @@ body {
   margin-bottom: 12px;
 }
 
+/* Ensure form groups in config sections align properly */
+.config-section .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.config-section .form-group label {
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #111827;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+/* Fix checkbox sizing in config sections */
+.config-section input[type="checkbox"] {
+  width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  padding: 0 !important;
+  transform: scale(1.2); /* Keep them slightly larger for accessibility */
+  margin-right: 8px;
+}
+
+/* Special handling for checkbox labels in config */
+.config-section .form-group label input[type="checkbox"] {
+  margin-right: 8px;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+/* Ensure selects and inputs have consistent heights */
+.config-section .form-group select,
+.config-section .form-group input {
+  min-height: 44px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+
+/* Enhanced config grid for better alignment */
 .config-grid {
   display: grid;
   grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
   gap: 16px;
+  align-items: start; /* Changed from default */
 }
 
 /* Results table */
