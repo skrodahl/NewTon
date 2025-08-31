@@ -714,23 +714,40 @@ function showMatchDetails() {
     }
     
     const activeMatches = matches.filter(m => getMatchState(m) === 'live');
-    const readyMatches = matches.filter(m => getMatchState(m) === 'ready'); 
-    const completedMatches = matches.filter(m => m.completed);
-    const totalMatches = matches.length;
+    const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
 
-    let details = `Tournament Match Summary:\n\n`;
-    details += `Total Matches: ${totalMatches}\n`;
-    details += `Completed: ${completedMatches.length}\n`;
-    details += `Live: ${activeMatches.length}\n`;
-    details += `Ready to Start: ${readyMatches.length}\n`;
-    details += `Pending: ${totalMatches - completedMatches.length - activeMatches.length - readyMatches.length}\n`;
+    let details = '';
 
+    // Show Live matches first (most important)
     if (activeMatches.length > 0) {
-        details += `\nActive Matches:\n`;
+        details += `Live:\n`;
         activeMatches.forEach(match => {
             const lane = match.lane ? ` (Lane ${match.lane})` : '';
             details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${lane}\n`;
         });
+        details += '\n';
+    }
+
+    // Show Ready to start matches
+    if (readyMatches.length > 0) {
+        details += `Ready to start:\n`;
+        readyMatches.forEach(match => {
+            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}\n`;
+        });
+        details += '\n';
+    }
+
+    // If no actionable matches, show summary
+    if (activeMatches.length === 0 && readyMatches.length === 0) {
+        const completedMatches = matches.filter(m => m.completed);
+        const pendingMatches = matches.length - completedMatches.length;
+        
+        details = `No matches currently active or ready.\n\n`;
+        details += `Completed: ${completedMatches.length}\n`;
+        details += `Pending: ${pendingMatches}`;
+    } else {
+        // Remove trailing newline
+        details = details.trim();
     }
 
     alert(details);

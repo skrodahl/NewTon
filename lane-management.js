@@ -3,7 +3,7 @@
 // Add lane configuration to global config
 if (typeof config !== 'undefined') {
     config.lanes = config.lanes || {
-        maxLanes: 10,           // Maximum number of lanes available
+        maxLanes: 4,           // Maximum number of lanes available
         requireLaneForStart: false  // Whether to require lane before starting match
     };
 }
