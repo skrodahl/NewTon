@@ -704,6 +704,38 @@ function updateMatchReferee(matchId, refereeId) {
     return true;
 }
 
+/**
+ * Show tournament match details summary
+ */
+function showMatchDetails() {
+    if (!matches || matches.length === 0) {
+        alert('No matches available to show details for.');
+        return;
+    }
+    
+    const activeMatches = matches.filter(m => getMatchState(m) === 'live');
+    const readyMatches = matches.filter(m => getMatchState(m) === 'ready'); 
+    const completedMatches = matches.filter(m => m.completed);
+    const totalMatches = matches.length;
+
+    let details = `Tournament Match Summary:\n\n`;
+    details += `Total Matches: ${totalMatches}\n`;
+    details += `Completed: ${completedMatches.length}\n`;
+    details += `Live: ${activeMatches.length}\n`;
+    details += `Ready to Start: ${readyMatches.length}\n`;
+    details += `Pending: ${totalMatches - completedMatches.length - activeMatches.length - readyMatches.length}\n`;
+
+    if (activeMatches.length > 0) {
+        details += `\nActive Matches:\n`;
+        activeMatches.forEach(match => {
+            const lane = match.lane ? ` (Lane ${match.lane})` : '';
+            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${lane}\n`;
+        });
+    }
+
+    alert(details);
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.updateUndoButtonState = updateUndoButtonState;
@@ -715,4 +747,5 @@ if (typeof window !== 'undefined') {
     window.refreshTournamentUI = refreshTournamentUI;
     window.generateRefereeOptions = generateRefereeOptions;
     window.updateMatchReferee = updateMatchReferee;
+    window.showMatchDetails = showMatchDetails;
 }
