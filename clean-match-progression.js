@@ -616,6 +616,11 @@ function generateCleanBracket() {
 
     console.log(`✓ Clean bracket generated: ${bracketSize} positions, ${paidPlayers.length} real players`);
 
+    // Refresh results table immediately after bracket generation
+    if (typeof displayResults === 'function') {
+        displayResults();
+    }
+
     if (typeof showPage === 'function') {
         showPage('tournament');
     }
