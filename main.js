@@ -31,6 +31,40 @@ let currentStatsPlayer = null;
 // Initialize application
 document.addEventListener('DOMContentLoaded', function() {
     loadConfiguration();
+
+    // Auto-detect and load logo
+    function loadClubLogo() {
+        const logoContainer = document.getElementById('clubLogo');
+        if (!logoContainer) return;
+    
+        // Try different logo file extensions
+        const logoFiles = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg'];
+        let logoLoaded = false;
+    
+        logoFiles.forEach(filename => {
+            if (logoLoaded) return; // Skip if already found one
+        
+            const img = new Image();
+            img.onload = function() {
+                // Logo found - replace placeholder
+                logoContainer.innerHTML = '';
+                logoContainer.className = 'club-logo';
+                logoContainer.appendChild(img);
+                img.alt = 'Club Logo';
+                img.style.width = '60px';
+                img.style.height = '60px';
+                img.style.borderRadius = '50%';
+                img.style.objectFit = 'cover';
+                logoLoaded = true;
+            };
+            img.onerror = function() {
+                // Logo not found - keep placeholder (do nothing)
+            };
+            img.src = filename;
+        });
+    }
+
+    loadClubLogo();
     
     // Try to load recent tournaments, but don't fail if function isn't available yet
     try {
