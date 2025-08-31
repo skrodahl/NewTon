@@ -33,7 +33,7 @@ Simply download the repository, open `tournament.html`, and start managing your 
   - Prevent conflicts with active matches
   - Lane usage summary
   - Configurable requirement for lane assignment before starting matches
-  - Auto-referee assignment with manual override
+  - Referee assignment
 
 - **Configuration**
   - Customizable points for participation, placements, short legs, outs, tons, and 180s
