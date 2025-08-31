@@ -44,19 +44,19 @@
             <div class="form-group">
                 <button class="btn btn-success" onclick="createTournament()">Create New Tournament</button>
                 <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
-		    <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
-    		    <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTournament(event)">
+                <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
+                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTournament(event)">
             </div>
 
-            <div id="tournamentStatus" class="alert alert-info"">
-    		No active tournament
-    	    </div>
+            <div id="tournamentStatus" class="alert alert-info">
+                No active tournament
+            </div>
 
-	    <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">
-    		<!-- Import status messages will appear here -->
-	    </div>
+            <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">
+                <!-- Import status messages will appear here -->
+            </div>
 
-    <div class=" config-section">
+            <div class="config-section">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
                     <h3>Recent Tournaments</h3>
                     <button class="btn" id="toggleTournamentsBtn" onclick="toggleTournamentView()"
@@ -80,7 +80,7 @@
                 </div>
             </div>
 
-            <div style="display: flex; justify-content: space-between; align-items: center; margin: 20px 0;">
+            <div class="d-flex justify-between align-center mt-20 mb-20">
                 <h3>Players (<span id="playerCount">0</span> total, <span id="paidCount">0</span> paid)</h3>
                 <div>
                     <button class="btn" onclick="generateBracket()">Generate Bracket</button>
@@ -117,15 +117,14 @@
         <div id="tournament" class="page">
             <h2>Double Elimination Bracket</h2>
 
-            <div id="tournamentControls" style="margin-bottom: 20px;">
-                <button class="btn" onclick="autoAssignReferees()">Auto-Assign Referees</button>
+            <div id="tournamentControls" class="mb-20">
                 <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
                 <button class="btn" onclick="showMatchDetails()">Match Details</button>
             </div>
 
             <div class="bracket-container">
                 <div class="bracket-controls">
-		    <button class="zoom-btn" id="undoBtn" onclick="handleUndoClick()" title="No matches to undo" disabled>↩</button>
+                    <button class="zoom-btn" id="undoBtn" onclick="handleUndoClick()" title="No matches to undo" disabled>↩</button>
                     <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
                     <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
                     <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
@@ -214,7 +213,7 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label for="semiFinalLegs">Semi-Finals</label>
+                        <label for="semiFinalsLegs">Semi-Finals</label>
                         <select id="semiFinalsLegs">
                             <option value="3" selected>Best of 3</option>
                             <option value="5">Best of 5</option>
@@ -335,8 +334,7 @@
     <script src="tournament-controls.js"></script>
     <script src="results-config.js"></script>
 
-    <footer
-        style="text-align: center; padding: 20px; color: #666; font-size: 14px; border-top: 1px solid #ddd; margin-top: 20px; background: white;">
+    <footer>
         Created by Håvard Skrödahl - NewTon DC Malmö
     </footer>
 
@@ -347,7 +345,7 @@
             <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
                 <!-- Message will be populated by JavaScript -->
             </div>
-            <div style="text-align: center; margin-top: 30px;">
+            <div class="text-center mt-20">
                 <button class="btn" id="winnerConfirmCancel" style="margin-right: 15px; background: #6c757d;">Cancel</button>
                 <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
             </div>
