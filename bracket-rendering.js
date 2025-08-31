@@ -281,16 +281,21 @@ function renderMatch(match, x, y, section, roundIndex) {
                 ${match.winner?.id === match.player2?.id ? '<span class="winner-check">✓</span>' : ''}
             </div>
         </div>
-        <div class="match-controls">
-            <span style="font-size: 11px; color: #666;">No referee system</span>
-            <button onclick="${getButtonClickHandler(matchState, match.id)}" 
-                    style="font-size: 9px; padding: 3px 6px; border: none; border-radius: 3px; 
-                           background: ${buttonColor}; color: ${buttonTextColor}; 
-                           ${buttonDisabled ? 'opacity: 0.6; cursor: not-allowed;' : 'cursor: pointer;'}"
-                    ${buttonDisabled ? 'disabled' : ''}>
-                ${buttonText}
-            </button>
-        </div>
+	<div class="match-controls">
+    	    <span style="font-size: 9px; color: #666;">
+        	    Ref: <select onchange="updateMatchReferee('${match.id}', this.value)" 
+                     style="background: white; border: 1px solid #ddd; font-size: 9px; width: 60px; padding: 1px;">
+            	    ${generateRefereeOptions(match.referee)}
+        	    </select>
+    	    </span>
+    	    <button onclick="${getButtonClickHandler(matchState, match.id)}" 
+            	    style="font-size: 9px; padding: 3px 6px; border: none; border-radius: 3px; 
+                   	    background: ${buttonColor}; color: ${buttonTextColor}; 
+                   	    ${buttonDisabled ? 'opacity: 0.6; cursor: not-allowed;' : 'cursor: pointer;'}"
+            	    ${buttonDisabled ? 'disabled' : ''}>
+        	    ${buttonText}
+    	    </button>
+	</div>
     `;
 
     document.getElementById('bracketMatches').appendChild(matchElement);
@@ -658,6 +663,47 @@ function refreshTournamentUI() {
     }
 }
 
+/**
+ * Generate referee dropdown options from all players
+ */
+function generateRefereeOptions(currentRefereeId = null) {
+    let options = '<option value="">None</option>';
+    
+    if (typeof players !== 'undefined' && Array.isArray(players)) {
+        const paidPlayers = players.filter(player => player.paid);
+        paidPlayers.forEach(player => {
+            const selected = currentRefereeId && String(currentRefereeId) === String(player.id) ? 'selected' : '';
+            const playerName = player.name.length > 8 ? player.name.substring(0, 8) + '...' : player.name;
+            options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
+        });
+    }
+    
+    return options;
+}
+
+/**
+ * Update match referee assignment
+ */
+function updateMatchReferee(matchId, refereeId) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        console.error(`Match ${matchId} not found`);
+        return false;
+    }
+    
+    // Set referee ID (null if "None" selected)
+    match.referee = refereeId ? parseInt(refereeId) : null;
+    
+    console.log(`Referee updated for ${matchId}: ${match.referee ? `Player ${refereeId}` : 'None'}`);
+    
+    // Save tournament if function exists
+    if (typeof saveTournament === 'function') {
+        saveTournament();
+    }
+    
+    return true;
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.updateUndoButtonState = updateUndoButtonState;
@@ -667,4 +713,6 @@ if (typeof window !== 'undefined') {
     window.restoreFromHistory = restoreFromHistory;
     window.removeLastHistoryEntry = removeLastHistoryEntry;
     window.refreshTournamentUI = refreshTournamentUI;
+    window.generateRefereeOptions = generateRefereeOptions;
+    window.updateMatchReferee = updateMatchReferee;
 }
