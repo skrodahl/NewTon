@@ -27,6 +27,10 @@ function renderBracket() {
     }
 
     clearBracket();
+    
+    // UPDATE UNDO BUTTON STATE
+    updateUndoButtonState();
+    
     renderCleanBracket();
 }
 
@@ -321,7 +325,7 @@ function renderTitles(grid) {
     
     const finalsX = grid.centerX + grid.centerBuffer + 4 * (grid.matchWidth + grid.horizontalSpacing);
     finalsTitle.style.position = 'absolute';
-    finalsTitle.style.left = (finalsX + 50) + 'px';
+    finalsTitle.style.left = (finalsX + 320) + 'px';
     finalsTitle.style.top = titleY + 'px';
     finalsTitle.style.fontSize = '28px';
     finalsTitle.style.color = '#ff6b35';
@@ -462,4 +466,205 @@ function handleDrag(e) {
 
 function endDrag() {
     isDragging = false;
+}
+
+// UNDO SYSTEM FUNCTIONS
+
+/**
+ * Get the most recent OPERATOR-COMPLETED history entry (skip walkovers)
+ */
+function getLastOperatorHistoryEntry() {
+    const history = getTournamentHistory();
+    
+    // Find first entry that's a real player vs real player match
+    for (const entry of history) {
+        const description = entry.description;
+        // Skip any matches involving walkovers or TBD players
+        if (!description.includes('Walkover') && !description.includes('TBD')) {
+            return entry;
+        }
+    }
+    
+    return null;
+}
+
+/**
+ * Check if undo is available for operator actions only
+ */
+function canUndoOperatorAction() {
+    return getLastOperatorHistoryEntry() !== null;
+}
+
+/**
+ * Update undo button state based on OPERATOR history availability
+ */
+function updateUndoButtonState() {
+    const undoBtn = document.getElementById('undoBtn');
+    if (!undoBtn) return; // Button doesn't exist yet
+    
+    const canUndoNow = canUndoOperatorAction();
+    const lastEntry = getLastOperatorHistoryEntry();
+    
+    if (canUndoNow && lastEntry) {
+        undoBtn.disabled = false;
+        undoBtn.style.opacity = '1';
+        undoBtn.style.cursor = 'pointer';
+        undoBtn.title = `Undo: ${lastEntry.description}`;
+    } else {
+        undoBtn.disabled = true;
+        undoBtn.style.opacity = '0.6';
+        undoBtn.style.cursor = 'not-allowed';
+        undoBtn.title = 'No operator matches to undo';
+    }
+}
+
+/**
+ * Handle undo button click - COMPLETE IMPLEMENTATION
+ */
+function handleUndoClick() {
+    const lastEntry = getLastOperatorHistoryEntry();
+    
+    if (!lastEntry) {
+        alert('No operator matches available to undo');
+        return;
+    }
+    
+    // Show confirmation dialog
+    const confirmMessage = 
+        `Undo Last Match\n\n` +
+        `Match: ${lastEntry.description}\n` +
+        `Completed: ${new Date(lastEntry.timestamp).toLocaleTimeString()}\n\n` +
+        `⚠️ This will restore the tournament to its previous state\n\n` +
+        `Are you sure?`;
+    
+    if (!confirm(confirmMessage)) {
+        console.log('Undo cancelled by user');
+        return;
+    }
+    
+    // Perform the restore
+    const success = restoreFromHistory(lastEntry);
+    
+    if (success) {
+        console.log(`✓ Successfully undid: ${lastEntry.description}`);
+        
+        // Show success feedback
+        alert(`✓ Undid: ${lastEntry.description}\n\nTournament restored to previous state.`);
+    } else {
+        console.error('Failed to restore from history');
+        alert('❌ Failed to restore tournament state. Please try again.');
+    }
+}
+
+/**
+ * Restore tournament to a specific history state
+ */
+function restoreFromHistory(historyEntry) {
+    try {
+        console.log(`Restoring tournament from: ${historyEntry.description}`);
+        
+        // Validate history entry structure
+        if (!historyEntry.state || !historyEntry.state.tournament || !historyEntry.state.players || !historyEntry.state.matches) {
+            console.error('Invalid history entry structure');
+            return false;
+        }
+        
+        // Restore global state variables
+        tournament = JSON.parse(JSON.stringify(historyEntry.state.tournament));
+        players = JSON.parse(JSON.stringify(historyEntry.state.players));
+        matches = JSON.parse(JSON.stringify(historyEntry.state.matches));
+        
+        console.log(`✓ Restored state: ${matches.filter(m => m.completed).length} completed matches`);
+        
+        // Remove the restored entry from history (it's now the current state)
+        removeLastHistoryEntry();
+        
+        // Save current state to localStorage
+        if (typeof saveTournament === 'function') {
+            saveTournament();
+        }
+        
+        // Refresh all UI components
+        refreshTournamentUI();
+        
+        return true;
+        
+    } catch (error) {
+        console.error('Error during restore operation:', error);
+        return false;
+    }
+}
+
+/**
+ * Remove the most recent history entry (after successful restore)
+ */
+function removeLastHistoryEntry() {
+    try {
+        let history = getTournamentHistory();
+        
+        if (history.length > 0) {
+            // Remove the first entry (most recent)
+            history.shift();
+            
+            // Save updated history
+            localStorage.setItem('tournamentHistory', JSON.stringify(history));
+            
+            console.log(`✓ Removed restored entry from history (${history.length} entries remaining)`);
+        }
+    } catch (error) {
+        console.error('Error removing history entry:', error);
+    }
+}
+
+/**
+ * Refresh all tournament UI components after restore
+ */
+function refreshTournamentUI() {
+    console.log('Refreshing tournament UI after restore...');
+    
+    try {
+        // Update tournament status display
+        if (typeof updateTournamentStatus === 'function') {
+            updateTournamentStatus();
+        }
+        
+        // Update players display and count
+        if (typeof updatePlayersDisplay === 'function') {
+            updatePlayersDisplay();
+        }
+        if (typeof updatePlayerCount === 'function') {
+            updatePlayerCount();
+        }
+        
+        // Re-render the bracket
+        if (typeof renderBracket === 'function') {
+            renderBracket();
+        }
+        
+        // Update results table
+        if (typeof displayResults === 'function') {
+            displayResults();
+        }
+        
+        // Refresh lane dropdowns if available
+        if (typeof refreshAllLaneDropdowns === 'function') {
+            setTimeout(refreshAllLaneDropdowns, 100);
+        }
+        
+        console.log('✓ UI refresh completed');
+        
+    } catch (error) {
+        console.error('Error during UI refresh:', error);
+    }
+}
+
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.updateUndoButtonState = updateUndoButtonState;
+    window.handleUndoClick = handleUndoClick;
+    window.getLastOperatorHistoryEntry = getLastOperatorHistoryEntry;
+    window.canUndoOperatorAction = canUndoOperatorAction;
+    window.restoreFromHistory = restoreFromHistory;
+    window.removeLastHistoryEntry = removeLastHistoryEntry;
+    window.refreshTournamentUI = refreshTournamentUI;
 }

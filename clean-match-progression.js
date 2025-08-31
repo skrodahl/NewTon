@@ -227,6 +227,10 @@ function advancePlayer(matchId, winner, loser) {
 /**
  * SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
  */
+/**
+ * SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
+ * MODIFIED: Now saves to history before making changes
+ */
 function completeMatch(matchId, winnerPlayerNumber) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
@@ -243,13 +247,31 @@ function completeMatch(matchId, winnerPlayerNumber) {
         return false;
     }
 
-    // Set match as completed
+    // STEP 1: Save current state to history BEFORE making any changes
+    // Only save for operator-completed real player vs real player matches
+    const isRealPlayerMatch = winner.name && winner.name !== 'TBD' && winner.name !== 'Walkover' && !winner.isBye &&
+                         loser.name && loser.name !== 'TBD' && loser.name !== 'Walkover' && !loser.isBye &&
+                         !isWalkover(winner) && !isWalkover(loser);
+
+    const isOperatorAction = !match.autoAdvanced;
+
+    const shouldSaveToHistory = isRealPlayerMatch && isOperatorAction;
+
+    if (shouldSaveToHistory) {
+        const historyDescription = `${matchId}: ${winner.name} defeats ${loser.name}`;
+        saveToHistory(historyDescription);
+        console.log(`✓ Saved operator action to history: ${historyDescription}`);
+    } else {
+        console.log(`⏭ Skipped history save: ${matchId} (walkover or auto-advancement)`);
+    }
+
+    // STEP 2: Set match as completed
     match.winner = winner;
     match.loser = loser;
     match.completed = true;
     match.active = false;
 
-    // Use lookup table to advance players
+    // STEP 3: Use lookup table to advance players
     const success = advancePlayer(matchId, winner, loser);
 
     if (success) {
@@ -296,7 +318,7 @@ function completeMatch(matchId, winnerPlayerNumber) {
             console.error('Grand-final completion error', { matchId, winner, loser, error: e });
         }
 
-        // Trigger auto-advancement check (Phase 3)
+        // STEP 4: Trigger auto-advancement check (Phase 3) - happens AFTER history save
         processAutoAdvancements();
 
         return true;
@@ -1042,9 +1064,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         Declare <strong>${winner.name}</strong> as the WINNER<br>
         against <strong>${loser.name}</strong> in match <strong>${matchId}</strong>
         <br><br>
-        Is this correct?
-        <br><br>
-        <span style="color: #856404;">⚠️ This action is permanent and cannot be undone.</span>
+        Please confirm the winner, or press "Cancel":
     `;
     
     // Show modal
@@ -1096,4 +1116,111 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     document.addEventListener('keydown', handleKeyPress);
     
     return true; // Indicates async operation
+}
+
+// TOURNAMENT HISTORY MANAGEMENT
+
+const MAX_HISTORY_ENTRIES = 10; // Keep last 10 states
+
+/**
+ * Save current tournament state to history before making changes
+ */
+function saveToHistory(description) {
+    if (!tournament || !matches || matches.length === 0) {
+        console.log('No tournament state to save to history');
+        return;
+    }
+
+    // Create snapshot of current state
+    const historyEntry = {
+        id: `step_${Date.now()}`,
+        timestamp: new Date().toISOString(),
+        description: description || 'Tournament state',
+        matchesCompleted: matches.filter(m => m.completed).length,
+        state: {
+            tournament: JSON.parse(JSON.stringify(tournament)),
+            players: JSON.parse(JSON.stringify(players)),
+            matches: JSON.parse(JSON.stringify(matches))
+        }
+    };
+
+    // Load existing history
+    let history = getTournamentHistory();
+    
+    // Add new entry at the beginning (most recent first)
+    history.unshift(historyEntry);
+    
+    // Keep only last MAX_HISTORY_ENTRIES
+    if (history.length > MAX_HISTORY_ENTRIES) {
+        history = history.slice(0, MAX_HISTORY_ENTRIES);
+    }
+    
+    // Save to localStorage
+    localStorage.setItem('tournamentHistory', JSON.stringify(history));
+    
+    console.log(`✓ Saved to history: ${description} (${history.length} entries total)`);
+}
+
+/**
+ * Get tournament history from localStorage
+ */
+function getTournamentHistory() {
+    try {
+        const historyData = localStorage.getItem('tournamentHistory');
+        return historyData ? JSON.parse(historyData) : [];
+    } catch (error) {
+        console.error('Error loading tournament history:', error);
+        return [];
+    }
+}
+
+/**
+ * Clear tournament history (useful for testing)
+ */
+function clearTournamentHistory() {
+    localStorage.removeItem('tournamentHistory');
+    console.log('✓ Tournament history cleared');
+}
+
+/**
+ * Get the most recent history entry (for undo)
+ */
+function getLastHistoryEntry() {
+    const history = getTournamentHistory();
+    return history.length > 0 ? history[0] : null;
+}
+
+/**
+ * Check if undo is available
+ */
+function canUndo() {
+    return getLastHistoryEntry() !== null;
+}
+
+/**
+ * Debug function to show current history
+ */
+function debugHistory() {
+    const history = getTournamentHistory();
+    console.log('=== TOURNAMENT HISTORY ===');
+    console.log(`Total entries: ${history.length}`);
+    
+    history.forEach((entry, index) => {
+        const time = new Date(entry.timestamp).toLocaleTimeString();
+        console.log(`${index + 1}. [${time}] ${entry.description} (${entry.matchesCompleted} matches)`);
+    });
+    
+    if (history.length === 0) {
+        console.log('No history entries found');
+    }
+}
+
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.saveToHistory = saveToHistory;
+    window.getTournamentHistory = getTournamentHistory;
+    window.clearTournamentHistory = clearTournamentHistory;
+    window.getLastHistoryEntry = getLastHistoryEntry;
+    window.canUndo = canUndo;
+    window.debugHistory = debugHistory;
 }
