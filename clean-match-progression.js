@@ -1120,7 +1120,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
 // TOURNAMENT HISTORY MANAGEMENT
 
-const MAX_HISTORY_ENTRIES = 10; // Keep last 10 states
+const MAX_HISTORY_ENTRIES = 50; // Keep last 50 states
 
 /**
  * Save current tournament state to history before making changes
