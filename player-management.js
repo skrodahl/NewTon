@@ -34,6 +34,7 @@ function addPlayer() {
     updatePlayersDisplay();
     updatePlayerCount();
     saveTournament();
+    updateResultsTable();
 }
 
 function removePlayer(playerId) {
@@ -42,6 +43,7 @@ function removePlayer(playerId) {
         updatePlayersDisplay();
         updatePlayerCount();
         saveTournament();
+	updateResultsTable();
     }
 }
 
@@ -52,6 +54,7 @@ function togglePaid(playerId) {
         updatePlayersDisplay();
         updatePlayerCount();
         saveTournament();
+	updateResultsTable();
     }
 }
 

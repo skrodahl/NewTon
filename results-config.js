@@ -33,7 +33,7 @@ function updateResultsTable() {
         console.warn('Could not derive placements for players', e);
     }
 
-    const sortedPlayers = [...players].sort((a, b) => {
+    const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
     if (a.placement && b.placement) {
     return a.placement - b.placement;
     }
