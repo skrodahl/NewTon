@@ -801,3 +801,22 @@ a:hover { color: #1e40af; }
     border: 3px solid #e5e7eb;
     overflow: hidden;
 }
+
+/* Results table column widths */
+.results-table th:nth-child(1),
+.results-table td:nth-child(1) {
+  width: 7ch; /* 5 characters wide for Rank */
+  min-width: 7ch;
+  max-width: 7ch;
+}
+
+.results-table th:nth-child(2),
+.results-table td:nth-child(2) {
+  min-width: 20ch; /* Minimum 20 characters for Player */
+}
+
+/* Make points column data bold and colorful - exclude header */
+.results-table td:nth-child(3) {
+  font-weight: bold;
+  color: #ea580c; /* Bright orange */
+}
