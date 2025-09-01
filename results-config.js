@@ -49,8 +49,8 @@ function updateResultsTable() {
     <td>${player.placement || '—'}</td>
     <td>${player.name}</td>
     <td>${points}</td>
-    <td>${player.stats.shortLegs || 0}</td>
-    <td>${(player.stats.highOuts || []).length}</td>
+    <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
+    <td>${(player.stats.highOuts || []).join(',') || '—'}</td>
     <td>${player.stats.tons || 0}</td>
     <td>${player.stats.oneEighties || 0}</td>
     </tr>
@@ -71,7 +71,8 @@ function calculatePlayerPoints(player) {
     points += config.points.third;
     }
 
-    points += (player.stats.shortLegs || 0) * (config.points.shortLeg || 0);
+    const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
+    points += shortLegsCount * (config.points.shortLeg || 0);
     points += (player.stats.highOuts || []).length * config.points.highOut;
     points += (player.stats.tons || 0) * config.points.ton;
     points += (player.stats.oneEighties || 0) * config.points.oneEighty;

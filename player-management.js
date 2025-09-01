@@ -64,8 +64,12 @@ function openStatsModal(playerId) {
 
     currentStatsPlayer = player;
     document.getElementById('statsPlayerName').textContent = `${player.name} - Statistics`;
-    document.getElementById('statsShortLegs').value = player.stats.shortLegs || 0;
     document.getElementById('statsTons').value = player.stats.tons || 0;
+    // Convert old format to new format if needed
+    if (typeof player.stats.shortLegs === 'number') {
+        player.stats.shortLegs = [];
+    }
+    updateShortLegsList();
     document.getElementById('stats180s').value = player.stats.oneEighties || 0;
     
     updateHighOutsList();
@@ -114,7 +118,6 @@ function removeHighOut(index) {
 function saveStats() {
     if (!currentStatsPlayer) return;
 
-    currentStatsPlayer.stats.shortLegs = parseInt(document.getElementById('statsShortLegs').value) || 0;
     currentStatsPlayer.stats.tons = parseInt(document.getElementById('statsTons').value) || 0;
     currentStatsPlayer.stats.oneEighties = parseInt(document.getElementById('stats180s').value) || 0;
 
@@ -166,8 +169,8 @@ function updatePlayersDisplay() {
             </div>
             <div class="stats-grid">
                 <div class="stat-item">
-                    <span>Short Legs:</span>
-                    <span>${player.stats.shortLegs || 0}</span>
+		<span>Short Legs:</span>
+		<span>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0}</span>
                 </div>
                 <div class="stat-item">
                     <span>High Outs:</span>
@@ -205,5 +208,44 @@ function clearAllPlayers() {
         updatePlayersDisplay();
         updatePlayerCount();
         saveTournament();
+    }
+}
+
+function addShortLeg() {
+    const darts = parseInt(document.getElementById('statsShortLegDarts').value);
+    if (!darts || darts < 9 || darts > 21) {
+        alert('Please enter valid dart count (9-21)');
+        return;
+    }
+
+    if (!Array.isArray(currentStatsPlayer.stats.shortLegs)) {
+        currentStatsPlayer.stats.shortLegs = [];
+    }
+
+    currentStatsPlayer.stats.shortLegs.push(darts);
+    document.getElementById('statsShortLegDarts').value = '';
+    updateShortLegsList();
+}
+
+function updateShortLegsList() {
+    const container = document.getElementById('shortLegsList');
+    if (!currentStatsPlayer || !Array.isArray(currentStatsPlayer.stats.shortLegs)) {
+        container.innerHTML = '';
+        return;
+    }
+
+    const html = currentStatsPlayer.stats.shortLegs.map((darts, index) => `
+        <span style="background: #f8f9fa; padding: 5px 10px; margin: 2px; border-radius: 3px; display: inline-block;">
+            ${darts} <button onclick="removeShortLeg(${index})" style="background: none; border: none; color: red; cursor: pointer;">×</button>
+        </span>
+    `).join('');
+
+    container.innerHTML = `<div style="margin-top: 10px;"><strong>Short Legs:</strong><br>${html}</div>`;
+}
+
+function removeShortLeg(index) {
+    if (currentStatsPlayer && Array.isArray(currentStatsPlayer.stats.shortLegs)) {
+        currentStatsPlayer.stats.shortLegs.splice(index, 1);
+        updateShortLegsList();
     }
 }
