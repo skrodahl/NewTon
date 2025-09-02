@@ -76,7 +76,7 @@ body {
 .nav {
   display: flex;
   gap: 10px;
-  justify-content: center;
+  justify-content: flex-start;
   flex-wrap: wrap;
 }
 
@@ -819,4 +819,48 @@ a:hover { color: #1e40af; }
 .results-table td:nth-child(3) {
   font-weight: bold;
   color: #ea580c; /* Bright orange */
+}
+
+/* Registration page two-column layout */
+.registration-layout {
+  display: flex;
+  gap: 30px;
+  margin-top: 20px;
+  align-items: flex-start;
+}
+
+.players-column {
+  width: 580px; /* Fixed width for player cards + breathing room */
+  flex-shrink: 0;
+}
+
+.results-column {
+  flex: 1; /* Takes remaining space */
+  min-width: 0; /* Allows table to shrink if needed */
+}
+
+/* Player cards in single column */
+.players-list {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+
+/* Remove the old grid layout for player cards */
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* Results section adjustments */
+#resultsSection {
+  margin-top: 0; /* Remove top margin since it's now inline */
+}
+
+/* Player card statistics numbers in orange */
+.stat-item span:last-child {
+  color: #ea580c;
+  font-weight: 600; /* Optional: make them slightly bolder too */
 }

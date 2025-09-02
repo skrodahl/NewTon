@@ -155,7 +155,14 @@ function updatePlayersDisplay() {
         return;
     }
 
-    const html = players.map(player => `
+    // Sort players alphabetically by name (case-insensitive, first character)
+    const sortedPlayers = [...players].sort((a, b) => {
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+
+    const html = sortedPlayers.map(player => `
         <div class="player-card ${player.paid ? 'paid' : ''}">
             <div class="player-header">
                 <span class="player-name">${player.name}</span>

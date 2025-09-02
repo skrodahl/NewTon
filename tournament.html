@@ -68,7 +68,7 @@
             </div>
         </div>
 
-        <!-- Registration Page -->
+<!-- Registration Page -->
         <div id="registration" class="page">
             <h2>Player Registration</h2>
 
@@ -88,28 +88,35 @@
                 </div>
             </div>
 
-            <div id="playersContainer" class="players-grid">
-                <!-- Players will be added here -->
-            </div>
+            <!-- Two-column layout: Player cards left, Results table right -->
+            <div class="registration-layout">
+                <div class="players-column">
+                    <div id="playersContainer" class="players-list">
+                        <!-- Players will be added here -->
+                    </div>
+                </div>
 
-            <!-- Results Section - NOW VISIBLE -->
-            <div id="resultsSection" style="margin-top: 40px;">
-                <h3 id="resultsTitle">Current Points</h3>
-                <table class="results-table">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Points</th>
-                            <th>Short Legs</th>
-                            <th>High Outs</th>
-                            <th>Tons</th>
-                            <th>180s</th>
-                        </tr>
-                    </thead>
-                    <tbody id="resultsTableBody">
-                    </tbody>
-                </table>
+                <div class="results-column">
+                    <!-- Results Section -->
+                    <div id="resultsSection">
+                        <h3 id="resultsTitle">Current Points</h3>
+                        <table class="results-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>Points</th>
+                                    <th>Short Legs</th>
+                                    <th>High Outs</th>
+                                    <th>Tons</th>
+                                    <th>180s</th>
+                                </tr>
+                            </thead>
+                            <tbody id="resultsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
 

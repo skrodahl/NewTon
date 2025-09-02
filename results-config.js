@@ -34,12 +34,17 @@ function updateResultsTable() {
     }
 
     const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
-    if (a.placement && b.placement) {
-    return a.placement - b.placement;
-    }
-    if (a.placement) return -1;
-    if (b.placement) return 1;
-    return 0;
+        // First sort by placement (rank)
+        if (a.placement && b.placement) {
+            return a.placement - b.placement;
+        }
+        if (a.placement) return -1;
+        if (b.placement) return 1;
+        
+        // Then sort alphabetically by name (case-insensitive)
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        return nameA.localeCompare(nameB);
     });
 
     tbody.innerHTML = sortedPlayers.map(player => {
