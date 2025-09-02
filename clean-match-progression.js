@@ -9,10 +9,10 @@
 const MATCH_PROGRESSION = {
     8: {
         // === FRONTSIDE ===
-        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-2', 'player1'] },
-        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-2', 'player2'] },
-        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-1', 'player1'] },
-        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-1', 'player2'] },
+        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-1', 'player2'] },
+        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-2', 'player1'] },
+        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-2', 'player2'] },
         'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-2', 'player2'] },
         'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-1', 'player2'] },
         'FS-3-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
