@@ -85,6 +85,7 @@
             <div class="d-flex justify-between align-center mt-20 mb-20">
                 <h3>Players (<span id="playerCount">0</span> total, <span id="paidCount">0</span> paid)</h3>
                 <div>
+                    <button class="btn btn-success" onclick="showPage('tournament')">Go to tournament page</button>
                     <button class="btn" onclick="generateBracket()">Generate Bracket</button>
                     <!-- <button class="btn btn-danger" onclick="clearAllPlayers()">Clear All</button> -->
                 </div>
@@ -126,6 +127,7 @@
             <div class="bracket-container">
                 <div class="bracket-controls">
                     <div class="bracket-controls-left">
+                        <button class="zoom-btn" onclick="generateBracket()" title="Generate Bracket">Generate Bracket</button>
                         <button class="zoom-btn" onclick="showMatchDetails()" title="Show LIVE and UPCOMING matches">➹ Match Details</button>
                         <button class="zoom-btn" onclick="showPage('registration')" title="Edit player statistics and view current points">⬅  Edit Statistics</button>
                     </div>
