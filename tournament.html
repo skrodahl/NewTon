@@ -311,11 +311,10 @@
         <div class="modal-content">
             <span class="close" onclick="closeStatsModal()">&times;</span>
             <h3 id="statsPlayerName">Player Statistics</h3>
-	    <div class="form-group">
-    		<label>Short Leg Darts (max 21)</label>
-    		<input type="number" id="statsShortLegDarts" min="9" max="21">
-    		<button class="btn" onclick="addShortLeg()">Add Short Leg</button>
-	    </div>
+            <div class="form-group">
+                <label>Short Legs (max 21 darts)</label>
+                <input type="number" id="statsShortLegs" min="0" max="21">
+            </div>
             <div class="form-group">
                 <label>High Out Score (101+)</label>
                 <input type="number" id="statsHighOut" min="101" max="170">
@@ -330,7 +329,6 @@
                 <input type="number" id="stats180s" min="0">
             </div>
             <div id="highOutsList" style="margin-top: 10px;"></div>
-	    <div id="shortLegsList" style="margin-top: 10px;"></div>
             <div style="margin-top: 20px;">
                 <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
                 <button class="btn" onclick="closeStatsModal()">Cancel</button>
@@ -345,6 +343,7 @@
     <script src="player-management.js"></script>
     <script src="clean-match-progression.js"></script>
     <script src="bracket-rendering.js"></script>
+    <script src="tournament-controls.js"></script>
     <script src="results-config.js"></script>
 
     <footer>
