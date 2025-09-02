@@ -28,19 +28,19 @@ const MATCH_PROGRESSION = {
 
     16: {
         // === FRONTSIDE ===
-        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-4', 'player1'] },
-        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-4', 'player2'] },
-        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-3', 'player1'] },
-        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-3', 'player2'] },
-        'FS-1-5': { winner: ['FS-2-3', 'player1'], loser: ['BS-1-2', 'player1'] },
-        'FS-1-6': { winner: ['FS-2-3', 'player2'], loser: ['BS-1-2', 'player2'] },
-        'FS-1-7': { winner: ['FS-2-4', 'player1'], loser: ['BS-1-1', 'player1'] },
-        'FS-1-8': { winner: ['FS-2-4', 'player2'], loser: ['BS-1-1', 'player2'] },
+        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-1', 'player2'] },
+        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-2', 'player1'] },
+        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-2', 'player2'] },
+        'FS-1-5': { winner: ['FS-2-3', 'player1'], loser: ['BS-1-3', 'player1'] },
+        'FS-1-6': { winner: ['FS-2-3', 'player2'], loser: ['BS-1-3', 'player2'] },
+        'FS-1-7': { winner: ['FS-2-4', 'player1'], loser: ['BS-1-4', 'player1'] },
+        'FS-1-8': { winner: ['FS-2-4', 'player2'], loser: ['BS-1-4', 'player2'] },
 
-        'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-4', 'player2'] },
-        'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-3', 'player2'] },
-        'FS-2-3': { winner: ['FS-3-2', 'player1'], loser: ['BS-2-2', 'player2'] },
-        'FS-2-4': { winner: ['FS-3-2', 'player2'], loser: ['BS-2-1', 'player2'] },
+        'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-3', 'player2'] },
+        'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-4', 'player2'] },
+        'FS-2-3': { winner: ['FS-3-2', 'player1'], loser: ['BS-2-1', 'player2'] },
+        'FS-2-4': { winner: ['FS-3-2', 'player2'], loser: ['BS-2-2', 'player2'] },
 
         // Winners side semis
         'FS-3-1': { winner: ['FS-4-1', 'player1'], loser: ['BS-4-2', 'player2'] }, // mirror into BS-4
@@ -78,41 +78,54 @@ const MATCH_PROGRESSION = {
     },
 
     32: {
-        // === FRONTSIDE ===
-        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-8', 'player1'] },
-        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-8', 'player2'] },
-        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-7', 'player1'] },
-        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-7', 'player2'] },
-        'FS-1-5': { winner: ['FS-2-3', 'player1'], loser: ['BS-1-6', 'player1'] },
-        'FS-1-6': { winner: ['FS-2-3', 'player2'], loser: ['BS-1-6', 'player2'] },
-        'FS-1-7': { winner: ['FS-2-4', 'player1'], loser: ['BS-1-5', 'player1'] },
-        'FS-1-8': { winner: ['FS-2-4', 'player2'], loser: ['BS-1-5', 'player2'] },
-        'FS-1-9': { winner: ['FS-2-5', 'player1'], loser: ['BS-1-4', 'player1'] },
-        'FS-1-10': { winner: ['FS-2-5', 'player2'], loser: ['BS-1-4', 'player2'] },
-        'FS-1-11': { winner: ['FS-2-6', 'player1'], loser: ['BS-1-3', 'player1'] },
-        'FS-1-12': { winner: ['FS-2-6', 'player2'], loser: ['BS-1-3', 'player2'] },
-        'FS-1-13': { winner: ['FS-2-7', 'player1'], loser: ['BS-1-2', 'player1'] },
-        'FS-1-14': { winner: ['FS-2-7', 'player2'], loser: ['BS-1-2', 'player2'] },
-        'FS-1-15': { winner: ['FS-2-8', 'player1'], loser: ['BS-1-1', 'player1'] },
-        'FS-1-16': { winner: ['FS-2-8', 'player2'], loser: ['BS-1-1', 'player2'] },
-        'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-8', 'player2'] },
-        'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-7', 'player2'] },
-        'FS-2-3': { winner: ['FS-3-2', 'player1'], loser: ['BS-2-6', 'player2'] },
-        'FS-2-4': { winner: ['FS-3-2', 'player2'], loser: ['BS-2-5', 'player2'] },
-        'FS-2-5': { winner: ['FS-3-3', 'player1'], loser: ['BS-2-4', 'player2'] },
-        'FS-2-6': { winner: ['FS-3-3', 'player2'], loser: ['BS-2-3', 'player2'] },
-        'FS-2-7': { winner: ['FS-3-4', 'player1'], loser: ['BS-2-2', 'player2'] },
-        'FS-2-8': { winner: ['FS-3-4', 'player2'], loser: ['BS-2-1', 'player2'] },
-        'FS-3-1': { winner: ['FS-4-1', 'player1'], loser: ['BS-3-6', 'player2'] },
-        'FS-3-2': { winner: ['FS-4-1', 'player2'], loser: ['BS-3-5', 'player2'] },
-        'FS-3-3': { winner: ['FS-4-2', 'player1'], loser: ['BS-3-2', 'player2'] },
-        'FS-3-4': { winner: ['FS-4-2', 'player2'], loser: ['BS-3-1', 'player2'] },
-        'FS-4-1': { winner: ['FS-5-1', 'player1'], loser: ['BS-4-4', 'player2'] },
-        'FS-4-2': { winner: ['FS-5-1', 'player2'], loser: ['BS-4-1', 'player2'] },
+        // === FRONTSIDE MATCHES ===
+
+        // Round 1 (16 matches: FS-1-1 through FS-1-16)
+        'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BS-1-1', 'player2'] },
+        'FS-1-3': { winner: ['FS-2-2', 'player1'], loser: ['BS-1-2', 'player1'] },
+        'FS-1-4': { winner: ['FS-2-2', 'player2'], loser: ['BS-1-2', 'player2'] },
+        'FS-1-5': { winner: ['FS-2-3', 'player1'], loser: ['BS-1-3', 'player1'] },
+        'FS-1-6': { winner: ['FS-2-3', 'player2'], loser: ['BS-1-3', 'player2'] },
+        'FS-1-7': { winner: ['FS-2-4', 'player1'], loser: ['BS-1-4', 'player1'] },
+        'FS-1-8': { winner: ['FS-2-4', 'player2'], loser: ['BS-1-4', 'player2'] },
+        'FS-1-9': { winner: ['FS-2-5', 'player1'], loser: ['BS-1-5', 'player1'] },
+        'FS-1-10': { winner: ['FS-2-5', 'player2'], loser: ['BS-1-5', 'player2'] },
+        'FS-1-11': { winner: ['FS-2-6', 'player1'], loser: ['BS-1-6', 'player1'] },
+        'FS-1-12': { winner: ['FS-2-6', 'player2'], loser: ['BS-1-6', 'player2'] },
+        'FS-1-13': { winner: ['FS-2-7', 'player1'], loser: ['BS-1-7', 'player1'] },
+        'FS-1-14': { winner: ['FS-2-7', 'player2'], loser: ['BS-1-7', 'player2'] },
+        'FS-1-15': { winner: ['FS-2-8', 'player1'], loser: ['BS-1-8', 'player1'] },
+        'FS-1-16': { winner: ['FS-2-8', 'player2'], loser: ['BS-1-8', 'player2'] },
+
+        // Round 2 (8 matches: FS-2-1 through FS-2-8)  
+        'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BS-2-5', 'player2'] },
+        'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BS-2-6', 'player2'] },
+        'FS-2-3': { winner: ['FS-3-2', 'player1'], loser: ['BS-2-7', 'player2'] },
+        'FS-2-4': { winner: ['FS-3-2', 'player2'], loser: ['BS-2-8', 'player2'] },
+        'FS-2-5': { winner: ['FS-3-3', 'player1'], loser: ['BS-2-1', 'player2'] },
+        'FS-2-6': { winner: ['FS-3-3', 'player2'], loser: ['BS-2-2', 'player2'] },
+        'FS-2-7': { winner: ['FS-3-4', 'player1'], loser: ['BS-2-3', 'player2'] },
+        'FS-2-8': { winner: ['FS-3-4', 'player2'], loser: ['BS-2-4', 'player2'] },
+
+        // Round 3 (4 matches: FS-3-1 through FS-3-4)
+        'FS-3-1': { winner: ['FS-4-1', 'player1'], loser: ['BS-4-2', 'player2'] },
+        'FS-3-2': { winner: ['FS-4-1', 'player2'], loser: ['BS-4-1', 'player2'] },
+        'FS-3-3': { winner: ['FS-4-2', 'player1'], loser: ['BS-4-4', 'player2'] },
+        'FS-3-4': { winner: ['FS-4-2', 'player2'], loser: ['BS-4-3', 'player2'] },
+
+        // Round 4 (2 matches: FS-4-1 through FS-4-2)
+        'FS-4-1': { winner: ['FS-5-1', 'player1'], loser: ['BS-6-2', 'player2'] },
+        'FS-4-2': { winner: ['FS-5-1', 'player2'], loser: ['BS-6-1', 'player2'] },
+
+        // Round 5 (1 match: FS-5-1) - Frontside Final
         'FS-5-1': { winner: ['GRAND-FINAL', 'player1'], loser: ['BS-FINAL', 'player1'] },
 
-        // === BACKSIDE ===
-        // R1 winners → R2
+        // === BACKSIDE MATCHES ===
+
+        // Round 1 (8 matches: BS-1-1 through BS-1-8)
+        // FS-R1 losers compete, losers eliminated
+        // Losers gets 25th-32nd place
         'BS-1-1': { winner: ['BS-2-1', 'player1'] },
         'BS-1-2': { winner: ['BS-2-2', 'player1'] },
         'BS-1-3': { winner: ['BS-2-3', 'player1'] },
@@ -122,40 +135,60 @@ const MATCH_PROGRESSION = {
         'BS-1-7': { winner: ['BS-2-7', 'player1'] },
         'BS-1-8': { winner: ['BS-2-8', 'player1'] },
 
-        // R2 winners → R3
+        // Round 2 (8 matches: BS-2-1 through BS-2-8)
+        // BS-R1 winners meet FS-R2 losers, losers eliminated
+        // Losers gets 17th-24th place
         'BS-2-1': { winner: ['BS-3-1', 'player1'] },
-        'BS-2-2': { winner: ['BS-3-2', 'player1'] },
-        'BS-2-3': { winner: ['BS-3-3', 'player1'] },
-        'BS-2-4': { winner: ['BS-3-3', 'player2'] },
-        'BS-2-5': { winner: ['BS-3-4', 'player1'] },
-        'BS-2-6': { winner: ['BS-3-4', 'player2'] },
-        'BS-2-7': { winner: ['BS-3-5', 'player1'] },
-        'BS-2-8': { winner: ['BS-3-6', 'player1'] },
+        'BS-2-2': { winner: ['BS-3-1', 'player2'] },
+        'BS-2-3': { winner: ['BS-3-2', 'player1'] },
+        'BS-2-4': { winner: ['BS-3-2', 'player2'] },
+        'BS-2-5': { winner: ['BS-3-3', 'player1'] },
+        'BS-2-6': { winner: ['BS-3-3', 'player2'] },
+        'BS-2-7': { winner: ['BS-3-4', 'player1'] },
+        'BS-2-8': { winner: ['BS-3-4', 'player2'] },
 
-        // R3 winners → R4
+        // Round 3 (4 matches: BS-3-1 through BS-3-4)
+        // Only backside winners, no frontside input, losers eliminated
+        // Losers gets 13th-16tth place
         'BS-3-1': { winner: ['BS-4-1', 'player1'] },
         'BS-3-2': { winner: ['BS-4-2', 'player1'] },
-        'BS-3-3': { winner: ['BS-4-2', 'player2'] },
-        'BS-3-4': { winner: ['BS-4-3', 'player1'] },
-        'BS-3-5': { winner: ['BS-4-3', 'player2'] },
-        'BS-3-6': { winner: ['BS-4-4', 'player1'] },
+        'BS-3-3': { winner: ['BS-4-3', 'player1'] },
+        'BS-3-4': { winner: ['BS-4-4', 'player1'] },
 
-        // R4 winners → populate 2 matches in R5
+        // Round 4 (4 matches: BS-4-1 through BS-4-4)
+        // BS-R3 winners meet FS-R3 losers, losers eliminated
+        // Losers gets 9th-12th place
         'BS-4-1': { winner: ['BS-5-1', 'player1'] },
         'BS-4-2': { winner: ['BS-5-1', 'player2'] },
         'BS-4-3': { winner: ['BS-5-2', 'player1'] },
         'BS-4-4': { winner: ['BS-5-2', 'player2'] },
 
-        // R5 (2 matches → feed R6)
+        // Round 5 (2 matches: BS-5-1 through BS-5-2)
+        // Only backside winners, no frontside input, losers eliminated
+        // Losers gets 7th-8th place
         'BS-5-1': { winner: ['BS-6-1', 'player1'] },
-        'BS-5-2': { winner: ['BS-6-1', 'player2'] },
+        'BS-5-2': { winner: ['BS-6-2', 'player1'] },
 
-        // R6 (1 match → BS-Final slot2)
-        'BS-6-1': { winner: ['BS-FINAL', 'player2'] },
+        // Round 6 (2 matches: BS-6-1 through BS-6-2)
+        // BS-R5 winners meet FS-R4 losers, losers eliminated
+        // Losers gets 5th-6th place
+        'BS-6-1': { winner: ['BS-7-1', 'player1'] },
+        'BS-6-2': { winner: ['BS-7-1', 'player2'] },
 
-        // FS-5-1 loser already goes to BS-Final.slot1
-        // BS-Final winner → Grand-Final.slot2
-        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
+        // Round 7 (1 matches: BS-7-1) - Backside final
+        // Only backside winners, no frontside input, losers eliminated
+        // Loser gets 4th place
+        'BS-7-1': { winner: ['BS-FINAL', 'player2'] },
+
+        // === FINAL MATCHES ===
+
+        // Backside Final: FS-5-1 loser vs BS-7-1 winner
+        // Loser gets 3rd place
+        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] },
+
+        // Grand Final: FS champion vs BS champion
+        // Winner = 1st place, Loser = 2nd place
+        'GRAND-FINAL': {} // Tournament complete
     }
 
     // TODO: Add 48-player progression when needed
@@ -250,8 +283,8 @@ function completeMatch(matchId, winnerPlayerNumber) {
     // STEP 1: Save current state to history BEFORE making any changes
     // Only save for operator-completed real player vs real player matches
     const isRealPlayerMatch = winner.name && winner.name !== 'TBD' && winner.name !== 'Walkover' && !winner.isBye &&
-                         loser.name && loser.name !== 'TBD' && loser.name !== 'Walkover' && !loser.isBye &&
-                         !isWalkover(winner) && !isWalkover(loser);
+        loser.name && loser.name !== 'TBD' && loser.name !== 'Walkover' && !loser.isBye &&
+        !isWalkover(winner) && !isWalkover(loser);
 
     const isOperatorAction = !match.autoAdvanced;
 
@@ -766,10 +799,11 @@ function calculateCleanBracketStructure(bracketSize) {
         backside = [
             { round: 1, matches: 8 },
             { round: 2, matches: 8 },
-            { round: 3, matches: 6 },
+            { round: 3, matches: 4 },
             { round: 4, matches: 4 },
             { round: 5, matches: 2 },
-            { round: 6, matches: 1 } // The hump - only 1 match
+            { round: 6, matches: 2 },
+            { round: 7, matches: 1 }
 
         ];
     }
@@ -1058,12 +1092,12 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const message = document.getElementById('winnerConfirmMessage');
     const cancelBtn = document.getElementById('winnerConfirmCancel');
     const confirmBtn = document.getElementById('winnerConfirmOK');
-    
+
     if (!modal || !message || !cancelBtn || !confirmBtn) {
         console.error('Winner confirmation modal elements not found');
         return false;
     }
-    
+
     // Set message content
     message.innerHTML = `
         Declare <strong>${winner.name}</strong> as the WINNER<br>
@@ -1071,42 +1105,42 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         <br><br>
         Please confirm the winner, or press "Cancel":
     `;
-    
+
     // Show modal
     modal.style.display = 'block';
-    
+
     // Focus cancel button by default (safer) and add visual indicator
     setTimeout(() => {
         cancelBtn.focus();
         cancelBtn.style.boxShadow = '0 0 0 3px rgba(108, 117, 125, 0.3)'; // Gray focus ring
         cancelBtn.style.transform = 'scale(1.05)';
-}, 100);
-    
+    }, 100);
+
     // Handle button clicks
     const handleCancel = () => {
         modal.style.display = 'none';
         console.log(`Winner selection cancelled for match ${matchId}`);
         cleanup();
     };
-    
+
     const handleConfirm = () => {
         modal.style.display = 'none';
         console.log(`Winner confirmed for match ${matchId}: ${winner.name}`);
         onConfirm();
         cleanup();
     };
-    
+
     const cleanup = () => {
         // Reset button styles
         cancelBtn.style.boxShadow = '';
         cancelBtn.style.transform = '';
-    
+
         // Remove event listeners
         cancelBtn.removeEventListener('click', handleCancel);
         confirmBtn.removeEventListener('click', handleConfirm);
         document.removeEventListener('keydown', handleKeyPress);
     };
-    
+
     const handleKeyPress = (e) => {
         if (e.key === 'Escape') {
             handleCancel();
@@ -1114,12 +1148,12 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
             handleCancel(); // Enter key cancels (safer)
         }
     };
-    
+
     // Add event listeners
     cancelBtn.addEventListener('click', handleCancel);
     confirmBtn.addEventListener('click', handleConfirm);
     document.addEventListener('keydown', handleKeyPress);
-    
+
     return true; // Indicates async operation
 }
 
@@ -1151,18 +1185,18 @@ function saveToHistory(description) {
 
     // Load existing history
     let history = getTournamentHistory();
-    
+
     // Add new entry at the beginning (most recent first)
     history.unshift(historyEntry);
-    
+
     // Keep only last MAX_HISTORY_ENTRIES
     if (history.length > MAX_HISTORY_ENTRIES) {
         history = history.slice(0, MAX_HISTORY_ENTRIES);
     }
-    
+
     // Save to localStorage
     localStorage.setItem('tournamentHistory', JSON.stringify(history));
-    
+
     console.log(`✓ Saved to history: ${description} (${history.length} entries total)`);
 }
 
@@ -1209,12 +1243,12 @@ function debugHistory() {
     const history = getTournamentHistory();
     console.log('=== TOURNAMENT HISTORY ===');
     console.log(`Total entries: ${history.length}`);
-    
+
     history.forEach((entry, index) => {
         const time = new Date(entry.timestamp).toLocaleTimeString();
         console.log(`${index + 1}. [${time}] ${entry.description} (${entry.matchesCompleted} matches)`);
     });
-    
+
     if (history.length === 0) {
         console.log('No history entries found');
     }
