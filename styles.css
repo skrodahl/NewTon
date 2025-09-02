@@ -103,7 +103,7 @@ body {
   box-shadow: 0 4px 12px rgba(255,107,53,0.35);
 }
 
-/* Pages */
+/* Tournament Page */
 .page {
   display: none;
   background: #ffffff;
@@ -289,10 +289,28 @@ body {
 .bracket-controls {
   position: absolute;
   top: 20px;
-  right: 20px;
+  left: 0;
+  right: 0;
   display: flex;
-  gap: 10px;
+  justify-content: space-between;
   z-index: 100;
+  pointer-events: none; /* Allow clicking through container */
+}
+
+.bracket-controls-left,
+.bracket-controls-right {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  pointer-events: auto; /* Re-enable clicking on buttons */
+}
+
+.bracket-controls-left {
+  margin-left: 20px;
+}
+
+.bracket-controls-right {
+  margin-right: 20px;
 }
 
 .zoom-btn {
@@ -310,11 +328,20 @@ body {
   justify-content: center;
   transition: all 0.2s ease;
   box-shadow: 0 2px 10px rgba(0,0,0,0.35);
+  white-space: nowrap;
 }
+
 .zoom-btn:hover {
   background: rgba(17,24,39,1);
   transform: translateY(-1px);
   box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
+/* Fixed width for left-side buttons (Match Details, future Assign Referees) */
+.bracket-controls-left .zoom-btn {
+  width: 120px;
+  font-size: 12px;
+  font-weight: 700;
 }
 
 /* Bracket section titles */
@@ -941,4 +968,24 @@ a:hover { color: #1e40af; }
 
 .results-table td:nth-child(2) .clickable-player-name:hover {
   color: #047857; /* Hover green */
+}
+
+/* Tournament page fullscreen override */
+#tournament.page {
+  padding: 0;
+  border-radius: 0;
+  box-shadow: none;
+  background: transparent;
+  height: 100vh;
+  overflow: hidden;
+}
+
+#tournament.page.active {
+  display: block;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 999;
 }

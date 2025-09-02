@@ -45,6 +45,7 @@
                 <button class="btn btn-success" onclick="createTournament()">Create New Tournament</button>
                 <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
                 <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
+                <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
                 <input type="file" id="importFile" accept=".json" style="display: none;"
                     onchange="importTournament(event)">
             </div>
@@ -85,7 +86,7 @@
                 <h3>Players (<span id="playerCount">0</span> total, <span id="paidCount">0</span> paid)</h3>
                 <div>
                     <button class="btn" onclick="generateBracket()">Generate Bracket</button>
-		    <!-- <button class="btn btn-danger" onclick="clearAllPlayers()">Clear All</button> -->
+                    <!-- <button class="btn btn-danger" onclick="clearAllPlayers()">Clear All</button> -->
                 </div>
             </div>
 
@@ -122,20 +123,19 @@
 
         <!-- Tournament Page -->
         <div id="tournament" class="page">
-            <h2>Double Elimination Bracket</h2>
-
-            <div id="tournamentControls" class="mb-20">
-                <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
-                <button class="btn" onclick="showMatchDetails()">Match Details</button>
-            </div>
-
             <div class="bracket-container">
                 <div class="bracket-controls">
-                    <button class="zoom-btn" id="undoBtn" onclick="handleUndoClick()" title="No matches to undo"
-                        disabled>↩</button>
-                    <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
-                    <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
-                    <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                    <div class="bracket-controls-left">
+                        <button class="zoom-btn" onclick="showPage('registration')" title="Edit player statistics and view current points">Edit Statistics</button>
+                        <button class="zoom-btn" onclick="showMatchDetails()" title="Show LIVE and UPCOMING matches">Match Details</button>
+                    </div>
+                    <div class="bracket-controls-right">
+                        <button class="zoom-btn" id="undoBtn" onclick="handleUndoClick()" title="No matches to undo"
+                            disabled>↩</button>
+                        <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
+                        <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
+                        <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
+                    </div>
                 </div>
 
                 <div class="bracket-viewport" id="bracketViewport">

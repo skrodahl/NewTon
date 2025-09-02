@@ -335,9 +335,21 @@ function renderTitles(grid) {
     finalsTitle.style.fontSize = '28px';
     finalsTitle.style.color = '#ff6b35';
 
+// Watermark at bottom center
+    const watermark = document.createElement('div');
+    watermark.className = 'bracket-title watermark';
+    watermark.textContent = 'NewTon DC Tournament Manager';
+    watermark.style.position = 'absolute';
+    watermark.style.left = (grid.centerX - 150) + 'px'; // Centered, assuming ~300px width
+    watermark.style.bottom = '30px';
+    watermark.style.fontSize = '16px';
+    watermark.style.color = 'rgba(17,24,39,0.3)';
+    watermark.style.letterSpacing = '1px';
+
     document.getElementById('bracketCanvas').appendChild(frontsideTitle);
     document.getElementById('bracketCanvas').appendChild(backsideTitle);
     document.getElementById('bracketCanvas').appendChild(finalsTitle);
+    document.getElementById('bracketCanvas').appendChild(watermark);
 }
 
 // HELPER FUNCTIONS
