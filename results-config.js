@@ -52,7 +52,7 @@ function updateResultsTable() {
     return `
     <tr>
     <td>${player.placement || '—'}</td>
-    <td>${player.name}</td>
+    <td><span class="clickable-player-name" onclick="openStatsModal(${player.id})">${player.name}</span></td>
     <td>${points}</td>
     <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
     <td>${(player.stats.highOuts || []).join(',') || '—'}</td>

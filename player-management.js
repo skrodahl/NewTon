@@ -162,41 +162,18 @@ function updatePlayersDisplay() {
         return nameA.localeCompare(nameB);
     });
 
-    const html = sortedPlayers.map(player => `
-        <div class="player-card ${player.paid ? 'paid' : ''}">
-            <div class="player-header">
-                <span class="player-name">${player.name}</span>
-                <div>
-                    <label style="margin-right: 10px;">
-                        <input type="checkbox" class="paid-checkbox" ${player.paid ? 'checked' : ''} 
-                               onchange="togglePaid(${player.id})"> Paid
-                    </label>
-                    <button onclick="removePlayer(${player.id})" style="background: #dc3545; color: white; border: none; border-radius: 3px; padding: 5px 8px; cursor: pointer;">×</button>
-                </div>
-            </div>
-            <div class="stats-grid">
-                <div class="stat-item">
-		<span>Short Legs:</span>
-		<span>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0}</span>
-                </div>
-                <div class="stat-item">
-                    <span>High Outs:</span>
-                    <span>${(player.stats.highOuts || []).length}</span>
-                </div>
-                <div class="stat-item">
-                    <span>Tons:</span>
-                    <span>${player.stats.tons || 0}</span>
-                </div>
-                <div class="stat-item">
-                    <span>180s:</span>
-                    <span>${player.stats.oneEighties || 0}</span>
-                </div>
-            </div>
-            <button class="btn" style="width: 100%; margin-top: 10px; padding: 8px;" onclick="openStatsModal(${player.id})">
-                Edit Statistics
-            </button>
+ const html = sortedPlayers.map(player => `
+    <div class="player-card ${player.paid ? 'paid' : ''}">
+        <div class="player-card-compact">
+            <label class="paid-status">
+                <input type="checkbox" class="paid-checkbox" ${player.paid ? 'checked' : ''} 
+                       onchange="togglePaid(${player.id})"> Paid
+            </label>
+            <button class="remove-btn" onclick="removePlayer(${player.id})">×</button>
         </div>
-    `).join('');
+        <div class="player-name-large" onclick="openStatsModal(${player.id})">${player.name}</div>
+    </div>
+`).join('');
 
     container.innerHTML = html;
 }

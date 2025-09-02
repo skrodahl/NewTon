@@ -13,9 +13,9 @@
         <div class="header">
             <div class="header-top">
                 <h1>
-		    <div id="clubLogo" class="logo-placeholder">
-		        CLUB<br>LOGO
-		    </div>
+                    <div id="clubLogo" class="logo-placeholder">
+                        CLUB<br>LOGO
+                    </div>
                     NewTon DC - Tournament Manager
                 </h1>
             </div>
@@ -45,7 +45,8 @@
                 <button class="btn btn-success" onclick="createTournament()">Create New Tournament</button>
                 <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
                 <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
-                <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTournament(event)">
+                <input type="file" id="importFile" accept=".json" style="display: none;"
+                    onchange="importTournament(event)">
             </div>
 
             <div id="tournamentStatus" class="alert alert-info">
@@ -68,7 +69,7 @@
             </div>
         </div>
 
-<!-- Registration Page -->
+        <!-- Registration Page -->
         <div id="registration" class="page">
             <h2>Player Registration</h2>
 
@@ -99,7 +100,6 @@
                 <div class="results-column">
                     <!-- Results Section -->
                     <div id="resultsSection">
-                        <h3 id="resultsTitle">Current Points</h3>
                         <table class="results-table">
                             <thead>
                                 <tr>
@@ -131,7 +131,8 @@
 
             <div class="bracket-container">
                 <div class="bracket-controls">
-                    <button class="zoom-btn" id="undoBtn" onclick="handleUndoClick()" title="No matches to undo" disabled>↩</button>
+                    <button class="zoom-btn" id="undoBtn" onclick="handleUndoClick()" title="No matches to undo"
+                        disabled>↩</button>
                     <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
                     <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
                     <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
@@ -157,13 +158,15 @@
         <!-- Configuration Page -->
         <div id="config" class="page">
             <h2>Tournament Configuration</h2>
-	    </br>
+            </br>
 
             <div class="config-section">
                 <h3>Logo</h3>
                 <div class="config-grid">
                     <div class="form-group">
-                        <label for="applicationTitle">To change the logo, place a square image with the name logo.png, logo.jpg, logo.jpeg, or logo.svg in the folder that contains the file tournament.html.</label>
+                        <label for="applicationTitle">To change the logo, place a square image with the name logo.png,
+                            logo.jpg, logo.jpeg, or logo.svg in the folder that contains the file
+                            tournament.html.</label>
                     </div>
                 </div>
             </div>
@@ -257,45 +260,45 @@
                 <button class="btn btn-success" onclick="saveConfiguration()">Save Point & Match Settings</button>
             </div>
 
-	    <div class="config-section">
-    	    <h3>Lane Management</h3>
-    	    <div class="config-grid">
-        	    <div class="form-group">
-            	    <label for="maxLanes">Maximum Number of Lanes</label>
-            	    <select id="maxLanes">
-                	    <option value="1">1 Lane</option>
-                	    <option value="2">2 Lanes</option>
-                	    <option value="3">3 Lanes</option>
-                	    <option value="4" selected>4 Lanes</option>
-                	    <option value="5">5 Lanes</option>
-                	    <option value="6">6 Lanes</option>
-                	    <option value="7">7 Lanes</option>
-                	    <option value="8">8 Lanes</option>
-                	    <option value="9">9 Lanes</option>
-                	    <option value="10">10 Lanes</option>
-                	    <option value="11">11 Lanes</option>
-                	    <option value="12">12 Lanes</option>
-                	    <option value="13">13 Lanes</option>
-                	    <option value="14">14 Lanes</option>
-                	    <option value="15">15 Lanes</option>
-                	    <option value="16">16 Lanes</option>
-                	    <option value="17">17 Lanes</option>
-                	    <option value="18">18 Lanes</option>
-                	    <option value="19">19 Lanes</option>
-                	    <option value="20">20 Lanes</option>
-            	    </select>
-        	    </div>
-    	    </div>
-    	    <!-- Checkbox OUTSIDE the config-grid, so it appears below -->
-    	    <div class="form-group" style="margin-top: 16px;">
-        	    <label>
-            	    <input type="checkbox" id="requireLaneForStart" style="margin-right: 8px;">
-            	    Require lane assignment before starting match
-        	    </label>
-    	    </div>
-    	    <button class="btn btn-success" onclick="updateLaneConfiguration()">Save Lane Settings</button>
-    	    <button class="btn" onclick="showLaneUsage()">Show Current Lane Usage</button>
-	    </div>
+            <div class="config-section">
+                <h3>Lane Management</h3>
+                <div class="config-grid">
+                    <div class="form-group">
+                        <label for="maxLanes">Maximum Number of Lanes</label>
+                        <select id="maxLanes">
+                            <option value="1">1 Lane</option>
+                            <option value="2">2 Lanes</option>
+                            <option value="3">3 Lanes</option>
+                            <option value="4" selected>4 Lanes</option>
+                            <option value="5">5 Lanes</option>
+                            <option value="6">6 Lanes</option>
+                            <option value="7">7 Lanes</option>
+                            <option value="8">8 Lanes</option>
+                            <option value="9">9 Lanes</option>
+                            <option value="10">10 Lanes</option>
+                            <option value="11">11 Lanes</option>
+                            <option value="12">12 Lanes</option>
+                            <option value="13">13 Lanes</option>
+                            <option value="14">14 Lanes</option>
+                            <option value="15">15 Lanes</option>
+                            <option value="16">16 Lanes</option>
+                            <option value="17">17 Lanes</option>
+                            <option value="18">18 Lanes</option>
+                            <option value="19">19 Lanes</option>
+                            <option value="20">20 Lanes</option>
+                        </select>
+                    </div>
+                </div>
+                <!-- Checkbox OUTSIDE the config-grid, so it appears below -->
+                <div class="form-group" style="margin-top: 16px;">
+                    <label>
+                        <input type="checkbox" id="requireLaneForStart" style="margin-right: 8px;">
+                        Require lane assignment before starting match
+                    </label>
+                </div>
+                <button class="btn btn-success" onclick="updateLaneConfiguration()">Save Lane Settings</button>
+                <button class="btn" onclick="showLaneUsage()">Show Current Lane Usage</button>
+            </div>
 
 
             <div class="config-section">
@@ -321,7 +324,9 @@
             <div class="form-group">
                 <label>Short Legs (max 21 darts)</label>
                 <input type="number" id="statsShortLegs" min="0" max="21">
+                <button class="btn" onclick="addShortLeg()">Add Short Leg</button>
             </div>
+            <div id="shortLegsList"></div> <!-- ADD THIS LINE -->
             <div class="form-group">
                 <label>High Out Score (101+)</label>
                 <input type="number" id="statsHighOut" min="101" max="170">
@@ -365,7 +370,8 @@
                 <!-- Message will be populated by JavaScript -->
             </div>
             <div class="text-center mt-20">
-                <button class="btn" id="winnerConfirmCancel" style="margin-right: 15px; background: #6c757d;">Cancel</button>
+                <button class="btn" id="winnerConfirmCancel"
+                    style="margin-right: 15px; background: #6c757d;">Cancel</button>
                 <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
             </div>
         </div>
