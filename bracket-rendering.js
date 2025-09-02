@@ -302,8 +302,12 @@ function renderMatch(match, x, y, section, roundIndex) {
 }
 
 function renderTitles(grid) {
-    // Remove any existing titles
+    // Remove any existing titles and watermark
     document.querySelectorAll('.bracket-title').forEach(title => title.remove());
+    const existingWatermark = document.getElementById('tournament-watermark');
+    if (existingWatermark) {
+        existingWatermark.remove();
+    }
 
     const frontsideTitle = document.createElement('div');
     frontsideTitle.className = 'bracket-title front';
@@ -336,15 +340,16 @@ function renderTitles(grid) {
     finalsTitle.style.color = '#ff6b35';
 
 // Watermark at bottom center
-    const watermark = document.createElement('div');
-    watermark.className = 'bracket-title watermark';
-    watermark.textContent = 'NewTon DC Tournament Manager';
-    watermark.style.position = 'absolute';
-    watermark.style.left = (grid.centerX - 150) + 'px'; // Centered, assuming ~300px width
-    watermark.style.bottom = '30px';
-    watermark.style.fontSize = '16px';
-    watermark.style.color = 'rgba(17,24,39,0.3)';
-    watermark.style.letterSpacing = '1px';
+const watermark = document.createElement('div');
+watermark.id = 'tournament-watermark';
+watermark.textContent = 'NewTon DC Tournament Manager';
+watermark.style.position = 'absolute';
+watermark.style.left = (grid.centerX - 150) + 'px';
+watermark.style.bottom = '30px';
+watermark.style.fontSize = '16px';
+watermark.style.color = 'rgba(17,24,39,0.3)';
+watermark.style.letterSpacing = '1px';
+watermark.style.pointerEvents = 'none';
 
     document.getElementById('bracketCanvas').appendChild(frontsideTitle);
     document.getElementById('bracketCanvas').appendChild(backsideTitle);

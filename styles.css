@@ -894,7 +894,7 @@ a:hover { color: #1e40af; }
 
 /* Clickable player names in results table */
 .clickable-player-name {
-  color: #065f46 /* Player Name Color */
+  color: #065f46; /* Player Name Color */
   cursor: pointer;
   text-decoration: none;
   transition: color 0.2s ease;
