@@ -1004,8 +1004,8 @@ a:hover { color: #1e40af; }
     left: 30px;
     bottom: 30px;
     fontSize: 14px;
-    color: #ffffff;
-    background: rgba(17,24,39,0.95);
+    color: #000000;
+    background: rgba(200,200,200,0.6);
     padding: 8px 12px;
     border-radius: 8px;
     letter-spacing: 0.5px;
@@ -1019,8 +1019,8 @@ a:hover { color: #1e40af; }
     bottom: 30px;
     fontSize: 16px;
     font-weight: 600;
-    color: #ffffff;
-    background: rgba(255,107,53,0.95);
+    color: #000000;
+    background: rgba(255,107,53,0.6);
     padding: 8px 12px;
     border-radius: 8px;
     letter-spacing: 0.5px;
