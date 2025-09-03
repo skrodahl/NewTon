@@ -32,12 +32,12 @@ const DEFAULT_CONFIG = {
 // BULLETPROOF CONFIG LOADING
 function loadConfiguration() {
     console.log('🔧 Loading global configuration...');
-    
+
     try {
         const savedConfig = localStorage.getItem('dartsConfig');
         if (savedConfig) {
             const parsed = JSON.parse(savedConfig);
-            
+
             // Merge with defaults to handle new config options
             config = mergeWithDefaults(parsed, DEFAULT_CONFIG);
             console.log('✓ Loaded saved global config');
@@ -47,10 +47,10 @@ function loadConfiguration() {
             saveGlobalConfig();
             console.log('✓ Initialized default global config');
         }
-        
+
         // Apply config to UI elements
         applyConfigToUI();
-        
+
     } catch (error) {
         console.error('❌ Error loading config, using defaults:', error);
         config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -62,7 +62,7 @@ function loadConfiguration() {
 // MERGE CONFIG WITH DEFAULTS (handles new config options)
 function mergeWithDefaults(userConfig, defaults) {
     const merged = JSON.parse(JSON.stringify(defaults));
-    
+
     // Deep merge user config over defaults
     Object.keys(userConfig).forEach(key => {
         if (typeof userConfig[key] === 'object' && !Array.isArray(userConfig[key])) {
@@ -71,14 +71,14 @@ function mergeWithDefaults(userConfig, defaults) {
             merged[key] = userConfig[key];
         }
     });
-    
+
     return merged;
 }
 
 // APPLY CONFIG TO UI ELEMENTS
 function applyConfigToUI() {
     console.log('🎨 Applying config to UI elements...');
-    
+
     // Point configuration
     safeSetValue('participationPoints', config.points.participation);
     safeSetValue('firstPlacePoints', config.points.first);
@@ -100,7 +100,7 @@ function applyConfigToUI() {
         safeSetValue('applicationTitle', config.applicationTitle);
         updateApplicationTitle(config.applicationTitle);
     }
-    
+
     // Lane configuration
     if (config.lanes) {
         safeSetValue('maxLanes', config.lanes.maxLanes);
@@ -143,7 +143,7 @@ function saveGlobalConfig() {
 // BULLETPROOF CONFIG SAVE - All Config page settings
 function saveConfiguration() {
     console.log('💾 Saving all configuration...');
-    
+
     try {
         // Points configuration
         config.points.participation = parseInt(document.getElementById('participationPoints').value) || 1;
@@ -163,7 +163,7 @@ function saveConfiguration() {
 
         saveGlobalConfig();
         alert('✓ Configuration saved successfully!');
-        
+
     } catch (error) {
         console.error('❌ Error saving configuration:', error);
         alert('❌ Error saving configuration. Please check the console.');
@@ -174,7 +174,7 @@ function saveConfiguration() {
 function saveApplicationSettings() {
     const titleElement = document.getElementById('applicationTitle');
     const newTitle = titleElement ? titleElement.value.trim() : '';
-    
+
     if (!newTitle) {
         alert('Application title cannot be empty');
         return;
@@ -182,7 +182,7 @@ function saveApplicationSettings() {
 
     config.applicationTitle = newTitle;
     updateApplicationTitle(newTitle);
-    
+
     saveGlobalConfig();
     alert('✓ Application settings saved successfully!');
 }
@@ -191,7 +191,7 @@ function saveApplicationSettings() {
 function saveLaneConfiguration() {
     const maxLanesElement = document.getElementById('maxLanes');
     const requireLaneElement = document.getElementById('requireLaneForStart');
-    
+
     if (!maxLanesElement) {
         alert('Max lanes element not found');
         return;
@@ -200,24 +200,24 @@ function saveLaneConfiguration() {
     config.lanes = config.lanes || {};
     config.lanes.maxLanes = parseInt(maxLanesElement.value) || 4;
     config.lanes.requireLaneForStart = requireLaneElement ? requireLaneElement.checked : false;
-    
+
     saveGlobalConfig();
-    
+
     // Refresh lane dropdowns if available
     if (typeof refreshAllLaneDropdowns === 'function') {
         setTimeout(refreshAllLaneDropdowns, 100);
     }
-    
+
     alert('✓ Lane settings saved successfully!');
 }
 
 // UI CONFIGURATION
 function saveUIConfiguration() {
     const confirmWinnerElement = document.getElementById('confirmWinnerSelection');
-    
+
     config.ui = config.ui || {};
     config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
-    
+
     saveGlobalConfig();
     alert('✓ UI settings saved successfully!');
 }
@@ -226,7 +226,7 @@ function saveUIConfiguration() {
 function updateApplicationTitle(title) {
     // Update page title (browser tab)
     document.title = title;
-    
+
     // Update main header
     const headerElement = document.querySelector('.header h1');
     if (headerElement) {
@@ -280,7 +280,7 @@ function updateResultsTable() {
                 })
                 .map(([pid, place]) => [String(pid), Number(place)])
         ) : {};
-        
+
         if (Array.isArray(players)) {
             players.forEach(p => {
                 p.placement = placementByPlayer[String(p.id)] || null;
@@ -297,7 +297,7 @@ function updateResultsTable() {
         }
         if (a.placement) return -1;
         if (b.placement) return 1;
-        
+
         // Then sort alphabetically by name (case-insensitive)
         const nameA = a.name.toLowerCase();
         const nameB = b.name.toLowerCase();
@@ -308,7 +308,7 @@ function updateResultsTable() {
         const points = calculatePlayerPoints(player);
         return `
             <tr>
-                <td>${player.placement || '—'}</td>
+                <td>${formatRanking(player.placement)}</td>
                 <td><span class="clickable-player-name" onclick="openStatsModal(${player.id})">${player.name}</span></td>
                 <td>${points}</td>
                 <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
@@ -326,6 +326,7 @@ function calculatePlayerPoints(player) {
     // Use GLOBAL config for point calculation
     points += config.points.participation;
 
+
     // Placement points based on ranking
     if (player.placement === 1) {
         points += config.points.first;
@@ -334,20 +335,62 @@ function calculatePlayerPoints(player) {
     } else if (player.placement === 3) {
         points += config.points.third;
     } else if (player.placement === 4) {
-        points += config.points.fourth;
-    } else if (player.placement === 5 || player.placement === 6) {
-        points += config.points.fifthSixth;
-    } else if (player.placement === 7 || player.placement === 8) {
-        points += config.points.seventhEighth;
+        points += config.points.fourth || 0;
+    } else if (player.placement === 5) {
+        points += config.points.fifthSixth || 0;
+    } else if (player.placement === 7) {
+        points += config.points.seventhEighth || 0;
     }
 
-    const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
-    points += shortLegsCount * (config.points.shortLeg || 0);
-    points += (player.stats.highOuts || []).length * config.points.highOut;
-    points += (player.stats.tons || 0) * config.points.ton;
-    points += (player.stats.oneEighties || 0) * config.points.oneEighty;
+const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
+points += shortLegsCount * (config.points.shortLeg || 0);
+points += (player.stats.highOuts || []).length * config.points.highOut;
+points += (player.stats.tons || 0) * config.points.ton;
+points += (player.stats.oneEighties || 0) * config.points.oneEighty;
 
-    return points;
+return points;
+}
+
+/**
+ * FORMAT RANKING DISPLAY - Convert numerical rank to display format
+ */
+function formatRanking(placement) {
+    if (!placement) return '—';
+    
+    // Convert tied rankings to readable format
+    switch (placement) {
+        case 1: return '1st';
+        case 2: return '2nd';
+        case 3: return '3rd';
+        case 4: return '4th';
+        case 5: return '5th-6th';    // Tied ranking
+        case 7: return '7th-8th';    // Tied ranking
+        case 9: return '9th-12th';   // Tied ranking (16+ player brackets)
+        case 13: return '13th-16th'; // Tied ranking (16+ player brackets)
+        case 17: return '17th-24th'; // Tied ranking (32+ player brackets)
+        case 25: return '25th-32nd'; // Tied ranking (32+ player brackets)
+        default: 
+            // For any other rankings, use ordinal format
+            const suffix = getOrdinalSuffix(placement);
+            return `${placement}${suffix}`;
+    }
+}
+
+/**
+ * GET ORDINAL SUFFIX (1st, 2nd, 3rd, 4th, etc.)
+ */
+function getOrdinalSuffix(num) {
+    const ones = num % 10;
+    const tens = Math.floor(num / 10) % 10;
+
+    if (tens === 1) return 'th'; // 11th, 12th, 13th
+
+    switch (ones) {
+        case 1: return 'st';
+        case 2: return 'nd';
+        case 3: return 'rd';
+        default: return 'th';
+    }
 }
 
 // INITIALIZATION - Load config immediately when file loads
@@ -365,7 +408,9 @@ if (typeof window !== 'undefined') {
     window.displayResults = displayResults;
     window.updateResultsTable = updateResultsTable;
     window.calculatePlayerPoints = calculatePlayerPoints;
-    
+    window.formatRanking = formatRanking;
+    window.getOrdinalSuffix = getOrdinalSuffix;
+
     // Debug functions
     window.forceReloadConfig = forceReloadConfig;
     window.resetConfigToDefaults = resetConfigToDefaults;
