@@ -311,15 +311,15 @@ function renderTitles(grid) {
 
     const frontsideTitle = document.createElement('div');
     frontsideTitle.className = 'bracket-title front';
-    frontsideTitle.textContent = 'FRONTSIDE';
+    // frontsideTitle.textContent = 'FRONTSIDE';
     
     const backsideTitle = document.createElement('div');
     backsideTitle.className = 'bracket-title back';
-    backsideTitle.textContent = 'BACKSIDE';
+    // backsideTitle.textContent = 'BACKSIDE';
     
     const finalsTitle = document.createElement('div');
     finalsTitle.className = 'bracket-title finals';
-    finalsTitle.textContent = 'FINALS';
+    // finalsTitle.textContent = 'FINALS';
 
     // Position titles
     const titleY = 100;
