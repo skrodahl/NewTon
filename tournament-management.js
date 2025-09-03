@@ -98,6 +98,7 @@ function saveTournamentOnly() {
         players: players, // Tournament-specific player data
         matches: matches, // Tournament-specific match data
         bracket: tournament.bracket,
+        bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
         placements: tournament.placements || {},
         lastSaved: new Date().toISOString()
         // NO CONFIG DATA - Config stays global
@@ -349,7 +350,7 @@ function resetTournament() {
         resultsSection.style.display = 'none';
     }
 
-    alert(`✓ Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Registration page.`);
+    alert(`✓ Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Tournament page.`);
 }
 
 function importTournament(event) {

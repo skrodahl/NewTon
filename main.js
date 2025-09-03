@@ -217,6 +217,7 @@ function autoLoadCurrentTournament() {
             created: tournamentData.created,
             status: tournamentData.status,
             bracket: tournamentData.bracket,
+            bracketSize: tournamentData.bracketSize, // ✅ Fixed: Include bracketSize
             placements: tournamentData.placements || {}
             // NO CONFIG loading - config stays global
         };
