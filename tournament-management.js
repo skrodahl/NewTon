@@ -42,7 +42,10 @@ function createTournament() {
     if (resultsSection) {
         resultsSection.style.display = 'none';
     }
-    
+
+    // Reset date to today for next tournament creation
+    setTodayDate(); //
+
     // Save tournament (but NOT config)
     saveTournamentOnly();
     updateTournamentStatus();
