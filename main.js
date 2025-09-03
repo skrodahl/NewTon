@@ -1,174 +1,288 @@
-// main.js - Core Application Logic and Initialization
+// main.js - Bulletproof Config Initialization and Core Application Logic
 
-// Global variables
+// Global variables for tournament data ONLY (never config)
 let tournament = null;
 let players = [];
 let matches = [];
-let config = {
-    points: {
-    participation: 1,
-    first: 3,
-    second: 2,
-    third: 1,
-    highOut: 1,
-    ton: 0,
-    oneEighty: 1,
-    shortLeg: 1 
-    },
-    legs: {
-    regularRounds: 3,
-    semifinal: 3,
-    backsideFinal: 5,
-    grandFinal: 5
-    },
-    applicationTitle: "NewTon DC - Tournament Manager",
-        ui: {
-        confirmWinnerSelection: true  // Default to true for safety
-    }
-};
 let currentStatsPlayer = null;
 
-// Initialize application
-document.addEventListener('DOMContentLoaded', function() {
-    loadConfiguration();
+// Global config is loaded by results-config.js - NEVER override it here
+// let config = {}; // This is loaded by results-config.js
 
-    // Auto-detect and load logo
-    function loadClubLogo() {
-        const logoContainer = document.getElementById('clubLogo');
-        if (!logoContainer) return;
+// Initialize application with bulletproof config loading
+document.addEventListener('DOMContentLoaded', function() {
+    console.log('🚀 Starting tournament manager...');
     
-        // Try different logo file extensions
-        const logoFiles = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg'];
-        let logoLoaded = false;
-    
-        logoFiles.forEach(filename => {
-            if (logoLoaded) return; // Skip if already found one
-        
-            const img = new Image();
-            img.onload = function() {
-                // Logo found - replace placeholder
-                logoContainer.innerHTML = '';
-                logoContainer.className = 'club-logo';
-                logoContainer.appendChild(img);
-                img.alt = 'Club Logo';
-                img.style.width = '60px';
-                img.style.height = '60px';
-                img.style.borderRadius = '50%';
-                img.style.objectFit = 'cover';
-                logoLoaded = true;
-            };
-            img.onerror = function() {
-                // Logo not found - keep placeholder (do nothing)
-            };
-            img.src = filename;
-        });
+    // Step 1: Ensure global config is loaded FIRST
+    if (typeof loadConfiguration === 'function') {
+        console.log('✓ Global config loaded by results-config.js');
+    } else {
+        console.warn('⚠️ loadConfiguration not available - config may not be loaded');
     }
 
+    // Step 2: Auto-detect and load logo
     loadClubLogo();
     
-    // Try to load recent tournaments, but don't fail if function isn't available yet
-    try {
-    loadRecentTournaments();
-    } catch (error) {
-    console.log('loadRecentTournaments not available yet, will retry');
-    // Retry after a short delay to ensure all JS files are loaded
+    // Step 3: Load recent tournaments list (but NOT tournament config)
     setTimeout(() => {
-    try {
-    loadRecentTournaments();
-    } catch (e) {
-    console.error('Failed to load recent tournaments:', e);
-    }
+        try {
+            if (typeof loadRecentTournaments === 'function') {
+                loadRecentTournaments();
+            }
+        } catch (error) {
+            console.error('Failed to load recent tournaments:', error);
+        }
     }, 100);
-    }
     
+    // Step 4: Setup event listeners
     setupEventListeners();
+    
+    // Step 5: Set today's date
     setTodayDate();
+    
+    // Step 6: Auto-load current tournament (if exists) - Never loads config
+    autoLoadCurrentTournament();
 });
+
+function loadClubLogo() {
+    const logoContainer = document.getElementById('clubLogo');
+    if (!logoContainer) return;
+
+    // Try different logo file extensions
+    const logoFiles = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg'];
+    let logoLoaded = false;
+
+    logoFiles.forEach(filename => {
+        if (logoLoaded) return;
+        
+        const img = new Image();
+        img.onload = function() {
+            logoContainer.innerHTML = '';
+            logoContainer.className = 'club-logo';
+            logoContainer.appendChild(img);
+            img.alt = 'Club Logo';
+            img.style.width = '60px';
+            img.style.height = '60px';
+            img.style.borderRadius = '50%';
+            img.style.objectFit = 'cover';
+            logoLoaded = true;
+        };
+        img.onerror = function() {
+            // Logo not found - keep placeholder
+        };
+        img.src = filename;
+    });
+}
 
 function setTodayDate() {
     const today = new Date().toISOString().split('T')[0];
-    document.getElementById('tournamentDate').value = today;
+    const dateElement = document.getElementById('tournamentDate');
+    if (dateElement) {
+        dateElement.value = today;
+    }
 }
 
 function setupEventListeners() {
+    console.log('🔗 Setting up event listeners...');
+    
     // Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.addEventListener('click', function() {
-    const page = this.dataset.page;
-    showPage(page);
-    });
+        btn.addEventListener('click', function() {
+            const page = this.dataset.page;
+            showPage(page);
+        });
     });
 
     // Enter key handlers
-    document.getElementById('playerName').addEventListener('keypress', function(e) {
-    if (e.key === 'Enter') {
-    addPlayer();
+    const playerNameInput = document.getElementById('playerName');
+    if (playerNameInput) {
+        playerNameInput.addEventListener('keypress', function(e) {
+            if (e.key === 'Enter') {
+                addPlayer();
+            }
+        });
     }
-    });
 
-    // Auto-save configuration
-    ['participationPoints', 'firstPlacePoints', 'secondPlacePoints', 'thirdPlacePoints', 
-    'highOutPoints', 'tonPoints', 'oneEightyPoints'].forEach(id => {
-    const element = document.getElementById(id);
-    if (element) {
-    element.addEventListener('change', function() {
-    const key = id.replace('Points', '').replace('oneEighty', 'oneEighty');
-    config.points[key] = parseInt(this.value);
-    saveConfiguration();
-    });
-    }
-    });
-
+    // Auto-save configuration on config page changes
+    setupConfigAutoSave();
+    
     // Initialize bracket controls
-    initializeBracketControls();
+    if (typeof initializeBracketControls === 'function') {
+        initializeBracketControls();
+    }
+}
+
+function setupConfigAutoSave() {
+    // Auto-save point configuration
+    const pointFields = [
+        'participationPoints', 'firstPlacePoints', 'secondPlacePoints', 'thirdPlacePoints',
+        'fourthPlacePoints', 'fifthSixthPlacePoints', 'seventhEighthPlacePoints',
+        'highOutPoints', 'tonPoints', 'oneEightyPoints', 'shortLegPoints'
+    ];
+    
+    pointFields.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', function() {
+                // Save immediately when config changes
+                if (typeof saveConfiguration === 'function') {
+                    console.log(`💾 Auto-saving config change: ${id} = ${this.value}`);
+                    
+                    // Update global config object
+                    const configKey = id.replace('Points', '')
+                        .replace('participation', 'participation')
+                        .replace('firstPlace', 'first')
+                        .replace('secondPlace', 'second')
+                        .replace('thirdPlace', 'third')
+                        .replace('fourthPlace', 'fourth')
+                        .replace('fifthSixthPlace', 'fifthSixth')
+                        .replace('seventhEighthPlace', 'seventhEighth')
+                        .replace('highOut', 'highOut')
+                        .replace('ton', 'ton')
+                        .replace('oneEighty', 'oneEighty')
+                        .replace('shortLeg', 'shortLeg');
+                        
+                    if (config && config.points) {
+                        config.points[configKey] = parseInt(this.value) || 0;
+                    }
+                    
+                    // Save to localStorage immediately
+                    if (typeof saveGlobalConfig === 'function') {
+                        saveGlobalConfig();
+                    }
+                }
+            });
+        }
+    });
+
+    // Auto-save match leg configuration
+    const legFields = ['regularRoundsLegs', 'semiFinalsLegs', 'backsideFinalLegs', 'grandFinalLegs'];
+    
+    legFields.forEach(id => {
+        const element = document.getElementById(id);
+        if (element) {
+            element.addEventListener('change', function() {
+                if (typeof saveConfiguration === 'function') {
+                    console.log(`💾 Auto-saving leg config: ${id} = ${this.value}`);
+                    
+                    // Update global config object
+                    const configKey = id.replace('Legs', '').replace('semiFinalsLegs', 'semifinal').replace('backsideFinalLegs', 'backsideFinal').replace('grandFinalLegs', 'grandFinal');
+                    if (config && config.legs) {
+                        if (id === 'regularRoundsLegs') config.legs.regularRounds = parseInt(this.value) || 3;
+                        else if (id === 'semiFinalsLegs') config.legs.semifinal = parseInt(this.value) || 3;
+                        else if (id === 'backsideFinalLegs') config.legs.backsideFinal = parseInt(this.value) || 5;
+                        else if (id === 'grandFinalLegs') config.legs.grandFinal = parseInt(this.value) || 5;
+                    }
+                    
+                    // Save to localStorage immediately
+                    if (typeof saveGlobalConfig === 'function') {
+                        saveGlobalConfig();
+                    }
+                }
+            });
+        }
+    });
 }
 
 function showPage(pageId) {
     document.querySelectorAll('.page').forEach(page => {
-    page.classList.remove('active');
+        page.classList.remove('active');
     });
     document.querySelectorAll('.nav-btn').forEach(btn => {
-    btn.classList.remove('active');
+        btn.classList.remove('active');
     });
     
     document.getElementById(pageId).classList.add('active');
     document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
 }
 
-// AUTO-LOAD CURRENT TOURNAMENT ON PAGE LOAD
-window.addEventListener('load', function() {
+// AUTO-LOAD CURRENT TOURNAMENT - Never loads config, only tournament data
+function autoLoadCurrentTournament() {
+    console.log('🔄 Auto-loading current tournament (config stays global)...');
+    
     const currentTournament = localStorage.getItem('currentTournament');
-    if (currentTournament) {
+    if (!currentTournament) {
+        console.log('No current tournament found');
+        return;
+    }
+    
     try {
-    tournament = JSON.parse(currentTournament);
-    players = tournament.players || [];
-    matches = tournament.matches || [];
+        const tournamentData = JSON.parse(currentTournament);
+        
+        // Load ONLY tournament data - NEVER config
+        tournament = {
+            id: tournamentData.id,
+            name: tournamentData.name,
+            date: tournamentData.date,
+            created: tournamentData.created,
+            status: tournamentData.status,
+            bracket: tournamentData.bracket,
+            placements: tournamentData.placements || {}
+            // NO CONFIG loading - config stays global
+        };
+        
+        players = tournamentData.players || [];
+        matches = tournamentData.matches || [];
 
-    if (tournament.name && tournament.date) {
-    document.getElementById('tournamentName').value = tournament.name;
-    document.getElementById('tournamentDate').value = tournament.date;
+        // Update UI with tournament data
+        if (tournament.name && tournament.date) {
+            const nameElement = document.getElementById('tournamentName');
+            const dateElement = document.getElementById('tournamentDate');
+            
+            if (nameElement) nameElement.value = tournament.name;
+            if (dateElement) dateElement.value = tournament.date;
+            
+            // Update tournament-specific UI
+            if (typeof updateTournamentStatus === 'function') {
+                updateTournamentStatus();
+            }
+            
+            if (typeof updatePlayersDisplay === 'function') {
+                updatePlayersDisplay();
+                updatePlayerCount();
+            }
+
+            // Render bracket if exists
+            if (tournament.bracket && matches.length > 0 && typeof renderBracket === 'function') {
+                renderBracket();
+            }
+
+            // Display results using global config
+            if (typeof displayResults === 'function') {
+                displayResults();
+            }
+            
+            console.log('✓ Current tournament loaded (global config preserved)');
+        }
+    } catch (error) {
+        console.error('❌ Error loading current tournament:', error);
+    }
+}
+
+// FORCE CONFIG RELOAD (for debugging)
+function forceConfigReload() {
+    if (typeof forceReloadConfig === 'function') {
+        forceReloadConfig();
+    } else {
+        console.error('forceReloadConfig function not available');
+    }
+}
+
+// DEBUG FUNCTIONS
+function debugConfigState() {
+    console.log('=== CONFIG DEBUG ===');
+    console.log('Global config object:', config);
+    console.log('Config in localStorage:', JSON.parse(localStorage.getItem('dartsConfig') || 'null'));
+    console.log('Tournament object:', tournament);
+    console.log('Current tournament in localStorage:', JSON.parse(localStorage.getItem('currentTournament') || 'null'));
+}
+
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.showPage = showPage;
+    window.forceConfigReload = forceConfigReload;
+    window.debugConfigState = debugConfigState;
     
-    // Make sure updateTournamentStatus exists before calling
-    if (typeof updateTournamentStatus === 'function') {
-    updateTournamentStatus();
-    }
-    
-    // Make sure updatePlayersDisplay exists before calling  
-    if (typeof updatePlayersDisplay === 'function') {
-    updatePlayersDisplay();
-    updatePlayerCount();
-    }
-
-    if (tournament.bracket && matches.length > 0 && typeof renderBracket === 'function') {
-    renderBracket();
-    }
-
-    if (typeof displayResults === 'function') {
-    displayResults();
-    }
-    }
-    } catch (e) {
-    console.error('Error loading current tournament:', e);
-    }
-    }
-});
+    // Also make these available for console debugging
+    window.autoLoadCurrentTournament = autoLoadCurrentTournament;
+}

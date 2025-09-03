@@ -1,4 +1,5 @@
-// tournament-management.js - Tournament Creation, Loading, and Management
+// tournament-management.js - Config-Free Tournament Operations
+// NEVER touches global config - only tournament-specific data
 
 let showingAllTournaments = false;
 
@@ -7,22 +8,25 @@ function createTournament() {
     const date = document.getElementById('tournamentDate').value;
     
     if (!name || !date) {
-    alert('Please enter both tournament name and date');
-    return;
+        alert('Please enter both tournament name and date');
+        return;
     }
 
+    // CREATE CLEAN TOURNAMENT OBJECT - No config contamination
     tournament = {
-    id: Date.now(),
-    name: name,
-    date: date,
-    created: new Date().toISOString(),
-    status: 'setup',
-    players: [],
-    matches: [],
-    bracket: null
+        id: Date.now(),
+        name: name,
+        date: date,
+        created: new Date().toISOString(),
+        status: 'setup',
+        players: [],
+        matches: [],
+        bracket: null,
+        placements: {} // Only tournament-specific placement data
+        // NO CONFIG DATA HERE - Config is always global
     };
 
-    // Clear all existing data for a fresh start
+    // Clear all existing tournament data for fresh start
     players = [];
     matches = [];
     
@@ -30,75 +34,108 @@ function createTournament() {
     updatePlayersDisplay();
     updatePlayerCount();
     if (typeof clearBracket === 'function') {
-    clearBracket();
+        clearBracket();
     }
     
     // Hide results section if visible
     const resultsSection = document.getElementById('resultsSection');
     if (resultsSection) {
-    resultsSection.style.display = 'none';
+        resultsSection.style.display = 'none';
     }
     
-    saveTournament();
+    // Save tournament (but NOT config)
+    saveTournamentOnly();
     updateTournamentStatus();
     showPage('registration');
-    // Ensure results table is populated by default
+    
+    // Ensure results table is populated
     if (typeof displayResults === 'function') {
-    displayResults();
+        displayResults();
     }
 
     updateTournamentWatermark();
     
-    alert('New tournament created successfully! Start by adding players.');
+    alert('✓ New tournament created successfully! Start by adding players.');
 }
 
 function exportTournament() {
     if (!tournament) {
-    alert('No active tournament to export');
-    return;
+        alert('No active tournament to export');
+        return;
     }
 
-    const dataStr = JSON.stringify(tournament, null, 2);
+    // Export ONLY tournament data, never global config
+    const tournamentData = {
+        ...tournament,
+        players: players,
+        matches: matches,
+        exportedAt: new Date().toISOString()
+        // NO CONFIG DATA in export
+    };
+
+    const dataStr = JSON.stringify(tournamentData, null, 2);
     const dataBlob = new Blob([dataStr], {type: 'application/json'});
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `${tournament.name}_${tournament.date}.json`;
     link.click();
+    
+    console.log('✓ Tournament exported (config excluded)');
 }
 
-function saveTournament() {
+// SAVE TOURNAMENT ONLY - Never touches global config
+function saveTournamentOnly() {
     if (!tournament) return;
 
-    tournament.players = players;
-    tournament.matches = matches;
-    tournament.lastSaved = new Date().toISOString();
+    // Build clean tournament object with current data
+    const tournamentToSave = {
+        id: tournament.id,
+        name: tournament.name,
+        date: tournament.date,
+        created: tournament.created,
+        status: tournament.status,
+        players: players, // Tournament-specific player data
+        matches: matches, // Tournament-specific match data
+        bracket: tournament.bracket,
+        placements: tournament.placements || {},
+        lastSaved: new Date().toISOString()
+        // NO CONFIG DATA - Config stays global
+    };
 
+    // Save to tournaments list
     let tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const index = tournaments.findIndex(t => t.id === tournament.id);
     
     if (index >= 0) {
-    tournaments[index] = tournament;
+        tournaments[index] = tournamentToSave;
     } else {
-    tournaments.push(tournament);
+        tournaments.push(tournamentToSave);
     }
     
     localStorage.setItem('dartsTournaments', JSON.stringify(tournaments));
-    localStorage.setItem('currentTournament', JSON.stringify(tournament));
+    localStorage.setItem('currentTournament', JSON.stringify(tournamentToSave));
+    
+    console.log('✓ Tournament saved (config unchanged)');
+}
+
+// WRAPPER FOR BACKWARD COMPATIBILITY
+function saveTournament() {
+    saveTournamentOnly();
 }
 
 function updateTournamentStatus() {
     const statusDiv = document.getElementById('tournamentStatus');
     if (tournament) {
-    statusDiv.innerHTML = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
-    statusDiv.className = 'alert alert-success';
-    statusDiv.style.display = 'block';
+        statusDiv.innerHTML = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
+        statusDiv.className = 'alert alert-success';
+        statusDiv.style.display = 'block';
     } else {
-    statusDiv.innerHTML = 'No active tournament';
-    statusDiv.className = 'alert alert-info';
-    statusDiv.style.display = 'block';
+        statusDiv.innerHTML = 'No active tournament';
+        statusDiv.className = 'alert alert-info';
+        statusDiv.style.display = 'block';
     }
-    updateTournamentWatermark()
+    updateTournamentWatermark();
 }
 
 function loadRecentTournaments() {
@@ -106,51 +143,50 @@ function loadRecentTournaments() {
     const container = document.getElementById('recentTournaments');
     
     if (tournaments.length === 0) {
-    container.innerHTML = '<p>No tournaments found</p>';
-    // Hide toggle button
-    const toggleBtn = document.getElementById('toggleTournamentsBtn');
-    if (toggleBtn) {
-    toggleBtn.style.display = 'none';
-    }
-    return;
+        container.innerHTML = '<p>No tournaments found</p>';
+        const toggleBtn = document.getElementById('toggleTournamentsBtn');
+        if (toggleBtn) {
+            toggleBtn.style.display = 'none';
+        }
+        return;
     }
 
     // Sort tournaments by creation timestamp (newest first)
     const sortedTournaments = tournaments.sort((a, b) => {
-    if (a.created && b.created) {
-    return new Date(b.created) - new Date(a.created);
-    } else if (a.created) {
-    return -1;
-    } else if (b.created) {
-    return 1;
-    } else {
-    const dateA = new Date(a.date + 'T00:00:00');
-    const dateB = new Date(b.date + 'T00:00:00');
-    return dateB - dateA;
-    }
+        if (a.created && b.created) {
+            return new Date(b.created) - new Date(a.created);
+        } else if (a.created) {
+            return -1;
+        } else if (b.created) {
+            return 1;
+        } else {
+            const dateA = new Date(a.date + 'T00:00:00');
+            const dateB = new Date(b.date + 'T00:00:00');
+            return dateB - dateA;
+        }
     });
 
     // Determine which tournaments to show
     const tournamentsToShow = showingAllTournaments ? 
-    sortedTournaments : 
-    sortedTournaments.slice(0, 5);
+        sortedTournaments : 
+        sortedTournaments.slice(0, 5);
 
     const html = tournamentsToShow.map(t => {
-    const isActiveTournament = tournament && tournament.id === t.id;
-    return `
-    <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
-    <div style="display: flex; justify-content: space-between; align-items: center;">
-    <span>
-    <strong>${t.name}</strong> (${t.date})
-    ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
-    </span>
-    <div>
-    <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
-    <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
-    </div>
-    </div>
-    </div>
-    `;
+        const isActiveTournament = tournament && tournament.id === t.id;
+        return `
+            <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>
+                        <strong>${t.name}</strong> (${t.date})
+                        ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
+                    </span>
+                    <div>
+                        <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
+                        <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
+                    </div>
+                </div>
+            </div>
+        `;
     }).join('');
     
     container.innerHTML = html;
@@ -158,12 +194,12 @@ function loadRecentTournaments() {
     // Update the toggle button
     const toggleBtn = document.getElementById('toggleTournamentsBtn');
     if (toggleBtn) {
-    if (tournaments.length <= 5) {
-    toggleBtn.style.display = 'none';
-    } else {
-    toggleBtn.style.display = 'inline-block';
-    toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
-    }
+        if (tournaments.length <= 5) {
+            toggleBtn.style.display = 'none';
+        } else {
+            toggleBtn.style.display = 'inline-block';
+            toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
+        }
     }
 }
 
@@ -172,37 +208,53 @@ function toggleTournamentView() {
     loadRecentTournaments();
 }
 
+// LOAD TOURNAMENT - Never touches global config
 function loadSpecificTournament(id) {
+    console.log(`🔄 Loading tournament ${id} (config will stay global)...`);
+    
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const selectedTournament = tournaments.find(t => t.id === id);
     
     if (!selectedTournament) {
-    alert('Tournament not found');
-    return;
+        alert('Tournament not found');
+        return;
     }
 
-    tournament = selectedTournament;
-    players = tournament.players || [];
-    matches = tournament.matches || [];
+    // Load ONLY tournament data - NEVER override global config
+    tournament = {
+        id: selectedTournament.id,
+        name: selectedTournament.name,
+        date: selectedTournament.date,
+        created: selectedTournament.created,
+        status: selectedTournament.status,
+        bracket: selectedTournament.bracket,
+        placements: selectedTournament.placements || {}
+        // NO CONFIG loading - config stays global
+    };
     
+    players = selectedTournament.players || [];
+    matches = selectedTournament.matches || [];
+    
+    // Update UI with tournament data
     document.getElementById('tournamentName').value = tournament.name;
     document.getElementById('tournamentDate').value = tournament.date;
     
     updateTournamentStatus();
     updatePlayersDisplay();
     updatePlayerCount();
-    updateTournamentWatermark()
+    updateTournamentWatermark();
     
-    // Populate results table by default when a tournament is loaded
+    // Display results with current global config
     if (typeof displayResults === 'function') {
-    displayResults();
+        displayResults();
     }
 
     if (tournament.bracket && typeof renderBracket === 'function') {
-    renderBracket();
+        renderBracket();
     }
     
     showPage('registration');
+    console.log('✓ Tournament loaded (global config preserved)');
 }
 
 function deleteTournament(tournamentId) {
@@ -210,37 +262,37 @@ function deleteTournament(tournamentId) {
     const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
     
     if (!tournamentToDelete) {
-    alert('Tournament not found.');
-    return;
+        alert('Tournament not found.');
+        return;
     }
 
     if (tournament && tournament.id === tournamentId) {
-    alert('Cannot delete the currently active tournament.\n\nPlease create a new tournament or load a different one first.');
-    return;
+        alert('Cannot delete the currently active tournament.\n\nPlease create a new tournament or load a different one first.');
+        return;
     }
 
     const confirmDelete = confirm(
-    `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
-    `Are you sure you want to permanently delete:\n` +
-    `"${tournamentToDelete.name}"\n\n` +
-    `This action cannot be undone.`
+        `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
+        `Are you sure you want to permanently delete:\n` +
+        `"${tournamentToDelete.name}"\n\n` +
+        `This action cannot be undone.`
     );
 
     if (!confirmDelete) {
-    return;
+        return;
     }
 
     const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
     localStorage.setItem('dartsTournaments', JSON.stringify(updatedTournaments));
 
     loadRecentTournaments();
-    alert(`Tournament "${tournamentToDelete.name}" has been deleted successfully.`);
+    alert(`✓ Tournament "${tournamentToDelete.name}" has been deleted successfully.`);
 }
 
 function resetTournament() {
     if (!tournament || !tournament.bracket) {
-    alert('No active tournament to reset.');
-    return;
+        alert('No active tournament to reset.');
+        return;
     }
 
     const tournamentName = tournament.name;
@@ -248,53 +300,56 @@ function resetTournament() {
     const totalMatches = matches.length;
     
     const confirmMessage = `⚠️ RESET TOURNAMENT WARNING ⚠️\n\n` +
-    `Tournament: "${tournamentName}"\n` +
-    `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
-    `Players: ${players.length} registered\n\n` +
-    `This will permanently delete:\n` +
-    `• All match results\n` +
-    `• All bracket progress\n` +
-    `• All tournament standings\n\n` +
-    `Are you sure you want to continue?`;
+        `Tournament: "${tournamentName}"\n` +
+        `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
+        `Players: ${players.length} registered\n\n` +
+        `This will permanently delete:\n` +
+        `• All match results\n` +
+        `• All bracket progress\n` +
+        `• All tournament standings\n\n` +
+        `Are you sure you want to continue?`;
 
     if (!confirm(confirmMessage)) {
-    return;
+        return;
     }
 
     const tournamentNameConfirm = prompt(
-    `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
-    `To confirm the reset, please type the tournament name exactly:\n\n` +
-    `"${tournamentName}"\n\n` +
-    `Type the tournament name below:`
+        `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
+        `To confirm the reset, please type the tournament name exactly:\n\n` +
+        `"${tournamentName}"\n\n` +
+        `Type the tournament name below:`
     );
 
     if (tournamentNameConfirm !== tournamentName) {
-    if (tournamentNameConfirm !== null) {
-    alert('Tournament name did not match. Reset cancelled for your protection.');
-    }
-    return;
+        if (tournamentNameConfirm !== null) {
+            alert('Tournament name did not match. Reset cancelled for your protection.');
+        }
+        return;
     }
 
+    // Reset tournament data only
     matches = [];
     tournament.bracket = null;
     tournament.status = 'setup';
+    tournament.placements = {};
 
     players.forEach(player => {
-    player.eliminated = false;
-    player.placement = null;
+        player.eliminated = false;
+        player.placement = null;
     });
 
-    saveTournament();
+    saveTournamentOnly(); // Save tournament but not config
+    
     if (typeof clearBracket === 'function') {
-    clearBracket();
+        clearBracket();
     }
 
     const resultsSection = document.getElementById('resultsSection');
     if (resultsSection) {
-    resultsSection.style.display = 'none';
+        resultsSection.style.display = 'none';
     }
 
-    alert(`Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Registration page.`);
+    alert(`✓ Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Registration page.`);
 }
 
 function importTournament(event) {
@@ -328,8 +383,10 @@ function importTournament(event) {
     reader.readAsText(file);
 }
 
+// PROCESS IMPORTED TOURNAMENT - Strip any config contamination
 function processImportedTournament(importedData) {
-    // Validate tournament structure
+    console.log('📥 Processing imported tournament (stripping any config data)...');
+    
     const validation = validateTournamentData(importedData);
     if (!validation.valid) {
         showImportStatus('error', `Invalid tournament data: ${validation.error}`);
@@ -352,26 +409,33 @@ function processImportedTournament(importedData) {
         }
     }
 
-    // Import the tournament
     try {
-        // Set as current tournament
-        tournament = importedData;
-        players = tournament.players || [];
-        matches = tournament.matches || [];
+        // Import ONLY tournament data - Strip any config contamination
+        tournament = {
+            id: importedData.id,
+            name: importedData.name,
+            date: importedData.date,
+            created: importedData.created || new Date().toISOString(),
+            status: importedData.status || 'setup',
+            bracket: importedData.bracket || null,
+            placements: importedData.placements || {}
+            // NO CONFIG DATA imported - global config stays intact
+        };
+        
+        players = importedData.players || [];
+        matches = importedData.matches || [];
 
         // Update UI fields
         document.getElementById('tournamentName').value = tournament.name;
         document.getElementById('tournamentDate').value = tournament.date;
 
         // Save to localStorage
-        saveTournament();
+        saveTournamentOnly(); // Save tournament only, not config
 
         // Update displays
         updateTournamentStatus();
         updatePlayersDisplay();
         updatePlayerCount();
-
-        // Load recent tournaments to show the updated list
         loadRecentTournaments();
 
         // Render bracket if exists
@@ -379,13 +443,13 @@ function processImportedTournament(importedData) {
             renderBracket();
         }
 
-        // Display results
+        // Display results using global config
         if (typeof displayResults === 'function') {
             displayResults();
         }
 
         showImportStatus('success', 
-            `Tournament "${tournament.name}" imported successfully! ` +
+            `✓ Tournament "${tournament.name}" imported successfully! ` +
             `${players.length} players and ${matches.filter(m => m.completed).length} completed matches loaded.`
         );
 
@@ -394,6 +458,8 @@ function processImportedTournament(importedData) {
             showPage('registration');
         }, 1500);
 
+        console.log('✓ Tournament imported (global config preserved)');
+
     } catch (error) {
         showImportStatus('error', 'Error importing tournament data. Please try again.');
         console.error('Import error:', error);
@@ -401,7 +467,6 @@ function processImportedTournament(importedData) {
 }
 
 function validateTournamentData(data) {
-    // Check required fields
     if (!data || typeof data !== 'object') {
         return { valid: false, error: 'Data must be a valid tournament object' };
     }
@@ -452,7 +517,7 @@ function validateTournamentData(data) {
             
             // Set default player values
             if (typeof player.paid === 'undefined') player.paid = false;
-            if (!player.stats) player.stats = { shortLegs: 0, highOuts: [], tons: 0, oneEighties: 0 };
+            if (!player.stats) player.stats = { shortLegs: [], highOuts: [], tons: 0, oneEighties: 0 };
         }
     }
 

@@ -127,9 +127,12 @@
             <div class="bracket-container">
                 <div class="bracket-controls">
                     <div class="bracket-controls-left">
-                        <button class="zoom-btn" onclick="generateBracket()" title="Generate Bracket">Generate Bracket</button>
-                        <button class="zoom-btn" onclick="showMatchDetails()" title="Show LIVE and UPCOMING matches">➹ Match Details</button>
-                        <button class="zoom-btn" onclick="showPage('registration')" title="Edit player statistics and view current points">⬅  Edit Statistics</button>
+                        <button class="zoom-btn" onclick="generateBracket()" title="Generate Bracket">Generate
+                            Bracket</button>
+                        <button class="zoom-btn" onclick="showMatchDetails()" title="Show LIVE and UPCOMING matches">➹
+                            Match Details</button>
+                        <button class="zoom-btn" onclick="showPage('registration')"
+                            title="Edit player statistics and view current points">⬅ Edit Statistics</button>
                     </div>
                     <div class="bracket-controls-right">
                         <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
@@ -139,14 +142,14 @@
                             disabled>↩</button>
                     </div>
                 </div>
-		<div class="bracket-watermarks">
-    			<div class="watermark-left" id="watermark-left">
-        	    		NewTon DC Tournament Manager
-    			</div>
-   			<div class="watermark-right" id="watermark-right">
-        			No Tournament
-    			</div>
-		</div>
+                <div class="bracket-watermarks">
+                    <div class="watermark-left" id="watermark-left">
+                        NewTon DC Tournament Manager
+                    </div>
+                    <div class="watermark-right" id="watermark-right">
+                        No Tournament
+                    </div>
+                </div>
 
                 <div class="bracket-viewport" id="bracketViewport">
                     <div class="bracket-canvas" id="bracketCanvas">
@@ -198,19 +201,31 @@
                 <div class="config-grid">
                     <div class="form-group">
                         <label for="participationPoints">Participation Points</label>
-                        <input type="number" id="participationPoints" value="1" min="0">
+                        <input type="number" id="participationPoints" value="5" min="0">
                     </div>
                     <div class="form-group">
                         <label for="firstPlacePoints">1st Place Points</label>
-                        <input type="number" id="firstPlacePoints" value="3" min="0">
+                        <input type="number" id="firstPlacePoints" value="15" min="0">
                     </div>
                     <div class="form-group">
                         <label for="secondPlacePoints">2nd Place Points</label>
-                        <input type="number" id="secondPlacePoints" value="2" min="0">
+                        <input type="number" id="secondPlacePoints" value="13" min="0">
                     </div>
                     <div class="form-group">
                         <label for="thirdPlacePoints">3rd Place Points</label>
-                        <input type="number" id="thirdPlacePoints" value="1" min="0">
+                        <input type="number" id="thirdPlacePoints" value="10" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="fourthPlacePoints">4th Place Points</label>
+                        <input type="number" id="fourthPlacePoints" value="9" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="fifthSixthPlacePoints">5th-6th Place Points</label>
+                        <input type="number" id="fifthSixthPlacePoints" value="8" min="0">
+                    </div>
+                    <div class="form-group">
+                        <label for="seventhEighthPlacePoints">7th-8th Place Points</label>
+                        <input type="number" id="seventhEighthPlacePoints" value="7" min="0">
                     </div>
                     <div class="form-group">
                         <label for="highOutPoints">High Out Points (101+)</label>
@@ -267,7 +282,6 @@
                         </select>
                     </div>
                 </div>
-                <button class="btn btn-success" onclick="saveConfiguration()">Save Point & Match Settings</button>
             </div>
 
             <div class="config-section">
@@ -279,13 +293,13 @@
                             <option value="1">1 Lane</option>
                             <option value="2">2 Lanes</option>
                             <option value="3">3 Lanes</option>
-                            <option value="4" selected>4 Lanes</option>
+                            <option value="4">4 Lanes</option>
                             <option value="5">5 Lanes</option>
                             <option value="6">6 Lanes</option>
                             <option value="7">7 Lanes</option>
                             <option value="8">8 Lanes</option>
                             <option value="9">9 Lanes</option>
-                            <option value="10">10 Lanes</option>
+                            <option value="10" selected>10 Lanes</option>
                             <option value="11">11 Lanes</option>
                             <option value="12">12 Lanes</option>
                             <option value="13">13 Lanes</option>
@@ -306,10 +320,9 @@
                         Require lane assignment before starting match
                     </label>
                 </div>
-                <button class="btn btn-success" onclick="updateLaneConfiguration()">Save Lane Settings</button>
+                <button class="btn btn-success" onclick="saveLaneConfiguration()">Save Lane Settings</button>
                 <button class="btn" onclick="showLaneUsage()">Show Current Lane Usage</button>
             </div>
-
 
             <div class="config-section">
                 <h3>User Interface</h3>
@@ -365,7 +378,6 @@
     <script src="player-management.js"></script>
     <script src="clean-match-progression.js"></script>
     <script src="bracket-rendering.js"></script>
-    <script src="tournament-controls.js"></script>
     <script src="results-config.js"></script>
 
     <footer>

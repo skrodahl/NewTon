@@ -1,10 +1,267 @@
-// results-config.js - Results Display and Configuration
+// results-config.js - Bulletproof Global Configuration System
+// All Config page settings are GLOBAL and PERSISTENT
 
+// GLOBAL CONFIG - Single Source of Truth
+const DEFAULT_CONFIG = {
+    points: {
+        participation: 1,
+        first: 3,
+        second: 2,
+        third: 1,
+        highOut: 1,
+        ton: 0,
+        oneEighty: 1,
+        shortLeg: 1
+    },
+    legs: {
+        regularRounds: 3,
+        semifinal: 3,
+        backsideFinal: 5,
+        grandFinal: 5
+    },
+    applicationTitle: "NewTon DC - Tournament Manager",
+    lanes: {
+        maxLanes: 4,
+        requireLaneForStart: false
+    },
+    ui: {
+        confirmWinnerSelection: true
+    }
+};
+
+// BULLETPROOF CONFIG LOADING
+function loadConfiguration() {
+    console.log('🔧 Loading global configuration...');
+    
+    try {
+        const savedConfig = localStorage.getItem('dartsConfig');
+        if (savedConfig) {
+            const parsed = JSON.parse(savedConfig);
+            
+            // Merge with defaults to handle new config options
+            config = mergeWithDefaults(parsed, DEFAULT_CONFIG);
+            console.log('✓ Loaded saved global config');
+        } else {
+            // Use defaults for first-time users
+            config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+            saveGlobalConfig();
+            console.log('✓ Initialized default global config');
+        }
+        
+        // Apply config to UI elements
+        applyConfigToUI();
+        
+    } catch (error) {
+        console.error('❌ Error loading config, using defaults:', error);
+        config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        saveGlobalConfig();
+        applyConfigToUI();
+    }
+}
+
+// MERGE CONFIG WITH DEFAULTS (handles new config options)
+function mergeWithDefaults(userConfig, defaults) {
+    const merged = JSON.parse(JSON.stringify(defaults));
+    
+    // Deep merge user config over defaults
+    Object.keys(userConfig).forEach(key => {
+        if (typeof userConfig[key] === 'object' && !Array.isArray(userConfig[key])) {
+            merged[key] = { ...merged[key], ...userConfig[key] };
+        } else {
+            merged[key] = userConfig[key];
+        }
+    });
+    
+    return merged;
+}
+
+// APPLY CONFIG TO UI ELEMENTS
+function applyConfigToUI() {
+    console.log('🎨 Applying config to UI elements...');
+    
+    // Point configuration
+    safeSetValue('participationPoints', config.points.participation);
+    safeSetValue('firstPlacePoints', config.points.first);
+    safeSetValue('secondPlacePoints', config.points.second);
+    safeSetValue('thirdPlacePoints', config.points.third);
+    safeSetValue('highOutPoints', config.points.highOut);
+    safeSetValue('tonPoints', config.points.ton);
+    safeSetValue('shortLegPoints', config.points.shortLeg);
+    safeSetValue('oneEightyPoints', config.points.oneEighty);
+
+    // Match leg configuration
+    safeSetValue('regularRoundsLegs', config.legs.regularRounds);
+    safeSetValue('semiFinalsLegs', config.legs.semifinal);
+    safeSetValue('backsideFinalLegs', config.legs.backsideFinal);
+    safeSetValue('grandFinalLegs', config.legs.grandFinal);
+
+    // Application title
+    if (config.applicationTitle) {
+        safeSetValue('applicationTitle', config.applicationTitle);
+        updateApplicationTitle(config.applicationTitle);
+    }
+    
+    // Lane configuration
+    if (config.lanes) {
+        safeSetValue('maxLanes', config.lanes.maxLanes);
+        safeSetChecked('requireLaneForStart', config.lanes.requireLaneForStart);
+    }
+
+    // UI configuration
+    if (config.ui) {
+        safeSetChecked('confirmWinnerSelection', config.ui.confirmWinnerSelection);
+    }
+
+    console.log('✓ Config applied to UI');
+}
+
+// SAFE UI ELEMENT SETTERS (won't crash if element doesn't exist)
+function safeSetValue(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (element && value !== undefined) {
+        element.value = value;
+    }
+}
+
+function safeSetChecked(elementId, value) {
+    const element = document.getElementById(elementId);
+    if (element && value !== undefined) {
+        element.checked = !!value;
+    }
+}
+
+// SAVE GLOBAL CONFIG - Always immediate
+function saveGlobalConfig() {
+    try {
+        localStorage.setItem('dartsConfig', JSON.stringify(config));
+        console.log('✓ Global config saved to localStorage');
+    } catch (error) {
+        console.error('❌ Failed to save global config:', error);
+    }
+}
+
+// BULLETPROOF CONFIG SAVE - All Config page settings
+function saveConfiguration() {
+    console.log('💾 Saving all configuration...');
+    
+    try {
+        // Points configuration
+        config.points.participation = parseInt(document.getElementById('participationPoints').value) || 1;
+        config.points.first = parseInt(document.getElementById('firstPlacePoints').value) || 3;
+        config.points.second = parseInt(document.getElementById('secondPlacePoints').value) || 2;
+        config.points.third = parseInt(document.getElementById('thirdPlacePoints').value) || 1;
+        config.points.highOut = parseInt(document.getElementById('highOutPoints').value) || 1;
+        config.points.ton = parseInt(document.getElementById('tonPoints').value) || 0;
+        config.points.shortLeg = parseInt(document.getElementById('shortLegPoints').value) || 1;
+        config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value) || 1;
+
+        // Match legs configuration
+        config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value) || 3;
+        config.legs.semifinal = parseInt(document.getElementById('semiFinalsLegs').value) || 3;
+        config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value) || 5;
+        config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value) || 5;
+
+        saveGlobalConfig();
+        alert('✓ Configuration saved successfully!');
+        
+    } catch (error) {
+        console.error('❌ Error saving configuration:', error);
+        alert('❌ Error saving configuration. Please check the console.');
+    }
+}
+
+// APPLICATION SETTINGS
+function saveApplicationSettings() {
+    const titleElement = document.getElementById('applicationTitle');
+    const newTitle = titleElement ? titleElement.value.trim() : '';
+    
+    if (!newTitle) {
+        alert('Application title cannot be empty');
+        return;
+    }
+
+    config.applicationTitle = newTitle;
+    updateApplicationTitle(newTitle);
+    
+    saveGlobalConfig();
+    alert('✓ Application settings saved successfully!');
+}
+
+// LANE CONFIGURATION
+function saveLaneConfiguration() {
+    const maxLanesElement = document.getElementById('maxLanes');
+    const requireLaneElement = document.getElementById('requireLaneForStart');
+    
+    if (!maxLanesElement) {
+        alert('Max lanes element not found');
+        return;
+    }
+
+    config.lanes = config.lanes || {};
+    config.lanes.maxLanes = parseInt(maxLanesElement.value) || 4;
+    config.lanes.requireLaneForStart = requireLaneElement ? requireLaneElement.checked : false;
+    
+    saveGlobalConfig();
+    
+    // Refresh lane dropdowns if available
+    if (typeof refreshAllLaneDropdowns === 'function') {
+        setTimeout(refreshAllLaneDropdowns, 100);
+    }
+    
+    alert('✓ Lane settings saved successfully!');
+}
+
+// UI CONFIGURATION
+function saveUIConfiguration() {
+    const confirmWinnerElement = document.getElementById('confirmWinnerSelection');
+    
+    config.ui = config.ui || {};
+    config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
+    
+    saveGlobalConfig();
+    alert('✓ UI settings saved successfully!');
+}
+
+// UPDATE APPLICATION TITLE
+function updateApplicationTitle(title) {
+    // Update page title (browser tab)
+    document.title = title;
+    
+    // Update main header
+    const headerElement = document.querySelector('.header h1');
+    if (headerElement) {
+        const logoPlaceholder = headerElement.querySelector('#clubLogo, .logo-placeholder');
+        headerElement.innerHTML = '';
+        if (logoPlaceholder) {
+            headerElement.appendChild(logoPlaceholder);
+        }
+        headerElement.appendChild(document.createTextNode(title));
+    }
+}
+
+// FORCE RELOAD CONFIG (for debugging)
+function forceReloadConfig() {
+    console.log('🔄 Force reloading configuration...');
+    loadConfiguration();
+    alert('Configuration reloaded from localStorage');
+}
+
+// RESET TO DEFAULTS (for debugging)
+function resetConfigToDefaults() {
+    if (confirm('⚠️ Reset all settings to defaults? This cannot be undone.')) {
+        config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        saveGlobalConfig();
+        applyConfigToUI();
+        alert('✓ Configuration reset to defaults');
+    }
+}
+
+// RESULTS DISPLAY FUNCTIONS
 function displayResults() {
     const resultsSection = document.getElementById('resultsSection');
     if (resultsSection) {
-    resultsSection.style.display = 'block';
-    updateResultsTable();
+        resultsSection.style.display = 'block';
+        updateResultsTable();
     }
 }
 
@@ -12,22 +269,22 @@ function updateResultsTable() {
     const tbody = document.getElementById('resultsTableBody');
     if (!tbody) return;
 
-    // Populate per-player placement from tournament.placements (playerId -> placement)
+    // Get placement data from tournament
     try {
         const t = JSON.parse(localStorage.getItem('currentTournament') || '{}');
         const placementByPlayer = t && t.placements ? Object.fromEntries(
-        Object.entries(t.placements)
-        // Ignore legacy placement->playerId numeric keys like "1","2"
-        .filter(([k]) => {
-        const n = Number(k);
-        return !Number.isInteger(n) || n > 1000;
-        })
-        .map(([pid, place]) => [String(pid), Number(place)])
+            Object.entries(t.placements)
+                .filter(([k]) => {
+                    const n = Number(k);
+                    return !Number.isInteger(n) || n > 1000;
+                })
+                .map(([pid, place]) => [String(pid), Number(place)])
         ) : {};
+        
         if (Array.isArray(players)) {
-        players.forEach(p => {
-        p.placement = placementByPlayer[String(p.id)] || null;
-        });
+            players.forEach(p => {
+                p.placement = placementByPlayer[String(p.id)] || null;
+            });
         }
     } catch (e) {
         console.warn('Could not derive placements for players', e);
@@ -48,32 +305,33 @@ function updateResultsTable() {
     });
 
     tbody.innerHTML = sortedPlayers.map(player => {
-    const points = calculatePlayerPoints(player);
-    return `
-    <tr>
-    <td>${player.placement || '—'}</td>
-    <td><span class="clickable-player-name" onclick="openStatsModal(${player.id})">${player.name}</span></td>
-    <td>${points}</td>
-    <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
-    <td>${(player.stats.highOuts || []).join(',') || '—'}</td>
-    <td>${player.stats.tons || 0}</td>
-    <td>${player.stats.oneEighties || 0}</td>
-    </tr>
-    `;
+        const points = calculatePlayerPoints(player);
+        return `
+            <tr>
+                <td>${player.placement || '—'}</td>
+                <td><span class="clickable-player-name" onclick="openStatsModal(${player.id})">${player.name}</span></td>
+                <td>${points}</td>
+                <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
+                <td>${(player.stats.highOuts || []).join(',') || '—'}</td>
+                <td>${player.stats.tons || 0}</td>
+                <td>${player.stats.oneEighties || 0}</td>
+            </tr>
+        `;
     }).join('');
 }
 
 function calculatePlayerPoints(player) {
     let points = 0;
 
+    // Use GLOBAL config for point calculation
     points += config.points.participation;
 
     if (player.placement === 1) {
-    points += config.points.first;
+        points += config.points.first;
     } else if (player.placement === 2) {
-    points += config.points.second;
+        points += config.points.second;
     } else if (player.placement === 3) {
-    points += config.points.third;
+        points += config.points.third;
     }
 
     const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
@@ -85,176 +343,23 @@ function calculatePlayerPoints(player) {
     return points;
 }
 
-function loadConfiguration() {
-    const savedConfig = localStorage.getItem('dartsConfig');
-    if (savedConfig) {
-    config = JSON.parse(savedConfig);
+// INITIALIZATION - Load config immediately when file loads
+console.log('🚀 Initializing bulletproof config system...');
+loadConfiguration();
 
-    // Load point configuration
-    const participationEl = document.getElementById('participationPoints');
-    if (participationEl) participationEl.value = config.points.participation;
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.loadConfiguration = loadConfiguration;
+    window.saveConfiguration = saveConfiguration;
+    window.saveApplicationSettings = saveApplicationSettings;
+    window.saveLaneConfiguration = saveLaneConfiguration;
+    window.saveUIConfiguration = saveUIConfiguration;
+    window.updateApplicationTitle = updateApplicationTitle;
+    window.displayResults = displayResults;
+    window.updateResultsTable = updateResultsTable;
+    window.calculatePlayerPoints = calculatePlayerPoints;
     
-    const firstPlaceEl = document.getElementById('firstPlacePoints');
-    if (firstPlaceEl) firstPlaceEl.value = config.points.first;
-    
-    const secondPlaceEl = document.getElementById('secondPlacePoints');
-    if (secondPlaceEl) secondPlaceEl.value = config.points.second;
-    
-    const thirdPlaceEl = document.getElementById('thirdPlacePoints');
-    if (thirdPlaceEl) thirdPlaceEl.value = config.points.third;
-    
-    const highOutEl = document.getElementById('highOutPoints');
-    if (highOutEl) highOutEl.value = config.points.highOut;
-    
-    const tonEl = document.getElementById('tonPoints');
-    if (tonEl) tonEl.value = config.points.ton;
-
-    const shortLegEl = document.getElementById('shortLegPoints');
-    if (shortLegEl) shortLegEl.value = config.points.shortLeg;
-    
-    const oneEightyEl = document.getElementById('oneEightyPoints');
-    if (oneEightyEl) oneEightyEl.value = config.points.oneEighty;
-
-    const regularRoundsLegsEl = document.getElementById('regularRoundsLegs');
-    if (regularRoundsLegsEl) regularRoundsLegsEl.value = config.legs.regularRounds;
-
-    const semifinalLegsEl = document.getElementById('semiFinalsLegs');
-    if (semifinalLegsEl) semifinalLegsEl.value = config.legs.semifinal;
-
-    const backsideFinalLegsEl = document.getElementById('backsideFinalLegs');
-    if (backsideFinalLegsEl) backsideFinalLegsEl.value = config.legs.backsideFinal;
-
-    const grandFinalLegsEl = document.getElementById('grandFinalLegs');
-    if (grandFinalLegsEl) grandFinalLegsEl.value = config.legs.grandFinal;
-
-    // Load application title
-    if (config.applicationTitle) {
-    const appTitleEl = document.getElementById('applicationTitle');
-    if (appTitleEl) appTitleEl.value = config.applicationTitle;
-    updateApplicationTitle(config.applicationTitle);
-    }
-    
-    // Load lane configuration (with null checks)
-    if (config.lanes) {
-    const maxLanesEl = document.getElementById('maxLanes');
-    if (maxLanesEl) maxLanesEl.value = config.lanes.maxLanes || 10;
-    
-    const requireLaneEl = document.getElementById('requireLaneForStart');
-    if (requireLaneEl) requireLaneEl.checked = config.lanes.requireLaneForStart || false;
-    }
-
-    // Load UI configuration (with null checks)
-    if (config.ui) {
-        const confirmWinnerEl = document.getElementById('confirmWinnerSelection');
-        if (confirmWinnerEl) confirmWinnerEl.checked = config.ui.confirmWinnerSelection !== false; // Default to true
-    }
-    }
-}
-
-//function saveConfiguration() {
-//    config.points.participation = parseInt(document.getElementById('participationPoints').value);
-//    config.points.first = parseInt(document.getElementById('firstPlacePoints').value);
-//    config.points.second = parseInt(document.getElementById('secondPlacePoints').value);
-//    config.points.third = parseInt(document.getElementById('thirdPlacePoints').value);
-//    config.points.highOut = parseInt(document.getElementById('highOutPoints').value);
-//    config.points.ton = parseInt(document.getElementById('tonPoints').value);
-//    config.points.shortLeg = parseInt(document.getElementById('shortLegPoints').value);
-//    config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value);
-//
-//    config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value);
-//    config.legs.semifinal = parseInt(document.getElementById('semiFinalsLegs').value);
-//    config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value);
-//    config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value);
-//
-//    localStorage.setItem('dartsConfig', JSON.stringify(config));
-//    alert('Configuration saved successfully!');
-//}
-
-function saveConfiguration() {
-    // Debug each element to find which one is null
-    const elements = {
-        'participationPoints': document.getElementById('participationPoints'),
-        'firstPlacePoints': document.getElementById('firstPlacePoints'),
-        'secondPlacePoints': document.getElementById('secondPlacePoints'),
-        'thirdPlacePoints': document.getElementById('thirdPlacePoints'),
-        'highOutPoints': document.getElementById('highOutPoints'),
-        'tonPoints': document.getElementById('tonPoints'),
-        'shortLegPoints': document.getElementById('shortLegPoints'),
-        'oneEightyPoints': document.getElementById('oneEightyPoints'),
-        'regularRoundsLegs': document.getElementById('regularRoundsLegs'),
-        'semiFinalsLegs': document.getElementById('semiFinalsLegs'),
-        'backsideFinalLegs': document.getElementById('backsideFinalLegs'),
-        'grandFinalLegs': document.getElementById('grandFinalLegs')
-    };
-    
-    // Check which elements are null
-    for (const [id, element] of Object.entries(elements)) {
-        if (!element) {
-            console.error(`Element with id '${id}' not found!`);
-            alert(`Element with id '${id}' not found!`);
-            return;
-        }
-    }
-    
-    // If we get here, all elements exist
-    config.points.participation = parseInt(elements.participationPoints.value);
-    config.points.first = parseInt(elements.firstPlacePoints.value);
-    config.points.second = parseInt(elements.secondPlacePoints.value);
-    config.points.third = parseInt(elements.thirdPlacePoints.value);
-    config.points.highOut = parseInt(elements.highOutPoints.value);
-    config.points.ton = parseInt(elements.tonPoints.value);
-    config.points.shortLeg = parseInt(elements.shortLegPoints.value);
-    config.points.oneEighty = parseInt(elements.oneEightyPoints.value);
-    
-    config.legs.regularRounds = parseInt(elements.regularRoundsLegs.value);
-    config.legs.semifinal = parseInt(elements.semiFinalsLegs.value);
-    config.legs.backsideFinal = parseInt(elements.backsideFinalLegs.value);
-    config.legs.grandFinal = parseInt(elements.grandFinalLegs.value);
-
-    localStorage.setItem('dartsConfig', JSON.stringify(config));
-    alert('Configuration saved successfully!');
-}
-
-function saveApplicationSettings() {
-    const newTitle = document.getElementById('applicationTitle').value.trim();
-    
-    if (!newTitle) {
-    alert('Application title cannot be empty');
-    return;
-    }
-
-    config.applicationTitle = newTitle;
-    updateApplicationTitle(newTitle);
-    
-    localStorage.setItem('dartsConfig', JSON.stringify(config));
-    alert('Application settings saved successfully!');
-}
-
-function updateApplicationTitle(title) {
-    // Update page title (browser tab)
-    document.title = title;
-    
-    // Update main header
-    const headerElement = document.querySelector('.header h1');
-    if (headerElement) {
-    const logoPlaceholder = headerElement.querySelector('.logo-placeholder');
-    headerElement.innerHTML = '';
-    if (logoPlaceholder) {
-    headerElement.appendChild(logoPlaceholder);
-    }
-    headerElement.appendChild(document.createTextNode(title));
-    }
-}
-
-function saveUIConfiguration() {
-    const confirmWinnerChecked = document.getElementById('confirmWinnerSelection').checked;
-    
-    if (!config.ui) {
-        config.ui = {};
-    }
-    
-    config.ui.confirmWinnerSelection = confirmWinnerChecked;
-    
-    localStorage.setItem('dartsConfig', JSON.stringify(config));
-    alert('UI settings saved successfully!');
+    // Debug functions
+    window.forceReloadConfig = forceReloadConfig;
+    window.resetConfigToDefaults = resetConfigToDefaults;
 }
