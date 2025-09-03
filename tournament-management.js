@@ -47,6 +47,7 @@ function createTournament() {
     displayResults();
     }
 
+    updateTournamentWatermark();
     
     alert('New tournament created successfully! Start by adding players.');
 }
@@ -97,6 +98,7 @@ function updateTournamentStatus() {
     statusDiv.className = 'alert alert-info';
     statusDiv.style.display = 'block';
     }
+    updateTournamentWatermark()
 }
 
 function loadRecentTournaments() {
@@ -189,6 +191,7 @@ function loadSpecificTournament(id) {
     updateTournamentStatus();
     updatePlayersDisplay();
     updatePlayerCount();
+    updateTournamentWatermark()
     
     // Populate results table by default when a tournament is loaded
     if (typeof displayResults === 'function') {
@@ -470,5 +473,12 @@ function showImportStatus(type, message) {
         setTimeout(() => {
             statusDiv.style.display = 'none';
         }, 5000);
+    }
+}
+
+function updateTournamentWatermark() {
+    const watermark = document.getElementById('watermark-right');
+    if (watermark) {
+        watermark.textContent = tournament?.name || 'No Tournament';
     }
 }

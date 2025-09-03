@@ -27,17 +27,17 @@ function renderBracket() {
     }
 
     clearBracket();
-    
+
     // UPDATE UNDO BUTTON STATE
     updateUndoButtonState();
-    
+
     renderCleanBracket();
 }
 
 function clearBracket() {
     const matchesContainer = document.getElementById('bracketMatches');
     const linesContainer = document.getElementById('bracketLines');
-    
+
     if (matchesContainer) {
         matchesContainer.innerHTML = '';
     }
@@ -48,7 +48,7 @@ function clearBracket() {
 
 function renderCleanBracket() {
     const bracketSize = tournament.bracketSize;
-    
+
     // Get structure from our lookup tables instead of calculating
     const structure = getStructureFromLookupTables(bracketSize);
 
@@ -69,7 +69,7 @@ function renderCleanBracket() {
     renderFrontsideMatches(structure.frontside, grid);
     renderBacksideMatches(structure.backside, grid);
     renderFinalMatches(grid);
-    
+
     // Add titles
     renderTitles(grid);
 }
@@ -91,36 +91,36 @@ function getStructureFromLookupTables(bracketSize) {
     // Extract frontside structure from lookup table
     let frontsideRound = 1;
     while (true) {
-        const roundMatches = Object.keys(progression).filter(id => 
+        const roundMatches = Object.keys(progression).filter(id =>
             id.startsWith('FS-') && id.includes(`-${frontsideRound}-`)
         );
-        
+
         if (roundMatches.length === 0) break;
-        
+
         frontside.push({
             round: frontsideRound,
             matches: roundMatches.length
         });
-        
+
         frontsideRound++;
     }
 
     // Extract backside structure from lookup table
     let backsideRound = 1;
     while (true) {
-        const roundMatches = Object.keys(progression).filter(id => 
-            id.startsWith('BS-') && 
+        const roundMatches = Object.keys(progression).filter(id =>
+            id.startsWith('BS-') &&
             id.includes(`-${backsideRound}-`) &&
             !id.includes('FINAL')
         );
-        
+
         if (roundMatches.length === 0) break;
-        
+
         backside.push({
             round: backsideRound,
             matches: roundMatches.length
         });
-        
+
         backsideRound++;
     }
 
@@ -198,11 +198,11 @@ function renderFinalMatches(grid) {
 
 function renderMatch(match, x, y, section, roundIndex) {
     const matchElement = document.createElement('div');
-    
+
     // Get match state
     const matchState = getMatchState(match);
     let stateClass = 'bracket-match';
-    
+
     switch (matchState) {
         case 'pending':
             stateClass += ' match-pending';
@@ -217,7 +217,7 @@ function renderMatch(match, x, y, section, roundIndex) {
             stateClass += ' match-completed completed';
             break;
     }
-    
+
     // Enhanced styling based on match importance
     if (match.id === 'GRAND-FINAL') {
         stateClass += ' grand-final-match';
@@ -247,13 +247,13 @@ function renderMatch(match, x, y, section, roundIndex) {
     // Get button properties
     const buttonText = getMatchButtonText(matchState);
     const buttonDisabled = matchState === 'pending' || matchState === 'completed';
-    const buttonColor = matchState === 'live' ? '#ff6b35' : 
-                       matchState === 'completed' ? '#28a745' : 
-                       matchState === 'pending' ? '#6c757d' : '#ddd';
+    const buttonColor = matchState === 'live' ? '#ff6b35' :
+        matchState === 'completed' ? '#28a745' :
+            matchState === 'pending' ? '#6c757d' : '#ddd';
     const buttonTextColor = matchState === 'live' || matchState === 'completed' ? 'white' : 'black';
 
     // Simplified lane options (basic 1-10 lanes)
-    const laneOptions = Array.from({length: 10}, (_, i) => i + 1).map(lane =>
+    const laneOptions = Array.from({ length: 10 }, (_, i) => i + 1).map(lane =>
         `<option value="${lane}" ${match.lane === lane ? 'selected' : ''}>${lane}</option>`
     ).join('');
 
@@ -339,17 +339,17 @@ function renderTitles(grid) {
     finalsTitle.style.fontSize = '28px';
     finalsTitle.style.color = '#ff6b35';
 
-// Watermark at bottom center
-const watermark = document.createElement('div');
-watermark.id = 'tournament-watermark';
-watermark.textContent = 'NewTon DC Tournament Manager';
-watermark.style.position = 'absolute';
-watermark.style.left = (grid.centerX - 150) + 'px';
-watermark.style.bottom = '30px';
-watermark.style.fontSize = '16px';
-watermark.style.color = 'rgba(17,24,39,0.3)';
-watermark.style.letterSpacing = '1px';
-watermark.style.pointerEvents = 'none';
+    // Watermark at bottom center
+    const watermark = document.createElement('div');
+    watermark.id = 'tournament-watermark';
+    watermark.textContent = 'NewTon DC Tournament Manager';
+    watermark.style.position = 'absolute';
+    watermark.style.left = (grid.centerX - 150) + 'px';
+    watermark.style.bottom = '30px';
+    watermark.style.fontSize = '16px';
+    watermark.style.color = 'rgba(17,24,39,0.3)';
+    watermark.style.letterSpacing = '1px';
+    watermark.style.pointerEvents = 'none';
 
     document.getElementById('bracketCanvas').appendChild(frontsideTitle);
     document.getElementById('bracketCanvas').appendChild(backsideTitle);
@@ -361,22 +361,22 @@ watermark.style.pointerEvents = 'none';
 
 function getMatchState(match) {
     if (!match) return 'pending';
-    
+
     if (match.completed) return 'completed';
     if (match.active) return 'live';
-    
+
     // Check if both players are ready
     if (canMatchStart && canMatchStart(match)) return 'ready';
-    
+
     return 'pending';
 }
 
 function canMatchStart(match) {
     if (!match || !match.player1 || !match.player2) return false;
-    
+
     const player1Valid = match.player1.name !== 'TBD' && !match.player1.isBye;
     const player2Valid = match.player2.name !== 'TBD' && !match.player2.isBye;
-    
+
     return player1Valid && player2Valid;
 }
 
@@ -408,8 +408,8 @@ function getButtonClickHandler(matchState, matchId) {
     if (matchState === 'pending' || matchState === 'completed') {
         return '';
     }
-    
-    const functionName = typeof toggleActiveWithValidation !== 'undefined' ? 
+
+    const functionName = typeof toggleActiveWithValidation !== 'undefined' ?
         'toggleActiveWithValidation' : 'toggleActive';
     return `${functionName}('${matchId}')`;
 }
@@ -497,7 +497,7 @@ function endDrag() {
  */
 function getLastOperatorHistoryEntry() {
     const history = getTournamentHistory();
-    
+
     // Find first entry that's a real player vs real player match
     for (const entry of history) {
         const description = entry.description;
@@ -506,7 +506,7 @@ function getLastOperatorHistoryEntry() {
             return entry;
         }
     }
-    
+
     return null;
 }
 
@@ -523,10 +523,10 @@ function canUndoOperatorAction() {
 function updateUndoButtonState() {
     const undoBtn = document.getElementById('undoBtn');
     if (!undoBtn) return; // Button doesn't exist yet
-    
+
     const canUndoNow = canUndoOperatorAction();
     const lastEntry = getLastOperatorHistoryEntry();
-    
+
     if (canUndoNow && lastEntry) {
         undoBtn.disabled = false;
         undoBtn.style.opacity = '1';
@@ -545,31 +545,31 @@ function updateUndoButtonState() {
  */
 function handleUndoClick() {
     const lastEntry = getLastOperatorHistoryEntry();
-    
+
     if (!lastEntry) {
         alert('No operator matches available to undo');
         return;
     }
-    
+
     // Show confirmation dialog
-    const confirmMessage = 
+    const confirmMessage =
         `Undo Last Match\n\n` +
         `Match: ${lastEntry.description}\n` +
         `Completed: ${new Date(lastEntry.timestamp).toLocaleTimeString()}\n\n` +
         `⚠️ This will restore the tournament to its previous state\n\n` +
         `Are you sure?`;
-    
+
     if (!confirm(confirmMessage)) {
         console.log('Undo cancelled by user');
         return;
     }
-    
+
     // Perform the restore
     const success = restoreFromHistory(lastEntry);
-    
+
     if (success) {
         console.log(`✓ Successfully undid: ${lastEntry.description}`);
-        
+
         // Show success feedback
         alert(`✓ Undid: ${lastEntry.description}\n\nTournament restored to previous state.`);
     } else {
@@ -584,33 +584,33 @@ function handleUndoClick() {
 function restoreFromHistory(historyEntry) {
     try {
         console.log(`Restoring tournament from: ${historyEntry.description}`);
-        
+
         // Validate history entry structure
         if (!historyEntry.state || !historyEntry.state.tournament || !historyEntry.state.players || !historyEntry.state.matches) {
             console.error('Invalid history entry structure');
             return false;
         }
-        
+
         // Restore global state variables
         tournament = JSON.parse(JSON.stringify(historyEntry.state.tournament));
         players = JSON.parse(JSON.stringify(historyEntry.state.players));
         matches = JSON.parse(JSON.stringify(historyEntry.state.matches));
-        
+
         console.log(`✓ Restored state: ${matches.filter(m => m.completed).length} completed matches`);
-        
+
         // Remove the restored entry from history (it's now the current state)
         removeLastHistoryEntry();
-        
+
         // Save current state to localStorage
         if (typeof saveTournament === 'function') {
             saveTournament();
         }
-        
+
         // Refresh all UI components
         refreshTournamentUI();
-        
+
         return true;
-        
+
     } catch (error) {
         console.error('Error during restore operation:', error);
         return false;
@@ -623,14 +623,14 @@ function restoreFromHistory(historyEntry) {
 function removeLastHistoryEntry() {
     try {
         let history = getTournamentHistory();
-        
+
         if (history.length > 0) {
             // Remove the first entry (most recent)
             history.shift();
-            
+
             // Save updated history
             localStorage.setItem('tournamentHistory', JSON.stringify(history));
-            
+
             console.log(`✓ Removed restored entry from history (${history.length} entries remaining)`);
         }
     } catch (error) {
@@ -643,13 +643,13 @@ function removeLastHistoryEntry() {
  */
 function refreshTournamentUI() {
     console.log('Refreshing tournament UI after restore...');
-    
+
     try {
         // Update tournament status display
         if (typeof updateTournamentStatus === 'function') {
             updateTournamentStatus();
         }
-        
+
         // Update players display and count
         if (typeof updatePlayersDisplay === 'function') {
             updatePlayersDisplay();
@@ -657,24 +657,24 @@ function refreshTournamentUI() {
         if (typeof updatePlayerCount === 'function') {
             updatePlayerCount();
         }
-        
+
         // Re-render the bracket
         if (typeof renderBracket === 'function') {
             renderBracket();
         }
-        
+
         // Update results table
         if (typeof displayResults === 'function') {
             displayResults();
         }
-        
+
         // Refresh lane dropdowns if available
         if (typeof refreshAllLaneDropdowns === 'function') {
             setTimeout(refreshAllLaneDropdowns, 100);
         }
-        
+
         console.log('✓ UI refresh completed');
-        
+
     } catch (error) {
         console.error('Error during UI refresh:', error);
     }
@@ -685,7 +685,7 @@ function refreshTournamentUI() {
  */
 function generateRefereeOptions(currentRefereeId = null) {
     let options = '<option value="">None</option>';
-    
+
     if (typeof players !== 'undefined' && Array.isArray(players)) {
         const paidPlayers = players.filter(player => player.paid);
         paidPlayers.forEach(player => {
@@ -694,7 +694,7 @@ function generateRefereeOptions(currentRefereeId = null) {
             options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
         });
     }
-    
+
     return options;
 }
 
@@ -707,17 +707,17 @@ function updateMatchReferee(matchId, refereeId) {
         console.error(`Match ${matchId} not found`);
         return false;
     }
-    
+
     // Set referee ID (null if "None" selected)
     match.referee = refereeId ? parseInt(refereeId) : null;
-    
+
     console.log(`Referee updated for ${matchId}: ${match.referee ? `Player ${refereeId}` : 'None'}`);
-    
+
     // Save tournament if function exists
     if (typeof saveTournament === 'function') {
         saveTournament();
     }
-    
+
     return true;
 }
 
@@ -729,7 +729,7 @@ function showMatchDetails() {
         alert('No matches available to show details for.');
         return;
     }
-    
+
     const activeMatches = matches.filter(m => getMatchState(m) === 'live');
     const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
 
@@ -758,7 +758,7 @@ function showMatchDetails() {
     if (activeMatches.length === 0 && readyMatches.length === 0) {
         const completedMatches = matches.filter(m => m.completed);
         const pendingMatches = matches.length - completedMatches.length;
-        
+
         details = `No matches currently active or ready.\n\n`;
         details += `Completed: ${completedMatches.length}\n`;
         details += `Pending: ${pendingMatches}`;
@@ -769,6 +769,7 @@ function showMatchDetails() {
 
     alert(details);
 }
+
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
