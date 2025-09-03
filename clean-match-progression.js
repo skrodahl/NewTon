@@ -1098,10 +1098,12 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         return false;
     }
 
-    // Set message content
+    // Set message content with clickable player names
     message.innerHTML = `
-        Declare <strong>${winner.name}</strong> as the WINNER<br>
-        against <strong>${loser.name}</strong> in match <strong>${matchId}</strong>
+        Declare <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${winner.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${winner.name}</span></strong> as the WINNER<br>
+        against <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${loser.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${loser.name}</span></strong> in match <strong>${matchId}</strong>
+        <br><br>
+        <small style="color: #6b7280; font-style: italic;">💡 Click player names to edit their statistics</small>
         <br><br>
         Please confirm the winner, or press "Cancel":
     `;
@@ -1112,7 +1114,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     // Focus cancel button by default (safer) and add visual indicator
     setTimeout(() => {
         cancelBtn.focus();
-        cancelBtn.style.boxShadow = '0 0 0 3px rgba(108, 117, 125, 0.3)'; // Gray focus ring
+        cancelBtn.style.boxShadow = '0 0 0 3px rgba(108, 117, 125, 0.3)';
         cancelBtn.style.transform = 'scale(1.05)';
     }, 100);
 
@@ -1254,6 +1256,37 @@ function debugHistory() {
     }
 }
 
+/**
+ * Open stats modal from winner confirmation dialog with proper z-index handling
+ */
+function openStatsModalFromConfirmation(playerId, matchId) {
+    // Temporarily hide the winner confirmation modal
+    const winnerModal = document.getElementById('winnerConfirmModal');
+    if (winnerModal) {
+        winnerModal.style.display = 'none';
+    }
+    
+    // Open stats modal
+    openStatsModal(playerId);
+    
+    // Override the stats modal close function to return to winner confirmation
+    const originalClose = window.closeStatsModal;
+    window.closeStatsModal = function() {
+        // Call original close function
+        if (originalClose) {
+            originalClose();
+        }
+        
+        // Show winner confirmation modal again
+        if (winnerModal) {
+            winnerModal.style.display = 'block';
+        }
+        
+        // Restore original close function
+        window.closeStatsModal = originalClose;
+    };
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.saveToHistory = saveToHistory;
@@ -1262,4 +1295,5 @@ if (typeof window !== 'undefined') {
     window.getLastHistoryEntry = getLastHistoryEntry;
     window.canUndo = canUndo;
     window.debugHistory = debugHistory;
+    window.openStatsModalFromConfirmation = openStatsModalFromConfirmation;
 }

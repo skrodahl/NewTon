@@ -326,12 +326,19 @@ function calculatePlayerPoints(player) {
     // Use GLOBAL config for point calculation
     points += config.points.participation;
 
+    // Placement points based on ranking
     if (player.placement === 1) {
         points += config.points.first;
     } else if (player.placement === 2) {
         points += config.points.second;
     } else if (player.placement === 3) {
         points += config.points.third;
+    } else if (player.placement === 4) {
+        points += config.points.fourth;
+    } else if (player.placement === 5 || player.placement === 6) {
+        points += config.points.fifthSixth;
+    } else if (player.placement === 7 || player.placement === 8) {
+        points += config.points.seventhEighth;
     }
 
     const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
