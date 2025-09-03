@@ -339,31 +339,38 @@
         </div>
     </div>
 
-    <!-- Statistics Modal -->
+<!-- Statistics Modal -->
     <div id="statsModal" class="modal">
         <div class="modal-content">
             <span class="close" onclick="closeStatsModal()">&times;</span>
             <h3 id="statsPlayerName">Player Statistics</h3>
+            
             <div class="form-group">
                 <label>Short Legs (max 21 darts)</label>
-                <input type="number" id="statsShortLegs" min="0" max="21">
+                <input type="number" id="statsShortLegDarts" min="9" max="21" placeholder="Enter dart count">
                 <button class="btn" onclick="addShortLeg()">Add Short Leg</button>
             </div>
-            <div id="shortLegsList"></div> <!-- ADD THIS LINE -->
+            
             <div class="form-group">
                 <label>High Out Score (101+)</label>
-                <input type="number" id="statsHighOut" min="101" max="170">
+                <input type="number" id="statsHighOut" min="101" max="170" placeholder="Enter high out score">
                 <button class="btn" onclick="addHighOut()">Add High Out</button>
             </div>
+            
             <div class="form-group">
                 <label>Tons (100+)</label>
-                <input type="number" id="statsTons" min="0">
+                <input type="number" id="statsTons" min="0" placeholder="Total tons">
             </div>
+            
             <div class="form-group">
                 <label>180s</label>
-                <input type="number" id="stats180s" min="0">
+                <input type="number" id="stats180s" min="0" placeholder="Total 180s">
             </div>
-            <div id="highOutsList" style="margin-top: 10px;"></div>
+            
+            <!-- Lists grouped together at the bottom -->
+            <div id="shortLegsList"></div>
+            <div id="highOutsList"></div>
+            
             <div style="margin-top: 20px;">
                 <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
                 <button class="btn" onclick="closeStatsModal()">Cancel</button>
