@@ -131,7 +131,7 @@ function saveTournament() {
 function updateTournamentStatus() {
     const statusDiv = document.getElementById('tournamentStatus');
     if (tournament) {
-        statusDiv.innerHTML = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
+        statusDiv.innerHTML = `Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
         statusDiv.className = 'alert alert-success';
         statusDiv.style.display = 'block';
     } else {
@@ -548,6 +548,6 @@ function showImportStatus(type, message) {
 function updateTournamentWatermark() {
     const watermark = document.getElementById('watermark-right');
     if (watermark) {
-        watermark.textContent = tournament ? `Tournament: ${tournament.name} (${tournament.date})` : 'No Tournament';
+        watermark.textContent = tournament ? `Now Playing: ${tournament.name} - ${tournament.date}` : 'No Tournament';
     }
 }
