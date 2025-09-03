@@ -669,7 +669,7 @@ body {
 .results-table {
   width: 100%;
   border-collapse: collapse;
-  margin-top: 16px;
+  margin-top: 0px;
   background: #ffffff;
   border-radius: 10px;
   overflow: hidden;
