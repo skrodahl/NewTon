@@ -64,15 +64,17 @@ function openStatsModal(playerId) {
 
     currentStatsPlayer = player;
     document.getElementById('statsPlayerName').textContent = `${player.name} - Statistics`;
-    document.getElementById('statsTons').value = player.stats.tons || 0;
+    
     // Convert old format to new format if needed
     if (typeof player.stats.shortLegs === 'number') {
         player.stats.shortLegs = [];
     }
-    updateShortLegsList();
-    document.getElementById('stats180s').value = player.stats.oneEighties || 0;
     
+    // Update counters instead of input values
+    updateStatsCounters();
+    updateShortLegsList();
     updateHighOutsList();
+    
     document.getElementById('statsModal').style.display = 'block';
 }
 
@@ -118,8 +120,9 @@ function removeHighOut(index) {
 function saveStats() {
     if (!currentStatsPlayer) return;
 
-    currentStatsPlayer.stats.tons = parseInt(document.getElementById('statsTons').value) || 0;
-    currentStatsPlayer.stats.oneEighties = parseInt(document.getElementById('stats180s').value) || 0;
+    // Remove these lines - no longer needed:
+    // currentStatsPlayer.stats.tons = parseInt(document.getElementById('statsTons').value) || 0;
+    // currentStatsPlayer.stats.oneEighties = parseInt(document.getElementById('stats180s').value) || 0;
 
     updatePlayersDisplay();
     // Call saveTournament if it exists, otherwise just continue
@@ -232,4 +235,42 @@ function removeShortLeg(index) {
         currentStatsPlayer.stats.shortLegs.splice(index, 1);
         updateShortLegsList();
     }
+}
+
+function increment180s() {
+    if (!currentStatsPlayer) return;
+    currentStatsPlayer.stats.oneEighties = (currentStatsPlayer.stats.oneEighties || 0) + 1;
+    updateStatsCounters();
+}
+
+function decrement180s() {
+    if (!currentStatsPlayer) return;
+    const current = currentStatsPlayer.stats.oneEighties || 0;
+    if (current > 0) {
+        currentStatsPlayer.stats.oneEighties = current - 1;
+        updateStatsCounters();
+    }
+}
+
+function incrementTons() {
+    if (!currentStatsPlayer) return;
+    currentStatsPlayer.stats.tons = (currentStatsPlayer.stats.tons || 0) + 1;
+    updateStatsCounters();
+}
+
+function decrementTons() {
+    if (!currentStatsPlayer) return;
+    const current = currentStatsPlayer.stats.tons || 0;
+    if (current > 0) {
+        currentStatsPlayer.stats.tons = current - 1;
+        updateStatsCounters();
+    }
+}
+
+function updateStatsCounters() {
+    const current180s = currentStatsPlayer?.stats.oneEighties || 0;
+    const currentTons = currentStatsPlayer?.stats.tons || 0;
+    
+    document.getElementById('current180sCount').textContent = `Current: ${current180s}`;
+    document.getElementById('currentTonsCount').textContent = `Current: ${currentTons}`;
 }

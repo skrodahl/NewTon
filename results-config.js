@@ -313,8 +313,8 @@ function updateResultsTable() {
                 <td>${points}</td>
                 <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
                 <td>${(player.stats.highOuts || []).join(',') || '—'}</td>
-                <td>${player.stats.tons || 0}</td>
                 <td>${player.stats.oneEighties || 0}</td>
+                <td>${player.stats.tons || 0}</td>
             </tr>
         `;
     }).join('');
@@ -342,13 +342,13 @@ function calculatePlayerPoints(player) {
         points += config.points.seventhEighth || 0;
     }
 
-const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
-points += shortLegsCount * (config.points.shortLeg || 0);
-points += (player.stats.highOuts || []).length * config.points.highOut;
-points += (player.stats.tons || 0) * config.points.ton;
-points += (player.stats.oneEighties || 0) * config.points.oneEighty;
+    const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
+    points += shortLegsCount * (config.points.shortLeg || 0);
+    points += (player.stats.highOuts || []).length * config.points.highOut;
+    points += (player.stats.tons || 0) * config.points.ton;
+    points += (player.stats.oneEighties || 0) * config.points.oneEighty;
 
-return points;
+    return points;
 }
 
 /**
@@ -356,7 +356,7 @@ return points;
  */
 function formatRanking(placement) {
     if (!placement) return '—';
-    
+
     // Convert tied rankings to readable format
     switch (placement) {
         case 1: return '1st';
@@ -369,7 +369,7 @@ function formatRanking(placement) {
         case 13: return '13th-16th'; // Tied ranking (16+ player brackets)
         case 17: return '17th-24th'; // Tied ranking (32+ player brackets)
         case 25: return '25th-32nd'; // Tied ranking (32+ player brackets)
-        default: 
+        default:
             // For any other rankings, use ordinal format
             const suffix = getOrdinalSuffix(placement);
             return `${placement}${suffix}`;
