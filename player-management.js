@@ -1,6 +1,12 @@
 // player-management.js - Player Operations and Statistics
 
 function addPlayer() {
+    // Check if tournament is in progress (bracket exists)
+    if (tournament && tournament.bracket && matches.length > 0) {
+        alert('Tournament is already in progress! Use "Reset Tournament" to start over.');
+        return;
+    }
+    
     const nameInput = document.getElementById('playerName');
     const name = nameInput.value.trim();
     

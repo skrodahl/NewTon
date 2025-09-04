@@ -304,6 +304,18 @@ function updateResultsTable() {
         return nameA.localeCompare(nameB);
     });
 
+    // Check if there are no paid players
+    if (sortedPlayers.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+                    No players added yet
+                </td>
+            </tr>
+        `;
+        return;
+    }
+
     tbody.innerHTML = sortedPlayers.map(player => {
         const points = calculatePlayerPoints(player);
         return `
