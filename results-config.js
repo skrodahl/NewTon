@@ -405,6 +405,133 @@ function getOrdinalSuffix(num) {
     }
 }
 
+/**
+ * Export results table as CSV with confirmation dialogs
+ */
+function exportResultsCSV() {
+    if (!tournament || !tournament.name || !tournament.date) {
+        alert('No active tournament to export');
+        return;
+    }
+
+    // Check if tournament has final rankings (same logic used for placement display)
+    const hasFinalisedRankings = tournament.placements && 
+        Object.keys(tournament.placements).length > 0 &&
+        players.some(p => p.placement);
+
+    // Generate filename
+    const filename = `${tournament.name}_${tournament.date}_Results.csv`;
+    
+    // Show appropriate confirmation dialog
+    let confirmMessage;
+    if (hasFinalisedRankings) {
+        confirmMessage = `Save results to "${filename}"?`;
+    } else {
+        confirmMessage = `Tournament incomplete, export to "${filename}" anyway?.`;
+    }
+
+    if (!confirm(confirmMessage)) {
+        return; // User cancelled
+    }
+
+    // Generate CSV content
+    const csvContent = generateResultsCSV();
+    
+    // Create and download file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log(`✓ Results exported: ${filename}`);
+}
+
+/**
+ * Generate CSV content from current results table
+ */
+function generateResultsCSV() {
+    // Tournament metadata rows
+    const tournamentInfo = [
+        [`Tournament: ${tournament.name}`],
+        [`Date: ${tournament.date}`],
+        [''] // Empty row for spacing
+    ];
+
+    // CSV Headers
+    const headers = ['Rank', 'Player', 'Points', 'Short Legs', 'High Outs', '180s', 'Tons'];
+    
+    // Get sorted players (same logic as updateResultsTable)
+    const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
+        if (a.placement && b.placement) {
+            return a.placement - b.placement;
+        }
+        if (a.placement) return -1;
+        if (b.placement) return 1;
+
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+
+    // Generate CSV rows
+    const rows = sortedPlayers.map(player => {
+        const points = calculatePlayerPoints(player);
+        
+        // Format ranking (remove ordinal suffixes, convert ties)
+        let rank = formatRankingForCSV(player.placement);
+        
+        // Format short legs (semicolon-separated)
+        const shortLegs = Array.isArray(player.stats.shortLegs) && player.stats.shortLegs.length > 0 
+            ? player.stats.shortLegs.join(';') 
+            : '0';
+        
+        // Format high outs (semicolon-separated)
+        const highOuts = (player.stats.highOuts || []).length > 0 
+            ? player.stats.highOuts.join(';') 
+            : '0';
+        
+        const oneEighties = player.stats.oneEighties || 0;
+        const tons = player.stats.tons || 0;
+        
+        return [rank, player.name, points, shortLegs, highOuts, oneEighties, tons];
+    });
+
+    // Convert to CSV format
+    const csvRows = [...tournamentInfo, headers, ...rows];
+    return csvRows.map(row => 
+        row.map(field => `"${field}"`).join(',')
+    ).join('\n');
+}
+
+/**
+ * Format ranking for CSV export (remove ordinals, convert ties)
+ */
+function formatRankingForCSV(placement) {
+    if (!placement) return '0';
+
+    // Convert tied rankings to number ranges
+    switch (placement) {
+        case 1: return '1';
+        case 2: return '2';
+        case 3: return '3';
+        case 4: return '4';
+        case 5: return '5-6';    // 5th-6th place
+        case 7: return '7-8';    // 7th-8th place
+        case 9: return '9-12';   // 9th-12th place
+        case 13: return '13-16'; // 13th-16th place
+        case 17: return '17-24'; // 17th-24th place
+        case 25: return '25-32'; // 25th-32nd place
+        default: return String(placement);
+    }
+}
+
 // INITIALIZATION - Load config immediately when file loads
 console.log('🚀 Initializing bulletproof config system...');
 loadConfiguration();
@@ -422,6 +549,9 @@ if (typeof window !== 'undefined') {
     window.calculatePlayerPoints = calculatePlayerPoints;
     window.formatRanking = formatRanking;
     window.getOrdinalSuffix = getOrdinalSuffix;
+    window.exportResultsCSV = exportResultsCSV;
+    window.generateResultsCSV = generateResultsCSV;
+    window.formatRankingForCSV = formatRankingForCSV;
 
     // Debug functions
     window.forceReloadConfig = forceReloadConfig;
