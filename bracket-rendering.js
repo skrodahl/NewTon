@@ -472,11 +472,21 @@ function updateCanvasTransform() {
 }
 
 function startDrag(e) {
-    if (e.target.closest('.bracket-match')) return;
+    // Don't start drag if clicking on interactive elements
+    if (e.target.closest('.bracket-match button') || 
+        e.target.closest('.bracket-match select') ||
+        e.target.closest('.bracket-controls')) {
+        return;
+    }
+    
     isDragging = true;
     dragStart.x = e.clientX - panOffset.x;
     dragStart.y = e.clientY - panOffset.y;
     e.preventDefault();
+    e.stopPropagation(); // Prevent event bubbling
+    
+    // Ensure we're in dragging mode
+    document.body.style.cursor = 'grabbing';
 }
 
 function handleDrag(e) {

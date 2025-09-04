@@ -408,7 +408,13 @@ body {
   overflow: hidden;
   position: relative;
   cursor: grab;
+  /* Prevent text selection on the viewport itself */
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
+
 .bracket-viewport:active { cursor: grabbing; }
 
 .bracket-canvas {
@@ -453,7 +459,17 @@ body {
   justify-content: space-between;
   align-items: flex-start;
   margin: 0 20px;
-  pointer-events: auto;
+  pointer-events: none; /* Changed from auto to none */
+}
+
+/* Only the button groups should capture pointer events, not the full-width containers */
+.bracket-controls-top-left,
+.bracket-controls-top-right,
+.bracket-controls-middle-left,
+.bracket-controls-middle-right,
+.bracket-controls-bottom-left,
+.bracket-controls-bottom-right {
+  pointer-events: auto; /* Only these specific button groups capture events */
 }
 
 .bracket-controls-top-left,
@@ -469,6 +485,38 @@ body {
 /* Keep the middle row aligned to the right */
 .bracket-controls-middle {
   justify-content: space-between;
+}
+
+/* Prevent text selection during canvas dragging */
+.bracket-canvas,
+.bracket-canvas * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+}
+
+/* Maintain grab cursor consistently across the canvas */
+.bracket-canvas {
+  cursor: inherit;
+}
+
+/* Override text selection for watermarks specifically */
+.bracket-watermarks,
+.bracket-watermarks * {
+  user-select: none !important;
+  -webkit-user-select: none !important;
+  -moz-user-select: none !important;
+  -ms-user-select: none !important;
+  pointer-events: none;
+}
+
+/* Prevent text selection within match cards during drag operations */
+.bracket-match * {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }
 
 .zoom-btn {
