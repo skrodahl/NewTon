@@ -56,13 +56,13 @@ function renderCleanBracket() {
     const grid = {
         matchWidth: 200,
         matchHeight: 100,
-        horizontalSpacing: 150,
-        verticalSpacing: 80,
+        horizontalSpacing: 65,
+        verticalSpacing: 60,
         canvasWidth: 3000,
         canvasHeight: 1200,
         centerX: 1500,
         centerY: 600,
-        centerBuffer: 75
+        centerBuffer: 50
     };
 
     // Render all bracket sections
