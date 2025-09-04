@@ -38,12 +38,18 @@ function addPlayer() {
 }
 
 function removePlayer(playerId) {
+    // Check if tournament is in progress (bracket exists)
+    if (tournament && tournament.bracket && matches.length > 0) {
+        alert('Tournament is already in progress! Use "Reset Tournament" to start over.');
+        return;
+    }
+    
     if (confirm('Are you sure you want to remove this player?')) {
         players = players.filter(p => p.id !== playerId);
         updatePlayersDisplay();
         updatePlayerCount();
         saveTournament();
-	updateResultsTable();
+        updateResultsTable();
     }
 }
 
