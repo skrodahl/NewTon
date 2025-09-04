@@ -468,7 +468,7 @@ body {
 
 /* Keep the middle row aligned to the right */
 .bracket-controls-middle {
-  justify-content: flex-end;
+  justify-content: space-between;
 }
 
 .zoom-btn {
@@ -495,8 +495,8 @@ body {
   box-shadow: 0 6px 16px rgba(0,0,0,0.35);
 }
 
-/* Wide buttons for main actions */
 .bracket-controls-top-left .zoom-btn,
+.bracket-controls-middle-left .zoom-btn,
 .bracket-controls-bottom-left .zoom-btn {
   width: 150px;
   font-size: 14px;
