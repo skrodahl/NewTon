@@ -32,13 +32,13 @@ Simply download the repository, open `tournament.html`, and start managing your 
 - **Lane Assignment**: Assign matches to specific dartboard lanes (1-20 configurable)
 - **Conflict Prevention**: Automatic detection and prevention of lane conflicts
 - **Match Validation**: Ensure proper match progression and prevent invalid states
-- **Referee Assignment**: Auto-suggest available referees from eliminated players
+- **Referee Assignment**: Select referees from a drop-down menu
 - **Flexible Match Lengths**: Configurable best-of legs for rounds, semifinals, and finals
 
 ### 📊 Results & Reporting
 - **Live Standings**: Real-time ranking and points calculation during tournament
 - **Comprehensive Placement**: Automatic 1st through 32nd place rankings with tie handling
-- **CSV Export**: Export complete results for external analysis
+- **CSV Export**: Export complete results for records keeping
 - **Point Breakdown**: Detailed scoring including participation, placement, and performance bonuses
 - **Statistics Summary**: Player performance metrics across all categories
 
