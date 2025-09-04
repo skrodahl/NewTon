@@ -339,8 +339,8 @@ body {
 
 /* Fixed width for left-side buttons (Match Details, future Assign Referees) */
 .bracket-controls-left .zoom-btn {
-  width: 120px;
-  font-size: 12px;
+  width: 150px;
+  font-size: 14px;
   font-weight: 700;
 }
 

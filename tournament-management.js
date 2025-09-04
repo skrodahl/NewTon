@@ -548,6 +548,6 @@ function showImportStatus(type, message) {
 function updateTournamentWatermark() {
     const watermark = document.getElementById('watermark-right');
     if (watermark) {
-        watermark.textContent = tournament ? `Now Playing: ${tournament.name} - ${tournament.date}` : 'No Tournament';
+        watermark.textContent = tournament ? `Tournament: ${tournament.name} - ${tournament.date}` : 'No Tournament';
     }
 }
