@@ -130,15 +130,36 @@ function saveTournament() {
 
 function updateTournamentStatus() {
     const statusDiv = document.getElementById('tournamentStatus');
+    const headerStatusDiv = document.getElementById('headerTournamentStatus');
+    
     if (tournament) {
-        statusDiv.innerHTML = `Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
-        statusDiv.className = 'alert alert-success';
-        statusDiv.style.display = 'block';
+        const statusText = `Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
+        
+        // Update main status div (in Setup page)
+        if (statusDiv) {
+            statusDiv.innerHTML = statusText;
+            statusDiv.className = 'alert alert-success';
+            statusDiv.style.display = 'block';
+        }
+        
+        // Update header status div (NEW)
+        if (headerStatusDiv) {
+            headerStatusDiv.innerHTML = statusText;
+        }
     } else {
-        statusDiv.innerHTML = 'No active tournament';
-        statusDiv.className = 'alert alert-info';
-        statusDiv.style.display = 'block';
+        // No tournament
+        if (statusDiv) {
+            statusDiv.innerHTML = 'No active tournament';
+            statusDiv.className = 'alert alert-info';
+            statusDiv.style.display = 'block';
+        }
+        
+        // Update header to show "None" (NEW)
+        if (headerStatusDiv) {
+            headerStatusDiv.innerHTML = 'Tournament: <strong>None</strong>';
+        }
     }
+    
     updateTournamentWatermark();
 }
 

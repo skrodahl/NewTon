@@ -24,6 +24,10 @@
                 <button class="nav-btn" data-page="registration">Registration</button>
                 <button class="nav-btn" data-page="tournament">Tournament</button>
                 <button class="nav-btn" data-page="config">Config</button>
+                <!-- NEW: Tournament status moved to bottom right of header -->
+                <div id="headerTournamentStatus" class="header-tournament-status">
+                    Tournament: <strong>None</strong>
+                </div>
             </div>
         </div>
 
@@ -360,18 +364,24 @@
             <div class="form-group">
                 <label>180s</label>
                 <div style="display: flex; align-items: center; height: 45px;">
-                    <button class="btn" onclick="decrement180s()" style="padding: 8px 12px; margin-right: 2px;">−</button>
-                    <button class="btn" onclick="increment180s()" style="padding: 8px 12px; margin-left: 1px;">+</button>
-                    <span id="current180sCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current: 0</span>
+                    <button class="btn" onclick="decrement180s()"
+                        style="padding: 8px 12px; margin-right: 2px;">−</button>
+                    <button class="btn" onclick="increment180s()"
+                        style="padding: 8px 12px; margin-left: 1px;">+</button>
+                    <span id="current180sCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
+                        0</span>
                 </div>
             </div>
 
             <div class="form-group">
                 <label>Tons (100+)</label>
                 <div style="display: flex; align-items: center; height: 45px;">
-                    <button class="btn" onclick="decrementTons()" style="padding: 8px 12px; margin-right: 2px;">−</button>
-                    <button class="btn" onclick="incrementTons()" style="padding: 8px 12px; margin-left: 1px;">+</button>
-                    <span id="currentTonsCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current: 0</span>
+                    <button class="btn" onclick="decrementTons()"
+                        style="padding: 8px 12px; margin-right: 2px;">−</button>
+                    <button class="btn" onclick="incrementTons()"
+                        style="padding: 8px 12px; margin-left: 1px;">+</button>
+                    <span id="currentTonsCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
+                        0</span>
                 </div>
             </div>
 

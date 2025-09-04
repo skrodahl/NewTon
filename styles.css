@@ -78,6 +78,7 @@ body {
   gap: 10px;
   justify-content: flex-start;
   flex-wrap: wrap;
+  position: relative;
 }
 
 .nav button {
@@ -1027,4 +1028,20 @@ a:hover { color: #1e40af; }
     letter-spacing: 0.5px;
     backdrop-filter: blur(4px);
     box-shadow: 0 2px 10px rgba(0,0,0,0.35); */
+}
+
+.header-tournament-status {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  color: #6b7280;
+  font-size: 17px;
+  font-weight: 400;
+  text-align: right;
+  line-height: 1.4;
+}
+
+.header-tournament-status strong {
+  color: #111827;
+  font-weight: 600;
 }
