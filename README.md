@@ -34,12 +34,13 @@ Simply download the repository, open `tournament.html`, and start managing your 
 - **Match Validation**: Ensure proper match progression and prevent invalid states
 - **Referee Assignment**: Select referees from a drop-down menu
 - **Flexible Match Lengths**: Configurable best-of legs for rounds, semifinals, and finals
+- **Register Match Results**: Register match results, legs won/lost are shown in the results table
 
 ### 📊 Results & Reporting
 - **Live Standings**: Real-time ranking and points calculation during tournament
 - **Comprehensive Placement**: Automatic 1st through 32nd place rankings with tie handling
 - **CSV Export**: Export complete results for records keeping
-- **Point Breakdown**: Detailed scoring including participation, placement, and performance bonuses
+- **Point Breakdown**: Detailed scoring including participation, placement, legs won/lost, and performance bonuses
 - **Statistics Summary**: Player performance metrics across all categories
 
 ### ⚙️ Configuration & Customization
