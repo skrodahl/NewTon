@@ -150,7 +150,8 @@
                     <div class="bracket-controls-middle">
                         <div class="bracket-controls-middle-left">
                             <button class="zoom-btn" onclick="showPage('registration')"
-                                title="Exit Tournament to edit statistics and see current results">⬅ Players/Points</button>
+                                title="Exit Tournament to edit statistics and see current results">⬅
+                                Players/Points</button>
                         </div>
                         <div class="bracket-controls-middle-right">
                             <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
@@ -431,12 +432,38 @@
     </footer>
 
     <!-- Winner Confirmation Modal -->
+    <!-- Winner Confirmation Modal -->
     <div id="winnerConfirmModal" class="modal">
         <div class="modal-content">
             <h3 id="winnerConfirmTitle">Confirm Match Winner</h3>
             <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
                 <!-- Message will be populated by JavaScript -->
             </div>
+
+            <!-- Leg scores section -->
+            <div id="legScoresSection"
+                style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                    <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <div style="display: flex; align-items: center;">
+                        <span id="winnerNameForLegs"
+                            style="font-weight: 600; color: #065f46; margin-right: 10px;">Winner</span>
+                        <input type="number" id="winnerLegs" min="0" max="7"
+                            style="width: 50px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
+                        <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                    </div>
+                    <div style="display: flex; align-items: center;">
+                        <span id="loserNameForLegs"
+                            style="font-weight: 600; color: #6b7280; margin-right: 10px;">Loser</span>
+                        <input type="number" id="loserLegs" min="0" max="7" value="0"
+                            style="width: 50px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
+                        <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                    </div>
+                </div>
+            </div>
+
             <div class="text-center mt-20">
                 <button class="btn" id="winnerConfirmCancel"
                     style="margin-right: 15px; background: #6c757d;">Cancel</button>

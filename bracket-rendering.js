@@ -596,19 +596,20 @@ function restoreFromHistory(historyEntry) {
         console.log(`Restoring tournament from: ${historyEntry.description}`);
 
         // Validate history entry structure
-        if (!historyEntry.state || !historyEntry.state.tournament || !historyEntry.state.players || !historyEntry.state.matches) {
+        if (!historyEntry.state || !historyEntry.state.tournament || !historyEntry.state.matches) {
             console.error('Invalid history entry structure');
             return false;
         }
 
-        // Restore global state variables
+        // Restore ONLY tournament and matches - NEVER touch players
         tournament = JSON.parse(JSON.stringify(historyEntry.state.tournament));
-        players = JSON.parse(JSON.stringify(historyEntry.state.players));
         matches = JSON.parse(JSON.stringify(historyEntry.state.matches));
+        // players = ... // REMOVED - players stay untouched!
 
         console.log(`✓ Restored state: ${matches.filter(m => m.completed).length} completed matches`);
+        console.log(`✓ Player stats preserved (not restored from history)`);
 
-        // Remove the restored entry from history (it's now the current state)
+        // Remove the restored entry from history
         removeLastHistoryEntry();
 
         // Save current state to localStorage

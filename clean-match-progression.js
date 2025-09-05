@@ -264,7 +264,7 @@ function advancePlayer(matchId, winner, loser) {
  * SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
  * MODIFIED: Now saves to history before making changes
  */
-function completeMatch(matchId, winnerPlayerNumber) {
+function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
         console.error('Match ' + matchId + ' not found');
@@ -298,11 +298,22 @@ function completeMatch(matchId, winnerPlayerNumber) {
         console.log(`⏭ Skipped history save: ${matchId} (walkover or auto-advancement)`);
     }
 
-    // STEP 2: Set match as completed
+    // STEP 2: Set match as completed with leg scores
     match.winner = winner;
     match.loser = loser;
     match.completed = true;
     match.active = false;
+    
+    // NEW: Store leg scores on match object
+    if (winnerLegs > 0 || loserLegs > 0) {
+        match.finalScore = {
+            winnerLegs: winnerLegs,
+            loserLegs: loserLegs,
+            winnerId: winner.id,
+            loserId: loser.id
+        };
+        console.log(`✓ Stored leg scores: ${winner.name} ${winnerLegs}-${loserLegs} ${loser.name}`);
+    }
 
     // STEP 3: Use lookup table to advance players
     const success = advancePlayer(matchId, winner, loser);
@@ -703,9 +714,9 @@ function selectWinnerClean(matchId, playerNumber) {
 
     // Show confirmation dialog if enabled
     if (config.ui && config.ui.confirmWinnerSelection) {
-        return showWinnerConfirmation(matchId, winner, loser, () => {
-            // This callback runs if user confirms
-            const success = completeMatch(matchId, playerNumber);
+        return showWinnerConfirmation(matchId, winner, loser, (winnerLegs, loserLegs) => {
+            // This callback runs if user confirms - now with leg scores
+            const success = completeMatch(matchId, playerNumber, winnerLegs, loserLegs);
 
             if (success) {
                 // Re-render bracket
@@ -723,8 +734,8 @@ function selectWinnerClean(matchId, playerNumber) {
         });
     }
 
-    // If no confirmation needed, complete match normally  
-    const success = completeMatch(matchId, playerNumber);
+    // If no confirmation needed, complete match normally with no leg scores
+    const success = completeMatch(matchId, playerNumber, 0, 0);
 
     if (success) {
         // Re-render bracket
@@ -1321,6 +1332,28 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         Please confirm the winner, or press "Cancel":
     `;
 
+    // NEW: Populate leg score fields
+    const match = matches.find(m => m.id === matchId);
+    const winnerNameSpan = document.getElementById('winnerNameForLegs');
+    const loserNameSpan = document.getElementById('loserNameForLegs');
+    const winnerLegsInput = document.getElementById('winnerLegs');
+    const loserLegsInput = document.getElementById('loserLegs');
+
+    if (winnerNameSpan) winnerNameSpan.textContent = winner.name;
+    if (loserNameSpan) loserNameSpan.textContent = loser.name;
+    
+    // Pre-fill winner legs based on match format
+    if (winnerLegsInput && match) {
+        const matchLegs = match.legs || 3; // Default to Bo3
+        const minToWin = Math.ceil(matchLegs / 2);
+        winnerLegsInput.value = minToWin;
+    }
+    
+    // Loser defaults to 0 (already set in HTML)
+    if (loserLegsInput) {
+        loserLegsInput.value = 0;
+    }
+
     // Show modal
     modal.style.display = 'block';
 
@@ -1341,7 +1374,12 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const handleConfirm = () => {
         modal.style.display = 'none';
         console.log(`Winner confirmed for match ${matchId}: ${winner.name}`);
-        onConfirm();
+        
+        // NEW: Get leg scores and pass to completion
+        const winnerLegs = parseInt(winnerLegsInput?.value) || 0;
+        const loserLegs = parseInt(loserLegsInput?.value) || 0;
+        
+        onConfirm(winnerLegs, loserLegs);
         cleanup();
     };
 
