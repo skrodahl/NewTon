@@ -303,7 +303,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
     match.loser = loser;
     match.completed = true;
     match.active = false;
-    
+
     // NEW: Store leg scores on match object
     if (winnerLegs > 0 || loserLegs > 0) {
         match.finalScore = {
@@ -326,42 +326,47 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             saveTournament();
         }
 
-// Grand Final completion hook: set placements and complete tournament
-try {
-    if (matchId === 'GRAND-FINAL') {
-        console.log('🏆 Grand Final completed - calculating all rankings...');
-        
-        // Clear any existing placements
-        tournament.placements = {};
-        
-        // 1st and 2nd place (Grand Final)
-        tournament.placements[String(winner.id)] = 1;
-        tournament.placements[String(loser.id)] = 2;
-        
-        // 3rd place (BS-FINAL loser)
-        const bsFinal = matches.find(m => m.id === 'BS-FINAL');
-        if (bsFinal && bsFinal.completed && bsFinal.loser && bsFinal.loser.id) {
-            tournament.placements[String(bsFinal.loser.id)] = 3;
+        // Update results table to show new leg data
+        if (typeof updateResultsTable === 'function') {
+            updateResultsTable();
         }
-        
-        // Calculate remaining rankings based on bracket size
-        calculateAllRankings();
-        
-        tournament.status = 'completed';
-        console.log(`✓ Tournament completed with full rankings — Grand Final: ${winner.name} defeats ${loser.name}`);
 
-        if (typeof saveTournament === 'function') saveTournament();
+        // Grand Final completion hook: set placements and complete tournament
+        try {
+            if (matchId === 'GRAND-FINAL') {
+                console.log('🏆 Grand Final completed - calculating all rankings...');
 
-        // Proactively refresh results UI after completion
-        if (typeof displayResults === 'function') {
-            try { displayResults(); } catch (e) {
-                console.warn('displayResults failed after completion', e);
+                // Clear any existing placements
+                tournament.placements = {};
+
+                // 1st and 2nd place (Grand Final)
+                tournament.placements[String(winner.id)] = 1;
+                tournament.placements[String(loser.id)] = 2;
+
+                // 3rd place (BS-FINAL loser)
+                const bsFinal = matches.find(m => m.id === 'BS-FINAL');
+                if (bsFinal && bsFinal.completed && bsFinal.loser && bsFinal.loser.id) {
+                    tournament.placements[String(bsFinal.loser.id)] = 3;
+                }
+
+                // Calculate remaining rankings based on bracket size
+                calculateAllRankings();
+
+                tournament.status = 'completed';
+                console.log(`✓ Tournament completed with full rankings — Grand Final: ${winner.name} defeats ${loser.name}`);
+
+                if (typeof saveTournament === 'function') saveTournament();
+
+                // Proactively refresh results UI after completion
+                if (typeof displayResults === 'function') {
+                    try { displayResults(); } catch (e) {
+                        console.warn('displayResults failed after completion', e);
+                    }
+                }
             }
+        } catch (e) {
+            console.error('Grand-final completion error', { matchId, winner, loser, error: e });
         }
-    }
-} catch (e) {
-    console.error('Grand-final completion error', { matchId, winner, loser, error: e });
-}
 
         // STEP 4: Trigger auto-advancement check (Phase 3) - happens AFTER history save
         processAutoAdvancements();
@@ -382,10 +387,10 @@ function calculateAllRankings() {
         console.error('Cannot calculate rankings: missing tournament or bracket size');
         return;
     }
-    
+
     const bracketSize = tournament.bracketSize;
     console.log(`Calculating rankings for ${bracketSize}-player bracket...`);
-    
+
     if (bracketSize === 8) {
         calculate8PlayerRankings();
     } else if (bracketSize === 16) {
@@ -395,7 +400,7 @@ function calculateAllRankings() {
     } else {
         console.warn(`Ranking calculation not implemented for ${bracketSize}-player bracket`);
     }
-    
+
     console.log('Final tournament placements:', tournament.placements);
 }
 
@@ -404,18 +409,18 @@ function calculateAllRankings() {
  */
 function calculate8PlayerRankings() {
     console.log('Calculating 8-player rankings...');
-    
+
     // 4th place: BS-3-1 loser
     const bs31 = matches.find(m => m.id === 'BS-3-1');
     if (bs31?.completed && bs31.loser?.id) {
         tournament.placements[String(bs31.loser.id)] = 4;
         console.log(`4th place: ${bs31.loser.name}`);
     }
-    
+
     // 5th-6th place: BS-2-1 and BS-2-2 losers  
     const bs21 = matches.find(m => m.id === 'BS-2-1');
     const bs22 = matches.find(m => m.id === 'BS-2-2');
-    
+
     if (bs21?.completed && bs21.loser?.id) {
         tournament.placements[String(bs21.loser.id)] = 5; // Will display as "5th-6th"
         console.log(`5th-6th place: ${bs21.loser.name}`);
@@ -424,11 +429,11 @@ function calculate8PlayerRankings() {
         tournament.placements[String(bs22.loser.id)] = 5; // Same rank for tie
         console.log(`5th-6th place: ${bs22.loser.name}`);
     }
-    
+
     // 7th-8th place: BS-1-1 and BS-1-2 losers
     const bs11 = matches.find(m => m.id === 'BS-1-1');
     const bs12 = matches.find(m => m.id === 'BS-1-2');
-    
+
     if (bs11?.completed && bs11.loser?.id) {
         tournament.placements[String(bs11.loser.id)] = 7; // Will display as "7th-8th"
         console.log(`7th-8th place: ${bs11.loser.name}`);
@@ -437,7 +442,7 @@ function calculate8PlayerRankings() {
         tournament.placements[String(bs12.loser.id)] = 7; // Same rank for tie
         console.log(`7th-8th place: ${bs12.loser.name}`);
     }
-    
+
     console.log('✓ 8-player rankings calculated');
 }
 
@@ -446,18 +451,18 @@ function calculate8PlayerRankings() {
  */
 function calculate16PlayerRankings() {
     console.log('Calculating 16-player rankings...');
-    
+
     // 4th place: BS-5-1 loser
     const bs51 = matches.find(m => m.id === 'BS-5-1');
     if (bs51?.completed && bs51.loser?.id) {
         tournament.placements[String(bs51.loser.id)] = 4;
         console.log(`4th place: ${bs51.loser.name}`);
     }
-    
+
     // 5th-6th place: BS-4-1 and BS-4-2 losers
     const bs41 = matches.find(m => m.id === 'BS-4-1');
     const bs42 = matches.find(m => m.id === 'BS-4-2');
-    
+
     if (bs41?.completed && bs41.loser?.id) {
         tournament.placements[String(bs41.loser.id)] = 5;
         console.log(`5th-6th place: ${bs41.loser.name}`);
@@ -466,11 +471,11 @@ function calculate16PlayerRankings() {
         tournament.placements[String(bs42.loser.id)] = 5;
         console.log(`5th-6th place: ${bs42.loser.name}`);
     }
-    
+
     // 7th-8th place: BS-3-1 and BS-3-2 losers
     const bs31 = matches.find(m => m.id === 'BS-3-1');
     const bs32 = matches.find(m => m.id === 'BS-3-2');
-    
+
     if (bs31?.completed && bs31.loser?.id) {
         tournament.placements[String(bs31.loser.id)] = 7;
         console.log(`7th-8th place: ${bs31.loser.name}`);
@@ -479,7 +484,7 @@ function calculate16PlayerRankings() {
         tournament.placements[String(bs32.loser.id)] = 7;
         console.log(`7th-8th place: ${bs32.loser.name}`);
     }
-    
+
     // 9th-12th place: BS-2-1 to BS-2-4 losers
     const bs2Matches = ['BS-2-1', 'BS-2-2', 'BS-2-3', 'BS-2-4'];
     bs2Matches.forEach(matchId => {
@@ -489,7 +494,7 @@ function calculate16PlayerRankings() {
             console.log(`9th-12th place: ${match.loser.name}`);
         }
     });
-    
+
     // 13th-16th place: BS-1-1 to BS-1-4 losers
     const bs1Matches = ['BS-1-1', 'BS-1-2', 'BS-1-3', 'BS-1-4'];
     bs1Matches.forEach(matchId => {
@@ -499,7 +504,7 @@ function calculate16PlayerRankings() {
             console.log(`13th-16th place: ${match.loser.name}`);
         }
     });
-    
+
     console.log('✓ 16-player rankings calculated');
 }
 
@@ -508,18 +513,18 @@ function calculate16PlayerRankings() {
  */
 function calculate32PlayerRankings() {
     console.log('Calculating 32-player rankings...');
-    
+
     // 4th place: BS-7-1 loser
     const bs71 = matches.find(m => m.id === 'BS-7-1');
     if (bs71?.completed && bs71.loser?.id) {
         tournament.placements[String(bs71.loser.id)] = 4;
         console.log(`4th place: ${bs71.loser.name}`);
     }
-    
+
     // 5th-6th place: BS-6-1 and BS-6-2 losers
     const bs61 = matches.find(m => m.id === 'BS-6-1');
     const bs62 = matches.find(m => m.id === 'BS-6-2');
-    
+
     if (bs61?.completed && bs61.loser?.id) {
         tournament.placements[String(bs61.loser.id)] = 5;
         console.log(`5th-6th place: ${bs61.loser.name}`);
@@ -528,11 +533,11 @@ function calculate32PlayerRankings() {
         tournament.placements[String(bs62.loser.id)] = 5;
         console.log(`5th-6th place: ${bs62.loser.name}`);
     }
-    
+
     // 7th-8th place: BS-5-1 and BS-5-2 losers
     const bs51 = matches.find(m => m.id === 'BS-5-1');
     const bs52 = matches.find(m => m.id === 'BS-5-2');
-    
+
     if (bs51?.completed && bs51.loser?.id) {
         tournament.placements[String(bs51.loser.id)] = 7;
         console.log(`7th-8th place: ${bs51.loser.name}`);
@@ -541,7 +546,7 @@ function calculate32PlayerRankings() {
         tournament.placements[String(bs52.loser.id)] = 7;
         console.log(`7th-8th place: ${bs52.loser.name}`);
     }
-    
+
     // 9th-12th place: BS-4-1 to BS-4-4 losers
     const bs4Matches = ['BS-4-1', 'BS-4-2', 'BS-4-3', 'BS-4-4'];
     bs4Matches.forEach(matchId => {
@@ -551,7 +556,7 @@ function calculate32PlayerRankings() {
             console.log(`9th-12th place: ${match.loser.name}`);
         }
     });
-    
+
     // 13th-16th place: BS-3-1 to BS-3-4 losers
     const bs3Matches = ['BS-3-1', 'BS-3-2', 'BS-3-3', 'BS-3-4'];
     bs3Matches.forEach(matchId => {
@@ -561,7 +566,7 @@ function calculate32PlayerRankings() {
             console.log(`13th-16th place: ${match.loser.name}`);
         }
     });
-    
+
     // 17th-24th place: BS-2-1 to BS-2-8 losers
     const bs2Matches = ['BS-2-1', 'BS-2-2', 'BS-2-3', 'BS-2-4', 'BS-2-5', 'BS-2-6', 'BS-2-7', 'BS-2-8'];
     bs2Matches.forEach(matchId => {
@@ -571,7 +576,7 @@ function calculate32PlayerRankings() {
             console.log(`17th-24th place: ${match.loser.name}`);
         }
     });
-    
+
     // 25th-32nd place: BS-1-1 to BS-1-8 losers
     const bs1Matches = ['BS-1-1', 'BS-1-2', 'BS-1-3', 'BS-1-4', 'BS-1-5', 'BS-1-6', 'BS-1-7', 'BS-1-8'];
     bs1Matches.forEach(matchId => {
@@ -581,7 +586,7 @@ function calculate32PlayerRankings() {
             console.log(`25th-32nd place: ${match.loser.name}`);
         }
     });
-    
+
     console.log('✓ 32-player rankings calculated');
 }
 
@@ -1341,14 +1346,14 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     if (winnerNameSpan) winnerNameSpan.textContent = winner.name;
     if (loserNameSpan) loserNameSpan.textContent = loser.name;
-    
+
     // Pre-fill winner legs based on match format
     if (winnerLegsInput && match) {
         const matchLegs = match.legs || 3; // Default to Bo3
         const minToWin = Math.ceil(matchLegs / 2);
         winnerLegsInput.value = minToWin;
     }
-    
+
     // Loser defaults to 0 (already set in HTML)
     if (loserLegsInput) {
         loserLegsInput.value = 0;
@@ -1374,11 +1379,11 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const handleConfirm = () => {
         modal.style.display = 'none';
         console.log(`Winner confirmed for match ${matchId}: ${winner.name}`);
-        
+
         // NEW: Get leg scores and pass to completion
         const winnerLegs = parseInt(winnerLegsInput?.value) || 0;
         const loserLegs = parseInt(loserLegsInput?.value) || 0;
-        
+
         onConfirm(winnerLegs, loserLegs);
         cleanup();
     };
@@ -1516,23 +1521,23 @@ function openStatsModalFromConfirmation(playerId, matchId) {
     if (winnerModal) {
         winnerModal.style.display = 'none';
     }
-    
+
     // Open stats modal
     openStatsModal(playerId);
-    
+
     // Override the stats modal close function to return to winner confirmation
     const originalClose = window.closeStatsModal;
-    window.closeStatsModal = function() {
+    window.closeStatsModal = function () {
         // Call original close function
         if (originalClose) {
             originalClose();
         }
-        
+
         // Show winner confirmation modal again
         if (winnerModal) {
             winnerModal.style.display = 'block';
         }
-        
+
         // Restore original close function
         window.closeStatsModal = originalClose;
     };

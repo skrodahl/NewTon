@@ -317,19 +317,46 @@ function updateResultsTable() {
     }
 
     tbody.innerHTML = sortedPlayers.map(player => {
-        const points = calculatePlayerPoints(player);
-        return `
-            <tr>
-                <td>${formatRanking(player.placement)}</td>
-                <td><span class="clickable-player-name" onclick="openStatsModal(${player.id})">${player.name}</span></td>
-                <td>${points}</td>
-                <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
-                <td>${(player.stats.highOuts || []).join(',') || '—'}</td>
-                <td>${player.stats.oneEighties || 0}</td>
-                <td>${player.stats.tons || 0}</td>
-            </tr>
-        `;
-    }).join('');
+    const points = calculatePlayerPoints(player);
+    const legs = calculatePlayerLegs(player.id);
+    return `
+        <tr>
+            <td>${formatRanking(player.placement)}</td>
+            <td><span class="clickable-player-name" onclick="openStatsModal(${player.id})">${player.name}</span></td>
+            <td>${points}</td>
+            <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
+            <td>${(player.stats.highOuts || []).join(',') || '—'}</td>
+            <td>${player.stats.oneEighties || 0}</td>
+            <td>${player.stats.tons || 0}</td>
+            <td>${legs.legsWon}</td>
+            <td>${legs.legsLost}</td>
+        </tr>
+    `;
+}).join('');
+}
+
+/**
+ * Calculate legs won/lost for a player from completed matches
+ */
+function calculatePlayerLegs(playerId) {
+    let legsWon = 0;
+    let legsLost = 0;
+    
+    matches.forEach(match => {
+        if (match.completed && match.finalScore) {
+            const { winnerLegs, loserLegs, winnerId, loserId } = match.finalScore;
+            
+            if (winnerId === playerId) {
+                legsWon += winnerLegs;
+                legsLost += loserLegs;
+            } else if (loserId === playerId) {
+                legsWon += loserLegs;
+                legsLost += winnerLegs;
+            }
+        }
+    });
+    
+    return { legsWon, legsLost };
 }
 
 function calculatePlayerPoints(player) {
@@ -465,7 +492,7 @@ function generateResultsCSV() {
     ];
 
     // CSV Headers
-    const headers = ['Rank', 'Player', 'Points', 'Short Legs', 'High Outs', '180s', 'Tons'];
+    const headers = ['Rank', 'Player', 'Points', 'Short Legs', 'High Outs', '180s', 'Tons', 'Legs Won', 'Legs Lost'];
     
     // Get sorted players (same logic as updateResultsTable)
     const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
@@ -483,6 +510,7 @@ function generateResultsCSV() {
     // Generate CSV rows
     const rows = sortedPlayers.map(player => {
         const points = calculatePlayerPoints(player);
+        const legs = calculatePlayerLegs(player.id);
         
         // Format ranking (remove ordinal suffixes, convert ties)
         let rank = formatRankingForCSV(player.placement);
@@ -500,7 +528,7 @@ function generateResultsCSV() {
         const oneEighties = player.stats.oneEighties || 0;
         const tons = player.stats.tons || 0;
         
-        return [rank, player.name, points, shortLegs, highOuts, oneEighties, tons];
+        return [rank, player.name, points, shortLegs, highOuts, oneEighties, tons, legs.legsWon, legs.legsLost];
     });
 
     // Convert to CSV format
