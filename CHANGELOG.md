@@ -12,7 +12,7 @@
 ### Undo System Enhancement:
 
 - Modified undo system to preserve all player statistics during match rollbacks
- -Match-related data (progression, leg scores) gets undone with match results
+ - Match-related data (progression, leg scores) gets undone with match results
 - Performance statistics (tons, 180s, short legs, high outs) persist through undo operations
 - Fixed player data restoration to only restore tournament and match state
 
