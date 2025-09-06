@@ -93,6 +93,10 @@ function openStatsModal(playerId) {
 
     currentStatsPlayer = player;
     document.getElementById('statsPlayerName').textContent = `${player.name} - Statistics`;
+
+    // Clear input fields when opening modal
+    document.getElementById('statsShortLegDarts').value = '';
+    document.getElementById('statsHighOut').value = '';
     
     // Convert old format to new format if needed
     if (typeof player.stats.shortLegs === 'number') {
