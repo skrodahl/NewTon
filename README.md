@@ -14,6 +14,7 @@ Simply download the repository, open `tournament.html`, and start managing your 
 - **Tournament History**: Comprehensive undo system to reverse match results
 - **Crash Resilient**: Automatic saving prevents data loss during unexpected closures
 - **Template System**: Reusable tournament configurations
+- **Dynamic Help**: Click the questionmark icon, or the F1/? buttons to get help
 
 ### 👥 Player Management
 - **Registration System**: Add, remove, and track player payment status
