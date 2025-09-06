@@ -278,6 +278,22 @@ function debugConfigState() {
     console.log('Current tournament in localStorage:', JSON.parse(localStorage.getItem('currentTournament') || 'null'));
 }
 
+// UPDATE: Enhanced showPage function with help integration
+function showPage(pageId) {
+    document.querySelectorAll('.page').forEach(page => {
+        page.classList.remove('active');
+    });
+    document.querySelectorAll('.nav-btn').forEach(btn => {
+        btn.classList.remove('active');
+    });
+    
+    document.getElementById(pageId).classList.add('active');
+    document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+    
+    // HELP SYSTEM INTEGRATION
+    onPageChange(pageId);
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.showPage = showPage;

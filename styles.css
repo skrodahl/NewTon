@@ -1099,3 +1099,107 @@ footer {
 /* Links */
 a { color: #1d4ed8; }
 a:hover { color: #1e40af; }
+
+/* Help system styles */
+.help-btn {
+    position: absolute !important;
+    right: 20px !important;
+    top: 20px !important;
+    width: 32px !important;
+    height: 32px !important;
+    border-radius: 50% !important;
+    border: 2px solid #ff6b35 !important;
+    background: #ffffff !important;
+    color: #ff6b35 !important;
+    font-weight: bold !important;
+    font-size: 16px !important;
+    cursor: pointer !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    transition: all 0.2s ease !important;
+    z-index: 10 !important;
+}
+
+.help-btn:hover {
+    background: #ff6b35 !important;
+    color: #ffffff !important;
+    transform: scale(1.1) !important;
+}
+
+.help-modal {
+    font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+}
+
+.help-modal h4 {
+    margin: 0 0 10px 0 !important;
+    color: #ff6b35 !important;
+}
+
+.help-modal ul, .help-modal ol {
+    margin: 10px 0 !important;
+    padding-left: 20px !important;
+}
+
+.help-modal li {
+    margin: 5px 0 !important;
+}
+
+.help-modal p {
+    margin: 10px 0 !important;
+}
+
+.help-modal strong {
+    color: #111827 !important;
+}
+
+/* Validation message styles */
+#legValidationMessage {
+    margin-top: 10px;
+    padding: 8px 12px;
+    border-radius: 4px;
+    font-size: 14px;
+    font-weight: 500;
+    background: #fff5f5;
+    color: #dc2626;
+    border: 1px solid #fecaca;
+}
+
+/* Enhanced input styling for validation states */
+#winnerLegs:invalid, #loserLegs:invalid {
+    border-color: #dc2626 !important;
+    box-shadow: 0 0 0 3px rgba(220, 38, 38, 0.1) !important;
+}
+
+#winnerLegs:valid, #loserLegs:valid {
+    border-color: #16a34a !important;
+}
+
+/* Disabled confirm button styling */
+#winnerConfirmOK:disabled {
+    background: #6b7280 !important;
+    cursor: not-allowed !important;
+    opacity: 0.6 !important;
+}
+
+/* Help hint animation */
+@keyframes slideDown {
+    from { 
+        transform: translateX(-50%) translateY(-100%); 
+        opacity: 0; 
+    }
+    to { 
+        transform: translateX(-50%) translateY(0); 
+        opacity: 1; 
+    }
+}
+
+/* Responsive help modal */
+@media (max-width: 768px) {
+    .help-modal {
+        width: 90% !important;
+        max-width: 350px !important;
+        right: 5% !important;
+        top: 20px !important;
+    }
+}

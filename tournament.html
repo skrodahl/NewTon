@@ -6,6 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewTon DC - Tournament Manager</title>
     <link rel="stylesheet" href="styles.css">
+
+    <script>
+    // Initialize help system when DOM is ready
+    document.addEventListener('DOMContentLoaded', function() {
+        // Load help system after other initialization
+        setTimeout(() => {
+            if (typeof initializeHelpSystem === 'function') {
+                initializeHelpSystem();
+            }
+        }, 500);
+    });
+    </script>
 </head>
 
 <body>
@@ -428,51 +440,50 @@
     <script src="clean-match-progression.js"></script>
     <script src="bracket-rendering.js"></script>
     <script src="results-config.js"></script>
+    <script src="dynamic-help-system.js"></script>
 
     <footer>
         NewTon DC - Tournament Manager</br> Created by Håvard Skrödahl, NewTon DC Malmö
     </footer>
 
-    <!-- Winner Confirmation Modal -->
-    <!-- Winner Confirmation Modal -->
-    <div id="winnerConfirmModal" class="modal">
-        <div class="modal-content">
-            <h3 id="winnerConfirmTitle">Confirm Match Winner</h3>
-            <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
-                <!-- Message will be populated by JavaScript -->
-            </div>
+<!-- Updated Winner Confirmation Modal with validation -->
+<div id="winnerConfirmModal" class="modal">
+    <div class="modal-content">
+        <h3 id="winnerConfirmTitle">Confirm Match Winner</h3>
+        <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
+            <!-- Message will be populated by JavaScript -->
+        </div>
 
-            <!-- Leg scores section -->
-            <div id="legScoresSection"
-                style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
+        <!-- Enhanced leg scores section with validation -->
+        <div id="legScoresSection" style="margin: 20px 0; padding: 15px; background: #f8f9fa; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
+                <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
+            </div>
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <div style="display: flex; align-items: center;">
+                    <span id="winnerNameForLegs" style="font-weight: 600; color: #065f46; margin-right: 10px; min-width: 80px;">Winner</span>
+                    <input type="number" id="winnerLegs" min="0" max="7" 
+                        style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
+                    <span style="margin: 0 8px; color: #6b7280;">legs</span>
                 </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center;">
-                        <span id="winnerNameForLegs"
-                            style="font-weight: 600; color: #065f46; margin-right: 10px;">Winner</span>
-                        <input type="number" id="winnerLegs" min="0" max="7"
-                            style="width: 50px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
-                        <span style="margin: 0 8px; color: #6b7280;">legs</span>
-                    </div>
-                    <div style="display: flex; align-items: center;">
-                        <span id="loserNameForLegs"
-                            style="font-weight: 600; color: #6b7280; margin-right: 10px;">Loser</span>
-                        <input type="number" id="loserLegs" min="0" max="7" value="0"
-                            style="width: 50px; padding: 4px 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
-                        <span style="margin: 0 8px; color: #6b7280;">legs</span>
-                    </div>
+                <div style="display: flex; align-items: center;">
+                    <span id="loserNameForLegs" style="font-weight: 600; color: #6b7280; margin-right: 10px; min-width: 80px;">Loser</span>
+                    <input type="number" id="loserLegs" min="0" max="7" value="0"
+                        style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; border-radius: 4px; text-align: center;">
+                    <span style="margin: 0 8px; color: #6b7280;">legs</span>
                 </div>
             </div>
+            <!-- Validation message will be inserted here by JavaScript -->
+        </div>
 
-            <div class="text-center mt-20">
-                <button class="btn" id="winnerConfirmCancel"
-                    style="margin-right: 15px; background: #6c757d;">Cancel</button>
-                <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
-            </div>
+        <div class="text-center mt-20">
+            <button class="btn" id="winnerConfirmCancel" style="margin-right: 15px; background: #6c757d;">Cancel</button>
+            <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
         </div>
     </div>
+</div>
+
 </body>
 
 </html>

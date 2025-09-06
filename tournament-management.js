@@ -3,6 +3,7 @@
 
 let showingAllTournaments = false;
 
+// UPDATE: Enhanced createTournament function with help integration
 function createTournament() {
     const name = document.getElementById('tournamentName').value.trim();
     const date = document.getElementById('tournamentDate').value;
@@ -22,8 +23,7 @@ function createTournament() {
         players: [],
         matches: [],
         bracket: null,
-        placements: {} // Only tournament-specific placement data
-        // NO CONFIG DATA HERE - Config is always global
+        placements: {}
     };
 
     // Clear all existing tournament data for fresh start
@@ -44,7 +44,7 @@ function createTournament() {
     }
 
     // Reset date to today for next tournament creation
-    setTodayDate(); //
+    setTodayDate();
 
     // Save tournament (but NOT config)
     saveTournamentOnly();
@@ -59,6 +59,11 @@ function createTournament() {
     updateTournamentWatermark();
     
     alert('✓ New tournament created successfully! Start by adding players.');
+    
+    // HELP SYSTEM INTEGRATION
+    if (typeof onTournamentCreated === 'function') {
+        onTournamentCreated();
+    }
 }
 
 function exportTournament() {

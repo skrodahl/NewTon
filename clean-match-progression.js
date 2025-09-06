@@ -257,13 +257,10 @@ function advancePlayer(matchId, winner, loser) {
     return true;
 }
 
-/**
- * SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
- */
-/**
- * SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
+/* SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
  * MODIFIED: Now saves to history before making changes
  */
+// UPDATE: Enhanced completeMatch with help integration for first match
 function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
@@ -280,14 +277,15 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         return false;
     }
 
+    // Check if this is the first completed match (for help system)
+    const isFirstMatch = matches.filter(m => m.completed).length === 0;
+
     // STEP 1: Save current state to history BEFORE making any changes
-    // Only save for operator-completed real player vs real player matches
     const isRealPlayerMatch = winner.name && winner.name !== 'TBD' && winner.name !== 'Walkover' && !winner.isBye &&
         loser.name && loser.name !== 'TBD' && loser.name !== 'Walkover' && !loser.isBye &&
         !isWalkover(winner) && !isWalkover(loser);
 
     const isOperatorAction = !match.autoAdvanced;
-
     const shouldSaveToHistory = isRealPlayerMatch && isOperatorAction;
 
     if (shouldSaveToHistory) {
@@ -304,7 +302,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
     match.completed = true;
     match.active = false;
 
-    // NEW: Store leg scores on match object
+    // Store leg scores on match object
     if (winnerLegs > 0 || loserLegs > 0) {
         match.finalScore = {
             winnerLegs: winnerLegs,
@@ -320,6 +318,13 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
     if (success) {
         console.log(`✓ Match ${matchId} completed: ${winner.name} defeats ${loser.name}`);
+
+        // HELP SYSTEM INTEGRATION - First match completed
+        if (isFirstMatch && isRealPlayerMatch && typeof onFirstMatchCompleted === 'function') {
+            setTimeout(() => {
+                onFirstMatchCompleted();
+            }, 1000);
+        }
 
         // Save tournament (general save after each match)
         if (typeof saveTournament === 'function') {
@@ -359,7 +364,14 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
                 // Proactively refresh results UI after completion
                 if (typeof displayResults === 'function') {
-                    try { displayResults(); } catch (e) {
+                    try { 
+                        displayResults(); 
+                        
+                        // HELP SYSTEM INTEGRATION - Tournament completed
+                        if (typeof showHelpHint === 'function') {
+                            showHelpHint(`🏆 Tournament completed! ${winner.name} wins. Check results on Registration page.`, 8000);
+                        }
+                    } catch (e) {
                         console.warn('displayResults failed after completion', e);
                     }
                 }
@@ -693,68 +705,10 @@ function processAutoAdvancements() {
 }
 
 /**
- * WINNER SELECTION - CLEAN VERSION (replaces all old selectWinner functions)
+ * WINNER SELECTION
  */
 function selectWinnerClean(matchId, playerNumber) {
-    const match = matches.find(m => m.id === matchId);
-    if (!match) {
-        console.error(`Match ${matchId} not found`);
-        return false;
-    }
-
-    // Can only select winner if match is active/live
-    if (!match.active) {
-        alert('Match must be active to select winner');
-        return false;
-    }
-
-    const winner = playerNumber === 1 ? match.player1 : match.player2;
-    const loser = playerNumber === 1 ? match.player2 : match.player1;
-
-    // Cannot select walkover or TBD as winner
-    if (isWalkover(winner) || winner.name === 'TBD') {
-        alert('Cannot select walkover or TBD as winner');
-        return false;
-    }
-
-    // Show confirmation dialog if enabled
-    if (config.ui && config.ui.confirmWinnerSelection) {
-        return showWinnerConfirmation(matchId, winner, loser, (winnerLegs, loserLegs) => {
-            // This callback runs if user confirms - now with leg scores
-            const success = completeMatch(matchId, playerNumber, winnerLegs, loserLegs);
-
-            if (success) {
-                // Re-render bracket
-                if (typeof renderBracket === 'function') {
-                    renderBracket();
-                }
-
-                // Refresh lane dropdowns if available
-                if (typeof refreshAllLaneDropdowns === 'function') {
-                    setTimeout(refreshAllLaneDropdowns, 100);
-                }
-            }
-
-            return success;
-        });
-    }
-
-    // If no confirmation needed, complete match normally with no leg scores
-    const success = completeMatch(matchId, playerNumber, 0, 0);
-
-    if (success) {
-        // Re-render bracket
-        if (typeof renderBracket === 'function') {
-            renderBracket();
-        }
-
-        // Refresh lane dropdowns if available
-        if (typeof refreshAllLaneDropdowns === 'function') {
-            setTimeout(refreshAllLaneDropdowns, 100);
-        }
-    }
-
-    return success;
+    return validateAndShowWinnerDialog(matchId, playerNumber);
 }
 
 /**
@@ -808,6 +762,7 @@ disableOldProgressionSystem();
 /**
  * CLEAN BRACKET GENERATION: Real players first, walkovers last, never walkover vs walkover
  */
+// UPDATE: Enhanced generateCleanBracket with help integration
 function generateCleanBracket() {
     if (!tournament) {
         alert('Please create a tournament first');
@@ -824,6 +779,11 @@ function generateCleanBracket() {
     if (paidPlayers.length < 4) {
         alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
         console.error('Bracket generation blocked: fewer than 4 paid players');
+        
+        // HELP SYSTEM INTEGRATION
+        if (typeof showHelpHint === 'function') {
+            showHelpHint('Need at least 4 paid players to generate bracket. Add more players on Registration page.', 5000);
+        }
         return false;
     }
 
@@ -844,12 +804,6 @@ function generateCleanBracket() {
     console.log(`Generating ${bracketSize}-player bracket for ${paidPlayers.length} players`);
 
     const bracket = createOptimizedBracketV2(paidPlayers, bracketSize);
-    if (!bracket) {
-        alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
-        console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
-        return false;
-    }
-
     if (!bracket) {
         alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
         console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
@@ -885,6 +839,11 @@ function generateCleanBracket() {
 
     if (typeof showPage === 'function') {
         showPage('tournament');
+    }
+
+    // HELP SYSTEM INTEGRATION
+    if (typeof onBracketGenerated === 'function') {
+        onBracketGenerated();
     }
 
     return true;
@@ -1314,7 +1273,8 @@ if (typeof window !== 'undefined') {
 }
 
 /**
- * Show custom winner confirmation dialog
+ * Enhanced showWinnerConfirmation with proper leg score validation
+ * Replaces the existing function in clean-match-progression.js
  */
 function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const modal = document.getElementById('winnerConfirmModal');
@@ -1337,37 +1297,73 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         Please confirm the winner, or press "Cancel":
     `;
 
-    // NEW: Populate leg score fields
+    // Populate leg score fields
     const match = matches.find(m => m.id === matchId);
     const winnerNameSpan = document.getElementById('winnerNameForLegs');
     const loserNameSpan = document.getElementById('loserNameForLegs');
     const winnerLegsInput = document.getElementById('winnerLegs');
     const loserLegsInput = document.getElementById('loserLegs');
+    const validationMessage = document.getElementById('legValidationMessage');
 
     if (winnerNameSpan) winnerNameSpan.textContent = winner.name;
     if (loserNameSpan) loserNameSpan.textContent = loser.name;
 
     // Pre-fill winner legs based on match format
     if (winnerLegsInput && match) {
-        const matchLegs = match.legs || 3; // Default to Bo3
+        const matchLegs = match.legs || 3;
         const minToWin = Math.ceil(matchLegs / 2);
         winnerLegsInput.value = minToWin;
+        winnerLegsInput.max = matchLegs;
     }
 
-    // Loser defaults to 0 (already set in HTML)
+    // Set up loser legs
     if (loserLegsInput) {
         loserLegsInput.value = 0;
+        if (match) {
+            loserLegsInput.max = match.legs - 1 || 2; // Max legs loser can have
+        }
+    }
+
+    // Clear any existing validation message
+    if (validationMessage) {
+        validationMessage.style.display = 'none';
     }
 
     // Show modal
     modal.style.display = 'block';
 
-    // Focus cancel button by default (safer) and add visual indicator
+    // Focus cancel button by default
     setTimeout(() => {
         cancelBtn.focus();
         cancelBtn.style.boxShadow = '0 0 0 3px rgba(108, 117, 125, 0.3)';
         cancelBtn.style.transform = 'scale(1.05)';
     }, 100);
+
+    // Add real-time validation to input fields
+    const validateInputs = () => {
+        const winnerLegs = parseInt(winnerLegsInput?.value) || 0;
+        const loserLegs = parseInt(loserLegsInput?.value) || 0;
+        const matchLegs = match?.legs || 3;
+        
+        return validateLegScores(winnerLegs, loserLegs, matchLegs);
+    };
+
+    // Add input event listeners for real-time validation
+    if (winnerLegsInput) {
+        winnerLegsInput.addEventListener('input', () => {
+            const validation = validateInputs();
+            updateValidationDisplay(validation);
+            confirmBtn.disabled = !validation.valid;
+        });
+    }
+
+    if (loserLegsInput) {
+        loserLegsInput.addEventListener('input', () => {
+            const validation = validateInputs();
+            updateValidationDisplay(validation);
+            confirmBtn.disabled = !validation.valid;
+        });
+    }
 
     // Handle button clicks
     const handleCancel = () => {
@@ -1377,12 +1373,20 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     };
 
     const handleConfirm = () => {
-        modal.style.display = 'none';
-        console.log(`Winner confirmed for match ${matchId}: ${winner.name}`);
-
-        // NEW: Get leg scores and pass to completion
         const winnerLegs = parseInt(winnerLegsInput?.value) || 0;
         const loserLegs = parseInt(loserLegsInput?.value) || 0;
+        const matchLegs = match?.legs || 3;
+
+        // Final validation before confirming
+        const validation = validateLegScores(winnerLegs, loserLegs, matchLegs);
+        
+        if (!validation.valid) {
+            showValidationError(validation.error);
+            return;
+        }
+
+        modal.style.display = 'none';
+        console.log(`Winner confirmed for match ${matchId}: ${winner.name} (${winnerLegs}-${loserLegs})`);
 
         onConfirm(winnerLegs, loserLegs);
         cleanup();
@@ -1397,13 +1401,33 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         cancelBtn.removeEventListener('click', handleCancel);
         confirmBtn.removeEventListener('click', handleConfirm);
         document.removeEventListener('keydown', handleKeyPress);
+
+        // Remove input listeners
+        if (winnerLegsInput) {
+            winnerLegsInput.removeEventListener('input', validateInputs);
+        }
+        if (loserLegsInput) {
+            loserLegsInput.removeEventListener('input', validateInputs);
+        }
+
+        // Clear validation message
+        if (validationMessage) {
+            validationMessage.style.display = 'none';
+        }
+        
+        // Re-enable confirm button
+        confirmBtn.disabled = false;
     };
 
     const handleKeyPress = (e) => {
         if (e.key === 'Escape') {
             handleCancel();
         } else if (e.key === 'Enter') {
-            handleCancel(); // Enter key cancels (safer)
+            // Only confirm if validation passes
+            const validation = validateInputs();
+            if (validation.valid) {
+                handleConfirm();
+            }
         }
     };
 
@@ -1412,9 +1436,110 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     confirmBtn.addEventListener('click', handleConfirm);
     document.addEventListener('keydown', handleKeyPress);
 
-    return true; // Indicates async operation
+    // Initial validation
+    const initialValidation = validateInputs();
+    updateValidationDisplay(initialValidation);
+    confirmBtn.disabled = !initialValidation.valid;
+
+    return true;
 }
 
+/**
+ * Validate leg scores with comprehensive rules
+ */
+function validateLegScores(winnerLegs, loserLegs, matchLegs) {
+    // Basic number validation
+    if (isNaN(winnerLegs) || isNaN(loserLegs)) {
+        return { valid: false, error: 'Please enter valid numbers for both leg counts' };
+    }
+
+    if (winnerLegs < 0 || loserLegs < 0) {
+        return { valid: false, error: 'Leg counts cannot be negative' };
+    }
+
+    // Winner must have more legs than loser (core requirement)
+    if (winnerLegs <= loserLegs) {
+        return { valid: false, error: 'Winner must have more legs than loser' };
+    }
+
+    // Optional: Check if it makes sense for the match format
+    const minToWin = Math.ceil(matchLegs / 2);
+    if (winnerLegs < minToWin) {
+        return { 
+            valid: false, 
+            error: `Winner needs at least ${minToWin} legs to win a best-of-${matchLegs} match` 
+        };
+    }
+
+    // Optional: Check if total legs is reasonable (not enforced strictly)
+    const totalLegs = winnerLegs + loserLegs;
+    if (totalLegs > matchLegs + 2) {
+        return { 
+            valid: false, 
+            error: `Total legs (${totalLegs}) seems high for a best-of-${matchLegs} match. Maximum expected: ${matchLegs + 2}` 
+        };
+    }
+
+    // Check if loser has too many legs (can't exceed what's possible)
+    const maxLoserLegs = matchLegs - 1; // In Bo5, max loser can have is 4 legs
+    if (loserLegs > maxLoserLegs) {
+        return { 
+            valid: false, 
+            error: `Loser cannot have more than ${maxLoserLegs} legs in a best-of-${matchLegs} match` 
+        };
+    }
+
+    return { valid: true, error: null };
+}
+
+/**
+ * Update validation display in the modal
+ */
+function updateValidationDisplay(validation) {
+    let validationMessage = document.getElementById('legValidationMessage');
+    
+    // Create validation message element if it doesn't exist
+    if (!validationMessage) {
+        const legScoresSection = document.getElementById('legScoresSection');
+        if (legScoresSection) {
+            validationMessage = document.createElement('div');
+            validationMessage.id = 'legValidationMessage';
+            validationMessage.style.marginTop = '10px';
+            validationMessage.style.padding = '8px 12px';
+            validationMessage.style.borderRadius = '4px';
+            validationMessage.style.fontSize = '14px';
+            validationMessage.style.fontWeight = '500';
+            legScoresSection.appendChild(validationMessage);
+        }
+    }
+
+    if (validationMessage) {
+        if (validation.valid) {
+            validationMessage.style.display = 'none';
+        } else {
+            validationMessage.style.display = 'block';
+            validationMessage.style.background = '#fff5f5';
+            validationMessage.style.color = '#dc2626';
+            validationMessage.style.border = '1px solid #fecaca';
+            validationMessage.textContent = validation.error;
+        }
+    }
+}
+
+/**
+ * Show validation error as alert (fallback)
+ */
+function showValidationError(error) {
+    alert('❌ Invalid leg scores:\n\n' + error);
+}
+
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.showWinnerConfirmation = showWinnerConfirmation;
+    window.validateLegScores = validateLegScores;
+    window.updateValidationDisplay = updateValidationDisplay;
+    window.showValidationError = showValidationError;
+}
 // TOURNAMENT HISTORY MANAGEMENT
 
 const MAX_HISTORY_ENTRIES = 50; // Keep last 50 states
@@ -1543,6 +1668,125 @@ function openStatsModalFromConfirmation(playerId, matchId) {
     };
 }
 
+// NEW: Enhanced match state detection with help suggestions
+function detectMatchIssues() {
+    if (!matches || matches.length === 0) return;
+
+    const readyMatches = matches.filter(m => getMatchState && getMatchState(m) === 'ready').length;
+    const liveMatches = matches.filter(m => getMatchState && getMatchState(m) === 'live').length;
+    
+    // Help suggestions based on match states
+    if (readyMatches > 0 && liveMatches === 0 && typeof showHelpHint === 'function') {
+        setTimeout(() => {
+            showHelpHint(`${readyMatches} match${readyMatches > 1 ? 'es' : ''} ready to start. Click "Start" to begin.`);
+        }, 2000);
+    }
+    
+    if (liveMatches > 3 && typeof showHelpHint === 'function') {
+        setTimeout(() => {
+            showHelpHint('Many matches are live. Consider using lanes to organize dartboards.');
+        }, 1000);
+    }
+}
+
+// NEW: Help system integration for common user actions
+function onPageChange(newPageId) {
+    // Trigger contextual help suggestions when switching pages
+    if (typeof triggerContextualHelp === 'function') {
+        setTimeout(() => {
+            triggerContextualHelp();
+        }, 1000);
+    }
+    
+    // Page-specific help triggers
+    if (newPageId === 'tournament' && tournament && tournament.bracket) {
+        setTimeout(() => {
+            detectMatchIssues();
+        }, 1500);
+    }
+}
+
+// NEW: Validation helper for leg scores in winner confirmation
+function validateAndShowWinnerDialog(matchId, playerNumber) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        console.error(`Match ${matchId} not found`);
+        return false;
+    }
+
+    // Can only select winner if match is active/live
+    if (!match.active) {
+        alert('Match must be active to select winner');
+        
+        // HELP SYSTEM INTEGRATION
+        if (typeof showHelpHint === 'function') {
+            showHelpHint('Click "Start" button first to activate the match before selecting winner.');
+        }
+        return false;
+    }
+
+    const winner = playerNumber === 1 ? match.player1 : match.player2;
+    const loser = playerNumber === 1 ? match.player2 : match.player1;
+
+    // Cannot select walkover or TBD as winner
+    if (isWalkover(winner) || winner.name === 'TBD') {
+        alert('Cannot select walkover or TBD as winner');
+        return false;
+    }
+
+    // Show enhanced confirmation dialog with validation
+    if (config.ui && config.ui.confirmWinnerSelection) {
+        return showWinnerConfirmation(matchId, winner, loser, (winnerLegs, loserLegs) => {
+            // This callback runs if user confirms with validated leg scores
+            const success = completeMatch(matchId, playerNumber, winnerLegs, loserLegs);
+
+            if (success) {
+                // Re-render bracket
+                if (typeof renderBracket === 'function') {
+                    renderBracket();
+                }
+
+                // Refresh lane dropdowns if available
+                if (typeof refreshAllLaneDropdowns === 'function') {
+                    setTimeout(refreshAllLaneDropdowns, 100);
+                }
+            }
+
+            return success;
+        });
+    }
+
+    // If no confirmation needed, complete match normally with no leg scores
+    const success = completeMatch(matchId, playerNumber, 0, 0);
+
+    if (success) {
+        // Re-render bracket
+        if (typeof renderBracket === 'function') {
+            renderBracket();
+        }
+
+        // Refresh lane dropdowns if available
+        if (typeof refreshAllLaneDropdowns === 'function') {
+            setTimeout(refreshAllLaneDropdowns, 100);
+        }
+    }
+
+    return success;
+}
+
+// NEW: Error handling with help suggestions
+function handleBracketGenerationError() {
+    if (typeof showHelpHint === 'function') {
+        if (!tournament) {
+            showHelpHint('Create a tournament first on the Setup page.');
+        } else if (players.filter(p => p.paid).length < 4) {
+            showHelpHint('Add at least 4 paid players before generating bracket.');
+        } else if (tournament.bracket) {
+            showHelpHint('Tournament already has a bracket. Use "Reset Tournament" to start over.');
+        }
+    }
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.saveToHistory = saveToHistory;
@@ -1554,4 +1798,16 @@ if (typeof window !== 'undefined') {
     window.openStatsModalFromConfirmation = openStatsModalFromConfirmation;
     window.calculateAllRankings = calculateAllRankings;
     window.calculate8PlayerRankings = calculate8PlayerRankings;
+    window.validateLegScores = validateLegScores;
+    window.updateValidationDisplay = updateValidationDisplay;
+    window.showValidationError = showValidationError;
+
+    window.validateAndShowWinnerDialog = validateAndShowWinnerDialog;
+    window.detectMatchIssues = detectMatchIssues;
+    window.onPageChange = onPageChange;
+    window.handleBracketGenerationError = handleBracketGenerationError;
+    window.selectWinner = selectWinnerClean;
+    window.selectWinnerV2 = selectWinnerClean;
+    window.selectWinnerWithValidation = selectWinnerClean;
+    window.selectWinnerWithAutoAdvancement = selectWinnerClean;
 }

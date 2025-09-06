@@ -1,5 +1,6 @@
 // player-management.js - Player Operations and Statistics
 
+// UPDATE: Enhanced addPlayer function with help integration
 function addPlayer() {
     // Check if tournament is in progress (bracket exists)
     if (tournament && tournament.bracket && matches.length > 0) {
@@ -41,6 +42,15 @@ function addPlayer() {
     updatePlayerCount();
     saveTournament();
     updateResultsTable();
+
+    // HELP SYSTEM INTEGRATION
+    const paidPlayers = players.filter(p => p.paid).length;
+    if (paidPlayers >= 4 && !tournament.bracket && typeof showHelpHint === 'function') {
+        showHelpHint('You now have enough players to generate a bracket! Go to Tournament page.', 4000);
+    } else if (paidPlayers < 4 && typeof showHelpHint === 'function') {
+        const needed = 4 - paidPlayers;
+        showHelpHint(`Need ${needed} more paid player${needed > 1 ? 's' : ''} to generate bracket.`, 3000);
+    }
 }
 
 function removePlayer(playerId) {
@@ -59,6 +69,7 @@ function removePlayer(playerId) {
     }
 }
 
+// UPDATE: Enhanced player paid toggle with help integration
 function togglePaid(playerId) {
     const player = players.find(p => p.id === playerId);
     if (player) {
@@ -66,7 +77,13 @@ function togglePaid(playerId) {
         updatePlayersDisplay();
         updatePlayerCount();
         saveTournament();
-	updateResultsTable();
+        updateResultsTable();
+
+        // HELP SYSTEM INTEGRATION
+        const paidPlayers = players.filter(p => p.paid).length;
+        if (paidPlayers === 4 && !tournament.bracket && typeof showHelpHint === 'function') {
+            showHelpHint('Great! You now have 4 paid players. Ready to generate bracket!', 4000);
+        }
     }
 }
 
