@@ -54,14 +54,14 @@ function renderCleanBracket() {
 
     // Define grid parameters
     const grid = {
-        matchWidth: 200,
+        matchWidth: 210,
         matchHeight: 100,
         horizontalSpacing: 65,
         verticalSpacing: 60,
         canvasWidth: 3000,
         canvasHeight: 1200,
-        centerX: 1500,
-        centerY: 600,
+        centerX: 500,
+        centerY: 500,
         centerBuffer: 50
     };
 
