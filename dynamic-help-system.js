@@ -835,9 +835,10 @@ function suggestHelp() {
     }
     
     // Active matches available
+    /*
     if (matches && matches.some(m => getMatchState && getMatchState(m) === 'live')) {
         return { page: 'tournament', section: 'completion', reason: 'Live matches need attention' };
-    }
+    } */
     
     return null;
 }

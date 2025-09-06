@@ -1676,11 +1676,12 @@ function detectMatchIssues() {
     const liveMatches = matches.filter(m => getMatchState && getMatchState(m) === 'live').length;
     
     // Help suggestions based on match states
+    /*
     if (readyMatches > 0 && liveMatches === 0 && typeof showHelpHint === 'function') {
         setTimeout(() => {
             showHelpHint(`${readyMatches} match${readyMatches > 1 ? 'es' : ''} ready to start. Click "Start" to begin.`);
         }, 2000);
-    }
+    } */
     
     if (liveMatches > 3 && typeof showHelpHint === 'function') {
         setTimeout(() => {
