@@ -284,8 +284,8 @@ function renderMatch(match, x, y, section, roundIndex) {
 	<div class="match-controls">
     	    <span style="font-size: 11px; color: #666;">
         	    Ref: <select onchange="updateMatchReferee('${match.id}', this.value)" 
-         onfocus="refreshRefereeDropdown('${match.id}')"
-         style="background: white; border: 1px solid #ddd; font-size: 11px; width: 200px; padding: 1px;">
+                onfocus="refreshRefereeDropdown('${match.id}')"
+                style="background: white; border: 1px solid #ddd; font-size: 11px; width: 200px; padding: 1px;">
             	    ${generateRefereeOptionsWithConflicts(match.id, match.referee)}
         	    </select>
     	    </span>
@@ -723,12 +723,12 @@ function generateRefereeOptions(currentMatchId, currentRefereeId = null) {
             // Always allow current referee to stay selected
             if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
                 const selected = isCurrentReferee ? 'selected' : '';
-                const playerName = player.name.length > 25 ? player.name.substring(0, 25) + '...' : player.name;
-                console.log('Player name processed:', player.name, '→', playerName);
+                //const playerName = player.name.length > 25 ? player.name.substring(0, 25) + '...' : player.name;
+                const playerName = player.name
                 options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
             } else {
                 // Show unavailable players as disabled with reason
-                const playerName = player.name.length > 25 ? player.name.substring(0, 25) + '...' : player.name;
+                const playerName = player.name.length > 30 ? player.name.substring(0, 30) + '...' : player.name;
                 let reason = '';
                 if (isAssignedElsewhere) reason = ' (assigned)';
                 else if (isInLiveMatch) reason = ' (playing)';
@@ -769,11 +769,12 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
             // Always allow current referee to stay selected
             if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
                 const selected = isCurrentReferee ? 'selected' : '';
-                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                //const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                const playerName = player.name
                 options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
             } else {
                 // Show unavailable players as disabled with reason
-                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                const playerName = player.name.length > 30 ? player.name.substring(0, 30) + '...' : player.name;
                 let reason = '';
                 if (isAssignedElsewhere) reason = ' (assigned)';
                 else if (isInLiveMatch) reason = ' (playing)';

@@ -461,6 +461,7 @@ function refreshLaneDropdown(matchId) {
 }
 
 function refreshRefereeDropdown(matchId) {
+    console.log('DEBUG: refreshRefereeDropdown called for', matchId);
     const matchElement = document.getElementById(`bracket-match-${matchId}`);
     if (!matchElement) return;
     
@@ -471,6 +472,7 @@ function refreshRefereeDropdown(matchId) {
     if (!match) return;
     
     const currentValue = dropdown.value;
+    console.log('DEBUG: About to call generateRefereeOptionsWithConflicts');
     dropdown.innerHTML = generateRefereeOptionsWithConflicts(matchId, match.referee);
     
     if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
