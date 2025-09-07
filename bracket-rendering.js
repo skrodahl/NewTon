@@ -253,9 +253,8 @@ function renderMatch(match, x, y, section, roundIndex) {
     const buttonTextColor = matchState === 'live' || matchState === 'completed' ? 'white' : 'black';
 
     // Simplified lane options (basic 1-10 lanes)
-    const laneOptions = Array.from({ length: 10 }, (_, i) => i + 1).map(lane =>
-        `<option value="${lane}" ${match.lane === lane ? 'selected' : ''}>${lane}</option>`
-    ).join('');
+    const maxLanes = config?.lanes?.maxLanes || 10;
+    const laneOptions = generateLaneOptions(match.id, match.lane);
 
     matchElement.innerHTML = `
         <div class="match-header">
@@ -263,7 +262,8 @@ function renderMatch(match, x, y, section, roundIndex) {
             ${roundIndicator}
             <span class="match-info">
                 L<select onchange="updateMatchLane('${match.id}', this.value)" 
-                         style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
+                    onfocus="refreshLaneDropdown('${match.id}')"
+                    style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
                     <option value="">No</option>
                     ${laneOptions}
                 </select> | Bo${match.legs}
@@ -284,7 +284,8 @@ function renderMatch(match, x, y, section, roundIndex) {
 	<div class="match-controls">
     	    <span style="font-size: 11px; color: #666;">
         	    Ref: <select onchange="updateMatchReferee('${match.id}', this.value)" 
-                     style="background: white; border: 1px solid #ddd; font-size: 11px; width: 165px; padding: 1px;">
+         onfocus="refreshRefereeDropdown('${match.id}')"
+         style="background: white; border: 1px solid #ddd; font-size: 11px; width: 200px; padding: 1px;">
             	    ${generateRefereeOptionsWithConflicts(match.id, match.referee)}
         	    </select>
     	    </span>
@@ -312,26 +313,26 @@ function renderTitles(grid) {
     const frontsideTitle = document.createElement('div');
     frontsideTitle.className = 'bracket-title front';
     // frontsideTitle.textContent = 'FRONTSIDE';
-    
+
     const backsideTitle = document.createElement('div');
     backsideTitle.className = 'bracket-title back';
     // backsideTitle.textContent = 'BACKSIDE';
-    
+
     const finalsTitle = document.createElement('div');
     finalsTitle.className = 'bracket-title finals';
     // finalsTitle.textContent = 'FINALS';
 
     // Position titles
     const titleY = 100;
-    
+
     frontsideTitle.style.position = 'absolute';
     frontsideTitle.style.left = (grid.centerX + grid.centerBuffer + 100) + 'px';
     frontsideTitle.style.top = titleY + 'px';
-    
+
     backsideTitle.style.position = 'absolute';
     backsideTitle.style.left = (grid.centerX - grid.centerBuffer - 300) + 'px';
     backsideTitle.style.top = titleY + 'px';
-    
+
     const finalsX = grid.centerX + grid.centerBuffer + 4 * (grid.matchWidth + grid.horizontalSpacing);
     finalsTitle.style.position = 'absolute';
     finalsTitle.style.left = (finalsX + 320) + 'px';
@@ -473,18 +474,18 @@ function updateCanvasTransform() {
 
 function startDrag(e) {
     // Don't start drag if clicking on interactive elements
-    if (e.target.closest('.bracket-match button') || 
+    if (e.target.closest('.bracket-match button') ||
         e.target.closest('.bracket-match select') ||
         e.target.closest('.bracket-controls')) {
         return;
     }
-    
+
     isDragging = true;
     dragStart.x = e.clientX - panOffset.x;
     dragStart.y = e.clientY - panOffset.y;
     e.preventDefault();
     e.stopPropagation(); // Prevent event bubbling
-    
+
     // Ensure we're in dragging mode
     document.body.style.cursor = 'grabbing';
 }
@@ -718,19 +719,20 @@ function generateRefereeOptions(currentMatchId, currentRefereeId = null) {
             const isCurrentReferee = currentRefereeId && playerId === parseInt(currentRefereeId);
             const isAssignedElsewhere = assignedReferees.includes(playerId);
             const isInLiveMatch = playersInLiveMatches.includes(playerId);
-            
+
             // Always allow current referee to stay selected
             if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
                 const selected = isCurrentReferee ? 'selected' : '';
-                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                const playerName = player.name.length > 25 ? player.name.substring(0, 25) + '...' : player.name;
+                console.log('Player name processed:', player.name, '→', playerName);
                 options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
             } else {
                 // Show unavailable players as disabled with reason
-                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                const playerName = player.name.length > 25 ? player.name.substring(0, 25) + '...' : player.name;
                 let reason = '';
                 if (isAssignedElsewhere) reason = ' (assigned)';
                 else if (isInLiveMatch) reason = ' (playing)';
-                
+
                 options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
             }
         });
@@ -763,7 +765,7 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
             const isCurrentReferee = currentRefereeId && playerId === parseInt(currentRefereeId);
             const isAssignedElsewhere = assignedReferees.includes(playerId);
             const isInLiveMatch = playersInLiveMatches.includes(playerId);
-            
+
             // Always allow current referee to stay selected
             if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
                 const selected = isCurrentReferee ? 'selected' : '';
@@ -775,7 +777,7 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
                 let reason = '';
                 if (isAssignedElsewhere) reason = ' (assigned)';
                 else if (isInLiveMatch) reason = ' (playing)';
-                
+
                 options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
             }
         });
@@ -814,19 +816,19 @@ function updateMatchReferee(matchId, refereeId) {
     const currentRefereeId = match.referee;
     if (refereeId !== currentRefereeId && !isPlayerAvailableAsReferee(refereeId, matchId)) {
         alert('This referee is already assigned to another match or currently playing.');
-        
+
         // Reset dropdown to previous value
         const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchReferee"]`);
         if (dropdown) {
             dropdown.value = currentRefereeId || '';
         }
-        
+
         return false;
     }
 
     // Update the referee
     match.referee = refereeId ? parseInt(refereeId) : null;
-    
+
     console.log(`Referee updated for ${matchId}: ${match.referee ? `Player ${refereeId}` : 'None'}`);
 
     // Save tournament

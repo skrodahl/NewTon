@@ -10,9 +10,9 @@ let currentStatsPlayer = null;
 // let config = {}; // This is loaded by results-config.js
 
 // Initialize application with bulletproof config loading
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log('🚀 Starting tournament manager...');
-    
+
     // Step 1: Ensure global config is loaded FIRST
     if (typeof loadConfiguration === 'function') {
         console.log('✓ Global config loaded by results-config.js');
@@ -22,7 +22,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Step 2: Auto-detect and load logo
     loadClubLogo();
-    
+
     // Step 3: Load recent tournaments list (but NOT tournament config)
     setTimeout(() => {
         try {
@@ -33,13 +33,13 @@ document.addEventListener('DOMContentLoaded', function() {
             console.error('Failed to load recent tournaments:', error);
         }
     }, 100);
-    
+
     // Step 4: Setup event listeners
     setupEventListeners();
-    
+
     // Step 5: Set today's date
     setTodayDate();
-    
+
     // Step 6: Auto-load current tournament (if exists) - Never loads config
     autoLoadCurrentTournament();
 });
@@ -54,9 +54,9 @@ function loadClubLogo() {
 
     logoFiles.forEach(filename => {
         if (logoLoaded) return;
-        
+
         const img = new Image();
-        img.onload = function() {
+        img.onload = function () {
             logoContainer.innerHTML = '';
             logoContainer.className = 'club-logo';
             logoContainer.appendChild(img);
@@ -67,7 +67,7 @@ function loadClubLogo() {
             img.style.objectFit = 'cover';
             logoLoaded = true;
         };
-        img.onerror = function() {
+        img.onerror = function () {
             // Logo not found - keep placeholder
         };
         img.src = filename;
@@ -84,10 +84,10 @@ function setTodayDate() {
 
 function setupEventListeners() {
     console.log('🔗 Setting up event listeners...');
-    
+
     // Navigation
     document.querySelectorAll('.nav-btn').forEach(btn => {
-        btn.addEventListener('click', function() {
+        btn.addEventListener('click', function () {
             const page = this.dataset.page;
             showPage(page);
         });
@@ -96,7 +96,7 @@ function setupEventListeners() {
     // Enter key handlers
     const playerNameInput = document.getElementById('playerName');
     if (playerNameInput) {
-        playerNameInput.addEventListener('keypress', function(e) {
+        playerNameInput.addEventListener('keypress', function (e) {
             if (e.key === 'Enter') {
                 addPlayer();
             }
@@ -105,7 +105,7 @@ function setupEventListeners() {
 
     // Auto-save configuration on config page changes
     setupConfigAutoSave();
-    
+
     // Initialize bracket controls
     if (typeof initializeBracketControls === 'function') {
         initializeBracketControls();
@@ -119,15 +119,15 @@ function setupConfigAutoSave() {
         'fourthPlacePoints', 'fifthSixthPlacePoints', 'seventhEighthPlacePoints',
         'highOutPoints', 'tonPoints', 'oneEightyPoints', 'shortLegPoints'
     ];
-    
+
     pointFields.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.addEventListener('change', function() {
+            element.addEventListener('change', function () {
                 // Save immediately when config changes
                 if (typeof saveConfiguration === 'function') {
                     console.log(`💾 Auto-saving config change: ${id} = ${this.value}`);
-                    
+
                     // Update global config object
                     const configKey = id.replace('Points', '')
                         .replace('participation', 'participation')
@@ -141,11 +141,11 @@ function setupConfigAutoSave() {
                         .replace('ton', 'ton')
                         .replace('oneEighty', 'oneEighty')
                         .replace('shortLeg', 'shortLeg');
-                        
+
                     if (config && config.points) {
                         config.points[configKey] = parseInt(this.value) || 0;
                     }
-                    
+
                     // Save to localStorage immediately
                     if (typeof saveGlobalConfig === 'function') {
                         saveGlobalConfig();
@@ -157,14 +157,14 @@ function setupConfigAutoSave() {
 
     // Auto-save match leg configuration
     const legFields = ['regularRoundsLegs', 'semiFinalsLegs', 'backsideFinalLegs', 'grandFinalLegs'];
-    
+
     legFields.forEach(id => {
         const element = document.getElementById(id);
         if (element) {
-            element.addEventListener('change', function() {
+            element.addEventListener('change', function () {
                 if (typeof saveConfiguration === 'function') {
                     console.log(`💾 Auto-saving leg config: ${id} = ${this.value}`);
-                    
+
                     // Update global config object
                     const configKey = id.replace('Legs', '').replace('semiFinalsLegs', 'semifinal').replace('backsideFinalLegs', 'backsideFinal').replace('grandFinalLegs', 'grandFinal');
                     if (config && config.legs) {
@@ -173,7 +173,7 @@ function setupConfigAutoSave() {
                         else if (id === 'backsideFinalLegs') config.legs.backsideFinal = parseInt(this.value) || 5;
                         else if (id === 'grandFinalLegs') config.legs.grandFinal = parseInt(this.value) || 5;
                     }
-                    
+
                     // Save to localStorage immediately
                     if (typeof saveGlobalConfig === 'function') {
                         saveGlobalConfig();
@@ -191,7 +191,7 @@ function showPage(pageId) {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     document.getElementById(pageId).classList.add('active');
     document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
 }
@@ -199,16 +199,16 @@ function showPage(pageId) {
 // AUTO-LOAD CURRENT TOURNAMENT - Never loads config, only tournament data
 function autoLoadCurrentTournament() {
     console.log('🔄 Auto-loading current tournament (config stays global)...');
-    
+
     const currentTournament = localStorage.getItem('currentTournament');
     if (!currentTournament) {
         console.log('No current tournament found');
         return;
     }
-    
+
     try {
         const tournamentData = JSON.parse(currentTournament);
-        
+
         // Load ONLY tournament data - NEVER config
         tournament = {
             id: tournamentData.id,
@@ -221,7 +221,7 @@ function autoLoadCurrentTournament() {
             placements: tournamentData.placements || {}
             // NO CONFIG loading - config stays global
         };
-        
+
         players = tournamentData.players || [];
         matches = tournamentData.matches || [];
 
@@ -229,15 +229,15 @@ function autoLoadCurrentTournament() {
         if (tournament.name && tournament.date) {
             const nameElement = document.getElementById('tournamentName');
             const dateElement = document.getElementById('tournamentDate');
-            
+
             if (nameElement) nameElement.value = tournament.name;
             if (dateElement) dateElement.value = tournament.date;
-            
+
             // Update tournament-specific UI
             if (typeof updateTournamentStatus === 'function') {
                 updateTournamentStatus();
             }
-            
+
             if (typeof updatePlayersDisplay === 'function') {
                 updatePlayersDisplay();
                 updatePlayerCount();
@@ -252,7 +252,16 @@ function autoLoadCurrentTournament() {
             if (typeof displayResults === 'function') {
                 displayResults();
             }
-            
+
+            // Refresh lane dropdowns with correct config after tournament load
+            if (tournament.bracket && matches.length > 0) {
+                setTimeout(() => {
+                    if (typeof refreshAllLaneDropdowns === 'function') {
+                        refreshAllLaneDropdowns();
+                    }
+                }, 200);
+            }
+
             console.log('✓ Current tournament loaded (global config preserved)');
         }
     } catch (error) {
@@ -286,10 +295,10 @@ function showPage(pageId) {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.classList.remove('active');
     });
-    
+
     document.getElementById(pageId).classList.add('active');
     document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
-    
+
     // HELP SYSTEM INTEGRATION
     onPageChange(pageId);
 }
@@ -299,7 +308,7 @@ if (typeof window !== 'undefined') {
     window.showPage = showPage;
     window.forceConfigReload = forceConfigReload;
     window.debugConfigState = debugConfigState;
-    
+
     // Also make these available for console debugging
     window.autoLoadCurrentTournament = autoLoadCurrentTournament;
 }
