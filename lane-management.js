@@ -130,53 +130,6 @@ function generateLaneOptions(currentMatchId, currentLane = null) {
 }
 
 /**
- * Enhanced match lane update function with conflict checking
- */
-function updateMatchLaneWithValidation(matchId, newLane) {
-    const match = matches.find(m => m.id === matchId);
-    if (!match) {
-        console.error(`Match ${matchId} not found`);
-        return false;
-    }
-    
-    const lane = newLane ? parseInt(newLane) : null;
-    
-    // If removing lane assignment, just clear it
-    if (!lane) {
-        match.lane = null;
-        saveTournament();
-        return true;
-    }
-    
-    // Check for conflicts with other LIVE matches
-    if (isLaneInUse(lane, matchId)) {
-        alert(`Lane ${lane} is already in use by another LIVE match`);
-        
-        // Reset dropdown to previous value
-        const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchLane"]`);
-        if (dropdown) {
-            dropdown.value = match.lane || '';
-        }
-        
-        return false;
-    }
-    
-    // Update the lane
-    const oldLane = match.lane;
-    match.lane = lane;
-    
-    console.log(`Lane updated for ${matchId}: ${oldLane} → ${lane}`);
-    
-    // Save and refresh UI
-    saveTournament();
-    
-    // Refresh lane dropdowns for all matches to show updated availability
-    refreshAllLaneDropdowns();
-    
-    return true;
-}
-
-/**
  * Refresh lane dropdowns for all visible matches
  */
 function refreshAllLaneDropdowns() {
@@ -235,6 +188,7 @@ function toggleActiveWithLaneValidation(matchId) {
     // Refresh dropdowns when match state changes
     setTimeout(() => {
         refreshAllLaneDropdowns();
+        refreshAllRefereeDropdowns();
     }, 100);
     
     return true;
@@ -309,6 +263,178 @@ function debugLaneManagement() {
     });
 }
 
+/**
+ * Get all referees currently assigned to matches (excluding specified match)
+ */
+function getAssignedReferees(excludeMatchId = null) {
+    if (!matches || matches.length === 0) return [];
+    
+    const assignedReferees = [];
+    matches.forEach(match => {
+        // Skip the match we're updating
+        if (excludeMatchId && match.id === excludeMatchId) return;
+        
+        // Only count referees assigned to matches that exist and have a referee
+        if (match.referee) {
+            assignedReferees.push(parseInt(match.referee));
+        }
+    });
+    
+    return assignedReferees;
+}
+
+/**
+ * Get all players currently in LIVE matches (excluding specified match)
+ */
+function getPlayersInLiveMatches(excludeMatchId = null) {
+    if (!matches || matches.length === 0) return [];
+    
+    const playersInLiveMatches = [];
+    matches.forEach(match => {
+        // Skip the match we're updating
+        if (excludeMatchId && match.id === excludeMatchId) return;
+        
+        // Only check LIVE matches
+        if (getMatchState && getMatchState(match) === 'live') {
+            if (match.player1 && match.player1.id && !match.player1.isBye && match.player1.name !== 'TBD') {
+                playersInLiveMatches.push(parseInt(match.player1.id));
+            }
+            if (match.player2 && match.player2.id && !match.player2.isBye && match.player2.name !== 'TBD') {
+                playersInLiveMatches.push(parseInt(match.player2.id));
+            }
+        }
+    });
+    
+    return playersInLiveMatches;
+}
+
+/**
+ * Generate referee dropdown options with conflict detection (replaces existing function)
+ */
+function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = null) {
+    let options = '<option value="">None</option>';
+
+    if (typeof players !== 'undefined' && Array.isArray(players)) {
+        // Get paid players and sort alphabetically
+        const paidPlayers = players.filter(player => player.paid);
+        const sortedPlayers = paidPlayers.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        // Get conflict information
+        const assignedReferees = getAssignedReferees(currentMatchId);
+        const playersInLiveMatches = getPlayersInLiveMatches(currentMatchId);
+
+        sortedPlayers.forEach(player => {
+            const playerId = parseInt(player.id);
+            const isCurrentReferee = currentRefereeId && playerId === parseInt(currentRefereeId);
+            const isAssignedElsewhere = assignedReferees.includes(playerId);
+            const isInLiveMatch = playersInLiveMatches.includes(playerId);
+            
+            // Always allow current referee to stay selected
+            if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
+                const selected = isCurrentReferee ? 'selected' : '';
+                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
+            } else {
+                // Show unavailable players as disabled with reason
+                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                let reason = '';
+                if (isAssignedElsewhere) reason = ' (assigned)';
+                else if (isInLiveMatch) reason = ' (playing)';
+                
+                options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
+            }
+        });
+    }
+
+    return options;
+}
+
+/**
+ * Enhanced match lane update function with conflict checking
+ */
+function updateMatchLaneWithValidation(matchId, newLane) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        console.error(`Match ${matchId} not found`);
+        return false;
+    }
+    
+    const lane = newLane ? parseInt(newLane) : null;
+    
+    // If removing lane assignment, just clear it
+    if (!lane) {
+        match.lane = null;
+        saveTournament();
+        return true;
+    }
+    
+    // Check for conflicts with other LIVE matches
+    if (isLaneInUse(lane, matchId)) {
+        alert(`Lane ${lane} is already in use by another LIVE match`);
+        
+        // Reset dropdown to previous value
+        const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchLane"]`);
+        if (dropdown) {
+            dropdown.value = match.lane || '';
+        }
+        
+        return false;
+    }
+    
+    // Update the lane
+    const oldLane = match.lane;
+    match.lane = lane;
+    
+    console.log(`Lane updated for ${matchId}: ${oldLane} → ${lane}`);
+    
+    // Save and refresh UI
+    saveTournament();
+    
+    // Refresh lane dropdowns for all matches to show updated availability
+    refreshAllLaneDropdowns();
+    
+    return true;
+}
+
+/**
+ * Check if a player is available as referee for a specific match
+ */
+function isPlayerAvailableAsReferee(playerId, excludeMatchId = null) {
+    const assignedReferees = getAssignedReferees(excludeMatchId);
+    const playersInLiveMatches = getPlayersInLiveMatches(excludeMatchId);
+    
+    const playerIdInt = parseInt(playerId);
+    
+    return !assignedReferees.includes(playerIdInt) && !playersInLiveMatches.includes(playerIdInt);
+}
+
+/**
+ * Refresh referee dropdowns for all visible matches
+ */
+function refreshAllRefereeDropdowns() {
+    if (!matches || matches.length === 0) return;
+    
+    matches.forEach(match => {
+        const matchElement = document.getElementById(`bracket-match-${match.id}`);
+        if (matchElement) {
+            const dropdown = matchElement.querySelector('select[onchange*="updateMatchReferee"]');
+            if (dropdown) {
+                const currentValue = dropdown.value;
+                dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
+                
+                // Maintain selection if still valid
+                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
+                    dropdown.value = currentValue;
+                }
+            }
+        }
+    });
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.getAvailableLanes = getAvailableLanes;
@@ -319,4 +445,5 @@ if (typeof window !== 'undefined') {
     window.updateLaneConfiguration = updateLaneConfiguration;
     window.debugLaneManagement = debugLaneManagement;
     window.refreshAllLaneDropdowns = refreshAllLaneDropdowns;
+    window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
 }

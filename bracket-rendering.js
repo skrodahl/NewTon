@@ -54,8 +54,8 @@ function renderCleanBracket() {
 
     // Define grid parameters
     const grid = {
-        matchWidth: 210,
-        matchHeight: 100,
+        matchWidth: 280,
+        matchHeight: 140,
         horizontalSpacing: 65,
         verticalSpacing: 60,
         canvasWidth: 3000,
@@ -263,7 +263,7 @@ function renderMatch(match, x, y, section, roundIndex) {
             ${roundIndicator}
             <span class="match-info">
                 L<select onchange="updateMatchLane('${match.id}', this.value)" 
-                         style="background: white; border: 1px solid #ddd; font-size: 11px; width: 40px; padding: 2px;">
+                         style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
                     <option value="">No</option>
                     ${laneOptions}
                 </select> | Bo${match.legs}
@@ -282,10 +282,10 @@ function renderMatch(match, x, y, section, roundIndex) {
             </div>
         </div>
 	<div class="match-controls">
-    	    <span style="font-size: 9px; color: #666;">
+    	    <span style="font-size: 11px; color: #666;">
         	    Ref: <select onchange="updateMatchReferee('${match.id}', this.value)" 
-                     style="background: white; border: 1px solid #ddd; font-size: 9px; width: 60px; padding: 1px;">
-            	    ${generateRefereeOptions(match.referee)}
+                     style="background: white; border: 1px solid #ddd; font-size: 11px; width: 165px; padding: 1px;">
+            	    ${generateRefereeOptionsWithConflicts(match.id, match.referee)}
         	    </select>
     	    </span>
     	    <button onclick="${getButtonClickHandler(matchState, match.id)}" 
@@ -694,19 +694,103 @@ function refreshTournamentUI() {
 /**
  * Generate referee dropdown options from all players
  */
-function generateRefereeOptions(currentRefereeId = null) {
+/**
+ * Generate referee dropdown options with conflict detection
+ */
+function generateRefereeOptions(currentMatchId, currentRefereeId = null) {
     let options = '<option value="">None</option>';
 
     if (typeof players !== 'undefined' && Array.isArray(players)) {
+        // Get paid players and sort alphabetically
         const paidPlayers = players.filter(player => player.paid);
-        paidPlayers.forEach(player => {
-            const selected = currentRefereeId && String(currentRefereeId) === String(player.id) ? 'selected' : '';
-            const playerName = player.name.length > 8 ? player.name.substring(0, 8) + '...' : player.name;
-            options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
+        const sortedPlayers = paidPlayers.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        // Get conflict information
+        const assignedReferees = getAssignedReferees ? getAssignedReferees(currentMatchId) : [];
+        const playersInLiveMatches = getPlayersInLiveMatches ? getPlayersInLiveMatches(currentMatchId) : [];
+
+        sortedPlayers.forEach(player => {
+            const playerId = parseInt(player.id);
+            const isCurrentReferee = currentRefereeId && playerId === parseInt(currentRefereeId);
+            const isAssignedElsewhere = assignedReferees.includes(playerId);
+            const isInLiveMatch = playersInLiveMatches.includes(playerId);
+            
+            // Always allow current referee to stay selected
+            if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
+                const selected = isCurrentReferee ? 'selected' : '';
+                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
+            } else {
+                // Show unavailable players as disabled with reason
+                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                let reason = '';
+                if (isAssignedElsewhere) reason = ' (assigned)';
+                else if (isInLiveMatch) reason = ' (playing)';
+                
+                options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
+            }
         });
     }
 
     return options;
+}
+
+/**
+ * Generate referee dropdown options with conflict detection (replaces existing function)
+ */
+function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = null) {
+    let options = '<option value="">None</option>';
+
+    if (typeof players !== 'undefined' && Array.isArray(players)) {
+        // Get paid players and sort alphabetically
+        const paidPlayers = players.filter(player => player.paid);
+        const sortedPlayers = paidPlayers.sort((a, b) => {
+            const nameA = a.name.toLowerCase();
+            const nameB = b.name.toLowerCase();
+            return nameA.localeCompare(nameB);
+        });
+
+        // Get conflict information
+        const assignedReferees = getAssignedReferees(currentMatchId);
+        const playersInLiveMatches = getPlayersInLiveMatches(currentMatchId);
+
+        sortedPlayers.forEach(player => {
+            const playerId = parseInt(player.id);
+            const isCurrentReferee = currentRefereeId && playerId === parseInt(currentRefereeId);
+            const isAssignedElsewhere = assignedReferees.includes(playerId);
+            const isInLiveMatch = playersInLiveMatches.includes(playerId);
+            
+            // Always allow current referee to stay selected
+            if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
+                const selected = isCurrentReferee ? 'selected' : '';
+                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
+            } else {
+                // Show unavailable players as disabled with reason
+                const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
+                let reason = '';
+                if (isAssignedElsewhere) reason = ' (assigned)';
+                else if (isInLiveMatch) reason = ' (playing)';
+                
+                options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
+            }
+        });
+    }
+
+    return options;
+}
+
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.getAssignedReferees = getAssignedReferees;
+    window.getPlayersInLiveMatches = getPlayersInLiveMatches;
+    window.isPlayerAvailableAsReferee = isPlayerAvailableAsReferee;
+    window.refreshAllRefereeDropdowns = refreshAllRefereeDropdowns;
+    window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
 }
 
 /**
@@ -719,15 +803,39 @@ function updateMatchReferee(matchId, refereeId) {
         return false;
     }
 
-    // Set referee ID (null if "None" selected)
-    match.referee = refereeId ? parseInt(refereeId) : null;
+    // If removing referee assignment, just clear it
+    if (!refereeId) {
+        match.referee = null;
+        saveTournament();
+        return true;
+    }
 
+    // Check for conflicts (unless it's the current referee)
+    const currentRefereeId = match.referee;
+    if (refereeId !== currentRefereeId && !isPlayerAvailableAsReferee(refereeId, matchId)) {
+        alert('This referee is already assigned to another match or currently playing.');
+        
+        // Reset dropdown to previous value
+        const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchReferee"]`);
+        if (dropdown) {
+            dropdown.value = currentRefereeId || '';
+        }
+        
+        return false;
+    }
+
+    // Update the referee
+    match.referee = refereeId ? parseInt(refereeId) : null;
+    
     console.log(`Referee updated for ${matchId}: ${match.referee ? `Player ${refereeId}` : 'None'}`);
 
-    // Save tournament if function exists
+    // Save tournament
     if (typeof saveTournament === 'function') {
         saveTournament();
     }
+
+    // Refresh all referee dropdowns to show updated availability
+    refreshAllRefereeDropdowns();
 
     return true;
 }
