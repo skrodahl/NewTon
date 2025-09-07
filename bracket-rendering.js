@@ -285,7 +285,7 @@ function renderMatch(match, x, y, section, roundIndex) {
     	    <span style="font-size: 11px; color: #666;">
         	    Ref: <select onchange="updateMatchReferee('${match.id}', this.value)" 
                 onfocus="refreshRefereeDropdown('${match.id}')"
-                style="background: white; border: 1px solid #ddd; font-size: 11px; width: 200px; padding: 1px;">
+                style="background: white; border: 1px solid #ddd; font-size: 11px; width: 185px; padding: 1px;">
             	    ${generateRefereeOptionsWithConflicts(match.id, match.referee)}
         	    </select>
     	    </span>
