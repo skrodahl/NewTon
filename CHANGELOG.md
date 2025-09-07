@@ -1,3 +1,62 @@
+# 2025-09-07
+## Enhanced Referee Assignment System & UI Improvements
+
+### Added
+- **Intelligent Referee Assignment System**
+  - Alphabetical sorting of all paid players in referee dropdowns
+  - Conflict detection preventing double-assignment of referees
+  - Visual indicators for unavailable referees:
+    - "(assigned)" for referees already assigned to other matches
+    - "(playing)" for players currently in live matches
+  - Real-time dropdown updates when match states change
+  - Integration with existing lane management conflict detection system
+
+### Changed
+- **Enhanced Dropdown Usability**
+  - Increased referee dropdown font size for better readability
+  - Expanded referee dropdown width to accommodate longer names
+  - Increased lane dropdown font size for consistency
+  - Expanded lane dropdown width for "(in use)" labels
+  
+- **Improved Match Card Layout**
+  - Expanded match card dimensions
+  - Increased player name font size for better visibility
+  - Expanded player name max-width to utilize available space
+  - Better accommodation for winner checkmarks and longer player names
+
+- **Referee System Integration**
+  - Modified `toggleActiveWithLaneValidation()` to refresh both lane and referee dropdowns
+  - Enhanced `updateMatchReferee()` with conflict validation and error handling
+  - Automatic dropdown refresh when referee assignments change
+
+### Technical Changes
+- Added referee conflict detection functions to `lane-management.js`:
+  - `getAssignedReferees(excludeMatchId)` - tracks current referee assignments
+  - `getPlayersInLiveMatches(excludeMatchId)` - identifies players in active matches
+  - `isPlayerAvailableAsReferee(playerId, excludeMatchId)` - availability validation
+  - `refreshAllRefereeDropdowns()` - updates all referee dropdowns system-wide
+  - `generateRefereeOptionsWithConflicts()` - creates conflict-aware dropdown options
+- Enhanced `updateMatchReferee()` in `bracket-rendering.js` with validation and error handling
+- Updated `renderMatch()` to use new referee dropdown generation with conflict detection
+- Modified CSS `.player-name-short` and `.bracket-match` classes for improved readability
+
+### Files Modified
+- `lane-management.js` - Added complete referee conflict detection system
+- `bracket-rendering.js` - Enhanced referee dropdown integration and validation
+- `styles.css` - Updated match card dimensions and player name styling
+
+### User Experience Improvements
+- Referees can no longer be double-assigned across matches
+- Clear visual feedback when referee assignments conflict
+- Much improved readability of match card text and dropdowns
+- Consistent styling between lane and referee assignment systems
+- Automatic prevention of assigning players who are currently playing as referees
+
+### Bug Fixes
+- Resolved referee dropdown function loading order issues
+- Fixed missing function exports causing console errors
+- Ensured proper integration between lane and referee management systems
+
 # 2025-09-06
 ## Enhanced Match Validation & Dynamic Help System
 
