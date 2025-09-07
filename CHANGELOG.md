@@ -56,6 +56,7 @@
 - Resolved referee dropdown function loading order issues
 - Fixed missing function exports causing console errors
 - Ensured proper integration between lane and referee management systems
+- Problems with loading number of lanes from config
 
 # 2025-09-06
 ## Enhanced Match Validation & Dynamic Help System
