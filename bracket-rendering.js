@@ -261,7 +261,7 @@ function renderMatch(match, x, y, section, roundIndex) {
             <span>${match.id}</span>
             ${roundIndicator}
             <span class="match-info">
-                L<select onchange="updateMatchLane('${match.id}', this.value)" 
+                L: <select onchange="updateMatchLane('${match.id}', this.value)" 
                     onfocus="refreshLaneDropdown('${match.id}')"
                     style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
                     <option value="">No</option>
