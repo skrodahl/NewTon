@@ -4,6 +4,8 @@
 
 Simply download the repository, open `tournament.html`, and start managing your tournament.
 
+[Download version 1.0.0 here!](https://github.com/skrodahl/NewTon/releases/tag/v1.0.0)
+
 ---
 
 ## ✨ Key Features
