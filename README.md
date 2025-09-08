@@ -31,7 +31,7 @@ Simply download the repository, open `tournament.html`, and start managing your 
 - **Interactive Bracket**: Zoom, pan, and click-to-select winners with visual feedback
 
 ### 🎮 Match Control & Lane Management
-- **Lane Assignment**: Assign matches to specific dartboard lanes (1-20 configurable) with conflict prevension
+- **Lane Assignment**: Assign matches to specific dartboard lanes (1-20 configurable)
 - **Conflict Prevention**: Automatic detection and prevention of lane conflicts
 - **Match Validation**: Ensure proper match progression and prevent invalid states
 - **Referee Assignment**: Select referees from a drop-down menu, with conflict prevension
