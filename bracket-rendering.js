@@ -861,8 +861,19 @@ function showMatchDetails() {
     if (activeMatches.length > 0) {
         details += `Live:\n`;
         activeMatches.forEach(match => {
-            const lane = match.lane ? ` (Lane ${match.lane})` : '';
-            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${lane}\n`;
+            const refereeName = match.referee ? 
+                (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
+            
+            let info = '';
+            if (match.lane && match.referee) {
+                info = ` (Lane ${match.lane}, Ref: ${refereeName})`;
+            } else if (match.lane) {
+                info = ` (Lane ${match.lane}, Ref: None)`;
+            } else if (match.referee) {
+                info = ` (No lane, Ref: ${refereeName})`;
+            }
+            
+            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
         });
         details += '\n';
     }
@@ -871,7 +882,19 @@ function showMatchDetails() {
     if (readyMatches.length > 0) {
         details += `Ready to start:\n`;
         readyMatches.forEach(match => {
-            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}\n`;
+            const refereeName = match.referee ? 
+                (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
+            
+            let info = '';
+            if (match.lane && match.referee) {
+                info = ` (Lane ${match.lane}, Ref: ${refereeName})`;
+            } else if (match.lane) {
+                info = ` (Lane ${match.lane}, Ref: None)`;
+            } else if (match.referee) {
+                info = ` (No lane, Ref: ${refereeName})`;
+            }
+            
+            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
         });
         details += '\n';
     }
