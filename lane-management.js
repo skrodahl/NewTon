@@ -17,7 +17,7 @@ function getUsedLanes() {
     const usedLanes = [];
     matches.forEach(match => {
         // Count lanes from ALL matches that have a lane assigned
-        if (match.lane) {
+        if (match.lane && !match.completed) {
             usedLanes.push(parseInt(match.lane));
         }
     });
@@ -274,7 +274,7 @@ function getAssignedReferees(excludeMatchId = null) {
         if (excludeMatchId && match.id === excludeMatchId) return;
 
         // Only count referees assigned to matches that exist and have a referee
-        if (match.referee) {
+        if (match.referee && !match.completed) {
             assignedReferees.push(parseInt(match.referee));
         }
     });
