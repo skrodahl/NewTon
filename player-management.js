@@ -45,12 +45,12 @@ function addPlayer() {
 
     // HELP SYSTEM INTEGRATION
     const paidPlayers = players.filter(p => p.paid).length;
-    if (paidPlayers >= 4 && !tournament.bracket && typeof showHelpHint === 'function') {
+    /* if (paidPlayers >= 4 && !tournament.bracket && typeof showHelpHint === 'function') {
         showHelpHint('You now have enough players to generate a bracket! Go to Tournament page.', 4000);
     } else if (paidPlayers < 4 && typeof showHelpHint === 'function') {
         const needed = 4 - paidPlayers;
-        <!-- showHelpHint(`Need ${needed} more paid player${needed > 1 ? 's' : ''} to generate bracket.`, 3000); -->
-    }
+        showHelpHint(`Need ${needed} more paid player${needed > 1 ? 's' : ''} to generate bracket.`, 3000);
+    } */
 }
 
 function removePlayer(playerId) {
