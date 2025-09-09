@@ -246,4 +246,4 @@ These changes provide enhanced tournament configuration flexibility while mainta
 # What happened before this?
 
 - Everything else, essentially...
-- In essence, all that needed to be done for the entire app framework. Just that it wasn't particularly useful or polished
+- In essence, all that needed to be done for the entire app framework. Just that it wasn't particularly useful or polished, nor was it especially stable (which is the main selling-point of the whole thing)
