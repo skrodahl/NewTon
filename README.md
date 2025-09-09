@@ -6,6 +6,9 @@ Simply download the repository, open `tournament.html`, and start managing your 
 
 [Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases)
 
+**This is the feature-complete version**.  
+Unless there are some groundbreaking new ideas that just *scream* to be implemented, expect only bug-fixes from now on.
+
 ---
 
 ## ✨ Key Features
