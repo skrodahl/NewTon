@@ -433,6 +433,102 @@ function getOrdinalSuffix(num) {
 }
 
 /**
+ * Export results as JSON with confirmation dialogs
+ */
+function exportResultsJSON() {
+    if (!tournament || !tournament.name || !tournament.date) {
+        alert('No active tournament to export');
+        return;
+    }
+
+    // Check if tournament has final rankings
+    const hasFinalisedRankings = tournament.placements && 
+        Object.keys(tournament.placements).length > 0 &&
+        players.some(p => p.placement);
+
+    // Generate filename
+    const filename = `${tournament.name}_${tournament.date}_Results.json`;
+    
+    // Show appropriate confirmation dialog
+    let confirmMessage;
+    if (hasFinalisedRankings) {
+        confirmMessage = `Save results to "${filename}"?`;
+    } else {
+        confirmMessage = `Tournament incomplete, export to "${filename}" anyway?`;
+    }
+
+    if (!confirm(confirmMessage)) {
+        return; // User cancelled
+    }
+
+    // Generate JSON content
+    const jsonContent = generateResultsJSON();
+    
+    // Create and download file
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    console.log(`✓ Results exported as JSON: ${filename}`);
+}
+
+/**
+ * Generate JSON content from current results
+ */
+function generateResultsJSON() {
+    // Get sorted players (same logic as updateResultsTable)
+    const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
+        if (a.placement && b.placement) {
+            return a.placement - b.placement;
+        }
+        if (a.placement) return -1;
+        if (b.placement) return 1;
+
+        const nameA = a.name.toLowerCase();
+        const nameB = b.name.toLowerCase();
+        return nameA.localeCompare(nameB);
+    });
+
+    // Build JSON structure
+    const jsonData = {
+        tournament: {
+            name: tournament.name,
+            date: tournament.date,
+            exported: new Date().toISOString(),
+            status: tournament.status || 'completed',
+            bracketSize: tournament.bracketSize || sortedPlayers.length
+        },
+        players: sortedPlayers.map(player => {
+            const points = calculatePlayerPoints(player);
+            const legs = calculatePlayerLegs(player.id);
+            
+            return {
+                rank: player.placement || 0,
+                rankDisplay: formatRanking(player.placement),
+                name: player.name,
+                points: points,
+                shortLegs: Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs : [],
+                highOuts: player.stats.highOuts || [],
+                oneEighties: player.stats.oneEighties || 0,
+                tons: player.stats.tons || 0,
+                legsWon: legs.legsWon,
+                legsLost: legs.legsLost
+            };
+        })
+    };
+
+    return JSON.stringify(jsonData, null, 2);
+}
+
+/**
  * Export results table as CSV with confirmation dialogs
  */
 function exportResultsCSV() {
@@ -544,18 +640,18 @@ function generateResultsCSV() {
 function formatRankingForCSV(placement) {
     if (!placement) return '0';
 
-    // Convert tied rankings to number ranges
+    // Convert rankings for CSV
     switch (placement) {
-        case 1: return '1';
-        case 2: return '2';
-        case 3: return '3';
-        case 4: return '4';
-        case 5: return '5-6';    // 5th-6th place
-        case 7: return '7-8';    // 7th-8th place
-        case 9: return '9-12';   // 9th-12th place
-        case 13: return '13-16'; // 13th-16th place
-        case 17: return '17-24'; // 17th-24th place
-        case 25: return '25-32'; // 25th-32nd place
+        case 1: return '1st';
+        case 2: return '2nd';
+        case 3: return '3rd';
+        case 4: return '4th';
+        case 5: return '5th-6th';    // 5th-6th place
+        case 7: return '7th-8th';    // 7th-8th place
+        case 9: return '9th-12th';   // 9th-12th place
+        case 13: return '13th-16th'; // 13th-16th place
+        case 17: return '17th-24th'; // 17th-24th place
+        case 25: return '25th-32nd'; // 25th-32nd place
         default: return String(placement);
     }
 }
@@ -580,6 +676,8 @@ if (typeof window !== 'undefined') {
     window.exportResultsCSV = exportResultsCSV;
     window.generateResultsCSV = generateResultsCSV;
     window.formatRankingForCSV = formatRankingForCSV;
+    window.exportResultsJSON = exportResultsJSON;
+    window.generateResultsJSON = generateResultsJSON;
 
     // Debug functions
     window.forceReloadConfig = forceReloadConfig;

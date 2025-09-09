@@ -7,7 +7,7 @@ let showingAllTournaments = false;
 function createTournament() {
     const name = document.getElementById('tournamentName').value.trim();
     const date = document.getElementById('tournamentDate').value;
-    
+
     if (!name || !date) {
         alert('Please enter both tournament name and date');
         return;
@@ -29,14 +29,14 @@ function createTournament() {
     // Clear all existing tournament data for fresh start
     players = [];
     matches = [];
-    
+
     // Clear the UI
     updatePlayersDisplay();
     updatePlayerCount();
     if (typeof clearBracket === 'function') {
         clearBracket();
     }
-    
+
     // Hide results section if visible
     const resultsSection = document.getElementById('resultsSection');
     if (resultsSection) {
@@ -50,16 +50,16 @@ function createTournament() {
     saveTournamentOnly();
     updateTournamentStatus();
     showPage('registration');
-    
+
     // Ensure results table is populated
     if (typeof displayResults === 'function') {
         displayResults();
     }
 
     updateTournamentWatermark();
-    
+
     alert('✓ New tournament created successfully! Start by adding players.');
-    
+
     // HELP SYSTEM INTEGRATION
     if (typeof onTournamentCreated === 'function') {
         onTournamentCreated();
@@ -82,13 +82,13 @@ function exportTournament() {
     };
 
     const dataStr = JSON.stringify(tournamentData, null, 2);
-    const dataBlob = new Blob([dataStr], {type: 'application/json'});
+    const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
     link.download = `${tournament.name}_${tournament.date}.json`;
     link.click();
-    
+
     console.log('✓ Tournament exported (config excluded)');
 }
 
@@ -115,16 +115,16 @@ function saveTournamentOnly() {
     // Save to tournaments list
     let tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const index = tournaments.findIndex(t => t.id === tournament.id);
-    
+
     if (index >= 0) {
         tournaments[index] = tournamentToSave;
     } else {
         tournaments.push(tournamentToSave);
     }
-    
+
     localStorage.setItem('dartsTournaments', JSON.stringify(tournaments));
     localStorage.setItem('currentTournament', JSON.stringify(tournamentToSave));
-    
+
     console.log('✓ Tournament saved (config unchanged)');
 }
 
@@ -136,17 +136,17 @@ function saveTournament() {
 function updateTournamentStatus() {
     const statusDiv = document.getElementById('tournamentStatus');
     const headerStatusDiv = document.getElementById('headerTournamentStatus');
-    
+
     if (tournament) {
         const statusText = `Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
-        
+
         // Update main status div (in Setup page)
         if (statusDiv) {
             statusDiv.innerHTML = statusText;
             statusDiv.className = 'alert alert-success';
             statusDiv.style.display = 'block';
         }
-        
+
         // Update header status div (NEW)
         if (headerStatusDiv) {
             headerStatusDiv.innerHTML = statusText;
@@ -158,20 +158,20 @@ function updateTournamentStatus() {
             statusDiv.className = 'alert alert-info';
             statusDiv.style.display = 'block';
         }
-        
+
         // Update header to show "None" (NEW)
         if (headerStatusDiv) {
             headerStatusDiv.innerHTML = 'Tournament: <strong>None</strong>';
         }
     }
-    
+
     updateTournamentWatermark();
 }
 
 function loadRecentTournaments() {
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const container = document.getElementById('recentTournaments');
-    
+
     if (tournaments.length === 0) {
         container.innerHTML = '<p>No tournaments found</p>';
         const toggleBtn = document.getElementById('toggleTournamentsBtn');
@@ -197,8 +197,8 @@ function loadRecentTournaments() {
     });
 
     // Determine which tournaments to show
-    const tournamentsToShow = showingAllTournaments ? 
-        sortedTournaments : 
+    const tournamentsToShow = showingAllTournaments ?
+        sortedTournaments :
         sortedTournaments.slice(0, 5);
 
     const html = tournamentsToShow.map(t => {
@@ -218,7 +218,7 @@ function loadRecentTournaments() {
             </div>
         `;
     }).join('');
-    
+
     container.innerHTML = html;
 
     // Update the toggle button
@@ -241,14 +241,25 @@ function toggleTournamentView() {
 // LOAD TOURNAMENT - Never touches global config
 function loadSpecificTournament(id) {
     console.log(`🔄 Loading tournament ${id} (config will stay global)...`);
-    
+
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const selectedTournament = tournaments.find(t => t.id === id);
-    
+    console.log('DEBUG: selectedTournament object:', selectedTournament);
+    console.log('DEBUG: selectedTournament.bracketSize:', selectedTournament.bracketSize);
+
     if (!selectedTournament) {
         alert('Tournament not found');
         return;
     }
+
+    // Calculate bracketSize if missing (for older tournaments)
+    let bracketSize = selectedTournament.bracketSize;
+    if (!bracketSize && selectedTournament.bracket) {
+        bracketSize = selectedTournament.bracket.length;
+    }
+
+    console.log('DEBUG: calculated bracketSize:', bracketSize); // Add this line
+    console.log('DEBUG: selectedTournament.bracket.length:', selectedTournament.bracket?.length);
 
     // Load ONLY tournament data - NEVER override global config
     tournament = {
@@ -258,22 +269,25 @@ function loadSpecificTournament(id) {
         created: selectedTournament.created,
         status: selectedTournament.status,
         bracket: selectedTournament.bracket,
+        bracketSize: bracketSize,
         placements: selectedTournament.placements || {}
         // NO CONFIG loading - config stays global
     };
-    
+
+    console.log('DEBUG: tournament.bracketSize after assignment:', tournament.bracketSize);
+
     players = selectedTournament.players || [];
     matches = selectedTournament.matches || [];
-    
+
     // Update UI with tournament data
     document.getElementById('tournamentName').value = tournament.name;
     document.getElementById('tournamentDate').value = tournament.date;
-    
+
     updateTournamentStatus();
     updatePlayersDisplay();
     updatePlayerCount();
     updateTournamentWatermark();
-    
+
     // Display results with current global config
     if (typeof displayResults === 'function') {
         displayResults();
@@ -282,7 +296,7 @@ function loadSpecificTournament(id) {
     if (tournament.bracket && typeof renderBracket === 'function') {
         renderBracket();
     }
-    
+
     showPage('registration');
     console.log('✓ Tournament loaded (global config preserved)');
 }
@@ -290,7 +304,7 @@ function loadSpecificTournament(id) {
 function deleteTournament(tournamentId) {
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
-    
+
     if (!tournamentToDelete) {
         alert('Tournament not found.');
         return;
@@ -328,7 +342,7 @@ function resetTournament() {
     const tournamentName = tournament.name;
     const completedMatches = matches.filter(m => m.completed).length;
     const totalMatches = matches.length;
-    
+
     const confirmMessage = `⚠️ RESET TOURNAMENT WARNING ⚠️\n\n` +
         `Tournament: "${tournamentName}"\n` +
         `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
@@ -369,7 +383,7 @@ function resetTournament() {
     });
 
     saveTournamentOnly(); // Save tournament but not config
-    
+
     if (typeof clearBracket === 'function') {
         clearBracket();
     }
@@ -395,8 +409,8 @@ function importTournament(event) {
     }
 
     const reader = new FileReader();
-    
-    reader.onload = function(e) {
+
+    reader.onload = function (e) {
         try {
             const importedData = JSON.parse(e.target.result);
             processImportedTournament(importedData);
@@ -406,7 +420,7 @@ function importTournament(event) {
         }
     };
 
-    reader.onerror = function() {
+    reader.onerror = function () {
         showImportStatus('error', 'Error reading file. Please try again.');
     };
 
@@ -416,7 +430,7 @@ function importTournament(event) {
 // PROCESS IMPORTED TOURNAMENT - Strip any config contamination
 function processImportedTournament(importedData) {
     console.log('📥 Processing imported tournament (stripping any config data)...');
-    
+
     const validation = validateTournamentData(importedData);
     if (!validation.valid) {
         showImportStatus('error', `Invalid tournament data: ${validation.error}`);
@@ -432,7 +446,7 @@ function processImportedTournament(importedData) {
             `Tournament "${importedData.name}" (${importedData.date}) already exists.\n\n` +
             `Do you want to overwrite it with the imported version?`
         );
-        
+
         if (!overwrite) {
             showImportStatus('warning', 'Import cancelled by user');
             return;
@@ -440,6 +454,11 @@ function processImportedTournament(importedData) {
     }
 
     try {
+        // Calculate bracketSize if missing (for older exported tournaments)
+        let bracketSize = importedData.bracketSize;
+        if (!bracketSize && importedData.bracket) {
+        bracketSize = importedData.bracket.length;
+    }
         // Import ONLY tournament data - Strip any config contamination
         tournament = {
             id: importedData.id,
@@ -448,10 +467,11 @@ function processImportedTournament(importedData) {
             created: importedData.created || new Date().toISOString(),
             status: importedData.status || 'setup',
             bracket: importedData.bracket || null,
+            bracketSize: bracketSize,
             placements: importedData.placements || {}
             // NO CONFIG DATA imported - global config stays intact
         };
-        
+
         players = importedData.players || [];
         matches = importedData.matches || [];
 
@@ -478,7 +498,7 @@ function processImportedTournament(importedData) {
             displayResults();
         }
 
-        showImportStatus('success', 
+        showImportStatus('success',
             `✓ Tournament "${tournament.name}" imported successfully! ` +
             `${players.length} players and ${matches.filter(m => m.completed).length} completed matches loaded.`
         );
@@ -544,7 +564,7 @@ function validateTournamentData(data) {
             if (!player.name || !player.id) {
                 return { valid: false, error: `Player ${i + 1} is missing required fields (name, id)` };
             }
-            
+
             // Set default player values
             if (typeof player.paid === 'undefined') player.paid = false;
             if (!player.stats) player.stats = { shortLegs: [], highOuts: [], tons: 0, oneEighties: 0 };
