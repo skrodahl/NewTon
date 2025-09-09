@@ -4,7 +4,7 @@
 ### Added
 - **Results Exported as JSON**
   - Better for importing into other systems
-  - CSV are handled poorly in Excel
+  - Current CSV is handled poorly in Excel
  
 ### Fixed
 - **Tournament Import**
