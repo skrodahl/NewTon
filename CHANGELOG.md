@@ -1,20 +1,34 @@
 # 2025-09-09
-## Improved Export of Results
+## Improved Export of Results & Split Semifinal Configuration
 
 ### Added
 - **Results Exported as JSON**
   - Better for importing into other systems
   - Current CSV is handled poorly in Excel
+
+- **Split Semifinal Configuration**
+  - Separate match length settings for frontside and backside semifinals
+  - **Frontside Semifinal**: Best of 5 (default) - applies to FS-3-1 (8p), FS-4-1 (16p), FS-5-1 (32p)
+  - **Backside Semifinal**: Best of 3 (default) - applies to BS-3-1 (8p), BS-5-1 (16p), BS-7-1 (32p)
+  - Auto-save functionality for both new settings
+  - Migration support for tournaments with old single "semifinal" setting
  
 ### Fixed
 - **Tournament Import**
-  - Bracket rendering failed when importing and loading tournaments.
-  - Bracket size is now calculated from the tournament JSON file.
+  - Bracket rendering failed when importing and loading tournaments
+  - Bracket size is now calculated from the tournament JSON file
+  
+- **Match Generation Error**
+  - Fixed "Assignment to constant variable" error in bracket generation
+  - Corrected variable naming conflict between string IDs and numeric counters
  
 ### Technical Changes
 - Added two new functions:
   - `exportResultsJSON()`
   - `generateResultsJSON()`
+- Added semifinal detection functions:
+  - `isFrontsideSemifinal(matchId, bracketSize)`
+  - `isBacksideSemifinal(matchId, bracketSize)`
 
 ### Files Modified
 - `tournament-management.js` - Fixed bracket loading for older tournaments
@@ -22,16 +36,42 @@
   - Added `bracketSize` calculation fallback in `processImportedTournament()` for imported tournaments
   - Ensures tournaments without stored `bracketSize` can render complete brackets by calculating from bracket array length
 
-- `results-config.js` - Added JSON export functionality
+- `results-config.js` - Added JSON export functionality and split semifinal config
   - Added `exportResultsJSON()` function for structured data export
   - Added `generateResultsJSON()` function creating tournament metadata and player results
   - Enhanced export UI with separate JSON and CSV options for different use cases
+  - Updated `DEFAULT_CONFIG` to include `frontsideSemifinal` and `backsideSemifinal` settings
+  - Added migration logic for old `semifinal` config in `mergeWithDefaults()`
+  - Updated config save/load functions to handle split semifinals
 
-- `tournament.html` - Updated export interface
+- `tournament.html` - Updated export interface and match configuration
   - Modified Registration page to include both "Export JSON" and "Export CSV" buttons
   - Provides users choice between structured data (JSON) for system integration and spreadsheet format (CSV) for Excel analysis
+  - Replaced single "Semi-Finals" dropdown with separate "Frontside Semifinal" and "Backside Semifinal" dropdowns in Config page
 
-These changes resolve resource management issues, improve tournament import/export reliability, and enhance the user interface for better tournament administration.
+- `main.js` - Enhanced auto-save functionality
+  - Updated `setupConfigAutoSave()` to handle new split semifinal fields
+  - Added auto-save listeners for `frontsideSemifinalLegs` and `backsideSemifinalLegs`
+
+- `clean-match-progression.js` - Split semifinal logic and bug fixes
+  - Updated `generateFrontsideMatches()` to use `config.legs.frontsideSemifinal` for semifinal matches
+  - Updated `generateBacksideMatches()` to use `config.legs.backsideSemifinal` for semifinal matches
+  - Added helper functions to detect frontside and backside semifinal matches
+  - Fixed variable naming conflict causing "Assignment to constant variable" error
+  - Separated string match IDs from numeric counters in match generation
+
+### User Experience Improvements
+- Tournament organizers can now set different match lengths for frontside vs backside semifinals
+- More granular control over tournament pacing and format
+- Backward compatibility maintained - existing tournaments load normally with migrated settings
+- JSON export provides better data structure for external analysis tools
+
+### Bug Fixes
+- Resolved bracket generation crash when creating tournaments with split semifinal configuration
+- Fixed tournament import/loading issues for tournaments missing bracketSize property
+- Improved error handling in match generation process
+
+These changes provide enhanced tournament configuration flexibility while maintaining system stability and backward compatibility.
 
 # 2025-09-07
 ## Enhanced Referee Assignment System & UI Improvements
