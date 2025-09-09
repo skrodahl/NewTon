@@ -16,6 +16,23 @@
   - exportResultsJSON()
   - generateResultsJSON()
 
+### Files Modified
+- `tournament-management.js` - Fixed bracket loading for older tournaments
+  - Added `bracketSize` calculation fallback in `loadSpecificTournament()` when property is missing
+  - Added `bracketSize` calculation fallback in `processImportedTournament()` for imported tournaments
+  - Ensures tournaments without stored `bracketSize` can render complete brackets by calculating from bracket array length
+
+- `results-config.js` - Added JSON export functionality
+  - Added `exportResultsJSON()` function for structured data export
+  - Added `generateResultsJSON()` function creating tournament metadata and player results
+  - Enhanced export UI with separate JSON and CSV options for different use cases
+
+- `tournament.html` - Updated export interface
+  - Modified Registration page to include both "Export JSON" and "Export CSV" buttons
+  - Provides users choice between structured data (JSON) for system integration and spreadsheet format (CSV) for Excel analysis
+
+These changes resolve resource management issues, improve tournament import/export reliability, and enhance the user interface for better tournament administration.
+
 # 2025-09-07
 ## Enhanced Referee Assignment System & UI Improvements
 
