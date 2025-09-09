@@ -242,3 +242,8 @@ These changes provide enhanced tournament configuration flexibility while mainta
 - Match-level storage for legs (tied to match lifecycle)
 - Player-level storage for performance stats (persistent across undo operations)
 - Clean separation between match results and player achievements
+
+# What happened before this?
+
+- Everything else, essentially...
+- In essence, all that needed to be done for the entire app framework. Just that it wasn't particularly useful or polished
