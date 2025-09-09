@@ -7,7 +7,7 @@
   - CSV are handled poorly in Excel
  
 ### Fixed
-- ** Tournament Import**
+- **Tournament Import**
   - Bracket rendering failed when importing and loading tournaments.
   - Bracket size is now calculated from the tournament JSON file.
  
