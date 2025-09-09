@@ -13,8 +13,8 @@
  
 ### Technical Changes
 - Added two new functions:
-  - exportResultsJSON()
-  - generateResultsJSON()
+  - `exportResultsJSON()`
+  - `generateResultsJSON()`
 
 ### Files Modified
 - `tournament-management.js` - Fixed bracket loading for older tournaments
