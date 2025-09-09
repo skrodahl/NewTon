@@ -15,7 +15,8 @@ const DEFAULT_CONFIG = {
     },
     legs: {
         regularRounds: 3,
-        semifinal: 3,
+        frontsideSemifinal: 5,      // NEW: Frontside semifinals (FS-3-1, FS-4-1, FS-5-1)
+        backsideSemifinal: 3,       // NEW: Backside semifinals (BS-3-1, BS-5-1, BS-7-1)
         backsideFinal: 5,
         grandFinal: 5
     },
@@ -72,6 +73,15 @@ function mergeWithDefaults(userConfig, defaults) {
         }
     });
 
+    // MIGRATION: Handle old 'semifinal' config
+    if (userConfig.legs && userConfig.legs.semifinal && 
+        !userConfig.legs.frontsideSemifinal && !userConfig.legs.backsideSemifinal) {
+        console.log('🔄 Migrating old semifinal config to split configuration');
+        merged.legs.frontsideSemifinal = userConfig.legs.semifinal;
+        merged.legs.backsideSemifinal = userConfig.legs.semifinal;
+        console.log(`✓ Migrated: frontsideSemifinal=${merged.legs.frontsideSemifinal}, backsideSemifinal=${merged.legs.backsideSemifinal}`);
+    }
+
     return merged;
 }
 
@@ -89,9 +99,10 @@ function applyConfigToUI() {
     safeSetValue('shortLegPoints', config.points.shortLeg);
     safeSetValue('oneEightyPoints', config.points.oneEighty);
 
-    // Match leg configuration
+    // Match leg configuration - Updated for split semifinals
     safeSetValue('regularRoundsLegs', config.legs.regularRounds);
-    safeSetValue('semiFinalsLegs', config.legs.semifinal);
+    safeSetValue('frontsideSemifinalLegs', config.legs.frontsideSemifinal);  // NEW
+    safeSetValue('backsideSemifinalLegs', config.legs.backsideSemifinal);    // NEW
     safeSetValue('backsideFinalLegs', config.legs.backsideFinal);
     safeSetValue('grandFinalLegs', config.legs.grandFinal);
 
@@ -155,9 +166,10 @@ function saveConfiguration() {
         config.points.shortLeg = parseInt(document.getElementById('shortLegPoints').value) || 1;
         config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value) || 1;
 
-        // Match legs configuration
+        // Match legs configuration - Updated for split semifinals
         config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value) || 3;
-        config.legs.semifinal = parseInt(document.getElementById('semiFinalsLegs').value) || 3;
+        config.legs.frontsideSemifinal = parseInt(document.getElementById('frontsideSemifinalLegs').value) || 5;  // NEW
+        config.legs.backsideSemifinal = parseInt(document.getElementById('backsideSemifinalLegs').value) || 3;    // NEW
         config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value) || 5;
         config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value) || 5;
 

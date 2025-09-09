@@ -1003,7 +1003,7 @@ function calculateCleanBracketStructure(bracketSize) {
  * GENERATE FRONTSIDE MATCHES
  */
 function generateFrontsideMatches(bracket, structure, startId) {
-    let matchId = startId;
+    let numericId = startId;
 
     structure.frontside.forEach((roundInfo, roundIndex) => {
         for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
@@ -1020,9 +1020,19 @@ function generateFrontsideMatches(bracket, structure, startId) {
                 player2 = createTBDPlayer(`fs-${roundInfo.round}-${matchIndex}-2`);
             }
 
+            // Determine leg count based on match type
+            let legCount;
+            const matchId = `FS-${roundInfo.round}-${matchIndex + 1}`;
+            
+            if (isFrontsideSemifinal(matchId, tournament.bracketSize)) {
+                legCount = config.legs.frontsideSemifinal;
+            } else {
+                legCount = config.legs.regularRounds;
+            }
+
             const match = {
-                id: `FS-${roundInfo.round}-${matchIndex + 1}`,
-                numericId: matchId++,
+                id: matchId,
+                numericId: numericId++,
                 round: roundInfo.round,
                 side: 'frontside',
                 player1: player1,
@@ -1030,7 +1040,7 @@ function generateFrontsideMatches(bracket, structure, startId) {
                 winner: null,
                 loser: null,
                 lane: null,
-                legs: roundInfo.round === structure.frontsideRounds ? config.legs.semifinal : config.legs.regularRounds,
+                legs: legCount,
                 referee: null,
                 active: false,
                 completed: false,
@@ -1046,18 +1056,27 @@ function generateFrontsideMatches(bracket, structure, startId) {
  * GENERATE BACKSIDE MATCHES
  */
 function generateBacksideMatches(structure, startId) {
-    let matchId = startId;
+    let numericId = startId;
 
     structure.backside.forEach((roundInfo) => {
         for (let matchIndex = 0; matchIndex < roundInfo.matches; matchIndex++) {
             // All backside matches start with TBD players
             const player1 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-1`);
             const player2 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-2`);
-            const isLastBacksideRound = roundInfo.round === Math.max(...structure.backside.map(r => r.round));
+            
+            // Determine leg count based on match type
+            let legCount;
+            const matchId = `BS-${roundInfo.round}-${matchIndex + 1}`;
+            
+            if (isBacksideSemifinal(matchId, tournament.bracketSize)) {
+                legCount = config.legs.backsideSemifinal;
+            } else {
+                legCount = config.legs.regularRounds;
+            }
 
             const match = {
-                id: `BS-${roundInfo.round}-${matchIndex + 1}`,
-                numericId: matchId++,
+                id: matchId,
+                numericId: numericId++,
                 round: roundInfo.round,
                 side: 'backside',
                 player1: player1,
@@ -1065,7 +1084,7 @@ function generateBacksideMatches(structure, startId) {
                 winner: null,
                 loser: null,
                 lane: null,
-                legs: isLastBacksideRound ? config.legs.semifinal : config.legs.regularRounds,
+                legs: legCount,
                 referee: null,
                 active: false,
                 completed: false,
@@ -1788,6 +1807,32 @@ function handleBracketGenerationError() {
     }
 }
 
+/**
+ * Check if a match is a frontside semifinal
+ */
+function isFrontsideSemifinal(matchId, bracketSize) {
+    const frontsideSemifinals = {
+        8: 'FS-3-1',
+        16: 'FS-4-1', 
+        32: 'FS-5-1'
+    };
+    
+    return frontsideSemifinals[bracketSize] === matchId;
+}
+
+/**
+ * Check if a match is a backside semifinal
+ */
+function isBacksideSemifinal(matchId, bracketSize) {
+    const backsideSemifinals = {
+        8: 'BS-3-1',
+        16: 'BS-5-1',
+        32: 'BS-7-1'
+    };
+    
+    return backsideSemifinals[bracketSize] === matchId;
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.saveToHistory = saveToHistory;
@@ -1802,6 +1847,8 @@ if (typeof window !== 'undefined') {
     window.validateLegScores = validateLegScores;
     window.updateValidationDisplay = updateValidationDisplay;
     window.showValidationError = showValidationError;
+    window.isFrontsideSemifinal = isFrontsideSemifinal;
+    window.isBacksideSemifinal = isBacksideSemifinal;
 
     window.validateAndShowWinnerDialog = validateAndShowWinnerDialog;
     window.detectMatchIssues = detectMatchIssues;

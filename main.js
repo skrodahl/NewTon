@@ -155,8 +155,8 @@ function setupConfigAutoSave() {
         }
     });
 
-    // Auto-save match leg configuration
-    const legFields = ['regularRoundsLegs', 'semiFinalsLegs', 'backsideFinalLegs', 'grandFinalLegs'];
+    // Auto-save match leg configuration - Updated for split semifinals
+    const legFields = ['regularRoundsLegs', 'frontsideSemifinalLegs', 'backsideSemifinalLegs', 'backsideFinalLegs', 'grandFinalLegs'];
 
     legFields.forEach(id => {
         const element = document.getElementById(id);
@@ -166,10 +166,10 @@ function setupConfigAutoSave() {
                     console.log(`💾 Auto-saving leg config: ${id} = ${this.value}`);
 
                     // Update global config object
-                    const configKey = id.replace('Legs', '').replace('semiFinalsLegs', 'semifinal').replace('backsideFinalLegs', 'backsideFinal').replace('grandFinalLegs', 'grandFinal');
                     if (config && config.legs) {
                         if (id === 'regularRoundsLegs') config.legs.regularRounds = parseInt(this.value) || 3;
-                        else if (id === 'semiFinalsLegs') config.legs.semifinal = parseInt(this.value) || 3;
+                        else if (id === 'frontsideSemifinalLegs') config.legs.frontsideSemifinal = parseInt(this.value) || 5;  // NEW
+                        else if (id === 'backsideSemifinalLegs') config.legs.backsideSemifinal = parseInt(this.value) || 3;    // NEW
                         else if (id === 'backsideFinalLegs') config.legs.backsideFinal = parseInt(this.value) || 5;
                         else if (id === 'grandFinalLegs') config.legs.grandFinal = parseInt(this.value) || 5;
                     }
