@@ -1,3 +1,21 @@
+# 2025-09-09
+## Improved Export of Results
+
+### Added
+- **Results Exported as JSON**
+  - Better for importing into other systems
+  - CSV are handled poorly in Excel
+ 
+### Fixed
+- ** Tournament Import**
+  - Bracket rendering failed when importing and loading tournaments.
+  - Bracket size is now calculated from the tournament JSON file.
+ 
+### Technical Changes
+- Added two new functions:
+  - exportResultsJSON()
+  - generateResultsJSON()
+
 # 2025-09-07
 ## Enhanced Referee Assignment System & UI Improvements
 
