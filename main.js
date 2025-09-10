@@ -6,6 +6,9 @@ let players = [];
 let matches = [];
 let currentStatsPlayer = null;
 
+// Application version
+const APP_VERSION = '1.1.0';
+
 // Global config is loaded by results-config.js - NEVER override it here
 // let config = {}; // This is loaded by results-config.js
 
@@ -42,6 +45,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Step 6: Auto-load current tournament (if exists) - Never loads config
     autoLoadCurrentTournament();
+
+    // Update footer with version
+    const footerContent = document.getElementById('footerContent');
+    if (footerContent) {
+        footerContent.textContent = `NewTon DC Tournament Manager version ${APP_VERSION}`;
+    }
 });
 
 function loadClubLogo() {
@@ -308,6 +317,7 @@ if (typeof window !== 'undefined') {
     window.showPage = showPage;
     window.forceConfigReload = forceConfigReload;
     window.debugConfigState = debugConfigState;
+    window.APP_VERSION = APP_VERSION;
 
     // Also make these available for console debugging
     window.autoLoadCurrentTournament = autoLoadCurrentTournament;
