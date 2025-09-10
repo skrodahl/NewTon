@@ -1203,3 +1203,19 @@ a:hover { color: #1e40af; }
         top: 20px !important;
     }
 }
+
+/* Surgical Undo */
+.winner-check .undo-icon {
+  display: none;
+  color: #065f46; /* Dark cold green */
+  font-weight: bold;
+  font-size: 18px;
+}
+
+.match-player.undoable:hover .winner-check .undo-icon {
+  display: inline;
+}
+
+.match-player.undoable:hover .winner-check .checkmark {
+  display: none;
+}

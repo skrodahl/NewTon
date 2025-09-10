@@ -29,6 +29,7 @@ function createTournament() {
     // Clear all existing tournament data for fresh start
     players = [];
     matches = [];
+    localStorage.removeItem('undoneTransactions');
 
     // Clear the UI
     updatePlayersDisplay();
@@ -376,6 +377,8 @@ function resetTournament() {
     tournament.bracket = null;
     tournament.status = 'setup';
     tournament.placements = {};
+    localStorage.removeItem('tournamentHistory');
+    localStorage.removeItem('undoneTransactions');
 
     players.forEach(player => {
         player.eliminated = false;

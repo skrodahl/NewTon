@@ -268,7 +268,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         return false;
     }
 
-    // Determine winner and loser
     const winner = winnerPlayerNumber === 1 ? match.player1 : match.player2;
     const loser = winnerPlayerNumber === 1 ? match.player2 : match.player1;
 
@@ -277,64 +276,44 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         return false;
     }
 
-    // Check if this is the first completed match (for help system)
-    const isFirstMatch = matches.filter(m => m.completed).length === 0;
+    // --- START TRANSACTION LOGIC ---
+    if (true) {
+        // Capture current state BEFORE making any changes
+        const beforeMatchesState = JSON.parse(JSON.stringify(matches));
 
-    // STEP 1: Save current state to history BEFORE making any changes
-    const isRealPlayerMatch = winner.name && winner.name !== 'TBD' && winner.name !== 'Walkover' && !winner.isBye &&
-        loser.name && loser.name !== 'TBD' && loser.name !== 'Walkover' && !loser.isBye &&
-        !isWalkover(winner) && !isWalkover(loser);
-
-    const isOperatorAction = !match.autoAdvanced;
-    const shouldSaveToHistory = isRealPlayerMatch && isOperatorAction;
-
-    if (shouldSaveToHistory) {
-        const historyDescription = `${matchId}: ${winner.name} defeats ${loser.name}`;
-        saveToHistory(historyDescription);
-        console.log(`✓ Saved operator action to history: ${historyDescription}`);
-    } else {
-        console.log(`⏭ Skipped history save: ${matchId} (walkover or auto-advancement)`);
+        const transaction = {
+            id: `tx_${Date.now()}`,
+            type: 'COMPLETE_MATCH',
+            description: `${matchId}: ${winner.name} defeats ${loser.name}`,
+            timestamp: new Date().toISOString(),
+            matchId: matchId,
+            winner: winner,
+            loser: loser,
+            beforeState: {
+                matches: beforeMatchesState,
+                tournament: JSON.parse(JSON.stringify(tournament)) // Save tournament state
+            }
+        };
+        saveTransaction(transaction);
     }
+    // --- END TRANSACTION LOGIC ---
 
-    // STEP 2: Set match as completed with leg scores
+    // Apply changes to the current state
     match.winner = winner;
     match.loser = loser;
     match.completed = true;
     match.active = false;
-
-    // Store leg scores on match object
     if (winnerLegs > 0 || loserLegs > 0) {
-        match.finalScore = {
-            winnerLegs: winnerLegs,
-            loserLegs: loserLegs,
-            winnerId: winner.id,
-            loserId: loser.id
-        };
-        console.log(`✓ Stored leg scores: ${winner.name} ${winnerLegs}-${loserLegs} ${loser.name}`);
+        match.finalScore = { winnerLegs, loserLegs, winnerId: winner.id, loserId: loser.id };
     }
 
-    // STEP 3: Use lookup table to advance players
     const success = advancePlayer(matchId, winner, loser);
 
     if (success) {
         console.log(`✓ Match ${matchId} completed: ${winner.name} defeats ${loser.name}`);
 
-        // HELP SYSTEM INTEGRATION - First match completed
-        if (isFirstMatch && isRealPlayerMatch && typeof onFirstMatchCompleted === 'function') {
-            setTimeout(() => {
-                onFirstMatchCompleted();
-            }, 1000);
-        }
-
-        // Save tournament (general save after each match)
-        if (typeof saveTournament === 'function') {
-            saveTournament();
-        }
-
-        // Update results table to show new leg data
-        if (typeof updateResultsTable === 'function') {
-            updateResultsTable();
-        }
+        saveTournament();
+        if (typeof updateResultsTable === 'function') updateResultsTable();
 
         // Grand Final completion hook: set placements and complete tournament
         try {
@@ -364,9 +343,9 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
                 // Proactively refresh results UI after completion
                 if (typeof displayResults === 'function') {
-                    try { 
-                        displayResults(); 
-                        
+                    try {
+                        displayResults();
+
                         // HELP SYSTEM INTEGRATION - Tournament completed
                         if (typeof showHelpHint === 'function') {
                             showHelpHint(`🏆 Tournament completed! ${winner.name} wins. Check results on Registration page.`, 8000);
@@ -380,14 +359,58 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             console.error('Grand-final completion error', { matchId, winner, loser, error: e });
         }
 
-        // STEP 4: Trigger auto-advancement check (Phase 3) - happens AFTER history save
         processAutoAdvancements();
-
         return true;
     } else {
         console.error(`Failed to advance players from ${matchId}`);
+        // Here we should ideally roll back the transaction, but for now we'll log an error
         return false;
     }
+}
+
+/**
+ * NEW: Get all downstream matches affected by a given match's outcome.
+ * @param {string} matchId The starting match ID.
+ * @param {number} bracketSize The size of the tournament bracket.
+ * @returns {Set<string>} A set of all downstream match IDs.
+ */
+function getDownstreamMatches(matchId, bracketSize) {
+    const progression = MATCH_PROGRESSION[bracketSize];
+    if (!progression) return new Set();
+
+    const downstream = new Set();
+    const queue = [matchId];
+    const visited = new Set();
+
+    while (queue.length > 0) {
+        const currentMatchId = queue.shift();
+        if (visited.has(currentMatchId)) {
+            continue;
+        }
+        visited.add(currentMatchId);
+
+        const rule = progression[currentMatchId];
+        if (rule) {
+            if (rule.winner) {
+                const winnerDest = rule.winner[0];
+                const winnerDestMatch = matches.find(m => m.id === winnerDest);
+                if (winnerDestMatch && winnerDestMatch.completed && !downstream.has(winnerDest)) {
+                    downstream.add(winnerDest);
+                    queue.push(winnerDest);
+                }
+            }
+            if (rule.loser) {
+                const loserDest = rule.loser[0];
+                const loserDestMatch = matches.find(m => m.id === loserDest);
+                if (loserDestMatch && loserDestMatch.completed && !downstream.has(loserDest)) {
+                    downstream.add(loserDest);
+                    queue.push(loserDest);
+                }
+            }
+        }
+    }
+
+    return downstream;
 }
 
 /**
@@ -779,7 +802,7 @@ function generateCleanBracket() {
     if (paidPlayers.length < 4) {
         alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
         console.error('Bracket generation blocked: fewer than 4 paid players');
-        
+
         // HELP SYSTEM INTEGRATION
         if (typeof showHelpHint === 'function') {
             showHelpHint('Need at least 4 paid players to generate bracket. Add more players on Registration page.', 5000);
@@ -1023,7 +1046,7 @@ function generateFrontsideMatches(bracket, structure, startId) {
             // Determine leg count based on match type
             let legCount;
             const matchId = `FS-${roundInfo.round}-${matchIndex + 1}`;
-            
+
             if (isFrontsideSemifinal(matchId, tournament.bracketSize)) {
                 legCount = config.legs.frontsideSemifinal;
             } else {
@@ -1063,11 +1086,11 @@ function generateBacksideMatches(structure, startId) {
             // All backside matches start with TBD players
             const player1 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-1`);
             const player2 = createTBDPlayer(`bs-${roundInfo.round}-${matchIndex}-2`);
-            
+
             // Determine leg count based on match type
             let legCount;
             const matchId = `BS-${roundInfo.round}-${matchIndex + 1}`;
-            
+
             if (isBacksideSemifinal(matchId, tournament.bracketSize)) {
                 legCount = config.legs.backsideSemifinal;
             } else {
@@ -1363,7 +1386,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         const winnerLegs = parseInt(winnerLegsInput?.value) || 0;
         const loserLegs = parseInt(loserLegsInput?.value) || 0;
         const matchLegs = match?.legs || 3;
-        
+
         return validateLegScores(winnerLegs, loserLegs, matchLegs);
     };
 
@@ -1398,7 +1421,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
         // Final validation before confirming
         const validation = validateLegScores(winnerLegs, loserLegs, matchLegs);
-        
+
         if (!validation.valid) {
             showValidationError(validation.error);
             return;
@@ -1433,7 +1456,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         if (validationMessage) {
             validationMessage.style.display = 'none';
         }
-        
+
         // Re-enable confirm button
         confirmBtn.disabled = false;
     };
@@ -1484,27 +1507,27 @@ function validateLegScores(winnerLegs, loserLegs, matchLegs) {
     // Optional: Check if it makes sense for the match format
     const minToWin = Math.ceil(matchLegs / 2);
     if (winnerLegs < minToWin) {
-        return { 
-            valid: false, 
-            error: `Winner needs at least ${minToWin} legs to win a best-of-${matchLegs} match` 
+        return {
+            valid: false,
+            error: `Winner needs at least ${minToWin} legs to win a best-of-${matchLegs} match`
         };
     }
 
     // Optional: Check if total legs is reasonable (not enforced strictly)
     const totalLegs = winnerLegs + loserLegs;
     if (totalLegs > matchLegs + 2) {
-        return { 
-            valid: false, 
-            error: `Total legs (${totalLegs}) seems high for a best-of-${matchLegs} match. Maximum expected: ${matchLegs + 2}` 
+        return {
+            valid: false,
+            error: `Total legs (${totalLegs}) seems high for a best-of-${matchLegs} match. Maximum expected: ${matchLegs + 2}`
         };
     }
 
     // Check if loser has too many legs (can't exceed what's possible)
     const maxLoserLegs = matchLegs - 1; // In Bo5, max loser can have is 4 legs
     if (loserLegs > maxLoserLegs) {
-        return { 
-            valid: false, 
-            error: `Loser cannot have more than ${maxLoserLegs} legs in a best-of-${matchLegs} match` 
+        return {
+            valid: false,
+            error: `Loser cannot have more than ${maxLoserLegs} legs in a best-of-${matchLegs} match`
         };
     }
 
@@ -1516,7 +1539,7 @@ function validateLegScores(winnerLegs, loserLegs, matchLegs) {
  */
 function updateValidationDisplay(validation) {
     let validationMessage = document.getElementById('legValidationMessage');
-    
+
     // Create validation message element if it doesn't exist
     if (!validationMessage) {
         const legScoresSection = document.getElementById('legScoresSection');
@@ -1559,56 +1582,46 @@ if (typeof window !== 'undefined') {
     window.updateValidationDisplay = updateValidationDisplay;
     window.showValidationError = showValidationError;
 }
-// TOURNAMENT HISTORY MANAGEMENT
+// TOURNAMENT HISTORY MANAGEMENT (TRANSACTIONAL)
 
 const MAX_HISTORY_ENTRIES = 50; // Keep last 50 states
 
 /**
- * Save current tournament state to history before making changes
+ * NEW: Save a single transaction to the history log.
+ * @param {object} transaction The transaction object to save.
  */
-function saveToHistory(description) {
-    if (!tournament || !matches || matches.length === 0) {
-        console.log('No tournament state to save to history');
-        return;
-    }
-
-    // Create snapshot of current state
-    const historyEntry = {
-        id: `step_${Date.now()}`,
-        timestamp: new Date().toISOString(),
-        description: description || 'Tournament state',
-        matchesCompleted: matches.filter(m => m.completed).length,
-        state: {
-            tournament: JSON.parse(JSON.stringify(tournament)),
-            players: JSON.parse(JSON.stringify(players)),
-            matches: JSON.parse(JSON.stringify(matches))
-        }
-    };
-
-    // Load existing history
+function saveTransaction(transaction) {
+    if (!tournament) return;
     let history = getTournamentHistory();
+    history.unshift(transaction); // Add to the beginning
 
-    // Add new entry at the beginning (most recent first)
-    history.unshift(historyEntry);
-
-    // Keep only last MAX_HISTORY_ENTRIES
     if (history.length > MAX_HISTORY_ENTRIES) {
         history = history.slice(0, MAX_HISTORY_ENTRIES);
     }
 
-    // Save to localStorage
     localStorage.setItem('tournamentHistory', JSON.stringify(history));
-
-    console.log(`✓ Saved to history: ${description} (${history.length} entries total)`);
+    console.log(`✓ Saved transaction: ${transaction.description}`);
 }
 
 /**
- * Get tournament history from localStorage
+ * Get tournament history from localStorage.
+ * Also handles clearing old snapshot-based history.
  */
 function getTournamentHistory() {
     try {
         const historyData = localStorage.getItem('tournamentHistory');
-        return historyData ? JSON.parse(historyData) : [];
+        if (!historyData || historyData === 'undefined') { // Add check for "undefined"
+            return [];
+        }
+
+        const history = JSON.parse(historyData);
+        // Check if history is in the old snapshot format and clear it if so
+        if (history.length > 0 && history[0].state && history[0].state.matches) {
+            console.warn('Old history format detected. Clearing history for new transactional system.');
+            clearTournamentHistory();
+            return [];
+        }
+        return history;
     } catch (error) {
         console.error('Error loading tournament history:', error);
         return [];
@@ -1616,7 +1629,7 @@ function getTournamentHistory() {
 }
 
 /**
- * Clear tournament history (useful for testing)
+ * Clear tournament history.
  */
 function clearTournamentHistory() {
     localStorage.removeItem('tournamentHistory');
@@ -1624,18 +1637,160 @@ function clearTournamentHistory() {
 }
 
 /**
- * Get the most recent history entry (for undo)
+ * Get undone transactions from localStorage.
+ * @returns {Array} An array of undone transaction objects.
  */
-function getLastHistoryEntry() {
-    const history = getTournamentHistory();
-    return history.length > 0 ? history[0] : null;
+function getUndoneTransactions() {
+    try {
+        const undoneData = localStorage.getItem('undoneTransactions');
+        return undoneData ? JSON.parse(undoneData) : [];
+    } catch (error) {
+        console.error('Error loading undone transactions:', error);
+        return [];
+    }
 }
 
 /**
- * Check if undo is available
+ * Save undone transactions to localStorage.
+ * @param {Array} undoneTransactions An array of undone transaction objects.
  */
-function canUndo() {
-    return getLastHistoryEntry() !== null;
+function saveUndoneTransactions(undoneTransactions) {
+    localStorage.setItem('undoneTransactions', JSON.stringify(undoneTransactions));
+}
+
+/**
+ * NEW: Undoes a single transaction.
+ * @param {string} transactionId The ID of the transaction to undo.
+ */
+function undoTransaction(transactionId) {
+    return undoTransactions([transactionId]);
+}
+
+/**
+ * NEW: Undoes a list of transactions.
+ * @param {Array<string>} transactionIds The IDs of the transactions to undo.
+ */
+function undoTransactions(transactionIds) {
+    if (!transactionIds || transactionIds.length === 0) {
+        return false;
+    }
+
+    const history = getTournamentHistory();
+    const undone = getUndoneTransactions();
+
+    const transactionsToUndo = history.filter(t => transactionIds.includes(t.id))
+                                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+
+    if (transactionsToUndo.length === 0) {
+        return false;
+    }
+
+    // Process each transaction to undo
+    transactionsToUndo.forEach(transaction => {
+        if (transaction.beforeState.matches) {
+            // 1. Restore the original match state EXACTLY as it was
+            const affectedMatch = transaction.beforeState.matches.find(m => m.id === transaction.matchId);
+            if (affectedMatch) {
+                const matchIndex = matches.findIndex(m => m.id === transaction.matchId);
+                if (matchIndex !== -1) {
+                    matches[matchIndex] = JSON.parse(JSON.stringify(affectedMatch));
+                }
+            }
+
+            // 2. Clear downstream effects using progression rules
+            if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
+                const progression = MATCH_PROGRESSION[tournament.bracketSize][transaction.matchId];
+                if (progression && transaction.winner && transaction.loser) {
+                    const winnerId = transaction.winner.id;
+                    const loserId = transaction.loser.id;
+
+                    // Clear winner from their destination
+                    if (progression.winner) {
+                        const [targetMatchId, slot] = progression.winner;
+                        const targetMatch = matches.find(m => m.id === targetMatchId);
+                        if (targetMatch && targetMatch[slot] && targetMatch[slot].id === winnerId) {
+                            targetMatch[slot] = { id: `${targetMatchId}-${slot}`, name: 'TBD' };
+                            // Also clear any further downstream effects recursively
+                            clearPlayerFromDownstream(winnerId, targetMatchId);
+                        }
+                    }
+
+                    // Clear loser from their destination
+                    if (progression.loser) {
+                        const [targetMatchId, slot] = progression.loser;
+                        const targetMatch = matches.find(m => m.id === targetMatchId);
+                        if (targetMatch && targetMatch[slot] && targetMatch[slot].id === loserId) {
+                            targetMatch[slot] = { id: `${targetMatchId}-${slot}`, name: 'TBD' };
+                            // Also clear any further downstream effects recursively
+                            clearPlayerFromDownstream(loserId, targetMatchId);
+                        }
+                    }
+                }
+            }
+        }
+    });
+
+    // Move undone transactions to the undone list
+    transactionsToUndo.forEach(t => undone.unshift(t));
+    saveUndoneTransactions(undone);
+
+    // Remove undone transactions from the history
+    const newHistory = history.filter(t => !transactionIds.includes(t.id));
+    localStorage.setItem('tournamentHistory', JSON.stringify(newHistory));
+
+    // Save and refresh
+    saveTournament();
+    if (typeof refreshTournamentUI === 'function') {
+        refreshTournamentUI();
+    }
+
+    console.log(`✓ ${transactionIds.length} transactions undone.`);
+    return true;
+}
+
+// Helper function to recursively clear a player from downstream matches
+function clearPlayerFromDownstream(playerId, currentMatchId) {
+    const currentMatch = matches.find(m => m.id === currentMatchId);
+    if (!currentMatch) return;
+
+    // If match has TBD players, it cannot be LIVE
+    if ((currentMatch.player1?.name === 'TBD' || currentMatch.player2?.name === 'TBD') && currentMatch.active) {
+        currentMatch.active = false;
+    }
+
+    // If the current match was completed and involved this player, clear it
+    if (currentMatch.completed && 
+        ((currentMatch.winner && currentMatch.winner.id === playerId) || 
+         (currentMatch.loser && currentMatch.loser.id === playerId))) {
+        
+        currentMatch.completed = false;
+        currentMatch.winner = null;
+        currentMatch.loser = null;
+        currentMatch.active = false;
+        
+        // Continue clearing downstream from this match
+        if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
+            const progression = MATCH_PROGRESSION[tournament.bracketSize][currentMatchId];
+            if (progression) {
+                if (progression.winner) {
+                    const [nextMatchId, slot] = progression.winner;
+                    const nextMatch = matches.find(m => m.id === nextMatchId);
+                    if (nextMatch && nextMatch[slot] && nextMatch[slot].id === playerId) {
+                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
+                        clearPlayerFromDownstream(playerId, nextMatchId);
+                    }
+                }
+                if (progression.loser) {
+                    const [nextMatchId, slot] = progression.loser;
+                    const nextMatch = matches.find(m => m.id === nextMatchId);
+                    if (nextMatch && nextMatch[slot] && nextMatch[slot].id === playerId) {
+                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
+                        clearPlayerFromDownstream(playerId, nextMatchId);
+                    }
+                }
+            }
+        }
+    }
 }
 
 /**
@@ -1648,7 +1803,7 @@ function debugHistory() {
 
     history.forEach((entry, index) => {
         const time = new Date(entry.timestamp).toLocaleTimeString();
-        console.log(`${index + 1}. [${time}] ${entry.description} (${entry.matchesCompleted} matches)`);
+        console.log(`${index + 1}. [${time}] ${entry.description}`);
     });
 
     if (history.length === 0) {
@@ -1693,7 +1848,7 @@ function detectMatchIssues() {
 
     const readyMatches = matches.filter(m => getMatchState && getMatchState(m) === 'ready').length;
     const liveMatches = matches.filter(m => getMatchState && getMatchState(m) === 'live').length;
-    
+
     // Help suggestions based on match states
     /*
     if (readyMatches > 0 && liveMatches === 0 && typeof showHelpHint === 'function') {
@@ -1701,7 +1856,7 @@ function detectMatchIssues() {
             showHelpHint(`${readyMatches} match${readyMatches > 1 ? 'es' : ''} ready to start. Click "Start" to begin.`);
         }, 2000);
     } */
-    
+
     if (liveMatches > 3 && typeof showHelpHint === 'function') {
         setTimeout(() => {
             showHelpHint('Many matches are live. Consider using lanes to organize dartboards.');
@@ -1717,7 +1872,7 @@ function onPageChange(newPageId) {
             triggerContextualHelp();
         }, 1000);
     }
-    
+
     // Page-specific help triggers
     if (newPageId === 'tournament' && tournament && tournament.bracket) {
         setTimeout(() => {
@@ -1737,7 +1892,7 @@ function validateAndShowWinnerDialog(matchId, playerNumber) {
     // Can only select winner if match is active/live
     if (!match.active) {
         alert('Match must be active to select winner');
-        
+
         // HELP SYSTEM INTEGRATION
         if (typeof showHelpHint === 'function') {
             showHelpHint('Click "Start" button first to activate the match before selecting winner.');
@@ -1813,10 +1968,10 @@ function handleBracketGenerationError() {
 function isFrontsideSemifinal(matchId, bracketSize) {
     const frontsideSemifinals = {
         8: 'FS-3-1',
-        16: 'FS-4-1', 
+        16: 'FS-4-1',
         32: 'FS-5-1'
     };
-    
+
     return frontsideSemifinals[bracketSize] === matchId;
 }
 
@@ -1829,33 +1984,51 @@ function isBacksideSemifinal(matchId, bracketSize) {
         16: 'BS-5-1',
         32: 'BS-7-1'
     };
-    
+
     return backsideSemifinals[bracketSize] === matchId;
 }
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
-    window.saveToHistory = saveToHistory;
+    // Transactional History System
+    window.saveTransaction = saveTransaction;
+    window.undoTransaction = undoTransaction;
+    window.undoTransactions = undoTransactions;
     window.getTournamentHistory = getTournamentHistory;
     window.clearTournamentHistory = clearTournamentHistory;
-    window.getLastHistoryEntry = getLastHistoryEntry;
-    window.canUndo = canUndo;
     window.debugHistory = debugHistory;
-    window.openStatsModalFromConfirmation = openStatsModalFromConfirmation;
-    window.calculateAllRankings = calculateAllRankings;
-    window.calculate8PlayerRankings = calculate8PlayerRankings;
-    window.validateLegScores = validateLegScores;
-    window.updateValidationDisplay = updateValidationDisplay;
-    window.showValidationError = showValidationError;
-    window.isFrontsideSemifinal = isFrontsideSemifinal;
-    window.isBacksideSemifinal = isBacksideSemifinal;
+    window.getUndoneTransactions = getUndoneTransactions;
+    window.saveUndoneTransactions = saveUndoneTransactions;
 
-    window.validateAndShowWinnerDialog = validateAndShowWinnerDialog;
-    window.detectMatchIssues = detectMatchIssues;
-    window.onPageChange = onPageChange;
-    window.handleBracketGenerationError = handleBracketGenerationError;
+    // Original Functions (unchanged)
+    window.advancePlayer = advancePlayer;
+    window.completeMatch = completeMatch;
+    window.selectWinnerClean = selectWinnerClean;
+    window.processAutoAdvancements = processAutoAdvancements;
+    window.debugProgression = debugProgression;
+    window.generateCleanBracket = generateCleanBracket;
+    window.debugBracketGeneration = debugBracketGeneration;
+    window.toggleActive = toggleActive;
+    window.getMatchState = getMatchState;
+    window.updateMatchLane = updateMatchLane;
+    window.MATCH_PROGRESSION = MATCH_PROGRESSION;
     window.selectWinner = selectWinnerClean;
     window.selectWinnerV2 = selectWinnerClean;
     window.selectWinnerWithValidation = selectWinnerClean;
     window.selectWinnerWithAutoAdvancement = selectWinnerClean;
+    window.generateBracket = generateCleanBracket;
+    window.showWinnerConfirmation = showWinnerConfirmation;
+    window.validateLegScores = validateLegScores;
+    window.updateValidationDisplay = updateValidationDisplay;
+    window.showValidationError = showValidationError;
+    window.openStatsModalFromConfirmation = openStatsModalFromConfirmation;
+    window.detectMatchIssues = detectMatchIssues;
+    window.onPageChange = onPageChange;
+    window.handleBracketGenerationError = handleBracketGenerationError;
+    window.isFrontsideSemifinal = isFrontsideSemifinal;
+    window.isBacksideSemifinal = isBacksideSemifinal;
+    window.calculateAllRankings = calculateAllRankings;
+    window.calculate8PlayerRankings = calculate8PlayerRankings;
+    window.getDownstreamMatches = getDownstreamMatches;
+    window.isWalkover = isWalkover;
 }

@@ -27,10 +27,6 @@ function renderBracket() {
     }
 
     clearBracket();
-
-    // UPDATE UNDO BUTTON STATE
-    updateUndoButtonState();
-
     renderCleanBracket();
 }
 
@@ -196,6 +192,76 @@ function renderFinalMatches(grid) {
     }
 }
 
+/**
+ * NEW: Get all matches that are in a state where they can be redone.
+ * @returns {Set<string>} A set of match IDs that are redoable.
+ */
+function getRedoableMatches() {
+    const undone = getUndoneTransactions();
+    const redoable = new Set();
+
+    if (undone.length === 0) {
+        return redoable;
+    }
+
+    undone.forEach(transaction => {
+        if (transaction && transaction.beforeState && transaction.beforeState.matches) {
+            const match = matches.find(m => m.id === transaction.matchId);
+            if (match && !match.completed) {
+                const beforeMatch = transaction.beforeState.matches.find(m => m.id === transaction.matchId);
+                if (beforeMatch && match.player1 && match.player2 &&
+                    beforeMatch.player1.id === match.player1.id &&
+                    beforeMatch.player2.id === match.player2.id) {
+                    redoable.add(transaction.matchId);
+                }
+            }
+        }
+    });
+
+    return redoable;
+}
+
+/**
+ * NEW: Handle the redo button click.
+ * @param {string} matchId The ID of the match to redo.
+ */
+function handleRedoClick(matchId) {
+    const undone = getUndoneTransactions();
+    const transactionToRedo = undone.find(t => t.matchId === matchId);
+
+    if (!transactionToRedo) {
+        alert('Could not find the match in the undone history to redo.');
+        return;
+    }
+
+    if (!transactionToRedo.winner) {
+        alert('The transaction to redo is corrupted and cannot be processed.');
+        return;
+    }
+
+    const beforeMatch = transactionToRedo.beforeState.matches.find(m => m.id === matchId);
+    if (!beforeMatch) {
+        alert('Could not find the match in the before state of the transaction.');
+        return;
+    }
+
+    // Re-complete the match with the original outcome
+    const winner = transactionToRedo.winner;
+    const winnerPlayerNumber = winner.id === beforeMatch.player1.id ? 1 : 2;
+    
+    completeMatch(matchId, winnerPlayerNumber, beforeMatch.finalScore?.winnerLegs, beforeMatch.finalScore?.loserLegs);
+
+    // Remove from undone transactions and add back to history
+    const newUndone = undone.filter(t => t.id !== transactionToRedo.id);
+    saveUndoneTransactions(newUndone);
+
+    const history = getTournamentHistory();
+    history.unshift(transactionToRedo);
+    localStorage.setItem('tournamentHistory', JSON.stringify(history));
+
+    refreshTournamentUI();
+}
+
 function renderMatch(match, x, y, section, roundIndex) {
     const matchElement = document.createElement('div');
 
@@ -247,14 +313,33 @@ function renderMatch(match, x, y, section, roundIndex) {
     // Get button properties
     const buttonText = getMatchButtonText(matchState);
     const buttonDisabled = matchState === 'pending' || matchState === 'completed';
-    const buttonColor = matchState === 'live' ? '#ff6b35' :
-        matchState === 'completed' ? '#28a745' :
-            matchState === 'pending' ? '#6c757d' : '#ddd';
-    const buttonTextColor = matchState === 'live' || matchState === 'completed' ? 'white' : 'black';
+    const buttonColor = matchState === 'live' ? '#ff6b35' : '#28a745';
+    const buttonTextColor = 'white';
 
-    // Simplified lane options (basic 1-10 lanes)
-    const maxLanes = config?.lanes?.maxLanes || 10;
+    // Lane options
     const laneOptions = generateLaneOptions(match.id, match.lane);
+
+    // --- START: Surgical Undo UI Logic ---
+    const isUndoable = isMatchUndoable(match.id);
+    const player1WinnerClass = match.winner?.id === match.player1?.id ? 'winner' : '';
+    const player2WinnerClass = match.winner?.id === match.player2?.id ? 'winner' : '';
+    const player1UndoableClass = player1WinnerClass && isUndoable ? 'undoable' : '';
+    const player2UndoableClass = player2WinnerClass && isUndoable ? 'undoable' : '';
+
+    const player1ClickHandler = player1UndoableClass ? `handleSurgicalUndo('${match.id}')` : getPlayerClickHandler(match, 1, matchState);
+    const player2ClickHandler = player2UndoableClass ? `handleSurgicalUndo('${match.id}')` : getPlayerClickHandler(match, 2, matchState);
+
+    const winnerCheck1 = player1WinnerClass ? `<span class="winner-check"><span class="checkmark">✓</span><span class="undo-icon">↺</span></span>` : '';
+    const winnerCheck2 = player2WinnerClass ? `<span class="winner-check"><span class="checkmark">✓</span><span class="undo-icon">↺</span></span>` : '';
+
+    // --- START: Redo UI Logic ---
+    //const redoableMatches = getRedoableMatches();
+    //const isRedoable = redoableMatches.has(match.id);
+    let redoButton = '';
+    //if (isRedoable) {
+    //    redoButton = `<button onclick="handleRedoClick('${match.id}')" class="btn btn-sm btn-info" style="margin-left: 5px;">Redo</button>`;
+    //}
+    // --- END: Redo UI Logic ---
 
     matchElement.innerHTML = `
         <div class="match-header">
@@ -270,15 +355,15 @@ function renderMatch(match, x, y, section, roundIndex) {
             </span>
         </div>
         <div class="match-players">
-            <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${match.winner?.id === match.player1?.id ? 'winner' : ''}"
-                 onclick="${getPlayerClickHandler(match, 1, matchState)}">
+            <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${player1WinnerClass} ${player1UndoableClass}"
+                 onclick="${player1ClickHandler}">
                 <span class="player-name-short">${getPlayerDisplayName(match.player1)}</span>
-                ${match.winner?.id === match.player1?.id ? '<span class="winner-check">✓</span>' : ''}
+                ${winnerCheck1}
             </div>
-            <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${match.winner?.id === match.player2?.id ? 'winner' : ''}"
-                 onclick="${getPlayerClickHandler(match, 2, matchState)}">
+            <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${player2WinnerClass} ${player2UndoableClass}"
+                 onclick="${player2ClickHandler}">
                 <span class="player-name-short">${getPlayerDisplayName(match.player2)}</span>
-                ${match.winner?.id === match.player2?.id ? '<span class="winner-check">✓</span>' : ''}
+                ${winnerCheck2}
             </div>
         </div>
 	<div class="match-controls">
@@ -296,6 +381,7 @@ function renderMatch(match, x, y, section, roundIndex) {
             	    ${buttonDisabled ? 'disabled' : ''}>
         	    ${buttonText}
     	    </button>
+            ${redoButton}
 	</div>
     `;
 
@@ -499,159 +585,152 @@ function handleDrag(e) {
 
 function endDrag() {
     isDragging = false;
+    document.body.style.cursor = 'grab';
 }
 
-// UNDO SYSTEM FUNCTIONS
+// --- START: Functions for Referee and Lane Management ---
 
-/**
- * Get the most recent OPERATOR-COMPLETED history entry (skip walkovers)
- */
-function getLastOperatorHistoryEntry() {
-    const history = getTournamentHistory();
-
-    // Find first entry that's a real player vs real player match
-    for (const entry of history) {
-        const description = entry.description;
-        // Skip any matches involving walkovers or TBD players
-        if (!description.includes('Walkover') && !description.includes('TBD')) {
-            return entry;
+function getAssignedReferees(excludeMatchId = null) {
+    if (!matches || matches.length === 0) return [];
+    const assignedReferees = [];
+    matches.forEach(match => {
+        if (excludeMatchId && match.id === excludeMatchId) return;
+        if (match.referee && !match.completed) {
+            assignedReferees.push(parseInt(match.referee));
         }
-    }
-
-    return null;
+    });
+    return assignedReferees;
 }
 
-/**
- * Check if undo is available for operator actions only
- */
-function canUndoOperatorAction() {
-    return getLastOperatorHistoryEntry() !== null;
-}
-
-/**
- * Update undo button state based on OPERATOR history availability
- */
-function updateUndoButtonState() {
-    const undoBtn = document.getElementById('undoBtn');
-    if (!undoBtn) return; // Button doesn't exist yet
-
-    const canUndoNow = canUndoOperatorAction();
-    const lastEntry = getLastOperatorHistoryEntry();
-
-    if (canUndoNow && lastEntry) {
-        undoBtn.disabled = false;
-        undoBtn.style.opacity = '1';
-        undoBtn.style.cursor = 'pointer';
-        undoBtn.title = `Undo: ${lastEntry.description}`;
-    } else {
-        undoBtn.disabled = true;
-        undoBtn.style.opacity = '0.6';
-        undoBtn.style.cursor = 'not-allowed';
-        undoBtn.title = 'No operator matches to undo';
-    }
-}
-
-/**
- * Handle undo button click - COMPLETE IMPLEMENTATION
- */
-function handleUndoClick() {
-    const lastEntry = getLastOperatorHistoryEntry();
-
-    if (!lastEntry) {
-        alert('No operator matches available to undo');
-        return;
-    }
-
-    // Show confirmation dialog
-    const confirmMessage =
-        `Undo Last Match\n\n` +
-        `Match: ${lastEntry.description}\n` +
-        `Completed: ${new Date(lastEntry.timestamp).toLocaleTimeString()}\n\n` +
-        `⚠️ This will restore the tournament to its previous state\n\n` +
-        `Are you sure?`;
-
-    if (!confirm(confirmMessage)) {
-        console.log('Undo cancelled by user');
-        return;
-    }
-
-    // Perform the restore
-    const success = restoreFromHistory(lastEntry);
-
-    if (success) {
-        console.log(`✓ Successfully undid: ${lastEntry.description}`);
-
-        // Show success feedback
-        alert(`✓ Undid: ${lastEntry.description}\n\nTournament restored to previous state.`);
-    } else {
-        console.error('Failed to restore from history');
-        alert('❌ Failed to restore tournament state. Please try again.');
-    }
-}
-
-/**
- * Restore tournament to a specific history state
- */
-function restoreFromHistory(historyEntry) {
-    try {
-        console.log(`Restoring tournament from: ${historyEntry.description}`);
-
-        // Validate history entry structure
-        if (!historyEntry.state || !historyEntry.state.tournament || !historyEntry.state.matches) {
-            console.error('Invalid history entry structure');
-            return false;
+function getPlayersInLiveMatches(excludeMatchId = null) {
+    if (!matches || matches.length === 0) return [];
+    const playersInLiveMatches = [];
+    matches.forEach(match => {
+        if (excludeMatchId && match.id === excludeMatchId) return;
+        if (getMatchState(match) === 'live') {
+            if (match.player1 && match.player1.id && !match.player1.isBye) {
+                playersInLiveMatches.push(parseInt(match.player1.id));
+            }
+            if (match.player2 && match.player2.id && !match.player2.isBye) {
+                playersInLiveMatches.push(parseInt(match.player2.id));
+            }
         }
+    });
+    return playersInLiveMatches;
+}
 
-        // Restore ONLY tournament and matches - NEVER touch players
-        tournament = JSON.parse(JSON.stringify(historyEntry.state.tournament));
-        matches = JSON.parse(JSON.stringify(historyEntry.state.matches));
-        // players = ... // REMOVED - players stay untouched!
+function isPlayerAvailableAsReferee(playerId, excludeMatchId = null) {
+    const assignedReferees = getAssignedReferees(excludeMatchId);
+    const playersInLiveMatches = getPlayersInLiveMatches(excludeMatchId);
+    const playerIdInt = parseInt(playerId);
+    return !assignedReferees.includes(playerIdInt) && !playersInLiveMatches.includes(playerIdInt);
+}
 
-        console.log(`✓ Restored state: ${matches.filter(m => m.completed).length} completed matches`);
-        console.log(`✓ Player stats preserved (not restored from history)`);
+function updateMatchReferee(matchId, refereeId) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return false;
 
-        // Remove the restored entry from history
-        removeLastHistoryEntry();
-
-        // Save current state to localStorage
-        if (typeof saveTournament === 'function') {
-            saveTournament();
-        }
-
-        // Refresh all UI components
-        refreshTournamentUI();
-
+    if (!refereeId) {
+        match.referee = null;
+        saveTournament();
         return true;
+    }
 
-    } catch (error) {
-        console.error('Error during restore operation:', error);
+    const currentRefereeId = match.referee;
+    if (refereeId !== currentRefereeId && !isPlayerAvailableAsReferee(refereeId, matchId)) {
+        alert('This referee is already assigned to another match or currently playing.');
+        const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchReferee"]`);
+        if (dropdown) dropdown.value = currentRefereeId || '';
         return false;
     }
+
+    match.referee = refereeId ? parseInt(refereeId) : null;
+    saveTournament();
+    refreshAllRefereeDropdowns();
+    return true;
 }
 
-/**
- * Remove the most recent history entry (after successful restore)
- */
-function removeLastHistoryEntry() {
-    try {
-        let history = getTournamentHistory();
-
-        if (history.length > 0) {
-            // Remove the first entry (most recent)
-            history.shift();
-
-            // Save updated history
-            localStorage.setItem('tournamentHistory', JSON.stringify(history));
-
-            console.log(`✓ Removed restored entry from history (${history.length} entries remaining)`);
+function refreshAllRefereeDropdowns() {
+    if (!matches) return;
+    matches.forEach(match => {
+        const matchElement = document.getElementById(`bracket-match-${match.id}`);
+        if (matchElement) {
+            const dropdown = matchElement.querySelector('select[onchange*="updateMatchReferee"]');
+            if (dropdown) {
+                const currentValue = dropdown.value;
+                dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
+                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
+                    dropdown.value = currentValue;
+                }
+            }
         }
-    } catch (error) {
-        console.error('Error removing history entry:', error);
+    });
+}
+
+function refreshRefereeDropdown(matchId) {
+    const matchElement = document.getElementById(`bracket-match-${matchId}`);
+    if (!matchElement) return;
+    const dropdown = matchElement.querySelector('select[onchange*="updateMatchReferee"]');
+    if (!dropdown) return;
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return;
+    const currentValue = dropdown.value;
+    dropdown.innerHTML = generateRefereeOptionsWithConflicts(matchId, match.referee);
+    if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
+        dropdown.value = currentValue;
+    } else {
+        dropdown.value = match.referee || '';
     }
 }
 
+function showMatchDetails() {
+    if (!matches || matches.length === 0) {
+        alert('No matches available to show details for.');
+        return;
+    }
+    const activeMatches = matches.filter(m => getMatchState(m) === 'live');
+    const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
+    let details = '';
+    if (activeMatches.length > 0) {
+        details += `Live:\n`;
+        activeMatches.forEach(match => {
+            const refereeName = match.referee ? (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
+            let info = match.lane ? ` (Lane ${match.lane}, Ref: ${refereeName})` : ` (No lane, Ref: ${refereeName})`;
+            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
+        });
+        details += '\n';
+    }
+    if (readyMatches.length > 0) {
+        details += `Ready to start:\n`;
+        readyMatches.forEach(match => {
+            const refereeName = match.referee ? (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
+            let info = match.lane ? ` (Lane ${match.lane}, Ref: ${refereeName})` : ` (No lane, Ref: ${refereeName})`;
+            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
+        });
+        details += '\n';
+    }
+    if (activeMatches.length === 0 && readyMatches.length === 0) {
+        const completedMatches = matches.filter(m => m.completed);
+        const pendingMatches = matches.length - completedMatches.length;
+        details = `No matches currently active or ready.\n\nCompleted: ${completedMatches.length}\nPending: ${pendingMatches}`;
+    } else {
+        details = details.trim();
+    }
+    alert(details);
+}
+
+// --- END: Functions for Referee and Lane Management ---
+
+
+// UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
+
+
+
+
+
+
 /**
- * Refresh all tournament UI components after restore
+ * Refresh all tournament UI components after a state change (like undo).
  */
 function refreshTournamentUI() {
     console.log('Refreshing tournament UI after restore...');
@@ -693,70 +772,15 @@ function refreshTournamentUI() {
 }
 
 /**
- * Generate referee dropdown options from all players
- */
-/**
- * Generate referee dropdown options with conflict detection
- */
-function generateRefereeOptions(currentMatchId, currentRefereeId = null) {
-    let options = '<option value="">None</option>';
-
-    if (typeof players !== 'undefined' && Array.isArray(players)) {
-        // Get paid players and sort alphabetically
-        const paidPlayers = players.filter(player => player.paid);
-        const sortedPlayers = paidPlayers.sort((a, b) => {
-            const nameA = a.name.toLowerCase();
-            const nameB = b.name.toLowerCase();
-            return nameA.localeCompare(nameB);
-        });
-
-        // Get conflict information
-        const assignedReferees = getAssignedReferees ? getAssignedReferees(currentMatchId) : [];
-        const playersInLiveMatches = getPlayersInLiveMatches ? getPlayersInLiveMatches(currentMatchId) : [];
-
-        sortedPlayers.forEach(player => {
-            const playerId = parseInt(player.id);
-            const isCurrentReferee = currentRefereeId && playerId === parseInt(currentRefereeId);
-            const isAssignedElsewhere = assignedReferees.includes(playerId);
-            const isInLiveMatch = playersInLiveMatches.includes(playerId);
-
-            // Always allow current referee to stay selected
-            if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
-                const selected = isCurrentReferee ? 'selected' : '';
-                //const playerName = player.name.length > 25 ? player.name.substring(0, 25) + '...' : player.name;
-                const playerName = player.name
-                options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
-            } else {
-                // Show unavailable players as disabled with reason
-                const playerName = player.name.length > 30 ? player.name.substring(0, 30) + '...' : player.name;
-                let reason = '';
-                if (isAssignedElsewhere) reason = ' (assigned)';
-                else if (isInLiveMatch) reason = ' (playing)';
-
-                options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
-            }
-        });
-    }
-
-    return options;
-}
-
-/**
- * Generate referee dropdown options with conflict detection (replaces existing function)
+ * Generate referee dropdown options with conflict detection.
  */
 function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = null) {
     let options = '<option value="">None</option>';
 
     if (typeof players !== 'undefined' && Array.isArray(players)) {
-        // Get paid players and sort alphabetically
         const paidPlayers = players.filter(player => player.paid);
-        const sortedPlayers = paidPlayers.sort((a, b) => {
-            const nameA = a.name.toLowerCase();
-            const nameB = b.name.toLowerCase();
-            return nameA.localeCompare(nameB);
-        });
+        const sortedPlayers = paidPlayers.sort((a, b) => a.name.localeCompare(b.name));
 
-        // Get conflict information
         const assignedReferees = getAssignedReferees(currentMatchId);
         const playersInLiveMatches = getPlayersInLiveMatches(currentMatchId);
 
@@ -766,20 +790,12 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
             const isAssignedElsewhere = assignedReferees.includes(playerId);
             const isInLiveMatch = playersInLiveMatches.includes(playerId);
 
-            // Always allow current referee to stay selected
             if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
                 const selected = isCurrentReferee ? 'selected' : '';
-                //const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
-                const playerName = player.name
-                options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
+                options += `<option value="${player.id}" ${selected}>${player.name}</option>`;
             } else {
-                // Show unavailable players as disabled with reason
-                const playerName = player.name.length > 30 ? player.name.substring(0, 30) + '...' : player.name;
-                let reason = '';
-                if (isAssignedElsewhere) reason = ' (assigned)';
-                else if (isInLiveMatch) reason = ' (playing)';
-
-                options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
+                let reason = isAssignedElsewhere ? ' (assigned)' : ' (playing)';
+                options += `<option value="${player.id}" disabled style="color: #ccc;">${player.name}${reason}</option>`;
             }
         });
     }
@@ -789,143 +805,108 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
+    
+    window.refreshTournamentUI = refreshTournamentUI;
+
+    // Original functions needed by HTML
+    window.showMatchDetails = showMatchDetails;
+    window.updateMatchReferee = updateMatchReferee;
+    window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
+    window.refreshRefereeDropdown = refreshRefereeDropdown;
     window.getAssignedReferees = getAssignedReferees;
     window.getPlayersInLiveMatches = getPlayersInLiveMatches;
     window.isPlayerAvailableAsReferee = isPlayerAvailableAsReferee;
-    window.refreshAllRefereeDropdowns = refreshAllRefereeDropdowns;
-    window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
+    window.getRedoableMatches = getRedoableMatches;
+    window.handleRedoClick = handleRedoClick;
 }
 
-/**
- * Update match referee assignment
- */
-function updateMatchReferee(matchId, refereeId) {
+// --- START: Surgical Undo Implementation ---
+
+function isMatchUndoable(matchId) {
+    const history = getTournamentHistory();
+    if (history.length === 0) return false;
+
     const match = matches.find(m => m.id === matchId);
-    if (!match) {
-        console.error(`Match ${matchId} not found`);
+    if (!match || (match.player1 && isWalkover(match.player1)) || (match.player2 && isWalkover(match.player2))) {
         return false;
     }
 
-    // If removing referee assignment, just clear it
-    if (!refereeId) {
-        match.referee = null;
-        saveTournament();
-        return true;
-    }
+    // Check if match has a transaction in history
+    const hasTransaction = history.some(t => t.matchId === matchId);
+    if (!hasTransaction) return false;
 
-    // Check for conflicts (unless it's the current referee)
-    const currentRefereeId = match.referee;
-    if (refereeId !== currentRefereeId && !isPlayerAvailableAsReferee(refereeId, matchId)) {
-        alert('This referee is already assigned to another match or currently playing.');
-
-        // Reset dropdown to previous value
-        const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchReferee"]`);
-        if (dropdown) {
-            dropdown.value = currentRefereeId || '';
+    // Check ALL immediate downstream matches (both sides)
+    if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
+        const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+        if (progression) {
+            // Check if winner's destination is completed
+            if (progression.winner) {
+                const [targetMatchId] = progression.winner;
+                const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.completed) {
+                    return false;
+                }
+            }
+            
+            // Check if loser's destination is completed
+            if (progression.loser) {
+                const [targetMatchId] = progression.loser;
+                const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.completed) {
+                    return false;
+                }
+            }
         }
-
-        return false;
     }
-
-    // Update the referee
-    match.referee = refereeId ? parseInt(refereeId) : null;
-
-    console.log(`Referee updated for ${matchId}: ${match.referee ? `Player ${refereeId}` : 'None'}`);
-
-    // Save tournament
-    if (typeof saveTournament === 'function') {
-        saveTournament();
-    }
-
-    // Refresh all referee dropdowns to show updated availability
-    refreshAllRefereeDropdowns();
 
     return true;
 }
 
-/**
- * Show tournament match details summary
- */
-function showMatchDetails() {
-    if (!matches || matches.length === 0) {
-        alert('No matches available to show details for.');
+function handleSurgicalUndo(matchId) {
+    const history = getTournamentHistory();
+    const transaction = history.find(t => t.matchId === matchId);
+
+    if (!transaction) {
+        alert('Could not find the match in the history to undo.');
         return;
     }
 
-    const activeMatches = matches.filter(m => getMatchState(m) === 'live');
-    const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
+    const downstreamMatches = getDownstreamMatches(matchId, tournament.bracketSize);
+    const affectedMatches = new Set([matchId, ...downstreamMatches]);
 
-    let details = '';
+    const transactionsToUndo = history.filter(t => affectedMatches.has(t.matchId));
 
-    // Show Live matches first (most important)
-    if (activeMatches.length > 0) {
-        details += `Live:\n`;
-        activeMatches.forEach(match => {
-            const refereeName = match.referee ? 
-                (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
-            
-            let info = '';
-            if (match.lane && match.referee) {
-                info = ` (Lane ${match.lane}, Ref: ${refereeName})`;
-            } else if (match.lane) {
-                info = ` (Lane ${match.lane}, Ref: None)`;
-            } else if (match.referee) {
-                info = ` (No lane, Ref: ${refereeName})`;
-            }
-            
-            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
-        });
-        details += '\n';
+    if (transactionsToUndo.length === 0) {
+        alert('No undoable transactions found for this match and its downstream dependencies.');
+        return;
     }
+    
+    let confirmMessage = `This will undo the selected match and all of its ${downstreamMatches.size} downstream match(es).
 
-    // Show Ready to start matches
-    if (readyMatches.length > 0) {
-        details += `Ready to start:\n`;
-        readyMatches.forEach(match => {
-            const refereeName = match.referee ? 
-                (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
-            
-            let info = '';
-            if (match.lane && match.referee) {
-                info = ` (Lane ${match.lane}, Ref: ${refereeName})`;
-            } else if (match.lane) {
-                info = ` (Lane ${match.lane}, Ref: None)`;
-            } else if (match.referee) {
-                info = ` (No lane, Ref: ${refereeName})`;
-            }
-            
-            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
-        });
-        details += '\n';
+ The following matches will be undone:
+ - ${matchId}`;
+    
+    downstreamMatches.forEach(affectedMatch => {
+        confirmMessage += `
+ - ${affectedMatch}`;
+    });
+
+    confirmMessage += `
+
+Are you sure?`;
+
+    if (confirm(confirmMessage)) {
+        const transactionIdsToUndo = transactionsToUndo.map(t => t.id);
+        if (typeof undoTransactions === 'function') {
+            undoTransactions(transactionIdsToUndo);
+        }
     }
-
-    // If no actionable matches, show summary
-    if (activeMatches.length === 0 && readyMatches.length === 0) {
-        const completedMatches = matches.filter(m => m.completed);
-        const pendingMatches = matches.length - completedMatches.length;
-
-        details = `No matches currently active or ready.\n\n`;
-        details += `Completed: ${completedMatches.length}\n`;
-        details += `Pending: ${pendingMatches}`;
-    } else {
-        // Remove trailing newline
-        details = details.trim();
-    }
-
-    alert(details);
 }
 
+// --- END: Surgical Undo Implementation ---
 
-// Make functions globally available
-if (typeof window !== 'undefined') {
-    window.updateUndoButtonState = updateUndoButtonState;
-    window.handleUndoClick = handleUndoClick;
-    window.getLastOperatorHistoryEntry = getLastOperatorHistoryEntry;
-    window.canUndoOperatorAction = canUndoOperatorAction;
-    window.restoreFromHistory = restoreFromHistory;
-    window.removeLastHistoryEntry = removeLastHistoryEntry;
-    window.refreshTournamentUI = refreshTournamentUI;
-    window.generateRefereeOptions = generateRefereeOptions;
-    window.updateMatchReferee = updateMatchReferee;
-    window.showMatchDetails = showMatchDetails;
-}
+
+// UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
+
+
+

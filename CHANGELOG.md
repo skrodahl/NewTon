@@ -1,3 +1,43 @@
+# 2025-09-11
+## Enhanced Undo System - Surgical Match Correction
+
+### Added
+- **Transactional History System**
+  - Replaced snapshot-based undo with transaction-based history tracking
+  - Each match completion creates a discrete transaction record
+  - Enables targeted undo operations without affecting unrelated matches
+
+- **Surgical Undo Functionality**
+  - Undo any completed match that has no downstream dependencies
+  - Visual indicators: Winner checkmarks become undo icons (↺) on hover for undoable matches
+  - Intelligent validation prevents undos that would break tournament integrity
+  - Preserves original bracket assignments while clearing only affected downstream placements
+
+### Enhanced
+- **Match State Management**
+  - Improved validation to prevent invalid match states (e.g., LIVE matches with TBD players)
+  - Better handling of cross-bracket dependencies between frontside and backside
+  - Cleaner restoration of match states during undo operations
+
+### Technical Changes
+- Implemented `saveTransaction()` for discrete match completion tracking
+- Added `undoTransactions()` with recursive downstream clearing
+- Enhanced `isMatchUndoable()` validation using progression rule lookups
+- Added `clearPlayerFromDownstream()` for precise player removal from affected matches
+
+### User Experience Improvements
+- Tournament organizers can now correct errors discovered well after they occurred
+- Particularly valuable for 32-player tournaments where mistakes might be found late in the process
+- Maintains tournament integrity by preventing undos that would create invalid bracket states
+- One-step-at-a-time undo approach provides predictable and safe error correction
+
+### Files Modified
+- `clean-match-progression.js` - Core transaction and undo logic implementation
+- `bracket-rendering.js` - Enhanced undo validation and visual indicators
+- Match progression now uses hardcoded lookup tables for precise state management
+
+This enhancement transforms error correction from a linear "last-match-only" limitation to a flexible system that allows surgical precision in fixing tournament mistakes while maintaining bracket validity.
+
 # 2025-09-09
 ## Improved Export of Results & Split Semifinal Configuration
 

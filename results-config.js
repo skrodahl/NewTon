@@ -4,10 +4,13 @@
 // GLOBAL CONFIG - Single Source of Truth
 const DEFAULT_CONFIG = {
     points: {
-        participation: 1,
-        first: 3,
-        second: 2,
-        third: 1,
+        participation: 5,
+        first: 15,
+        second: 13,
+        third: 10,
+        fourth: 9, // Correctly added
+        fifthSixth: 8, // Correctly added
+        seventhEighth: 7, // Correctly added
         highOut: 1,
         ton: 0,
         oneEighty: 1,
@@ -15,8 +18,8 @@ const DEFAULT_CONFIG = {
     },
     legs: {
         regularRounds: 3,
-        frontsideSemifinal: 5,      // NEW: Frontside semifinals (FS-3-1, FS-4-1, FS-5-1)
-        backsideSemifinal: 3,       // NEW: Backside semifinals (BS-3-1, BS-5-1, BS-7-1)
+        frontsideSemifinal: 5,
+        backsideSemifinal: 3,
         backsideFinal: 5,
         grandFinal: 5
     },
@@ -38,20 +41,14 @@ function loadConfiguration() {
         const savedConfig = localStorage.getItem('dartsConfig');
         if (savedConfig) {
             const parsed = JSON.parse(savedConfig);
-
-            // Merge with defaults to handle new config options
             config = mergeWithDefaults(parsed, DEFAULT_CONFIG);
             console.log('✓ Loaded saved global config');
         } else {
-            // Use defaults for first-time users
             config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
             saveGlobalConfig();
             console.log('✓ Initialized default global config');
         }
-
-        // Apply config to UI elements
         applyConfigToUI();
-
     } catch (error) {
         console.error('❌ Error loading config, using defaults:', error);
         config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
@@ -60,28 +57,16 @@ function loadConfiguration() {
     }
 }
 
-// MERGE CONFIG WITH DEFAULTS (handles new config options)
+// MERGE CONFIG WITH DEFAULTS
 function mergeWithDefaults(userConfig, defaults) {
     const merged = JSON.parse(JSON.stringify(defaults));
-
-    // Deep merge user config over defaults
     Object.keys(userConfig).forEach(key => {
-        if (typeof userConfig[key] === 'object' && !Array.isArray(userConfig[key])) {
+        if (typeof userConfig[key] === 'object' && !Array.isArray(userConfig[key]) && userConfig[key] !== null) {
             merged[key] = { ...merged[key], ...userConfig[key] };
         } else {
             merged[key] = userConfig[key];
         }
     });
-
-    // MIGRATION: Handle old 'semifinal' config
-    if (userConfig.legs && userConfig.legs.semifinal && 
-        !userConfig.legs.frontsideSemifinal && !userConfig.legs.backsideSemifinal) {
-        console.log('🔄 Migrating old semifinal config to split configuration');
-        merged.legs.frontsideSemifinal = userConfig.legs.semifinal;
-        merged.legs.backsideSemifinal = userConfig.legs.semifinal;
-        console.log(`✓ Migrated: frontsideSemifinal=${merged.legs.frontsideSemifinal}, backsideSemifinal=${merged.legs.backsideSemifinal}`);
-    }
-
     return merged;
 }
 
@@ -94,15 +79,18 @@ function applyConfigToUI() {
     safeSetValue('firstPlacePoints', config.points.first);
     safeSetValue('secondPlacePoints', config.points.second);
     safeSetValue('thirdPlacePoints', config.points.third);
+    safeSetValue('fourthPlacePoints', config.points.fourth);
+    safeSetValue('fifthSixthPlacePoints', config.points.fifthSixth);
+    safeSetValue('seventhEighthPlacePoints', config.points.seventhEighth);
     safeSetValue('highOutPoints', config.points.highOut);
     safeSetValue('tonPoints', config.points.ton);
     safeSetValue('shortLegPoints', config.points.shortLeg);
     safeSetValue('oneEightyPoints', config.points.oneEighty);
 
-    // Match leg configuration - Updated for split semifinals
+    // Match leg configuration
     safeSetValue('regularRoundsLegs', config.legs.regularRounds);
-    safeSetValue('frontsideSemifinalLegs', config.legs.frontsideSemifinal);  // NEW
-    safeSetValue('backsideSemifinalLegs', config.legs.backsideSemifinal);    // NEW
+    safeSetValue('frontsideSemifinalLegs', config.legs.frontsideSemifinal);
+    safeSetValue('backsideSemifinalLegs', config.legs.backsideSemifinal);
     safeSetValue('backsideFinalLegs', config.legs.backsideFinal);
     safeSetValue('grandFinalLegs', config.legs.grandFinal);
 
@@ -126,7 +114,7 @@ function applyConfigToUI() {
     console.log('✓ Config applied to UI');
 }
 
-// SAFE UI ELEMENT SETTERS (won't crash if element doesn't exist)
+// SAFE UI ELEMENT SETTERS
 function safeSetValue(elementId, value) {
     const element = document.getElementById(elementId);
     if (element && value !== undefined) {
@@ -141,7 +129,7 @@ function safeSetChecked(elementId, value) {
     }
 }
 
-// SAVE GLOBAL CONFIG - Always immediate
+// SAVE GLOBAL CONFIG
 function saveGlobalConfig() {
     try {
         localStorage.setItem('dartsConfig', JSON.stringify(config));
@@ -151,27 +139,30 @@ function saveGlobalConfig() {
     }
 }
 
-// BULLETPROOF CONFIG SAVE - All Config page settings
+// SAVE CONFIGURATION FROM UI
 function saveConfiguration() {
     console.log('💾 Saving all configuration...');
 
     try {
         // Points configuration
-        config.points.participation = parseInt(document.getElementById('participationPoints').value) || 1;
-        config.points.first = parseInt(document.getElementById('firstPlacePoints').value) || 3;
-        config.points.second = parseInt(document.getElementById('secondPlacePoints').value) || 2;
-        config.points.third = parseInt(document.getElementById('thirdPlacePoints').value) || 1;
-        config.points.highOut = parseInt(document.getElementById('highOutPoints').value) || 1;
+        config.points.participation = parseInt(document.getElementById('participationPoints').value) || 0;
+        config.points.first = parseInt(document.getElementById('firstPlacePoints').value) || 0;
+        config.points.second = parseInt(document.getElementById('secondPlacePoints').value) || 0;
+        config.points.third = parseInt(document.getElementById('thirdPlacePoints').value) || 0;
+        config.points.fourth = parseInt(document.getElementById('fourthPlacePoints').value) || 0;
+        config.points.fifthSixth = parseInt(document.getElementById('fifthSixthPlacePoints').value) || 0;
+        config.points.seventhEighth = parseInt(document.getElementById('seventhEighthPlacePoints').value) || 0;
+        config.points.highOut = parseInt(document.getElementById('highOutPoints').value) || 0;
         config.points.ton = parseInt(document.getElementById('tonPoints').value) || 0;
-        config.points.shortLeg = parseInt(document.getElementById('shortLegPoints').value) || 1;
-        config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value) || 1;
+        config.points.shortLeg = parseInt(document.getElementById('shortLegPoints').value) || 0;
+        config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value) || 0;
 
-        // Match legs configuration - Updated for split semifinals
+        // Match legs configuration
         config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value) || 3;
-        config.legs.frontsideSemifinal = parseInt(document.getElementById('frontsideSemifinalLegs').value) || 5;  // NEW
-        config.legs.backsideSemifinal = parseInt(document.getElementById('backsideSemifinalLegs').value) || 3;    // NEW
-        config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value) || 5;
-        config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value) || 5;
+        config.legs.frontsideSemifinal = parseInt(document.getElementById('frontsideSemifinalLegs').value) || 3;
+        config.legs.backsideSemifinal = parseInt(document.getElementById('backsideSemifinalLegs').value) || 3;
+        config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value) || 3;
+        config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value) || 3;
 
         saveGlobalConfig();
         alert('✓ Configuration saved successfully!');
@@ -181,6 +172,8 @@ function saveConfiguration() {
         alert('❌ Error saving configuration. Please check the console.');
     }
 }
+
+// ... (The rest of the functions remain the same as the original file)
 
 // APPLICATION SETTINGS
 function saveApplicationSettings() {
