@@ -699,6 +699,11 @@ function processAutoAdvancements() {
     const maxIterations = 10;
 
     console.log('Processing auto-advancements...');
+    
+    // Debug: Show all matches that could potentially auto-advance
+    const candidates = matches.filter(m => !m.completed && m.player1 && m.player2);
+    console.log(`Found ${candidates.length} non-completed matches with both players:`, 
+        candidates.map(m => `${m.id}: ${m.player1.name} vs ${m.player2.name}`));
 
     while (foundAdvancement && iterations < maxIterations) {
         foundAdvancement = false;
@@ -716,6 +721,11 @@ function processAutoAdvancements() {
                 match.autoAdvanced = true;
                 completeMatch(match.id, winnerPlayerNumber);
                 foundAdvancement = true;
+            } else if (!match.completed && match.player1 && match.player2) {
+                // Debug: Why isn't this match auto-advancing?
+                const p1IsWalkover = isWalkover(match.player1);
+                const p2IsWalkover = isWalkover(match.player2);
+                console.log(`NOT auto-advancing ${match.id}: ${match.player1.name} vs ${match.player2.name} (p1Walkover=${p1IsWalkover}, p2Walkover=${p2IsWalkover})`);
             }
         });
 
@@ -1685,15 +1695,22 @@ function undoTransactions(transactionIds) {
         return false;
     }
 
+    // Track matches that have been cleared by downstream cleanup
+    const clearedMatches = new Set();
+    
     // Process each transaction to undo
     transactionsToUndo.forEach(transaction => {
         if (transaction.beforeState.matches) {
             // 1. Restore the original match state EXACTLY as it was
+            // FIXED: Don't restore auto-advanced matches that were cleared by downstream cleanup
             const affectedMatch = transaction.beforeState.matches.find(m => m.id === transaction.matchId);
-            if (affectedMatch) {
+            if (affectedMatch && !clearedMatches.has(transaction.matchId)) {
                 const matchIndex = matches.findIndex(m => m.id === transaction.matchId);
                 if (matchIndex !== -1) {
+                    console.log(`DEBUG: Restoring match ${transaction.matchId} to original state`);
                     matches[matchIndex] = JSON.parse(JSON.stringify(affectedMatch));
+                } else {
+                    console.log(`DEBUG: Skipping restoration of cleared match ${transaction.matchId}`);
                 }
             }
 
@@ -1708,10 +1725,20 @@ function undoTransactions(transactionIds) {
                     if (progression.winner) {
                         const [targetMatchId, slot] = progression.winner;
                         const targetMatch = matches.find(m => m.id === targetMatchId);
-                        if (targetMatch && targetMatch[slot] && targetMatch[slot].id === winnerId) {
+                        console.log(`DEBUG: Looking for winner ${transaction.winner.name} in ${targetMatchId}.${slot}, found:`, targetMatch ? targetMatch[slot] : 'no match');
+                        
+                        // FIXED: Match by name instead of ID, since auto-advancement creates new IDs
+                        if (targetMatch && targetMatch[slot] && targetMatch[slot].name === transaction.winner.name) {
+                            // Get the current player ID (may be different from original due to auto-advancement)  
+                            const currentPlayerId = targetMatch[slot].id;
+                            console.log(`DEBUG: Clearing winner ${transaction.winner.name} (current ID: ${currentPlayerId}) from ${targetMatchId}`);
+                            clearPlayerFromDownstream(currentPlayerId, targetMatchId);
+                            // Mark this match as cleared so it won't be restored later
+                            clearedMatches.add(targetMatchId);
+                            // Then clear the immediate slot
                             targetMatch[slot] = { id: `${targetMatchId}-${slot}`, name: 'TBD' };
-                            // Also clear any further downstream effects recursively
-                            clearPlayerFromDownstream(winnerId, targetMatchId);
+                        } else {
+                            console.log(`DEBUG: Winner ${transaction.winner.name} NOT found in ${targetMatchId}.${slot}`);
                         }
                     }
 
@@ -1719,10 +1746,20 @@ function undoTransactions(transactionIds) {
                     if (progression.loser) {
                         const [targetMatchId, slot] = progression.loser;
                         const targetMatch = matches.find(m => m.id === targetMatchId);
-                        if (targetMatch && targetMatch[slot] && targetMatch[slot].id === loserId) {
+                        console.log(`DEBUG: Looking for loser ${transaction.loser.name} in ${targetMatchId}.${slot}, found:`, targetMatch ? targetMatch[slot] : 'no match');
+                        
+                        // FIXED: Match by name instead of ID, since auto-advancement creates new IDs
+                        if (targetMatch && targetMatch[slot] && targetMatch[slot].name === transaction.loser.name) {
+                            // Get the current player ID (may be different from original due to auto-advancement)
+                            const currentPlayerId = targetMatch[slot].id;
+                            console.log(`DEBUG: Clearing loser ${transaction.loser.name} (current ID: ${currentPlayerId}) from ${targetMatchId}`);
+                            clearPlayerFromDownstream(currentPlayerId, targetMatchId);
+                            // Mark this match as cleared so it won't be restored later
+                            clearedMatches.add(targetMatchId);
+                            // Then clear the immediate slot
                             targetMatch[slot] = { id: `${targetMatchId}-${slot}`, name: 'TBD' };
-                            // Also clear any further downstream effects recursively
-                            clearPlayerFromDownstream(loserId, targetMatchId);
+                        } else {
+                            console.log(`DEBUG: Loser ${transaction.loser.name} NOT found in ${targetMatchId}.${slot} (expected from FS-2-1 undo)`);
                         }
                     }
                 }
@@ -1740,6 +1777,15 @@ function undoTransactions(transactionIds) {
 
     // Save and refresh
     saveTournament();
+    
+    // DEBUG: Check final state of matches after undo
+    console.log('DEBUG: Final match states after undo:');
+    matches.forEach(match => {
+        if (match.id.includes('BS-2-2')) {
+            console.log(`${match.id}: ${match.player1?.name || 'NULL'} vs ${match.player2?.name || 'NULL'} (completed: ${match.completed}, autoAdvanced: ${match.autoAdvanced})`);
+        }
+    });
+    
     if (typeof refreshTournamentUI === 'function') {
         refreshTournamentUI();
     }
@@ -1748,27 +1794,39 @@ function undoTransactions(transactionIds) {
     return true;
 }
 
+/**
+ * Helper function to check if a match has any walkover players
+ */
+function hasWalkoverPlayer(match) {
+    return isWalkover(match.player1) || isWalkover(match.player2);
+}
+
 // Helper function to recursively clear a player from downstream matches
 function clearPlayerFromDownstream(playerId, currentMatchId) {
     const currentMatch = matches.find(m => m.id === currentMatchId);
     if (!currentMatch) return;
+
+    console.log(`Clearing player ${playerId} from match ${currentMatchId}`);
 
     // If match has TBD players, it cannot be LIVE
     if ((currentMatch.player1?.name === 'TBD' || currentMatch.player2?.name === 'TBD') && currentMatch.active) {
         currentMatch.active = false;
     }
 
-    // If the current match was completed and involved this player, clear it
-    if (currentMatch.completed && 
-        ((currentMatch.winner && currentMatch.winner.id === playerId) || 
-         (currentMatch.loser && currentMatch.loser.id === playerId))) {
+    // Check if this player is in this match at all
+    const player1Match = currentMatch.player1 && currentMatch.player1.id === playerId;
+    const player2Match = currentMatch.player2 && currentMatch.player2.id === playerId;
+    
+    if (!player1Match && !player2Match) {
+        console.log(`Player ${playerId} not found in match ${currentMatchId}`);
+        return;
+    }
+
+    // If this match was completed (auto or manual), clear it and continue downstream
+    if (currentMatch.completed) {
+        console.log(`Clearing completed match ${currentMatchId}`);
         
-        currentMatch.completed = false;
-        currentMatch.winner = null;
-        currentMatch.loser = null;
-        currentMatch.active = false;
-        
-        // Continue clearing downstream from this match
+        // Continue clearing downstream BEFORE we clear this match
         if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
             const progression = MATCH_PROGRESSION[tournament.bracketSize][currentMatchId];
             if (progression) {
@@ -1776,19 +1834,56 @@ function clearPlayerFromDownstream(playerId, currentMatchId) {
                     const [nextMatchId, slot] = progression.winner;
                     const nextMatch = matches.find(m => m.id === nextMatchId);
                     if (nextMatch && nextMatch[slot] && nextMatch[slot].id === playerId) {
-                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
                         clearPlayerFromDownstream(playerId, nextMatchId);
+                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
                     }
                 }
                 if (progression.loser) {
                     const [nextMatchId, slot] = progression.loser;
                     const nextMatch = matches.find(m => m.id === nextMatchId);
                     if (nextMatch && nextMatch[slot] && nextMatch[slot].id === playerId) {
-                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
                         clearPlayerFromDownstream(playerId, nextMatchId);
+                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
                     }
                 }
             }
+        }
+        
+        // Now clear this match
+        currentMatch.completed = false;
+        currentMatch.winner = null;
+        currentMatch.loser = null;
+        currentMatch.active = false;
+        currentMatch.autoAdvanced = false;
+    }
+    
+    // FIXED: Handle walkover matches - remove real players completely, leaving only walkovers
+    if (currentMatch.autoAdvanced || hasWalkoverPlayer(currentMatch)) {
+        console.log(`Match ${currentMatchId} has walkover - removing real player completely`);
+        
+        // For auto-advanced walkover matches, remove the real player and leave only walkovers/TBD
+        // This prevents the match from auto-advancing again
+        if (player1Match && !isWalkover(currentMatch.player1)) {
+            // Removing a real player - replace with TBD so match can't auto-advance
+            currentMatch.player1 = { id: `${currentMatchId}-player1`, name: 'TBD' };
+            console.log(`Removed real player ${playerId} from player1 slot in ${currentMatchId}, replaced with TBD`);
+            console.log(`DEBUG: Match ${currentMatchId} is now: ${currentMatch.player1.name} vs ${currentMatch.player2.name}`);
+        } else if (player2Match && !isWalkover(currentMatch.player2)) {
+            // Removing a real player - replace with TBD so match can't auto-advance  
+            currentMatch.player2 = { id: `${currentMatchId}-player2`, name: 'TBD' };
+            console.log(`Removed real player ${playerId} from player2 slot in ${currentMatchId}, replaced with TBD`);
+            console.log(`DEBUG: Match ${currentMatchId} is now: ${currentMatch.player1.name} vs ${currentMatch.player2.name}`);
+        }
+        // If removing a walkover player, just leave it (shouldn't happen in practice)
+    } else {
+        // For normal matches, clear to TBD as usual
+        if (player1Match) {
+            currentMatch.player1 = { id: `${currentMatchId}-player1`, name: 'TBD' };
+            console.log(`Cleared player ${playerId} from player1 slot in ${currentMatchId}`);
+        }
+        if (player2Match) {
+            currentMatch.player2 = { id: `${currentMatchId}-player2`, name: 'TBD' };
+            console.log(`Cleared player ${playerId} from player2 slot in ${currentMatchId}`);
         }
     }
 }

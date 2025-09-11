@@ -827,7 +827,13 @@ function isMatchUndoable(matchId) {
     if (history.length === 0) return false;
 
     const match = matches.find(m => m.id === matchId);
-    if (!match || (match.player1 && isWalkover(match.player1)) || (match.player2 && isWalkover(match.player2))) {
+    if (!match) {
+        return false;
+    }
+    
+    // FIXED: Don't allow undo for matches that were auto-advanced (walkover matches)
+    // These matches should not show the undo symbol on hover
+    if (match.autoAdvanced) {
         return false;
     }
 
@@ -835,25 +841,25 @@ function isMatchUndoable(matchId) {
     const hasTransaction = history.some(t => t.matchId === matchId);
     if (!hasTransaction) return false;
 
-    // Check ALL immediate downstream matches (both sides)
+    // Check downstream matches, but exclude auto-advanced walkover matches
     if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
         const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
         if (progression) {
-            // Check if winner's destination is completed
+            // Check if winner's destination is completed (excluding walkover auto-advancement)
             if (progression.winner) {
                 const [targetMatchId] = progression.winner;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.completed) {
-                    return false;
+                if (targetMatch && targetMatch.completed && !targetMatch.autoAdvanced) {
+                    return false; // Blocked by manually completed downstream match
                 }
             }
             
-            // Check if loser's destination is completed
+            // Check if loser's destination is completed (excluding walkover auto-advancement)
             if (progression.loser) {
                 const [targetMatchId] = progression.loser;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.completed) {
-                    return false;
+                if (targetMatch && targetMatch.completed && !targetMatch.autoAdvanced) {
+                    return false; // Blocked by manually completed downstream match
                 }
             }
         }
