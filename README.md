@@ -233,9 +233,10 @@ NewTon DC Malmö
 
 ## 🔗 Getting Started
 
-1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases)**, run `git clone` or download ZIP
-2. **Open**: Launch `tournament.html` in your browser
-3. **Configure**: Set up your club branding and point system
-4. **Run**: Create your first tournament and start managing matches!
+1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases)** (Run `git clone` or download ZIP for the latest beta)
+2. Unzip the file you just downloaded
+3. **Open**: Launch `tournament.html` in your browser
+4. **Configure**: Set up your club branding and point system
+5. **Run**: Create your first tournament and start managing matches!
 
 *No installation, no servers, no complexity — just pure tournament management.*
