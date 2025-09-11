@@ -16,7 +16,7 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 ### 🏆 Tournament Management
 - **Create, Save & Load**: Multiple tournaments with automatic saving to browser storage
 - **Import/Export**: JSON-based tournament backup and sharing between computers
-- **Tournament History**: Comprehensive undo system to reverse match results
+- **Tournament History**: Transaction based tournament history, allows for undo on all matches without completed downstream matches.
 - **Crash Resilient**: Automatic saving prevents data loss during unexpected closures
 - **Template System**: Reusable tournament configurations
 
