@@ -1775,16 +1775,28 @@ function undoTransactions(transactionIds) {
     const newHistory = history.filter(t => !transactionIds.includes(t.id));
     localStorage.setItem('tournamentHistory', JSON.stringify(newHistory));
 
+    // FIXED: Clear tournament completion state when undoing GRAND-FINAL
+    const isUndoingGrandFinal = transactionsToUndo.some(t => t.matchId === 'GRAND-FINAL');
+    if (isUndoingGrandFinal) {
+        clearTournamentCompletionState();
+    }
+
     // Save and refresh
     saveTournament();
     
-    // DEBUG: Check final state of matches after undo
-    console.log('DEBUG: Final match states after undo:');
-    matches.forEach(match => {
-        if (match.id.includes('BS-2-2')) {
-            console.log(`${match.id}: ${match.player1?.name || 'NULL'} vs ${match.player2?.name || 'NULL'} (completed: ${match.completed}, autoAdvanced: ${match.autoAdvanced})`);
-        }
-    });
+    // FIXED: Refresh results table after clearing tournament state
+    if (isUndoingGrandFinal && typeof updateResultsTable === 'function') {
+        console.log('🔄 Refreshing results table after GRAND-FINAL undo');
+        updateResultsTable();
+    }
+    
+    // DEBUG: Show tournament state after undo
+    if (isUndoingGrandFinal) {
+        console.log('DEBUG: Tournament state after GRAND-FINAL undo:');
+        console.log(`- Status: ${tournament.status}`);
+        console.log(`- Placements: ${Object.keys(tournament.placements || {}).length} entries`);
+        console.log(`- Players with placement: ${players.filter(p => p.placement).length}`);
+    }
     
     if (typeof refreshTournamentUI === 'function') {
         refreshTournamentUI();
@@ -1792,6 +1804,39 @@ function undoTransactions(transactionIds) {
 
     console.log(`✓ ${transactionIds.length} transactions undone.`);
     return true;
+}
+
+/**
+ * Helper function to clear tournament completion state
+ * Called when undoing GRAND-FINAL to revert tournament back to active state
+ */
+function clearTournamentCompletionState() {
+    console.log('🔄 Clearing tournament completion state (GRAND-FINAL undo)');
+    
+    // Clear tournament placements
+    if (tournament.placements) {
+        const placementCount = Object.keys(tournament.placements).length;
+        tournament.placements = {};
+        console.log(`Cleared ${placementCount} tournament placements`);
+    }
+    
+    // Reset tournament status 
+    if (tournament.status === 'completed') {
+        tournament.status = 'active';
+        console.log('Reset tournament status from "completed" to "active"');
+    }
+    
+    // Clear all player placement properties
+    let clearedPlacements = 0;
+    players.forEach(player => {
+        if (player.placement) {
+            player.placement = null;
+            clearedPlacements++;
+        }
+    });
+    console.log(`Cleared ${clearedPlacements} player placement properties`);
+    
+    console.log('✓ Tournament completion state cleared');
 }
 
 /**
