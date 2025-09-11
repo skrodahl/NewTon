@@ -1,4 +1,51 @@
 # 2025-09-11
+## Advanced Undo System - Walkover Match Handling & Tournament Completion
+
+### Fixed
+- **Walkover Match Undo Corruption** 
+  - Resolved critical issue where undoing matches with walkover opponents left players in invalid states
+  - Fixed "Walkover vs Real Player (READY)" states that violated tournament integrity
+  - Players are now properly removed from auto-advanced walkover match chains during undo operations
+  - Walkover matches remain as "Walkover vs TBD" after upstream match undos, preventing illegal game states
+
+- **GRAND-FINAL Undo Tournament Completion**
+  - Fixed issue where undoing GRAND-FINAL left tournament in completed state with stale rankings
+  - Tournament placements and status now properly reset when GRAND-FINAL is undone
+  - Results table correctly clears placement points and rankings after GRAND-FINAL undo
+  - Player placement properties are reset to maintain data consistency
+
+### Enhanced
+- **Player Matching Logic**
+  - Enhanced undo system to match players by name instead of ID during cleanup operations
+  - Resolves issues caused by auto-advancement creating new player objects with different IDs
+  - Ensures reliable player removal from walkover matches during transaction rollback
+
+- **Tournament State Management**
+  - Added `clearTournamentCompletionState()` function for proper tournament state reset
+  - Tournament status transitions from "completed" back to "active" when appropriate
+  - Comprehensive clearing of placement data across all tournament and player objects
+
+### Technical Changes
+- Enhanced `clearPlayerFromDownstream()` to handle walkover matches correctly
+- Added name-based player matching in undo operations to handle ID changes from auto-advancement
+- Implemented tournament completion state detection and clearing in `undoTransactions()`
+- Added `clearedMatches` tracking to prevent restoration of cleared walkover matches
+- Enhanced debugging output for walkover match state transitions and tournament completion changes
+
+### User Experience Improvements
+- Eliminates invalid tournament states that could confuse organizers and participants
+- Provides reliable undo functionality even in complex scenarios with walkover progressions
+- Maintains accurate results table that reflects actual tournament state
+- Tournament organizers can confidently undo GRAND-FINAL without manually clearing results
+
+### Files Modified
+- `clean-match-progression.js` - Enhanced walkover handling, tournament completion state management
+- `bracket-rendering.js` - Improved undo validation for auto-advanced matches
+
+This update resolves the final critical issues in the surgical undo system, ensuring robust tournament management regardless of walkover match complexity or tournament completion state.
+
+---
+
 ## Enhanced Undo System - Surgical Match Correction
 
 ### Added
