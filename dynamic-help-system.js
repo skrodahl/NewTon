@@ -116,7 +116,7 @@ const HELP_CONTENT = {
                     <p><strong>Generating the Bracket:</strong></p>
                     <ol>
                         <li>Ensure you have at least 4 paid players</li>
-                        <li>Click "Generate Bracket" button</li>
+                        <li>Click "<strong>Generate Bracket</strong>" button</li>
                         <li>System creates optimized double-elimination bracket</li>
                         <li>Real players are distributed to avoid bye vs bye matches</li>
                     </ol>
@@ -135,6 +135,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Mouse:</strong> Click and drag to pan around the bracket</li>
                         <li><strong>Zoom:</strong> Use + and - buttons or mouse wheel</li>
+                        <li><strong>Players/Points (⬅):</strong> Exit the tournament view</li>
                         <li><strong>Reset (⌂):</strong> Return to default view</li>
                         <li><strong>Match Details (➹):</strong> Show active and upcoming matches</li>
                     </ul>
@@ -153,10 +154,10 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Starting Matches:</strong></p>
                     <ol>
-                        <li>Click "Start" button on ready matches</li>
-                        <li>Assign lane number (optional)</li>
-                        <li>Select referee from dropdown</li>
+                        <li>Click "<strong>Start</strong>" button on ready matches</li>
                         <li>Match becomes LIVE</li>
+                        <li>Assign lane number (optional)</li>
+                        <li>Select referee from dropdown (optional)</li>
                     </ol>
                 `
             },
@@ -168,13 +169,14 @@ const HELP_CONTENT = {
                 <li>Click on winner's name in LIVE match</li>
                 <li>Confirmation dialog appears</li>
                 <li>Enter leg scores (optional but recommended)</li>
-                <li>Click "Confirm Winner"</li>
+                <li>Click "<strong>Confirm Winner</strong>"</li>
             </ol>
             <p><strong>Leg Score Validation:</strong></p>
             <ul>
                 <li>Winner must have more legs than loser</li>
                 <li>Scores must be reasonable for match format (Bo3/5/7)</li>
                 <li>Real-time validation prevents invalid entries</li>
+                <li>Change match formats in Config page</li>
             </ul>
             <p><strong>Correcting Match Results:</strong></p>
             <ul>
@@ -189,13 +191,16 @@ const HELP_CONTENT = {
             `
             },
             lanes: {
-                title: "Lane Management",
+                title: "Lane/Referee Management",
                 content: `
-                    <p><strong>Assigning Lanes:</strong></p>
+                    <p><strong>Assigning Lanes/Referees:</strong></p>
                     <ul>
-                        <li>Use lane dropdown (L) in each match</li>
-                        <li>Only LIVE matches hold their assigned lanes</li>
-                        <li>System prevents multiple matches on same lane</li>
+                        <li>Use lane/referee dropdown (L)/(Ref) in each match</li>
+                        <li>System prevents multiple matches with same lane/referee</li>
+                        <li>Players in LIVE matches cannot be selected as referees</li>
+                        <li>Players in LIVE matches may be selected as referees in their own match</li>
+                        <li>Completed matches will release their assigned lanes/referees</li>
+                        <li>Lane/referee history is retained for completed matches</li>
                         <li>Configure max lanes in Config page</li>
                     </ul>
                     <p><strong>💡 Tip:</strong> Assign lanes to organize physical dartboard usage and avoid conflicts.</p>
