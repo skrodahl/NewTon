@@ -371,10 +371,12 @@ function updateMatchHistory() {
             scoreText = ` (${winnerLegs}-${loserLegs})`;
         }
         
+        const autoCompletedText = isWalkover ? ' <span class="auto-completed">(auto-completed)</span>' : '';
+        
         historyHtml += `
             <div class="${itemClass}">
                 <div class="match-header">
-                    <span class="match-id">${match.id}</span>
+                    <span class="match-id">${match.id}${autoCompletedText}</span>
                     <span class="match-winner">Winner: ${winnerName}</span>
                 </div>
                 <div class="match-result">

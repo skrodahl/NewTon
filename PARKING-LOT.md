@@ -2,8 +2,7 @@
 
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
-- (invalid state) A match containing a TBD can be LIVE after an undo. The correct state should be "Waiting". - [ux] - bracket-rendering.js:handleSurgicalUndo()
-- Undo dialog: Convert to a richer dialog, like the Match Completion dialog [ux] - bracket-rendering.js:handleSurgicalUndo()
+- Add Match Results export function and button
 - (Experimental) Render match cards to align with previous rounds [render]
 - Match Details dialog: Convert to a richer dialog, like Match Completion Dialog. Investigate if it could display even more useful information [ux] - bracket-rendering.js:showMatchDetails()
 
