@@ -137,7 +137,7 @@ const HELP_CONTENT = {
                         <li><strong>Zoom:</strong> Use + and - buttons or mouse wheel</li>
                         <li><strong>Players/Points (⬅):</strong> Exit the tournament view</li>
                         <li><strong>Reset (⌂):</strong> Return to default view</li>
-                        <li><strong>Match Details (➹):</strong> Show active and upcoming matches</li>
+                        <li><strong>Match Controls (➹):</strong> Manage LIVE and ready matches - start, complete, assign lanes/referees</li>
                     </ul>
                     <p><strong>💡 Tip:</strong> Use zoom controls to focus on active areas of the bracket.</p>
                 `

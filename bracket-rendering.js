@@ -991,6 +991,253 @@ Are you sure?`;
 
 // --- END: Surgical Undo Implementation ---
 
+// --- START: Match Command Center Implementation ---
+
+// Helper function to get match format description
+function getMatchFormatDescription(match) {
+    if (!match.legs) return 'Unknown';
+    const legs = match.legs;
+    return `Best of ${legs}`;
+}
+
+// Helper function to get round description
+function getRoundDescription(match) {
+    if (match.id === 'GRAND-FINAL') return 'Grand Final';
+    if (match.id === 'BS-FINAL') return 'Backside Final';
+    
+    // Check for semifinals
+    if (typeof isFrontsideSemifinal === 'function' && isFrontsideSemifinal(match.id, tournament?.bracketSize)) {
+        return 'Frontside Semifinal';
+    }
+    if (typeof isBacksideSemifinal === 'function' && isBacksideSemifinal(match.id, tournament?.bracketSize)) {
+        return 'Backside Semifinal';
+    }
+    
+    // Default round naming
+    if (match.id.startsWith('FS-')) {
+        const parts = match.id.split('-');
+        return `Frontside Round ${parts[1]}`;
+    }
+    if (match.id.startsWith('BS-')) {
+        const parts = match.id.split('-');
+        return `Backside Round ${parts[1]}`;
+    }
+    
+    return 'Match';
+}
+
+// Create match card HTML
+function createMatchCard(match) {
+    const format = getMatchFormatDescription(match);
+    const round = getRoundDescription(match);
+    const state = getMatchState(match);
+    
+    const laneOptions = generateLaneOptions(match.id, match.lane);
+    const refereeOptions = generateRefereeOptionsWithConflicts(match.id, match.referee);
+    
+    const player1Name = match.player1?.name || 'TBD';
+    const player2Name = match.player2?.name || 'TBD';
+    const player1Id = match.player1?.id || '';
+    const player2Id = match.player2?.id || '';
+    
+    // Use same button logic as tournament bracket, but add Command Center refresh
+    const originalClickHandler = getButtonClickHandler(state, match.id);
+    const commandCenterClickHandler = originalClickHandler ? 
+        `${originalClickHandler}; setTimeout(() => { if (document.getElementById('matchCommandCenterModal').style.display === 'flex') showMatchCommandCenter(); }, 500)` : 
+        '';
+    
+    const actionButton = state === 'live' ? 
+        `<div class="cc-winner-buttons">
+            <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 1)">${player1Name} Wins</button>
+            <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 2)">${player2Name} Wins</button>
+        </div>` :
+        `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}">Start Match</button>`;
+    
+    return `
+        <div class="cc-match-card">
+            <div class="cc-match-card-header">
+                <div class="cc-match-id">${match.id}</div>
+                <div class="cc-match-format">${format} • ${round}</div>
+            </div>
+            
+            <div class="cc-match-players">
+                <span class="cc-player-name" onclick="openStatsModal(${player1Id})">${player1Name}</span>
+                <span class="cc-vs-divider">vs</span>
+                <span class="cc-player-name" onclick="openStatsModal(${player2Id})">${player2Name}</span>
+            </div>
+            
+            <div class="cc-match-controls">
+                <div class="cc-control-group">
+                    <label class="cc-control-label">Lane:</label>
+                    <select class="cc-match-dropdown" onchange="updateMatchLane('${match.id}', this.value); setTimeout(() => showMatchCommandCenter(), 200);">
+                        ${laneOptions}
+                    </select>
+                </div>
+                
+                <div class="cc-control-group">
+                    <label class="cc-control-label">Ref:</label>
+                    <select class="cc-match-dropdown" onchange="updateMatchReferee('${match.id}', this.value); setTimeout(() => showMatchCommandCenter(), 200);">
+                        ${refereeOptions}
+                    </select>
+                </div>
+                
+                ${actionButton}
+            </div>
+        </div>
+    `;
+}
+
+// Main function to show the command center
+function showMatchCommandCenter() {
+    if (!matches || matches.length === 0) {
+        showCommandCenterModal([]); // Show empty state
+        return;
+    }
+
+    const liveMatches = matches.filter(m => getMatchState(m) === 'live');
+    const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
+
+    // Separate ready matches by bracket side
+    const frontMatches = readyMatches.filter(m => m.side === 'frontside' || m.id.startsWith('FS-'));
+    const backMatches = readyMatches.filter(m => m.side === 'backside' || m.id.startsWith('BS-'));
+
+    // Sort by match ID for consistent ordering
+    liveMatches.sort((a, b) => a.id.localeCompare(b.id));
+    frontMatches.sort((a, b) => a.id.localeCompare(b.id));
+    backMatches.sort((a, b) => a.id.localeCompare(b.id));
+
+    const matchData = {
+        live: liveMatches,
+        front: frontMatches,
+        back: backMatches
+    };
+
+    showCommandCenterModal(matchData);
+}
+
+function showCommandCenterModal(matchData) {
+    const modal = document.getElementById('matchCommandCenterModal');
+    const liveContainer = document.getElementById('liveMatchesContainer');
+    const frontContainer = document.getElementById('frontMatchesContainer');
+    const backContainer = document.getElementById('backMatchesContainer');
+    const liveSection = document.getElementById('liveMatchesSection');
+    const frontSection = document.getElementById('frontMatchesSection');
+    const backSection = document.getElementById('backMatchesSection');
+    const noMatchesMessage = document.getElementById('noMatchesMessage');
+    const okBtn = document.getElementById('commandCenterOK');
+    
+    if (!modal || !liveContainer || !frontContainer || !backContainer) {
+        console.error('Match command center modal elements not found');
+        return;
+    }
+    
+    // Clear existing content
+    liveContainer.innerHTML = '';
+    frontContainer.innerHTML = '';
+    backContainer.innerHTML = '';
+    
+    // Check if we have any matches to show
+    const hasMatches = Array.isArray(matchData) ? matchData.length > 0 : 
+        (matchData.live && matchData.live.length > 0) || 
+        (matchData.front && matchData.front.length > 0) || 
+        (matchData.back && matchData.back.length > 0);
+    
+    if (!hasMatches) {
+        // Show empty state
+        liveSection.style.display = 'none';
+        frontSection.style.display = 'none';
+        backSection.style.display = 'none';
+        noMatchesMessage.style.display = 'block';
+    } else {
+        noMatchesMessage.style.display = 'none';
+        
+        // Populate LIVE matches
+        if (matchData.live && matchData.live.length > 0) {
+            liveSection.style.display = 'block';
+            matchData.live.forEach(match => {
+                liveContainer.innerHTML += createMatchCard(match);
+            });
+        } else {
+            liveSection.style.display = 'none';
+        }
+        
+        // Populate Front matches
+        if (matchData.front && matchData.front.length > 0) {
+            frontSection.style.display = 'block';
+            matchData.front.forEach(match => {
+                frontContainer.innerHTML += createMatchCard(match);
+            });
+        } else {
+            frontSection.style.display = 'none';
+        }
+        
+        // Populate Back matches
+        if (matchData.back && matchData.back.length > 0) {
+            backSection.style.display = 'block';
+            matchData.back.forEach(match => {
+                backContainer.innerHTML += createMatchCard(match);
+            });
+        } else {
+            backSection.style.display = 'none';
+        }
+    }
+    
+    // Show modal
+    modal.style.display = 'flex';
+    
+    // Set up event handlers
+    const closeModal = () => {
+        modal.style.display = 'none';
+        okBtn.onclick = null; // Clean up
+    };
+    
+    okBtn.onclick = closeModal;
+    
+    // Close on Escape key
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+// Helper functions for match command center actions
+
+function completeMatchFromCommandCenter(matchId, playerNumber) {
+    // Find the match
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        return;
+    }
+    
+    // Store reference to command center being open
+    window.commandCenterWasOpen = true;
+    
+    // Close the command center modal
+    const modal = document.getElementById('matchCommandCenterModal');
+    if (modal) {
+        modal.style.display = 'none';
+    }
+    
+    // Complete match with selected winner
+    if (typeof selectWinner === 'function') {
+        selectWinner(matchId, playerNumber);
+    }
+}
+
+
+// Export Command Center functions
+if (typeof window !== 'undefined') {
+    window.showMatchCommandCenter = showMatchCommandCenter;
+    window.completeMatchFromCommandCenter = completeMatchFromCommandCenter;
+    window.createMatchCard = createMatchCard;
+    window.getMatchFormatDescription = getMatchFormatDescription;
+    window.getRoundDescription = getRoundDescription;
+}
+
+// --- END: Match Command Center Implementation ---
 
 // UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
 

@@ -166,8 +166,8 @@
                         <div class="bracket-controls-top-left">
                             <button class="zoom-btn" onclick="generateBracket()" title="Generate Bracket">Generate
                                 Bracket</button>
-                            <button class="zoom-btn" onclick="showMatchDetails()"
-                                title="Show LIVE and UPCOMING matches">➹ Match Details</button>
+                            <button class="zoom-btn" onclick="showMatchCommandCenter()"
+                                title="Show LIVE and UPCOMING matches">➹ Match Controls</button>
                         </div>
                         <div class="bracket-controls-top-right">
                             <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
@@ -510,15 +510,55 @@
         </div>
     </div>
 
-    <!-- Match Details Modal -->
+    <!-- Match Controls Modal -->
     <div id="matchDetailsModal" class="modal">
         <div class="modal-content">
-            <h3 id="matchDetailsTitle">Match Details</h3>
+            <h3 id="matchDetailsTitle">Match Controls</h3>
             <div id="matchDetailsMessage" style="margin: 20px 0; line-height: 1.5; font-family: monospace; white-space: pre-line;">
                 <!-- Match details will be populated by JavaScript -->
             </div>
             <div class="text-center mt-20">
                 <button class="btn" id="matchDetailsOK" style="background: #065f46;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Controls Modal -->
+    <div id="matchCommandCenterModal" class="modal">
+        <div class="modal-content" style="max-width: 800px;">
+            <h3 id="commandCenterTitle">Match Controls</h3>
+            
+            <!-- LIVE Matches Section -->
+            <div id="liveMatchesSection" class="cc-match-section">
+                <h4 class="cc-section-header">🔴 LIVE Matches</h4>
+                <div id="liveMatchesContainer" class="cc-matches-container">
+                    <!-- LIVE match cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Front Bracket Matches Section -->
+            <div id="frontMatchesSection" class="cc-match-section">
+                <h4 class="cc-section-header">⚪ Frontside - Ready to Start</h4>
+                <div id="frontMatchesContainer" class="cc-matches-container">
+                    <!-- Front bracket ready match cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Back Bracket Matches Section -->
+            <div id="backMatchesSection" class="cc-match-section">
+                <h4 class="cc-section-header">⚫ Backside - Ready to Start</h4>
+                <div id="backMatchesContainer" class="cc-matches-container">
+                    <!-- Back bracket ready match cards will be populated here -->
+                </div>
+            </div>
+
+            <!-- Empty state message -->
+            <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
+                <p>No matches currently active or ready to start.</p>
+            </div>
+
+            <div class="text-center mt-20">
+                <button class="btn" id="commandCenterOK" style="background: #065f46;">Close</button>
             </div>
         </div>
     </div>

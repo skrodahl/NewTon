@@ -1448,6 +1448,14 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         modal.style.display = 'none';
         console.log(`Winner selection cancelled for match ${matchId}`);
         cleanup();
+        
+        // If Command Center was open when completion was initiated, reopen it
+        if (window.commandCenterWasOpen && typeof showMatchCommandCenter === 'function') {
+            setTimeout(() => {
+                showMatchCommandCenter();
+                window.commandCenterWasOpen = false; // Clear flag
+            }, 100);
+        }
     };
 
     const handleConfirm = () => {
@@ -1468,6 +1476,14 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
         onConfirm(winnerLegs, loserLegs);
         cleanup();
+        
+        // If Command Center was open when completion was initiated, reopen it after completion
+        if (window.commandCenterWasOpen && typeof showMatchCommandCenter === 'function') {
+            setTimeout(() => {
+                showMatchCommandCenter();
+                window.commandCenterWasOpen = false; // Clear flag
+            }, 500); // Longer delay to allow match completion to finish
+        }
     };
 
     const cleanup = () => {

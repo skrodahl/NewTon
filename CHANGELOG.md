@@ -52,6 +52,16 @@
   - Automatic scrolling when content exceeds viewport height
   - Responsive mobile layout with proper stacking behavior
 
+- **Match Controls System (formerly Match Details)**
+  - Transformed simple text-based match listing into interactive Match Controls interface
+  - Organized matches into clear sections: LIVE matches first, then Ready matches by bracket side (Front/Back)
+  - Added direct match management: start matches, complete matches, assign lanes and referees
+  - Replaced single "Complete Match" button with intuitive "[Player Name] Wins" buttons for clear winner selection
+  - Auto-refresh: Match Controls updates in real-time after starting matches
+  - Smart navigation: cancelling or completing matches returns user to Match Controls interface
+  - Consistent functionality: uses same proven tournament logic as bracket interface
+  - Updated UI terminology from "Match Details" to "Match Controls" throughout application and help system
+
 ### Fixed  
 - **Destructive User Behavior Prevention**
   - Eliminated automatic population of tournament name field with active tournament data
@@ -73,11 +83,15 @@
 - Creates consistent, predictable behavior for tournament management workflow
 
 ### Files Modified
-- `tournament.html` - Updated Setup page layout and button positioning
+- `tournament.html` - Updated Setup page layout, button positioning, and Match Controls modal structure/titles
 - `tournament-management.js` - Added duplicate validation, field clearing logic, and helper functions
 - `main.js` - Modified auto-load behavior to preserve user input during navigation
+- `bracket-rendering.js` - Implemented Match Controls interface, winner button logic, and auto-refresh functionality
+- `clean-match-progression.js` - Enhanced winner confirmation modal with Command Center return navigation
+- `styles.css` - Added Match Controls styling with winner button layout and hover effects
+- `dynamic-help-system.js` - Updated help documentation for Match Controls functionality
 
-This update significantly reduces operator-generated errors and provides a much more intuitive tournament creation experience.
+This update significantly reduces operator-generated errors, provides a much more intuitive tournament creation experience, and transforms match management with the new interactive Match Controls system.
 
 ---
 # 2025-09-11

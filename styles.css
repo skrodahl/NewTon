@@ -1325,3 +1325,179 @@ a:hover { color: #1e40af; }
 .match-player.undoable:hover .winner-check .checkmark {
   display: none;
 }
+
+/* Stats modal should appear above Command Center */
+#statsModal {
+  z-index: 1100 !important;
+}
+
+/* Match Command Center */
+.cc-match-section {
+  margin-bottom: 25px;
+}
+
+.cc-section-header {
+  font-size: 16px;
+  font-weight: 600;
+  color: #111827;
+  margin-bottom: 15px;
+  padding-bottom: 8px;
+  border-bottom: 2px solid #e5e7eb;
+}
+
+.cc-matches-container {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cc-match-card {
+  background: #f8f9fa;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 15px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.cc-match-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.cc-match-id {
+  font-weight: 600;
+  font-size: 14px;
+  color: #111827;
+}
+
+.cc-match-format {
+  font-size: 12px;
+  color: #6b7280;
+}
+
+.cc-match-players {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 15px;
+}
+
+.cc-player-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #065f46;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.cc-player-name:hover {
+  text-decoration: underline;
+}
+
+.cc-vs-divider {
+  color: #6b7280;
+  font-weight: 400;
+}
+
+.cc-match-controls {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.cc-control-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.cc-control-label {
+  font-size: 12px;
+  color: #6b7280;
+  font-weight: 500;
+  min-width: 30px;
+}
+
+.cc-match-dropdown {
+  font-size: 12px;
+  padding: 4px 8px;
+  border: 1px solid #d1d5db;
+  border-radius: 4px;
+  background: white;
+  color: #111827;
+  min-width: 80px;
+}
+
+.cc-match-action-btn {
+  padding: 6px 12px;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.cc-btn-start {
+  background: #10b981;
+  color: white;
+}
+
+.cc-btn-start:hover {
+  background: #059669;
+}
+
+.cc-btn-complete {
+  background: #f59e0b;
+  color: white;
+}
+
+.cc-btn-complete:hover {
+  background: #d97706;
+}
+
+.cc-winner-buttons {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.cc-btn-winner {
+  background: #059669;
+  color: white;
+  flex: 1;
+  min-width: 120px;
+}
+
+.cc-btn-winner:hover {
+  background: #047857;
+}
+
+.cc-no-matches-message {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  margin: 40px 0;
+}
+
+/* Responsive adjustments for Command Center match cards */
+@media (max-width: 640px) {
+  .cc-match-controls {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  
+  .cc-control-group {
+    justify-content: space-between;
+  }
+  
+  .cc-match-players {
+    flex-direction: column;
+    gap: 8px;
+  }
+}
