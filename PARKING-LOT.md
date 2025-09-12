@@ -7,13 +7,10 @@
 - Match completion dialog: Add which match winner advances to, and which match loser is moved to (or eliminated) [ux] - clean-match-progression.js:showWinnerConfirmation()
 - (Experimental) Render match cards to align with previous rounds [render]
 - Match Details dialog: Convert to a richer dialog, like Match Completion Dialog. Investigate if it could display even more useful information [ux] - bracket-rendering.js:showMatchDetails()
-- (destructive behavior) Show a confirmation dialog when loading an existing tournament [ux]
 
 ## Next  
 *Promoted items to consider soon (max 3 items)*
 - Render BS-FINAL after FS Semifinal, Render GRAND-FINAL after BS-FINAL [render] - bracket-rendering.js:renderFinalMatches()
-- Setup page: Do not show active tournament/date in the tournament creation input boxes [ux]
-- Move "Create Tournament" button to the right of the input boxes [ux]
 
 ## Later
 *Not urgent but worth tracking*

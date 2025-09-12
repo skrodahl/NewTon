@@ -280,6 +280,34 @@ function loadSpecificTournament(id) {
         return;
     }
 
+    // Show confirmation dialog before loading
+    let confirmMessage = `⚠️ LOAD TOURNAMENT CONFIRMATION ⚠️\n\n`;
+    confirmMessage += `ℹ️ Your current tournament data is automatically saved and can be reloaded at any time.\n`;
+    confirmMessage += `Loading a different tournament will not cause any data loss.\n\n`;
+    
+    if (tournament && tournament.name) {
+        const currentCompletedMatches = matches.filter(m => m.completed).length;
+        const currentTotalMatches = matches.length;
+        confirmMessage += `Current Tournament: "${tournament.name}" (${tournament.date})\n`;
+        confirmMessage += `Progress: ${currentCompletedMatches}/${currentTotalMatches} matches completed\n`;
+        confirmMessage += `Players: ${players.length} registered\n\n`;
+        confirmMessage += `This will be replaced with:\n`;
+    } else {
+        confirmMessage += `You are about to load:\n`;
+    }
+    
+    const selectedCompletedMatches = (selectedTournament.matches || []).filter(m => m.completed).length;
+    const selectedTotalMatches = (selectedTournament.matches || []).length;
+    confirmMessage += `Tournament: "${selectedTournament.name}" (${selectedTournament.date})\n`;
+    confirmMessage += `Progress: ${selectedCompletedMatches}/${selectedTotalMatches} matches completed\n`;
+    confirmMessage += `Players: ${(selectedTournament.players || []).length} registered\n\n`;
+    confirmMessage += `Do you want to continue?`;
+
+    const confirmed = confirm(confirmMessage);
+    if (!confirmed) {
+        return;
+    }
+
     // Calculate bracketSize if missing (for older tournaments)
     let bracketSize = selectedTournament.bracketSize;
     if (!bracketSize && selectedTournament.bracket) {

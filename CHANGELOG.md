@@ -15,6 +15,12 @@
   - Fields automatically clear after successful tournament creation
   - Fields automatically clear after failed creation attempts (duplicates)
 
+- **Tournament Loading Safety**
+  - Added confirmation dialog when loading existing tournaments
+  - Shows detailed comparison between current and target tournament (name, date, progress, players)
+  - Prominent reassurance that no data is lost when switching tournaments
+  - Clear information about automatic saving and ability to reload any tournament
+
 ### Enhanced
 - **Setup Page Layout**
   - Moved "Create Tournament" button to the right of the date input field
