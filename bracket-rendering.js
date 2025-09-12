@@ -685,7 +685,7 @@ function refreshRefereeDropdown(matchId) {
 
 function showMatchDetails() {
     if (!matches || matches.length === 0) {
-        alert('No matches available to show details for.');
+        showMatchDetailsModal('No matches available to show details for.');
         return;
     }
     const activeMatches = matches.filter(m => getMatchState(m) === 'live');
@@ -716,7 +716,87 @@ function showMatchDetails() {
     } else {
         details = details.trim();
     }
-    alert(details);
+    showMatchDetailsModal(details);
+}
+
+function showMatchDetailsModal(message) {
+    const modal = document.getElementById('matchDetailsModal');
+    const messageDiv = document.getElementById('matchDetailsMessage');
+    const okBtn = document.getElementById('matchDetailsOK');
+    
+    if (!modal || !messageDiv || !okBtn) {
+        console.error('Match details modal elements not found');
+        alert(message); // Fallback to alert
+        return;
+    }
+    
+    messageDiv.textContent = message;
+    modal.style.display = 'flex';
+    
+    // Focus the OK button
+    setTimeout(() => okBtn.focus(), 100);
+    
+    // Set up event handlers
+    const closeModal = () => {
+        modal.style.display = 'none';
+        okBtn.onclick = null; // Clean up
+    };
+    
+    okBtn.onclick = closeModal;
+    
+    // Close on Escape key
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
+}
+
+function showUndoConfirmationModal(message, onConfirm) {
+    const modal = document.getElementById('undoConfirmModal');
+    const messageDiv = document.getElementById('undoConfirmMessage');
+    const cancelBtn = document.getElementById('undoConfirmCancel');
+    const confirmBtn = document.getElementById('undoConfirmOK');
+    
+    if (!modal || !messageDiv || !cancelBtn || !confirmBtn) {
+        console.error('Undo confirmation modal elements not found');
+        if (confirm(message)) onConfirm(); // Fallback to confirm
+        return;
+    }
+    
+    messageDiv.textContent = message;
+    modal.style.display = 'flex';
+    
+    // Focus the Cancel button (default selection)
+    setTimeout(() => {
+        cancelBtn.focus();
+        cancelBtn.style.boxShadow = '0 0 0 3px rgba(108, 117, 125, 0.3)';
+        cancelBtn.style.transform = 'scale(1.05)';
+    }, 100);
+    
+    // Set up event handlers
+    const closeModal = () => {
+        modal.style.display = 'none';
+        cancelBtn.onclick = null; // Clean up
+        confirmBtn.onclick = null;
+    };
+    
+    cancelBtn.onclick = closeModal;
+    confirmBtn.onclick = () => {
+        closeModal();
+        onConfirm();
+    };
+    
+    // Close on Escape key (same as Cancel)
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            closeModal();
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
 }
 
 // --- END: Functions for Referee and Lane Management ---
@@ -901,12 +981,12 @@ function handleSurgicalUndo(matchId) {
 
 Are you sure?`;
 
-    if (confirm(confirmMessage)) {
+    showUndoConfirmationModal(confirmMessage, () => {
         const transactionIdsToUndo = transactionsToUndo.map(t => t.id);
         if (typeof undoTransactions === 'function') {
             undoTransactions(transactionIdsToUndo);
         }
-    }
+    });
 }
 
 // --- END: Surgical Undo Implementation ---

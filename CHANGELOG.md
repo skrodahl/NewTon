@@ -29,6 +29,13 @@
   - Improved dialog layout with statistics tip positioned above progression information
 
 ### Enhanced
+- **Dialog System Improvements**
+  - Transformed Match Details dialog from browser alert to rich modal dialog
+  - Transformed Undo confirmation dialog from browser confirm to rich modal dialog
+  - Both dialogs now feature consistent styling, better readability, and improved UX
+  - Added proper focus management with Cancel button as default selection
+  - Enhanced visual indicators (box-shadow and scale) for default button choice
+
 - **Setup Page Layout**
   - Moved "Create Tournament" button to the right of the date input field
   - Improved visual alignment and button positioning

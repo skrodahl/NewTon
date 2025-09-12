@@ -489,8 +489,35 @@
 
             <div class="text-center mt-20">
                 <button class="btn" id="winnerConfirmCancel"
-                    style="margin-right: 15px; background: #6c757d;">Cancel</button>
+                    style="margin-right: 15px; background: #6c757d; font-weight: 600;">Cancel</button>
                 <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Match Details Modal -->
+    <div id="matchDetailsModal" class="modal">
+        <div class="modal-content">
+            <h3 id="matchDetailsTitle">Match Details</h3>
+            <div id="matchDetailsMessage" style="margin: 20px 0; line-height: 1.5; font-family: monospace; white-space: pre-line;">
+                <!-- Match details will be populated by JavaScript -->
+            </div>
+            <div class="text-center mt-20">
+                <button class="btn" id="matchDetailsOK" style="background: #065f46;">OK</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Undo Confirmation Modal -->
+    <div id="undoConfirmModal" class="modal">
+        <div class="modal-content">
+            <h3 id="undoConfirmTitle">Confirm Match Undo</h3>
+            <div id="undoConfirmMessage" style="margin: 20px 0; line-height: 1.5; font-family: monospace; white-space: pre-line;">
+                <!-- Undo confirmation message will be populated by JavaScript -->
+            </div>
+            <div class="text-center mt-20">
+                <button class="btn" id="undoConfirmCancel" style="margin-right: 15px; background: #6c757d; font-weight: 600;">Cancel</button>
+                <button class="btn btn-warning" id="undoConfirmOK">Confirm Undo</button>
             </div>
         </div>
     </div>
