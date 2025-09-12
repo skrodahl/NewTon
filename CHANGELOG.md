@@ -21,6 +21,13 @@
   - Prominent reassurance that no data is lost when switching tournaments
   - Clear information about automatic saving and ability to reload any tournament
 
+- **Enhanced Match Completion Dialog**
+  - Shows winner advancement information (which match they progress to, e.g., FS-3-1)
+  - Shows loser progression (next match or elimination status)
+  - Tournament finals display "wins the tournament!" message
+  - Color-coded progression info with visual styling for clarity
+  - Improved dialog layout with statistics tip positioned above progression information
+
 ### Enhanced
 - **Setup Page Layout**
   - Moved "Create Tournament" button to the right of the date input field

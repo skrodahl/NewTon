@@ -1339,13 +1339,39 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         return false;
     }
 
-    // Set message content with clickable player names
+    // Get progression information for this match
+    let progressionInfo = '';
+    if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
+        const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+        if (progression) {
+            progressionInfo += '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #065f46;">';
+            progressionInfo += '<div style="font-weight: 600; color: #065f46; margin-bottom: 5px;">Match Progression:</div>';
+            
+            // Winner advancement
+            if (progression.winner) {
+                progressionInfo += `<div style="color: #065f46;">✓ <strong>${winner.name}</strong> advances to <strong>${progression.winner[0]}</strong></div>`;
+            } else {
+                progressionInfo += `<div style="color: #065f46;">✓ <strong>${winner.name}</strong> wins the tournament!</div>`;
+            }
+            
+            // Loser advancement or elimination
+            if (progression.loser) {
+                progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> moves to <strong>${progression.loser[0]}</strong></div>`;
+            } else {
+                progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> is eliminated</div>`;
+            }
+            
+            progressionInfo += '</div>';
+        }
+    }
+
+    // Set message content with clickable player names and progression info
     message.innerHTML = `
         Declare <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${winner.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${winner.name}</span></strong> as the WINNER<br>
         against <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${loser.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${loser.name}</span></strong> in match <strong>${matchId}</strong>
         <br><br>
         <small style="color: #6b7280; font-style: italic;">💡 Click player names to edit their statistics</small>
-        <br><br>
+        ${progressionInfo}
         Please confirm the winner, or press "Cancel":
     `;
 
