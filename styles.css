@@ -1361,6 +1361,11 @@ a:hover { color: #1e40af; }
   gap: 12px;
 }
 
+.cc-match-card-live {
+  box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1);
+  border-color: #fb923c;
+}
+
 .cc-match-card-header {
   display: flex;
   justify-content: space-between;

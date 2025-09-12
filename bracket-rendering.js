@@ -1053,8 +1053,10 @@ function createMatchCard(match) {
         </div>` :
         `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}">Start Match</button>`;
     
+    const liveClass = state === 'live' ? ' cc-match-card-live' : '';
+    
     return `
-        <div class="cc-match-card">
+        <div class="cc-match-card${liveClass}">
             <div class="cc-match-card-header">
                 <div class="cc-match-id">${match.id}</div>
                 <div class="cc-match-format">${format} • ${round}</div>
