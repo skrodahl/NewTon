@@ -1501,3 +1501,86 @@ a:hover { color: #1e40af; }
     gap: 8px;
   }
 }
+
+/* Match History Styles */
+.match-history-item {
+  background: #ffffff;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 8px;
+  transition: all 0.2s ease;
+}
+
+.match-history-item:hover {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  border-color: #d1d5db;
+}
+
+.match-history-item.walkover {
+  background: #f9fafb;
+  border-color: #e5e7eb;
+  color: #6b7280;
+  font-style: italic;
+}
+
+.match-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.match-id {
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  background: #f3f4f6;
+  padding: 2px 6px;
+  border-radius: 4px;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+}
+
+.match-winner {
+  font-size: 12px;
+  font-weight: 600;
+  color: #059669;
+}
+
+.match-history-item.walkover .match-winner {
+  color: #6b7280;
+}
+
+.match-result {
+  font-size: 14px;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.match-history-item.walkover .match-result {
+  color: #6b7280;
+}
+
+.winner-name {
+  color: #059669;
+  font-weight: 600;
+}
+
+.match-history-item.walkover .winner-name {
+  color: #6b7280;
+  font-weight: normal;
+  font-style: italic;
+}
+
+/* Mobile responsive adjustments for match history */
+@media (max-width: 640px) {
+  .match-header {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 4px;
+  }
+  
+  .match-history-item {
+    padding: 10px;
+  }
+}

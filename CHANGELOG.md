@@ -1,4 +1,54 @@
 # 2025-09-12
+
+## v1.2.0 - Match History Display & Visual Winner Identification
+
+### Added
+- **Comprehensive Match History Display**
+  - Complete chronological match history in Setup page "Match Results" column
+  - Latest completed matches shown at top, earliest at bottom
+  - Shows match ID, player names, winner, and final scores when available
+  - Real-time updates when matches are completed or when navigating to Setup page
+  - Automatic population on page refresh/initial load
+
+- **Visual Winner Identification**  
+  - Winner's name highlighted in green (#059669) and bold in "Player vs Player" display
+  - Consistent color matching with "Winner: Player" indicator
+  - Clear visual hierarchy for instant match result recognition
+
+- **Walkover Match Differentiation**
+  - Auto-completed walkover matches displayed with muted/greyed styling
+  - Italic text treatment distinguishes walkovers from regular matches
+  - Special handling preserves walkover status in visual presentation
+
+- **Match Completion Timestamps**
+  - Added `completedAt` timestamp to all match completions
+  - Enables accurate chronological sorting of match history
+  - Applies to both manual match completions and auto-advanced walkovers
+
+### Technical Implementation
+- `updateMatchHistory()` function in main.js for rendering chronological match list
+- `isWalkoverMatch()` helper function for consistent walkover detection
+- Completion timestamps added to `completeMatch()` in clean-match-progression.js
+- CSS styling with `.match-history-item`, `.winner-name`, and walkover variants
+- Auto-refresh integration with tournament save operations
+- Mobile-responsive design with proper stacking and spacing
+
+### User Experience Improvements  
+- Instant visual feedback showing tournament progress and results
+- Quick identification of match winners through color-coded names
+- Clear distinction between regular matches and administrative walkovers
+- No manual refresh needed - history updates automatically as tournament progresses
+
+### Files Modified
+- `main.js` - Added match history rendering, winner highlighting, and auto-update integration
+- `clean-match-progression.js` - Added completion timestamps and history refresh calls  
+- `styles.css` - Match history styling with winner name highlighting and walkover differentiation
+- `tournament.html` - Utilizes existing "Match Results" column structure
+
+This update transforms the previously empty "Match Results" column into a comprehensive, real-time tournament activity log with clear visual indicators for match outcomes.
+
+---
+
 ## Tournament Setup UX Improvements - Duplicate Prevention & Field Management
 
 ### Added

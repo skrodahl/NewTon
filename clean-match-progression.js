@@ -303,6 +303,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
     match.loser = loser;
     match.completed = true;
     match.active = false;
+    match.completedAt = Date.now(); // Add completion timestamp
     if (winnerLegs > 0 || loserLegs > 0) {
         match.finalScore = { winnerLegs, loserLegs, winnerId: winner.id, loserId: loser.id };
     }
@@ -314,6 +315,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
         saveTournament();
         if (typeof updateResultsTable === 'function') updateResultsTable();
+        if (typeof updateMatchHistory === 'function') updateMatchHistory();
 
         // Grand Final completion hook: set placements and complete tournament
         try {
@@ -340,6 +342,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 console.log(`✓ Tournament completed with full rankings — Grand Final: ${winner.name} defeats ${loser.name}`);
 
                 if (typeof saveTournament === 'function') saveTournament();
+                if (typeof updateMatchHistory === 'function') updateMatchHistory();
 
                 // Proactively refresh results UI after completion
                 if (typeof displayResults === 'function') {

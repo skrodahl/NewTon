@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '1.1.1';
+const APP_VERSION = '1.2.0';
 
 // Global config is loaded by results-config.js - NEVER override it here
 // let config = {}; // This is loaded by results-config.js
@@ -45,6 +45,11 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Step 6: Auto-load current tournament (if exists) - Never loads config
     autoLoadCurrentTournament();
+
+    // Step 7: Update match history on initial load (since Setup page is default)
+    setTimeout(() => {
+        updateMatchHistory();
+    }, 200);
 
     // Update footer with version
     const footerContent = document.getElementById('footerContent');
@@ -304,13 +309,100 @@ function showPage(pageId) {
     document.getElementById(pageId).classList.add('active');
     document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
 
+    // Update match history when showing setup page
+    if (pageId === 'setup') {
+        updateMatchHistory();
+    }
+
     // HELP SYSTEM INTEGRATION
     onPageChange(pageId);
+}
+
+// Update match history for Setup page
+function updateMatchHistory() {
+    const matchResultsContainer = document.getElementById('matchResults');
+    if (!matchResultsContainer) return;
+
+    // If no tournament or no matches, show empty state
+    if (!tournament || !matches || matches.length === 0) {
+        matchResultsContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No match results yet</p>';
+        return;
+    }
+
+    // Get completed matches sorted chronologically (latest first)
+    const completedMatches = matches
+        .filter(match => match.completed)
+        .sort((a, b) => {
+            // Sort by completion timestamp if available, otherwise by match ID
+            const aTime = a.completedAt || 0;
+            const bTime = b.completedAt || 0;
+            return bTime - aTime; // Latest first
+        });
+
+    if (completedMatches.length === 0) {
+        matchResultsContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No matches completed yet</p>';
+        return;
+    }
+
+    // Build match history HTML
+    let historyHtml = '';
+    completedMatches.forEach(match => {
+        const isWalkover = match.autoAdvanced || isWalkoverMatch(match);
+        const itemClass = isWalkover ? 'match-history-item walkover' : 'match-history-item';
+        
+        const player1Name = match.player1?.name || 'Unknown';
+        const player2Name = match.player2?.name || 'Unknown';
+        const winnerName = match.winner?.name || 'Unknown';
+        
+        // Format match result with winner highlighting
+        let resultText = '';
+        if (player1Name === winnerName) {
+            resultText = `<span class="winner-name">${player1Name}</span> vs ${player2Name}`;
+        } else if (player2Name === winnerName) {
+            resultText = `${player1Name} vs <span class="winner-name">${player2Name}</span>`;
+        } else {
+            resultText = `${player1Name} vs ${player2Name}`;
+        }
+        
+        let scoreText = '';
+        if (match.finalScore && match.finalScore.winnerLegs > 0) {
+            const winnerLegs = match.finalScore.winnerLegs;
+            const loserLegs = match.finalScore.loserLegs;
+            scoreText = ` (${winnerLegs}-${loserLegs})`;
+        }
+        
+        historyHtml += `
+            <div class="${itemClass}">
+                <div class="match-header">
+                    <span class="match-id">${match.id}</span>
+                    <span class="match-winner">Winner: ${winnerName}</span>
+                </div>
+                <div class="match-result">
+                    ${resultText}${scoreText}
+                </div>
+            </div>
+        `;
+    });
+
+    matchResultsContainer.innerHTML = historyHtml;
+}
+
+// Helper function to check if a match is a walkover
+function isWalkoverMatch(match) {
+    if (!match || !match.player1 || !match.player2) return false;
+    
+    return match.player1.name === 'Walkover' || 
+           match.player2.name === 'Walkover' ||
+           match.player1.isBye === true || 
+           match.player2.isBye === true ||
+           (match.player1.id && match.player1.id.toString().startsWith('walkover-')) ||
+           (match.player2.id && match.player2.id.toString().startsWith('walkover-'));
 }
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.showPage = showPage;
+    window.updateMatchHistory = updateMatchHistory;
     window.forceConfigReload = forceConfigReload;
     window.debugConfigState = debugConfigState;
     window.APP_VERSION = APP_VERSION;
