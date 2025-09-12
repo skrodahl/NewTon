@@ -34,6 +34,7 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 - **Interactive Bracket**: Zoom, pan, and click-to-select winners with visual feedback
 
 ### 🎮 Match Control & Lane Management
+- **Match Controls Interface**: Centralized match management with direct winner selection and match control
 - **Lane Assignment**: Assign matches to specific dartboard lanes (1-20 configurable)
 - **Conflict Prevention**: Automatic detection and prevention of lane conflicts
 - **Match Validation**: Ensure proper match progression and prevent invalid states
@@ -41,6 +42,7 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 - **Flexible Match Lengths**: Configurable best-of legs for rounds, semifinals, and finals
 
 ### 📊 Results & Reporting
+- **Match Results History**: Chronological display of completed matches with visual winner identification
 - **Live Standings**: Real-time ranking and points calculation during tournament
 - **Comprehensive Placement**: Automatic 1st through 32nd place rankings with tie handling
 - **CSV Export**: Export complete results for records keeping
