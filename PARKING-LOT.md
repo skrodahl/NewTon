@@ -14,7 +14,6 @@
 ## Later
 *Not urgent but worth tracking*
 - Player cards shadow matching results table [ui] - styles.css - Add shadow to .player-card
-- Setup page: Show match history for the active tournament in a column to the right of "Recent Tournaments" [feature]
 
 ## ✅ Completed This Session
 *Items completed on <date>*

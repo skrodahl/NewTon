@@ -44,73 +44,88 @@
         </div>
 
         <!-- Setup Page -->
-        <div id="setup" class="page active">
-            <h2>Tournament Setup</h2>
-            <div class="tournament-info">
-                <div class="form-group">
-                    <label for="tournamentName">Tournament Name</label>
-                    <input type="text" id="tournamentName" placeholder="Enter tournament name">
-                </div>
-                <div style="display: flex; gap: 10px; align-items: end; margin-bottom: 20px;">
-                    <div style="max-width: 250px;">
-                        <label for="tournamentDate" style="display: block; margin-bottom: 6px; font-weight: 700; color: #111827;">Tournament Date</label>
-                        <input type="date" id="tournamentDate" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; color: #111827; background: #ffffff;">
+        <div id="setup" class="page active setup-page-flex">
+            <div class="setup-page-header">
+                <h2>Tournament Setup</h2>
+                <div class="tournament-info">
+                    <div class="form-group">
+                        <label for="tournamentName">Tournament Name</label>
+                        <input type="text" id="tournamentName" placeholder="Enter tournament name">
                     </div>
-                    <button class="btn btn-success" onclick="createTournament()" style="margin-bottom: 3px;">Create New Tournament</button>
+                    <div style="display: flex; gap: 10px; align-items: end; margin-bottom: 20px;">
+                        <div style="max-width: 250px;">
+                            <label for="tournamentDate" style="display: block; margin-bottom: 6px; font-weight: 700; color: #111827;">Tournament Date</label>
+                            <input type="date" id="tournamentDate" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; color: #111827; background: #ffffff;">
+                        </div>
+                        <button class="btn btn-success" onclick="createTournament()" style="margin-bottom: 3px;">Create New Tournament</button>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
+                    <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
+                    <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
+                    <input type="file" id="importFile" accept=".json" style="display: none;"
+                        onchange="importTournament(event)">
+                </div>
+
+                <div id="tournamentStatus" class="alert alert-info">
+                    No active tournament
+                </div>
+
+                <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">
+                    <!-- Import status messages will appear here -->
                 </div>
             </div>
 
-            <div class="form-group">
-                <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
-                <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
-                <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
-                <input type="file" id="importFile" accept=".json" style="display: none;"
-                    onchange="importTournament(event)">
-            </div>
-
-            <div id="tournamentStatus" class="alert alert-info">
-                No active tournament
-            </div>
-
-            <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">
-                <!-- Import status messages will appear here -->
-            </div>
-
-            <div class="config-section">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
-                    <h3>Recent Tournaments</h3>
-                    <button class="btn" id="toggleTournamentsBtn" onclick="toggleTournamentView()"
-                        style="padding: 5px 15px; font-size: 14px;">Show All</button>
+            <div class="two-column-container setup-page-main">
+                <div class="scrollable-column">
+                    <h3>Recent Tournaments
+                        <button class="btn" id="toggleTournamentsBtn" onclick="toggleTournamentView()">Show All</button>
+                    </h3>
+                    <div class="scrollable-column-content">
+                        <div id="recentTournaments">
+                            <p>No tournaments found</p>
+                        </div>
+                    </div>
                 </div>
-                <div id="recentTournaments">
-                    <p>No tournaments found</p>
+                
+                <div class="scrollable-column">
+                    <h3>Match Results</h3>
+                    <div class="scrollable-column-content">
+                        <div id="matchResults">
+                            <p style="color: #6b7280; font-style: italic;">No match results yet</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
 
         <!-- Registration Page -->
-        <div id="registration" class="page">
-            <h2>Player Registration</h2>
+        <div id="registration" class="page registration-page-flex">
+            <div class="registration-page-header">
+                <h2>Player Registration</h2>
 
-            <div class="form-group">
-                <label for="playerName">Add New Player</label>
-                <div style="display: flex; gap: 10px;">
-                    <input type="text" id="playerName" placeholder="Enter player name" style="flex: 1; margin-bottom: 9px;">
-                    <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
+                <div class="form-group">
+                    <label for="playerName">Add New Player</label>
+                    <div style="display: flex; gap: 10px;">
+                        <input type="text" id="playerName" placeholder="Enter player name" style="flex: 1; margin-bottom: 9px;">
+                        <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
+                    </div>
                 </div>
-            </div>
 
-            <div class="d-flex justify-between align-center mt-20 mb-20">
-                <h3>Players (<span id="playerCount">0</span> total, <span id="paidCount">0</span> paid)</h3>
-                <div>
-                    <button class="btn btn-success" onclick="exportResultsJSON()">Export JSON</button>
-                    <button class="btn btn-success" onclick="exportResultsCSV()">Export CSV</button>
-                    <button class="btn btn" onclick="showPage('tournament')">Go to tournament page</button>
+                <div class="d-flex justify-between align-center mt-20 mb-20">
+                    <h3>Players (<span id="playerCount">0</span> total, <span id="paidCount">0</span> paid)</h3>
+                    <div>
+                        <button class="btn btn-success" onclick="exportResultsJSON()">Export JSON</button>
+                        <button class="btn btn-success" onclick="exportResultsCSV()">Export CSV</button>
+                        <button class="btn btn" onclick="showPage('tournament')">Go to tournament page</button>
+                    </div>
                 </div>
             </div>
 
             <!-- Two-column layout: Player cards left, Results table right -->
-            <div class="registration-layout">
+            <div class="registration-layout registration-page-main">
                 <div class="players-column">
                     <div id="playersContainer" class="players-list">
                         <!-- Players will be added here -->

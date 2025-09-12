@@ -36,10 +36,21 @@
   - Added proper focus management with Cancel button as default selection
   - Enhanced visual indicators (box-shadow and scale) for default button choice
 
-- **Setup Page Layout**
+- **Setup Page Layout and Navigation**
+  - Split Recent Tournaments area into two-column layout with scrollable content areas
+  - Left column: Recent Tournaments (maintains existing functionality)
+  - Right column: Match Results (prepared for future tournament activity display)
+  - Eliminated page-level scrolling - Setup page now fills full browser viewport height
+  - Added responsive design: columns stack vertically on mobile devices
   - Moved "Create Tournament" button to the right of the date input field
   - Improved visual alignment and button positioning
-  - Better use of horizontal space in the tournament setup form
+
+- **Registration Page Space Utilization**
+  - Implemented sticky footer layout for better vertical space usage
+  - Results table now positioned at bottom of viewport when few players are registered
+  - Maintains two-column layout (player cards left, results table right)
+  - Automatic scrolling when content exceeds viewport height
+  - Responsive mobile layout with proper stacking behavior
 
 ### Fixed  
 - **Destructive User Behavior Prevention**

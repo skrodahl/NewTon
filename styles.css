@@ -360,12 +360,37 @@ body {
   margin-bottom: 20px;
 }
 
+/* Registration page flex layout - sticky footer */
+#registration.registration-page-flex {
+  display: flex !important;
+  flex-direction: column;
+  height: calc(100vh - 200px); /* Account for container padding and header */
+  overflow: auto; /* Allow scrolling when content is long */
+}
+
+/* Only apply when page is actually active */
+#registration:not(.active) {
+  display: none !important;
+}
+
+.registration-page-header {
+  flex-shrink: 0;
+}
+
+.registration-page-main {
+  flex: 1;
+  min-height: 0;
+  /* Don't specify flex-direction - let .registration-layout handle its own layout */
+}
+
 /* Registration page two-column layout */
 .registration-layout {
   display: flex;
+  flex-direction: row; /* Explicitly set horizontal layout */
   gap: 30px;
   margin-top: 20px;
   align-items: flex-start;
+  flex: 1;
 }
 
 .players-column {
@@ -850,6 +875,66 @@ body {
   color: #111827;
 }
 
+/* Setup page flex layout - only for Setup page when active */
+#setup.setup-page-flex.active {
+  display: flex !important;
+  flex-direction: column;
+  height: calc(100vh - 200px); /* Account for container padding and header */
+  overflow: hidden;
+}
+
+.setup-page-header {
+  flex-shrink: 0;
+}
+
+.setup-page-main {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Two-column layout for Setup page */
+.two-column-container {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+.scrollable-column {
+  flex: 1;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flexbox scrolling */
+}
+
+.scrollable-column h3 {
+  color: #111827;
+  margin: 0;
+  padding: 20px 20px 12px 20px;
+  border-bottom: 1px solid #e5e7eb;
+  flex-shrink: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.scrollable-column-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  min-height: 0; /* Important for flexbox scrolling */
+}
+
+/* Style toggle button in column header */
+.scrollable-column h3 button {
+  padding: 5px 15px;
+  font-size: 14px;
+}
+
 .config-section h3 {
   color: #111827;
   margin-bottom: 12px;
@@ -1084,6 +1169,27 @@ footer {
   .player-name-short { max-width: 100px; font-size: 11px; }
   .bracket-title { font-size: 24px; letter-spacing: 2px; }
   .zoom-btn { width: 40px; height: 40px; font-size: 16px; }
+  
+  /* Stack columns vertically on mobile */
+  .two-column-container {
+    flex-direction: column;
+    height: auto;
+  }
+  
+  .scrollable-column {
+    height: 300px; /* Fixed height for scrollable areas on mobile */
+  }
+  
+  /* Registration page mobile adjustments */
+  #registration.registration-page-flex {
+    height: auto; /* Allow natural height on mobile */
+    overflow: visible; /* Normal scrolling on mobile */
+  }
+  
+  .registration-layout {
+    flex-direction: column; /* Stack player cards above results table */
+    flex: none; /* Don't stretch on mobile */
+  }
 }
 
 @media (max-width: 480px) {
