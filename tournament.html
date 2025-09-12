@@ -51,14 +51,16 @@
                     <label for="tournamentName">Tournament Name</label>
                     <input type="text" id="tournamentName" placeholder="Enter tournament name">
                 </div>
-                <div class="form-group" style="max-width: 250px;">
-                    <label for="tournamentDate">Tournament Date</label>
-                    <input type="date" id="tournamentDate">
+                <div style="display: flex; gap: 10px; align-items: end; margin-bottom: 20px;">
+                    <div style="max-width: 250px;">
+                        <label for="tournamentDate" style="display: block; margin-bottom: 6px; font-weight: 700; color: #111827;">Tournament Date</label>
+                        <input type="date" id="tournamentDate" style="width: 100%; padding: 10px 12px; border: 2px solid #e5e7eb; border-radius: 8px; font-size: 16px; color: #111827; background: #ffffff;">
+                    </div>
+                    <button class="btn btn-success" onclick="createTournament()" style="margin-bottom: 3px;">Create New Tournament</button>
                 </div>
             </div>
 
             <div class="form-group">
-                <button class="btn btn-success" onclick="createTournament()">Create New Tournament</button>
                 <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
                 <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
                 <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
@@ -93,7 +95,7 @@
             <div class="form-group">
                 <label for="playerName">Add New Player</label>
                 <div style="display: flex; gap: 10px;">
-                    <input type="text" id="playerName" placeholder="Enter player name" style="flex: 1;">
+                    <input type="text" id="playerName" placeholder="Enter player name" style="flex: 1; margin-bottom: 9px;">
                     <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
                 </div>
             </div>
