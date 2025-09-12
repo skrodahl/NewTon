@@ -1,3 +1,54 @@
+# 2025-09-12
+## Tournament Setup UX Improvements - Duplicate Prevention & Field Management
+
+### Added
+- **Duplicate Tournament Prevention**
+  - Validation prevents creating tournaments with identical name AND date combinations
+  - Clear error message guides users to choose different name or date
+  - Same name with different dates allowed (e.g., weekly tournaments)
+  - Different names on same date allowed (multiple tournaments per day)
+
+- **Smart Tournament Field Management**
+  - Tournament name field remains empty on page load for clean tournament creation
+  - Tournament date field always defaults to today's date
+  - Input fields preserve user work during normal navigation between pages
+  - Fields automatically clear after successful tournament creation
+  - Fields automatically clear after failed creation attempts (duplicates)
+
+### Enhanced
+- **Setup Page Layout**
+  - Moved "Create Tournament" button to the right of the date input field
+  - Improved visual alignment and button positioning
+  - Better use of horizontal space in the tournament setup form
+
+### Fixed  
+- **Destructive User Behavior Prevention**
+  - Eliminated automatic population of tournament name field with active tournament data
+  - Prevented accidental duplicate tournament creation due to pre-filled fields
+  - Reduced operator-generated failures through better UX design
+
+### Technical Changes
+- Added `clearTournamentFields()` helper function for consistent field management
+- Enhanced `createTournament()` function with duplicate detection and field clearing
+- Modified `autoLoadCurrentTournament()`, `loadSpecificTournament()`, and `importTournament()` to preserve user input during navigation
+- Added tournament name/date validation using localStorage `dartsTournaments` array
+- Improved Setup page HTML structure with flexbox layout for button positioning
+
+### User Experience Improvements
+- Prevents confusion about tournament creation status through clear field states
+- Eliminates common user error of creating multiple tournaments with same name/date
+- Preserves user work when navigating between pages accidentally
+- Provides immediate, clear feedback when tournament creation succeeds or fails
+- Creates consistent, predictable behavior for tournament management workflow
+
+### Files Modified
+- `tournament.html` - Updated Setup page layout and button positioning
+- `tournament-management.js` - Added duplicate validation, field clearing logic, and helper functions
+- `main.js` - Modified auto-load behavior to preserve user input during navigation
+
+This update significantly reduces operator-generated errors and provides a much more intuitive tournament creation experience.
+
+---
 # 2025-09-11
 ## Advanced Undo System - Walkover Match Handling & Tournament Completion
 

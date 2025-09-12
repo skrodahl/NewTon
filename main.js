@@ -234,13 +234,9 @@ function autoLoadCurrentTournament() {
         players = tournamentData.players || [];
         matches = tournamentData.matches || [];
 
-        // Update UI with tournament data
+        // Update UI with tournament data - preserve user input during navigation
         if (tournament.name && tournament.date) {
-            const nameElement = document.getElementById('tournamentName');
-            const dateElement = document.getElementById('tournamentDate');
-
-            if (nameElement) nameElement.value = tournament.name;
-            if (dateElement) dateElement.value = tournament.date;
+            // Don't modify the input fields during navigation - preserve user's work
 
             // Update tournament-specific UI
             if (typeof updateTournamentStatus === 'function') {

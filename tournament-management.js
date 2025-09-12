@@ -3,6 +3,18 @@
 
 let showingAllTournaments = false;
 
+// Helper function to clear tournament input fields
+function clearTournamentFields() {
+    const nameElement = document.getElementById('tournamentName');
+    const dateElement = document.getElementById('tournamentDate');
+    
+    if (nameElement) nameElement.value = '';
+    if (dateElement) {
+        const today = new Date().toISOString().split('T')[0];
+        dateElement.value = today;
+    }
+}
+
 // UPDATE: Enhanced createTournament function with help integration
 function createTournament() {
     const name = document.getElementById('tournamentName').value.trim();
@@ -10,6 +22,17 @@ function createTournament() {
 
     if (!name || !date) {
         alert('Please enter both tournament name and date');
+        return;
+    }
+
+    // Check for duplicate tournament with same name and date
+    const existingTournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const duplicateTournament = existingTournaments.find(t => t.name === name && t.date === date);
+    
+    if (duplicateTournament) {
+        alert(`A tournament named "${name}" on ${date} already exists.\n\nPlease choose a different name or date.`);
+        // Clear fields after failed creation attempt
+        clearTournamentFields();
         return;
     }
 
@@ -50,6 +73,10 @@ function createTournament() {
     // Save tournament (but NOT config)
     saveTournamentOnly();
     updateTournamentStatus();
+    
+    // Clear fields after successful creation
+    clearTournamentFields();
+    
     showPage('registration');
 
     // Ensure results table is populated
@@ -280,9 +307,7 @@ function loadSpecificTournament(id) {
     players = selectedTournament.players || [];
     matches = selectedTournament.matches || [];
 
-    // Update UI with tournament data
-    document.getElementById('tournamentName').value = tournament.name;
-    document.getElementById('tournamentDate').value = tournament.date;
+    // Don't modify input fields when loading tournament - preserve user's work during navigation
 
     updateTournamentStatus();
     updatePlayersDisplay();
@@ -478,9 +503,7 @@ function processImportedTournament(importedData) {
         players = importedData.players || [];
         matches = importedData.matches || [];
 
-        // Update UI fields
-        document.getElementById('tournamentName').value = tournament.name;
-        document.getElementById('tournamentDate').value = tournament.date;
+        // Don't modify input fields during import - preserve user's work
 
         // Save to localStorage
         saveTournamentOnly(); // Save tournament only, not config
