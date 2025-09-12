@@ -29,7 +29,7 @@ const HELP_CONTENT = {
                 `
             },
             management: {
-                title: "Tournament Management", 
+                title: "Tournament Management",
                 content: `
                     <p><strong>Export Tournament:</strong> Save tournament data as JSON file for backup or sharing between computers.</p>
                     <p><strong>Import Tournament:</strong> Load previously exported tournament data. Useful for:</p>
@@ -161,23 +161,32 @@ const HELP_CONTENT = {
                 `
             },
             completion: {
-                title: "Completing Matches",
+                title: "Completing & Correcting Matches",
                 content: `
-                    <p><strong>Selecting Winners:</strong></p>
-                    <ol>
-                        <li>Click on winner's name in LIVE match</li>
-                        <li>Confirmation dialog appears</li>
-                        <li>Enter leg scores (optional but recommended)</li>
-                        <li>Click "Confirm Winner"</li>
-                    </ol>
-                    <p><strong>Leg Score Validation:</strong></p>
-                    <ul>
-                        <li>Winner must have more legs than loser</li>
-                        <li>Scores must be reasonable for match format (Bo3/5/7)</li>
-                        <li>Real-time validation prevents invalid entries</li>
-                    </ul>
-                    <p><strong>⚠️ Undo Feature:</strong> Use undo button (↩) to reverse the last completed match.</p>
-                `
+            <p><strong>Selecting Winners:</strong></p>
+            <ol>
+                <li>Click on winner's name in LIVE match</li>
+                <li>Confirmation dialog appears</li>
+                <li>Enter leg scores (optional but recommended)</li>
+                <li>Click "Confirm Winner"</li>
+            </ol>
+            <p><strong>Leg Score Validation:</strong></p>
+            <ul>
+                <li>Winner must have more legs than loser</li>
+                <li>Scores must be reasonable for match format (Bo3/5/7)</li>
+                <li>Real-time validation prevents invalid entries</li>
+            </ul>
+            <p><strong>Correcting Match Results:</strong></p>
+            <ul>
+                <li><strong>Hover over completed matches</strong> to see if undo is available</li>
+                <li><strong>Click the undo symbol (↺)</strong> to reverse that specific match</li>
+                <li><strong>Only safe matches show the undo option</strong> - no downstream matches completed</li>
+                <li><strong>Safety protection</strong> prevents accidentally undoing large portions of the tournament</li>
+                <li><strong>Multi-step correction</strong> allows undoing several matches by working backwards through the bracket</li>
+                <li><strong>Perfect for late discoveries</strong> - fix errors found well into the tournament</li>
+            </ul>
+            <p><strong>💡 Tips:</strong> The undo symbol only appears when safe to use. Great for 32-player tournaments where mistakes might be discovered late.</p>
+            `
             },
             lanes: {
                 title: "Lane Management",
@@ -214,7 +223,7 @@ const HELP_CONTENT = {
                 `
             },
             matches: {
-                title: "Match Format Configuration", 
+                title: "Match Format Configuration",
                 content: `
                     <p><strong>Match Length Options:</strong></p>
                     <ul>
@@ -301,19 +310,19 @@ let helpState = {
  */
 function initializeHelpSystem() {
     console.log('🔧 Initializing dynamic help system...');
-    
+
     // Create help button for each page
     createHelpButtons();
-    
+
     // Create help modal
     createHelpModal();
-    
+
     // Setup context detection
     setupContextDetection();
-    
+
     // Add keyboard shortcuts
     setupHelpKeyboardShortcuts();
-    
+
     console.log('✓ Help system initialized');
 }
 
@@ -323,22 +332,22 @@ function initializeHelpSystem() {
  */
 function createHelpButtons() {
     const pages = ['setup', 'registration', 'tournament', 'config'];
-    
+
     pages.forEach(pageId => {
         const page = document.getElementById(pageId);
         if (!page) return;
-        
+
         // Find the h2 header in the page
         const header = page.querySelector('h2');
         if (!header) return;
-        
+
         // Create help button
         const helpBtn = document.createElement('button');
         helpBtn.className = 'help-btn';
         helpBtn.innerHTML = '?';
         helpBtn.title = `Get help with ${pageId}`;
         helpBtn.onclick = () => showHelp(pageId);
-        
+
         // Style the help button
         helpBtn.style.cssText = `
             position: absolute;
@@ -359,20 +368,20 @@ function createHelpButtons() {
             transition: all 0.2s ease;
             z-index: 10;
         `;
-        
+
         // Add hover effect
         helpBtn.addEventListener('mouseenter', () => {
             helpBtn.style.background = '#ff6b35';
             helpBtn.style.color = '#ffffff';
             helpBtn.style.transform = 'scale(1.1)';
         });
-        
+
         helpBtn.addEventListener('mouseleave', () => {
             helpBtn.style.background = '#ffffff';
             helpBtn.style.color = '#ff6b35';
             helpBtn.style.transform = 'scale(1)';
         });
-        
+
         // Make page header relative for positioning
         header.style.position = 'relative';
         header.style.minHeight = '60px';
@@ -405,7 +414,7 @@ function createHelpModal() {
         min-width: 350px;
         min-height: 200px;
     `;
-    
+
     modal.innerHTML = `
         <div class="help-header" style="
             background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
@@ -469,9 +478,9 @@ function createHelpModal() {
             </div>
         </div>
     `;
-    
+
     document.body.appendChild(modal);
-    
+
     // Setup modal interactions
     setupHelpModalInteractions(modal);
 }
@@ -484,41 +493,41 @@ function setupHelpModalInteractions(modal) {
     const closeBtn = modal.querySelector('#helpClose');
     const minimizeBtn = modal.querySelector('#helpMinimize');
     const scenariosBtn = modal.querySelector('#helpShowScenarios');
-    
+
     // Make modal draggable
     let isDragging = false;
     let dragOffset = { x: 0, y: 0 };
-    
+
     header.addEventListener('mousedown', (e) => {
         isDragging = true;
         dragOffset.x = e.clientX - modal.offsetLeft;
         dragOffset.y = e.clientY - modal.offsetTop;
         modal.style.cursor = 'grabbing';
     });
-    
+
     document.addEventListener('mousemove', (e) => {
         if (!isDragging) return;
-        
+
         const newX = e.clientX - dragOffset.x;
         const newY = e.clientY - dragOffset.y;
-        
+
         // Keep modal within viewport
         const maxX = window.innerWidth - modal.offsetWidth;
         const maxY = window.innerHeight - modal.offsetHeight;
-        
+
         modal.style.left = Math.max(0, Math.min(newX, maxX)) + 'px';
         modal.style.top = Math.max(0, Math.min(newY, maxY)) + 'px';
         modal.style.right = 'auto'; // Remove right positioning
     });
-    
+
     document.addEventListener('mouseup', () => {
         isDragging = false;
         modal.style.cursor = 'auto';
     });
-    
+
     // Close button
     closeBtn.addEventListener('click', hideHelp);
-    
+
     // Minimize button
     minimizeBtn.addEventListener('click', () => {
         const content = modal.querySelector('.help-content');
@@ -532,7 +541,7 @@ function setupHelpModalInteractions(modal) {
             modal.style.height = '60px';
         }
     });
-    
+
     // Scenarios button
     scenariosBtn.addEventListener('click', () => {
         showHelpSection('scenarios', 'troubleshooting');
@@ -555,14 +564,14 @@ function setupContextDetection() {
             }
         }
     });
-    
+
     observer.observe(document.body, {
         childList: true,
         subtree: true,
         attributes: true,
         attributeFilter: ['class']
     });
-    
+
     // Detect first-time user
     if (!localStorage.getItem('helpSystemSeen')) {
         setTimeout(() => {
@@ -586,12 +595,12 @@ function setupHelpKeyboardShortcuts() {
                 showHelp(helpState.currentPage);
             }
         }
-        
+
         // ESC - Close help
         if (e.key === 'Escape' && helpState.isVisible) {
             hideHelp();
         }
-        
+
         // Ctrl+H - Toggle help
         if (e.ctrlKey && e.key === 'h') {
             e.preventDefault();
@@ -607,20 +616,20 @@ function setupHelpKeyboardShortcuts() {
 function showHelp(pageId = 'setup', sectionId = null) {
     const modal = document.getElementById('dynamicHelpModal');
     if (!modal) return;
-    
+
     helpState.isVisible = true;
     helpState.currentPage = pageId;
     helpState.currentSection = sectionId;
-    
+
     // Update help content
     updateHelpContent(pageId, sectionId);
-    
+
     // Show modal
     modal.style.display = 'block';
-    
+
     // Focus for keyboard navigation
     modal.focus();
-    
+
     console.log(`📖 Help shown for ${pageId}${sectionId ? ` > ${sectionId}` : ''}`);
 }
 
@@ -630,10 +639,10 @@ function showHelp(pageId = 'setup', sectionId = null) {
 function hideHelp() {
     const modal = document.getElementById('dynamicHelpModal');
     if (!modal) return;
-    
+
     modal.style.display = 'none';
     helpState.isVisible = false;
-    
+
     console.log('📖 Help hidden');
 }
 
@@ -654,7 +663,7 @@ function toggleHelp() {
  */
 function updateHelpContext() {
     if (!helpState.isVisible) return;
-    
+
     // Update help content for new page
     updateHelpContent(helpState.currentPage);
 }
@@ -669,16 +678,16 @@ function updateHelpContent(pageId, sectionId = null) {
         console.warn(`No help content found for page: ${pageId}`);
         return;
     }
-    
+
     const titleElement = document.getElementById('helpTitle');
     const overviewElement = document.getElementById('helpOverview');
     const sectionsElement = document.getElementById('helpSections');
-    
+
     // Update title
     if (titleElement) {
         titleElement.textContent = helpData.title;
     }
-    
+
     // Update overview
     if (overviewElement) {
         overviewElement.innerHTML = `
@@ -687,14 +696,14 @@ function updateHelpContent(pageId, sectionId = null) {
             </div>
         `;
     }
-    
+
     // Update sections
     if (sectionsElement && helpData.sections) {
         let sectionsHTML = '';
-        
+
         Object.entries(helpData.sections).forEach(([key, section]) => {
             const isExpanded = sectionId === key || sectionId === null;
-            
+
             sectionsHTML += `
                 <div class="help-section" style="margin-bottom: 15px;">
                     <h4 style="
@@ -725,10 +734,10 @@ function updateHelpContent(pageId, sectionId = null) {
                 </div>
             `;
         });
-        
+
         sectionsElement.innerHTML = sectionsHTML;
     }
-    
+
     // Add quick actions based on current page
     addQuickActions(pageId);
 }
@@ -740,26 +749,26 @@ function updateHelpContent(pageId, sectionId = null) {
 function addQuickActions(pageId) {
     const navigation = document.getElementById('helpNavigation');
     if (!navigation) return;
-    
+
     // Remove existing quick actions
     const existingActions = navigation.querySelector('.quick-actions');
     if (existingActions) {
         existingActions.remove();
     }
-    
+
     const quickActions = document.createElement('div');
     quickActions.className = 'quick-actions';
     quickActions.style.cssText = 'display: flex; gap: 8px; align-items: center;';
-    
+
     let actionsHTML = '';
-    
+
     switch (pageId) {
         case 'setup':
             if (!tournament) {
                 actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showPage(\'setup\');" style="font-size: 12px; padding: 6px 12px;">Create Tournament</button>';
             }
             break;
-            
+
         case 'registration':
             if (tournament && players.filter(p => p.paid).length < 4) {
                 actionsHTML = '<button class="btn btn-warning" onclick="hideHelp(); document.getElementById(\'playerName\').focus();" style="font-size: 12px; padding: 6px 12px;">Add Players</button>';
@@ -767,7 +776,7 @@ function addQuickActions(pageId) {
                 actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showPage(\'tournament\');" style="font-size: 12px; padding: 6px 12px;">Generate Bracket</button>';
             }
             break;
-            
+
         case 'tournament':
             if (tournament && !tournament.bracket) {
                 actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); generateBracket();" style="font-size: 12px; padding: 6px 12px;">Generate Bracket</button>';
@@ -775,12 +784,12 @@ function addQuickActions(pageId) {
                 actionsHTML = '<button class="btn btn-warning" onclick="hideHelp(); showMatchDetails();" style="font-size: 12px; padding: 6px 12px;">Show Ready Matches</button>';
             }
             break;
-            
+
         case 'config':
             actionsHTML = '<button class="btn" onclick="hideHelp(); showPage(\'setup\');" style="font-size: 12px; padding: 6px 12px;">Back to Setup</button>';
             break;
     }
-    
+
     if (actionsHTML) {
         quickActions.innerHTML = actionsHTML;
         navigation.insertBefore(quickActions, navigation.firstChild);
@@ -794,9 +803,9 @@ function addQuickActions(pageId) {
 function toggleHelpSection(sectionId) {
     const section = document.getElementById(`section-${sectionId}`);
     const toggle = document.getElementById(`toggle-${sectionId}`);
-    
+
     if (!section || !toggle) return;
-    
+
     if (section.style.display === 'none') {
         section.style.display = 'block';
         toggle.textContent = '−';
@@ -823,23 +832,23 @@ function suggestHelp() {
     if (!tournament) {
         return { page: 'setup', section: 'creation', reason: 'No active tournament' };
     }
-    
+
     // Few players
     if (players.filter(p => p.paid).length < 4) {
         return { page: 'registration', section: 'adding', reason: 'Need more paid players' };
     }
-    
+
     // No bracket generated
     if (!tournament.bracket) {
         return { page: 'tournament', section: 'bracket', reason: 'Ready to generate bracket' };
     }
-    
+
     // Active matches available
     /*
     if (matches && matches.some(m => getMatchState && getMatchState(m) === 'live')) {
         return { page: 'tournament', section: 'completion', reason: 'Live matches need attention' };
     } */
-    
+
     return null;
 }
 
@@ -853,7 +862,7 @@ function showHelpHint(message, duration = 3000) {
     if (existingHint) {
         existingHint.remove();
     }
-    
+
     const hint = document.createElement('div');
     hint.id = 'helpHint';
     hint.style.cssText = `
@@ -871,7 +880,7 @@ function showHelpHint(message, duration = 3000) {
         font-weight: 500;
         animation: slideDown 0.3s ease;
     `;
-    
+
     hint.innerHTML = `
         💡 ${message}
         <button onclick="this.parentElement.remove()" style="
@@ -883,7 +892,7 @@ function showHelpHint(message, duration = 3000) {
             font-size: 16px;
         ">×</button>
     `;
-    
+
     // Add animation CSS if not exists
     if (!document.querySelector('#helpAnimations')) {
         const style = document.createElement('style');
@@ -896,9 +905,9 @@ function showHelpHint(message, duration = 3000) {
         `;
         document.head.appendChild(style);
     }
-    
+
     document.body.appendChild(hint);
-    
+
     // Auto-remove after duration
     setTimeout(() => {
         if (hint.parentElement) {
@@ -942,16 +951,16 @@ if (typeof window !== 'undefined') {
     window.toggleHelp = toggleHelp;
     window.toggleHelpSection = toggleHelpSection;
     window.showHelpSection = showHelpSection;
-    
+
     // Utility functions
     window.showHelpHint = showHelpHint;
     window.triggerContextualHelp = triggerContextualHelp;
     window.suggestHelp = suggestHelp;
-    
+
     // Integration hooks
     window.onTournamentCreated = onTournamentCreated;
     window.onBracketGenerated = onBracketGenerated;
     window.onFirstMatchCompleted = onFirstMatchCompleted;
-    
+
     console.log('✅ Dynamic help system functions registered globally');
 }
