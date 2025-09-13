@@ -1077,8 +1077,12 @@ body {
   border-radius: 12px;
   width: 90%;
   max-width: 640px;
+  max-height: 80vh; /* Limit modal height */
   box-shadow: 0 8px 30px rgba(0,0,0,0.3);
   color: #111827;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden; /* Prevent content overflow */
 }
 
 .close {
@@ -1496,13 +1500,18 @@ a:hover { color: #1e40af; }
   margin-bottom: 20px;
   color: #111827;
   text-align: center;
+  flex-shrink: 0; /* Don't shrink header */
 }
 
 .undo-matches-container {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  margin-bottom: 20px;
+  flex: 1; /* Expand to fill available space */
+  overflow-y: auto;
+  padding-right: 8px; /* Space for scrollbar */
+  margin-bottom: 20px; /* Space before buttons */
+  min-height: 0; /* Allow flexbox shrinking */
 }
 
 .undo-match-card {
@@ -1551,6 +1560,23 @@ a:hover { color: #1e40af; }
   background: #f9fafb;
   border-radius: 8px;
   margin-bottom: 20px;
+}
+
+/* Undo modal content area - allow scrolling */
+#undoConfirmMessage {
+  display: flex !important;
+  flex-direction: column !important;
+  flex: 1 !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  margin: 20px 0 !important;
+  line-height: 1.5 !important;
+}
+
+/* Undo modal button container - keep buttons at bottom */
+#undoConfirmModal .text-center.mt-20 {
+  flex-shrink: 0; /* Don't shrink button area */
+  margin-top: 20px;
 }
 
 /* Responsive adjustments for Command Center match cards */

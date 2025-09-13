@@ -955,44 +955,48 @@ function isMatchUndoable(matchId) {
     return true; // Safe to undo - match has MANUAL transaction and no MANUAL downstream dependencies
 }
 
-// Helper function to find matches that were affected by completing a specific match
+// Helper function to find matches that are directly affected by undoing a specific match
 function getConsequentialMatches(transaction) {
     const consequentialMatches = [];
-    
-    if (!transaction || !transaction.beforeState || !transaction.beforeState.matches) {
+
+    if (!transaction || !tournament || !tournament.bracketSize) {
         return consequentialMatches;
     }
-    
-    const beforeMatches = transaction.beforeState.matches;
-    const currentMatches = matches; // Current state
-    
-    // Compare before and after states to find matches that were changed
-    Object.keys(currentMatches).forEach(matchId => {
-        const beforeMatch = beforeMatches[matchId];
-        const currentMatch = currentMatches[matchId];
-        
-        if (!beforeMatch || !currentMatch) return;
-        
-        // Skip the transaction's own match
-        if (matchId === transaction.matchId) return;
-        
-        // Check if this match was affected (players changed from TBD to actual players)
-        const beforeP1 = beforeMatch.player1?.name || 'TBD';
-        const beforeP2 = beforeMatch.player2?.name || 'TBD';
-        const currentP1 = currentMatch.player1?.name || 'TBD';
-        const currentP2 = currentMatch.player2?.name || 'TBD';
-        
-        // If players changed and aren't walkovers, this match was consequentially affected
-        if ((beforeP1 !== currentP1 || beforeP2 !== currentP2) && 
-            currentP1 !== 'Walkover' && currentP2 !== 'Walkover') {
+
+    // Use hardcoded MATCH_PROGRESSION to find exact destinations
+    const progression = MATCH_PROGRESSION[tournament.bracketSize];
+    if (!progression || !progression[transaction.matchId]) {
+        return consequentialMatches;
+    }
+
+    const matchProgression = progression[transaction.matchId];
+
+    // Add winner destination match if it exists
+    if (matchProgression.winner) {
+        const [targetMatchId] = matchProgression.winner;
+        const targetMatch = matches.find(m => m.id === targetMatchId);
+        if (targetMatch) {
             consequentialMatches.push({
-                id: currentMatch.id,
-                match: currentMatch,
-                isFrontside: currentMatch.id.startsWith('FS-')
+                id: targetMatch.id,
+                match: targetMatch,
+                isFrontside: targetMatch.id.startsWith('FS-')
             });
         }
-    });
-    
+    }
+
+    // Add loser destination match if it exists
+    if (matchProgression.loser) {
+        const [targetMatchId] = matchProgression.loser;
+        const targetMatch = matches.find(m => m.id === targetMatchId);
+        if (targetMatch) {
+            consequentialMatches.push({
+                id: targetMatch.id,
+                match: targetMatch,
+                isFrontside: targetMatch.id.startsWith('FS-')
+            });
+        }
+    }
+
     // Sort: frontside matches first, then backside
     return consequentialMatches.sort((a, b) => {
         if (a.isFrontside && !b.isFrontside) return -1;
