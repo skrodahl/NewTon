@@ -1659,8 +1659,8 @@ a:hover { color: #1e40af; }
 }
 
 .match-id {
-  font-size: 12px;
-  font-weight: 600;
+  font-size: 13px;
+  font-weight: 700;
   color: #374151;
   background: #f3f4f6;
   padding: 2px 6px;
@@ -1699,6 +1699,11 @@ a:hover { color: #1e40af; }
 
 .match-history-item.walkover .match-result-enhanced {
   color: #6b7280;
+}
+
+.match-history-item.walkover .match-id {
+  font-weight: 400;
+  font-size: 12px;
 }
 
 .player-info {
