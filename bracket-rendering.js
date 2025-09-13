@@ -1167,8 +1167,9 @@ function rebuildBracketFromHistory(cleanHistory) {
         return;
     }
 
-    // Set global flag to prevent any transaction creation during rebuild
+    // Set global flags to prevent any transaction creation during rebuild
     window.rebuildInProgress = true;
+    window.autoAdvancementsDisabled = true;
 
     console.log(`Rebuilding bracket from ${cleanHistory.length} transactions`);
 
@@ -1231,10 +1232,12 @@ function rebuildBracketFromHistory(cleanHistory) {
 
     console.log(`Bracket rebuild complete: applied ${appliedCount} transactions`);
 
-    // Delay clearing rebuild flag to prevent auto-advancements during UI refresh
+    // Extended delay to prevent auto-advancements during UI refresh cycles
     setTimeout(() => {
+        console.log('🔓 Rebuild protection window ending - re-enabling auto-advancements');
         window.rebuildInProgress = false;
-    }, 500);
+        window.autoAdvancementsDisabled = false;
+    }, 2000);
 }
 
 // Update match states based on current player composition

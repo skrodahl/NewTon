@@ -699,9 +699,13 @@ function processAutoAdvancements() {
     if (!matches || matches.length === 0) return;
 
     // Skip auto-advancements during rebuild to prevent transaction corruption
-    if (window.rebuildInProgress) {
+    if (window.rebuildInProgress || window.autoAdvancementsDisabled) {
+        console.log('🚫 processAutoAdvancements blocked during rebuild');
         return;
     }
+
+    // DEBUG: Log what triggered this auto-advancement
+    console.log('⚡ processAutoAdvancements called - stack trace:', new Error().stack.substring(0, 500));
 
     let foundAdvancement = true;
     let iterations = 0;
