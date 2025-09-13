@@ -766,7 +766,7 @@ function showUndoConfirmationModal(message, onConfirm) {
         return;
     }
     
-    messageDiv.textContent = message;
+    messageDiv.innerHTML = message;
     modal.style.display = 'flex';
     
     // Focus the Cancel button (default selection)
@@ -948,6 +948,83 @@ function isMatchUndoable(matchId) {
     return true;
 }
 
+// Helper function to find matches that were affected by completing a specific match
+function getConsequentialMatches(transaction) {
+    const consequentialMatches = [];
+    
+    if (!transaction || !transaction.beforeState || !transaction.beforeState.matches) {
+        return consequentialMatches;
+    }
+    
+    const beforeMatches = transaction.beforeState.matches;
+    const currentMatches = matches; // Current state
+    
+    // Compare before and after states to find matches that were changed
+    Object.keys(currentMatches).forEach(matchId => {
+        const beforeMatch = beforeMatches[matchId];
+        const currentMatch = currentMatches[matchId];
+        
+        if (!beforeMatch || !currentMatch) return;
+        
+        // Skip the transaction's own match
+        if (matchId === transaction.matchId) return;
+        
+        // Check if this match was affected (players changed from TBD to actual players)
+        const beforeP1 = beforeMatch.player1?.name || 'TBD';
+        const beforeP2 = beforeMatch.player2?.name || 'TBD';
+        const currentP1 = currentMatch.player1?.name || 'TBD';
+        const currentP2 = currentMatch.player2?.name || 'TBD';
+        
+        // If players changed and aren't walkovers, this match was consequentially affected
+        if ((beforeP1 !== currentP1 || beforeP2 !== currentP2) && 
+            currentP1 !== 'Walkover' && currentP2 !== 'Walkover') {
+            consequentialMatches.push({
+                id: currentMatch.id,
+                match: currentMatch,
+                isFrontside: currentMatch.id.startsWith('FS-')
+            });
+        }
+    });
+    
+    // Sort: frontside matches first, then backside
+    return consequentialMatches.sort((a, b) => {
+        if (a.isFrontside && !b.isFrontside) return -1;
+        if (!a.isFrontside && b.isFrontside) return 1;
+        return 0;
+    });
+}
+
+// Create enhanced modal content with match cards
+function createUndoModalContent(matchId, consequentialMatches) {
+    let content = `<div class="undo-header">Undoing <strong>${matchId}</strong> will reset the following matches:</div>`;
+    
+    if (consequentialMatches.length === 0) {
+        content += `<div class="undo-no-matches">No other matches will be affected.</div>`;
+    } else {
+        content += `<div class="undo-matches-container">`;
+        
+        consequentialMatches.forEach(({ id, match, isFrontside }) => {
+            const player1Name = match.player1?.name || 'TBD';
+            const player2Name = match.player2?.name || 'TBD';
+            const bracketType = isFrontside ? '⚪ Frontside' : '⚫ Backside';
+            
+            content += `
+                <div class="undo-match-card">
+                    <div class="undo-match-header">
+                        <div class="undo-match-id">${id}</div>
+                        <div class="undo-bracket-type">${bracketType}</div>
+                    </div>
+                    <div class="undo-match-players">${player1Name} vs ${player2Name}</div>
+                </div>
+            `;
+        });
+        
+        content += `</div>`;
+    }
+    
+    return content;
+}
+
 function handleSurgicalUndo(matchId) {
     const history = getTournamentHistory();
     const transaction = history.find(t => t.matchId === matchId);
@@ -957,31 +1034,23 @@ function handleSurgicalUndo(matchId) {
         return;
     }
 
+    // Find consequential matches instead of downstream
+    const consequentialMatches = getConsequentialMatches(transaction);
+    
+    // Still need to find all affected transactions for the actual undo
     const downstreamMatches = getDownstreamMatches(matchId, tournament.bracketSize);
     const affectedMatches = new Set([matchId, ...downstreamMatches]);
-
     const transactionsToUndo = history.filter(t => affectedMatches.has(t.matchId));
 
     if (transactionsToUndo.length === 0) {
         alert('No undoable transactions found for this match and its downstream dependencies.');
         return;
     }
+
+    // Create enhanced confirmation modal content
+    const modalContent = createUndoModalContent(matchId, consequentialMatches);
     
-    let confirmMessage = `This will undo the selected match and all of its ${downstreamMatches.size} downstream match(es).
-
- The following matches will be undone:
- - ${matchId}`;
-    
-    downstreamMatches.forEach(affectedMatch => {
-        confirmMessage += `
- - ${affectedMatch}`;
-    });
-
-    confirmMessage += `
-
-Are you sure?`;
-
-    showUndoConfirmationModal(confirmMessage, () => {
+    showUndoConfirmationModal(modalContent, () => {
         const transactionIdsToUndo = transactionsToUndo.map(t => t.id);
         if (typeof undoTransactions === 'function') {
             undoTransactions(transactionIdsToUndo);
