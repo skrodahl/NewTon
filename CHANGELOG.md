@@ -1,6 +1,6 @@
 # 2025-09-13
 
-## v1.2.2 - Bulletproof Transaction-Based Undo System
+## v1.2.1 - Bulletproof Transaction-Based Undo System
 
 ### Revolutionary Architectural Change
 - **Complete Undo System Redesign**
