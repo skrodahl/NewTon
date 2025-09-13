@@ -1,3 +1,44 @@
+# 2025-09-14
+
+## v1.2.3 - Enhanced Dialog Interfaces & Tournament Experience
+
+### User Interface Improvements
+- **Undo Dialog Round Headers**
+  - Enhanced consequential match display with detailed round information
+  - FS/BS matches now show "⚪ Frontside - Round 3" format with hyphens
+  - Finals display clean format: "BS-FINAL", "GRAND-FINAL" without icons
+  - Provides precise context for understanding undo impact
+
+- **Match Controls Dialog Scrollability**
+  - Fixed dialog overflow issues in large tournaments (32+ players)
+  - Implemented same flexbox layout pattern as undo dialog
+  - Fixed title "Match Controls" stays at top, scrollable content fills dialog
+  - Close button positioned at bottom, always accessible
+  - Consistent user experience across all modal dialogs
+
+- **Walkover Chain Detection**
+  - Enhanced consequential match detection to follow walkover progressions
+  - Now shows final destination where players actually compete
+  - Example: FS-2-8 undo shows "BS-3-2" instead of intermediate walkover "BS-2-4"
+  - Provides accurate surgical undo precision for complex tournament scenarios
+
+### Technical Fixes
+- **Rebuild Process Optimization**
+  - Eliminated duplicate `processAutoAdvancements()` calls during undo rebuild
+  - Fixed "completed without winner" states in matches like FS-2-1 (TBD vs TBD)
+  - Resolved transaction history corruption during undo operations
+  - Maintained perfect bracket state consistency across undo/redo cycles
+
+### Files Modified
+- `bracket-rendering.js` - Enhanced undo dialog headers, walkover chain detection, rebuild optimization
+- `tournament.html` - Match Controls modal structure with scrollable layout
+- `styles.css` - Flexbox layout styling for Match Controls dialog
+- `main.js` - Version bump to 1.2.3
+
+This update completes the undo system refinement and provides professional-grade dialog interfaces for tournament management at any scale.
+
+----
+
 # 2025-09-13
 
 ## v1.2.2 - Bulletproof Transaction-Based Undo System

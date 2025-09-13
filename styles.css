@@ -1579,6 +1579,33 @@ a:hover { color: #1e40af; }
   margin-top: 20px;
 }
 
+/* Match Controls Modal - Same Flexbox Layout as Undo Dialog */
+.match-controls-modal {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 80vh !important;
+  overflow: hidden !important;
+}
+
+.match-controls-modal h3 {
+  flex-shrink: 0; /* Don't shrink title */
+  margin-bottom: 20px;
+}
+
+.match-controls-container {
+  flex: 1; /* Expand to fill available space */
+  overflow-y: auto;
+  padding-right: 8px; /* Space for scrollbar */
+  margin-bottom: 20px; /* Space before buttons */
+  min-height: 0; /* Allow flexbox shrinking */
+}
+
+/* Match Controls modal button container - keep buttons at bottom */
+.match-controls-modal .text-center.mt-20 {
+  flex-shrink: 0; /* Don't shrink button area */
+  margin-top: 20px;
+}
+
 /* Responsive adjustments for Command Center match cards */
 @media (max-width: 640px) {
   .cc-match-controls {
