@@ -1051,7 +1051,16 @@ function createUndoModalContent(matchId, consequentialMatches) {
         consequentialMatches.forEach(({ id, match, isFrontside }) => {
             const player1Name = match.player1?.name || 'TBD';
             const player2Name = match.player2?.name || 'TBD';
-            const bracketType = isFrontside ? '⚪ Frontside' : '⚫ Backside';
+
+            // Enhanced bracket type with round numbers
+            let bracketType;
+            if (match.id === 'GRAND-FINAL' || match.id === 'BS-FINAL') {
+                bracketType = match.id;
+            } else if (isFrontside) {
+                bracketType = `⚪ Frontside - Round ${match.id.split('-')[1]}`;
+            } else {
+                bracketType = `⚫ Backside - Round ${match.id.split('-')[1]}`;
+            }
             
             content += `
                 <div class="undo-match-card">
