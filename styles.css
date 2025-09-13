@@ -1566,6 +1566,37 @@ a:hover { color: #1e40af; }
   color: #6b7280;
 }
 
+.match-result-enhanced {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 14px;
+  color: #111827;
+  line-height: 1.4;
+}
+
+.match-history-item.walkover .match-result-enhanced {
+  color: #6b7280;
+}
+
+.player-info {
+  flex: 1;
+}
+
+.result-score {
+  font-weight: 600;
+  color: #374151;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
+  margin-left: 12px;
+}
+
+.progression-info {
+  color: #6b7280;
+  font-size: 12px;
+  font-weight: 500;
+  font-style: italic;
+}
+
 .winner-name {
   color: #059669;
   font-weight: 600;
@@ -1589,5 +1620,20 @@ a:hover { color: #1e40af; }
   
   .match-history-item {
     padding: 10px;
+  }
+  
+  .match-result-enhanced {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+  }
+  
+  .result-score {
+    margin-left: 0;
+    font-size: 13px;
+  }
+  
+  .progression-info {
+    font-size: 11px;
   }
 }

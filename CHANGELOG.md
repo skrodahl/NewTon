@@ -1,3 +1,53 @@
+# 2025-09-13
+
+## v1.2.1 - Enhanced Match Results with Player Progression Info
+
+### Added
+- **Player Progression Information**
+  - Match results now display where each player advances next or their elimination rank
+  - Winners show next match destination (e.g., "FS-2-1", "BS-3-2") or "Tournament Winner!"
+  - Losers show either next match they move to or elimination rank (e.g., "7th-8th", "5th-6th")
+  - Real-time progression info appears immediately after match completion
+
+- **Enhanced Match Results Layout**
+  - Right-aligned match scores with improved visual separation
+  - Progression info displayed in italic text within parentheses for subtle emphasis
+  - Flexbox layout separates player information from match scores
+  - Mobile-responsive design stacks elements vertically on small screens
+
+- **Comprehensive Ranking System Integration**
+  - Leverages existing hardcoded tournament progression logic from `MATCH_PROGRESSION`
+  - Reuses existing `formatRanking()` function for consistent rank display
+  - Maps elimination matches to specific ranks (BS-1-1 → 7th-8th, BS-2-1 → 5th-6th, etc.)
+  - Supports all bracket sizes (8, 16, 32 players) with accurate rank assignments
+
+- **Updated Help Documentation**
+  - Added "Match Results" section to Setup page help system
+  - Documents new progression info display format
+  - Maintains consistency with existing help text style and tone
+
+### Technical Implementation
+- `getEliminationRankForMatch()` - Maps match IDs to elimination ranks using tournament progression rules
+- `getPlayerProgressionForDisplay()` - Extracts progression logic from existing winner confirmation system
+- Enhanced `updateMatchHistory()` - Integrates progression info with existing match display
+- New CSS classes: `.match-result-enhanced`, `.player-info`, `.result-score`, `.progression-info`
+- Zero code duplication - reuses existing `MATCH_PROGRESSION` and `formatRanking()` functions
+
+### User Experience Improvements
+- Instant visibility into tournament flow and player standings
+- Clear understanding of match consequences before they happen
+- Consistent information display matching Match Completion dialog and Results Table
+- Improved visual hierarchy with right-aligned scores and italic progression text
+
+### Files Modified
+- `main.js` - Added helper functions and enhanced match history display with progression info
+- `styles.css` - New flexbox layout with italic progression info styling and mobile responsiveness  
+- `dynamic-help-system.js` - Added Match Results documentation to Setup page help
+
+This update transforms the Match Results display into a comprehensive tournament flow indicator, showing not just what happened, but what happens next for each player.
+
+---
+
 # 2025-09-12
 
 ## v1.2.0 - Match History Display & Visual Winner Identification

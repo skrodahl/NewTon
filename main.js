@@ -318,6 +318,82 @@ function showPage(pageId) {
     onPageChange(pageId);
 }
 
+// Helper function to get elimination rank based on match ID and bracket size
+function getEliminationRankForMatch(matchId, bracketSize) {
+    // Hardcoded elimination ranks based on tournament progression logic
+    const rankMappings = {
+        8: {
+            'BS-1-1': 7, 'BS-1-2': 7,  // 7th-8th place
+            'BS-2-1': 5, 'BS-2-2': 5,  // 5th-6th place
+            'BS-3-1': 4,               // 4th place
+            'BS-FINAL': 3,             // 3rd place (loser)
+            'GRAND-FINAL': 2           // 2nd place (loser)
+        },
+        16: {
+            'BS-1-1': 13, 'BS-1-2': 13, 'BS-1-3': 13, 'BS-1-4': 13,  // 13th-16th place
+            'BS-2-1': 9, 'BS-2-2': 9, 'BS-2-3': 9, 'BS-2-4': 9,      // 9th-12th place
+            'BS-3-1': 7, 'BS-3-2': 7,                                 // 7th-8th place
+            'BS-4-1': 5, 'BS-4-2': 5,                                 // 5th-6th place
+            'BS-5-1': 4,                                              // 4th place
+            'BS-FINAL': 3,                                            // 3rd place (loser)
+            'GRAND-FINAL': 2                                          // 2nd place (loser)
+        },
+        32: {
+            'BS-1-1': 25, 'BS-1-2': 25, 'BS-1-3': 25, 'BS-1-4': 25, 'BS-1-5': 25, 'BS-1-6': 25, 'BS-1-7': 25, 'BS-1-8': 25,  // 25th-32nd place
+            'BS-2-1': 17, 'BS-2-2': 17, 'BS-2-3': 17, 'BS-2-4': 17, 'BS-2-5': 17, 'BS-2-6': 17, 'BS-2-7': 17, 'BS-2-8': 17,  // 17th-24th place
+            'BS-3-1': 13, 'BS-3-2': 13, 'BS-3-3': 13, 'BS-3-4': 13,  // 13th-16th place
+            'BS-4-1': 9, 'BS-4-2': 9, 'BS-4-3': 9, 'BS-4-4': 9,      // 9th-12th place
+            'BS-5-1': 7, 'BS-5-2': 7,                                 // 7th-8th place
+            'BS-6-1': 5, 'BS-6-2': 5,                                 // 5th-6th place
+            'BS-7-1': 4,                                              // 4th place
+            'BS-FINAL': 3,                                            // 3rd place (loser)
+            'GRAND-FINAL': 2                                          // 2nd place (loser)
+        }
+    };
+
+    if (rankMappings[bracketSize] && rankMappings[bracketSize][matchId]) {
+        return rankMappings[bracketSize][matchId];
+    }
+    return null;
+}
+
+// Helper function to get player progression info for display
+function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
+    if (!tournament || !tournament.bracketSize || !MATCH_PROGRESSION) {
+        return '';
+    }
+
+    const progression = MATCH_PROGRESSION[tournament.bracketSize] && MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    if (!progression) {
+        return '';
+    }
+
+    if (isWinner) {
+        if (progression.winner) {
+            const nextMatch = progression.winner[0];
+            // Clean up match names for display - keep BS- and FS- prefixes
+            const displayMatch = nextMatch.replace('GRAND-FINAL', 'Grand Final');
+            return `(${displayMatch})`;
+        } else {
+            return '(Tournament Winner!)';
+        }
+    } else {
+        // For losers
+        if (progression.loser) {
+            const nextMatch = progression.loser[0];
+            const displayMatch = nextMatch.replace('GRAND-FINAL', 'Grand Final');
+            return `(${displayMatch})`;
+        } else {
+            // Player is eliminated - show rank
+            const rank = getEliminationRankForMatch(matchId, tournament.bracketSize);
+            if (rank && typeof formatRanking === 'function') {
+                return `(${formatRanking(rank)})`;
+            }
+            return '(Eliminated)';
+        }
+    }
+}
+
 // Update match history for Setup page
 function updateMatchHistory() {
     const matchResultsContainer = document.getElementById('matchResults');
@@ -354,21 +430,31 @@ function updateMatchHistory() {
         const player2Name = match.player2?.name || 'Unknown';
         const winnerName = match.winner?.name || 'Unknown';
         
-        // Format match result with winner highlighting
-        let resultText = '';
-        if (player1Name === winnerName) {
-            resultText = `<span class="winner-name">${player1Name}</span> vs ${player2Name}`;
-        } else if (player2Name === winnerName) {
-            resultText = `${player1Name} vs <span class="winner-name">${player2Name}</span>`;
-        } else {
-            resultText = `${player1Name} vs ${player2Name}`;
-        }
+        // Get progression info for both players
+        const player1Id = match.player1?.id;
+        const player2Id = match.player2?.id;
+        const winnerId = match.winner?.id;
+        
+        const player1IsWinner = player1Id === winnerId;
+        const player2IsWinner = player2Id === winnerId;
+        
+        const player1Progression = getPlayerProgressionForDisplay(player1Id, match.id, player1IsWinner);
+        const player2Progression = getPlayerProgressionForDisplay(player2Id, match.id, player2IsWinner);
+        
+        // Format match result with winner highlighting and progression info
+        let player1Display = player1IsWinner 
+            ? `<span class="winner-name">${player1Name}</span>${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}` 
+            : `${player1Name}${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}`;
+            
+        let player2Display = player2IsWinner 
+            ? `<span class="winner-name">${player2Name}</span>${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}` 
+            : `${player2Name}${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}`;
         
         let scoreText = '';
         if (match.finalScore && match.finalScore.winnerLegs > 0) {
             const winnerLegs = match.finalScore.winnerLegs;
             const loserLegs = match.finalScore.loserLegs;
-            scoreText = ` (${winnerLegs}-${loserLegs})`;
+            scoreText = `(${winnerLegs}-${loserLegs})`;
         }
         
         const autoCompletedText = isWalkover ? ' <span class="auto-completed">(auto-completed)</span>' : '';
@@ -379,8 +465,9 @@ function updateMatchHistory() {
                     <span class="match-id">${match.id}${autoCompletedText}</span>
                     <span class="match-winner">Winner: ${winnerName}</span>
                 </div>
-                <div class="match-result">
-                    ${resultText}${scoreText}
+                <div class="match-result-enhanced">
+                    <span class="player-info">${player1Display} vs ${player2Display}</span>
+                    <span class="result-score">${scoreText}</span>
                 </div>
             </div>
         `;

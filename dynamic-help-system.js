@@ -53,6 +53,19 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Note:</strong> You cannot delete the currently active tournament.</p>
                 `
+            },
+            results: {
+                title: "Match Results",
+                content: `
+                    <p><strong>Live Match Results:</strong> View completed matches with enhanced progression information.</p>
+                    <p><strong>Display Format:</strong></p>
+                    <ul>
+                        <li><strong>Player Names:</strong> Winner highlighted in green</li>
+                        <li><strong>Progression Info:</strong> <em>Shows where each player advances (FS-2-1) or elimination rank (7th-8th)</em></li>
+                        <li><strong>Match Score:</strong> Right-aligned final leg scores when available</li>
+                    </ul>
+                    <p><strong>💡 Tip:</strong> Progression info updates immediately after each match completion.</p>
+                `
             }
         }
     },
