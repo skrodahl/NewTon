@@ -1167,6 +1167,9 @@ function rebuildBracketFromHistory(cleanHistory) {
         return;
     }
 
+    // Set global flag to prevent any transaction creation during rebuild
+    window.rebuildInProgress = true;
+
     console.log(`Rebuilding bracket from ${cleanHistory.length} transactions`);
 
     // 1. Clear existing matches and regenerate bracket structure
@@ -1199,25 +1202,23 @@ function rebuildBracketFromHistory(cleanHistory) {
         if (transaction.matchId && transaction.winner && transaction.loser) {
             const match = matches.find(m => m.id === transaction.matchId);
             if (match) {
-                // Apply the transaction directly to match state
-                match.completed = true;
-                match.winner = transaction.winner;
-                match.loser = transaction.loser;
-                match.winnerLegs = transaction.winnerLegs || 0;
-                match.loserLegs = transaction.loserLegs || 0;
-                match.state = 'COMPLETED';
+                // Ensure the match has the correct players from transaction
+                // We need both winner and loser in the match for completeMatch to work
+                match.player1 = transaction.winner;
+                match.player2 = transaction.loser;
 
-                // For AUTO transactions, mark as auto-advanced
-                if (transaction.completionType === 'AUTO') {
-                    match.autoAdvanced = true;
+                // Winner is always player1 for this rebuild approach
+                const winnerPlayerNumber = 1;
+                if (typeof completeMatch === 'function') {
+                    completeMatch(
+                        transaction.matchId,
+                        winnerPlayerNumber,
+                        transaction.winnerLegs || 0,
+                        transaction.loserLegs || 0,
+                        transaction.completionType || 'MANUAL'
+                    );
+                    appliedCount++;
                 }
-
-                // Apply progression for ALL transactions (both MANUAL and AUTO)
-                if (typeof advancePlayer === 'function') {
-                    advancePlayer(transaction.matchId, transaction.winner, transaction.loser);
-                }
-
-                appliedCount++;
             }
         }
     });
@@ -1229,6 +1230,11 @@ function rebuildBracketFromHistory(cleanHistory) {
     }
 
     console.log(`Bracket rebuild complete: applied ${appliedCount} transactions`);
+
+    // Delay clearing rebuild flag to prevent auto-advancements during UI refresh
+    setTimeout(() => {
+        window.rebuildInProgress = false;
+    }, 500);
 }
 
 // Update match states based on current player composition

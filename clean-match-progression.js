@@ -274,7 +274,8 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
     }
 
     // --- START TRANSACTION LOGIC ---
-    if (true) {
+    // Skip transaction creation during rebuild to prevent corruption
+    if (!window.rebuildInProgress) {
         // Capture current state BEFORE making any changes
         const beforeMatchesState = JSON.parse(JSON.stringify(matches));
 
@@ -359,7 +360,10 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             console.error('Grand-final completion error', { matchId, winner, loser, error: e });
         }
 
-        processAutoAdvancements();
+        // Skip auto-advancements during rebuild to prevent transaction corruption
+        if (!window.rebuildInProgress) {
+            processAutoAdvancements();
+        }
         return true;
     } else {
         console.error(`Failed to advance players from ${matchId}`);
@@ -694,6 +698,11 @@ function processAutoAdvancement(match) {
 function processAutoAdvancements() {
     if (!matches || matches.length === 0) return;
 
+    // Skip auto-advancements during rebuild to prevent transaction corruption
+    if (window.rebuildInProgress) {
+        return;
+    }
+
     let foundAdvancement = true;
     let iterations = 0;
     const maxIterations = 10;
@@ -839,7 +848,10 @@ function generateCleanBracket() {
     generateAllMatches(bracket, bracketSize);
 
     // Process initial auto-advancements (real vs walkover)
-    processAutoAdvancements();
+    // Skip during rebuild to prevent transaction corruption
+    if (!window.rebuildInProgress) {
+        processAutoAdvancements();
+    }
 
     // Save and render
     if (typeof saveTournament === 'function') {
