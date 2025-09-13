@@ -956,6 +956,36 @@ function isMatchUndoable(matchId) {
 }
 
 // Helper function to find matches that are directly affected by undoing a specific match
+// Helper function to follow walkover chain to final destination
+function followWalkoverChain(matchId, progression) {
+    let currentMatchId = matchId;
+    let visited = new Set(); // Prevent infinite loops
+
+    while (currentMatchId && !visited.has(currentMatchId)) {
+        visited.add(currentMatchId);
+
+        const match = matches.find(m => m.id === currentMatchId);
+        if (!match) break;
+
+        // If match has real players or is not a walkover, this is the final destination
+        if (!isWalkover(match.player1) && !isWalkover(match.player2)) {
+            return currentMatchId;
+        }
+
+        // If it's a walkover match, follow the progression chain
+        const matchProgression = progression[currentMatchId];
+        if (!matchProgression || !matchProgression.winner) {
+            break;
+        }
+
+        // Follow where the winner of this walkover match goes
+        const [nextMatchId] = matchProgression.winner;
+        currentMatchId = nextMatchId;
+    }
+
+    return matchId; // Return original if can't follow chain
+}
+
 function getConsequentialMatches(transaction) {
     const consequentialMatches = [];
 
@@ -974,7 +1004,9 @@ function getConsequentialMatches(transaction) {
     // Add winner destination match if it exists
     if (matchProgression.winner) {
         const [targetMatchId] = matchProgression.winner;
-        const targetMatch = matches.find(m => m.id === targetMatchId);
+        // Follow walkover chain to final destination
+        const finalMatchId = followWalkoverChain(targetMatchId, progression);
+        const targetMatch = matches.find(m => m.id === finalMatchId);
         if (targetMatch) {
             consequentialMatches.push({
                 id: targetMatch.id,
@@ -987,7 +1019,9 @@ function getConsequentialMatches(transaction) {
     // Add loser destination match if it exists
     if (matchProgression.loser) {
         const [targetMatchId] = matchProgression.loser;
-        const targetMatch = matches.find(m => m.id === targetMatchId);
+        // Follow walkover chain to final destination
+        const finalMatchId = followWalkoverChain(targetMatchId, progression);
+        const targetMatch = matches.find(m => m.id === finalMatchId);
         if (targetMatch) {
             consequentialMatches.push({
                 id: targetMatch.id,
@@ -1146,12 +1180,7 @@ function rebuildBracketFromHistory(cleanHistory) {
         return;
     }
 
-    // 2. Process initial auto-advancements to get baseline bracket state
-    if (typeof processAutoAdvancements === 'function') {
-        processAutoAdvancements();
-    }
-
-    // 3. Apply each transaction from clean history in chronological order
+    // 2. Apply each transaction from clean history in chronological order
     const chronologicalHistory = cleanHistory
         .slice() // Don't mutate original array
         .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
@@ -1169,6 +1198,11 @@ function rebuildBracketFromHistory(cleanHistory) {
                 match.loserLegs = transaction.loserLegs || 0;
                 match.state = 'COMPLETED';
 
+                // For AUTO transactions, mark as auto-advanced
+                if (transaction.completionType === 'AUTO') {
+                    match.autoAdvanced = true;
+                }
+
                 // Apply progression for ALL transactions (both MANUAL and AUTO)
                 if (typeof advancePlayer === 'function') {
                     advancePlayer(transaction.matchId, transaction.winner, transaction.loser);
@@ -1178,11 +1212,6 @@ function rebuildBracketFromHistory(cleanHistory) {
             }
         }
     });
-
-    // 4. Process any auto-advancements that resulted from the applied transactions
-    if (typeof processAutoAdvancements === 'function') {
-        processAutoAdvancements();
-    }
 
     // 5. Update match states and UI
     updateAllMatchStates();
