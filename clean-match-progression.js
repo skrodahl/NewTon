@@ -261,7 +261,7 @@ function advancePlayer(matchId, winner, loser) {
  * MODIFIED: Now saves to history before making changes
  */
 // UPDATE: Enhanced completeMatch with help integration for first match
-function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0) {
+function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0, completionType = 'MANUAL') {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
         console.error('Match ' + matchId + ' not found');
@@ -284,6 +284,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         const transaction = {
             id: `tx_${Date.now()}`,
             type: 'COMPLETE_MATCH',
+            completionType: completionType,
             description: `${matchId}: ${winner.name} defeats ${loser.name}`,
             timestamp: new Date().toISOString(),
             matchId: matchId,
@@ -688,7 +689,7 @@ function processAutoAdvancement(match) {
 
     // Mark as auto-advanced and complete
     match.autoAdvanced = true;
-    return completeMatch(match.id, winnerPlayerNumber);
+    return completeMatch(match.id, winnerPlayerNumber, 0, 0, 'AUTO');
 }
 
 /**
@@ -722,7 +723,7 @@ function processAutoAdvancements() {
 
                 // Mark as auto-advanced and complete
                 match.autoAdvanced = true;
-                completeMatch(match.id, winnerPlayerNumber);
+                completeMatch(match.id, winnerPlayerNumber, 0, 0, 'AUTO');
                 foundAdvancement = true;
             } else if (!match.completed && match.player1 && match.player2) {
                 // Debug: Why isn't this match auto-advancing?

@@ -1027,35 +1027,179 @@ function createUndoModalContent(matchId, consequentialMatches) {
 
 function handleSurgicalUndo(matchId) {
     const history = getTournamentHistory();
-    const transaction = history.find(t => t.matchId === matchId);
+    const transaction = history.find(t => t.matchId === matchId && t.completionType === 'MANUAL');
 
     if (!transaction) {
-        alert('Could not find the match in the history to undo.');
+        alert('Could not find a manual completion for this match in the history to undo.');
         return;
     }
 
-    // Find consequential matches instead of downstream
+    // For display purposes, still find consequential matches to show user what will be affected
     const consequentialMatches = getConsequentialMatches(transaction);
     
-    // Still need to find all affected transactions for the actual undo
-    const downstreamMatches = getDownstreamMatches(matchId, tournament.bracketSize);
-    const affectedMatches = new Set([matchId, ...downstreamMatches]);
-    const transactionsToUndo = history.filter(t => affectedMatches.has(t.matchId));
-
-    if (transactionsToUndo.length === 0) {
-        alert('No undoable transactions found for this match and its downstream dependencies.');
-        return;
-    }
-
     // Create enhanced confirmation modal content
     const modalContent = createUndoModalContent(matchId, consequentialMatches);
     
     showUndoConfirmationModal(modalContent, () => {
-        const transactionIdsToUndo = transactionsToUndo.map(t => t.id);
-        if (typeof undoTransactions === 'function') {
-            undoTransactions(transactionIdsToUndo);
+        // New bulletproof undo: Only remove the MANUAL transaction and rebuild
+        undoManualTransaction(transaction.id);
+    });
+}
+
+// Bulletproof undo: Remove MANUAL transaction and rebuild entire bracket
+function undoManualTransaction(transactionId) {
+    console.log(`🔄 Starting bulletproof undo for transaction: ${transactionId}`);
+    
+    // 1. Remove the MANUAL transaction from history
+    const history = getTournamentHistory();
+    const updatedHistory = history.filter(t => t.id !== transactionId);
+    localStorage.setItem('tournamentHistory', JSON.stringify(updatedHistory));
+    
+    // 2. Rebuild entire bracket from remaining MANUAL transactions
+    rebuildBracketFromHistory(updatedHistory);
+    
+    console.log(`✅ Bulletproof undo completed`);
+}
+
+// Rebuild entire bracket state from MANUAL transactions only
+function rebuildBracketFromHistory(history) {
+    console.log(`🔧 Rebuilding bracket from ${history.length} transactions...`);
+    
+    // 1. Reset all matches to their original state
+    resetAllMatches();
+    
+    // 2. Replay only MANUAL transactions in chronological order
+    const manualTransactions = history
+        .filter(t => t.completionType === 'MANUAL')
+        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+    
+    console.log(`📋 Replaying ${manualTransactions.length} MANUAL transactions...`);
+    
+    // 3. Apply each MANUAL transaction
+    manualTransactions.forEach(transaction => {
+        replayTransaction(transaction);
+    });
+    
+    // 4. Process all auto-advancements based on current state
+    if (typeof processAutoAdvancements === 'function') {
+        processAutoAdvancements();
+    }
+    
+    // 5. Update match states and UI
+    updateAllMatchStates();
+    refreshTournamentUI();
+    
+    console.log(`✅ Bracket rebuild completed`);
+}
+
+// Reset all matches to their initial state
+function resetAllMatches() {
+    matches.forEach(match => {
+        // Reset completion status
+        match.completed = false;
+        match.winner = null;
+        match.loser = null;
+        match.winnerLegs = 0;
+        match.loserLegs = 0;
+        match.autoAdvanced = false;
+        match.state = 'PENDING';
+        
+        // Reset players to original seeded positions or TBD
+        // This part needs to restore to the bracket's initial state
+        if (match.id.includes('FS-1-')) {
+            // Keep original seeded players for Round 1 matches
+            // (These should already be set correctly)
+        } else {
+            // Reset all other matches to TBD
+            if (match.player1 && !match.player1.seeded) {
+                match.player1 = { name: 'TBD', isBye: false };
+            }
+            if (match.player2 && !match.player2.seeded) {
+                match.player2 = { name: 'TBD', isBye: false };
+            }
         }
     });
+}
+
+// Replay a single MANUAL transaction
+function replayTransaction(transaction) {
+    console.log(`🔄 Replaying: ${transaction.description}`);
+    
+    const match = matches.find(m => m.id === transaction.matchId);
+    if (!match) {
+        console.error(`Match ${transaction.matchId} not found during replay`);
+        return;
+    }
+    
+    // Ensure the match has the right players (they should from resetAllMatches + previous transactions)
+    if (transaction.winner && transaction.loser) {
+        // Apply the completion without creating new transactions (we're replaying)
+        const winnerPlayerNumber = match.player1?.id === transaction.winner.id ? 1 : 2;
+        
+        // Use the existing completeMatch logic but skip transaction saving
+        replayMatchCompletion(transaction.matchId, winnerPlayerNumber, transaction);
+    }
+}
+
+// Complete a match during replay (no transaction saving)
+function replayMatchCompletion(matchId, winnerPlayerNumber, originalTransaction) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return;
+    
+    const winner = winnerPlayerNumber === 1 ? match.player1 : match.player2;
+    const loser = winnerPlayerNumber === 1 ? match.player2 : match.player1;
+    
+    // Apply completion
+    match.winner = winner;
+    match.loser = loser;
+    match.completed = true;
+    match.state = 'COMPLETED';
+    match.winnerLegs = originalTransaction.winner.legs || 0;
+    match.loserLegs = originalTransaction.loser.legs || 0;
+    
+    // Advance players using hardcoded logic
+    if (typeof advancePlayer === 'function') {
+        advancePlayer(matchId, winner, loser);
+    }
+    
+    console.log(`✓ Replayed completion: ${matchId}`);
+}
+
+// Update match states based on current player composition
+function updateAllMatchStates() {
+    matches.forEach(match => {
+        if (match.completed) {
+            match.state = 'COMPLETED';
+        } else if (match.player1?.name === 'TBD' || match.player2?.name === 'TBD' ||
+                   isWalkover(match.player1) || isWalkover(match.player2)) {
+            match.state = 'PENDING';
+        } else if (match.player1 && match.player2) {
+            match.state = 'READY';
+        } else {
+            match.state = 'PENDING';
+        }
+    });
+}
+
+// Refresh tournament UI after rebuild
+function refreshTournamentUI() {
+    console.log('🎨 Refreshing tournament UI after rebuild...');
+    
+    // Re-render bracket
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    }
+    
+    // Update any other UI elements that depend on match state
+    if (typeof updatePlayersDisplay === 'function') {
+        updatePlayersDisplay();
+    }
+    
+    if (typeof saveCurrentTournament === 'function') {
+        saveCurrentTournament();
+    }
+    
+    console.log('✓ UI refresh completed');
 }
 
 // --- END: Surgical Undo Implementation ---
