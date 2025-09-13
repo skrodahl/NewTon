@@ -753,7 +753,7 @@ function showMatchDetailsModal(message) {
     document.addEventListener('keydown', handleEscape);
 }
 
-function showUndoConfirmationModal(message, onConfirm) {
+function showUndoConfirmationModal(message, onConfirm, onCancel = null) {
     const modal = document.getElementById('undoConfirmModal');
     const messageDiv = document.getElementById('undoConfirmMessage');
     const cancelBtn = document.getElementById('undoConfirmCancel');
@@ -782,7 +782,10 @@ function showUndoConfirmationModal(message, onConfirm) {
         confirmBtn.onclick = null;
     };
     
-    cancelBtn.onclick = closeModal;
+    cancelBtn.onclick = () => {
+        closeModal();
+        if (onCancel) onCancel();
+    };
     confirmBtn.onclick = () => {
         closeModal();
         onConfirm();
@@ -1079,11 +1082,26 @@ function createUndoModalContent(matchId, consequentialMatches) {
     return content;
 }
 
+// Global debounce state for undo operations
+let undoDebounceActive = false;
+
 function handleSurgicalUndo(matchId) {
+    // Debounce: Prevent rapid undo clicks
+    if (undoDebounceActive) {
+        console.log('⏸️ Undo operation blocked - debounce active');
+        return;
+    }
+
+    // Activate debounce immediately to prevent multiple undo modals
+    undoDebounceActive = true;
+    console.log('🔒 Undo debounce activated');
+
     const history = getTournamentHistory();
     const transaction = history.find(t => t.matchId === matchId && t.completionType === 'MANUAL');
 
     if (!transaction) {
+        // Clear debounce if we can't proceed
+        undoDebounceActive = false;
         alert('Could not find a manual completion for this match in the history to undo.');
         return;
     }
@@ -1097,6 +1115,16 @@ function handleSurgicalUndo(matchId) {
     showUndoConfirmationModal(modalContent, () => {
         // New bulletproof undo: Only remove the MANUAL transaction and rebuild
         undoManualTransaction(transaction.id);
+
+        // Clear debounce after operation completes
+        setTimeout(() => {
+            undoDebounceActive = false;
+            console.log('🔓 Undo debounce cleared');
+        }, 1500);
+    }, () => {
+        // User cancelled - clear debounce immediately
+        undoDebounceActive = false;
+        console.log('❌ Undo cancelled - debounce cleared');
     });
 }
 
@@ -1232,12 +1260,12 @@ function rebuildBracketFromHistory(cleanHistory) {
 
     console.log(`Bracket rebuild complete: applied ${appliedCount} transactions`);
 
-    // Extended delay to prevent auto-advancements during UI refresh cycles
+    // Reasonable delay to prevent auto-advancements during UI refresh cycles
     setTimeout(() => {
         console.log('🔓 Rebuild protection window ending - re-enabling auto-advancements');
         window.rebuildInProgress = false;
         window.autoAdvancementsDisabled = false;
-    }, 2000);
+    }, 500);
 }
 
 // Update match states based on current player composition

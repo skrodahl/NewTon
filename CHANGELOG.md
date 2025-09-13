@@ -1,5 +1,42 @@
 # 2025-09-14
 
+## v1.2.4 - Undo System Stability & Rapid-Click Protection
+
+### System Stability Improvements
+- **Undo Operation Debouncing**
+  - Added 1.5-second debounce protection for undo operations
+  - Prevents rapid clicking that could cause tournament state corruption
+  - Clear console logging shows when debounce is active/cleared
+  - Maintains all sophisticated undo logic while preventing edge case failures
+
+- **Enhanced Rebuild Protection**
+  - Dual flag system (`rebuildInProgress` + `autoAdvancementsDisabled`) for comprehensive transaction isolation
+  - Optimized protection window from 2000ms to 500ms for better performance
+  - Debug logging with stack traces for auto-advancement trigger identification
+  - Multiple safety checks throughout rebuild process for bulletproof operation
+
+### Root Cause Resolution
+- **Cascading Auto-Advancement Protection**
+  - Identified and resolved rapid-click induced auto-advancement cascades
+  - Stack trace analysis revealed overlapping rebuild operations as corruption source
+  - Defense-in-depth approach maintains system integrity under all usage patterns
+  - Normal single undo operations unaffected by stability improvements
+
+### Technical Implementation
+- Enhanced `handleSurgicalUndo()` with debounce logic and clear user feedback
+- Extended `processAutoAdvancements()` with comprehensive blocking mechanisms
+- Optimized `rebuildBracketFromHistory()` protection window for better responsiveness
+- Maintained all existing debug capabilities for future troubleshooting
+
+### Files Modified
+- `bracket-rendering.js` - Undo debouncing, optimized rebuild protection, enhanced debugging
+- `clean-match-progression.js` - Auto-advancement blocking with stack trace logging
+- `main.js` - Version bump to 1.2.4
+
+This update resolves tournament state corruption under rapid undo operations while maintaining the sophisticated undo system's precision and reliability for normal tournament management.
+
+----
+
 ## v1.2.3 - Enhanced Dialog Interfaces & Tournament Experience
 
 ### User Interface Improvements
