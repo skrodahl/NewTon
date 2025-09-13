@@ -216,7 +216,6 @@ function advancePlayer(matchId, winner, loser) {
         return true;
     }
 
-    console.log(`Advancing from ${matchId}: Winner=${winner?.name}, Loser=${loser?.name}`);
 
     // Place winner
     if (rule.winner) {
@@ -230,7 +229,6 @@ function advancePlayer(matchId, winner, loser) {
                 paid: winner.paid,
                 stats: winner.stats
             };
-            console.log(`✓ Winner ${winner.name} → ${targetMatchId}.${slot}`);
         } else {
             console.error(`Target match ${targetMatchId} not found for winner`);
         }
@@ -248,7 +246,6 @@ function advancePlayer(matchId, winner, loser) {
                 paid: loser.paid,
                 stats: loser.stats
             };
-            console.log(`✓ Loser ${loser.name} → ${targetMatchId}.${slot}`);
         } else {
             console.error(`Target match ${targetMatchId} not found for loser`);
         }
@@ -312,7 +309,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
     const success = advancePlayer(matchId, winner, loser);
 
     if (success) {
-        console.log(`✓ Match ${matchId} completed: ${winner.name} defeats ${loser.name}`);
 
         saveTournament();
         if (typeof updateResultsTable === 'function') updateResultsTable();
@@ -702,13 +698,8 @@ function processAutoAdvancements() {
     let iterations = 0;
     const maxIterations = 10;
 
-    console.log('Processing auto-advancements...');
+    const autoAdvancedMatches = [];
     
-    // Debug: Show all matches that could potentially auto-advance
-    const candidates = matches.filter(m => !m.completed && m.player1 && m.player2);
-    console.log(`Found ${candidates.length} non-completed matches with both players:`, 
-        candidates.map(m => `${m.id}: ${m.player1.name} vs ${m.player2.name}`));
-
     while (foundAdvancement && iterations < maxIterations) {
         foundAdvancement = false;
         iterations++;
@@ -719,26 +710,18 @@ function processAutoAdvancements() {
                 const p1IsWalkover = isWalkover(match.player1);
                 const winnerPlayerNumber = p1IsWalkover ? 2 : 1;
 
-                console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name})`);
-
                 // Mark as auto-advanced and complete
                 match.autoAdvanced = true;
+                autoAdvancedMatches.push(match.id);
                 completeMatch(match.id, winnerPlayerNumber, 0, 0, 'AUTO');
                 foundAdvancement = true;
-            } else if (!match.completed && match.player1 && match.player2) {
-                // Debug: Why isn't this match auto-advancing?
-                const p1IsWalkover = isWalkover(match.player1);
-                const p2IsWalkover = isWalkover(match.player2);
-                console.log(`NOT auto-advancing ${match.id}: ${match.player1.name} vs ${match.player2.name} (p1Walkover=${p1IsWalkover}, p2Walkover=${p2IsWalkover})`);
             }
         });
-
-        if (foundAdvancement) {
-            console.log(`Auto-advancement iteration ${iterations} completed`);
-        }
     }
-
-    console.log(`Auto-advancement finished after ${iterations} iterations`);
+    
+    if (autoAdvancedMatches.length > 0) {
+        console.log(`Auto-advanced: ${autoAdvancedMatches.join(', ')} (${autoAdvancedMatches.length} matches)`);
+    }
 }
 
 /**
@@ -1656,7 +1639,6 @@ function saveTransaction(transaction) {
     }
 
     localStorage.setItem('tournamentHistory', JSON.stringify(history));
-    console.log(`✓ Saved transaction: ${transaction.description}`);
 }
 
 /**

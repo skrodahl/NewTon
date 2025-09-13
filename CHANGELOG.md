@@ -1,53 +1,51 @@
 # 2025-09-13
 
-## v1.2.2 - Bulletproof Undo System Architecture
+## v1.2.1 - Bulletproof Transaction-Based Undo System
 
-### Revolutionary Change
+### Revolutionary Architectural Change
 - **Complete Undo System Redesign**
-  - Replaced complex cascade-tracking undo logic with bulletproof transaction-based architecture
-  - Introduced MANUAL vs AUTO transaction distinction for surgical precision
-  - Implemented complete bracket rebuilding approach for guaranteed consistency
-  - Eliminated all cascade-related bugs and invalid match states
-  - Fixed undone matches returning to correct states (READY instead of LIVE)
+  - Replaced complex beforeState restoration with clean transaction-history rebuilding
+  - Implemented single-source-of-truth approach using transaction history
+  - Eliminated all state conflicts and unwanted match re-completions
+  - Fixed surgical undo to preserve independent matches correctly
 
-### Technical Innovation
-- **Transaction Type Classification**
-  - All match completions now marked as `completionType: 'MANUAL'` (user actions) or `'AUTO'` (system walkovers)
-  - MANUAL transactions represent real tournament decisions worth preserving
-  - AUTO transactions represent system consequences that can be recalculated
-  - Complete historical record maintained for tournament analysis
+### Core Technical Improvements
+- **Transaction-Based History Rebuilding**
+  - New `rebuildBracketFromHistory()` function rebuilds entire bracket from clean transaction history
+  - Leverages existing hardcoded progression logic for bulletproof reliability
+  - Eliminates complex state reconciliation and replay conflicts
+  - Ensures bracket state always matches transaction history exactly
 
-- **Bulletproof Undo Architecture**
-  - Undo operations target only MANUAL transactions
-  - Entire bracket state rebuilt from remaining MANUAL transactions
-  - Hardcoded MATCH_PROGRESSION logic recreates all AUTO advancements
-  - Guarantees perfect consistency regardless of scenario complexity
+- **Enhanced Undoability Logic**
+  - Updated `isMatchUndoable()` to use transaction.completionType instead of unreliable match flags
+  - Only MANUAL transactions are undoable (prevents AUTO walkover undo attempts)
+  - Blocks undo only when downstream MANUAL transactions exist (preserves safety guardrails)
+  - Maintains step-by-step undo approach for tournament integrity
 
-- **Enhanced Undo Dialog**
-  - Removed monospace font for improved readability
-  - Fixed match ID display showing proper identifiers (FS-2-1, BS-1-1) instead of internal numbers
-  - Visual match cards styled like Match Controls interface
-  - Clear frontside/backside distinction with appropriate icons
+- **Tournament Status Management**
+  - GRAND-FINAL undo now properly resets tournament status from 'completed' to 'active'
+  - Clears final placements to restore live standings display
+  - Automatically refreshes Results table to show current tournament progress
+  - Prevents incorrect final placement points after undo operations
 
-### User Experience Transformation
-- **Reliable Undo Operations**
-  - No more incomplete undos leaving players in impossible positions
-  - No more "TBD vs Real Player (READY)" illegal states
-  - No more cascade failures in complex walkover scenarios
-  - Perfect state consistency after every undo operation
+### User Experience Fixes
+- **Surgical Undo Precision**
+  - Undoing FS-2-1 no longer affects independently completed FS-2-2
+  - Eliminated unwanted match re-completions during undo operations
+  - Maintains proper match states after complex undo sequences
+  - Preserves tournament integrity with step-by-step undo safety
 
-- **Improved Undo Interface**
-  - Clear visual presentation of affected matches
-  - Proper font styling consistent with other dialogs
-  - Match cards show actual match IDs and player names
-  - Organized display with frontside matches first, backside second
+- **Match State Consistency**
+  - Fixed progression application for both MANUAL and AUTO transactions during rebuild
+  - Eliminated "TBD vs TBD" states in downstream matches after undo
+  - Proper player advancement from all transaction types
+  - Consistent bracket state regardless of undo sequence complexity
 
-### Architecture Benefits
-- **Future-Proof Design**
-  - Works with any bracket size or tournament complexity
-  - Adapts automatically to changes in auto-advancement logic
-  - Self-validating through complete state reconstruction
-  - Single source of truth: MANUAL transaction history
+### Architecture Strengths
+- **Single Source of Truth**: Transaction history drives all bracket state
+- **Proven Foundation**: Uses existing hardcoded MATCH_PROGRESSION logic
+- **Bulletproof Consistency**: Complete rebuild eliminates edge cases
+- **Future-Proof Design**: Scales to any bracket size or tournament complexity
 
 - **Debugging and Analysis**
   - Complete audit trail of all match completions preserved

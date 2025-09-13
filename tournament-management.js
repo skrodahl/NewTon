@@ -121,7 +121,7 @@ function exportTournament() {
 }
 
 // SAVE TOURNAMENT ONLY - Never touches global config
-function saveTournamentOnly() {
+function saveTournamentOnly(shouldLog = true) {
     if (!tournament) return;
 
     // Build clean tournament object with current data
@@ -153,12 +153,25 @@ function saveTournamentOnly() {
     localStorage.setItem('dartsTournaments', JSON.stringify(tournaments));
     localStorage.setItem('currentTournament', JSON.stringify(tournamentToSave));
 
-    console.log('✓ Tournament saved (config unchanged)');
+    if (shouldLog) {
+        console.log('✓ Tournament saved (config unchanged)');
+    }
 }
 
-// WRAPPER FOR BACKWARD COMPATIBILITY
+// Simple debouncing to prevent save spam
+let lastSaveTime = 0;
+const SAVE_DEBOUNCE_MS = 100; // Wait 100ms between save logs
+
+// WRAPPER FOR BACKWARD COMPATIBILITY  
 function saveTournament() {
-    saveTournamentOnly();
+    const now = Date.now();
+    const shouldLog = (now - lastSaveTime) > SAVE_DEBOUNCE_MS;
+    
+    saveTournamentOnly(shouldLog);
+    
+    if (shouldLog) {
+        lastSaveTime = now;
+    }
 }
 
 function updateTournamentStatus() {
