@@ -1,5 +1,29 @@
 # 2025-09-14
 
+## v1.2.5 - Enhanced JSON Export with Match Results
+
+### Export Functionality Enhancement
+- **Match Results in JSON Export**
+  - Registration page JSON export now includes complete match history
+  - Added `matchResults` section with chronological match data
+  - Each match includes player details, winner, final score, and completion timestamp
+  - Walkover and auto-completion flags for comprehensive match tracking
+  - Maintains existing tournament metadata and player statistics sections
+
+### Technical Implementation
+- Enhanced `generateResultsJSON()` function in `results-config.js`
+- Made `isWalkoverMatch()` globally available to prevent code duplication
+- Match results sorted chronologically (newest first) matching UI display
+- Consistent walkover detection logic across display and export functions
+
+### Files Modified
+- `results-config.js` - Enhanced JSON generation with match results section
+- `main.js` - Made `isWalkoverMatch()` globally available, version bump to 1.2.5
+
+This update provides complete tournament data export in a single JSON file, eliminating the need for separate match results export functionality.
+
+----
+
 ## v1.2.4 - Undo System Stability & Rapid-Click Protection
 
 ### System Stability Improvements

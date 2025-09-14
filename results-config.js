@@ -502,6 +502,38 @@ function generateResultsJSON() {
         return nameA.localeCompare(nameB);
     });
 
+    // Get completed matches for match results section
+    const completedMatches = matches ? matches
+        .filter(match => match.completed)
+        .sort((a, b) => {
+            // Sort by completion timestamp if available, otherwise by match ID
+            const aTime = a.completedAt || 0;
+            const bTime = b.completedAt || 0;
+            return bTime - aTime; // Latest first
+        })
+        .map(match => {
+            const isWalkover = match.autoAdvanced || isWalkoverMatch(match);
+            return {
+                matchId: match.id,
+                player1: {
+                    name: match.player1?.name || 'Unknown',
+                    id: match.player1?.id || null
+                },
+                player2: {
+                    name: match.player2?.name || 'Unknown',
+                    id: match.player2?.id || null
+                },
+                winner: {
+                    name: match.winner?.name || 'Unknown',
+                    id: match.winner?.id || null
+                },
+                finalScore: match.finalScore || null,
+                completedAt: match.completedAt || null,
+                isWalkover: isWalkover,
+                autoCompleted: match.autoAdvanced || false
+            };
+        }) : [];
+
     // Build JSON structure
     const jsonData = {
         tournament: {
@@ -514,7 +546,7 @@ function generateResultsJSON() {
         players: sortedPlayers.map(player => {
             const points = calculatePlayerPoints(player);
             const legs = calculatePlayerLegs(player.id);
-            
+
             return {
                 rank: player.placement || 0,
                 rankDisplay: formatRanking(player.placement),
@@ -527,7 +559,8 @@ function generateResultsJSON() {
                 legsWon: legs.legsWon,
                 legsLost: legs.legsLost
             };
-        })
+        }),
+        matchResults: completedMatches
     };
 
     return JSON.stringify(jsonData, null, 2);
