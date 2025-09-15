@@ -1368,11 +1368,10 @@ function createMatchCard(match) {
         `${originalClickHandler}; setTimeout(() => { if (document.getElementById('matchCommandCenterModal').style.display === 'flex') showMatchCommandCenter(); }, 500)` : 
         '';
     
-    const actionButton = state === 'live' ? 
-        `<div class="cc-winner-buttons">
-            <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 1)">${player1Name} Wins</button>
-            <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 2)">${player2Name} Wins</button>
-        </div>` :
+    // For live matches, no separate action button needed (winner buttons are in player area)
+    // For non-live matches, show the start button
+    const actionButton = state === 'live' ?
+        '' :
         `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}">Start Match</button>`;
     
     const liveClass = state === 'live' ? ' cc-match-card-live' : '';
@@ -1382,13 +1381,17 @@ function createMatchCard(match) {
         <div class="cc-match-card${liveClass}${backsideClass}">
             <div class="cc-match-card-header">
                 <div class="cc-match-id">${match.id}</div>
-                <div class="cc-match-format">${format} • ${round}</div>
+                <div class="cc-match-format">${format} • <strong>${round}</strong></div>
             </div>
             
             <div class="cc-match-players">
-                <span class="cc-player-name" onclick="openStatsModal(${player1Id})">${player1Name}</span>
-                <span class="cc-vs-divider">vs</span>
-                <span class="cc-player-name" onclick="openStatsModal(${player2Id})">${player2Name}</span>
+                ${state === 'live' ?
+                    `<button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 1)">${player1Name} Wins</button>
+                     <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 2)">${player2Name} Wins</button>` :
+                    `<span class="cc-player-name" onclick="openStatsModal(${player1Id})">${player1Name}</span>
+                     <span class="cc-vs-divider">vs</span>
+                     <span class="cc-player-name" onclick="openStatsModal(${player2Id})">${player2Name}</span>`
+                }
             </div>
             
             <div class="cc-match-controls">
@@ -1398,14 +1401,15 @@ function createMatchCard(match) {
                         ${laneOptions}
                     </select>
                 </div>
-                
+
                 <div class="cc-control-group">
                     <label class="cc-control-label">Ref:</label>
                     <select class="cc-match-dropdown" onchange="updateMatchReferee('${match.id}', this.value); setTimeout(() => showMatchCommandCenter(), 200);">
                         ${refereeOptions}
                     </select>
                 </div>
-                
+
+                ${state === 'live' ? '' : '<div style="flex: 1;"></div>'}
                 ${actionButton}
             </div>
         </div>

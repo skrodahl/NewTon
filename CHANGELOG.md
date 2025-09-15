@@ -24,6 +24,21 @@
   - Both views stay synchronized regardless of where changes are made
   - Automatic refresh of open modals when data changes
 
+- **Streamlined Live Match Interface**
+  - Live matches now show "Player 1 Wins" / "Player 2 Wins" buttons instead of player names
+  - Removed redundant separate winner buttons section for cleaner interface
+  - Single-click winner selection directly from player area
+  - Statistics access removed from live matches (available in Match Completion dialog)
+
+- **Improved Control Layout**
+  - Lane and Referee dropdowns now aligned to left for reduced mouse movement
+  - Start Match button positioned on right side for ready matches
+  - More efficient control grouping and visual hierarchy
+
+- **Enhanced Typography**
+  - Round descriptions ("Frontside Round #", "Backside Round #") now displayed in bold
+  - "Best of #" format text remains normal weight for clear visual distinction
+
 ### Technical Implementation
 - Enhanced `createMatchCard()` function to add backside identification classes
 - Added bracket refresh logic to `updateMatchLane()` and `updateMatchReferee()` functions
