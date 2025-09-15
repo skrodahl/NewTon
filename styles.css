@@ -1487,6 +1487,11 @@ a:hover { color: #1e40af; }
   background: #047857;
 }
 
+/* Darker background for backside matches in Match Controls */
+#backMatchesSection .cc-match-card {
+  background: #d1d5db;
+}
+
 .cc-no-matches-message {
   text-align: center;
   color: #6b7280;
