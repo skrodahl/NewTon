@@ -1,5 +1,56 @@
 # 2025-09-16
 
+## v1.2.8 Excluded Lanes Configuration & Match Format Update
+
+### Lane Management Enhancement
+- **Excluded Lanes Configuration**
+  - Added new "Excluded Lanes" field in Config → Lane Management
+  - Enter comma-separated lane numbers to exclude from assignment (e.g., "5,7")
+  - Excluded lanes appear as "(excluded)" in match lane dropdowns
+  - Excluded lanes are grayed out and disabled, matching the existing "(in use)" pattern
+  - Input validation ensures excluded lanes don't exceed maximum lane setting
+  - Backwards compatible - existing configurations work without excluded lanes
+  - Perfect for venues with permanently unusable lanes or temporarily occupied dartboards
+
+- **Enhanced Lane Usage Display**
+  - Updated "Show Current Lane Usage" to display excluded lanes information
+  - Shows total lanes, excluded lanes, currently in use, and available for assignment
+  - Provides comprehensive overview of lane availability status
+
+- **Configuration Management**
+  - Excluded lanes saved and loaded with all other global settings
+  - Invalid excluded lanes (above max lanes) filtered out with warning message
+  - Real-time validation when saving lane configuration
+
+### Match Format Configuration
+- **Frontside Semifinal Default Change**
+  - Changed default from Best of 5 to Best of 3 for frontside semifinals
+  - Provides faster tournament progression and consistent semifinal formatting
+  - Affects new tournaments - existing tournaments maintain their current settings
+
+### Technical Implementation
+- Enhanced `generateLaneOptions()` to respect excluded lanes in dropdown generation
+- Updated `getAvailableLanes()` to filter out both used and excluded lanes
+- Modified `saveLaneConfiguration()` in both lane-management.js and results-config.js
+- Added `parseExcludedLanesString()` helper function for input validation
+- Updated `DEFAULT_CONFIG` to include `excludedLanes` array
+- Enhanced `applyConfigToUI()` to populate excluded lanes field from saved configuration
+
+### User Experience Improvements
+- Intuitive comma-separated input format for excluded lanes (e.g., "5,7,9")
+- Helper text explains the input format clearly
+- Lane dropdowns show clear visual distinction between available, in-use, and excluded lanes
+- Temporary exclusions easily managed by editing the excluded lanes field
+- Maintains physical lane number mapping for clear operational understanding
+
+### Files Modified
+- `lane-management.js` - Enhanced lane generation logic and exclusion handling
+- `results-config.js` - Updated configuration save/load with excluded lanes support
+- `tournament.html` - Added excluded lanes input field to configuration form
+- `main.js` - Version bump to 1.2.8
+
+This update enables precise lane management for venues with complex dartboard availability, providing both permanent exclusions for unusable lanes and flexible temporary exclusions for occupied boards.
+
 ## v1.2.7 UI Improvements & Match Controls Synchronization
 
 ### Dialog Transparency

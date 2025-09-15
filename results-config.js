@@ -18,7 +18,7 @@ const DEFAULT_CONFIG = {
     },
     legs: {
         regularRounds: 3,
-        frontsideSemifinal: 5,
+        frontsideSemifinal: 3,
         backsideSemifinal: 3,
         backsideFinal: 5,
         grandFinal: 5
@@ -26,6 +26,7 @@ const DEFAULT_CONFIG = {
     applicationTitle: "NewTon DC - Tournament Manager",
     lanes: {
         maxLanes: 4,
+        excludedLanes: [],
         requireLaneForStart: false
     },
     ui: {
@@ -104,6 +105,11 @@ function applyConfigToUI() {
     if (config.lanes) {
         safeSetValue('maxLanes', config.lanes.maxLanes);
         safeSetChecked('requireLaneForStart', config.lanes.requireLaneForStart);
+
+        // Set excluded lanes as comma-separated string
+        if (config.lanes.excludedLanes && Array.isArray(config.lanes.excludedLanes)) {
+            safeSetValue('excludedLanes', config.lanes.excludedLanes.join(','));
+        }
     }
 
     // UI configuration
@@ -192,9 +198,25 @@ function saveApplicationSettings() {
     alert('✓ Application settings saved successfully!');
 }
 
+// Helper function to parse excluded lanes from string
+function parseExcludedLanesString(excludedLanesString) {
+    if (!excludedLanesString || typeof excludedLanesString !== 'string') {
+        return [];
+    }
+
+    // Split by comma and convert to integers, filtering out invalid values
+    return excludedLanesString
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .map(s => parseInt(s))
+        .filter(n => !isNaN(n) && n > 0);
+}
+
 // LANE CONFIGURATION
 function saveLaneConfiguration() {
     const maxLanesElement = document.getElementById('maxLanes');
+    const excludedLanesElement = document.getElementById('excludedLanes');
     const requireLaneElement = document.getElementById('requireLaneForStart');
 
     if (!maxLanesElement) {
@@ -202,8 +224,21 @@ function saveLaneConfiguration() {
         return;
     }
 
+    // Parse excluded lanes from input
+    const excludedLanesString = excludedLanesElement ? excludedLanesElement.value : '';
+    const excludedLanes = parseExcludedLanesString(excludedLanesString);
+
+    // Validate excluded lanes are within range
+    const maxLanes = parseInt(maxLanesElement.value) || 4;
+    const validExcludedLanes = excludedLanes.filter(lane => lane <= maxLanes);
+    if (validExcludedLanes.length !== excludedLanes.length) {
+        const invalidLanes = excludedLanes.filter(lane => lane > maxLanes);
+        alert(`Warning: Some excluded lanes (${invalidLanes.join(', ')}) are above the maximum lane number (${maxLanes}) and will be ignored.`);
+    }
+
     config.lanes = config.lanes || {};
-    config.lanes.maxLanes = parseInt(maxLanesElement.value) || 4;
+    config.lanes.maxLanes = maxLanes;
+    config.lanes.excludedLanes = validExcludedLanes;
     config.lanes.requireLaneForStart = requireLaneElement ? requireLaneElement.checked : false;
 
     saveGlobalConfig();

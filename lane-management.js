@@ -4,6 +4,7 @@
 if (typeof config !== 'undefined') {
     config.lanes = config.lanes || {
         maxLanes: 4,           // Maximum number of lanes available
+        excludedLanes: [],     // Array of lane numbers to exclude (e.g., [5, 7])
         requireLaneForStart: false  // Whether to require lane before starting match
     };
 }
@@ -30,6 +31,7 @@ function getUsedLanes() {
  */
 function getAvailableLanes(excludeMatchId) {
     const maxLanes = (config && config.lanes && config.lanes.maxLanes) || 10;
+    const excludedLanes = (config && config.lanes && config.lanes.excludedLanes) || [];
     const usedLanes = getUsedLanes();
 
     // If we're updating an existing match, don't count its current lane as used
@@ -44,10 +46,10 @@ function getAvailableLanes(excludeMatchId) {
         }
     }
 
-    // Generate list of available lanes
+    // Generate list of available lanes (not used and not excluded)
     const availableLanes = [];
     for (let i = 1; i <= maxLanes; i++) {
-        if (!usedLanes.includes(i)) {
+        if (!usedLanes.includes(i) && !excludedLanes.includes(i)) {
             availableLanes.push(i);
         }
     }
@@ -108,20 +110,26 @@ function validateLaneAssignments() {
  */
 function generateLaneOptions(currentMatchId, currentLane = null) {
     const maxLanes = (config && config.lanes && config.lanes.maxLanes) || 10;
+    const excludedLanes = (config && config.lanes && config.lanes.excludedLanes) || [];
 
     let options = '<option value="">No</option>';
 
     for (let i = 1; i <= maxLanes; i++) {
         const isCurrentLane = currentLane && parseInt(currentLane) === i;
         const isInUse = isLaneInUse(i, currentMatchId);
+        const isExcluded = excludedLanes.includes(i);
 
         // Always allow current lane to stay selected
-        if (isCurrentLane || !isInUse) {
+        if (isCurrentLane || (!isInUse && !isExcluded)) {
             const selected = isCurrentLane ? 'selected' : '';
             options += `<option value="${i}" ${selected}>${i}</option>`;
         } else {
             // Show unavailable lanes as disabled with reason
-            options += `<option value="${i}" disabled style="color: #ccc;">${i} (in use)</option>`;
+            let reason = '';
+            if (isInUse) reason = ' (in use)';
+            else if (isExcluded) reason = ' (excluded)';
+
+            options += `<option value="${i}" disabled style="color: #ccc;">${i}${reason}</option>`;
         }
     }
 
@@ -199,12 +207,15 @@ function toggleActiveWithLaneValidation(matchId) {
 function showLaneUsage() {
     const usedLanes = getUsedLanes();
     const maxLanes = (config && config.lanes && config.lanes.maxLanes) || 10;
+    const excludedLanes = (config && config.lanes && config.lanes.excludedLanes) || [];
+    const availableLanes = getAvailableLanes();
     const validation = validateLaneAssignments();
 
     let message = `Lane Usage Summary:\n`;
-    message += `Available lanes: 1-${maxLanes}\n`;
+    message += `Total lanes: 1-${maxLanes}\n`;
+    message += `Excluded lanes: ${excludedLanes.length > 0 ? excludedLanes.join(', ') : 'None'}\n`;
     message += `Currently in use: ${usedLanes.length > 0 ? usedLanes.join(', ') : 'None'}\n`;
-    message += `Available: ${maxLanes - usedLanes.length}\n\n`;
+    message += `Available for assignment: ${availableLanes.length > 0 ? availableLanes.join(', ') : 'None'}\n\n`;
 
     if (!validation.valid) {
         message += `⚠️ CONFLICTS DETECTED:\n`;
@@ -219,14 +230,43 @@ function showLaneUsage() {
 }
 
 /**
+ * Parse excluded lanes from input string
+ */
+function parseExcludedLanes(excludedLanesString) {
+    if (!excludedLanesString || typeof excludedLanesString !== 'string') {
+        return [];
+    }
+
+    // Split by comma and convert to integers, filtering out invalid values
+    return excludedLanesString
+        .split(',')
+        .map(s => s.trim())
+        .filter(s => s.length > 0)
+        .map(s => parseInt(s))
+        .filter(n => !isNaN(n) && n > 0);
+}
+
+/**
  * Update lane configuration (called from config page)
  */
 function updateLaneConfiguration() {
     const maxLanes = parseInt(document.getElementById('maxLanes')?.value) || 10;
     const requireLane = document.getElementById('requireLaneForStart')?.checked || false;
+    const excludedLanesString = document.getElementById('excludedLanes')?.value || '';
+
+    // Parse excluded lanes
+    const excludedLanes = parseExcludedLanes(excludedLanesString);
+
+    // Validate excluded lanes are within range
+    const validExcludedLanes = excludedLanes.filter(lane => lane <= maxLanes);
+    if (validExcludedLanes.length !== excludedLanes.length) {
+        const invalidLanes = excludedLanes.filter(lane => lane > maxLanes);
+        alert(`Warning: Some excluded lanes (${invalidLanes.join(', ')}) are above the maximum lane number (${maxLanes}) and will be ignored.`);
+    }
 
     config.lanes = {
         maxLanes: maxLanes,
+        excludedLanes: validExcludedLanes,
         requireLaneForStart: requireLane
     };
 
@@ -239,7 +279,7 @@ function updateLaneConfiguration() {
 
     console.log('Lane configuration updated:', config.lanes);
 
-    // Refresh all lane dropdowns with new max
+    // Refresh all lane dropdowns with new settings
     setTimeout(() => {
         refreshAllLaneDropdowns();
     }, 100);
