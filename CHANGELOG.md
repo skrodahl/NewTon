@@ -1,3 +1,19 @@
+# 2025-09-15
+
+## v1.2.6 UX Improvements, Match Controls
+
+### Match Controls, Better Separation Between Ready to Start Frontside and Backside Matches
+- Backside matches now have darker cards
+- This gives a clearer indication of which bracket the Ready to Start matches belong to
+- The style of the frontside and backside matches are now aligned with their headline bullets
+
+### Technical Implementation
+- CSS Selectors used to give the backside matches a darker color
+
+### Files Modified
+- `styles.css` - Added the CSS rule `#backMatchesSection .cc-match-card` for a darker color
+- `main.js` - Version bump to 1.2.6
+
 # 2025-09-14
 
 ## v1.2.5 - Enhanced JSON Export with Match Results
