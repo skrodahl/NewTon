@@ -632,6 +632,19 @@ function updateMatchReferee(matchId, refereeId) {
     if (!refereeId) {
         match.referee = null;
         saveTournament();
+
+        // Refresh tournament bracket to show updated referee
+        if (typeof renderBracket === 'function') {
+            renderBracket();
+        }
+
+        // Refresh Match Controls if it's open
+        if (document.getElementById('matchCommandCenterModal') &&
+            document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
+            typeof showMatchCommandCenter === 'function') {
+            setTimeout(() => showMatchCommandCenter(), 200);
+        }
+
         return true;
     }
 
@@ -646,6 +659,19 @@ function updateMatchReferee(matchId, refereeId) {
     match.referee = refereeId ? parseInt(refereeId) : null;
     saveTournament();
     refreshAllRefereeDropdowns();
+
+    // Refresh tournament bracket to show updated referee
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    }
+
+    // Refresh Match Controls if it's open
+    if (document.getElementById('matchCommandCenterModal') &&
+        document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
+        typeof showMatchCommandCenter === 'function') {
+        setTimeout(() => showMatchCommandCenter(), 200);
+    }
+
     return true;
 }
 
@@ -1350,9 +1376,10 @@ function createMatchCard(match) {
         `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}">Start Match</button>`;
     
     const liveClass = state === 'live' ? ' cc-match-card-live' : '';
+    const backsideClass = (match.side === 'backside' || match.id.startsWith('BS-')) ? ' cc-match-card-backside' : '';
     
     return `
-        <div class="cc-match-card${liveClass}">
+        <div class="cc-match-card${liveClass}${backsideClass}">
             <div class="cc-match-card-header">
                 <div class="cc-match-id">${match.id}</div>
                 <div class="cc-match-format">${format} • ${round}</div>

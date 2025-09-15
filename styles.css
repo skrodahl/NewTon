@@ -1071,7 +1071,7 @@ body {
 }
 
 .modal-content {
-  background-color: #ffffff;
+  background-color: rgba(255, 255, 255, 0.9);
   margin: 5% auto;
   padding: 28px;
   border-radius: 12px;
@@ -1492,6 +1492,15 @@ a:hover { color: #1e40af; }
   background: #d1d5db;
 }
 
+/* Keep backside matches darker even when live */
+.cc-match-card-backside {
+  background: #d1d5db; /* Darker gray for backside matches */
+}
+
+.cc-match-card-backside.cc-match-card-live {
+  background: #d1d5db !important; /* Same darker gray as ready backside matches */
+}
+
 .cc-no-matches-message {
   text-align: center;
   color: #6b7280;
@@ -1768,4 +1777,30 @@ a:hover { color: #1e40af; }
   .progression-info {
     font-size: 11px;
   }
+}
+
+/* Stats Modal Scrolling Fixes */
+#statsModal .modal-content {
+  display: flex !important;
+  flex-direction: column !important;
+  max-height: 80vh !important;
+  overflow: hidden !important;
+}
+
+#statsModal .modal-content > *:not(:last-child) {
+  flex-shrink: 0; /* Keep header and form elements fixed */
+}
+
+#statsModal .modal-content > *:last-child {
+  flex-shrink: 0; /* Keep button area fixed */
+  margin-top: auto; /* Push buttons to bottom */
+}
+
+/* Make the scrollable content area for stats */
+#statsModal form {
+  flex: 1 !important;
+  overflow-y: auto !important;
+  min-height: 0 !important;
+  padding-right: 8px !important; /* Space for scrollbar */
+  margin-bottom: 20px !important;
 }

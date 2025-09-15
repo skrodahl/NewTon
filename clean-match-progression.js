@@ -1269,6 +1269,18 @@ function updateMatchLane(matchId, newLane) {
         saveTournament();
     }
 
+    // Refresh tournament bracket to show updated lane
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    }
+
+    // Refresh Match Controls if it's open
+    if (document.getElementById('matchCommandCenterModal') &&
+        document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
+        typeof showMatchCommandCenter === 'function') {
+        setTimeout(() => showMatchCommandCenter(), 200);
+    }
+
     return true;
 }
 

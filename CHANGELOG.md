@@ -1,3 +1,41 @@
+# 2025-09-16
+
+## v1.2.7 UI Improvements & Match Controls Synchronization
+
+### Dialog Transparency
+- Modal dialogs (Match Controls, Statistics, etc.) now have slight transparency (90% opacity)
+- Improved visual depth while maintaining readability
+- Allows partial visibility of background content
+
+### Match Controls Enhancements
+- **Statistics Modal Scrolling Fix**
+  - Fixed button visibility issue when adding High Outs or Short Legs while browser is zoomed
+  - Statistics form content now scrolls independently while keeping buttons visible at bottom
+  - Proper flexbox layout ensures Save/Cancel buttons never get cut off
+
+- **Backside Match Consistency**
+  - Backside matches maintain darker background color even when moved to LIVE section
+  - Added `cc-match-card-backside` class to preserve visual distinction across all states
+  - Consistent color scheme between Ready to Start and Live sections
+
+- **Real-time Synchronization**
+  - Lane and Referee changes in tournament bracket now immediately reflect in Match Controls
+  - Lane and Referee changes in Match Controls now immediately reflect in tournament bracket
+  - Both views stay synchronized regardless of where changes are made
+  - Automatic refresh of open modals when data changes
+
+### Technical Implementation
+- Enhanced `createMatchCard()` function to add backside identification classes
+- Added bracket refresh logic to `updateMatchLane()` and `updateMatchReferee()` functions
+- Improved CSS specificity for modal content transparency and scrolling behavior
+- Cross-component state synchronization for seamless user experience
+
+### Files Modified
+- `styles.css` - Modal transparency, stats modal scrolling fixes, backside match colors
+- `bracket-rendering.js` - Backside class assignment, bracket refresh on updates
+- `clean-match-progression.js` - Lane update with bracket refresh
+- `main.js` - Version bump to 1.2.7
+
 # 2025-09-15
 
 ## v1.2.6 UX Improvements, Match Controls
