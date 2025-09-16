@@ -361,7 +361,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
                         // HELP SYSTEM INTEGRATION - Tournament completed
                         if (typeof showHelpHint === 'function') {
-                            showHelpHint(`🏆 Tournament completed! ${winner.name} wins. Check results on Registration page.`, 8000);
+                            showHelpHint(`🏆 Tournament completed! ${winner.name} wins. Check results in Match Controls or on Registration page.`, 8000);
                         }
                     } catch (e) {
                         console.warn('displayResults failed after completion', e);
