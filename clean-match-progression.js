@@ -2230,6 +2230,14 @@ function validateAndShowWinnerDialog(matchId, playerNumber) {
         if (typeof refreshAllLaneDropdowns === 'function') {
             setTimeout(refreshAllLaneDropdowns, 100);
         }
+
+        // If Command Center was open when completion was initiated, reopen it after completion
+        if (window.commandCenterWasOpen && typeof showMatchCommandCenter === 'function') {
+            setTimeout(() => {
+                showMatchCommandCenter();
+                window.commandCenterWasOpen = false; // Clear flag
+            }, 500); // Same delay as confirmation path
+        }
     }
 
     return success;

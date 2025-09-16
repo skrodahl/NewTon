@@ -1,5 +1,16 @@
 # 2025-09-16
 
+## v1.4.5 Match Controls Dialog Behavior Fix
+
+### Bug Fix
+- **Match Controls Dialog Persistence**
+  - Fixed issue where Match Controls dialog would close and not reopen when confirmation dialogs are disabled
+  - Root cause: Command Center reopening logic was only present in confirmation dialog handlers
+  - Added same reopening logic to the no-confirmation completion path for consistent behavior
+  - Match Controls now properly reopens after match completion regardless of confirmation setting
+  - Maintains 500ms delay and cleanup pattern consistent with confirmation path
+  - Improves workflow efficiency when using disabled confirmation dialogs
+
 ## v1.4.4 Match Undo Ranking Fix
 
 ### Bug Fix
