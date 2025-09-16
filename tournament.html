@@ -598,7 +598,39 @@
             </div>
 
             <div class="text-center mt-20">
+                <button class="btn" id="showStatisticsBtn" style="background: #1f2937; margin-right: 10px;">Statistics</button>
                 <button class="btn" id="commandCenterOK" style="background: #065f46;">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Statistics Modal -->
+    <div id="statisticsModal" class="modal">
+        <div class="modal-content" style="width: 90%; max-width: 1200px;">
+            <h3 style="text-align: center; margin-bottom: 20px;">📊 Tournament Statistics</h3>
+
+            <div class="statistics-container" style="max-height: 70vh; overflow-y: auto;">
+                <table class="results-table" id="statisticsTable">
+                    <thead>
+                        <tr>
+                            <th>Rank</th>
+                            <th>Player</th>
+                            <th>Points</th>
+                            <th>Short Legs</th>
+                            <th>High Outs</th>
+                            <th>180s</th>
+                            <th>Tons</th>
+                            <th>Legs Won</th>
+                            <th>Legs Lost</th>
+                        </tr>
+                    </thead>
+                    <tbody id="statisticsTableBody">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="text-center mt-20">
+                <button class="btn" onclick="document.getElementById('statisticsModal').style.display='none'" style="background: #065f46;">Close</button>
             </div>
         </div>
     </div>

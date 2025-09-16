@@ -1,5 +1,31 @@
 # 2025-09-16
 
+## v1.4.3 System Architecture Documentation & Statistics Enhancement
+
+### Player Statistics Enhancement
+- **Dynamic Ranking System**
+  - New "Statistics" button in Match Controls, providing direct access to the tournament statistics and editable user statistics without leaving the Tournament page
+  - Added real-time player elimination rankings that appear immediately when players are eliminated
+  - Rankings display dynamically in results table during tournament play (e.g., "7th-8th", "5th-6th")
+  - Clean removal of rankings when matches are undone, maintaining accurate tournament state
+  - Integration with existing hardcoded progression logic for bulletproof rank calculations
+  - Enhanced user experience showing live tournament standings as play progresses
+
+### Documentation Enhancement
+- **Comprehensive Undo System Documentation**
+  - Added UNDO.md with complete architectural overview of the surgical undo system
+  - Documents the logic behind hardcoded match progression and transaction-based history
+  - Explains the surgical vs rebuilding approach for match rollbacks
+  - Covers auto-advancement chain handling and error prevention mechanisms
+  - Technical reference for maintaining tournament integrity during undo operations
+
+### Architecture Insight
+- **Single Sources of Truth Approach**
+  - Hardcoded Match Progression (`MATCH_PROGRESSION`) as definitive bracket logic
+  - Transaction-based History as chronological state record
+  - Surgical state repair vs complete bracket rebuilding
+  - Bulletproof data integrity through precise dependency identification
+
 ## v1.4.1 Recent Referee Assignments & UI Refinements
 
 ### Recent Referee Assignments - Enhancement

@@ -305,8 +305,8 @@ function displayResults() {
     }
 }
 
-function updateResultsTable() {
-    const tbody = document.getElementById('resultsTableBody');
+function updateResultsTable(targetTbodyId = 'resultsTableBody') {
+    const tbody = document.getElementById(targetTbodyId);
     if (!tbody) return;
 
     // Get placement data from tournament
@@ -360,9 +360,9 @@ function updateResultsTable() {
     const points = calculatePlayerPoints(player);
     const legs = calculatePlayerLegs(player.id);
     return `
-        <tr>
+        <tr onclick="openStatsModal(${player.id})" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor=''">
             <td>${formatRanking(player.placement)}</td>
-            <td><span class="clickable-player-name" onclick="openStatsModal(${player.id})">${player.name}</span></td>
+            <td style="font-weight: 500;">${player.name}</td>
             <td>${points}</td>
             <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
             <td>${(player.stats.highOuts || []).join(',') || '—'}</td>

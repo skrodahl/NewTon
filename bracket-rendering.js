@@ -1037,8 +1037,9 @@ function isMatchUndoable(matchId) {
 }
 
 // Helper function to find matches that are directly affected by undoing a specific match
-// Helper function to follow walkover chain to final destination
-function followWalkoverChain(matchId, progression) {
+// Helper function to collect all matches in walkover chain (including intermediate auto-completed matches)
+function collectWalkoverChain(matchId, progression) {
+    const chainMatches = [];
     let currentMatchId = matchId;
     let visited = new Set(); // Prevent infinite loops
 
@@ -1048,9 +1049,12 @@ function followWalkoverChain(matchId, progression) {
         const match = matches.find(m => m.id === currentMatchId);
         if (!match) break;
 
+        // Always add the current match to the chain
+        chainMatches.push(currentMatchId);
+
         // If match has real players or is not a walkover, this is the final destination
         if (!isWalkover(match.player1) && !isWalkover(match.player2)) {
-            return currentMatchId;
+            break;
         }
 
         // If it's a walkover match, follow the progression chain
@@ -1064,11 +1068,12 @@ function followWalkoverChain(matchId, progression) {
         currentMatchId = nextMatchId;
     }
 
-    return matchId; // Return original if can't follow chain
+    return chainMatches;
 }
 
 function getConsequentialMatches(transaction) {
     const consequentialMatches = [];
+    const addedMatchIds = new Set(); // Prevent duplicates
 
     if (!transaction || !tournament || !tournament.bracketSize) {
         return consequentialMatches;
@@ -1082,34 +1087,44 @@ function getConsequentialMatches(transaction) {
 
     const matchProgression = progression[transaction.matchId];
 
-    // Add winner destination match if it exists
+    // Add all matches in winner destination chain
     if (matchProgression.winner) {
         const [targetMatchId] = matchProgression.winner;
-        // Follow walkover chain to final destination
-        const finalMatchId = followWalkoverChain(targetMatchId, progression);
-        const targetMatch = matches.find(m => m.id === finalMatchId);
-        if (targetMatch) {
-            consequentialMatches.push({
-                id: targetMatch.id,
-                match: targetMatch,
-                isFrontside: targetMatch.id.startsWith('FS-')
-            });
-        }
+        // Collect all matches in the walkover chain (including intermediate auto-completed matches)
+        const chainMatches = collectWalkoverChain(targetMatchId, progression);
+        chainMatches.forEach(matchId => {
+            if (!addedMatchIds.has(matchId)) {
+                const targetMatch = matches.find(m => m.id === matchId);
+                if (targetMatch) {
+                    consequentialMatches.push({
+                        id: targetMatch.id,
+                        match: targetMatch,
+                        isFrontside: targetMatch.id.startsWith('FS-')
+                    });
+                    addedMatchIds.add(matchId);
+                }
+            }
+        });
     }
 
-    // Add loser destination match if it exists
+    // Add all matches in loser destination chain
     if (matchProgression.loser) {
         const [targetMatchId] = matchProgression.loser;
-        // Follow walkover chain to final destination
-        const finalMatchId = followWalkoverChain(targetMatchId, progression);
-        const targetMatch = matches.find(m => m.id === finalMatchId);
-        if (targetMatch) {
-            consequentialMatches.push({
-                id: targetMatch.id,
-                match: targetMatch,
-                isFrontside: targetMatch.id.startsWith('FS-')
-            });
-        }
+        // Collect all matches in the walkover chain (including intermediate auto-completed matches)
+        const chainMatches = collectWalkoverChain(targetMatchId, progression);
+        chainMatches.forEach(matchId => {
+            if (!addedMatchIds.has(matchId)) {
+                const targetMatch = matches.find(m => m.id === matchId);
+                if (targetMatch) {
+                    consequentialMatches.push({
+                        id: targetMatch.id,
+                        match: targetMatch,
+                        isFrontside: targetMatch.id.startsWith('FS-')
+                    });
+                    addedMatchIds.add(matchId);
+                }
+            }
+        });
     }
 
     // Sort: frontside matches first, then backside
@@ -1216,20 +1231,22 @@ function undoManualTransaction(transactionId) {
         return;
     }
 
-    // 1. Identify transactions to remove: target + immediate AUTO consequences
-    const targetTimestamp = new Date(targetTransaction.timestamp);
+    // 1. Identify transactions to remove: target + downstream dependencies
     const transactionsToRemove = [transactionId];
 
-    // Find AUTO transactions that happened immediately after target transaction
-    // (within a short time window, indicating they were consequences)
-    const timeWindowMs = 1000; // 1 second window for immediate consequences
-    history.forEach(t => {
-        const tTimestamp = new Date(t.timestamp);
-        if (t.completionType === 'AUTO' &&
-            tTimestamp > targetTimestamp &&
-            tTimestamp - targetTimestamp <= timeWindowMs) {
-            transactionsToRemove.push(t.id);
-        }
+    // Find all downstream matches affected by this transaction
+    const consequentialMatches = getConsequentialMatches(targetTransaction);
+
+    console.log(`🔍 Undo ${targetTransaction.matchId} - Consequential matches:`, consequentialMatches.map(m => m.id));
+
+    // Remove all transactions for affected downstream matches
+    consequentialMatches.forEach(match => {
+        const matchTransactions = history.filter(t => t.matchId === match.id);
+        matchTransactions.forEach(t => {
+            if (!transactionsToRemove.includes(t.id)) {
+                transactionsToRemove.push(t.id);
+            }
+        });
     });
 
     console.log(`Clean undo ${targetTransaction.matchId}: removing ${transactionsToRemove.length} transactions`);
@@ -1250,20 +1267,76 @@ function undoManualTransaction(transactionId) {
         tournament.placements = {}; // Clear final placements
     }
 
-    // 6. Rebuild entire bracket from clean history (single source of truth)
-    rebuildBracketFromHistory(cleanHistory);
+    // 6. Roll back ALL affected matches and remove advancing players from downstream matches
+    // Process all transactions being removed (handles auto-advancement chains)
+    const progression = MATCH_PROGRESSION[tournament.bracketSize];
 
-    // 7. Save tournament state
+    transactionsToRemove.forEach(transactionId => {
+        const transaction = history.find(t => t.id === transactionId);
+        if (!transaction || !transaction.winner || !transaction.loser) return;
+
+        const match = matches.find(m => m.id === transaction.matchId);
+        if (!match) return;
+
+        console.log(`🔄 Rolling back ${transaction.matchId} from COMPLETED to READY`);
+
+        // Find where the winner and loser went using hardcoded progression
+        if (progression && progression[transaction.matchId]) {
+            const matchProgression = progression[transaction.matchId];
+
+            // Remove winner from their destination match
+            if (matchProgression.winner) {
+                const [winnerDestMatchId, winnerSlot] = matchProgression.winner;
+                const winnerDestMatch = matches.find(m => m.id === winnerDestMatchId);
+                if (winnerDestMatch) {
+                    console.log(`  ➤ Removing winner ${transaction.winner.name} from ${winnerDestMatchId} (${winnerSlot})`);
+                    winnerDestMatch[winnerSlot] = { name: 'TBD', id: null };
+                }
+            }
+
+            // Remove loser from their destination match
+            if (matchProgression.loser) {
+                const [loserDestMatchId, loserSlot] = matchProgression.loser;
+                const loserDestMatch = matches.find(m => m.id === loserDestMatchId);
+                if (loserDestMatch) {
+                    console.log(`  ➤ Removing loser ${transaction.loser.name} from ${loserDestMatchId} (${loserSlot})`);
+                    loserDestMatch[loserSlot] = { name: 'TBD', id: null };
+                }
+            }
+        }
+
+        // Roll back the match itself
+        match.completed = false;
+        match.winner = null;
+        match.loser = null;
+        match.active = false;
+        match.state = 'READY';
+        // Keep original players - they came from upstream completed matches
+        console.log(`✅ ${transaction.matchId} rolled back: ${match.player1?.name || 'TBD'} vs ${match.player2?.name || 'TBD'}`);
+    });
+
+    // 7. Update match states and UI
+    updateAllMatchStates();
+    if (typeof refreshTournamentUI === 'function') {
+        refreshTournamentUI();
+    }
+
+    // 8. Save tournament state
     if (typeof saveTournament === 'function') {
         saveTournament();
     }
 
-    // 8. Refresh results display if we reset tournament status
+    // 8. Refresh results displays after undo
     if (isUndoingGrandFinal && typeof displayResults === 'function') {
         displayResults();
     }
 
-    console.log(`Clean undo complete: rebuilt bracket from ${cleanHistory.length} transactions`);
+    // Always refresh results table to show updated rankings after undo
+    if (typeof updateResultsTable === 'function') {
+        updateResultsTable();
+    }
+
+    console.log(`Clean undo complete: surgically rolled back ${targetTransaction.matchId}`);
 }
 
 // Rebuild entire bracket from clean transaction history (single source of truth approach)
@@ -1279,8 +1352,9 @@ function rebuildBracketFromHistory(cleanHistory) {
 
     console.log(`Rebuilding bracket from ${cleanHistory.length} transactions`);
 
-    // 1. Clear existing matches and regenerate bracket structure
+    // 1. Clear existing matches and placements, then regenerate bracket structure
     matches.length = 0;
+    tournament.placements = {}; // Clear all rankings to start fresh
 
     // Recreate the bracket structure (similar to generateCleanBracket)
     const bracketSize = tournament.bracketSize;
@@ -1305,14 +1379,21 @@ function rebuildBracketFromHistory(cleanHistory) {
         .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
 
     let appliedCount = 0;
-    chronologicalHistory.forEach(transaction => {
+    chronologicalHistory.forEach((transaction, index) => {
         const match = matches.find(m => m.id === transaction.matchId);
-        if (!match) return;
+        if (!match) {
+            console.log(`🔍 Rebuild ${index + 1}/${chronologicalHistory.length}: Match ${transaction.matchId} not found`);
+            return;
+        }
+
+        console.log(`🔍 Rebuild ${index + 1}/${chronologicalHistory.length}: Processing ${transaction.type} for ${transaction.matchId}`);
 
         // Process different transaction types
         switch (transaction.type) {
             case 'COMPLETE_MATCH':
                 if (transaction.winner && transaction.loser) {
+                    console.log(`  ➤ Setting players: ${transaction.winner.name} vs ${transaction.loser.name}`);
+
                     // Ensure the match has the correct players from transaction
                     match.player1 = transaction.winner;
                     match.player2 = transaction.loser;
@@ -1320,6 +1401,7 @@ function rebuildBracketFromHistory(cleanHistory) {
                     // Winner is always player1 for this rebuild approach
                     const winnerPlayerNumber = 1;
                     if (typeof completeMatch === 'function') {
+                        console.log(`  ➤ Calling completeMatch(${transaction.matchId}, ${winnerPlayerNumber})`);
                         completeMatch(
                             transaction.matchId,
                             winnerPlayerNumber,
@@ -1327,6 +1409,7 @@ function rebuildBracketFromHistory(cleanHistory) {
                             transaction.loserLegs || 0,
                             transaction.completionType || 'MANUAL'
                         );
+                        console.log(`  ✅ Completed ${transaction.matchId}: ${transaction.winner.name} wins`);
                         appliedCount++;
                     }
                 }
@@ -1386,6 +1469,37 @@ function rebuildBracketFromHistory(cleanHistory) {
         console.log('🔓 Rebuild protection window ending - re-enabling auto-advancements');
         window.rebuildInProgress = false;
         window.autoAdvancementsDisabled = false;
+
+        // Process auto-advancements to handle walkover matches that should advance automatically
+        if (typeof processAutoAdvancements === 'function') {
+            console.log('🔄 Processing auto-advancements after bracket rebuild');
+            // Safety reset: ensure flag is clean before starting
+            window.processingAutoAdvancements = false;
+
+            // Process auto-advancements multiple times to catch cascading walkover effects
+            let attempts = 0;
+            const maxAttempts = 3;
+            const processRound = () => {
+                attempts++;
+                console.log(`🔄 Auto-advancement attempt ${attempts}/${maxAttempts}`);
+                processAutoAdvancements();
+
+                // Schedule additional rounds to catch cascading effects
+                if (attempts < maxAttempts) {
+                    setTimeout(processRound, 100);
+                }
+            };
+
+            processRound();
+
+            // Emergency flag cleanup after all attempts
+            setTimeout(() => {
+                if (window.processingAutoAdvancements) {
+                    console.warn('🚨 Emergency flag cleanup - processingAutoAdvancements was stuck');
+                    window.processingAutoAdvancements = false;
+                }
+            }, 2000);
+        }
     }, 500);
 }
 
@@ -1521,8 +1635,15 @@ function showMatchCommandCenter() {
     const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
 
     // Separate ready matches by bracket side
-    const frontMatches = readyMatches.filter(m => m.side === 'frontside' || m.id.startsWith('FS-'));
-    const backMatches = readyMatches.filter(m => m.side === 'backside' || m.id.startsWith('BS-'));
+    const frontMatches = readyMatches.filter(m =>
+        m.side === 'frontside' ||
+        m.id.startsWith('FS-') ||
+        m.id === 'GRAND-FINAL'  // GRAND-FINAL shows in front section
+    );
+    const backMatches = readyMatches.filter(m =>
+        m.side === 'backside' ||
+        m.id.startsWith('BS-')
+    );
 
     // Sort by match ID for consistent ordering
     liveMatches.sort((a, b) => a.id.localeCompare(b.id));
@@ -1855,13 +1976,22 @@ function showCommandCenterModal(matchData) {
 
     // Show modal
     modal.style.display = 'flex';
-    
+
     // Set up event handlers
     const closeModal = () => {
         modal.style.display = 'none';
         okBtn.onclick = null; // Clean up
+        // Clean up Statistics button handler
+        const statsBtn = document.getElementById('showStatisticsBtn');
+        if (statsBtn) statsBtn.onclick = null;
     };
-    
+
+    // Statistics button handler
+    const statsBtn = document.getElementById('showStatisticsBtn');
+    if (statsBtn) {
+        statsBtn.onclick = () => showStatisticsModal();
+    }
+
     okBtn.onclick = closeModal;
     
     // Close on Escape key
@@ -1872,6 +2002,29 @@ function showCommandCenterModal(matchData) {
         }
     };
     document.addEventListener('keydown', handleEscape);
+}
+
+// Function to show Statistics modal with results table
+function showStatisticsModal() {
+    const modal = document.getElementById('statisticsModal');
+    if (!modal) {
+        console.error('Statistics modal not found');
+        return;
+    }
+
+    // Update the statistics table with current data
+    updateStatisticsTable();
+
+    // Show modal
+    modal.style.display = 'flex';
+}
+
+// Function to update the statistics table with current results data
+function updateStatisticsTable() {
+    // Use the enhanced original updateResultsTable function
+    if (typeof updateResultsTable === 'function') {
+        updateResultsTable('statisticsTableBody');
+    }
 }
 
 // Helper functions for match command center actions

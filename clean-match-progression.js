@@ -315,6 +315,18 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         if (typeof updateResultsTable === 'function') updateResultsTable();
         if (typeof updateMatchHistory === 'function') updateMatchHistory();
 
+        // Calculate live rankings after every match completion (reuse existing logic)
+        // Only calculate rankings during normal play, not during rebuild or auto-advancement processing
+        if (!window.rebuildInProgress && !window.processingAutoAdvancements) {
+            try {
+                calculateAllRankings();
+                if (typeof saveTournament === 'function') saveTournament(); // Save updated rankings
+                if (typeof updateResultsTable === 'function') updateResultsTable(); // Refresh Registration page results
+            } catch (e) {
+                console.warn('Could not calculate live rankings:', e);
+            }
+        }
+
         // Grand Final completion hook: set placements and complete tournament
         try {
             if (matchId === 'GRAND-FINAL') {
@@ -629,6 +641,7 @@ function calculate32PlayerRankings() {
     console.log('✓ 32-player rankings calculated');
 }
 
+
 /**
  * CHECK IF PLAYER IS WALKOVER (for auto-advancement)
  */
@@ -704,37 +717,69 @@ function processAutoAdvancements() {
         return;
     }
 
+    // Prevent recursive calls to avoid infinite loops
+    if (window.processingAutoAdvancements) {
+        console.log('🚫 processAutoAdvancements already running, skipping to prevent infinite loop');
+        console.log('⚠️ Flag state check - processingAutoAdvancements:', window.processingAutoAdvancements);
+        return;
+    }
+
     // DEBUG: Log what triggered this auto-advancement
     console.log('⚡ processAutoAdvancements called - stack trace:', new Error().stack.substring(0, 500));
 
-    let foundAdvancement = true;
-    let iterations = 0;
-    const maxIterations = 10;
+    // Set flag to prevent recursive calls
+    window.processingAutoAdvancements = true;
 
-    const autoAdvancedMatches = [];
-    
-    while (foundAdvancement && iterations < maxIterations) {
-        foundAdvancement = false;
-        iterations++;
+    try {
+        let foundAdvancement = true;
+        let iterations = 0;
+        const maxIterations = 10;
 
-        matches.forEach(match => {
-            if (shouldAutoAdvance(match)) {
-                // Determine automatic winner
-                const p1IsWalkover = isWalkover(match.player1);
-                const winnerPlayerNumber = p1IsWalkover ? 2 : 1;
+        const autoAdvancedMatches = [];
 
-                // Mark as auto-advanced and complete
-                match.autoAdvanced = true;
-                autoAdvancedMatches.push(match.id);
-                completeMatch(match.id, winnerPlayerNumber, 0, 0, 'AUTO');
-                foundAdvancement = true;
-            }
-        });
+        while (foundAdvancement && iterations < maxIterations) {
+            foundAdvancement = false;
+            iterations++;
+
+            matches.forEach(match => {
+                if (shouldAutoAdvance(match)) {
+                    // Determine automatic winner
+                    const p1IsWalkover = isWalkover(match.player1);
+                    const winnerPlayerNumber = p1IsWalkover ? 2 : 1;
+
+                    // Mark as auto-advanced and complete
+                    match.autoAdvanced = true;
+                    autoAdvancedMatches.push(match.id);
+                    completeMatch(match.id, winnerPlayerNumber, 0, 0, 'AUTO');
+                    foundAdvancement = true;
+                }
+            });
+        }
+
+        if (autoAdvancedMatches.length > 0) {
+            console.log(`Auto-advanced: ${autoAdvancedMatches.join(', ')} (${autoAdvancedMatches.length} matches)`);
+        }
+    } finally {
+        // Always clear flag, even if function exits early
+        console.log('🧹 Clearing processingAutoAdvancements flag');
+        window.processingAutoAdvancements = false;
     }
-    
-    if (autoAdvancedMatches.length > 0) {
-        console.log(`Auto-advanced: ${autoAdvancedMatches.join(', ')} (${autoAdvancedMatches.length} matches)`);
-    }
+}
+
+/**
+ * DEBUGGING: Reset stuck flags (can be called from browser console)
+ */
+function resetAutoAdvancementFlags() {
+    console.log('🔧 Resetting auto-advancement flags');
+    window.processingAutoAdvancements = false;
+    window.rebuildInProgress = false;
+    window.autoAdvancementsDisabled = false;
+    console.log('✅ Flags reset');
+}
+
+// Make it globally available for debugging
+if (typeof window !== 'undefined') {
+    window.resetAutoAdvancementFlags = resetAutoAdvancementFlags;
 }
 
 /**
