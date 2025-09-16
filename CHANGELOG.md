@@ -1,5 +1,15 @@
 # 2025-09-16
 
+## v1.4.4 Match Undo Ranking Fix
+
+### Bug Fix
+- **Undo System Rankings Update**
+  - Fixed issue where player rankings were not properly updated after undoing matches
+  - Resolved tournament placement persistence bug where stale ranking data remained in localStorage
+  - Corrected operation order: now clears placements, recalculates rankings, then saves tournament state
+  - Ensures Results Table displays current tournament standings immediately after match undo operations
+  - Maintains data integrity between in-memory tournament state and persistent storage
+
 ## v1.4.3 System Architecture Documentation & Statistics Enhancement
 
 ### Player Statistics Enhancement

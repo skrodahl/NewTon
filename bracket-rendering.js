@@ -1321,14 +1321,23 @@ function undoManualTransaction(transactionId) {
         refreshTournamentUI();
     }
 
-    // 8. Save tournament state
-    if (typeof saveTournament === 'function') {
-        saveTournament();
-    }
-
     // 8. Refresh results displays after undo
     if (isUndoingGrandFinal && typeof displayResults === 'function') {
         displayResults();
+    }
+
+    // Clear stale placements and recalculate rankings after undo
+    if (tournament) {
+        tournament.placements = {}; // Clear all existing placements
+        console.log('🧹 Cleared stale placements before recalculating rankings');
+    }
+    if (typeof calculateAllRankings === 'function') {
+        calculateAllRankings();
+    }
+
+    // Save tournament state with updated rankings
+    if (typeof saveTournament === 'function') {
+        saveTournament();
     }
 
     // Always refresh results table to show updated rankings after undo
