@@ -218,6 +218,32 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>💡 Tip:</strong> Assign lanes to organize physical dartboard usage and avoid conflicts.</p>
                 `
+            },
+            matchControls: {
+                title: "Match Controls Interface",
+                content: `
+                    <p><strong>Accessing Match Controls:</strong></p>
+                    <ul>
+                        <li>Click the "<strong>Match Controls (➹)</strong>" button in the bracket toolbar</li>
+                        <li>Centralized command center for all match management</li>
+                        <li>Stay in one interface instead of clicking individual matches</li>
+                    </ul>
+                    <p><strong>Interface Organization:</strong></p>
+                    <ul>
+                        <li><strong>LIVE Matches Section:</strong> Currently active matches shown first</li>
+                        <li><strong>Frontside Ready:</strong> Ready frontside matches</li>
+                        <li><strong>Backside Ready:</strong> Ready backside matches with darker styling</li>
+                    </ul>
+                    <p><strong>Available Actions:</strong></p>
+                    <ul>
+                        <li><strong>Start Match:</strong> Move ready matches to LIVE status</li>
+                        <li><strong>[Player Name] Wins:</strong> Direct winner selection buttons</li>
+                        <li><strong>Lane/Referee Assignment:</strong> Dropdowns for each match</li>
+                        <li><strong>Statistics Button:</strong> Access tournament and player statistics without leaving the Tournament page</li>
+                    </ul>
+                    <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action</p>
+                    <p><strong>💡 Tip:</strong> Use Match Controls for efficient tournament management - everything in one place!</p>
+                `
             }
         }
     },
