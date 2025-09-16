@@ -629,8 +629,27 @@ function updateMatchReferee(matchId, refereeId) {
     const match = matches.find(m => m.id === matchId);
     if (!match) return false;
 
+    // Capture state before change for transaction
+    const oldReferee = match.referee;
+
     if (!refereeId) {
         match.referee = null;
+
+        // Create transaction for referee clearing
+        if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
+            const transaction = {
+                id: `tx_${Date.now()}`,
+                type: 'ASSIGN_REFEREE',
+                description: `${matchId}: Referee cleared`,
+                timestamp: new Date().toISOString(),
+                matchId: matchId,
+                beforeState: { referee: oldReferee },
+                afterState: { referee: null }
+            };
+
+            saveTransaction(transaction);
+        }
+
         saveTournament();
 
         // Refresh tournament bracket to show updated referee
@@ -664,7 +683,24 @@ function updateMatchReferee(matchId, refereeId) {
         return false;
     }
 
-    match.referee = refereeId ? parseInt(refereeId) : null;
+    const parsedRefereeId = refereeId ? parseInt(refereeId) : null;
+    match.referee = parsedRefereeId;
+
+    // Create transaction for referee assignment
+    if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
+        const transaction = {
+            id: `tx_${Date.now()}`,
+            type: 'ASSIGN_REFEREE',
+            description: `${matchId}: Referee assigned to player ${parsedRefereeId}`,
+            timestamp: new Date().toISOString(),
+            matchId: matchId,
+            beforeState: { referee: oldReferee },
+            afterState: { referee: parsedRefereeId }
+        };
+
+        saveTransaction(transaction);
+    }
+
     saveTournament();
     refreshAllRefereeDropdowns();
 
@@ -1270,27 +1306,70 @@ function rebuildBracketFromHistory(cleanHistory) {
 
     let appliedCount = 0;
     chronologicalHistory.forEach(transaction => {
-        if (transaction.matchId && transaction.winner && transaction.loser) {
-            const match = matches.find(m => m.id === transaction.matchId);
-            if (match) {
-                // Ensure the match has the correct players from transaction
-                // We need both winner and loser in the match for completeMatch to work
-                match.player1 = transaction.winner;
-                match.player2 = transaction.loser;
+        const match = matches.find(m => m.id === transaction.matchId);
+        if (!match) return;
 
-                // Winner is always player1 for this rebuild approach
-                const winnerPlayerNumber = 1;
-                if (typeof completeMatch === 'function') {
-                    completeMatch(
-                        transaction.matchId,
-                        winnerPlayerNumber,
-                        transaction.winnerLegs || 0,
-                        transaction.loserLegs || 0,
-                        transaction.completionType || 'MANUAL'
-                    );
-                    appliedCount++;
+        // Process different transaction types
+        switch (transaction.type) {
+            case 'COMPLETE_MATCH':
+                if (transaction.winner && transaction.loser) {
+                    // Ensure the match has the correct players from transaction
+                    match.player1 = transaction.winner;
+                    match.player2 = transaction.loser;
+
+                    // Winner is always player1 for this rebuild approach
+                    const winnerPlayerNumber = 1;
+                    if (typeof completeMatch === 'function') {
+                        completeMatch(
+                            transaction.matchId,
+                            winnerPlayerNumber,
+                            transaction.winnerLegs || 0,
+                            transaction.loserLegs || 0,
+                            transaction.completionType || 'MANUAL'
+                        );
+                        appliedCount++;
+                    }
                 }
-            }
+                break;
+
+            case 'START_MATCH':
+                match.active = true;
+                appliedCount++;
+                break;
+
+            case 'STOP_MATCH':
+                match.active = false;
+                appliedCount++;
+                break;
+
+            case 'ASSIGN_LANE':
+                match.lane = transaction.afterState.lane;
+                appliedCount++;
+                break;
+
+            case 'ASSIGN_REFEREE':
+                match.referee = transaction.afterState.referee;
+                appliedCount++;
+                break;
+
+            default:
+                // Handle legacy transactions without explicit type (assume COMPLETE_MATCH)
+                if (transaction.matchId && transaction.winner && transaction.loser) {
+                    match.player1 = transaction.winner;
+                    match.player2 = transaction.loser;
+                    const winnerPlayerNumber = 1;
+                    if (typeof completeMatch === 'function') {
+                        completeMatch(
+                            transaction.matchId,
+                            winnerPlayerNumber,
+                            transaction.winnerLegs || 0,
+                            transaction.loserLegs || 0,
+                            transaction.completionType || 'MANUAL'
+                        );
+                        appliedCount++;
+                    }
+                }
+                break;
         }
     });
 

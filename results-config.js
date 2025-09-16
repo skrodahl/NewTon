@@ -548,6 +548,12 @@ function generateResultsJSON() {
         })
         .map(match => {
             const isWalkover = match.autoAdvanced || isWalkoverMatch(match);
+
+            // Get referee name if referee ID exists
+            const refereeName = match.referee ?
+                (players.find(p => p.id === match.referee)?.name || 'Unknown') :
+                null;
+
             return {
                 matchId: match.id,
                 player1: {
@@ -565,7 +571,12 @@ function generateResultsJSON() {
                 finalScore: match.finalScore || null,
                 completedAt: match.completedAt || null,
                 isWalkover: isWalkover,
-                autoCompleted: match.autoAdvanced || false
+                autoCompleted: match.autoAdvanced || false,
+                lane: match.lane || null,
+                referee: match.referee ? {
+                    id: match.referee,
+                    name: refereeName
+                } : null
             };
         }) : [];
 

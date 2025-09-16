@@ -1,5 +1,26 @@
 # 2025-09-16
 
+## v1.3.0 Undo System & Match Controls UX Improvements
+
+### Undo System Enhancement - Major Fix
+- **Fixed Undo System Losing Match State**
+  - Resolved critical issue where undoing matches would clear LIVE status, lane assignments, and referee assignments from unrelated matches
+  - Root cause: Match state changes (start/stop, lane/referee assignments) were not stored as transactions
+  - All match state is now properly tracked in transaction history for complete undo safety
+
+- **Enhanced Transaction System**
+  - Added `START_MATCH` and `STOP_MATCH` transaction types for match activation/deactivation
+  - Added `ASSIGN_LANE` transaction type for lane assignments and changes
+  - Added `ASSIGN_REFEREE` transaction type for referee assignments and changes
+  - Updated `rebuildBracketFromHistory()` to process all new transaction types
+  - Maintains backwards compatibility with existing tournament data
+
+- **Improved Undo Safety**
+  - Unrelated LIVE matches now preserve their state during undo operations
+  - Lane and referee assignments survive bracket rebuilds
+  - Undo operations are now surgical, affecting only progression-related changes
+  - Single source of truth principle now applies to ALL match state changes
+
 ## v1.2.9 Match Controls UX Improvements
 
 ### Match Controls Dialog Enhancement
@@ -15,6 +36,21 @@
   - Allows stopping accidentally started matches without exiting dialog
   - Uses existing `toggleActive()` function to return match to ready state
   - Includes proper CSS styling with hover effects
+
+### Match Results & Export Enhancements
+- **Enhanced Match Results Display**
+  - Added lane and referee information to Match Results on Setup page
+  - Shows "Referee: [Name] • Lane [Number]" format for completed matches
+  - Clean display with subtle styling that doesn't interfere with existing layout
+  - Backwards compatible with matches that had no lane/referee assignments
+  - Proper styling for both regular and walkover matches
+
+- **Enhanced JSON Export**
+  - JSON export now includes complete lane and referee data for all matches
+  - Lane information exported as `lane: number` field
+  - Referee information exported as comprehensive object with `id` and `name`
+  - Full data traceability for tournament record keeping and analysis
+  - Maintains backwards compatibility with existing export structure
 
 ### Technical Improvements
 - **Performance Optimization**

@@ -1740,6 +1740,26 @@ a:hover { color: #1e40af; }
   margin-left: 12px;
 }
 
+.match-details {
+  margin-top: 8px;
+  padding-top: 6px;
+  border-top: 1px solid #e5e7eb;
+}
+
+.match-meta {
+  font-size: 11px;
+  color: #6b7280;
+  font-weight: 500;
+}
+
+.match-history-item.walkover .match-details {
+  border-top-color: #f3f4f6;
+}
+
+.match-history-item.walkover .match-meta {
+  color: #9ca3af;
+}
+
 .progression-info {
   color: #6b7280;
   font-size: 12px;

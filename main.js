@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '1.2.8';
+const APP_VERSION = '1.3.0';
 
 // Global config is loaded by results-config.js - NEVER override it here
 // let config = {}; // This is loaded by results-config.js
@@ -458,7 +458,17 @@ function updateMatchHistory() {
         }
         
         const autoCompletedText = isWalkover ? ' <span class="auto-completed">(auto-completed)</span>' : '';
-        
+
+        // Add lane and referee information
+        let matchDetailsText = '';
+        const laneText = match.lane ? `Lane ${match.lane}` : '';
+        const refereeText = match.referee ? `Referee: ${getPlayerNameById(match.referee)}` : '';
+
+        if (laneText || refereeText) {
+            const details = [refereeText, laneText].filter(Boolean).join(' • ');
+            matchDetailsText = `<div class="match-details"><span class="match-meta">${details}</span></div>`;
+        }
+
         historyHtml += `
             <div class="${itemClass}">
                 <div class="match-header">
@@ -469,6 +479,7 @@ function updateMatchHistory() {
                     <span class="player-info">${player1Display} vs ${player2Display}</span>
                     <span class="result-score">${scoreText}</span>
                 </div>
+                ${matchDetailsText}
             </div>
         `;
     });
@@ -486,6 +497,13 @@ function isWalkoverMatch(match) {
            match.player2.isBye === true ||
            (match.player1.id && match.player1.id.toString().startsWith('walkover-')) ||
            (match.player2.id && match.player2.id.toString().startsWith('walkover-'));
+}
+
+// Helper function to get player name by ID
+function getPlayerNameById(playerId) {
+    if (!playerId || !players) return 'Unknown';
+    const player = players.find(p => p.id === playerId);
+    return player ? player.name : 'Unknown';
 }
 
 // Make functions globally available

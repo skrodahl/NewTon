@@ -1207,10 +1207,28 @@ function toggleActive(matchId) {
         return false;
     }
 
+    // Capture state before change for transaction
+    const wasActive = match.active;
+
     // Toggle active state
     match.active = !match.active;
 
     console.log(`Match ${matchId} ${match.active ? 'activated' : 'deactivated'}`);
+
+    // Create transaction for match state change
+    if (!window.rebuildInProgress) {
+        const transaction = {
+            id: `tx_${Date.now()}`,
+            type: match.active ? 'START_MATCH' : 'STOP_MATCH',
+            description: `${matchId}: ${match.active ? 'Started' : 'Stopped'}`,
+            timestamp: new Date().toISOString(),
+            matchId: matchId,
+            beforeState: { active: wasActive },
+            afterState: { active: match.active }
+        };
+
+        saveTransaction(transaction);
+    }
 
     // Save and render
     if (typeof saveTournament === 'function') {
@@ -1261,9 +1279,28 @@ function updateMatchLane(matchId, newLane) {
         return false;
     }
 
-    match.lane = newLane ? parseInt(newLane) : null;
+    // Capture state before change for transaction
+    const oldLane = match.lane;
+    const parsedNewLane = newLane ? parseInt(newLane) : null;
+
+    match.lane = parsedNewLane;
 
     console.log(`Lane updated for ${matchId}: ${match.lane || 'none'}`);
+
+    // Create transaction for lane assignment
+    if (!window.rebuildInProgress) {
+        const transaction = {
+            id: `tx_${Date.now()}`,
+            type: 'ASSIGN_LANE',
+            description: `${matchId}: Lane ${parsedNewLane ? `assigned to ${parsedNewLane}` : 'cleared'}`,
+            timestamp: new Date().toISOString(),
+            matchId: matchId,
+            beforeState: { lane: oldLane },
+            afterState: { lane: parsedNewLane }
+        };
+
+        saveTransaction(transaction);
+    }
 
     if (typeof saveTournament === 'function') {
         saveTournament();
