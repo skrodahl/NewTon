@@ -1497,7 +1497,7 @@ function createMatchCard(match) {
                 </div>
 
                 <div class="cc-control-group">
-                    <label class="cc-control-label">Ref:</label>
+                    <label class="cc-control-label">Referee:</label>
                     <select class="cc-match-dropdown" onchange="updateMatchReferee('${match.id}', this.value);">
                         ${refereeOptions}
                     </select>
