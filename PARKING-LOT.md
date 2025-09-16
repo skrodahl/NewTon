@@ -3,7 +3,6 @@
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
 - (Experimental) Render match cards to align with previous rounds [render]
-- Match Details dialog: Match history, without auto-advance matches
 ## Next  
 *Promoted items to consider soon (max 3 items)*
 - Render BS-FINAL after FS Semifinal, Render GRAND-FINAL after BS-FINAL [render] - bracket-rendering.js:renderFinalMatches()
