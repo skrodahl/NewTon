@@ -1,5 +1,20 @@
 # 2025-09-16
 
+## v1.4.1 Recent Referee Assignments & UI Refinements
+
+### Recent Referee Assignments - Enhancement
+- **Added Recent Assignments Section**
+  - Third section in referee suggestions showing last 10 referee assignments from transaction history
+  - Chronological order with most recent assignments first
+  - Same FS/BS color coding as other suggestions (light for FS, darker for BS)
+  - Shows assigned referee name with round context (e.g., "John (FS-R2)")
+
+- **UI Refinements**
+  - Configurable suggestion limits for better interface management
+  - Default reduced to 7 items per section (losers/winners) for less overwhelming display
+  - Consistent slice limits across all suggestion categories
+  - Transaction-based data ensures reliable referee assignment history
+
 ## v1.4.0 Referee Suggestions System & Enhanced Match Controls
 
 ### Referee Suggestions System - New Feature

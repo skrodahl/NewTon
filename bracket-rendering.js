@@ -1611,7 +1611,7 @@ function getRefereeSuggestions() {
     const fsLosers = [];
     const bsLosers = [];
     for (const match of completedMatches) {
-        if (fsLosers.length + bsLosers.length >= 10) break;
+        if (fsLosers.length + bsLosers.length >= 7) break;
 
         const loserId = match.loser?.id;
         if (loserId && isEligible(loserId, match.loser?.name)) {
@@ -1630,13 +1630,13 @@ function getRefereeSuggestions() {
     }
 
     // Combine FS first, then BS
-    const recentLosers = [...fsLosers, ...bsLosers].slice(0, 10);
+    const recentLosers = [...fsLosers, ...bsLosers].slice(0, 7);
 
     // Collect recent winners by FS/BS (up to 10 total eligible)
     const fsWinners = [];
     const bsWinners = [];
     for (const match of completedMatches) {
-        if (fsWinners.length + bsWinners.length >= 10) break;
+        if (fsWinners.length + bsWinners.length >= 7) break;
 
         const winnerId = match.winner?.id;
         if (winnerId && isEligible(winnerId, match.winner?.name)) {
@@ -1658,11 +1658,41 @@ function getRefereeSuggestions() {
     }
 
     // Combine FS first, then BS
-    const recentWinners = [...fsWinners, ...bsWinners].slice(0, 10);
+    const recentWinners = [...fsWinners, ...bsWinners].slice(0, 7);
+
+    // Get recent referee assignments from transaction history (last 10)
+    const recentRefereeAssignments = [];
+    const history = JSON.parse(localStorage.getItem('tournamentHistory') || '[]');
+
+    // Filter ASSIGN_REFEREE transactions with actual referee assignments (not null)
+    const refereeTransactions = history
+        .filter(tx => tx.type === 'ASSIGN_REFEREE' && tx.afterState?.referee)
+        .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Most recent first
+        .slice(0, 7);
+
+    for (const tx of refereeTransactions) {
+        const refereeId = tx.afterState.referee;
+        if (refereeId) {
+            // Find referee name from players
+            const referee = players.find(p => p.id === refereeId);
+            if (referee) {
+                // Get round description from match ID
+                const roundDescription = getRoundDescription(tx.matchId);
+
+                recentRefereeAssignments.push({
+                    id: refereeId,
+                    name: referee.name,
+                    round: roundDescription,
+                    timestamp: tx.timestamp
+                });
+            }
+        }
+    }
 
     return {
         losers: recentLosers,
-        winners: recentWinners
+        winners: recentWinners,
+        recentReferees: recentRefereeAssignments
     };
 }
 
@@ -1670,19 +1700,22 @@ function getRefereeSuggestions() {
 function populateRefereeSuggestions() {
     const losersContainer = document.getElementById('refereeLosersContainer');
     const winnersContainer = document.getElementById('refereeWinnersContainer');
+    const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
     const losersSection = document.getElementById('refereeLosersSection');
     const winnersSection = document.getElementById('refereeWinnersSection');
+    const assignmentsSection = document.getElementById('refereeAssignmentsSection');
     const noSuggestionsMessage = document.getElementById('noRefereeSuggestionsMessage');
 
-    if (!losersContainer || !winnersContainer) return;
+    if (!losersContainer || !winnersContainer || !assignmentsContainer) return;
 
     const suggestions = getRefereeSuggestions();
-    const hasAnysuggestions = suggestions.losers.length > 0 || suggestions.winners.length > 0;
+    const hasAnysuggestions = suggestions.losers.length > 0 || suggestions.winners.length > 0 || suggestions.recentReferees.length > 0;
 
     if (!hasAnysuggestions) {
         // Show empty state
         losersSection.style.display = 'none';
         winnersSection.style.display = 'none';
+        assignmentsSection.style.display = 'none';
         noSuggestionsMessage.style.display = 'block';
         return;
     }
@@ -1717,6 +1750,21 @@ function populateRefereeSuggestions() {
         }).join('');
     } else {
         winnersSection.style.display = 'none';
+    }
+
+    // Populate recent assignments
+    if (suggestions.recentReferees.length > 0) {
+        assignmentsSection.style.display = 'block';
+        assignmentsContainer.innerHTML = suggestions.recentReferees.map(assignment => {
+            const isBackside = assignment.round.startsWith('BS-');
+            const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
+            return `<div class="referee-suggestion-item${backsideClass}">
+                <span class="referee-suggestion-name">${assignment.name}</span>
+                <span class="referee-suggestion-round">(${assignment.round})</span>
+            </div>`;
+        }).join('');
+    } else {
+        assignmentsSection.style.display = 'none';
     }
 }
 
