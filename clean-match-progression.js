@@ -1278,7 +1278,15 @@ function updateMatchLane(matchId, newLane) {
     if (document.getElementById('matchCommandCenterModal') &&
         document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
         typeof showMatchCommandCenter === 'function') {
-        setTimeout(() => showMatchCommandCenter(), 200);
+        // Preserve scroll position
+        const modalContent = document.querySelector('.cc-modal-content');
+        const scrollTop = modalContent ? modalContent.scrollTop : 0;
+        setTimeout(() => {
+            showMatchCommandCenter();
+            if (modalContent) {
+                modalContent.scrollTop = scrollTop;
+            }
+        }, 200);
     }
 
     return true;

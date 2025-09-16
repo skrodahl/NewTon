@@ -1,5 +1,27 @@
 # 2025-09-16
 
+## v1.2.9 Match Controls UX Improvements
+
+### Match Controls Dialog Enhancement
+- **Fixed Match Controls Dialog Refresh Issue**
+  - Resolved inconsistent refresh behavior between Frontside and Backside matches
+  - Fixed scroll position reset when changing lane/referee assignments
+  - Dialog now maintains scroll position during updates instead of jumping to top
+  - Improved user experience when managing multiple matches
+
+- **Added Stop Match Button**
+  - Added red "Stop Match" button to LIVE match cards in Match Controls dialog
+  - Button appears in lower right corner for easy access
+  - Allows stopping accidentally started matches without exiting dialog
+  - Uses existing `toggleActive()` function to return match to ready state
+  - Includes proper CSS styling with hover effects
+
+### Technical Improvements
+- **Performance Optimization**
+  - Improved DOM update efficiency by building HTML strings before setting innerHTML
+  - Eliminated redundant function calls during match updates
+  - Enhanced scroll position preservation during dialog refreshes
+
 ## v1.2.8 Excluded Lanes Configuration & Match Format Update
 
 ### Lane Management Enhancement

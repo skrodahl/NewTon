@@ -642,7 +642,15 @@ function updateMatchReferee(matchId, refereeId) {
         if (document.getElementById('matchCommandCenterModal') &&
             document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
             typeof showMatchCommandCenter === 'function') {
-            setTimeout(() => showMatchCommandCenter(), 200);
+            // Preserve scroll position
+            const modalContent = document.querySelector('.cc-modal-content');
+            const scrollTop = modalContent ? modalContent.scrollTop : 0;
+            setTimeout(() => {
+                showMatchCommandCenter();
+                if (modalContent) {
+                    modalContent.scrollTop = scrollTop;
+                }
+            }, 200);
         }
 
         return true;
@@ -669,7 +677,15 @@ function updateMatchReferee(matchId, refereeId) {
     if (document.getElementById('matchCommandCenterModal') &&
         document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
         typeof showMatchCommandCenter === 'function') {
-        setTimeout(() => showMatchCommandCenter(), 200);
+        // Preserve scroll position
+        const modalContent = document.querySelector('.cc-modal-content');
+        const scrollTop = modalContent ? modalContent.scrollTop : 0;
+        setTimeout(() => {
+            showMatchCommandCenter();
+            if (modalContent) {
+                modalContent.scrollTop = scrollTop;
+            }
+        }, 200);
     }
 
     return true;
@@ -1368,10 +1384,9 @@ function createMatchCard(match) {
         `${originalClickHandler}; setTimeout(() => { if (document.getElementById('matchCommandCenterModal').style.display === 'flex') showMatchCommandCenter(); }, 500)` : 
         '';
     
-    // For live matches, no separate action button needed (winner buttons are in player area)
-    // For non-live matches, show the start button
+    // For live matches, show stop button; for non-live matches, show start button
     const actionButton = state === 'live' ?
-        '' :
+        `<button class="cc-match-action-btn cc-btn-stop" onclick="toggleActive('${match.id}'); setTimeout(() => showMatchCommandCenter(), 200);">Stop Match</button>` :
         `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}">Start Match</button>`;
     
     const liveClass = state === 'live' ? ' cc-match-card-live' : '';
@@ -1397,19 +1412,19 @@ function createMatchCard(match) {
             <div class="cc-match-controls">
                 <div class="cc-control-group">
                     <label class="cc-control-label">Lane:</label>
-                    <select class="cc-match-dropdown" onchange="updateMatchLane('${match.id}', this.value); setTimeout(() => showMatchCommandCenter(), 200);">
+                    <select class="cc-match-dropdown" onchange="updateMatchLane('${match.id}', this.value);">
                         ${laneOptions}
                     </select>
                 </div>
 
                 <div class="cc-control-group">
                     <label class="cc-control-label">Ref:</label>
-                    <select class="cc-match-dropdown" onchange="updateMatchReferee('${match.id}', this.value); setTimeout(() => showMatchCommandCenter(), 200);">
+                    <select class="cc-match-dropdown" onchange="updateMatchReferee('${match.id}', this.value);">
                         ${refereeOptions}
                     </select>
                 </div>
 
-                ${state === 'live' ? '' : '<div style="flex: 1;"></div>'}
+                <div style="flex: 1;"></div>
                 ${actionButton}
             </div>
         </div>
@@ -1454,12 +1469,16 @@ function showCommandCenterModal(matchData) {
     const backSection = document.getElementById('backMatchesSection');
     const noMatchesMessage = document.getElementById('noMatchesMessage');
     const okBtn = document.getElementById('commandCenterOK');
-    
+
+    // Get the scrollable container and preserve scroll position
+    const scrollContainer = document.querySelector('.match-controls-container');
+    const initialScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
+
     if (!modal || !liveContainer || !frontContainer || !backContainer) {
         console.error('Match command center modal elements not found');
         return;
     }
-    
+
     // Clear existing content
     liveContainer.innerHTML = '';
     frontContainer.innerHTML = '';
@@ -1483,34 +1502,45 @@ function showCommandCenterModal(matchData) {
         // Populate LIVE matches
         if (matchData.live && matchData.live.length > 0) {
             liveSection.style.display = 'block';
+            let liveHTML = '';
             matchData.live.forEach(match => {
-                liveContainer.innerHTML += createMatchCard(match);
+                liveHTML += createMatchCard(match);
             });
+            liveContainer.innerHTML = liveHTML;
         } else {
             liveSection.style.display = 'none';
         }
-        
+
         // Populate Front matches
         if (matchData.front && matchData.front.length > 0) {
             frontSection.style.display = 'block';
+            let frontHTML = '';
             matchData.front.forEach(match => {
-                frontContainer.innerHTML += createMatchCard(match);
+                frontHTML += createMatchCard(match);
             });
+            frontContainer.innerHTML = frontHTML;
         } else {
             frontSection.style.display = 'none';
         }
-        
+
         // Populate Back matches
         if (matchData.back && matchData.back.length > 0) {
             backSection.style.display = 'block';
+            let backHTML = '';
             matchData.back.forEach(match => {
-                backContainer.innerHTML += createMatchCard(match);
+                backHTML += createMatchCard(match);
             });
+            backContainer.innerHTML = backHTML;
         } else {
             backSection.style.display = 'none';
         }
     }
-    
+
+    // Restore scroll position
+    if (scrollContainer && initialScrollTop > 0) {
+        scrollContainer.scrollTop = initialScrollTop;
+    }
+
     // Show modal
     modal.style.display = 'flex';
     
