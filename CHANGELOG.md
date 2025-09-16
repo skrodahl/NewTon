@@ -1,5 +1,32 @@
 # 2025-09-16
 
+## v1.4.0 Referee Suggestions System & Enhanced Match Controls
+
+### Referee Suggestions System - New Feature
+- **Comprehensive Referee Suggestion System**
+  - Added intelligent referee suggestions to Match Controls dialog
+  - Expanded dialog layout from 800px to 1100px width for two-column design
+  - Right column displays up to 10 recent losers first, then up to 10 recent winners
+  - Each suggestion shows player name with round context (e.g., "Player Name (FS-R2)")
+
+- **Smart Filtering Logic**
+  - Automatically excludes players already assigned as referees
+  - Filters out players currently in LIVE matches
+  - Removes walkover players from suggestions (not eligible referees)
+  - Prevents invalid referee assignments through comprehensive validation
+
+- **Visual Organization & Color Coding**
+  - Frontside (FS) players grouped first with light backgrounds
+  - Backside (BS) players grouped second with darker backgrounds matching bracket scheme
+  - Consistent color coding maintains visual harmony with existing match cards
+  - Hover effects provide clear interaction feedback
+
+- **Tournament Flow Integration**
+  - Prioritizes eliminated players (losers) as immediately available referees
+  - Shows winners with multiple appearances for activity pattern insight
+  - Chronological ordering within each group (most recent first)
+  - Provides operators comprehensive context for informed referee selection
+
 ## v1.3.0 Undo System & Match Controls UX Improvements
 
 ### Undo System Enhancement - Major Fix

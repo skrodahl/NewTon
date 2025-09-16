@@ -1615,12 +1615,101 @@ a:hover { color: #1e40af; }
   margin-bottom: 20px;
 }
 
+/* Two-column layout container */
+.match-controls-main-container {
+  display: flex;
+  gap: 20px;
+  flex: 1;
+  min-height: 0;
+}
+
 .match-controls-container {
-  flex: 1; /* Expand to fill available space */
+  flex: 2; /* Takes 2/3 of the space */
   overflow-y: auto;
   padding-right: 8px; /* Space for scrollbar */
   margin-bottom: 20px; /* Space before buttons */
   min-height: 0; /* Allow flexbox shrinking */
+}
+
+/* Referee suggestions column */
+.referee-suggestions-container {
+  flex: 1; /* Takes 1/3 of the space */
+  border-left: 2px solid #e5e7eb;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.referee-suggestions-content {
+  flex: 1;
+  overflow-y: auto;
+  padding-right: 8px;
+  min-height: 0;
+}
+
+.referee-section {
+  margin-bottom: 20px;
+}
+
+.referee-subsection-header {
+  font-size: 14px;
+  font-weight: 600;
+  color: #374151;
+  margin-bottom: 8px;
+  padding-bottom: 4px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.referee-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.referee-suggestion-item {
+  background: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 6px;
+  padding: 8px 10px;
+  font-size: 13px;
+  color: #374151;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.referee-suggestion-item:hover {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+}
+
+.referee-suggestion-name {
+  font-weight: 500;
+  color: #111827;
+}
+
+.referee-suggestion-round {
+  color: #6b7280;
+  font-size: 11px;
+  margin-left: 4px;
+}
+
+/* Backside color scheme for referee suggestions */
+.referee-suggestion-item.referee-suggestion-backside {
+  background: #d1d5db; /* Same darker gray as backside matches */
+}
+
+.referee-suggestion-item.referee-suggestion-backside:hover {
+  background: #c1c6cd; /* Slightly darker on hover for backside */
+  border-color: #9ca3af;
+}
+
+.referee-empty-message {
+  text-align: center;
+  color: #6b7280;
+  font-style: italic;
+  padding: 20px;
+  margin-top: 20px;
 }
 
 /* Match Controls modal button container - keep buttons at bottom */

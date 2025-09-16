@@ -1538,6 +1538,188 @@ function showMatchCommandCenter() {
     showCommandCenterModal(matchData);
 }
 
+// Function to get referee suggestions
+function getRefereeSuggestions() {
+    if (!matches || !players) return { losers: [], winners: [] };
+
+    // Get completed matches sorted by most recent first
+    const completedMatches = matches
+        .filter(m => m.completed && m.winner && m.loser)
+        .sort((a, b) => {
+            const aTime = a.completedAt || 0;
+            const bTime = b.completedAt || 0;
+            return bTime - aTime; // Most recent first
+        });
+
+    // Get players currently assigned as referees
+    const assignedReferees = new Set();
+    matches.forEach(match => {
+        if (match.referee) {
+            assignedReferees.add(match.referee);
+        }
+    });
+
+    // Get players currently in LIVE matches
+    const playersInLiveMatches = new Set();
+    matches.forEach(match => {
+        if (match.active) {
+            if (match.player1?.id) playersInLiveMatches.add(match.player1.id);
+            if (match.player2?.id) playersInLiveMatches.add(match.player2.id);
+        }
+    });
+
+    // Helper function to check if a player is eligible
+    const isEligible = (playerId, playerName) => {
+        if (!playerId) return false;
+
+        // Check basic eligibility (not assigned as referee, not in live match)
+        if (assignedReferees.has(playerId) || playersInLiveMatches.has(playerId)) {
+            return false;
+        }
+
+        // Check if player is a walkover by name or ID
+        if (playerName === 'Walkover' || playerId.toString().startsWith('walkover-')) {
+            return false;
+        }
+
+        // Additional check using player object if available
+        const player = players.find(p => p.id === playerId);
+        if (player && window.isWalkover && window.isWalkover(player)) {
+            return false;
+        }
+
+        return true;
+    };
+
+    // Helper function to get round description
+    const getRoundDescription = (matchId) => {
+        if (matchId.startsWith('FS-')) {
+            const parts = matchId.split('-');
+            if (parts.length >= 2) {
+                return `FS-R${parts[1]}`;
+            }
+        } else if (matchId.startsWith('BS-')) {
+            const parts = matchId.split('-');
+            if (parts.length >= 2) {
+                return `BS-R${parts[1]}`;
+            }
+        }
+        return matchId; // Fallback
+    };
+
+    // Collect recent losers by FS/BS (up to 10 total eligible)
+    const fsLosers = [];
+    const bsLosers = [];
+    for (const match of completedMatches) {
+        if (fsLosers.length + bsLosers.length >= 10) break;
+
+        const loserId = match.loser?.id;
+        if (loserId && isEligible(loserId, match.loser?.name)) {
+            const loserData = {
+                id: loserId,
+                name: match.loser.name,
+                round: getRoundDescription(match.id)
+            };
+
+            if (match.id.startsWith('FS-')) {
+                fsLosers.push(loserData);
+            } else if (match.id.startsWith('BS-')) {
+                bsLosers.push(loserData);
+            }
+        }
+    }
+
+    // Combine FS first, then BS
+    const recentLosers = [...fsLosers, ...bsLosers].slice(0, 10);
+
+    // Collect recent winners by FS/BS (up to 10 total eligible)
+    const fsWinners = [];
+    const bsWinners = [];
+    for (const match of completedMatches) {
+        if (fsWinners.length + bsWinners.length >= 10) break;
+
+        const winnerId = match.winner?.id;
+        if (winnerId && isEligible(winnerId, match.winner?.name)) {
+            // Don't add if already in losers list
+            if (!recentLosers.some(loser => loser.id === winnerId)) {
+                const winnerData = {
+                    id: winnerId,
+                    name: match.winner.name,
+                    round: getRoundDescription(match.id)
+                };
+
+                if (match.id.startsWith('FS-')) {
+                    fsWinners.push(winnerData);
+                } else if (match.id.startsWith('BS-')) {
+                    bsWinners.push(winnerData);
+                }
+            }
+        }
+    }
+
+    // Combine FS first, then BS
+    const recentWinners = [...fsWinners, ...bsWinners].slice(0, 10);
+
+    return {
+        losers: recentLosers,
+        winners: recentWinners
+    };
+}
+
+// Function to populate referee suggestions in the UI
+function populateRefereeSuggestions() {
+    const losersContainer = document.getElementById('refereeLosersContainer');
+    const winnersContainer = document.getElementById('refereeWinnersContainer');
+    const losersSection = document.getElementById('refereeLosersSection');
+    const winnersSection = document.getElementById('refereeWinnersSection');
+    const noSuggestionsMessage = document.getElementById('noRefereeSuggestionsMessage');
+
+    if (!losersContainer || !winnersContainer) return;
+
+    const suggestions = getRefereeSuggestions();
+    const hasAnysuggestions = suggestions.losers.length > 0 || suggestions.winners.length > 0;
+
+    if (!hasAnysuggestions) {
+        // Show empty state
+        losersSection.style.display = 'none';
+        winnersSection.style.display = 'none';
+        noSuggestionsMessage.style.display = 'block';
+        return;
+    }
+
+    noSuggestionsMessage.style.display = 'none';
+
+    // Populate losers
+    if (suggestions.losers.length > 0) {
+        losersSection.style.display = 'block';
+        losersContainer.innerHTML = suggestions.losers.map(loser => {
+            const isBackside = loser.round.startsWith('BS-');
+            const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
+            return `<div class="referee-suggestion-item${backsideClass}">
+                <span class="referee-suggestion-name">${loser.name}</span>
+                <span class="referee-suggestion-round">(${loser.round})</span>
+            </div>`;
+        }).join('');
+    } else {
+        losersSection.style.display = 'none';
+    }
+
+    // Populate winners
+    if (suggestions.winners.length > 0) {
+        winnersSection.style.display = 'block';
+        winnersContainer.innerHTML = suggestions.winners.map(winner => {
+            const isBackside = winner.round.startsWith('BS-');
+            const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
+            return `<div class="referee-suggestion-item${backsideClass}">
+                <span class="referee-suggestion-name">${winner.name}</span>
+                <span class="referee-suggestion-round">(${winner.round})</span>
+            </div>`;
+        }).join('');
+    } else {
+        winnersSection.style.display = 'none';
+    }
+}
+
 function showCommandCenterModal(matchData) {
     const modal = document.getElementById('matchCommandCenterModal');
     const liveContainer = document.getElementById('liveMatchesContainer');
@@ -1614,6 +1796,9 @@ function showCommandCenterModal(matchData) {
             backSection.style.display = 'none';
         }
     }
+
+    // Populate referee suggestions
+    populateRefereeSuggestions();
 
     // Restore scroll position
     if (scrollContainer && initialScrollTop > 0) {

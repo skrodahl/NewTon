@@ -533,37 +533,61 @@
 
     <!-- Match Controls Modal -->
     <div id="matchCommandCenterModal" class="modal">
-        <div class="modal-content match-controls-modal" style="max-width: 800px;">
+        <div class="modal-content match-controls-modal" style="max-width: 1100px;">
             <h3 id="commandCenterTitle">Match Controls</h3>
 
-            <div class="match-controls-container">
-                <!-- LIVE Matches Section -->
-                <div id="liveMatchesSection" class="cc-match-section">
-                    <h4 class="cc-section-header">🔴 LIVE Matches</h4>
-                    <div id="liveMatchesContainer" class="cc-matches-container">
-                        <!-- LIVE match cards will be populated here -->
+            <div class="match-controls-main-container">
+                <div class="match-controls-container">
+                    <!-- LIVE Matches Section -->
+                    <div id="liveMatchesSection" class="cc-match-section">
+                        <h4 class="cc-section-header">🔴 LIVE Matches</h4>
+                        <div id="liveMatchesContainer" class="cc-matches-container">
+                            <!-- LIVE match cards will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Front Bracket Matches Section -->
+                    <div id="frontMatchesSection" class="cc-match-section">
+                        <h4 class="cc-section-header">⚪ Frontside - Ready to Start</h4>
+                        <div id="frontMatchesContainer" class="cc-matches-container">
+                            <!-- Front bracket ready match cards will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Back Bracket Matches Section -->
+                    <div id="backMatchesSection" class="cc-match-section">
+                        <h4 class="cc-section-header">⚫ Backside - Ready to Start</h4>
+                        <div id="backMatchesContainer" class="cc-matches-container">
+                            <!-- Back bracket ready match cards will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- Empty state message -->
+                    <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
+                        <p>No matches currently active or ready to start.</p>
                     </div>
                 </div>
 
-                <!-- Front Bracket Matches Section -->
-                <div id="frontMatchesSection" class="cc-match-section">
-                    <h4 class="cc-section-header">⚪ Frontside - Ready to Start</h4>
-                    <div id="frontMatchesContainer" class="cc-matches-container">
-                        <!-- Front bracket ready match cards will be populated here -->
+                <!-- Referee Suggestions Column -->
+                <div class="referee-suggestions-container">
+                    <h4 class="cc-section-header">👥 Referee Suggestions</h4>
+                    <div class="referee-suggestions-content">
+                        <div id="refereeLosersSection" class="referee-section">
+                            <h5 class="referee-subsection-header">Recent Losers</h5>
+                            <div id="refereeLosersContainer" class="referee-list">
+                                <!-- Recent losers will be populated here -->
+                            </div>
+                        </div>
+                        <div id="refereeWinnersSection" class="referee-section">
+                            <h5 class="referee-subsection-header">Recent Winners</h5>
+                            <div id="refereeWinnersContainer" class="referee-list">
+                                <!-- Recent winners will be populated here -->
+                            </div>
+                        </div>
+                        <div id="noRefereeSuggestionsMessage" class="referee-empty-message" style="display: none;">
+                            <p>No referee suggestions available</p>
+                        </div>
                     </div>
-                </div>
-
-                <!-- Back Bracket Matches Section -->
-                <div id="backMatchesSection" class="cc-match-section">
-                    <h4 class="cc-section-header">⚫ Backside - Ready to Start</h4>
-                    <div id="backMatchesContainer" class="cc-matches-container">
-                        <!-- Back bracket ready match cards will be populated here -->
-                    </div>
-                </div>
-
-                <!-- Empty state message -->
-                <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
-                    <p>No matches currently active or ready to start.</p>
                 </div>
             </div>
 
