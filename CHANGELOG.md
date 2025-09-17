@@ -9,7 +9,7 @@
   - Added subtle color guidance: green tint for Match Controls (primary action), amber tint for Generate Bracket (important/caution)
   - Uses existing Statistics modal functionality with cleaner tournament page integration
   - Inconsistent Esc key behavior
-  - The Statistics dialog did not update when editing player statistics.
+  - The Statistics dialog did not update when editing player statistics
 - **Visual Consistency Improvements**
   - Added consistent backside match styling to Match Results in Setup page
   - Backside match headers now use darker background (`#d1d5db`) matching Match Controls design
