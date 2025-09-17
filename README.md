@@ -6,9 +6,6 @@ Simply download the repository, open `tournament.html`, and start managing your 
 
 [Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases)
 
-**This is the feature-complete version**.  
-Unless there are some groundbreaking new ideas that just *scream* to be implemented, expect only bug-fixes from now on.
-
 ---
 
 ## ✨ Key Features
@@ -16,25 +13,20 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 ### 🏆 Tournament Management
 - **Create, Save & Load**: Multiple tournaments with automatic saving to browser storage
 - **Import/Export**: JSON-based tournament backup and sharing between computers
-- **Tournament History**: Transaction based tournament history, allows for undo on all matches without completed downstream matches.
+- **Tournament History**: Full chronological record of all matches in the active tournament with results, lane and referee assignments
 - **Crash Resilient**: Automatic saving prevents data loss during unexpected closures
 - **Template System**: Reusable tournament configurations
 
 ### 👥 Player Management
 - **Registration System**: Add, remove, and track player payment status
-- **Comprehensive Statistics**: Track short legs (9-21 darts), high outs (101+), tons (100+), and 180s
+- **Comprehensive Statistics**: Track ranks, short legs (9-21 darts), high outs (101+), tons (100+), and 180s
 - **Real-time Stats Entry**: Update player statistics during matches
 - **Flexible Point System**: Fully configurable scoring for all achievements
-
-### 🎯 Advanced Bracket System
-- **Double Elimination**: Professional frontside/backside bracket structure for 8, 16, and 32 players
-- **Smart Bracket Generation**: Prevents bye vs bye matchups in first round
-- **Automatic Advancement**: Walkovers (byes) automatically advance real players
-- **Match State Management**: Clear pending/ready/live/completed match visualization
-- **Interactive Bracket**: Zoom, pan, and click-to-select winners with visual feedback
+- **Export Results**: Results, points and statistics, either as CSV or JSON (JSON export includes full tournament history)
 
 ### 🎮 Match Control & Lane Management
-- **Match Controls Interface**: Centralized command center for tournament management
+- **Match Controls Interface**: Centralized command center for managing the entire tournament
+  - Manage the tournament without searching around in the tournament bracket
   - Organized sections: LIVE matches first, then Ready matches by bracket side
   - Direct "[Player Name] Wins" buttons for instant winner selection
   - Start/stop matches without leaving the interface
@@ -44,7 +36,14 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 - **Conflict Prevention**: Automatic detection and prevention of lane conflicts
 - **Match Validation**: Ensure proper match progression and prevent invalid states
 - **Referee Assignment**: Select referees from a drop-down menu, with conflict prevention
-- **Flexible Match Lengths**: Configurable best-of legs for rounds, semifinals, and finals
+- **Referee Suggestions**: See who lost/won last and who were recently assigned as referee, with smart filtering
+
+### 🎯 Advanced Bracket System
+- **Double Elimination**: Professional frontside/backside bracket structure for 8, 16, and 32 players
+- **Smart Bracket Generation**: Prevents bye vs bye matchups in first round
+- **Automatic Advancement**: Walkovers (byes) automatically advance real players
+- **Match State Management**: Clear pending/ready/live/completed match visualization
+- **Interactive Bracket**: Zoom, pan, and click-to-select winners with visual feedback
 
 ### 📊 Results & Reporting
 - **Match Results History**: Chronological display of completed matches with visual winner identification
@@ -58,7 +57,8 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 - **Global Settings**: Persistent configuration across all tournaments
 - **Custom Branding**: Add your club logo and customize application title
 - **Flexible Scoring**: Adjust point values for participation, placements, and achievements
-- **Match Formats**: Configure best-of legs for different tournament rounds
+- **Configure Number of Lanes**: Select 1-20 lanes, with lane exclusions
+- **Flexible Match Lengths**: Configurable best-of legs for rounds, semifinals, and finals
 - **UI Preferences**: Customize confirmation dialogs and interface behavior
 
 ---
@@ -67,20 +67,22 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 
 1. **Download**: Clone or download this repository to your computer
 2. **Open**: Double-click `tournament.html` to open in your web browser
-3. **Create**: Set up a new tournament with name and date
-4. **Register**: Add players and mark payment status
-5. **Generate**: Create the tournament bracket
-6. **Run**: Manage matches, assign lanes, and track results in real-time
+3. **Configure**: Set all global configs, match lenghts, points awarded and more
+4. **Create**: Set up a new tournament with name and date
+5. **Register**: Add players and mark payment status
+6. **Generate**: Create the tournament bracket
+7. **Run**: Manage matches, assign lanes, and track results in real-time
 
 ---
 
 ## 📋 Detailed Workflow
 
 ### Setup Phase
-1. **Create Tournament**: Enter tournament name and date
-2. **Add Players**: Register participants and track payment status
-3. **Configure Settings**: Adjust point values and match formats if needed
-4. **Export Tournament**: Export the tournament for use on another computer, or analysis
+1. **Configure**: Global configuration for all tournaments
+2. **Create Tournament**: Enter tournament name and date
+3. **Add Players**: Register participants and track payment status
+4. **Configure Settings**: Adjust point values and match formats if needed
+5. **Export Tournament**: Export the tournament for use on another computer, or analysis
 
 ### Tournament Phase
 1. **Generate Bracket**: Automatically creates optimized double-elimination bracket
@@ -105,14 +107,15 @@ Unless there are some groundbreaking new ideas that just *scream* to be implemen
 ### Core Technologies
 - **Frontend**: Pure HTML5, CSS3, and JavaScript (ES6+)
 - **Storage**: Browser LocalStorage for offline persistence
-- **No Dependencies**: Zero external libraries or frameworks required
+- **No Dependencies**: Zero external libraries or frameworks, or even an Internet connetion required
 - **Offline First**: Works completely without internet connection
 
 ### Bracket Logic
 - **Hardcoded Progression**: Bulletproof match advancement using lookup tables
 - **Mirroring Rules**: Proper frontside/backside player distribution
-- **State Management**: Comprehensive match state tracking and validation
+- **State Management**: Comprehensive transaction-based match state tracking and validation
 - **Auto-advancement**: Intelligent handling of walkover scenarios
+- **Full Undo**: Undo uses hardcoded progression and transaction-based history for bullet-proof operation
 
 ### Data Management
 - **Tournament Isolation**: Clean separation between global config and tournament data
