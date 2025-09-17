@@ -180,6 +180,8 @@
                             <button class="zoom-btn" onclick="showPage('registration')"
                                 title="Exit Tournament to edit statistics and see current results">⬅
                                 Players/Points</button>
+                            <button class="zoom-btn" onclick="showStatisticsModal()"
+                                title="View tournament statistics and rankings">≡ Stats/Results</button>
                         </div>
                         <div class="bracket-controls-middle-right">
                             <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
@@ -400,7 +402,7 @@
                     <div class="form-group">
                         <label>
                             <input type="checkbox" id="confirmWinnerSelection" checked style="margin-right: 8px;">
-                            Show confirmation dialog when selecting match winner
+                            Show confirmation dialog when selecting match winner (when disabled, matches complete instantly without entering scores or statistics)
                         </label>
                     </div>
                 </div>

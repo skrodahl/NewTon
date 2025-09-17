@@ -111,8 +111,13 @@ const HELP_CONTENT = {
                         <li><strong>Points:</strong> Total calculated based on placement + achievements</li>
                         <li><strong>Legs Won/Lost:</strong> Match performance from completed games</li>
                     </ul>
-                    <p><strong>Export Results:</strong> Save results as CSV file for record keeping or league management.</p>
+                    <p><strong>Export Results:</strong></p>
+                    <ul>
+                        <li><strong>Export CSV:</strong> Save results table for record keeping or league management</li>
+                        <li><strong>Export JSON:</strong> Export results and tournament match history in JSON format</li>
+                    </ul>
                     <p><strong>Note:</strong> Rankings update automatically as matches are completed.</p>
+                    <p><strong>💡 Tip:</strong> Use Export JSON for automated import into external tournament statistics websites and league management systems.</p>
                 `
             }
         }
@@ -149,6 +154,7 @@ const HELP_CONTENT = {
                         <li><strong>Mouse:</strong> Click and drag to pan around the bracket</li>
                         <li><strong>Zoom:</strong> Use + and - buttons or mouse wheel</li>
                         <li><strong>Players/Points (⬅):</strong> Exit the tournament view</li>
+                        <li><strong>Stats/Results (≡):</strong> View tournament statistics, rankings, and detailed results</li>
                         <li><strong>Reset (⌂):</strong> Return to default view</li>
                         <li><strong>Match Controls (➹):</strong> Manage LIVE and ready matches - start, complete, assign lanes/referees</li>
                     </ul>
@@ -272,8 +278,8 @@ const HELP_CONTENT = {
                     <p><strong>Match Length Options:</strong></p>
                     <ul>
                         <li><strong>Regular Rounds:</strong> Early bracket matches</li>
-                        <li><strong>Semi-Finals:</strong> Later frontside rounds</li>
-                        <li><strong>Backside Final:</strong> Last backside match</li>
+                        <li><strong>Semi-Finals:</strong> Last frontside and backside matches</li>
+                        <li><strong>Backside Final:</strong> Qualifier match for Grand Final</li>
                         <li><strong>Grand Final:</strong> Championship match</li>
                     </ul>
                     <p><strong>Format:</strong> Choose Best of 3, 5, or 7 legs for each round type.</p>
@@ -288,7 +294,7 @@ const HELP_CONTENT = {
                         <li><strong>Application Title:</strong> Customize header text and browser title</li>
                         <li><strong>Club Logo:</strong> Add logo.png/jpg/jpeg/svg file to root folder</li>
                         <li><strong>Lane Management:</strong> Set maximum lanes and requirements</li>
-                        <li><strong>UI Preferences:</strong> Enable/disable confirmation dialogs</li>
+                        <li><strong>UI Preferences:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
                     </ul>
                     <p><strong>💡 Tip:</strong> Personalize the application for your club or organization.</p>
                 `

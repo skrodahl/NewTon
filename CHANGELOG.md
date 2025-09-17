@@ -1,3 +1,34 @@
+# 2025-09-17
+
+## v1.4.6 Tournament Navigation & Help System Improvements
+
+### User Interface Enhancements
+- **Tournament Page Navigation**
+  - Added "≡ Stats/Results" button to Tournament page upper-left controls for quick access to statistics
+  - Positioned alongside "⬅ Players/Points" button for consistent navigation options
+  - Uses existing Statistics modal functionality with cleaner tournament page integration
+
+### Help System Updates
+- **Registration Page Help**
+  - Added documentation for Export JSON functionality (results and tournament match history)
+  - Added tip about using Export JSON for automated import into external tournament statistics websites
+- **Config Page Help**
+  - Updated Match Format Configuration descriptions for separate Frontside/Backside Semi-Finals
+  - Clarified Backside Final as "Qualifier match for Grand Final"
+  - Enhanced confirmation dialog description to explain impact on match result and statistics entry
+- **Tournament Page Help**
+  - Updated bracket navigation section to include new Stats/Results button
+
+### Bug Fixes
+- **Modal Behavior**
+  - Added Esc key support to Statistics modal for consistent modal behavior
+  - Statistics modal now closes with Esc key like other modals in the application
+
+### Technical Improvements
+- **Code Documentation**
+  - Streamlined README.md removing duplications and improving focus (reduced from 253 to 108 lines)
+  - Enhanced CLAUDE.md collaboration guidelines with clearer architecture foundations
+
 # 2025-09-16
 
 ## v1.4.5 Match Controls Dialog Behavior Fix

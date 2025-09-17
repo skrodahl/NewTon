@@ -2026,6 +2026,15 @@ function showStatisticsModal() {
 
     // Show modal
     modal.style.display = 'flex';
+
+    // Close on Escape key
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') {
+            modal.style.display = 'none';
+            document.removeEventListener('keydown', handleEscape);
+        }
+    };
+    document.addEventListener('keydown', handleEscape);
 }
 
 // Function to update the statistics table with current results data
