@@ -2021,6 +2021,14 @@ function showStatisticsModal() {
         return;
     }
 
+    // Check if Match Controls modal is open and hide it temporarily
+    const matchControlsModal = document.getElementById('matchCommandCenterModal');
+    const wasMatchControlsOpen = matchControlsModal && matchControlsModal.style.display === 'flex';
+
+    if (wasMatchControlsOpen) {
+        matchControlsModal.style.display = 'none';
+    }
+
     // Update the statistics table with current data
     updateStatisticsTable();
 
@@ -2030,11 +2038,33 @@ function showStatisticsModal() {
     // Close on Escape key
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
+            e.stopPropagation(); // Prevent other modals from also handling this event
             modal.style.display = 'none';
             document.removeEventListener('keydown', handleEscape);
+
+            // Restore Match Controls modal if it was open before
+            if (wasMatchControlsOpen && matchControlsModal) {
+                matchControlsModal.style.display = 'flex';
+            }
         }
     };
     document.addEventListener('keydown', handleEscape);
+
+    // Also handle the close button click to restore Match Controls
+    const originalCloseHandler = () => {
+        modal.style.display = 'none';
+
+        // Restore Match Controls modal if it was open before
+        if (wasMatchControlsOpen && matchControlsModal) {
+            matchControlsModal.style.display = 'flex';
+        }
+    };
+
+    // Override the close button onclick
+    const closeButton = modal.querySelector('.btn[onclick*="statisticsModal"]');
+    if (closeButton) {
+        closeButton.onclick = originalCloseHandler;
+    }
 }
 
 // Function to update the statistics table with current results data

@@ -166,6 +166,12 @@ function saveStats() {
     // Refresh the results table dynamically
     if (typeof updateResultsTable === 'function') {
         updateResultsTable();
+
+        // Also update the statistics table if the statistics modal is open
+        const statisticsModal = document.getElementById('statisticsModal');
+        if (statisticsModal && statisticsModal.style.display !== 'none') {
+            updateResultsTable('statisticsTableBody');
+        }
     }
 
     closeStatsModal();
