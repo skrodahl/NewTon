@@ -5,8 +5,13 @@
 ### User Interface Enhancements
 - **Tournament Page Navigation**
   - Added "≡ Stats/Results" button to Tournament page upper-left controls for quick access to statistics
-  - Positioned alongside "⬅ Players/Points" button for consistent navigation options
+  - Repositioned Match Controls to middle row alongside Players/Points for better accessibility
+  - Added subtle color guidance: green tint for Match Controls (primary action), amber tint for Generate Bracket (important/caution)
   - Uses existing Statistics modal functionality with cleaner tournament page integration
+- **Visual Consistency Improvements**
+  - Added consistent backside match styling to Match Results in Setup page
+  - Backside match headers now use darker background (`#d1d5db`) matching Match Controls design
+  - Maintains uniform header appearance while preserving visual distinction between frontside/backside matches
 
 ### Help System Updates
 - **Registration Page Help**

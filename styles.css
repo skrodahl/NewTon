@@ -568,6 +568,25 @@ body {
   box-shadow: 0 6px 16px rgba(0,0,0,0.35);
 }
 
+/* Subtle color tints for key tournament buttons */
+.zoom-btn.match-controls-btn {
+  background: rgba(22, 101, 52, 0.9); /* Subtle green tint */
+}
+.zoom-btn.match-controls-btn:hover {
+  background: rgba(22, 101, 52, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
+.zoom-btn.generate-bracket-btn {
+  background: rgba(154, 52, 18, 0.9); /* Subtle orange/amber tint */
+}
+.zoom-btn.generate-bracket-btn:hover {
+  background: rgba(154, 52, 18, 1);
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
+}
+
 .bracket-controls-top-left .zoom-btn,
 .bracket-controls-middle-left .zoom-btn,
 .bracket-controls-bottom-left .zoom-btn {
@@ -1761,6 +1780,14 @@ a:hover { color: #1e40af; }
   border-color: #e5e7eb;
   color: #6b7280;
   font-style: italic;
+}
+
+/* Backside match styling - darker header background */
+.match-history-item.backside .match-header {
+  background: #d1d5db; /* Use backside darker color for entire header */
+}
+.match-history-item.backside .match-id {
+  background: transparent; /* Remove separate background, blend with header */
 }
 
 .match-header {

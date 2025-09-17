@@ -424,7 +424,11 @@ function updateMatchHistory() {
     let historyHtml = '';
     completedMatches.forEach(match => {
         const isWalkover = match.autoAdvanced || isWalkoverMatch(match);
-        const itemClass = isWalkover ? 'match-history-item walkover' : 'match-history-item';
+        const isBackside = match.id && match.id.startsWith('BS-');
+
+        let itemClass = 'match-history-item';
+        if (isWalkover) itemClass += ' walkover';
+        if (isBackside) itemClass += ' backside';
         
         const player1Name = match.player1?.name || 'Unknown';
         const player2Name = match.player2?.name || 'Unknown';
