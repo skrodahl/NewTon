@@ -1582,13 +1582,13 @@ function createMatchCard(match) {
     
     // Use same button logic as tournament bracket, but add Command Center refresh
     const originalClickHandler = getButtonClickHandler(state, match.id);
-    const commandCenterClickHandler = originalClickHandler ? 
-        `${originalClickHandler}; setTimeout(() => { if (document.getElementById('matchCommandCenterModal').style.display === 'flex') showMatchCommandCenter(); }, 500)` : 
+    const commandCenterClickHandler = originalClickHandler ?
+        `${originalClickHandler}; setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100)` :
         '';
     
     // For live matches, show stop button; for non-live matches, show start button
     const actionButton = state === 'live' ?
-        `<button class="cc-match-action-btn cc-btn-stop" onclick="toggleActive('${match.id}'); setTimeout(() => showMatchCommandCenter(), 200);">Stop Match</button>` :
+        `<button class="cc-match-action-btn cc-btn-stop" onclick="toggleActive('${match.id}'); setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100);">Stop Match</button>` :
         `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}">Start Match</button>`;
     
     const liveClass = state === 'live' ? ' cc-match-card-live' : '';
@@ -1931,13 +1931,26 @@ function showCommandCenterModal(matchData) {
         (matchData.back && matchData.back.length > 0);
     
     if (!hasMatches) {
-        // Show empty state
-        liveSection.style.display = 'none';
-        frontSection.style.display = 'none';
-        backSection.style.display = 'none';
-        noMatchesMessage.style.display = 'block';
+        // Check if tournament is completed
+        if (tournament && tournament.status === 'completed' && tournament.placements) {
+            // Show celebration podium instead of empty state
+            liveSection.style.display = 'none';
+            frontSection.style.display = 'none';
+            backSection.style.display = 'none';
+            noMatchesMessage.style.display = 'none';
+            showTournamentCelebration();
+        } else {
+            // Show regular empty state
+            liveSection.style.display = 'none';
+            frontSection.style.display = 'none';
+            backSection.style.display = 'none';
+            noMatchesMessage.style.display = 'block';
+        }
     } else {
         noMatchesMessage.style.display = 'none';
+        // Hide celebration in case it was showing
+        const celebrationDiv = document.getElementById('tournamentCelebration');
+        if (celebrationDiv) celebrationDiv.style.display = 'none';
         
         // Populate LIVE matches
         if (matchData.live && matchData.live.length > 0) {
@@ -1976,8 +1989,24 @@ function showCommandCenterModal(matchData) {
         }
     }
 
-    // Populate referee suggestions
-    populateRefereeSuggestions();
+    // Clear and populate referee section based on tournament status (same pattern as match section)
+    const losersContainer = document.getElementById('refereeLosersContainer');
+    const winnersContainer = document.getElementById('refereeWinnersContainer');
+    const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
+    const refereeHeader = document.querySelector('.referee-suggestions-container .cc-section-header');
+
+    // Clear existing content first (like match section)
+    if (losersContainer) losersContainer.innerHTML = '';
+    if (winnersContainer) winnersContainer.innerHTML = '';
+    if (assignmentsContainer) assignmentsContainer.innerHTML = '';
+
+    if (tournament && tournament.status === 'completed') {
+        showTournamentAchievements();
+    } else {
+        // Set header back to referee suggestions
+        if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
+        populateRefereeSuggestions();
+    }
 
     // Restore scroll position
     if (scrollContainer && initialScrollTop > 0) {
@@ -2041,6 +2070,306 @@ if (typeof window !== 'undefined') {
 }
 
 // --- END: Match Command Center Implementation ---
+
+/**
+ * TOURNAMENT CELEBRATION FUNCTIONS
+ * Display celebratory podium when tournament is completed
+ */
+
+function showTournamentCelebration() {
+    const celebrationDiv = document.getElementById('tournamentCelebration');
+    const refereeSuggestionsContainer = document.querySelector('.referee-suggestions-container');
+
+    if (!celebrationDiv || !tournament || !tournament.placements) {
+        console.error('Cannot show celebration: missing elements or tournament data');
+        return;
+    }
+
+    // Show the celebration container
+    celebrationDiv.style.display = 'block';
+
+    // Update subtitle with player count
+    updateCelebrationSubtitle();
+
+    // Get top 3 players from placements
+    const topPlayers = getTopThreePlayers();
+
+    // Populate podium positions
+    populatePodium(topPlayers);
+
+    // Generate and display highlights
+    generateTournamentHighlights();
+
+    // Referee column is now handled by main dialog logic based on tournament status
+
+    console.log('🏆 Tournament celebration displayed');
+}
+
+function updateCelebrationSubtitle() {
+    const subtitleDiv = document.getElementById('celebrationSubtitle');
+    if (!subtitleDiv) return;
+
+    const playerCount = tournament.bracketSize || (players ? players.length : 0);
+    subtitleDiv.textContent = `Congratulations to all ${playerCount} players!`;
+}
+
+function getTopThreePlayers() {
+    if (!tournament.placements || !players) return { first: null, second: null, third: null };
+
+    const placements = tournament.placements;
+    const topPlayers = { first: null, second: null, third: null };
+
+    // Find players by their placement rank
+    for (const playerId in placements) {
+        const rank = placements[playerId];
+        const player = players.find(p => String(p.id) === playerId);
+
+        if (player) {
+            if (rank === 1) topPlayers.first = player;
+            else if (rank === 2) topPlayers.second = player;
+            else if (rank === 3) topPlayers.third = player;
+        }
+    }
+
+    return topPlayers;
+}
+
+function populatePodium(topPlayers) {
+    // Update first place
+    if (topPlayers.first) {
+        const firstDiv = document.getElementById('podium-first');
+        if (firstDiv) {
+            const nameDiv = firstDiv.querySelector('.podium-name');
+            if (nameDiv) nameDiv.textContent = topPlayers.first.name;
+        }
+    }
+
+    // Update second place
+    if (topPlayers.second) {
+        const secondDiv = document.getElementById('podium-second');
+        if (secondDiv) {
+            const nameDiv = secondDiv.querySelector('.podium-name');
+            if (nameDiv) nameDiv.textContent = topPlayers.second.name;
+        }
+    }
+
+    // Update third place
+    if (topPlayers.third) {
+        const thirdDiv = document.getElementById('podium-third');
+        if (thirdDiv) {
+            const nameDiv = thirdDiv.querySelector('.podium-name');
+            if (nameDiv) nameDiv.textContent = topPlayers.third.name;
+        }
+    }
+}
+
+function generateTournamentHighlights() {
+    const highlightsGrid = document.getElementById('highlightsGrid');
+    if (!highlightsGrid || !players) return;
+
+    // Calculate tournament statistics
+    const stats = calculateTournamentStats();
+
+    // Create highlight items
+    const highlights = [
+        {
+            label: 'Most 180s',
+            value: stats.most180s.count > 0 ? `${stats.most180s.player} (${stats.most180s.count})` : 'None'
+        },
+        {
+            label: 'Highest Checkout',
+            value: stats.highestCheckout.value > 0 ? `${stats.highestCheckout.player} (${stats.highestCheckout.value})` : 'None'
+        },
+        {
+            label: 'Shortest Leg',
+            value: stats.shortestLeg.value !== Infinity ? `${stats.shortestLeg.player} (${stats.shortestLeg.value} darts)` : 'None'
+        }
+    ];
+
+    // Generate HTML for highlights
+    let highlightsHTML = '';
+    highlights.forEach(highlight => {
+        highlightsHTML += `
+            <div class="highlight-item">
+                <div class="highlight-label">${highlight.label}</div>
+                <div class="highlight-value">${highlight.value}</div>
+            </div>
+        `;
+    });
+
+    highlightsGrid.innerHTML = highlightsHTML;
+}
+
+function calculateTournamentStats() {
+    const stats = {
+        mostAchievementPoints: { player: '', points: 0 },
+        most180s: { player: '', count: 0 },
+        highestCheckout: { player: '', value: 0 },
+        mostTons: { player: '', count: 0 },
+        shortestLeg: { player: '', value: Infinity }
+    };
+
+    players.forEach(player => {
+        if (!player.stats) return;
+
+        // Check most achievement points (excluding placement/participation)
+        const achievementPoints = calculateAchievementPoints(player);
+        if (achievementPoints > stats.mostAchievementPoints.points) {
+            stats.mostAchievementPoints = { player: player.name, points: achievementPoints };
+        }
+
+        // Check 180s
+        const oneEighties = player.stats.oneEighties || 0;
+        if (oneEighties > stats.most180s.count) {
+            stats.most180s = { player: player.name, count: oneEighties };
+        }
+
+        // Check highest checkout
+        const highOuts = player.stats.highOuts || [];
+        if (Array.isArray(highOuts) && highOuts.length > 0) {
+            const playerHighest = Math.max(...highOuts);
+            if (playerHighest > stats.highestCheckout.value) {
+                stats.highestCheckout = { player: player.name, value: playerHighest };
+            }
+        }
+
+        // Check tons
+        const tons = player.stats.tons || 0;
+        if (tons > stats.mostTons.count) {
+            stats.mostTons = { player: player.name, count: tons };
+        }
+
+        // Check shortest leg
+        const shortLegs = player.stats.shortLegs || [];
+        if (Array.isArray(shortLegs) && shortLegs.length > 0) {
+            const playerShortest = Math.min(...shortLegs);
+            if (playerShortest < stats.shortestLeg.value) {
+                stats.shortestLeg = { player: player.name, value: playerShortest };
+            }
+        }
+    });
+
+    return stats;
+}
+
+function calculateAchievementPoints(player) {
+    if (!player.stats) return 0;
+
+    let points = 0;
+
+    // Achievement points only (no placement or participation)
+    const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
+    points += shortLegsCount * (config.points.shortLeg || 0);
+    points += (player.stats.highOuts || []).length * config.points.highOut;
+    points += (player.stats.tons || 0) * config.points.ton;
+    points += (player.stats.oneEighties || 0) * config.points.oneEighty;
+
+    return points;
+}
+
+
+
+function showTournamentAchievements() {
+    // Update header
+    const header = document.querySelector('.referee-suggestions-container .cc-section-header');
+    if (header) {
+        header.textContent = '🏆 Tournament Achievements';
+    }
+
+    // Use existing referee containers to display achievement data
+    const losersContainer = document.getElementById('refereeLosersContainer');
+    const winnersContainer = document.getElementById('refereeWinnersContainer');
+    const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
+    const losersSection = document.getElementById('refereeLosersSection');
+    const winnersSection = document.getElementById('refereeWinnersSection');
+    const assignmentsSection = document.getElementById('refereeAssignmentsSection');
+
+    if (!losersContainer || !winnersContainer || !assignmentsContainer) return;
+
+    // Calculate comprehensive stats
+    const stats = calculateTournamentStats();
+    const tournamentSummary = calculateTournamentSummary();
+
+    // Update section headers
+    if (losersSection) {
+        const header = losersSection.querySelector('.referee-subsection-header');
+        if (header) header.textContent = '🎯 Player Achievements';
+    }
+    if (winnersSection) {
+        const header = winnersSection.querySelector('.referee-subsection-header');
+        if (header) header.textContent = '📊 Tournament Summary';
+    }
+    if (assignmentsSection) {
+        const header = assignmentsSection.querySelector('.referee-subsection-header');
+        if (header) header.textContent = '💾 Export Data';
+    }
+
+    // Populate Player Achievements in losers container
+    losersContainer.innerHTML = `
+        <div class="achievement-list">
+            ${generateAchievementItem('Most Achievement Points', stats.mostAchievementPoints.points > 0 ? `${stats.mostAchievementPoints.player} (${stats.mostAchievementPoints.points})` : 'None')}
+            ${generateAchievementItem('Most 180s', stats.most180s.count > 0 ? `${stats.most180s.player} (${stats.most180s.count})` : 'None')}
+            ${generateAchievementItem('Highest Checkout', stats.highestCheckout.value > 0 ? `${stats.highestCheckout.player} (${stats.highestCheckout.value})` : 'None')}
+            ${generateAchievementItem('Shortest Leg', stats.shortestLeg.value !== Infinity ? `${stats.shortestLeg.player} (${stats.shortestLeg.value} darts)` : 'None')}
+            ${generateAchievementItem('Most Tons', stats.mostTons.count > 0 ? `${stats.mostTons.player} (${stats.mostTons.count})` : 'None')}
+        </div>
+    `;
+
+    // Populate Tournament Summary in winners container
+    winnersContainer.innerHTML = `
+        <div class="achievement-list">
+            ${generateAchievementItem('Total Matches', tournamentSummary.totalMatches)}
+            ${generateAchievementItem('Bracket Size', tournamentSummary.bracketSize)}
+        </div>
+    `;
+
+    // Populate Export section in assignments container
+    assignmentsContainer.innerHTML = `
+        <div class="achievement-export-section">
+            <button class="achievement-export-btn" onclick="exportTournamentJSON()">
+                📊 Export Tournament Data
+            </button>
+            <p class="export-description">Download complete tournament results as JSON file</p>
+        </div>
+    `;
+}
+
+function generateAchievementItem(label, value) {
+    return `
+        <div class="achievement-item">
+            <span class="achievement-label">${label}:</span>
+            <span class="achievement-value">${value}</span>
+        </div>
+    `;
+}
+
+function calculateTournamentSummary() {
+    const summary = {
+        totalMatches: matches ? matches.length : 0,
+        completedMatches: matches ? matches.filter(m => m.completed).length : 0,
+        bracketSize: tournament.bracketSize || (players ? players.length : 0)
+    };
+
+    return summary;
+}
+
+// Tournament export function for celebration button
+function exportTournamentJSON() {
+    // Use the existing exportResultsJSON function from results-config.js
+    if (typeof exportResultsJSON === 'function') {
+        exportResultsJSON();
+    } else {
+        alert('Export function not available. Please use the Results page to export tournament data.');
+    }
+}
+
+// Expose functions to global scope
+if (typeof window !== 'undefined') {
+    window.showTournamentCelebration = showTournamentCelebration;
+    window.exportTournamentJSON = exportTournamentJSON;
+}
+
+// --- END: Tournament Celebration Functions ---
 
 // UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
 

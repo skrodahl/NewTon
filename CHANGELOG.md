@@ -1,5 +1,54 @@
 # 2025-09-18
 
+## v1.5.1 Tournament Celebration & Command Center Enhancement
+
+### ✨ New Feature: Tournament Completion Celebration
+- **🏆 Olympic-Style Podium Display**
+  - Visual podium showing 1st, 2nd, and 3rd place winners with gold, silver, bronze styling
+  - Medal emojis (🥇🥈🥉) and dynamic player names on podium positions
+  - Dynamic congratulations message including total player count (e.g., "Congratulations to all 8 players!")
+
+- **🎯 Tournament Highlights Section**
+  - Most 180s - Player with most maximum scores
+  - Highest Checkout - Best finishing score achieved
+  - Shortest Leg - Fastest leg completion (in darts)
+  - Responsive 3-column grid layout for key achievements
+
+- **🏆 Tournament Achievements Column**
+  - Repurposes referee suggestions column when tournament completes
+  - **Player Achievements**: Most Achievement Points, Most 180s, Highest Checkout, Shortest Leg, Most Tons
+  - **Tournament Summary**: Total matches, bracket size
+  - **Integrated Export**: One-click JSON export directly from celebration
+
+### 🧮 New Scoring System: Achievement Points
+- **Most Achievement Points**: Calculates skill-based points excluding placement/participation
+  - Rewards pure dart performance: 180s, high outs, short legs, tons
+  - Highlights skill mastery vs tournament progression
+  - Can recognize players who finish lower but dominated individual achievements
+
+### 🎛️ Match Controls: Complete Tournament Command Center
+- **State-Responsive Interface**: Dynamically adapts based on tournament status
+  - Active tournaments: Shows matches + referee suggestions
+  - Completed tournaments: Shows celebration + achievements + export
+- **No More Empty States**: Replaced sad "No matches currently active" with vibrant celebration
+- **Enhanced UI Refresh**: Fixed real-time updates when starting/stopping matches in dialog
+
+### 🏗️ Foundation-Respecting Architecture
+- **Single Source of Truth**: All celebration data flows from existing tournament logic and transaction history
+- **State-Driven Design**: Both match section and referee section check `tournament.status` and rebuild accordingly
+- **Clean Container Management**: Follows match section pattern - clear containers first, then populate based on current state
+- **No Code Duplication**: Reuses existing functions and follows established architectural patterns
+
+### 🔧 Technical Improvements
+- Added tournament status checks for UI state management
+- Implemented dynamic column transformation based on tournament completion
+- Enhanced dialog refresh logic for real-time state updates
+- Proper cleanup and restoration when tournament status changes (e.g., undo operations)
+
+The Match Controls have evolved from a simple match management tool into the true nerve center of the entire tournament experience, providing comprehensive celebration, statistics, and export functionality while maintaining the application's core architectural principles.
+
+---
+
 ## v1.5.0 Unified Dialog Stack System
 
 ### Major Architecture Improvement
