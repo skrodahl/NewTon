@@ -1668,6 +1668,7 @@ function showMatchCommandCenter() {
     showCommandCenterModal(matchData);
 }
 
+
 // Function to get referee suggestions
 function getRefereeSuggestions() {
     if (!matches || !players) return { losers: [], winners: [] };
@@ -1983,17 +1984,10 @@ function showCommandCenterModal(matchData) {
         scrollContainer.scrollTop = initialScrollTop;
     }
 
-    // Show modal
-    modal.style.display = 'flex';
+    // Use dialog stack to show modal
+    pushDialog('matchCommandCenterModal', () => showMatchCommandCenter());
 
     // Set up event handlers
-    const closeModal = () => {
-        modal.style.display = 'none';
-        okBtn.onclick = null; // Clean up
-        // Clean up Statistics button handler
-        const statsBtn = document.getElementById('showStatisticsBtn');
-        if (statsBtn) statsBtn.onclick = null;
-    };
 
     // Statistics button handler
     const statsBtn = document.getElementById('showStatisticsBtn');
@@ -2001,70 +1995,16 @@ function showCommandCenterModal(matchData) {
         statsBtn.onclick = () => showStatisticsModal();
     }
 
-    okBtn.onclick = closeModal;
-    
-    // Close on Escape key
-    const handleEscape = (e) => {
-        if (e.key === 'Escape') {
-            closeModal();
-            document.removeEventListener('keydown', handleEscape);
-        }
-    };
-    document.addEventListener('keydown', handleEscape);
+    okBtn.onclick = () => popDialog(); // Use dialog stack to close
 }
 
 // Function to show Statistics modal with results table
 function showStatisticsModal() {
-    const modal = document.getElementById('statisticsModal');
-    if (!modal) {
-        console.error('Statistics modal not found');
-        return;
-    }
-
-    // Check if Match Controls modal is open and hide it temporarily
-    const matchControlsModal = document.getElementById('matchCommandCenterModal');
-    const wasMatchControlsOpen = matchControlsModal && matchControlsModal.style.display === 'flex';
-
-    if (wasMatchControlsOpen) {
-        matchControlsModal.style.display = 'none';
-    }
-
     // Update the statistics table with current data
     updateStatisticsTable();
 
-    // Show modal
-    modal.style.display = 'flex';
-
-    // Close on Escape key
-    const handleEscape = (e) => {
-        if (e.key === 'Escape') {
-            e.stopPropagation(); // Prevent other modals from also handling this event
-            modal.style.display = 'none';
-            document.removeEventListener('keydown', handleEscape);
-
-            // Restore Match Controls modal if it was open before
-            if (wasMatchControlsOpen && matchControlsModal) {
-                matchControlsModal.style.display = 'flex';
-            }
-        }
-    };
-    document.addEventListener('keydown', handleEscape);
-
-    // Also handle the close button click to restore Match Controls
-    const originalCloseHandler = () => {
-        modal.style.display = 'none';
-
-        // Restore Match Controls modal if it was open before
-        if (wasMatchControlsOpen && matchControlsModal) {
-            matchControlsModal.style.display = 'flex';
-        }
-    };
-
-    // Override the close button onclick
-    const closeButton = modal.querySelector('.btn[onclick*="statisticsModal"]');
-    if (closeButton) {
-        closeButton.onclick = originalCloseHandler;
-    }
+    // Use dialog stack to show modal with automatic parent hiding/restoration
+    pushDialog('statisticsModal', () => showStatisticsModal());
 }
 
 // Function to update the statistics table with current results data
@@ -2083,17 +2023,8 @@ function completeMatchFromCommandCenter(matchId, playerNumber) {
     if (!match) {
         return;
     }
-    
-    // Store reference to command center being open
-    window.commandCenterWasOpen = true;
-    
-    // Close the command center modal
-    const modal = document.getElementById('matchCommandCenterModal');
-    if (modal) {
-        modal.style.display = 'none';
-    }
-    
-    // Complete match with selected winner
+
+    // Complete match with selected winner - this will open Match Completion dialog via dialog stack
     if (typeof selectWinner === 'function') {
         selectWinner(matchId, playerNumber);
     }

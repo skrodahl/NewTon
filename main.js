@@ -7,7 +7,90 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '1.4.6';
+const APP_VERSION = '1.5.0';
+
+// =============================================================================
+// DIALOG STACK MANAGER - Unified dialog stacking system
+// =============================================================================
+
+// Global dialog stack - each entry: {id, restoreFunction, zIndex}
+window.dialogStack = [];
+const BASE_Z_INDEX = 1000;
+
+/**
+ * Push a dialog onto the stack and show it
+ * @param {string} dialogId - DOM element ID of the dialog
+ * @param {Function} restoreFunction - Function to call when this dialog needs to be restored
+ */
+window.pushDialog = function(dialogId, restoreFunction) {
+    const dialog = document.getElementById(dialogId);
+    if (!dialog) {
+        console.error(`Dialog ${dialogId} not found`);
+        return;
+    }
+
+    // Check if this dialog is already on top of the stack (restoration scenario)
+    if (window.dialogStack.length > 0 && window.dialogStack[window.dialogStack.length - 1].id === dialogId) {
+        // Just show the dialog, don't add to stack again
+        const zIndex = BASE_Z_INDEX + window.dialogStack.length;
+        dialog.style.display = dialog.id === 'statisticsModal' ? 'flex' : 'block';
+        dialog.style.zIndex = zIndex;
+        console.log(`📚 Dialog restored: [${window.dialogStack.map(d => d.id).join(' → ')}]`);
+        return;
+    }
+
+    // Hide current top dialog if any
+    if (window.dialogStack.length > 0) {
+        const currentTop = window.dialogStack[window.dialogStack.length - 1];
+        const currentDialog = document.getElementById(currentTop.id);
+        if (currentDialog) {
+            currentDialog.style.display = 'none';
+        }
+    }
+
+    // Calculate z-index for new dialog
+    const zIndex = BASE_Z_INDEX + window.dialogStack.length + 1;
+
+    // Add to stack
+    window.dialogStack.push({
+        id: dialogId,
+        restoreFunction: restoreFunction || null,
+        zIndex: zIndex
+    });
+
+    // Show dialog with proper z-index
+    dialog.style.display = dialog.id === 'statisticsModal' ? 'flex' : 'block';
+    dialog.style.zIndex = zIndex;
+
+    console.log(`📚 Dialog stack: [${window.dialogStack.map(d => d.id).join(' → ')}]`);
+};
+
+/**
+ * Pop the top dialog from the stack and restore the previous one
+ */
+window.popDialog = function() {
+    if (window.dialogStack.length === 0) {
+        console.warn('No dialogs in stack to pop');
+        return;
+    }
+
+    // Get and remove top dialog
+    const topDialog = window.dialogStack.pop();
+    const dialog = document.getElementById(topDialog.id);
+    if (dialog) {
+        dialog.style.display = 'none';
+    }
+
+    // Restore previous dialog if any
+    if (window.dialogStack.length > 0) {
+        const previousDialog = window.dialogStack[window.dialogStack.length - 1];
+        if (previousDialog.restoreFunction) {
+            previousDialog.restoreFunction();
+        }
+    }
+
+    console.log(`📚 Dialog stack: [${window.dialogStack.map(d => d.id).join(' → ')}]`);
+};
 
 // Global config is loaded by results-config.js - NEVER override it here
 // let config = {}; // This is loaded by results-config.js

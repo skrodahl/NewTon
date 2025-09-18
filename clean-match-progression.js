@@ -1472,8 +1472,8 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     // Set message content with clickable player names and progression info
     message.innerHTML = `
-        Declare <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${winner.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${winner.name}</span></strong> as the WINNER<br>
-        against <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${loser.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${loser.name}</span></strong> in match <strong>${matchId}</strong>
+        Declare <strong><span class="clickable-player-name" onclick="openStatsModal(${winner.id})" style="cursor: pointer; text-decoration: underline; color: #065f46;">${winner.name}</span></strong> as the WINNER<br>
+        against <strong><span class="clickable-player-name" onclick="openStatsModal(${loser.id})" style="cursor: pointer; text-decoration: underline; color: #065f46;">${loser.name}</span></strong> in match <strong>${matchId}</strong>
         <br><br>
         <small style="color: #6b7280; font-style: italic;">💡 Click player names to edit their statistics</small>
         ${progressionInfo}
@@ -1512,8 +1512,8 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         validationMessage.style.display = 'none';
     }
 
-    // Show modal
-    modal.style.display = 'block';
+    // Use dialog stack to show modal
+    pushDialog('winnerConfirmModal', () => showWinnerConfirmation(matchId, winner, loser, onConfirm));
 
     // Focus cancel button by default
     setTimeout(() => {
@@ -1550,16 +1550,13 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     // Handle button clicks
     const handleCancel = () => {
-        modal.style.display = 'none';
         console.log(`Winner selection cancelled for match ${matchId}`);
         cleanup();
-        
-        // If Command Center was open when completion was initiated, reopen it
-        if (window.commandCenterWasOpen && typeof showMatchCommandCenter === 'function') {
-            setTimeout(() => {
-                showMatchCommandCenter();
-                window.commandCenterWasOpen = false; // Clear flag
-            }, 100);
+        popDialog(); // Use dialog stack to close and restore parent
+
+        // Clear flag
+        if (window.commandCenterWasOpen) {
+            window.commandCenterWasOpen = false;
         }
     };
 
@@ -1576,18 +1573,15 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
             return;
         }
 
-        modal.style.display = 'none';
         console.log(`Winner confirmed for match ${matchId}: ${winner.name} (${winnerLegs}-${loserLegs})`);
 
         onConfirm(winnerLegs, loserLegs);
         cleanup();
-        
-        // If Command Center was open when completion was initiated, reopen it after completion
-        if (window.commandCenterWasOpen && typeof showMatchCommandCenter === 'function') {
-            setTimeout(() => {
-                showMatchCommandCenter();
-                window.commandCenterWasOpen = false; // Clear flag
-            }, 500); // Longer delay to allow match completion to finish
+        popDialog(); // Use dialog stack to close and restore parent
+
+        // Clear flag
+        if (window.commandCenterWasOpen) {
+            window.commandCenterWasOpen = false;
         }
     };
 
@@ -1629,6 +1623,22 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
             }
         }
     };
+
+    // Remove any existing event listeners first (in case this is a restoration)
+    if (modal._cancelHandler) {
+        cancelBtn.removeEventListener('click', modal._cancelHandler);
+    }
+    if (modal._confirmHandler) {
+        confirmBtn.removeEventListener('click', modal._confirmHandler);
+    }
+    if (modal._keyHandler) {
+        document.removeEventListener('keydown', modal._keyHandler);
+    }
+
+    // Store handlers on modal for cleanup
+    modal._cancelHandler = handleCancel;
+    modal._confirmHandler = handleConfirm;
+    modal._keyHandler = handleKeyPress;
 
     // Add event listeners
     cancelBtn.addEventListener('click', handleCancel);

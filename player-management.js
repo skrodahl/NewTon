@@ -97,18 +97,19 @@ function openStatsModal(playerId) {
     // Clear input fields when opening modal
     document.getElementById('statsShortLegDarts').value = '';
     document.getElementById('statsHighOut').value = '';
-    
+
     // Convert old format to new format if needed
     if (typeof player.stats.shortLegs === 'number') {
         player.stats.shortLegs = [];
     }
-    
+
     // Update counters instead of input values
     updateStatsCounters();
     updateShortLegsList();
     updateHighOutsList();
-    
-    document.getElementById('statsModal').style.display = 'block';
+
+    // Use dialog stack to show modal with automatic parent hiding/restoration
+    pushDialog('statsModal', null); // No restore function needed - this is a leaf dialog
 }
 
 function addHighOut() {
@@ -185,8 +186,8 @@ function safeSaveTournament() {
 }
 
 function closeStatsModal() {
-    document.getElementById('statsModal').style.display = 'none';
     currentStatsPlayer = null;
+    popDialog(); // Use dialog stack to close and restore parent
 }
 
 function updatePlayersDisplay() {

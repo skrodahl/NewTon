@@ -1,3 +1,31 @@
+# 2025-09-18
+
+## v1.5.0 Unified Dialog Stack System
+
+### Major Architecture Improvement
+- **Unified Dialog Stack Manager**
+  - Implemented comprehensive dialog stacking system with automatic z-index management
+  - All dialogs now use consistent `pushDialog()` and `popDialog()` functions for opening and closing
+  - Automatic parent dialog hiding and restoration when navigating between nested dialogs
+  - Console logging for debugging dialog stack state (`📚 Dialog stack: [...]`)
+
+### Dialog Flow Improvements
+- **Statistics Dialog Chain**: Stats/Results → Statistics → Edit Statistics → proper restoration
+- **Match Controls Dialog Chain**: Match Controls → Statistics → Edit Statistics → proper restoration
+- **Match Completion Dialog Chain**: Match Controls → Match Completion → Edit Statistics → proper restoration
+- **Edit Statistics Modal**: Added Esc key support for consistent user experience
+- **Event Handler Cleanup**: Fixed duplicate event listeners that caused double-close behavior in nested dialogs
+
+### User Interface Polish
+- **Edit Statistics Modal**: Removed confusing "X" close button to encourage use of Cancel/Save buttons
+- **Consistent Close Behavior**: All dialog close buttons now use unified dialog stack system
+- **Z-index Management**: Proper modal layering (1001, 1002, 1003...) prevents dialogs appearing behind each other
+
+### Technical Improvements
+- **Dialog Stack State Management**: Proper cleanup and restoration of dialog states
+- **Event Listener Management**: Prevention of duplicate event handlers during dialog restoration
+- **Automatic Parent Detection**: Smart dialog restoration without manual parent tracking
+
 # 2025-09-17
 
 ## v1.4.6 Tournament Navigation & Help System Improvements
