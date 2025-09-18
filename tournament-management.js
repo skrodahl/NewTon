@@ -293,41 +293,75 @@ function loadSpecificTournament(id) {
         return;
     }
 
-    // Show confirmation dialog before loading
-    let confirmMessage = `⚠️ LOAD TOURNAMENT CONFIRMATION ⚠️\n\n`;
-    confirmMessage += `ℹ️ Your current tournament data is automatically saved and can be reloaded at any time.\n`;
-    confirmMessage += `Loading a different tournament will not cause any data loss.\n\n`;
-    
-    if (tournament && tournament.name) {
-        const currentCompletedMatches = matches.filter(m => m.completed).length;
-        const currentTotalMatches = matches.length;
-        confirmMessage += `Current Tournament: "${tournament.name}" (${tournament.date})\n`;
-        confirmMessage += `Progress: ${currentCompletedMatches}/${currentTotalMatches} matches completed\n`;
-        confirmMessage += `Players: ${players.length} registered\n\n`;
-        confirmMessage += `This will be replaced with:\n`;
-    } else {
-        confirmMessage += `You are about to load:\n`;
-    }
-    
+    showLoadTournamentModal(id, selectedTournament);
+}
+
+function showLoadTournamentModal(tournamentId, selectedTournament) {
+    // Store tournament info for later use
+    window.selectedTournamentId = tournamentId;
+    window.selectedTournamentData = selectedTournament;
+
+    // Populate selected tournament details
+    document.getElementById('loadTournamentName').textContent = selectedTournament.name;
+    document.getElementById('loadTournamentDate').textContent = selectedTournament.date;
+
     const selectedCompletedMatches = (selectedTournament.matches || []).filter(m => m.completed).length;
     const selectedTotalMatches = (selectedTournament.matches || []).length;
-    confirmMessage += `Tournament: "${selectedTournament.name}" (${selectedTournament.date})\n`;
-    confirmMessage += `Progress: ${selectedCompletedMatches}/${selectedTotalMatches} matches completed\n`;
-    confirmMessage += `Players: ${(selectedTournament.players || []).length} registered\n\n`;
-    confirmMessage += `Do you want to continue?`;
+    document.getElementById('loadMatchProgress').textContent = `${selectedCompletedMatches}/${selectedTotalMatches} matches completed`;
+    document.getElementById('loadPlayerCount').textContent = `${(selectedTournament.players || []).length} registered`;
 
-    const confirmed = confirm(confirmMessage);
-    if (!confirmed) {
+    // Show/hide current tournament section and update title
+    const currentSection = document.getElementById('currentTournamentSection');
+    const actionTitle = document.getElementById('loadActionTitle');
+
+    if (tournament && tournament.name) {
+        // Show current tournament details
+        currentSection.style.display = 'block';
+        actionTitle.textContent = 'This will be replaced with:';
+
+        document.getElementById('currentTournamentName').textContent = tournament.name;
+        document.getElementById('currentTournamentDate').textContent = tournament.date;
+
+        const currentCompletedMatches = matches.filter(m => m.completed).length;
+        const currentTotalMatches = matches.length;
+        document.getElementById('currentMatchProgress').textContent = `${currentCompletedMatches}/${currentTotalMatches} matches completed`;
+        document.getElementById('currentPlayerCount').textContent = `${players.length} registered`;
+    } else {
+        // No current tournament
+        currentSection.style.display = 'none';
+        actionTitle.textContent = 'You are about to load:';
+    }
+
+    // Show modal with Esc support
+    pushDialog('loadTournamentModal', null, true);
+}
+
+function confirmLoadTournament() {
+    console.log('🔄 confirmLoadTournament called');
+    const selectedTournament = window.selectedTournamentData;
+    console.log('📝 selectedTournament:', selectedTournament);
+
+    if (!selectedTournament) {
+        alert('Tournament data not found.');
+        popDialog();
         return;
     }
 
+    // Close modal first
+    popDialog();
+
+    // Continue with loading process
+    continueLoadProcess(selectedTournament);
+}
+
+function continueLoadProcess(selectedTournament) {
     // Calculate bracketSize if missing (for older tournaments)
     let bracketSize = selectedTournament.bracketSize;
     if (!bracketSize && selectedTournament.bracket) {
         bracketSize = selectedTournament.bracket.length;
     }
 
-    console.log('DEBUG: calculated bracketSize:', bracketSize); // Add this line
+    console.log('DEBUG: calculated bracketSize:', bracketSize);
     console.log('DEBUG: selectedTournament.bracket.length:', selectedTournament.bracket?.length);
 
     // Load ONLY tournament data - NEVER override global config
@@ -382,17 +416,51 @@ function deleteTournament(tournamentId) {
         return;
     }
 
-    const confirmDelete = confirm(
-        `⚠️ DELETE TOURNAMENT ⚠️\n\n` +
-        `Are you sure you want to permanently delete:\n` +
-        `"${tournamentToDelete.name}"\n\n` +
-        `This action cannot be undone.`
-    );
+    showDeleteTournamentModal(tournamentId, tournamentToDelete);
+}
 
-    if (!confirmDelete) {
+function showDeleteTournamentModal(tournamentId, tournamentToDelete) {
+    // Store the tournament ID for later use
+    window.tournamentToDeleteId = tournamentId;
+
+    // Populate modal with tournament details
+    document.getElementById('deleteTournamentName').textContent = tournamentToDelete.name;
+    document.getElementById('deleteTournamentDate').textContent = tournamentToDelete.date;
+
+    // Calculate players count
+    const playerCount = tournamentToDelete.players ? tournamentToDelete.players.length : 0;
+    document.getElementById('deleteTournamentPlayers').textContent = `${playerCount} players`;
+
+    // Determine status
+    let status = 'Setup';
+    if (tournamentToDelete.bracket) {
+        if (tournamentToDelete.matches && tournamentToDelete.matches.some(m => m.completed)) {
+            status = 'In Progress';
+        } else {
+            status = 'Bracket Generated';
+        }
+    }
+    document.getElementById('deleteTournamentStatus').textContent = status;
+
+    // Show modal with Esc support
+    pushDialog('deleteTournamentModal', null, true);
+}
+
+function confirmDeleteTournament() {
+    const tournamentId = window.tournamentToDeleteId;
+    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
+
+    if (!tournamentToDelete) {
+        alert('Tournament not found.');
+        popDialog();
         return;
     }
 
+    // Close modal first
+    popDialog();
+
+    // Delete the tournament
     const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
     localStorage.setItem('dartsTournaments', JSON.stringify(updatedTournaments));
 
@@ -400,43 +468,157 @@ function deleteTournament(tournamentId) {
     alert(`✓ Tournament "${tournamentToDelete.name}" has been deleted successfully.`);
 }
 
-function resetTournament() {
-    if (!tournament || !tournament.bracket) {
-        alert('No active tournament to reset.');
+function showImportOverwriteModal(importedData) {
+    // Store the imported data for later use
+    window.importedTournamentData = importedData;
+
+    // Populate modal with tournament details
+    document.getElementById('importTournamentName').textContent = importedData.name;
+    document.getElementById('importTournamentDate').textContent = importedData.date;
+
+    // Show modal with Esc support
+    pushDialog('importOverwriteModal', null, true);
+}
+
+function confirmOverwriteTournament() {
+    const importedData = window.importedTournamentData;
+
+    if (!importedData) {
+        alert('Import data not found.');
+        popDialog();
         return;
     }
 
+    // Close modal first
+    popDialog();
+
+    // Continue with the import process (same logic as before)
+    continueImportProcess(importedData);
+}
+
+function continueImportProcess(importedData) {
+    try {
+        // Calculate bracketSize if missing (for older exported tournaments)
+        let bracketSize = importedData.bracketSize;
+        if (!bracketSize && importedData.bracket) {
+            bracketSize = importedData.bracket.length;
+        }
+
+        // Import ONLY tournament data - Strip any config contamination
+        tournament = {
+            id: importedData.id,
+            name: importedData.name,
+            date: importedData.date,
+            created: importedData.created,
+            status: importedData.status || 'setup',
+            players: importedData.players || [],
+            matches: importedData.matches || [],
+            bracket: importedData.bracket || null,
+            placements: importedData.placements || {},
+            bracketSize: bracketSize
+        };
+
+        // Set global arrays
+        players = tournament.players;
+        matches = tournament.matches;
+
+        // Save tournament (but not global config)
+        saveTournamentOnly();
+
+        // Update displays
+        updateTournamentStatus();
+        updatePlayersDisplay();
+        updatePlayerCount();
+        loadRecentTournaments();
+
+        // Render bracket if exists
+        if (tournament.bracket && typeof renderBracket === 'function') {
+            renderBracket();
+        }
+
+        // Display results using global config
+        if (typeof displayResults === 'function') {
+            displayResults();
+        }
+
+        // Show success with detailed info
+        showImportStatus('success',
+            `✓ Tournament "${tournament.name}" imported successfully! ` +
+            `${players.length} players and ${matches.filter(m => m.completed).length} completed matches loaded.`
+        );
+
+        // Auto-switch to registration page
+        setTimeout(() => {
+            showPage('registration');
+        }, 1500);
+
+        // Update watermark
+        updateTournamentWatermark();
+
+        console.log('✓ Tournament imported (global config preserved)');
+    } catch (error) {
+        showImportStatus('error', 'Error importing tournament. Please check the file format.');
+        console.error('Import error:', error);
+    }
+}
+
+function showResetTournamentModal() {
     const tournamentName = tournament.name;
     const completedMatches = matches.filter(m => m.completed).length;
     const totalMatches = matches.length;
 
-    const confirmMessage = `⚠️ RESET TOURNAMENT WARNING ⚠️\n\n` +
-        `Tournament: "${tournamentName}"\n` +
-        `Progress: ${completedMatches}/${totalMatches} matches completed\n` +
-        `Players: ${players.length} registered\n\n` +
-        `This will permanently delete:\n` +
-        `• All match results\n` +
-        `• All bracket progress\n` +
-        `• All tournament standings\n\n` +
-        `Are you sure you want to continue?`;
+    // Populate modal with tournament details
+    document.getElementById('resetTournamentName').textContent = tournamentName;
+    document.getElementById('resetMatchProgress').textContent = `${completedMatches}/${totalMatches} matches completed`;
+    document.getElementById('resetPlayerCount').textContent = players.length;
 
-    if (!confirm(confirmMessage)) {
-        return;
-    }
+    // Clear and reset input field
+    const input = document.getElementById('resetConfirmationInput');
+    input.value = '';
+    input.placeholder = `Type "${tournamentName}" exactly`;
 
-    const tournamentNameConfirm = prompt(
-        `⚠️ FINAL CONFIRMATION ⚠️\n\n` +
-        `To confirm the reset, please type the tournament name exactly:\n\n` +
-        `"${tournamentName}"\n\n` +
-        `Type the tournament name below:`
-    );
+    // Disable reset button initially
+    document.getElementById('confirmResetBtn').disabled = true;
 
-    if (tournamentNameConfirm !== tournamentName) {
-        if (tournamentNameConfirm !== null) {
-            alert('Tournament name did not match. Reset cancelled for your protection.');
+    // Set up real-time validation
+    input.addEventListener('input', function() {
+        const resetBtn = document.getElementById('confirmResetBtn');
+        if (this.value === tournamentName) {
+            resetBtn.disabled = false;
+            resetBtn.style.background = '#dc3545';
+        } else {
+            resetBtn.disabled = true;
+            resetBtn.style.background = '#6c757d';
         }
+    });
+
+    // Add Enter key support
+    input.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' && this.value === tournamentName) {
+            confirmReset();
+        }
+    });
+
+    // Focus input after modal shows
+    setTimeout(() => {
+        input.focus();
+    }, 100);
+
+    // Show modal with Esc support
+    pushDialog('resetTournamentModal', null, true);
+}
+
+function confirmReset() {
+    const input = document.getElementById('resetConfirmationInput');
+    const tournamentName = tournament.name;
+
+    if (input.value !== tournamentName) {
+        alert('Tournament name did not match. Reset cancelled for your protection.');
         return;
     }
+
+    // Close the modal first
+    popDialog();
 
     // Reset tournament data only
     matches = [];
@@ -511,76 +693,12 @@ function processImportedTournament(importedData) {
     const existingTournament = tournaments.find(t => t.id === importedData.id);
 
     if (existingTournament) {
-        const overwrite = confirm(
-            `Tournament "${importedData.name}" (${importedData.date}) already exists.\n\n` +
-            `Do you want to overwrite it with the imported version?`
-        );
-
-        if (!overwrite) {
-            showImportStatus('warning', 'Import cancelled by user');
-            return;
-        }
+        showImportOverwriteModal(importedData);
+        return; // Exit here, modal will handle the decision
     }
 
-    try {
-        // Calculate bracketSize if missing (for older exported tournaments)
-        let bracketSize = importedData.bracketSize;
-        if (!bracketSize && importedData.bracket) {
-        bracketSize = importedData.bracket.length;
-    }
-        // Import ONLY tournament data - Strip any config contamination
-        tournament = {
-            id: importedData.id,
-            name: importedData.name,
-            date: importedData.date,
-            created: importedData.created || new Date().toISOString(),
-            status: importedData.status || 'setup',
-            bracket: importedData.bracket || null,
-            bracketSize: bracketSize,
-            placements: importedData.placements || {}
-            // NO CONFIG DATA imported - global config stays intact
-        };
-
-        players = importedData.players || [];
-        matches = importedData.matches || [];
-
-        // Don't modify input fields during import - preserve user's work
-
-        // Save to localStorage
-        saveTournamentOnly(); // Save tournament only, not config
-
-        // Update displays
-        updateTournamentStatus();
-        updatePlayersDisplay();
-        updatePlayerCount();
-        loadRecentTournaments();
-
-        // Render bracket if exists
-        if (tournament.bracket && typeof renderBracket === 'function') {
-            renderBracket();
-        }
-
-        // Display results using global config
-        if (typeof displayResults === 'function') {
-            displayResults();
-        }
-
-        showImportStatus('success',
-            `✓ Tournament "${tournament.name}" imported successfully! ` +
-            `${players.length} players and ${matches.filter(m => m.completed).length} completed matches loaded.`
-        );
-
-        // Auto-switch to registration page
-        setTimeout(() => {
-            showPage('registration');
-        }, 1500);
-
-        console.log('✓ Tournament imported (global config preserved)');
-
-    } catch (error) {
-        showImportStatus('error', 'Error importing tournament data. Please try again.');
-        console.error('Import error:', error);
-    }
+    // No existing tournament, proceed with import
+    continueImportProcess(importedData);
 }
 
 function validateTournamentData(data) {
@@ -667,4 +785,16 @@ function updateTournamentWatermark() {
             watermark.innerHTML = 'Tournament: <strong>None</strong>';
         }
     }
+}
+
+// Make functions globally available
+if (typeof window !== 'undefined') {
+    window.showResetTournamentModal = showResetTournamentModal;
+    window.confirmReset = confirmReset;
+    window.showDeleteTournamentModal = showDeleteTournamentModal;
+    window.confirmDeleteTournament = confirmDeleteTournament;
+    window.showImportOverwriteModal = showImportOverwriteModal;
+    window.confirmOverwriteTournament = confirmOverwriteTournament;
+    window.showLoadTournamentModal = showLoadTournamentModal;
+    window.confirmLoadTournament = confirmLoadTournament;
 }

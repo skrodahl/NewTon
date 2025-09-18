@@ -849,7 +849,7 @@ function generateCleanBracket() {
 
     // Check if bracket already exists
     if (tournament.bracket && matches.length > 0) {
-        alert('Tournament is already in progress! Use "Reset Tournament" to start over.');
+        showTournamentProgressWarning();
         return false;
     }
 
@@ -2292,6 +2292,15 @@ function isBacksideSemifinal(matchId, bracketSize) {
     return backsideSemifinals[bracketSize] === matchId;
 }
 
+/**
+ * Show tournament in progress warning modal
+ * Replaces browser alert with user-friendly modal dialog
+ */
+function showTournamentProgressWarning() {
+    // Use dialog stack to show modal with Esc support
+    pushDialog('tournamentProgressModal', null, true);
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     // Transactional History System
@@ -2335,4 +2344,5 @@ if (typeof window !== 'undefined') {
     window.calculate8PlayerRankings = calculate8PlayerRankings;
     window.getDownstreamMatches = getDownstreamMatches;
     window.isWalkover = isWalkover;
+    window.showTournamentProgressWarning = showTournamentProgressWarning;
 }
