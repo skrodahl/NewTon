@@ -2014,7 +2014,7 @@ function showCommandCenterModal(matchData) {
     }
 
     // Use dialog stack to show modal
-    pushDialog('matchCommandCenterModal', () => showMatchCommandCenter());
+    pushDialog('matchCommandCenterModal', () => showMatchCommandCenter(), true);
 
     // Set up event handlers
 
@@ -2033,7 +2033,7 @@ function showStatisticsModal() {
     updateStatisticsTable();
 
     // Use dialog stack to show modal with automatic parent hiding/restoration
-    pushDialog('statisticsModal', () => showStatisticsModal());
+    pushDialog('statisticsModal', () => showStatisticsModal(), true);
 }
 
 // Function to update the statistics table with current results data

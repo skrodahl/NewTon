@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '1.5.1';
+const APP_VERSION = '1.5.2';
 
 // =============================================================================
 // DIALOG STACK MANAGER - Unified dialog stacking system
@@ -22,7 +22,7 @@ const BASE_Z_INDEX = 1000;
  * @param {string} dialogId - DOM element ID of the dialog
  * @param {Function} restoreFunction - Function to call when this dialog needs to be restored
  */
-window.pushDialog = function(dialogId, restoreFunction) {
+window.pushDialog = function(dialogId, restoreFunction, enableEsc = false) {
     const dialog = document.getElementById(dialogId);
     if (!dialog) {
         console.error(`Dialog ${dialogId} not found`);
@@ -55,7 +55,8 @@ window.pushDialog = function(dialogId, restoreFunction) {
     window.dialogStack.push({
         id: dialogId,
         restoreFunction: restoreFunction || null,
-        zIndex: zIndex
+        zIndex: zIndex,
+        escEnabled: enableEsc
     });
 
     // Show dialog with proper z-index
@@ -91,6 +92,31 @@ window.popDialog = function() {
 
     console.log(`📚 Dialog stack: [${window.dialogStack.map(d => d.id).join(' → ')}]`);
 };
+
+// =============================================================================
+// STACK-AWARE ESC KEY HANDLER - Works with dialog stack system
+// =============================================================================
+
+/**
+ * Global Esc key handler that respects dialog stack escEnabled setting
+ * Only closes dialogs that explicitly enable Esc support via pushDialog()
+ */
+document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && window.dialogStack.length > 0) {
+        const topDialog = window.dialogStack[window.dialogStack.length - 1];
+
+        // Only handle if top dialog explicitly enables Esc
+        if (topDialog.escEnabled) {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Use existing popDialog logic for consistent behavior
+            popDialog();
+
+            console.log('🔑 Stack Esc handler closed dialog:', topDialog.id);
+        }
+    }
+});
 
 // Global config is loaded by results-config.js - NEVER override it here
 // let config = {}; // This is loaded by results-config.js

@@ -1,5 +1,28 @@
 # 2025-09-18
 
+## v1.5.2 Stack-Integrated Esc Key Support
+
+### ✨ New Feature: Universal Esc Key Support for Dialogs
+- **🔑 Stack-Aware Esc Handling**
+  - Enhanced `pushDialog()` function with optional `enableEsc` parameter for explicit control
+  - Single global Esc handler that respects dialog stack settings - no conflicts with existing handlers
+  - Esc support enabled for Statistics Modal, Match Command Center, and Edit Statistics Modal
+
+- **🎯 Explicit Control Model**
+  - Clear intent in code with `pushDialog(dialogId, restoreFunction, true)` syntax
+  - Debuggable behavior with console logging showing which dialogs close via Esc
+  - Easy to enable/disable Esc per dialog for future enhancements
+
+- **📚 Dialog Flow Improvements**
+  - **Stats/Results Flow**: Stats → Esc → Closed
+  - **Match Controls Statistics Flow**: Controls → Statistics → Esc → Back to Statistics → Esc → Back to Controls → Esc → Closed
+  - **Match Controls Completion Flow**: Controls → Match Completion → Edit Statistics → Esc → Back to Completion → Esc → Back to Controls → Esc → Closed
+
+### 🏗️ Architecture Enhancement
+- **Consistent Integration**: Uses existing `popDialog()` restoration logic for reliable parent dialog restoration
+- **Future-Proof Design**: Foundation for easy Esc enablement in future dialogs
+- **Preserved Compatibility**: Existing individual Esc handlers remain unaffected
+
 ## v1.5.1 Tournament Celebration & Command Center Enhancement
 
 ### Small bug-fix

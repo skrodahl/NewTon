@@ -109,7 +109,7 @@ function openStatsModal(playerId) {
     updateHighOutsList();
 
     // Use dialog stack to show modal with automatic parent hiding/restoration
-    pushDialog('statsModal', null); // No restore function needed - this is a leaf dialog
+    pushDialog('statsModal', null, true); // No restore function needed - this is a leaf dialog
 }
 
 function addHighOut() {
