@@ -16,7 +16,7 @@
   Configuration/Settings
 
   - ❌ "Reset all settings to defaults" confirmation (results-config.js:291)
-  - ❌ Export confirmations for CSV/JSON (results-config.js:500,640)
+  - ✅ Export confirmations for CSV/JSON (results-config.js:500,640)
 
   🔧 Medium Priority - Validation & Errors
 

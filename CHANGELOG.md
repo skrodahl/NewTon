@@ -27,6 +27,13 @@
   - Detailed action plan explaining exactly what happens during the load process
   - Responsive design with scrollable content and compact spacing for better fit
 
+- **📤 Export Confirmation Modals (JSON/CSV)**
+  - Comprehensive tournament overview with status, progress, and player information
+  - Format-specific export details showing filename, content type, and included data
+  - Smart status detection with color-coded warnings for incomplete tournaments
+  - Detailed content preview listing exactly what will be included in each export format
+  - Professional styling with clear file information and download confirmation
+
 ### 🎨 Enhanced User Experience
 - **Consistent Design Language**: All modals follow the same professional styling and color scheme
 - **Rich Information Display**: Users see comprehensive details before making decisions
@@ -48,6 +55,7 @@ Completely replaced generic browser dialogs (`alert`, `confirm`, `prompt`) with 
 - ✅ Tournament deletion → Detailed impact modal
 - ✅ Import conflicts → Clear overwrite decision modal
 - ✅ Tournament loading → Comprehensive before/after modal
+- ✅ Export confirmations → Professional export details modal
 
 # 2025-09-18
 

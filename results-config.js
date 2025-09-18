@@ -489,35 +489,8 @@ function exportResultsJSON() {
     // Generate filename
     const filename = `${tournament.name}_${tournament.date}_Results.json`;
     
-    // Show appropriate confirmation dialog
-    let confirmMessage;
-    if (hasFinalisedRankings) {
-        confirmMessage = `Save results to "${filename}"?`;
-    } else {
-        confirmMessage = `Tournament incomplete, export to "${filename}" anyway?`;
-    }
-
-    if (!confirm(confirmMessage)) {
-        return; // User cancelled
-    }
-
-    // Generate JSON content
-    const jsonContent = generateResultsJSON();
-    
-    // Create and download file
-    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    console.log(`✓ Results exported as JSON: ${filename}`);
+    // Show export confirmation modal
+    showExportConfirmModal('JSON', filename, hasFinalisedRankings);
 }
 
 /**
@@ -629,35 +602,8 @@ function exportResultsCSV() {
     // Generate filename
     const filename = `${tournament.name}_${tournament.date}_Results.csv`;
     
-    // Show appropriate confirmation dialog
-    let confirmMessage;
-    if (hasFinalisedRankings) {
-        confirmMessage = `Save results to "${filename}"?`;
-    } else {
-        confirmMessage = `Tournament incomplete, export to "${filename}" anyway?.`;
-    }
-
-    if (!confirm(confirmMessage)) {
-        return; // User cancelled
-    }
-
-    // Generate CSV content
-    const csvContent = generateResultsCSV();
-    
-    // Create and download file
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    
-    console.log(`✓ Results exported: ${filename}`);
+    // Show export confirmation modal
+    showExportConfirmModal('CSV', filename, hasFinalisedRankings);
 }
 
 /**
@@ -744,6 +690,116 @@ function formatRankingForCSV(placement) {
 console.log('🚀 Initializing bulletproof config system...');
 loadConfiguration();
 
+/**
+ * Show export confirmation modal with tournament and export details
+ */
+function showExportConfirmModal(format, filename, hasFinalisedRankings) {
+    // Store export details for later use
+    window.pendingExport = {
+        format: format,
+        filename: filename,
+        hasFinalisedRankings: hasFinalisedRankings
+    };
+
+    // Populate tournament details
+    document.getElementById('exportTournamentName').textContent = tournament.name;
+    document.getElementById('exportTournamentDate').textContent = tournament.date;
+
+    // Calculate tournament status
+    const completedMatches = matches.filter(m => m.completed).length;
+    const totalMatches = matches.length;
+    const status = hasFinalisedRankings ? 'Complete' : 'In Progress';
+
+    document.getElementById('exportTournamentStatus').textContent = status;
+    document.getElementById('exportPlayerCount').textContent = `${players.length} registered`;
+    document.getElementById('exportMatchProgress').textContent = `${completedMatches}/${totalMatches} matches`;
+
+    // Populate export details
+    document.getElementById('exportFormat').textContent = format;
+    document.getElementById('exportFilename').textContent = filename;
+
+    const contentDescription = format === 'JSON'
+        ? 'Complete tournament data with match results and statistics'
+        : 'Results table with rankings, points, and player statistics';
+    document.getElementById('exportContent').textContent = contentDescription;
+
+    // Show/hide status sections
+    const warningSection = document.getElementById('exportWarningSection');
+    const completeSection = document.getElementById('exportCompleteSection');
+
+    if (hasFinalisedRankings) {
+        warningSection.style.display = 'none';
+        completeSection.style.display = 'block';
+    } else {
+        warningSection.style.display = 'block';
+        completeSection.style.display = 'none';
+    }
+
+    // Populate what will be included list
+    const includesList = document.getElementById('exportIncludesList');
+    const items = format === 'JSON' ? [
+        'Complete tournament configuration',
+        'All player information and statistics',
+        'Complete match history and results',
+        'Bracket structure and progression',
+        'Current rankings and placements'
+    ] : [
+        'Final rankings and positions',
+        'Player names and statistics',
+        'Points breakdown (placement, participation, achievements)',
+        'Tournament totals and summary'
+    ];
+
+    includesList.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+
+    // Show modal with Esc support
+    pushDialog('exportConfirmModal', null, true);
+}
+
+function confirmExport() {
+    const exportDetails = window.pendingExport;
+
+    if (!exportDetails) {
+        alert('Export details not found.');
+        popDialog();
+        return;
+    }
+
+    // Close modal first
+    popDialog();
+
+    // Perform the actual export
+    executeExport(exportDetails.format, exportDetails.filename);
+}
+
+function executeExport(format, filename) {
+    let content, mimeType;
+
+    if (format === 'JSON') {
+        content = generateResultsJSON();
+        mimeType = 'application/json;charset=utf-8;';
+    } else {
+        content = generateResultsCSV();
+        mimeType = 'text/csv;charset=utf-8;';
+    }
+
+    // Create and download file
+    const blob = new Blob([content], { type: mimeType });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+
+    URL.revokeObjectURL(url);
+    console.log(`✓ Results exported as ${format}: ${filename}`);
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.loadConfiguration = loadConfiguration;
@@ -766,4 +822,8 @@ if (typeof window !== 'undefined') {
     // Debug functions
     window.forceReloadConfig = forceReloadConfig;
     window.resetConfigToDefaults = resetConfigToDefaults;
+
+    // Export modal functions
+    window.showExportConfirmModal = showExportConfirmModal;
+    window.confirmExport = confirmExport;
 }

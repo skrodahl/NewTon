@@ -874,6 +874,51 @@
         </div>
     </div>
 
+    <!-- Export Confirmation Modal -->
+    <div id="exportConfirmModal" class="modal">
+        <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+            <h3>📤 Export Tournament Results</h3>
+            <div style="margin: 15px 0; line-height: 1.4;">
+                <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                    <h4 style="margin: 0 0 8px 0; color: #333;">Tournament Details:</h4>
+                    <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span id="exportTournamentName">-</span></p>
+                    <p style="margin: 3px 0;"><strong>Date:</strong> <span id="exportTournamentDate">-</span></p>
+                    <p style="margin: 3px 0;"><strong>Status:</strong> <span id="exportTournamentStatus">-</span></p>
+                    <p style="margin: 3px 0;"><strong>Players:</strong> <span id="exportPlayerCount">-</span></p>
+                    <p style="margin: 3px 0;"><strong>Completed Matches:</strong> <span id="exportMatchProgress">-</span></p>
+                </div>
+
+                <div style="background: #e7f3ff; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #0056b3;">
+                    <h4 style="margin: 0 0 8px 0; color: #0056b3;">Export Details:</h4>
+                    <p style="margin: 3px 0;"><strong>Format:</strong> <span id="exportFormat">-</span></p>
+                    <p style="margin: 3px 0;"><strong>Filename:</strong> <span id="exportFilename">-</span></p>
+                    <p style="margin: 3px 0;"><strong>Content:</strong> <span id="exportContent">-</span></p>
+                </div>
+
+                <div id="exportWarningSection" style="background: #fff3cd; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #ffc107; display: none;">
+                    <p style="margin: 0; font-weight: 600; color: #856404;">⚠️ Tournament Incomplete</p>
+                    <p style="margin: 6px 0 0 0; color: #856404;">This tournament is not yet finished. The export will contain current standings but may not reflect final rankings.</p>
+                </div>
+
+                <div id="exportCompleteSection" style="background: #d4edda; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #28a745; display: none;">
+                    <p style="margin: 0; font-weight: 600; color: #155724;">✓ Tournament Complete</p>
+                    <p style="margin: 6px 0 0 0; color: #155724;">This tournament is finished with final rankings available. The export will contain complete results.</p>
+                </div>
+
+                <div style="background: #d1ecf1; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #17a2b8;">
+                    <p style="margin: 0; font-weight: 600; color: #0c5460;">📋 What will be included:</p>
+                    <ul style="margin: 8px 0; padding-left: 18px; color: #0c5460;" id="exportIncludesList">
+                        <!-- Populated by JavaScript -->
+                    </ul>
+                </div>
+            </div>
+            <div class="text-center mt-20">
+                <button class="btn" onclick="popDialog()" style="margin-right: 15px; background: #6c757d; font-weight: 600;">Cancel</button>
+                <button class="btn btn-success" id="confirmExportBtn" onclick="confirmExport()" style="font-weight: 600;">Export Results</button>
+            </div>
+        </div>
+    </div>
+
 </body>
 
 </html>
