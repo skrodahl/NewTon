@@ -2,6 +2,9 @@
 
 ## v1.5.1 Tournament Celebration & Command Center Enhancement
 
+### Small bug-fix
+- The undo dialog was too tall. It now adapts to the number of matches it displays
+
 ### ✨ New Feature: Tournament Completion Celebration
 - **🏆 Olympic-Style Podium Display**
   - Visual podium showing 1st, 2nd, and 3rd place winners with gold, silver, bronze styling
