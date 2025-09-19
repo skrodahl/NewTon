@@ -1919,93 +1919,155 @@ function showCommandCenterModal(matchData) {
         return;
     }
 
-    // Clear existing content
+    // Clear existing content and hide all sections first
     liveContainer.innerHTML = '';
     frontContainer.innerHTML = '';
     backContainer.innerHTML = '';
-    
-    // Check if we have any matches to show
-    const hasMatches = Array.isArray(matchData) ? matchData.length > 0 : 
-        (matchData.live && matchData.live.length > 0) || 
-        (matchData.front && matchData.front.length > 0) || 
-        (matchData.back && matchData.back.length > 0);
-    
-    if (!hasMatches) {
-        // Check if tournament is completed
-        if (tournament && tournament.status === 'completed' && tournament.placements) {
-            // Show celebration podium instead of empty state
-            liveSection.style.display = 'none';
-            frontSection.style.display = 'none';
-            backSection.style.display = 'none';
-            noMatchesMessage.style.display = 'none';
-            showTournamentCelebration();
-        } else {
-            // Show regular empty state
-            liveSection.style.display = 'none';
-            frontSection.style.display = 'none';
-            backSection.style.display = 'none';
-            noMatchesMessage.style.display = 'block';
-        }
+
+    // Get all possible display elements
+    const setupMessage = document.getElementById('setupMessage');
+    const celebrationDiv = document.getElementById('tournamentCelebration');
+
+    // Hide all possible states initially
+    liveSection.style.display = 'none';
+    frontSection.style.display = 'none';
+    backSection.style.display = 'none';
+    noMatchesMessage.style.display = 'none';
+    if (setupMessage) setupMessage.style.display = 'none';
+    if (celebrationDiv) celebrationDiv.style.display = 'none';
+
+    // STATE-DRIVEN LOGIC: Use tournament status to determine what to show
+    if (!tournament || !tournament.status) {
+        // Fallback: show empty state if no tournament data
+        noMatchesMessage.style.display = 'block';
     } else {
-        noMatchesMessage.style.display = 'none';
-        // Hide celebration in case it was showing
-        const celebrationDiv = document.getElementById('tournamentCelebration');
-        if (celebrationDiv) celebrationDiv.style.display = 'none';
-        
-        // Populate LIVE matches
-        if (matchData.live && matchData.live.length > 0) {
-            liveSection.style.display = 'block';
-            let liveHTML = '';
-            matchData.live.forEach(match => {
-                liveHTML += createMatchCard(match);
-            });
-            liveContainer.innerHTML = liveHTML;
-        } else {
-            liveSection.style.display = 'none';
-        }
+        switch (tournament.status) {
+            case 'setup':
+                // Tournament in setup - show setup message
+                if (setupMessage) {
+                    setupMessage.style.display = 'block';
+                } else {
+                    noMatchesMessage.style.display = 'block'; // Fallback
+                }
+                break;
 
-        // Populate Front matches
-        if (matchData.front && matchData.front.length > 0) {
-            frontSection.style.display = 'block';
-            let frontHTML = '';
-            matchData.front.forEach(match => {
-                frontHTML += createMatchCard(match);
-            });
-            frontContainer.innerHTML = frontHTML;
-        } else {
-            frontSection.style.display = 'none';
-        }
+            case 'completed':
+                // Tournament completed - show celebration
+                showTournamentCelebration();
+                break;
 
-        // Populate Back matches
-        if (matchData.back && matchData.back.length > 0) {
-            backSection.style.display = 'block';
-            let backHTML = '';
-            matchData.back.forEach(match => {
-                backHTML += createMatchCard(match);
-            });
-            backContainer.innerHTML = backHTML;
-        } else {
-            backSection.style.display = 'none';
+            case 'active':
+            default:
+                // Tournament active - show matches (guaranteed to exist in active state)
+                // Populate LIVE matches
+                if (matchData.live && matchData.live.length > 0) {
+                    liveSection.style.display = 'block';
+                    let liveHTML = '';
+                    matchData.live.forEach(match => {
+                        liveHTML += createMatchCard(match);
+                    });
+                    liveContainer.innerHTML = liveHTML;
+                }
+
+                // Populate Front matches
+                if (matchData.front && matchData.front.length > 0) {
+                    frontSection.style.display = 'block';
+                    let frontHTML = '';
+                    matchData.front.forEach(match => {
+                        frontHTML += createMatchCard(match);
+                    });
+                    frontContainer.innerHTML = frontHTML;
+                }
+
+                // Populate Back matches
+                if (matchData.back && matchData.back.length > 0) {
+                    backSection.style.display = 'block';
+                    let backHTML = '';
+                    matchData.back.forEach(match => {
+                        backHTML += createMatchCard(match);
+                    });
+                    backContainer.innerHTML = backHTML;
+                }
+
+                // If no matches in active state, show fallback message
+                const hasActiveMatches = (matchData.live && matchData.live.length > 0) ||
+                                       (matchData.front && matchData.front.length > 0) ||
+                                       (matchData.back && matchData.back.length > 0);
+                if (!hasActiveMatches) {
+                    noMatchesMessage.style.display = 'block';
+                }
+                break;
         }
     }
 
-    // Clear and populate referee section based on tournament status (same pattern as match section)
+    // Clear and populate referee section using STATE-DRIVEN LOGIC (same pattern as match section)
     const losersContainer = document.getElementById('refereeLosersContainer');
     const winnersContainer = document.getElementById('refereeWinnersContainer');
     const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
     const refereeHeader = document.querySelector('.referee-suggestions-container .cc-section-header');
+    const refereeSetupMessage = document.getElementById('refereeSetupMessage');
+    const noRefereeSuggestionsMessage = document.getElementById('noRefereeSuggestionsMessage');
 
-    // Clear existing content first (like match section)
+    // Clear existing content first
     if (losersContainer) losersContainer.innerHTML = '';
     if (winnersContainer) winnersContainer.innerHTML = '';
     if (assignmentsContainer) assignmentsContainer.innerHTML = '';
 
-    if (tournament && tournament.status === 'completed') {
-        showTournamentAchievements();
-    } else {
-        // Set header back to referee suggestions
+    // Hide all referee sections initially
+    const refereeSections = document.querySelectorAll('#refereeLosersSection, #refereeWinnersSection, #refereeAssignmentsSection');
+    refereeSections.forEach(section => section.style.display = 'none');
+    if (refereeSetupMessage) refereeSetupMessage.style.display = 'none';
+    if (noRefereeSuggestionsMessage) noRefereeSuggestionsMessage.style.display = 'none';
+
+    // STATE-DRIVEN LOGIC: Use tournament status to determine referee column content
+    if (!tournament || !tournament.status) {
+        // Fallback: show empty state if no tournament data
         if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
-        populateRefereeSuggestions();
+        if (noRefereeSuggestionsMessage) noRefereeSuggestionsMessage.style.display = 'block';
+    } else {
+        switch (tournament.status) {
+            case 'setup':
+                // Tournament in setup - show setup message
+                if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
+                if (refereeSetupMessage) {
+                    refereeSetupMessage.style.display = 'block';
+                } else if (noRefereeSuggestionsMessage) {
+                    noRefereeSuggestionsMessage.style.display = 'block'; // Fallback
+                }
+                break;
+
+            case 'completed':
+                // Tournament completed - show achievements
+                showTournamentAchievements();
+                break;
+
+            case 'active':
+            default:
+                // Tournament active - show referee suggestions
+                if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
+
+                // Reset subsection headers to their original values for active state
+                const losersSection = document.getElementById('refereeLosersSection');
+                const winnersSection = document.getElementById('refereeWinnersSection');
+                const assignmentsSection = document.getElementById('refereeAssignmentsSection');
+
+                if (losersSection) {
+                    const header = losersSection.querySelector('.referee-subsection-header');
+                    if (header) header.textContent = 'Recent Losers';
+                }
+                if (winnersSection) {
+                    const header = winnersSection.querySelector('.referee-subsection-header');
+                    if (header) header.textContent = 'Recent Winners';
+                }
+                if (assignmentsSection) {
+                    const header = assignmentsSection.querySelector('.referee-subsection-header');
+                    if (header) header.textContent = 'Recent Assignments';
+                }
+
+                refereeSections.forEach(section => section.style.display = 'block');
+                populateRefereeSuggestions();
+                break;
+        }
     }
 
     // Restore scroll position
@@ -2270,6 +2332,8 @@ function calculateAchievementPoints(player) {
 
 
 function showTournamentAchievements() {
+    console.log('🏆 Showing tournament achievements...');
+
     // Update header
     const header = document.querySelector('.referee-suggestions-container .cc-section-header');
     if (header) {
@@ -2284,11 +2348,18 @@ function showTournamentAchievements() {
     const winnersSection = document.getElementById('refereeWinnersSection');
     const assignmentsSection = document.getElementById('refereeAssignmentsSection');
 
-    if (!losersContainer || !winnersContainer || !assignmentsContainer) return;
+    if (!losersContainer || !winnersContainer || !assignmentsContainer) {
+        console.error('Missing achievement containers');
+        return;
+    }
 
     // Calculate comprehensive stats
+    console.log('📊 Calculating tournament stats...');
     const stats = calculateTournamentStats();
     const tournamentSummary = calculateTournamentSummary();
+
+    console.log('Stats calculated:', stats);
+    console.log('Tournament summary:', tournamentSummary);
 
     // Update section headers
     if (losersSection) {
@@ -2332,6 +2403,13 @@ function showTournamentAchievements() {
             <p class="export-description">Download complete tournament results as JSON file</p>
         </div>
     `;
+
+    // Make all sections visible after populating them
+    if (losersSection) losersSection.style.display = 'block';
+    if (winnersSection) winnersSection.style.display = 'block';
+    if (assignmentsSection) assignmentsSection.style.display = 'block';
+
+    console.log('✓ Tournament achievements displayed and sections made visible');
 }
 
 function generateAchievementItem(label, value) {

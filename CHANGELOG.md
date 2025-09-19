@@ -1,5 +1,39 @@
 # 2025-09-19
 
+## v1.5.4 State-Driven Match Controls Architecture
+
+### 🏗️ Core Architecture: Tournament State-Driven Match Controls
+Completely refactored Match Controls to use tournament status as the single source of truth for UI behavior.
+
+**Match Controls Column (Left):**
+- **'setup'**: Shows styled setup message with guidance for adding players and generating matches
+- **'active'**: Shows live/ready matches organized by frontside/backside brackets
+- **'completed'**: Shows celebration podium with winner rankings and tournament highlights
+
+**Referee Suggestions Column (Right):**
+- **'setup'**: Shows setup message explaining referee suggestions will appear when tournament starts
+- **'active'**: Shows referee suggestions (recent losers, winners, assignments) with proper headers
+- **'completed'**: Shows player achievements (most 180s, highest checkout, etc.) and tournament summary
+
+### 🐛 Critical Data Fixes
+- **Results Table Rankings**: Fixed to read from tournament object instead of stale localStorage data
+- **Achievement Display**: Fixed sections not being made visible after populating with achievement data
+- **Tournament Persistence**: Fixed loaded tournaments not surviving browser refreshes
+- **Recent Tournaments**: Fixed new tournaments not appearing in list and active status not updating
+
+### 🎯 UI Consistency Improvements
+- **Header Reset**: Active tournaments now properly reset subsection headers from celebration state
+- **State Clearing**: All celebration elements properly cleared when switching tournaments
+- **Setup State**: Added proper setup messages for both columns when tournament is in initial state
+
+### 🔧 Technical Improvements
+- **Single Source of Truth**: All Match Controls logic now flows from `tournament.status`
+- **Reliable State Management**: Tournament status drives all UI decisions instead of derived match state
+- **Consistent Updates**: All tournament operations (create, load, delete, import) now refresh displays properly
+- **Data Synchronization**: Fixed discrepancies between tournament object and localStorage persistence
+
+This architectural overhaul transforms Match Controls from a reactive system to a predictable, state-driven interface that accurately reflects tournament lifecycle at all times.
+
 ## v1.5.3 Tournament Management Modal Suite
 
 ### ✨ New Feature: Professional Tournament Management Dialogs

@@ -1536,6 +1536,16 @@ a:hover { color: #1e40af; }
   margin: 40px 0;
 }
 
+.cc-setup-message {
+  text-align: center;
+  color: #4b5563;
+  margin: 40px 0;
+  padding: 20px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
+}
+
 /* Tournament Completion Celebration Podium */
 .tournament-celebration {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
@@ -2035,6 +2045,16 @@ a:hover { color: #1e40af; }
   font-style: italic;
   padding: 20px;
   margin-top: 20px;
+}
+
+.referee-setup-message {
+  text-align: center;
+  color: #4b5563;
+  padding: 20px;
+  margin-top: 20px;
+  background-color: #f9fafb;
+  border: 1px solid #e5e7eb;
+  border-radius: 8px;
 }
 
 /* Match Controls modal button container - keep buttons at bottom */

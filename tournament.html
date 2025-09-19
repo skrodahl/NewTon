@@ -563,6 +563,12 @@
                         </div>
                     </div>
 
+                    <!-- Setup state message -->
+                    <div id="setupMessage" class="cc-setup-message" style="display: none;">
+                        <p>🔧 Tournament in setup mode</p>
+                        <p style="font-size: 14px; color: #666; margin-top: 8px;">Add players and configure the tournament to generate matches.</p>
+                    </div>
+
                     <!-- Empty state message -->
                     <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
                         <p>No matches currently active or ready to start.</p>
@@ -634,6 +640,10 @@
                             <div id="refereeAssignmentsContainer" class="referee-list">
                                 <!-- Recent referee assignments will be populated here -->
                             </div>
+                        </div>
+                        <div id="refereeSetupMessage" class="referee-setup-message" style="display: none;">
+                            <p>🔧 Tournament in setup mode</p>
+                            <p style="font-size: 14px; color: #666; margin-top: 8px;">Referee suggestions will appear when the tournament starts.</p>
                         </div>
                         <div id="noRefereeSuggestionsMessage" class="referee-empty-message" style="display: none;">
                             <p>No referee suggestions available</p>

@@ -73,7 +73,10 @@ function createTournament() {
     // Save tournament (but NOT config)
     saveTournamentOnly();
     updateTournamentStatus();
-    
+
+    // Refresh recent tournaments list to show the new tournament
+    loadRecentTournaments();
+
     // Clear fields after successful creation
     clearTournamentFields();
     
@@ -400,6 +403,13 @@ function continueLoadProcess(selectedTournament) {
 
     showPage('registration');
     console.log('✓ Tournament loaded (global config preserved)');
+
+    // CRITICAL FIX: Save the loaded tournament as current tournament
+    localStorage.setItem('currentTournament', JSON.stringify(tournament));
+    console.log(`✓ Set "${tournament.name}" as current tournament for persistence`);
+
+    // Update Recent Tournaments display to show correct active tournament
+    loadRecentTournaments();
 }
 
 function deleteTournament(tournamentId) {
@@ -524,6 +534,10 @@ function continueImportProcess(importedData) {
 
         // Save tournament (but not global config)
         saveTournamentOnly();
+
+        // Debug: Verify what got saved
+        const saved = JSON.parse(localStorage.getItem('currentTournament'));
+        console.log(`✓ Saved tournament "${saved.name}" as current tournament`);
 
         // Update displays
         updateTournamentStatus();

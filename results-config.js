@@ -309,9 +309,9 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
     const tbody = document.getElementById(targetTbodyId);
     if (!tbody) return;
 
-    // Get placement data from tournament
+    // Get placement data from tournament (use global tournament object, not localStorage)
     try {
-        const t = JSON.parse(localStorage.getItem('currentTournament') || '{}');
+        const t = tournament || {};
         const placementByPlayer = t && t.placements ? Object.fromEntries(
             Object.entries(t.placements)
                 .filter(([k]) => {
