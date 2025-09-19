@@ -2331,8 +2331,8 @@ function updateCelebrationSubtitle() {
         titleDiv.textContent = `🏆 ${tournament.name} Complete! 🏆`;
     }
 
-    // Update subtitle with tournament date and player count
-    const playerCount = tournament.bracketSize || (players ? players.length : 0);
+    // Update subtitle with tournament date and actual player count
+    const playerCount = players ? players.length : 0;
     let subtitleText = `Congratulations to all ${playerCount} players!`;
 
     if (tournament.date) {
