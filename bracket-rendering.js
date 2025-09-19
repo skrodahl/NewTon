@@ -1671,7 +1671,7 @@ function showMatchCommandCenter() {
 
 // Function to get referee suggestions
 function getRefereeSuggestions() {
-    if (!matches || !players) return { losers: [], winners: [] };
+    if (!matches || !players) return { losers: [], winners: [], recentReferees: [] };
 
     // Get completed matches sorted by most recent first
     const completedMatches = matches
