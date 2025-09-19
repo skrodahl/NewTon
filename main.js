@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '1.6.1';
+const APP_VERSION = '1.6.2';
 
 // =============================================================================
 // DIALOG STACK MANAGER - Unified dialog stacking system
@@ -421,6 +421,16 @@ function showPage(pageId) {
     // Update match history when showing setup page
     if (pageId === 'setup') {
         updateMatchHistory();
+    }
+
+    // Auto-open Match Controls when navigating to tournament page (if enabled and tournament exists)
+    if (pageId === 'tournament' && config.ui.autoOpenMatchControls && tournament) {
+        // Small delay to ensure page transition is complete
+        setTimeout(() => {
+            if (typeof showMatchCommandCenter === 'function') {
+                showMatchCommandCenter();
+            }
+        }, 100);
     }
 
     // HELP SYSTEM INTEGRATION

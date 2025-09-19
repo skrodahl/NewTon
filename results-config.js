@@ -30,7 +30,8 @@ const DEFAULT_CONFIG = {
         requireLaneForStart: false
     },
     ui: {
-        confirmWinnerSelection: true
+        confirmWinnerSelection: true,
+        autoOpenMatchControls: true
     }
 };
 
@@ -115,6 +116,7 @@ function applyConfigToUI() {
     // UI configuration
     if (config.ui) {
         safeSetChecked('confirmWinnerSelection', config.ui.confirmWinnerSelection);
+        safeSetChecked('autoOpenMatchControls', config.ui.autoOpenMatchControls);
     }
 
     console.log('✓ Config applied to UI');
@@ -254,9 +256,11 @@ function saveLaneConfiguration() {
 // UI CONFIGURATION
 function saveUIConfiguration() {
     const confirmWinnerElement = document.getElementById('confirmWinnerSelection');
+    const autoOpenElement = document.getElementById('autoOpenMatchControls');
 
     config.ui = config.ui || {};
     config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
+    config.ui.autoOpenMatchControls = autoOpenElement ? autoOpenElement.checked : true;
 
     saveGlobalConfig();
     alert('✓ UI settings saved successfully!');

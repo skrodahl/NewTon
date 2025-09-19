@@ -297,6 +297,7 @@ const HELP_CONTENT = {
                         <li><strong>Club Logo:</strong> Add logo.png/jpg/jpeg/svg file to root folder</li>
                         <li><strong>Lane Management:</strong> Set maximum lanes and requirements</li>
                         <li><strong>UI Preferences:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
+                        <li><strong>Match Controls Auto-Open:</strong> Automatically show Command Center when entering Tournament page</li>
                     </ul>
                     <p><strong>💡 Tip:</strong> Personalize the application for your club or organization.</p>
                 `
