@@ -1,5 +1,10 @@
 # 2025-09-19
 
+## v1.6.3 Polish & UX Improvements
+- **Matches Played**: Tournament celebration now shows "Matches played" instead of meaningless "Total matches" count (excludes walkover matches)
+- **Focus Preservation**: Fixed input field losing focus when adding players from Match Controls setup interface
+- **Button Layout**: Swapped Match Controls and Stats/Results button positions for better accessibility
+
 ## v1.6.2 Auto-Open & UI Polish
 - **Auto-Open Match Controls**: Configurable setting to automatically open Match Controls when entering Tournament page (enabled by default)
 - **UI Layout Fix**: Fixed Global Settings UI options display to show checkboxes on separate lines for better readability

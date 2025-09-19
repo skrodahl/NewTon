@@ -2230,8 +2230,17 @@ function addPlayerFromCC() {
     mainInput.value = originalValue;
     ccInput.value = '';
 
-    // Refresh the Command Center to show the new player
-    setTimeout(() => showMatchCommandCenter(), 100);
+    // Refresh the Command Center to show the new player and restore focus
+    setTimeout(() => {
+        showMatchCommandCenter();
+        // Restore focus to the input field after refresh
+        setTimeout(() => {
+            const ccInput = document.getElementById('ccPlayerName');
+            if (ccInput) {
+                ccInput.focus();
+            }
+        }, 50);
+    }, 100);
 }
 
 // Function to show Statistics modal with results table
@@ -2554,7 +2563,7 @@ function showTournamentAchievements() {
     // Populate Tournament Summary in winners container
     winnersContainer.innerHTML = `
         <div class="achievement-list">
-            ${generateAchievementItem('Total Matches', tournamentSummary.totalMatches)}
+            ${generateAchievementItem('Matches Played', tournamentSummary.matchesPlayed)}
             ${generateAchievementItem('Bracket Size', tournamentSummary.bracketSize)}
         </div>
     `;
@@ -2587,8 +2596,14 @@ function generateAchievementItem(label, value) {
 }
 
 function calculateTournamentSummary() {
+    // Count only matches that were actually played (not walkovers)
+    const matchesPlayed = matches ? matches.filter(m => {
+        return m.completed && !m.autoAdvanced &&
+               (!isWalkover(m.player1) && !isWalkover(m.player2));
+    }).length : 0;
+
     const summary = {
-        totalMatches: matches ? matches.length : 0,
+        matchesPlayed: matchesPlayed,
         completedMatches: matches ? matches.filter(m => m.completed).length : 0,
         bracketSize: tournament.bracketSize || (players ? players.length : 0)
     };
