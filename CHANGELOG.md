@@ -1,5 +1,8 @@
 # 2025-09-19
 
+## V.1.6.1 Small Bug-fix
+- The section "Recent Assignments", in Match Controls -> Referee Suggestions was lost. Now it's found.
+
 ## v1.6.0 Command Center Revolution
 
 ### 🎯 Match Controls Command Center
