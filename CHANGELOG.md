@@ -1,6 +1,6 @@
 # 2025-09-19
 
-## v1.6.0 Command Center Revolution
+## v.1.6.0 Command Center Revolution
 
 ### 🎯 Match Controls Command Center
 Transformed Match Controls into a true tournament management Command Center with intelligent state-driven interfaces.
