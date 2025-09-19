@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '1.6.3';
+const APP_VERSION = '1.6.4';
 
 // =============================================================================
 // DIALOG STACK MANAGER - Unified dialog stacking system
@@ -628,6 +628,7 @@ function getPlayerNameById(playerId) {
     const player = players.find(p => p.id === playerId);
     return player ? player.name : 'Unknown';
 }
+
 
 // Make functions globally available
 if (typeof window !== 'undefined') {

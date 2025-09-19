@@ -599,24 +599,44 @@ body {
 .bracket-watermarks {
   position: absolute;
   bottom: 0;
-  left: 0;
-  right: 0;
+  left: 20px;
+  right: 20px;
+  height: 45px;
   z-index: 100;
   pointer-events: none;
+  display: flex;
+  align-items: center;
 }
 
 .watermark-left {
   position: absolute;
   left: 30px;
-  bottom: 30px;
   font-size: 16px;
   color: #696969;
+}
+
+.watermark-center {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  font-size: 16px;
+  font-weight: 500;
+  color: #333333;
+  letter-spacing: normal;
+  transition: all 0.2s ease;
+}
+
+.watermark-center.active {
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(6px);
+  border-radius: 8px;
+  padding: 8px 16px;
+  border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
 #watermark-right {
   position: absolute;
   right: 30px;
-  bottom: 30px;
   font-size: 16px !important; /* Force consistent font size */
   font-weight: 400; /* Normal weight for non-bold text */
   color: #000000;

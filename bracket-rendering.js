@@ -384,6 +384,35 @@ function renderMatch(match, x, y, section, roundIndex) {
 	</div>
     `;
 
+    // Add hover events for match progression info
+    let hoverTimeout = null;
+
+    matchElement.addEventListener('mouseenter', function() {
+        // HOVER DELAY SYSTEM:
+        // - Prevents accidental triggers when quickly moving mouse across bracket
+        // - 1500ms (1.5 seconds) requires deliberate hover intent
+        // - Useful when navigating crowded brackets with many match cards
+        // - Can be set to 0 for immediate response if preferred
+        // - Timeout is cleared if mouse leaves before delay completes
+        const HOVER_DELAY_MS = 300; // 0.3 second delay - responsive but prevents jumpy navigation
+
+        hoverTimeout = setTimeout(() => {
+            const progressionText = getMatchProgressionText(match.id);
+            if (progressionText) {
+                updateStatusCenter(progressionText);
+            }
+        }, HOVER_DELAY_MS);
+    });
+
+    matchElement.addEventListener('mouseleave', function() {
+        // Clear any pending hover timeout and immediately hide progression info
+        if (hoverTimeout) {
+            clearTimeout(hoverTimeout);
+            hoverTimeout = null;
+        }
+        clearStatusCenter();
+    });
+
     document.getElementById('bracketMatches').appendChild(matchElement);
 }
 
@@ -2625,9 +2654,66 @@ function exportTournamentJSON() {
 if (typeof window !== 'undefined') {
     window.showTournamentCelebration = showTournamentCelebration;
     window.exportTournamentJSON = exportTournamentJSON;
+    window.updateStatusCenter = updateStatusCenter;
+    window.clearStatusCenter = clearStatusCenter;
+    window.getMatchProgressionText = getMatchProgressionText;
 }
 
 // --- END: Tournament Celebration Functions ---
+
+// --- STATUS CENTER FUNCTIONS - Dynamic Tournament Page Status Bar ---
+
+// Update center watermark with message
+function updateStatusCenter(message) {
+    const centerElement = document.getElementById('watermark-center');
+    if (centerElement) {
+        centerElement.textContent = message;
+        centerElement.classList.add('active');
+    }
+}
+
+// Clear center watermark
+function clearStatusCenter() {
+    const centerElement = document.getElementById('watermark-center');
+    if (centerElement) {
+        centerElement.textContent = '';
+        centerElement.classList.remove('active');
+    }
+}
+
+// Generate match progression text using MATCH_PROGRESSION lookup
+function getMatchProgressionText(matchId) {
+    if (!tournament || !tournament.bracketSize || !MATCH_PROGRESSION[tournament.bracketSize]) {
+        return null;
+    }
+
+    const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    if (!progression) {
+        return null;
+    }
+
+    const destinations = [];
+
+    // Check for winner destination
+    if (progression.winner && progression.winner[0]) {
+        destinations.push(progression.winner[0]);
+    }
+
+    // Check for loser destination
+    if (progression.loser && progression.loser[0]) {
+        destinations.push(progression.loser[0]);
+    }
+
+    if (destinations.length === 0) {
+        return `Match ${matchId} leads to tournament completion`;
+    } else if (destinations.length === 1) {
+        return `Match ${matchId} leads to ${destinations[0]}`;
+    } else {
+        return `Match ${matchId} leads to ${destinations[0]} and ${destinations[1]}`;
+    }
+}
+
+// --- END: Status Center Functions ---
 
 // UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
 

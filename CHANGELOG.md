@@ -1,5 +1,14 @@
 # 2025-09-19
 
+## v1.6.4 Dynamic Match Progression Status Bar
+- **Tournament Flow Visualization**: Added elegant status bar system showing match progression on Tournament page
+- **Smart Hover Information**: Hover over any match card to see where players advance next (e.g., "Match FS-2-1 leads to FS-3-1 and BS-2-2")
+- **Purposeful Design**: Status bar background only appears when displaying information, creating a subtle "blooming" effect
+- **Optimized Timing**: 300ms hover delay prevents jumpy navigation while maintaining responsiveness
+- **Universal Coverage**: Works for all match states and tournament sizes using hardcoded progression lookup tables
+- **Undo Context**: Helps users understand bracket flow and identify why certain matches block undo operations
+- **Tournament Page Only**: Clean implementation that doesn't affect other pages
+
 ## v1.6.3 Polish & UX Improvements
 - **Matches Played**: Tournament celebration now shows "Matches played" instead of meaningless "Total matches" count (excludes walkover matches)
 - **Focus Preservation**: Fixed input field losing focus when adding players from Match Controls setup interface
