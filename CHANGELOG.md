@@ -1,6 +1,6 @@
 # 2025-09-19
 
-## v1.6.4 Dynamic Match Progression Status Bar
+## v.1.6.4 Dynamic Match Progression Status Bar
 - **Tournament Flow Visualization**: Added elegant status bar system showing match progression on Tournament page
 - **Smart Hover Information**: Hover over any match card to see where players advance next (e.g., "Match FS-2-1 leads to FS-3-1 and BS-2-2")
 - **Purposeful Design**: Status bar background only appears when displaying information, creating a subtle "blooming" effect
