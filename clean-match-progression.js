@@ -872,9 +872,15 @@ function generateCleanBracket() {
     else if (paidPlayers.length <= 32) bracketSize = 32;
     else bracketSize = 48;
 
-    if (bracketSize === 8 && paidPlayers.length < 4) {
-        alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
-        console.error('Bracket generation blocked for 8-player bracket: fewer than 4 paid players');
+    if (paidPlayers.length < 4) {
+        alert('At least 4 paid players are required to generate a double-elimination tournament.');
+        console.error('Bracket generation blocked: fewer than 4 paid players');
+        return false;
+    }
+
+    if (paidPlayers.length > 32) {
+        alert('Maximum 32 paid players supported. Please remove some players to generate bracket.');
+        console.error('Bracket generation blocked: more than 32 paid players');
         return false;
     }
 
@@ -916,6 +922,16 @@ function generateCleanBracket() {
     // Refresh results table immediately after bracket generation
     if (typeof displayResults === 'function') {
         displayResults();
+    }
+
+    // Refresh Match Controls if it's open to show new ACTIVE state
+    const modal = document.getElementById('matchCommandCenterModal');
+    if (modal &&
+        (modal.style.display === 'flex' || modal.style.display === 'block') &&
+        typeof showMatchCommandCenter === 'function') {
+        setTimeout(() => {
+            showMatchCommandCenter();
+        }, 100);
     }
 
     if (typeof showPage === 'function') {
@@ -2239,6 +2255,16 @@ function validateAndShowWinnerDialog(matchId, playerNumber) {
         // Refresh lane dropdowns if available
         if (typeof refreshAllLaneDropdowns === 'function') {
             setTimeout(refreshAllLaneDropdowns, 100);
+        }
+
+        // Refresh Match Controls if it's open to show updated match state
+        const modal = document.getElementById('matchCommandCenterModal');
+        if (modal &&
+            (modal.style.display === 'flex' || modal.style.display === 'block') &&
+            typeof showMatchCommandCenter === 'function') {
+            setTimeout(() => {
+                showMatchCommandCenter();
+            }, 100);
         }
 
         // If Command Center was open when completion was initiated, reopen it after completion

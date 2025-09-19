@@ -658,7 +658,16 @@ function confirmReset() {
         resultsSection.style.display = 'none';
     }
 
-    alert(`✓ Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket on the Tournament page.`);
+    // Refresh Match Controls if it's open to show new SETUP state
+    if (document.getElementById('matchCommandCenterModal') &&
+        document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
+        typeof showMatchCommandCenter === 'function') {
+        setTimeout(() => {
+            showMatchCommandCenter();
+        }, 100);
+    }
+
+    alert(`✓ Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket using Match Controls.`);
 }
 
 function importTournament(event) {

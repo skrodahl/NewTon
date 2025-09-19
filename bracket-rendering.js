@@ -1941,10 +1941,100 @@ function showCommandCenterModal(matchData) {
         // Fallback: show empty state if no tournament data
         noMatchesMessage.style.display = 'block';
     } else {
+        // Update title based on tournament state
+        const titleElement = document.getElementById('commandCenterTitle');
+        if (titleElement) {
+            if (tournament.name && (tournament.status === 'setup' || tournament.status === 'active')) {
+                titleElement.textContent = `Match Controls - ${tournament.name}`;
+            } else {
+                titleElement.textContent = 'Match Controls';
+            }
+        }
+
         switch (tournament.status) {
             case 'setup':
-                // Tournament in setup - show setup message
+                // Tournament in setup - show enhanced setup interface
                 if (setupMessage) {
+                    // Update setup message with player count and bracket info
+                    const totalPlayers = players ? players.length : 0;
+                    const paidPlayers = players ? players.filter(p => p.paid).length : 0;
+
+                    // Determine bracket size based on paid players
+                    let bracketInfo;
+                    if (paidPlayers < 4) {
+                        bracketInfo = 'need 4+ paid players to start';
+                    } else if (paidPlayers <= 8) {
+                        bracketInfo = 'ready for 8-player bracket';
+                    } else if (paidPlayers <= 16) {
+                        bracketInfo = 'ready for 16-player bracket';
+                    } else if (paidPlayers <= 32) {
+                        bracketInfo = 'ready for 32-player bracket';
+                    } else {
+                        bracketInfo = 'remove 2+ players for 32-player bracket';
+                    }
+
+                    // Create player lists with toggle functionality
+                    const paidPlayersList = players.filter(p => p.paid);
+                    const unpaidPlayersList = players.filter(p => !p.paid);
+
+                    let paidPlayersHTML = '';
+                    if (paidPlayersList.length > 0) {
+                        paidPlayersHTML = `
+                            <div style="margin-top: 15px;">
+                                <div style="font-size: 13px; font-weight: 500; color: #065f46;">Entrance Fee Paid (${paidPlayersList.length}):</div>
+                                <div style="margin-top: 8px; line-height: 1.6;">
+                                    ${paidPlayersList.map(player =>
+                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">✓ ${player.name}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    let unpaidPlayersHTML = '';
+                    if (unpaidPlayersList.length > 0) {
+                        unpaidPlayersHTML = `
+                            <div style="margin-top: 15px;">
+                                <div style="font-size: 13px; font-weight: 500; color: #dc2626;">Entrance Fee Not Paid (${unpaidPlayersList.length}):</div>
+                                <div style="margin-top: 8px; line-height: 1.6;">
+                                    ${unpaidPlayersList.map(player =>
+                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">☐ ${player.name}</span>`
+                                    ).join('')}
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Add player input section
+                    let addPlayerHTML = '';
+                    if (totalPlayers < 32) { // Only show if we haven't hit the max
+                        addPlayerHTML = `
+                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
+                                <div style="font-size: 13px; font-weight: 500; color: #374151;">Add Player:</div>
+                                <div style="margin-top: 8px; display: flex; gap: 8px; width: 70%; margin: 8px auto 0 auto;">
+                                    <input type="text" id="ccPlayerName" placeholder="Player name" style="flex: 1; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;" onkeypress="if(event.key==='Enter') addPlayerFromCC()">
+                                    <button onclick="addPlayerFromCC()" style="padding: 4px 12px; background: #065f46; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                                </div>
+                            </div>
+                        `;
+                    }
+
+                    // Add helpful hint for player interaction
+                    let hintHTML = '';
+                    if (totalPlayers > 0) {
+                        hintHTML = `
+                            <p style="font-size: 12px; color: #6b7280; margin-top: 12px; font-style: italic;">💡 Click player names to toggle paid/unpaid status</p>
+                        `;
+                    }
+
+                    setupMessage.innerHTML = `
+                        <p>🔧 Tournament in setup mode</p>
+                        <p style="font-size: 14px; color: #666; margin-top: 8px;">${totalPlayers} players registered, ${paidPlayers} entrance fees paid (${bracketInfo})</p>
+                        ${hintHTML}
+                        ${paidPlayersHTML}
+                        ${unpaidPlayersHTML}
+                        ${addPlayerHTML}
+                    `;
                     setupMessage.style.display = 'block';
                 } else {
                     noMatchesMessage.style.display = 'block'; // Fallback
@@ -2027,9 +2117,33 @@ function showCommandCenterModal(matchData) {
     } else {
         switch (tournament.status) {
             case 'setup':
-                // Tournament in setup - show setup message
-                if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
+                // Tournament in setup - show setup actions
+                if (refereeHeader) refereeHeader.textContent = '⚙️ Setup Actions';
                 if (refereeSetupMessage) {
+                    // Create action buttons below the setup message
+                    const paidPlayers = players ? players.filter(p => p.paid).length : 0;
+                    let bracketSize, buttonText;
+
+                    if (paidPlayers < 4) {
+                        buttonText = 'Generate Bracket (need 4+ players)';
+                    } else if (paidPlayers > 32) {
+                        buttonText = 'Generate Bracket (max 32 players)';
+                    } else {
+                        if (paidPlayers <= 8) bracketSize = 8;
+                        else if (paidPlayers <= 16) bracketSize = 16;
+                        else if (paidPlayers <= 32) bracketSize = 32;
+                        buttonText = `Generate ${bracketSize}-Player Bracket`;
+                    }
+
+                    refereeSetupMessage.innerHTML = `
+                        <p>🔧 Tournament in setup mode</p>
+                        <p style="font-size: 14px; color: #666; margin-top: 8px;">Setup actions will help you configure the tournament.</p>
+                        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn" onclick="popDialog(); showPage('registration')" style="padding: 8px 16px; font-size: 14px;">Player Registration Page</button>
+                            <button class="btn" onclick="popDialog(); showPage('config')" style="padding: 8px 16px; font-size: 14px;">Global Settings Page</button>
+                            <button class="btn btn-success" onclick="generateBracket()" style="padding: 8px 16px; font-size: 14px;">${buttonText}</button>
+                        </div>
+                    `;
                     refereeSetupMessage.style.display = 'block';
                 } else if (noRefereeSuggestionsMessage) {
                     noRefereeSuggestionsMessage.style.display = 'block'; // Fallback
@@ -2087,6 +2201,37 @@ function showCommandCenterModal(matchData) {
     }
 
     okBtn.onclick = () => popDialog(); // Use dialog stack to close
+}
+
+// Wrapper function to add player from Command Center
+function addPlayerFromCC() {
+    const ccInput = document.getElementById('ccPlayerName');
+    const mainInput = document.getElementById('playerName');
+
+    if (!ccInput || !mainInput) {
+        console.error('Required input elements not found');
+        return;
+    }
+
+    const playerName = ccInput.value.trim();
+    if (!playerName) {
+        alert('Please enter a player name');
+        return;
+    }
+
+    // Temporarily set the main input value so addPlayer() can read it
+    const originalValue = mainInput.value;
+    mainInput.value = playerName;
+
+    // Call the existing addPlayer function
+    addPlayer();
+
+    // Restore original value and clear our input
+    mainInput.value = originalValue;
+    ccInput.value = '';
+
+    // Refresh the Command Center to show the new player
+    setTimeout(() => showMatchCommandCenter(), 100);
 }
 
 // Function to show Statistics modal with results table
@@ -2169,10 +2314,30 @@ function showTournamentCelebration() {
 
 function updateCelebrationSubtitle() {
     const subtitleDiv = document.getElementById('celebrationSubtitle');
+    const titleDiv = document.querySelector('.celebration-title');
     if (!subtitleDiv) return;
 
+    // Update main title with tournament name
+    if (titleDiv && tournament.name) {
+        titleDiv.textContent = `🏆 ${tournament.name} Complete! 🏆`;
+    }
+
+    // Update subtitle with tournament date and player count
     const playerCount = tournament.bracketSize || (players ? players.length : 0);
-    subtitleDiv.textContent = `Congratulations to all ${playerCount} players!`;
+    let subtitleText = `Congratulations to all ${playerCount} players!`;
+
+    if (tournament.date) {
+        // Format the date nicely for display
+        const tournamentDate = new Date(tournament.date);
+        const formattedDate = tournamentDate.toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+        subtitleText = `${formattedDate} • ${subtitleText}`;
+    }
+
+    subtitleDiv.textContent = subtitleText;
 }
 
 function getTopThreePlayers() {

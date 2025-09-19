@@ -129,14 +129,15 @@ const HELP_CONTENT = {
         overview: "Run the tournament bracket, manage matches, and track live progress.",
         sections: {
             bracket: {
-                title: "Bracket Generation",
+                title: "Tournament Setup & Bracket Generation",
                 content: `
-                    <p><strong>Generating the Bracket:</strong></p>
+                    <p><strong>Setting Up Your Tournament:</strong></p>
                     <ol>
-                        <li>Ensure you have at least 4 paid players</li>
-                        <li>Click "<strong>Generate Bracket</strong>" button</li>
-                        <li>System creates optimized double-elimination bracket</li>
-                        <li>Real players are distributed to avoid bye vs bye matches</li>
+                        <li>Click "<strong>Match Controls</strong>" button (top-left)</li>
+                        <li>Use the Setup Command Center to manage players and tournament</li>
+                        <li>Add players directly in Match Controls or navigate to Registration page</li>
+                        <li>Toggle player paid status by clicking on player names</li>
+                        <li>When ready, click the "<strong>Generate [X]-Player Bracket</strong>" button</li>
                     </ol>
                     <p><strong>Bracket Sizes:</strong></p>
                     <ul>
@@ -144,6 +145,7 @@ const HELP_CONTENT = {
                         <li>9-16 players → 16-player bracket</li>
                         <li>17-32 players → 32-player bracket</li>
                     </ul>
+                    <p><strong>💡 Tip:</strong> Match Controls adapts based on tournament state - use it for both setup and active tournament management!</p>
                 `
             },
             navigation: {
@@ -823,13 +825,13 @@ function addQuickActions(pageId) {
             if (tournament && players.filter(p => p.paid).length < 4) {
                 actionsHTML = '<button class="btn btn-warning" onclick="hideHelp(); document.getElementById(\'playerName\').focus();" style="font-size: 12px; padding: 6px 12px;">Add Players</button>';
             } else if (tournament && !tournament.bracket) {
-                actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showPage(\'tournament\');" style="font-size: 12px; padding: 6px 12px;">Generate Bracket</button>';
+                actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showPage(\'tournament\');" style="font-size: 12px; padding: 6px 12px;">Go to Tournament</button>';
             }
             break;
 
         case 'tournament':
             if (tournament && !tournament.bracket) {
-                actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); generateBracket();" style="font-size: 12px; padding: 6px 12px;">Generate Bracket</button>';
+                actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showMatchCommandCenter();" style="font-size: 12px; padding: 6px 12px;">Open Match Controls</button>';
             } else if (matches && matches.some(m => getMatchState && getMatchState(m) === 'ready')) {
                 actionsHTML = '<button class="btn btn-warning" onclick="hideHelp(); showMatchDetails();" style="font-size: 12px; padding: 6px 12px;">Show Ready Matches</button>';
             }

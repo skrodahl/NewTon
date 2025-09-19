@@ -64,7 +64,7 @@
                 <div class="form-group">
                     <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
                     <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
-                    <button class="btn btn-warning" onclick="resetTournament()">Reset Tournament</button>
+                    <button class="btn btn-warning" onclick="showResetTournamentModal()">Reset Tournament</button>
                     <input type="file" id="importFile" accept=".json" style="display: none;"
                         onchange="importTournament(event)">
                 </div>
@@ -164,8 +164,8 @@
                     <!-- Top row -->
                     <div class="bracket-controls-top">
                         <div class="bracket-controls-top-left">
-                            <button class="zoom-btn generate-bracket-btn" onclick="generateBracket()" title="Generate Bracket">Generate
-                                Bracket</button>
+                            <button class="zoom-btn match-controls-btn" onclick="showMatchCommandCenter()"
+                                title="Show LIVE and UPCOMING matches">➹ Match Controls</button>
                             <button class="zoom-btn" onclick="showStatisticsModal()"
                                 title="View tournament statistics and rankings">≡ Stats/Results</button>
                         </div>
@@ -180,8 +180,6 @@
                             <button class="zoom-btn" onclick="showPage('registration')"
                                 title="Exit Tournament to edit statistics and see current results">⬅
                                 Players/Points</button>
-                            <button class="zoom-btn match-controls-btn" onclick="showMatchCommandCenter()"
-                                title="Show LIVE and UPCOMING matches">➹ Match Controls</button>
                         </div>
                         <div class="bracket-controls-middle-right">
                             <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>

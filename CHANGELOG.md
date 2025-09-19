@@ -1,5 +1,55 @@
 # 2025-09-19
 
+## v1.6.0 Command Center Revolution
+
+### 🎯 Match Controls Command Center
+Transformed Match Controls into a true tournament management Command Center with intelligent state-driven interfaces.
+
+**Setup State Enhancements:**
+- **Tournament Branding**: Title shows "Match Controls - [Tournament Name]"
+- **Enhanced Status Display**: Live player count with bracket size calculation ("8 players registered, 6 entrance fees paid (ready for 16-player bracket)")
+- **Interactive Player Management**: Click player names to toggle paid/unpaid status with visual feedback (✓/☐)
+- **Direct Player Addition**: Add players without leaving tournament view
+- **Setup Actions Hub**: Integrated buttons for Player Registration Page, Global Settings Page, and dynamic bracket generation
+- **Smart Button Text**: Generate button reflects validation states ("Generate 16-Player Bracket" vs "Generate Bracket (need 4+ players)")
+- **Helpful Guidance**: Visual hints and tips for interactive elements
+
+**Active State Improvements:**
+- **Tournament Branding**: Consistent naming throughout active tournament management
+- **Real-time Updates**: All match state changes immediately refresh Command Center
+
+**Celebration State Enhancement:**
+- **Tournament Branding**: "🏆 [Tournament Name] Complete! 🏆"
+- **Date Context**: "[Date] • Congratulations to all [X] players!" for perfect social media sharing
+
+### 🔄 Seamless State Transitions
+- **Setup → Active**: Generate bracket automatically refreshes to show matches/referees
+- **Active → Setup**: Reset tournament refreshes to show setup interface
+- **All Transitions**: Maintain context and tournament branding throughout
+
+### 🎛️ Streamlined UI Architecture
+- **Removed Redundant Elements**: Eliminated top-left "Generate Bracket" button
+- **Promoted Match Controls**: Moved to prime top-left position for better accessibility
+- **Enhanced Tournament Workflow**: Single entry point for all tournament management phases
+
+### 🐛 Critical Fixes
+- **Match Completion Refresh**: Fixed Match Controls not updating when completing matches without confirmation dialog
+- **Reset Tournament Function**: Fixed ReferenceError by correcting function name from `resetTournament()` to `showResetTournamentModal()`
+- **Validation Logic**: Added proper >32 player limit with clear error messaging
+
+### 📚 Documentation Updates
+- **Dynamic Help System**: Updated Tournament page help to reflect new Match Controls workflow
+- **Action Buttons**: Help system buttons now direct users to Match Controls instead of removed Generate Bracket button
+- **User Messages**: Updated all references to align with new workflow
+
+### 🎨 Visual Polish
+- **Consistent Typography**: Refined section headers to proper visual hierarchy
+- **Professional Terminology**: "Entrance Fee Paid/Not Paid" for better consistency
+- **Intuitive Icons**: ✓ for paid, ☐ for unpaid players with clear visual distinction
+- **Responsive Design**: Optimized input sizing and alignment throughout
+
+---
+
 ## v1.5.4 State-Driven Match Controls Architecture
 
 ### 🏗️ Core Architecture: Tournament State-Driven Match Controls
