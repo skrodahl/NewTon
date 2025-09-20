@@ -658,6 +658,13 @@ function confirmReset() {
         resultsSection.style.display = 'none';
     }
 
+    // Refresh the results display after reset (with delay to ensure DOM updates)
+    if (typeof displayResults === 'function') {
+        setTimeout(() => {
+            displayResults();
+        }, 100);
+    }
+
     // Refresh Match Controls if it's open to show new SETUP state
     if (document.getElementById('matchCommandCenterModal') &&
         document.getElementById('matchCommandCenterModal').style.display === 'flex' &&

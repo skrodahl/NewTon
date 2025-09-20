@@ -1,3 +1,16 @@
+# 2025-09-20
+
+## v1.6.6 Professional Visual Bracket Positioning
+- **Systematic Match Alignment**: Complete overhaul of bracket positioning for 8, 16, and 32-player tournaments
+- **Visual Progression Clarity**: Matches positioned to show clear convergence patterns and tournament flow
+- **8-Player Bracket Excellence**: FS-R2 centered between inputs, BS mirrored to left with proper alignment
+- **16-Player Bracket Refinement**: BS-R1/BS-R2 aligned with FS-R2, BS-R3/BS-R4 aligned for classical layout
+- **32-Player Bracket Mastery**: Full 7-round backside positioning with strategic vertical alignment patterns
+- **Finals Prominence**: 6x spacing for all bracket sizes gives finals proper visual weight
+- **Backside Final Fix**: BS-FINAL now properly turns green when completed (CSS specificity resolved)
+- **Enhanced Spacing**: Improved horizontal spacing options for better visual balance
+- **Reset Tournament Fix**: Results Table now properly refreshes after tournament reset
+
 # 2025-09-19
 
 ## v1.6.5 Enhanced Two-Line Match Status Display
