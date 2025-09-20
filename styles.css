@@ -634,6 +634,19 @@ body {
   border: 1px solid rgba(0, 0, 0, 0.12);
 }
 
+.status-line1 {
+  font-weight: 600;
+  margin-bottom: 2px;
+  text-align: center;
+}
+
+.status-line2 {
+  font-weight: 400;
+  font-size: 14px;
+  opacity: 0.85;
+  text-align: center;
+}
+
 #watermark-right {
   position: absolute;
   right: 30px;

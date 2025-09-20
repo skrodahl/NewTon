@@ -397,9 +397,9 @@ function renderMatch(match, x, y, section, roundIndex) {
         const HOVER_DELAY_MS = 300; // 0.3 second delay - responsive but prevents jumpy navigation
 
         hoverTimeout = setTimeout(() => {
-            const progressionText = getMatchProgressionText(match.id);
-            if (progressionText) {
-                updateStatusCenter(progressionText);
+            const progressionInfo = getMatchProgressionText(match.id);
+            if (progressionInfo) {
+                updateStatusCenter(progressionInfo);
             }
         }, HOVER_DELAY_MS);
     });
@@ -2663,11 +2663,101 @@ if (typeof window !== 'undefined') {
 
 // --- STATUS CENTER FUNCTIONS - Dynamic Tournament Page Status Bar ---
 
-// Update center watermark with message
-function updateStatusCenter(message) {
+// Get detailed match state information including undo status
+function getDetailedMatchState(matchId) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return null;
+
+    const basicState = getMatchState(match);
+
+    // For non-completed matches, return basic state
+    if (basicState !== 'completed') {
+        let stateText;
+        switch (basicState) {
+            case 'pending': stateText = 'Pending'; break;
+            case 'ready': stateText = 'Ready to Play'; break;
+            case 'live': stateText = 'LIVE'; break;
+            default: stateText = 'Unknown'; break;
+        }
+        return { state: basicState, text: stateText };
+    }
+
+    // For completed matches, check if it's a walkover/bye match
+    if (match.player1?.isBye || match.player2?.isBye ||
+        match.player1?.name?.includes('Walkover') || match.player2?.name?.includes('Walkover')) {
+        return { state: 'completed', text: 'Cannot Undo, Walkover' };
+    }
+
+    // Check undo status for regular completed matches
+    const history = getTournamentHistory();
+    if (history.length === 0) {
+        return { state: 'completed', text: 'Cannot Undo' };
+    }
+
+    // Only MANUAL transactions can be undone
+    const manualTransaction = history.find(t => t.matchId === matchId && t.completionType === 'MANUAL');
+    if (!manualTransaction) {
+        return { state: 'completed', text: 'Cannot Undo' };
+    }
+
+    // Check for blocking downstream matches
+    if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
+        const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+        if (progression) {
+            const blockingMatches = [];
+
+            // Check winner's destination
+            if (progression.winner) {
+                const [targetMatchId] = progression.winner;
+                const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.completed) {
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId);
+                    if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
+                        blockingMatches.push(targetMatchId);
+                    }
+                }
+            }
+
+            // Check loser's destination
+            if (progression.loser) {
+                const [targetMatchId] = progression.loser;
+                const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.completed) {
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId);
+                    if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
+                        blockingMatches.push(targetMatchId);
+                    }
+                }
+            }
+
+            // Generate text based on blocking matches
+            if (blockingMatches.length === 0) {
+                return { state: 'completed', text: 'Can Undo' };
+            } else if (blockingMatches.length === 1) {
+                return { state: 'completed', text: `Cannot Undo, blocked by ${blockingMatches[0]}` };
+            } else {
+                return { state: 'completed', text: `Cannot Undo, blocked by ${blockingMatches[0]} and ${blockingMatches[1]}` };
+            }
+        }
+    }
+
+    return { state: 'completed', text: 'Can Undo' };
+}
+
+// Update center watermark with message (supports both string and two-line object)
+function updateStatusCenter(content) {
     const centerElement = document.getElementById('watermark-center');
     if (centerElement) {
-        centerElement.textContent = message;
+        if (typeof content === 'string') {
+            // Backwards compatibility for single-line strings
+            centerElement.textContent = content;
+        } else if (content && content.line1 && content.line2) {
+            // Two-line object format
+            centerElement.innerHTML = `
+                <div class="status-line1">${content.line1}</div>
+                <div class="status-line2">${content.line2}</div>
+            `;
+        }
         centerElement.classList.add('active');
     }
 }
@@ -2681,7 +2771,7 @@ function clearStatusCenter() {
     }
 }
 
-// Generate match progression text using MATCH_PROGRESSION lookup
+// Generate two-line match information using MATCH_PROGRESSION and state logic
 function getMatchProgressionText(matchId) {
     if (!tournament || !tournament.bracketSize || !MATCH_PROGRESSION[tournament.bracketSize]) {
         return null;
@@ -2692,25 +2782,37 @@ function getMatchProgressionText(matchId) {
         return null;
     }
 
-    const destinations = [];
+    // Get detailed state information
+    const stateInfo = getDetailedMatchState(matchId);
+    if (!stateInfo) {
+        return null;
+    }
 
-    // Check for winner destination
+    // Generate first line: Match ID + State
+    const line1 = `${matchId} • ${stateInfo.text}`;
+
+    // Generate second line: Progression
+    const destinations = [];
     if (progression.winner && progression.winner[0]) {
         destinations.push(progression.winner[0]);
     }
-
-    // Check for loser destination
     if (progression.loser && progression.loser[0]) {
         destinations.push(progression.loser[0]);
     }
 
+    let line2;
     if (destinations.length === 0) {
-        return `Match ${matchId} leads to tournament completion`;
+        line2 = "Leads to tournament completion";
     } else if (destinations.length === 1) {
-        return `Match ${matchId} leads to ${destinations[0]}`;
+        line2 = `Leads to ${destinations[0]}`;
     } else {
-        return `Match ${matchId} leads to ${destinations[0]} and ${destinations[1]}`;
+        line2 = `Leads to ${destinations[0]} and ${destinations[1]}`;
     }
+
+    return {
+        line1: line1,
+        line2: line2
+    };
 }
 
 // --- END: Status Center Functions ---

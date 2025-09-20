@@ -1,5 +1,14 @@
 # 2025-09-19
 
+## v1.6.5 Enhanced Two-Line Match Status Display
+- **Rich Contextual Information**: Upgraded status bar to show two lines of information per match
+- **Match State Integration**: First line shows match ID and current state (Pending, Ready to Play, LIVE, Can Undo, Cannot Undo with blocking matches)
+- **Walkover Detection**: Special handling for bye/walkover matches showing "Cannot Undo, Walkover"
+- **Specific Undo Blocking**: Displays exact matches preventing undo operations (e.g., "Cannot undo, blocked by FS-3-1")
+- **Centered Layout**: Both status lines are center-aligned for professional appearance
+- **Tournament Management Integration**: Creates seamless workflow between Tournament Bracket (information) and Match Controls (actions)
+- **Eliminates Guesswork**: No more visual scanning of backside bracket to find blocking matches due to complex mirroring rules
+
 ## v1.6.4 Dynamic Match Progression Status Bar
 - **Tournament Flow Visualization**: Added elegant status bar system showing match progression on Tournament page
 - **Smart Hover Information**: Hover over any match card to see where players advance next (e.g., "Match FS-2-1 leads to FS-3-1 and BS-2-2")
