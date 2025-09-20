@@ -242,10 +242,10 @@ function render16PlayerFrontsideMatches(grid) {
     if (fs23) renderMatch(fs23, round2X, fs23Y, 'frontside', 1);
     if (fs24) renderMatch(fs24, round2X, fs24Y, 'frontside', 1);
 
-    // Round 3: FS-3-1 and FS-3-2 - centered between their inputs
+    // Round 3: FS-3-1 and FS-3-2 - aligned with specific FS-R2 matches
     const round3X = round2X + grid.matchWidth + grid.horizontalSpacing;
-    const fs31Y = (fs21Y + fs22Y) / 2; // Centered between FS-2-1 and FS-2-2
-    const fs32Y = (fs23Y + fs24Y) / 2; // Centered between FS-2-3 and FS-2-4
+    const fs31Y = fs22Y; // FS-3-1 aligned with FS-2-2
+    const fs32Y = fs23Y; // FS-3-2 aligned with FS-2-3
 
     const fs31 = matches.find(m => m.id === 'FS-3-1');
     const fs32 = matches.find(m => m.id === 'FS-3-2');
@@ -328,9 +328,17 @@ function render32PlayerFrontsideMatches(grid) {
 
             let matchY;
             if (i === 1) {
-                matchY = (fs3_1Y + fs3_2Y) / 2 - (grid.matchHeight / 2); // Center between FS-3-1 and FS-3-2, moved up
+                // FS-4-1: Align with FS-2-4 position
+                // FS-2-4 is centered between FS-1-7 and FS-1-8
+                const fs2_4_input1Y = round1StartY + (6) * spacing;     // FS-1-7 position
+                const fs2_4_input2Y = round1StartY + (7) * spacing;     // FS-1-8 position
+                matchY = (fs2_4_input1Y + fs2_4_input2Y) / 2; // Align with FS-2-4
             } else {
-                matchY = (fs3_3Y + fs3_4Y) / 2 - (grid.matchHeight / 2); // Center between FS-3-3 and FS-3-4, moved up
+                // FS-4-2: Align with FS-2-5 position
+                // FS-2-5 is centered between FS-1-9 and FS-1-10
+                const fs2_5_input1Y = round1StartY + (8) * spacing;     // FS-1-9 position
+                const fs2_5_input2Y = round1StartY + (9) * spacing;     // FS-1-10 position
+                matchY = (fs2_5_input1Y + fs2_5_input2Y) / 2; // Align with FS-2-5
             }
             renderMatch(match, round4X, matchY, 'frontside', 3);
         }
@@ -665,8 +673,8 @@ function renderFinalMatches(grid, frontsideStructure) {
     const frontsideRounds = frontsideStructure.length;
     const lastFrontsideX = grid.centerX + grid.centerBuffer + (frontsideRounds - 1) * (grid.matchWidth + grid.horizontalSpacing);
 
-    // Position finals with more spacing (6x the normal spacing for 8-player, 16-player, and 32-player brackets)
-    const spacingMultiplier = (tournament.bracketSize === 8 || tournament.bracketSize === 16 || tournament.bracketSize === 32) ? 6 : 1;
+    // Position finals with more spacing (4x the normal spacing for 8-player, 16-player, and 32-player brackets)
+    const spacingMultiplier = (tournament.bracketSize === 8 || tournament.bracketSize === 16 || tournament.bracketSize === 32) ? 4 : 1;
     const finalsX = lastFrontsideX + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
     const backsideFinalY = grid.centerY - 80;
     const grandFinalY = grid.centerY + 80;
