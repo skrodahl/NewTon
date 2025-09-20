@@ -608,7 +608,7 @@ function getMatchButtonText(matchState) {
     switch (matchState) {
         case 'pending': return 'Waiting';
         case 'ready': return 'Start';
-        case 'live': return 'LIVE';
+        case 'live': return 'Started';
         case 'completed': return 'Done';
         default: return 'Unknown';
     }
@@ -2784,8 +2784,8 @@ function getDetailedMatchState(matchId) {
         let stateText;
         switch (basicState) {
             case 'pending': stateText = 'Pending'; break;
-            case 'ready': stateText = 'Ready to Play'; break;
-            case 'live': stateText = 'LIVE'; break;
+            case 'ready': stateText = 'Ready to Start'; break;
+            case 'live': stateText = 'Started'; break;
             default: stateText = 'Unknown'; break;
         }
         return { state: basicState, text: stateText };

@@ -2,7 +2,7 @@
 
 ## v1.6.5 Enhanced Two-Line Match Status Display
 - **Rich Contextual Information**: Upgraded status bar to show two lines of information per match
-- **Match State Integration**: First line shows match ID and current state (Pending, Ready to Play, LIVE, Can Undo, Cannot Undo with blocking matches)
+- **Match State Integration**: First line shows match ID and current state (Pending, Ready to Start, Started, Can Undo, Cannot Undo with blocking matches)
 - **Walkover Detection**: Special handling for bye/walkover matches showing "Cannot Undo, Walkover"
 - **Specific Undo Blocking**: Displays exact matches preventing undo operations (e.g., "Cannot undo, blocked by FS-3-1")
 - **Centered Layout**: Both status lines are center-aligned for professional appearance
