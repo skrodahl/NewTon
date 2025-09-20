@@ -33,8 +33,8 @@
 - **Smart Generation**: Prevents two walkovers from meeting in first round
 - **Interactive Visualization**: Zoom, pan, and click-to-select winners
 - **Automatic Advancement**: Walkovers advance real players intelligently
-- **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 - **Undo**: Full undo of all matches without completed downstream matches to prevent undoing large portions of the tournament at once, can undo more matches in stages
+- **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 
 ### 🎮 Match Management
 - **Centralized Control**: Manage entire tournament from one interface
