@@ -33,6 +33,7 @@
 - **Smart Generation**: Prevents bye vs bye matchups in first round
 - **Interactive Visualization**: Zoom, pan, and click-to-select winners
 - **Automatic Advancement**: Walkovers advance real players intelligently
+- **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 
 ### 🎮 Match Management
 - **Centralized Control**: Manage entire tournament from one interface
