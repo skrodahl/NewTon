@@ -1,5 +1,8 @@
 # 2025-09-20
 
+## v.1.6.7 Tournament Visuals Bug-Fix
+- Improved tournament flow
+
 ## v1.6.6 Professional Visual Bracket Positioning
 - **Systematic Match Alignment**: Complete overhaul of bracket positioning for 8, 16, and 32-player tournaments
 - **Visual Progression Clarity**: Matches positioned to show clear convergence patterns and tournament flow
