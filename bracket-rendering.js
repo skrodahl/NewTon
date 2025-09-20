@@ -615,7 +615,7 @@ function render32PlayerBacksideMatches(grid) {
         // Same calculation as BS-4-2: i=2, so input1Index=3, input2Index=4
         const input1Y = round1StartY + (2 * (3 - 1)) * spacing + spacing / 2;
         const input2Y = round1StartY + (2 * (4 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 + (grid.matchHeight / 2) + (grid.matchHeight / 2) + (grid.matchHeight / 2);
+        const matchY = (input1Y + input2Y) / 2 + (grid.matchHeight / 2) + (grid.matchHeight / 2) + (grid.matchHeight / 2) - (grid.matchHeight / 2); // Moved 0.5 match height up
         renderMatch(bs51, bs5X, matchY, 'backside', 4);
     }
 
@@ -625,7 +625,7 @@ function render32PlayerBacksideMatches(grid) {
         // Same calculation as BS-4-3: i=3, so input1Index=5, input2Index=6
         const input1Y = round1StartY + (2 * (5 - 1)) * spacing + spacing / 2;
         const input2Y = round1StartY + (2 * (6 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 - (1.5 * grid.matchHeight);
+        const matchY = (input1Y + input2Y) / 2 - (1.5 * grid.matchHeight) + (grid.matchHeight / 2); // Moved 0.5 match height down
         renderMatch(bs52, bs5X, matchY, 'backside', 4);
     }
 
@@ -638,7 +638,7 @@ function render32PlayerBacksideMatches(grid) {
         // Same calculation as BS-5-1
         const input1Y = round1StartY + (2 * (3 - 1)) * spacing + spacing / 2;
         const input2Y = round1StartY + (2 * (4 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 + (grid.matchHeight / 2) + (grid.matchHeight / 2) + (grid.matchHeight / 2);
+        const matchY = (input1Y + input2Y) / 2 + (grid.matchHeight / 2) + (grid.matchHeight / 2) + (grid.matchHeight / 2) - (grid.matchHeight / 2); // Moved 0.5 match height up
         renderMatch(bs61, bs6X, matchY, 'backside', 5);
     }
 
@@ -648,7 +648,7 @@ function render32PlayerBacksideMatches(grid) {
         // Same calculation as BS-4-3: i=3, so input1Index=5, input2Index=6
         const input1Y = round1StartY + (2 * (5 - 1)) * spacing + spacing / 2;
         const input2Y = round1StartY + (2 * (6 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 - (1.5 * grid.matchHeight);
+        const matchY = (input1Y + input2Y) / 2 - (1.5 * grid.matchHeight) + (grid.matchHeight / 2); // Moved 0.5 match height down
         renderMatch(bs62, bs6X, matchY, 'backside', 5);
     }
 
