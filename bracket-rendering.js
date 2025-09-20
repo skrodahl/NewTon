@@ -64,7 +64,7 @@ function renderCleanBracket() {
     // Render all bracket sections
     renderFrontsideMatches(structure.frontside, grid);
     renderBacksideMatches(structure.backside, grid);
-    renderFinalMatches(grid);
+    renderFinalMatches(grid, structure.frontside);
 
     // Add titles
     renderTitles(grid);
@@ -173,12 +173,16 @@ function renderBacksideMatches(backsideStructure, grid) {
     });
 }
 
-function renderFinalMatches(grid) {
+function renderFinalMatches(grid, frontsideStructure) {
     const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
     const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
 
-    // Position finals to the FAR RIGHT
-    const finalsX = grid.centerX + grid.centerBuffer + 4 * (grid.matchWidth + grid.horizontalSpacing) + 1.5 * grid.matchWidth;
+    // Calculate dynamic position based on actual frontside bracket width
+    const frontsideRounds = frontsideStructure.length;
+    const lastFrontsideX = grid.centerX + grid.centerBuffer + (frontsideRounds - 1) * (grid.matchWidth + grid.horizontalSpacing);
+
+    // Position finals directly after the last frontside round
+    const finalsX = lastFrontsideX + grid.matchWidth + grid.horizontalSpacing;
     const backsideFinalY = grid.centerY - 80;
     const grandFinalY = grid.centerY + 80;
 
