@@ -609,46 +609,38 @@ function render32PlayerBacksideMatches(grid) {
     // Round 5: BS-5-1 and BS-5-2 aligned with BS-4-2 and BS-4-3
     const bs5X = bs4X - (grid.matchWidth + grid.horizontalSpacing);
 
-    // BS-5-1 using exact same calculation as BS-4-2
+    // BS-5-1 aligned with BS-2-4 position
     const bs51 = matches.find(m => m.id === 'BS-5-1');
     if (bs51) {
-        // Same calculation as BS-4-2: i=2, so input1Index=3, input2Index=4
-        const input1Y = round1StartY + (2 * (3 - 1)) * spacing + spacing / 2;
-        const input2Y = round1StartY + (2 * (4 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 + (grid.matchHeight / 2) + (grid.matchHeight / 2) + (grid.matchHeight / 2) - (grid.matchHeight / 2); // Moved 0.5 match height up
+        // Align with BS-2-4: round1StartY + 6 * spacing + (spacing / 2)
+        const matchY = round1StartY + 6 * spacing + (spacing / 2);
         renderMatch(bs51, bs5X, matchY, 'backside', 4);
     }
 
-    // BS-5-2 using exact same calculation as BS-4-3
+    // BS-5-2 aligned with BS-2-5 position
     const bs52 = matches.find(m => m.id === 'BS-5-2');
     if (bs52) {
-        // Same calculation as BS-4-3: i=3, so input1Index=5, input2Index=6
-        const input1Y = round1StartY + (2 * (5 - 1)) * spacing + spacing / 2;
-        const input2Y = round1StartY + (2 * (6 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 - (1.5 * grid.matchHeight) + (grid.matchHeight / 2); // Moved 0.5 match height down
+        // Align with BS-2-5: round1StartY + 8.5 * spacing
+        const matchY = round1StartY + 8.5 * spacing;
         renderMatch(bs52, bs5X, matchY, 'backside', 4);
     }
 
     // Round 6: BS-6-1 and BS-6-2 aligned with BS-4-2 and BS-4-3
     const bs6X = bs5X - (grid.matchWidth + grid.horizontalSpacing);
 
-    // BS-6-1 aligned exactly with BS-5-1 position
+    // BS-6-1 aligned with BS-2-4 position (same as BS-5-1)
     const bs61 = matches.find(m => m.id === 'BS-6-1');
     if (bs61) {
-        // Same calculation as BS-5-1
-        const input1Y = round1StartY + (2 * (3 - 1)) * spacing + spacing / 2;
-        const input2Y = round1StartY + (2 * (4 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 + (grid.matchHeight / 2) + (grid.matchHeight / 2) + (grid.matchHeight / 2) - (grid.matchHeight / 2); // Moved 0.5 match height up
+        // Align with BS-2-4: round1StartY + 6 * spacing + (spacing / 2)
+        const matchY = round1StartY + 6 * spacing + (spacing / 2);
         renderMatch(bs61, bs6X, matchY, 'backside', 5);
     }
 
-    // BS-6-2 using exact same calculation as BS-4-3 (same as BS-5-2)
+    // BS-6-2 aligned with BS-2-5 position (same as BS-5-2)
     const bs62 = matches.find(m => m.id === 'BS-6-2');
     if (bs62) {
-        // Same calculation as BS-4-3: i=3, so input1Index=5, input2Index=6
-        const input1Y = round1StartY + (2 * (5 - 1)) * spacing + spacing / 2;
-        const input2Y = round1StartY + (2 * (6 - 1)) * spacing + spacing / 2;
-        const matchY = (input1Y + input2Y) / 2 - (1.5 * grid.matchHeight) + (grid.matchHeight / 2); // Moved 0.5 match height down
+        // Align with BS-2-5: round1StartY + 8.5 * spacing
+        const matchY = round1StartY + 8.5 * spacing;
         renderMatch(bs62, bs6X, matchY, 'backside', 5);
     }
 

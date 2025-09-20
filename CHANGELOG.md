@@ -1,9 +1,6 @@
 # 2025-09-20
 
-## v.1.6.8 32-Player Bracket Visuals
-- Fixed symmetry flow for 32-player bracket
-
-## v.1.6.7 Tournament Visuals Bug-Fix
+## v.1.6.7, 1.6.8 & 1.6.9 Tournament Visuals Bug-Fix
 - Improved tournament flow for 16 and 32-player brackets
 
 ## v1.6.6 Professional Visual Bracket Positioning
