@@ -124,9 +124,13 @@ function getStructureFromLookupTables(bracketSize) {
 }
 
 function renderFrontsideMatches(frontsideStructure, grid) {
-    // Use hardcoded positioning for 8-player brackets to show progression clearly
+    // Use hardcoded positioning for specific bracket sizes to show progression clearly
     if (tournament.bracketSize === 8) {
         render8PlayerFrontsideMatches(grid);
+        return;
+    }
+    if (tournament.bracketSize === 16) {
+        render16PlayerFrontsideMatches(grid);
         return;
     }
 
@@ -194,10 +198,73 @@ function render8PlayerFrontsideMatches(grid) {
     if (fs31) renderMatch(fs31, round3X, fs31Y, 'frontside', 2);
 }
 
+// Hardcoded positioning for 16-player frontside to show clear progression
+function render16PlayerFrontsideMatches(grid) {
+    console.log('🎯 Rendering 16-player frontside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
+
+    const spacing = grid.matchHeight + grid.verticalSpacing;
+
+    // Round 1: FS-1-1 through FS-1-8 (8 matches, evenly spaced)
+    const round1X = grid.centerX + grid.centerBuffer;
+    const round1StartY = grid.centerY - (3.5 * spacing); // Center 8 matches
+
+    for (let i = 1; i <= 8; i++) {
+        const match = matches.find(m => m.id === `FS-1-${i}`);
+        if (match) {
+            const matchY = round1StartY + (i - 1) * spacing;
+            renderMatch(match, round1X, matchY, 'frontside', 0);
+        }
+    }
+
+    // Round 2: FS-2-1 through FS-2-4 - align with their input matches
+    const round2X = round1X + grid.matchWidth + grid.horizontalSpacing;
+
+    // FS-2-1 centered between FS-1-1 and FS-1-2
+    const fs21Y = round1StartY + (spacing / 2);
+    // FS-2-2 centered between FS-1-3 and FS-1-4
+    const fs22Y = round1StartY + 2 * spacing + (spacing / 2);
+    // FS-2-3 centered between FS-1-5 and FS-1-6
+    const fs23Y = round1StartY + 4 * spacing + (spacing / 2);
+    // FS-2-4 centered between FS-1-7 and FS-1-8
+    const fs24Y = round1StartY + 6 * spacing + (spacing / 2);
+
+    const fs21 = matches.find(m => m.id === 'FS-2-1');
+    const fs22 = matches.find(m => m.id === 'FS-2-2');
+    const fs23 = matches.find(m => m.id === 'FS-2-3');
+    const fs24 = matches.find(m => m.id === 'FS-2-4');
+
+    if (fs21) renderMatch(fs21, round2X, fs21Y, 'frontside', 1);
+    if (fs22) renderMatch(fs22, round2X, fs22Y, 'frontside', 1);
+    if (fs23) renderMatch(fs23, round2X, fs23Y, 'frontside', 1);
+    if (fs24) renderMatch(fs24, round2X, fs24Y, 'frontside', 1);
+
+    // Round 3: FS-3-1 and FS-3-2 - centered between their inputs
+    const round3X = round2X + grid.matchWidth + grid.horizontalSpacing;
+    const fs31Y = (fs21Y + fs22Y) / 2; // Centered between FS-2-1 and FS-2-2
+    const fs32Y = (fs23Y + fs24Y) / 2; // Centered between FS-2-3 and FS-2-4
+
+    const fs31 = matches.find(m => m.id === 'FS-3-1');
+    const fs32 = matches.find(m => m.id === 'FS-3-2');
+
+    if (fs31) renderMatch(fs31, round3X, fs31Y, 'frontside', 2);
+    if (fs32) renderMatch(fs32, round3X, fs32Y, 'frontside', 2);
+
+    // Round 4: FS-4-1 - centered between FS-3-1 and FS-3-2
+    const round4X = round3X + grid.matchWidth + grid.horizontalSpacing;
+    const fs41Y = (fs31Y + fs32Y) / 2;
+
+    const fs41 = matches.find(m => m.id === 'FS-4-1');
+    if (fs41) renderMatch(fs41, round4X, fs41Y, 'frontside', 3);
+}
+
 function renderBacksideMatches(backsideStructure, grid) {
-    // Use hardcoded positioning for 8-player brackets to show progression clearly
+    // Use hardcoded positioning for specific bracket sizes to show progression clearly
     if (tournament.bracketSize === 8) {
         render8PlayerBacksideMatches(grid);
+        return;
+    }
+    if (tournament.bracketSize === 16) {
+        render16PlayerBacksideMatches(grid);
         return;
     }
 
@@ -277,6 +344,94 @@ function render8PlayerBacksideMatches(grid) {
     if (bs31) renderMatch(bs31, bs3X, bs31Y, 'backside', 2);
 }
 
+// Hardcoded positioning for 16-player backside to show clear progression (mirrored to left)
+function render16PlayerBacksideMatches(grid) {
+    console.log('🎯 Rendering 16-player backside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
+
+    const spacing = grid.matchHeight + grid.verticalSpacing;
+
+    // Mirror frontside positioning to the left side
+    const round1StartY = grid.centerY - (3.5 * spacing); // Same as frontside
+
+    // Round 1: Position BS matches on the left side, aligned with frontside round 2 positions
+    const bs1X = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing);
+
+    // BS-1-1 gets losers from FS-2-1, align with FS-2-1 position
+    const bs11Y = round1StartY + (spacing / 2); // Same as FS-2-1
+    // BS-1-2 gets losers from FS-2-2, align with FS-2-2 position
+    const bs12Y = round1StartY + 2 * spacing + (spacing / 2); // Same as FS-2-2
+    // BS-1-3 gets losers from FS-2-3, align with FS-2-3 position
+    const bs13Y = round1StartY + 4 * spacing + (spacing / 2); // Same as FS-2-3
+    // BS-1-4 gets losers from FS-2-4, align with FS-2-4 position
+    const bs14Y = round1StartY + 6 * spacing + (spacing / 2); // Same as FS-2-4
+
+    const bs11 = matches.find(m => m.id === 'BS-1-1');
+    const bs12 = matches.find(m => m.id === 'BS-1-2');
+    const bs13 = matches.find(m => m.id === 'BS-1-3');
+    const bs14 = matches.find(m => m.id === 'BS-1-4');
+
+    if (bs11) renderMatch(bs11, bs1X, bs11Y, 'backside', 0);
+    if (bs12) renderMatch(bs12, bs1X, bs12Y, 'backside', 0);
+    if (bs13) renderMatch(bs13, bs1X, bs13Y, 'backside', 0);
+    if (bs14) renderMatch(bs14, bs1X, bs14Y, 'backside', 0);
+
+    // Round 2: BS-2-1 through BS-2-4 advance leftward (align with frontside like BS-R1)
+    const bs2X = bs1X - (grid.matchWidth + grid.horizontalSpacing);
+
+    // BS-2-1 through BS-2-4 get losers from FS-3-1, FS-3-2, etc. - align with frontside round 3 positions
+    const fs31Y = round1StartY + (spacing / 2) + spacing + (spacing / 2); // FS-3-1 position from frontside
+    const fs32Y = round1StartY + 4 * spacing + (spacing / 2) + spacing + (spacing / 2); // FS-3-2 position from frontside
+
+    // Align BS-2 matches with their corresponding frontside positions
+    const bs21Y = round1StartY + (spacing / 2); // Same as FS-2-1 position
+    const bs22Y = round1StartY + 2 * spacing + (spacing / 2); // Same as FS-2-2 position
+    const bs23Y = round1StartY + 4 * spacing + (spacing / 2); // Same as FS-2-3 position
+    const bs24Y = round1StartY + 6 * spacing + (spacing / 2); // Same as FS-2-4 position
+
+    const bs21 = matches.find(m => m.id === 'BS-2-1');
+    const bs22 = matches.find(m => m.id === 'BS-2-2');
+    const bs23 = matches.find(m => m.id === 'BS-2-3');
+    const bs24 = matches.find(m => m.id === 'BS-2-4');
+
+    if (bs21) renderMatch(bs21, bs2X, bs21Y, 'backside', 1);
+    if (bs22) renderMatch(bs22, bs2X, bs22Y, 'backside', 1);
+    if (bs23) renderMatch(bs23, bs2X, bs23Y, 'backside', 1);
+    if (bs24) renderMatch(bs24, bs2X, bs24Y, 'backside', 1);
+
+    // Round 3: BS-3-1 and BS-3-2 (align with BS-R4 for classical bracket layout)
+    const bs3X = bs2X - (grid.matchWidth + grid.horizontalSpacing);
+
+    // Align BS-3-1 and BS-3-2 with BS-4-1 and BS-4-2 positions for classical look
+    const bs31Y = grid.centerY - (0.5 * spacing) - (0.5 * grid.matchHeight); // Same as BS-4-1
+    const bs32Y = grid.centerY + (0.5 * spacing) + (0.5 * grid.matchHeight); // Same as BS-4-2
+
+    const bs31 = matches.find(m => m.id === 'BS-3-1');
+    const bs32 = matches.find(m => m.id === 'BS-3-2');
+
+    if (bs31) renderMatch(bs31, bs3X, bs31Y, 'backside', 2);
+    if (bs32) renderMatch(bs32, bs3X, bs32Y, 'backside', 2);
+
+    // Round 4: BS-4-1 and BS-4-2 (2 matches grouped with same spacing as FS-R1)
+    const bs4X = bs3X - (grid.matchWidth + grid.horizontalSpacing);
+
+    // Group BS-4-1 and BS-4-2 with adjusted spacing around grid center
+    const bs41Y = grid.centerY - (0.5 * spacing) - (0.5 * grid.matchHeight); // BS-4-1 moved up 0.5 match height
+    const bs42Y = grid.centerY + (0.5 * spacing) + (0.5 * grid.matchHeight); // BS-4-2 moved down 0.5 match height
+
+    const bs41 = matches.find(m => m.id === 'BS-4-1');
+    const bs42 = matches.find(m => m.id === 'BS-4-2');
+
+    if (bs41) renderMatch(bs41, bs4X, bs41Y, 'backside', 3);
+    if (bs42) renderMatch(bs42, bs4X, bs42Y, 'backside', 3);
+
+    // Round 5: BS-5-1 (1 match) - centered between BS-4-1 and BS-4-2
+    const bs5X = bs4X - (grid.matchWidth + grid.horizontalSpacing);
+    const bs51Y = (bs41Y + bs42Y) / 2;
+
+    const bs51 = matches.find(m => m.id === 'BS-5-1');
+    if (bs51) renderMatch(bs51, bs5X, bs51Y, 'backside', 4);
+}
+
 function renderFinalMatches(grid, frontsideStructure) {
     const backsideFinal = matches.find(m => m.id === 'BS-FINAL');
     const grandFinal = matches.find(m => m.id === 'GRAND-FINAL');
@@ -285,8 +440,8 @@ function renderFinalMatches(grid, frontsideStructure) {
     const frontsideRounds = frontsideStructure.length;
     const lastFrontsideX = grid.centerX + grid.centerBuffer + (frontsideRounds - 1) * (grid.matchWidth + grid.horizontalSpacing);
 
-    // Position finals with more spacing (6x the normal spacing for 8-player brackets)
-    const spacingMultiplier = tournament.bracketSize === 8 ? 6 : 1;
+    // Position finals with more spacing (6x the normal spacing for 8-player and 16-player brackets)
+    const spacingMultiplier = (tournament.bracketSize === 8 || tournament.bracketSize === 16) ? 6 : 1;
     const finalsX = lastFrontsideX + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
     const backsideFinalY = grid.centerY - 80;
     const grandFinalY = grid.centerY + 80;
