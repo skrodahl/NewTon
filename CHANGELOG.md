@@ -1,3 +1,11 @@
+# 2025-09-22
+
+## v1.6.11 Backside Bracket Visual Enhancement
+- **Gradient Background**: Added subtle gradient background to backside brackets for all tournament sizes (8, 16, 32 players)
+- **Visual Distinction**: Backside brackets now have a gradient from 0.06 opacity on the right fading to transparent on the left
+- **Consistent Styling**: Uniform visual treatment across all bracket sizes with proper positioning and rounded corners
+- **Non-Intrusive Design**: Background stays behind matches and doesn't interfere with user interactions
+
 # 2025-09-20
 
 ## v.1.6.7, 1.6.8 & 1.6.9 Tournament Visuals Bug-Fix
