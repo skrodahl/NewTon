@@ -143,9 +143,27 @@ function refreshAllLaneDropdowns() {
     if (!matches || matches.length === 0) return;
 
     matches.forEach(match => {
-        const matchElement = document.getElementById(`bracket-match-${match.id}`);
-        if (matchElement) {
-            const dropdown = matchElement.querySelector('select[onchange*="updateMatchLane"]');
+        // Check both bracket matches and command center matches
+        const bracketElement = document.getElementById(`bracket-match-${match.id}`);
+        const commandCenterElement = document.getElementById(`cc-match-card-${match.id}`);
+
+        // Update bracket dropdown if it exists
+        if (bracketElement) {
+            const dropdown = bracketElement.querySelector('select[onchange*="updateMatchLane"]');
+            if (dropdown) {
+                const currentValue = dropdown.value;
+                dropdown.innerHTML = generateLaneOptions(match.id, match.lane);
+
+                // Maintain selection if still valid
+                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
+                    dropdown.value = currentValue;
+                }
+            }
+        }
+
+        // Update command center dropdown if it exists
+        if (commandCenterElement) {
+            const dropdown = commandCenterElement.querySelector('select[onchange*="updateMatchLane"]');
             if (dropdown) {
                 const currentValue = dropdown.value;
                 dropdown.innerHTML = generateLaneOptions(match.id, match.lane);

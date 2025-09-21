@@ -1367,6 +1367,11 @@ function updateMatchLane(matchId, newLane) {
         saveTournament();
     }
 
+    // Refresh all lane dropdowns to update conflict detection
+    if (typeof refreshAllLaneDropdowns === 'function') {
+        refreshAllLaneDropdowns();
+    }
+
     // Refresh tournament bracket to show updated lane
     if (typeof renderBracket === 'function') {
         renderBracket();

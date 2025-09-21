@@ -1248,9 +1248,25 @@ function updateMatchReferee(matchId, refereeId) {
 function refreshAllRefereeDropdowns() {
     if (!matches) return;
     matches.forEach(match => {
-        const matchElement = document.getElementById(`bracket-match-${match.id}`);
-        if (matchElement) {
-            const dropdown = matchElement.querySelector('select[onchange*="updateMatchReferee"]');
+        // Check both bracket matches and command center matches
+        const bracketElement = document.getElementById(`bracket-match-${match.id}`);
+        const commandCenterElement = document.getElementById(`cc-match-card-${match.id}`);
+
+        // Update bracket dropdown if it exists
+        if (bracketElement) {
+            const dropdown = bracketElement.querySelector('select[onchange*="updateMatchReferee"]');
+            if (dropdown) {
+                const currentValue = dropdown.value;
+                dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
+                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
+                    dropdown.value = currentValue;
+                }
+            }
+        }
+
+        // Update command center dropdown if it exists
+        if (commandCenterElement) {
+            const dropdown = commandCenterElement.querySelector('select[onchange*="updateMatchReferee"]');
             if (dropdown) {
                 const currentValue = dropdown.value;
                 dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
@@ -1497,6 +1513,7 @@ if (typeof window !== 'undefined') {
     window.updateMatchReferee = updateMatchReferee;
     window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
     window.refreshRefereeDropdown = refreshRefereeDropdown;
+    window.refreshAllRefereeDropdowns = refreshAllRefereeDropdowns;
     window.getAssignedReferees = getAssignedReferees;
     window.getPlayersInLiveMatches = getPlayersInLiveMatches;
     window.isPlayerAvailableAsReferee = isPlayerAvailableAsReferee;
@@ -2113,7 +2130,7 @@ function createMatchCard(match) {
     const backsideClass = (match.side === 'backside' || match.id.startsWith('BS-')) ? ' cc-match-card-backside' : '';
     
     return `
-        <div class="cc-match-card${liveClass}${backsideClass}">
+        <div id="cc-match-card-${match.id}" class="cc-match-card${liveClass}${backsideClass}">
             <div class="cc-match-card-header">
                 <div class="cc-match-id">${match.id}</div>
                 <div class="cc-match-format">${format} • <strong>${round}</strong></div>
