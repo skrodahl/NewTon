@@ -1,11 +1,12 @@
 # 2025-09-22
 
-## v2.0.2 Reset Tournament Bug Fix & Watermark Repositioning
+## v2.0.2 Reset Tournament Bug Fix, Watermark Repositioning & Bracket Lines Proof of Concept
 - **Fixed Event Listener Accumulation**: Resolved bug where resetting the same tournament multiple times caused exponentially increasing browser confirmation dialogs
 - **Clean Event Handling**: Tournament reset input field now properly removes old event listeners before adding new ones
 - **Color Consistency**: Updated reset button enabled state to use subtle orange color matching interface palette
 - **Improved Watermark Positioning**: Moved "NewTon DC Tournament Manager" text from bottom of viewport to centered below last first-round match for all bracket sizes
 - **Enhanced Watermark Visibility**: Increased watermark opacity for better readability while maintaining subtle appearance
+- **Bracket Lines Proof of Concept**: Added complete tournament flow visualization for 8-player brackets with professional L-shaped connector lines showing frontside progression and finals connections
 
 ## v2.0.1 Dialog Visual Consistency
 - **Dialog Color Harmonization**: Updated all modal dialogs to use consistent subtle color palette

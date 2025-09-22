@@ -200,6 +200,149 @@ function render8PlayerFrontsideMatches(grid) {
 
     const fs31 = matches.find(m => m.id === 'FS-3-1');
     if (fs31) renderMatch(fs31, round3X, fs31Y, 'frontside', 2);
+
+    // === PROOF OF CONCEPT: Bracket Lines ===
+    // Test bracket-style connector lines showing FS-1-1 and FS-1-2 feeding into FS-2-1
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    svg.style.pointerEvents = 'none';
+    svg.style.zIndex = '1'; // Behind matches
+
+    //const strokeColor = '#d1d5db';
+    const strokeColor = '#666666';
+    const strokeWidth = '3';
+
+    // Calculate connection points for Round 1 → Round 2
+    const fs11CenterY = round1StartY + (grid.matchHeight / 2);
+    const fs12CenterY = round1StartY + spacing + (grid.matchHeight / 2);
+    const fs13CenterY = round1StartY + 2 * spacing + (grid.matchHeight / 2);
+    const fs14CenterY = round1StartY + 3 * spacing + (grid.matchHeight / 2);
+
+    const fs21CenterY = fs21Y + (grid.matchHeight / 2);
+    const fs22CenterY = fs22Y + (grid.matchHeight / 2);
+
+    const horizontalExtension = 20; // How far lines extend horizontally
+    const midPointX = round1X + grid.matchWidth + horizontalExtension + (grid.horizontalSpacing - 2 * horizontalExtension) / 2;
+
+    // FS-1-1 to FS-2-1 connector
+    const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData1 = `M ${round1X + grid.matchWidth} ${fs11CenterY}
+                       L ${midPointX} ${fs11CenterY}
+                       L ${midPointX} ${fs21CenterY}
+                       L ${round2X} ${fs21CenterY}`;
+    path1.setAttribute('d', pathData1);
+    path1.setAttribute('stroke', strokeColor);
+    path1.setAttribute('stroke-width', strokeWidth);
+    path1.setAttribute('fill', 'none');
+
+    // FS-1-2 to FS-2-1 connector
+    const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData2 = `M ${round1X + grid.matchWidth} ${fs12CenterY}
+                       L ${midPointX} ${fs12CenterY}
+                       L ${midPointX} ${fs21CenterY}
+                       L ${round2X} ${fs21CenterY}`;
+    path2.setAttribute('d', pathData2);
+    path2.setAttribute('stroke', strokeColor);
+    path2.setAttribute('stroke-width', strokeWidth);
+    path2.setAttribute('fill', 'none');
+
+    // FS-1-3 to FS-2-2 connector
+    const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData3 = `M ${round1X + grid.matchWidth} ${fs13CenterY}
+                       L ${midPointX} ${fs13CenterY}
+                       L ${midPointX} ${fs22CenterY}
+                       L ${round2X} ${fs22CenterY}`;
+    path3.setAttribute('d', pathData3);
+    path3.setAttribute('stroke', strokeColor);
+    path3.setAttribute('stroke-width', strokeWidth);
+    path3.setAttribute('fill', 'none');
+
+    // FS-1-4 to FS-2-2 connector
+    const path4 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData4 = `M ${round1X + grid.matchWidth} ${fs14CenterY}
+                       L ${midPointX} ${fs14CenterY}
+                       L ${midPointX} ${fs22CenterY}
+                       L ${round2X} ${fs22CenterY}`;
+    path4.setAttribute('d', pathData4);
+    path4.setAttribute('stroke', strokeColor);
+    path4.setAttribute('stroke-width', strokeWidth);
+    path4.setAttribute('fill', 'none');
+
+    // Round 2 → Round 3 connections (FS-2-1 and FS-2-2 → FS-3-1)
+    // Use the already calculated positions from above
+    const fs31CenterY = fs31Y + (grid.matchHeight / 2);
+
+    const midPointX2 = round2X + grid.matchWidth + horizontalExtension + (grid.horizontalSpacing - 2 * horizontalExtension) / 2;
+
+    // FS-2-1 to FS-3-1 connector
+    const path5 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData5 = `M ${round2X + grid.matchWidth} ${fs21CenterY}
+                       L ${midPointX2} ${fs21CenterY}
+                       L ${midPointX2} ${fs31CenterY}
+                       L ${round3X} ${fs31CenterY}`;
+    path5.setAttribute('d', pathData5);
+    path5.setAttribute('stroke', strokeColor);
+    path5.setAttribute('stroke-width', strokeWidth);
+    path5.setAttribute('fill', 'none');
+
+    // FS-2-2 to FS-3-1 connector
+    const path6 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData6 = `M ${round2X + grid.matchWidth} ${fs22CenterY}
+                       L ${midPointX2} ${fs22CenterY}
+                       L ${midPointX2} ${fs31CenterY}
+                       L ${round3X} ${fs31CenterY}`;
+    path6.setAttribute('d', pathData6);
+    path6.setAttribute('stroke', strokeColor);
+    path6.setAttribute('stroke-width', strokeWidth);
+    path6.setAttribute('fill', 'none');
+
+    // Finals connections (FS-3-1 and BS-FINAL → GRAND-FINAL)
+    const spacingMultiplier = 4; // Same as in renderFinalMatches
+    const finalsX = round3X + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
+    const backsideFinalY = grid.centerY - 80;
+    const grandFinalY = grid.centerY + 80;
+
+    const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
+    const grandFinalCenterY = grandFinalY + (grid.matchHeight / 2);
+
+    const midPointX3 = finalsX - horizontalExtension - 10; // Much closer to finals matches
+
+    // FS-3-1 to GRAND-FINAL connector
+    const path7 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData7 = `M ${round3X + grid.matchWidth} ${fs31CenterY}
+                       L ${midPointX3} ${fs31CenterY}
+                       L ${midPointX3} ${grandFinalCenterY}
+                       L ${finalsX} ${grandFinalCenterY}`;
+    path7.setAttribute('d', pathData7);
+    path7.setAttribute('stroke', strokeColor);
+    path7.setAttribute('stroke-width', strokeWidth);
+    path7.setAttribute('fill', 'none');
+
+    // BS-FINAL to GRAND-FINAL connector
+    const path8 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathData8 = `M ${finalsX} ${backsideFinalCenterY}
+                       L ${midPointX3} ${backsideFinalCenterY}
+                       L ${midPointX3} ${grandFinalCenterY}
+                       L ${finalsX} ${grandFinalCenterY}`;
+    path8.setAttribute('d', pathData8);
+    path8.setAttribute('stroke', strokeColor);
+    path8.setAttribute('stroke-width', strokeWidth);
+    path8.setAttribute('fill', 'none');
+
+
+    svg.appendChild(path1);
+    svg.appendChild(path2);
+    svg.appendChild(path3);
+    svg.appendChild(path4);
+    svg.appendChild(path5);
+    svg.appendChild(path6);
+    svg.appendChild(path7);
+    svg.appendChild(path8);
+    document.getElementById('bracketCanvas').appendChild(svg);
 }
 
 // Hardcoded positioning for 16-player frontside to show clear progression
