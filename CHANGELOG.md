@@ -6,7 +6,8 @@
 - **Color Consistency**: Updated reset button enabled state to use subtle orange color matching interface palette
 - **Improved Watermark Positioning**: Moved "NewTon DC Tournament Manager" text from bottom of viewport to centered below last first-round match for all bracket sizes
 - **Enhanced Watermark Visibility**: Increased watermark opacity for better readability while maintaining subtle appearance
-- **Bracket Lines Proof of Concept**: Added complete tournament flow visualization for 8-player brackets with professional L-shaped connector lines showing frontside progression and finals connections
+- **Rendering Error**: Fixed an error where the matches in backside rounds one and two were rendered in the wrong order.
+- **Bracket Lines Proof of Concept**: Added complete tournament flow visualization for 8-player brackets with professional L-shaped connector lines showing frontside progression and finals connections, connectors from frontside round 1 to backside round 1 added.
 
 ## v2.0.1 Dialog Visual Consistency
 - **Dialog Color Harmonization**: Updated all modal dialogs to use consistent subtle color palette

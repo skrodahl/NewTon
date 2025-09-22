@@ -893,7 +893,7 @@ function suggestHelp() {
 
     // No bracket generated
     if (!tournament.bracket) {
-        return { page: 'tournament', section: 'bracket', reason: 'Ready to generate bracket' };
+        return { page: 'tournament', section: 'bracket', reason: 'Ready to generate bracket in Match Controls' };
     }
 
     // Active matches available

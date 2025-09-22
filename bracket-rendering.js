@@ -581,10 +581,10 @@ function render8PlayerBacksideMatches(grid) {
     const fs13Y = round1StartY + 2 * spacing;      // FS-1-3 position
     const fs14Y = round1StartY + 3 * spacing;      // FS-1-4 position
 
-    // BS-1-1 gets losers from FS-1-3 and FS-1-4, position between them
-    const bs11Y = (fs13Y + fs14Y) / 2;
-    // BS-1-2 gets losers from FS-1-1 and FS-1-2, position between them
-    const bs12Y = (fs11Y + fs12Y) / 2;
+    // BS-1-1 gets losers from FS-1-1 and FS-1-2, position between them
+    const bs11Y = (fs11Y + fs12Y) / 2;
+    // BS-1-2 gets losers from FS-1-3 and FS-1-4, position between them
+    const bs12Y = (fs13Y + fs14Y) / 2;
 
     const bs11 = matches.find(m => m.id === 'BS-1-1');
     const bs12 = matches.find(m => m.id === 'BS-1-2');
@@ -592,12 +592,12 @@ function render8PlayerBacksideMatches(grid) {
     if (bs11) renderMatch(bs11, bs1X, bs11Y, 'backside', 0);
     if (bs12) renderMatch(bs12, bs1X, bs12Y, 'backside', 0);
 
-    // Round 2: BS-2-1 and BS-2-2 advance leftward, centered between their inputs, moved up by half match height
+    // Round 2: BS-2-1 and BS-2-2 advance leftward, centered between their inputs
     const bs2X = bs1X - (grid.matchWidth + grid.horizontalSpacing);
-    const bs21Y = (bs12Y + bs11Y) / 2 - (grid.matchHeight / 2); // Centered between BS-1-2 and BS-1-1, moved up
+    const bs22Y = (bs12Y + bs11Y) / 2 - (grid.matchHeight / 2); // BS-2-2 centered between BS-1-2 and BS-1-1
 
-    // BS-2-2 gets input from BS-1-1 winner + FS-2-2 loser, position relative to BS-1-1, moved up
-    const bs22Y = bs11Y - (grid.matchHeight / 2); // Align with BS-1-1, moved up by half match height
+    // BS-2-1 gets input from BS-1-2 winner, position relative to BS-1-2
+    const bs21Y = bs12Y - (grid.matchHeight / 2); // Align with BS-1-2
 
     const bs21 = matches.find(m => m.id === 'BS-2-1');
     const bs22 = matches.find(m => m.id === 'BS-2-2');
@@ -611,6 +611,85 @@ function render8PlayerBacksideMatches(grid) {
 
     const bs31 = matches.find(m => m.id === 'BS-3-1');
     if (bs31) renderMatch(bs31, bs3X, bs31Y, 'backside', 2);
+
+    // === BACKSIDE PROGRESSION LINES ===
+    // Mirror the frontside pattern: FS-1-1 and FS-1-2 both feed into BS-1-1
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    svg.style.position = 'absolute';
+    svg.style.top = '0';
+    svg.style.left = '0';
+    svg.style.width = '100%';
+    svg.style.height = '100%';
+    svg.style.pointerEvents = 'none';
+    svg.style.zIndex = '1'; // Behind matches
+
+    const strokeColor = '#666666';
+    const strokeWidth = '3';
+
+    // Calculate connection points - need frontside round 1 positions
+    const round1X = grid.centerX + grid.centerBuffer + grid.horizontalSpacing;
+    const fs11CenterY = round1StartY + (grid.matchHeight / 2);
+    const fs12CenterY = round1StartY + spacing + (grid.matchHeight / 2);
+    const bs11CenterY = bs11Y + (grid.matchHeight / 2);
+
+    const horizontalExtension = 20;
+    // Move vertical line 130px left of frontside matches
+    const midPointX = round1X - 115;
+
+    // FS-1-1 to BS-1-1 connector (loser feed)
+    const pathFS11ToBS11 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathDataFS11ToBS11 = `M ${round1X} ${fs11CenterY}
+                                L ${midPointX} ${fs11CenterY}
+                                L ${midPointX} ${bs11CenterY}
+                                L ${bs1X + grid.matchWidth} ${bs11CenterY}`;
+    pathFS11ToBS11.setAttribute('d', pathDataFS11ToBS11);
+    pathFS11ToBS11.setAttribute('stroke', strokeColor);
+    pathFS11ToBS11.setAttribute('stroke-width', strokeWidth);
+    pathFS11ToBS11.setAttribute('fill', 'none');
+
+    // FS-1-2 to BS-1-1 connector (loser feed)
+    const pathFS12ToBS11 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathDataFS12ToBS11 = `M ${round1X} ${fs12CenterY}
+                                L ${midPointX} ${fs12CenterY}
+                                L ${midPointX} ${bs11CenterY}
+                                L ${bs1X + grid.matchWidth} ${bs11CenterY}`;
+    pathFS12ToBS11.setAttribute('d', pathDataFS12ToBS11);
+    pathFS12ToBS11.setAttribute('stroke', strokeColor);
+    pathFS12ToBS11.setAttribute('stroke-width', strokeWidth);
+    pathFS12ToBS11.setAttribute('fill', 'none');
+
+    // Calculate center Y positions for FS-1-3 and FS-1-4
+    const fs13CenterY = round1StartY + 2 * spacing + (grid.matchHeight / 2);
+    const fs14CenterY = round1StartY + 3 * spacing + (grid.matchHeight / 2);
+    const bs12CenterY = bs12Y + (grid.matchHeight / 2);
+
+    // FS-1-3 to BS-1-2 connector (loser feed)
+    const pathFS13ToBS12 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathDataFS13ToBS12 = `M ${round1X} ${fs13CenterY}
+                                L ${midPointX} ${fs13CenterY}
+                                L ${midPointX} ${bs12CenterY}
+                                L ${bs1X + grid.matchWidth} ${bs12CenterY}`;
+    pathFS13ToBS12.setAttribute('d', pathDataFS13ToBS12);
+    pathFS13ToBS12.setAttribute('stroke', strokeColor);
+    pathFS13ToBS12.setAttribute('stroke-width', strokeWidth);
+    pathFS13ToBS12.setAttribute('fill', 'none');
+
+    // FS-1-4 to BS-1-2 connector (loser feed)
+    const pathFS14ToBS12 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    const pathDataFS14ToBS12 = `M ${round1X} ${fs14CenterY}
+                                L ${midPointX} ${fs14CenterY}
+                                L ${midPointX} ${bs12CenterY}
+                                L ${bs1X + grid.matchWidth} ${bs12CenterY}`;
+    pathFS14ToBS12.setAttribute('d', pathDataFS14ToBS12);
+    pathFS14ToBS12.setAttribute('stroke', strokeColor);
+    pathFS14ToBS12.setAttribute('stroke-width', strokeWidth);
+    pathFS14ToBS12.setAttribute('fill', 'none');
+
+    svg.appendChild(pathFS11ToBS11);
+    svg.appendChild(pathFS12ToBS11);
+    svg.appendChild(pathFS13ToBS12);
+    svg.appendChild(pathFS14ToBS12);
+    document.getElementById('bracketCanvas').appendChild(svg);
 }
 
 // Hardcoded positioning for 16-player backside to show clear progression (mirrored to left)
