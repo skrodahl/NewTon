@@ -2278,7 +2278,12 @@ function showMatchCommandCenter() {
 
 // Function to get referee suggestions
 function getRefereeSuggestions() {
-    if (!matches || !players) return { losers: [], winners: [], recentReferees: [] };
+    console.log('🔍 getRefereeSuggestions called - tournament status:', tournament?.status);
+
+    if (!matches || !players) {
+        console.log('❌ No matches or players data available');
+        return { losers: [], winners: [], recentReferees: [] };
+    }
 
     // Get completed matches sorted by most recent first
     const completedMatches = matches
@@ -2288,6 +2293,8 @@ function getRefereeSuggestions() {
             const bTime = b.completedAt || 0;
             return bTime - aTime; // Most recent first
         });
+
+    console.log(`📊 Found ${completedMatches.length} completed matches for referee suggestions`);
 
     // Get players currently assigned as referees
     const assignedReferees = new Set();
@@ -2427,6 +2434,14 @@ function getRefereeSuggestions() {
         }
     }
 
+    console.log('📋 Referee suggestions summary:', {
+        losersCount: recentLosers.length,
+        winnersCount: recentWinners.length,
+        recentRefereesCount: recentRefereeAssignments.length,
+        losers: recentLosers.map(l => l.name),
+        winners: recentWinners.map(w => w.name)
+    });
+
     return {
         losers: recentLosers,
         winners: recentWinners,
@@ -2436,6 +2451,8 @@ function getRefereeSuggestions() {
 
 // Function to populate referee suggestions in the UI
 function populateRefereeSuggestions() {
+    console.log('🎯 populateRefereeSuggestions called');
+
     const losersContainer = document.getElementById('refereeLosersContainer');
     const winnersContainer = document.getElementById('refereeWinnersContainer');
     const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
@@ -2444,7 +2461,10 @@ function populateRefereeSuggestions() {
     const assignmentsSection = document.getElementById('refereeAssignmentsSection');
     const noSuggestionsMessage = document.getElementById('noRefereeSuggestionsMessage');
 
-    if (!losersContainer || !winnersContainer || !assignmentsContainer) return;
+    if (!losersContainer || !winnersContainer || !assignmentsContainer) {
+        console.log('❌ Missing referee suggestion containers');
+        return;
+    }
 
     const suggestions = getRefereeSuggestions();
     const hasAnysuggestions = suggestions.losers.length > 0 || suggestions.winners.length > 0 || suggestions.recentReferees.length > 0;
