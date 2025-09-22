@@ -409,7 +409,7 @@ function render8PlayerBacksideMatches(grid) {
     backsideBackground.style.cssText = `
         position: absolute;
         background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
-        border-radius: 8px;
+        border-radius: 16px;
         z-index: 0;
         pointer-events: none;
     `;
@@ -482,7 +482,7 @@ function render16PlayerBacksideMatches(grid) {
     backsideBackground.style.cssText = `
         position: absolute;
         background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
-        border-radius: 8px;
+        border-radius: 16px;
         z-index: 0;
         pointer-events: none;
     `;
@@ -593,7 +593,7 @@ function render32PlayerBacksideMatches(grid) {
     backsideBackground.style.cssText = `
         position: absolute;
         background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
-        border-radius: 8px;
+        border-radius: 16px;
         z-index: 0;
         pointer-events: none;
     `;
