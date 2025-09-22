@@ -1015,17 +1015,47 @@ function renderTitles(grid) {
     finalsTitle.style.fontSize = '28px';
     finalsTitle.style.color = '#ff6b35';
 
-    // Watermark at bottom center
+    // Watermark positioned below bottom-most first round match
     const watermark = document.createElement('div');
     watermark.id = 'tournament-watermark';
     watermark.textContent = 'NewTon DC Tournament Manager';
     watermark.style.position = 'absolute';
-    watermark.style.left = (grid.centerX - 150) + 'px';
-    watermark.style.bottom = '30px';
     watermark.style.fontSize = '16px';
-    watermark.style.color = 'rgba(17,24,39,0.3)';
+    watermark.style.color = 'rgba(17,24,39,0.5)';
     watermark.style.letterSpacing = '1px';
     watermark.style.pointerEvents = 'none';
+    watermark.style.width = grid.matchWidth + 'px';
+    watermark.style.textAlign = 'center';
+
+    // Position based on bracket size
+    const spacing = grid.matchHeight + grid.verticalSpacing;
+    let watermarkX, watermarkY;
+
+    if (tournament.bracketSize === 32) {
+        // Position below FS-1-16 (last match in round 1)
+        const round1X = grid.centerX + grid.centerBuffer;
+        const round1StartY = grid.centerY - (7.5 * spacing);
+        const fs116Y = round1StartY + 15 * spacing; // FS-1-16 position
+        watermarkX = round1X; // Align with left edge of match
+        watermarkY = fs116Y + grid.matchHeight + 40; // Below the match with some spacing
+    } else if (tournament.bracketSize === 16) {
+        // Position below FS-1-8 (last match in round 1 for 16-player)
+        const round1X = grid.centerX + grid.centerBuffer;
+        const round1StartY = grid.centerY - (3.5 * spacing);
+        const fs18Y = round1StartY + 7 * spacing; // FS-1-8 position
+        watermarkX = round1X;
+        watermarkY = fs18Y + grid.matchHeight + 40;
+    } else {
+        // For 8-player bracket, position below FS-1-4
+        const round1X = grid.centerX + grid.centerBuffer;
+        const round1StartY = grid.centerY - (1.5 * spacing);
+        const fs14Y = round1StartY + 3 * spacing; // FS-1-4 position
+        watermarkX = round1X;
+        watermarkY = fs14Y + grid.matchHeight + 40;
+    }
+
+    watermark.style.left = watermarkX + 'px';
+    watermark.style.top = watermarkY + 'px';
 
     document.getElementById('bracketCanvas').appendChild(frontsideTitle);
     document.getElementById('bracketCanvas').appendChild(backsideTitle);
