@@ -1,5 +1,20 @@
 # 2025-09-22
 
+## v2.0.0 Tournament Management Platform Maturity
+- **Major Version Release**: Complete transformation from functional tool to professional tournament management platform
+- **Core Architecture**: Hardcoded tournament logic with transaction-based history system for bulletproof reliability
+- **Surgical Undo System**: Transaction-based undo enabling precise match correction without affecting independent matches
+- **Match Controls Command Center**: State-driven unified interface for tournament setup, match management, and celebration
+- **Referee Suggestions**: Intelligent referee assignment with conflict detection and visual organization
+- **Tournament Celebration**: Olympic-style podium display with achievement tracking and integrated export
+- **Unified Dialog System**: Rich modal replacements with stack-aware management and Esc key integration
+- **Live Tournament Intelligence**: Real-time match history, progression status bar, and dynamic results integration
+- **Cohesive Visual Design**: Muted color palette with cross-component consistency, replacing bright competing colors
+- **Enhanced UX**: Dynamic help system, lane management, match validation, and comprehensive workflow improvements
+- **Technical Foundation**: Zero-dependency modular architecture with efficient data persistence and browser compatibility
+
+This release represents the culmination of incremental improvements since v1.4, establishing NewTon DC as a mature, production-ready platform for competitive darts tournaments.
+
 ## v1.6.12 Debugging of Referee Suggestions
 - Referee suggestions had no debugging for verifying workflow
 - The suggestions show the latest 7 losers, latest 7 winners, and latest 7 assignments

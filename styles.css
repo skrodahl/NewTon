@@ -109,10 +109,10 @@ body {
 }
 
 .nav button.active {
-  background: #ff6b35;
+  background: rgba(180, 83, 9, 0.9);
   color: #ffffff;
-  border-color: #ff6b35;
-  box-shadow: 0 4px 12px rgba(255,107,53,0.35);
+  border-color: rgba(180, 83, 9, 0.9);
+  box-shadow: 0 4px 12px rgba(180, 83, 9, 0.35);
 }
 
 .header-tournament-status {
@@ -227,14 +227,14 @@ body {
   box-shadow: 0 4px 12px rgba(0,0,0,0.15);
 }
 
-.btn-success { background: #16a34a; }
-.btn-success:hover { background: #15803d; }
+.btn-success { background: rgba(22, 101, 52, 0.9); }
+.btn-success:hover { background: rgba(22, 101, 52, 1); }
 
-.btn-danger { background: #dc2626; }
-.btn-danger:hover { background: #b91c1c; }
+.btn-danger { background: rgba(154, 52, 18, 0.9); }
+.btn-danger:hover { background: rgba(154, 52, 18, 1); }
 
-.btn-warning { background: #f59e0b; color: #111827; }
-.btn-warning:hover { background: #d97706; color: #ffffff; }
+.btn-warning { background: rgba(180, 83, 9, 0.9); color: #ffffff; }
+.btn-warning:hover { background: rgba(180, 83, 9, 1); color: #ffffff; }
 
 /* Player management */
 .players-grid {
@@ -260,8 +260,8 @@ body {
 }
 
 .player-card.paid {
-  border-color: #2e7d32;
-  background: #e6f4ea; /* higher contrast than pale green */
+  border-color: rgba(22, 101, 52, 1);
+  background: #eef1f0; /* darker, more muted green */
 }
 
 .player-header {
@@ -336,7 +336,7 @@ body {
 }
 
 .remove-btn {
-  background: #dc3545;
+  background: rgba(154, 52, 18, 0.9);
   color: white;
   border: none;
   border-radius: 3px; /* Changed from 50% to 3px for square */
@@ -721,12 +721,12 @@ body {
 
 .bracket-match.match-ready {
   background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border-color: #f59e0b;
+  border-color: rgba(180, 83, 9, 0.9);
   border-width: 3px;
 }
 .bracket-match.match-ready:hover {
-  border-color: #d97706;
-  box-shadow: 0 8px 22px rgba(245,158,11,0.35);
+  border-color: rgba(180, 83, 9, 1);
+  box-shadow: 0 8px 22px rgba(180, 83, 9, 0.35);
 }
 
 .bracket-match.match-live,
@@ -745,13 +745,13 @@ body {
 .bracket-match.match-completed,
 .bracket-match.completed {
   background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border-color: #28a745;
+  border-color: rgba(22, 101, 52, 1);
   border-width: 2px;
 }
 .bracket-match.match-completed:hover,
 .bracket-match.completed:hover {
-  border-color: #1f8f3a;
-  box-shadow: 0 8px 22px rgba(40,167,69,0.32);
+  border-color: rgba(22, 101, 52, 1);
+  box-shadow: 0 8px 22px rgba(22, 101, 52, 0.32);
 }
 
 /* Special matches */
@@ -760,12 +760,12 @@ body {
   box-shadow: 0 6px 18px rgba(0,0,0,0.12);
 }
 .bracket-match.backside-final-match {
-  border-color: #f59e0b;
+  border-color: rgba(180, 83, 9, 0.9);
   background: linear-gradient(135deg, #fffaf0 0%, #fff3cd 100%);
 }
 .bracket-match.backside-final-match.completed {
   background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border-color: #28a745;
+  border-color: rgba(22, 101, 52, 1);
 }
 .bracket-match.grand-final-match {
   border-color: #dc2626;
@@ -1089,7 +1089,7 @@ body {
 /* Make points column data bold and colorful - exclude header */
 .results-table td:nth-child(3) {
   font-weight: bold;
-  color: #ea580c; /* Bright orange */
+  color: rgba(180, 83, 9, 1); /* Muted orange to match buttons */
 }
 
 /* Bold and green player names in results table */
@@ -1509,30 +1509,30 @@ a:hover { color: #1e40af; }
 }
 
 .cc-btn-start {
-  background: #10b981;
+  background: rgba(22, 101, 52, 0.9);
   color: white;
 }
 
 .cc-btn-start:hover {
-  background: #059669;
+  background: rgba(22, 101, 52, 1);
 }
 
 .cc-btn-stop {
-  background: #ef4444;
+  background: rgba(154, 52, 18, 0.9);
   color: white;
 }
 
 .cc-btn-stop:hover {
-  background: #dc2626;
+  background: rgba(154, 52, 18, 1);
 }
 
 .cc-btn-complete {
-  background: #f59e0b;
+  background: rgba(180, 83, 9, 0.9);
   color: white;
 }
 
 .cc-btn-complete:hover {
-  background: #d97706;
+  background: rgba(180, 83, 9, 1);
 }
 
 .cc-winner-buttons {
@@ -1542,14 +1542,14 @@ a:hover { color: #1e40af; }
 }
 
 .cc-btn-winner {
-  background: #059669;
+  background: rgba(22, 101, 52, 0.9);
   color: white;
   flex: 1;
   min-width: 120px;
 }
 
 .cc-btn-winner:hover {
-  background: #047857;
+  background: rgba(22, 101, 52, 1);
 }
 
 /* Darker background for backside matches in Match Controls */
