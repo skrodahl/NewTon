@@ -1,6 +1,6 @@
 # 2025-09-22
 
-## **v2.0.2-beta** Reset Tournament Bug Fix, Watermark Repositioning & Bracket Lines Proof of Concept
+## **v2.0.2-beta** Reset Tournament Bug Fix, Focus on Tournament Bracket Visuals
 - **Fixed Event Listener Accumulation**: Resolved bug where resetting the same tournament multiple times caused exponentially increasing browser confirmation dialogs
 - **Clean Event Handling**: Tournament reset input field now properly removes old event listeners before adding new ones
 - **Color Consistency**: Updated reset button enabled state to use subtle orange color matching interface palette
