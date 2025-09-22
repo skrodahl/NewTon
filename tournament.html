@@ -717,18 +717,18 @@
                 <p><strong>This tournament is currently active with matches in progress.</strong></p>
                 <p>To generate a new bracket, you'll need to reset the tournament first.</p>
 
-                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #17a2b8;">
+                <div style="background: #f8f9fa; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
                     <p style="margin: 0; font-weight: 600;">💡 How to Reset:</p>
                     <p style="margin: 8px 0 0 0;">Go to <strong>Setup page</strong> → <strong>"Reset Tournament"</strong> button</p>
                 </div>
 
-                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;">
+                <div style="background: #faf8f3; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
                     <p style="margin: 0; font-weight: 600;">⚠️ Important:</p>
                     <p style="margin: 8px 0 0 0;">Resetting will keep all players but clear match results and bracket progress.</p>
                 </div>
             </div>
             <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()" style="background: #17a2b8; font-weight: 600;">Got It</button>
+                <button class="btn" onclick="popDialog()" style="background: rgba(22, 101, 52, 0.9); font-weight: 600;">Got It</button>
             </div>
         </div>
     </div>
@@ -738,7 +738,7 @@
         <div class="modal-content">
             <h3>⚠️ Reset Tournament Confirmation</h3>
             <div style="margin: 20px 0; line-height: 1.6;">
-                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid #ffc107;">
+                <div style="background: #faf8f3; padding: 15px; border-radius: 5px; margin-bottom: 20px; border-left: 4px solid rgba(180, 83, 9, 1);">
                     <p style="margin: 0; font-weight: 600;">🚨 WARNING: This action cannot be undone!</p>
                 </div>
 
@@ -749,27 +749,27 @@
                     <p style="margin: 5px 0;"><strong>Players:</strong> <span id="resetPlayerCount">-</span> registered</p>
                 </div>
 
-                <div style="background: #f8d7da; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #dc3545;">
-                    <h4 style="margin: 0 0 10px 0; color: #721c24;">This will permanently delete:</h4>
-                    <ul style="margin: 10px 0; padding-left: 20px; color: #721c24;">
+                <div style="background: #faf8f3; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
+                    <h4 style="margin: 0 0 10px 0; color: #111827;">This will permanently delete:</h4>
+                    <ul style="margin: 10px 0; padding-left: 20px; color: #111827;">
                         <li>All match results</li>
                         <li>All bracket progress</li>
                         <li>All tournament standings</li>
                     </ul>
-                    <p style="margin: 8px 0 0 0; font-weight: 600; color: #721c24;">Players will be kept but their elimination status will be reset.</p>
+                    <p style="margin: 8px 0 0 0; font-weight: 600; color: #111827;">Players will be kept but their elimination status will be reset.</p>
                 </div>
 
-                <div style="background: #e7f3ff; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #0056b3;">
-                    <p style="margin: 0; font-weight: 600; color: #0056b3;">🔒 Security Confirmation Required</p>
-                    <p style="margin: 8px 0 12px 0; color: #0056b3;">Type the tournament name exactly to confirm reset:</p>
+                <div style="background: #f2f5f4; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
+                    <p style="margin: 0; font-weight: 600; color: #111827;">🔒 Security Confirmation Required</p>
+                    <p style="margin: 8px 0 12px 0; color: #111827;">Type the tournament name exactly to confirm reset:</p>
                     <input type="text" id="resetConfirmationInput" placeholder="Tournament name..."
-                           style="width: 100%; padding: 8px; border: 2px solid #0056b3; border-radius: 4px; font-size: 14px;"
+                           style="width: 100%; padding: 8px; border: 2px solid rgba(22, 101, 52, 1); border-radius: 4px; font-size: 14px;"
                            autocomplete="off">
                 </div>
             </div>
             <div class="text-center mt-20">
                 <button class="btn" onclick="popDialog()" style="margin-right: 15px; background: #6c757d; font-weight: 600;">Cancel</button>
-                <button class="btn btn-danger" id="confirmResetBtn" onclick="confirmReset()" style="font-weight: 600;" disabled>Reset Tournament</button>
+                <button class="btn" id="confirmResetBtn" onclick="confirmReset()" style="background: rgba(180, 83, 9, 0.9); color: white; font-weight: 600;" disabled>Reset Tournament</button>
             </div>
         </div>
     </div>
@@ -791,7 +791,7 @@
                     <p style="margin: 5px 0;"><strong>Status:</strong> <span id="deleteTournamentStatus">-</span></p>
                 </div>
 
-                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;">
+                <div style="background: #faf8f3; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
                     <h4 style="margin: 0 0 10px 0; color: #856404;">This will permanently remove:</h4>
                     <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
                         <li>All tournament data</li>
@@ -824,7 +824,7 @@
                     <p style="margin: 5px 0;"><strong>Date:</strong> <span id="importTournamentDate">-</span></p>
                 </div>
 
-                <div style="background: #fff3cd; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid #ffc107;">
+                <div style="background: #faf8f3; padding: 15px; border-radius: 5px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
                     <h4 style="margin: 0 0 10px 0; color: #856404;">If you choose to overwrite:</h4>
                     <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
                         <li>Current tournament data will be completely replaced</li>
@@ -903,33 +903,33 @@
                     <p style="margin: 3px 0;"><strong>Completed Matches:</strong> <span id="exportMatchProgress">-</span></p>
                 </div>
 
-                <div style="background: #e7f3ff; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #0056b3;">
-                    <h4 style="margin: 0 0 8px 0; color: #0056b3;">Export Details:</h4>
+                <div style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
+                    <h4 style="margin: 0 0 8px 0; color: #111827;">Export Details:</h4>
                     <p style="margin: 3px 0;"><strong>Format:</strong> <span id="exportFormat">-</span></p>
                     <p style="margin: 3px 0;"><strong>Filename:</strong> <span id="exportFilename">-</span></p>
                     <p style="margin: 3px 0;"><strong>Content:</strong> <span id="exportContent">-</span></p>
                 </div>
 
-                <div id="exportWarningSection" style="background: #fff3cd; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #ffc107; display: none;">
+                <div id="exportWarningSection" style="background: #faf8f3; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(180, 83, 9, 1); display: none;">
                     <p style="margin: 0; font-weight: 600; color: #856404;">⚠️ Tournament Incomplete</p>
                     <p style="margin: 6px 0 0 0; color: #856404;">This tournament is not yet finished. The export will contain current standings but may not reflect final rankings.</p>
                 </div>
 
-                <div id="exportCompleteSection" style="background: #d4edda; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #28a745; display: none;">
-                    <p style="margin: 0; font-weight: 600; color: #155724;">✓ Tournament Complete</p>
-                    <p style="margin: 6px 0 0 0; color: #155724;">This tournament is finished with final rankings available. The export will contain complete results.</p>
+                <div id="exportCompleteSection" style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1); display: none;">
+                    <p style="margin: 0; font-weight: 600; color: #111827;">✓ Tournament Complete</p>
+                    <p style="margin: 6px 0 0 0; color: #111827;">This tournament is finished with final rankings available. The export will contain complete results.</p>
                 </div>
 
-                <div style="background: #d1ecf1; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid #17a2b8;">
-                    <p style="margin: 0; font-weight: 600; color: #0c5460;">📋 What will be included:</p>
-                    <ul style="margin: 8px 0; padding-left: 18px; color: #0c5460;" id="exportIncludesList">
+                <div style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
+                    <p style="margin: 0; font-weight: 600; color: #111827;">📋 What will be included:</p>
+                    <ul style="margin: 8px 0; padding-left: 18px; color: #111827;" id="exportIncludesList">
                         <!-- Populated by JavaScript -->
                     </ul>
                 </div>
             </div>
             <div class="text-center mt-20">
                 <button class="btn" onclick="popDialog()" style="margin-right: 15px; background: #6c757d; font-weight: 600;">Cancel</button>
-                <button class="btn btn-success" id="confirmExportBtn" onclick="confirmExport()" style="font-weight: 600;">Export Results</button>
+                <button class="btn" id="confirmExportBtn" onclick="confirmExport()" style="background: rgba(22, 101, 52, 0.9); color: white; font-weight: 600;">Export Results</button>
             </div>
         </div>
     </div>

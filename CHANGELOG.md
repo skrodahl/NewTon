@@ -1,5 +1,13 @@
 # 2025-09-22
 
+## v2.0.1 Dialog Visual Consistency
+- **Dialog Color Harmonization**: Updated all modal dialogs to use consistent subtle color palette
+- **Tournament in Progress Dialog**: Changed blue "Got it" button and info box border to subtle green theme
+- **Reset Tournament Dialog**: Replaced bright red/blue sections with muted orange/green styling, updated "Reset Tournament" button
+- **Export Dialogs**: Converted bright blue/green sections to consistent subtle green styling, updated "Export Results" button
+- **Warning Boxes**: All yellow warning sections now use subtle orange border and muted background across all dialogs
+- **Professional Polish**: Eliminated visual chaos from competing bright colors, creating cohesive modal experience
+
 ## v2.0.0 Tournament Management Platform Maturity
 - **Major Version Release**: Complete transformation from functional tool to professional tournament management platform
 - **Core Architecture**: Hardcoded tournament logic with transaction-based history system for bulletproof reliability
