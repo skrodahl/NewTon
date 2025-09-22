@@ -1,6 +1,6 @@
 # 2025-09-22
 
-## v1.6.12 Debugging of Referee Suggestions
+## v.1.6.12 Debugging of Referee Suggestions
 - Referee suggestions had no debugging for verifying workflow
 - The suggestions show the latest 7 losers, latest 7 winners, and latest 7 assignments
 - Players are moved from Recent Losers/Winners to Recent Assignments on match start/completion to avoid suggesting same referee too often
