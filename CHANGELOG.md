@@ -1,11 +1,12 @@
 # 2025-09-22
 
-## v.1.6.12 Debugging of Referee Suggestions
+## v1.6.12 Debugging of Referee Suggestions
 - Referee suggestions had no debugging for verifying workflow
 - The suggestions show the latest 7 losers, latest 7 winners, and latest 7 assignments
 - Players are moved from Recent Losers/Winners to Recent Assignments on match start/completion to avoid suggesting same referee too often
+- Visual Change: Made the rounded corners of the Backside Bracket gradient more pronounced.
 
-## v.1.6.11 Backside Bracket Visual Enhancement
+## v1.6.11 Backside Bracket Visual Enhancement
 - **Gradient Background**: Added subtle gradient background to backside brackets for all tournament sizes (8, 16, 32 players)
 - **Visual Distinction**: Backside brackets now have a gradient from 0.06 opacity on the right fading to transparent on the left
 - **Consistent Styling**: Uniform visual treatment across all bracket sizes with proper positioning and rounded corners
@@ -13,7 +14,7 @@
 
 # 2025-09-20
 
-## v.1.6.7, 1.6.8 & 1.6.9 Tournament Visuals Bug-Fix
+## v1.6.7, 1.6.8 & 1.6.9 Tournament Visuals Bug-Fix
 - Improved tournament flow for 16 and 32-player brackets
 
 ## v1.6.6 Professional Visual Bracket Positioning
