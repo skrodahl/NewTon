@@ -201,104 +201,31 @@ function render8PlayerFrontsideMatches(grid) {
     const fs31 = matches.find(m => m.id === 'FS-3-1');
     if (fs31) renderMatch(fs31, round3X, fs31Y, 'frontside', 2);
 
-    // === PROOF OF CONCEPT: Bracket Lines ===
-    // Test bracket-style connector lines showing FS-1-1 and FS-1-2 feeding into FS-2-1
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.style.position = 'absolute';
-    svg.style.top = '0';
-    svg.style.left = '0';
-    svg.style.width = '100%';
-    svg.style.height = '100%';
-    svg.style.pointerEvents = 'none';
-    svg.style.zIndex = '1'; // Behind matches
-
-    //const strokeColor = '#d1d5db';
-    const strokeColor = '#666666';
-    const strokeWidth = '3';
+    // === HTML/CSS Progression Lines ===
+    // Note: createLShapedProgressionLine function is now in bracket-lines.js
 
     // Calculate connection points for Round 1 → Round 2
     const fs11CenterY = round1StartY + (grid.matchHeight / 2);
     const fs12CenterY = round1StartY + spacing + (grid.matchHeight / 2);
     const fs13CenterY = round1StartY + 2 * spacing + (grid.matchHeight / 2);
     const fs14CenterY = round1StartY + 3 * spacing + (grid.matchHeight / 2);
-
     const fs21CenterY = fs21Y + (grid.matchHeight / 2);
     const fs22CenterY = fs22Y + (grid.matchHeight / 2);
 
-    const horizontalExtension = 20; // How far lines extend horizontally
-    const midPointX = round1X + grid.matchWidth + horizontalExtension + (grid.horizontalSpacing - 2 * horizontalExtension) / 2;
+    // FS-1-1 and FS-1-2 to FS-2-1 connectors
+    const [fs11_h1, fs11_v, fs11_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs11CenterY, round2X, fs21CenterY);
+    const [fs12_h1, fs12_v, fs12_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs12CenterY, round2X, fs21CenterY);
 
-    // FS-1-1 to FS-2-1 connector
-    const path1 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData1 = `M ${round1X + grid.matchWidth} ${fs11CenterY}
-                       L ${midPointX} ${fs11CenterY}
-                       L ${midPointX} ${fs21CenterY}
-                       L ${round2X} ${fs21CenterY}`;
-    path1.setAttribute('d', pathData1);
-    path1.setAttribute('stroke', strokeColor);
-    path1.setAttribute('stroke-width', strokeWidth);
-    path1.setAttribute('fill', 'none');
-
-    // FS-1-2 to FS-2-1 connector
-    const path2 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData2 = `M ${round1X + grid.matchWidth} ${fs12CenterY}
-                       L ${midPointX} ${fs12CenterY}
-                       L ${midPointX} ${fs21CenterY}
-                       L ${round2X} ${fs21CenterY}`;
-    path2.setAttribute('d', pathData2);
-    path2.setAttribute('stroke', strokeColor);
-    path2.setAttribute('stroke-width', strokeWidth);
-    path2.setAttribute('fill', 'none');
-
-    // FS-1-3 to FS-2-2 connector
-    const path3 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData3 = `M ${round1X + grid.matchWidth} ${fs13CenterY}
-                       L ${midPointX} ${fs13CenterY}
-                       L ${midPointX} ${fs22CenterY}
-                       L ${round2X} ${fs22CenterY}`;
-    path3.setAttribute('d', pathData3);
-    path3.setAttribute('stroke', strokeColor);
-    path3.setAttribute('stroke-width', strokeWidth);
-    path3.setAttribute('fill', 'none');
-
-    // FS-1-4 to FS-2-2 connector
-    const path4 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData4 = `M ${round1X + grid.matchWidth} ${fs14CenterY}
-                       L ${midPointX} ${fs14CenterY}
-                       L ${midPointX} ${fs22CenterY}
-                       L ${round2X} ${fs22CenterY}`;
-    path4.setAttribute('d', pathData4);
-    path4.setAttribute('stroke', strokeColor);
-    path4.setAttribute('stroke-width', strokeWidth);
-    path4.setAttribute('fill', 'none');
+    // FS-1-3 and FS-1-4 to FS-2-2 connectors
+    const [fs13_h1, fs13_v, fs13_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs13CenterY, round2X, fs22CenterY);
+    const [fs14_h1, fs14_v, fs14_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs14CenterY, round2X, fs22CenterY);
 
     // Round 2 → Round 3 connections (FS-2-1 and FS-2-2 → FS-3-1)
-    // Use the already calculated positions from above
     const fs31CenterY = fs31Y + (grid.matchHeight / 2);
 
-    const midPointX2 = round2X + grid.matchWidth + horizontalExtension + (grid.horizontalSpacing - 2 * horizontalExtension) / 2;
-
-    // FS-2-1 to FS-3-1 connector
-    const path5 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData5 = `M ${round2X + grid.matchWidth} ${fs21CenterY}
-                       L ${midPointX2} ${fs21CenterY}
-                       L ${midPointX2} ${fs31CenterY}
-                       L ${round3X} ${fs31CenterY}`;
-    path5.setAttribute('d', pathData5);
-    path5.setAttribute('stroke', strokeColor);
-    path5.setAttribute('stroke-width', strokeWidth);
-    path5.setAttribute('fill', 'none');
-
-    // FS-2-2 to FS-3-1 connector
-    const path6 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData6 = `M ${round2X + grid.matchWidth} ${fs22CenterY}
-                       L ${midPointX2} ${fs22CenterY}
-                       L ${midPointX2} ${fs31CenterY}
-                       L ${round3X} ${fs31CenterY}`;
-    path6.setAttribute('d', pathData6);
-    path6.setAttribute('stroke', strokeColor);
-    path6.setAttribute('stroke-width', strokeWidth);
-    path6.setAttribute('fill', 'none');
+    // FS-2-1 and FS-2-2 to FS-3-1 connectors
+    const [fs21_h1, fs21_v, fs21_h2] = createLShapedProgressionLine(round2X + grid.matchWidth, fs21CenterY, round3X, fs31CenterY);
+    const [fs22_h1, fs22_v, fs22_h2] = createLShapedProgressionLine(round2X + grid.matchWidth, fs22CenterY, round3X, fs31CenterY);
 
     // Finals connections (FS-3-1 and BS-FINAL → GRAND-FINAL)
     const spacingMultiplier = 4; // Same as in renderFinalMatches
@@ -309,40 +236,22 @@ function render8PlayerFrontsideMatches(grid) {
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
     const grandFinalCenterY = grandFinalY + (grid.matchHeight / 2);
 
-    const midPointX3 = finalsX - horizontalExtension - 10; // Much closer to finals matches
-
-    // FS-3-1 to GRAND-FINAL connector
-    const path7 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData7 = `M ${round3X + grid.matchWidth} ${fs31CenterY}
-                       L ${midPointX3} ${fs31CenterY}
-                       L ${midPointX3} ${grandFinalCenterY}
-                       L ${finalsX} ${grandFinalCenterY}`;
-    path7.setAttribute('d', pathData7);
-    path7.setAttribute('stroke', strokeColor);
-    path7.setAttribute('stroke-width', strokeWidth);
-    path7.setAttribute('fill', 'none');
+    // Custom Finals connections using bracket-lines.js function
+    const [fs31_h1, fs31_v, fs31_h2, fs31ToBsFinal_h1, extendedVertical, fs31ToBsFinal_h2] =
+        createCustomFinalsLines(round3X, fs31CenterY, finalsX, backsideFinalCenterY, grandFinalCenterY, grid);
 
     // BS-FINAL to GRAND-FINAL connector
-    const path8 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathData8 = `M ${finalsX} ${backsideFinalCenterY}
-                       L ${midPointX3} ${backsideFinalCenterY}
-                       L ${midPointX3} ${grandFinalCenterY}
-                       L ${finalsX} ${grandFinalCenterY}`;
-    path8.setAttribute('d', pathData8);
-    path8.setAttribute('stroke', strokeColor);
-    path8.setAttribute('stroke-width', strokeWidth);
-    path8.setAttribute('fill', 'none');
+    const [bsFinal_h1, bsFinal_v, bsFinal_h2] = createLShapedProgressionLine(finalsX, backsideFinalCenterY, finalsX, grandFinalCenterY);
 
-
-    svg.appendChild(path1);
-    svg.appendChild(path2);
-    svg.appendChild(path3);
-    svg.appendChild(path4);
-    svg.appendChild(path5);
-    svg.appendChild(path6);
-    svg.appendChild(path7);
-    svg.appendChild(path8);
-    document.getElementById('bracketCanvas').appendChild(svg);
+    // Add all lines to the bracket canvas
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    [fs11_h1, fs11_v, fs11_h2, fs12_h1, fs12_v, fs12_h2,
+     fs13_h1, fs13_v, fs13_h2, fs14_h1, fs14_v, fs14_h2,
+     fs21_h1, fs21_v, fs21_h2, fs22_h1, fs22_v, fs22_h2,
+     fs31_h1, fs31_v, fs31_h2, fs31ToBsFinal_h1, extendedVertical, fs31ToBsFinal_h2,
+     bsFinal_h1, bsFinal_v, bsFinal_h2].forEach(line => {
+        bracketCanvas.appendChild(line);
+    });
 }
 
 // Hardcoded positioning for 16-player frontside to show clear progression
@@ -546,30 +455,9 @@ function render8PlayerBacksideMatches(grid) {
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
-    // Add gradient background box for the backside bracket
-    const backsideBackground = document.createElement('div');
-    backsideBackground.className = 'backside-background';
-    backsideBackground.style.cssText = `
-        position: absolute;
-        background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
-        border-radius: 16px;
-        z-index: 0;
-        pointer-events: none;
-    `;
-
-    // Calculate background dimensions based on the backside bracket area for 8-player
+    // Add gradient background box for the backside bracket using bracket-lines.js function
     const round1StartY = grid.centerY - (1.5 * spacing);
-    const backsideStartX = grid.centerX - grid.centerBuffer - (3 * (grid.matchWidth + grid.horizontalSpacing)); // Estimate for 8-player depth
-    const backsideEndX = grid.centerX - grid.centerBuffer - grid.horizontalSpacing;
-    const backsideWidth = backsideEndX - backsideStartX + grid.matchWidth + 40 - (2 * grid.matchWidth / 3); // Extra padding minus 1/3 match width on each end
-    const backsideHeight = 4 * spacing + 40; // Height to cover all 8-player matches plus padding
-    const backsideTop = round1StartY - 20; // Start with some padding above
-
-    backsideBackground.style.left = `${backsideStartX - 20 - (grid.matchWidth / 2) + (grid.matchWidth / 3)}px`;
-    backsideBackground.style.top = `${backsideTop}px`;
-    backsideBackground.style.width = `${backsideWidth}px`;
-    backsideBackground.style.height = `${backsideHeight}px`;
-
+    const backsideBackground = createBacksideBackground(grid, 8, round1StartY, spacing);
     document.getElementById('bracketMatches').appendChild(backsideBackground);
 
     // Round 1: Position BS matches on the left side, mirroring the frontside Y positions
@@ -594,10 +482,10 @@ function render8PlayerBacksideMatches(grid) {
 
     // Round 2: BS-2-1 and BS-2-2 advance leftward, centered between their inputs
     const bs2X = bs1X - (grid.matchWidth + grid.horizontalSpacing);
-    const bs22Y = (bs12Y + bs11Y) / 2 - (grid.matchHeight / 2); // BS-2-2 centered between BS-1-2 and BS-1-1
+    const bs21Y = (bs12Y + bs11Y) / 2 - (grid.matchHeight / 2); // BS-2-1 centered between BS-1-2 and BS-1-1
 
-    // BS-2-1 gets input from BS-1-2 winner, position relative to BS-1-2
-    const bs21Y = bs12Y - (grid.matchHeight / 2); // Align with BS-1-2
+    // BS-2-2 gets input from BS-1-2 winner, position relative to BS-1-2
+    const bs22Y = bs12Y - (grid.matchHeight / 2); // Align with BS-1-2
 
     const bs21 = matches.find(m => m.id === 'BS-2-1');
     const bs22 = matches.find(m => m.id === 'BS-2-2');
@@ -612,84 +500,139 @@ function render8PlayerBacksideMatches(grid) {
     const bs31 = matches.find(m => m.id === 'BS-3-1');
     if (bs31) renderMatch(bs31, bs3X, bs31Y, 'backside', 2);
 
-    // === BACKSIDE PROGRESSION LINES ===
-    // Mirror the frontside pattern: FS-1-1 and FS-1-2 both feed into BS-1-1
-    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
-    svg.style.position = 'absolute';
-    svg.style.top = '0';
-    svg.style.left = '0';
-    svg.style.width = '100%';
-    svg.style.height = '100%';
-    svg.style.pointerEvents = 'none';
-    svg.style.zIndex = '1'; // Behind matches
+    // === ALL PROGRESSION LINES (HTML/CSS) ===
+    // Shared function for creating L-shaped progression lines
+    function createLShapedProgressionLine(fromX, fromY, toX, toY, color = '#666666', width = 3) {
+        const midX = (fromX + toX) / 2;
 
-    const strokeColor = '#666666';
-    const strokeWidth = '3';
+        // Horizontal line from start to midpoint
+        const hLine1 = document.createElement('div');
+        hLine1.style.position = 'absolute';
+        hLine1.style.left = `${Math.min(fromX, midX)}px`;
+        hLine1.style.top = `${fromY}px`;
+        hLine1.style.width = `${Math.abs(midX - fromX)}px`;
+        hLine1.style.height = `${width}px`;
+        hLine1.style.backgroundColor = color;
+        hLine1.style.zIndex = '1';
 
-    // Calculate connection points - need frontside round 1 positions
+        // Vertical line from fromY to toY at midpoint
+        const vLine = document.createElement('div');
+        vLine.style.position = 'absolute';
+        vLine.style.left = `${midX}px`;
+        vLine.style.top = `${Math.min(fromY, toY)}px`;
+        vLine.style.width = `${width}px`;
+        vLine.style.height = `${Math.abs(toY - fromY)}px`;
+        vLine.style.backgroundColor = color;
+        vLine.style.zIndex = '1';
+
+        // Horizontal line from midpoint to end
+        const hLine2 = document.createElement('div');
+        hLine2.style.position = 'absolute';
+        hLine2.style.left = `${Math.min(midX, toX)}px`;
+        hLine2.style.top = `${toY}px`;
+        hLine2.style.width = `${Math.abs(toX - midX)}px`;
+        hLine2.style.height = `${width}px`;
+        hLine2.style.backgroundColor = color;
+        hLine2.style.zIndex = '1';
+
+        return [hLine1, vLine, hLine2];
+    }
+
+    // Calculate all center Y coordinates for both frontside and backside matches
     const round1X = grid.centerX + grid.centerBuffer + grid.horizontalSpacing;
     const fs11CenterY = round1StartY + (grid.matchHeight / 2);
     const fs12CenterY = round1StartY + spacing + (grid.matchHeight / 2);
-    const bs11CenterY = bs11Y + (grid.matchHeight / 2);
-
-    const horizontalExtension = 20;
-    // Move vertical line 130px left of frontside matches
-    const midPointX = round1X - 115;
-
-    // FS-1-1 to BS-1-1 connector (loser feed)
-    const pathFS11ToBS11 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathDataFS11ToBS11 = `M ${round1X} ${fs11CenterY}
-                                L ${midPointX} ${fs11CenterY}
-                                L ${midPointX} ${bs11CenterY}
-                                L ${bs1X + grid.matchWidth} ${bs11CenterY}`;
-    pathFS11ToBS11.setAttribute('d', pathDataFS11ToBS11);
-    pathFS11ToBS11.setAttribute('stroke', strokeColor);
-    pathFS11ToBS11.setAttribute('stroke-width', strokeWidth);
-    pathFS11ToBS11.setAttribute('fill', 'none');
-
-    // FS-1-2 to BS-1-1 connector (loser feed)
-    const pathFS12ToBS11 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathDataFS12ToBS11 = `M ${round1X} ${fs12CenterY}
-                                L ${midPointX} ${fs12CenterY}
-                                L ${midPointX} ${bs11CenterY}
-                                L ${bs1X + grid.matchWidth} ${bs11CenterY}`;
-    pathFS12ToBS11.setAttribute('d', pathDataFS12ToBS11);
-    pathFS12ToBS11.setAttribute('stroke', strokeColor);
-    pathFS12ToBS11.setAttribute('stroke-width', strokeWidth);
-    pathFS12ToBS11.setAttribute('fill', 'none');
-
-    // Calculate center Y positions for FS-1-3 and FS-1-4
     const fs13CenterY = round1StartY + 2 * spacing + (grid.matchHeight / 2);
     const fs14CenterY = round1StartY + 3 * spacing + (grid.matchHeight / 2);
+    const bs11CenterY = bs11Y + (grid.matchHeight / 2);
     const bs12CenterY = bs12Y + (grid.matchHeight / 2);
+    const bs21CenterY = bs21Y + (grid.matchHeight / 2);
+    const bs22CenterY = bs22Y + (grid.matchHeight / 2);
+    const bs31CenterY = bs31Y + (grid.matchHeight / 2);
 
-    // FS-1-3 to BS-1-2 connector (loser feed)
-    const pathFS13ToBS12 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathDataFS13ToBS12 = `M ${round1X} ${fs13CenterY}
-                                L ${midPointX} ${fs13CenterY}
-                                L ${midPointX} ${bs12CenterY}
-                                L ${bs1X + grid.matchWidth} ${bs12CenterY}`;
-    pathFS13ToBS12.setAttribute('d', pathDataFS13ToBS12);
-    pathFS13ToBS12.setAttribute('stroke', strokeColor);
-    pathFS13ToBS12.setAttribute('stroke-width', strokeWidth);
-    pathFS13ToBS12.setAttribute('fill', 'none');
+    // FS to BS loser feed lines
+    const [fs11_h1, fs11_v, fs11_h2] = createLShapedProgressionLine(round1X, fs11CenterY, bs1X + grid.matchWidth, bs11CenterY);
+    const [fs12_h1, fs12_v, fs12_h2] = createLShapedProgressionLine(round1X, fs12CenterY, bs1X + grid.matchWidth, bs11CenterY);
+    const [fs13_h1, fs13_v, fs13_h2] = createLShapedProgressionLine(round1X, fs13CenterY, bs1X + grid.matchWidth, bs12CenterY);
+    const [fs14_h1, fs14_v, fs14_h2] = createLShapedProgressionLine(round1X, fs14CenterY, bs1X + grid.matchWidth, bs12CenterY);
 
-    // FS-1-4 to BS-1-2 connector (loser feed)
-    const pathFS14ToBS12 = document.createElementNS('http://www.w3.org/2000/svg', 'path');
-    const pathDataFS14ToBS12 = `M ${round1X} ${fs14CenterY}
-                                L ${midPointX} ${fs14CenterY}
-                                L ${midPointX} ${bs12CenterY}
-                                L ${bs1X + grid.matchWidth} ${bs12CenterY}`;
-    pathFS14ToBS12.setAttribute('d', pathDataFS14ToBS12);
-    pathFS14ToBS12.setAttribute('stroke', strokeColor);
-    pathFS14ToBS12.setAttribute('stroke-width', strokeWidth);
-    pathFS14ToBS12.setAttribute('fill', 'none');
+    // BS to BS progression lines
+    const [bs11_h1, bs11_v, bs11_h2] = createLShapedProgressionLine(bs1X, bs11CenterY, bs2X + grid.matchWidth, bs21CenterY);
+    const [bs12_h1, bs12_v, bs12_h2] = createLShapedProgressionLine(bs1X, bs12CenterY, bs2X + grid.matchWidth, bs22CenterY);
 
-    svg.appendChild(pathFS11ToBS11);
-    svg.appendChild(pathFS12ToBS11);
-    svg.appendChild(pathFS13ToBS12);
-    svg.appendChild(pathFS14ToBS12);
-    document.getElementById('bracketCanvas').appendChild(svg);
+    // Add all FS-to-BS and BS-to-BS lines to bracketMatches container
+    [fs11_h1, fs11_v, fs11_h2, fs12_h1, fs12_v, fs12_h2, fs13_h1, fs13_v, fs13_h2, fs14_h1, fs14_v, fs14_h2, bs11_h1, bs11_v, bs11_h2, bs12_h1, bs12_v, bs12_h2].forEach(line => {
+        document.getElementById('bracketMatches').appendChild(line);
+    });
+
+    // Center Y coordinates already calculated above
+
+    console.log('🔍 Match positions vs line positions:', {
+        'BS-1-1 match at': bs11Y, 'BS-1-1 center': bs11CenterY,
+        'BS-2-1 match at': bs21Y, 'BS-2-1 center': bs21CenterY,
+        'BS-2-2 match at': bs22Y, 'BS-2-2 center': bs22CenterY,
+        'BS-3-1 match at': bs31Y, 'BS-3-1 center': bs31CenterY
+    });
+    console.log('🔍 Backside progression debug:', {
+        bs1X, bs2X, bs3X,
+        bs11Y, bs12Y, bs21Y, bs22Y, bs31Y,
+        bs11CenterY, bs21CenterY, bs22CenterY, bs31CenterY,
+        gridMatchWidth: grid.matchWidth
+    });
+
+    // All BS-1 to BS-2 and BS-2 to BS-3 progression lines now use HTML/CSS (created above)
+
+    // BS-2 to BS-3 progression lines using HTML/CSS positioning (like matches)
+    function createProgressionLine(fromX, fromY, toX, toY, color = '#666666', width = 3) {
+        // Create horizontal line
+        const hLine = document.createElement('div');
+        hLine.style.position = 'absolute';
+        hLine.style.left = `${Math.min(fromX, toX)}px`;
+        hLine.style.top = `${fromY}px`;
+        hLine.style.width = `${Math.abs(toX - fromX)}px`;
+        hLine.style.height = `${width}px`;
+        hLine.style.backgroundColor = color;
+        hLine.style.zIndex = '1';
+
+        // Create vertical line
+        const vLine = document.createElement('div');
+        vLine.style.position = 'absolute';
+        vLine.style.left = `${toX}px`;
+        vLine.style.top = `${Math.min(fromY, toY)}px`;
+        vLine.style.width = `${width}px`;
+        vLine.style.height = `${Math.abs(toY - fromY)}px`;
+        vLine.style.backgroundColor = color;
+        vLine.style.zIndex = '1';
+
+        return [hLine, vLine];
+    }
+
+    // BS-2-1 to BS-3-1 progression line
+    const bs2LeftEdge = bs2X;
+    const bs3RightEdge = bs3X + grid.matchWidth;
+    const bs2ToBS3MidPointX = (bs2LeftEdge + bs3RightEdge) / 2;
+
+    const [hLine1, vLine1] = createProgressionLine(bs2LeftEdge, bs21CenterY, bs2ToBS3MidPointX, bs21CenterY);
+    const [hLine2, vLine2] = createProgressionLine(bs2ToBS3MidPointX, bs21CenterY, bs2ToBS3MidPointX, bs31CenterY);
+    const [hLine3, vLine3] = createProgressionLine(bs2ToBS3MidPointX, bs31CenterY, bs3RightEdge, bs31CenterY);
+
+    // BS-2-2 to BS-3-1 progression line
+    const [hLine4, vLine4] = createProgressionLine(bs2LeftEdge, bs22CenterY, bs2ToBS3MidPointX, bs22CenterY);
+    const [hLine5, vLine5] = createProgressionLine(bs2ToBS3MidPointX, bs22CenterY, bs2ToBS3MidPointX, bs31CenterY);
+
+    // Add lines to bracketMatches container (same as matches)
+    document.getElementById('bracketMatches').appendChild(hLine1);
+    document.getElementById('bracketMatches').appendChild(vLine1);
+    document.getElementById('bracketMatches').appendChild(hLine2);
+    document.getElementById('bracketMatches').appendChild(vLine2);
+    document.getElementById('bracketMatches').appendChild(hLine3);
+    document.getElementById('bracketMatches').appendChild(vLine3);
+    document.getElementById('bracketMatches').appendChild(hLine4);
+    document.getElementById('bracketMatches').appendChild(vLine4);
+    document.getElementById('bracketMatches').appendChild(hLine5);
+    document.getElementById('bracketMatches').appendChild(vLine5);
+
+    // All progression lines now use HTML/CSS positioning instead of SVG
 }
 
 // Hardcoded positioning for 16-player backside to show clear progression (mirrored to left)
@@ -698,30 +641,9 @@ function render16PlayerBacksideMatches(grid) {
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
-    // Add gradient background box for the backside bracket
-    const backsideBackground = document.createElement('div');
-    backsideBackground.className = 'backside-background';
-    backsideBackground.style.cssText = `
-        position: absolute;
-        background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
-        border-radius: 16px;
-        z-index: 0;
-        pointer-events: none;
-    `;
-
-    // Calculate background dimensions based on the backside bracket area for 16-player
+    // Add gradient background box for the backside bracket using bracket-lines.js function
     const round1StartY = grid.centerY - (3.5 * spacing); // Same as frontside
-    const backsideStartX = grid.centerX - grid.centerBuffer - (5 * (grid.matchWidth + grid.horizontalSpacing)); // Estimate for 16-player depth
-    const backsideEndX = grid.centerX - grid.centerBuffer - grid.horizontalSpacing;
-    const backsideWidth = backsideEndX - backsideStartX + grid.matchWidth + 40 - (2 * grid.matchWidth / 3); // Extra padding minus 1/3 match width on each end
-    const backsideHeight = 8 * spacing + 40; // Height to cover all 16-player matches plus padding
-    const backsideTop = round1StartY - 20; // Start with some padding above
-
-    backsideBackground.style.left = `${backsideStartX - 20 - (grid.matchWidth / 2) + (grid.matchWidth / 3)}px`;
-    backsideBackground.style.top = `${backsideTop}px`;
-    backsideBackground.style.width = `${backsideWidth}px`;
-    backsideBackground.style.height = `${backsideHeight}px`;
-
+    const backsideBackground = createBacksideBackground(grid, 16, round1StartY, spacing);
     document.getElementById('bracketMatches').appendChild(backsideBackground);
 
     // Round 1: Position BS matches on the left side, aligned with frontside round 2 positions
