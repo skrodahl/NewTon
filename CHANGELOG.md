@@ -1,5 +1,10 @@
 # 2025-09-22
 
+## v2.0.2 Reset Tournament Bug Fix
+- **Fixed Event Listener Accumulation**: Resolved bug where resetting the same tournament multiple times caused exponentially increasing browser confirmation dialogs
+- **Clean Event Handling**: Tournament reset input field now properly removes old event listeners before adding new ones
+- **Color Consistency**: Updated reset button enabled state to use subtle orange color matching interface palette
+
 ## v2.0.1 Dialog Visual Consistency
 - **Dialog Color Harmonization**: Updated all modal dialogs to use consistent subtle color palette
 - **Tournament in Progress Dialog**: Changed blue "Got it" button and info box border to subtle green theme

@@ -4,8 +4,8 @@
 *Raw ideas and suggestions awaiting triage*
 - None
 
-## Next  
-- None
+## Next
+- Tournament bracket visual cues and captions
 
 ## Later
 *Not urgent but worth tracking*

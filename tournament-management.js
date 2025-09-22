@@ -594,12 +594,16 @@ function showResetTournamentModal() {
     // Disable reset button initially
     document.getElementById('confirmResetBtn').disabled = true;
 
-    // Set up real-time validation
-    input.addEventListener('input', function() {
+    // Remove any existing event listeners by cloning the input element
+    const newInput = input.cloneNode(true);
+    input.parentNode.replaceChild(newInput, input);
+
+    // Set up real-time validation on the clean input
+    newInput.addEventListener('input', function() {
         const resetBtn = document.getElementById('confirmResetBtn');
         if (this.value === tournamentName) {
             resetBtn.disabled = false;
-            resetBtn.style.background = '#dc3545';
+            resetBtn.style.background = 'rgba(180, 83, 9, 0.9)';
         } else {
             resetBtn.disabled = true;
             resetBtn.style.background = '#6c757d';
@@ -607,7 +611,7 @@ function showResetTournamentModal() {
     });
 
     // Add Enter key support
-    input.addEventListener('keydown', function(e) {
+    newInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && this.value === tournamentName) {
             confirmReset();
         }
@@ -615,7 +619,7 @@ function showResetTournamentModal() {
 
     // Focus input after modal shows
     setTimeout(() => {
-        input.focus();
+        newInput.focus();
     }, 100);
 
     // Show modal with Esc support
