@@ -168,14 +168,9 @@ function createCustomFinalsLines(round3X, fs31CenterY, finalsX, backsideFinalCen
     fs31_h1.style.backgroundColor = '#666666';
     fs31_h1.style.zIndex = '1';
 
+    // Create invisible placeholder for fs31_v to maintain array structure
     const fs31_v = document.createElement('div');
-    fs31_v.style.position = 'absolute';
-    fs31_v.style.left = `${finalsVerticalX}px`;
-    fs31_v.style.top = `${Math.min(fs31CenterY, grandFinalCenterY)}px`;
-    fs31_v.style.width = '3px';
-    fs31_v.style.height = `${Math.abs(grandFinalCenterY - fs31CenterY)}px`;
-    fs31_v.style.backgroundColor = '#666666';
-    fs31_v.style.zIndex = '1';
+    fs31_v.style.display = 'none';
 
     const fs31_h2 = document.createElement('div');
     fs31_h2.style.position = 'absolute';
