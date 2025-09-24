@@ -351,5 +351,85 @@ function create8PlayerBacksideLines(grid, matches, positions) {
 
     progressionLines.push(hLine1, vLine1, hLine2, vLine2, hLine3, vLine3, hLine4, vLine4, hLine5, vLine5);
 
+    // Add BS-FINAL indicator for 8-player bracket
+    const spacingMultiplier = 4;
+    const finalsX = positions.round3X + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
+    const backsideFinalY = grid.centerY - 80;
+    const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
+
+    const bs31ToFinalElements = createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCenterY, grid);
+    progressionLines.push(...bs31ToFinalElements);
+
     return progressionLines;
+}
+
+/**
+ * Creates L-shaped line with arrow pointing to BS-FINAL text for 8-player bracket
+ * @param {number} bs3X - X position of BS-3-1 match
+ * @param {number} bs31CenterY - Center Y position of BS-3-1 match
+ * @param {number} finalsX - X position of finals matches
+ * @param {number} backsideFinalCenterY - Center Y position of BS-FINAL match
+ * @param {Object} grid - Grid configuration object
+ * @returns {Array} Array of DOM elements for the L-shaped line, arrow, and text
+ */
+function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCenterY, grid) {
+    const elements = [];
+
+    // Calculate positions
+    const lineStartX = bs3X - 30; // Start line 30px to the left of BS-3-1
+    const horizontalLineLength = 40; // Length of horizontal line
+    const verticalLineEndX = lineStartX - horizontalLineLength + 15; // End vertical line 15px from horizontal end
+    const textX = verticalLineEndX - 35; // Position text 35px to the left of vertical line
+    const textY = backsideFinalCenterY + 30; // Position text 30px below BS-FINAL center
+
+    // Horizontal line (left from BS-3-1)
+    const hLine = document.createElement('div');
+    hLine.style.position = 'absolute';
+    hLine.style.left = `${lineStartX - horizontalLineLength}px`;
+    hLine.style.top = `${bs31CenterY}px`;
+    hLine.style.width = `${horizontalLineLength}px`;
+    hLine.style.height = '3px';
+    hLine.style.backgroundColor = '#666666';
+    hLine.style.zIndex = '2';
+    elements.push(hLine);
+
+    // Vertical line (downward)
+    const vLine = document.createElement('div');
+    vLine.style.position = 'absolute';
+    vLine.style.left = `${verticalLineEndX}px`;
+    vLine.style.top = `${bs31CenterY}px`;
+    vLine.style.width = '3px';
+    vLine.style.height = `${Math.abs(textY - bs31CenterY - 15)}px`; // Stop 15px before text
+    vLine.style.backgroundColor = '#666666';
+    vLine.style.zIndex = '2';
+    elements.push(vLine);
+
+    // Arrow pointing down
+    const arrow = document.createElement('div');
+    arrow.style.position = 'absolute';
+    arrow.style.left = `${verticalLineEndX - 5}px`; // Center arrow on vertical line
+    arrow.style.top = `${textY - 25}px`; // Position arrow above text
+    arrow.style.width = '0';
+    arrow.style.height = '0';
+    arrow.style.borderLeft = '5px solid transparent';
+    arrow.style.borderRight = '5px solid transparent';
+    arrow.style.borderTop = '10px solid #666666';
+    arrow.style.zIndex = '2';
+    elements.push(arrow);
+
+    // BS-FINAL text
+    const text = document.createElement('div');
+    text.style.position = 'absolute';
+    text.style.left = `${textX}px`;
+    text.style.top = `${textY}px`;
+    text.style.fontFamily = 'Arial, sans-serif';
+    text.style.fontSize = '12px';
+    text.style.fontWeight = 'bold';
+    text.style.color = '#333333';
+    text.style.textAlign = 'center';
+    text.style.zIndex = '2';
+    text.textContent = 'BS-FINAL';
+    elements.push(text);
+
+    return elements;
 }

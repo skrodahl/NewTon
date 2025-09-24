@@ -518,11 +518,13 @@ function render8PlayerBacksideMatches(grid) {
     }
 
     const round1X = grid.centerX + grid.centerBuffer + grid.horizontalSpacing;
+    const round2X = round1X + grid.matchWidth + grid.horizontalSpacing;
+    const round3X = round2X + grid.matchWidth + grid.horizontalSpacing;
 
     // === 8-Player Backside Progression Lines ===
     // Create all backside progression lines using bracket-lines.js functions
     const positions = {
-        round1X, bs1X, bs2X, bs3X,
+        round1X, bs1X, bs2X, bs3X, round3X,
         round1StartY, spacing,
         bs11Y, bs12Y, bs21Y, bs22Y, bs31Y
     };

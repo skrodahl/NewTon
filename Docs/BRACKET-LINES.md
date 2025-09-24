@@ -77,6 +77,7 @@ const positions = {
 - Uses `createLShapedProgressionLine()` for most connections
 - Uses `createProgressionLine()` for complex BS-2 → BS-3 merging
 - Supports frontside-to-backside coordinate translation
+- **NEW**: Includes `createBS31ToFinalIndicator()` for BS-FINAL text indicator
 
 ## Line Creation Utilities
 
@@ -94,6 +95,13 @@ const positions = {
 **Purpose**: Creates complex finals area progression lines
 **Returns**: Array of 6 DOM elements for finals routing
 **Use Case**: FS-3-1 connections to both BS-FINAL and GRAND-FINAL
+
+### `createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCenterY, grid)`
+**Purpose**: Creates L-shaped line with arrow pointing to BS-FINAL text for 8-player bracket
+**Returns**: Array of 4 DOM elements `[hLine, vLine, arrow, text]`
+**Components**: Horizontal line, vertical line, downward arrow, and "BS-FINAL" text
+**Use Case**: Visual indicator showing progression from BS-3-1 to BS-FINAL match
+**Styling**: Uses consistent bracket colors (#666666) with enhanced z-index (2) for visibility
 
 ## Rendering Integration
 
@@ -140,6 +148,7 @@ progressionLines.forEach(line => {
 - Pattern is ready for 16 and 32-player implementation
 - New line types can be added without affecting existing code
 - Support for custom tournament formats
+- **NEW**: Text indicators and arrows can be added for improved user experience
 
 ## Guidelines for 16 & 32-Player Implementation
 
