@@ -617,6 +617,26 @@ function render16PlayerBacksideMatches(grid) {
 
     const bs51 = matches.find(m => m.id === 'BS-5-1');
     if (bs51) renderMatch(bs51, bs5X, bs51Y, 'backside', 4);
+
+    // === 16-Player Backside Progression Lines ===
+    // Create Phase 1: FS → BS loser feed lines using bracket-lines.js functions
+
+    // Calculate frontside coordinates for loser feeds
+    const frontsideRound1X = grid.centerX + grid.centerBuffer;
+
+    const positions = {
+        round1X: frontsideRound1X, bs1X,
+        round1StartY, spacing,
+        bs11Y, bs12Y, bs13Y, bs14Y,
+        bs21Y, bs22Y, bs23Y, bs24Y
+    };
+
+    const progressionLines = create16PlayerBacksideLines(grid, matches, positions);
+
+    // Add all lines to bracketMatches container
+    progressionLines.forEach(line => {
+        document.getElementById('bracketMatches').appendChild(line);
+    });
 }
 
 // Hardcoded positioning for 32-player backside to show clear progression (mirrored to left)

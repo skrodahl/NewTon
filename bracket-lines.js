@@ -536,3 +536,139 @@ function create16PlayerFrontsideLines(grid, matches, positions) {
 
     return progressionLines;
 }
+
+/**
+ * Creates all backside progression lines for 16-player bracket
+ * @param {Object} grid - Grid configuration object
+ * @param {Array} matches - Array of match objects
+ * @param {Object} positions - Object containing calculated match positions
+ * @returns {Array} Array of DOM elements for all backside progression lines
+ */
+function create16PlayerBacksideLines(grid, matches, positions) {
+    const progressionLines = [];
+    const { round1X, bs1X } = positions;
+    const { round1StartY, spacing } = positions;
+    const { bs11Y, bs12Y, bs13Y, bs14Y } = positions;
+
+    // Calculate center Y coordinates for frontside Round 1 matches (for loser feeds)
+    const fs11CenterY = round1StartY + (grid.matchHeight / 2);
+    const fs12CenterY = round1StartY + spacing + (grid.matchHeight / 2);
+    const fs13CenterY = round1StartY + 2 * spacing + (grid.matchHeight / 2);
+    const fs14CenterY = round1StartY + 3 * spacing + (grid.matchHeight / 2);
+    const fs15CenterY = round1StartY + 4 * spacing + (grid.matchHeight / 2);
+    const fs16CenterY = round1StartY + 5 * spacing + (grid.matchHeight / 2);
+    const fs17CenterY = round1StartY + 6 * spacing + (grid.matchHeight / 2);
+    const fs18CenterY = round1StartY + 7 * spacing + (grid.matchHeight / 2);
+
+    // Calculate center Y coordinates for backside matches
+    const bs11CenterY = bs11Y + (grid.matchHeight / 2);
+    const bs12CenterY = bs12Y + (grid.matchHeight / 2);
+    const bs13CenterY = bs13Y + (grid.matchHeight / 2);
+    const bs14CenterY = bs14Y + (grid.matchHeight / 2);
+
+    // Phase 1: FS Round 1 to BS Round 1 loser feed lines (custom L-shaped with vertical closer to frontside)
+    // Hardcode vertical line position closer to frontside (like 8-player bracket)
+    const loserFeedVerticalX = round1X - 40; // Position vertical line 40px left of frontside matches
+
+    // Helper function to create custom loser feed lines
+    function createLoserFeedLine(fromX, fromY, toX, toY, verticalX) {
+        // Horizontal line from frontside match to vertical line
+        const hLine1 = document.createElement('div');
+        hLine1.style.position = 'absolute';
+        hLine1.style.left = `${Math.min(fromX, verticalX)}px`;
+        hLine1.style.top = `${fromY}px`;
+        hLine1.style.width = `${Math.abs(verticalX - fromX)}px`;
+        hLine1.style.height = '3px';
+        hLine1.style.backgroundColor = '#666666';
+        hLine1.style.zIndex = '1';
+
+        // Vertical line
+        const vLine = document.createElement('div');
+        vLine.style.position = 'absolute';
+        vLine.style.left = `${verticalX}px`;
+        vLine.style.top = `${Math.min(fromY, toY)}px`;
+        vLine.style.width = '3px';
+        vLine.style.height = `${Math.abs(toY - fromY)}px`;
+        vLine.style.backgroundColor = '#666666';
+        vLine.style.zIndex = '1';
+
+        // Horizontal line from vertical line to backside match
+        const hLine2 = document.createElement('div');
+        hLine2.style.position = 'absolute';
+        hLine2.style.left = `${Math.min(verticalX, toX)}px`;
+        hLine2.style.top = `${toY}px`;
+        hLine2.style.width = `${Math.abs(toX - verticalX)}px`;
+        hLine2.style.height = '3px';
+        hLine2.style.backgroundColor = '#666666';
+        hLine2.style.zIndex = '1';
+
+        return [hLine1, vLine, hLine2];
+    }
+
+    // FS-1-1 and FS-1-2 losers → BS-1-1
+    const [fs11_h1, fs11_v, fs11_h2] = createLoserFeedLine(round1X, fs11CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
+    const [fs12_h1, fs12_v, fs12_h2] = createLoserFeedLine(round1X, fs12CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
+
+    // FS-1-3 and FS-1-4 losers → BS-1-2
+    const [fs13_h1, fs13_v, fs13_h2] = createLoserFeedLine(round1X, fs13CenterY, bs1X + grid.matchWidth, bs12CenterY, loserFeedVerticalX);
+    const [fs14_h1, fs14_v, fs14_h2] = createLoserFeedLine(round1X, fs14CenterY, bs1X + grid.matchWidth, bs12CenterY, loserFeedVerticalX);
+
+    // FS-1-5 and FS-1-6 losers → BS-1-3
+    const [fs15_h1, fs15_v, fs15_h2] = createLoserFeedLine(round1X, fs15CenterY, bs1X + grid.matchWidth, bs13CenterY, loserFeedVerticalX);
+    const [fs16_h1, fs16_v, fs16_h2] = createLoserFeedLine(round1X, fs16CenterY, bs1X + grid.matchWidth, bs13CenterY, loserFeedVerticalX);
+
+    // FS-1-7 and FS-1-8 losers → BS-1-4
+    const [fs17_h1, fs17_v, fs17_h2] = createLoserFeedLine(round1X, fs17CenterY, bs1X + grid.matchWidth, bs14CenterY, loserFeedVerticalX);
+    const [fs18_h1, fs18_v, fs18_h2] = createLoserFeedLine(round1X, fs18CenterY, bs1X + grid.matchWidth, bs14CenterY, loserFeedVerticalX);
+
+    progressionLines.push(fs11_h1, fs11_v, fs11_h2, fs12_h1, fs12_v, fs12_h2, fs13_h1, fs13_v, fs13_h2, fs14_h1, fs14_v, fs14_h2);
+    progressionLines.push(fs15_h1, fs15_v, fs15_h2, fs16_h1, fs16_v, fs16_h2, fs17_h1, fs17_v, fs17_h2, fs18_h1, fs18_v, fs18_h2);
+
+    // Phase 2a: BS Round 1 → BS Round 2 (straight lines, 1:1 progression)
+    const bs2X = bs1X - (grid.matchWidth + grid.horizontalSpacing);
+    const bs21CenterY = positions.bs21Y + (grid.matchHeight / 2);
+    const bs22CenterY = positions.bs22Y + (grid.matchHeight / 2);
+    const bs23CenterY = positions.bs23Y + (grid.matchHeight / 2);
+    const bs24CenterY = positions.bs24Y + (grid.matchHeight / 2);
+
+    // Straight lines: BS-1-1→BS-2-1, BS-1-2→BS-2-2, BS-1-3→BS-2-3, BS-1-4→BS-2-4
+    const bs11ToBs21 = document.createElement('div');
+    bs11ToBs21.style.position = 'absolute';
+    bs11ToBs21.style.left = `${bs1X}px`;
+    bs11ToBs21.style.top = `${bs11CenterY}px`;
+    bs11ToBs21.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs11ToBs21.style.height = '3px';
+    bs11ToBs21.style.backgroundColor = '#666666';
+    bs11ToBs21.style.zIndex = '1';
+
+    const bs12ToBs22 = document.createElement('div');
+    bs12ToBs22.style.position = 'absolute';
+    bs12ToBs22.style.left = `${bs1X}px`;
+    bs12ToBs22.style.top = `${bs12CenterY}px`;
+    bs12ToBs22.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs12ToBs22.style.height = '3px';
+    bs12ToBs22.style.backgroundColor = '#666666';
+    bs12ToBs22.style.zIndex = '1';
+
+    const bs13ToBs23 = document.createElement('div');
+    bs13ToBs23.style.position = 'absolute';
+    bs13ToBs23.style.left = `${bs1X}px`;
+    bs13ToBs23.style.top = `${bs13CenterY}px`;
+    bs13ToBs23.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs13ToBs23.style.height = '3px';
+    bs13ToBs23.style.backgroundColor = '#666666';
+    bs13ToBs23.style.zIndex = '1';
+
+    const bs14ToBs24 = document.createElement('div');
+    bs14ToBs24.style.position = 'absolute';
+    bs14ToBs24.style.left = `${bs1X}px`;
+    bs14ToBs24.style.top = `${bs14CenterY}px`;
+    bs14ToBs24.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs14ToBs24.style.height = '3px';
+    bs14ToBs24.style.backgroundColor = '#666666';
+    bs14ToBs24.style.zIndex = '1';
+
+    progressionLines.push(bs11ToBs21, bs12ToBs22, bs13ToBs23, bs14ToBs24);
+
+    return progressionLines;
+}
