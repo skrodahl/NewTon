@@ -421,47 +421,51 @@
         <div class="modal-content">
             <h3 id="statsPlayerName">Player Statistics</h3>
 
-            <div class="form-group">
-                <label>Short Legs (max 21 darts)</label>
-                <input type="number" id="statsShortLegDarts" min="9" max="21" placeholder="Enter dart count">
-                <button class="btn" onclick="addShortLeg()" style="margin-top: 5px;">Add Short Leg</button>
-            </div>
-
-            <div class="form-group">
-                <label>High Out Score (101+)</label>
-                <input type="number" id="statsHighOut" min="101" max="170" placeholder="Enter high out score">
-                <button class="btn" onclick="addHighOut()" style="margin-top: 5px;">Add High Out</button>
-            </div>
-
-            <div class="form-group">
-                <label>180s</label>
-                <div style="display: flex; align-items: center; height: 45px;">
-                    <button class="btn" onclick="decrement180s()"
-                        style="padding: 8px 12px; margin-right: 2px;">−</button>
-                    <button class="btn" onclick="increment180s()"
-                        style="padding: 8px 12px; margin-left: 1px;">+</button>
-                    <span id="current180sCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
-                        0</span>
+            <!-- Scrollable content area -->
+            <div class="stats-content-container" style="max-height: 60vh; overflow-y: auto; padding-right: 8px;">
+                <div class="form-group">
+                    <label>Short Legs (max 21 darts)</label>
+                    <input type="number" id="statsShortLegDarts" min="9" max="21" placeholder="Enter dart count">
+                    <button class="btn" onclick="addShortLeg()" style="margin-top: 5px;">Add Short Leg</button>
                 </div>
-            </div>
 
-            <div class="form-group">
-                <label>Tons (100+)</label>
-                <div style="display: flex; align-items: center; height: 45px;">
-                    <button class="btn" onclick="decrementTons()"
-                        style="padding: 8px 12px; margin-right: 2px;">−</button>
-                    <button class="btn" onclick="incrementTons()"
-                        style="padding: 8px 12px; margin-left: 1px;">+</button>
-                    <span id="currentTonsCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
-                        0</span>
+                <div class="form-group">
+                    <label>High Out Score (101+)</label>
+                    <input type="number" id="statsHighOut" min="101" max="170" placeholder="Enter high out score">
+                    <button class="btn" onclick="addHighOut()" style="margin-top: 5px;">Add High Out</button>
                 </div>
+
+                <div class="form-group">
+                    <label>180s</label>
+                    <div style="display: flex; align-items: center; height: 45px;">
+                        <button class="btn" onclick="decrement180s()"
+                            style="padding: 8px 12px; margin-right: 2px;">−</button>
+                        <button class="btn" onclick="increment180s()"
+                            style="padding: 8px 12px; margin-left: 1px;">+</button>
+                        <span id="current180sCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
+                            0</span>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label>Tons (100+)</label>
+                    <div style="display: flex; align-items: center; height: 45px;">
+                        <button class="btn" onclick="decrementTons()"
+                            style="padding: 8px 12px; margin-right: 2px;">−</button>
+                        <button class="btn" onclick="incrementTons()"
+                            style="padding: 8px 12px; margin-left: 1px;">+</button>
+                        <span id="currentTonsCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
+                            0</span>
+                    </div>
+                </div>
+
+                <!-- Lists grouped together -->
+                <div id="shortLegsList"></div>
+                <div id="highOutsList"></div>
             </div>
 
-            <!-- Lists grouped together at the bottom -->
-            <div id="shortLegsList"></div>
-            <div id="highOutsList"></div>
-
-            <div style="margin-top: 20px;">
+            <!-- Fixed button area at bottom -->
+            <div class="text-center mt-20" style="flex-shrink: 0; margin-top: 20px;">
                 <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
                 <button class="btn" onclick="closeStatsModal()">Cancel</button>
             </div>
