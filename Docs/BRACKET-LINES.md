@@ -103,6 +103,13 @@ const positions = {
 **Use Case**: Visual indicator showing progression from BS-3-1 to BS-FINAL match
 **Styling**: Uses consistent bracket colors (#666666) with enhanced z-index (2) for visibility
 
+**Positioning Details**:
+- **Horizontal line**: Extends 40px left from BS-3-1 match left edge
+- **Vertical line**: Drops down from horizontal line end to text area
+- **Arrow**: Positioned at vertical line bottom end, centered with 1px right offset
+- **Text**: Positioned one match height + 20px below BS-FINAL center, 27px left of vertical line
+- **Precise alignment**: All elements form clean L-shape with proper connections
+
 ## Rendering Integration
 
 ### Execution Flow

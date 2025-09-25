@@ -376,11 +376,12 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCen
     const elements = [];
 
     // Calculate positions
-    const lineStartX = bs3X - 30; // Start line 30px to the left of BS-3-1
     const horizontalLineLength = 40; // Length of horizontal line
-    const verticalLineEndX = lineStartX - horizontalLineLength + 15; // End vertical line 15px from horizontal end
-    const textX = verticalLineEndX - 35; // Position text 35px to the left of vertical line
-    const textY = backsideFinalCenterY + 30; // Position text 30px below BS-FINAL center
+    const lineStartX = bs3X; // Start line from the left edge of BS-3-1 match
+    const verticalLineEndX = lineStartX - horizontalLineLength; // Position vertical line at the end of horizontal line
+    const textX = verticalLineEndX - 27; // Position text ~8px closer to the right (about one character width)
+    const textY = backsideFinalCenterY + grid.matchHeight + 20; // Position text one match height + 20px below BS-FINAL center
+    const verticalLineBottomY = textY - 15; // Vertical line ends 15px above text
 
     // Horizontal line (left from BS-3-1)
     const hLine = document.createElement('div');
@@ -399,7 +400,7 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCen
     vLine.style.left = `${verticalLineEndX}px`;
     vLine.style.top = `${bs31CenterY}px`;
     vLine.style.width = '3px';
-    vLine.style.height = `${Math.abs(textY - bs31CenterY - 15)}px`; // Stop 15px before text
+    vLine.style.height = `${verticalLineBottomY - bs31CenterY}px`; // Line extends to just above text
     vLine.style.backgroundColor = '#666666';
     vLine.style.zIndex = '2';
     elements.push(vLine);
@@ -407,8 +408,8 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCen
     // Arrow pointing down
     const arrow = document.createElement('div');
     arrow.style.position = 'absolute';
-    arrow.style.left = `${verticalLineEndX - 5}px`; // Center arrow on vertical line
-    arrow.style.top = `${textY - 25}px`; // Position arrow above text
+    arrow.style.left = `${verticalLineEndX - 4}px`; // Center arrow on vertical line (1px right)
+    arrow.style.top = `${verticalLineBottomY}px`; // Position arrow at the end of vertical line
     arrow.style.width = '0';
     arrow.style.height = '0';
     arrow.style.borderLeft = '5px solid transparent';

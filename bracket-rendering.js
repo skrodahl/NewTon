@@ -480,42 +480,6 @@ function render8PlayerBacksideMatches(grid) {
     if (bs31) renderMatch(bs31, bs3X, bs31Y, 'backside', 2);
 
     // === ALL PROGRESSION LINES (HTML/CSS) ===
-    // Shared function for creating L-shaped progression lines
-    function createLShapedProgressionLine(fromX, fromY, toX, toY, color = '#666666', width = 3) {
-        const midX = (fromX + toX) / 2;
-
-        // Horizontal line from start to midpoint
-        const hLine1 = document.createElement('div');
-        hLine1.style.position = 'absolute';
-        hLine1.style.left = `${Math.min(fromX, midX)}px`;
-        hLine1.style.top = `${fromY}px`;
-        hLine1.style.width = `${Math.abs(midX - fromX)}px`;
-        hLine1.style.height = `${width}px`;
-        hLine1.style.backgroundColor = color;
-        hLine1.style.zIndex = '1';
-
-        // Vertical line from fromY to toY at midpoint
-        const vLine = document.createElement('div');
-        vLine.style.position = 'absolute';
-        vLine.style.left = `${midX}px`;
-        vLine.style.top = `${Math.min(fromY, toY)}px`;
-        vLine.style.width = `${width}px`;
-        vLine.style.height = `${Math.abs(toY - fromY)}px`;
-        vLine.style.backgroundColor = color;
-        vLine.style.zIndex = '1';
-
-        // Horizontal line from midpoint to end
-        const hLine2 = document.createElement('div');
-        hLine2.style.position = 'absolute';
-        hLine2.style.left = `${Math.min(midX, toX)}px`;
-        hLine2.style.top = `${toY}px`;
-        hLine2.style.width = `${Math.abs(toX - midX)}px`;
-        hLine2.style.height = `${width}px`;
-        hLine2.style.backgroundColor = color;
-        hLine2.style.zIndex = '1';
-
-        return [hLine1, vLine, hLine2];
-    }
 
     const round1X = grid.centerX + grid.centerBuffer + grid.horizontalSpacing;
     const round2X = round1X + grid.matchWidth + grid.horizontalSpacing;
