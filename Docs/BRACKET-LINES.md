@@ -211,6 +211,63 @@ All line elements are created with:
 - No real-time calculations during bracket rendering
 - All positioning data pre-calculated before line generation
 
+## Lessons Learned: 8→16 Player Implementation
+
+The successful implementation of 16-player bracket lines revealed key patterns and best practices:
+
+### 1. **Horizontal Alignment Principle**
+**Critical Discovery**: In convergence rounds, matches must align horizontally with their source rounds for proper visual flow.
+- **16-Player Example**: BS-3-1/BS-4-1 align with BS-2-2, BS-3-2/BS-4-2 align with BS-2-3
+- **Implementation**: Use source match Y-coordinates directly (`bs31Y = bs22Y`) instead of grid-center calculations
+- **Pattern**: Convergence matches inherit Y-positioning from their input matches for clean visual connections
+
+### 2. **Phase-Based Implementation Strategy**
+**Proven Approach**: Breaking complex backside implementations into sequential phases prevents errors:
+1. **Phase 1**: Loser feed lines (FS→BS) with hardcoded 40px offset
+2. **Phase 2a-2b**: Straight-line progressions (BS-R1→BS-R2, BS-R3→BS-R4)
+3. **Phase 2c-2d**: Convergence L-shaped lines (BS-R2→BS-R3, BS-R4→BS-R5)
+4. **Phase 2e**: Final indicator (BS-5-1→BS-FINAL text)
+
+### 3. **Coordinate Calculation Patterns**
+**16-Player Positioning Logic**:
+```javascript
+// Source rounds use standard spacing
+const bs21Y = round1StartY + 2 * spacing + (spacing / 2);
+const bs22Y = round1StartY + 2 * spacing + (spacing / 2);
+
+// Convergence rounds inherit from source
+const bs31Y = bs22Y; // Direct inheritance
+const bs41Y = bs22Y; // Maintains alignment
+```
+
+### 4. **Line Type Distribution**
+**16-Player Line Complexity**:
+- **L-shaped lines**: 14 total (frontside progression + backside convergence + loser feeds)
+- **Straight lines**: 6 total (BS-R1→BS-R2: 4 lines, BS-R3→BS-R4: 2 lines)
+- **Custom lines**: 2 total (finals routing + BS-FINAL indicator)
+- **Pattern**: Straight lines appear in rounds with 1:1 advancement ratios
+
+### 5. **Z-Index and Layering Requirements**
+**Visual Stacking Order**:
+- Match cards: z-index 20+ (top layer)
+- Progression lines: z-index 10 (middle layer, visible above matches due to transparency)
+- Background elements: z-index 1 (bottom layer)
+- **Critical**: Lines must be visible through semi-transparent match cards
+
+### 6. **Gap Prevention Universality**
+**Proven Technique**: The 1-pixel overlap method scales perfectly across bracket sizes:
+```javascript
+const halfWidth = Math.floor(width / 2);
+// Apply to all L-shaped lines regardless of bracket size
+```
+
+### 7. **Scalability Indicators for 32-Player**
+**Projected Requirements**:
+- **L-shaped lines**: ~30 total (5 frontside + 18 backside + 7 loser feeds)
+- **Straight lines**: ~14 total (7 rounds with 1:1 advancement)
+- **Alignment complexity**: 5 convergence levels requiring horizontal alignment
+- **Phase approach**: 7-8 implementation phases recommended
+
 ---
 
 This system provides the foundation for scalable, maintainable tournament bracket visualization that adheres to NewTon's Sky High Resilience principles.

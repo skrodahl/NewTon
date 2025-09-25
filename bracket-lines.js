@@ -437,6 +437,78 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCen
 }
 
 /**
+ * Creates L-shaped line with arrow pointing to BS-FINAL text for 16-player bracket
+ * @param {number} bs5X - X position of BS-5-1 match
+ * @param {number} bs51CenterY - Center Y position of BS-5-1 match
+ * @param {number} finalsX - X position of finals matches
+ * @param {number} backsideFinalCenterY - Center Y position of BS-FINAL match
+ * @param {Object} grid - Grid configuration object
+ * @returns {Array} Array of DOM elements for the L-shaped line, arrow, and text
+ */
+function create16PlayerBSFinalIndicator(bs5X, bs51CenterY, finalsX, backsideFinalCenterY, grid) {
+    const elements = [];
+
+    // Calculate positions (same approach as 8-player createBS31ToFinalIndicator)
+    const horizontalLineLength = 40; // Length of horizontal line
+    const lineStartX = bs5X; // Start line from the left edge of BS-5-1 match
+    const verticalLineEndX = lineStartX - horizontalLineLength; // Position vertical line at the end of horizontal line
+    const textX = verticalLineEndX - 27; // Position text ~8px closer to the right (about one character width)
+    const textY = backsideFinalCenterY + grid.matchHeight + 20; // Position text one match height + 20px below BS-FINAL center
+    const verticalLineBottomY = textY - 15; // Vertical line ends 15px above text
+
+    // Horizontal line (left from BS-5-1)
+    const hLine = document.createElement('div');
+    hLine.style.position = 'absolute';
+    hLine.style.left = `${lineStartX - horizontalLineLength}px`;
+    hLine.style.top = `${bs51CenterY}px`;
+    hLine.style.width = `${horizontalLineLength}px`;
+    hLine.style.height = '3px';
+    hLine.style.backgroundColor = '#666666';
+    hLine.style.zIndex = '2';
+    elements.push(hLine);
+
+    // Vertical line (downward)
+    const vLine = document.createElement('div');
+    vLine.style.position = 'absolute';
+    vLine.style.left = `${verticalLineEndX}px`;
+    vLine.style.top = `${bs51CenterY}px`;
+    vLine.style.width = '3px';
+    vLine.style.height = `${verticalLineBottomY - bs51CenterY}px`; // Line extends to just above text
+    vLine.style.backgroundColor = '#666666';
+    vLine.style.zIndex = '2';
+    elements.push(vLine);
+
+    // Arrow pointing down
+    const arrow = document.createElement('div');
+    arrow.style.position = 'absolute';
+    arrow.style.left = `${verticalLineEndX - 4}px`; // Center arrow on vertical line (1px right)
+    arrow.style.top = `${verticalLineBottomY}px`; // Position arrow at the end of vertical line
+    arrow.style.width = '0';
+    arrow.style.height = '0';
+    arrow.style.borderLeft = '5px solid transparent';
+    arrow.style.borderRight = '5px solid transparent';
+    arrow.style.borderTop = '10px solid #666666';
+    arrow.style.zIndex = '2';
+    elements.push(arrow);
+
+    // BS-FINAL text
+    const text = document.createElement('div');
+    text.style.position = 'absolute';
+    text.style.left = `${textX}px`;
+    text.style.top = `${textY}px`;
+    text.style.fontFamily = 'Arial, sans-serif';
+    text.style.fontSize = '12px';
+    text.style.fontWeight = 'bold';
+    text.style.color = '#333333';
+    text.style.textAlign = 'center';
+    text.style.zIndex = '2';
+    text.textContent = 'BS-FINAL';
+    elements.push(text);
+
+    return elements;
+}
+
+/**
  * Creates all frontside progression lines for 16-player bracket
  * @param {Object} grid - Grid configuration object
  * @param {Array} matches - Array of match objects
@@ -546,7 +618,7 @@ function create16PlayerFrontsideLines(grid, matches, positions) {
  */
 function create16PlayerBacksideLines(grid, matches, positions) {
     const progressionLines = [];
-    const { round1X, bs1X } = positions;
+    const { round1X, bs1X, bs2X, bs3X, bs4X } = positions;
     const { round1StartY, spacing } = positions;
     const { bs11Y, bs12Y, bs13Y, bs14Y } = positions;
 
@@ -625,50 +697,145 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     progressionLines.push(fs15_h1, fs15_v, fs15_h2, fs16_h1, fs16_v, fs16_h2, fs17_h1, fs17_v, fs17_h2, fs18_h1, fs18_v, fs18_h2);
 
     // Phase 2a: BS Round 1 → BS Round 2 (straight lines, 1:1 progression)
-    const bs2X = bs1X - (grid.matchWidth + grid.horizontalSpacing);
+    console.log('🔧 Creating BS-R1 → BS-R2 straight lines');
+    console.log('bs1X:', bs1X, 'bs2X:', bs2X);
+    console.log('bs21Y:', positions.bs21Y, 'bs22Y:', positions.bs22Y);
+
     const bs21CenterY = positions.bs21Y + (grid.matchHeight / 2);
     const bs22CenterY = positions.bs22Y + (grid.matchHeight / 2);
     const bs23CenterY = positions.bs23Y + (grid.matchHeight / 2);
     const bs24CenterY = positions.bs24Y + (grid.matchHeight / 2);
 
     // Straight lines: BS-1-1→BS-2-1, BS-1-2→BS-2-2, BS-1-3→BS-2-3, BS-1-4→BS-2-4
+    // Connect from left edge of BS-R1 to right edge of BS-R2 (proper bracket flow)
+    const lineStart = bs2X + grid.matchWidth; // Start from right edge of BS-R2 matches
+    const lineEnd = bs1X; // End at left edge of BS-R1 matches
+    const lineWidth = lineEnd - lineStart; // Width between the matches
+    console.log('BS progression line: from BS-R2 right edge', lineStart, 'to BS-R1 left edge', lineEnd, 'width =', lineWidth);
+
     const bs11ToBs21 = document.createElement('div');
     bs11ToBs21.style.position = 'absolute';
-    bs11ToBs21.style.left = `${bs1X}px`;
+    bs11ToBs21.style.left = `${lineStart}px`;
     bs11ToBs21.style.top = `${bs11CenterY}px`;
-    bs11ToBs21.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs11ToBs21.style.width = `${lineWidth}px`;
     bs11ToBs21.style.height = '3px';
     bs11ToBs21.style.backgroundColor = '#666666';
-    bs11ToBs21.style.zIndex = '1';
+    bs11ToBs21.style.zIndex = '10';
+
+    console.log('BS-1-1→BS-2-1 line:', {
+        left: bs1X,
+        top: bs11CenterY,
+        width: lineWidth,
+        height: 3
+    });
 
     const bs12ToBs22 = document.createElement('div');
     bs12ToBs22.style.position = 'absolute';
-    bs12ToBs22.style.left = `${bs1X}px`;
+    bs12ToBs22.style.left = `${lineStart}px`;
     bs12ToBs22.style.top = `${bs12CenterY}px`;
-    bs12ToBs22.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs12ToBs22.style.width = `${lineWidth}px`;
     bs12ToBs22.style.height = '3px';
     bs12ToBs22.style.backgroundColor = '#666666';
-    bs12ToBs22.style.zIndex = '1';
+    bs12ToBs22.style.zIndex = '10';
 
     const bs13ToBs23 = document.createElement('div');
     bs13ToBs23.style.position = 'absolute';
-    bs13ToBs23.style.left = `${bs1X}px`;
+    bs13ToBs23.style.left = `${lineStart}px`;
     bs13ToBs23.style.top = `${bs13CenterY}px`;
-    bs13ToBs23.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs13ToBs23.style.width = `${lineWidth}px`;
     bs13ToBs23.style.height = '3px';
     bs13ToBs23.style.backgroundColor = '#666666';
-    bs13ToBs23.style.zIndex = '1';
+    bs13ToBs23.style.zIndex = '10';
 
     const bs14ToBs24 = document.createElement('div');
     bs14ToBs24.style.position = 'absolute';
-    bs14ToBs24.style.left = `${bs1X}px`;
+    bs14ToBs24.style.left = `${lineStart}px`;
     bs14ToBs24.style.top = `${bs14CenterY}px`;
-    bs14ToBs24.style.width = `${bs2X + grid.matchWidth - bs1X}px`;
+    bs14ToBs24.style.width = `${lineWidth}px`;
     bs14ToBs24.style.height = '3px';
     bs14ToBs24.style.backgroundColor = '#666666';
-    bs14ToBs24.style.zIndex = '1';
+    bs14ToBs24.style.zIndex = '10';
 
     progressionLines.push(bs11ToBs21, bs12ToBs22, bs13ToBs23, bs14ToBs24);
+
+    // Phase 2b: BS Round 3 → BS Round 4 (straight lines, 1:1 progression)
+    console.log('🔧 Creating BS-R3 → BS-R4 straight lines');
+
+    const bs31CenterY = positions.bs31Y + (grid.matchHeight / 2);
+    const bs32CenterY = positions.bs32Y + (grid.matchHeight / 2);
+    const bs41CenterY = positions.bs41Y + (grid.matchHeight / 2);
+    const bs42CenterY = positions.bs42Y + (grid.matchHeight / 2);
+
+    // Connect from right edge of BS-R4 to left edge of BS-R3 (same pattern as BS-R1→BS-R2)
+    const bs3ToBS4LineStart = bs4X + grid.matchWidth; // Start from right edge of BS-R4 matches
+    const bs3ToBS4LineEnd = bs3X; // End at left edge of BS-R3 matches
+    const bs3ToBS4LineWidth = bs3ToBS4LineEnd - bs3ToBS4LineStart; // Width between the matches
+
+    console.log('BS-R3→BS-R4 line: from BS-R4 right edge', bs3ToBS4LineStart, 'to BS-R3 left edge', bs3ToBS4LineEnd, 'width =', bs3ToBS4LineWidth);
+
+    // Straight line: BS-3-1 → BS-4-1
+    const bs31ToBs41 = document.createElement('div');
+    bs31ToBs41.style.position = 'absolute';
+    bs31ToBs41.style.left = `${bs3ToBS4LineStart}px`;
+    bs31ToBs41.style.top = `${bs31CenterY}px`;
+    bs31ToBs41.style.width = `${bs3ToBS4LineWidth}px`;
+    bs31ToBs41.style.height = '3px';
+    bs31ToBs41.style.backgroundColor = '#666666';
+    bs31ToBs41.style.zIndex = '10';
+
+    // Straight line: BS-3-2 → BS-4-2
+    const bs32ToBs42 = document.createElement('div');
+    bs32ToBs42.style.position = 'absolute';
+    bs32ToBs42.style.left = `${bs3ToBS4LineStart}px`;
+    bs32ToBs42.style.top = `${bs32CenterY}px`;
+    bs32ToBs42.style.width = `${bs3ToBS4LineWidth}px`;
+    bs32ToBs42.style.height = '3px';
+    bs32ToBs42.style.backgroundColor = '#666666';
+    bs32ToBs42.style.zIndex = '10';
+
+    progressionLines.push(bs31ToBs41, bs32ToBs42);
+
+    // Phase 2c: BS Round 2 → BS Round 3 (L-shaped convergence lines, 4→2)
+    console.log('🔧 Creating BS-R2 → BS-R3 convergence lines');
+
+    // BS-2-1 & BS-2-2 → BS-3-1 (convergence)
+    // Note: bs21CenterY, bs22CenterY, bs23CenterY, bs24CenterY already calculated above for Phase 2a
+
+    const [bs21_h1, bs21_v, bs21_h2] = createLShapedProgressionLine(bs2X, bs21CenterY, bs3X + grid.matchWidth, bs31CenterY);
+    const [bs22_h1, bs22_v, bs22_h2] = createLShapedProgressionLine(bs2X, bs22CenterY, bs3X + grid.matchWidth, bs31CenterY);
+
+    progressionLines.push(bs21_h1, bs21_v, bs21_h2, bs22_h1, bs22_v, bs22_h2);
+
+    // BS-2-3 & BS-2-4 → BS-3-2 (convergence)
+
+    const [bs23_h1, bs23_v, bs23_h2] = createLShapedProgressionLine(bs2X, bs23CenterY, bs3X + grid.matchWidth, bs32CenterY);
+    const [bs24_h1, bs24_v, bs24_h2] = createLShapedProgressionLine(bs2X, bs24CenterY, bs3X + grid.matchWidth, bs32CenterY);
+
+    progressionLines.push(bs23_h1, bs23_v, bs23_h2, bs24_h1, bs24_v, bs24_h2);
+
+    // Phase 2d: BS Round 4 → BS Round 5 (L-shaped convergence lines, 2→1)
+    console.log('🔧 Creating BS-R4 → BS-R5 convergence lines');
+
+    const bs51CenterY = positions.bs51Y + (grid.matchHeight / 2);
+
+    // BS-4-1 & BS-4-2 → BS-5-1 (convergence)
+    const [bs41_h1, bs41_v, bs41_h2] = createLShapedProgressionLine(bs4X, bs41CenterY, positions.bs5X + grid.matchWidth, bs51CenterY);
+    const [bs42_h1, bs42_v, bs42_h2] = createLShapedProgressionLine(bs4X, bs42CenterY, positions.bs5X + grid.matchWidth, bs51CenterY);
+
+    progressionLines.push(bs41_h1, bs41_v, bs41_h2, bs42_h1, bs42_v, bs42_h2);
+
+    // Phase 2e: BS-5-1 to BS-FINAL indicator (like 8-player BS-3-1 indicator)
+    console.log('🔧 Creating BS-5-1 to BS-FINAL indicator');
+
+    // Calculate finals positioning (similar to frontside finals)
+    const spacingMultiplier = 4;
+    const finalsX = positions.round1X + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
+    const backsideFinalY = grid.centerY - 80;
+    const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
+
+    // Create BS-FINAL indicator from BS-5-1 (like createBS31ToFinalIndicator for 8-player)
+    const bs51ToFinalElements = create16PlayerBSFinalIndicator(positions.bs5X, bs51CenterY, finalsX, backsideFinalCenterY, grid);
+    progressionLines.push(...bs51ToFinalElements);
 
     return progressionLines;
 }

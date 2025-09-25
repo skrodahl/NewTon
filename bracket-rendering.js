@@ -585,12 +585,12 @@ function render16PlayerBacksideMatches(grid) {
     if (bs23) renderMatch(bs23, bs2X, bs23Y, 'backside', 1);
     if (bs24) renderMatch(bs24, bs2X, bs24Y, 'backside', 1);
 
-    // Round 3: BS-3-1 and BS-3-2 (align with BS-R4 for classical bracket layout)
+    // Round 3: BS-3-1 and BS-3-2 (align horizontally with BS-2-2 and BS-2-3)
     const bs3X = bs2X - (grid.matchWidth + grid.horizontalSpacing);
 
-    // Align BS-3-1 and BS-3-2 with BS-4-1 and BS-4-2 positions for classical look
-    const bs31Y = grid.centerY - (0.5 * spacing) - (0.5 * grid.matchHeight); // Same as BS-4-1
-    const bs32Y = grid.centerY + (0.5 * spacing) + (0.5 * grid.matchHeight); // Same as BS-4-2
+    // Align BS-3-1 horizontally with BS-2-2 and BS-3-2 horizontally with BS-2-3
+    const bs31Y = bs22Y; // BS-3-1 aligns with BS-2-2
+    const bs32Y = bs23Y; // BS-3-2 aligns with BS-2-3
 
     const bs31 = matches.find(m => m.id === 'BS-3-1');
     const bs32 = matches.find(m => m.id === 'BS-3-2');
@@ -598,12 +598,12 @@ function render16PlayerBacksideMatches(grid) {
     if (bs31) renderMatch(bs31, bs3X, bs31Y, 'backside', 2);
     if (bs32) renderMatch(bs32, bs3X, bs32Y, 'backside', 2);
 
-    // Round 4: BS-4-1 and BS-4-2 (2 matches grouped with same spacing as FS-R1)
+    // Round 4: BS-4-1 and BS-4-2 (align horizontally with BS-2-2 and BS-2-3)
     const bs4X = bs3X - (grid.matchWidth + grid.horizontalSpacing);
 
-    // Group BS-4-1 and BS-4-2 with adjusted spacing around grid center
-    const bs41Y = grid.centerY - (0.5 * spacing) - (0.5 * grid.matchHeight); // BS-4-1 moved up 0.5 match height
-    const bs42Y = grid.centerY + (0.5 * spacing) + (0.5 * grid.matchHeight); // BS-4-2 moved down 0.5 match height
+    // Align BS-4-1 horizontally with BS-2-2 and BS-4-2 horizontally with BS-2-3
+    const bs41Y = bs22Y; // BS-4-1 aligns with BS-2-2
+    const bs42Y = bs23Y; // BS-4-2 aligns with BS-2-3
 
     const bs41 = matches.find(m => m.id === 'BS-4-1');
     const bs42 = matches.find(m => m.id === 'BS-4-2');
@@ -625,10 +625,11 @@ function render16PlayerBacksideMatches(grid) {
     const frontsideRound1X = grid.centerX + grid.centerBuffer;
 
     const positions = {
-        round1X: frontsideRound1X, bs1X,
+        round1X: frontsideRound1X, bs1X, bs2X, bs3X, bs4X, bs5X,
         round1StartY, spacing,
         bs11Y, bs12Y, bs13Y, bs14Y,
-        bs21Y, bs22Y, bs23Y, bs24Y
+        bs21Y, bs22Y, bs23Y, bs24Y,
+        bs31Y, bs32Y, bs41Y, bs42Y, bs51Y
     };
 
     const progressionLines = create16PlayerBacksideLines(grid, matches, positions);
