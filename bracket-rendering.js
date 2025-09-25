@@ -714,6 +714,7 @@ function render32PlayerBacksideMatches(grid) {
     // Round 1: BS-1-1 through BS-1-8 aligned with FS-R2 positions (they receive FS-R2 losers)
     const bs1X = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing);
 
+
     for (let i = 1; i <= 8; i++) {
         const match = matches.find(m => m.id === `BS-1-${i}`);
         if (match) {
@@ -820,6 +821,26 @@ function render32PlayerBacksideMatches(grid) {
         const fs51Y = grid.centerY - 80 + (grid.matchHeight / 2); // Same as FS-5-1 position
         renderMatch(bs71, bs7X, fs51Y, 'backside', 6);
     }
+
+    // === 32-Player Backside Progression Lines ===
+    // Use existing variable declarations (all bs1X through bs6X are already defined above)
+
+    // Create positions object for progression line generation
+    // Use existing bs7X variable declared above
+
+    const positions = {
+        round1X: grid.centerX + grid.centerBuffer, // Frontside round 1 X for loser feeds
+        bs1X, bs2X, bs3X, bs4X, bs5X, bs6X, bs7X,
+        round1StartY, spacing
+    };
+
+    const backProgressionLines = create32PlayerBacksideLines(grid, matches, positions);
+
+    // Add all lines to the bracket canvas
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    backProgressionLines.forEach(line => {
+        bracketCanvas.appendChild(line);
+    });
 
     // TODO: Add remaining backside rounds if needed
 }

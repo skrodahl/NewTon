@@ -211,9 +211,9 @@ All line elements are created with:
 - No real-time calculations during bracket rendering
 - All positioning data pre-calculated before line generation
 
-## Lessons Learned: 8→16 Player Implementation
+## Lessons Learned: 8→16→32 Player Implementation
 
-The successful implementation of 16-player bracket lines revealed key patterns and best practices:
+The successful implementation of 16 and 32-player bracket lines revealed key patterns and best practices:
 
 ### 1. **Horizontal Alignment Principle**
 **Critical Discovery**: In convergence rounds, matches must align horizontally with their source rounds for proper visual flow.
@@ -261,12 +261,31 @@ const halfWidth = Math.floor(width / 2);
 // Apply to all L-shaped lines regardless of bracket size
 ```
 
-### 7. **Scalability Indicators for 32-Player**
-**Projected Requirements**:
-- **L-shaped lines**: ~30 total (5 frontside + 18 backside + 7 loser feeds)
-- **Straight lines**: ~14 total (7 rounds with 1:1 advancement)
-- **Alignment complexity**: 5 convergence levels requiring horizontal alignment
-- **Phase approach**: 7-8 implementation phases recommended
+### 7. **32-Player Implementation Insights**
+**Actual Requirements Achieved**:
+- **L-shaped lines**: 60 total (32 frontside + 14 backside convergence + 16 loser feeds)
+- **Straight lines**: 14 total (BS-R1→R2: 8, BS-R3→R4: 4, BS-R5→R6: 2)
+- **Custom lines**: 10 total (6 frontside finals + 4 BS-FINAL indicator)
+- **Total elements**: 104 progression elements
+
+### 8. **Leftward Calculation Discovery**
+**Critical Error Pattern**: Initial implementations used frontside (rightward) calculation logic for backside (leftward) progressions.
+- **Problem**: `width = toX - fromX` produces negative widths when toX < fromX
+- **Solution**: Reverse calculation for leftward flow: `width = fromX - toX`
+- **32-Player Example**: `lineStartX = bs2X + matchWidth; lineWidth = bs1X - lineStartX`
+- **Pattern**: Always calculate width as rightmost - leftmost coordinate
+
+### 9. **Variable Scope Management**
+**Challenge**: Large bracket functions have numerous X/Y coordinate variables that conflict with progression line code.
+- **Solution**: Use existing variable declarations from match rendering instead of redeclaring
+- **Best Practice**: Add progression line generation at end of rendering function after all coordinates defined
+- **32-Player Example**: Reused `bs1X` through `bs7X` from rendering logic instead of creating duplicates
+
+### 10. **Exact Positioning Inheritance**
+**Key Discovery**: Progression lines must use identical Y-coordinate calculations as match rendering for perfect alignment.
+- **Wrong Approach**: Hardcoded spacing calculations (`round1StartY + i * spacing`)
+- **Correct Approach**: Copy exact positioning logic from bracket-rendering.js
+- **32-Player Example**: BS-5-1 uses `round1StartY + 6 * spacing + (spacing / 2)` - same as match rendering
 
 ---
 
