@@ -226,6 +226,100 @@ function createBacksideBackground(grid, bracketSize, round1StartY, spacing) {
 }
 
 /**
+ * Creates placement labels for backside bracket rounds showing elimination placements
+ * @param {Object} grid - Grid configuration object with positioning data
+ * @param {number} bracketSize - Tournament bracket size (8, 16, or 32)
+ * @param {number} round1StartY - Starting Y position for round 1
+ * @param {number} spacing - Vertical spacing between matches
+ * @param {Object} positions - Object containing calculated match positions including backside X coordinates
+ * @returns {Array} Array of DOM elements for placement labels
+ */
+function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing, positions) {
+    const placementLabels = [];
+
+    // Calculate Y position below the gradient background
+    let backsideHeight;
+    switch (bracketSize) {
+        case 8:
+            backsideHeight = 4 * spacing + 40;
+            break;
+        case 16:
+            backsideHeight = 8 * spacing + 40;
+            break;
+        case 32:
+            backsideHeight = 16 * spacing + 40;
+            break;
+        default:
+            backsideHeight = 4 * spacing + 40;
+    }
+
+    const backsideTop = round1StartY - 20; // Same as gradient background
+    const labelsY = backsideTop + backsideHeight + 20; // 20px below gradient background
+
+    // Calculate backside X positions manually since they might not be in positions object yet
+    const bs1X = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing);
+    const bs2X = bs1X - (grid.matchWidth + grid.horizontalSpacing);
+    const bs3X = bs2X - (grid.matchWidth + grid.horizontalSpacing);
+    const bs4X = bs3X - (grid.matchWidth + grid.horizontalSpacing);
+    const bs5X = bs4X - (grid.matchWidth + grid.horizontalSpacing);
+    const bs6X = bs5X - (grid.matchWidth + grid.horizontalSpacing);
+    const bs7X = bs6X - (grid.matchWidth + grid.horizontalSpacing);
+
+    // Define placement text for each bracket size and round with calculated X positions
+    const placementsBySize = {
+        8: [
+            { round: 1, text: "7th-8th Place", xCoord: bs1X },
+            { round: 2, text: "5th-6th Place", xCoord: bs2X },
+            { round: 3, text: "4th Place", xCoord: bs3X }
+        ],
+        16: [
+            { round: 1, text: "13th-16th Place", xCoord: bs1X },
+            { round: 2, text: "9th-12th Place", xCoord: bs2X },
+            { round: 3, text: "7th-8th Place", xCoord: bs3X },
+            { round: 4, text: "5th-6th Place", xCoord: bs4X },
+            { round: 5, text: "4th Place", xCoord: bs5X }
+        ],
+        32: [
+            { round: 1, text: "25th-32nd Place", xCoord: bs1X },
+            { round: 2, text: "17th-24th Place", xCoord: bs2X },
+            { round: 3, text: "13th-16th Place", xCoord: bs3X },
+            { round: 4, text: "9th-12th Place", xCoord: bs4X },
+            { round: 5, text: "7th-8th Place", xCoord: bs5X },
+            { round: 6, text: "5th-6th Place", xCoord: bs6X },
+            { round: 7, text: "4th Place", xCoord: bs7X }
+        ]
+    };
+
+    const placements = placementsBySize[bracketSize] || [];
+
+    // Create labels for each round
+    placements.forEach(placement => {
+        const label = document.createElement('div');
+        label.style.position = 'absolute';
+
+        // Calculate X position - center label on the match center
+        const roundX = placement.xCoord + (grid.matchWidth / 2);
+
+        label.style.left = `${roundX}px`;
+        label.style.top = `${labelsY}px`;
+        label.style.fontFamily = 'Arial, sans-serif';
+        label.style.fontSize = '24px'; // Slightly smaller than bracket labels
+        label.style.fontWeight = 'bold';
+        label.style.color = '#666666'; // Match progression line color
+        label.style.textAlign = 'center';
+        label.style.transform = 'translateX(-50%)'; // Center on X coordinate
+        label.style.zIndex = '5';
+        label.style.pointerEvents = 'none';
+        label.style.whiteSpace = 'nowrap';
+        label.textContent = placement.text;
+
+        placementLabels.push(label);
+    });
+
+    return placementLabels;
+}
+
+/**
  * Creates custom Finals area progression lines with optimized positioning
  * @param {number} round3X - X position of round 3 matches
  * @param {number} fs31CenterY - Center Y position of FS-3-1 match
@@ -310,6 +404,10 @@ function create8PlayerFrontsideLines(grid, matches, positions) {
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
     const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
     progressionLines.push(...labels);
+
+    // Add backside placement labels
+    const placementLabels = createBacksidePlacementLabels(grid, 8, round1StartY, spacing, positions);
+    progressionLines.push(...placementLabels);
 
     // Find matches
     const fs11 = matches.find(m => m.id === 'FS-1-1');
@@ -611,6 +709,10 @@ function create16PlayerFrontsideLines(grid, matches, positions) {
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
     const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
     progressionLines.push(...labels);
+
+    // Add backside placement labels
+    const placementLabels = createBacksidePlacementLabels(grid, 16, round1StartY, spacing, positions);
+    progressionLines.push(...placementLabels);
 
     // Calculate center Y coordinates for all matches
     const fs11CenterY = round1StartY + (grid.matchHeight / 2);
@@ -948,6 +1050,10 @@ function create32PlayerFrontsideLines(grid, matches, positions) {
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
     const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
     progressionLines.push(...labels);
+
+    // Add backside placement labels
+    const placementLabels = createBacksidePlacementLabels(grid, 32, round1StartY, spacing, positions);
+    progressionLines.push(...placementLabels);
     const { fs21Y, fs22Y, fs23Y, fs24Y, fs25Y, fs26Y, fs27Y, fs28Y } = positions;
     const { fs31Y, fs32Y, fs33Y, fs34Y, fs41Y, fs42Y, fs51Y } = positions;
 
