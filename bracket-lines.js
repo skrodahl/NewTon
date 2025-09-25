@@ -435,3 +435,104 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCen
 
     return elements;
 }
+
+/**
+ * Creates all frontside progression lines for 16-player bracket
+ * @param {Object} grid - Grid configuration object
+ * @param {Array} matches - Array of match objects
+ * @param {Object} positions - Object containing calculated match positions
+ * @returns {Array} Array of DOM elements for all frontside progression lines
+ */
+function create16PlayerFrontsideLines(grid, matches, positions) {
+    const progressionLines = [];
+    const { round1X, round2X, round3X, round4X, round1StartY, spacing } = positions;
+    const { fs21Y, fs22Y, fs23Y, fs24Y, fs31Y, fs32Y, fs41Y } = positions;
+
+    // Calculate center Y coordinates for all matches
+    const fs11CenterY = round1StartY + (grid.matchHeight / 2);
+    const fs12CenterY = round1StartY + spacing + (grid.matchHeight / 2);
+    const fs13CenterY = round1StartY + 2 * spacing + (grid.matchHeight / 2);
+    const fs14CenterY = round1StartY + 3 * spacing + (grid.matchHeight / 2);
+    const fs15CenterY = round1StartY + 4 * spacing + (grid.matchHeight / 2);
+    const fs16CenterY = round1StartY + 5 * spacing + (grid.matchHeight / 2);
+    const fs17CenterY = round1StartY + 6 * spacing + (grid.matchHeight / 2);
+    const fs18CenterY = round1StartY + 7 * spacing + (grid.matchHeight / 2);
+
+    const fs21CenterY = fs21Y + (grid.matchHeight / 2);
+    const fs22CenterY = fs22Y + (grid.matchHeight / 2);
+    const fs23CenterY = fs23Y + (grid.matchHeight / 2);
+    const fs24CenterY = fs24Y + (grid.matchHeight / 2);
+
+    const fs31CenterY = fs31Y + (grid.matchHeight / 2);
+    const fs32CenterY = fs32Y + (grid.matchHeight / 2);
+
+    const fs41CenterY = fs41Y + (grid.matchHeight / 2);
+
+    // Round 1 → Round 2 connections
+    // FS-1-1 and FS-1-2 to FS-2-1
+    const [fs11_h1, fs11_v, fs11_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs11CenterY, round2X, fs21CenterY);
+    progressionLines.push(fs11_h1, fs11_v, fs11_h2);
+
+    const [fs12_h1, fs12_v, fs12_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs12CenterY, round2X, fs21CenterY);
+    progressionLines.push(fs12_h1, fs12_v, fs12_h2);
+
+    // FS-1-3 and FS-1-4 to FS-2-2
+    const [fs13_h1, fs13_v, fs13_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs13CenterY, round2X, fs22CenterY);
+    progressionLines.push(fs13_h1, fs13_v, fs13_h2);
+
+    const [fs14_h1, fs14_v, fs14_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs14CenterY, round2X, fs22CenterY);
+    progressionLines.push(fs14_h1, fs14_v, fs14_h2);
+
+    // FS-1-5 and FS-1-6 to FS-2-3
+    const [fs15_h1, fs15_v, fs15_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs15CenterY, round2X, fs23CenterY);
+    progressionLines.push(fs15_h1, fs15_v, fs15_h2);
+
+    const [fs16_h1, fs16_v, fs16_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs16CenterY, round2X, fs23CenterY);
+    progressionLines.push(fs16_h1, fs16_v, fs16_h2);
+
+    // FS-1-7 and FS-1-8 to FS-2-4
+    const [fs17_h1, fs17_v, fs17_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs17CenterY, round2X, fs24CenterY);
+    progressionLines.push(fs17_h1, fs17_v, fs17_h2);
+
+    const [fs18_h1, fs18_v, fs18_h2] = createLShapedProgressionLine(round1X + grid.matchWidth, fs18CenterY, round2X, fs24CenterY);
+    progressionLines.push(fs18_h1, fs18_v, fs18_h2);
+
+    // Round 2 → Round 3 connections
+    // FS-2-1 and FS-2-2 to FS-3-1
+    const [fs21_h1, fs21_v, fs21_h2] = createLShapedProgressionLine(round2X + grid.matchWidth, fs21CenterY, round3X, fs31CenterY);
+    progressionLines.push(fs21_h1, fs21_v, fs21_h2);
+
+    const [fs22_h1, fs22_v, fs22_h2] = createLShapedProgressionLine(round2X + grid.matchWidth, fs22CenterY, round3X, fs31CenterY);
+    progressionLines.push(fs22_h1, fs22_v, fs22_h2);
+
+    // FS-2-3 and FS-2-4 to FS-3-2
+    const [fs23_h1, fs23_v, fs23_h2] = createLShapedProgressionLine(round2X + grid.matchWidth, fs23CenterY, round3X, fs32CenterY);
+    progressionLines.push(fs23_h1, fs23_v, fs23_h2);
+
+    const [fs24_h1, fs24_v, fs24_h2] = createLShapedProgressionLine(round2X + grid.matchWidth, fs24CenterY, round3X, fs32CenterY);
+    progressionLines.push(fs24_h1, fs24_v, fs24_h2);
+
+    // Round 3 → Round 4 connections
+    // FS-3-1 and FS-3-2 to FS-4-1
+    const [fs31_h1, fs31_v, fs31_h2] = createLShapedProgressionLine(round3X + grid.matchWidth, fs31CenterY, round4X, fs41CenterY);
+    progressionLines.push(fs31_h1, fs31_v, fs31_h2);
+
+    const [fs32_h1, fs32_v, fs32_h2] = createLShapedProgressionLine(round3X + grid.matchWidth, fs32CenterY, round4X, fs41CenterY);
+    progressionLines.push(fs32_h1, fs32_v, fs32_h2);
+
+    // Round 4 → Finals connections
+    const spacingMultiplier = 4;
+    const finalsX = round4X + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
+    const backsideFinalY = grid.centerY - 80;
+    const grandFinalY = grid.centerY + 80;
+
+    const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
+    const grandFinalCenterY = grandFinalY + (grid.matchHeight / 2);
+
+    // Custom Finals connections (FS-4-1 to both BS-FINAL and GRAND-FINAL)
+    const [fs41_h1, fs41_v, fs41_h2, fs41ToBsFinal_h1, extendedVertical, fs41ToBsFinal_h2] =
+        createCustomFinalsLines(round4X, fs41CenterY, finalsX, backsideFinalCenterY, grandFinalCenterY, grid);
+    progressionLines.push(fs41_h1, fs41_v, fs41_h2, fs41ToBsFinal_h1, extendedVertical, fs41ToBsFinal_h2);
+
+    return progressionLines;
+}

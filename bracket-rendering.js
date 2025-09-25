@@ -40,6 +40,18 @@ function clearBracket() {
     if (linesContainer) {
         linesContainer.innerHTML = '';
     }
+
+    // Clear progression lines directly added to bracketCanvas (but preserve structure)
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    if (bracketCanvas) {
+        // Remove only direct children that are not the essential containers
+        const childNodes = Array.from(bracketCanvas.children);
+        childNodes.forEach(child => {
+            if (child.id !== 'bracketMatches' && child.id !== 'bracketLines') {
+                child.remove();
+            }
+        });
+    }
 }
 
 function renderCleanBracket() {
@@ -290,6 +302,22 @@ function render16PlayerFrontsideMatches(grid) {
 
     const fs41 = matches.find(m => m.id === 'FS-4-1');
     if (fs41) renderMatch(fs41, round4X, fs41Y, 'frontside', 3);
+
+    // === 16-Player Frontside Progression Lines ===
+    // Create all frontside progression lines using bracket-lines.js functions
+    const positions = {
+        round1X, round2X, round3X, round4X,
+        round1StartY, spacing,
+        fs21Y, fs22Y, fs23Y, fs24Y, fs31Y, fs32Y, fs41Y
+    };
+
+    const progressionLines = create16PlayerFrontsideLines(grid, matches, positions);
+
+    // Add all lines to the bracket canvas
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    progressionLines.forEach(line => {
+        bracketCanvas.appendChild(line);
+    });
 }
 
 // Hardcoded positioning for 32-player frontside to show clear progression
