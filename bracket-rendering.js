@@ -406,13 +406,49 @@ function render32PlayerFrontsideMatches(grid) {
     // Round 5: FS-5-1 - centered between FS-4-1 and FS-4-2
     const round5X = round4X + grid.matchWidth + grid.horizontalSpacing;
 
+    // Calculate FS-5-1 Y position (needed for progression lines)
+    const fs51Y = grid.centerY - 80 + (grid.matchHeight / 2); // Half match height down from BS-FINAL
+
     const fs51 = matches.find(m => m.id === 'FS-5-1');
     if (fs51) {
-        // Position FS-5-1 half a match height below BS-FINAL position
-        const fs51Y = grid.centerY - 80 + (grid.matchHeight / 2); // Half match height down from BS-FINAL
-
         renderMatch(fs51, round5X, fs51Y, 'frontside', 4);
     }
+
+    // === 32-Player Frontside Progression Lines ===
+    // Calculate Y positions for rounds 2-5 based on centering logic used above
+    const fs21Y = round1StartY + spacing / 2;       // FS-2-1 centered between FS-1-1 and FS-1-2
+    const fs22Y = round1StartY + 2 * spacing + spacing / 2;   // FS-2-2 centered between FS-1-3 and FS-1-4
+    const fs23Y = round1StartY + 4 * spacing + spacing / 2;   // FS-2-3 centered between FS-1-5 and FS-1-6
+    const fs24Y = round1StartY + 6 * spacing + spacing / 2;   // FS-2-4 centered between FS-1-7 and FS-1-8
+    const fs25Y = round1StartY + 8 * spacing + spacing / 2;   // FS-2-5 centered between FS-1-9 and FS-1-10
+    const fs26Y = round1StartY + 10 * spacing + spacing / 2;  // FS-2-6 centered between FS-1-11 and FS-1-12
+    const fs27Y = round1StartY + 12 * spacing + spacing / 2;  // FS-2-7 centered between FS-1-13 and FS-1-14
+    const fs28Y = round1StartY + 14 * spacing + spacing / 2;  // FS-2-8 centered between FS-1-15 and FS-1-16
+
+    const fs31Y = (fs21Y + fs22Y) / 2;  // FS-3-1 centered between FS-2-1 and FS-2-2
+    const fs32Y = (fs23Y + fs24Y) / 2;  // FS-3-2 centered between FS-2-3 and FS-2-4
+    const fs33Y = (fs25Y + fs26Y) / 2;  // FS-3-3 centered between FS-2-5 and FS-2-6
+    const fs34Y = (fs27Y + fs28Y) / 2;  // FS-3-4 centered between FS-2-7 and FS-2-8
+
+    const fs41Y = fs24Y;  // FS-4-1 aligned with FS-2-4 (as calculated above)
+    const fs42Y = fs25Y;  // FS-4-2 aligned with FS-2-5 (as calculated above)
+
+    // Create positions object for progression line generation
+    const positions = {
+        round1X, round2X, round3X, round4X, round5X,
+        round1StartY, spacing,
+        fs21Y, fs22Y, fs23Y, fs24Y, fs25Y, fs26Y, fs27Y, fs28Y,
+        fs31Y, fs32Y, fs33Y, fs34Y,
+        fs41Y, fs42Y, fs51Y
+    };
+
+    const progressionLines = create32PlayerFrontsideLines(grid, matches, positions);
+
+    // Add all lines to the bracket canvas
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    progressionLines.forEach(line => {
+        bracketCanvas.appendChild(line);
+    });
 }
 
 function renderBacksideMatches(backsideStructure, grid) {
