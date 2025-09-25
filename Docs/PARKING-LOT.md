@@ -5,6 +5,9 @@
 - None
 
 ## Next
+- Add "FINALS" text, along with "FRONTSIDE" and "BACKSIDE"
+- Add directional arrows to FRONTSIDE and BACKSIDE labels
+- Status line, include Lane and Referee information
 - Tournament bracket visual cues and captions
 
 ## Later
