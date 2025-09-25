@@ -18,14 +18,45 @@
  * @param {number} round1StartY - Y coordinate of first round start
  * @param {number} frontsideX - X coordinate of frontside bracket center
  * @param {number} backsideX - X coordinate of backside bracket center
- * @returns {Array} Array of 2 DOM elements [frontsideLabel, backsideLabel]
+ * @returns {Array} Array of 3 DOM elements [tournamentHeader, frontsideLabel, backsideLabel]
  */
 function createBracketLabels(grid, round1StartY, frontsideX, backsideX) {
     const labels = [];
 
-    // Calculate label positioning above brackets with breathing room
-    const labelY = round1StartY - 80; // 80px above bracket start
+    // Get current tournament data
+    const currentTournament = localStorage.getItem('currentTournament');
+    let tournamentName = 'Tournament';
+    let tournamentDate = 'Date';
+
+    if (currentTournament) {
+        try {
+            const tournament = JSON.parse(currentTournament);
+            tournamentName = tournament.name || 'Tournament';
+            tournamentDate = tournament.date || 'Date';
+        } catch (e) {
+            console.warn('Could not parse tournament data for bracket labels');
+        }
+    }
+
+    // Calculate positioning
+    const bracketCenterX = grid.centerX; // Center of entire bracket
+    const tournamentHeaderY = round1StartY - 220; // 220px above bracket start for tournament header
+    const labelY = round1StartY - 80; // 80px above bracket start for FRONTSIDE/BACKSIDE labels
     const fontSize = '36px'; // Large font for visibility when zoomed out
+
+    // Tournament header - centered on entire bracket
+    const tournamentHeader = document.createElement('div');
+    tournamentHeader.style.position = 'absolute';
+    tournamentHeader.style.left = `${bracketCenterX}px`;
+    tournamentHeader.style.top = `${tournamentHeaderY}px`;
+    tournamentHeader.style.fontFamily = 'Arial, sans-serif';
+    tournamentHeader.style.fontSize = '78px';
+    tournamentHeader.style.color = '#333333';
+    tournamentHeader.style.textAlign = 'center';
+    tournamentHeader.style.transform = 'translateX(-50%)'; // Center horizontally
+    tournamentHeader.style.zIndex = '5';
+    tournamentHeader.innerHTML = `<strong>${tournamentName}</strong> - ${tournamentDate}`;
+    labels.push(tournamentHeader);
 
     // FRONTSIDE label - positioned above frontside bracket
     const frontsideLabel = document.createElement('div');

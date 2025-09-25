@@ -293,7 +293,7 @@ const halfWidth = Math.floor(width / 2);
 The bracket labels system adds "FRONTSIDE" and "BACKSIDE" text labels above their respective bracket sections for improved visual identification and tournament navigation.
 
 ### `createBracketLabels()` Function
-**Purpose**: Creates both FRONTSIDE and BACKSIDE text labels with consistent positioning across all bracket sizes.
+**Purpose**: Creates tournament header and FRONTSIDE/BACKSIDE text labels with consistent positioning across all bracket sizes.
 
 **Function Signature**:
 ```javascript
@@ -306,19 +306,28 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX)
 - `frontsideX`: X coordinate for FRONTSIDE label positioning
 - `backsideX`: X coordinate for BACKSIDE label positioning
 
-**Returns**: Array of 2 DOM elements `[frontsideLabel, backsideLabel]`
+**Returns**: Array of 3 DOM elements `[tournamentHeader, frontsideLabel, backsideLabel]`
 
 ### Label Specifications
 
-**Visual Properties**:
+**Tournament Header**:
+- **Content**: `<strong>Tournament Name</strong> - Tournament Date` format
+- **Font Size**: 78px for maximum prominence
+- **Font Weight**: Tournament name in bold, date in normal weight
+- **Font Family**: Arial, sans-serif for consistency
+- **Color**: #333333 for readability
+- **Z-Index**: 5 to appear above all bracket elements
+- **Positioning**: 220px above bracket start (`round1StartY - 220`), centered on entire bracket
+- **Data Source**: Retrieved from `localStorage.getItem('currentTournament')`
+- **Fallback**: Shows "Tournament - Date" if no tournament data available
+
+**FRONTSIDE/BACKSIDE Labels**:
 - **Font Size**: 36px for visibility when zoomed out
 - **Font Weight**: Bold for prominence
 - **Font Family**: Arial, sans-serif for consistency
 - **Color**: #333333 for readability
 - **Z-Index**: 5 to appear above all bracket elements
-
-**Positioning**:
-- **Vertical**: 80px above bracket start (`round1StartY - 80`)
+- **Positioning**: 80px above bracket start (`round1StartY - 80`)
 - **Horizontal Alignment**: Centered using `transform: translateX(-50%)`
 
 ### Consistent Positioning Logic
@@ -350,9 +359,9 @@ function create[SIZE]PlayerFrontsideLines(grid, matches, positions) {
     const frontsideX = round1X + (grid.matchWidth / 2);
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2);
 
-    // Create and add labels
+    // Create and add labels (tournament header + FRONTSIDE/BACKSIDE labels)
     const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
-    progressionLines.push(...labels);
+    progressionLines.push(...labels); // Adds 3 elements: [tournamentHeader, frontsideLabel, backsideLabel]
 
     // ... rest of line creation logic
 
@@ -363,9 +372,11 @@ function create[SIZE]PlayerFrontsideLines(grid, matches, positions) {
 ### Key Benefits
 
 **Visual Clarity**:
-- Large, prominent text labels improve tournament bracket navigation
+- Prominent tournament header (78px) displays tournament name and date at top of bracket
+- Large text labels (36px) improve tournament bracket navigation
 - Clear identification of frontside vs backside bracket sections
 - Enhanced user experience when zoomed out
+- Professional tournament presentation with comprehensive labeling
 
 **Consistent Positioning**:
 - Symmetric positioning above round 1 centers for both sides
