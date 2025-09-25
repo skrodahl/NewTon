@@ -85,6 +85,8 @@ const positions = {
 **Purpose**: Creates standard L-shaped tournament progression lines
 **Returns**: `[hLine1, vLine, hLine2]` - Three DOM elements forming an L-shape
 **Use Case**: Most standard bracket progressions
+**Implementation**: Uses 1-pixel overlap at junction points to eliminate visual gaps at 90-degree bends
+**Gap Prevention**: Each line segment extends slightly beyond its endpoint to ensure continuous visual connection
 
 ### `createProgressionLine(fromX, fromY, toX, toY)`
 **Purpose**: Creates simple horizontal + vertical line pairs

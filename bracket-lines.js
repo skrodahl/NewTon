@@ -23,33 +23,34 @@
  */
 function createLShapedProgressionLine(fromX, fromY, toX, toY, color = '#666666', width = 3) {
     const midX = (fromX + toX) / 2;
+    const halfWidth = Math.floor(width / 2);
 
-    // Horizontal line from start to midpoint
+    // Horizontal line from start to midpoint (extend slightly past midpoint)
     const hLine1 = document.createElement('div');
     hLine1.style.position = 'absolute';
     hLine1.style.left = `${Math.min(fromX, midX)}px`;
     hLine1.style.top = `${fromY}px`;
-    hLine1.style.width = `${Math.abs(midX - fromX)}px`;
+    hLine1.style.width = `${Math.abs(midX - fromX) + halfWidth}px`; // Extend by half line width
     hLine1.style.height = `${width}px`;
     hLine1.style.backgroundColor = color;
     hLine1.style.zIndex = '1';
 
-    // Vertical line from fromY to toY
+    // Vertical line from fromY to toY (extend at both ends)
     const vLine = document.createElement('div');
     vLine.style.position = 'absolute';
-    vLine.style.left = `${midX}px`;
+    vLine.style.left = `${midX - halfWidth}px`; // Start half-width before midpoint
     vLine.style.top = `${Math.min(fromY, toY)}px`;
     vLine.style.width = `${width}px`;
-    vLine.style.height = `${Math.abs(toY - fromY)}px`;
+    vLine.style.height = `${Math.abs(toY - fromY) + halfWidth}px`; // Extend by half line width
     vLine.style.backgroundColor = color;
     vLine.style.zIndex = '1';
 
-    // Horizontal line from midpoint to end
+    // Horizontal line from midpoint to end (extend slightly before midpoint)
     const hLine2 = document.createElement('div');
     hLine2.style.position = 'absolute';
-    hLine2.style.left = `${Math.min(midX, toX)}px`;
+    hLine2.style.left = `${Math.min(midX, toX) - halfWidth}px`; // Start half-width before midpoint
     hLine2.style.top = `${toY}px`;
-    hLine2.style.width = `${Math.abs(toX - midX)}px`;
+    hLine2.style.width = `${Math.abs(toX - midX) + halfWidth}px`; // Extend by half line width
     hLine2.style.height = `${width}px`;
     hLine2.style.backgroundColor = color;
     hLine2.style.zIndex = '1';
