@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '2.0.2-beta';
+const APP_VERSION = '2.0.2';
 
 // =============================================================================
 // DIALOG STACK MANAGER - Unified dialog stacking system
