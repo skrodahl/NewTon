@@ -9,6 +9,7 @@
 - Add directional arrows to FRONTSIDE and BACKSIDE labels
 - Status line, include Lane and Referee information
 - Tournament bracket visual cues and captions
+- Experimental: Zoom in on specific match when hovering over it
 
 ## Later
 *Not urgent but worth tracking*
