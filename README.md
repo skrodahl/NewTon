@@ -31,7 +31,7 @@
 ### 🎯 Double Elimination Brackets
 - **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players
 - **Smart Generation**: Prevents two walkovers from meeting in first round
-- **Interactive Visualization**: Zoom, pan, and click-to-select winners
+- **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
 - **Automatic Advancement**: Walkovers advance real players intelligently
 - **Undo**: Full undo of all matches without completed downstream matches to prevent undoing large portions of the tournament at once, can undo more matches in stages
 - **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
