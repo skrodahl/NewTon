@@ -297,7 +297,7 @@ The bracket labels system adds "FRONTSIDE" and "BACKSIDE" text labels above thei
 
 **Function Signature**:
 ```javascript
-function createBracketLabels(grid, round1StartY, frontsideX, backsideX)
+function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketSize)
 ```
 
 **Parameters**:
@@ -305,6 +305,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX)
 - `round1StartY`: Y coordinate of the first round start position
 - `frontsideX`: X coordinate for FRONTSIDE label positioning
 - `backsideX`: X coordinate for BACKSIDE label positioning
+- `bracketSize`: Tournament bracket size (8, 16, or 32) for dynamic font sizing
 
 **Returns**: Array of 3 DOM elements `[tournamentHeader, frontsideLabel, backsideLabel]`
 
@@ -312,7 +313,10 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX)
 
 **Tournament Header**:
 - **Content**: `<strong>Tournament Name</strong> - Tournament Date` format
-- **Font Size**: 78px for maximum prominence
+- **Font Size**: Bracket-specific sizing for optimal visual proportion:
+  - **8-player bracket**: 54px (smallest, appropriate for compact bracket)
+  - **16-player bracket**: 64px (medium, balanced for mid-size bracket)
+  - **32-player bracket**: 78px (largest, maintains prominence on complex bracket)
 - **Font Weight**: Tournament name in bold, date in normal weight
 - **Font Family**: Arial, sans-serif for consistency
 - **Color**: #333333 for readability
@@ -359,8 +363,8 @@ function create[SIZE]PlayerFrontsideLines(grid, matches, positions) {
     const frontsideX = round1X + (grid.matchWidth / 2);
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2);
 
-    // Create and add labels (tournament header + FRONTSIDE/BACKSIDE labels)
-    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    // Create and add labels with bracket-specific font sizing (tournament header + FRONTSIDE/BACKSIDE labels)
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX, [SIZE]);
     progressionLines.push(...labels); // Adds 3 elements: [tournamentHeader, frontsideLabel, backsideLabel]
 
     // ... rest of line creation logic
@@ -369,10 +373,36 @@ function create[SIZE]PlayerFrontsideLines(grid, matches, positions) {
 }
 ```
 
+### Bracket-Specific Font Sizing
+
+**Dynamic Tournament Header Sizing**:
+The tournament header font size automatically adapts based on bracket complexity to maintain optimal visual proportion:
+
+```javascript
+// Font size determination logic
+switch (bracketSize) {
+    case 8:
+        tournamentHeaderFontSize = '54px'; // Compact, appropriate for simple bracket
+        break;
+    case 16:
+        tournamentHeaderFontSize = '64px'; // Balanced for moderate complexity
+        break;
+    case 32:
+        tournamentHeaderFontSize = '78px'; // Prominent for complex bracket
+        break;
+}
+```
+
+**Rationale**:
+- **Smaller brackets (8-player)**: Reduced font size prevents overwhelming the compact bracket structure
+- **Medium brackets (16-player)**: Balanced sizing maintains prominence without visual clutter
+- **Large brackets (32-player)**: Maximum font size ensures visibility across the complex bracket layout
+- **Progressive scaling**: 12px increments (54→64→78) provide smooth visual progression
+
 ### Key Benefits
 
 **Visual Clarity**:
-- Prominent tournament header (78px) displays tournament name and date at top of bracket
+- **Adaptive tournament header**: Font size scales appropriately with bracket complexity
 - Large text labels (36px) improve tournament bracket navigation
 - Clear identification of frontside vs backside bracket sections
 - Enhanced user experience when zoomed out
@@ -388,6 +418,112 @@ function create[SIZE]PlayerFrontsideLines(grid, matches, positions) {
 - Reuses existing grid coordinate system
 - No complex offset adjustments required
 - Perfect integration with existing bracket line system
+
+## Backside Placement Labels System
+
+### Overview
+The backside placement labels system adds visual indicators showing what tournament placement (rank) players receive when eliminated from each backside round. These labels appear below the gradient background box and provide clear information about tournament standings.
+
+### `createBacksidePlacementLabels()` Function
+**Purpose**: Creates placement text labels positioned below the backside gradient background for all bracket sizes.
+
+**Function Signature**:
+```javascript
+function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing, positions)
+```
+
+**Parameters**:
+- `grid`: Grid configuration object containing match dimensions and spacing
+- `bracketSize`: Tournament bracket size (8, 16, or 32)
+- `round1StartY`: Y coordinate of the first round start position
+- `spacing`: Vertical spacing between matches
+- `positions`: Object containing calculated match positions (not used due to timing issues)
+
+**Returns**: Array of DOM elements for placement labels
+
+### Placement Mappings by Bracket Size
+
+**8-Player Placements**:
+- **BS-R1**: "7th-8th Place" (losers of BS-1-1, BS-1-2)
+- **BS-R2**: "5th-6th Place" (losers of BS-2-1, BS-2-2)
+- **BS-R3**: "4th Place" (loser of BS-3-1)
+
+**16-Player Placements**:
+- **BS-R1**: "13th-16th Place" (losers of BS-1-1 through BS-1-4)
+- **BS-R2**: "9th-12th Place" (losers of BS-2-1 through BS-2-4)
+- **BS-R3**: "7th-8th Place" (losers of BS-3-1, BS-3-2)
+- **BS-R4**: "5th-6th Place" (losers of BS-4-1, BS-4-2)
+- **BS-R5**: "4th Place" (loser of BS-5-1)
+
+**32-Player Placements**:
+- **BS-R1**: "25th-32nd Place" (losers of BS-1-1 through BS-1-8)
+- **BS-R2**: "17th-24th Place" (losers of BS-2-1 through BS-2-8)
+- **BS-R3**: "13th-16th Place" (losers of BS-3-1 through BS-3-4)
+- **BS-R4**: "9th-12th Place" (losers of BS-4-1 through BS-4-4)
+- **BS-R5**: "7th-8th Place" (losers of BS-5-1, BS-5-2)
+- **BS-R6**: "5th-6th Place" (losers of BS-6-1, BS-6-2)
+- **BS-R7**: "4th Place" (loser of BS-7-1)
+
+### Technical Implementation
+
+**Positioning Strategy**:
+- **Y Position**: 20px below gradient background box (`backsideTop + backsideHeight + 20`)
+- **X Position**: Manually calculated backside round centers using bracket rendering logic
+- **Calculation**: `bs1X = centerX - centerBuffer - (matchWidth + horizontalSpacing)`, then sequential leftward progression
+
+**Manual X Calculation Necessity**:
+- Placement labels are added in frontside functions before backside matches are rendered
+- Backside X coordinates (`bs1X`, `bs2X`, etc.) not available in positions object yet
+- Solution: Calculate backside positions using identical logic as bracket rendering
+
+**Label Specifications**:
+- **Font Size**: 24px (smaller than bracket labels for appropriate hierarchy)
+- **Font Weight**: Bold for visibility
+- **Font Family**: Arial, sans-serif for consistency
+- **Color**: #666666 (matches progression line color)
+- **Z-Index**: 5 to appear above all bracket elements
+- **Alignment**: Centered using `transform: translateX(-50%)`
+- **White Space**: `nowrap` to prevent text wrapping
+
+### Integration Pattern
+
+**Implementation in Bracket Functions**:
+Each bracket size function includes placement labels:
+```javascript
+function create[SIZE]PlayerFrontsideLines(grid, matches, positions) {
+    const progressionLines = [];
+
+    // Add bracket labels (tournament header + FRONTSIDE/BACKSIDE labels)
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    progressionLines.push(...labels);
+
+    // Add backside placement labels
+    const placementLabels = createBacksidePlacementLabels(grid, [SIZE], round1StartY, spacing, positions);
+    progressionLines.push(...placementLabels);
+
+    // ... rest of line creation logic
+
+    return progressionLines;
+}
+```
+
+### Key Benefits
+
+**Tournament Clarity**:
+- Immediate visual feedback on tournament placement structure
+- Clear understanding of what's at stake in each backside round
+- Professional tournament presentation with comprehensive ranking information
+
+**User Experience**:
+- Non-intrusive design that complements existing bracket elements
+- Appropriate font size (24px) for visibility without overwhelming bracket
+- Consistent positioning across all bracket sizes
+
+**Technical Excellence**:
+- Follows established bracket isolation principles
+- Maintains Sky High Resilience through independent calculations
+- Perfect integration with existing bracket line and label systems
+- Scales seamlessly across all supported bracket sizes
 
 ---
 

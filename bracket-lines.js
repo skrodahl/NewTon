@@ -18,9 +18,10 @@
  * @param {number} round1StartY - Y coordinate of first round start
  * @param {number} frontsideX - X coordinate of frontside bracket center
  * @param {number} backsideX - X coordinate of backside bracket center
+ * @param {number} bracketSize - Tournament bracket size (8, 16, or 32) for font sizing
  * @returns {Array} Array of 3 DOM elements [tournamentHeader, frontsideLabel, backsideLabel]
  */
-function createBracketLabels(grid, round1StartY, frontsideX, backsideX) {
+function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketSize) {
     const labels = [];
 
     // Get current tournament data
@@ -44,13 +45,29 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX) {
     const labelY = round1StartY - 80; // 80px above bracket start for FRONTSIDE/BACKSIDE labels
     const fontSize = '36px'; // Large font for visibility when zoomed out
 
+    // Determine tournament header font size based on bracket size
+    let tournamentHeaderFontSize;
+    switch (bracketSize) {
+        case 8:
+            tournamentHeaderFontSize = '54px'; // Smallest for 8-player
+            break;
+        case 16:
+            tournamentHeaderFontSize = '64px'; // Medium for 16-player
+            break;
+        case 32:
+            tournamentHeaderFontSize = '78px'; // Largest for 32-player
+            break;
+        default:
+            tournamentHeaderFontSize = '78px';
+    }
+
     // Tournament header - centered on entire bracket
     const tournamentHeader = document.createElement('div');
     tournamentHeader.style.position = 'absolute';
     tournamentHeader.style.left = `${bracketCenterX}px`;
     tournamentHeader.style.top = `${tournamentHeaderY}px`;
     tournamentHeader.style.fontFamily = 'Arial, sans-serif';
-    tournamentHeader.style.fontSize = '78px';
+    tournamentHeader.style.fontSize = tournamentHeaderFontSize;
     tournamentHeader.style.color = '#333333';
     tournamentHeader.style.textAlign = 'center';
     tournamentHeader.style.transform = 'translateX(-50%)'; // Center horizontally
@@ -402,7 +419,7 @@ function create8PlayerFrontsideLines(grid, matches, positions) {
     // Add bracket labels
     const frontsideX = round1X + (grid.matchWidth / 2); // Center of FS-R1 for consistent positioning
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
-    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX, 8);
     progressionLines.push(...labels);
 
     // Add backside placement labels
@@ -707,7 +724,7 @@ function create16PlayerFrontsideLines(grid, matches, positions) {
     // Add bracket labels
     const frontsideX = round1X + (grid.matchWidth / 2); // Center of FS-R1 for consistent positioning
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
-    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX, 16);
     progressionLines.push(...labels);
 
     // Add backside placement labels
@@ -1048,7 +1065,7 @@ function create32PlayerFrontsideLines(grid, matches, positions) {
     // Add bracket labels
     const frontsideX = round1X + (grid.matchWidth / 2); // Center of FS-R1 for consistent positioning
     const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
-    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX, 32);
     progressionLines.push(...labels);
 
     // Add backside placement labels
