@@ -5,11 +5,60 @@
  * for the NewTon DC Tournament Manager bracket system.
  *
  * Functions:
+ * - createBracketLabels(): Creates FRONTSIDE and BACKSIDE text labels
  * - createLShapedProgressionLine(): Creates L-shaped tournament bracket progression lines
  * - createProgressionLine(): Creates simple horizontal/vertical line pairs
  * - createBacksideBackground(): Creates gradient background for backside bracket area
  * - createCustomFinalsLines(): Creates custom Finals area progression lines
  */
+
+/**
+ * Creates FRONTSIDE and BACKSIDE labels above bracket sections
+ * @param {Object} grid - Grid configuration object
+ * @param {number} round1StartY - Y coordinate of first round start
+ * @param {number} frontsideX - X coordinate of frontside bracket center
+ * @param {number} backsideX - X coordinate of backside bracket center
+ * @returns {Array} Array of 2 DOM elements [frontsideLabel, backsideLabel]
+ */
+function createBracketLabels(grid, round1StartY, frontsideX, backsideX) {
+    const labels = [];
+
+    // Calculate label positioning above brackets with breathing room
+    const labelY = round1StartY - 80; // 80px above bracket start
+    const fontSize = '36px'; // Large font for visibility when zoomed out
+
+    // FRONTSIDE label - positioned above frontside bracket
+    const frontsideLabel = document.createElement('div');
+    frontsideLabel.style.position = 'absolute';
+    frontsideLabel.style.left = `${frontsideX}px`;
+    frontsideLabel.style.top = `${labelY}px`;
+    frontsideLabel.style.fontFamily = 'Arial, sans-serif';
+    frontsideLabel.style.fontSize = fontSize;
+    frontsideLabel.style.fontWeight = 'bold';
+    frontsideLabel.style.color = '#333333';
+    frontsideLabel.style.textAlign = 'center';
+    frontsideLabel.style.transform = 'translateX(-50%)'; // Center horizontally
+    frontsideLabel.style.zIndex = '5';
+    frontsideLabel.textContent = 'FRONTSIDE';
+    labels.push(frontsideLabel);
+
+    // BACKSIDE label - positioned above backside bracket
+    const backsideLabel = document.createElement('div');
+    backsideLabel.style.position = 'absolute';
+    backsideLabel.style.left = `${backsideX}px`;
+    backsideLabel.style.top = `${labelY}px`;
+    backsideLabel.style.fontFamily = 'Arial, sans-serif';
+    backsideLabel.style.fontSize = fontSize;
+    backsideLabel.style.fontWeight = 'bold';
+    backsideLabel.style.color = '#333333';
+    backsideLabel.style.textAlign = 'center';
+    backsideLabel.style.transform = 'translateX(-50%)'; // Center horizontally
+    backsideLabel.style.zIndex = '5';
+    backsideLabel.textContent = 'BACKSIDE';
+    labels.push(backsideLabel);
+
+    return labels;
+}
 
 /**
  * Creates an L-shaped progression line using HTML/CSS positioning
@@ -224,6 +273,12 @@ function createCustomFinalsLines(round3X, fs31CenterY, finalsX, backsideFinalCen
 function create8PlayerFrontsideLines(grid, matches, positions) {
     const progressionLines = [];
     const { round1X, round2X, round3X, round1StartY, spacing, fs21Y, fs22Y, fs31Y } = positions;
+
+    // Add bracket labels
+    const frontsideX = round1X + (grid.matchWidth / 2); // Center of FS-R1 for consistent positioning
+    const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    progressionLines.push(...labels);
 
     // Find matches
     const fs11 = matches.find(m => m.id === 'FS-1-1');
@@ -519,6 +574,12 @@ function create16PlayerFrontsideLines(grid, matches, positions) {
     const progressionLines = [];
     const { round1X, round2X, round3X, round4X, round1StartY, spacing } = positions;
     const { fs21Y, fs22Y, fs23Y, fs24Y, fs31Y, fs32Y, fs41Y } = positions;
+
+    // Add bracket labels
+    const frontsideX = round1X + (grid.matchWidth / 2); // Center of FS-R1 for consistent positioning
+    const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    progressionLines.push(...labels);
 
     // Calculate center Y coordinates for all matches
     const fs11CenterY = round1StartY + (grid.matchHeight / 2);
@@ -850,6 +911,12 @@ function create16PlayerBacksideLines(grid, matches, positions) {
 function create32PlayerFrontsideLines(grid, matches, positions) {
     const progressionLines = [];
     const { round1X, round2X, round3X, round4X, round5X, round1StartY, spacing } = positions;
+
+    // Add bracket labels
+    const frontsideX = round1X + (grid.matchWidth / 2); // Center of FS-R1 for consistent positioning
+    const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1 for consistent positioning
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    progressionLines.push(...labels);
     const { fs21Y, fs22Y, fs23Y, fs24Y, fs25Y, fs26Y, fs27Y, fs28Y } = positions;
     const { fs31Y, fs32Y, fs33Y, fs34Y, fs41Y, fs42Y, fs51Y } = positions;
 

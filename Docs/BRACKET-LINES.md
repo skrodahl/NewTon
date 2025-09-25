@@ -287,6 +287,97 @@ const halfWidth = Math.floor(width / 2);
 - **Correct Approach**: Copy exact positioning logic from bracket-rendering.js
 - **32-Player Example**: BS-5-1 uses `round1StartY + 6 * spacing + (spacing / 2)` - same as match rendering
 
+## Bracket Labels System
+
+### Overview
+The bracket labels system adds "FRONTSIDE" and "BACKSIDE" text labels above their respective bracket sections for improved visual identification and tournament navigation.
+
+### `createBracketLabels()` Function
+**Purpose**: Creates both FRONTSIDE and BACKSIDE text labels with consistent positioning across all bracket sizes.
+
+**Function Signature**:
+```javascript
+function createBracketLabels(grid, round1StartY, frontsideX, backsideX)
+```
+
+**Parameters**:
+- `grid`: Grid configuration object containing match dimensions and spacing
+- `round1StartY`: Y coordinate of the first round start position
+- `frontsideX`: X coordinate for FRONTSIDE label positioning
+- `backsideX`: X coordinate for BACKSIDE label positioning
+
+**Returns**: Array of 2 DOM elements `[frontsideLabel, backsideLabel]`
+
+### Label Specifications
+
+**Visual Properties**:
+- **Font Size**: 36px for visibility when zoomed out
+- **Font Weight**: Bold for prominence
+- **Font Family**: Arial, sans-serif for consistency
+- **Color**: #333333 for readability
+- **Z-Index**: 5 to appear above all bracket elements
+
+**Positioning**:
+- **Vertical**: 80px above bracket start (`round1StartY - 80`)
+- **Horizontal Alignment**: Centered using `transform: translateX(-50%)`
+
+### Consistent Positioning Logic
+
+**FRONTSIDE Label**:
+```javascript
+const frontsideX = round1X + (grid.matchWidth / 2); // Center of FS-R1
+```
+- Positioned directly above the center of FS-R1 (first frontside round)
+- Consistent across all bracket sizes (8, 16, 32 players)
+
+**BACKSIDE Label**:
+```javascript
+const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2); // Center of BS-R1
+```
+- Positioned directly above the center of BS-R1 (first backside round)
+- Accounts for match width and horizontal spacing for proper centering
+- Consistent across all bracket sizes (8, 16, 32 players)
+
+### Integration Pattern
+
+**Implementation in Bracket Functions**:
+Each bracket size function follows this pattern:
+```javascript
+function create[SIZE]PlayerFrontsideLines(grid, matches, positions) {
+    const progressionLines = [];
+
+    // Calculate label positions
+    const frontsideX = round1X + (grid.matchWidth / 2);
+    const backsideX = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing) + (grid.matchWidth / 2);
+
+    // Create and add labels
+    const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX);
+    progressionLines.push(...labels);
+
+    // ... rest of line creation logic
+
+    return progressionLines;
+}
+```
+
+### Key Benefits
+
+**Visual Clarity**:
+- Large, prominent text labels improve tournament bracket navigation
+- Clear identification of frontside vs backside bracket sections
+- Enhanced user experience when zoomed out
+
+**Consistent Positioning**:
+- Symmetric positioning above round 1 centers for both sides
+- Identical relative positioning across all bracket sizes
+- Clean, professional visual appearance
+
+**Technical Simplicity**:
+- Simple, maintainable positioning calculations
+- Reuses existing grid coordinate system
+- No complex offset adjustments required
+- Perfect integration with existing bracket line system
+
 ---
 
 This system provides the foundation for scalable, maintainable tournament bracket visualization that adheres to NewTon's Sky High Resilience principles.
