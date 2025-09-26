@@ -5,6 +5,7 @@
 - None
 
 ## Next
+- Placement text, BACKSIDE, place right above 1st match of the round.
 
 ## Later
 *Not urgent but worth tracking*
