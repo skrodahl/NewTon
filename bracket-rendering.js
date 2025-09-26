@@ -3134,7 +3134,7 @@ function updateCelebrationSubtitle() {
 
     // Update subtitle with tournament date and actual player count
     const playerCount = players ? players.length : 0;
-    let subtitleText = `Congratulations to all ${playerCount} players!`;
+    let subtitleText = `Congratulations to all ${playerCount} registered players!`;
 
     if (tournament.date) {
         // Format the date nicely for display
