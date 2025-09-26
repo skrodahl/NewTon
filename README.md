@@ -8,9 +8,9 @@ It is a fully self-contained web application that runs entirely in your browser 
 
 ---
 # See It in Action
-**Player Registration**:
+**Player Registration and Dynamic Help**:
 
-![Player Registration](https://github.com/skrodahl/NewTon/blob/main/Screenshots/player-registration.png)
+![Player Registration and Dynamic Help](https://github.com/skrodahl/NewTon/blob/main/Screenshots/player-registration-help.png)
 
 **Tournament Setup**:
 
