@@ -8,6 +8,10 @@ It is a fully self-contained web application that runs entirely in your browser 
 
 ---
 # See It in Action
+**Player Registration**:
+
+![Player Registration](https://github.com/skrodahl/NewTon/blob/main/Screenshots/player-registration.png)
+
 **16-player tournament bracket with "Match Card Magic Zoom"**:
 
 ![16-player bracket with "Match Card Magic Zoom"](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
