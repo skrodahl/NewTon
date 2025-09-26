@@ -1,3 +1,61 @@
+# 2025-09-26
+
+## **v2.0.3** Enhanced Bracket Interaction and User Experience
+
+### New Interactive Features
+- **Hover Zoom for Match Cards**: Revolutionary new feature for crowded bracket navigation
+  - Automatically activates when bracket zoom level is less than 1.0x
+  - 1-second hover delay prevents accidental triggers during navigation
+  - Scales individual matches to 1.0x viewport size for perfect readability
+  - Smooth CSS transitions with intelligent animation conflict resolution
+  - Preserves all match interactions (winner selection, lane/referee assignment)
+  - Seamless integration with existing live match pulse animations
+
+### Enhanced Visual Elements
+- **Directional Navigation Labels**: Added triangular arrows to bracket section headers
+  - "FRONTSIDE ►" and "◄ BACKSIDE" for clear directional guidance
+  - Professional triangular arrow symbols replacing basic text indicators
+  - Maintains consistent styling with existing bracket typography
+
+- **FINALS Label Addition**: Precisely positioned championship section identifier
+  - Positioned directly above BS-FINAL match card with exact bracket rendering calculations
+  - Consistent vertical alignment with FRONTSIDE/BACKSIDE labels
+  - Uses same professional typography and styling standards
+
+### User Experience Improvements
+- **Intuitive Match Discovery**: Hover zoom eliminates fumbling when searching for specific matches
+  - Natural user behavior (pausing cursor while looking) triggers helpful zoom
+  - No learning curve - feature is discoverable through normal interaction patterns
+  - Becomes integral part of tournament operator workflow after discovery
+
+- **Comprehensive Help Documentation**: Added hover zoom feature description to dynamic help system
+  - Integrated into Tournament page "Bracket Navigation" section
+  - Clear explanation of activation conditions and behavior
+  - Updated navigation tips to include hover functionality
+
+### Technical Excellence
+- **Animation Conflict Resolution**: Sophisticated handling of overlapping visual effects
+  - `zoom-hover` CSS class disables live match pulse animation during hover
+  - Proper state management with timeout cleanup on mouse leave
+  - Transform origin optimization for smooth scaling behavior
+
+- **Viewport-Relative Scaling**: Consistent zoom experience regardless of current bracket zoom level
+  - Dynamic scale calculation ensures 1.0x viewport appearance
+  - Mathematical precision: `targetScale / currentZoomLevel = elementScale`
+  - Perfect readability at any zoom level from 0.3x to 0.99x
+
+### Bug Fixes
+- **Player Statistics Reset**: Fixed tournament reset not clearing player achievement data
+  - Added proper statistics clearing in `confirmReset()` function
+  - Ensures clean slate for shortLegs, highOuts, tons, and oneEighties tracking
+  - Maintains data integrity across tournament lifecycle
+
+### User Experience Impact
+- **Effortless Navigation**: Hover zoom transforms crowded bracket usability
+- **Professional Polish**: Directional indicators and FINALS label complete visual hierarchy
+- **Reliable Data Management**: Tournament reset now properly handles all player data
+- **Discoverable Excellence**: Features that users find naturally and adopt into their workflow
+
 # 2025-09-25
 
 ## **v2.0.2** Complete Tournament Bracket Visualization System

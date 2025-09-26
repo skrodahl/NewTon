@@ -1061,8 +1061,9 @@ function renderMatch(match, x, y, section, roundIndex) {
 	</div>
     `;
 
-    // Add hover events for match progression info
+    // Add hover events for match progression info and zoom functionality
     let hoverTimeout = null;
+    let zoomTimeout = null;
 
     matchElement.addEventListener('mouseenter', function() {
         // HOVER DELAY SYSTEM:
@@ -1079,6 +1080,24 @@ function renderMatch(match, x, y, section, roundIndex) {
                 updateStatusCenter(progressionInfo);
             }
         }, HOVER_DELAY_MS);
+
+        // ZOOM HOVER FUNCTIONALITY:
+        // - Only zoom when current bracket zoom level is less than 1.0
+        // - 1 second delay prevents accidental zooming during navigation
+        // - Scale factor gives consistent viewport size regardless of bracket zoom
+        const ZOOM_DELAY_MS = 1000; // 1 second delay for zoom activation
+        const TARGET_VIEWPORT_SCALE = 1.0; // Target size relative to viewport (1.0 = normal size)
+
+        if (zoomLevel < 1.0) {
+            zoomTimeout = setTimeout(() => {
+                // Calculate scale to achieve consistent viewport size
+                // If bracket is at 0.5 zoom and we want 1.2 viewport scale: 1.2 / 0.5 = 2.4 element scale
+                const elementScale = TARGET_VIEWPORT_SCALE / zoomLevel;
+                matchElement.classList.add('zoom-hover');
+                matchElement.style.transform = `scale(${elementScale})`;
+                matchElement.style.zIndex = '1000';
+            }, ZOOM_DELAY_MS);
+        }
     });
 
     matchElement.addEventListener('mouseleave', function() {
@@ -1088,6 +1107,15 @@ function renderMatch(match, x, y, section, roundIndex) {
             hoverTimeout = null;
         }
         clearStatusCenter();
+
+        // Clear zoom timeout and reset zoom state
+        if (zoomTimeout) {
+            clearTimeout(zoomTimeout);
+            zoomTimeout = null;
+        }
+        matchElement.classList.remove('zoom-hover');
+        matchElement.style.transform = '';
+        matchElement.style.zIndex = '';
     });
 
     document.getElementById('bracketMatches').appendChild(matchElement);

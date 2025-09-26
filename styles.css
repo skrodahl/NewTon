@@ -685,6 +685,8 @@ body {
   height: 150px;
   background: #ffffff;
   border: 2px solid #d1d5db;
+  transition: transform 0.3s ease-out, z-index 0s;
+  transform-origin: center;
   border-radius: 10px;
   display: flex;
   flex-direction: column;
@@ -740,6 +742,12 @@ body {
 .bracket-match.active:hover {
   border-color: #e55a2b;
   box-shadow: 0 10px 26px rgba(255,107,53,0.45);
+}
+
+/* Disable animation during zoom hover to prevent conflict */
+.bracket-match.zoom-hover {
+  animation: none !important;
+  transform-origin: center;
 }
 
 .bracket-match.match-completed,
