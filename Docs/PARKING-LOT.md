@@ -5,7 +5,8 @@
 - None
 
 ## Next
-- Placement text, BACKSIDE, place right above 1st match of the round.
+- Placement text, BACKSIDE, place right above 1st match of the round
+- Celebration: Count only paid players, check bracket size
 
 ## Later
 *Not urgent but worth tracking*
