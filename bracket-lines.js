@@ -87,7 +87,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     frontsideLabel.style.textAlign = 'center';
     frontsideLabel.style.transform = 'translateX(-50%)'; // Center horizontally
     frontsideLabel.style.zIndex = '5';
-    frontsideLabel.textContent = 'FRONTSIDE';
+    frontsideLabel.textContent = 'FRONTSIDE ►';
     labels.push(frontsideLabel);
 
     // BACKSIDE label - positioned above backside bracket
@@ -102,7 +102,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     backsideLabel.style.textAlign = 'center';
     backsideLabel.style.transform = 'translateX(-50%)'; // Center horizontally
     backsideLabel.style.zIndex = '5';
-    backsideLabel.textContent = 'BACKSIDE';
+    backsideLabel.textContent = '◄ BACKSIDE';
     labels.push(backsideLabel);
 
     return labels;
@@ -271,7 +271,7 @@ function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing,
     }
 
     const backsideTop = round1StartY - 20; // Same as gradient background
-    const labelsY = backsideTop + backsideHeight + 20; // 20px below gradient background
+    const labelsY = backsideTop + 10; // 10px from top of gradient background
 
     // Calculate backside X positions manually since they might not be in positions object yet
     const bs1X = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing);
