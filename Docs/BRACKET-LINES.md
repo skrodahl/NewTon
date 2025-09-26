@@ -307,7 +307,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
 - `backsideX`: X coordinate for BACKSIDE label positioning
 - `bracketSize`: Tournament bracket size (8, 16, or 32) for dynamic font sizing
 
-**Returns**: Array of 3 DOM elements `[tournamentHeader, frontsideLabel, backsideLabel]`
+**Returns**: Array of 4 DOM elements `[tournamentHeader, frontsideLabel, backsideLabel, finalsLabel]`
 
 ### Label Specifications
 
@@ -325,13 +325,15 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
 - **Data Source**: Retrieved from `localStorage.getItem('currentTournament')`
 - **Fallback**: Shows "Tournament - Date" if no tournament data available
 
-**FRONTSIDE/BACKSIDE Labels**:
+**FRONTSIDE/BACKSIDE/FINALS Labels**:
 - **Font Size**: 36px for visibility when zoomed out
 - **Font Weight**: Bold for prominence
 - **Font Family**: Arial, sans-serif for consistency
 - **Color**: #333333 for readability
 - **Z-Index**: 5 to appear above all bracket elements
-- **Positioning**: 80px above bracket start (`round1StartY - 80`)
+- **FRONTSIDE/BACKSIDE Positioning**: 80px above bracket start (`round1StartY - 80`)
+- **FINALS Positioning**: 60px above BS-FINAL match for visual connection
+- **Directional Indicators**: "FRONTSIDE ►", "◄ BACKSIDE", "FINALS"
 - **Horizontal Alignment**: Centered using `transform: translateX(-50%)`
 
 ### Consistent Positioning Logic
@@ -467,7 +469,7 @@ function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing,
 ### Technical Implementation
 
 **Positioning Strategy**:
-- **Y Position**: 20px below gradient background box (`backsideTop + backsideHeight + 20`)
+- **Y Position**: 10px from top of gradient background box (`backsideTop + 10`)
 - **X Position**: Manually calculated backside round centers using bracket rendering logic
 - **Calculation**: `bs1X = centerX - centerBuffer - (matchWidth + horizontalSpacing)`, then sequential leftward progression
 

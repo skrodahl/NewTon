@@ -649,6 +649,8 @@ function confirmReset() {
     players.forEach(player => {
         player.eliminated = false;
         player.placement = null;
+        // Clear player statistics
+        player.stats = { shortLegs: [], highOuts: [], tons: 0, oneEighties: 0 };
     });
 
     saveTournamentOnly(); // Save tournament but not config
