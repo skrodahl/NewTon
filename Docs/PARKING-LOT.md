@@ -5,8 +5,6 @@
 - None
 
 ## Next
-- Add "FINALS" text, along with "FRONTSIDE" and "BACKSIDE"
-- Experimental: Zoom in on specific match when hovering over it
 
 ## Later
 *Not urgent but worth tracking*
@@ -17,7 +15,7 @@
 - Status line, include Lane and Referee information
 
 ## ✅ Completed This Session
-- Render match cards to align with previous rounds
-- Rich Contextual Status, while hovering over matches
+- Add "FINALS" text, along with "FRONTSIDE" and "BACKSIDE"
+- Experimental: Zoom in on specific match when hovering over it
 ---
-**Last updated:** September 17, 2025
+**Last updated:** September 26, 2025
