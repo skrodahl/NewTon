@@ -7,7 +7,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 [Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases)
 
 ---
-# Screenshot of the Tournament Bracket
+# See It in Action
 **Screenshot of the 16-player bracket with "Match Card Magic Zoom"**:
 
 ![16-player bracket with "Match Card Magic Zoom".](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
