@@ -7,6 +7,10 @@ It is a fully self-contained web application that runs entirely in your browser 
 [Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases)
 
 ---
+# Screenshot of the Tournament Bracket
+
+![16-player bracket with "Match Card Magic Zoom".]()
+---
 
 ## 🚀 Getting Started
 
@@ -34,6 +38,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 - **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players
 - **Smart Generation**: Prevents two walkovers from meeting in first round
 - **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
+- **Match Card Magic Zoom:** Auto-zoom on individual matches when zoomed out to far to read and control the matches
 - **Automatic Advancement**: Walkovers advance real players intelligently
 - **Undo**: Full undo of all matches without completed downstream matches to prevent undoing large portions of the tournament at once, can undo more matches in stages
 - **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
