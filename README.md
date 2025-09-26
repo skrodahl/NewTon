@@ -8,9 +8,13 @@ It is a fully self-contained web application that runs entirely in your browser 
 
 ---
 # See It in Action
-**Screenshot of the 16-player bracket with "Match Card Magic Zoom"**:
+**16-player tournament bracket with "Match Card Magic Zoom"**:
 
-![16-player bracket with "Match Card Magic Zoom".](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
+![16-player bracket with "Match Card Magic Zoom"](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
+
+**Match Controls**:
+
+![Match Controls](https://github.com/skrodahl/NewTon/blob/main/Screenshots/match-controls.png)
 ---
 
 ## 🚀 Getting Started
