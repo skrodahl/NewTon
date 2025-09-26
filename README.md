@@ -19,6 +19,10 @@ It is a fully self-contained web application that runs entirely in your browser 
 **Match Controls**:
 
 ![Match Controls](https://github.com/skrodahl/NewTon/blob/main/Screenshots/match-controls.png)
+
+**Celebration**:
+
+![Celebration](https://github.com/skrodahl/NewTon/blob/main/Screenshots/celebration.png)
 ---
 
 ## 🚀 Getting Started
