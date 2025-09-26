@@ -105,6 +105,27 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     backsideLabel.textContent = '◄ BACKSIDE';
     labels.push(backsideLabel);
 
+    // FINALS label - positioned above finals area
+    // Calculate finals X position using the exact logic from bracket rendering
+    const frontsideRounds = bracketSize === 8 ? 3 : bracketSize === 16 ? 4 : 5;
+    const lastFrontsideX = grid.centerX + grid.centerBuffer + (frontsideRounds - 1) * (grid.matchWidth + grid.horizontalSpacing);
+    const spacingMultiplier = 4; // Same as in renderFinalMatches
+    const finalsX = lastFrontsideX + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
+
+    const finalsLabel = document.createElement('div');
+    finalsLabel.style.position = 'absolute';
+    finalsLabel.style.left = `${finalsX + (grid.matchWidth / 2)}px`; // Center on the finals match column
+    finalsLabel.style.top = `${grid.centerY - 80 - 60}px`; // 60px above BS-FINAL match (20px higher than before)
+    finalsLabel.style.fontFamily = 'Arial, sans-serif';
+    finalsLabel.style.fontSize = fontSize;
+    finalsLabel.style.fontWeight = 'bold';
+    finalsLabel.style.color = '#333333';
+    finalsLabel.style.textAlign = 'center';
+    finalsLabel.style.transform = 'translateX(-50%)'; // Center horizontally
+    finalsLabel.style.zIndex = '5';
+    finalsLabel.textContent = 'FINALS';
+    labels.push(finalsLabel);
+
     return labels;
 }
 

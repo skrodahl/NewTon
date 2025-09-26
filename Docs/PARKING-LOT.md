@@ -6,8 +6,6 @@
 
 ## Next
 - Add "FINALS" text, along with "FRONTSIDE" and "BACKSIDE"
-- Add directional arrows to FRONTSIDE and BACKSIDE labels
-- Status line, include Lane and Referee information
 - Experimental: Zoom in on specific match when hovering over it
 
 ## Later
@@ -16,6 +14,7 @@
 
 ## Decided against
 - Player cards shadow matching results table [ui] - styles.css - Add shadow to .player-card
+- Status line, include Lane and Referee information
 
 ## ✅ Completed This Session
 - Render match cards to align with previous rounds
