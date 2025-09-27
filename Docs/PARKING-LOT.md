@@ -5,8 +5,7 @@
 - None
 
 ## Next
-- Configurable club name, instead of Application Title
-- CAD-style info in lower right corner instead of tournament name/date.
+- Matches played/total in CAD-box. This shows the actual number for the full bracket, should it stay that way or reflect the actual number of matches without BYEs?
 
 ## Later
 *Not urgent but worth tracking*
@@ -17,7 +16,7 @@
 - Status line, include Lane and Referee information
 
 ## ✅ Completed This Session
-- Placement text, BACKSIDE, place right above 1st match of the round
-- Celebration: Count only paid players, check bracket size
+- Configurable club name, instead of Application Title
+- CAD-style info in lower right corner instead of tournament name/date.
 ---
-**Last updated:** September 27, 2025
+**Last updated:** September 28, 2025
