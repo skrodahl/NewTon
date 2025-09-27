@@ -3,7 +3,7 @@
 ## **v2.1.2** CAD-Style Information Box Enhancements
 - **Dynamic Progress Display**: Replaced static "DOUBLE ELIMINATION" text with real-time tournament progress
   - Active tournaments show "COMPLETED MATCHES: #" with live match completion count
-  - Completed tournaments display winner recognition: "1st: WINNER N." in all-caps CAD style
+  - Completed tournaments display winner recognition: "WINNER: WINNER NAME" in all-caps CAD style
   - Automatic state switching between progress tracking and winner display
 - **Header Simplification**: Streamlined CAD header for better readability
   - Removed club name from header to focus on tournament name
