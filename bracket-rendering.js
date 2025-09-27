@@ -2424,26 +2424,44 @@ function showMatchCommandCenter() {
     const liveMatches = matches.filter(m => getMatchState(m) === 'live');
     const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
 
-    // Separate ready matches by bracket side
-    const frontMatches = readyMatches.filter(m =>
-        m.side === 'frontside' ||
-        m.id.startsWith('FS-') ||
-        m.id === 'GRAND-FINAL'  // GRAND-FINAL shows in front section
-    );
-    const backMatches = readyMatches.filter(m =>
-        m.side === 'backside' ||
-        m.id.startsWith('BS-')
-    );
+    // Group ready matches by round for chronological organization
+    const roundGroups = {};
 
-    // Sort by match ID for consistent ordering
+    readyMatches.forEach(match => {
+        // Determine round identifier for grouping
+        let roundKey;
+
+        if (match.id === 'GRAND-FINAL') {
+            roundKey = 'GRAND-FINAL';
+        } else if (match.id === 'BS-FINAL') {
+            roundKey = 'BS-FINAL';
+        } else if (match.id.startsWith('FS-')) {
+            const roundNum = parseInt(match.id.split('-')[1]);
+            roundKey = `FS-R${roundNum}`;
+        } else if (match.id.startsWith('BS-')) {
+            const roundNum = parseInt(match.id.split('-')[1]);
+            roundKey = `BS-R${roundNum}`;
+        } else {
+            roundKey = 'OTHER';
+        }
+
+        if (!roundGroups[roundKey]) {
+            roundGroups[roundKey] = [];
+        }
+        roundGroups[roundKey].push(match);
+    });
+
+    // Sort matches within each round group by match ID
+    Object.keys(roundGroups).forEach(roundKey => {
+        roundGroups[roundKey].sort((a, b) => a.id.localeCompare(b.id));
+    });
+
+    // Sort live matches
     liveMatches.sort((a, b) => a.id.localeCompare(b.id));
-    frontMatches.sort((a, b) => a.id.localeCompare(b.id));
-    backMatches.sort((a, b) => a.id.localeCompare(b.id));
 
     const matchData = {
         live: liveMatches,
-        front: frontMatches,
-        back: backMatches
+        rounds: roundGroups
     };
 
     showCommandCenterModal(matchData);
@@ -2860,30 +2878,59 @@ function showCommandCenterModal(matchData) {
                     liveContainer.innerHTML = liveHTML;
                 }
 
-                // Populate Front matches
-                if (matchData.front && matchData.front.length > 0) {
-                    frontSection.style.display = 'block';
-                    let frontHTML = '';
-                    matchData.front.forEach(match => {
-                        frontHTML += createMatchCard(match);
+                // Populate Round-based matches
+                if (matchData.rounds && Object.keys(matchData.rounds).length > 0) {
+                    // Sort round keys for logical display order
+                    const sortedRoundKeys = Object.keys(matchData.rounds).sort((a, b) => {
+                        // Custom sorting for logical round progression
+                        const order = {
+                            'FS-R1': 1, 'BS-R1': 2, 'FS-R2': 3, 'BS-R2': 4, 'FS-R3': 5, 'BS-R3': 6,
+                            'FS-R4': 7, 'BS-R4': 8, 'FS-R5': 9, 'BS-R5': 10, 'BS-R6': 11, 'BS-R7': 12,
+                            'BS-FINAL': 13, 'GRAND-FINAL': 14, 'OTHER': 15
+                        };
+                        return (order[a] || 99) - (order[b] || 99);
                     });
-                    frontContainer.innerHTML = frontHTML;
-                }
 
-                // Populate Back matches
-                if (matchData.back && matchData.back.length > 0) {
-                    backSection.style.display = 'block';
-                    let backHTML = '';
-                    matchData.back.forEach(match => {
-                        backHTML += createMatchCard(match);
+                    // Create dynamic sections for each round
+                    let allRoundsHTML = '';
+                    sortedRoundKeys.forEach(roundKey => {
+                        const roundMatches = matchData.rounds[roundKey];
+                        if (roundMatches && roundMatches.length > 0) {
+                            // Create user-friendly round names
+                            let roundDisplayName;
+                            if (roundKey === 'GRAND-FINAL') {
+                                roundDisplayName = '🏆 Grand Final';
+                            } else if (roundKey === 'BS-FINAL') {
+                                roundDisplayName = '🥈 Backside Final';
+                            } else if (roundKey.startsWith('FS-R')) {
+                                const roundNum = roundKey.replace('FS-R', '');
+                                roundDisplayName = `⚪ Round ${roundNum} (Frontside)`;
+                            } else if (roundKey.startsWith('BS-R')) {
+                                const roundNum = roundKey.replace('BS-R', '');
+                                roundDisplayName = `⚫ Round ${roundNum} (Backside)`;
+                            } else {
+                                roundDisplayName = `📋 ${roundKey}`;
+                            }
+
+                            allRoundsHTML += `
+                                <div class="cc-match-section" style="display: block;">
+                                    <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
+                                    <div class="cc-matches-container">
+                                        ${roundMatches.map(match => createMatchCard(match)).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
                     });
-                    backContainer.innerHTML = backHTML;
+
+                    // Use frontContainer for all round content (repurposing existing container)
+                    frontContainer.innerHTML = allRoundsHTML;
+                    frontSection.style.display = 'block';
                 }
 
                 // If no matches in active state, show fallback message
                 const hasActiveMatches = (matchData.live && matchData.live.length > 0) ||
-                                       (matchData.front && matchData.front.length > 0) ||
-                                       (matchData.back && matchData.back.length > 0);
+                                       (matchData.rounds && Object.keys(matchData.rounds).length > 0);
                 if (!hasActiveMatches) {
                     noMatchesMessage.style.display = 'block';
                 }

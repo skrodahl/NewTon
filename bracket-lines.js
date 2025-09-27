@@ -24,10 +24,11 @@
 function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketSize) {
     const labels = [];
 
-    // Get current tournament data
+    // Get current tournament data and club name
     const currentTournament = localStorage.getItem('currentTournament');
     let tournamentName = 'Tournament';
     let tournamentDate = 'Date';
+    let clubName = 'Club';
 
     if (currentTournament) {
         try {
@@ -39,9 +40,26 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
         }
     }
 
+    // Get club name from global config
+    try {
+        const globalConfig = JSON.parse(localStorage.getItem('globalConfig') || '{}');
+        if (globalConfig.clubName) {
+            clubName = globalConfig.clubName;
+        } else if (globalConfig.applicationTitle) {
+            // Extract club name from legacy applicationTitle
+            clubName = globalConfig.applicationTitle.replace(' - Tournament Manager', '');
+        } else {
+            // Use default from results-config.js
+            clubName = 'NewTon DC';
+        }
+    } catch (e) {
+        console.warn('Could not parse global config for club name');
+        clubName = 'NewTon DC';
+    }
+
     // Calculate positioning
     const bracketCenterX = grid.centerX; // Center of entire bracket
-    const tournamentHeaderY = round1StartY - 220; // 220px above bracket start for tournament header
+    const tournamentHeaderY = round1StartY - 320; // 320px above bracket start for tournament header
     const labelY = round1StartY - 80; // 80px above bracket start for FRONTSIDE/BACKSIDE labels
     const fontSize = '36px'; // Large font for visibility when zoomed out
 
@@ -72,7 +90,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     tournamentHeader.style.textAlign = 'center';
     tournamentHeader.style.transform = 'translateX(-50%)'; // Center horizontally
     tournamentHeader.style.zIndex = '5';
-    tournamentHeader.innerHTML = `<strong>${tournamentName}</strong> - ${tournamentDate}`;
+    tournamentHeader.innerHTML = `<strong>${clubName} - ${tournamentName}</strong><br><span style="font-size: 0.8em; font-weight: normal;">${tournamentDate}</span>`;
     labels.push(tournamentHeader);
 
     // FRONTSIDE label - positioned above frontside bracket

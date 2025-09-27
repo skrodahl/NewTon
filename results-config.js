@@ -23,7 +23,7 @@ const DEFAULT_CONFIG = {
         backsideFinal: 5,
         grandFinal: 5
     },
-    applicationTitle: "NewTon DC - Tournament Manager",
+    clubName: "NewTon DC",
     lanes: {
         maxLanes: 4,
         excludedLanes: [],
@@ -97,8 +97,14 @@ function applyConfigToUI() {
     safeSetValue('grandFinalLegs', config.legs.grandFinal);
 
     // Application title
-    if (config.applicationTitle) {
-        safeSetValue('applicationTitle', config.applicationTitle);
+    if (config.clubName) {
+        safeSetValue('applicationTitle', config.clubName);
+        updateApplicationTitle(config.clubName + ' - Tournament Manager');
+    } else if (config.applicationTitle) {
+        // Legacy support - extract club name from old format
+        const clubName = config.applicationTitle.replace(' - Tournament Manager', '');
+        config.clubName = clubName;
+        safeSetValue('applicationTitle', clubName);
         updateApplicationTitle(config.applicationTitle);
     }
 
@@ -185,19 +191,19 @@ function saveConfiguration() {
 
 // APPLICATION SETTINGS
 function saveApplicationSettings() {
-    const titleElement = document.getElementById('applicationTitle');
-    const newTitle = titleElement ? titleElement.value.trim() : '';
+    const clubNameElement = document.getElementById('applicationTitle');
+    const newClubName = clubNameElement ? clubNameElement.value.trim() : '';
 
-    if (!newTitle) {
-        alert('Application title cannot be empty');
+    if (!newClubName) {
+        alert('Club name cannot be empty');
         return;
     }
 
-    config.applicationTitle = newTitle;
-    updateApplicationTitle(newTitle);
+    config.clubName = newClubName;
+    updateApplicationTitle(newClubName + ' - Tournament Manager');
 
     saveGlobalConfig();
-    alert('✓ Application settings saved successfully!');
+    alert('✓ Branding saved successfully!');
 }
 
 // Helper function to parse excluded lanes from string

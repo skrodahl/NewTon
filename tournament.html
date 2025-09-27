@@ -241,15 +241,15 @@
             </div>
 
             <div class="config-section">
-                <h3>Application Settings</h3>
+                <h3>Branding</h3>
                 <div class="config-grid">
                     <div class="form-group">
-                        <label for="applicationTitle">Application Title</label>
-                        <input type="text" id="applicationTitle" value="NewTon DC - Tournament Manager"
-                            placeholder="Your Club - Tournament Manager">
+                        <label for="applicationTitle">Club Name</label>
+                        <input type="text" id="applicationTitle" value="NewTon DC"
+                            placeholder="Your Club Name">
                     </div>
                 </div>
-                <button class="btn btn-success" onclick="saveApplicationSettings()">Save Application Settings</button>
+                <button class="btn btn-success" onclick="saveApplicationSettings()">Save Branding</button>
             </div>
 
             <div class="config-section">
@@ -557,16 +557,16 @@
                         </div>
                     </div>
 
-                    <!-- Front Bracket Matches Section -->
+                    <!-- Round-based Matches Section (repurposing front section) -->
                     <div id="frontMatchesSection" class="cc-match-section">
-                        <h4 class="cc-section-header">⚪ Frontside - Ready to Start</h4>
+                        <!-- Section header will be dynamically created for each round -->
                         <div id="frontMatchesContainer" class="cc-matches-container">
-                            <!-- Front bracket ready match cards will be populated here -->
+                            <!-- Round-based match cards will be populated here -->
                         </div>
                     </div>
 
-                    <!-- Back Bracket Matches Section -->
-                    <div id="backMatchesSection" class="cc-match-section">
+                    <!-- Back Bracket Matches Section (hidden - no longer used) -->
+                    <div id="backMatchesSection" class="cc-match-section" style="display: none;">
                         <h4 class="cc-section-header">⚫ Backside - Ready to Start</h4>
                         <div id="backMatchesContainer" class="cc-matches-container">
                             <!-- Back bracket ready match cards will be populated here -->

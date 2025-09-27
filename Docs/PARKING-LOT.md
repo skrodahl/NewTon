@@ -5,8 +5,8 @@
 - None
 
 ## Next
-- Placement text, BACKSIDE, place right above 1st match of the round
-- Celebration: Count only paid players, check bracket size
+- Configurable club name, instead of Application Title
+- CAD-style info in lower right corner instead of tournament name/date.
 
 ## Later
 *Not urgent but worth tracking*
@@ -17,7 +17,7 @@
 - Status line, include Lane and Referee information
 
 ## ✅ Completed This Session
-- Add "FINALS" text, along with "FRONTSIDE" and "BACKSIDE"
-- Experimental: Zoom in on specific match when hovering over it
+- Placement text, BACKSIDE, place right above 1st match of the round
+- Celebration: Count only paid players, check bracket size
 ---
-**Last updated:** September 26, 2025
+**Last updated:** September 27, 2025
