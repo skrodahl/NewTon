@@ -1241,8 +1241,8 @@ function getMatchButtonText(matchState) {
 }
 
 function getPlayerDisplayName(player) {
-    if (!player) return 'TBD';
-    if (player.name === 'TBD') return 'TBD';
+    if (!player) return 'Awaiting Player';
+    if (player.name === 'TBD') return 'Awaiting Player';
     if (player.isBye) return 'Walkover';
     return player.name || 'Unknown';
 }

@@ -815,10 +815,92 @@ function showImportStatus(type, message) {
 function updateTournamentWatermark() {
     const watermark = document.getElementById('watermark-right');
     if (watermark) {
+        // Get current tournament data from localStorage
+        const currentTournamentData = localStorage.getItem('currentTournament');
+        let tournament = null;
+
+        if (currentTournamentData) {
+            try {
+                tournament = JSON.parse(currentTournamentData);
+            } catch (e) {
+                console.warn('Could not parse current tournament data');
+            }
+        }
+
         if (tournament) {
-            watermark.innerHTML = `Tournament: <strong>${tournament.name}</strong> - ${tournament.date}`;
+            // Get club name from global config
+            let clubName = 'CLUB';
+            try {
+                const globalConfig = JSON.parse(localStorage.getItem('globalConfig') || '{}');
+                if (globalConfig.clubName) {
+                    clubName = globalConfig.clubName.toUpperCase();
+                } else if (globalConfig.applicationTitle) {
+                    clubName = globalConfig.applicationTitle.replace(' - Tournament Manager', '').toUpperCase();
+                } else {
+                    clubName = 'NEWTON DC';
+                }
+            } catch (e) {
+                clubName = 'NEWTON DC';
+            }
+
+            // Calculate tournament statistics
+            const players = tournament.players || [];
+            const paidPlayers = players.filter(p => p.paid);
+            const playerCount = paidPlayers.length;
+            const bracketSize = tournament.bracketSize || 8;
+
+            // Calculate total matches (excluding BYEs)
+            const matches = tournament.matches || [];
+            const realMatches = matches.filter(match =>
+                match.player1 !== 'BYE' && match.player2 !== 'BYE'
+            );
+            const matchCount = realMatches.length;
+
+            // Determine tournament status
+            let status = 'SETUP';
+            if (matches.some(m => m.winner)) {
+                const completedMatches = matches.filter(m => m.winner);
+                if (completedMatches.length === realMatches.length) {
+                    status = 'COMPLETE';
+                } else {
+                    status = 'ACTIVE';
+                }
+            }
+
+            // Get app version
+            const version = window.APP_VERSION || 'v2.0.3';
+
+            watermark.innerHTML = `
+                <div class="cad-header">${clubName} - ${tournament.name}</div>
+                <div class="cad-grid">
+                    <div class="cad-cell cad-format">DOUBLE ELIMINATION</div>
+                    <div class="cad-cell cad-players">
+                        <div>${playerCount}</div>
+                        <div>PLAYERS</div>
+                    </div>
+                    <div class="cad-cell cad-bracket">${bracketSize}-BRACKET</div>
+                    <div class="cad-cell cad-matches">${matchCount} MATCHES</div>
+                    <div class="cad-cell cad-date">${tournament.date}</div>
+                    <div class="cad-cell cad-version">v${version}</div>
+                </div>
+                <div class="cad-status">${status}</div>
+            `;
         } else {
-            watermark.innerHTML = 'Tournament: <strong>None</strong>';
+            watermark.innerHTML = `
+                <div class="cad-header">NO TOURNAMENT</div>
+                <div class="cad-grid">
+                    <div class="cad-cell cad-format">-</div>
+                    <div class="cad-cell cad-players">
+                        <div>0</div>
+                        <div>PLAYERS</div>
+                    </div>
+                    <div class="cad-cell cad-bracket">-</div>
+                    <div class="cad-cell cad-matches">-</div>
+                    <div class="cad-cell cad-date">-</div>
+                    <div class="cad-cell cad-version">v${window.APP_VERSION || '2.0.3'}</div>
+                </div>
+                <div class="cad-status">SETUP</div>
+            `;
         }
     }
 }

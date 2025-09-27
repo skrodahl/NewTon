@@ -333,7 +333,7 @@ const HELP_CONTENT = {
                 </ul>
                 <p><strong>Match won't start:</strong></p>
                 <ul>
-                    <li>Both players must be determined (not "TBD")</li>
+                    <li>Both players must be determined (not "Awaiting Player")</li>
                     <li>Previous matches may need to be completed first</li>
                     <li>Check for walkover situations</li>
                 </ul>
