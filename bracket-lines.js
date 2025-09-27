@@ -275,24 +275,63 @@ function createBacksideBackground(grid, bracketSize, round1StartY, spacing) {
 function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing, positions) {
     const placementLabels = [];
 
-    // Calculate Y position below the gradient background
-    let backsideHeight;
+    // Debug: Log what's in the positions object
+    console.log('createBacksidePlacementLabels called with:');
+    console.log('  bracketSize:', bracketSize);
+    console.log('  round1StartY:', round1StartY);
+    console.log('  spacing:', spacing);
+    console.log('  positions object:', positions);
+    console.log('  positions.bs11Y:', positions.bs11Y);
+    console.log('  positions.bs21Y:', positions.bs21Y);
+    console.log('  positions.bs31Y:', positions.bs31Y);
+
+    // Calculate first match Y positions for each backside round
+    // These will be used to position labels directly above the first match of each round
+    let firstMatchYPositions = {};
+
     switch (bracketSize) {
         case 8:
-            backsideHeight = 4 * spacing + 40;
+            // Use passed Y coordinates for 8-player bracket
+            firstMatchYPositions = {
+                1: positions.bs11Y, // BS-1-1
+                2: positions.bs21Y, // BS-2-1
+                3: positions.bs31Y  // BS-3-1
+            };
             break;
         case 16:
-            backsideHeight = 8 * spacing + 40;
+            // Use passed Y coordinates for 16-player bracket
+            firstMatchYPositions = {
+                1: positions.bs11Y, // BS-1-1
+                2: positions.bs21Y, // BS-2-1
+                3: positions.bs31Y, // BS-3-1
+                4: positions.bs41Y, // BS-4-1
+                5: positions.bs51Y  // BS-5-1
+            };
             break;
         case 32:
-            backsideHeight = 16 * spacing + 40;
+            // Calculate Y positions for 32-player bracket (same logic as bracket rendering)
+            // BS-1-1: First backside round 1 match (between FS-1-1 and FS-1-2)
+            const bs11Y32 = (round1StartY + (round1StartY + spacing)) / 2;
+            // BS-2-1: First backside round 2 match (same position as BS-1-1)
+            const bs21Y32 = bs11Y32;
+            // BS-3-1: First backside round 3 match (between FS-2-1 and FS-2-2)
+            const input1Y_bs31 = round1StartY + spacing / 2;
+            const input2Y_bs31 = round1StartY + spacing + spacing / 2;
+            const bs31Y32 = (input1Y_bs31 + input2Y_bs31) / 2;
+
+            firstMatchYPositions = {
+                1: bs11Y32, // BS-1-1
+                2: bs21Y32, // BS-2-1
+                3: bs31Y32, // BS-3-1
+                4: round1StartY + 1.5 * spacing, // BS-4-1 (align with FS-3-1)
+                5: round1StartY + 3.5 * spacing, // BS-5-1 (align with FS-4-1)
+                6: round1StartY + 5.5 * spacing, // BS-6-1 (align with FS-4-2)
+                7: grid.centerY - 80 + (grid.matchHeight / 2) // BS-7-1 (same as FS-5-1)
+            };
             break;
         default:
-            backsideHeight = 4 * spacing + 40;
+            firstMatchYPositions = {};
     }
-
-    const backsideTop = round1StartY - 20; // Same as gradient background
-    const labelsY = backsideTop + 10; // 10px from top of gradient background
 
     // Calculate backside X positions manually since they might not be in positions object yet
     const bs1X = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing);
@@ -338,8 +377,30 @@ function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing,
         // Calculate X position - center label on the match center
         const roundX = placement.xCoord + (grid.matchWidth / 2);
 
+        // Calculate Y position - place at same vertical distance above first match as BACKSIDE label
+        // BACKSIDE label is at round1StartY - 80, so calculate the distance from that to the first BS match
+        const firstMatchY = firstMatchYPositions[placement.round];
+        let labelY;
+        if (firstMatchY) {
+            // Position placement labels at a consistent distance above their matches
+            // Use a shorter distance than the BACKSIDE label to avoid overlap
+            const placementLabelDistance = 70; // 70px above each match (optimal visual balance)
+            labelY = firstMatchY - placementLabelDistance;
+
+            // Debug logging
+            console.log(`Placement label for round ${placement.round}:`, {
+                firstMatchY,
+                labelY,
+                placementText: placement.text
+            });
+        } else {
+            // Fallback to old position if match Y position not available
+            labelY = round1StartY - 10;
+            console.log(`No firstMatchY for round ${placement.round}, using fallback:`, labelY);
+        }
+
         label.style.left = `${roundX}px`;
-        label.style.top = `${labelsY}px`;
+        label.style.top = `${labelY}px`;
         label.style.fontFamily = 'Arial, sans-serif';
         label.style.fontSize = '24px'; // Slightly smaller than bracket labels
         label.style.fontWeight = 'bold';
@@ -443,9 +504,8 @@ function create8PlayerFrontsideLines(grid, matches, positions) {
     const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX, 8);
     progressionLines.push(...labels);
 
-    // Add backside placement labels
-    const placementLabels = createBacksidePlacementLabels(grid, 8, round1StartY, spacing, positions);
-    progressionLines.push(...placementLabels);
+    // Note: Backside placement labels are now created in the backside rendering function
+    // where the backside match Y positions are available
 
     // Find matches
     const fs11 = matches.find(m => m.id === 'FS-1-1');
@@ -530,6 +590,10 @@ function create8PlayerBacksideLines(grid, matches, positions) {
     const progressionLines = [];
     const { round1X, bs1X, bs2X, bs3X, round1StartY, spacing } = positions;
     const { bs11Y, bs12Y, bs21Y, bs22Y, bs31Y } = positions;
+
+    // Add backside placement labels now that we have the Y positions
+    const placementLabels = createBacksidePlacementLabels(grid, 8, round1StartY, spacing, positions);
+    progressionLines.push(...placementLabels);
 
     // Calculate center Y coordinates for frontside matches (for loser feeds)
     const fs11CenterY = round1StartY + (grid.matchHeight / 2);
@@ -748,9 +812,8 @@ function create16PlayerFrontsideLines(grid, matches, positions) {
     const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX, 16);
     progressionLines.push(...labels);
 
-    // Add backside placement labels
-    const placementLabels = createBacksidePlacementLabels(grid, 16, round1StartY, spacing, positions);
-    progressionLines.push(...placementLabels);
+    // Note: Backside placement labels are now created in the backside rendering function
+    // where the backside match Y positions are available
 
     // Calculate center Y coordinates for all matches
     const fs11CenterY = round1StartY + (grid.matchHeight / 2);
@@ -853,6 +916,10 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     const { round1X, bs1X, bs2X, bs3X, bs4X } = positions;
     const { round1StartY, spacing } = positions;
     const { bs11Y, bs12Y, bs13Y, bs14Y } = positions;
+
+    // Add backside placement labels now that we have the Y positions
+    const placementLabels = createBacksidePlacementLabels(grid, 16, round1StartY, spacing, positions);
+    progressionLines.push(...placementLabels);
 
     // Calculate center Y coordinates for frontside Round 1 matches (for loser feeds)
     const fs11CenterY = round1StartY + (grid.matchHeight / 2);
@@ -1089,9 +1156,8 @@ function create32PlayerFrontsideLines(grid, matches, positions) {
     const labels = createBracketLabels(grid, round1StartY, frontsideX, backsideX, 32);
     progressionLines.push(...labels);
 
-    // Add backside placement labels
-    const placementLabels = createBacksidePlacementLabels(grid, 32, round1StartY, spacing, positions);
-    progressionLines.push(...placementLabels);
+    // Note: Backside placement labels are now created in the backside rendering function
+    // where the backside match Y positions are available
     const { fs21Y, fs22Y, fs23Y, fs24Y, fs25Y, fs26Y, fs27Y, fs28Y } = positions;
     const { fs31Y, fs32Y, fs33Y, fs34Y, fs41Y, fs42Y, fs51Y } = positions;
 
@@ -1317,6 +1383,10 @@ function create32PlayerBSFinalIndicator(bs7X, bs71CenterY, finalsX, backsideFina
  */
 function create32PlayerBacksideLines(grid, matches, positions) {
     const progressionLines = [];
+
+    // Add backside placement labels
+    const placementLabels = createBacksidePlacementLabels(grid, 32, positions.round1StartY, positions.spacing, positions);
+    progressionLines.push(...placementLabels);
     const { round1X, bs1X, bs2X, bs3X, bs4X, bs5X, bs6X, bs7X, round1StartY, spacing } = positions;
 
     // Phase 1: FS-R1 → BS-R1 loser feed lines (16 connections, 2→1 grouping)
