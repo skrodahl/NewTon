@@ -27,6 +27,10 @@ It is a fully self-contained web application that runs entirely in your browser 
 **Celebration**:
 
 ![Celebration](https://github.com/skrodahl/NewTon/blob/main/Screenshots/celebration.png)
+
+**Configuration Page**:
+
+![Configuration Page](https://github.com/skrodahl/NewTon/blob/main/Screenshots/config-page.png)
 ---
 
 ## 🚀 Getting Started
