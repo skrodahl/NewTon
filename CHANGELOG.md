@@ -7,7 +7,7 @@
   - Automatic state switching between progress tracking and winner display
 - **Header Simplification**: Streamlined CAD header for better readability
   - Removed club name from header to focus on tournament name
-  - Added automatic truncation for long tournament names (40+ characters)
+  - Added automatic truncation for long tournament names (35+ characters)
   - Cleaner, more professional appearance with improved space utilization
 - **Winner Name Formatting**: Enhanced winner display with proper CAD technical drawing aesthetics
   - First name + last initial format: "JOHN S." for space efficiency
