@@ -1,3 +1,65 @@
+# 2025-09-27
+
+## **v2.1.0** Professional Tournament Management and CAD-Style Information Display
+
+### Tournament Management Enhancements
+- **Club Branding System**: Complete overhaul of application title configuration
+  - Changed "Application Title" to "Club Name" in Config page for clearer purpose
+  - Automatic title generation: "[Club Name] - Tournament Manager" format
+  - Enhanced tournament bracket headers with club name integration
+  - Tournament displays now show "Club Name - Tournament Name" with date
+  - Legacy configuration support for seamless migration from previous versions
+
+- **Round-Based Match Organization**: Revolutionary Command & Control Center interface
+  - Match Controls dialog reorganized from bracket-side grouping to chronological rounds
+  - Frontside and Backside matches unified by round progression (FS-R1, BS-R1, etc.)
+  - LIVE matches remain prominent and unified at the top for immediate attention
+  - Maintains all bracket context while improving operational flow
+  - Reflects military Command & Control Center philosophy for tournament management
+
+### Visual and Interface Improvements
+- **CAD-Style Information Box**: Professional technical drawing aesthetic
+  - Replaced simple tournament watermark with authentic CAD title block
+  - Mixed-size cell structure mimicking engineering drawing standards
+  - Positioned flush in bottom-right corner using viewport frame
+  - Monospace typography (Courier New) for technical drawing authenticity
+  - Consistent 1px line weights throughout grid structure
+  - Real-time tournament data: club name, format, players, matches, date, version, status
+
+- **Enhanced Tournament Bracket Positioning**: Improved visual hierarchy
+  - Tournament title block repositioned 60px higher to eliminate overlap with bracket labels
+  - Better integration of club name with tournament information
+  - Maintains professional appearance while providing complete branding context
+
+- **User Experience Refinements**: Clearer communication throughout interface
+  - Replaced technical "TBD" with user-friendly "Awaiting Player" in match displays
+  - Improved button color coding: Export (green), Import (orange), Reset (red) for risk indication
+  - Celebration messages now count only paid players, removing "registered" terminology
+  - Placement labels repositioned contextually above respective tournament rounds
+
+### Technical Infrastructure
+- **Robust Data Integration**: Enhanced tournament information accuracy
+  - CAD information box reads real-time data from localStorage
+  - Smart match counting excludes BYE matches, includes competitive matches only
+  - Dynamic status tracking: SETUP → ACTIVE → COMPLETE based on match progression
+  - Accurate player count using paid players only
+  - Automatic bracket size detection and display
+
+- **Configuration Migration**: Seamless transition from legacy settings
+  - Automatic extraction of club names from old "Application Title" format
+  - Fallback support ensures no data loss during configuration updates
+  - Maintains backward compatibility while enabling new features
+
+### Architectural Philosophy
+This release embodies the **Command & Control Center** design philosophy:
+- **Information at a glance**: CAD-style technical display provides comprehensive tournament status
+- **Operational efficiency**: Round-based organization matches natural tournament flow
+- **Professional appearance**: Technical drawing aesthetics convey competence and precision
+- **Clear communication**: User-friendly terminology eliminates confusion
+- **Brand integration**: Club identity seamlessly woven throughout tournament experience
+
+---
+
 # 2025-09-26
 
 ## **v2.0.3** Enhanced Bracket Interaction and User Experience
