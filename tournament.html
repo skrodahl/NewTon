@@ -62,9 +62,9 @@
                 </div>
 
                 <div class="form-group">
-                    <button class="btn btn-warning" onclick="exportTournament()">Export Tournament</button>
-                    <button class="btn" onclick="document.getElementById('importFile').click()">Import Tournament</button>
-                    <button class="btn btn-warning" onclick="showResetTournamentModal()">Reset Tournament</button>
+                    <button class="btn btn-success" onclick="exportTournament()">Export Tournament</button>
+                    <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">Import Tournament</button>
+                    <button class="btn btn-danger" onclick="showResetTournamentModal()">Reset Tournament</button>
                     <input type="file" id="importFile" accept=".json" style="display: none;"
                         onchange="importTournament(event)">
                 </div>
