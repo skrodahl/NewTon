@@ -23,7 +23,11 @@ const MATCH_PROGRESSION = {
         'BS-2-1': { winner: ['BS-3-1', 'player1'] },
         'BS-2-2': { winner: ['BS-3-1', 'player2'] },
         'BS-3-1': { winner: ['BS-FINAL', 'player2'] },
-        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
+        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] },
+
+        // Grand Final: FS champion vs BS champion
+        // Winner = 1st place, Loser = 2nd place
+        'GRAND-FINAL': {} // Tournament complete
     },
 
     16: {
@@ -74,7 +78,11 @@ const MATCH_PROGRESSION = {
         'BS-5-1': { winner: ['BS-FINAL', 'player2'] },
 
         // BS champion → GRAND-FINAL.player2
-        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] }
+        'BS-FINAL': { winner: ['GRAND-FINAL', 'player2'] },
+
+        // Grand Final: FS champion vs BS champion
+        // Winner = 1st place, Loser = 2nd place
+        'GRAND-FINAL': {} // Tournament complete
     },
 
     32: {
