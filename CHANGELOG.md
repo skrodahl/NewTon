@@ -1,5 +1,10 @@
 # 2025-09-27
 
+## **v.2.1.1** Bugfixes
+- CAD box was not dynamically updating
+- CAD box has more transparency
+- Status bar message was missing from GRAND-FINAL in 8 and 16-player brackets.
+
 ## **v2.1.0** Professional Tournament Management and CAD-Style Information Display
 
 ### Tournament Management Enhancements
