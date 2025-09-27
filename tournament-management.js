@@ -833,20 +833,10 @@ function updateTournamentWatermark() {
         }
 
         if (tournament) {
-            // Get club name from global config
-            let clubName = 'CLUB';
-            try {
-                const globalConfig = JSON.parse(localStorage.getItem('globalConfig') || '{}');
-                if (globalConfig.clubName) {
-                    clubName = globalConfig.clubName.toUpperCase();
-                } else if (globalConfig.applicationTitle) {
-                    clubName = globalConfig.applicationTitle.replace(' - Tournament Manager', '').toUpperCase();
-                } else {
-                    clubName = 'NEWTON DC';
-                }
-            } catch (e) {
-                clubName = 'NEWTON DC';
-            }
+            // Truncate tournament name if needed
+            const truncatedName = tournament.name.length > 40
+                ? tournament.name.substring(0, 37) + "..."
+                : tournament.name;
 
             // Calculate tournament statistics
             const players = tournament.players || [];
@@ -861,6 +851,10 @@ function updateTournamentWatermark() {
             );
             const matchCount = realMatches.length;
 
+            // Calculate completed matches
+            const completedMatches = realMatches.filter(match => match.completed);
+            const completedCount = completedMatches.length;
+
             // Determine tournament status using built-in tournament.status property
             let status = 'SETUP';  // default fallback
             if (tournament.status === 'setup') {
@@ -871,13 +865,40 @@ function updateTournamentWatermark() {
                 status = 'COMPLETE';
             }
 
+            // Determine format display text
+            let formatText = `COMPLETED MATCHES: ${completedCount}`;
+            if (tournament.status === 'completed') {
+                // Find winner (1st place) from tournament.placements
+                let winner = null;
+                if (tournament.placements) {
+                    // Find player ID with placement 1
+                    const winnerID = Object.keys(tournament.placements).find(playerID =>
+                        tournament.placements[playerID] === 1
+                    );
+                    if (winnerID) {
+                        winner = players.find(p => String(p.id) === winnerID);
+                    }
+                }
+
+                if (winner) {
+                    const nameParts = winner.name.trim().split(' ');
+                    const firstName = nameParts[0].toUpperCase();
+                    const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1][0].toUpperCase() : '';
+                    const displayName = lastInitial ? `${firstName} ${lastInitial}.` : firstName;
+                    formatText = `1st: ${displayName}`;
+                } else {
+                    // Fallback if no winner found
+                    formatText = `TOURNAMENT COMPLETE`;
+                }
+            }
+
             // Get app version
             const version = window.APP_VERSION || 'v2.0.3';
 
             watermark.innerHTML = `
-                <div class="cad-header">${clubName} - ${tournament.name}</div>
+                <div class="cad-header">${truncatedName}</div>
                 <div class="cad-grid">
-                    <div class="cad-cell cad-format">DOUBLE ELIMINATION</div>
+                    <div class="cad-cell cad-format">${formatText}</div>
                     <div class="cad-cell cad-players">
                         <div>${playerCount}</div>
                         <div>PLAYERS</div>
