@@ -169,9 +169,14 @@ const SAVE_DEBOUNCE_MS = 100; // Wait 100ms between save logs
 function saveTournament() {
     const now = Date.now();
     const shouldLog = (now - lastSaveTime) > SAVE_DEBOUNCE_MS;
-    
+
     saveTournamentOnly(shouldLog);
-    
+
+    // Update CAD-style information box whenever tournament is saved
+    if (typeof updateTournamentWatermark === 'function') {
+        updateTournamentWatermark();
+    }
+
     if (shouldLog) {
         lastSaveTime = now;
     }
@@ -856,15 +861,14 @@ function updateTournamentWatermark() {
             );
             const matchCount = realMatches.length;
 
-            // Determine tournament status
-            let status = 'SETUP';
-            if (matches.some(m => m.winner)) {
-                const completedMatches = matches.filter(m => m.winner);
-                if (completedMatches.length === realMatches.length) {
-                    status = 'COMPLETE';
-                } else {
-                    status = 'ACTIVE';
-                }
+            // Determine tournament status using built-in tournament.status property
+            let status = 'SETUP';  // default fallback
+            if (tournament.status === 'setup') {
+                status = 'SETUP';
+            } else if (tournament.status === 'active') {
+                status = 'ACTIVE';
+            } else if (tournament.status === 'completed') {
+                status = 'COMPLETE';
             }
 
             // Get app version

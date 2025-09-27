@@ -349,6 +349,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 calculateAllRankings();
 
                 tournament.status = 'completed';
+
                 console.log(`✓ Tournament completed with full rankings — Grand Final: ${winner.name} defeats ${loser.name}`);
 
                 if (typeof saveTournament === 'function') saveTournament();
@@ -1997,7 +1998,7 @@ function clearTournamentCompletionState() {
         console.log(`Cleared ${placementCount} tournament placements`);
     }
     
-    // Reset tournament status 
+    // Reset tournament status
     if (tournament.status === 'completed') {
         tournament.status = 'active';
         console.log('Reset tournament status from "completed" to "active"');

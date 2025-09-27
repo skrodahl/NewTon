@@ -28,6 +28,11 @@ function renderBracket() {
 
     clearBracket();
     renderCleanBracket();
+
+    // Update CAD information box to reflect current tournament state
+    if (typeof updateTournamentWatermark === 'function') {
+        updateTournamentWatermark();
+    }
 }
 
 function clearBracket() {
