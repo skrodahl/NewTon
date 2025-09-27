@@ -834,8 +834,8 @@ function updateTournamentWatermark() {
 
         if (tournament) {
             // Truncate tournament name if needed
-            const truncatedName = tournament.name.length > 40
-                ? tournament.name.substring(0, 37) + "..."
+            const truncatedName = tournament.name.length > 38
+                ? tournament.name.substring(0, 35) + "..."
                 : tournament.name;
 
             // Calculate tournament statistics
@@ -882,10 +882,20 @@ function updateTournamentWatermark() {
 
                 if (winner) {
                     const nameParts = winner.name.trim().split(' ');
-                    const firstName = nameParts[0].toUpperCase();
+                    let firstName = nameParts[0].toUpperCase();
                     const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1][0].toUpperCase() : '';
+
+                    // Truncate first name if needed to fit " WINNER: NAME L." in ~25 chars
+                    // " WINNER: " = 9 chars, " L." = 3 chars, so 13 chars max for first name
+                    if (lastInitial && firstName.length > 13) {
+                        firstName = firstName.substring(0, 13);
+                    } else if (!lastInitial && firstName.length > 16) {
+                        // Single name gets more space
+                        firstName = firstName.substring(0, 16);
+                    }
+
                     const displayName = lastInitial ? `${firstName} ${lastInitial}.` : firstName;
-                    formatText = ` 1st: ${displayName}`;
+                    formatText = ` WINNER: ${displayName}`;
                 } else {
                     // Fallback if no winner found
                     formatText = `TOURNAMENT COMPLETE`;
