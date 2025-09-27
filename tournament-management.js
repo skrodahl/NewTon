@@ -866,7 +866,7 @@ function updateTournamentWatermark() {
             }
 
             // Determine format display text
-            let formatText = `COMPLETED MATCHES: ${completedCount}`;
+            let formatText = ` COMPLETED MATCHES: ${completedCount}`;
             if (tournament.status === 'completed') {
                 // Find winner (1st place) from tournament.placements
                 let winner = null;
@@ -885,7 +885,7 @@ function updateTournamentWatermark() {
                     const firstName = nameParts[0].toUpperCase();
                     const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1][0].toUpperCase() : '';
                     const displayName = lastInitial ? `${firstName} ${lastInitial}.` : firstName;
-                    formatText = `1st: ${displayName}`;
+                    formatText = ` 1st: ${displayName}`;
                 } else {
                     // Fallback if no winner found
                     formatText = `TOURNAMENT COMPLETE`;
@@ -896,7 +896,7 @@ function updateTournamentWatermark() {
             const version = window.APP_VERSION || 'v2.0.3';
 
             watermark.innerHTML = `
-                <div class="cad-header">${truncatedName}</div>
+                <div class="cad-header"> ${truncatedName}</div>
                 <div class="cad-grid">
                     <div class="cad-cell cad-format">${formatText}</div>
                     <div class="cad-cell cad-players">
