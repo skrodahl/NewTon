@@ -1,6 +1,7 @@
 # 2025-09-28
-## **v2.1.4** Small Visual Change
+## **v2.1.4** Visual Changes
 - Changed "Awaiting Player" in matches with no assigned players italics and muted, to make it look less like a "real" player
+- Changed the layout and font size/weight for players in the upcoming matches in Match Controls for better legibility
 
 ## **v2.1.3** Read-Only Tournament Protection & Critical Bug Fixes
 - **Read-Only Tournament Protection**: Complete protection system for imported and loaded completed tournaments

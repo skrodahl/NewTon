@@ -1559,14 +1559,14 @@ a:hover { color: #1e40af; }
 
 .cc-match-players {
   display: flex;
-  justify-content: space-between;
+  justify-content: center;
   align-items: center;
-  gap: 15px;
+  gap: 8px;
 }
 
 .cc-player-name {
-  font-size: 14px;
-  font-weight: 500;
+  font-size: 16px;
+  font-weight: 700;
   color: #065f46;
   cursor: pointer;
   text-decoration: none;
