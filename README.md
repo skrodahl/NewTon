@@ -52,6 +52,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 ### 🏆 Tournament Management
 - **Multiple Tournaments**: Create, save, and load with automatic browser storage
 - **Import/Export**: JSON-based backup and sharing between computers
+  - **Tournament Protection**: Loaded or imported **completed** tournaments are read-only, protecting the tournament integrity
 - **Tournament History**: Complete match records with lane and referee assignments
 - **Crash Resilient**: Automatic saving prevents data loss
 
