@@ -26,6 +26,12 @@ function saveState() {
 }
 
 function undo() {
+    // Check if tournament is read-only (imported completed tournament)
+    if (tournament && tournament.readOnly) {
+        alert('Completed tournament: Read-only - Use Reset Tournament to modify');
+        return;
+    }
+
     if (undoStack.length === 0) {
         console.warn("Nothing to undo.");
         return;

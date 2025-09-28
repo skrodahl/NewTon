@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '2.1.2';
+const APP_VERSION = '2.1.3';
 
 // =============================================================================
 // DIALOG STACK MANAGER - Unified dialog stacking system
@@ -339,14 +339,18 @@ function autoLoadCurrentTournament() {
             date: tournamentData.date,
             created: tournamentData.created,
             status: tournamentData.status,
+            players: tournamentData.players || [],
+            matches: tournamentData.matches || [],
             bracket: tournamentData.bracket,
             bracketSize: tournamentData.bracketSize, // ✅ Fixed: Include bracketSize
-            placements: tournamentData.placements || {}
+            placements: tournamentData.placements || {},
+            readOnly: tournamentData.readOnly // ✅ Fixed: Include readOnly flag
             // NO CONFIG loading - config stays global
         };
 
-        players = tournamentData.players || [];
-        matches = tournamentData.matches || [];
+        // Set global arrays from tournament object
+        players = tournament.players;
+        matches = tournament.matches;
 
         // Update UI with tournament data - preserve user input during navigation
         if (tournament.name && tournament.date) {

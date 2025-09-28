@@ -1871,6 +1871,12 @@ function undoTransactions(transactionIds) {
         return false;
     }
 
+    // Check if tournament is read-only (imported completed tournament)
+    if (tournament && tournament.readOnly) {
+        alert('Completed tournament: Read-only - Use Reset Tournament to modify');
+        return false;
+    }
+
     const history = getTournamentHistory();
     const undone = getUndoneTransactions();
 

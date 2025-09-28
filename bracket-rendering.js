@@ -1775,6 +1775,9 @@ if (typeof window !== 'undefined') {
 // --- START: Surgical Undo Implementation ---
 
 function isMatchUndoable(matchId) {
+    // Read-only tournaments cannot be undone
+    if (tournament && tournament.readOnly) return false;
+
     const history = getTournamentHistory();
     if (history.length === 0) return false;
 
@@ -1965,6 +1968,12 @@ function createUndoModalContent(matchId, consequentialMatches) {
 let undoDebounceActive = false;
 
 function handleSurgicalUndo(matchId) {
+    // Check if tournament is read-only (completed tournament)
+    if (tournament && tournament.readOnly) {
+        updateStatusCenter('Completed tournament: Read-only - Use Reset Tournament to modify');
+        return;
+    }
+
     // Debounce: Prevent rapid undo clicks
     if (undoDebounceActive) {
         console.log('⏸️ Undo operation blocked - debounce active');
@@ -2009,6 +2018,12 @@ function handleSurgicalUndo(matchId) {
 
 // Clean undo: Remove target transaction and consequences, rebuild from clean history
 function undoManualTransaction(transactionId) {
+    // Check if tournament is read-only (imported completed tournament)
+    if (tournament && tournament.readOnly) {
+        alert('Completed tournament: Read-only - Use Reset Tournament to modify');
+        return;
+    }
+
     const history = getTournamentHistory();
     const targetTransaction = history.find(t => t.id === transactionId);
 
@@ -3504,6 +3519,11 @@ function getDetailedMatchState(matchId) {
             default: stateText = 'Unknown'; break;
         }
         return { state: basicState, text: stateText };
+    }
+
+    // For completed matches, check if tournament is read-only first
+    if (tournament && tournament.readOnly) {
+        return { state: 'completed', text: 'Completed tournament: Read-only' };
     }
 
     // For completed matches, check if it's a walkover/bye match

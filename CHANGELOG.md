@@ -1,3 +1,52 @@
+# 2025-09-28
+
+## **v2.1.3** Read-Only Tournament Protection & Critical Bug Fixes
+- **Read-Only Tournament Protection**: Complete protection system for imported and loaded completed tournaments
+  - Completed tournaments from files or localStorage automatically set to read-only
+  - Comprehensive undo prevention: no undo styling, no clickable undo handlers, no undo modals
+  - Clean status bar messaging: "Completed tournament: Read-only" for all match hovers
+  - Early prevention: undo attempts blocked before any UI appears
+  - Reset Tournament escape hatch available for modification needs
+- **Persistent Read-Only State**: Read-only flag survives browser refreshes and navigation
+  - Fixed critical bug where readOnly flag was lost on page reload
+  - Ensured data integrity for shared tournament results
+  - Maintains distinction between active tournaments (editable) and archived results (protected)
+
+### Critical Bug Fixes
+- **Fixed Tournament Loading Data Loss**: Tournaments loaded from localStorage were losing players/matches after browser refresh
+  - Root cause: `continueLoadProcess()` wasn't including players/matches in tournament object structure
+  - Solution: Added players/matches to tournament object and global array assignment
+  - Impact: Loaded tournaments now survive page refreshes with complete data
+- **Fixed Read-Only Persistence**: Read-only flag wasn't saved to localStorage, causing loss on refresh
+  - Root cause: `saveTournamentOnly()` function missing readOnly field in saved object
+  - Solution: Added `readOnly: tournament.readOnly` to tournament save structure
+  - Impact: Read-only tournaments maintain protection across browser sessions
+- **Fixed App Initialization**: Page startup wasn't preserving tournament readOnly flag or complete data
+  - Root cause: `autoLoadCurrentTournament()` in main.js missing players, matches, and readOnly fields
+  - Solution: Added complete tournament data structure matching import/load processes
+  - Impact: All tournament data and protection state preserved on app startup
+- **Fixed CAD-Box Import Updates**: CAD watermark wasn't updating when importing tournaments
+  - Root cause: Import process missing `updateTournamentWatermark()` call
+  - Solution: Added watermark update to `continueImportProcess()` display updates
+  - Impact: CAD-box now updates immediately for both loading and importing operations
+
+### Technical Implementation
+- **Three-Layer Protection**: Read-only checks in `isMatchUndoable()`, `handleSurgicalUndo()`, and `getDetailedMatchState()`
+- **Consistent Data Structure**: Unified tournament object structure across import, load, and initialization
+- **Status Bar Integration**: Non-intrusive read-only messaging through existing status system
+- **Complete Undo Prevention**: UI-level prevention (no styling) + interaction-level prevention (early blocking)
+
+### Files Modified
+- `tournament-management.js` - Read-only flags, complete data structures, CAD-box updates
+- `bracket-rendering.js` - Undo prevention, status messaging, match state detection
+- `main.js` - App initialization with complete tournament data preservation
+- `clean-match-progression.js` - Read-only undo prevention
+- `history-management.js` - Read-only undo prevention
+
+This update ensures tournament result integrity while maintaining full functionality for active tournaments, with comprehensive bug fixes that resolve data loss and state persistence issues.
+
+-----
+
 # 2025-09-27
 
 ## **v2.1.2** CAD-Style Information Box Enhancements

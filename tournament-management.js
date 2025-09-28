@@ -139,6 +139,7 @@ function saveTournamentOnly(shouldLog = true) {
         bracket: tournament.bracket,
         bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
         placements: tournament.placements || {},
+        readOnly: tournament.readOnly, // ✅ Fixed: Include readOnly flag
         lastSaved: new Date().toISOString()
         // NO CONFIG DATA - Config stays global
     };
@@ -379,16 +380,23 @@ function continueLoadProcess(selectedTournament) {
         date: selectedTournament.date,
         created: selectedTournament.created,
         status: selectedTournament.status,
+        players: selectedTournament.players || [],
+        matches: selectedTournament.matches || [],
         bracket: selectedTournament.bracket,
         bracketSize: bracketSize,
-        placements: selectedTournament.placements || {}
+        placements: selectedTournament.placements || {},
+        readOnly: (selectedTournament.status === 'completed') // Read-only for completed tournaments
         // NO CONFIG loading - config stays global
     };
 
     console.log('DEBUG: tournament.bracketSize after assignment:', tournament.bracketSize);
 
-    players = selectedTournament.players || [];
-    matches = selectedTournament.matches || [];
+    // Set global arrays from tournament object
+    players = tournament.players;
+    matches = tournament.matches;
+
+    // Save tournament to ensure proper persistence
+    saveTournamentOnly();
 
     // Don't modify input fields when loading tournament - preserve user's work during navigation
 
@@ -530,7 +538,8 @@ function continueImportProcess(importedData) {
             matches: importedData.matches || [],
             bracket: importedData.bracket || null,
             placements: importedData.placements || {},
-            bracketSize: bracketSize
+            bracketSize: bracketSize,
+            readOnly: (importedData.status === 'completed') // Read-only for completed imports
         };
 
         // Set global arrays
@@ -548,6 +557,7 @@ function continueImportProcess(importedData) {
         updateTournamentStatus();
         updatePlayersDisplay();
         updatePlayerCount();
+        updateTournamentWatermark();
         loadRecentTournaments();
 
         // Render bracket if exists
@@ -648,6 +658,7 @@ function confirmReset() {
     tournament.bracket = null;
     tournament.status = 'setup';
     tournament.placements = {};
+    tournament.readOnly = false; // Clear read-only flag (escape hatch)
     localStorage.removeItem('tournamentHistory');
     localStorage.removeItem('undoneTransactions');
 
