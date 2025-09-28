@@ -1,4 +1,6 @@
 # 2025-09-28
+## **v2.1.4** Small Visual Change
+- Changed "Awaiting Player" in matches with no assigned players italics and muted, to make it look less like a "real" player
 
 ## **v2.1.3** Read-Only Tournament Protection & Critical Bug Fixes
 - **Read-Only Tournament Protection**: Complete protection system for imported and loaded completed tournaments

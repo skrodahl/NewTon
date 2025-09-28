@@ -958,6 +958,12 @@ body {
   color: #111827;
 }
 
+.awaiting-player {
+  font-style: italic;
+  color: #999;
+  font-weight: 400;
+}
+
 .winner-check {
   color: #16a34a;
   font-weight: 900;
