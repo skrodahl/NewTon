@@ -1,0 +1,22 @@
+VIEW TOURNAMENT PROGRESSION ON A SECOND MONITOR:
+
+Open a second browser window on a second monitor to see tournament progression.
+
+To automatically update the tournament view in the second window, run the following command in the browser console (Ctrl-Shift-J or F12 -> Console):
+
+// Sync every 5 seconds (5000 milliseconds)
+const syncInterval = setInterval(() => {
+    autoLoadCurrentTournament();
+}, 5000);
+
+To stop the automatic syncing later:
+
+  clearInterval(syncInterval);
+
+You can adjust the timing:
+  - Every 2 seconds: 2000
+  - Every 10 seconds: 10000
+  - Every 30 seconds: 30000
+
+  For a tournament setting, every 5-10 seconds is probably reasonable to catch match updates without being too
+  frequent.
