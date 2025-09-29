@@ -105,23 +105,80 @@ Transform from tournament management software to a complete darts venue manageme
 
 ## Technical Architecture
 
-### Docker + nginx Deployment Strategy
+### Security Architecture
+
+**Docker Container Isolation Benefits:**
+- **Network Segmentation**: SQLite database runs inside container, never exposed to venue network
+- **Process Isolation**: Tournament logic and database operations protected from external access
+- **Controlled API Surface**: Only specific REST endpoints exposed to referee tablets and displays
+- **File System Protection**: Database files and configuration hidden inside container filesystem
+
+**What Gets Exposed vs. Hidden:**
+
+**Exposed to venue network:**
+- Static HTML/CSS/JS files (existing tournament interface)
+- Specific REST API endpoints (`/api/tournaments`, `/api/matches`, `/api/statistics`)
+- WebSocket connections for real-time updates
+- Tournament Overview display pages
+
+**Hidden inside container:**
+- SQLite database file (no direct database access from network devices)
+- Database connection strings and credentials
+- Server-side tournament progression logic and business rules
+- Administrative functions and dangerous operations (tournament reset, data export)
+- File system access and internal container APIs
+- Backend configuration files and environment variables
+
+**Security Benefits for Tournament Environment:**
+
+**Referee tablets cannot:**
+- Access SQLite database directly (only through controlled API transactions)
+- Execute arbitrary database queries or modifications
+- Access other tournaments' data or administrative functions
+- Corrupt database files through direct file system writes
+- Access internal container services or system commands
+
+**Malicious devices on venue WiFi cannot:**
+- Connect directly to database or internal services
+- Access tournament data outside their authorized scope
+- Execute system commands or access host filesystem
+- Read sensitive configuration files or credentials
+- Interfere with other connected devices' operations
+
+**Contrast with File-Based Security Risks:**
+- **Direct file access** would expose file system paths to network devices
+- **File permission misconfiguration** could allow unauthorized data access
+- **Concurrent file writes** could be exploited for data corruption attacks
+- **Directory traversal vulnerabilities** could expose entire tournament archives
+- **No transaction isolation** leaves tournament state vulnerable during updates
+
+### Database-Backed Docker Deployment Strategy
 
 **Two deployment options maintain flexibility:**
 - **Option 1**: Download web app directly (current method) - remains primary supported approach
-- **Option 2**: Run Docker container with nginx serving the same files
+- **Option 2**: Run Docker container with SQLite database backend serving enhanced capabilities
 
-**Docker container benefits:**
+**Docker + SQLite benefits:**
 - nginx serves static files to tablets/displays on local network
-- Auto-update capability when internet connection available
-- Persistent storage for tournament data
-- Zero changes to existing web application code
-- Clean deployment without system dependencies
-- Future-proofs for potential advanced features without committing to them
+- SQLite database handles concurrent access safely with ACID transactions
+- WAL (Write-Ahead Logging) mode enables simultaneous readers + single writer
+- Zero changes to existing web application code for Phase 1
+- Proven concurrency handling prevents data corruption from multiple referee tablets
+- WebSocket support for real-time tournament updates
+- Standard database tooling for backup, recovery, and administration
+- Future-proofs for potential PostgreSQL upgrade if needed
+
+**Why Database over File-Based Storage:**
+- **Concurrent Access Safety**: SQLite transactions prevent corruption when multiple referees submit simultaneously
+- **Data Integrity**: ACID properties ensure bracket state remains consistent during power failures
+- **Security Isolation**: Database hidden inside container vs files exposed to network filesystem
+- **Controlled Access**: API endpoints provide granular permissions vs direct file system access
+- **Proven Technology**: Mature file locking and transaction mechanisms vs experimental file APIs
+- **Professional Reliability**: Database approach standard for multi-user tournament systems
 
 **Hybrid deployment approach:**
 ```bash
-# Container startup logic:
+# Docker container startup logic:
 # Check if app files exist in persistent volume
 if [ ! -f "/app/tournament.html" ]; then
     # Option A: Try to download latest release from GitHub
@@ -136,8 +193,11 @@ if [ ! -f "/app/tournament.html" ]; then
         serve_instructions_page
     fi
 fi
-# Start nginx serving /app/ directory
-nginx -g 'daemon off;'
+# Initialize SQLite database with tournament schema
+sqlite3 /data/tournaments.db < /app/schema.sql
+# Start nginx serving /app/ directory + API backend
+nginx -g 'daemon off;' &
+node /app/api-server.js
 ```
 
 **Strategic advantages:**
@@ -150,10 +210,12 @@ nginx -g 'daemon off;'
 ### Network Topology
 ```
 Tournament Computer (Docker Container)
-├── nginx serves web app files to local network
-├── Persistent volume for tournament storage
+├── nginx serves static files to local network
+├── SQLite database with WAL mode for concurrent access
+├── Node.js/Python API backend handling database operations
 ├── Auto-update from internet when available
-└── API endpoints for tournament CRUD operations
+├── WebSocket connections for real-time updates
+└── REST API endpoints for tournament CRUD operations
 
 Venue WiFi Network (No Internet Required)
 ├── Tournament Overview Display(s)
@@ -161,29 +223,34 @@ Venue WiFi Network (No Internet Required)
 ├── Referee Tablets
 │   ├── Connect to same nginx-served web app
 │   ├── 501 scoring interface
-│   └── Statistics sync via API
+│   ├── WebSocket for real-time match updates
+│   ├── Statistics sync via API with database transactions
+│   └── Concurrent access safely handled by SQLite WAL mode
 └── Tournament Manager Browser
-    └── Enhanced with persistent disk storage
+    └── Enhanced with database persistence and WebSocket updates
 ```
 
 ### Resilient Storage Architecture
 
-**Triple-redundant data storage:**
+**Database-backed resilient storage:**
 ```
-Disk Storage (Persistent) ↔ localStorage (Working Copy) ↔ Browser UI
+SQLite Database (ACID Transactions) ↔ localStorage (Working Copy) ↔ Browser UI
 ```
 
 **Data flow patterns:**
-- **Load Tournament**: Disk → localStorage → UI
-- **Tournament Changes**: UI → localStorage → auto-save to disk
+- **Load Tournament**: SQLite → API → localStorage → UI
+- **Tournament Changes**: UI → localStorage → API transaction → SQLite
 - **Browser Refresh**: localStorage provides instant availability
-- **Container Restart**: Disk storage provides authoritative state
+- **Container Restart**: SQLite database provides authoritative state
+- **Concurrent Operations**: SQLite WAL mode handles multiple referee updates safely
 
 **Failure resilience:**
 - **Network fails**: Browser continues using localStorage, syncs when reconnected
-- **Container crashes**: Browser works from localStorage until container restarts
-- **Browser crashes**: Container maintains authoritative copy on disk
-- **Power failure**: Both localStorage and disk storage survive
+- **API server crashes**: Browser works from localStorage until server restarts
+- **Browser crashes**: SQLite database maintains authoritative copy
+- **Power failure**: SQLite WAL mode ensures transaction durability
+- **Concurrent corruption**: ACID transactions prevent database corruption from simultaneous referee submissions
+- **WebSocket disconnects**: Automatic reconnection with state synchronization
 
 ### Enhanced Tournament Management
 
@@ -192,33 +259,42 @@ Disk Storage (Persistent) ↔ localStorage (Working Copy) ↔ Browser UI
 - Export tournament → download JSON file
 - Import tournament → upload JSON file
 
-**With persistent storage:**
-- Tournament data automatically saved to container's persistent volume
-- "Save Tournament" writes directly to disk
-- Tournament list shows all previously saved tournaments
-- "Load Tournament" picks from disk-saved tournaments
-- Export/import still available for sharing between venues
+**With database persistence:**
+- Tournament data automatically saved to SQLite database via ACID transactions
+- "Save Tournament" commits transaction ensuring data integrity
+- Tournament list queries database for all previously saved tournaments
+- "Load Tournament" retrieves from database with concurrent access safety
+- Export/import still available for sharing between venues (JSON export from database)
+- WebSocket broadcasts tournament changes to all connected devices
+- Multiple referee tablets can submit match results simultaneously without corruption
 
 **localStorage becomes resilience layer:**
 - Maintains existing Sky High Resilience within browser
-- PLUS persistent storage surviving browser/computer failures
-- PLUS network access for tablets/displays
-- Working copy principle: localStorage like Git working directory with persistent backing store
+- PLUS ACID database storage surviving concurrent access scenarios
+- PLUS network access for tablets/displays with transaction safety
+- Working copy principle: localStorage like Git working directory with database backing store
+- Database handles all concurrency concerns invisible to browser clients
 
-### Browser Technology Stack
-- **nginx Web Server**: Serves static web app files and provides API endpoints
-- **Docker Container**: Provides consistent deployment and persistent storage
-- **WebSocket/HTTP Communication**: Real-time updates between devices
+### Database-Backed Technology Stack
+- **Docker Container**: Consistent deployment with nginx + API backend + SQLite database
+- **nginx Web Server**: Serves static web app files to local network devices
+- **SQLite Database**: ACID-compliant storage with WAL mode for concurrent access
+- **API Backend**: Node.js/Python handling database operations with proper transactions
+- **WebSocket Support**: Real-time bidirectional communication between devices
 - **localStorage**: Working copy storage for offline resilience
-- **Persistent Volume**: Authoritative tournament data storage
+- **Database Transactions**: All tournament operations wrapped in ACID transactions
+- **WAL Mode**: Write-Ahead Logging enables concurrent readers + single writer
 - **Responsive Web Design**: Same codebase adapts to different screen sizes
 
 ## Implementation Priorities
 
 ### High Priority (Phase 1)
+- [ ] Create Docker container with nginx serving existing tournament.html unchanged
+- [ ] Design SQLite database schema for tournament data
+- [ ] Implement API backend with database transaction support
 - [ ] Tournament Overview display page
-- [ ] Local HTTP server capability
-- [ ] Basic tournament state broadcasting
+- [ ] WebSocket connection for real-time tournament state broadcasting
+- [ ] Database integration replacing localStorage persistence
 
 ### Medium Priority (Phase 2)
 - [ ] Referee tablet 501 interface
@@ -262,16 +338,19 @@ Disk Storage (Persistent) ↔ localStorage (Working Copy) ↔ Browser UI
 
 ### Security Concerns
 **Potential Issues:**
-- nginx container serving on local network without authentication - anyone can access
-- Referee tablets could potentially corrupt tournament data if compromised
+- Docker container serving on local network requires proper API access controls
+- Referee tablets need authenticated access to prevent unauthorized match submissions
 - Malicious devices connecting to venue WiFi pose security risks
-- Tournament computer becomes a network attack surface
+- Tournament computer becomes a network attack surface requiring protection
 
 **Mitigation Strategies:**
-- Implement basic HTTP authentication for tournament management endpoints
-- Read-only access for display devices, limited write access for referee tablets
-- Network isolation through VLAN or guest network configuration
-- Regular security updates through auto-update mechanism
+- **Container Isolation**: SQLite database and sensitive operations hidden inside Docker container
+- **API Access Controls**: Implement authentication tokens for referee tablets and display devices
+- **Granular Permissions**: Read-only access for displays, limited match-update access for referees
+- **Network Segmentation**: VLAN or guest network isolation for tournament devices
+- **Controlled Endpoints**: Only expose necessary API endpoints, hide administrative functions
+- **Regular Security Updates**: Auto-update mechanism with security patches
+- **Database Protection**: No direct database access from network, all operations through API transactions
 
 ### Network Reliability Edge Cases
 **Potential Issues:**
@@ -317,17 +396,20 @@ Disk Storage (Persistent) ↔ localStorage (Working Copy) ↔ Browser UI
 
 ### Deployment and Technical Complexity
 **Potential Issues:**
-- Docker adds significant complexity for non-technical tournament directors
-- Version mismatches between container and referee tablets
-- Venue IT policies may block Docker or custom containers
+- Deno adds some complexity for non-technical tournament directors
+- Version mismatches between server and referee tablets
+- Venue IT policies may block custom executables or network servers
 - Network configuration becomes tournament director responsibility
+- Command-line permissions (--allow-net, --allow-read, --allow-write) may be intimidating
 
 **Mitigation Strategies:**
-- Provide pre-configured Docker images with simple startup scripts
+- Provide simple startup scripts with pre-configured permissions
+- Single binary deployment (simpler than Docker containers)
 - Automated version compatibility checks and warnings
-- Alternative deployment options for restrictive environments
+- Fallback to file:// protocol for restrictive environments
 - Network setup documentation and venue requirements checklist
 - Technical support resources and troubleshooting guides
+- Wrapper scripts that handle Deno permissions automatically
 
 ### Fundamental Questions
 **Critical Considerations:**
