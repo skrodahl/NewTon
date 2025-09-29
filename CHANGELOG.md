@@ -1,3 +1,7 @@
+# 2025-09-29
+## **v2.1.5-beta**
+- Made the "Save Statistics" button in the Edit Statistics dialog respond to Enter.
+
 # 2025-09-28
 ## **v2.1.4** Visual Changes
 - Changed "Awaiting Player" in matches with no assigned players italics and muted, to make it look less like a "real" player and improve visibility when zoomed out
