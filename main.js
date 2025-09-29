@@ -116,6 +116,23 @@ document.addEventListener('keydown', (e) => {
             console.log('🔑 Stack Esc handler closed dialog:', topDialog.id);
         }
     }
+
+    // Enter key handler for Edit Statistics dialog
+    if (e.key === 'Enter' && window.dialogStack.length > 0) {
+        const topDialog = window.dialogStack[window.dialogStack.length - 1];
+
+        // Only handle Enter for the Edit Statistics dialog
+        if (topDialog.id === 'statsModal') {
+            e.preventDefault();
+            e.stopPropagation();
+
+            // Call saveStats function to save statistics
+            if (typeof saveStats === 'function') {
+                saveStats();
+                console.log('🔑 Enter key saved statistics');
+            }
+        }
+    }
 });
 
 // Global config is loaded by results-config.js - NEVER override it here
