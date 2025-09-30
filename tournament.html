@@ -452,25 +452,27 @@
 
                 <div class="form-group">
                     <label>180s</label>
-                    <div style="display: flex; align-items: center; height: 45px;">
+                    <div style="display: flex; align-items: center;">
                         <button class="btn" onclick="decrement180s()"
-                            style="padding: 8px 12px; margin-right: 2px;">−</button>
+                            onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#ffffff'"
+                            style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
                         <button class="btn" onclick="increment180s()"
-                            style="padding: 8px 12px; margin-left: 1px;">+</button>
-                        <span id="current180sCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
-                            0</span>
+                            onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#ffffff'"
+                            style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
+                        <span id="current180sCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current: 0</span>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label>Tons (100+)</label>
-                    <div style="display: flex; align-items: center; height: 45px;">
+                    <div style="display: flex; align-items: center;">
                         <button class="btn" onclick="decrementTons()"
-                            style="padding: 8px 12px; margin-right: 2px;">−</button>
+                            onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#ffffff'"
+                            style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
                         <button class="btn" onclick="incrementTons()"
-                            style="padding: 8px 12px; margin-left: 1px;">+</button>
-                        <span id="currentTonsCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em;">Current:
-                            0</span>
+                            onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#ffffff'"
+                            style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
+                        <span id="currentTonsCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current: 0</span>
                     </div>
                 </div>
 
