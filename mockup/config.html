@@ -1,0 +1,247 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NewTon DC - Tournament Manager</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-top">
+                <h1>
+                    <div id="clubLogo" class="logo-placeholder">
+                        CLUB<br>LOGO
+                    </div>
+                    NewTon DC - Tournament Manager
+                </h1>
+            </div>
+            <div class="nav">
+                <button class="nav-btn" data-page="setup">Setup</button>
+                <button class="nav-btn" data-page="registration">Registration</button>
+                <button class="nav-btn" data-page="tournament">Tournament</button>
+                <button class="nav-btn active" data-page="config">Config</button>
+                <div id="headerTournamentStatus" class="header-tournament-status">
+                    Tournament: <strong>Spring Championship</strong>
+                </div>
+            </div>
+        </div>
+
+        <!-- Configuration Page -->
+        <div id="config" class="page active config-page">
+            <div class="config-page-header">
+                <h2>Tournament Configuration</h2>
+            </div>
+
+            <div class="config-sections-container">
+                <!-- Left Column -->
+                <div class="config-column">
+                    <!-- Logo Section -->
+                    <div class="config-section">
+                        <h3>Logo</h3>
+                        <div class="config-content">
+                            <div class="info-text">
+                                To change the logo, place a square image with the name logo.png, logo.jpg, logo.jpeg, or logo.svg in the folder that contains the file tournament.html.
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Branding Section -->
+                    <div class="config-section">
+                        <h3>Branding</h3>
+                        <div class="config-content">
+                            <div class="form-group">
+                                <label for="applicationTitle">Club Name</label>
+                                <input type="text" id="applicationTitle" value="NewTon DC" placeholder="Your Club Name">
+                            </div>
+                            <button class="btn btn-success">Save Branding</button>
+                        </div>
+                    </div>
+
+                    <!-- Point Values Section -->
+                    <div class="config-section">
+                        <h3>Point Values (autosave)</h3>
+                        <div class="config-content">
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="participationPoints">Participation Points</label>
+                                    <input type="number" id="participationPoints" value="5" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="firstPlacePoints">1st Place Points</label>
+                                    <input type="number" id="firstPlacePoints" value="15" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="secondPlacePoints">2nd Place Points</label>
+                                    <input type="number" id="secondPlacePoints" value="13" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="thirdPlacePoints">3rd Place Points</label>
+                                    <input type="number" id="thirdPlacePoints" value="10" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fourthPlacePoints">4th Place Points</label>
+                                    <input type="number" id="fourthPlacePoints" value="9" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fifthSixthPlacePoints">5th-6th Place Points</label>
+                                    <input type="number" id="fifthSixthPlacePoints" value="8" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="seventhEighthPlacePoints">7th-8th Place Points</label>
+                                    <input type="number" id="seventhEighthPlacePoints" value="7" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="highOutPoints">High Out Points (101+)</label>
+                                    <input type="number" id="highOutPoints" value="1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tonPoints">Ton Points (100+)</label>
+                                    <input type="number" id="tonPoints" value="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="shortLegPoints">Short Leg Points</label>
+                                    <input type="number" id="shortLegPoints" value="1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="oneEightyPoints">180 Points</label>
+                                    <input type="number" id="oneEightyPoints" value="1" min="0">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Column -->
+                <div class="config-column">
+                    <!-- Match Configuration Section -->
+                    <div class="config-section">
+                        <h3>Match Configuration (autosave)</h3>
+                        <div class="config-content">
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="regularRoundsLegs">Regular Rounds</label>
+                                    <select id="regularRoundsLegs">
+                                        <option value="3" selected>Best of 3</option>
+                                        <option value="5">Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="backsideSemifinalLegs">Backside Semifinal</label>
+                                    <select id="backsideSemifinalLegs">
+                                        <option value="3" selected>Best of 3</option>
+                                        <option value="5">Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="frontsideSemifinalLegs">Frontside Semifinal</label>
+                                    <select id="frontsideSemifinalLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="backsideFinalLegs">Backside Final</label>
+                                    <select id="backsideFinalLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="grandFinalLegs">Grand Final</label>
+                                    <select id="grandFinalLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Lane Management Section -->
+                    <div class="config-section">
+                        <h3>Lane Management</h3>
+                        <div class="config-content">
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="maxLanes">Maximum Number of Lanes</label>
+                                    <select id="maxLanes">
+                                        <option value="1">1 Lane</option>
+                                        <option value="2">2 Lanes</option>
+                                        <option value="3">3 Lanes</option>
+                                        <option value="4">4 Lanes</option>
+                                        <option value="5">5 Lanes</option>
+                                        <option value="6">6 Lanes</option>
+                                        <option value="7">7 Lanes</option>
+                                        <option value="8">8 Lanes</option>
+                                        <option value="9">9 Lanes</option>
+                                        <option value="10" selected>10 Lanes</option>
+                                        <option value="11">11 Lanes</option>
+                                        <option value="12">12 Lanes</option>
+                                        <option value="13">13 Lanes</option>
+                                        <option value="14">14 Lanes</option>
+                                        <option value="15">15 Lanes</option>
+                                        <option value="16">16 Lanes</option>
+                                        <option value="17">17 Lanes</option>
+                                        <option value="18">18 Lanes</option>
+                                        <option value="19">19 Lanes</option>
+                                        <option value="20">20 Lanes</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="excludedLanes">Excluded Lanes (comma-separated)</label>
+                                    <input type="text" id="excludedLanes" placeholder="e.g. 5,7,9">
+                                    <small class="field-help">Enter lane numbers to exclude from assignment</small>
+                                </div>
+                            </div>
+                            <div class="config-buttons">
+                                <button class="btn btn-success">Save Lane Settings</button>
+                                <button class="btn">Show Current Lane Usage</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Interface Section -->
+                    <div class="config-section">
+                        <h3>User Interface</h3>
+                        <div class="config-content">
+                            <div class="checkbox-group">
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="confirmWinnerSelection" checked>
+                                        <span>
+                                            Show confirmation dialog when selecting match winner
+                                            <small class="field-help">When disabled, matches complete instantly without entering scores or statistics</small>
+                                        </span>
+                                    </label>
+                                </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="autoOpenMatchControls" checked>
+                                        <span>Automatically open Match Controls when entering Tournament page</span>
+                                    </label>
+                                </div>
+                            </div>
+                            <button class="btn btn-success">Save UI Settings</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer>
+        <span id="footerContent">NewTon DC Tournament Manager</span><br> Created by Håvard Skrödahl, NewTon DC Malmö
+    </footer>
+
+</body>
+
+</html>
