@@ -71,6 +71,12 @@ function removePlayer(playerId) {
 
 // UPDATE: Enhanced player paid toggle with help integration
 function togglePaid(playerId) {
+    // Prevent changes if tournament is active or completed
+    if (tournament && (tournament.status === 'active' || tournament.status === 'completed')) {
+        showTournamentProgressWarning();
+        return;
+    }
+
     const player = players.find(p => p.id === playerId);
     if (player) {
         player.paid = !player.paid;

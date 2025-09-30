@@ -38,10 +38,17 @@
 - **Consistent z-index management** for modal layering
 - **JavaScript refactoring**: Removed inline background style manipulation in favor of CSS class-based styling
 
+### Bug Fixes
+- **Payment Status Protection**: Prevented paid/unpaid status changes during active or completed tournaments
+  - Clicking player cards in active/completed tournaments now shows "Tournament in Progress" dialog
+  - Protects tournament integrity and historical data from accidental modifications
+  - Applies to both active tournaments and read-only completed tournaments
+
 ### Files Modified
 - `styles.css` - Extensive redesign following flat 2D principles
 - `tournament.html` - Button updates, modal structure improvements
 - `tournament-management.js` - Reset button state management cleanup
+- `player-management.js` - Added tournament status validation to togglePaid()
 - Main pages (Setup, Registration, Config, Tournament) - Layout and spacing standardization
 
 This release establishes a comprehensive design system foundation for the entire application, replacing the previous mixed aesthetic with a cohesive, professional flat 2D interface.

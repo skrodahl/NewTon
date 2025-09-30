@@ -10,7 +10,8 @@
 
 ## Later
 *Not urgent but worth tracking*
-- None
+- Review modal contents
+- *Maybe* look at changing the Tournament bracket design
 
 ## Decided against
 - Player cards shadow matching results table [ui] - styles.css - Add shadow to .player-card
