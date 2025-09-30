@@ -1186,7 +1186,7 @@ body {
   background-color: rgba(255, 255, 255, 0.9);
   margin: 5% auto;
   padding: 28px;
-  border-radius: 12px;
+  border-radius: 0;
   width: 90%;
   max-width: 640px;
   max-height: 80vh; /* Limit modal height */
