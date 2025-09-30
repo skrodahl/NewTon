@@ -251,112 +251,6 @@
                         </div>
                     </div>
 
-                    <!-- Point Values Section -->
-                    <div class="config-section">
-                        <h3>Point Values (autosave)</h3>
-                        <div class="config-content">
-                            <div class="config-grid">
-                                <div class="form-group">
-                                    <label for="participationPoints">Participation Points</label>
-                                    <input type="number" id="participationPoints" value="5" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="firstPlacePoints">1st Place Points</label>
-                                    <input type="number" id="firstPlacePoints" value="15" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="secondPlacePoints">2nd Place Points</label>
-                                    <input type="number" id="secondPlacePoints" value="13" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="thirdPlacePoints">3rd Place Points</label>
-                                    <input type="number" id="thirdPlacePoints" value="10" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fourthPlacePoints">4th Place Points</label>
-                                    <input type="number" id="fourthPlacePoints" value="9" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fifthSixthPlacePoints">5th-6th Place Points</label>
-                                    <input type="number" id="fifthSixthPlacePoints" value="8" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="seventhEighthPlacePoints">7th-8th Place Points</label>
-                                    <input type="number" id="seventhEighthPlacePoints" value="7" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="highOutPoints">High Out Points (101+)</label>
-                                    <input type="number" id="highOutPoints" value="1" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="tonPoints">Ton Points (100+)</label>
-                                    <input type="number" id="tonPoints" value="0" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="shortLegPoints">Short Leg Points</label>
-                                    <input type="number" id="shortLegPoints" value="1" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="oneEightyPoints">180 Points</label>
-                                    <input type="number" id="oneEightyPoints" value="1" min="0">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Right Column -->
-                <div class="config-column">
-
-                    <!-- Match Configuration Section -->
-                    <div class="config-section">
-                        <h3>Match Configuration (autosave)</h3>
-                        <div class="config-content">
-                            <div class="config-grid">
-                                <div class="form-group">
-                                    <label for="regularRoundsLegs">Regular Rounds</label>
-                                    <select id="regularRoundsLegs">
-                                        <option value="3" selected>Best of 3</option>
-                                        <option value="5">Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="backsideSemifinalLegs">Backside Semifinal</label>
-                                    <select id="backsideSemifinalLegs">
-                                        <option value="3" selected>Best of 3</option>
-                                        <option value="5">Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="frontsideSemifinalLegs">Frontside Semifinal</label>
-                                    <select id="frontsideSemifinalLegs">
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="backsideFinalLegs">Backside Final</label>
-                                    <select id="backsideFinalLegs">
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="grandFinalLegs">Grand Final</label>
-                                    <select id="grandFinalLegs">
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
                     <!-- Lane Management Section -->
                     <div class="config-section">
                         <h3>Lane Management</h3>
@@ -422,6 +316,113 @@
                                 </div>
                             </div>
                             <button class="btn btn-success" onclick="saveUIConfiguration()">Save UI Settings</button>
+                        </div>
+                    </div>
+                </div>
+
+
+                <!-- Right Column -->
+                <div class="config-column">
+
+                    <!-- Match Configuration Section -->
+                    <div class="config-section">
+                        <h3>Match Configuration (autosave)</h3>
+                        <div class="config-content">
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="regularRoundsLegs">Regular Rounds</label>
+                                    <select id="regularRoundsLegs">
+                                        <option value="3" selected>Best of 3</option>
+                                        <option value="5">Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="backsideSemifinalLegs">Backside Semifinal</label>
+                                    <select id="backsideSemifinalLegs">
+                                        <option value="3" selected>Best of 3</option>
+                                        <option value="5">Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="frontsideSemifinalLegs">Frontside Semifinal</label>
+                                    <select id="frontsideSemifinalLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="backsideFinalLegs">Backside Final</label>
+                                    <select id="backsideFinalLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="grandFinalLegs">Grand Final</label>
+                                    <select id="grandFinalLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Point Values Section -->
+                    <div class="config-section">
+                        <h3>Point Values (autosave)</h3>
+                        <div class="config-content">
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="participationPoints">Participation Points</label>
+                                    <input type="number" id="participationPoints" value="5" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="firstPlacePoints">1st Place Points</label>
+                                    <input type="number" id="firstPlacePoints" value="15" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="secondPlacePoints">2nd Place Points</label>
+                                    <input type="number" id="secondPlacePoints" value="13" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="thirdPlacePoints">3rd Place Points</label>
+                                    <input type="number" id="thirdPlacePoints" value="10" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fourthPlacePoints">4th Place Points</label>
+                                    <input type="number" id="fourthPlacePoints" value="9" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="fifthSixthPlacePoints">5th-6th Place Points</label>
+                                    <input type="number" id="fifthSixthPlacePoints" value="8" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="seventhEighthPlacePoints">7th-8th Place Points</label>
+                                    <input type="number" id="seventhEighthPlacePoints" value="7" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="highOutPoints">High Out Points (101+)</label>
+                                    <input type="number" id="highOutPoints" value="1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="tonPoints">Ton Points (100+)</label>
+                                    <input type="number" id="tonPoints" value="0" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="shortLegPoints">Short Leg Points</label>
+                                    <input type="number" id="shortLegPoints" value="1" min="0">
+                                </div>
+                                <div class="form-group">
+                                    <label for="oneEightyPoints">180 Points</label>
+                                    <input type="number" id="oneEightyPoints" value="1" min="0">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
