@@ -2,7 +2,7 @@
 
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
-- None
+- Registration page scrolling, background is permanent/does not scroll
 
 ## Next
 *Items ready for implementation*
