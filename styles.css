@@ -1171,69 +1171,6 @@ body {
 }
 
 /* Results table */
-.results-table {
-  width: 100%;
-  border-collapse: collapse;
-  margin-top: 0px;
-  background: #ffffff;
-  border-radius: 0;
-  overflow: hidden;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-  color: #111827;
-}
-
-.results-table th,
-.results-table td {
-  padding: 12px;
-  text-align: left;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.results-table th {
-  background: #111827;
-  color: #ffffff;
-  font-weight: 800;
-}
-
-.results-table tr:nth-child(even) { background: #f8fafc; }
-.results-table tr:hover { background: #e5e7eb; }
-
-/* Results table column widths */
-.results-table th:nth-child(1),
-.results-table td:nth-child(1) {
-  width: 7ch; /* 5 characters wide for Rank */
-  min-width: 7ch;
-  max-width: 7ch;
-}
-
-.results-table th:nth-child(2),
-.results-table td:nth-child(2) {
-  min-width: 20ch; /* Minimum 20 characters for Player */
-}
-
-/* Make points column data bold and colorful - exclude header */
-.results-table td:nth-child(3) {
-  font-weight: bold;
-  color: rgba(180, 83, 9, 1); /* Muted orange to match buttons */
-}
-
-/* Bold and green player names in results table */
-.results-table td:nth-child(2) .clickable-player-name {
-  font-weight: bold;
-  color: #065f46; /* Dark cold green */
-}
-
-.results-table td:nth-child(2) .clickable-player-name:hover {
-  color: #047857; /* Hover green */
-}
-
-/* Clickable player names in results table */
-.clickable-player-name {
-  color: #065f46; /* Player Name Color */
-  cursor: pointer;
-  text-decoration: none;
-  transition: color 0.2s ease;
-}
 
 .clickable-player-name:hover {
   color: #047857; /* Player Name Color */
@@ -2925,6 +2862,7 @@ a:hover { color: #1e40af; }
 
 .player-status {
   font-size: 12px;
+  font-weight: 400;
   color: #666666;
 }
 
@@ -2989,16 +2927,59 @@ a:hover { color: #1e40af; }
 .results-table th {
   background: #f9f9f9;
   border: 1px solid #e8e8e8;
-  padding: 12px 8px;
-  text-align: left;
+  padding: 8px;
+  text-align: center;
   font-weight: 600;
   color: #222222;
 }
 
+.results-table th:nth-child(1),
+.results-table th:nth-child(2) {
+  text-align: left;
+}
+
 .results-table td {
   border: 1px solid #e8e8e8;
-  padding: 12px 8px;
+  padding: 8px;
   color: #333333;
+}
+
+.results-table tr:nth-child(even) {
+  background: #fafafa;
+}
+
+.results-table tr:hover {
+  background: #f3f4f6;
+}
+
+
+/* Cell styling */
+.results-table .rank {
+  font-weight: 600;
+  color: #333333;
+  width: 5%;
+  text-align: center;
+}
+
+.results-table .player-name {
+  font-weight: 500;
+  color: #333333;
+  width: 20%;
+}
+
+.results-table .points {
+  font-weight: 600;
+  color: #166534;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+  width: 10%;
+  text-align: center;
+}
+
+.results-table .stat {
+  color: #666666;
+  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+  text-align: center;
+  width: 10%;
 }
 
 /* Config Page Styles */

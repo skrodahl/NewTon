@@ -206,15 +206,14 @@ function updatePlayersDisplay() {
     });
 
  const html = sortedPlayers.map(player => `
-    <div class="player-card ${player.paid ? 'paid' : ''}">
-        <div class="player-card-compact">
-            <label class="paid-status">
-                <input type="checkbox" class="paid-checkbox" ${player.paid ? 'checked' : ''} 
-                       onchange="togglePaid(${player.id})"> Paid
-            </label>
-            <button class="remove-btn" onclick="removePlayer(${player.id})">×</button>
+    <div class="player-card ${player.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${player.id})">
+        <div class="player-info">
+            <div class="player-name">${player.name}</div>
+            <div class="player-status">${player.paid ? 'Paid' : 'Unpaid'}</div>
         </div>
-        <div class="player-name-large" onclick="openStatsModal(${player.id})">${player.name}</div>
+        <div class="player-actions">
+            <button class="btn-small btn-danger" onclick="event.stopPropagation(); removePlayer(${player.id})">×</button>
+        </div>
     </div>
 `).join('');
 

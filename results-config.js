@@ -358,7 +358,7 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
     if (sortedPlayers.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="7" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+                <td colspan="9" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
                     No players added yet
                 </td>
             </tr>
@@ -370,16 +370,16 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
     const points = calculatePlayerPoints(player);
     const legs = calculatePlayerLegs(player.id);
     return `
-        <tr onclick="openStatsModal(${player.id})" style="cursor: pointer;" onmouseover="this.style.backgroundColor='#f3f4f6'" onmouseout="this.style.backgroundColor=''">
-            <td>${formatRanking(player.placement)}</td>
-            <td style="font-weight: 500;">${player.name}</td>
-            <td>${points}</td>
-            <td>${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
-            <td>${(player.stats.highOuts || []).join(',') || '—'}</td>
-            <td>${player.stats.oneEighties || 0}</td>
-            <td>${player.stats.tons || 0}</td>
-            <td>${legs.legsWon}</td>
-            <td>${legs.legsLost}</td>
+        <tr onclick="openStatsModal(${player.id})" style="cursor: pointer;">
+            <td class="rank">${formatRanking(player.placement)}</td>
+            <td class="player-name">${player.name}</td>
+            <td class="points">${points}</td>
+            <td class="stat">${Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.join(',') : '—'}</td>
+            <td class="stat">${(player.stats.highOuts || []).join(',') || '—'}</td>
+            <td class="stat">${player.stats.oneEighties || 0}</td>
+            <td class="stat">${player.stats.tons || 0}</td>
+            <td class="stat">${legs.legsWon}</td>
+            <td class="stat">${legs.legsLost}</td>
         </tr>
     `;
 }).join('');
