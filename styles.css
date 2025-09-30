@@ -258,7 +258,7 @@ body {
 .player-card {
   background: #ffffff;
   border: 2px solid #9ca3af;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 12px 16px; /* Reduced from 16px */
   transition: all 0.2s ease;
   color: #111827;
@@ -1176,7 +1176,7 @@ body {
   border-collapse: collapse;
   margin-top: 0px;
   background: #ffffff;
-  border-radius: 10px;
+  border-radius: 0;
   overflow: hidden;
   box-shadow: 0 4px 15px rgba(0,0,0,0.08);
   color: #111827;
@@ -2796,6 +2796,10 @@ a:hover { color: #1e40af; }
   align-items: end;
   gap: 16px;
   margin-bottom: 24px;
+}
+
+.player-registration-row .btn {
+  margin-bottom: 0;
 }
 
 .player-name-field {
