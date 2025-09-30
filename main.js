@@ -586,13 +586,8 @@ function updateMatchHistory() {
         const player2Progression = getPlayerProgressionForDisplay(player2Id, match.id, player2IsWinner);
         
         // Format match result with winner highlighting and progression info
-        let player1Display = player1IsWinner 
-            ? `<span class="winner-name">${player1Name}</span>${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}` 
-            : `${player1Name}${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}`;
-            
-        let player2Display = player2IsWinner 
-            ? `<span class="winner-name">${player2Name}</span>${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}` 
-            : `${player2Name}${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}`;
+        let player1Display = player1IsWinner ? `<span class="winner-name">${player1Name}</span>${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}` : `${player1Name}${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}`;
+        let player2Display = player2IsWinner ? `<span class="winner-name">${player2Name}</span>${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}` : `${player2Name}${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}`;
         
         let scoreText = '';
         if (match.finalScore && match.finalScore.winnerLegs > 0) {

@@ -29,7 +29,7 @@ body {
 /* Header */
 .header {
   background: #ffffff;
-  border: 1px solid #c0c0c0;
+  border: 1px solid #666666;
   padding: 24px;
   margin-bottom: 24px;
   display: flex;
@@ -2335,6 +2335,16 @@ a:hover { color: #1e40af; }
 
 .player-info {
   flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.player-info span,
+.player-info .winner-name,
+.player-info .progression-info {
+  display: inline !important;
+  white-space: nowrap !important;
 }
 
 .result-score {
@@ -2520,7 +2530,16 @@ a:hover { color: #1e40af; }
   color: #222222;
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 0px;
+}
+
+.setup-page-header .form-group {
+  margin-bottom: 0;
+  margin-top: -6px;
+}
+
+.setup-page-header .btn {
+  margin-bottom: 0;
 }
 
 .setup-page-flex .alert {
@@ -2535,7 +2554,7 @@ a:hover { color: #1e40af; }
 
 .tournament-creation-row {
   display: flex;
-  align-items: flex-start;
+  align-items: end;
   gap: 16px;
   width: 1000px;
   margin-bottom: 24px;
@@ -2547,11 +2566,6 @@ a:hover { color: #1e40af; }
 
 .tournament-creation-row input {
   margin-top: -2px;
-}
-
-.tournament-create-button {
-  margin-top: 24px;
-  margin-bottom: 0;
 }
 
 .tournament-name-field {
@@ -2734,8 +2748,6 @@ a:hover { color: #1e40af; }
 
 .match-result-item.backside .match-content {
   background: #f7f7f7;
-  padding: 8px 0;
-  margin: 4px 0;
   margin-left: -21px;
   margin-right: -24px;
   padding-left: 21px;
@@ -2758,6 +2770,8 @@ a:hover { color: #1e40af; }
   font-size: 14px;
   color: #333333;
   font-weight: 500;
+  display: block;
+  white-space: nowrap;
 }
 
 .setup-page-flex .match-players span,
@@ -2788,7 +2802,11 @@ a:hover { color: #1e40af; }
   color: #222222;
   font-size: 1.5rem;
   font-weight: 600;
-  margin-bottom: 24px;
+  margin-bottom: 0px;
+}
+
+.registration-page-header .btn {
+  margin-bottom: 0;
 }
 
 .player-registration-row {
@@ -2796,6 +2814,11 @@ a:hover { color: #1e40af; }
   align-items: end;
   gap: 16px;
   margin-bottom: 24px;
+  margin-top: -6px;
+}
+
+.player-registration-row .form-group {
+  margin-bottom: 0;
 }
 
 .player-registration-row .btn {
@@ -2820,15 +2843,16 @@ a:hover { color: #1e40af; }
 }
 
 .player-count {
-  font-size: 14px;
-  color: #666666;
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222222;
 }
 
 .registration-page-main {
   flex: 1;
   display: flex;
   gap: 24px;
-  padding: 24px;
+  padding: 24px 24px 24px 0px;
   overflow: hidden;
 }
 
@@ -2887,7 +2911,7 @@ a:hover { color: #1e40af; }
   background: #f9f9f9;
 }
 
-.player-info {
+.player-card .player-info {
   display: flex;
   flex-direction: column;
   gap: 4px;
