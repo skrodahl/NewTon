@@ -1,3 +1,51 @@
+# 2025-10-01
+## **v2.2.0-beta** - Minimalistic Flat 2D Design System
+
+### UI Redesign - Core Pages
+- **Setup, Registration, Config Pages**: Complete redesign following new flat 2D design principles
+  - Removed all rounded corners, gradients, and shadows for pure flat aesthetic
+  - Implemented consistent spacing system (24px primary, 16px secondary, 8px tight)
+  - Standardized element heights (44px interactive elements, 60px headers, 72px content rows)
+  - Applied muted monochromatic color palette with selective green/amber/red accents
+  - Fixed padding issues across pages ensuring content extends to edges properly
+
+### Button System Overhaul
+- **Flat Outline Buttons**: Replaced filled buttons with minimal outline style throughout application
+  - Base: White background with 1px gray border
+  - Hover: Subtle color-tinted backgrounds (#dcfce7 green, #fef3c7 amber, #fef2f2 red)
+  - Updated all dialogs: Match Controls, Statistics, Confirm Winner, Reset Tournament, Delete Tournament, Undo Confirmation
+  - Consistent styling across primary actions (green), warnings (amber), and destructive actions (red)
+
+### Modal/Dialog Improvements
+- **Removed rounded corners** from all modal dialogs for design consistency
+- **Enhanced button states**:
+  - Edit Statistics dialog: Redesigned +/− buttons (24×24px) with red/green accents and proper hover effects
+  - Reset Tournament dialog: Added visual feedback when enabled (amber background) with proper contrast
+  - All Cancel buttons converted to flat outline style
+- **Fixed alignment issues**: Vertically centered text labels using `transform: translateY()` approach
+
+### Design System Documentation
+- **DESIGN.md principles implemented**:
+  - Minimalistic flat 2D aesthetic with no gradients or shadows
+  - Muted color strategy with strategic accent usage
+  - Fixed desktop-focused layouts with consistent spacing
+  - Typography hierarchy with proper weight and size differentiation
+  - Border-based hover feedback instead of background changes
+
+### Technical Improvements
+- **Removed duplicate CSS rules** causing override conflicts on Registration and Config pages
+- **Cleaned up inline styles** in favor of reusable CSS classes
+- **Consistent z-index management** for modal layering
+- **JavaScript refactoring**: Removed inline background style manipulation in favor of CSS class-based styling
+
+### Files Modified
+- `styles.css` - Extensive redesign following flat 2D principles
+- `tournament.html` - Button updates, modal structure improvements
+- `tournament-management.js` - Reset button state management cleanup
+- Main pages (Setup, Registration, Config, Tournament) - Layout and spacing standardization
+
+This release establishes a comprehensive design system foundation for the entire application, replacing the previous mixed aesthetic with a cohesive, professional flat 2D interface.
+
 # 2025-09-29
 ## **v2.1.5-beta**
 - Made the "Save Statistics" button in the Edit Statistics dialog respond to Enter
