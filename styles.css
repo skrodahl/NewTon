@@ -1043,7 +1043,7 @@ body {
 /* Config sections */
 .config-section {
   background: #f8f9fa;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 20px;
   margin-bottom: 20px;
   border: 1px solid #e5e7eb;
@@ -3001,7 +3001,7 @@ a:hover { color: #1e40af; }
   flex: 1;
   display: flex;
   gap: 24px;
-  padding: 24px;
+  padding: 24px 0px 24px 0px;
   overflow: hidden;
 }
 
