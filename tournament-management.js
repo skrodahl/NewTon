@@ -618,10 +618,10 @@ function showResetTournamentModal() {
         const resetBtn = document.getElementById('confirmResetBtn');
         if (this.value === tournamentName) {
             resetBtn.disabled = false;
-            resetBtn.style.background = 'rgba(180, 83, 9, 0.9)';
+            resetBtn.style.background = '#fef3c7';
         } else {
             resetBtn.disabled = true;
-            resetBtn.style.background = '#6c757d';
+            resetBtn.style.background = '';
         }
     });
 
