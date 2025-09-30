@@ -1,8 +1,8 @@
 /* NewTon DC - Tournament Manager
-   Consolidated high-contrast stylesheet
-   - Dark app shell, light content cards
-   - Keeps all original classes used by JS
-   - Improves readability, focus states, and contrast
+   Minimalistic flat 2D design
+   - Clean, airy interface with muted colors
+   - Selective accent colors for actions
+   - Professional desktop-focused layout
 */
 
 /* Reset */
@@ -15,12 +15,9 @@
 /* App shell */
 body {
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, Apple Color Emoji, Segoe UI Emoji;
-  background:
-    radial-gradient(1200px 600px at 10% -10%, #263147 0%, transparent 55%),
-    radial-gradient(1000px 500px at 110% -20%, #1a2640 0%, transparent 60%),
-    linear-gradient(180deg, #111827, #0b1220);
+  background: #f5f5f5;
   min-height: 100vh;
-  color: #e5e7eb; /* shell default; light cards override to near-black */
+  color: #2a2a2a;
 }
 
 .container {
@@ -32,13 +29,12 @@ body {
 /* Header */
 .header {
   background: #ffffff;
-  border-radius: 10px;
-  padding: 20px;
-  margin-bottom: 20px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  border: 1px solid #c0c0c0;
+  padding: 24px;
+  margin-bottom: 24px;
   display: flex;
   flex-direction: column;
-  gap: 15px;
+  gap: 24px;
 }
 
 .header-top {
@@ -48,8 +44,9 @@ body {
 }
 
 .header h1 {
-  color: #111827;
-  font-size: 2rem;
+  color: #000000;
+  font-size: 1.75rem;
+  font-weight: 600;
   display: flex;
   align-items: center;
   gap: 15px;
@@ -58,16 +55,15 @@ body {
 .logo-placeholder {
   width: 60px;
   height: 60px;
-  background: linear-gradient(135deg, #111827 0%, #374151 100%);
-  border-radius: 50%;
+  background: #f5f5f5;
+  border: 1px solid #c0c0c0;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #ffffff;
-  font-weight: 800;
-  font-size: 12px;
+  color: #666666;
+  font-weight: 600;
+  font-size: 10px;
   letter-spacing: 0.5px;
-  border: 3px solid #e5e7eb;
   text-align: center;
   line-height: 1.2;
 }
@@ -86,33 +82,30 @@ body {
 /* Nav */
 .nav {
   display: flex;
-  gap: 10px;
+  gap: 32px;
   justify-content: flex-start;
   flex-wrap: wrap;
   position: relative;
 }
 
-.nav button {
-  padding: 10px 16px;
-  border-radius: 8px;
-  border: 1px solid #e5e7eb;
-  background: #f3f4f6;
-  color: #111827;
+.nav-btn {
+  padding: 0;
+  border: none;
+  background: none;
+  color: #444444;
   cursor: pointer;
-  font-weight: 600;
-  transition: all 0.2s ease;
+  font-weight: 400;
+  font-size: 16px;
+  transition: color 0.15s ease;
 }
 
-.nav button:hover {
-  background: #e5e7eb;
-  transform: translateY(-1px);
+.nav-btn:hover {
+  color: #222222;
 }
 
-.nav button.active {
-  background: rgba(180, 83, 9, 0.9);
-  color: #ffffff;
-  border-color: rgba(180, 83, 9, 0.9);
-  box-shadow: 0 4px 12px rgba(180, 83, 9, 0.35);
+.nav-btn.active {
+  color: rgba(180, 83, 9, 1);
+  font-weight: 700;
 }
 
 .header-tournament-status {
@@ -135,9 +128,9 @@ body {
 .page {
   display: none;
   background: #ffffff;
-  border-radius: 10px;
+  border-radius: 0;
   padding: 24px;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+  box-shadow: none;
   color: #111827; /* ensure readable text on light page */
 }
 
@@ -208,33 +201,51 @@ body {
 
 /* Buttons */
 .btn {
-  padding: 12px 18px;
-  border: none;
-  border-radius: 8px;
-  background: #374151;
-  color: #ffffff;
+  padding: 12px 20px;
+  border: 1px solid #b0b0b0;
+  background: #ffffff;
+  color: #333333;
   cursor: pointer;
-  font-weight: 700;
+  font-weight: 500;
   font-size: 14px;
-  transition: all 0.2s ease;
+  transition: all 0.15s ease;
   margin-right: 10px;
   margin-bottom: 10px;
+  height: 44px;
+  box-sizing: border-box;
 }
 
 .btn:hover {
-  filter: brightness(1.05);
-  transform: translateY(-1px);
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  background: #f8f8f8;
+  border-color: #999999;
 }
 
-.btn-success { background: rgba(22, 101, 52, 0.9); }
-.btn-success:hover { background: rgba(22, 101, 52, 1); }
+.btn-success {
+  color: #166534;
+  border-color: #166534;
+}
+.btn-success:hover {
+  background: #dcfce7;
+  border-color: #166534;
+}
 
-.btn-danger { background: rgba(154, 52, 18, 0.9); }
-.btn-danger:hover { background: rgba(154, 52, 18, 1); }
+.btn-danger {
+  color: #dc2626;
+  border-color: #dc2626;
+}
+.btn-danger:hover {
+  background: #fef2f2;
+  border-color: #dc2626;
+}
 
-.btn-warning { background: rgba(180, 83, 9, 0.9); color: #ffffff; }
-.btn-warning:hover { background: rgba(180, 83, 9, 1); color: #ffffff; }
+.btn-warning {
+  color: #d97706;
+  border-color: #d97706;
+}
+.btn-warning:hover {
+  background: #fef3c7;
+  border-color: #d97706;
+}
 
 /* Player management */
 .players-grid {
@@ -1312,7 +1323,7 @@ footer {
   border-top: 1px solid #e5e7eb;
   margin-top: 20px;
   background: #ffffff;
-  border-radius: 0 0 10px 10px;
+  border-radius: 0;
 }
 
 /* Utilities */
@@ -2425,4 +2436,652 @@ a:hover { color: #1e40af; }
   min-height: 0 !important;
   padding-right: 8px !important; /* Space for scrollbar */
   margin-bottom: 20px !important;
+}
+
+/* ==========================================
+   NEW FLAT DESIGN STYLES FOR REDESIGNED PAGES
+   ========================================== */
+
+/* Form Elements - Only for redesigned pages */
+.setup-page-flex input[type="text"],
+.setup-page-flex input[type="number"],
+.setup-page-flex input[type="date"],
+.setup-page-flex select,
+.registration-page-flex input[type="text"],
+.registration-page-flex input[type="number"],
+.registration-page-flex input[type="date"],
+.registration-page-flex select,
+.config-page input[type="text"],
+.config-page input[type="number"],
+.config-page input[type="date"],
+.config-page select {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #c0c0c0;
+  border-radius: 0;
+  background: #ffffff;
+  color: #2a2a2a;
+  font-size: 14px;
+  height: 44px;
+  box-sizing: border-box;
+  transition: border-color 0.15s ease;
+}
+
+.setup-page-flex input[type="text"]:focus,
+.setup-page-flex input[type="number"]:focus,
+.setup-page-flex input[type="date"]:focus,
+.setup-page-flex select:focus,
+.registration-page-flex input[type="text"]:focus,
+.registration-page-flex input[type="number"]:focus,
+.registration-page-flex input[type="date"]:focus,
+.registration-page-flex select:focus,
+.config-page input[type="text"]:focus,
+.config-page input[type="number"]:focus,
+.config-page input[type="date"]:focus,
+.config-page select:focus {
+  outline: none;
+  border-color: rgba(180, 83, 9, 1);
+  box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.1);
+}
+
+.setup-page-flex .form-group,
+.registration-page-flex .form-group,
+.config-page .form-group {
+  margin-bottom: 16px;
+}
+
+.setup-page-flex .form-group label,
+.registration-page-flex .form-group label,
+.config-page .form-group label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #222222;
+  font-size: 14px;
+}
+
+/* Setup Page Styles */
+.page.setup-page-flex.active {
+  display: flex;
+  flex-direction: column;
+  height: calc(100vh - 200px);
+  overflow: hidden;
+}
+
+.setup-page-header {
+  flex-shrink: 0;
+  padding: 24px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.setup-page-header h2 {
+  margin: 0;
+  color: #222222;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.setup-page-flex .alert {
+  border: none;
+  background: none;
+  border-radius: 0;
+  padding: 0;
+  margin: 0;
+  color: #666666;
+  font-size: 14px;
+}
+
+.tournament-creation-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  width: 1000px;
+  margin-bottom: 24px;
+}
+
+.tournament-creation-row .form-group {
+  margin-bottom: 0;
+}
+
+.tournament-creation-row input {
+  margin-top: -2px;
+}
+
+.tournament-create-button {
+  margin-top: 24px;
+  margin-bottom: 0;
+}
+
+.tournament-name-field {
+  width: 510px;
+}
+
+.tournament-date-field {
+  width: 154px;
+}
+
+.tournament-create-button {
+  width: 220px;
+  margin-bottom: 0;
+}
+
+.setup-page-main {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 24px 24px 24px 0px;
+  overflow: hidden;
+}
+
+.two-column-container {
+  display: flex;
+  gap: 24px;
+  flex: 1;
+}
+
+.setup-page-flex .scrollable-column:first-child {
+  flex: 0 0 55%;
+}
+
+.setup-page-flex .scrollable-column:last-child {
+  flex: 0 0 45%;
+}
+
+.scrollable-column {
+  background: #ffffff;
+  border: 1px solid #c0c0c0;
+  border-radius: 0;
+  color: #2a2a2a;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+}
+
+.scrollable-column h3 {
+  color: #222222;
+  margin: 0;
+  padding: 20px 24px 12px 24px;
+  border-bottom: 1px solid #c0c0c0;
+  flex-shrink: 0;
+  height: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.scrollable-column h3 .btn {
+  height: 28px;
+  padding: 6px 12px;
+  font-size: 12px;
+  margin: 0;
+}
+
+.scrollable-column-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 24px;
+  min-height: 0;
+}
+
+/* Tournament Items */
+.tournament-item {
+  border-bottom: 1px solid #e8e8e8;
+  height: 72px;
+  min-height: 72px;
+  max-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  padding-left: 21px;
+  margin-right: -24px;
+  padding-right: 24px;
+}
+
+.tournament-item .btn,
+.tournament-item button {
+  height: 32px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  margin: 0 2px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+}
+
+.setup-page-flex .scrollable-column-content button,
+.setup-page-flex .scrollable-column-content .btn {
+  height: 32px !important;
+  padding: 6px 10px !important;
+  font-size: 12px !important;
+  margin: 0 2px !important;
+  min-height: 32px !important;
+  max-height: 32px !important;
+}
+
+.tournament-item:first-child {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.tournament-item:last-child {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.tournament-item:hover {
+  border-left-color: #166534;
+}
+
+.tournament-item.active-tournament .tournament-name {
+  font-size: 18px;
+  font-weight: 700;
+  color: #166534;
+}
+
+.tournament-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+  margin-bottom: 4px;
+}
+
+.tournament-meta {
+  font-size: 12px;
+  color: #666666;
+  display: flex;
+  gap: 16px;
+}
+
+/* Match Results */
+.match-result-item {
+  border-bottom: 1px solid #e8e8e8;
+  height: 72px;
+  min-height: 72px;
+  max-height: 72px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  overflow: hidden;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  border-left: 3px solid transparent;
+  padding-left: 21px;
+  margin-right: -24px;
+  padding-right: 24px;
+}
+
+.match-result-item:first-child {
+  padding-top: 0;
+  margin-top: 0;
+}
+
+.match-result-item:last-child {
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.match-result-item:hover {
+  border-left-color: #166534;
+}
+
+.match-result-item.backside .match-content {
+  background: #f7f7f7;
+  padding: 8px 0;
+  margin: 4px 0;
+  margin-left: -21px;
+  margin-right: -24px;
+  padding-left: 21px;
+  padding-right: 24px;
+}
+
+.match-content {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.match-header {
+  font-size: 12px;
+  color: #666666;
+  font-weight: 500;
+}
+
+.setup-page-flex .match-players {
+  font-size: 14px;
+  color: #333333;
+  font-weight: 500;
+}
+
+.setup-page-flex .match-players span,
+.setup-page-flex .match-players .player-name,
+.setup-page-flex .match-players .match-text {
+  display: inline !important;
+  white-space: nowrap !important;
+}
+
+/* Registration Page Styles */
+.page.registration-page-flex.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.registration-page-header {
+  flex-shrink: 0;
+  padding: 24px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.registration-page-header h2 {
+  margin: 0;
+  color: #222222;
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 24px;
+}
+
+.player-registration-row {
+  display: flex;
+  align-items: end;
+  gap: 16px;
+  margin-bottom: 24px;
+}
+
+.player-name-field {
+  width: 441px;
+}
+
+.controls-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0;
+  margin-top: -6px;
+}
+
+.control-buttons {
+  display: flex;
+  gap: 16px;
+}
+
+.player-count {
+  font-size: 14px;
+  color: #666666;
+}
+
+.registration-page-main {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+/* Column Proportions */
+.scrollable-column:first-child {
+  flex: 0 0 34%;
+}
+
+.scrollable-column:last-child {
+  flex: 0 0 66%;
+}
+
+/* Player Grid */
+.players-list {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+
+.player-card {
+  border: 1px solid #e8e8e8;
+  height: 48px;
+  min-height: 48px;
+  max-height: 48px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  overflow: hidden;
+  transition: all 0.15s ease;
+  cursor: pointer;
+  padding: 8px 12px;
+  background: #ffffff;
+  position: relative;
+}
+
+.player-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.player-card.paid {
+  background: #f0f9f4;
+  border-color: #166534;
+}
+
+.player-card.paid:hover {
+  background: #dcfce7;
+}
+
+.player-card.unpaid {
+  background: #ffffff;
+  border-color: #d97706;
+}
+
+.player-card.unpaid:hover {
+  background: #f9f9f9;
+}
+
+.player-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.player-name {
+  font-size: 14px;
+  font-weight: 500;
+  color: #333333;
+}
+
+.player-status {
+  font-size: 12px;
+  color: #666666;
+}
+
+.player-card.paid .player-status {
+  color: #166534;
+}
+
+.player-card.unpaid .player-status {
+  color: #d97706;
+}
+
+.player-actions {
+  display: flex;
+  gap: 4px;
+  position: relative;
+  z-index: 2;
+}
+
+.btn-small {
+  padding: 4px 8px;
+  font-size: 14px;
+  height: auto;
+  font-weight: 400;
+  border: 1px solid #d0d0d0;
+  background: #ffffff;
+  color: #666666;
+  transition: all 0.15s ease;
+  width: 24px;
+  height: 24px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+}
+
+.btn-small:hover {
+  background: #f8f8f8;
+  border-color: #c0c0c0;
+}
+
+.btn-small.btn-danger {
+  color: #dc2626;
+  border-color: #dc2626;
+}
+
+.btn-small.btn-danger:hover {
+  background: #fef2f2;
+  border-color: #b91c1c;
+}
+
+/* Results Table */
+.results-table-container {
+  overflow-x: auto;
+}
+
+.results-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.results-table th {
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  padding: 12px 8px;
+  text-align: left;
+  font-weight: 600;
+  color: #222222;
+}
+
+.results-table td {
+  border: 1px solid #e8e8e8;
+  padding: 12px 8px;
+  color: #333333;
+}
+
+/* Config Page Styles */
+.page.config-page.active {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  flex: 1;
+  overflow: hidden;
+}
+
+.config-page-header {
+  flex-shrink: 0;
+  padding: 24px;
+  background: #f5f5f5;
+  border-bottom: 1px solid #e8e8e8;
+}
+
+.config-page-header h2 {
+  margin: 0;
+  color: #222222;
+  font-size: 1.5rem;
+  font-weight: 600;
+}
+
+.config-sections-container {
+  flex: 1;
+  display: flex;
+  gap: 24px;
+  padding: 24px;
+  overflow: hidden;
+}
+
+.config-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  overflow-y: auto;
+  padding-right: 8px;
+}
+
+.config-section {
+  background: #ffffff;
+  border: 1px solid #c0c0c0;
+  flex-shrink: 0;
+}
+
+.config-section h3 {
+  margin: 0;
+  padding: 20px 24px 12px 24px;
+  border-bottom: 1px solid #c0c0c0;
+  color: #222222;
+  font-size: 1rem;
+  font-weight: 600;
+}
+
+.config-content {
+  padding: 24px;
+}
+
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.config-buttons {
+  display: flex;
+  gap: 16px;
+  margin-top: 16px;
+}
+
+.checkbox-group {
+  margin-bottom: 16px;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 400;
+  color: #2a2a2a;
+  line-height: 1.4;
+}
+
+.checkbox-label input[type="checkbox"] {
+  margin: 0;
+  flex-shrink: 0;
+  width: 16px;
+  height: 16px;
+  margin-top: 2px;
+}
+
+.field-help {
+  display: block;
+  font-size: 12px;
+  color: #666666;
+  margin-top: 4px;
+  font-style: italic;
+}
+
+.info-text {
+  font-size: 14px;
+  color: #2a2a2a;
+  line-height: 1.5;
+  padding: 16px;
+  background: #f9f9f9;
+  border: 1px solid #e8e8e8;
+  border-radius: 4px;
 }
