@@ -3047,7 +3047,10 @@ function showCommandCenterModal(matchData) {
                 }
                 if (assignmentsSection) {
                     const header = assignmentsSection.querySelector('.referee-subsection-header');
-                    if (header) header.textContent = 'Recent Assignments';
+                    if (header) {
+                        header.textContent = 'Recent Assignments';
+                        header.style.display = '';  // Restore display (remove inline style)
+                    }
                 }
 
                 refereeSections.forEach(section => section.style.display = 'block');
