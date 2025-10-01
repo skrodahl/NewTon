@@ -1,6 +1,6 @@
 # 2025-10-01
 
-## **v2.2.0** - Minimalistic Flat 2D Design System
+## **v2.2.0** - Minimalistic Flat 2D Design
 
 ### Visual Framework Refinements
 - **Consistent Border Hierarchy**: Implemented three-tier border system throughout application
