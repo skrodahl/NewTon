@@ -358,7 +358,7 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
     if (sortedPlayers.length === 0) {
         tbody.innerHTML = `
             <tr>
-                <td colspan="9" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+                <td colspan="10" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
                     No players added yet
                 </td>
             </tr>
@@ -380,6 +380,7 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
             <td class="stat">${player.stats.tons || 0}</td>
             <td class="stat">${legs.legsWon}</td>
             <td class="stat">${legs.legsLost}</td>
+            <td style="width: 0; padding: 0; border: none;"></td>
         </tr>
     `;
 }).join('');

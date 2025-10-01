@@ -255,6 +255,7 @@ body {
   margin-top: 12px;
 }
 
+/* DUPLICATE CANDIDATE: .player-card superseded by flat design version at line ~2810 - CONSIDER REMOVAL */
 .player-card {
   background: #ffffff;
   border: 2px solid #9ca3af;
@@ -372,6 +373,7 @@ body {
 }
 
 /* Registration page flex layout - sticky footer */
+/* !IMPORTANT CLEANUP: Could use higher specificity instead of !important - OPTIMIZATION CANDIDATE */
 #registration.registration-page-flex {
   display: flex !important;
   flex-direction: column;
@@ -1073,6 +1075,7 @@ body {
   margin-bottom: 0;
 }
 
+/* DUPLICATE CANDIDATE: .scrollable-column superseded by flat design version at line ~2540 - CONSIDER REMOVAL */
 .scrollable-column {
   flex: 1;
   background: #f8f9fa;
@@ -1293,6 +1296,7 @@ footer {
     height: auto;
   }
   
+  /* DUPLICATE CANDIDATE: Mobile .scrollable-column may conflict with flat design - REVIEW NEEDED */
   .scrollable-column {
     height: 300px; /* Fixed height for scrollable areas on mobile */
   }
@@ -2537,6 +2541,9 @@ a:hover { color: #1e40af; }
   flex: 0 0 45%;
 }
 
+/* ===============================================
+   FLAT DESIGN STYLES - ACTIVE (v2.2.0+)
+   =============================================== */
 .scrollable-column {
   background: #ffffff;
   border: 1px solid #e8e8e8;
@@ -2571,6 +2578,7 @@ a:hover { color: #1e40af; }
 }
 
 .scrollable-column-content {
+  flex: 1;
   padding: 24px;
 }
 
@@ -2579,6 +2587,8 @@ a:hover { color: #1e40af; }
   overflow-y: visible;
   min-height: initial;
 }
+
+/* Removed incorrect margin-right that broke the working spacing */
 
 /* Tournament Items */
 .tournament-item {
@@ -2791,12 +2801,12 @@ a:hover { color: #1e40af; }
   align-items: flex-start;
 }
 
-/* Column Proportions */
-.scrollable-column:first-child {
+/* Column Proportions - Registration Page Only */
+.registration-page-main .scrollable-column:first-child {
   flex: 0 0 34%;
 }
 
-.scrollable-column:last-child {
+.registration-page-main .scrollable-column:last-child {
   flex: 0 0 66%;
 }
 
@@ -2914,12 +2924,16 @@ a:hover { color: #1e40af; }
 /* Results Table */
 .results-table-container {
   overflow-x: auto;
+  width: 100%;
+  margin: 0;
+  padding: 0;
 }
 
 .results-table {
   width: 100%;
   border-collapse: collapse;
   font-size: 14px;
+  margin: 0;
 }
 
 .results-table th {
@@ -2962,7 +2976,7 @@ a:hover { color: #1e40af; }
 .results-table .player-name {
   font-weight: 500;
   color: #333333;
-  width: 20%;
+  width: 25%;
 }
 
 .results-table .points {
