@@ -1,14 +1,14 @@
 # CSS Cleanup Analysis - NewTon DC Tournament Manager
 
 **Generated:** 2025-10-01
-**Last Updated:** 2025-10-01
-**Status:** Flat Design Transformation Complete - All Pages Unified
+**Last Updated:** 2025-10-01 (Evening Session)
+**Status:** Flat Design Transformation Complete - All Functional UI Unified
 **Purpose:** Document cleanup candidates for styles.css maintenance
 
 ## Recent Changes Applied
 
 ### Registration Page Table Width Fix
-**Date:** 2025-10-01
+**Date:** 2025-10-01 (Morning)
 **Issue:** Tournament Results table not extending to full container width
 **Solution Implemented:**
 - Added hidden 10th column to table structure (HTML + JS)
@@ -22,17 +22,37 @@
 - `styles.css`: Restored padding, added margin reset
 
 ### Complete Flat Design Transformation
-**Date:** 2025-10-01
-**Issue:** Remaining rounded corners breaking visual consistency
+**Date:** 2025-10-01 (Evening)
+**Issue:** Remaining rounded corners breaking visual consistency across all pages
 **Solution Implemented:**
+
+**Setup Page:**
 - Removed `border-radius: 5px` from Recent Tournaments items (inline JS)
-- Changed `.match-history-item` from `border-radius: 8px` to `border-radius: 0`
-- Changed `.bracket-match` from `border-radius: 10px` to `border-radius: 0`
-- Changed `.zoom-btn` from `border-radius: 10px` to `border-radius: 0`
+- Changed `.match-history-item` from `border-radius: 8px` to `0`
+- Changed `.match-header` from `border-radius: 8px 8px 0 0` to `0`
+- Added 8px horizontal padding to `.match-result-enhanced` for better text spacing
+
+**Tournament/Bracket Page:**
+- Changed `.bracket-match` from `border-radius: 10px` to `0`
+- Changed `.zoom-btn` from `border-radius: 10px` to `0`
+
+**Match Controls (Active Mode):**
+- Changed `.cc-match-action-btn` from `border-radius: 6px` to `0` (Start/Stop buttons)
+- Changed `.referee-suggestion-item` from `border-radius: 6px` to `0`
+- Changed `.cc-match-card` from `border-radius: 8px` to `0`
+
+**Match Controls (Celebration Mode):**
+- Changed `.tournament-celebration` from `border-radius: 15px` to `0` (main celebration box)
+- Changed `.celebration-highlights` from `border-radius: 8px` to `0` (Tournament Highlights container)
+- Changed `.highlight-item` from `border-radius: 6px` to `0` (individual stat boxes)
+- Changed `.achievement-item` from `border-radius: 6px` to `0` (achievement rows)
+- Changed `.achievement-export-btn` from `border-radius: 8px` to `0` (Export button)
+- **Exception:** Kept `.podium-block` at `border-radius: 8px 8px 0 0` and `.podium-player` at `border-radius: 8px` for decorative appeal
 
 **Files Modified:**
 - `tournament-management.js`: Removed border-radius from tournament item inline styles
-- `styles.css`: Updated match history, bracket match, and control button border-radius
+- `styles.css`: Complete border-radius elimination for all functional UI elements
+- `bracket-rendering.js`: Added match progression display, hidden redundant Export Data header
 
 ## Executive Summary
 
@@ -60,11 +80,21 @@ The following duplicates remain and are still cleanup candidates:
 - `.scrollable-column` (lines 1079, 2547) - Legacy vs flat design versions
 - Mobile responsive rules may still conflict with desktop styles
 
+### Design Exception: Decorative Elements
+**Decision Made:** 2025-10-01
+The following elements intentionally retain rounded corners for visual appeal:
+- `.podium-block`: `border-radius: 8px 8px 0 0` (celebration podium stands)
+- `.podium-player`: `border-radius: 8px` (celebration player name boxes)
+
+**Rationale:** These purely decorative elements appear only in the celebration view and benefit from softer edges to create a festive, rewarding visual experience. All functional UI elements use `border-radius: 0`.
+
 ### Protected Elements
 **DO NOT MODIFY** during cleanup:
 - `.registration-page-main` padding (now working correctly)
 - `.results-table` margin reset
 - Tournament Results table HTML structure (hidden 10th column)
+- `.podium-block` and `.podium-player` border-radius (intentional design exception)
+- `.match-result-enhanced` padding (8px horizontal for text spacing)
 
 ---
 

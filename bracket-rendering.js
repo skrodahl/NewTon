@@ -2394,14 +2394,18 @@ function createMatchCard(match) {
     
     const liveClass = state === 'live' ? ' cc-match-card-live' : '';
     const backsideClass = (match.side === 'backside' || match.id.startsWith('BS-')) ? ' cc-match-card-backside' : '';
-    
+
+    // Get progression text
+    const progressionInfo = getMatchProgressionText(match.id);
+    const progressionText = progressionInfo ? progressionInfo.line2 : '';
+
     return `
         <div id="cc-match-card-${match.id}" class="cc-match-card${liveClass}${backsideClass}">
             <div class="cc-match-card-header">
-                <div class="cc-match-id">${match.id}</div>
+                <div class="cc-match-id">${match.id}${progressionText ? ` • ${progressionText}` : ''}</div>
                 <div class="cc-match-format">${format} • <strong>${round}</strong></div>
             </div>
-            
+
             <div class="cc-match-players">
                 ${state === 'live' ?
                     `<button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 1)">${player1Name} Wins</button>
@@ -3414,7 +3418,7 @@ function showTournamentAchievements() {
     }
     if (assignmentsSection) {
         const header = assignmentsSection.querySelector('.referee-subsection-header');
-        if (header) header.textContent = '💾 Export Data';
+        if (header) header.style.display = 'none';
     }
 
     // Populate Player Achievements in losers container

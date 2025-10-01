@@ -208,6 +208,17 @@ The Config page follows all core design principles with organized two-column lay
 - **16px gaps**: Within form grids and button groups
 - **Help text**: 12px italic for field guidance
 
+## Design Exceptions
+
+### Decorative vs. Functional Elements
+While the application follows strict flat design principles with `border-radius: 0` for all functional UI elements, **decorative celebratory elements** are allowed subtle rounded corners for visual appeal:
+
+- **Tournament Celebration Podium**: Podium stands maintain `border-radius: 8px 8px 0 0` (rounded top corners)
+- **Player Name Boxes**: Celebration podium player cards keep `border-radius: 8px`
+- **Rationale**: These purely decorative elements appear only in the celebration view and benefit from softer edges to create a more festive, rewarding visual experience
+
+All functional elements (buttons, cards, inputs, containers) across Setup, Registration, Config, Tournament, and Match Controls pages use sharp, angular geometry (`border-radius: 0`).
+
 ## Future Application
 
 When applying these principles to other pages:
@@ -219,6 +230,7 @@ When applying these principles to other pages:
 5. **Keep hover effects minimal** - border-based feedback
 6. **Extend backgrounds fully** - use negative margins when needed
 7. **Make active states obvious** - combine multiple visual indicators
+8. **Decorative exceptions** - allow rounded corners only for purely celebratory/decorative elements that don't affect user interaction
 
 ## Key Measurements Reference
 
