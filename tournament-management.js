@@ -254,7 +254,7 @@ function loadRecentTournaments() {
     const html = tournamentsToShow.map(t => {
         const isActiveTournament = tournament && tournament.id === t.id;
         return `
-            <div style="padding: 10px; border: 1px solid #ddd; border-radius: 5px; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
+            <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span>
                         <strong>${t.name}</strong> (${t.date})

@@ -2188,7 +2188,7 @@ a:hover { color: #1e40af; }
 .match-history-item {
   background: #ffffff;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 0;
   padding: 12px;
   margin-bottom: 8px;
   transition: all 0.2s ease;
