@@ -4,7 +4,7 @@
 
 It is a fully self-contained web application that runs entirely in your browser — no server, database, Internet connection, or installation required.
 
-[Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases)
+[Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases/latest)
 
 ---
 # See It in Action
