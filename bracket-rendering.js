@@ -2851,8 +2851,8 @@ function showCommandCenterModal(matchData) {
                             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
                                 <div style="font-size: 13px; font-weight: 500; color: #374151;">Add Player:</div>
                                 <div style="margin-top: 8px; display: flex; gap: 8px; width: 70%; margin: 8px auto 0 auto;">
-                                    <input type="text" id="ccPlayerName" placeholder="Player name" style="flex: 1; padding: 4px 8px; border: 1px solid #ccc; border-radius: 4px;" onkeypress="if(event.key==='Enter') addPlayerFromCC()">
-                                    <button onclick="addPlayerFromCC()" style="padding: 4px 12px; background: #065f46; color: white; border: none; border-radius: 4px; cursor: pointer;">Add</button>
+                                    <input type="text" id="ccPlayerName" placeholder="Player name" style="flex: 1; padding: 4px 8px; border: 1px solid #ccc;" onkeypress="if(event.key==='Enter') addPlayerFromCC()">
+                                    <button onclick="addPlayerFromCC()" style="padding: 4px 12px; background: #065f46; color: white; border: none; cursor: pointer;">Add</button>
                                 </div>
                             </div>
                         `;

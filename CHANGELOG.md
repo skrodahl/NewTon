@@ -8,6 +8,7 @@
   - Standardized element heights (44px interactive elements, 60px headers, 72px content rows)
   - Applied muted monochromatic color palette with selective green/amber/red accents
   - Fixed padding issues across pages ensuring content extends to edges properly
+  - Registration page: Fixed scrolling behavior (removed fixed height constraint, entire page now scrolls naturally)
 
 ### Button System Overhaul
 - **Flat Outline Buttons**: Replaced filled buttons with minimal outline style throughout application
@@ -17,7 +18,13 @@
   - Consistent styling across primary actions (green), warnings (amber), and destructive actions (red)
 
 ### Modal/Dialog Improvements
-- **Removed rounded corners** from all modal dialogs for design consistency
+- **Comprehensive rounded corner removal** from all modal dialogs for design consistency:
+  - Modal containers and all content boxes
+  - Undo modal: match cards and "no matches" message box
+  - Confirm Winner modal: match progression info box
+  - Match Controls Setup stage: setup messages and Add Player input/button
+  - All text/number/date inputs in modals (with browser-specific prefixes for maximum compatibility)
+  - Import/Load Tournament modals: all info boxes and buttons
 - **Enhanced button states**:
   - Edit Statistics dialog: Redesigned +/− buttons (24×24px) with red/green accents and proper hover effects
   - Reset Tournament dialog: Added visual feedback when enabled (amber background) with proper contrast
@@ -45,10 +52,12 @@
   - Applies to both active tournaments and read-only completed tournaments
 
 ### Files Modified
-- `styles.css` - Extensive redesign following flat 2D principles
-- `tournament.html` - Button updates, modal structure improvements
+- `styles.css` - Extensive redesign following flat 2D principles, comprehensive rounded corner removal
+- `tournament.html` - Button updates, modal structure improvements, input field styling
 - `tournament-management.js` - Reset button state management cleanup
 - `player-management.js` - Added tournament status validation to togglePaid()
+- `bracket-rendering.js` - Match Controls Setup stage rounded corner removal (Add Player section)
+- `clean-match-progression.js` - Confirm Winner progression box styling updates
 - Main pages (Setup, Registration, Config, Tournament) - Layout and spacing standardization
 
 This release establishes a comprehensive design system foundation for the entire application, replacing the previous mixed aesthetic with a cohesive, professional flat 2D interface.

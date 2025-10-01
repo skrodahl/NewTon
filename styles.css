@@ -1195,6 +1195,19 @@ body {
   overflow: hidden; /* Prevent content overflow */
 }
 
+/* Remove rounded corners from all inputs in modals */
+.modal-content input[type="text"],
+.modal-content input[type="number"],
+.modal-content input[type="date"],
+.modal-content input[type="text"]:focus,
+.modal-content input[type="number"]:focus,
+.modal-content input[type="date"]:focus,
+#resetConfirmationInput {
+  border-radius: 0 !important;
+  -webkit-border-radius: 0 !important;
+  -moz-border-radius: 0 !important;
+}
+
 .close {
   color: #6b7280;
   float: right;
@@ -1634,7 +1647,7 @@ a:hover { color: #1e40af; }
   padding: 20px;
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 /* Tournament Completion Celebration Podium */
@@ -1958,7 +1971,7 @@ a:hover { color: #1e40af; }
 .undo-match-card {
   background: #f8f9fa;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 0;
   padding: 15px;
   display: flex;
   flex-direction: column;
@@ -1999,7 +2012,7 @@ a:hover { color: #1e40af; }
   font-style: italic;
   padding: 20px;
   background: #f9fafb;
-  border-radius: 8px;
+  border-radius: 0;
   margin-bottom: 20px;
 }
 
@@ -2145,7 +2158,7 @@ a:hover { color: #1e40af; }
   margin-top: 20px;
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
-  border-radius: 8px;
+  border-radius: 0;
 }
 
 /* Match Controls modal button container - keep buttons at bottom */

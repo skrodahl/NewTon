@@ -1479,7 +1479,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
         const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
         if (progression) {
-            progressionInfo += '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-radius: 6px; border-left: 4px solid #065f46;">';
+            progressionInfo += '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #065f46;">';
             progressionInfo += '<div style="font-weight: 600; color: #065f46; margin-bottom: 5px;">Match Progression:</div>';
             
             // Winner advancement
