@@ -17,16 +17,31 @@
   - Right Column: Match Configuration, Point Values
 - **Improved Information Architecture**: Physical/hardware settings grouped with UI preferences, while game rules and scoring grouped together
 
+### Registration Page Fixes
+- **Table Width Resolution**: Fixed Tournament Results table not extending to full container width using hidden 10th column technique
+- **Container Padding Restoration**: Restored proper 24px padding for symmetric spacing throughout Registration page
+
+### Complete Flat Design Unification
+- **Eliminated All Rounded Corners**: Removed remaining `border-radius` from all interface elements for complete geometric consistency
+  - Recent Tournaments items: Removed 5px rounded corners
+  - Match Results cards: Changed from 8px to 0px border-radius
+  - Tournament bracket match cards: Changed from 10px to 0px border-radius
+  - Tournament control buttons: Changed from 10px to 0px border-radius (Stats/Results, Match Controls, Players/Points, zoom controls)
+- **Visual Harmony Achieved**: Every element now uses sharp, angular geometry aligned with minimalistic flat design principles
+
 ### Technical Improvements
 - **CSS Cleanup**: Removed duplicate and conflicting border definitions that caused inconsistent styling
 - **Border Optimization**: Changed column headers from full borders to bottom-only borders to prevent double-border effects
 - **Padding Standardization**: Unified header padding (`0 24px` for columns, `16px 24px` for config sections) for perfect vertical centering
+- **Table Structure Enhancement**: Added hidden column to fix complex table width calculation issues
 
 ### Files Modified
-- `styles.css` - Border hierarchy implementation, double-border fixes, text alignment improvements
-- `tournament.html` - Config page section reorganization for better user workflow
+- `styles.css` - Border hierarchy, table fixes, complete border-radius elimination
+- `tournament.html` - Config page reorganization, table structure enhancement
+- `tournament-management.js` - Removed inline border-radius from tournament items
+- `results-config.js` - Updated table generation for proper width behavior
 
-This update completes the flat design transformation with refined visual hierarchy and enhanced organizational structure for optimal usability.
+This update achieves complete flat design transformation across ALL pages (Setup, Registration, Config, Tournament) with unified visual language, resolved layout issues, and enhanced organizational structure for optimal usability.
 
 ## **v2.2.0-beta** - Professional Border System & Visual Consistency Improvements
 
