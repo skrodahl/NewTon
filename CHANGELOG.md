@@ -1,6 +1,6 @@
 # 2025-10-01
 
-## **v2.2.0-beta** - Minimalistic Flat 2D Design System
+## **v2.2.0** - Minimalistic Flat 2D Design System
 
 ### Visual Framework Refinements
 - **Consistent Border Hierarchy**: Implemented three-tier border system throughout application
@@ -50,6 +50,7 @@
 - **Border Optimization**: Changed column headers from full borders to bottom-only borders to prevent double-border effects
 - **Padding Standardization**: Unified header padding (`0 24px` for columns, `16px 24px` for config sections) for perfect vertical centering
 - **Table Structure Enhancement**: Added hidden column to fix complex table width calculation issues
+- **CAD-style Info Box**: Increased size by 20%
 
 ### Files Modified
 - `styles.css` - Border hierarchy, table fixes, complete border-radius elimination, match result padding
