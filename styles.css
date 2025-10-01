@@ -1084,16 +1084,6 @@ body {
   min-height: 0; /* Important for flexbox scrolling */
 }
 
-.scrollable-column h3 {
-  color: #111827;
-  margin: 0;
-  padding: 20px 20px 12px 20px;
-  border-bottom: 1px solid #e5e7eb;
-  flex-shrink: 0;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
 
 .scrollable-column-content {
   flex: 1;
@@ -1262,7 +1252,7 @@ footer {
   padding: 20px;
   color: #4b5563;
   font-size: 14px;
-  border-top: 1px solid #e5e7eb;
+  border: 1px solid #666666;
   margin-top: 20px;
   background: #ffffff;
   border-radius: 0;
@@ -2458,6 +2448,7 @@ a:hover { color: #1e40af; }
   flex-direction: column;
   height: calc(100vh - 200px);
   overflow: hidden;
+  border: 1px solid #666666;
 }
 
 .setup-page-header {
@@ -2465,6 +2456,7 @@ a:hover { color: #1e40af; }
   padding: 24px;
   background: #f5f5f5;
   border-bottom: 1px solid #e8e8e8;
+  border: 1px solid #e8e8e8;
 }
 
 .setup-page-header h2 {
@@ -2547,7 +2539,7 @@ a:hover { color: #1e40af; }
 
 .scrollable-column {
   background: #ffffff;
-  border: 1px solid #c0c0c0;
+  border: 1px solid #e8e8e8;
   border-radius: 0;
   color: #2a2a2a;
   display: flex;
@@ -2557,8 +2549,8 @@ a:hover { color: #1e40af; }
 .scrollable-column h3 {
   color: #222222;
   margin: 0;
-  padding: 20px 24px 12px 24px;
-  border-bottom: 1px solid #c0c0c0;
+  padding: 0 24px;
+  border-bottom: 1px solid #e8e8e8;
   flex-shrink: 0;
   height: 60px;
   min-height: 60px;
@@ -2568,6 +2560,7 @@ a:hover { color: #1e40af; }
   justify-content: space-between;
   font-size: 1rem;
   font-weight: 600;
+  background: #f5f5f5;
 }
 
 .scrollable-column h3 .btn {
@@ -2729,6 +2722,7 @@ a:hover { color: #1e40af; }
   display: flex;
   flex-direction: column;
   overflow-y: auto;
+  border: 1px solid #666666;
 }
 
 .registration-page-header {
@@ -2736,6 +2730,7 @@ a:hover { color: #1e40af; }
   padding: 24px;
   background: #f5f5f5;
   border-bottom: 1px solid #e8e8e8;
+  border: 1px solid #e8e8e8;
 }
 
 .registration-page-header h2 {
@@ -2992,6 +2987,7 @@ a:hover { color: #1e40af; }
   min-height: 0;
   flex: 1;
   overflow: hidden;
+  border: 1px solid #666666;
 }
 
 .config-page-header {
@@ -2999,6 +2995,7 @@ a:hover { color: #1e40af; }
   padding: 24px;
   background: #f5f5f5;
   border-bottom: 1px solid #e8e8e8;
+  border: 1px solid #e8e8e8;
 }
 
 .config-page-header h2 {
@@ -3027,17 +3024,20 @@ a:hover { color: #1e40af; }
 
 .config-section {
   background: #ffffff;
-  border: 1px solid #c0c0c0;
+  border: 1px solid #e8e8e8;
   flex-shrink: 0;
 }
 
 .config-section h3 {
   margin: 0;
-  padding: 20px 24px 12px 24px;
-  border-bottom: 1px solid #c0c0c0;
+  padding: 16px 24px;
+  border: 1px solid #e8e8e8;
   color: #222222;
   font-size: 1rem;
   font-weight: 600;
+  background: #f5f5f5;
+  display: flex;
+  align-items: center;
 }
 
 .config-content {
