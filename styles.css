@@ -375,8 +375,6 @@ body {
 #registration.registration-page-flex {
   display: flex !important;
   flex-direction: column;
-  height: calc(100vh - 200px); /* Account for container padding and header */
-  overflow: auto; /* Allow scrolling when content is long */
 }
 
 /* Only apply when page is actually active */
