@@ -35,7 +35,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 
 ## 🚀 Getting Started
 
-1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases)** (Run `git clone` or download ZIP for the latest beta)
+1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases/latest)** (Run `git clone` or download ZIP for the latest beta)
 2. **Open**: Launch `tournament.html` in your browser
 3. **Configure**: Set up your club branding and point system
 4. **Create**: Set up a new tournament with name and date
