@@ -1,5 +1,34 @@
 # 2025-10-01
+
 ## **v2.2.0-beta** - Minimalistic Flat 2D Design System
+
+### Visual Framework Refinements
+- **Consistent Border Hierarchy**: Implemented three-tier border system throughout application
+  - Main containers: Bold dark borders (`#666666`) for strong visual structure
+  - Section headers: Subtle light borders (`#e8e8e8`) for gentle separation
+  - Internal elements: Light borders for organization without visual clutter
+- **Enhanced Border Contrast**: Added dark borders to footer and main page containers matching header styling
+- **Fixed Double Border Issues**: Resolved thick border appearance on column headers caused by conflicting border styles
+- **Perfect Text Alignment**: Fixed vertical centering issues in all section headers across Setup, Registration, and Config pages
+
+### Config Page Organization
+- **Logical Section Grouping**: Reorganized Config page for better workflow
+  - Left Column: Logo, Branding, Lane Management, User Interface
+  - Right Column: Match Configuration, Point Values
+- **Improved Information Architecture**: Physical/hardware settings grouped with UI preferences, while game rules and scoring grouped together
+
+### Technical Improvements
+- **CSS Cleanup**: Removed duplicate and conflicting border definitions that caused inconsistent styling
+- **Border Optimization**: Changed column headers from full borders to bottom-only borders to prevent double-border effects
+- **Padding Standardization**: Unified header padding (`0 24px` for columns, `16px 24px` for config sections) for perfect vertical centering
+
+### Files Modified
+- `styles.css` - Border hierarchy implementation, double-border fixes, text alignment improvements
+- `tournament.html` - Config page section reorganization for better user workflow
+
+This update completes the flat design transformation with refined visual hierarchy and enhanced organizational structure for optimal usability.
+
+## **v2.2.0-beta** - Professional Border System & Visual Consistency Improvements
 
 ### UI Redesign - Core Pages
 - **Setup, Registration, Config Pages**: Complete redesign following new flat 2D design principles
