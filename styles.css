@@ -553,7 +553,7 @@ body {
   width: 45px;
   height: 45px;
   border: none;
-  border-radius: 10px;
+  border-radius: 0;
   background: rgba(17,24,39,0.95);
   color: #ffffff;
   font-size: 18px;
