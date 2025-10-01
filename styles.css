@@ -792,7 +792,7 @@ body {
   border: 2px solid #d1d5db;
   transition: transform 0.3s ease-out, z-index 0s;
   transform-origin: center;
-  border-radius: 10px;
+  border-radius: 0;
   display: flex;
   flex-direction: column;
   font-size: 11px;
