@@ -106,6 +106,11 @@ function applyConfigToUI() {
         config.clubName = clubName;
         safeSetValue('applicationTitle', clubName);
         updateApplicationTitle(config.applicationTitle);
+    } else {
+        // No custom branding - use default
+        const defaultClubName = 'NewTon DC';
+        safeSetValue('applicationTitle', defaultClubName);
+        updateApplicationTitle(defaultClubName + ' - Tournament Manager');
     }
 
     // Lane configuration
@@ -203,6 +208,12 @@ function saveApplicationSettings() {
     updateApplicationTitle(newClubName + ' - Tournament Manager');
 
     saveGlobalConfig();
+
+    // Re-render bracket to update tournament header with new club name
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    }
+
     alert('✓ Branding saved successfully!');
 }
 

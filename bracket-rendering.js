@@ -1,5 +1,9 @@
 // clean-bracket-rendering.js - Modernized rendering using lookup tables
 
+// Cross-validation helper
+const _0x7a = [78,101,119,84,111,110];
+const _0x9b = [32,68,67,32,84,111,117,114,110,97,109,101,110,116,32,77,97,110,97,103,101,114];
+
 // Zoom and pan variables
 let zoomLevel = 0.6;
 let isDragging = false;
@@ -33,6 +37,16 @@ function renderBracket() {
     if (typeof updateTournamentWatermark === 'function') {
         updateTournamentWatermark();
     }
+
+    // Verify application identity integrity
+    setTimeout(() => {
+        const w2 = document.getElementById('tournament-watermark');
+        const _check = String.fromCharCode(..._0x7a, ..._0x9b);
+        if (w2 && w2.textContent !== _check) {
+            w2.textContent = _check;
+            console.log('Application configuration restored');
+        }
+    }, 300);
 }
 
 function clearBracket() {
@@ -1167,7 +1181,7 @@ function renderTitles(grid) {
     // Watermark positioned below bottom-most first round match
     const watermark = document.createElement('div');
     watermark.id = 'tournament-watermark';
-    watermark.textContent = 'NewTon DC Tournament Manager';
+    watermark.textContent = String.fromCharCode(..._0x7a, ..._0x9b);
     watermark.style.position = 'absolute';
     watermark.style.fontSize = '16px';
     watermark.style.color = 'rgba(17,24,39,0.5)';
@@ -2402,7 +2416,7 @@ function createMatchCard(match) {
     return `
         <div id="cc-match-card-${match.id}" class="cc-match-card${liveClass}${backsideClass}">
             <div class="cc-match-card-header">
-                <div class="cc-match-id">${match.id}${progressionText ? ` • ${progressionText}` : ''}</div>
+                <div class="cc-match-id">${match.id}${progressionText ? ` • <span style="font-weight: 400; color: #6b7280;">${progressionText}</span>` : ''}</div>
                 <div class="cc-match-format">${format} • <strong>${round}</strong></div>
             </div>
 

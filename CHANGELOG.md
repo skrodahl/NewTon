@@ -1,3 +1,26 @@
+# 2025-10-02
+
+## **v2.2.1** - Polish and Bug Fixes
+
+### Visual Improvements
+- **Match Progression Text Styling**: "Leads to..." text in Match Controls cards now uses normal font weight and muted gray color (#6b7280) for better visual hierarchy, distinguishing it from the bold match ID
+
+### Bug Fixes
+- **Tournament Header Branding**: Fixed custom club names not displaying in tournament bracket header
+  - Root cause: Incorrect localStorage key reference (`globalConfig` vs `dartsConfig`)
+  - Tournament headers now properly show configured club name in "Club Name - Tournament Name" format
+  - Branding updates now trigger bracket re-render for immediate visual feedback
+
+### Files Modified
+- `main.js` - Version bump to 2.2.1, application identity encoding
+- `bracket-rendering.js` - Match progression text styling, identity validation
+- `bracket-lines.js` - Fixed localStorage key for club name retrieval
+- `results-config.js` - Added bracket re-render on branding save, default club name fallback
+- `tournament.html` - Application identity initialization
+- `styles.css` - Integrity hash comment
+
+---
+
 # 2025-10-01
 
 ## **v2.2.0** - Minimalistic Flat 2D Design

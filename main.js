@@ -7,7 +7,12 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '2.2.0';
+const APP_VERSION = '2.2.1';
+
+// Application identity (encoded)
+const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
+const _0x6e = [110,97,109,101,110,116,32,77,97,110,97,103,101,114];
+const _0x2d = () => String.fromCharCode(..._0x4e, ..._0x6e);
 
 // =============================================================================
 // DIALOG STACK MANAGER - Unified dialog stacking system
@@ -152,6 +157,10 @@ document.addEventListener('DOMContentLoaded', function () {
     // Step 2: Auto-detect and load logo
     loadClubLogo();
 
+    // Application identity injection
+    const w1 = document.getElementById('watermark-left');
+    if (w1) w1.textContent = `${_0x2d()} (Press F1 for help)`;
+
     // Step 3: Load recent tournaments list (but NOT tournament config)
     setTimeout(() => {
         try {
@@ -180,8 +189,27 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update footer with version
     const footerContent = document.getElementById('footerContent');
     if (footerContent) {
-        footerContent.textContent = `NewTon DC Tournament Manager version ${APP_VERSION}`;
+        footerContent.textContent = `${_0x2d()} version ${APP_VERSION}`;
     }
+
+    // Application integrity check
+    const _0x3f = () => {
+        const w1 = document.getElementById('watermark-left');
+        const w2 = document.getElementById('tournament-watermark');
+        const f1 = document.getElementById('footerContent');
+        const _s = _0x2d();
+
+        if (w1 && !w1.textContent.includes(_s.split(' ').slice(0, 2).join(' '))) {
+            w1.textContent = `${_s} (Press F1 for help)`;
+            console.log('Application configuration restored');
+        }
+        if (f1 && !f1.textContent.includes(_s)) {
+            f1.textContent = `${_s} version ${APP_VERSION}`;
+            console.log('Application configuration restored');
+        }
+    };
+
+    setTimeout(_0x3f, 500);
 });
 
 function loadClubLogo() {

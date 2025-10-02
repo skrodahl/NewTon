@@ -42,7 +42,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
 
     // Get club name from global config
     try {
-        const globalConfig = JSON.parse(localStorage.getItem('globalConfig') || '{}');
+        const globalConfig = JSON.parse(localStorage.getItem('dartsConfig') || '{}');
         if (globalConfig.clubName) {
             clubName = globalConfig.clubName;
         } else if (globalConfig.applicationTitle) {
