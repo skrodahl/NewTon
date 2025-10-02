@@ -63,8 +63,11 @@
                     <button class="btn btn-success" onclick="exportTournament()">Export Tournament</button>
                     <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">Import Tournament</button>
                     <button class="btn btn-danger" onclick="showResetTournamentModal()">Reset Tournament</button>
+                    <button id="uploadToServerBtn" class="btn btn-success" onclick="document.getElementById('uploadFile').click()" style="display: none;">Upload to Server</button>
                     <input type="file" id="importFile" accept=".json" style="display: none;"
                         onchange="importTournament(event)">
+                    <input type="file" id="uploadFile" accept=".json" style="display: none;"
+                        onchange="uploadTournamentFile(event)">
                 </div>
 
                 <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">

@@ -123,6 +123,52 @@ function exportTournament() {
     console.log('✓ Tournament exported (config excluded)');
 }
 
+// Upload tournament file to server (bonus feature - file picker based)
+async function uploadTournamentFile(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    try {
+        // Read file content
+        const fileContent = await file.text();
+        const tournamentData = JSON.parse(fileContent);
+
+        const filename = file.name;
+
+        const response = await fetch('/api/upload-tournament.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                filename: filename,
+                data: tournamentData
+            })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Upload failed: ${errorData.error || 'Unknown error'}`);
+            return;
+        }
+
+        const result = await response.json();
+        alert(`✓ Tournament uploaded to server successfully!\n\n${filename}`);
+
+        // Reload tournament list to show newly uploaded tournament
+        if (typeof loadRecentTournaments === 'function') {
+            loadRecentTournaments();
+        }
+
+        // Clear file input
+        event.target.value = '';
+
+    } catch (error) {
+        console.error('Error uploading tournament:', error);
+        alert('Error uploading tournament to server: ' + error.message);
+    }
+}
+
 // SAVE TOURNAMENT ONLY - Never touches global config
 function saveTournamentOnly(shouldLog = true) {
     if (!tournament) return;
@@ -218,11 +264,87 @@ function updateTournamentStatus() {
     updateTournamentWatermark();
 }
 
-function loadRecentTournaments() {
+// SHARED TOURNAMENTS (SERVER FEATURE)
+// Attempts to load tournaments from server - fails silently if not available
+async function loadSharedTournaments() {
+    console.log('[Shared Tournaments] Attempting to load from server...');
+    try {
+        const response = await fetch('/api/list-tournaments.php', {
+            method: 'GET',
+            cache: 'no-cache'
+        });
+
+        console.log('[Shared Tournaments] Response status:', response.status);
+
+        if (!response.ok) {
+            console.log('[Shared Tournaments] Server endpoint not available (status:', response.status, ')');
+            return null;
+        }
+
+        const data = await response.json();
+        console.log('[Shared Tournaments] Data received:', data);
+
+        // If successful, show the upload button
+        const uploadBtn = document.getElementById('uploadToServerBtn');
+        console.log('[Shared Tournaments] Upload button element:', uploadBtn);
+        if (uploadBtn) {
+            uploadBtn.style.display = 'inline-block';
+            console.log('[Shared Tournaments] Upload button shown');
+        }
+
+        console.log('[Shared Tournaments] Returning', data.tournaments?.length || 0, 'tournaments');
+        return data.tournaments || [];
+
+    } catch (error) {
+        console.log('[Shared Tournaments] Error:', error.message);
+        return null;
+    }
+}
+
+async function loadRecentTournaments() {
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const container = document.getElementById('recentTournaments');
 
-    if (tournaments.length === 0) {
+    // Try to load shared tournaments from server
+    const sharedTournaments = await loadSharedTournaments();
+
+    // Build HTML sections
+    let htmlSections = [];
+
+    // Shared Tournaments Section (if available)
+    if (sharedTournaments && sharedTournaments.length > 0) {
+        // Sort by date (newest first)
+        const sortedShared = sharedTournaments.sort((a, b) => {
+            const dateA = new Date(a.date + 'T00:00:00');
+            const dateB = new Date(b.date + 'T00:00:00');
+            return dateB - dateA;
+        });
+
+        const sharedHtml = sortedShared.map(t => {
+            const playerCount = t.players || '?';
+            return `
+                <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; background: #f0f8ff;">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>
+                            <strong>${t.name}</strong> (${t.date}) - ${playerCount}p
+                        </span>
+                        <div>
+                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSharedTournament('${t.filename}')">Load</button>
+                            <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteSharedTournament('${t.filename}')">×</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        htmlSections.push(`
+            <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #555;">Shared Tournaments</h3>
+            ${sharedHtml}
+        `);
+    }
+
+    // Local Tournaments Section
+    if (tournaments.length === 0 && !sharedTournaments) {
         container.innerHTML = '<p>No tournaments found</p>';
         const toggleBtn = document.getElementById('toggleTournamentsBtn');
         if (toggleBtn) {
@@ -231,61 +353,131 @@ function loadRecentTournaments() {
         return;
     }
 
-    // Sort tournaments by creation timestamp (newest first)
-    const sortedTournaments = tournaments.sort((a, b) => {
-        if (a.created && b.created) {
-            return new Date(b.created) - new Date(a.created);
-        } else if (a.created) {
-            return -1;
-        } else if (b.created) {
-            return 1;
-        } else {
-            const dateA = new Date(a.date + 'T00:00:00');
-            const dateB = new Date(b.date + 'T00:00:00');
-            return dateB - dateA;
-        }
-    });
+    if (tournaments.length > 0) {
+        // Sort tournaments by creation timestamp (newest first)
+        const sortedTournaments = tournaments.sort((a, b) => {
+            if (a.created && b.created) {
+                return new Date(b.created) - new Date(a.created);
+            } else if (a.created) {
+                return -1;
+            } else if (b.created) {
+                return 1;
+            } else {
+                const dateA = new Date(a.date + 'T00:00:00');
+                const dateB = new Date(b.date + 'T00:00:00');
+                return dateB - dateA;
+            }
+        });
 
-    // Determine which tournaments to show
-    const tournamentsToShow = showingAllTournaments ?
-        sortedTournaments :
-        sortedTournaments.slice(0, 5);
+        // Determine which tournaments to show
+        const tournamentsToShow = showingAllTournaments ?
+            sortedTournaments :
+            sortedTournaments.slice(0, 5);
 
-    const html = tournamentsToShow.map(t => {
-        const isActiveTournament = tournament && tournament.id === t.id;
-        return `
-            <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>
-                        <strong>${t.name}</strong> (${t.date})
-                        ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
-                    </span>
-                    <div>
-                        <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
-                        <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
+        const localHtml = tournamentsToShow.map(t => {
+            const isActiveTournament = tournament && tournament.id === t.id;
+            return `
+                <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <span>
+                            <strong>${t.name}</strong> (${t.date})
+                            ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
+                        </span>
+                        <div>
+                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
+                            <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
+                        </div>
                     </div>
                 </div>
-            </div>
-        `;
-    }).join('');
+            `;
+        }).join('');
 
-    container.innerHTML = html;
+        const headerText = sharedTournaments && sharedTournaments.length > 0 ?
+            '<h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px; color: #555;">My Tournaments</h3>' :
+            '';
 
-    // Update the toggle button
-    const toggleBtn = document.getElementById('toggleTournamentsBtn');
-    if (toggleBtn) {
-        if (tournaments.length <= 5) {
-            toggleBtn.style.display = 'none';
-        } else {
-            toggleBtn.style.display = 'inline-block';
-            toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
+        htmlSections.push(`
+            ${headerText}
+            ${localHtml}
+        `);
+
+        // Update the toggle button
+        const toggleBtn = document.getElementById('toggleTournamentsBtn');
+        if (toggleBtn) {
+            if (tournaments.length <= 5) {
+                toggleBtn.style.display = 'none';
+            } else {
+                toggleBtn.style.display = 'inline-block';
+                toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
+            }
         }
     }
+
+    container.innerHTML = htmlSections.join('');
 }
 
 function toggleTournamentView() {
     showingAllTournaments = !showingAllTournaments;
     loadRecentTournaments();
+}
+
+// Load shared tournament from server
+async function loadSharedTournament(filename) {
+    try {
+        const response = await fetch(`/tournaments/${filename}`, {
+            method: 'GET',
+            cache: 'no-cache'
+        });
+
+        if (!response.ok) {
+            alert('Failed to load shared tournament');
+            return;
+        }
+
+        const tournamentData = await response.json();
+
+        // Continue with same import logic as local tournaments
+        continueImportProcess(tournamentData, filename);
+
+    } catch (error) {
+        console.error('Error loading shared tournament:', error);
+        alert('Error loading shared tournament');
+    }
+}
+
+// Delete shared tournament from server
+async function deleteSharedTournament(filename) {
+    if (!confirm(`Delete "${filename}" from server?\n\nThis cannot be undone.`)) {
+        return;
+    }
+
+    try {
+        const response = await fetch('/api/delete-tournament.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ filename: filename })
+        });
+
+        if (!response.ok) {
+            const errorData = await response.json();
+            alert(`Delete failed: ${errorData.error || 'Unknown error'}`);
+            return;
+        }
+
+        const result = await response.json();
+        alert(`✓ Tournament deleted from server`);
+
+        // Reload tournament list
+        if (typeof loadRecentTournaments === 'function') {
+            loadRecentTournaments();
+        }
+
+    } catch (error) {
+        console.error('Error deleting shared tournament:', error);
+        alert('Error deleting tournament from server: ' + error.message);
+    }
 }
 
 // LOAD TOURNAMENT - Never touches global config

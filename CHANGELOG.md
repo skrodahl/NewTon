@@ -1,5 +1,48 @@
 # 2025-10-02
 
+## **v2.3.0** - Optional Server Features (Shared Tournaments)
+
+### 🎉 New: Server-Enhanced Tournament Sharing (Optional Feature)
+
+When deployed to a PHP-enabled web server, the application now supports shared tournament hosting - a completely optional feature that activates automatically when server dependencies are met. Local-only usage remains fully functional with zero changes.
+
+#### Shared Tournament Features
+- **Browse Server Tournaments**: Automatically displays "Shared Tournaments" section when server API is available
+- **Upload to Server**: File picker-based upload (similar to Import workflow) for sharing completed tournaments
+- **Delete Server Tournaments**: Remove tournaments from server with confirmation dialog
+- **Graceful Degradation**: Features appear only when server is configured; local users see no difference
+- **Visual Distinction**: Shared tournaments display with light blue background, sorted by date (newest first)
+- **Unicode Support**: Full support for international characters (Norwegian, Swedish, Danish, etc.) in tournament names
+
+#### Technical Implementation
+- **REST API Foundation**: Three PHP endpoints in `/api` directory
+  - `GET /api/list-tournaments.php` - List available tournaments
+  - `POST /api/upload-tournament.php` - Upload tournament with validation
+  - `POST /api/delete-tournament.php` - Delete tournament with confirmation
+- **Security**: Filename validation, directory traversal prevention, CORS headers
+- **Progressive Enhancement**: Server detection on page load, conditional UI injection
+- **Zero Breaking Changes**: Core offline functionality completely preserved
+
+#### Server Requirements (Optional)
+- PHP 7.0+ with FastCGI/PHP-FPM
+- Write permissions to `/tournaments` directory
+- Web server (nginx, Apache, etc.)
+- See `/api/README.md` for setup instructions
+
+### Files Modified
+- `main.js` - Version bump to 2.3.0
+- `tournament-management.js` - Shared tournament loading, file-based upload, delete functionality, debug logging
+- `tournament.html` - Upload file picker, conditional upload button placement
+- `bracket-lines.js` - Fixed localStorage key for club name (dartsConfig)
+
+### Files Added
+- `api/list-tournaments.php` - List tournaments endpoint
+- `api/upload-tournament.php` - Upload tournament endpoint with Unicode support
+- `api/delete-tournament.php` - Delete tournament endpoint
+- `api/README.md` - Server setup documentation and API reference
+
+---
+
 ## **v2.2.1** - Polish and Bug Fixes
 
 ### Visual Improvements
