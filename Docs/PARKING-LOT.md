@@ -5,7 +5,12 @@
 
 ## Next
 *Items ready for implementation*
-- None
+- Match Results, Setup page: Change BS-FINAL to Backside Final
+- **Shared Tournament Delete Permission**: Add config setting to control who can delete shared tournaments
+  - Default: Disabled (no delete buttons shown)
+  - Consideration: Prevents accidental deletion of shared tournaments
+  - Use case: Hosted deployments where only admins should delete
+  - Implementation: Config checkbox, conditional delete button rendering
 
 ## Later
 *Not urgent but worth tracking*
@@ -13,8 +18,6 @@
   - Benefit: Faster registration for recurring participants
   - Consideration: Need player data persistence across tournaments
   - Use case: Clubs with regular player base
-- *Maybe* look at changing the Tournament bracket design
-- *Maybe* look at changing Active and Celebration states in Match Controls
 
 ## Decided against
 - None
