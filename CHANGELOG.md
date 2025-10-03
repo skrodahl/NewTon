@@ -21,9 +21,15 @@
   - "Tournament" tab second (right)
   - More intentional workflow: start with registry → add players → manage tournament
 
+### Branding
+- **Favicon**: Added favicon support using existing logo file
+  - Automatically uses `logo.jpg` from root folder
+  - Appears in browser tab for easy identification
+  - Updates automatically when logo file is replaced
+
 ### Files Modified
 - `styles.css` - Added @font-face declarations for Droid Serif, box-shadow to `.scrollable-column`, `.setup-page-header`, `.registration-page-header`, `.config-page-header`, `.config-section`
-- `tournament.html` - Removed Google Fonts links, swapped tab order, adjusted default active states
+- `tournament.html` - Removed Google Fonts links, swapped tab order, adjusted default active states, added favicon link
 - `main.js` - Added Player List tab initialization when showing registration page
 - `fonts/` - Added DroidSerif-Regular.ttf and DroidSerif-Bold.ttf
 
