@@ -1,5 +1,9 @@
 # 2025-10-03
 
+## **v2.4.1**
+- Added subtle shadows to all main elements in Setup, Registration, and Config pages to provide a little depth and contrast
+- More changes will come before this version is released
+
 ## **v2.4.0** - Player List Registry & UI Polish
 
 ### 🎉 New: Player List Registry
