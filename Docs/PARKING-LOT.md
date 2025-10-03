@@ -6,6 +6,7 @@
 ## Next
 *Items ready for implementation*
 - Match Results, Setup page: Change BS-FINAL to Backside Final
+- Leads to: Grand Final and Backside Final, Placement
 - **Shared Tournament Delete Permission**: Add config setting to control who can delete shared tournaments
   - Default: Disabled (no delete buttons shown)
   - Consideration: Prevents accidental deletion of shared tournaments
