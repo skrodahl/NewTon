@@ -125,21 +125,12 @@
                 <div class="scrollable-column">
                     <!-- Tab Headers -->
                     <div class="registration-tabs">
-                        <button class="registration-tab active" onclick="switchRegistrationTab('tournament')">Tournament</button>
-                        <button class="registration-tab" onclick="switchRegistrationTab('playerList')">Player List</button>
-                    </div>
-
-                    <!-- Tournament Tab Content -->
-                    <div id="tournamentTab" class="tab-content active">
-                        <div class="scrollable-column-content">
-                            <div id="playersContainer" class="players-list">
-                                <!-- Players will be added here -->
-                            </div>
-                        </div>
+                        <button class="registration-tab active" onclick="switchRegistrationTab('playerList')">Player List</button>
+                        <button class="registration-tab" onclick="switchRegistrationTab('tournament')">Tournament</button>
                     </div>
 
                     <!-- Player List Tab Content -->
-                    <div id="playerListTab" class="tab-content" style="display: none;">
+                    <div id="playerListTab" class="tab-content active">
                         <div class="player-list-header">
                             <span id="playerListCount">Player List (0)</span>
                             <button class="btn btn-success" onclick="importPlayerListFromFile()">Import Player List</button>
@@ -147,6 +138,15 @@
                         <div class="scrollable-column-content">
                             <div id="playerListContainer" class="player-list-items">
                                 <!-- Player List will be rendered here -->
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tournament Tab Content -->
+                    <div id="tournamentTab" class="tab-content" style="display: none;">
+                        <div class="scrollable-column-content">
+                            <div id="playersContainer" class="players-list">
+                                <!-- Players will be added here -->
                             </div>
                         </div>
                     </div>

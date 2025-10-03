@@ -2,6 +2,8 @@
 
 ## **v2.4.1**
 - Added subtle shadows to all main elements in Setup, Registration, and Config pages to provide a little depth and contrast
+- Registration page: Swapped the order of the "Player List" and "Tournament" tabs for improved workflow
+  - "Player List" is selected by default
 - More changes will come before this version is released
 
 ## **v2.4.0** - Player List Registry & UI Polish

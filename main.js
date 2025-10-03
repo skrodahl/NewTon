@@ -482,6 +482,13 @@ function showPage(pageId) {
         }, 100);
     }
 
+    // Initialize Player List tab when showing registration page
+    if (pageId === 'registration') {
+        if (typeof renderPlayerListTab === 'function') {
+            renderPlayerListTab();
+        }
+    }
+
     // HELP SYSTEM INTEGRATION
     onPageChange(pageId);
 }
