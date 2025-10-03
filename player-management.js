@@ -1,5 +1,300 @@
 // player-management.js - Player Operations and Statistics
 
+// PLAYER LIST (Registry) - localStorage management
+function getPlayerList() {
+    const stored = localStorage.getItem('playerList');
+    return stored ? JSON.parse(stored) : [];
+}
+
+function savePlayerList(playerList) {
+    localStorage.setItem('playerList', JSON.stringify(playerList));
+}
+
+function addToPlayerList(playerName) {
+    const playerList = getPlayerList();
+    const normalizedName = playerName.trim();
+
+    // Case-insensitive duplicate check
+    const exists = playerList.some(name => name.toLowerCase() === normalizedName.toLowerCase());
+
+    if (!exists) {
+        playerList.push(normalizedName);
+        savePlayerList(playerList);
+        console.log(`[Player List] Added: ${normalizedName}`);
+
+        // Update UI if Player List tab is visible
+        if (typeof renderPlayerListTab === 'function') {
+            renderPlayerListTab();
+        }
+    }
+}
+
+function removeFromPlayerList(playerName) {
+    const playerList = getPlayerList();
+    const filtered = playerList.filter(name => name.toLowerCase() !== playerName.toLowerCase());
+    savePlayerList(filtered);
+    console.log(`[Player List] Removed: ${playerName}`);
+
+    // Update UI
+    if (typeof renderPlayerListTab === 'function') {
+        renderPlayerListTab();
+    }
+}
+
+// TAB SWITCHING
+function switchRegistrationTab(tabName) {
+    // Update tab buttons
+    const tabs = document.querySelectorAll('.registration-tab');
+    tabs.forEach(tab => tab.classList.remove('active'));
+    event.target.classList.add('active');
+
+    // Update tab content
+    const tournamentTab = document.getElementById('tournamentTab');
+    const playerListTab = document.getElementById('playerListTab');
+
+    if (tabName === 'tournament') {
+        tournamentTab.classList.add('active');
+        tournamentTab.style.display = 'block';
+        playerListTab.classList.remove('active');
+        playerListTab.style.display = 'none';
+    } else {
+        playerListTab.classList.add('active');
+        playerListTab.style.display = 'block';
+        tournamentTab.classList.remove('active');
+        tournamentTab.style.display = 'none';
+
+        // Render Player List when switching to it
+        renderPlayerListTab();
+    }
+}
+
+// RENDER PLAYER LIST TAB
+function renderPlayerListTab() {
+    const playerList = getPlayerList();
+    const container = document.getElementById('playerListContainer');
+    const countSpan = document.getElementById('playerListCount');
+
+    // Update count
+    countSpan.textContent = `Player List (${playerList.length})`;
+
+    // Check if no players
+    if (playerList.length === 0) {
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: #6b7280;">No players yet. Add players in the Tournament tab to build your list.</p>';
+        return;
+    }
+
+    // Get current tournament players for comparison
+    const tournamentPlayerNames = players.map(p => p.name.toLowerCase());
+
+    // Render player list items
+    const html = playerList.map(playerName => {
+        const isInTournament = tournamentPlayerNames.includes(playerName.toLowerCase());
+        const itemClass = isInTournament ? 'player-list-item in-tournament' : 'player-list-item';
+
+        let buttons;
+        if (isInTournament) {
+            // Show remove button
+            buttons = `<button class="player-list-remove-btn" onclick="removePlayerFromTournament('${playerName}')">- Remove</button>`;
+        } else {
+            // Show add and delete buttons
+            buttons = `
+                <button class="player-list-add-btn" onclick="addPlayerFromList('${playerName}')">+ Add</button>
+                <button class="player-list-delete-btn" onclick="deleteFromPlayerList('${playerName}')">× Delete</button>
+            `;
+        }
+
+        return `
+            <div class="${itemClass}">
+                <div class="player-list-item-name">
+                    ${isInTournament ? '<span class="checkmark">✓</span>' : ''}
+                    <span>${playerName}</span>
+                </div>
+                <div class="player-list-item-actions">
+                    ${buttons}
+                </div>
+            </div>
+        `;
+    }).join('');
+
+    container.innerHTML = html;
+}
+
+// ADD PLAYER FROM PLAYER LIST TO TOURNAMENT
+function addPlayerFromList(playerName) {
+    // Check if tournament is in progress
+    if (tournament && tournament.bracket && matches.length > 0) {
+        showTournamentProgressWarning();
+        return;
+    }
+
+    // Check if player already in tournament
+    if (players.find(p => p.name.toLowerCase() === playerName.toLowerCase())) {
+        alert('Player already in tournament');
+        return;
+    }
+
+    // Add player to tournament
+    const player = {
+        id: Date.now(),
+        name: playerName,
+        paid: false,
+        stats: {
+            shortLegs: 0,
+            highOuts: [],
+            tons: 0,
+            oneEighties: 0
+        },
+        placement: null,
+        eliminated: false
+    };
+
+    players.push(player);
+
+    updatePlayersDisplay();
+    updatePlayerCount();
+    saveTournament();
+    updateResultsTable();
+
+    // Re-render Player List to show updated state
+    renderPlayerListTab();
+
+    console.log(`[Player List] Added ${playerName} to tournament from Player List`);
+}
+
+// REMOVE PLAYER FROM TOURNAMENT (via Player List tab)
+function removePlayerFromTournament(playerName) {
+    const player = players.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+    if (!player) return;
+
+    // Use existing removePlayer function
+    removePlayer(player.id);
+
+    // Re-render Player List to show updated state
+    renderPlayerListTab();
+}
+
+// DELETE FROM PLAYER LIST
+function deleteFromPlayerList(playerName) {
+    if (!confirm(`Delete "${playerName}" from Player List?\n\nThis will NOT remove them from the current tournament.`)) {
+        return;
+    }
+
+    removeFromPlayerList(playerName);
+}
+
+// IMPORT PLAYER LIST FROM FILE
+function importPlayerListFromFile() {
+    const input = document.createElement('input');
+    input.type = 'file';
+    input.accept = '.json';
+
+    input.onchange = async (e) => {
+        const file = e.target.files[0];
+        if (!file) return;
+
+        try {
+            const fileContent = await file.text();
+            const data = JSON.parse(fileContent);
+
+            // Check if file contains playerList
+            if (!data.playerList || !Array.isArray(data.playerList) || data.playerList.length === 0) {
+                alert('This file doesn\'t contain a Player List.');
+                return;
+            }
+
+            const importedList = data.playerList;
+            const currentList = getPlayerList();
+
+            // Show import dialog
+            showImportPlayerListDialog(importedList, currentList);
+
+        } catch (error) {
+            console.error('Error importing Player List:', error);
+            alert('Error reading file. Please check the file format.');
+        }
+    };
+
+    input.click();
+}
+
+// SHOW IMPORT PLAYER LIST DIALOG
+function showImportPlayerListDialog(importedList, currentList) {
+    // Calculate new players
+    const currentNamesLower = currentList.map(n => n.toLowerCase());
+    const newPlayers = importedList.filter(name => !currentNamesLower.includes(name.toLowerCase()));
+
+    const modal = document.createElement('div');
+    modal.className = 'modal';
+    modal.style.display = 'block';
+    modal.innerHTML = `
+        <div class="modal-content">
+            <h3>Import Player List</h3>
+            <p>Found <strong>${importedList.length}</strong> players in this file.</p>
+            <p>Your current Player List has <strong>${currentList.length}</strong> players.</p>
+            <div style="margin: 20px 0;">
+                <label style="display: block; margin-bottom: 10px;">
+                    <input type="radio" name="importMode" value="merge" checked>
+                    Add new players only (merge - adds ${newPlayers.length} new players)
+                </label>
+                <label style="display: block;">
+                    <input type="radio" name="importMode" value="replace">
+                    Replace entire Player List
+                </label>
+            </div>
+            <div style="text-align: right; margin-top: 20px;">
+                <button class="btn" onclick="closeImportDialog()">Cancel</button>
+                <button class="btn btn-success" onclick="confirmImportPlayerList()">Import</button>
+            </div>
+        </div>
+    `;
+
+    document.body.appendChild(modal);
+
+    // Store data for import confirmation
+    window._importPlayerListData = {
+        importedList: importedList,
+        modal: modal
+    };
+}
+
+// CONFIRM IMPORT PLAYER LIST
+function confirmImportPlayerList() {
+    const data = window._importPlayerListData;
+    if (!data) return;
+
+    const mode = document.querySelector('input[name="importMode"]:checked').value;
+    const importedList = data.importedList;
+
+    if (mode === 'replace') {
+        // Replace entire list
+        savePlayerList(importedList);
+        console.log(`[Player List] Replaced with ${importedList.length} players`);
+    } else {
+        // Merge - add new players only
+        const currentList = getPlayerList();
+        const currentNamesLower = currentList.map(n => n.toLowerCase());
+        const newPlayers = importedList.filter(name => !currentNamesLower.includes(name.toLowerCase()));
+
+        const mergedList = [...currentList, ...newPlayers];
+        savePlayerList(mergedList);
+        console.log(`[Player List] Merged - added ${newPlayers.length} new players`);
+    }
+
+    // Close dialog and refresh UI
+    closeImportDialog();
+    renderPlayerListTab();
+    alert('✓ Player List imported successfully!');
+}
+
+// CLOSE IMPORT DIALOG
+function closeImportDialog() {
+    const data = window._importPlayerListData;
+    if (data && data.modal) {
+        data.modal.remove();
+    }
+    delete window._importPlayerListData;
+}
+
 // UPDATE: Enhanced addPlayer function with help integration
 function addPlayer() {
     // Check if tournament is in progress (bracket exists)
@@ -37,7 +332,10 @@ function addPlayer() {
 
     players.push(player);
     nameInput.value = '';
-    
+
+    // Auto-add to Player List
+    addToPlayerList(name);
+
     updatePlayersDisplay();
     updatePlayerCount();
     saveTournament();

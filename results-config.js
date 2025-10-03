@@ -365,16 +365,44 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
         return nameA.localeCompare(nameB);
     });
 
+    // Determine which context we're in (main results or statistics modal)
+    const isMainResults = (targetTbodyId === 'resultsTableBody');
+
     // Check if there are no paid players
     if (sortedPlayers.length === 0) {
-        tbody.innerHTML = `
-            <tr>
-                <td colspan="10" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
-                    No players added yet
-                </td>
-            </tr>
-        `;
+        if (isMainResults) {
+            // Main results: hide table and show empty message
+            const table = document.getElementById('resultsSection');
+            const emptyMessage = document.getElementById('resultsEmptyMessage');
+            if (table) {
+                table.style.display = 'none';
+            }
+            if (emptyMessage) {
+                emptyMessage.style.display = 'block';
+            }
+        } else {
+            // Statistics modal: show message in tbody
+            tbody.innerHTML = `
+                <tr>
+                    <td colspan="9" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
+                        No players added yet
+                    </td>
+                </tr>
+            `;
+        }
         return;
+    }
+
+    // Show the table and hide the empty message (main results only)
+    if (isMainResults) {
+        const table = document.getElementById('resultsSection');
+        const emptyMessage = document.getElementById('resultsEmptyMessage');
+        if (table) {
+            table.style.display = '';
+        }
+        if (emptyMessage) {
+            emptyMessage.style.display = 'none';
+        }
     }
 
     tbody.innerHTML = sortedPlayers.map(player => {

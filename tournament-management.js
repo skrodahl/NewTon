@@ -108,6 +108,7 @@ function exportTournament() {
         ...tournament,
         players: players,
         matches: matches,
+        playerList: getPlayerList(), // Include Player List backup
         exportedAt: new Date().toISOString()
         // NO CONFIG DATA in export
     };
