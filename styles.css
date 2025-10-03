@@ -6,6 +6,23 @@
    integrity: 4e-65-77-54-6f-6e-20-44-43
 */
 
+/* Fonts */
+@font-face {
+  font-family: 'Droid Serif';
+  src: url('fonts/DroidSerif-Regular.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Droid Serif';
+  src: url('fonts/DroidSerif-Bold.ttf') format('truetype');
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
 /* Reset */
 * {
   margin: 0;
@@ -51,6 +68,7 @@ body {
   display: flex;
   align-items: center;
   gap: 15px;
+  font-family: 'Droid Serif', serif;
 }
 
 .logo-placeholder {

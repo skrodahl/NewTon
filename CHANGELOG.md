@@ -1,10 +1,31 @@
 # 2025-10-03
 
-## **v2.4.1**
-- Added subtle shadows to all main elements in Setup, Registration, and Config pages to provide a little depth and contrast
-- Registration page: Swapped the order of the "Player List" and "Tournament" tabs for improved workflow
-  - "Player List" is selected by default
-- More changes will come before this version is released
+## **v2.4.1** - Visual Polish & Typography
+
+### Visual Enhancements
+- **Subtle Depth**: Added subtle box shadows (`0 4px 12px rgba(0, 0, 0, 0.06)`) to all main content boxes
+  - Applied to: Setup page header and columns, Registration page header and columns, Config page header and sections
+  - Purpose: Provides gentle depth perception while maintaining flat design aesthetic
+  - Creates visual hierarchy: background → elevated content boxes → interactive elements
+
+### Typography
+- **Droid Serif Title Font**: Application title now uses Droid Serif for a professional, editorial feel
+  - Hosted locally in `/fonts` folder for offline functionality
+  - Applied only to main application header (`.header h1`)
+  - Creates visual anchor while keeping interface clean and functional
+  - Adds formality without disrupting the modern, workflow-focused design
+
+### UX Improvements
+- **Player List Tab Order**: Swapped tab order in Registration page for better workflow
+  - "Player List" tab now appears first (left) and is selected by default
+  - "Tournament" tab second (right)
+  - More intentional workflow: start with registry → add players → manage tournament
+
+### Files Modified
+- `styles.css` - Added @font-face declarations for Droid Serif, box-shadow to `.scrollable-column`, `.setup-page-header`, `.registration-page-header`, `.config-page-header`, `.config-section`
+- `tournament.html` - Removed Google Fonts links, swapped tab order, adjusted default active states
+- `main.js` - Added Player List tab initialization when showing registration page
+- `fonts/` - Added DroidSerif-Regular.ttf and DroidSerif-Bold.ttf
 
 ## **v2.4.0** - Player List Registry & UI Polish
 
