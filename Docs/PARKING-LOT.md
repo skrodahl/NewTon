@@ -5,26 +5,17 @@
 
 ## Next
 *Items ready for implementation*
-- Match Results, Setup page: Change BS-FINAL to Backside Final
-- Leads to: Grand Final and Backside Final, Placement
-- **Shared Tournament Delete Permission**: Add config setting to control who can delete shared tournaments
-  - Default: Disabled (no delete buttons shown)
-  - Consideration: Prevents accidental deletion of shared tournaments
-  - Use case: Hosted deployments where only admins should delete
-  - Implementation: Config checkbox, conditional delete button rendering
 
 ## Later
 *Not urgent but worth tracking*
-- **Player Register**: Database of regular players selectable from dropdown or card interface during player registration
-  - Benefit: Faster registration for recurring participants
-  - Consideration: Need player data persistence across tournaments
-  - Use case: Clubs with regular player base
 
 ## Decided against
 - None
 
 ## ✅ Completed This Session
-- Review modal contents
-- Registration page scrolling, background is permanent/does not scroll
+- **Player List Registry** (v2.4.0): Persistent player registry with tab interface in Registration page
+- **Match Results Humanization** (v2.4.0): "Grand Final" and "Backside Final" in Setup page Match Results
+- **Tournament Results Empty State** (v2.4.0): Clean "No players added yet" message when table is empty
+- **Shared Tournament Delete Permission** (v2.4.0): Config setting to control delete button visibility for shared tournaments
 ---
-**Last updated:** October 2, 2025
+**Last updated:** October 3, 2025

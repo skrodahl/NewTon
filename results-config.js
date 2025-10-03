@@ -32,6 +32,9 @@ const DEFAULT_CONFIG = {
     ui: {
         confirmWinnerSelection: true,
         autoOpenMatchControls: true
+    },
+    server: {
+        allowSharedTournamentDelete: false
     }
 };
 
@@ -128,6 +131,11 @@ function applyConfigToUI() {
     if (config.ui) {
         safeSetChecked('confirmWinnerSelection', config.ui.confirmWinnerSelection);
         safeSetChecked('autoOpenMatchControls', config.ui.autoOpenMatchControls);
+    }
+
+    // Server configuration
+    if (config.server) {
+        safeSetChecked('allowSharedTournamentDelete', config.server.allowSharedTournamentDelete);
     }
 
     console.log('✓ Config applied to UI');
@@ -274,12 +282,22 @@ function saveLaneConfiguration() {
 function saveUIConfiguration() {
     const confirmWinnerElement = document.getElementById('confirmWinnerSelection');
     const autoOpenElement = document.getElementById('autoOpenMatchControls');
+    const allowDeleteElement = document.getElementById('allowSharedTournamentDelete');
 
     config.ui = config.ui || {};
     config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
     config.ui.autoOpenMatchControls = autoOpenElement ? autoOpenElement.checked : true;
 
+    config.server = config.server || {};
+    config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;
+
     saveGlobalConfig();
+
+    // Refresh tournament list if on Setup page to update delete button visibility
+    if (typeof loadRecentTournaments === 'function') {
+        loadRecentTournaments();
+    }
+
     alert('✓ UI settings saved successfully!');
 }
 

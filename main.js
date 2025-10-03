@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '2.3.0';
+const APP_VERSION = '2.4.0';
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -525,6 +525,20 @@ function getEliminationRankForMatch(matchId, bracketSize) {
     return null;
 }
 
+// Helper function to convert match ID to human-readable format
+function humanizeMatchId(matchId) {
+    if (!matchId) return matchId;
+
+    // Convert GRAND-FINAL to "Grand Final"
+    if (matchId === 'GRAND-FINAL') return 'Grand Final';
+
+    // Convert BS-FINAL to "Backside Final"
+    if (matchId === 'BS-FINAL') return 'Backside Final';
+
+    // Keep other match IDs unchanged (BS-1-1, FS-2-1, etc.)
+    return matchId;
+}
+
 // Helper function to get player progression info for display
 function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
     if (!tournament || !tournament.bracketSize || !MATCH_PROGRESSION) {
@@ -539,8 +553,7 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
     if (isWinner) {
         if (progression.winner) {
             const nextMatch = progression.winner[0];
-            // Clean up match names for display - keep BS- and FS- prefixes
-            const displayMatch = nextMatch.replace('GRAND-FINAL', 'Grand Final');
+            const displayMatch = humanizeMatchId(nextMatch);
             return `(${displayMatch})`;
         } else {
             return '(Tournament Winner!)';
@@ -549,7 +562,7 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
         // For losers
         if (progression.loser) {
             const nextMatch = progression.loser[0];
-            const displayMatch = nextMatch.replace('GRAND-FINAL', 'Grand Final');
+            const displayMatch = humanizeMatchId(nextMatch);
             return `(${displayMatch})`;
         } else {
             // Player is eliminated - show rank

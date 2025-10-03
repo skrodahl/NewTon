@@ -323,6 +323,10 @@ async function loadRecentTournaments() {
 
         const sharedHtml = sortedShared.map(t => {
             const playerCount = t.players || '?';
+            const allowDelete = config.server && config.server.allowSharedTournamentDelete;
+            const deleteButton = allowDelete
+                ? `<button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteSharedTournament('${t.filename}')">×</button>`
+                : '';
             return `
                 <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; background: #f0f8ff;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
@@ -331,7 +335,7 @@ async function loadRecentTournaments() {
                         </span>
                         <div>
                             <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSharedTournament('${t.filename}')">Load</button>
-                            <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteSharedTournament('${t.filename}')">×</button>
+                            ${deleteButton}
                         </div>
                     </div>
                 </div>

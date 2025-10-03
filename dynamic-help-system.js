@@ -78,12 +78,20 @@ const HELP_CONTENT = {
             adding: {
                 title: "Adding Players",
                 content: `
-                    <p><strong>Adding Players:</strong></p>
+                    <p><strong>Tournament Tab:</strong></p>
                     <ol>
-                        <li>Type player name in the input field</li>
+                        <li>Type player name or select from Player List tab</li>
                         <li>Press Enter or click "Add Player"</li>
                         <li>Check "Paid" checkbox for players who have paid entry fee</li>
                     </ol>
+                    <p><strong>Player List Tab:</strong></p>
+                    <ul>
+                        <li>Maintains a registry of regular tournament players for consistency</li>
+                        <li>Players added to tournaments are automatically saved to the list</li>
+                        <li>Click <strong>[+ Add]</strong> to quickly add player to current tournament</li>
+                        <li>Click <strong>[× Delete]</strong> to permanently remove from Player List</li>
+                        <li>Player List is included in tournament JSON exports</li>
+                    </ul>
                     <p><strong>Important:</strong> Only paid players are included in the tournament bracket.</p>
                     <p><strong>Minimum Players:</strong> You need at least 4 paid players to generate an 8-player bracket.</p>
                 `
@@ -297,8 +305,17 @@ const HELP_CONTENT = {
                         <li><strong>Application Title:</strong> Customize header text and browser title</li>
                         <li><strong>Club Logo:</strong> Add logo.png/jpg/jpeg/svg file to root folder</li>
                         <li><strong>Lane Management:</strong> Set maximum lanes and requirements</li>
-                        <li><strong>UI Preferences:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
+                    </ul>
+                    <p><strong>UI Settings:</strong></p>
+                    <ul>
+                        <li><strong>Winner Confirmation:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
                         <li><strong>Match Controls Auto-Open:</strong> Automatically show Command Center when entering Tournament page</li>
+                    </ul>
+                    <p><strong>Server Settings:</strong></p>
+                    <ul>
+                        <li><strong>Allow Deleting Shared Tournaments:</strong> Control delete button visibility for server-hosted tournaments</li>
+                        <li>Default: Disabled (prevents accidental deletion on shared deployments)</li>
+                        <li>Enable this only if you want operators to be able to delete shared tournaments</li>
                     </ul>
                     <p><strong>💡 Tip:</strong> Personalize the application for your club or organization.</p>
                 `

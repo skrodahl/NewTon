@@ -1,3 +1,48 @@
+# 2025-10-03
+
+## **v2.4.0** - Player List Registry & UI Polish
+
+### 🎉 New: Player List Registry
+
+A new Player List feature helps maintain consistency across weekly tournaments by creating a persistent registry of regular players.
+
+#### Player List Features
+- **Automatic Addition**: Players added to tournaments are automatically saved to the Player List
+- **Quick Add**: Click [+ Add] to quickly add players from the list to current tournament
+- **Manual Curation**: Remove players from list with [× Delete] button
+- **Visual Indication**: Green checkmark and bold text show which players are in the current tournament
+- **Import/Export**: Player List included in tournament JSON exports with merge/replace options on import
+- **Tab Interface**: Clean tab system in Registration page separates tournament players from the registry
+
+#### Technical Implementation
+- **localStorage Persistence**: Simple array stored in `playerList` key
+- **Case-Insensitive Matching**: Prevents duplicate entries with different capitalization
+- **Context-Aware Buttons**: [+ Add], [- Remove], [× Delete] appear based on player state
+- **Additive Workflow**: Import offers "merge" or "replace" options with clear messaging
+
+### Server Settings
+- **Shared Tournament Delete Permission**: New config setting to control delete button visibility for shared tournaments
+  - **Default**: Disabled (delete buttons hidden)
+  - **Purpose**: Prevents accidental deletion on hosted deployments
+  - **Location**: Config page → UI Settings → Server Settings
+  - **Behavior**: When disabled, only Load buttons appear for shared tournaments
+
+### UI Improvements
+- **Tournament Results Table**: Now properly hides when no paid players exist, showing clean "No players added yet" message
+- **Match Results Humanization**: Setup page Match Results now shows "Grand Final" and "Backside Final" instead of technical IDs (GRAND-FINAL, BS-FINAL)
+- **Context-Aware Display**: Statistics modal maintains original table-based empty state display
+
+### Files Modified
+- `main.js` - Version bump to 2.4.0, added `humanizeMatchId()` function for human-readable match progression
+- `player-management.js` - Player List localStorage functions, tab switching, auto-add logic, import/export
+- `tournament-management.js` - Export includes Player List, import shows merge/replace dialog, conditional delete button rendering
+- `tournament.html` - Tab interface for Registration page, Player List container, empty message element for results table, server settings checkbox
+- `styles.css` - Tab styling, Player List item styling with green "in tournament" state
+- `results-config.js` - Context-aware empty state handling, server settings in DEFAULT_CONFIG, save/load server settings
+- `dynamic-help-system.js` - Updated Registration page help with Player List documentation
+
+---
+
 # 2025-10-02
 
 ## **v2.3.0** - Optional Server Features (Shared Tournaments)
