@@ -4,6 +4,7 @@
 
 ### Interface Improvements
 - Clearer instructions when the Player List is empty
+- Fixed Configuration page element misalignment
 
 # 2025-10-03
 
