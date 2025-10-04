@@ -1,8 +1,12 @@
 # NewTon DC Tournament Manager
 
-**NewTon DC Tournament Manager** is a Command & Control Center for running double-elimination darts tournaments.  
+**Version 2.4.1**
+
+**NewTon DC Tournament Manager** is a Command & Control Center for running double-elimination darts tournaments.
 
 It is a fully self-contained web application that runs entirely in your browser — no server, database, Internet connection, or installation required.
+
+**Clean, professional interface with offline-first design for reliable tournament management.**
 
 [Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases/latest)
 
@@ -55,6 +59,7 @@ It is a fully self-contained web application that runs entirely in your browser 
   - **Tournament Protection**: Loaded or imported **completed** tournaments are read-only, protecting the tournament integrity
 - **Tournament History**: Complete match records with lane and referee assignments
 - **Crash Resilient**: Automatic saving prevents data loss
+- **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using REST API
 
 ### 🎯 Double Elimination Brackets
 - **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players
@@ -66,12 +71,17 @@ It is a fully self-contained web application that runs entirely in your browser 
 - **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 
 ### 🎮 Match Management
-- **Centralized Control**: Manage entire tournament from one interface
-- **Lane Assignment**: Assign matches to dartboard lanes (1-20 configurable)
+- **Centralized Control**: Manage entire tournament from Match Controls interface
+- **Clear Progression**: Each match shows exactly where winners and losers advance ("Leads to...")
+- **Lane Assignment**: Assign matches to dartboard lanes (1-20 with exclusions, configurable)
 - **Referee System**: Select referees with conflict prevention
 - **Real-time Updates**: Live standings and bracket progression
 
 ### 👥 Player & Statistics
+- **Player List Registry**: Maintain a persistent list of regular players for consistency across tournaments
+  - Alphabetically sorted for easy scanning
+  - Quick-add players to new tournaments
+  - Import/export with tournament data
 - **Registration**: Add players and track payment status
 - **Comprehensive Stats**: Short legs, high outs, tons, 180s with configurable points
 - **Live Rankings**: Real-time 1st through 32nd place calculation
