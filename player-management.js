@@ -79,7 +79,7 @@ function renderPlayerListTab() {
 
     // Check if no players
     if (playerList.length === 0) {
-        container.innerHTML = '<p style="padding: 20px; text-align: center; color: #6b7280;">No players yet. Add players in the Tournament tab to build your list.</p>';
+        container.innerHTML = '<p style="padding: 20px; text-align: center; color: #6b7280;">No players yet. Add players above to build your list.</p>';
         return;
     }
 
