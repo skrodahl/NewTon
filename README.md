@@ -88,7 +88,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 - **Export Results**: CSV and JSON export with full tournament history
 
 ### ⚙️ Configuration
-- **Custom Branding**: Add club logo and customize title
+- **Custom Branding**: Add club logo, favicon, and customize title
 - **Flexible Scoring**: Configurable points for participation, placements, and achievements
 - **Match Formats**: Best-of legs for rounds, semifinals, and finals
 - **UI Preferences**: Confirmation dialogs and interface behavior
