@@ -3197,7 +3197,6 @@ a:hover { color: #1e40af; }
   flex-direction: column;
   gap: 24px;
   overflow-y: auto;
-  padding-right: 8px;
 }
 
 .config-section {
