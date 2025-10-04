@@ -1,6 +1,6 @@
 # 2025-10-04
 
-## v2.4.2-beta
+## **v2.4.2-beta** - Smaller Refinements
 
 ### Interface Improvements
 - Clearer instructions when the Player List is empty
