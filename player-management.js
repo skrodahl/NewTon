@@ -83,11 +83,16 @@ function renderPlayerListTab() {
         return;
     }
 
+    // Sort player list alphabetically (case-insensitive)
+    const sortedPlayerList = [...playerList].sort((a, b) =>
+        a.toLowerCase().localeCompare(b.toLowerCase())
+    );
+
     // Get current tournament players for comparison
     const tournamentPlayerNames = players.map(p => p.name.toLowerCase());
 
     // Render player list items
-    const html = playerList.map(playerName => {
+    const html = sortedPlayerList.map(playerName => {
         const isInTournament = tournamentPlayerNames.includes(playerName.toLowerCase());
         const itemClass = isInTournament ? 'player-list-item in-tournament' : 'player-list-item';
 

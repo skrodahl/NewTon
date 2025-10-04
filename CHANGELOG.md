@@ -20,6 +20,10 @@
   - "Player List" tab now appears first (left) and is selected by default
   - "Tournament" tab second (right)
   - More intentional workflow: start with registry → add players → manage tournament
+- **Alphabetical Sorting**: Player List now displays in alphabetical order
+  - Case-insensitive sorting using `localeCompare()` for proper language-specific ordering
+  - Makes scanning long player lists much easier
+  - Sorted on display only - storage order unchanged
 
 ### Branding
 - **Favicon**: Added favicon support using existing logo file
@@ -31,6 +35,7 @@
 - `styles.css` - Added @font-face declarations for Droid Serif, box-shadow to `.scrollable-column`, `.setup-page-header`, `.registration-page-header`, `.config-page-header`, `.config-section`
 - `tournament.html` - Removed Google Fonts links, swapped tab order, adjusted default active states, added favicon link
 - `main.js` - Added Player List tab initialization when showing registration page
+- `player-management.js` - Added alphabetical sorting to `renderPlayerListTab()`
 - `fonts/` - Added DroidSerif-Regular.ttf and DroidSerif-Bold.ttf
 
 ## **v2.4.0** - Player List Registry & UI Polish
