@@ -1,3 +1,10 @@
+# 2025-10-04
+
+## v2.4.2-beta
+
+## UI Improvements
+- Clearer instructions when the Player List is empty
+
 # 2025-10-03
 
 ## **v2.4.1** - Visual Polish & Typography
