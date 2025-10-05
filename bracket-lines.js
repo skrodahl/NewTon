@@ -81,6 +81,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
 
     // Tournament header - centered on entire bracket
     const tournamentHeader = document.createElement('div');
+    tournamentHeader.id = 'tournamentHeader'; // Add ID for easy identification
     tournamentHeader.style.position = 'absolute';
     tournamentHeader.style.left = `${bracketCenterX}px`;
     tournamentHeader.style.top = `${tournamentHeaderY}px`;
@@ -95,6 +96,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
 
     // FRONTSIDE label - positioned above frontside bracket
     const frontsideLabel = document.createElement('div');
+    frontsideLabel.id = 'frontsideLabel'; // Add ID for easy identification
     frontsideLabel.style.position = 'absolute';
     frontsideLabel.style.left = `${frontsideX}px`;
     frontsideLabel.style.top = `${labelY}px`;
@@ -110,6 +112,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
 
     // BACKSIDE label - positioned above backside bracket
     const backsideLabel = document.createElement('div');
+    backsideLabel.id = 'backsideLabel'; // Add ID for easy identification
     backsideLabel.style.position = 'absolute';
     backsideLabel.style.left = `${backsideX}px`;
     backsideLabel.style.top = `${labelY}px`;
@@ -131,6 +134,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     const finalsX = lastFrontsideX + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
 
     const finalsLabel = document.createElement('div');
+    finalsLabel.id = 'finalsLabel'; // Add ID for easy identification
     finalsLabel.style.position = 'absolute';
     finalsLabel.style.left = `${finalsX + (grid.matchWidth / 2)}px`; // Center on the finals match column
     finalsLabel.style.top = `${grid.centerY - 80 - 60}px`; // 60px above BS-FINAL match (20px higher than before)

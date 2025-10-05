@@ -1142,6 +1142,44 @@ function renderMatch(match, x, y, section, roundIndex) {
                 matchElement.classList.add('zoom-hover');
                 matchElement.style.transform = `scale(${elementScale})`;
                 matchElement.style.zIndex = '1000';
+
+                // Add depth: dim and blur everything except the zoomed match
+                const bracketCanvas = document.getElementById('bracketCanvas');
+                const bracketMatches = document.getElementById('bracketMatches');
+
+                // Blur all direct children of bracketCanvas (some lines and labels)
+                // Skip main section labels to keep them clear
+                const skipBlurIds = ['bracketMatches', 'bracketLines', 'tournamentHeader', 'frontsideLabel', 'backsideLabel', 'finalsLabel'];
+                if (bracketCanvas) {
+                    Array.from(bracketCanvas.children).forEach(child => {
+                        if (!skipBlurIds.includes(child.id)) {
+                            child.style.opacity = '0.6';
+                            child.style.filter = 'blur(0.5px)';
+                        }
+                    });
+                }
+
+                // Blur all children of bracketMatches except matches (lines, labels, backgrounds)
+                // Skip tournament header to keep it clear
+                if (bracketMatches) {
+                    Array.from(bracketMatches.children).forEach(child => {
+                        if (!child.classList.contains('bracket-match') && child.id !== 'tournamentHeader') {
+                            child.style.opacity = '0.6';
+                            child.style.filter = 'blur(0.5px)';
+                        }
+                    });
+                }
+
+                // Blur all other matches
+                document.querySelectorAll('.bracket-match').forEach(m => {
+                    if (m !== matchElement) {
+                        m.style.opacity = '0.6';
+                        m.style.filter = 'blur(0.5px)';
+                    }
+                });
+
+                // Enhance the zoomed match with dramatic shadow
+                matchElement.style.boxShadow = '0 20px 60px rgba(0,0,0,0.5)';
             }, ZOOM_DELAY_MS);
         }
     });
@@ -1162,6 +1200,31 @@ function renderMatch(match, x, y, section, roundIndex) {
         matchElement.classList.remove('zoom-hover');
         matchElement.style.transform = '';
         matchElement.style.zIndex = '';
+        matchElement.style.boxShadow = '';
+
+        // Reset all bracket canvas and bracketMatches children back to normal
+        const bracketCanvas = document.getElementById('bracketCanvas');
+        const bracketMatches = document.getElementById('bracketMatches');
+
+        if (bracketCanvas) {
+            Array.from(bracketCanvas.children).forEach(child => {
+                child.style.opacity = '';
+                child.style.filter = '';
+            });
+        }
+
+        if (bracketMatches) {
+            Array.from(bracketMatches.children).forEach(child => {
+                child.style.opacity = '';
+                child.style.filter = '';
+            });
+        }
+
+        // Reset all matches back to normal
+        document.querySelectorAll('.bracket-match').forEach(m => {
+            m.style.opacity = '';
+            m.style.filter = '';
+        });
     });
 
     document.getElementById('bracketMatches').appendChild(matchElement);
