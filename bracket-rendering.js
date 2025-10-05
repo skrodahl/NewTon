@@ -9,6 +9,8 @@ let zoomLevel = 0.6;
 let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let panOffset = { x: 0, y: 0 };
+let zoomAnimationFrame = null;
+let initialBracketRender = true;
 
 function initializeBracketControls() {
     const viewport = document.getElementById('bracketViewport');
@@ -47,6 +49,31 @@ function renderBracket() {
             console.log('Application configuration restored');
         }
     }, 300);
+
+    // Set default zoom and position for initial bracket render
+    if (initialBracketRender && tournament && tournament.bracket) {
+        // Different zoom/pan settings for each bracket size
+        if (tournament.bracketSize === 32) {
+            zoomLevel = 0.33;
+            panOffset.x = 750;
+            panOffset.y = 360;
+        } else if (tournament.bracketSize === 16) {
+            // TODO: Test and adjust for 16-player bracket
+            zoomLevel = 0.45;
+            panOffset.x = 645;
+            panOffset.y = 275;
+        } else if (tournament.bracketSize === 8) {
+            // TODO: Test and adjust for 8-player bracket
+            zoomLevel = 0.61;
+            panOffset.x = 450;
+            panOffset.y = 175;
+        }
+
+        initialBracketRender = false;
+    }
+
+    // Apply current zoom and pan transform
+    updateCanvasTransform();
 }
 
 function clearBracket() {
@@ -1293,8 +1320,12 @@ function handleZoom(e) {
     const mouseY = e.clientY - rect.top;
     const canvasMouseX = (mouseX - panOffset.x) / zoomLevel;
     const canvasMouseY = (mouseY - panOffset.y) / zoomLevel;
-    const delta = e.deltaY > 0 ? -0.05 : 0.05;
+
+    // Use smaller fixed step for finer control with both trackpad and mouse wheel
+    // 0.015 provides smoother, more precise zoom than original 0.05
+    const delta = e.deltaY > 0 ? -0.015 : 0.015;
     const newZoom = Math.max(0.3, Math.min(2, zoomLevel + delta));
+
     if (newZoom !== zoomLevel) {
         panOffset.x = mouseX - canvasMouseX * newZoom;
         panOffset.y = mouseY - canvasMouseY * newZoom;

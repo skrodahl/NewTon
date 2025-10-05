@@ -472,7 +472,7 @@ body {
   height: 3000px;
   background: #f5f5f5;
   transform-origin: 0 0;
-  transition: transform 0.2s ease;
+  will-change: transform;
 }
 
 /* Bracket controls - CORRECTED 2x2 grid layout */

@@ -859,6 +859,11 @@ function confirmReset() {
     localStorage.removeItem('tournamentHistory');
     localStorage.removeItem('undoneTransactions');
 
+    // Reset bracket rendering flag for proper zoom/pan on new bracket
+    if (typeof initialBracketRender !== 'undefined') {
+        initialBracketRender = true;
+    }
+
     players.forEach(player => {
         player.eliminated = false;
         player.placement = null;

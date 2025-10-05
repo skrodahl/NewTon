@@ -1,10 +1,37 @@
-# 2025-10-04
+# 2025-10-05
 
-## **v2.4.2-beta** - Smaller Refinements
+## **v2.4.2-beta** - Bracket Zoom & Interface Polish
+
+### Bracket Controls
+- **Improved Zoom Precision**: Reduced zoom step from 0.05 to 0.015 for smoother, more precise control
+  - 70% finer zoom increments allow better positioning of large 32-player brackets
+  - Smooth zoom experience in Chrome, significantly improved in Safari
+  - Optimal for trackpad and mouse wheel control
+- **Safari Motion Blur Fix**: Removed CSS transition causing motion blur during zoom/pan
+  - Added `will-change: transform` for better performance
+  - Eliminated laggy, blurred rendering during bracket navigation
+- **Fixed Initial Snap**: Added `updateCanvasTransform()` call when rendering bracket
+  - Eliminates jarring zoom/pan snap on first interaction
+  - Bracket now displays consistently from page load
+- **Smart Default Positioning**: Bracket-size-specific default zoom and pan settings
+  - 32-player: zoom 0.32, centered to show full bracket overview with section titles
+  - 16-player: optimized zoom and centering for medium brackets
+  - 8-player: optimized zoom and centering for small brackets
+  - Shows Frontside Round 1 (where action starts) prominently on initial load
+- **Tournament Reset Fix**: Default zoom/pan now applies correctly when switching bracket sizes
+  - Reset `initialBracketRender` flag in `confirmReset()`
+  - Changing from 32→16→8 player brackets now uses correct initial view for each size
 
 ### Interface Improvements
-- Clearer instructions when the Player List is empty
-- Fixed Configuration page element misalignment
+- **Clearer Player List Instructions**: Better guidance when the Player List is empty
+- **Fixed Configuration Page Alignment**: Config page elements now properly align with page header
+  - Removed excessive padding causing misalignment with "Tournament Configuration" header
+  - Consistent layout with Setup and Registration pages
+
+### Files Modified
+- `bracket-rendering.js` - Zoom step reduction (0.015), removed requestAnimationFrame throttling, added updateCanvasTransform() call, bracket-size-specific default zoom/pan settings, reset flag handling
+- `styles.css` - Removed CSS transition from `.bracket-canvas`, added `will-change: transform`, fixed `.config-sections-container` padding
+- `tournament-management.js` - Reset `initialBracketRender` flag in `confirmReset()`
 
 # 2025-10-03
 
