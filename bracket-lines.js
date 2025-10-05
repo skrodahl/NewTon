@@ -648,11 +648,48 @@ function create8PlayerBacksideLines(grid, matches, positions) {
     const bs22CenterY = bs22Y + (grid.matchHeight / 2);
     const bs31CenterY = bs31Y + (grid.matchHeight / 2);
 
-    // FS to BS loser feed lines
-    const [fs11_h1, fs11_v, fs11_h2] = createLShapedProgressionLine(round1X, fs11CenterY, bs1X + grid.matchWidth, bs11CenterY);
-    const [fs12_h1, fs12_v, fs12_h2] = createLShapedProgressionLine(round1X, fs12CenterY, bs1X + grid.matchWidth, bs11CenterY);
-    const [fs13_h1, fs13_v, fs13_h2] = createLShapedProgressionLine(round1X, fs13CenterY, bs1X + grid.matchWidth, bs12CenterY);
-    const [fs14_h1, fs14_v, fs14_h2] = createLShapedProgressionLine(round1X, fs14CenterY, bs1X + grid.matchWidth, bs12CenterY);
+    // FS to BS loser feed lines - use custom approach like 16/32 player brackets
+    const loserFeedVerticalX = round1X - 40; // Position vertical line 40px left of frontside matches
+
+    // Helper function to create custom loser feed lines (same as 16/32-player)
+    function createLoserFeedLine(fromX, fromY, toX, toY, verticalX) {
+        // Horizontal line from frontside match to vertical line
+        const hLine1 = document.createElement('div');
+        hLine1.style.position = 'absolute';
+        hLine1.style.left = `${Math.min(fromX, verticalX)}px`;
+        hLine1.style.top = `${fromY}px`;
+        hLine1.style.width = `${Math.abs(verticalX - fromX)}px`;
+        hLine1.style.height = '3px';
+        hLine1.style.backgroundColor = '#666666';
+        hLine1.style.zIndex = '1';
+
+        // Vertical line
+        const vLine = document.createElement('div');
+        vLine.style.position = 'absolute';
+        vLine.style.left = `${verticalX}px`;
+        vLine.style.top = `${Math.min(fromY, toY)}px`;
+        vLine.style.width = '3px';
+        vLine.style.height = `${Math.abs(toY - fromY)}px`;
+        vLine.style.backgroundColor = '#666666';
+        vLine.style.zIndex = '1';
+
+        // Horizontal line from vertical line to backside match
+        const hLine2 = document.createElement('div');
+        hLine2.style.position = 'absolute';
+        hLine2.style.left = `${Math.min(verticalX, toX)}px`;
+        hLine2.style.top = `${toY}px`;
+        hLine2.style.width = `${Math.abs(toX - verticalX)}px`;
+        hLine2.style.height = '3px';
+        hLine2.style.backgroundColor = '#666666';
+        hLine2.style.zIndex = '1';
+
+        return [hLine1, vLine, hLine2];
+    }
+
+    const [fs11_h1, fs11_v, fs11_h2] = createLoserFeedLine(round1X, fs11CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
+    const [fs12_h1, fs12_v, fs12_h2] = createLoserFeedLine(round1X, fs12CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
+    const [fs13_h1, fs13_v, fs13_h2] = createLoserFeedLine(round1X, fs13CenterY, bs1X + grid.matchWidth, bs12CenterY, loserFeedVerticalX);
+    const [fs14_h1, fs14_v, fs14_h2] = createLoserFeedLine(round1X, fs14CenterY, bs1X + grid.matchWidth, bs12CenterY, loserFeedVerticalX);
 
     progressionLines.push(fs11_h1, fs11_v, fs11_h2, fs12_h1, fs12_v, fs12_h2, fs13_h1, fs13_v, fs13_h2, fs14_h1, fs14_v, fs14_h2);
 

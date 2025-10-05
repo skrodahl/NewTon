@@ -22,14 +22,30 @@
   - Reset `initialBracketRender` flag in `confirmReset()`
   - Changing from 32→16→8 player brackets now uses correct initial view for each size
 
+### Visual Enhancements
+- **Match Card Zoom Depth Effect**: Added visual depth when hovering over match cards while zoomed out
+  - Zoomed match enhanced with dramatic shadow (0 20px 60px rgba(0,0,0,0.5))
+  - Other matches dimmed (opacity 0.6) and blurred (0.5px) for focus effect
+  - Main labels (tournament header, FRONTSIDE, BACKSIDE, FINALS) remain sharp
+  - Only activates when bracket zoom < 1.0x for better readability at reduced zoom levels
+  - Creates clear visual hierarchy emphasizing the match being inspected
+
 ### Interface Improvements
 - **Clearer Player List Instructions**: Better guidance when the Player List is empty
 - **Fixed Configuration Page Alignment**: Config page elements now properly align with page header
   - Removed excessive padding causing misalignment with "Tournament Configuration" header
   - Consistent layout with Setup and Registration pages
 
+### Bug Fixes
+- **8-Player Bracket Line Positioning**: Fixed loser feed lines extending inside FS-R1 match cards
+  - Root cause: Backside rendering function incorrectly calculating `round1X` with extra horizontal spacing
+  - Lines now cleanly start from left edge of frontside matches as intended
+  - Vertical line positioning adjusted to -40px for optimal visual appearance
+  - Matches visual consistency of 16/32-player bracket line rendering
+
 ### Files Modified
-- `bracket-rendering.js` - Zoom step reduction (0.015), removed requestAnimationFrame throttling, added updateCanvasTransform() call, bracket-size-specific default zoom/pan settings, reset flag handling
+- `bracket-rendering.js` - Zoom step reduction (0.015), removed requestAnimationFrame throttling, added updateCanvasTransform() call, bracket-size-specific default zoom/pan settings, reset flag handling, match hover depth effect, fixed 8-player round1X calculation
+- `bracket-lines.js` - Updated 8-player loser feed line positioning, added label IDs for blur exclusion
 - `styles.css` - Removed CSS transition from `.bracket-canvas`, added `will-change: transform`, fixed `.config-sections-container` padding
 - `tournament-management.js` - Reset `initialBracketRender` flag in `confirmReset()`
 

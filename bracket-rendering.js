@@ -591,7 +591,7 @@ function render8PlayerBacksideMatches(grid) {
 
     // === ALL PROGRESSION LINES (HTML/CSS) ===
 
-    const round1X = grid.centerX + grid.centerBuffer + grid.horizontalSpacing;
+    const round1X = grid.centerX + grid.centerBuffer;
     const round2X = round1X + grid.matchWidth + grid.horizontalSpacing;
     const round3X = round2X + grid.matchWidth + grid.horizontalSpacing;
 
