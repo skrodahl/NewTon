@@ -1,6 +1,6 @@
 # 2025-10-05
 
-## **v2.4.2-beta** - Bracket Zoom & Interface Polish
+## **v2.4.2** - Bracket Zoom & Interface Polish
 
 ### Bracket Controls
 - **Improved Zoom Precision**: Reduced zoom step from 0.05 to 0.015 for smoother, more precise control
