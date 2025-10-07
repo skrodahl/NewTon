@@ -9,6 +9,7 @@
   - Score replaces lane/Bo3 info when match is complete (contextually relevant)
   - Score numbers prominently styled: 20px, bold, green (#059669), monospace font with subtle shadow
   - "Result:" label sized at 16px for clear hierarchy
+  - Match ID sized at 12px for balanced header composition
   - Score automatically reverts to lane/Bo3 display when match is undone
   - Elegant use of existing space without layout changes
 

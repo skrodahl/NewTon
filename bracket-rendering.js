@@ -1065,7 +1065,7 @@ function renderMatch(match, x, y, section, roundIndex) {
 
     matchElement.innerHTML = `
         <div class="match-header">
-            <span>${match.id}</span>
+            <span style="font-size: 12px;">${match.id}</span>
             ${roundIndicator}
             <span class="match-info">
                 ${matchState === 'completed' && match.finalScore
