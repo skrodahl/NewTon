@@ -1027,9 +1027,9 @@ function renderMatch(match, x, y, section, roundIndex) {
     } else if (section === 'backside') {
         roundIndicator = `<span class="round-indicator backside">B${match.round}</span>`;
     } else if (match.id === 'BS-FINAL') {
-        roundIndicator = `<span class="round-indicator final">BS FINAL</span>`;
+        roundIndicator = `<span class="round-indicator final">FINALS</span>`;
     } else if (match.id === 'GRAND-FINAL') {
-        roundIndicator = `<span class="round-indicator grand">GRAND FINAL</span>`;
+        roundIndicator = `<span class="round-indicator grand">FINALS</span>`;
     }
 
     // Get button properties
@@ -1065,7 +1065,7 @@ function renderMatch(match, x, y, section, roundIndex) {
 
     matchElement.innerHTML = `
         <div class="match-header">
-            <span style="font-size: 12px;">${match.id}</span>
+            <span style="font-size: 15px;">${match.id}</span>
             ${roundIndicator}
             <span class="match-info">
                 ${matchState === 'completed' && match.finalScore
