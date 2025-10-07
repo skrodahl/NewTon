@@ -12,6 +12,10 @@
   - Match ID sized at 15px for balanced header composition
   - Score automatically reverts to lane/Bo3 display when match is undone
   - Elegant use of existing space without layout changes
+- **Finals Match Round Indicators**: Simplified round indicator labels for finals matches
+  - BS-FINAL and GRAND-FINAL now show "FINALS" instead of repeating match ID
+  - Eliminates redundancy and frees up header space
+  - Allows consistent 15px match ID sizing across all match cards including finals
 
 ### User Experience Improvements
 - **Match Card Hover State Preservation**: Match cards maintain zoom state when changing lane or referee assignments
