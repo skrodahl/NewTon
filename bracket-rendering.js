@@ -1065,11 +1065,11 @@ function renderMatch(match, x, y, section, roundIndex) {
 
     matchElement.innerHTML = `
         <div class="match-header">
-            <span style="font-size: 15px;">${match.id}</span>
+            <span style="font-size: 16px;">${match.id}</span>
             ${roundIndicator}
             <span class="match-info">
                 ${matchState === 'completed' && match.finalScore
-                    ? `<span style="font-size: 16px;">Result:</span> <span style="font-size: 20px; font-weight: bold; color: #059669; font-family: 'Courier New', monospace; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">${match.finalScore.winnerLegs}-${match.finalScore.loserLegs}</span>`
+                    ? `<span style="font-size: 16px;"></span> <span style="font-size: 20px; font-weight: bold; color: #059669; font-family: 'Courier New', monospace; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">${match.finalScore.winnerLegs}-${match.finalScore.loserLegs}</span>`
                     : `L: <select onchange="updateMatchLane('${match.id}', this.value)"
                         onfocus="refreshLaneDropdown('${match.id}')"
                         style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
