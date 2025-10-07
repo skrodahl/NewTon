@@ -1381,10 +1381,8 @@ function updateMatchLane(matchId, newLane) {
         refreshAllLaneDropdowns();
     }
 
-    // Refresh tournament bracket to show updated lane
-    if (typeof renderBracket === 'function') {
-        renderBracket();
-    }
+    // Note: No renderBracket() call needed - dropdown refresh is sufficient
+    // and prevents losing match card hover zoom state
 
     // Refresh Match Controls if it's open
     if (document.getElementById('matchCommandCenterModal') &&

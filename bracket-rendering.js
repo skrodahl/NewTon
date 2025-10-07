@@ -1068,12 +1068,15 @@ function renderMatch(match, x, y, section, roundIndex) {
             <span>${match.id}</span>
             ${roundIndicator}
             <span class="match-info">
-                L: <select onchange="updateMatchLane('${match.id}', this.value)" 
-                    onfocus="refreshLaneDropdown('${match.id}')"
-                    style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
-                    <option value="">No</option>
-                    ${laneOptions}
-                </select> | Bo${match.legs}
+                ${matchState === 'completed' && match.finalScore
+                    ? `<span style="font-size: 16px;">Result:</span> <span style="font-size: 20px; font-weight: bold; color: #059669; font-family: 'Courier New', monospace; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">${match.finalScore.winnerLegs}-${match.finalScore.loserLegs}</span>`
+                    : `L: <select onchange="updateMatchLane('${match.id}', this.value)"
+                        onfocus="refreshLaneDropdown('${match.id}')"
+                        style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
+                        <option value="">No</option>
+                        ${laneOptions}
+                    </select> | Bo${match.legs}`
+                }
             </span>
         </div>
         <div class="match-players">
@@ -1529,10 +1532,13 @@ function updateMatchReferee(matchId, refereeId) {
 
         saveTournament();
 
-        // Refresh tournament bracket to show updated referee
-        if (typeof renderBracket === 'function') {
-            renderBracket();
+        // Refresh all referee dropdowns to update conflict detection
+        if (typeof refreshAllRefereeDropdowns === 'function') {
+            refreshAllRefereeDropdowns();
         }
+
+        // Note: No renderBracket() call needed - dropdown refresh is sufficient
+        // and prevents losing match card hover zoom state
 
         // Refresh Match Controls if it's open
         if (document.getElementById('matchCommandCenterModal') &&
@@ -1581,10 +1587,8 @@ function updateMatchReferee(matchId, refereeId) {
     saveTournament();
     refreshAllRefereeDropdowns();
 
-    // Refresh tournament bracket to show updated referee
-    if (typeof renderBracket === 'function') {
-        renderBracket();
-    }
+    // Note: No renderBracket() call needed - dropdown refresh is sufficient
+    // and prevents losing match card hover zoom state
 
     // Refresh Match Controls if it's open
     if (document.getElementById('matchCommandCenterModal') &&

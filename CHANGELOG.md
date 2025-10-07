@@ -1,3 +1,30 @@
+# 2025-10-07
+
+## **v2.4.3-beta** - Match Score Display & Hover State Improvements
+
+### Visual Enhancements
+- **Match Card Score Display**: Completed matches now display final score in match header
+  - Active matches show: `L: 7 | Bo3`
+  - Completed matches show: `Result: 2-0`
+  - Score replaces lane/Bo3 info when match is complete (contextually relevant)
+  - Score numbers prominently styled: 20px, bold, green (#059669), monospace font with subtle shadow
+  - "Result:" label sized at 16px for clear hierarchy
+  - Score automatically reverts to lane/Bo3 display when match is undone
+  - Elegant use of existing space without layout changes
+
+### User Experience Improvements
+- **Match Card Hover State Preservation**: Match cards maintain zoom state when changing lane or referee assignments
+  - Removed unnecessary full bracket re-renders from lane/referee update functions
+  - Only dropdown options refresh across all matches (conflict detection maintained)
+  - Eliminates visual interruption and bracket blinking during dropdown changes
+  - Zoom naturally ends when mouse leaves card boundaries (expected behavior)
+  - Smoother, more responsive user experience when managing match details
+
+### Files Modified
+- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee
+- `clean-match-progression.js` - Removed renderBracket() call from updateMatchLane()
+- `main.js` - Version bump to 2.4.3-beta
+
 # 2025-10-05
 
 ## **v2.4.2** - Bracket Zoom & Interface Polish
