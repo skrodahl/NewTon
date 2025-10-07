@@ -1388,8 +1388,8 @@ function handleZoom(e) {
     const canvasMouseY = (mouseY - panOffset.y) / zoomLevel;
 
     // Use smaller fixed step for finer control with both trackpad and mouse wheel
-    // 0.015 provides smoother, more precise zoom than original 0.05
-    const delta = e.deltaY > 0 ? -0.015 : 0.015;
+    // 0.025 provides smoother, more precise zoom than original 0.05
+    const delta = e.deltaY > 0 ? -0.025 : 0.025;
     const newZoom = Math.max(0.3, Math.min(2, zoomLevel + delta));
 
     if (newZoom !== zoomLevel) {

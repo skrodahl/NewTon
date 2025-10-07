@@ -19,6 +19,10 @@
   - Eliminates visual interruption and bracket blinking during dropdown changes
   - Zoom naturally ends when mouse leaves card boundaries (expected behavior)
   - Smoother, more responsive user experience when managing match details
+- **Bracket Zoom Step Adjustment**: Increased zoom step from 0.015 to 0.025
+  - Better balance between precision and speed for mouse wheel users
+  - Still provides smooth, precise control compared to original 0.05 step
+  - Maintains excellent trackpad experience while improving mouse wheel responsiveness
 
 ### Files Modified
 - `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee
