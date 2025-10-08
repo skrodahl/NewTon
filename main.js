@@ -637,12 +637,8 @@ function updateMatchHistory() {
         let player1Display = player1IsWinner ? `<span class="winner-name">${player1Name}</span>${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}` : `${player1Name}${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}`;
         let player2Display = player2IsWinner ? `<span class="winner-name">${player2Name}</span>${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}` : `${player2Name}${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}`;
         
-        let scoreText = '';
-        if (match.finalScore && match.finalScore.winnerLegs > 0) {
-            const winnerLegs = match.finalScore.winnerLegs;
-            const loserLegs = match.finalScore.loserLegs;
-            scoreText = `(${winnerLegs}-${loserLegs})`;
-        }
+        const score = formatMatchScore(match);
+        const scoreText = score ? `(${score})` : '';
         
         const autoCompletedText = isWalkover ? ' <span class="auto-completed">(auto-completed)</span>' : '';
 
@@ -693,12 +689,29 @@ function getPlayerNameById(playerId) {
     return player ? player.name : 'Unknown';
 }
 
+// Helper function to format match score in Player1 vs Player2 order
+function formatMatchScore(match) {
+    if (!match || !match.finalScore || !match.finalScore.winnerLegs) {
+        return '';
+    }
+
+    const winnerLegs = match.finalScore.winnerLegs;
+    const loserLegs = match.finalScore.loserLegs;
+    const winnerId = match.winner?.id;
+    const player1Id = match.player1?.id;
+
+    // Show score in Player1 vs Player2 order
+    const player1IsWinner = player1Id === winnerId;
+    return player1IsWinner ? `${winnerLegs}-${loserLegs}` : `${loserLegs}-${winnerLegs}`;
+}
+
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.showPage = showPage;
     window.updateMatchHistory = updateMatchHistory;
     window.isWalkoverMatch = isWalkoverMatch;
+    window.formatMatchScore = formatMatchScore;
     window.forceConfigReload = forceConfigReload;
     window.debugConfigState = debugConfigState;
     window.APP_VERSION = APP_VERSION;

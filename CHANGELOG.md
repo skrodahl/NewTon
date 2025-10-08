@@ -1,4 +1,4 @@
-# 2025-10-07
+# 2025-10-08
 
 ## **v2.4.3-beta** - Match Score Display & Hover State Improvements
 
@@ -16,6 +16,11 @@
   - BS-FINAL and GRAND-FINAL now show "FINALS" instead of repeating match ID
   - Eliminates redundancy and frees up header space
   - Allows consistent 15px match ID sizing across all match cards including finals
+- **Consistent Score Ordering**: Match scores now display in Player1 vs Player2 order across all displays
+  - New `formatMatchScore()` helper function provides single source of truth for score formatting
+  - Scores consistently show actual player order (e.g., if Player2 won 2-1, shows "1-2" not "2-1")
+  - Applied uniformly to bracket match cards and Match Results page
+  - Eliminates confusion when winner is Player2
 
 ### User Experience Improvements
 - **Match Card Hover State Preservation**: Match cards maintain zoom state when changing lane or referee assignments
@@ -30,9 +35,9 @@
   - Maintains excellent trackpad experience while improving mouse wheel responsiveness
 
 ### Files Modified
-- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee
+- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper
 - `clean-match-progression.js` - Removed renderBracket() call from updateMatchLane()
-- `main.js` - Version bump to 2.4.3-beta
+- `main.js` - Added formatMatchScore() helper function, updated Match Results to use consistent score ordering, version bump to 2.4.3-beta
 
 # 2025-10-05
 
