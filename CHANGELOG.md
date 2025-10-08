@@ -21,6 +21,11 @@
   - Scores consistently show actual player order (e.g., if Player2 won 2-1, shows "1-2" not "2-1")
   - Applied uniformly to bracket match cards and Match Results page
   - Eliminates confusion when winner is Player2
+- **Walkover Match Display**: Completed walkover matches now display "W/O" instead of lane/Bo3 info
+  - Bracket match cards show "W/O" in header for auto-completed walkover matches
+  - Match Results page shows "(W/O)" instead of arbitrary score numbers
+  - Provides clear visual indication that match was won by walkover, not played
+  - Uses same `formatMatchScore()` helper for consistent handling across all displays
 
 ### User Experience Improvements
 - **Match Card Hover State Preservation**: Match cards maintain zoom state when changing lane or referee assignments
@@ -35,9 +40,9 @@
   - Maintains excellent trackpad experience while improving mouse wheel responsiveness
 
 ### Files Modified
-- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper
+- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper, added walkover check to display condition
 - `clean-match-progression.js` - Removed renderBracket() call from updateMatchLane()
-- `main.js` - Added formatMatchScore() helper function, updated Match Results to use consistent score ordering, version bump to 2.4.3-beta
+- `main.js` - Added formatMatchScore() helper function with walkover detection, updated Match Results to use consistent score ordering, version bump to 2.4.3-beta
 
 # 2025-10-05
 

@@ -1068,7 +1068,7 @@ function renderMatch(match, x, y, section, roundIndex) {
             <span style="font-size: 16px;">${match.id}</span>
             ${roundIndicator}
             <span class="match-info">
-                ${matchState === 'completed' && match.finalScore
+                ${matchState === 'completed' && (match.finalScore || (typeof isWalkoverMatch === 'function' && isWalkoverMatch(match)))
                     ? `<span style="font-size: 16px;"></span> <span style="font-size: 20px; font-weight: bold; color: #059669; font-family: 'Courier New', monospace; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">${formatMatchScore(match)}</span>`
                     : `L: <select onchange="updateMatchLane('${match.id}', this.value)"
                         onfocus="refreshLaneDropdown('${match.id}')"

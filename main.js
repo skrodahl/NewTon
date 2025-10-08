@@ -691,7 +691,17 @@ function getPlayerNameById(playerId) {
 
 // Helper function to format match score in Player1 vs Player2 order
 function formatMatchScore(match) {
-    if (!match || !match.finalScore || !match.finalScore.winnerLegs) {
+    if (!match) {
+        return '';
+    }
+
+    // Check if this is a walkover match first (before checking finalScore)
+    if (isWalkoverMatch(match)) {
+        return 'W/O';
+    }
+
+    // For regular matches, require finalScore
+    if (!match.finalScore || !match.finalScore.winnerLegs) {
         return '';
     }
 
