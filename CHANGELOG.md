@@ -1,6 +1,6 @@
 # 2025-10-09
 
-## **v2.4.4-beta** - Registration Page Redesign & Saved Players Enhancement
+## **v2.4.3** - Registration Page Redesign & Tournament Interface Improvements
 
 ### Registration Page Redesign
 - **Context-Aware Two-Column Layout**: Eliminated confusing tab interface in favor of intelligent, state-aware display
@@ -30,8 +30,6 @@
   - "Saved Players" replaces ambiguous "Player List" naming
   - Import helper text: "Import from tournament export file" clarifies functionality
   - Delete button styled to match Tournament Players remove buttons (24×24px red outline)
-
-### User Experience Improvements
 - **Streamlined Player Management**: No more confusion between Tournament and Player List tabs
   - Context makes it obvious: setup shows saved players, active tournament shows results
   - Single-click add/remove between Available and In Tournament sections
@@ -42,15 +40,6 @@
   - Bracket generation automatically switches right column to results
   - Layout updates propagate through addPlayer, removePlayer, and tournament state changes
   - Seamless experience throughout tournament creation and execution
-
-### Files Modified
-- `tournament.html` - Removed tab structure, implemented two-column context-aware layout, removed player count from headers, added import helper text, changed container from grid to block element
-- `player-management.js` - Added updateRegistrationPageLayout() for context switching, renamed renderPlayerListTab() to renderPlayerList(), separated players into availablePlayers and inTournamentPlayers arrays, conditional delete button rendering with tooltip, added confirmation dialog for deletion, fixed renderPlayerList callback bug
-- `clean-match-progression.js` - Added updateRegistrationPageLayout() call after bracket generation
-- `main.js` - Updated showPage() to call updateRegistrationPageLayout() and renderPlayerList() for registration page
-- `styles.css` - Removed old tab styles, added saved-players-section and saved-players-section-header styles, updated player-list-header to match column header height (60px), simplified delete button styling
-
-## **v2.4.3-beta** - Match Score Display & Walkover Styling Improvements
 
 ### Visual Enhancements
 - **Match Card Score Display**: Completed matches now display final score in match header
@@ -102,10 +91,12 @@
   - Eliminates confusion when home button returned to different view than initial load
 
 ### Files Modified
+- `tournament.html` - Removed tab structure, implemented two-column context-aware layout, removed player count from headers, added import helper text, changed container from grid to block element
+- `player-management.js` - Added updateRegistrationPageLayout() for context switching, renamed renderPlayerListTab() to renderPlayerList(), separated players into availablePlayers and inTournamentPlayers arrays, conditional delete button rendering with tooltip, added confirmation dialog for deletion, fixed renderPlayerList callback bug
 - `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper, added walkover check to display condition, updated player class assignment to include both 'bye' and 'first-throw' for Player1 walkovers, updated resetZoom() to use bracket-size-specific default positions
-- `clean-match-progression.js` - Removed renderBracket() call from updateMatchLane()
-- `main.js` - Added formatMatchScore() helper function with walkover detection, updated Match Results to use consistent score ordering, version bump to 2.4.3-beta
-- `styles.css` - Restructured .match-player.bye styling to only apply green background in completed matches, allowing normal match state backgrounds to show through in pending matches
+- `clean-match-progression.js` - Removed renderBracket() call from updateMatchLane(), added updateRegistrationPageLayout() call after bracket generation
+- `main.js` - Added formatMatchScore() helper function with walkover detection, updated Match Results to use consistent score ordering, updated showPage() to call updateRegistrationPageLayout() and renderPlayerList() for registration page, version bump to 2.4.3
+- `styles.css` - Restructured .match-player.bye styling to only apply green background in completed matches, removed old tab styles, added saved-players-section and saved-players-section-header styles, updated player-list-header to match column header height (60px), simplified delete button styling
 
 # 2025-10-05
 
