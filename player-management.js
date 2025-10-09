@@ -192,6 +192,13 @@ function removePlayerFromTournament(playerName) {
     const player = players.find(p => p.name.toLowerCase() === playerName.toLowerCase());
     if (!player) return;
 
+    // Warn if removing a paid player
+    if (player.paid) {
+        if (!confirm(`Remove paid player "${playerName}" from tournament?\n\nThis will remove them from the current tournament but keep them in Saved Players.`)) {
+            return;
+        }
+    }
+
     // Use existing removePlayer function
     removePlayer(player.id);
 
@@ -538,17 +545,24 @@ function updatePlayersDisplay() {
         return nameA.localeCompare(nameB);
     });
 
- const html = sortedPlayers.map(player => `
-    <div class="player-card ${player.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${player.id})">
-        <div class="player-info">
-            <div class="player-name">${player.name}</div>
-            <div class="player-status">${player.paid ? 'Paid' : 'Unpaid'}</div>
-        </div>
-        <div class="player-actions">
-            <button class="btn-small btn-danger" onclick="event.stopPropagation(); removePlayer(${player.id})">×</button>
-        </div>
-    </div>
-`).join('');
+ const html = sortedPlayers.map(player => {
+        // Only show remove button for unpaid players
+        const removeButton = !player.paid
+            ? `<button class="btn-small btn-danger" onclick="event.stopPropagation(); removePlayer(${player.id})">×</button>`
+            : '';
+
+        return `
+            <div class="player-card ${player.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${player.id})">
+                <div class="player-info">
+                    <div class="player-name">${player.name}</div>
+                    <div class="player-status">${player.paid ? 'Paid' : 'Unpaid'}</div>
+                </div>
+                <div class="player-actions">
+                    ${removeButton}
+                </div>
+            </div>
+        `;
+    }).join('');
 
     container.innerHTML = html;
 }
