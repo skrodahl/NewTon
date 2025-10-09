@@ -70,27 +70,34 @@ const HELP_CONTENT = {
         }
     },
 
-    // Registration Page Help  
+    // Registration Page Help
     registration: {
-        title: "Player Registration & Results",
-        overview: "Manage players, track payment status, and view live tournament standings.",
+        title: "Player Registration & Management",
+        overview: "Add players, manage payment status, and access saved players or tournament results based on tournament state.",
         sections: {
             adding: {
                 title: "Adding Players",
                 content: `
-                    <p><strong>Tournament Tab:</strong></p>
+                    <p><strong>Quick Add:</strong></p>
                     <ol>
-                        <li>Type player name or select from Player List tab</li>
+                        <li>Type player name in the "Add New Player" field</li>
                         <li>Press Enter or click "Add Player"</li>
-                        <li>Check "Paid" checkbox for players who have paid entry fee</li>
+                        <li>Click player card to toggle paid status (Paid/Unpaid)</li>
+                        <li>Only paid players can be removed (× button hidden for paid players)</li>
                     </ol>
-                    <p><strong>Player List Tab:</strong></p>
+                    <p><strong>Saved Players (During Setup):</strong></p>
                     <ul>
-                        <li>Maintains a registry of regular tournament players for consistency</li>
-                        <li>Players added to tournaments are automatically saved to the list</li>
-                        <li>Click <strong>[+ Add]</strong> to quickly add player to current tournament</li>
-                        <li>Click <strong>[× Delete]</strong> to permanently remove from Player List</li>
-                        <li>Player List is included in tournament JSON exports</li>
+                        <li><strong>Available Players:</strong> Click any player to add to tournament</li>
+                        <li><strong>In Tournament:</strong> Click to remove from tournament (warns if paid)</li>
+                        <li>Players automatically move between sections when added/removed</li>
+                        <li>Click <strong>×</strong> on Available Players to permanently delete from saved list</li>
+                        <li>Cannot delete players currently in tournament</li>
+                        <li>Saved Players automatically switches to Tournament Results when bracket is generated</li>
+                    </ul>
+                    <p><strong>Import Saved Players:</strong></p>
+                    <ul>
+                        <li>Import from tournament export file to quickly rebuild player roster</li>
+                        <li>Saved Players persist across tournaments for easy reuse</li>
                     </ul>
                     <p><strong>Important:</strong> Only paid players are included in the tournament bracket.</p>
                     <p><strong>Minimum Players:</strong> You need at least 4 paid players to generate an 8-player bracket.</p>
