@@ -1425,8 +1425,26 @@ function zoomOut() {
 }
 
 function resetZoom() {
-    zoomLevel = 0.6;
-    panOffset = { x: 0, y: 0 };
+    // Set zoom and pan based on current bracket size (matching initial render values)
+    if (tournament && tournament.bracketSize) {
+        if (tournament.bracketSize === 32) {
+            zoomLevel = 0.33;
+            panOffset.x = 750;
+            panOffset.y = 360;
+        } else if (tournament.bracketSize === 16) {
+            zoomLevel = 0.45;
+            panOffset.x = 645;
+            panOffset.y = 275;
+        } else if (tournament.bracketSize === 8) {
+            zoomLevel = 0.61;
+            panOffset.x = 450;
+            panOffset.y = 175;
+        }
+    } else {
+        // Fallback for safety
+        zoomLevel = 0.6;
+        panOffset = { x: 0, y: 0 };
+    }
     updateCanvasTransform();
 }
 

@@ -44,9 +44,15 @@
   - Better balance between precision and speed for mouse wheel users
   - Still provides smooth, precise control compared to original 0.05 step
   - Maintains excellent trackpad experience while improving mouse wheel responsiveness
+- **Bracket Home Button Synchronization**: Home button now resets to bracket-size-specific default views
+  - 32-player brackets: Returns to optimal overview zoom (0.33) with centered positioning
+  - 16-player brackets: Returns to optimized default view (0.45 zoom)
+  - 8-player brackets: Returns to optimized default view (0.61 zoom)
+  - Matches the initial bracket render positioning for consistent "home" behavior
+  - Eliminates confusion when home button returned to different view than initial load
 
 ### Files Modified
-- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper, added walkover check to display condition, updated player class assignment to include both 'bye' and 'first-throw' for Player1 walkovers
+- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper, added walkover check to display condition, updated player class assignment to include both 'bye' and 'first-throw' for Player1 walkovers, updated resetZoom() to use bracket-size-specific default positions
 - `clean-match-progression.js` - Removed renderBracket() call from updateMatchLane()
 - `main.js` - Added formatMatchScore() helper function with walkover detection, updated Match Results to use consistent score ordering, version bump to 2.4.3-beta
 - `styles.css` - Restructured .match-player.bye styling to only apply green background in completed matches, allowing normal match state backgrounds to show through in pending matches
