@@ -1,6 +1,6 @@
-# 2025-10-08
+# 2025-10-09
 
-## **v2.4.3-beta** - Match Score Display & Hover State Improvements
+## **v2.4.3-beta** - Match Score Display & Walkover Styling Improvements
 
 ### Visual Enhancements
 - **Match Card Score Display**: Completed matches now display final score in match header
@@ -26,6 +26,12 @@
   - Match Results page shows "(W/O)" instead of arbitrary score numbers
   - Provides clear visual indication that match was won by walkover, not played
   - Uses same `formatMatchScore()` helper for consistent handling across all displays
+- **Walkover Player Styling**: Walkover players now have consistent, context-aware styling across all match states
+  - Completed matches: Walkover players display with green background matching completed match styling
+  - Pending/waiting matches: Walkover players blend seamlessly with normal match card backgrounds
+  - Player1 walkovers maintain pinkish background and orange left border in pending matches
+  - Player2 walkovers have transparent background in pending matches
+  - Eliminates visual inconsistencies where walkovers appeared in different colors across tournament bracket
 
 ### User Experience Improvements
 - **Match Card Hover State Preservation**: Match cards maintain zoom state when changing lane or referee assignments
@@ -40,9 +46,10 @@
   - Maintains excellent trackpad experience while improving mouse wheel responsiveness
 
 ### Files Modified
-- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper, added walkover check to display condition
+- `bracket-rendering.js` - Added conditional score display in match headers, removed renderBracket() calls from updateMatchReferee(), added refreshAllRefereeDropdowns() when clearing referee, updated to use formatMatchScore() helper, added walkover check to display condition, updated player class assignment to include both 'bye' and 'first-throw' for Player1 walkovers
 - `clean-match-progression.js` - Removed renderBracket() call from updateMatchLane()
 - `main.js` - Added formatMatchScore() helper function with walkover detection, updated Match Results to use consistent score ordering, version bump to 2.4.3-beta
+- `styles.css` - Restructured .match-player.bye styling to only apply green background in completed matches, allowing normal match state backgrounds to show through in pending matches
 
 # 2025-10-05
 

@@ -966,10 +966,14 @@ body {
 }
 
 .match-player.bye {
-  background: #f8f9fa;
   color: #6b7280;
   font-style: italic;
   cursor: default;
+}
+
+.bracket-match.match-completed .match-player.bye,
+.bracket-match.completed .match-player.bye {
+  background: #d4edda;
 }
 
 .player-name-short {

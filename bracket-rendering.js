@@ -1080,12 +1080,12 @@ function renderMatch(match, x, y, section, roundIndex) {
             </span>
         </div>
         <div class="match-players">
-            <div class="match-player ${match.player1?.isBye ? 'bye' : 'first-throw'} ${player1WinnerClass} ${player1UndoableClass}"
+            <div class="match-player ${match.player1?.isBye || match.player1?.name === 'Walkover' ? 'bye first-throw' : 'first-throw'} ${player1WinnerClass} ${player1UndoableClass}"
                  onclick="${player1ClickHandler}">
                 <span class="player-name-short">${getPlayerDisplayName(match.player1)}</span>
                 ${winnerCheck1}
             </div>
-            <div class="match-player ${match.player2?.isBye ? 'bye' : ''} ${player2WinnerClass} ${player2UndoableClass}"
+            <div class="match-player ${match.player2?.isBye || match.player2?.name === 'Walkover' ? 'bye' : ''} ${player2WinnerClass} ${player2UndoableClass}"
                  onclick="${player2ClickHandler}">
                 <span class="player-name-short">${getPlayerDisplayName(match.player2)}</span>
                 ${winnerCheck2}
