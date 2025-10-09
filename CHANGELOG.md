@@ -1,5 +1,9 @@
 # 2025-10-09
 
+## **v2.4.4** - Registration Page Workflow fixes
+- The "x" for removing tournament players are now hidden for participants that have paid the entrance fee
+- A confirmation/warning dialog is shown when removing paid players from the Saved Players column
+
 ## **v2.4.3** - Registration Page Redesign & Tournament Interface Improvements
 
 ### Registration Page Redesign
