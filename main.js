@@ -482,10 +482,13 @@ function showPage(pageId) {
         }, 100);
     }
 
-    // Initialize Player List tab when showing registration page
+    // Update Registration page layout when showing registration page
     if (pageId === 'registration') {
-        if (typeof renderPlayerListTab === 'function') {
-            renderPlayerListTab();
+        if (typeof updateRegistrationPageLayout === 'function') {
+            updateRegistrationPageLayout();
+        }
+        if (typeof renderPlayerList === 'function') {
+            renderPlayerList();
         }
     }
 

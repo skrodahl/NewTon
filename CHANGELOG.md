@@ -1,5 +1,55 @@
 # 2025-10-09
 
+## **v2.4.4-beta** - Registration Page Redesign & Saved Players Enhancement
+
+### Registration Page Redesign
+- **Context-Aware Two-Column Layout**: Eliminated confusing tab interface in favor of intelligent, state-aware display
+  - Left column: Tournament Players (always visible during setup and active tournament)
+  - Right column: Contextual content that adapts to tournament state
+    - **Setup mode**: Displays Saved Players for quick player management
+    - **Active/Completed mode**: Automatically switches to Tournament Results
+  - Instant switching when bracket is generated - no manual tab navigation required
+  - Cleaner, more intuitive workflow aligned with natural tournament progression
+- **Saved Players Section Reorganization**: Two-section layout with clear visual hierarchy
+  - **Available Players** section at top: Players not yet added to current tournament
+  - **In Tournament** section below: Players already added to tournament (with checkmarks)
+  - Both sections display in 4-column grid for efficient space usage
+  - Players dynamically move between sections when clicked (add/remove from tournament)
+  - Click available player to add → moves to "In Tournament" section
+  - Click tournament player to remove → moves back to "Available Players" section
+  - Clean section headers with subtle styling matching app design language
+- **Improved Delete Functionality**: Context-aware deletion with clear user intent
+  - Delete button (`×`) only visible for Available Players (hidden for In Tournament players)
+  - Prevents accidental deletion of players currently in use
+  - Hover tooltip: "Remove from saved players" clarifies permanent deletion
+  - Confirmation dialog with clear messaging: "This permanently deletes them from your saved players list"
+  - Immediate UI update after deletion (fixed bug in renderPlayerList callback)
+- **Visual Polish**: Consistent header styling and improved alignment
+  - Tournament Players and Saved Players headers match styling (60px height, #f5f5f5 background)
+  - Player count removed from headers for cleaner appearance
+  - "Saved Players" replaces ambiguous "Player List" naming
+  - Import helper text: "Import from tournament export file" clarifies functionality
+  - Delete button styled to match Tournament Players remove buttons (24×24px red outline)
+
+### User Experience Improvements
+- **Streamlined Player Management**: No more confusion between Tournament and Player List tabs
+  - Context makes it obvious: setup shows saved players, active tournament shows results
+  - Single-click add/remove between Available and In Tournament sections
+  - Visual feedback with checkmarks and green backgrounds for added players
+  - No confirmation dialogs for add/remove (fast workflow), confirmation only for permanent deletion
+- **Intelligent State Management**: UI adapts automatically to tournament lifecycle
+  - Page navigation triggers layout update to show correct content
+  - Bracket generation automatically switches right column to results
+  - Layout updates propagate through addPlayer, removePlayer, and tournament state changes
+  - Seamless experience throughout tournament creation and execution
+
+### Files Modified
+- `tournament.html` - Removed tab structure, implemented two-column context-aware layout, removed player count from headers, added import helper text, changed container from grid to block element
+- `player-management.js` - Added updateRegistrationPageLayout() for context switching, renamed renderPlayerListTab() to renderPlayerList(), separated players into availablePlayers and inTournamentPlayers arrays, conditional delete button rendering with tooltip, added confirmation dialog for deletion, fixed renderPlayerList callback bug
+- `clean-match-progression.js` - Added updateRegistrationPageLayout() call after bracket generation
+- `main.js` - Updated showPage() to call updateRegistrationPageLayout() and renderPlayerList() for registration page
+- `styles.css` - Removed old tab styles, added saved-players-section and saved-players-section-header styles, updated player-list-header to match column header height (60px), simplified delete button styling
+
 ## **v2.4.3-beta** - Match Score Display & Walkover Styling Improvements
 
 ### Visual Enhancements

@@ -23,8 +23,8 @@ function addToPlayerList(playerName) {
         console.log(`[Player List] Added: ${normalizedName}`);
 
         // Update UI if Player List tab is visible
-        if (typeof renderPlayerListTab === 'function') {
-            renderPlayerListTab();
+        if (typeof renderPlayerList === 'function') {
+            renderPlayerList();
         }
     }
 }
@@ -36,46 +36,39 @@ function removeFromPlayerList(playerName) {
     console.log(`[Player List] Removed: ${playerName}`);
 
     // Update UI
-    if (typeof renderPlayerListTab === 'function') {
-        renderPlayerListTab();
+    if (typeof renderPlayerList === 'function') {
+        renderPlayerList();
     }
 }
 
 // TAB SWITCHING
-function switchRegistrationTab(tabName) {
-    // Update tab buttons
-    const tabs = document.querySelectorAll('.registration-tab');
-    tabs.forEach(tab => tab.classList.remove('active'));
-    event.target.classList.add('active');
+// Update Registration Page Layout based on tournament state
+function updateRegistrationPageLayout() {
+    const playerListSection = document.getElementById('playerListSection');
+    const tournamentResultsSection = document.getElementById('tournamentResultsSection');
 
-    // Update tab content
-    const tournamentTab = document.getElementById('tournamentTab');
-    const playerListTab = document.getElementById('playerListTab');
+    // Check if tournament has started
+    const tournamentStarted = tournament && tournament.bracket && matches.length > 0;
 
-    if (tabName === 'tournament') {
-        tournamentTab.classList.add('active');
-        tournamentTab.style.display = 'block';
-        playerListTab.classList.remove('active');
-        playerListTab.style.display = 'none';
+    if (tournamentStarted) {
+        // Tournament active - show results
+        playerListSection.style.display = 'none';
+        tournamentResultsSection.style.display = 'block';
     } else {
-        playerListTab.classList.add('active');
-        playerListTab.style.display = 'block';
-        tournamentTab.classList.remove('active');
-        tournamentTab.style.display = 'none';
-
-        // Render Player List when switching to it
-        renderPlayerListTab();
+        // Setup mode - show player list
+        playerListSection.style.display = 'block';
+        tournamentResultsSection.style.display = 'none';
     }
 }
 
-// RENDER PLAYER LIST TAB
-function renderPlayerListTab() {
+// RENDER PLAYER LIST
+function renderPlayerList() {
     const playerList = getPlayerList();
     const container = document.getElementById('playerListContainer');
     const countSpan = document.getElementById('playerListCount');
 
-    // Update count
-    countSpan.textContent = `Player List (${playerList.length})`;
+    // Update header
+    countSpan.textContent = 'Saved Players';
 
     // Check if no players
     if (playerList.length === 0) {
@@ -91,35 +84,63 @@ function renderPlayerListTab() {
     // Get current tournament players for comparison
     const tournamentPlayerNames = players.map(p => p.name.toLowerCase());
 
-    // Render player list items
-    const html = sortedPlayerList.map(playerName => {
-        const isInTournament = tournamentPlayerNames.includes(playerName.toLowerCase());
-        const itemClass = isInTournament ? 'player-list-item in-tournament' : 'player-list-item';
+    // Separate players into two groups
+    const availablePlayers = sortedPlayerList.filter(name =>
+        !tournamentPlayerNames.includes(name.toLowerCase())
+    );
+    const inTournamentPlayers = sortedPlayerList.filter(name =>
+        tournamentPlayerNames.includes(name.toLowerCase())
+    );
 
-        let buttons;
-        if (isInTournament) {
-            // Show remove button
-            buttons = `<button class="player-list-remove-btn" onclick="removePlayerFromTournament('${playerName}')">- Remove</button>`;
-        } else {
-            // Show add and delete buttons
-            buttons = `
-                <button class="player-list-add-btn" onclick="addPlayerFromList('${playerName}')">+ Add</button>
-                <button class="player-list-delete-btn" onclick="deleteFromPlayerList('${playerName}')">× Delete</button>
-            `;
-        }
+    // Helper function to render player cards
+    const renderPlayerCard = (playerName, isInTournament) => {
+        const itemClass = isInTournament ? 'player-list-item in-tournament' : 'player-list-item';
+        const clickHandler = isInTournament
+            ? `onclick="removePlayerFromTournament('${playerName}')"`
+            : `onclick="addPlayerFromList('${playerName}')"`;
+
+        // Only show delete button for available players (not in tournament)
+        const deleteButton = !isInTournament
+            ? `<button class="player-list-delete-btn" onclick="event.stopPropagation(); deleteFromPlayerList('${playerName}')" title="Remove from saved players">×</button>`
+            : '';
 
         return `
-            <div class="${itemClass}">
+            <div class="${itemClass}" ${clickHandler} style="cursor: pointer;">
                 <div class="player-list-item-name">
                     ${isInTournament ? '<span class="checkmark">✓</span>' : ''}
                     <span>${playerName}</span>
                 </div>
                 <div class="player-list-item-actions">
-                    ${buttons}
+                    ${deleteButton}
                 </div>
             </div>
         `;
-    }).join('');
+    };
+
+    // Build HTML with two sections
+    let html = '';
+
+    // Available Players section
+    html += '<div class="saved-players-section">';
+    html += '<h4 class="saved-players-section-header">Available Players</h4>';
+    html += '<div class="player-list-items">';
+    if (availablePlayers.length === 0) {
+        html += '<p style="padding: 20px; text-align: center; color: #6b7280; grid-column: 1 / -1;">All players added to tournament</p>';
+    } else {
+        html += availablePlayers.map(name => renderPlayerCard(name, false)).join('');
+    }
+    html += '</div></div>';
+
+    // In Tournament section
+    html += '<div class="saved-players-section">';
+    html += '<h4 class="saved-players-section-header">In Tournament</h4>';
+    html += '<div class="player-list-items">';
+    if (inTournamentPlayers.length === 0) {
+        html += '<p style="padding: 20px; text-align: center; color: #6b7280; grid-column: 1 / -1;">No players added yet</p>';
+    } else {
+        html += inTournamentPlayers.map(name => renderPlayerCard(name, true)).join('');
+    }
+    html += '</div></div>';
 
     container.innerHTML = html;
 }
@@ -161,7 +182,7 @@ function addPlayerFromList(playerName) {
     updateResultsTable();
 
     // Re-render Player List to show updated state
-    renderPlayerListTab();
+    renderPlayerList();
 
     console.log(`[Player List] Added ${playerName} to tournament from Player List`);
 }
@@ -175,15 +196,14 @@ function removePlayerFromTournament(playerName) {
     removePlayer(player.id);
 
     // Re-render Player List to show updated state
-    renderPlayerListTab();
+    renderPlayerList();
 }
 
 // DELETE FROM PLAYER LIST
 function deleteFromPlayerList(playerName) {
-    if (!confirm(`Delete "${playerName}" from Player List?\n\nThis will NOT remove them from the current tournament.`)) {
+    if (!confirm(`Remove "${playerName}" from Saved Players?\n\nThis permanently deletes them from your saved players list.`)) {
         return;
     }
-
     removeFromPlayerList(playerName);
 }
 
@@ -287,7 +307,7 @@ function confirmImportPlayerList() {
 
     // Close dialog and refresh UI
     closeImportDialog();
-    renderPlayerListTab();
+    renderPlayerList();
     alert('✓ Player List imported successfully!');
 }
 
@@ -346,6 +366,9 @@ function addPlayer() {
     saveTournament();
     updateResultsTable();
 
+    // Re-render Player List to show updated state
+    renderPlayerList();
+
     // HELP SYSTEM INTEGRATION
     const paidPlayers = players.filter(p => p.paid).length;
     if (paidPlayers === 4 && !tournament.bracket && typeof showHelpHint === 'function') {
@@ -363,13 +386,14 @@ function removePlayer(playerId) {
         return;
     }
     
-    if (confirm('Are you sure you want to remove this player?')) {
-        players = players.filter(p => p.id !== playerId);
-        updatePlayersDisplay();
-        updatePlayerCount();
-        saveTournament();
-        updateResultsTable();
-    }
+    players = players.filter(p => p.id !== playerId);
+    updatePlayersDisplay();
+    updatePlayerCount();
+    saveTournament();
+    updateResultsTable();
+
+    // Re-render Player List to show updated state
+    renderPlayerList();
 }
 
 // UPDATE: Enhanced player paid toggle with help integration
@@ -532,7 +556,7 @@ function updatePlayersDisplay() {
 function updatePlayerCount() {
     const totalPlayers = players.length;
     const paidPlayers = players.filter(p => p.paid).length;
-    
+
     document.getElementById('playerCount').textContent = totalPlayers;
     document.getElementById('paidCount').textContent = paidPlayers;
 }

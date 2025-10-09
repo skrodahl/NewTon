@@ -2840,42 +2840,9 @@ a:hover { color: #1e40af; }
   flex: 0 0 66%;
 }
 
-/* Registration Tabs */
-.registration-tabs {
-  display: flex;
-  border-bottom: 2px solid #e5e7eb;
-  margin-bottom: 0;
-}
-
-.registration-tab {
-  flex: 1;
-  padding: 12px 16px;
-  background: none;
-  border: none;
-  border-bottom: 3px solid transparent;
-  font-size: 14px;
-  font-weight: 600;
-  color: #6b7280;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.registration-tab:hover {
-  color: #111827;
-  background: #f9fafb;
-}
-
-.registration-tab.active {
-  color: #111827;
-  border-bottom-color: #10b981;
-}
-
-.tab-content {
-  display: none;
-}
-
-.tab-content.active {
-  display: block;
+/* Registration Page Two-Column Layout */
+.registration-page-main {
+  height: calc(100vh - 140px); /* Account for header and form */
 }
 
 /* Player List Header */
@@ -2883,25 +2850,48 @@ a:hover { color: #1e40af; }
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px;
-  border-bottom: 1px solid #e5e7eb;
-  background: #f9fafb;
+  height: 60px;
+  min-height: 60px;
+  max-height: 60px;
+  padding: 0 16px;
+  border-bottom: 1px solid #e8e8e8;
+  background: #f5f5f5;
 }
 
 .player-list-header span {
   font-size: 16px;
   font-weight: 600;
-  color: #111827;
+  color: #222222;
 }
 
 .player-list-header button {
+  height: 28px;
   padding: 6px 12px;
-  font-size: 13px;
+  font-size: 12px;
+  margin: 0;
+}
+
+/* Saved Players Sections */
+.saved-players-section {
+  margin-bottom: 16px;
+}
+
+.saved-players-section-header {
+  color: #222222;
+  margin: 0;
+  padding: 12px 16px;
+  border-bottom: 1px solid #e8e8e8;
+  font-size: 14px;
+  font-weight: 600;
+  background: #fafafa;
 }
 
 /* Player List Items */
 .player-list-items {
   padding: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
 }
 
 .player-list-item {
@@ -2909,7 +2899,6 @@ a:hover { color: #1e40af; }
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  margin-bottom: 8px;
   border: 1px solid #e5e7eb;
   background: white;
 }
@@ -2943,38 +2932,24 @@ a:hover { color: #1e40af; }
 }
 
 .player-list-item-actions button {
-  padding: 4px 10px;
-  font-size: 12px;
-  border: none;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  font-size: 18px;
+  border: 1px solid #dc2626;
+  background: white;
+  color: #dc2626;
   cursor: pointer;
   transition: all 0.2s ease;
-}
-
-.player-list-add-btn {
-  background: #10b981;
-  color: white;
-}
-
-.player-list-add-btn:hover {
-  background: #059669;
-}
-
-.player-list-remove-btn {
-  background: #f59e0b;
-  color: white;
-}
-
-.player-list-remove-btn:hover {
-  background: #d97706;
-}
-
-.player-list-delete-btn {
-  background: #ef4444;
-  color: white;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
 }
 
 .player-list-delete-btn:hover {
   background: #dc2626;
+  color: white;
 }
 
 /* Player Grid */

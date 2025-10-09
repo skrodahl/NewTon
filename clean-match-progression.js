@@ -947,6 +947,11 @@ function generateCleanBracket() {
         showPage('tournament');
     }
 
+    // Update Registration page layout (tournament now active)
+    if (typeof updateRegistrationPageLayout === 'function') {
+        updateRegistrationPageLayout();
+    }
+
     // HELP SYSTEM INTEGRATION
     if (typeof onBracketGenerated === 'function') {
         onBracketGenerated();

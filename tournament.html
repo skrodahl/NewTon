@@ -123,60 +123,60 @@
             </div>
 
             <div class="two-column-container registration-page-main">
+                <!-- Left Column: Tournament Players -->
                 <div class="scrollable-column">
-                    <!-- Tab Headers -->
-                    <div class="registration-tabs">
-                        <button class="registration-tab active" onclick="switchRegistrationTab('playerList')">Player List</button>
-                        <button class="registration-tab" onclick="switchRegistrationTab('tournament')">Tournament</button>
+                    <h3>Tournament Players</h3>
+                    <div class="scrollable-column-content">
+                        <div id="playersContainer" class="players-list">
+                            <!-- Players will be added here -->
+                        </div>
                     </div>
+                </div>
 
-                    <!-- Player List Tab Content -->
-                    <div id="playerListTab" class="tab-content active">
+                <!-- Right Column: Contextual Content -->
+                <div class="scrollable-column">
+                    <!-- Player List Section (shown during setup) -->
+                    <div id="playerListSection">
                         <div class="player-list-header">
-                            <span id="playerListCount">Player List (0)</span>
-                            <button class="btn btn-success" onclick="importPlayerListFromFile()">Import Player List</button>
+                            <span id="playerListCount">Saved Players</span>
+                            <div style="display: flex; align-items: center; gap: 12px;">
+                                <span style="font-size: 13px; color: #6b7280; font-weight: normal;">Import from tournament export file</span>
+                                <button class="btn btn-success" onclick="importPlayerListFromFile()">Import Saved Players</button>
+                            </div>
                         </div>
                         <div class="scrollable-column-content">
-                            <div id="playerListContainer" class="player-list-items">
+                            <div id="playerListContainer">
                                 <!-- Player List will be rendered here -->
                             </div>
                         </div>
                     </div>
 
-                    <!-- Tournament Tab Content -->
-                    <div id="tournamentTab" class="tab-content" style="display: none;">
+                    <!-- Tournament Results Section (shown during tournament) -->
+                    <div id="tournamentResultsSection" style="display: none;">
+                        <h3>Tournament Results</h3>
                         <div class="scrollable-column-content">
-                            <div id="playersContainer" class="players-list">
-                                <!-- Players will be added here -->
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="scrollable-column">
-                    <h3>Tournament Results</h3>
-                    <div class="scrollable-column-content">
-                        <div class="results-table-container">
-                            <table class="results-table" id="resultsSection">
-                                <thead>
-                                    <tr>
-                                        <th>Rank</th>
-                                        <th>Player</th>
-                                        <th>Points</th>
-                                        <th>Short Legs</th>
-                                        <th>High Outs</th>
-                                        <th>180s</th>
-                                        <th>Tons</th>
-                                        <th>Legs Won</th>
-                                        <th>Legs Lost</th>
-                                        <th style="width: 0; padding: 0; border: none;"></th>
-                                    </tr>
-                                </thead>
-                                <tbody id="resultsTableBody">
-                                </tbody>
-                            </table>
-                            <div id="resultsEmptyMessage" style="display: none; text-align: center; color: #666; font-style: italic; padding: 20px;">
-                                No players added yet
+                            <div class="results-table-container">
+                                <table class="results-table" id="resultsSection">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Player</th>
+                                            <th>Points</th>
+                                            <th>Short Legs</th>
+                                            <th>High Outs</th>
+                                            <th>180s</th>
+                                            <th>Tons</th>
+                                            <th>Legs Won</th>
+                                            <th>Legs Lost</th>
+                                            <th style="width: 0; padding: 0; border: none;"></th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="resultsTableBody">
+                                    </tbody>
+                                </table>
+                                <div id="resultsEmptyMessage" style="display: none; text-align: center; color: #666; font-style: italic; padding: 20px;">
+                                    No players added yet
+                                </div>
                             </div>
                         </div>
                     </div>
