@@ -4,6 +4,7 @@
 - The "x" for removing tournament players are now hidden for participants that have paid the entrance fee
 - A confirmation/warning dialog is shown when removing paid players from the Saved Players column
 - Updated the help section to reflect the Registration page redesign
+- Added hints/instructions to the Registration page headers
 
 ## **v2.4.3** - Registration Page Redesign & Tournament Interface Improvements
 

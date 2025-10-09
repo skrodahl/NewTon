@@ -122,7 +122,7 @@ function renderPlayerList() {
 
     // Available Players section
     html += '<div class="saved-players-section">';
-    html += '<h4 class="saved-players-section-header">Available Players</h4>';
+    html += '<h4 class="saved-players-section-header">Available Players <span style="font-weight: normal; font-size: 13px; color: #6b7280;">(Click to add player to tournament)</span></h4>';
     html += '<div class="player-list-items">';
     if (availablePlayers.length === 0) {
         html += '<p style="padding: 20px; text-align: center; color: #6b7280; grid-column: 1 / -1;">All players added to tournament</p>';
@@ -133,7 +133,7 @@ function renderPlayerList() {
 
     // In Tournament section
     html += '<div class="saved-players-section">';
-    html += '<h4 class="saved-players-section-header">In Tournament</h4>';
+    html += '<h4 class="saved-players-section-header">In Tournament <span style="font-weight: normal; font-size: 13px; color: #6b7280;">(Click to remove player from tournament)</span></h4>';
     html += '<div class="player-list-items">';
     if (inTournamentPlayers.length === 0) {
         html += '<p style="padding: 20px; text-align: center; color: #6b7280; grid-column: 1 / -1;">No players added yet</p>';
