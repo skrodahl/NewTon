@@ -2899,13 +2899,13 @@ a:hover { color: #1e40af; }
   justify-content: space-between;
   align-items: center;
   padding: 10px 12px;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d1d5db;
   background: white;
 }
 
 .player-list-item.in-tournament {
   background: #f0fdf4;
-  border: 1px solid #e5e7eb;
+  border: 1px solid #d1d5db;
 }
 
 .player-list-item-name {
