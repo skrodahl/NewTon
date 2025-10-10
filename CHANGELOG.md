@@ -6,12 +6,17 @@
 - **Distributed BYE Placement**: Replaced sequential seeding with randomized BYE distribution
   - BYEs now randomly scattered across all FS-R1 matches instead of clustering at bottom
   - Each BYE randomly placed in either player1 or player2 slot within a match
-  - Eliminates perception of unfairness from visual clustering
-  - Still guarantees no BYE-vs-BYE matches (max 1 BYE per match)
+  - **Actual fairness improvement**: Old sequential system maximized BYE-vs-BYE matches by clustering
+    - Example (22 players, 32-bracket): Old system guaranteed 5 BYE-vs-BYE matches in BS-R1
+    - New distributed system typically produces 2-4 BYE-vs-BYE matches (varies randomly)
+    - Reduces wasted walkover matches, increases real competitive matches
+    - Players dropping to backside face more real opponents instead of automatic advances
+  - Eliminates visual appearance of systematic disadvantage from clustering pattern
+  - Still guarantees no BYE-vs-BYE matches in FS-R1 (max 1 BYE per match)
   - Instant execution across all bracket sizes (8, 16, 32 players)
   - Mathematical guarantee: minimum players equals number of matches, ensuring algorithm always succeeds
   - Every bracket generation produces unique, random BYE distribution
-  - Significantly improves perceived fairness for weekly tournament operators
+  - Significantly improves both actual and perceived fairness for tournament operators
 
 ### Visual Consistency
 - Improved the design and colors of player cards in the Registration page
