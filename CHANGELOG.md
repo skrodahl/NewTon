@@ -6,17 +6,23 @@
 - **Distributed BYE Placement**: Replaced sequential seeding with randomized BYE distribution
   - BYEs now randomly scattered across all FS-R1 matches instead of clustering at bottom
   - Each BYE randomly placed in either player1 or player2 slot within a match
-  - **Actual fairness improvement**: Old sequential system maximized BYE-vs-BYE matches by clustering
+  - **Critical fairness fix**: Old sequential system created guaranteed systematic advantage
+    - **The problem**: Sequential seeding clustered BYEs at bottom of FS-R1 (matches 12-16 in 32-bracket)
+    - **The chain reaction**: Bottom BYEs → bottom FS-R2 BYEs → 5 guaranteed BYE-vs-BYE matches in bottom BS-R1
+    - **The unfair advantage**: Mirroring places FS-R2 top-half losers into BS-R2 bottom-half positions
+    - **The collision**: FS-R2 top-half losers faced walkover-advanced opponents; bottom-half losers faced real winners
+    - **Result**: Losing in top half of FS-R2 was predictably easier than losing in bottom half - every single tournament
+  - **The solution**: Distributed seeding eliminates this structural bias
     - Example (22 players, 32-bracket): Old system guaranteed 5 BYE-vs-BYE matches in BS-R1
-    - New distributed system typically produces 2-4 BYE-vs-BYE matches (varies randomly)
-    - Reduces wasted walkover matches, increases real competitive matches
-    - Players dropping to backside face more real opponents instead of automatic advances
-  - Eliminates visual appearance of systematic disadvantage from clustering pattern
+    - New distributed system typically produces 2-4 BYE-vs-BYE matches, randomly distributed
+    - Walkover opponents appear unpredictably throughout BS-R2, not concentrated in specific regions
+    - No correlation between FS-R2 bracket position and BS-R2 opponent difficulty
+    - Fewer wasted walkover matches overall, more real competitive matches throughout tournament
   - Still guarantees no BYE-vs-BYE matches in FS-R1 (max 1 BYE per match)
   - Instant execution across all bracket sizes (8, 16, 32 players)
   - Mathematical guarantee: minimum players equals number of matches, ensuring algorithm always succeeds
   - Every bracket generation produces unique, random BYE distribution
-  - Significantly improves both actual and perceived fairness for tournament operators
+  - Eliminates both the actual systematic advantage and the visual appearance of unfairness
 
 ### Visual Consistency
 - Improved the design and colors of player cards in the Registration page
