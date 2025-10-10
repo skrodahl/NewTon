@@ -1,7 +1,31 @@
 # 2025-10-10
 
-## **v2.4.5-beta** - Visual Consistency
-- Improved the design and colors of match cards in the Registration page, while still having a separation of functions
+## **v2.5.0-beta** - Distributed Seeding & Visual Consistency
+
+### Tournament Seeding Improvements
+- **Distributed BYE Placement**: Replaced sequential seeding with randomized BYE distribution
+  - BYEs now randomly scattered across all FS-R1 matches instead of clustering at bottom
+  - Each BYE randomly placed in either player1 or player2 slot within a match
+  - Eliminates perception of unfairness from visual clustering
+  - Still guarantees no BYE-vs-BYE matches (max 1 BYE per match)
+  - Instant execution across all bracket sizes (8, 16, 32 players)
+  - Mathematical guarantee: minimum players equals number of matches, ensuring algorithm always succeeds
+  - Every bracket generation produces unique, random BYE distribution
+  - Significantly improves perceived fairness for weekly tournament operators
+
+### Visual Consistency
+- Improved the design and colors of player cards in the Registration page
+- Removed green borders from "In Tournament" cards (now use neutral gray like "Available Players")
+- Removed checkmarks from Saved Players cards (section headers provide sufficient context)
+- Normalized text styling across all player cards (consistent font weight and color)
+- Maintained subtle visual distinction with light green background (#f0fdf4) for "In Tournament" cards
+- Cleaner, more professional appearance while preserving functional separation
+
+### Files Modified
+- `clean-match-progression.js` - Replaced two-pass sequential seeding with distributed random BYE placement algorithm
+- `player-management.js` - Removed checkmark rendering, updated card styling
+- `styles.css` - Updated border colors and text styling for Saved Players cards
+- `main.js` - Version bump to 2.5.0-beta
 
 # 2025-10-09
 

@@ -961,10 +961,13 @@ function generateCleanBracket() {
 }
 
 /**
- * CREATE OPTIMIZED BRACKET: Two-pass seeding to avoid bye-vs-bye in FS Round 1
- * - Pass 1: Fill first seat of each FS-1 match (indices 0,2,4,...)
- * - Pass 2: Fill second seat of each FS-1 match (indices 1,3,5,...)
- * - Remaining slots become walkovers
+ * CREATE OPTIMIZED BRACKET: Distributed random seeding to avoid bye-vs-bye in FS Round 1
+ * - Step 1: Randomly distribute BYEs across FS-R1 matches (max 1 per match, random slot)
+ * - Step 2: Fill remaining slots with shuffled real players
+ *
+ * Mathematical guarantee: min players = bracketSize/2, so max BYEs = bracketSize/2 = numMatches
+ * This ensures we can always place max 1 BYE per match without BYE-vs-BYE scenarios
+ *
  * Works for bracketSize 8, 16, 32
  */
 function createOptimizedBracketV2(players, bracketSize) {
@@ -974,40 +977,56 @@ function createOptimizedBracketV2(players, bracketSize) {
         return null;
     }
     if (![8, 16, 32].includes(bracketSize)) {
-        console.warn(`createOptimizedBracketV2: unexpected bracketSize=${bracketSize}; proceeding with two-pass seeding`);
+        console.warn(`createOptimizedBracketV2: unexpected bracketSize=${bracketSize}; proceeding with distributed seeding`);
     }
 
     const P = players.length;
     const K = bracketSize;
-    const numWalkovers = Math.max(0, K - P);
+    const numWalkovers = K - P;
+    const numMatches = K / 2;
 
     console.log(`Creating bracket: ${P} real players, ${numWalkovers} walkovers, size=${K}`);
 
-    // Shuffle players to ensure perceived randomness
+    // Assertion: numWalkovers <= numMatches (guaranteed by min 4 player requirement)
+    if (numWalkovers > numMatches) {
+        console.error(`IMPOSSIBLE: ${numWalkovers} walkovers exceeds ${numMatches} matches`);
+        return null;
+    }
+
+    // Shuffle players to ensure randomness
     const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
 
-    // Two-pass fill
-    const bracket = new Array(K);
+    // Initialize bracket with null slots
+    const bracket = new Array(K).fill(null);
+    const matchesWithBye = new Set();
 
-    // Pass 1: fill first seats (one real in every FS-1 match if P >= K/2)
-    let idx = 0;
-    for (let pos = 0; pos < K && idx < shuffledPlayers.length; pos += 2) {
-        bracket[pos] = shuffledPlayers[idx++];
+    // Step 1: Randomly distribute BYEs across matches
+    let byesPlaced = 0;
+    while (byesPlaced < numWalkovers) {
+        // Pick a random match that doesn't have a BYE yet
+        const matchIndex = Math.floor(Math.random() * numMatches);
+
+        if (matchesWithBye.has(matchIndex)) continue;
+
+        matchesWithBye.add(matchIndex);
+
+        // Randomly choose player1 (0) or player2 (1) slot within this match
+        const slotInMatch = Math.random() < 0.5 ? 0 : 1;
+        const bracketPosition = matchIndex * 2 + slotInMatch;
+
+        bracket[bracketPosition] = createWalkoverPlayer(bracketPosition);
+        byesPlaced++;
     }
 
-    // Pass 2: fill second seats
-    for (let pos = 1; pos < K && idx < shuffledPlayers.length; pos += 2) {
-        bracket[pos] = shuffledPlayers[idx++];
-    }
-
-    // Fill remaining with walkovers
+    // Step 2: Fill remaining slots with shuffled players
+    let playerIndex = 0;
     for (let i = 0; i < K; i++) {
-        if (!bracket[i]) {
-            bracket[i] = createWalkoverPlayer(i);
+        if (bracket[i] === null) {
+            bracket[i] = shuffledPlayers[playerIndex++];
         }
     }
 
-    // Sanity validation: ensure no FS-1 bye-vs-bye
+    // Sanity validation: ensure no FS-1 bye-vs-bye (should be impossible with this algorithm)
     const firstRoundMatches = K / 2;
     let invalidPairs = 0;
     for (let m = 0; m < firstRoundMatches; m++) {
@@ -1019,12 +1038,12 @@ function createOptimizedBracketV2(players, bracketSize) {
     }
 
     if (invalidPairs > 0) {
-        // This should never happen with two-pass + your upstream minimums
-        console.error(`createOptimizedBracketV2: unexpected ${invalidPairs} bye-vs-bye pairs in FS-1`);
+        // This should NEVER happen with distributed seeding
+        console.error(`ALGORITHM BUG: ${invalidPairs} bye-vs-bye pairs detected in FS-1!`);
         return null;
     }
 
-    console.log('✓ Two-pass seeding completed (no FS-1 bye-vs-bye)');
+    console.log(`✓ Distributed seeding completed: ${numWalkovers} BYEs randomly placed across ${numMatches} matches`);
     return bracket;
 }
 
