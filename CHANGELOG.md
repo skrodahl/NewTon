@@ -1,3 +1,8 @@
+# 2025-10-10
+
+## **v2.4.5-beta** - Visual Consistency
+- Improved the design and colors of match cards in the Registration page, while still having a separation of functions
+
 # 2025-10-09
 
 ## **v2.4.4** - Registration Page Workflow fixes

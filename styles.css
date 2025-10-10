@@ -2905,7 +2905,7 @@ a:hover { color: #1e40af; }
 
 .player-list-item.in-tournament {
   background: #f0fdf4;
-  border-color: #86efac;
+  border: 1px solid #e5e7eb;
 }
 
 .player-list-item-name {
@@ -2917,8 +2917,8 @@ a:hover { color: #1e40af; }
 }
 
 .player-list-item.in-tournament .player-list-item-name {
-  font-weight: 700;
-  color: #16a34a;
+  font-weight: normal;
+  color: #111827;
 }
 
 .player-list-item-name .checkmark {

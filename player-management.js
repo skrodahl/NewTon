@@ -107,7 +107,6 @@ function renderPlayerList() {
         return `
             <div class="${itemClass}" ${clickHandler} style="cursor: pointer;">
                 <div class="player-list-item-name">
-                    ${isInTournament ? '<span class="checkmark">✓</span>' : ''}
                     <span>${playerName}</span>
                 </div>
                 <div class="player-list-item-actions">
