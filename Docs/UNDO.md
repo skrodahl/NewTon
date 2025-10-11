@@ -178,40 +178,40 @@ Result: FS-R1-1 cannot be undone ❌ (transaction lost)
 Note: With MAX_HISTORY_ENTRIES = 300, this scenario no longer occurs in practice
 ```
 
-### Potential Edge Case: Transaction Type Confusion
+### Fixed: Transaction Type Confusion in Downstream Blocking
 
-**Status**: Possible bug, not yet confirmed in practice with MAX_HISTORY_ENTRIES = 300
+**Status**: Confirmed bug, fixed in v2.5.0-beta
 
-**Scenario**: The downstream blocking check uses `history.find(t => t.matchId === targetMatchId)` which returns the **first** (newest) transaction for that match. If the downstream match has multiple transaction types (e.g., COMPLETE_MATCH followed by CHANGE_LANE or ASSIGN_REFEREE), the function might find the wrong transaction type.
+**The Problem**: The downstream blocking check used `history.find(t => t.matchId === targetMatchId)` which returns the **first** (newest) transaction for that match. When a completed match had multiple transaction types (COMPLETE_MATCH followed by ASSIGN_LANE or ASSIGN_REFEREE), the function would find the wrong transaction type.
+
+**Impact**: Matches with completed MANUAL downstream matches incorrectly showed as undoable, because the downstream check found non-COMPLETE_MATCH transactions (ASSIGN_LANE, ASSIGN_REFEREE) which have no `completionType` property.
 
 **Example problematic sequence**:
 ```
-1. FS-R1-1 completed (MANUAL) - COMPLETE_MATCH transaction created
-2. FS-R2-1 completed (MANUAL) - COMPLETE_MATCH transaction created
-3. Operator changes lane for FS-R2-1 - CHANGE_LANE transaction created (newer in history)
-4. Check if FS-R1-1 is undoable:
-   - history.find() for FS-R2-1 returns CHANGE_LANE (newest)
+1. BS-R3-1 completed (MANUAL) → winner advances to BS-R4-1
+2. BS-R4-1 completed (MANUAL) - COMPLETE_MATCH transaction created
+3. Later: Operator assigns referee to BS-R4-1 - ASSIGN_REFEREE transaction created (newer in history)
+4. Check if BS-R3-1 is undoable:
+   - history.find() for BS-R4-1 returns ASSIGN_REFEREE (newest transaction)
    - Check: transaction.completionType === 'MANUAL'
-   - CHANGE_LANE has no completionType property → undefined !== 'MANUAL' → false
-   - FS-R2-1 doesn't block the undo
-   - Result: FS-R1-1 incorrectly shows as undoable ❌
+   - ASSIGN_REFEREE has no completionType property → undefined !== 'MANUAL' → false
+   - BS-R4-1 doesn't block the undo
+   - Result: BS-R3-1 incorrectly shows as undoable ❌
 ```
 
-**Potential fix** (not yet implemented):
+**The Fix**: Added transaction type filtering to ensure only COMPLETE_MATCH transactions are considered:
 ```javascript
-// Current code (lines 1934, 1946, 3695, 3707 in bracket-rendering.js):
+// OLD CODE:
 const targetTransaction = history.find(t => t.matchId === targetMatchId);
 
-// Proposed fix:
+// NEW CODE (lines 1934, 1946, 3695, 3707 in bracket-rendering.js):
 const targetTransaction = history.find(t =>
     t.matchId === targetMatchId &&
     t.type === 'COMPLETE_MATCH'
 );
 ```
 
-**Why not fixed yet**: Conservative approach - fixing MAX_HISTORY_ENTRIES first (addressing confirmed Bug B: history pruning), then monitoring to see if this edge case actually occurs in practice before implementing additional changes.
-
-**Monitoring plan**: If matches with completed MANUAL downstream matches incorrectly show as undoable after the MAX_HISTORY_ENTRIES fix, implement the transaction type filtering above.
+**Result**: The downstream blocking check now correctly finds COMPLETE_MATCH transactions only, ignoring operational transactions (ASSIGN_LANE, ASSIGN_REFEREE, START_MATCH, STOP_MATCH). Matches with completed MANUAL downstream matches are now correctly blocked from undo.
 
 ## Surgical Undo Algorithm
 

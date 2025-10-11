@@ -1931,7 +1931,7 @@ function isMatchUndoable(matchId) {
                 const [targetMatchId] = progression.winner;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
                 if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId);
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
                         return false; // Blocked by MANUAL downstream match
                     }
@@ -1943,7 +1943,7 @@ function isMatchUndoable(matchId) {
                 const [targetMatchId] = progression.loser;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
                 if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId);
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
                         return false; // Blocked by MANUAL downstream match
                     }
@@ -3692,7 +3692,7 @@ function getDetailedMatchState(matchId) {
                 const [targetMatchId] = progression.winner;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
                 if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId);
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
                         blockingMatches.push(targetMatchId);
                     }
@@ -3704,7 +3704,7 @@ function getDetailedMatchState(matchId) {
                 const [targetMatchId] = progression.loser;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
                 if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId);
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
                         blockingMatches.push(targetMatchId);
                     }

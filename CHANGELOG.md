@@ -1,9 +1,11 @@
 # 2025-10-11
 
-## **v2.5.0-beta** - Undo System History Fix
+## **v2.5.0-beta** - Undo System Fixes
 
 ### Undo System Improvements
-- **Fixed History Pruning Bug**: Increased MAX_HISTORY_ENTRIES from 50 to 300
+
+#### Fixed History Pruning Bug (Bug B)
+- **Increased MAX_HISTORY_ENTRIES from 50 to 300**
   - **The problem**: History limit of 50 caused premature pruning in 32-player tournaments
   - **Impact**: Early matches (FS-R1, FS-R2) would lose their COMPLETE_MATCH transactions after ~30-40 matches completed
   - **Result**: Matches without transactions in history appeared non-undoable, even when they should be undoable
@@ -11,7 +13,16 @@
     - 32-player bracket generates ~169 total transactions in typical tournament (62 matches + ~107 operational changes)
     - 300 provides 78% buffer for tournaments with heavy lane/referee management
     - All matches now remain undoable throughout the entire tournament
-  - Conservative fix addressing confirmed bug (history pruning) without modifying undo logic
+
+#### Fixed Transaction Type Confusion Bug (Bug A)
+- **Added transaction type filtering to downstream blocking checks**
+  - **The problem**: Downstream blocking check used `history.find(t => t.matchId === targetMatchId)` which returned the newest transaction for a match, regardless of type
+  - **Impact**: When completed matches had operational transactions (ASSIGN_LANE, ASSIGN_REFEREE) after COMPLETE_MATCH, the check would find the wrong transaction type
+  - **Result**: Matches with completed MANUAL downstream matches incorrectly showed as undoable (observed in BS-R3 → BS-R4 scenarios)
+  - **The solution**: Added `&& t.type === 'COMPLETE_MATCH'` filter to 4 locations in `isMatchUndoable()` and `getDetailedMatchState()` functions
+    - Lines 1934, 1946 (isMatchUndoable winner/loser checks)
+    - Lines 3695, 3707 (getDetailedMatchState winner/loser checks)
+  - **Result**: Downstream blocking check now correctly finds COMPLETE_MATCH transactions only, ignoring operational transactions
 
 ### Documentation
 - Updated `Docs/UNDO.md` with comprehensive undo system documentation
@@ -19,11 +30,12 @@
   - Added "Match Undoability Rules" section documenting complete logic for when matches can/cannot be undone
   - Expanded transaction structure to show all fields (type, description, beforeState)
   - Documented all 5 transaction types (COMPLETE_MATCH, START_MATCH, STOP_MATCH, ASSIGN_LANE, ASSIGN_REFEREE)
-  - Added section on potential edge case: transaction type confusion in downstream blocking check
+  - Documented Bug A (transaction type confusion) with example scenario and fix details
   - Included 4 detailed example scenarios covering common undoability cases
 
 ### Files Modified
 - `clean-match-progression.js` - Increased MAX_HISTORY_ENTRIES from 50 to 300
+- `bracket-rendering.js` - Added transaction type filtering to 4 locations (lines 1934, 1946, 3695, 3707)
 - `Docs/UNDO.md` - Comprehensive documentation of undo system behavior and limits
 
 # 2025-10-10
