@@ -50,18 +50,16 @@ The system creates transactions for multiple types of operations:
 - **COMPLETE_MATCH**: Match completion (MANUAL: user-completed, AUTO: walkover auto-completion)
 - **START_MATCH**: Match activation (operator clicked "Start Match")
 - **STOP_MATCH**: Match deactivation (operator clicked "Stop Match")
-- **CHANGE_LANE**: Lane assignment changed for a match
-- **ASSIGN_REFEREE**: Referee assigned to a match
-- **CLEAR_REFEREE**: Referee removed from a match
+- **ASSIGN_LANE**: Lane assignment or change for a match
+- **ASSIGN_REFEREE**: Referee assigned to or cleared from a match
 
 **Important**: All transaction types consume history entries. A typical 32-player tournament generates:
 - 62 COMPLETE_MATCH transactions (one per match)
 - 62 START_MATCH transactions (one per match)
 - ~5 STOP_MATCH transactions (rare - when matches are stopped before completion)
-- ~10 CHANGE_LANE transactions (occasional corrections)
-- ~30 ASSIGN_REFEREE transactions (referee management)
-- ~5 CLEAR_REFEREE transactions (rare - clearing incorrect assignments)
-- **Total: ~174 transactions in a typical tournament**
+- ~10 ASSIGN_LANE transactions (occasional lane corrections)
+- ~30 ASSIGN_REFEREE transactions (referee assignment and clearing)
+- **Total: ~169 transactions in a typical tournament**
 
 ### Transaction History Storage and Limits
 
@@ -79,8 +77,8 @@ if (history.length > MAX_HISTORY_ENTRIES) {
 
 **Why 300?**
 - 32-player bracket has 62 matches (maximum possible)
-- Typical tournament generates ~174 total transactions (match completions + operational changes)
-- 300 provides 72% buffer for tournaments with heavy lane/referee management
+- Typical tournament generates ~169 total transactions (match completions + operational changes)
+- 300 provides 78% buffer for tournaments with heavy lane/referee management
 - Previous limit of 50 caused premature pruning, making early matches lose their COMPLETE_MATCH transactions
 
 **Impact of pruning on undoability**:

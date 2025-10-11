@@ -8,8 +8,8 @@
   - **Impact**: Early matches (FS-R1, FS-R2) would lose their COMPLETE_MATCH transactions after ~30-40 matches completed
   - **Result**: Matches without transactions in history appeared non-undoable, even when they should be undoable
   - **The solution**: Increased limit to 300 transactions
-    - 32-player bracket generates ~174 total transactions in typical tournament (62 matches + ~112 operational changes)
-    - 300 provides 72% buffer for tournaments with heavy lane/referee management
+    - 32-player bracket generates ~169 total transactions in typical tournament (62 matches + ~107 operational changes)
+    - 300 provides 78% buffer for tournaments with heavy lane/referee management
     - All matches now remain undoable throughout the entire tournament
   - Conservative fix addressing confirmed bug (history pruning) without modifying undo logic
 
@@ -18,7 +18,7 @@
   - Added "Transaction History Storage and Limits" section explaining MAX_HISTORY_ENTRIES and pruning behavior
   - Added "Match Undoability Rules" section documenting complete logic for when matches can/cannot be undone
   - Expanded transaction structure to show all fields (type, description, beforeState)
-  - Documented all 6 transaction types (COMPLETE_MATCH, START_MATCH, STOP_MATCH, CHANGE_LANE, ASSIGN_REFEREE, CLEAR_REFEREE)
+  - Documented all 5 transaction types (COMPLETE_MATCH, START_MATCH, STOP_MATCH, ASSIGN_LANE, ASSIGN_REFEREE)
   - Added section on potential edge case: transaction type confusion in downstream blocking check
   - Included 4 detailed example scenarios covering common undoability cases
 
