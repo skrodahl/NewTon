@@ -1,6 +1,6 @@
 # 2025-10-11
 
-## **v2.5.1-beta** - Undo System History Fix
+## **v2.5.0-beta** - Undo System History Fix
 
 ### Undo System Improvements
 - **Fixed History Pruning Bug**: Increased MAX_HISTORY_ENTRIES from 50 to 300
