@@ -65,26 +65,26 @@ The system creates transactions for multiple types of operations:
 
 **Storage location**: `localStorage` with key `'tournamentHistory'`
 
-**History limit**: `MAX_HISTORY_ENTRIES = 300`
+**History limit**: `MAX_HISTORY_ENTRIES = 500`
 
-**Pruning behavior**: When history exceeds 300 entries, oldest transactions are removed (FIFO - First In, First Out):
+**Pruning behavior**: When history exceeds 500 entries, oldest transactions are removed (FIFO - First In, First Out):
 ```javascript
 history.unshift(transaction); // Add new transaction to beginning
 if (history.length > MAX_HISTORY_ENTRIES) {
-    history = history.slice(0, MAX_HISTORY_ENTRIES); // Keep only first 300
+    history = history.slice(0, MAX_HISTORY_ENTRIES); // Keep only first 500
 }
 ```
 
-**Why 300?**
+**Why 500?**
 - 32-player bracket has 62 matches (maximum possible)
 - Typical tournament generates ~169 total transactions (match completions + operational changes)
-- 300 provides 78% buffer for tournaments with heavy lane/referee management
+- 500 provides 196% buffer for tournaments with heavy lane/referee management
 - Previous limit of 50 caused premature pruning, making early matches lose their COMPLETE_MATCH transactions
 
 **Impact of pruning on undoability**:
 - If a match's COMPLETE_MATCH transaction is pruned from history, the match cannot be undone
 - With limit of 50: Early matches (FS-R1, FS-R2) would become non-undoable after ~30-40 completed matches
-- With limit of 300: All matches remain undoable throughout the entire tournament
+- With limit of 500: All matches remain undoable throughout the entire tournament
 
 ## Hardcoded Match Progression
 
@@ -172,10 +172,10 @@ Result: FS-R1-1 can be undone ✅ (FS-R2-1 will recalculate)
 **Scenario 4: Transaction pruned**
 ```
 FS-R1-1 completed (MANUAL) at transaction #5
-Tournament continues... 300+ more transactions
+Tournament continues... 500+ more transactions
 FS-R1-1's COMPLETE_MATCH transaction pruned from history
 Result: FS-R1-1 cannot be undone ❌ (transaction lost)
-Note: With MAX_HISTORY_ENTRIES = 300, this scenario no longer occurs in practice
+Note: With MAX_HISTORY_ENTRIES = 500, this scenario no longer occurs in practice
 ```
 
 ### Fixed: Transaction Type Confusion in Downstream Blocking
