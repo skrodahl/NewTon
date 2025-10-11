@@ -1,3 +1,31 @@
+# 2025-10-11
+
+## **v2.5.1-beta** - Undo System History Fix
+
+### Undo System Improvements
+- **Fixed History Pruning Bug**: Increased MAX_HISTORY_ENTRIES from 50 to 300
+  - **The problem**: History limit of 50 caused premature pruning in 32-player tournaments
+  - **Impact**: Early matches (FS-R1, FS-R2) would lose their COMPLETE_MATCH transactions after ~30-40 matches completed
+  - **Result**: Matches without transactions in history appeared non-undoable, even when they should be undoable
+  - **The solution**: Increased limit to 300 transactions
+    - 32-player bracket generates ~174 total transactions in typical tournament (62 matches + ~112 operational changes)
+    - 300 provides 72% buffer for tournaments with heavy lane/referee management
+    - All matches now remain undoable throughout the entire tournament
+  - Conservative fix addressing confirmed bug (history pruning) without modifying undo logic
+
+### Documentation
+- Updated `Docs/UNDO.md` with comprehensive undo system documentation
+  - Added "Transaction History Storage and Limits" section explaining MAX_HISTORY_ENTRIES and pruning behavior
+  - Added "Match Undoability Rules" section documenting complete logic for when matches can/cannot be undone
+  - Expanded transaction structure to show all fields (type, description, beforeState)
+  - Documented all 6 transaction types (COMPLETE_MATCH, START_MATCH, STOP_MATCH, CHANGE_LANE, ASSIGN_REFEREE, CLEAR_REFEREE)
+  - Added section on potential edge case: transaction type confusion in downstream blocking check
+  - Included 4 detailed example scenarios covering common undoability cases
+
+### Files Modified
+- `clean-match-progression.js` - Increased MAX_HISTORY_ENTRIES from 50 to 300
+- `Docs/UNDO.md` - Comprehensive documentation of undo system behavior and limits
+
 # 2025-10-10
 
 ## **v2.5.0-beta** - Distributed Seeding & Visual Consistency

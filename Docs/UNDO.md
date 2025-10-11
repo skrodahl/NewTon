@@ -28,18 +28,65 @@ The undo system is built on two fundamental single sources of truth:
 ### Transaction Structure
 ```javascript
 {
-    id: "unique-transaction-id",
+    id: "tx_1705318200000",
+    type: "COMPLETE_MATCH", // Transaction type (see below)
+    completionType: "MANUAL" | "AUTO", // Only present for COMPLETE_MATCH transactions
+    description: "FS-2-8: Player A defeats Player B",
+    timestamp: "2025-01-15T10:30:00.000Z",
     matchId: "FS-2-8",
-    winner: { name: "Player A", id: "player-a" },
-    loser: { name: "Player B", id: "player-b" },
-    completionType: "MANUAL" | "AUTO",
-    timestamp: "2025-01-15T10:30:00.000Z"
+    winner: { name: "Player A", id: "player-a" }, // Only for COMPLETE_MATCH
+    loser: { name: "Player B", id: "player-b" },  // Only for COMPLETE_MATCH
+    beforeState: {
+        matches: [...], // Full copy of matches array before the change
+        tournament: {...} // Full copy of tournament object before the change
+    }
 }
 ```
 
 ### Transaction Types
-- **MANUAL**: User-completed matches (can be undone)
-- **AUTO**: Auto-completed walkover matches (consequences of manual completions)
+
+The system creates transactions for multiple types of operations:
+
+- **COMPLETE_MATCH**: Match completion (MANUAL: user-completed, AUTO: walkover auto-completion)
+- **START_MATCH**: Match activation (operator clicked "Start Match")
+- **STOP_MATCH**: Match deactivation (operator clicked "Stop Match")
+- **CHANGE_LANE**: Lane assignment changed for a match
+- **ASSIGN_REFEREE**: Referee assigned to a match
+- **CLEAR_REFEREE**: Referee removed from a match
+
+**Important**: All transaction types consume history entries. A typical 32-player tournament generates:
+- 62 COMPLETE_MATCH transactions (one per match)
+- 62 START_MATCH transactions (one per match)
+- ~5 STOP_MATCH transactions (rare - when matches are stopped before completion)
+- ~10 CHANGE_LANE transactions (occasional corrections)
+- ~30 ASSIGN_REFEREE transactions (referee management)
+- ~5 CLEAR_REFEREE transactions (rare - clearing incorrect assignments)
+- **Total: ~174 transactions in a typical tournament**
+
+### Transaction History Storage and Limits
+
+**Storage location**: `localStorage` with key `'tournamentHistory'`
+
+**History limit**: `MAX_HISTORY_ENTRIES = 300`
+
+**Pruning behavior**: When history exceeds 300 entries, oldest transactions are removed (FIFO - First In, First Out):
+```javascript
+history.unshift(transaction); // Add new transaction to beginning
+if (history.length > MAX_HISTORY_ENTRIES) {
+    history = history.slice(0, MAX_HISTORY_ENTRIES); // Keep only first 300
+}
+```
+
+**Why 300?**
+- 32-player bracket has 62 matches (maximum possible)
+- Typical tournament generates ~174 total transactions (match completions + operational changes)
+- 300 provides 72% buffer for tournaments with heavy lane/referee management
+- Previous limit of 50 caused premature pruning, making early matches lose their COMPLETE_MATCH transactions
+
+**Impact of pruning on undoability**:
+- If a match's COMPLETE_MATCH transaction is pruned from history, the match cannot be undone
+- With limit of 50: Early matches (FS-R1, FS-R2) would become non-undoable after ~30-40 completed matches
+- With limit of 300: All matches remain undoable throughout the entire tournament
 
 ## Hardcoded Match Progression
 
@@ -59,6 +106,114 @@ MATCH_PROGRESSION = {
 - **Bulletproof Logic**: No ambiguity about where players advance
 - **Dependency Identification**: Enables precise identification of affected matches
 - **Auto-advancement Processing**: Drives walkover match completions
+
+## Match Undoability Rules
+
+The system determines whether a completed match can be undone using `isMatchUndoable(matchId)` function, which implements the following logic:
+
+### When a Match CANNOT Be Undone
+
+1. **Tournament is read-only** (`tournament.readOnly === true`)
+   - Completed tournaments are locked to prevent accidental changes
+
+2. **No transaction history exists** (`history.length === 0`)
+   - Cannot undo without historical record of the match completion
+
+3. **Match has no MANUAL transaction in history**
+   - Only matches completed by the operator can be undone
+   - AUTO-completed walkover matches cannot be directly undone (they can only be undone by undoing their upstream MANUAL match)
+   - If the match's COMPLETE_MATCH transaction was pruned from history due to MAX_HISTORY_ENTRIES limit, it cannot be undone
+
+4. **Downstream matches are completed with MANUAL transactions**
+   - If the winner advanced to a downstream match that was manually completed, undo is blocked
+   - If the loser advanced to a downstream match that was manually completed, undo is blocked
+   - **Exception**: If downstream match was AUTO-completed (walkover), undo is allowed because the AUTO match will recalculate when the upstream match is undone
+
+### When a Match CAN Be Undone
+
+A match is undoable if ALL of the following are true:
+- ✅ Tournament is not read-only
+- ✅ Transaction history exists
+- ✅ Match has a MANUAL COMPLETE_MATCH transaction in history
+- ✅ Winner's destination match is either:
+  - Not completed, OR
+  - Completed via AUTO (walkover)
+- ✅ Loser's destination match is either:
+  - Not completed, OR
+  - Completed via AUTO (walkover)
+
+### Visual Indicators
+
+The UI shows match undoability status:
+- **Completed match with green checkmark and ↺ undo icon**: Can be undone (click to undo)
+- **Completed match with green checkmark only**: Cannot be undone (blocked by downstream matches or missing transaction)
+- **Status bar message**: Shows specific blocking matches when undo is prevented
+
+### Example Scenarios
+
+**Scenario 1: Simple undoable match**
+```
+FS-R1-1 completed (MANUAL) → Winner in FS-R2-1 (not completed yet)
+Result: FS-R1-1 can be undone ✅
+```
+
+**Scenario 2: Blocked by downstream MANUAL completion**
+```
+FS-R1-1 completed (MANUAL) → Winner advanced to FS-R2-1
+FS-R2-1 completed (MANUAL)
+Result: FS-R1-1 cannot be undone ❌ (blocked by FS-R2-1)
+```
+
+**Scenario 3: Allowed despite downstream AUTO completion**
+```
+FS-R1-1 completed (MANUAL) → Winner advanced to FS-R2-1 (facing walkover)
+FS-R2-1 auto-completed (AUTO)
+Result: FS-R1-1 can be undone ✅ (FS-R2-1 will recalculate)
+```
+
+**Scenario 4: Transaction pruned**
+```
+FS-R1-1 completed (MANUAL) at transaction #5
+Tournament continues... 300+ more transactions
+FS-R1-1's COMPLETE_MATCH transaction pruned from history
+Result: FS-R1-1 cannot be undone ❌ (transaction lost)
+Note: With MAX_HISTORY_ENTRIES = 300, this scenario no longer occurs in practice
+```
+
+### Potential Edge Case: Transaction Type Confusion
+
+**Status**: Possible bug, not yet confirmed in practice with MAX_HISTORY_ENTRIES = 300
+
+**Scenario**: The downstream blocking check uses `history.find(t => t.matchId === targetMatchId)` which returns the **first** (newest) transaction for that match. If the downstream match has multiple transaction types (e.g., COMPLETE_MATCH followed by CHANGE_LANE or ASSIGN_REFEREE), the function might find the wrong transaction type.
+
+**Example problematic sequence**:
+```
+1. FS-R1-1 completed (MANUAL) - COMPLETE_MATCH transaction created
+2. FS-R2-1 completed (MANUAL) - COMPLETE_MATCH transaction created
+3. Operator changes lane for FS-R2-1 - CHANGE_LANE transaction created (newer in history)
+4. Check if FS-R1-1 is undoable:
+   - history.find() for FS-R2-1 returns CHANGE_LANE (newest)
+   - Check: transaction.completionType === 'MANUAL'
+   - CHANGE_LANE has no completionType property → undefined !== 'MANUAL' → false
+   - FS-R2-1 doesn't block the undo
+   - Result: FS-R1-1 incorrectly shows as undoable ❌
+```
+
+**Potential fix** (not yet implemented):
+```javascript
+// Current code (lines 1934, 1946, 3695, 3707 in bracket-rendering.js):
+const targetTransaction = history.find(t => t.matchId === targetMatchId);
+
+// Proposed fix:
+const targetTransaction = history.find(t =>
+    t.matchId === targetMatchId &&
+    t.type === 'COMPLETE_MATCH'
+);
+```
+
+**Why not fixed yet**: Conservative approach - fixing MAX_HISTORY_ENTRIES first (addressing confirmed Bug B: history pruning), then monitoring to see if this edge case actually occurs in practice before implementing additional changes.
+
+**Monitoring plan**: If matches with completed MANUAL downstream matches incorrectly show as undoable after the MAX_HISTORY_ENTRIES fix, implement the transaction type filtering above.
 
 ## Surgical Undo Algorithm
 
