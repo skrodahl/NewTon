@@ -31,7 +31,8 @@ const DEFAULT_CONFIG = {
     },
     ui: {
         confirmWinnerSelection: true,
-        autoOpenMatchControls: true
+        autoOpenMatchControls: true,
+        developerMode: false
     },
     server: {
         allowSharedTournamentDelete: false
@@ -131,6 +132,7 @@ function applyConfigToUI() {
     if (config.ui) {
         safeSetChecked('confirmWinnerSelection', config.ui.confirmWinnerSelection);
         safeSetChecked('autoOpenMatchControls', config.ui.autoOpenMatchControls);
+        safeSetChecked('developerMode', config.ui.developerMode);
     }
 
     // Server configuration
@@ -283,10 +285,12 @@ function saveUIConfiguration() {
     const confirmWinnerElement = document.getElementById('confirmWinnerSelection');
     const autoOpenElement = document.getElementById('autoOpenMatchControls');
     const allowDeleteElement = document.getElementById('allowSharedTournamentDelete');
+    const developerModeElement = document.getElementById('developerMode');
 
     config.ui = config.ui || {};
     config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
     config.ui.autoOpenMatchControls = autoOpenElement ? autoOpenElement.checked : true;
+    config.ui.developerMode = developerModeElement ? developerModeElement.checked : false;
 
     config.server = config.server || {};
     config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;

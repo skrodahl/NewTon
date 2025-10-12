@@ -1,3 +1,64 @@
+# 2025-10-12
+
+## **v2.5.0-beta** - Developer Console
+
+### New Feature: Developer Console
+- **Hidden developer tool for real-time tournament diagnostics**
+  - **Purpose**: Monitor tournament health, run validation checks, and execute developer commands without browser console
+  - **Access**: Enable in Config → User Interface → "Enable Developer Analytics", then click version number in Tournament page CAD-box
+  - **Design**: Large modal (90% screen) with split-view layout (30% sidebar, 70% detail pane)
+  - **Auto-refresh**: Updates every 2 seconds (pauses while scrolling)
+
+#### Statistics (Real-time Monitoring)
+- **Transaction Health**: Shows current usage (X/500) with health indicators (✅ <50%, ⚠️ 50-80%, 🔴 >80%)
+- **Match State**: Breakdown of completed/live/ready/pending matches
+- **Player Count**: Paid vs unpaid players
+- **Lane Usage**: Current lane utilization with conflict detection (✅/⚠️)
+
+#### Validation Checks (6 Total)
+1. **Lane Assignments**: Detects overlapping lane assignments for LIVE matches
+2. **Referee Assignments**: Detects referees playing in matches they're refereeing
+3. **Match State Integrity**: Verifies completed matches have winner/loser assigned
+4. **Transaction Count**: Warns if approaching 500-entry limit (>80%)
+5. **Player ID Integrity**: Detects orphaned player references in matches array
+6. **Progression Integrity**: Verifies winners/losers are in correct downstream matches per MATCH_PROGRESSION rules
+
+#### Developer Commands
+- **Re-render Bracket**: Force visual refresh of bracket display (`renderBracket()`)
+- **Recalculate Rankings**: Recompute all player placements (`calculateAllRankings()`)
+- **Refresh All Dropdowns**: Update lane and referee dropdown options
+- **Validate Everything**: Run all 6 validation checks and display results
+- **View Transaction History**: Display all transactions (latest first) with timestamp, type, and description
+- **View Console Output**: Show captured console.log output with Clear and Copy to Clipboard buttons
+- **View Match Progression**: Display MATCH_PROGRESSION lookup tables for current bracket size
+
+#### Console Output Capture
+- **Smart capture**: Only intercepts console.log while Developer Console is open
+- **Buffer**: Stores last 100 entries with timestamps
+- **Actions**: Clear buffer or copy all output to clipboard
+- **Use case**: Monitor command execution without browser developer tools
+
+#### Technical Implementation
+- **Files Added**:
+  - `analytics.js` - Complete analytics system (console capture, validations, commands, UI management)
+  - `Docs/ANALYTICS.md` - Comprehensive documentation (1000+ lines: features, use cases, troubleshooting, extension guide, future improvements)
+- **Files Modified**:
+  - `tournament.html` - Added analytics modal HTML (90% layout, split-view) + script tag + developerMode checkbox in Config
+  - `results-config.js` - Added `globalConfig.ui.developerMode` (default: false) with save/load persistence
+  - `tournament-management.js` - Made version number clickable when developerMode enabled, reads directly from localStorage to avoid script loading order issues
+  - `styles.css` - Fixed pointer-events to allow version number clicks despite bracket viewport grab cursor, removed nested scrolling
+- **Global Functions**: All analytics functions accessible via window object for browser console debugging
+- **Dialog Stack Integration**: Uses pushDialog/popDialog for proper z-index management and Escape key support
+- **Smart Auto-refresh**: Updates left pane statistics every 2 seconds, only refreshes right pane Quick Overview (other views stay static for readability)
+
+#### Use Cases
+- **Live monitoring**: Keep console open during tournament to watch transaction health and match state
+- **Issue diagnosis**: Run validation checks to identify lane conflicts, progression errors, or data corruption
+- **Command execution**: Re-render bracket or recalculate rankings after manual data fixes
+- **Debug export**: Copy console output and validation results for bug reports
+
+---
+
 # 2025-10-11
 
 ## **v2.5.0-beta** - Undo System Fixes

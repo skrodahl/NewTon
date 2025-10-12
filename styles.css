@@ -551,12 +551,17 @@ body {
 }
 
 /* Override text selection for watermarks specifically */
+/* Prevent text selection on all watermark elements */
 .bracket-watermarks,
 .bracket-watermarks * {
   user-select: none !important;
   -webkit-user-select: none !important;
   -moz-user-select: none !important;
   -ms-user-select: none !important;
+}
+
+/* Disable pointer events by default, will be overridden for specific elements */
+.bracket-watermarks {
   pointer-events: none;
 }
 
@@ -768,6 +773,13 @@ body {
   grid-row: 3;
   border-right: 1px solid #34495e;
   justify-content: center;
+  position: relative;
+  z-index: 100;
+}
+
+/* Allow version number to be clickable when cursor is pointer (developer mode enabled) */
+#watermark-right .cad-version[style*="cursor: pointer"] {
+  pointer-events: auto;
 }
 
 #watermark-right .cad-status {

@@ -1118,6 +1118,20 @@ function updateTournamentWatermark() {
             // Get app version
             const version = window.APP_VERSION || 'v2.0.3';
 
+            // Check if developer mode is enabled (read directly from localStorage)
+            const developerMode = (() => {
+                try {
+                    const savedConfig = localStorage.getItem('dartsConfig');
+                    if (savedConfig) {
+                        const parsed = JSON.parse(savedConfig);
+                        return parsed.ui && parsed.ui.developerMode;
+                    }
+                } catch (e) {}
+                return false;
+            })();
+            const versionStyle = developerMode ? 'cursor: pointer;' : '';
+            const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
+
             watermark.innerHTML = `
                 <div class="cad-header"> ${truncatedName}</div>
                 <div class="cad-grid">
@@ -1129,11 +1143,25 @@ function updateTournamentWatermark() {
                     <div class="cad-cell cad-bracket">${bracketSize}-BRACKET</div>
                     <div class="cad-cell cad-matches">${matchCount} MATCHES</div>
                     <div class="cad-cell cad-date">${tournament.date}</div>
-                    <div class="cad-cell cad-version">v${version}</div>
+                    <div class="cad-cell cad-version" style="${versionStyle}" ${versionClick}>v${version}</div>
                 </div>
                 <div class="cad-status">${status}</div>
             `;
         } else {
+            // Check if developer mode is enabled (read directly from localStorage)
+            const developerMode = (() => {
+                try {
+                    const savedConfig = localStorage.getItem('dartsConfig');
+                    if (savedConfig) {
+                        const parsed = JSON.parse(savedConfig);
+                        return parsed.ui && parsed.ui.developerMode;
+                    }
+                } catch (e) {}
+                return false;
+            })();
+            const versionStyle = developerMode ? 'cursor: pointer;' : '';
+            const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
+
             watermark.innerHTML = `
                 <div class="cad-header">NO TOURNAMENT</div>
                 <div class="cad-grid">
@@ -1145,7 +1173,7 @@ function updateTournamentWatermark() {
                     <div class="cad-cell cad-bracket">-</div>
                     <div class="cad-cell cad-matches">-</div>
                     <div class="cad-cell cad-date">-</div>
-                    <div class="cad-cell cad-version">v${window.APP_VERSION || '2.0.3'}</div>
+                    <div class="cad-cell cad-version" style="${versionStyle}" ${versionClick}>v${window.APP_VERSION || '2.0.3'}</div>
                 </div>
                 <div class="cad-status">SETUP</div>
             `;
