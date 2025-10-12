@@ -1093,11 +1093,14 @@ function renderMatch(match, x, y, section, roundIndex) {
         </div>
 	<div class="match-controls">
     	    <span style="font-size: 11px; color: #666;">
-        	    Ref: <select onchange="updateMatchReferee('${match.id}', this.value)" 
-                onfocus="refreshRefereeDropdown('${match.id}')"
-                style="background: white; border: 1px solid #ddd; font-size: 11px; width: 185px; padding: 1px;">
-            	    ${generateRefereeOptionsWithConflicts(match.id, match.referee)}
-        	    </select>
+        	    ${matchState === 'completed'
+                    ? `Ref: <span style="font-size: 11px;">${match.referee ? players.find(p => p.id === match.referee)?.name || 'Unknown' : 'None'}</span>`
+                    : `Ref: <select onchange="updateMatchReferee('${match.id}', this.value)"
+                        onfocus="refreshRefereeDropdown('${match.id}')"
+                        style="background: white; border: 1px solid #ddd; font-size: 11px; width: 185px; padding: 1px;">
+                        ${generateRefereeOptionsWithConflicts(match.id, match.referee)}
+                    </select>`
+                }
     	    </span>
     	    <button onclick="${getButtonClickHandler(matchState, match.id)}" 
             	    style="font-size: 9px; padding: 3px 6px; border: none; border-radius: 3px; 
