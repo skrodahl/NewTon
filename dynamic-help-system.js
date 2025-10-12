@@ -318,6 +318,16 @@ const HELP_CONTENT = {
                         <li><strong>Winner Confirmation:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
                         <li><strong>Match Controls Auto-Open:</strong> Automatically show Command Center when entering Tournament page</li>
                     </ul>
+                    <p><strong>Developer Analytics:</strong></p>
+                    <ul>
+                        <li><strong>Enable Developer Analytics:</strong> Show advanced diagnostics and developer tools
+                            <ul>
+                                <li>When enabled, click version number in Tournament page to open Developer Console</li>
+                                <li>Provides real-time statistics, validation checks, and developer commands</li>
+                                <li>Hidden developer tool - no visual changes when enabled</li>
+                            </ul>
+                        </li>
+                    </ul>
                     <p><strong>Server Settings:</strong></p>
                     <ul>
                         <li><strong>Allow Deleting Shared Tournaments:</strong> Control delete button visibility for server-hosted tournaments</li>

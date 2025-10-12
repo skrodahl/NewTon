@@ -57,14 +57,18 @@
                         <label for="tournamentDate">Tournament Date</label>
                         <input type="date" id="tournamentDate">
                     </div>
-                    <button class="btn btn-success tournament-create-button" onclick="createTournament()">Create New Tournament</button>
+                    <button class="btn btn-success tournament-create-button" onclick="createTournament()">Create New
+                        Tournament</button>
                 </div>
 
                 <div class="form-group">
                     <button class="btn btn-success" onclick="exportTournament()">Export Tournament</button>
-                    <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">Import Tournament</button>
+                    <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">Import
+                        Tournament</button>
                     <button class="btn btn-danger" onclick="showResetTournamentModal()">Reset Tournament</button>
-                    <button id="uploadToServerBtn" class="btn btn-success" onclick="document.getElementById('uploadFile').click()" style="display: none;">Upload to Server</button>
+                    <button id="uploadToServerBtn" class="btn btn-success"
+                        onclick="document.getElementById('uploadFile').click()" style="display: none;">Upload to
+                        Server</button>
                     <input type="file" id="importFile" accept=".json" style="display: none;"
                         onchange="importTournament(event)">
                     <input type="file" id="uploadFile" accept=".json" style="display: none;"
@@ -87,7 +91,7 @@
                         </div>
                     </div>
                 </div>
-                
+
                 <div class="scrollable-column">
                     <h3>Match Results</h3>
                     <div class="scrollable-column-content">
@@ -118,14 +122,16 @@
                         <button class="btn btn-success" onclick="exportResultsCSV()">Export CSV</button>
                         <button class="btn" onclick="showPage('tournament')">Go to Tournament</button>
                     </div>
-                    <div class="player-count"><span id="playerCount">0</span> Registered Players (<span id="paidCount">0</span> paid)</div>
+                    <div class="player-count"><span id="playerCount">0</span> Registered Players (<span
+                            id="paidCount">0</span> paid)</div>
                 </div>
             </div>
 
             <div class="two-column-container registration-page-main">
                 <!-- Left Column: Tournament Players -->
                 <div class="scrollable-column">
-                    <h3>Tournament Players <span style="font-weight: normal; font-size: 14px; color: #6b7280;">(Click to toggle paid status)</span></h3>
+                    <h3>Tournament Players <span style="font-weight: normal; font-size: 14px; color: #6b7280;">(Click to
+                            toggle paid status)</span></h3>
                     <div class="scrollable-column-content">
                         <div id="playersContainer" class="players-list">
                             <!-- Players will be added here -->
@@ -140,8 +146,10 @@
                         <div class="player-list-header">
                             <span id="playerListCount">Saved Players</span>
                             <div style="display: flex; align-items: center; gap: 12px;">
-                                <span style="font-size: 13px; color: #6b7280; font-weight: normal;">Import from tournament export file</span>
-                                <button class="btn btn-success" onclick="importPlayerListFromFile()">Import Saved Players</button>
+                                <span style="font-size: 13px; color: #6b7280; font-weight: normal;">Import from
+                                    tournament export file</span>
+                                <button class="btn btn-success" onclick="importPlayerListFromFile()">Import Saved
+                                    Players</button>
                             </div>
                         </div>
                         <div class="scrollable-column-content">
@@ -174,7 +182,8 @@
                                     <tbody id="resultsTableBody">
                                     </tbody>
                                 </table>
-                                <div id="resultsEmptyMessage" style="display: none; text-align: center; color: #666; font-style: italic; padding: 20px;">
+                                <div id="resultsEmptyMessage"
+                                    style="display: none; text-align: center; color: #666; font-style: italic; padding: 20px;">
                                     No players added yet
                                 </div>
                             </div>
@@ -264,7 +273,9 @@
                         <h3>Logo</h3>
                         <div class="config-content">
                             <div class="info-text">
-                                To change the logo, place a square image with the name 'logo.png', 'logo.jpg', 'logo.jpeg', or 'logo.svg' in the folder that contains the file tournament.html. Browser favicon uses the file 'logo.jpg'.
+                                To change the logo, place a square image with the name 'logo.png', 'logo.jpg',
+                                'logo.jpeg', or 'logo.svg' in the folder that contains the file tournament.html. Browser
+                                favicon uses the file 'logo.jpg'.
                             </div>
                         </div>
                     </div>
@@ -318,7 +329,8 @@
                                 </div>
                             </div>
                             <div class="config-buttons">
-                                <button class="btn btn-success" onclick="saveLaneConfiguration()">Save Lane Settings</button>
+                                <button class="btn btn-success" onclick="saveLaneConfiguration()">Save Lane
+                                    Settings</button>
                                 <button class="btn" onclick="showLaneUsage()">Show Current Lane Usage</button>
                             </div>
                         </div>
@@ -334,7 +346,8 @@
                                         <input type="checkbox" id="confirmWinnerSelection" checked>
                                         <span>
                                             Show confirmation dialog when selecting match winner
-                                            <small class="field-help">When disabled, matches complete instantly without entering scores or statistics</small>
+                                            <small class="field-help">When disabled, matches complete instantly without
+                                                entering scores or statistics</small>
                                         </span>
                                     </label>
                                 </div>
@@ -345,6 +358,16 @@
                                     </label>
                                 </div>
                             </div>
+                            <div class="form-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="developerMode">
+                                    <span>
+                                        Enable Developer Analytics
+                                        <small class="field-help">Show advanced diagnostics and developer tools (click
+                                            version number in Tournament page)</small>
+                                    </span>
+                                </label>
+                            </div>
 
                             <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">Server Settings</h4>
                             <div class="checkbox-group">
@@ -353,19 +376,12 @@
                                         <input type="checkbox" id="allowSharedTournamentDelete">
                                         <span>
                                             Allow deleting shared tournaments
-                                            <small class="field-help">When disabled, delete buttons are hidden for shared tournaments on the server</small>
+                                            <small class="field-help">When disabled, delete buttons are hidden for
+                                                shared tournaments on the server</small>
                                         </span>
                                     </label>
                                 </div>
-                                <div class="form-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="developerMode">
-                                        <span>
-                                            Enable Developer Analytics
-                                            <small class="field-help">Show advanced diagnostics and developer tools (click version number in Tournament page)</small>
-                                        </span>
-                                    </label>
-                                </div>
+
                             </div>
 
                             <button class="btn btn-success" onclick="saveUIConfiguration()">Save UI Settings</button>
@@ -482,611 +498,688 @@
             </div>
         </div>
 
-    <!-- Statistics Modal -->
-    <div id="statsModal" class="modal">
-        <div class="modal-content">
-            <h3 id="statsPlayerName">Player Statistics</h3>
+        <!-- Statistics Modal -->
+        <div id="statsModal" class="modal">
+            <div class="modal-content">
+                <h3 id="statsPlayerName">Player Statistics</h3>
 
-            <!-- Scrollable content area -->
-            <div class="stats-content-container" style="max-height: 60vh; overflow-y: auto; padding-right: 8px;">
-                <div class="form-group">
-                    <label>Short Legs (max 21 darts)</label>
-                    <input type="number" id="statsShortLegDarts" min="9" max="21" placeholder="Enter dart count">
-                    <button class="btn" onclick="addShortLeg()" style="margin-top: 5px;">Add Short Leg</button>
-                </div>
-
-                <div class="form-group">
-                    <label>High Out Score (101+)</label>
-                    <input type="number" id="statsHighOut" min="101" max="170" placeholder="Enter high out score">
-                    <button class="btn" onclick="addHighOut()" style="margin-top: 5px;">Add High Out</button>
-                </div>
-
-                <div class="form-group">
-                    <label>180s</label>
-                    <div style="display: flex; align-items: center;">
-                        <button class="btn" onclick="decrement180s()"
-                            onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#ffffff'"
-                            style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
-                        <button class="btn" onclick="increment180s()"
-                            onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#ffffff'"
-                            style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
-                        <span id="current180sCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current: 0</span>
-                    </div>
-                </div>
-
-                <div class="form-group">
-                    <label>Tons (100+)</label>
-                    <div style="display: flex; align-items: center;">
-                        <button class="btn" onclick="decrementTons()"
-                            onmouseover="this.style.background='#fef2f2'" onmouseout="this.style.background='#ffffff'"
-                            style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
-                        <button class="btn" onclick="incrementTons()"
-                            onmouseover="this.style.background='#dcfce7'" onmouseout="this.style.background='#ffffff'"
-                            style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
-                        <span id="currentTonsCount" style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current: 0</span>
-                    </div>
-                </div>
-
-                <!-- Lists grouped together -->
-                <div id="shortLegsList"></div>
-                <div id="highOutsList"></div>
-            </div>
-
-            <!-- Fixed button area at bottom -->
-            <div class="text-center mt-20" style="flex-shrink: 0; margin-top: 20px;">
-                <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
-                <button class="btn" onclick="closeStatsModal()">Cancel</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Developer Analytics Modal -->
-    <div id="analyticsModal" class="modal">
-        <div class="modal-content analytics-modal-content" style="width: 90%; height: 90%; max-width: 90%; display: flex; flex-direction: column;">
-
-            <!-- Title bar -->
-            <h3>Developer Console</h3>
-
-            <!-- Split view container -->
-            <div class="analytics-split-view" style="display: flex; flex: 1; overflow: hidden; margin-top: 20px;">
-
-                <!-- Left pane: Statistics + Commands -->
-                <div class="analytics-left-pane" style="width: 30%; overflow-y: auto; padding: 24px; border-right: 1px solid #ddd;">
-
-                    <!-- Statistics Section -->
-                    <h4 style="margin-top: 0; margin-bottom: 15px; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Statistics</h4>
-
-                    <div style="margin-bottom: 20px;">
-                        <a href="#" onclick="showTransactionBreakdown(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
-                            <strong>Transaction Health</strong><br>
-                            <span id="stat-transactions" style="font-size: 13px; color: #666;">Loading...</span>
-                        </a>
-
-                        <a href="#" onclick="showMatchStateDetails(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
-                            <strong>Match State</strong><br>
-                            <span id="stat-matches" style="font-size: 13px; color: #666;">Loading...</span>
-                        </a>
-
-                        <a href="#" onclick="showQuickOverview(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
-                            <strong>Player Count</strong><br>
-                            <span id="stat-players" style="font-size: 13px; color: #666;">Loading...</span>
-                        </a>
-
-                        <a href="#" onclick="showQuickOverview(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
-                            <strong>Lane Usage</strong><br>
-                            <span id="stat-lanes" style="font-size: 13px; color: #666;">Loading...</span>
-                        </a>
+                <!-- Scrollable content area -->
+                <div class="stats-content-container" style="max-height: 60vh; overflow-y: auto; padding-right: 8px;">
+                    <div class="form-group">
+                        <label>Short Legs (max 21 darts)</label>
+                        <input type="number" id="statsShortLegDarts" min="9" max="21" placeholder="Enter dart count">
+                        <button class="btn" onclick="addShortLeg()" style="margin-top: 5px;">Add Short Leg</button>
                     </div>
 
-                    <!-- Commands Section -->
-                    <h4 style="margin-top: 20px; margin-bottom: 15px; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">Commands</h4>
-
-                    <div style="margin-bottom: 20px;">
-                        <a href="#" onclick="commandReRenderBracket(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Re-render Bracket</a>
-
-                        <a href="#" onclick="commandRecalculateRankings(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Recalculate Rankings</a>
-
-                        <a href="#" onclick="commandRefreshDropdowns(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Refresh All Dropdowns</a>
-
-                        <a href="#" onclick="commandValidateEverything(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Validate Everything</a>
-
-                        <a href="#" onclick="showTransactionHistory(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View Transaction History</a>
-
-                        <a href="#" onclick="showConsoleOutput(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View Console Output</a>
-
-                        <a href="#" onclick="showMatchProgression(); return false;" style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View Match Progression</a>
+                    <div class="form-group">
+                        <label>High Out Score (101+)</label>
+                        <input type="number" id="statsHighOut" min="101" max="170" placeholder="Enter high out score">
+                        <button class="btn" onclick="addHighOut()" style="margin-top: 5px;">Add High Out</button>
                     </div>
 
-                    <!-- Timestamp -->
-                    <div id="analytics-timestamp" style="font-size: 11px; color: #999; margin-top: 30px;">
-                        Last updated: --:--:--
+                    <div class="form-group">
+                        <label>180s</label>
+                        <div style="display: flex; align-items: center;">
+                            <button class="btn" onclick="decrement180s()" onmouseover="this.style.background='#fef2f2'"
+                                onmouseout="this.style.background='#ffffff'"
+                                style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
+                            <button class="btn" onclick="increment180s()" onmouseover="this.style.background='#dcfce7'"
+                                onmouseout="this.style.background='#ffffff'"
+                                style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
+                            <span id="current180sCount"
+                                style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current:
+                                0</span>
+                        </div>
                     </div>
 
-                </div>
-
-                <!-- Right pane: Detail view -->
-                <div class="analytics-right-pane" style="flex: 1; overflow-y: auto; padding: 24px;">
-                    <h4>Loading...</h4>
-                    <p>Initializing Developer Console...</p>
-                </div>
-
-            </div>
-
-            <!-- Close button -->
-            <div class="text-center mt-20" style="flex-shrink: 0; margin-top: 20px;">
-                <button class="btn" onclick="closeAnalyticsModal()">Close</button>
-            </div>
-
-        </div>
-    </div>
-
-    <!-- Load JavaScript files in the correct order -->
-    <script src="main.js"></script>
-    <script src="lane-management.js"></script>
-    <script src="tournament-management.js"></script>
-    <script src="player-management.js"></script>
-    <script src="clean-match-progression.js"></script>
-    <script src="bracket-lines.js"></script>
-    <script src="bracket-rendering.js"></script>
-    <script src="results-config.js"></script>
-    <script src="dynamic-help-system.js"></script>
-    <script src="analytics.js"></script>
-
-    <footer>
-        <span id="footerContent"></span></br> Created by Håvard Skrödahl, NewTon DC Malmö
-    </footer>
-
-    <!-- Updated Winner Confirmation Modal with validation -->
-    <div id="winnerConfirmModal" class="modal">
-        <div class="modal-content">
-            <h3 id="winnerConfirmTitle">Confirm Match Winner</h3>
-            <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
-                <!-- Message will be populated by JavaScript -->
-            </div>
-
-            <!-- Enhanced leg scores section with validation -->
-            <div id="legScoresSection"
-                style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e5e7eb;">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                    <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
-                    <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
-                </div>
-                <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <div style="display: flex; align-items: center;">
-                        <span id="winnerNameForLegs"
-                            style="font-weight: 600; color: #065f46; margin-right: 10px; min-width: 80px;">Winner</span>
-                        <input type="number" id="winnerLegs" min="0" max="7"
-                            style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
-                        <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                    <div class="form-group">
+                        <label>Tons (100+)</label>
+                        <div style="display: flex; align-items: center;">
+                            <button class="btn" onclick="decrementTons()" onmouseover="this.style.background='#fef2f2'"
+                                onmouseout="this.style.background='#ffffff'"
+                                style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
+                            <button class="btn" onclick="incrementTons()" onmouseover="this.style.background='#dcfce7'"
+                                onmouseout="this.style.background='#ffffff'"
+                                style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
+                            <span id="currentTonsCount"
+                                style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current:
+                                0</span>
+                        </div>
                     </div>
-                    <div style="display: flex; align-items: center;">
-                        <span id="loserNameForLegs"
-                            style="font-weight: 600; color: #6b7280; margin-right: 10px; min-width: 80px;">Loser</span>
-                        <input type="number" id="loserLegs" min="0" max="7" value="0"
-                            style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
-                        <span style="margin: 0 8px; color: #6b7280;">legs</span>
-                    </div>
-                </div>
-                <!-- Validation message will be inserted here by JavaScript -->
-            </div>
 
-            <div class="text-center mt-20">
-                <button class="btn" id="winnerConfirmCancel"
-                    style="margin-right: 15px;">Cancel</button>
-                <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
+                    <!-- Lists grouped together -->
+                    <div id="shortLegsList"></div>
+                    <div id="highOutsList"></div>
+                </div>
+
+                <!-- Fixed button area at bottom -->
+                <div class="text-center mt-20" style="flex-shrink: 0; margin-top: 20px;">
+                    <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
+                    <button class="btn" onclick="closeStatsModal()">Cancel</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Match Controls Modal -->
-    <div id="matchDetailsModal" class="modal">
-        <div class="modal-content">
-            <h3 id="matchDetailsTitle">Match Controls</h3>
-            <div id="matchDetailsMessage" style="margin: 20px 0; line-height: 1.5; font-family: monospace; white-space: pre-line;">
-                <!-- Match details will be populated by JavaScript -->
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" id="matchDetailsOK" style="background: #065f46;">OK</button>
-            </div>
-        </div>
-    </div>
+        <!-- Developer Analytics Modal -->
+        <div id="analyticsModal" class="modal">
+            <div class="modal-content analytics-modal-content"
+                style="width: 90%; height: 90%; max-width: 90%; display: flex; flex-direction: column;">
 
-    <!-- Match Controls Modal -->
-    <div id="matchCommandCenterModal" class="modal">
-        <div class="modal-content match-controls-modal" style="max-width: 1100px;">
-            <h3 id="commandCenterTitle">Match Controls</h3>
+                <!-- Title bar -->
+                <h3>Developer Console</h3>
 
-            <div class="match-controls-main-container">
-                <div class="match-controls-container">
-                    <!-- LIVE Matches Section -->
-                    <div id="liveMatchesSection" class="cc-match-section">
-                        <h4 class="cc-section-header">🔴 LIVE Matches</h4>
-                        <div id="liveMatchesContainer" class="cc-matches-container">
-                            <!-- LIVE match cards will be populated here -->
-                        </div>
-                    </div>
+                <!-- Split view container -->
+                <div class="analytics-split-view" style="display: flex; flex: 1; overflow: hidden; margin-top: 20px;">
 
-                    <!-- Round-based Matches Section (repurposing front section) -->
-                    <div id="frontMatchesSection" class="cc-match-section">
-                        <!-- Section header will be dynamically created for each round -->
-                        <div id="frontMatchesContainer" class="cc-matches-container">
-                            <!-- Round-based match cards will be populated here -->
-                        </div>
-                    </div>
+                    <!-- Left pane: Statistics + Commands -->
+                    <div class="analytics-left-pane"
+                        style="width: 30%; overflow-y: auto; padding: 24px; border-right: 1px solid #ddd;">
 
-                    <!-- Back Bracket Matches Section (hidden - no longer used) -->
-                    <div id="backMatchesSection" class="cc-match-section" style="display: none;">
-                        <h4 class="cc-section-header">⚫ Backside - Ready to Start</h4>
-                        <div id="backMatchesContainer" class="cc-matches-container">
-                            <!-- Back bracket ready match cards will be populated here -->
-                        </div>
-                    </div>
+                        <!-- Statistics Section -->
+                        <h4
+                            style="margin-top: 0; margin-bottom: 15px; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Statistics</h4>
 
-                    <!-- Setup state message -->
-                    <div id="setupMessage" class="cc-setup-message" style="display: none;">
-                        <p>🔧 Tournament in setup mode</p>
-                        <p style="font-size: 14px; color: #666; margin-top: 8px;">Add players and configure the tournament to generate matches.</p>
-                    </div>
+                        <div style="margin-bottom: 20px;">
+                            <a href="#" onclick="showTransactionBreakdown(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
+                                <strong>Transaction Health</strong><br>
+                                <span id="stat-transactions" style="font-size: 13px; color: #666;">Loading...</span>
+                            </a>
 
-                    <!-- Empty state message -->
-                    <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
-                        <p>No matches currently active or ready to start.</p>
-                    </div>
+                            <a href="#" onclick="showMatchStateDetails(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
+                                <strong>Match State</strong><br>
+                                <span id="stat-matches" style="font-size: 13px; color: #666;">Loading...</span>
+                            </a>
 
-                    <!-- Tournament Completion Celebration -->
-                    <div id="tournamentCelebration" class="tournament-celebration" style="display: none;">
-                        <div class="celebration-header">
-                            <div class="celebration-title">🏆 Tournament Complete! 🏆</div>
-                            <div class="celebration-subtitle" id="celebrationSubtitle">Congratulations to all players!</div>
+                            <a href="#" onclick="showQuickOverview(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
+                                <strong>Player Count</strong><br>
+                                <span id="stat-players" style="font-size: 13px; color: #666;">Loading...</span>
+                            </a>
+
+                            <a href="#" onclick="showQuickOverview(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
+                                <strong>Lane Usage</strong><br>
+                                <span id="stat-lanes" style="font-size: 13px; color: #666;">Loading...</span>
+                            </a>
                         </div>
 
-                        <div class="podium-container">
-                            <div class="podium-position second">
-                                <div class="podium-player" id="podium-second">
-                                    <span class="podium-medal">🥈</span>
-                                    <div class="podium-rank">2nd Place</div>
-                                    <div class="podium-name">-</div>
-                                </div>
-                                <div class="podium-block second">2</div>
-                            </div>
+                        <!-- Commands Section -->
+                        <h4
+                            style="margin-top: 20px; margin-bottom: 15px; font-size: 14px; color: #666; text-transform: uppercase; letter-spacing: 0.5px;">
+                            Commands</h4>
 
-                            <div class="podium-position first">
-                                <div class="podium-player" id="podium-first">
-                                    <span class="podium-medal">🥇</span>
-                                    <div class="podium-rank">1st Place</div>
-                                    <div class="podium-name">-</div>
-                                </div>
-                                <div class="podium-block first">1</div>
-                            </div>
+                        <div style="margin-bottom: 20px;">
+                            <a href="#" onclick="commandReRenderBracket(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Re-render
+                                Bracket</a>
 
-                            <div class="podium-position third">
-                                <div class="podium-player" id="podium-third">
-                                    <span class="podium-medal">🥉</span>
-                                    <div class="podium-rank">3rd Place</div>
-                                    <div class="podium-name">-</div>
-                                </div>
-                                <div class="podium-block third">3</div>
-                            </div>
+                            <a href="#" onclick="commandRecalculateRankings(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Recalculate
+                                Rankings</a>
+
+                            <a href="#" onclick="commandRefreshDropdowns(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Refresh
+                                All Dropdowns</a>
+
+                            <a href="#" onclick="commandValidateEverything(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Validate
+                                Everything</a>
+
+                            <a href="#" onclick="showTransactionHistory(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
+                                Transaction History</a>
+
+                            <a href="#" onclick="showConsoleOutput(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
+                                Console Output</a>
+
+                            <a href="#" onclick="showMatchProgression(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
+                                Match Progression</a>
                         </div>
 
-                        <div class="celebration-highlights">
-                            <div class="highlights-title">🎯 Tournament Highlights</div>
-                            <div class="highlights-grid" id="highlightsGrid">
-                                <!-- Highlights will be populated here -->
-                            </div>
+                        <!-- Timestamp -->
+                        <div id="analytics-timestamp" style="font-size: 11px; color: #999; margin-top: 30px;">
+                            Last updated: --:--:--
                         </div>
+
                     </div>
+
+                    <!-- Right pane: Detail view -->
+                    <div class="analytics-right-pane" style="flex: 1; overflow-y: auto; padding: 24px;">
+                        <h4>Loading...</h4>
+                        <p>Initializing Developer Console...</p>
+                    </div>
+
                 </div>
 
-                <!-- Referee Suggestions Column -->
-                <div class="referee-suggestions-container">
-                    <h4 class="cc-section-header">👥 Referee Suggestions</h4>
-                    <div class="referee-suggestions-content">
-                        <div id="refereeLosersSection" class="referee-section">
-                            <h5 class="referee-subsection-header">Recent Losers</h5>
-                            <div id="refereeLosersContainer" class="referee-list">
-                                <!-- Recent losers will be populated here -->
+                <!-- Close button -->
+                <div class="text-center mt-20" style="flex-shrink: 0; margin-top: 20px;">
+                    <button class="btn" onclick="closeAnalyticsModal()">Close</button>
+                </div>
+
+            </div>
+        </div>
+
+        <!-- Load JavaScript files in the correct order -->
+        <script src="main.js"></script>
+        <script src="lane-management.js"></script>
+        <script src="tournament-management.js"></script>
+        <script src="player-management.js"></script>
+        <script src="clean-match-progression.js"></script>
+        <script src="bracket-lines.js"></script>
+        <script src="bracket-rendering.js"></script>
+        <script src="results-config.js"></script>
+        <script src="dynamic-help-system.js"></script>
+        <script src="analytics.js"></script>
+
+        <footer>
+            <span id="footerContent"></span></br> Created by Håvard Skrödahl, NewTon DC Malmö
+        </footer>
+
+        <!-- Updated Winner Confirmation Modal with validation -->
+        <div id="winnerConfirmModal" class="modal">
+            <div class="modal-content">
+                <h3 id="winnerConfirmTitle">Confirm Match Winner</h3>
+                <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
+                    <!-- Message will be populated by JavaScript -->
+                </div>
+
+                <!-- Enhanced leg scores section with validation -->
+                <div id="legScoresSection"
+                    style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e5e7eb;">
+                    <div
+                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                        <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
+                        <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
+                    </div>
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div style="display: flex; align-items: center;">
+                            <span id="winnerNameForLegs"
+                                style="font-weight: 600; color: #065f46; margin-right: 10px; min-width: 80px;">Winner</span>
+                            <input type="number" id="winnerLegs" min="0" max="7"
+                                style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
+                            <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                        </div>
+                        <div style="display: flex; align-items: center;">
+                            <span id="loserNameForLegs"
+                                style="font-weight: 600; color: #6b7280; margin-right: 10px; min-width: 80px;">Loser</span>
+                            <input type="number" id="loserLegs" min="0" max="7" value="0"
+                                style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
+                            <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                        </div>
+                    </div>
+                    <!-- Validation message will be inserted here by JavaScript -->
+                </div>
+
+                <div class="text-center mt-20">
+                    <button class="btn" id="winnerConfirmCancel" style="margin-right: 15px;">Cancel</button>
+                    <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Controls Modal -->
+        <div id="matchDetailsModal" class="modal">
+            <div class="modal-content">
+                <h3 id="matchDetailsTitle">Match Controls</h3>
+                <div id="matchDetailsMessage"
+                    style="margin: 20px 0; line-height: 1.5; font-family: monospace; white-space: pre-line;">
+                    <!-- Match details will be populated by JavaScript -->
+                </div>
+                <div class="text-center mt-20">
+                    <button class="btn" id="matchDetailsOK" style="background: #065f46;">OK</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Controls Modal -->
+        <div id="matchCommandCenterModal" class="modal">
+            <div class="modal-content match-controls-modal" style="max-width: 1100px;">
+                <h3 id="commandCenterTitle">Match Controls</h3>
+
+                <div class="match-controls-main-container">
+                    <div class="match-controls-container">
+                        <!-- LIVE Matches Section -->
+                        <div id="liveMatchesSection" class="cc-match-section">
+                            <h4 class="cc-section-header">🔴 LIVE Matches</h4>
+                            <div id="liveMatchesContainer" class="cc-matches-container">
+                                <!-- LIVE match cards will be populated here -->
                             </div>
                         </div>
-                        <div id="refereeWinnersSection" class="referee-section">
-                            <h5 class="referee-subsection-header">Recent Winners</h5>
-                            <div id="refereeWinnersContainer" class="referee-list">
-                                <!-- Recent winners will be populated here -->
+
+                        <!-- Round-based Matches Section (repurposing front section) -->
+                        <div id="frontMatchesSection" class="cc-match-section">
+                            <!-- Section header will be dynamically created for each round -->
+                            <div id="frontMatchesContainer" class="cc-matches-container">
+                                <!-- Round-based match cards will be populated here -->
                             </div>
                         </div>
-                        <div id="refereeAssignmentsSection" class="referee-section">
-                            <h5 class="referee-subsection-header">Recent Assignments</h5>
-                            <div id="refereeAssignmentsContainer" class="referee-list">
-                                <!-- Recent referee assignments will be populated here -->
+
+                        <!-- Back Bracket Matches Section (hidden - no longer used) -->
+                        <div id="backMatchesSection" class="cc-match-section" style="display: none;">
+                            <h4 class="cc-section-header">⚫ Backside - Ready to Start</h4>
+                            <div id="backMatchesContainer" class="cc-matches-container">
+                                <!-- Back bracket ready match cards will be populated here -->
                             </div>
                         </div>
-                        <div id="refereeSetupMessage" class="referee-setup-message" style="display: none;">
+
+                        <!-- Setup state message -->
+                        <div id="setupMessage" class="cc-setup-message" style="display: none;">
                             <p>🔧 Tournament in setup mode</p>
-                            <p style="font-size: 14px; color: #666; margin-top: 8px;">Referee suggestions will appear when the tournament starts.</p>
+                            <p style="font-size: 14px; color: #666; margin-top: 8px;">Add players and configure the
+                                tournament to generate matches.</p>
                         </div>
-                        <div id="noRefereeSuggestionsMessage" class="referee-empty-message" style="display: none;">
-                            <p>No referee suggestions available</p>
+
+                        <!-- Empty state message -->
+                        <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
+                            <p>No matches currently active or ready to start.</p>
+                        </div>
+
+                        <!-- Tournament Completion Celebration -->
+                        <div id="tournamentCelebration" class="tournament-celebration" style="display: none;">
+                            <div class="celebration-header">
+                                <div class="celebration-title">🏆 Tournament Complete! 🏆</div>
+                                <div class="celebration-subtitle" id="celebrationSubtitle">Congratulations to all
+                                    players!</div>
+                            </div>
+
+                            <div class="podium-container">
+                                <div class="podium-position second">
+                                    <div class="podium-player" id="podium-second">
+                                        <span class="podium-medal">🥈</span>
+                                        <div class="podium-rank">2nd Place</div>
+                                        <div class="podium-name">-</div>
+                                    </div>
+                                    <div class="podium-block second">2</div>
+                                </div>
+
+                                <div class="podium-position first">
+                                    <div class="podium-player" id="podium-first">
+                                        <span class="podium-medal">🥇</span>
+                                        <div class="podium-rank">1st Place</div>
+                                        <div class="podium-name">-</div>
+                                    </div>
+                                    <div class="podium-block first">1</div>
+                                </div>
+
+                                <div class="podium-position third">
+                                    <div class="podium-player" id="podium-third">
+                                        <span class="podium-medal">🥉</span>
+                                        <div class="podium-rank">3rd Place</div>
+                                        <div class="podium-name">-</div>
+                                    </div>
+                                    <div class="podium-block third">3</div>
+                                </div>
+                            </div>
+
+                            <div class="celebration-highlights">
+                                <div class="highlights-title">🎯 Tournament Highlights</div>
+                                <div class="highlights-grid" id="highlightsGrid">
+                                    <!-- Highlights will be populated here -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Referee Suggestions Column -->
+                    <div class="referee-suggestions-container">
+                        <h4 class="cc-section-header">👥 Referee Suggestions</h4>
+                        <div class="referee-suggestions-content">
+                            <div id="refereeLosersSection" class="referee-section">
+                                <h5 class="referee-subsection-header">Recent Losers</h5>
+                                <div id="refereeLosersContainer" class="referee-list">
+                                    <!-- Recent losers will be populated here -->
+                                </div>
+                            </div>
+                            <div id="refereeWinnersSection" class="referee-section">
+                                <h5 class="referee-subsection-header">Recent Winners</h5>
+                                <div id="refereeWinnersContainer" class="referee-list">
+                                    <!-- Recent winners will be populated here -->
+                                </div>
+                            </div>
+                            <div id="refereeAssignmentsSection" class="referee-section">
+                                <h5 class="referee-subsection-header">Recent Assignments</h5>
+                                <div id="refereeAssignmentsContainer" class="referee-list">
+                                    <!-- Recent referee assignments will be populated here -->
+                                </div>
+                            </div>
+                            <div id="refereeSetupMessage" class="referee-setup-message" style="display: none;">
+                                <p>🔧 Tournament in setup mode</p>
+                                <p style="font-size: 14px; color: #666; margin-top: 8px;">Referee suggestions will
+                                    appear when the tournament starts.</p>
+                            </div>
+                            <div id="noRefereeSuggestionsMessage" class="referee-empty-message" style="display: none;">
+                                <p>No referee suggestions available</p>
+                            </div>
                         </div>
                     </div>
                 </div>
-            </div>
 
-            <div class="text-center mt-20">
-                <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Statistics</button>
-                <button class="btn" id="commandCenterOK">Close</button>
+                <div class="text-center mt-20">
+                    <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Statistics</button>
+                    <button class="btn" id="commandCenterOK">Close</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Statistics Modal -->
-    <div id="statisticsModal" class="modal">
-        <div class="modal-content" style="width: 90%; max-width: 1200px;">
-            <h3 style="text-align: center; margin-bottom: 20px;">📊 Tournament Statistics</h3>
+        <!-- Statistics Modal -->
+        <div id="statisticsModal" class="modal">
+            <div class="modal-content" style="width: 90%; max-width: 1200px;">
+                <h3 style="text-align: center; margin-bottom: 20px;">📊 Tournament Statistics</h3>
 
-            <div class="statistics-container" style="max-height: 70vh; overflow-y: auto;">
-                <table class="results-table" id="statisticsTable">
-                    <thead>
-                        <tr>
-                            <th>Rank</th>
-                            <th>Player</th>
-                            <th>Points</th>
-                            <th>Short Legs</th>
-                            <th>High Outs</th>
-                            <th>180s</th>
-                            <th>Tons</th>
-                            <th>Legs Won</th>
-                            <th>Legs Lost</th>
-                        </tr>
-                    </thead>
-                    <tbody id="statisticsTableBody">
-                    </tbody>
-                </table>
-            </div>
+                <div class="statistics-container" style="max-height: 70vh; overflow-y: auto;">
+                    <table class="results-table" id="statisticsTable">
+                        <thead>
+                            <tr>
+                                <th>Rank</th>
+                                <th>Player</th>
+                                <th>Points</th>
+                                <th>Short Legs</th>
+                                <th>High Outs</th>
+                                <th>180s</th>
+                                <th>Tons</th>
+                                <th>Legs Won</th>
+                                <th>Legs Lost</th>
+                            </tr>
+                        </thead>
+                        <tbody id="statisticsTableBody">
+                        </tbody>
+                    </table>
+                </div>
 
-            <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()">Close</button>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()">Close</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Undo Confirmation Modal -->
-    <div id="undoConfirmModal" class="modal">
-        <div class="modal-content">
-            <h3 id="undoConfirmTitle">Confirm Match Undo</h3>
-            <div id="undoConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
-                <!-- Undo confirmation message will be populated by JavaScript -->
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" id="undoConfirmCancel" style="margin-right: 15px;">Cancel</button>
-                <button class="btn btn-warning" id="undoConfirmOK">Confirm Undo</button>
+        <!-- Undo Confirmation Modal -->
+        <div id="undoConfirmModal" class="modal">
+            <div class="modal-content">
+                <h3 id="undoConfirmTitle">Confirm Match Undo</h3>
+                <div id="undoConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
+                    <!-- Undo confirmation message will be populated by JavaScript -->
+                </div>
+                <div class="text-center mt-20">
+                    <button class="btn" id="undoConfirmCancel" style="margin-right: 15px;">Cancel</button>
+                    <button class="btn btn-warning" id="undoConfirmOK">Confirm Undo</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Tournament In Progress Warning Modal -->
-    <div id="tournamentProgressModal" class="modal">
-        <div class="modal-content">
-            <h3>🏆 Tournament Already in Progress</h3>
-            <div style="margin: 20px 0; line-height: 1.6;">
-                <p><strong>This tournament is currently active with matches in progress.</strong></p>
-                <p>To generate a new bracket, you'll need to reset the tournament first.</p>
+        <!-- Tournament In Progress Warning Modal -->
+        <div id="tournamentProgressModal" class="modal">
+            <div class="modal-content">
+                <h3>🏆 Tournament Already in Progress</h3>
+                <div style="margin: 20px 0; line-height: 1.6;">
+                    <p><strong>This tournament is currently active with matches in progress.</strong></p>
+                    <p>To generate a new bracket, you'll need to reset the tournament first.</p>
 
-                <div style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                    <p style="margin: 0; font-weight: 600;">💡 How to Reset:</p>
-                    <p style="margin: 8px 0 0 0;">Go to <strong>Setup page</strong> → <strong>"Reset Tournament"</strong> button</p>
+                    <div
+                        style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
+                        <p style="margin: 0; font-weight: 600;">💡 How to Reset:</p>
+                        <p style="margin: 8px 0 0 0;">Go to <strong>Setup page</strong> → <strong>"Reset
+                                Tournament"</strong> button</p>
+                    </div>
+
+                    <div
+                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
+                        <p style="margin: 0; font-weight: 600;">⚠️ Important:</p>
+                        <p style="margin: 8px 0 0 0;">Resetting will keep all players but clear match results and
+                            bracket progress.</p>
+                    </div>
                 </div>
-
-                <div style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                    <p style="margin: 0; font-weight: 600;">⚠️ Important:</p>
-                    <p style="margin: 8px 0 0 0;">Resetting will keep all players but clear match results and bracket progress.</p>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()">Got It</button>
                 </div>
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()">Got It</button>
             </div>
         </div>
-    </div>
 
-    <!-- Reset Tournament Confirmation Modal -->
-    <div id="resetTournamentModal" class="modal">
-        <div class="modal-content">
-            <h3>⚠️ Reset Tournament Confirmation</h3>
-            <div style="margin: 20px 0; line-height: 1.6;">
-                <div style="background: #faf8f3; padding: 15px; margin-bottom: 20px; border-left: 4px solid rgba(180, 83, 9, 1);">
-                    <p style="margin: 0; font-weight: 600;">🚨 WARNING: This action cannot be undone!</p>
-                </div>
+        <!-- Reset Tournament Confirmation Modal -->
+        <div id="resetTournamentModal" class="modal">
+            <div class="modal-content">
+                <h3>⚠️ Reset Tournament Confirmation</h3>
+                <div style="margin: 20px 0; line-height: 1.6;">
+                    <div
+                        style="background: #faf8f3; padding: 15px; margin-bottom: 20px; border-left: 4px solid rgba(180, 83, 9, 1);">
+                        <p style="margin: 0; font-weight: 600;">🚨 WARNING: This action cannot be undone!</p>
+                    </div>
 
-                <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
-                    <h4 style="margin: 0 0 10px 0; color: #333;">Tournament Details:</h4>
-                    <p style="margin: 5px 0;"><strong>Name:</strong> <span id="resetTournamentName">-</span></p>
-                    <p style="margin: 5px 0;"><strong>Progress:</strong> <span id="resetMatchProgress">-</span></p>
-                    <p style="margin: 5px 0;"><strong>Players:</strong> <span id="resetPlayerCount">-</span> registered</p>
-                </div>
+                    <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
+                        <h4 style="margin: 0 0 10px 0; color: #333;">Tournament Details:</h4>
+                        <p style="margin: 5px 0;"><strong>Name:</strong> <span id="resetTournamentName">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Progress:</strong> <span id="resetMatchProgress">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Players:</strong> <span id="resetPlayerCount">-</span>
+                            registered</p>
+                    </div>
 
-                <div style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                    <h4 style="margin: 0 0 10px 0; color: #111827;">This will permanently delete:</h4>
-                    <ul style="margin: 10px 0; padding-left: 20px; color: #111827;">
-                        <li>All match results</li>
-                        <li>All bracket progress</li>
-                        <li>All tournament standings</li>
-                    </ul>
-                    <p style="margin: 8px 0 0 0; font-weight: 600; color: #111827;">Players will be kept but their elimination status will be reset.</p>
-                </div>
+                    <div
+                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
+                        <h4 style="margin: 0 0 10px 0; color: #111827;">This will permanently delete:</h4>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #111827;">
+                            <li>All match results</li>
+                            <li>All bracket progress</li>
+                            <li>All tournament standings</li>
+                        </ul>
+                        <p style="margin: 8px 0 0 0; font-weight: 600; color: #111827;">Players will be kept but their
+                            elimination status will be reset.</p>
+                    </div>
 
-                <div style="background: #f2f5f4; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                    <p style="margin: 0; font-weight: 600; color: #111827;">🔒 Security Confirmation Required</p>
-                    <p style="margin: 8px 0 12px 0; color: #111827;">Type the tournament name exactly to confirm reset:</p>
-                    <input type="text" id="resetConfirmationInput" placeholder="Tournament name..."
-                           style="width: 100%; padding: 8px; border: 2px solid rgba(22, 101, 52, 1); font-size: 14px; border-radius: 0;"
-                           autocomplete="off">
+                    <div
+                        style="background: #f2f5f4; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
+                        <p style="margin: 0; font-weight: 600; color: #111827;">🔒 Security Confirmation Required</p>
+                        <p style="margin: 8px 0 12px 0; color: #111827;">Type the tournament name exactly to confirm
+                            reset:</p>
+                        <input type="text" id="resetConfirmationInput" placeholder="Tournament name..."
+                            style="width: 100%; padding: 8px; border: 2px solid rgba(22, 101, 52, 1); font-size: 14px; border-radius: 0;"
+                            autocomplete="off">
+                    </div>
                 </div>
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
-                <button class="btn btn-warning" id="confirmResetBtn" onclick="confirmReset()" disabled>Reset Tournament</button>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
+                    <button class="btn btn-warning" id="confirmResetBtn" onclick="confirmReset()" disabled>Reset
+                        Tournament</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Delete Tournament Confirmation Modal -->
-    <div id="deleteTournamentModal" class="modal">
-        <div class="modal-content">
-            <h3>🗑️ Delete Tournament Confirmation</h3>
-            <div style="margin: 20px 0; line-height: 1.6;">
-                <div style="background: #f8d7da; padding: 15px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
-                    <p style="margin: 0; font-weight: 600; color: #721c24;">⚠️ DANGER: This action cannot be undone!</p>
-                </div>
+        <!-- Delete Tournament Confirmation Modal -->
+        <div id="deleteTournamentModal" class="modal">
+            <div class="modal-content">
+                <h3>🗑️ Delete Tournament Confirmation</h3>
+                <div style="margin: 20px 0; line-height: 1.6;">
+                    <div
+                        style="background: #f8d7da; padding: 15px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
+                        <p style="margin: 0; font-weight: 600; color: #721c24;">⚠️ DANGER: This action cannot be undone!
+                        </p>
+                    </div>
 
-                <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
-                    <h4 style="margin: 0 0 10px 0; color: #333;">Tournament to Delete:</h4>
-                    <p style="margin: 5px 0; font-size: 16px;"><strong>Name:</strong> <span id="deleteTournamentName">-</span></p>
-                    <p style="margin: 5px 0;"><strong>Date:</strong> <span id="deleteTournamentDate">-</span></p>
-                    <p style="margin: 5px 0;"><strong>Players:</strong> <span id="deleteTournamentPlayers">-</span></p>
-                    <p style="margin: 5px 0;"><strong>Status:</strong> <span id="deleteTournamentStatus">-</span></p>
-                </div>
+                    <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
+                        <h4 style="margin: 0 0 10px 0; color: #333;">Tournament to Delete:</h4>
+                        <p style="margin: 5px 0; font-size: 16px;"><strong>Name:</strong> <span
+                                id="deleteTournamentName">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Date:</strong> <span id="deleteTournamentDate">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Players:</strong> <span id="deleteTournamentPlayers">-</span>
+                        </p>
+                        <p style="margin: 5px 0;"><strong>Status:</strong> <span id="deleteTournamentStatus">-</span>
+                        </p>
+                    </div>
 
-                <div style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                    <h4 style="margin: 0 0 10px 0; color: #856404;">This will permanently remove:</h4>
-                    <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
-                        <li>All tournament data</li>
-                        <li>All player statistics</li>
-                        <li>All match results and history</li>
-                        <li>Tournament configuration</li>
-                    </ul>
-                    <p style="margin: 8px 0 0 0; font-weight: 600; color: #856404;">The tournament file will be completely removed from your device.</p>
+                    <div
+                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
+                        <h4 style="margin: 0 0 10px 0; color: #856404;">This will permanently remove:</h4>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
+                            <li>All tournament data</li>
+                            <li>All player statistics</li>
+                            <li>All match results and history</li>
+                            <li>Tournament configuration</li>
+                        </ul>
+                        <p style="margin: 8px 0 0 0; font-weight: 600; color: #856404;">The tournament file will be
+                            completely removed from your device.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
-                <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDeleteTournament()">Delete Tournament</button>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
+                    <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDeleteTournament()">Delete
+                        Tournament</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Import Tournament Overwrite Modal -->
-    <div id="importOverwriteModal" class="modal">
-        <div class="modal-content">
-            <h3>📂 Tournament Already Exists</h3>
-            <div style="margin: 20px 0; line-height: 1.6;">
-                <div style="background: #e7f3ff; padding: 15px; margin-bottom: 20px; border-left: 4px solid #0056b3;">
-                    <p style="margin: 0; font-weight: 600; color: #0056b3;">A tournament with this name and date already exists in your system.</p>
-                </div>
+        <!-- Import Tournament Overwrite Modal -->
+        <div id="importOverwriteModal" class="modal">
+            <div class="modal-content">
+                <h3>📂 Tournament Already Exists</h3>
+                <div style="margin: 20px 0; line-height: 1.6;">
+                    <div
+                        style="background: #e7f3ff; padding: 15px; margin-bottom: 20px; border-left: 4px solid #0056b3;">
+                        <p style="margin: 0; font-weight: 600; color: #0056b3;">A tournament with this name and date
+                            already exists in your system.</p>
+                    </div>
 
-                <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
-                    <h4 style="margin: 0 0 10px 0; color: #333;">Tournament Details:</h4>
-                    <p style="margin: 5px 0; font-size: 16px;"><strong>Name:</strong> <span id="importTournamentName">-</span></p>
-                    <p style="margin: 5px 0;"><strong>Date:</strong> <span id="importTournamentDate">-</span></p>
-                </div>
+                    <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
+                        <h4 style="margin: 0 0 10px 0; color: #333;">Tournament Details:</h4>
+                        <p style="margin: 5px 0; font-size: 16px;"><strong>Name:</strong> <span
+                                id="importTournamentName">-</span></p>
+                        <p style="margin: 5px 0;"><strong>Date:</strong> <span id="importTournamentDate">-</span></p>
+                    </div>
 
-                <div style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                    <h4 style="margin: 0 0 10px 0; color: #856404;">If you choose to overwrite:</h4>
-                    <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
-                        <li>Current tournament data will be completely replaced</li>
-                        <li>All existing match results will be lost</li>
-                        <li>Player statistics will be overwritten</li>
-                        <li>This action cannot be undone</li>
-                    </ul>
-                </div>
+                    <div
+                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
+                        <h4 style="margin: 0 0 10px 0; color: #856404;">If you choose to overwrite:</h4>
+                        <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
+                            <li>Current tournament data will be completely replaced</li>
+                            <li>All existing match results will be lost</li>
+                            <li>Player statistics will be overwritten</li>
+                            <li>This action cannot be undone</li>
+                        </ul>
+                    </div>
 
-                <div style="background: #d1ecf1; padding: 15px; margin: 15px 0; border-left: 4px solid #17a2b8;">
-                    <p style="margin: 0; font-weight: 600; color: #0c5460;">💡 Alternative:</p>
-                    <p style="margin: 8px 0 0 0; color: #0c5460;">You can cancel and rename the imported tournament file to avoid overwriting.</p>
+                    <div style="background: #d1ecf1; padding: 15px; margin: 15px 0; border-left: 4px solid #17a2b8;">
+                        <p style="margin: 0; font-weight: 600; color: #0c5460;">💡 Alternative:</p>
+                        <p style="margin: 8px 0 0 0; color: #0c5460;">You can cancel and rename the imported tournament
+                            file to avoid overwriting.</p>
+                    </div>
                 </div>
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel Import</button>
-                <button class="btn btn-warning" id="confirmOverwriteBtn" onclick="confirmOverwriteTournament()">Overwrite Existing</button>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel Import</button>
+                    <button class="btn btn-warning" id="confirmOverwriteBtn"
+                        onclick="confirmOverwriteTournament()">Overwrite Existing</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Load Tournament Confirmation Modal -->
-    <div id="loadTournamentModal" class="modal">
-        <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
-            <h3>🔄 Load Tournament Confirmation</h3>
-            <div style="margin: 15px 0; line-height: 1.4;">
-                <div style="background: #d1ecf1; padding: 12px; margin-bottom: 15px; border-left: 4px solid #17a2b8;">
-                    <p style="margin: 0; font-weight: 600; color: #0c5460;">ℹ️ Data Safety Guaranteed</p>
-                    <p style="margin: 6px 0 0 0; color: #0c5460;">Your current tournament data is automatically saved and can be reloaded at any time. Loading a different tournament will not cause any data loss.</p>
-                </div>
+        <!-- Load Tournament Confirmation Modal -->
+        <div id="loadTournamentModal" class="modal">
+            <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+                <h3>🔄 Load Tournament Confirmation</h3>
+                <div style="margin: 15px 0; line-height: 1.4;">
+                    <div
+                        style="background: #d1ecf1; padding: 12px; margin-bottom: 15px; border-left: 4px solid #17a2b8;">
+                        <p style="margin: 0; font-weight: 600; color: #0c5460;">ℹ️ Data Safety Guaranteed</p>
+                        <p style="margin: 6px 0 0 0; color: #0c5460;">Your current tournament data is automatically
+                            saved and can be reloaded at any time. Loading a different tournament will not cause any
+                            data loss.</p>
+                    </div>
 
-                <div id="currentTournamentSection" style="background: #f8f9fa; padding: 12px; margin: 12px 0; display: none;">
-                    <h4 style="margin: 0 0 8px 0; color: #333;">Current Tournament:</h4>
-                    <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span id="currentTournamentName">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Date:</strong> <span id="currentTournamentDate">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="currentMatchProgress">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Players:</strong> <span id="currentPlayerCount">-</span></p>
-                </div>
+                    <div id="currentTournamentSection"
+                        style="background: #f8f9fa; padding: 12px; margin: 12px 0; display: none;">
+                        <h4 style="margin: 0 0 8px 0; color: #333;">Current Tournament:</h4>
+                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
+                                id="currentTournamentName">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="currentTournamentDate">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="currentMatchProgress">-</span>
+                        </p>
+                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="currentPlayerCount">-</span></p>
+                    </div>
 
-                <div style="background: #e7f3ff; padding: 12px; margin: 12px 0; border-left: 4px solid #0056b3;">
-                    <h4 style="margin: 0 0 8px 0; color: #0056b3;" id="loadActionTitle">You are about to load:</h4>
-                    <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span id="loadTournamentName">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Date:</strong> <span id="loadTournamentDate">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="loadMatchProgress">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Players:</strong> <span id="loadPlayerCount">-</span></p>
-                </div>
+                    <div style="background: #e7f3ff; padding: 12px; margin: 12px 0; border-left: 4px solid #0056b3;">
+                        <h4 style="margin: 0 0 8px 0; color: #0056b3;" id="loadActionTitle">You are about to load:</h4>
+                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
+                                id="loadTournamentName">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="loadTournamentDate">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="loadMatchProgress">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="loadPlayerCount">-</span></p>
+                    </div>
 
-                <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">
-                    <p style="margin: 0; font-weight: 600; color: #155724;">✓ What happens next:</p>
-                    <ul style="margin: 8px 0; padding-left: 18px; color: #155724;">
-                        <li>Current tournament data is automatically saved</li>
-                        <li>Selected tournament becomes active</li>
-                        <li>You'll be taken to the Registration page</li>
-                        <li>All settings and configurations remain unchanged</li>
-                    </ul>
+                    <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">
+                        <p style="margin: 0; font-weight: 600; color: #155724;">✓ What happens next:</p>
+                        <ul style="margin: 8px 0; padding-left: 18px; color: #155724;">
+                            <li>Current tournament data is automatically saved</li>
+                            <li>Selected tournament becomes active</li>
+                            <li>You'll be taken to the Registration page</li>
+                            <li>All settings and configurations remain unchanged</li>
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
-                <button class="btn btn-primary" id="confirmLoadBtn" onclick="confirmLoadTournament()">Load Tournament</button>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
+                    <button class="btn btn-primary" id="confirmLoadBtn" onclick="confirmLoadTournament()">Load
+                        Tournament</button>
+                </div>
             </div>
         </div>
-    </div>
 
-    <!-- Export Confirmation Modal -->
-    <div id="exportConfirmModal" class="modal">
-        <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
-            <h3>📤 Export Tournament Results</h3>
-            <div style="margin: 15px 0; line-height: 1.4;">
-                <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
-                    <h4 style="margin: 0 0 8px 0; color: #333;">Tournament Details:</h4>
-                    <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span id="exportTournamentName">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Date:</strong> <span id="exportTournamentDate">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Status:</strong> <span id="exportTournamentStatus">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Players:</strong> <span id="exportPlayerCount">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Completed Matches:</strong> <span id="exportMatchProgress">-</span></p>
-                </div>
+        <!-- Export Confirmation Modal -->
+        <div id="exportConfirmModal" class="modal">
+            <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+                <h3>📤 Export Tournament Results</h3>
+                <div style="margin: 15px 0; line-height: 1.4;">
+                    <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
+                        <h4 style="margin: 0 0 8px 0; color: #333;">Tournament Details:</h4>
+                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
+                                id="exportTournamentName">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="exportTournamentDate">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Status:</strong> <span id="exportTournamentStatus">-</span>
+                        </p>
+                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="exportPlayerCount">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Completed Matches:</strong> <span
+                                id="exportMatchProgress">-</span></p>
+                    </div>
 
-                <div style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                    <h4 style="margin: 0 0 8px 0; color: #111827;">Export Details:</h4>
-                    <p style="margin: 3px 0;"><strong>Format:</strong> <span id="exportFormat">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Filename:</strong> <span id="exportFilename">-</span></p>
-                    <p style="margin: 3px 0;"><strong>Content:</strong> <span id="exportContent">-</span></p>
-                </div>
+                    <div
+                        style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
+                        <h4 style="margin: 0 0 8px 0; color: #111827;">Export Details:</h4>
+                        <p style="margin: 3px 0;"><strong>Format:</strong> <span id="exportFormat">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Filename:</strong> <span id="exportFilename">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Content:</strong> <span id="exportContent">-</span></p>
+                    </div>
 
-                <div id="exportWarningSection" style="background: #faf8f3; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(180, 83, 9, 1); display: none;">
-                    <p style="margin: 0; font-weight: 600; color: #856404;">⚠️ Tournament Incomplete</p>
-                    <p style="margin: 6px 0 0 0; color: #856404;">This tournament is not yet finished. The export will contain current standings but may not reflect final rankings.</p>
-                </div>
+                    <div id="exportWarningSection"
+                        style="background: #faf8f3; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(180, 83, 9, 1); display: none;">
+                        <p style="margin: 0; font-weight: 600; color: #856404;">⚠️ Tournament Incomplete</p>
+                        <p style="margin: 6px 0 0 0; color: #856404;">This tournament is not yet finished. The export
+                            will contain current standings but may not reflect final rankings.</p>
+                    </div>
 
-                <div id="exportCompleteSection" style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1); display: none;">
-                    <p style="margin: 0; font-weight: 600; color: #111827;">✓ Tournament Complete</p>
-                    <p style="margin: 6px 0 0 0; color: #111827;">This tournament is finished with final rankings available. The export will contain complete results.</p>
-                </div>
+                    <div id="exportCompleteSection"
+                        style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1); display: none;">
+                        <p style="margin: 0; font-weight: 600; color: #111827;">✓ Tournament Complete</p>
+                        <p style="margin: 6px 0 0 0; color: #111827;">This tournament is finished with final rankings
+                            available. The export will contain complete results.</p>
+                    </div>
 
-                <div style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                    <p style="margin: 0; font-weight: 600; color: #111827;">📋 What will be included:</p>
-                    <ul style="margin: 8px 0; padding-left: 18px; color: #111827;" id="exportIncludesList">
-                        <!-- Populated by JavaScript -->
-                    </ul>
+                    <div
+                        style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
+                        <p style="margin: 0; font-weight: 600; color: #111827;">📋 What will be included:</p>
+                        <ul style="margin: 8px 0; padding-left: 18px; color: #111827;" id="exportIncludesList">
+                            <!-- Populated by JavaScript -->
+                        </ul>
+                    </div>
                 </div>
-            </div>
-            <div class="text-center mt-20">
-                <button class="btn" onclick="popDialog()" style="margin-right: 15px; background: #6c757d; font-weight: 600;">Cancel</button>
-                <button class="btn" id="confirmExportBtn" onclick="confirmExport()" style="background: rgba(22, 101, 52, 0.9); color: white; font-weight: 600;">Export Results</button>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()"
+                        style="margin-right: 15px; background: #6c757d; font-weight: 600;">Cancel</button>
+                    <button class="btn" id="confirmExportBtn" onclick="confirmExport()"
+                        style="background: rgba(22, 101, 52, 0.9); color: white; font-weight: 600;">Export
+                        Results</button>
+                </div>
             </div>
         </div>
-    </div>
 
 </body>
 
