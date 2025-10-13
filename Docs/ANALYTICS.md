@@ -30,7 +30,7 @@ The Developer Console is a hidden diagnostic tool designed for developers to mon
 ### Step 2: Access the Console
 
 1. Navigate to **Tournament** page
-2. Locate the version number in the bottom-right of the CAD-box (e.g., "v2.5.0-beta")
+2. Locate the version number in the bottom-right of the CAD-box (e.g., "v2.5.0")
 3. Click on the version number
 4. Developer Console modal opens immediately
 
@@ -805,7 +805,7 @@ The following UX improvements have been identified for future implementation:
 
 ### 1. Statistics Click Behavior Improvements
 
-**Status**: ✅ **Partially Implemented** - Player Count detail view completed in v2.5.0-beta
+**Status**: ✅ **Partially Implemented** - Player Count detail view completed in v2.5.0
 
 #### Player Count Detail View ✅ IMPLEMENTED
 When clicking "Player Count", shows:
@@ -880,9 +880,9 @@ Time: 11:38:52 PM
 
 ### 3. Validation UX Improvements
 
-**Status**: ✅ **Partially Implemented** - Console output added in v2.5.0-beta
+**Status**: ✅ **Partially Implemented** - Console output added in v2.5.0
 
-**Implemented in v2.5.0-beta:**
+**Implemented in v2.5.0:**
 - ✅ "Validate Everything" now logs summary to console footer
 - ✅ Individual check results with ✅/⚠️ icons in console
 - ✅ Failure details logged with indentation
@@ -1195,7 +1195,7 @@ FS-2-2:
 
 ## Implementation Priority
 
-**Completed in v2.5.0-beta:**
+**Completed in v2.5.0:**
 - ✅ Player Count detail view with IDs (Fix 1 - partial)
 - ✅ Validation console output (Fix 3 - partial)
 - ✅ Lane usage calculation respects excluded lanes
@@ -1220,7 +1220,7 @@ FS-2-2:
 
 ## Version History
 
-**v2.5.0-beta** - Initial Developer Console implementation
+**v2.5.0** - Initial Developer Console implementation
 - Real-time statistics (4 metrics)
 - 6 validation checks with enhanced console output
 - 8 commands/views (added Player Details view)
