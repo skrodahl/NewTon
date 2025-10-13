@@ -632,10 +632,6 @@
                                 style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
                                 Transaction History</a>
 
-                            <a href="#" onclick="showConsoleOutput(); return false;"
-                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
-                                Console Output</a>
-
                             <a href="#" onclick="showMatchProgression(); return false;"
                                 style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
                                 Match Progression</a>
@@ -648,10 +644,23 @@
 
                     </div>
 
-                    <!-- Right pane: Detail view -->
-                    <div class="analytics-right-pane" style="flex: 1; overflow-y: auto; padding: 24px;">
-                        <h4>Loading...</h4>
-                        <p>Initializing Developer Console...</p>
+                    <!-- Right pane: Split into content area and console footer -->
+                    <div class="analytics-right-pane" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
+
+                        <!-- Main content area (70%) -->
+                        <div id="analyticsContentArea" style="flex: 0 0 70%; overflow-y: auto; padding: 24px; border-bottom: 1px solid #ddd;">
+                            <h4>Loading...</h4>
+                            <p>Initializing Developer Console...</p>
+                        </div>
+
+                        <!-- Console output footer (30%) -->
+                        <div id="analyticsConsoleFooter" style="flex: 0 0 30%; overflow-y: auto; padding: 24px; background: #f9fafb;">
+                            <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 14px; color: #666;">Console Output</h4>
+                            <div id="consoleOutputContent" style="font-family: monospace; font-size: 12px; line-height: 1.6;">
+                                <div style="color: #666; font-style: italic;">Console output will appear here...</div>
+                            </div>
+                        </div>
+
                     </div>
 
                 </div>

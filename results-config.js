@@ -302,6 +302,11 @@ function saveUIConfiguration() {
         loadRecentTournaments();
     }
 
+    // Refresh watermark if on Tournament page to update version number clickability
+    if (typeof updateTournamentWatermark === 'function') {
+        updateTournamentWatermark();
+    }
+
     alert('✓ UI settings saved successfully!');
 }
 

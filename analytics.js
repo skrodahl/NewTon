@@ -16,6 +16,7 @@
 let consoleBuffer = [];
 let originalConsoleLog = null;
 let maxConsoleEntries = 100;
+let lastConsoleUpdateLength = 0; // Track when console actually changes
 
 // Auto-refresh system
 let analyticsRefreshInterval = null;
@@ -156,10 +157,10 @@ function stopAutoRefresh() {
  * Detect user scrolling and pause refresh
  */
 function setupScrollDetection() {
-    const rightPane = document.querySelector('.analytics-right-pane');
-    if (!rightPane) return;
+    const contentArea = document.getElementById('analyticsContentArea');
+    const consoleFooter = document.getElementById('analyticsConsoleFooter');
 
-    rightPane.addEventListener('scroll', () => {
+    const handleScroll = () => {
         isUserScrolling = true;
 
         // Clear existing timeout
@@ -171,7 +172,15 @@ function setupScrollDetection() {
         scrollTimeout = setTimeout(() => {
             isUserScrolling = false;
         }, 1000);
-    });
+    };
+
+    if (contentArea) {
+        contentArea.addEventListener('scroll', handleScroll);
+    }
+
+    if (consoleFooter) {
+        consoleFooter.addEventListener('scroll', handleScroll);
+    }
 }
 
 /**
@@ -185,6 +194,9 @@ function refreshAnalytics() {
     if (currentView === 'overview') {
         showQuickOverview();
     }
+
+    // Always update console footer
+    updateConsoleFooter();
 }
 
 /**
@@ -571,13 +583,60 @@ function showValidationResults() {
 }
 
 /**
- * Update right pane content
+ * Update right pane content area (not console footer)
  */
 function updateRightPane(html) {
-    const rightPane = document.querySelector('.analytics-right-pane');
-    if (rightPane) {
-        rightPane.innerHTML = html;
+    const contentArea = document.getElementById('analyticsContentArea');
+    if (contentArea) {
+        contentArea.innerHTML = html;
     }
+}
+
+/**
+ * Update console footer with latest console output
+ * Only updates DOM if buffer length has changed (prevents unnecessary redraws)
+ */
+function updateConsoleFooter() {
+    const consoleContent = document.getElementById('consoleOutputContent');
+    if (!consoleContent) return;
+
+    // Only update if buffer length changed (new entries added)
+    if (consoleBuffer.length === lastConsoleUpdateLength) {
+        return; // No changes, skip update
+    }
+
+    lastConsoleUpdateLength = consoleBuffer.length;
+
+    if (consoleBuffer.length === 0) {
+        consoleContent.innerHTML = '<div style="color: #666; font-style: italic;">No console output yet...</div>';
+        return;
+    }
+
+    // Show last 50 entries (most recent at bottom)
+    const entries = consoleBuffer.slice(-50);
+    const html = entries.map(entry => {
+        return `<div style="margin-bottom: 4px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
+            <span style="color: #6b7280; font-size: 10px;">${entry.timestamp}</span>
+            <div style="color: #111827; white-space: pre-wrap; word-break: break-word;">${escapeHtml(entry.message)}</div>
+        </div>`;
+    }).join('');
+
+    consoleContent.innerHTML = html;
+
+    // Auto-scroll to bottom if user isn't actively scrolling the console
+    const consoleFooter = document.getElementById('analyticsConsoleFooter');
+    if (consoleFooter && !isUserScrolling) {
+        consoleFooter.scrollTop = consoleFooter.scrollHeight;
+    }
+}
+
+/**
+ * Escape HTML to prevent injection
+ */
+function escapeHtml(text) {
+    const div = document.createElement('div');
+    div.textContent = text;
+    return div.innerHTML;
 }
 
 // ============================================================================

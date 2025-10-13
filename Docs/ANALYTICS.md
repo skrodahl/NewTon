@@ -42,22 +42,31 @@ The Developer Console is a hidden diagnostic tool designed for developers to mon
 
 ## Interface Layout
 
-The Developer Console opens as a large modal (90% screen width/height) with a split-view layout:
+The Developer Console opens as a large modal (90% screen width/height) with a three-pane layout:
 
 ### Left Pane (30% width)
 - **Statistics** - Real-time tournament metrics (clickable for details)
 - **Commands** - Developer action buttons
 - **Timestamp** - Last update time
 
-### Right Pane (70% width)
+### Right Pane (70% width) - Split Vertically
+
+#### Content Area (70% of right pane)
 - **Dynamic content area** - Shows details based on selected statistic or command
 - **Default view** - Quick Overview with most important metrics
 - **Scrollable** - Independently scrolls for long content
 
+#### Console Output Footer (30% of right pane)
+- **Always visible** - Persistent console log at bottom
+- **Real-time updates** - Shows last 50 console entries
+- **Auto-scroll** - Scrolls to bottom when new entries appear (pauses while user scrolling)
+- **Timestamp per entry** - Each log entry shows time of occurrence
+- **Scrollable** - Independent scroll from content area above
+
 ### Modal Behavior
 - **Always on top** - Stays open while operating tournament
 - **Auto-refresh** - Updates every 2 seconds (pauses while scrolling)
-- **Scroll detection** - Refresh pauses 1 second after scroll stops
+- **Scroll detection** - Refresh pauses 1 second after scroll stops in any pane
 - **Close button** - Bottom of modal (always accessible)
 
 ---
@@ -181,23 +190,6 @@ All commands are **navigation links** - click to execute or show results.
 **Display:** All transactions, latest first, with ID, timestamp, type, and description
 
 **Format:** `#169 | 14:31:45 | COMPLETE_MATCH | FS-2-1: Player A wins`
-
----
-
-### View Console Output
-**Function:** Displays captured console.log output
-
-**Purpose:** See function execution logs without browser console
-
-**Use case:** Monitor command execution, debug issues, export logs
-
-**Features:**
-- Shows last 100 console entries
-- Includes timestamps
-- **Clear Console** button - Empties buffer
-- **Copy to Clipboard** button - Copies all output
-
-**Note:** Only captures output while Developer Console is open
 
 ---
 
@@ -354,21 +346,6 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 
 ---
 
-### Console Output
-**Triggered by:** Clicking "View Console Output"
-
-**Shows:**
-- Last 100 console.log entries captured while modal open
-- Timestamps for each entry
-- Clear and Copy to Clipboard buttons
-
-**Capture Behavior:**
-- Starts when Developer Console opens
-- Stops when Developer Console closes
-- Does not capture output before modal was opened
-
----
-
 ### Match Progression Rules
 **Triggered by:** Clicking "View Match Progression"
 
@@ -390,22 +367,34 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 
 ---
 
-## Console Output Capture
+## Console Output Footer
+
+### Persistent Console Log
+
+The Console Output footer is always visible at the bottom 30% of the right pane, providing real-time visibility into console activity.
 
 ### How It Works
 
-The Developer Console intercepts `console.log()` calls while the modal is open, capturing output for display in the UI.
+The Developer Console intercepts `console.log()` calls while the modal is open, capturing output for persistent display in the footer.
 
 **Implementation:**
 1. Modal opens → saves original `console.log` function
 2. Replaces `console.log` with custom function that:
    - Calls original function (logs still appear in browser console)
    - Captures message and timestamp to buffer
-   - Updates Console Output view if currently displayed
+   - Updates Console Output footer automatically every 2 seconds
 3. Modal closes → restores original `console.log` function
 
+**Display Behavior:**
+- Shows last 50 entries in footer (most recent at bottom)
+- Auto-scrolls to bottom when new entries appear
+- Pauses auto-scroll while user is actively scrolling
+- Each entry shows timestamp and message
+- Independent scrolling from content area above
+
 **Buffer Limits:**
-- Stores last 100 entries
+- Stores last 100 entries in memory
+- Displays last 50 entries in footer
 - Older entries automatically removed (FIFO)
 
 **What Gets Captured:**
@@ -419,9 +408,11 @@ The Developer Console intercepts `console.log()` calls while the modal is open, 
 - Logs before Developer Console was opened
 - Browser-generated console messages
 
-**Actions:**
-- **Clear Console** - Empties buffer (doesn't affect browser console)
-- **Copy to Clipboard** - Copies all captured output with timestamps
+**Benefits:**
+- Always visible - no need to switch views to see console activity
+- Real-time monitoring - immediate feedback on command execution
+- Context preserved - view details in content area while monitoring console below
+- No browser console needed - all diagnostic info in one place
 
 ---
 
@@ -693,10 +684,9 @@ function showMyNewDetails() {
 **Actions:**
 1. Open Developer Console
 2. Click "Validate Everything" to run all checks
-3. Click "View Console Output"
-4. Click "Copy to Clipboard" to copy logs
-5. Export tournament JSON from Setup page
-6. Share both files for complete diagnostic picture
+3. Console output will show validation results in footer automatically
+4. Export tournament JSON from Setup page
+5. Share tournament JSON and validation results for complete diagnostic picture
 
 ---
 
@@ -928,7 +918,6 @@ STATISTICS (clickable to show details)
 
 VIEWS (show data, read-only)
 - View Transaction History
-- View Console Output
 - View Match Progression
 
 COMMANDS (execute actions, modify state)
@@ -948,25 +937,25 @@ Last updated: 11:38:57 PM
 
 ---
 
-### 5. Console Output Integration
+### 5. Console Output Enhancements
 
-**Current Behavior**: Console capture only works while modal is open. Command output only visible if Console Output view is active.
+**Current Implementation**: ✅ Console footer is always visible at bottom of modal, showing last 50 entries with auto-scroll.
 
-**Enhancement Options:**
+**Possible Future Enhancements:**
 
 1. **Persistent console buffer**: Start capturing when Developer Mode is enabled (not just when modal opens)
    - **Pro**: Captures everything from page load, useful for debugging initialization
    - **Con**: Memory overhead, may capture sensitive data
 
-2. **Command output always logged**: All command executions automatically append to Console Output view
-   - **Pro**: Complete audit trail of all actions
-   - **Con**: May clutter output with routine operations
+2. **Console output export**: Add button to export/download console log as text file
+   - **Pro**: Easy to share diagnostic logs
+   - **Con**: Additional UI complexity
 
-3. **Selective capture**: Only capture when Console Output view is active
-   - **Pro**: User controls what gets captured
-   - **Con**: May miss important command output
+3. **Filter/search**: Add ability to filter console entries by keyword or time range
+   - **Pro**: Easier to find relevant entries in long logs
+   - **Con**: Additional UI complexity
 
-**Recommendation**: Keep current behavior (capture only while modal open) but ensure all commands produce visible feedback in right pane.
+**Priority**: Low - Current implementation meets core needs
 
 ---
 

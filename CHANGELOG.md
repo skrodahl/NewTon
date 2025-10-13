@@ -6,8 +6,12 @@
 - **Hidden developer tool for real-time tournament diagnostics**
   - **Purpose**: Monitor tournament health, run validation checks, and execute developer commands without browser console
   - **Access**: Enable in Config → User Interface → "Enable Developer Analytics", then click version number in Tournament page CAD-box
-  - **Design**: Large modal (90% screen) with split-view layout (30% sidebar, 70% detail pane)
+  - **Design**: Large modal (90% screen) with three-pane layout:
+    - Left pane (30%): Statistics and commands
+    - Right pane content area (49%): Dynamic detail views
+    - Right pane console footer (21%): Persistent console output (always visible)
   - **Auto-refresh**: Updates every 2 seconds (pauses while scrolling)
+  - **Settings take effect immediately**: No browser refresh required when enabling/disabling Developer Analytics
 
 #### Statistics (Real-time Monitoring)
 - **Transaction Health**: Shows current usage (X/500) with health indicators (✅ <50%, ⚠️ 50-80%, 🔴 >80%)
@@ -29,33 +33,37 @@
 - **Refresh All Dropdowns**: Update lane and referee dropdown options
 - **Validate Everything**: Run all 6 validation checks and display results
 - **View Transaction History**: Display all transactions (latest first) with timestamp, type, and description
-- **View Console Output**: Show captured console.log output with Clear and Copy to Clipboard buttons
 - **View Match Progression**: Display MATCH_PROGRESSION lookup tables for current bracket size
 
-#### Console Output Capture
+#### Console Output Footer (Persistent)
+- **Always visible**: Console output footer shows last 50 entries at bottom 30% of right pane
+- **Real-time updates**: Auto-refreshes every 2 seconds with new console.log entries
+- **Auto-scroll**: Scrolls to bottom when new entries appear (pauses while user scrolling)
 - **Smart capture**: Only intercepts console.log while Developer Console is open
-- **Buffer**: Stores last 100 entries with timestamps
-- **Actions**: Clear buffer or copy all output to clipboard
-- **Use case**: Monitor command execution without browser developer tools
+- **Buffer**: Stores last 100 entries in memory, displays last 50 with timestamps
+- **Independent scrolling**: Console footer scrolls separately from content area above
+- **Benefits**: Monitor command execution in real-time without switching views or using browser developer tools
 
 #### Technical Implementation
 - **Files Added**:
-  - `analytics.js` - Complete analytics system (console capture, validations, commands, UI management)
+  - `analytics.js` - Complete analytics system (console capture, validations, commands, UI management, persistent footer)
   - `Docs/ANALYTICS.md` - Comprehensive documentation (1000+ lines: features, use cases, troubleshooting, extension guide, future improvements)
 - **Files Modified**:
-  - `tournament.html` - Added analytics modal HTML (90% layout, split-view) + script tag + developerMode checkbox in Config
-  - `results-config.js` - Added `globalConfig.ui.developerMode` (default: false) with save/load persistence
+  - `tournament.html` - Added analytics modal HTML (90% layout, three-pane design with persistent console footer) + script tag + developerMode checkbox in Config
+  - `results-config.js` - Added `globalConfig.ui.developerMode` (default: false) with save/load persistence + watermark refresh on save for immediate effect
   - `tournament-management.js` - Made version number clickable when developerMode enabled, reads directly from localStorage to avoid script loading order issues
-  - `styles.css` - Fixed pointer-events to allow version number clicks despite bracket viewport grab cursor, removed nested scrolling
+  - `styles.css` - Fixed pointer-events to allow version number clicks despite bracket viewport grab cursor, added analytics modal CSS overrides (90% height, 1% margin)
+  - `dynamic-help-system.js` - Updated Config page help to document Developer Analytics feature
 - **Global Functions**: All analytics functions accessible via window object for browser console debugging
 - **Dialog Stack Integration**: Uses pushDialog/popDialog for proper z-index management and Escape key support
-- **Smart Auto-refresh**: Updates left pane statistics every 2 seconds, only refreshes right pane Quick Overview (other views stay static for readability)
+- **Smart Auto-refresh**: Updates left pane statistics + console footer every 2 seconds, only refreshes right pane Quick Overview (other views stay static for readability)
+- **Three-pane Layout**: Left 30% (stats/commands), Right content 49% (detail views), Right footer 21% (persistent console)
 
 #### Use Cases
-- **Live monitoring**: Keep console open during tournament to watch transaction health and match state
+- **Live monitoring**: Keep console open during tournament to watch transaction health, match state, and console activity in real-time
 - **Issue diagnosis**: Run validation checks to identify lane conflicts, progression errors, or data corruption
-- **Command execution**: Re-render bracket or recalculate rankings after manual data fixes
-- **Debug export**: Copy console output and validation results for bug reports
+- **Command execution**: Execute commands and monitor output in persistent console footer without switching views
+- **Debug workflow**: Validation results and command execution logs appear immediately in always-visible console footer
 
 ---
 

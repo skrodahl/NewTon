@@ -1223,6 +1223,13 @@ body {
   overflow: hidden; /* Prevent content overflow */
 }
 
+/* Analytics Modal - Override default modal constraints */
+.analytics-modal-content {
+  margin: 1% auto !important;
+  max-height: 98vh !important;
+  max-width: none !important;
+}
+
 /* Remove rounded corners from all inputs in modals */
 .modal-content input[type="text"],
 .modal-content input[type="number"],
