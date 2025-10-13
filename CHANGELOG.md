@@ -1,6 +1,6 @@
 # 2025-10-12
 
-## **v2.5.0-beta** - Developer Console
+## **v2.5.0** - Developer Console
 
 ### New Feature: Developer Console
 - **Hidden developer tool for real-time tournament diagnostics**
@@ -69,7 +69,7 @@
 
 # 2025-10-11
 
-## **v2.5.0-beta** - Undo System Fixes
+## **v2.5.0** - Undo System Fixes
 
 ### Undo System Improvements
 
@@ -109,7 +109,7 @@
 
 # 2025-10-10
 
-## **v2.5.0-beta** - Distributed Seeding & Visual Consistency
+## **v2.5.0** - Distributed Seeding & Visual Consistency
 
 ### Tournament Seeding Improvements
 - **Distributed BYE Placement**: Replaced sequential seeding with randomized BYE distribution
