@@ -1094,6 +1094,105 @@ Tournament organizer wants to display live bracket progression on a second monit
 
 ---
 
+### 10. Improved Match Progression Visuals
+
+**Purpose**: Enhance the "View Match Progression" display for better readability and understanding of tournament bracket flow.
+
+**Current Implementation**:
+Shows MATCH_PROGRESSION lookup table in monospace text format:
+```
+FS-1-1:
+  Winner → FS-2-1 (player1)
+  Loser → BS-1-1 (player1)
+```
+
+**Proposed Enhancements**:
+
+#### Option 1: Visual Bracket Flow Diagram
+Display match progression as a mini visual bracket with arrows showing winner/loser paths:
+```
+       ┌─ FS-2-1 (Winner)
+FS-1-1 ┤
+       └─ BS-1-1 (Loser)
+
+       ┌─ FS-2-1 (Winner)
+FS-1-2 ┤
+       └─ BS-1-1 (Loser)
+```
+
+#### Option 2: Color-Coded Progression Table
+Add color coding and icons for better visual distinction:
+```
+FS-1-1: Match 1, Round 1 (Frontside)
+  ✅ Winner → FS-2-1 (player1)  [Advances to Round 2]
+  ⬇️ Loser → BS-1-1 (player1)   [Drops to Backside]
+
+BS-FINAL: Backside Final
+  🏆 Winner → GRAND-FINAL (player1)  [Grand Final qualifier]
+  ❌ Loser → Eliminated (3rd place)
+```
+
+#### Option 3: Interactive Highlight
+Click on a match ID to see its progression rules highlighted in the right pane with visual emphasis:
+```
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+     MATCH: FS-2-1
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+📍 CURRENT MATCH
+Round 2, Frontside
+
+⬅️ INCOMING PLAYERS
+From FS-1-1 (winner → player1)
+From FS-1-2 (winner → player2)
+
+➡️ OUTGOING DESTINATIONS
+Winner advances to: FS-3-1 (player1)
+Loser drops to: BS-2-1 (player1)
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+```
+
+#### Option 4: Searchable/Filterable View
+Add search box to filter progression rules by match ID:
+```
+Search: [FS-2-____]  [Filter by: Frontside ▼]
+
+Showing 8 matches (8 total)
+
+FS-2-1:
+  Winner → FS-3-1 (player1)
+  Loser → BS-2-1 (player1)
+
+FS-2-2:
+  Winner → FS-3-1 (player2)
+  Loser → BS-2-1 (player2)
+...
+```
+
+**Benefits:**
+- Easier to understand bracket flow at a glance
+- Reduces need to mentally parse text format
+- Better visual hierarchy shows match relationships
+- Useful for tournament organizers learning the system
+- Helpful for troubleshooting progression issues
+
+**Use Cases:**
+- **Learning bracket structure**: New tournament organizers understanding double elimination flow
+- **Debugging progression errors**: Quickly verify where winners/losers should advance
+- **Tournament planning**: Visualize bracket structure before running tournament
+- **Documentation**: Take screenshots for external documentation or training materials
+
+**Technical Notes:**
+- Could use Unicode box-drawing characters for ASCII art diagrams
+- Color coding would require CSS classes for styled text
+- Interactive highlighting would require click handlers on match IDs
+- Search/filter would require JavaScript filtering logic on MATCH_PROGRESSION data
+
+**Priority**: Low - Current text format is functional, enhancement is purely visual/UX improvement
+
+---
+
 ## Implementation Priority
 
 **Completed in v2.5.0-beta:**
@@ -1115,6 +1214,7 @@ Tournament organizer wants to display live bracket progression on a second monit
 7. Export and reporting (Fix 7) - Useful but not critical
 8. Performance optimizations (Fix 8) - Only needed for very large tournaments
 9. Second monitor sync command (Fix 9) - Quality-of-life feature, workaround exists
+10. Improved match progression visuals (Fix 10) - Purely visual/UX enhancement
 
 ---
 
