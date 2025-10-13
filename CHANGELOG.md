@@ -1,6 +1,32 @@
+# 2025-10-14
+
+## **v2.5.1-beta** - Match Controls Improvements
+
+### Enhanced: LIVE Match Sorting
+- **Lane-based sorting in Match Controls**
+  - LIVE matches now sort by lane assignment (ascending) first, then by match ID
+  - Matches with lanes appear before matches without lanes
+  - Lane order: Lane 1, Lane 2, Lane 3... (numerical ascending)
+  - Within same lane status, matches sorted alphabetically by ID
+  - **Benefit**: Matches organized by physical venue layout for easier tournament management
+  - **Use case**: Operators can quickly find "What's on Lane 3?" without scanning through match IDs
+  - **Tournament-tested**: Real-world insight from live tournament operations
+
+### Enhanced: Read-Only Tournament Protection
+- **Player statistics locked for loaded completed tournaments**
+  - Clicking player names in Results Table, Match Controls, or Winner Confirmation dialogs does nothing when `tournament.readOnly === true`
+  - Silent behavior - no alert, no modal, no feedback
+  - Prevents accidental modification of historical tournament data
+  - **Read-only condition**: Tournament must be both loaded from file AND completed
+  - **Escape hatch**: Use "Reset Tournament" to clear read-only flag and make tournament editable
+  - **Applies to**: All entry points to player statistics editing (Results Table rows, Match Controls player names, Winner Confirmation player names)
+  - **Implementation**: Single check in `openStatsModal()` function (player-management.js:431-433)
+
+---
+
 # 2025-10-12
 
-## **v2.5.0** - Developer Console
+## **v2.5.0-beta** - Developer Console
 
 ### New Feature: Developer Console
 - **Hidden developer tool for real-time tournament diagnostics**

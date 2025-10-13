@@ -2613,8 +2613,28 @@ function showMatchCommandCenter() {
         roundGroups[roundKey].sort((a, b) => a.id.localeCompare(b.id));
     });
 
-    // Sort live matches
-    liveMatches.sort((a, b) => a.id.localeCompare(b.id));
+    // Sort live matches by lane (ascending), then by match ID
+    liveMatches.sort((a, b) => {
+        // Matches with lanes come before matches without lanes
+        const aHasLane = a.lane && a.lane !== '';
+        const bHasLane = b.lane && b.lane !== '';
+
+        if (aHasLane && !bHasLane) return -1;
+        if (!aHasLane && bHasLane) return 1;
+
+        // Both have lanes or both don't have lanes
+        if (aHasLane && bHasLane) {
+            // Sort by lane number (numerically)
+            const laneA = parseInt(a.lane) || 0;
+            const laneB = parseInt(b.lane) || 0;
+            if (laneA !== laneB) {
+                return laneA - laneB;
+            }
+        }
+
+        // If lanes are equal (or both missing), sort by match ID
+        return a.id.localeCompare(b.id);
+    });
 
     const matchData = {
         live: liveMatches,

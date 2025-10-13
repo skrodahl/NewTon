@@ -427,6 +427,11 @@ function togglePaid(playerId) {
 }
 
 function openStatsModal(playerId) {
+    // Silent early return for read-only tournaments - clicking does nothing
+    if (tournament && tournament.readOnly) {
+        return;
+    }
+
     const player = players.find(p => p.id === playerId);
     if (!player) return;
 
