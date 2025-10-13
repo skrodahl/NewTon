@@ -105,14 +105,16 @@ All statistics are **clickable** - click to show detailed breakdown in right pan
 
 **Shows:** Number of paid vs unpaid registered players
 
-**Click to view:** (Currently shows same info - may be expanded in future)
+**Click to view:** Complete player list sorted by paid/unpaid status with player IDs
 
-**Purpose:** Verify player registration status
+**Purpose:** Verify player registration status and quickly locate player IDs
 
 ---
 
 ### 4. Lane Usage
-**Display:** `3/10 in use ✅`
+**Display:** `3/8 in use ✅`
+
+**Shows:** Number of lanes currently in use vs available lanes (excludes excluded lanes)
 
 **Indicators:**
 - ✅ Green: No lane conflicts
@@ -121,6 +123,8 @@ All statistics are **clickable** - click to show detailed breakdown in right pan
 **Click to view:** (Currently shows same info - may be expanded in future)
 
 **Purpose:** Monitor lane assignments and detect conflicts
+
+**Note:** The denominator reflects available lanes (total lanes minus excluded lanes from Config)
 
 ---
 
@@ -176,7 +180,11 @@ All commands are **navigation links** - click to execute or show results.
 
 **Safety:** Read-only operation, no changes made
 
-**Output:** Validation results displayed in right pane (see Validation Checks section)
+**Output:**
+- Detailed validation results displayed in right pane
+- Summary logged to console footer showing pass/fail for each check
+- Individual check results with ✅ or ⚠️ icons
+- Failure details indented underneath each failing check
 
 ---
 
@@ -279,7 +287,7 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 
 **Fail:** ⚠️ X issue(s) detected
 - Lists matches with orphaned player ID references
-- Skips special IDs (bye-*, tbd-*, WALKOVER)
+- Skips special IDs: bye-*, tbd-*, walkover-*, bs-*, fs-*, grand-final-*, WALKOVER
 
 **Purpose:** Detect data corruption or orphaned player references
 
@@ -333,6 +341,35 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 **Shows:**
 - Match counts by state (COMPLETED, LIVE, READY, PENDING)
 - List of match IDs for each state
+
+---
+
+### Player Details
+**Triggered by:** Clicking "Player Count"
+
+**Shows:**
+- Total player count
+- Complete list of paid players (alphabetically sorted)
+  - Player name and ID for each player
+- Complete list of unpaid players (alphabetically sorted)
+  - Player name and ID for each player
+
+**Format:**
+```
+Player Details (29 total)
+
+✅ Paid Players (22)
+  Alice Smith (ID: 1)
+  Bob Johnson (ID: 5)
+  ...
+
+⚠️ Unpaid Players (7)
+  Charlie Brown (ID: 3)
+  David Lee (ID: 12)
+  ...
+```
+
+**Purpose:** Quick player lookup by name or ID, verify payment status
 
 ---
 
@@ -453,6 +490,7 @@ window.closeAnalyticsModal()   // Close Developer Console
 window.showQuickOverview()           // Show default overview
 window.showTransactionBreakdown()    // Show transaction details
 window.showMatchStateDetails()       // Show match state lists
+window.showPlayerDetails()           // Show player list with IDs
 window.showTransactionHistory()      // Show transaction history
 window.showConsoleOutput()           // Show console output
 window.showMatchProgression()        // Show progression rules
@@ -767,27 +805,15 @@ The following UX improvements have been identified for future implementation:
 
 ### 1. Statistics Click Behavior Improvements
 
-**Current Issue**: Player Count and Lane Usage statistics both navigate to Quick Overview (generic view) instead of showing relevant details.
+**Status**: ✅ **Partially Implemented** - Player Count detail view completed in v2.5.0-beta
 
-**Proposed Changes:**
+#### Player Count Detail View ✅ IMPLEMENTED
+When clicking "Player Count", shows:
+- Complete alphabetically sorted list of paid players with IDs
+- Complete alphabetically sorted list of unpaid players with IDs
+- Total counts for each category
 
-#### Player Count Detail View
-When clicking "Player Count", show:
-```
-Player Details
-
-Total: 29 players
-Paid: 22 players
-Unpaid: 7 players
-
-Paid Players:
-John Doe, Jane Smith, Bob Wilson, ... (complete list)
-
-Unpaid Players:
-Alice Cooper, David Lee, ... (complete list)
-```
-
-#### Lane Usage Detail View
+#### Lane Usage Detail View ⏳ PLANNED
 When clicking "Lane Usage", show:
 ```
 Lane Usage Details
@@ -854,13 +880,15 @@ Time: 11:38:52 PM
 
 ### 3. Validation UX Improvements
 
-**Current Issues:**
-- "Validate Everything" shows results in right pane but provides no console output
-- Left pane statistics don't indicate validation status or timestamp
-- Not clear when validation was last run
-- Results not easily shareable/exportable
+**Status**: ✅ **Partially Implemented** - Console output added in v2.5.0-beta
 
-**Proposed Improvements:**
+**Implemented in v2.5.0-beta:**
+- ✅ "Validate Everything" now logs summary to console footer
+- ✅ Individual check results with ✅/⚠️ icons in console
+- ✅ Failure details logged with indentation
+- ✅ Pass/fail counts displayed
+
+**Remaining Improvements:**
 
 #### Add Validation Status to Statistics
 ```
@@ -994,21 +1022,99 @@ Last updated: 11:38:57 PM
 
 ---
 
+### 9. Second Monitor Support Command
+
+**Purpose**: Add a Developer Console command to enable automatic tournament syncing on a second monitor/display.
+
+**Current Workaround** (documented in `Docs/2ND-WINDOW.txt`):
+- Open second browser window on second monitor
+- Manually run `setInterval(() => { autoLoadCurrentTournament(); }, 5000)` in browser console
+- Manually stop with `clearInterval(syncInterval)` when done
+
+**Proposed Command**: "Start Second Monitor Sync"
+
+**Implementation Ideas:**
+
+#### Option 1: Simple Toggle Command
+```
+Commands (Left Pane):
+- Start Second Monitor Sync
+  - Clicking starts auto-sync on current window
+  - Button text changes to "Stop Second Monitor Sync"
+  - Console logs: "Second monitor sync started (5s interval)"
+  - Clicking again stops sync
+```
+
+#### Option 2: Dedicated View
+```
+Second Monitor Sync
+
+Status: ⭕ Not Running
+
+Instructions:
+1. Open second browser window on second monitor
+2. Navigate to Tournament page in second window
+3. Open Developer Console in second window (this window)
+4. Click "Start Sync" below
+
+[Start Sync (5s)] [Start Sync (10s)] [Stop Sync]
+
+Current interval: 5 seconds
+Last sync: Never
+```
+
+#### Option 3: New Browser Window Command
+```
+Command: Open Second Monitor Window
+
+Execution:
+1. Opens new browser window with window.open()
+2. Automatically loads tournament page
+3. Starts auto-sync on new window (5s interval)
+4. Original window shows: "Second monitor active"
+5. Closing Developer Console stops sync in second window
+```
+
+**Benefits:**
+- Eliminates need to manually run console commands
+- User-friendly toggle in familiar Developer Console interface
+- Consistent with existing command structure
+- Easy to start/stop during tournament
+
+**Use Case:**
+Tournament organizer wants to display live bracket progression on a second monitor/TV for participants to view, while operating tournament controls on primary monitor.
+
+**Technical Notes:**
+- Would call existing `autoLoadCurrentTournament()` function
+- Uses standard `setInterval()` / `clearInterval()` pattern
+- Interval configurable (5s, 10s, 30s options)
+- Could store sync state in `globalConfig` for persistence
+
+**Priority**: Low - Nice quality-of-life feature, current workaround is acceptable
+
+---
+
 ## Implementation Priority
+
+**Completed in v2.5.0-beta:**
+- ✅ Player Count detail view with IDs (Fix 1 - partial)
+- ✅ Validation console output (Fix 3 - partial)
+- ✅ Lane usage calculation respects excluded lanes
 
 **High Priority** (Most Impact):
 1. Command execution feedback (Fix 2) - Essential for usability
-2. Player Count and Lane Usage detail views (Fix 1) - Completes statistics consistency
-3. Validation UX improvements (Fix 3) - Makes validation actionable
+2. Lane Usage detail view (Fix 1 - remaining) - Completes statistics consistency
+3. Enhanced validation status display (Fix 3 - remaining) - Timestamps and overall status
 
 **Medium Priority** (Nice to Have):
 4. Menu reorganization (Fix 4) - Improves discoverability
 5. Enhanced validation checks (Fix 6) - Adds more diagnostic capability
 
 **Low Priority** (Future Enhancements):
-6. Console output integration (Fix 5) - Current behavior acceptable
+6. Console output enhancements (Fix 5) - Current behavior acceptable
 7. Export and reporting (Fix 7) - Useful but not critical
 8. Performance optimizations (Fix 8) - Only needed for very large tournaments
+9. Second monitor sync command (Fix 9) - Quality-of-life feature, workaround exists
 
 ---
 
@@ -1016,9 +1122,13 @@ Last updated: 11:38:57 PM
 
 **v2.5.0-beta** - Initial Developer Console implementation
 - Real-time statistics (4 metrics)
-- 6 validation checks
-- 7 commands/views
-- Console output capture
-- Auto-refresh system
+- 6 validation checks with enhanced console output
+- 8 commands/views (added Player Details view)
+- Console output capture with always-visible footer
+- Auto-refresh system (2-second intervals)
 - Global function accessibility
+- Player Count detail view: alphabetically sorted lists with IDs
+- Lane usage respects excluded lanes configuration
+- Validation command logs summary to console with pass/fail details
+- Player ID validation excludes walkover and placeholder IDs
 - Known UX improvements documented for future implementation

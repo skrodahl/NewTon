@@ -15,23 +15,23 @@
 
 #### Statistics (Real-time Monitoring)
 - **Transaction Health**: Shows current usage (X/500) with health indicators (✅ <50%, ⚠️ 50-80%, 🔴 >80%)
-- **Match State**: Breakdown of completed/live/ready/pending matches
-- **Player Count**: Paid vs unpaid players
-- **Lane Usage**: Current lane utilization with conflict detection (✅/⚠️)
+- **Match State**: Breakdown of completed/live/ready/pending matches (click to view match IDs by state)
+- **Player Count**: Paid vs unpaid players (click to view complete alphabetically sorted player list with IDs)
+- **Lane Usage**: Current lane utilization with conflict detection (✅/⚠️), respects excluded lanes from Config
 
 #### Validation Checks (6 Total)
 1. **Lane Assignments**: Detects overlapping lane assignments for LIVE matches
 2. **Referee Assignments**: Detects referees playing in matches they're refereeing
 3. **Match State Integrity**: Verifies completed matches have winner/loser assigned
 4. **Transaction Count**: Warns if approaching 500-entry limit (>80%)
-5. **Player ID Integrity**: Detects orphaned player references in matches array
+5. **Player ID Integrity**: Detects orphaned player references in matches array (excludes walkover-*, bye-*, tbd-*, and placeholder IDs)
 6. **Progression Integrity**: Verifies winners/losers are in correct downstream matches per MATCH_PROGRESSION rules
 
 #### Developer Commands
 - **Re-render Bracket**: Force visual refresh of bracket display (`renderBracket()`)
 - **Recalculate Rankings**: Recompute all player placements (`calculateAllRankings()`)
 - **Refresh All Dropdowns**: Update lane and referee dropdown options
-- **Validate Everything**: Run all 6 validation checks and display results
+- **Validate Everything**: Run all 6 validation checks, display results in right pane, log summary to console with pass/fail details
 - **View Transaction History**: Display all transactions (latest first) with timestamp, type, and description
 - **View Match Progression**: Display MATCH_PROGRESSION lookup tables for current bracket size
 

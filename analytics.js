@@ -320,11 +320,15 @@ function getPlayerStats() {
  */
 function getLaneStats() {
     const maxLanes = (config && config.lanes && config.lanes.maxLanes) || 10;
+    const excludedLanes = (config && config.lanes && config.lanes.excludedLanes) || [];
     const usedLanes = getUsedLanes ? getUsedLanes() : [];
     const validation = validateLaneAssignments ? validateLaneAssignments() : { valid: true, conflicts: [] };
 
+    // Calculate effective available lanes (total minus excluded)
+    const availableLanes = maxLanes - excludedLanes.length;
+
     return {
-        max: maxLanes,
+        max: availableLanes,
         inUse: usedLanes.length,
         conflicts: validation.conflicts.length
     };
@@ -494,6 +498,51 @@ function showConsoleOutput() {
     } else {
         consoleBuffer.forEach(entry => {
             html += `<p>[${entry.timestamp}] ${entry.message}</p>`;
+        });
+    }
+
+    html += `</div>`;
+
+    updateRightPane(html);
+}
+
+/**
+ * Show Player Details
+ */
+function showPlayerDetails() {
+    currentView = 'players';
+
+    if (!players || players.length === 0) {
+        updateRightPane(`<h4>Player Details</h4><p style="color: #666;">No players registered</p>`);
+        return;
+    }
+
+    // Separate and sort players by paid status
+    const paidPlayers = players.filter(p => p.paid).sort((a, b) => a.name.localeCompare(b.name));
+    const unpaidPlayers = players.filter(p => !p.paid).sort((a, b) => a.name.localeCompare(b.name));
+
+    let html = `
+        <h4>Player Details (${players.length} total)</h4>
+        <div style="line-height: 1.8;">
+    `;
+
+    // Paid Players Section
+    if (paidPlayers.length > 0) {
+        html += `
+            <h5 style="margin-top: 20px; margin-bottom: 10px; color: #065f46;">✅ Paid Players (${paidPlayers.length})</h5>
+        `;
+        paidPlayers.forEach(player => {
+            html += `<p style="margin-left: 20px;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></p>`;
+        });
+    }
+
+    // Unpaid Players Section
+    if (unpaidPlayers.length > 0) {
+        html += `
+            <h5 style="margin-top: 20px; margin-bottom: 10px; color: #dc2626;">⚠️ Unpaid Players (${unpaidPlayers.length})</h5>
+        `;
+        unpaidPlayers.forEach(player => {
+            html += `<p style="margin-left: 20px;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></p>`;
         });
     }
 
@@ -780,10 +829,18 @@ function validatePlayerIdIntegrity() {
     matches.forEach(match => {
         // Check player1
         if (match.player1 && match.player1.id) {
-            // Skip special players (BYE, TBD, WALKOVER)
-            if (!match.player1.id.startsWith('bye-') &&
-                !match.player1.id.startsWith('tbd-') &&
-                match.player1.id !== 'WALKOVER' &&
+            const player1Id = String(match.player1.id);
+            // Skip special players (BYE, TBD, WALKOVER, placeholder IDs)
+            // Placeholder IDs follow patterns like: bs-final-1, grand-final-2, fs-3-1, etc.
+            const isPlaceholder = player1Id.startsWith('bs-') ||
+                                  player1Id.startsWith('fs-') ||
+                                  player1Id.startsWith('grand-final-');
+
+            if (!player1Id.startsWith('bye-') &&
+                !player1Id.startsWith('tbd-') &&
+                !player1Id.startsWith('walkover-') &&
+                !isPlaceholder &&
+                player1Id !== 'WALKOVER' &&
                 !playerIds.has(match.player1.id)) {
                 issues.push(`${match.id}: player1 ID ${match.player1.id} not found in players array`);
             }
@@ -791,10 +848,18 @@ function validatePlayerIdIntegrity() {
 
         // Check player2
         if (match.player2 && match.player2.id) {
-            // Skip special players (BYE, TBD, WALKOVER)
-            if (!match.player2.id.startsWith('bye-') &&
-                !match.player2.id.startsWith('tbd-') &&
-                match.player2.id !== 'WALKOVER' &&
+            const player2Id = String(match.player2.id);
+            // Skip special players (BYE, TBD, WALKOVER, placeholder IDs)
+            // Placeholder IDs follow patterns like: bs-final-1, grand-final-2, fs-3-1, etc.
+            const isPlaceholder = player2Id.startsWith('bs-') ||
+                                  player2Id.startsWith('fs-') ||
+                                  player2Id.startsWith('grand-final-');
+
+            if (!player2Id.startsWith('bye-') &&
+                !player2Id.startsWith('tbd-') &&
+                !player2Id.startsWith('walkover-') &&
+                !isPlaceholder &&
+                player2Id !== 'WALKOVER' &&
                 !playerIds.has(match.player2.id)) {
                 issues.push(`${match.id}: player2 ID ${match.player2.id} not found in players array`);
             }
@@ -937,9 +1002,34 @@ function commandRefreshDropdowns() {
  * Command: Validate Everything
  */
 function commandValidateEverything() {
-    console.log('Running all validation checks...');
+    console.log('Running 6 validation checks...');
+
+    const results = runAllValidations();
+
+    // Log summary to console
+    let passCount = 0;
+    let failCount = 0;
+
+    results.forEach(result => {
+        if (result.valid) {
+            passCount++;
+            console.log(`✅ ${result.name}: ${result.message}`);
+        } else {
+            failCount++;
+            console.log(`⚠️ ${result.name}: ${result.message}`);
+            if (result.details && result.details.length > 0) {
+                result.details.forEach(detail => {
+                    console.log(`   - ${detail}`);
+                });
+            }
+        }
+    });
+
+    console.log(`Validation complete: ${passCount} passed, ${failCount} failed`);
+    console.log('(Full results displayed in right pane)');
+
+    // Show detailed results in right pane
     showValidationResults();
-    console.log('✓ Validation complete - see results in right pane');
 }
 
 /**
@@ -1000,6 +1090,7 @@ if (typeof window !== 'undefined') {
     window.showMatchStateDetails = showMatchStateDetails;
     window.showTransactionHistory = showTransactionHistory;
     window.showConsoleOutput = showConsoleOutput;
+    window.showPlayerDetails = showPlayerDetails;
     window.showMatchProgression = showMatchProgression;
     window.showValidationResults = showValidationResults;
     window.commandReRenderBracket = commandReRenderBracket;
