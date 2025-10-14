@@ -1,5 +1,19 @@
 # 2025-10-14
 
+## **v2.5.2-beta** - Match Controls Real-Time Updates
+
+### Fixed: Match Controls Auto-Refresh on Lane Changes
+- **Match Controls now updates immediately when lane assignments change on LIVE matches**
+  - Previously, changing a lane on a LIVE match required closing and reopening Match Controls to see the updated sort order
+  - LIVE matches now automatically re-sort by lane number when lanes are changed
+  - **Root cause**: Modal refresh check was looking for `display === 'flex'` but Match Controls uses `display: 'block'`
+  - **Solution**: Updated display check to accept both 'flex' and 'block' in `updateMatchLane()` function
+  - **Side benefit**: Also fixed lane/referee resources not being immediately "released" when stopping LIVE matches
+  - **Implementation**: Modified modal display check in clean-match-progression.js:1412-1414
+  - **User impact**: Real-time sorting and resource availability updates during tournament operations
+
+---
+
 ## **v2.5.1** - Match Controls and UI Improvements
 
 ### Enhanced: LIVE Match Sorting

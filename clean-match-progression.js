@@ -1409,8 +1409,9 @@ function updateMatchLane(matchId, newLane) {
     // and prevents losing match card hover zoom state
 
     // Refresh Match Controls if it's open
-    if (document.getElementById('matchCommandCenterModal') &&
-        document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
+    const modal = document.getElementById('matchCommandCenterModal');
+    if (modal &&
+        (modal.style.display === 'flex' || modal.style.display === 'block') &&
         typeof showMatchCommandCenter === 'function') {
         // Preserve scroll position
         const modalContent = document.querySelector('.cc-modal-content');
