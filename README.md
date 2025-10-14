@@ -12,7 +12,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 
 ---
 # See It in Action
-**Player Registration, Results Table, and Dynamic Help**:
+**Player Registration, Saved Players, and Dynamic Help**:
 
 ![Player Registration and Dynamic Help](https://github.com/skrodahl/NewTon/blob/main/Screenshots/player-registration-help.png)
 
