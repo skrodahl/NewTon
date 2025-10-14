@@ -1072,7 +1072,8 @@ function renderMatch(match, x, y, section, roundIndex) {
                     ? `<span style="font-size: 16px;"></span> <span style="font-size: 20px; font-weight: bold; color: #059669; font-family: 'Courier New', monospace; text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);">${formatMatchScore(match)}</span>`
                     : `L: <select onchange="updateMatchLane('${match.id}', this.value)"
                         onfocus="refreshLaneDropdown('${match.id}')"
-                        style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px;">
+                        style="background: white; border: 1px solid #ddd; font-size: 12px; width: 50px; padding: 2px; ${matchState === 'pending' ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
+                        ${matchState === 'pending' ? 'disabled' : ''}>
                         <option value="">No</option>
                         ${laneOptions}
                     </select> | Bo${match.legs}`
@@ -1097,7 +1098,8 @@ function renderMatch(match, x, y, section, roundIndex) {
                     ? `Ref: <span style="font-size: 11px;">${match.referee ? players.find(p => p.id === match.referee)?.name || 'Unknown' : 'None'}</span>`
                     : `Ref: <select onchange="updateMatchReferee('${match.id}', this.value)"
                         onfocus="refreshRefereeDropdown('${match.id}')"
-                        style="background: white; border: 1px solid #ddd; font-size: 11px; width: 185px; padding: 1px;">
+                        style="background: white; border: 1px solid #ddd; font-size: 11px; width: 185px; padding: 1px; ${matchState === 'pending' ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
+                        ${matchState === 'pending' ? 'disabled' : ''}>
                         ${generateRefereeOptionsWithConflicts(match.id, match.referee)}
                     </select>`
                 }

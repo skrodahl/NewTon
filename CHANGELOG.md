@@ -1,6 +1,6 @@
 # 2025-10-14
 
-## **v2.5.1-beta** - Match Controls Improvements
+## **v2.5.1** - Match Controls and UI Improvements
 
 ### Enhanced: LIVE Match Sorting
 - **Lane-based sorting in Match Controls**
@@ -37,6 +37,17 @@
     - Match cards: Applied to `.cc-match-card` class (LIVE matches retain their distinctive orange glow)
   - **Affected elements**: All action buttons (Create Tournament, Add Player, Save, Reset, Load, Delete, etc.) and Ready to Start match cards
   - **Real-world tested**: Refinement based on live tournament operation observations over multiple weeks
+
+### Fixed: Disabled Lane and Referee Assignment for Pending Matches
+- **Prevents resource blocking by disabling lane/referee dropdowns for pending matches**
+  - Lane and referee dropdowns now disabled when match state is 'pending' (both players not yet determined/TBD)
+  - Visual feedback: Disabled dropdowns shown with reduced opacity (0.5) and not-allowed cursor
+  - **Problem solved**: Operators were assigning lanes/referees to pending matches, blocking those resources from ready matches
+  - **User benefit**: Lanes and referees only show as "assigned" when actually in use by ready or live matches
+  - **Consistent pattern**: Aligns with disabled "Start Match" button behavior for pending matches
+  - **Applies to**: Tournament bracket view only (Match Command Center doesn't show pending matches)
+  - **Implementation**: Added `disabled` attribute and visual styling in bracket rendering (bracket-rendering.js:1075-1076, 1101-1102)
+  - **Real-world tested**: Fix identified through live tournament operations where resource confusion occurred
 
 ### Enhanced: Read-Only Tournament Protection
 - **Player statistics locked for loaded completed tournaments**
