@@ -64,6 +64,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 ### 🎯 Double Elimination Brackets
 - **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players
 - **Smart Generation**: Prevents two walkovers from meeting in first round
+- **Fair Draw**: Byes randomly distributed to prevent unfair advantages and minimize walkover chains
 - **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
 - **Match Card Magic Zoom:** Auto-zoom on individual matches when zoomed out too far to read and control the matches
 - **Automatic Advancement**: Walkovers advance real players intelligently
