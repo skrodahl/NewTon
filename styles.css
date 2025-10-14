@@ -1090,54 +1090,6 @@ footer {
 ::-webkit-scrollbar-thumb { background: #9ca3af; border-radius: 4px; }
 ::-webkit-scrollbar-thumb:hover { background: #6b7280; }
 
-/* Responsive */
-@media (max-width: 1200px) {
-  .bracket-match { width: 180px; height: 95px; }
-  .player-name-short { max-width: 110px; }
-}
-
-@media (max-width: 768px) {
-  .tournament-info { grid-template-columns: 1fr; }
-  .players-grid { grid-template-columns: 1fr; }
-  .bracket-container { height: 80vh; }
-  .bracket-match { width: 160px; height: 90px; }
-  .player-name-short { max-width: 100px; font-size: 11px; }
-  .bracket-title { font-size: 24px; letter-spacing: 2px; }
-  .zoom-btn { width: 40px; height: 40px; font-size: 16px; }
-  
-  /* Stack columns vertically on mobile */
-  .two-column-container {
-    flex-direction: column;
-    height: auto;
-  }
-  
-  /* DUPLICATE CANDIDATE: Mobile .scrollable-column may conflict with flat design - REVIEW NEEDED */
-  .scrollable-column {
-    height: 300px; /* Fixed height for scrollable areas on mobile */
-  }
-  
-  /* Registration page mobile adjustments */
-  #registration.registration-page-flex {
-    height: auto; /* Allow natural height on mobile */
-    overflow: visible; /* Normal scrolling on mobile */
-  }
-  
-  .registration-layout {
-    flex-direction: column; /* Stack player cards above results table */
-    flex: none; /* Don't stretch on mobile */
-  }
-}
-
-@media (max-width: 480px) {
-  .header h1 { font-size: 1.5rem; }
-  .nav { gap: 8px; }
-  .nav button { padding: 8px 12px; font-size: 14px; }
-  .bracket-match { width: 140px; height: 85px; }
-  .player-name-short { max-width: 80px; font-size: 10px; }
-  .match-header { font-size: 9px; padding: 4px 6px; }
-  .bracket-title { font-size: 20px; }
-}
-
 /* Links */
 a { color: #1d4ed8; }
 a:hover { color: #1e40af; }
@@ -1233,16 +1185,6 @@ a:hover { color: #1e40af; }
     to { 
         transform: translateX(-50%) translateY(0); 
         opacity: 1; 
-    }
-}
-
-/* Responsive help modal */
-@media (max-width: 768px) {
-    .help-modal {
-        width: 90% !important;
-        max-width: 350px !important;
-        right: 5% !important;
-        top: 20px !important;
     }
 }
 
@@ -1724,42 +1666,6 @@ a:hover { color: #1e40af; }
   font-style: italic;
 }
 
-@media (max-width: 600px) {
-  .podium-container {
-    gap: 10px;
-  }
-
-  .podium-block {
-    width: 60px;
-    font-size: 1rem;
-  }
-
-  .podium-block.first {
-    height: 80px;
-  }
-
-  .podium-block.second {
-    height: 65px;
-  }
-
-  .podium-block.third {
-    height: 50px;
-  }
-
-  .podium-player {
-    min-width: 80px;
-    padding: 8px;
-  }
-
-  .celebration-title {
-    font-size: 1.5rem;
-  }
-
-  .highlights-grid {
-    grid-template-columns: 1fr;
-  }
-}
-
 /* Enhanced Undo Confirmation Modal */
 .undo-header {
   font-size: 16px;
@@ -1977,29 +1883,6 @@ a:hover { color: #1e40af; }
   margin-top: 20px;
 }
 
-/* Responsive adjustments for Command Center match cards */
-@media (max-width: 640px) {
-  .cc-match-controls {
-    flex-direction: column;
-    align-items: stretch;
-  }
-  
-  .cc-control-group {
-    justify-content: space-between;
-  }
-  
-  .cc-match-players {
-    flex-direction: column;
-    gap: 8px;
-  }
-  
-  .undo-match-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-}
-
 /* Match History Styles */
 .match-history-item {
   background: #ffffff;
@@ -2146,34 +2029,6 @@ a:hover { color: #1e40af; }
   color: #6b7280;
   font-style: italic;
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
-}
-
-/* Mobile responsive adjustments for match history */
-@media (max-width: 640px) {
-  .match-header {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 4px;
-  }
-  
-  .match-history-item {
-    padding: 10px;
-  }
-  
-  .match-result-enhanced {
-    flex-direction: column;
-    align-items: flex-start;
-    gap: 6px;
-  }
-  
-  .result-score {
-    margin-left: 0;
-    font-size: 13px;
-  }
-  
-  .progression-info {
-    font-size: 11px;
-  }
 }
 
 /* Stats Modal Scrolling Fixes */

@@ -293,52 +293,92 @@ After each cleanup phase:
 
 1. ✅ **Git checkpoint created** - Table width fixes applied and working
 2. ✅ **Phase 1 cleanup COMPLETED** (2025-10-14) - Aggressive cleanup of legacy sections
-   - ✅ Commented out ~232 lines of legacy CSS
-   - ✅ Section 1: Legacy Registration page styles (lines 277-395)
-   - ✅ Section 2: Legacy Setup/Config styles (lines 1106-1220)
-   - ✅ Created backup: styles.css.backup-2025-10-14
-3. ✅ **Testing completed** - All 4 pages rendering correctly
-   - ✅ Tournament page: Perfect
-   - ✅ Setup, Registration, Config pages: Rendering correctly
-   - ⚠️ Minor issue: 13 modals visible at bottom (but functionally working)
-4. **Phase 2 cleanup**: Additional legacy removal (NEXT)
+3. ✅ **Phase 2 cleanup COMPLETED** (2025-10-15) - Removed all mobile/responsive CSS
+4. ⚠️ **Testing in progress** - Initial testing looks good, full testing needed
+5. **Phase 3 cleanup**: Additional optimization opportunities (if desired)
 
 ### Phase 1 Cleanup Results (2025-10-14)
 
 **Files Modified:**
-- `styles.css` - Commented out 2 major legacy sections
+- `styles.css` - Commented out and then deleted 2 major legacy sections
 - Created backup: `styles.css.backup-2025-10-14`
 
-**Section 1 - Lines 277-395 (~118 lines)**
-- Legacy Registration page player cards
+**Section 1 - Legacy Registration page styles (~118 lines)**
 - Old `.player-card`, `.players-grid`, `.player-header` styles
-- Superseded by flat design at line ~2950
+- Superseded by flat design version
 
-**Section 2 - Lines 1106-1220 (~114 lines)**
-- Legacy Setup/Config page layout
+**Section 2 - Legacy Setup/Config styles (~114 lines)**
 - Old `.scrollable-column`, `.scrollable-column-content` styles
-- Superseded by flat design at line ~2603
+- Superseded by flat design version
+
+**Critical Bug Fixed:**
+- Fixed nested CSS comment syntax that was breaking Chrome's CSS parser
+- Modals were displaying at bottom of pages instead of being hidden
+- Root cause: Nested `/* */` comments inside commented block confused Chrome
 
 **Test Results:**
-- ✅ All pages functional
+- ✅ All 4 pages functional
 - ✅ All UI elements rendering correctly
-- ⚠️ Modals visible at bottom but working properly when triggered
+- ✅ Modals working properly in both Safari and Chrome
 
-**Phase 2: Additional Safe Removals (Next Priority)**
-1. Identify remaining gradient/shadow styles not used by Tournament page
-2. Continue consolidation of duplicate selectors
-3. Remove redundant !important declarations where specificity can be increased
+**Phase 1 Impact:**
+- Removed: 229 lines
+- Before: 3,278 lines → After: 3,049 lines
+- Reduction: 7.0%
 
-**Phase 3: Protected Elements (DO NOT TOUCH)**
+### Phase 2 Cleanup Results (2025-10-15)
+
+**Target: Remove all mobile/responsive CSS**
+- Application is desktop-only, designed for proper computer monitors
+- No mobile support needed or intended
+
+**Removed:**
+- All 7 `@media` query blocks
+- Mobile breakpoints: 1200px, 768px, 640px, 600px, 480px
+- Mobile-specific layout adjustments
+- Mobile podium sizing
+- Mobile Command Center layouts
+- Mobile match history adjustments
+
+**Specific Deletions:**
+1. `@media (max-width: 1200px)` - Bracket match sizing
+2. `@media (max-width: 768px)` - General mobile layout (35 lines)
+3. `@media (max-width: 480px)` - Small screen adjustments
+4. `@media (max-width: 768px)` - Help modal responsive
+5. `@media (max-width: 600px)` - Celebration/podium mobile
+6. `@media (max-width: 640px)` - Command Center mobile
+7. `@media (max-width: 640px)` - Match history mobile
+
+**Phase 2 Impact:**
+- Removed: 145 lines
+- Before: 3,049 lines → After: 2,904 lines
+- Reduction: 4.8%
+
+**Combined Phase 1 + Phase 2:**
+- Original: 3,278 lines
+- Current: 2,904 lines
+- **Total removed: 374 lines (11.4% reduction)**
+
+**Initial Test Results (2025-10-15):**
+- ✅ No visual changes at first glance
+- ✅ Celebration podium works (rounded corners/shadows intentionally kept)
+- ⚠️ Full modal testing pending
+- ⚠️ Comprehensive 4-page testing pending
+
+### Phase 3: Protected Elements (DO NOT TOUCH)
 - Registration page table structure and CSS
 - .registration-page-main padding
 - .results-table styles
-- Podium elements (intentional rounded corners)
+- Podium elements (intentional rounded corners and shadows - decorative)
+- Tournament bracket gradients and state styling (active/ready/completed)
+- Command Center match card styling
+- Help system styles
 
-**Phase 4: Future Optimization**
+### Phase 4: Future Optimization (Optional)
 - Button style consolidation
 - Form element unification
 - CSS variable implementation
+- Additional !important removal where specificity can be increased
 
 ---
 
