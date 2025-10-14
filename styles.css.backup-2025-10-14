@@ -268,6 +268,123 @@ body {
   border-color: #d97706;
 }
 
+/* Player management */
+.players-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 16px;
+  margin-top: 12px;
+}
+
+/* DUPLICATE CANDIDATE: .player-card superseded by flat design version at line ~2810 - CONSIDER REMOVAL */
+.player-card {
+  background: #ffffff;
+  border: 2px solid #9ca3af;
+  border-radius: 0;
+  padding: 12px 16px; /* Reduced from 16px */
+  transition: all 0.2s ease;
+  color: #111827;
+}
+
+.player-card:hover {
+  border-color: #ff6b35;
+  box-shadow: 0 6px 16px rgba(255,107,53,0.15);
+  transform: translateY(-2px);
+}
+
+.player-card.paid {
+  border-color: rgba(22, 101, 52, 1);
+  background: #eef1f0; /* darker, more muted green */
+}
+
+.player-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.player-name {
+  font-weight: 800;
+  font-size: 18px;
+  color: #111827;
+}
+
+.paid-checkbox {
+  transform: scale(1.2);
+  accent-color: #2563eb;
+}
+
+.stats-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  color: #111827;
+}
+
+/* Player card statistics numbers in orange */
+.stat-item span:last-child {
+  color: #ea580c;
+  font-weight: 600; /* Optional: make them slightly bolder too */
+}
+
+/* Compact player cards */
+.player-card-compact {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+
+.paid-status {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #374151;
+  margin: 0;
+  cursor: pointer;
+}
+
+.player-name-large {
+  font-size: 16px;
+  font-weight: 700;
+  color: #065f46; /* Player Name Color */
+  cursor: pointer;
+  padding: 4px 0;
+  transition: color 0.2s ease;
+}
+
+.player-name-large:hover {
+  color: #047857; /* Player Name Color */
+  text-decoration: underline;
+}
+
+.remove-btn {
+  background: rgba(154, 52, 18, 0.9);
+  color: white;
+  border: none;
+  border-radius: 3px; /* Changed from 50% to 3px for square */
+  width: auto; /* Changed from 24px */
+  height: auto; /* Changed from 24px */
+  padding: 5px 8px; /* Added padding back */
+  cursor: pointer;
+  font-weight: bold;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px; /* Reduced from 16px */
+  line-height: 1;
+}
+
 /* Tournament info grid */
 .tournament-info {
   display: grid;
@@ -968,6 +1085,118 @@ body {
   margin-bottom: 20px;
   border: 1px solid #e5e7eb;
   color: #111827;
+}
+
+/* Setup page flex layout - only for Setup page when active */
+#setup.setup-page-flex.active {
+  display: flex !important;
+  flex-direction: column;
+  height: calc(100vh - 200px); /* Account for container padding and header */
+  overflow: hidden;
+}
+
+.setup-page-header {
+  flex-shrink: 0;
+}
+
+.setup-page-main {
+  flex: 1;
+  min-height: 0;
+}
+
+/* Two-column layout for Setup page */
+.two-column-container {
+  display: flex;
+  gap: 20px;
+  height: 100%;
+  margin-bottom: 0;
+}
+
+/* DUPLICATE CANDIDATE: .scrollable-column superseded by flat design version at line ~2540 - CONSIDER REMOVAL */
+.scrollable-column {
+  flex: 1;
+  background: #f8f9fa;
+  border-radius: 10px;
+  border: 1px solid #e5e7eb;
+  color: #111827;
+  display: flex;
+  flex-direction: column;
+  min-height: 0; /* Important for flexbox scrolling */
+}
+
+
+.scrollable-column-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  min-height: 0; /* Important for flexbox scrolling */
+}
+
+/* Style toggle button in column header */
+.scrollable-column h3 button {
+  padding: 5px 15px;
+  font-size: 14px;
+}
+
+.config-section h3 {
+  color: #111827;
+  margin-bottom: 12px;
+}
+
+/* Ensure form groups in config sections align properly */
+.config-section .form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 16px;
+}
+
+.config-section .form-group label {
+  margin-bottom: 8px;
+  font-weight: 700;
+  color: #111827;
+  min-height: 20px;
+  display: flex;
+  align-items: center;
+}
+
+/* Fix checkbox sizing in config sections */
+.config-section input[type="checkbox"] {
+  width: auto !important;
+  height: auto !important;
+  min-height: auto !important;
+  padding: 0 !important;
+  transform: scale(1.2); /* Keep them slightly larger for accessibility */
+  margin-right: 8px;
+}
+
+/* Special handling for checkbox labels in config */
+.config-section .form-group label input[type="checkbox"] {
+  margin-right: 8px;
+  margin-top: 0;
+  flex-shrink: 0;
+}
+
+/* Ensure selects and inputs have consistent heights */
+.config-section .form-group select,
+.config-section .form-group input {
+  min-height: 44px;
+  padding: 10px 12px;
+  box-sizing: border-box;
+}
+
+/* Enhanced config grid for better alignment */
+.config-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+  align-items: start; /* Changed from default */
+}
+
+/* Results table */
+
+.clickable-player-name:hover {
+  color: #047857; /* Player Name Color */
+  text-decoration: underline;
 }
 
 /* Modals */

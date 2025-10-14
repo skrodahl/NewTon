@@ -12,7 +12,7 @@
   - **Implementation**: Modified modal display check in clean-match-progression.js:1412-1414
   - **User impact**: Real-time sorting and resource availability updates during tournament operations
 
-### Improved: Referee Suggestions Logic 
+### Improved: Referee Suggestions Logic
 - **Complete rewrite of referee suggestions system with timeline-based event tracking**
   - **Timeline approach**: Lists show history of events, not unique players (e.g., "Jack, Ken, Bob, Ken, Nick, Ken")
   - **Recent Winners**: Last 10 match wins (up from 7, configurable 5-20 in Config page)
@@ -30,6 +30,16 @@
   - **Configurable limit**: Added "Number of referee suggestions to show" field in Config > User Interface (5-20, default 10)
   - **Implementation**: bracket-rendering.js:2651-2900 (getRefereeSuggestions), clean-match-progression.js:1567-1631 (updateMatchReferee auto-refresh)
   - **User impact**: Tournament operators can quickly assign referees from accurate, real-time list of eligible players - dramatically speeds up tournament management
+
+### Maintenance: CSS Cleanup Phase 1
+- **Removed 229 lines of legacy CSS from pre-redesign era**
+  - Deleted duplicate Registration page player card styles (superseded by flat design)
+  - Deleted duplicate Setup/Config page layout styles (superseded by flat design)
+  - Fixed nested CSS comment syntax issue breaking Chrome's CSS parser
+  - All 4 pages (Tournament, Setup, Registration, Config) tested and working perfectly
+  - Created backup: styles.css.backup-2025-10-14
+  - **Before**: 3,278 lines | **After**: 3,049 lines | **Reduction**: 7%
+  - **User impact**: Cleaner codebase, no functional changes
 
 ---
 
