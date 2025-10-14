@@ -2651,6 +2651,9 @@ function showMatchCommandCenter() {
 function getRefereeSuggestions() {
     console.log('🔍 getRefereeSuggestions called - tournament status:', tournament?.status);
 
+    // Maximum number of suggestions to show in each category (configurable)
+    const MAX_SUGGESTIONS = 10;
+
     if (!matches || !players) {
         console.log('❌ No matches or players data available');
         return { losers: [], winners: [], recentReferees: [] };
@@ -2667,15 +2670,7 @@ function getRefereeSuggestions() {
 
     console.log(`📊 Found ${completedMatches.length} completed matches for referee suggestions`);
 
-    // Get players currently assigned as referees
-    const assignedReferees = new Set();
-    matches.forEach(match => {
-        if (match.referee) {
-            assignedReferees.add(match.referee);
-        }
-    });
-
-    // Get players currently in LIVE matches
+    // Get players currently in LIVE matches (these are ineligible)
     const playersInLiveMatches = new Set();
     matches.forEach(match => {
         if (match.active) {
@@ -2684,12 +2679,12 @@ function getRefereeSuggestions() {
         }
     });
 
-    // Helper function to check if a player is eligible
+    // Helper function to check if a player is eligible for referee suggestions
     const isEligible = (playerId, playerName) => {
         if (!playerId) return false;
 
-        // Check basic eligibility (not assigned as referee, not in live match)
-        if (assignedReferees.has(playerId) || playersInLiveMatches.has(playerId)) {
+        // Check if player is currently in a LIVE match
+        if (playersInLiveMatches.has(playerId)) {
             return false;
         }
 
@@ -2723,99 +2718,171 @@ function getRefereeSuggestions() {
         return matchId; // Fallback
     };
 
-    // Collect recent losers by FS/BS (up to 10 total eligible)
-    const fsLosers = [];
-    const bsLosers = [];
-    for (const match of completedMatches) {
-        if (fsLosers.length + bsLosers.length >= 7) break;
-
-        const loserId = match.loser?.id;
-        if (loserId && isEligible(loserId, match.loser?.name)) {
-            const loserData = {
-                id: loserId,
-                name: match.loser.name,
-                round: getRoundDescription(match.id)
-            };
-
-            if (match.id.startsWith('FS-')) {
-                fsLosers.push(loserData);
-            } else if (match.id.startsWith('BS-')) {
-                bsLosers.push(loserData);
-            }
-        }
-    }
-
-    // Combine FS first, then BS
-    const recentLosers = [...fsLosers, ...bsLosers].slice(0, 7);
-
-    // Collect recent winners by FS/BS (up to 10 total eligible)
-    const fsWinners = [];
-    const bsWinners = [];
-    for (const match of completedMatches) {
-        if (fsWinners.length + bsWinners.length >= 7) break;
-
-        const winnerId = match.winner?.id;
-        if (winnerId && isEligible(winnerId, match.winner?.name)) {
-            // Don't add if already in losers list
-            if (!recentLosers.some(loser => loser.id === winnerId)) {
-                const winnerData = {
-                    id: winnerId,
-                    name: match.winner.name,
-                    round: getRoundDescription(match.id)
-                };
-
-                if (match.id.startsWith('FS-')) {
-                    fsWinners.push(winnerData);
-                } else if (match.id.startsWith('BS-')) {
-                    bsWinners.push(winnerData);
-                }
-            }
-        }
-    }
-
-    // Combine FS first, then BS
-    const recentWinners = [...fsWinners, ...bsWinners].slice(0, 7);
-
-    // Get recent referee assignments from transaction history (last 10)
-    const recentRefereeAssignments = [];
+    // Get transaction history for referee assignments
     const history = JSON.parse(localStorage.getItem('tournamentHistory') || '[]');
 
-    // Filter ASSIGN_REFEREE transactions with actual referee assignments (not null)
+    // Build a map of most recent referee assignment timestamp for each player
+    const playerRefereeAssignments = new Map(); // playerId -> {timestamp, matchId}
+    history.forEach(tx => {
+        if (tx.type === 'ASSIGN_REFEREE' && tx.afterState?.referee) {
+            const refereeId = tx.afterState.referee;
+            const txTimestamp = new Date(tx.timestamp).getTime();
+
+            // Keep only the most recent assignment for each player
+            if (!playerRefereeAssignments.has(refereeId) ||
+                txTimestamp > playerRefereeAssignments.get(refereeId).timestamp) {
+                playerRefereeAssignments.set(refereeId, {
+                    timestamp: txTimestamp,
+                    matchId: tx.matchId,
+                    timestampStr: tx.timestamp
+                });
+            }
+        }
+    });
+
+    // Build a map of most recent match completion timestamp for each player (winner or loser)
+    const playerMatchCompletions = new Map(); // playerId -> timestamp
+    completedMatches.forEach(match => {
+        const completedAt = match.completedAt || 0;
+
+        // Track winner's most recent completion
+        if (match.winner?.id) {
+            if (!playerMatchCompletions.has(match.winner.id) ||
+                completedAt > playerMatchCompletions.get(match.winner.id)) {
+                playerMatchCompletions.set(match.winner.id, completedAt);
+            }
+        }
+
+        // Track loser's most recent completion
+        if (match.loser?.id) {
+            if (!playerMatchCompletions.has(match.loser.id) ||
+                completedAt > playerMatchCompletions.get(match.loser.id)) {
+                playerMatchCompletions.set(match.loser.id, completedAt);
+            }
+        }
+    });
+
+    // Collect recent losers (up to MAX_SUGGESTIONS)
+    const recentLosers = [];
+    const addedLoserIds = new Set();
+
+    for (const match of completedMatches) {
+        if (recentLosers.length >= MAX_SUGGESTIONS) break;
+
+        const loserId = match.loser?.id;
+        const loserName = match.loser?.name;
+
+        // Skip if not eligible or already added
+        if (!loserId || !isEligible(loserId, loserName) || addedLoserIds.has(loserId)) {
+            continue;
+        }
+
+        recentLosers.push({
+            id: loserId,
+            name: loserName,
+            round: getRoundDescription(match.id),
+            completedAt: match.completedAt || 0
+        });
+        addedLoserIds.add(loserId);
+    }
+
+    // Collect recent winners (up to MAX_SUGGESTIONS)
+    const recentWinners = [];
+    const addedWinnerIds = new Set();
+
+    for (const match of completedMatches) {
+        if (recentWinners.length >= MAX_SUGGESTIONS) break;
+
+        const winnerId = match.winner?.id;
+        const winnerName = match.winner?.name;
+
+        // Skip if not eligible or already added
+        if (!winnerId || !isEligible(winnerId, winnerName) || addedWinnerIds.has(winnerId)) {
+            continue;
+        }
+
+        recentWinners.push({
+            id: winnerId,
+            name: winnerName,
+            round: getRoundDescription(match.id),
+            completedAt: match.completedAt || 0
+        });
+        addedWinnerIds.add(winnerId);
+    }
+
+    // Get recent referee assignments from transaction history (last MAX_SUGGESTIONS)
     const refereeTransactions = history
         .filter(tx => tx.type === 'ASSIGN_REFEREE' && tx.afterState?.referee)
         .sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp)) // Most recent first
-        .slice(0, 7);
+        .slice(0, MAX_SUGGESTIONS);
+
+    const recentRefereeAssignments = [];
+    const addedRefereeIds = new Set();
 
     for (const tx of refereeTransactions) {
         const refereeId = tx.afterState.referee;
+
+        // Skip if already added (only show each player once in Recent Assignments)
+        if (addedRefereeIds.has(refereeId)) continue;
+
         if (refereeId) {
             // Find referee name from players
             const referee = players.find(p => p.id === refereeId);
             if (referee) {
-                // Get round description from match ID
-                const roundDescription = getRoundDescription(tx.matchId);
-
                 recentRefereeAssignments.push({
                     id: refereeId,
                     name: referee.name,
-                    round: roundDescription,
-                    timestamp: tx.timestamp
+                    round: getRoundDescription(tx.matchId),
+                    timestamp: new Date(tx.timestamp).getTime(),
+                    timestampStr: tx.timestamp
                 });
+                addedRefereeIds.add(refereeId);
             }
         }
     }
 
+    // CRITICAL LOGIC: Remove players from Winners/Losers if they have a MORE RECENT referee assignment
+    // Logic: If a player was assigned as referee AFTER their last match completion,
+    // they should only appear in Recent Assignments, not in Winners/Losers
+
+    const finalLosers = recentLosers.filter(loser => {
+        const lastMatchCompletion = playerMatchCompletions.get(loser.id) || 0;
+        const lastRefereeAssignment = playerRefereeAssignments.get(loser.id);
+
+        if (lastRefereeAssignment && lastRefereeAssignment.timestamp > lastMatchCompletion) {
+            // Referee assignment is MORE RECENT than match completion
+            // Remove from losers list
+            console.log(`🔄 Removing ${loser.name} from Recent Losers (assigned as referee more recently)`);
+            return false;
+        }
+        return true;
+    });
+
+    const finalWinners = recentWinners.filter(winner => {
+        const lastMatchCompletion = playerMatchCompletions.get(winner.id) || 0;
+        const lastRefereeAssignment = playerRefereeAssignments.get(winner.id);
+
+        if (lastRefereeAssignment && lastRefereeAssignment.timestamp > lastMatchCompletion) {
+            // Referee assignment is MORE RECENT than match completion
+            // Remove from winners list
+            console.log(`🔄 Removing ${winner.name} from Recent Winners (assigned as referee more recently)`);
+            return false;
+        }
+        return true;
+    });
+
     console.log('📋 Referee suggestions summary:', {
-        losersCount: recentLosers.length,
-        winnersCount: recentWinners.length,
+        losersCount: finalLosers.length,
+        winnersCount: finalWinners.length,
         recentRefereesCount: recentRefereeAssignments.length,
-        losers: recentLosers.map(l => l.name),
-        winners: recentWinners.map(w => w.name)
+        losers: finalLosers.map(l => l.name),
+        winners: finalWinners.map(w => w.name),
+        recentReferees: recentRefereeAssignments.map(r => r.name)
     });
 
     return {
-        losers: recentLosers,
-        winners: recentWinners,
+        losers: finalLosers,
+        winners: finalWinners,
         recentReferees: recentRefereeAssignments
     };
 }

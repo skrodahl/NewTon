@@ -1,6 +1,6 @@
 # 2025-10-14
 
-## **v2.5.2-beta** - Match Controls Real-Time Updates
+## **v2.5.2-beta** - Match Controls Real-Time Updates & Referee Suggestions
 
 ### Fixed: Match Controls Auto-Refresh on Lane Changes
 - **Match Controls now updates immediately when lane assignments change on LIVE matches**
@@ -11,6 +11,20 @@
   - **Side benefit**: Also fixed lane/referee resources not being immediately "released" when stopping LIVE matches
   - **Implementation**: Modified modal display check in clean-match-progression.js:1412-1414
   - **User impact**: Real-time sorting and resource availability updates during tournament operations
+
+### Improved: Referee Suggestions Logic
+- **Complete rewrite of referee suggestions system with corrected multi-category logic**
+  - **Recent Winners**: Shows last 10 match winners (up from 7)
+  - **Recent Losers**: Shows last 10 match losers (up from 7)
+  - **Recent Assignments**: Shows last 10 referee assignments (up from 7)
+  - **Key improvement**: Players can now appear in multiple categories simultaneously
+  - **Critical logic**: When a player is assigned as referee, they are REMOVED from Winners/Losers until they complete another match
+  - **Implementation**: Uses transaction timestamps to compare most recent match completion vs. most recent referee assignment
+  - **Configurable**: `MAX_SUGGESTIONS` constant (currently 10) makes it easy to adjust or add to Config page later
+  - **Fixed bugs**: Corrected winner/loser identification in Backside matches
+  - **Better eligibility**: Only filters out players in LIVE matches and walkovers (no longer incorrectly filters currently assigned referees)
+  - **Technical details**: bracket-rendering.js:2651-2888 (getRefereeSuggestions function)
+  - **User impact**: More accurate and helpful referee suggestions that reflect actual recent tournament activity
 
 ---
 
