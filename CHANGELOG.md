@@ -25,6 +25,15 @@
     - Match Config: Regular (Best of 3), Frontside SF (Best of 5), Backside SF (Best of 3), Backside Final (Best of 5), Grand Final (Best of 5)
   - **Implementation**: `resetPointValuesToDefaults()` and `resetMatchConfigToDefaults()` in results-config.js
 
+### Enhanced: Subtle Button Shadows
+- **Added subtle depth to all buttons for improved actionability**
+  - Default state: `box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08)` - Very subtle shadow with 8% opacity
+  - Hover state: `box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12)` - Slightly enhanced at 12% opacity for interactive feedback
+  - **Design philosophy**: Adds meaningful depth without breaking minimalist flat aesthetic
+  - **User benefit**: Buttons feel more tangible and "actionable" while maintaining clean, professional appearance
+  - **Implementation**: Applied to base `.btn` class in styles.css, automatically cascades to all button variants (.btn-success, .btn-danger, .btn-warning, .btn-small)
+  - **Affected buttons**: All action buttons throughout application (Create Tournament, Add Player, Save, Reset, Load, Delete, etc.)
+
 ### Enhanced: Read-Only Tournament Protection
 - **Player statistics locked for loaded completed tournaments**
   - Clicking player names in Results Table, Match Controls, or Winner Confirmation dialogs does nothing when `tournament.readOnly === true`
