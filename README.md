@@ -70,6 +70,12 @@ It is a fully self-contained web application that runs entirely in your browser 
 - **Undo**: Full undo of all matches without completed downstream matches to prevent undoing large portions of the tournament at once, can undo more matches in stages
 - **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 
+#### 🟢 Match Color Coding
+- 🔴 Orange/Red = "DO THIS NOW" (LIVE matches, current focus)
+- 🟡 Yellow = "READY FOR ACTION" (can be started, next up)
+- 🟢 Green = "COMPLETED" (done and archived)
+- ⚪ White/Gray = "NOT READY YET" (pending, no action possible)
+
 ### 🎮 Match Management
 - **Centralized Control**: Manage entire tournament from Match Controls interface
 - **Clear Progression**: Each match shows exactly where winners and losers advance ("Leads to...")
