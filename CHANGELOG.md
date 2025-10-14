@@ -25,14 +25,18 @@
     - Match Config: Regular (Best of 3), Frontside SF (Best of 5), Backside SF (Best of 3), Backside Final (Best of 5), Grand Final (Best of 5)
   - **Implementation**: `resetPointValuesToDefaults()` and `resetMatchConfigToDefaults()` in results-config.js
 
-### Enhanced: Subtle Button Shadows
-- **Added subtle depth to all buttons for improved actionability**
-  - Default state: `box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08)` - Very subtle shadow with 8% opacity
-  - Hover state: `box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12)` - Slightly enhanced at 12% opacity for interactive feedback
-  - **Design philosophy**: Adds meaningful depth without breaking minimalist flat aesthetic
-  - **User benefit**: Buttons feel more tangible and "actionable" while maintaining clean, professional appearance
-  - **Implementation**: Applied to base `.btn` class in styles.css, automatically cascades to all button variants (.btn-success, .btn-danger, .btn-warning, .btn-small)
-  - **Affected buttons**: All action buttons throughout application (Create Tournament, Add Player, Save, Reset, Load, Delete, etc.)
+### Enhanced: Subtle Shadows for Depth and Actionability
+- **Added subtle depth to buttons and match cards for improved visual hierarchy**
+  - **Buttons**: Default state `box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08)`, hover state `box-shadow: 0 2px 3px rgba(0, 0, 0, 0.12)`
+  - **Match cards**: Applied same subtle shadow `box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08)` to "Ready to Start" cards in Match Controls
+  - **Design philosophy**: Tiny accent that leads the eye in the right direction without overdoing it
+  - **User benefit**: Interactive elements feel more tangible and "actionable" while maintaining clean, professional appearance
+  - **Subconscious impact**: Users won't consciously notice the shadows, but will feel the interface is more polished and professional
+  - **Implementation**:
+    - Buttons: Applied to base `.btn` class in styles.css, automatically cascades to all button variants (.btn-success, .btn-danger, .btn-warning, .btn-small)
+    - Match cards: Applied to `.cc-match-card` class (LIVE matches retain their distinctive orange glow)
+  - **Affected elements**: All action buttons (Create Tournament, Add Player, Save, Reset, Load, Delete, etc.) and Ready to Start match cards
+  - **Real-world tested**: Refinement based on live tournament operation observations over multiple weeks
 
 ### Enhanced: Read-Only Tournament Protection
 - **Player statistics locked for loaded completed tournaments**
