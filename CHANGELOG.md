@@ -12,7 +12,7 @@
   - **Implementation**: Modified modal display check in clean-match-progression.js:1412-1414
   - **User impact**: Real-time sorting and resource availability updates during tournament operations
 
-### Improved: Referee Suggestions Logic (Hero Feature)
+### Improved: Referee Suggestions Logic 
 - **Complete rewrite of referee suggestions system with timeline-based event tracking**
   - **Timeline approach**: Lists show history of events, not unique players (e.g., "Jack, Ken, Bob, Ken, Nick, Ken")
   - **Recent Winners**: Last 10 match wins (up from 7, configurable 5-20 in Config page)
