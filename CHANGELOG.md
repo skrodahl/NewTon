@@ -34,7 +34,7 @@
 
 # 2025-10-12
 
-## **v2.5.0-beta** - Developer Console
+## **v2.5.0** - Developer Console
 
 ### New Feature: Developer Console
 - **Hidden developer tool for real-time tournament diagnostics**
