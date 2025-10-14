@@ -344,6 +344,57 @@ function resetConfigToDefaults() {
     }
 }
 
+// RESET POINT VALUES TO DEFAULTS
+function resetPointValuesToDefaults() {
+    if (confirm('Reset all point values to defaults?')) {
+        // Reset point values to defaults
+        config.points = JSON.parse(JSON.stringify(DEFAULT_CONFIG.points));
+
+        // Apply to UI
+        safeSetValue('participationPoints', config.points.participation);
+        safeSetValue('firstPlacePoints', config.points.first);
+        safeSetValue('secondPlacePoints', config.points.second);
+        safeSetValue('thirdPlacePoints', config.points.third);
+        safeSetValue('fourthPlacePoints', config.points.fourth);
+        safeSetValue('fifthSixthPlacePoints', config.points.fifthSixth);
+        safeSetValue('seventhEighthPlacePoints', config.points.seventhEighth);
+        safeSetValue('highOutPoints', config.points.highOut);
+        safeSetValue('tonPoints', config.points.ton);
+        safeSetValue('shortLegPoints', config.points.shortLeg);
+        safeSetValue('oneEightyPoints', config.points.oneEighty);
+
+        // Save to localStorage
+        saveGlobalConfig();
+
+        // Update results table if visible
+        if (typeof updateResultsTable === 'function') {
+            updateResultsTable();
+        }
+
+        alert('✓ Point values reset to defaults');
+    }
+}
+
+// RESET MATCH CONFIGURATION TO DEFAULTS
+function resetMatchConfigToDefaults() {
+    if (confirm('Reset all match configuration to defaults?')) {
+        // Reset leg configuration to defaults
+        config.legs = JSON.parse(JSON.stringify(DEFAULT_CONFIG.legs));
+
+        // Apply to UI
+        safeSetValue('regularRoundsLegs', config.legs.regularRounds);
+        safeSetValue('frontsideSemifinalLegs', config.legs.frontsideSemifinal);
+        safeSetValue('backsideSemifinalLegs', config.legs.backsideSemifinal);
+        safeSetValue('backsideFinalLegs', config.legs.backsideFinal);
+        safeSetValue('grandFinalLegs', config.legs.grandFinal);
+
+        // Save to localStorage
+        saveGlobalConfig();
+
+        alert('✓ Match configuration reset to defaults');
+    }
+}
+
 // RESULTS DISPLAY FUNCTIONS
 function displayResults() {
     const resultsSection = document.getElementById('resultsSection');
@@ -899,6 +950,10 @@ if (typeof window !== 'undefined') {
     // Debug functions
     window.forceReloadConfig = forceReloadConfig;
     window.resetConfigToDefaults = resetConfigToDefaults;
+
+    // Reset to defaults functions
+    window.resetPointValuesToDefaults = resetPointValuesToDefaults;
+    window.resetMatchConfigToDefaults = resetMatchConfigToDefaults;
 
     // Export modal functions
     window.showExportConfirmModal = showExportConfirmModal;

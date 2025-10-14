@@ -12,6 +12,19 @@
   - **Use case**: Operators can quickly find "What's on Lane 3?" without scanning through match IDs
   - **Tournament-tested**: Real-world insight from live tournament operations
 
+### Enhanced: Config Page Reset to Defaults
+- **Reset buttons for Point Values and Match Configuration**
+  - Added "Reset to Defaults" button at bottom of Point Values section
+  - Added "Reset to Defaults" button at bottom of Match Configuration section
+  - Both buttons follow same styling pattern as other config section buttons (Branding, Lane Management)
+  - **Confirmation dialog**: Prompts user before resetting to prevent accidental changes
+  - **Autosave**: Changes immediately saved to localStorage after reset
+  - **Auto-update**: Results table automatically refreshes when point values are reset
+  - **Default values**:
+    - Point Values: Participation (5), 1st (15), 2nd (13), 3rd (10), 4th (9), 5th-6th (8), 7th-8th (7), High Out (1), Ton (0), Short Leg (1), 180 (1)
+    - Match Config: Regular (Best of 3), Frontside SF (Best of 5), Backside SF (Best of 3), Backside Final (Best of 5), Grand Final (Best of 5)
+  - **Implementation**: `resetPointValuesToDefaults()` and `resetMatchConfigToDefaults()` in results-config.js
+
 ### Enhanced: Read-Only Tournament Protection
 - **Player statistics locked for loaded completed tournaments**
   - Clicking player names in Results Table, Match Controls, or Winner Confirmation dialogs does nothing when `tournament.readOnly === true`
