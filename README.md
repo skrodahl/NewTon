@@ -71,6 +71,8 @@ It is a fully self-contained web application that runs entirely in your browser 
 - **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 
 #### 🟢 Match Color Coding
+The match card colors are designed to help prioritize actions, and to make the bracket easier to navigate at a glance:
+
 - 🔴 Orange/Red = "**DO THIS NOW**" (LIVE matches, current focus)
 - 🟡 Yellow = "**READY FOR ACTION**" (can be started, next up)
 - 🟢 Green = "**COMPLETED**" (done and archived)
