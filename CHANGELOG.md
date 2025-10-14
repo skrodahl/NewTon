@@ -31,15 +31,34 @@
   - **Implementation**: bracket-rendering.js:2651-2900 (getRefereeSuggestions), clean-match-progression.js:1567-1631 (updateMatchReferee auto-refresh)
   - **User impact**: Tournament operators can quickly assign referees from accurate, real-time list of eligible players - dramatically speeds up tournament management
 
-### Maintenance: CSS Cleanup Phase 1
-- **Removed 229 lines of legacy CSS from pre-redesign era**
+### Maintenance: CSS Cleanup (Complete)
+- **Removed 393 lines of CSS (12% reduction) across 3 cleanup phases**
+
+  **Phase 1 - Legacy Duplicates (229 lines removed)**
   - Deleted duplicate Registration page player card styles (superseded by flat design)
   - Deleted duplicate Setup/Config page layout styles (superseded by flat design)
   - Fixed nested CSS comment syntax issue breaking Chrome's CSS parser
-  - All 4 pages (Tournament, Setup, Registration, Config) tested and working perfectly
   - Created backup: styles.css.backup-2025-10-14
-  - **Before**: 3,278 lines | **After**: 3,049 lines | **Reduction**: 7%
-  - **User impact**: Cleaner codebase, no functional changes
+
+  **Phase 2 - Mobile/Responsive CSS (145 lines removed)**
+  - Removed all 7 @media query blocks (1200px, 768px, 640px, 600px, 480px breakpoints)
+  - Application is desktop-only, mobile support not needed
+  - Removed mobile layout adjustments, podium sizing, Command Center layouts
+
+  **Phase 3 - Unused Utilities (19 lines removed)**
+  - Created CSS coverage tracker tool to analyze live runtime usage
+  - Achieved 93.6% CSS coverage (233 of 249 classes actively used)
+  - Removed confirmed unused utilities: `.mb-20`, `.d-flex`, `.justify-between`, `.align-center`
+  - Removed disabled bracket lines feature: `.bracket-line`, `#bracketLines`
+  - Removed unused button style: `.generate-bracket-btn`
+
+  **Final Results:**
+  - **Before**: 3,278 lines | **After**: 2,885 lines | **Total Reduction**: 12%
+  - All 4 pages tested and working perfectly
+  - All modals tested and working
+  - No visual changes or regressions
+  - Remaining CSS is lean, functional, and 93.6% actively used
+  - **User impact**: Cleaner, more maintainable codebase with no functional changes
 
 ---
 
