@@ -22,6 +22,14 @@
   - **Applies to**: All entry points to player statistics editing (Results Table rows, Match Controls player names, Winner Confirmation player names)
   - **Implementation**: Single check in `openStatsModal()` function (player-management.js:431-433)
 
+### Fixed: Score Preservation in Winner Confirmation
+- **Match score values now preserved when editing player statistics**
+  - When clicking player names in Winner Confirmation dialog to edit stats, the leg scores (e.g., 3-1) are now saved and restored
+  - Previously, scores would reset to default values (e.g., 2-0) when returning from stats modal
+  - **Root cause**: Dialog restoration was re-initializing input fields
+  - **Solution**: Save input values before hiding modal, restore after showing again
+  - **Implementation**: Enhanced `openStatsModalFromConfirmation()` in clean-match-progression.js:2172-2212
+
 ---
 
 # 2025-10-12

@@ -1524,8 +1524,8 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     // Set message content with clickable player names and progression info
     message.innerHTML = `
-        Declare <strong><span class="clickable-player-name" onclick="openStatsModal(${winner.id})" style="cursor: pointer; text-decoration: underline; color: #065f46;">${winner.name}</span></strong> as the WINNER<br>
-        against <strong><span class="clickable-player-name" onclick="openStatsModal(${loser.id})" style="cursor: pointer; text-decoration: underline; color: #065f46;">${loser.name}</span></strong> in match <strong>${matchId}</strong>
+        Declare <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${winner.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${winner.name}</span></strong> as the WINNER<br>
+        against <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${loser.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${loser.name}</span></strong> in match <strong>${matchId}</strong>
         <br><br>
         <small style="color: #6b7280; font-style: italic;">💡 Click player names to edit their statistics</small>
         ${progressionInfo}
@@ -2169,6 +2169,12 @@ function debugHistory() {
  * Open stats modal from winner confirmation dialog with proper z-index handling
  */
 function openStatsModalFromConfirmation(playerId, matchId) {
+    // Save current leg score values before hiding modal
+    const winnerLegsInput = document.getElementById('winnerLegs');
+    const loserLegsInput = document.getElementById('loserLegs');
+    const savedWinnerLegs = winnerLegsInput ? winnerLegsInput.value : '';
+    const savedLoserLegs = loserLegsInput ? loserLegsInput.value : '';
+
     // Temporarily hide the winner confirmation modal
     const winnerModal = document.getElementById('winnerConfirmModal');
     if (winnerModal) {
@@ -2189,6 +2195,16 @@ function openStatsModalFromConfirmation(playerId, matchId) {
         // Show winner confirmation modal again
         if (winnerModal) {
             winnerModal.style.display = 'block';
+        }
+
+        // Restore the saved leg score values
+        const winnerLegsInputRestore = document.getElementById('winnerLegs');
+        const loserLegsInputRestore = document.getElementById('loserLegs');
+        if (winnerLegsInputRestore && savedWinnerLegs !== '') {
+            winnerLegsInputRestore.value = savedWinnerLegs;
+        }
+        if (loserLegsInputRestore && savedLoserLegs !== '') {
+            loserLegsInputRestore.value = savedLoserLegs;
         }
 
         // Restore original close function
