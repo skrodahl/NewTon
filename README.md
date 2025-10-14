@@ -56,7 +56,7 @@ It is a fully self-contained web application that runs entirely in your browser 
 ### 🏆 Tournament Management
 - **Multiple Tournaments**: Create, save, and load with automatic browser storage
 - **Import/Export**: JSON-based backup and sharing between computers
-  - **Tournament Protection**: Loaded or imported **completed** tournaments are read-only, protecting the tournament integrity
+  - **Tournament Protection**: Completed tournaments loaded from file are read-only to protect data integrity
 - **Tournament History**: Complete match records with lane and referee assignments
 - **Crash Resilient**: Automatic saving prevents data loss
 - **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using REST API
@@ -65,13 +65,13 @@ It is a fully self-contained web application that runs entirely in your browser 
 - **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players
 - **Smart Generation**: Prevents two walkovers from meeting in first round
 - **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
-- **Match Card Magic Zoom:** Auto-zoom on individual matches when zoomed out to far to read and control the matches
+- **Match Card Magic Zoom:** Auto-zoom on individual matches when zoomed out too far to read and control the matches
 - **Automatic Advancement**: Walkovers advance real players intelligently
-- **Undo**: Full undo of all matches without completed downstream matches to prevent undoing large portions of the tournament at once, can undo more matches in stages
+- **Undo**: Reverse recent match results (staged undo prevents accidentally clearing large portions of the bracket)
 - **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 
 #### 🟢 Match Color Coding
-The match card colors are designed to help prioritize actions, and to make the bracket easier to navigate at a glance:
+Intuitive traffic light system for instant priority assessment:
 
 - 🔴 Orange/Red = "**DO THIS NOW**" (LIVE matches, current focus)
 - 🟡 Yellow = "**READY FOR ACTION**" (can be started, next up)
