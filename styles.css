@@ -492,15 +492,6 @@ body {
   box-shadow: 0 6px 16px rgba(0,0,0,0.35);
 }
 
-.zoom-btn.generate-bracket-btn {
-  background: rgba(154, 52, 18, 0.9); /* Subtle orange/amber tint */
-}
-.zoom-btn.generate-bracket-btn:hover {
-  background: rgba(154, 52, 18, 1);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
-}
-
 .bracket-controls-top-left .zoom-btn,
 .bracket-controls-middle-left .zoom-btn,
 .bracket-controls-bottom-left .zoom-btn {
@@ -954,12 +945,6 @@ body {
 }
 .bracket-match:hover::before { opacity: 1; }
 
-/* Lines are disabled */
-.bracket-line,
-#bracketLines {
-  display: none !important;
-}
-
 /* Config sections */
 .config-section {
   background: #f8f9fa;
@@ -1078,11 +1063,7 @@ footer {
 
 /* Utilities */
 .text-center { text-align: center; }
-.mb-20 { margin-bottom: 20px; }
 .mt-20 { margin-top: 20px; }
-.d-flex { display: flex; }
-.justify-between { justify-content: space-between; }
-.align-center { align-items: center; }
 
 /* Scrollbars */
 ::-webkit-scrollbar { width: 8px; height: 8px; }
