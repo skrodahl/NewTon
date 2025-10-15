@@ -389,18 +389,40 @@ function showQuickOverview() {
     const transactionPercentage = Math.round((stats.total / 500) * 100);
     const matchPercentage = matchStats.total > 0 ? Math.round((matchStats.completed / matchStats.total) * 100) : 0;
 
-    const laneStatus = laneStats.conflicts === 0 ? '✅ None' : `⚠️ ${laneStats.conflicts} conflict(s)`;
+    const laneHasConflicts = laneStats.conflicts > 0;
     const refereeValidation = validateRefereeAssignments();
-    const refereeStatus = refereeValidation.valid ? '✅ None' : `⚠️ ${refereeValidation.conflicts.length} conflict(s)`;
+    const refereeHasConflicts = !refereeValidation.valid;
+
+    const allHealthy = !laneHasConflicts && !refereeHasConflicts;
+    const statusColor = allHealthy ? '#166534' : '#dc2626';
+    const bgColor = allHealthy ? '#f0fdf4' : '#fef2f2';
+    const borderColor = allHealthy ? '#166534' : '#dc2626';
+    const statusIcon = allHealthy ? '✓' : '⚠️';
 
     const html = `
-        <h4>Quick Overview</h4>
-        <div style="line-height: 1.8;">
-            <p><strong>Matches:</strong> ${matchStats.completed}/${matchStats.total} completed (${matchPercentage}%)</p>
-            <p><strong>Transactions:</strong> ${stats.total}/500 (${transactionPercentage}%)</p>
-            <p><strong>Active:</strong> ${matchStats.live} live matches, ${matchStats.ready} ready</p>
-            <p><strong>Lane conflicts:</strong> ${laneStatus}</p>
-            <p><strong>Referee conflicts:</strong> ${refereeStatus}</p>
+        <h4 style="margin-top: 0; color: #111827;">Quick Overview</h4>
+
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} ${allHealthy ? 'Tournament Health: Good' : 'Issues Detected'}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+                <div style="margin: 8px 0;">
+                    <strong>Matches:</strong> ${matchStats.completed}/${matchStats.total} completed (${matchPercentage}%)
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Transactions:</strong> ${stats.total}/500 (${transactionPercentage}%)
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Active:</strong> ${matchStats.live} live matches, ${matchStats.ready} ready
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Lane conflicts:</strong> ${laneHasConflicts ? `⚠️ ${laneStats.conflicts}` : '✅ None'}
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Referee conflicts:</strong> ${refereeHasConflicts ? `⚠️ ${refereeValidation.conflicts.length}` : '✅ None'}
+                </div>
+            </div>
         </div>
     `;
 
@@ -415,23 +437,49 @@ function showTransactionBreakdown() {
 
     const stats = getTransactionStats();
     const percentage = Math.round((stats.total / 500) * 100);
-    const status = percentage < 50 ? '✅ Healthy' : (percentage < 80 ? '⚠️ Moderate' : '🔴 High');
     const remaining = 500 - stats.total;
 
+    const isHealthy = percentage < 50;
+    const statusColor = isHealthy ? '#166534' : (percentage < 80 ? '#ca8a04' : '#dc2626');
+    const bgColor = isHealthy ? '#f0fdf4' : (percentage < 80 ? '#fefce8' : '#fef2f2');
+    const borderColor = isHealthy ? '#166534' : (percentage < 80 ? '#ca8a04' : '#dc2626');
+    const statusIcon = isHealthy ? '✓' : (percentage < 80 ? '⚠️' : '🔴');
+    const statusText = isHealthy ? 'Healthy' : (percentage < 80 ? 'Moderate' : 'High');
+
     let html = `
-        <h4>Transaction Breakdown (${stats.total} total)</h4>
-        <div style="line-height: 1.8;">
+        <h4 style="margin-top: 0; color: #111827;">Transaction Breakdown (${stats.total} total)</h4>
+
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} Status: ${statusText}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
     `;
 
     for (const [type, count] of Object.entries(stats.breakdown)) {
         const typePercentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
-        html += `<p><strong>${type}:</strong> ${count} (${typePercentage}%)</p>`;
+        html += `
+            <div style="margin: 8px 0;">
+                <strong>${type}:</strong> ${count} (${typePercentage}%)
+            </div>
+        `;
     }
 
     html += `
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-            <p><strong>Storage:</strong> ${stats.total}/500 entries (${percentage}%)</p>
-            <p><strong>Status:</strong> ${status} (${remaining} capacity remaining)</p>
+                <div style="margin: 16px 0 8px 0; padding-top: 12px; border-top: 1px solid #ddd;">
+                    <strong>Storage:</strong> ${stats.total}/500 entries (${percentage}%)
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Capacity remaining:</strong> ${remaining} entries
+                </div>
+            </div>
+        </div>
+
+        <div>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
         </div>
     `;
 
@@ -445,11 +493,6 @@ function showMatchStateDetails() {
     currentView = 'matches';
 
     const matchStats = getMatchStateStats();
-
-    let html = `
-        <h4>Match State Breakdown (${matchStats.total} total)</h4>
-        <div style="line-height: 1.8;">
-    `;
 
     // Group matches by state
     const matchesByState = {
@@ -468,18 +511,62 @@ function showMatchStateDetails() {
         });
     }
 
-    // Display each state
+    const hasActive = matchStats.live > 0 || matchStats.ready > 0;
+    const statusColor = hasActive ? '#166534' : '#666';
+    const bgColor = hasActive ? '#f0fdf4' : '#f8f9fa';
+    const borderColor = hasActive ? '#166534' : '#c0c0c0';
+    const statusIcon = hasActive ? '✓' : 'ℹ️';
+
+    let html = `
+        <h4 style="margin-top: 0; color: #111827;">Match State Breakdown (${matchStats.total} total)</h4>
+
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} ${hasActive ? 'Active Tournament' : 'Tournament Status'}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+    `;
+
+    // Display each state with color coding
+    const stateColors = {
+        completed: '#065f46',
+        live: '#dc2626',
+        ready: '#ca8a04',
+        pending: '#666'
+    };
+
     for (const [state, matchIds] of Object.entries(matchesByState)) {
         const count = matchIds.length;
         const stateName = state.toUpperCase();
+        const color = stateColors[state] || '#666';
 
-        html += `<p><strong>${stateName}:</strong> ${count} matches</p>`;
+        html += `
+            <div style="margin: 12px 0;">
+                <div style="color: ${color}; font-weight: 600; margin-bottom: 4px;">
+                    ${stateName}: ${count} matches
+                </div>
+        `;
+
         if (count > 0) {
-            html += `<p style="margin-left: 20px; color: #666; font-size: 13px;">${matchIds.join(', ')}</p>`;
+            html += `<div style="margin-left: 20px; color: #666; font-size: 13px; line-height: 1.4;">
+                ${matchIds.join(', ')}
+            </div>`;
         }
+
+        html += `</div>`;
     }
 
-    html += `</div>`;
+    html += `
+            </div>
+        </div>
+
+        <div>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
+        </div>
+    `;
 
     updateRightPane(html);
 }
@@ -636,7 +723,16 @@ function showPlayerDetails() {
     currentView = 'players';
 
     if (!players || players.length === 0) {
-        updateRightPane(`<h4>Player Details</h4><p style="color: #666;">No players registered</p>`);
+        updateRightPane(`
+            <h4 style="margin-top: 0; color: #111827;">Player Details</h4>
+            <p style="color: #666;">No players registered</p>
+            <div style="margin-top: 30px;">
+                <a href="#" onclick="showQuickOverview(); return false;"
+                   style="text-decoration: none; color: #065f46; font-size: 14px;">
+                    ← Back to Overview
+                </a>
+            </div>
+        `);
         return;
     }
 
@@ -644,32 +740,63 @@ function showPlayerDetails() {
     const paidPlayers = players.filter(p => p.paid).sort((a, b) => a.name.localeCompare(b.name));
     const unpaidPlayers = players.filter(p => !p.paid).sort((a, b) => a.name.localeCompare(b.name));
 
+    const allPaid = unpaidPlayers.length === 0;
+    const statusColor = allPaid ? '#166534' : '#ca8a04';
+    const bgColor = allPaid ? '#f0fdf4' : '#fefce8';
+    const borderColor = allPaid ? '#166534' : '#ca8a04';
+    const statusIcon = allPaid ? '✓' : '⚠️';
+
     let html = `
-        <h4>Player Details (${players.length} total)</h4>
-        <div style="line-height: 1.8;">
+        <h4 style="margin-top: 0; color: #111827;">Player Details (${players.length} total)</h4>
+
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} ${allPaid ? 'All Players Paid' : `${unpaidPlayers.length} Unpaid Player${unpaidPlayers.length > 1 ? 's' : ''}`}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
     `;
 
     // Paid Players Section
     if (paidPlayers.length > 0) {
         html += `
-            <h5 style="margin-top: 20px; margin-bottom: 10px; color: #065f46;">✅ Paid Players (${paidPlayers.length})</h5>
+            <div style="margin: 12px 0;">
+                <div style="color: #065f46; font-weight: 600; margin-bottom: 8px;">
+                    ✅ Paid Players (${paidPlayers.length})
+                </div>
+                <div style="margin-left: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;">
         `;
         paidPlayers.forEach(player => {
-            html += `<p style="margin-left: 20px;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></p>`;
+            html += `<div style="margin: 4px 0;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></div>`;
         });
+        html += `</div></div>`;
     }
 
     // Unpaid Players Section
     if (unpaidPlayers.length > 0) {
         html += `
-            <h5 style="margin-top: 20px; margin-bottom: 10px; color: #dc2626;">⚠️ Unpaid Players (${unpaidPlayers.length})</h5>
+            <div style="margin: 12px 0;">
+                <div style="color: #dc2626; font-weight: 600; margin-bottom: 8px;">
+                    ⚠️ Unpaid Players (${unpaidPlayers.length})
+                </div>
+                <div style="margin-left: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;">
         `;
         unpaidPlayers.forEach(player => {
-            html += `<p style="margin-left: 20px;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></p>`;
+            html += `<div style="margin: 4px 0;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></div>`;
         });
+        html += `</div></div>`;
     }
 
-    html += `</div>`;
+    html += `
+            </div>
+        </div>
+
+        <div>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
+        </div>
+    `;
 
     updateRightPane(html);
 }
@@ -682,6 +809,13 @@ function showLocalStorageUsage() {
 
     const storageStats = getLocalStorageStats();
 
+    const isHealthy = storageStats.percentage < 50;
+    const statusColor = isHealthy ? '#166534' : (storageStats.percentage < 80 ? '#ca8a04' : '#dc2626');
+    const bgColor = isHealthy ? '#f0fdf4' : (storageStats.percentage < 80 ? '#fefce8' : '#fef2f2');
+    const borderColor = isHealthy ? '#166534' : (storageStats.percentage < 80 ? '#ca8a04' : '#dc2626');
+    const statusIcon = isHealthy ? '✓' : (storageStats.percentage < 80 ? '⚠️' : '🔴');
+    const statusText = isHealthy ? 'Healthy' : (storageStats.percentage < 80 ? 'Moderate' : 'High');
+
     // Sort items by size (largest first)
     const sortedItems = Object.entries(storageStats.items)
         .map(([key, sizeBytes]) => ({
@@ -693,14 +827,23 @@ function showLocalStorageUsage() {
         .sort((a, b) => parseFloat(b.sizeKB) - parseFloat(a.sizeKB));
 
     let html = `
-        <h4>localStorage Usage</h4>
-        <div style="line-height: 1.8;">
-            <p><strong>Total Used:</strong> ${storageStats.used.toFixed(2)} MB of ${storageStats.limit} MB (${storageStats.percentage}%)</p>
-            <p><strong>Browser Limit:</strong> ${storageStats.limit} MB (Chrome 114+, Firefox, Safari, Edge)</p>
+        <h4 style="margin-top: 0; color: #111827;">localStorage Usage</h4>
 
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} Storage Status: ${statusText}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+                <div style="margin: 8px 0;">
+                    <strong>Total Used:</strong> ${storageStats.used.toFixed(2)} MB of ${storageStats.limit} MB (${storageStats.percentage}%)
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Browser Limit:</strong> ${storageStats.limit} MB (Chrome 114+, Firefox, Safari, Edge)
+                </div>
 
-            <h5 style="margin-bottom: 10px;">Breakdown by Key:</h5>
+                <div style="margin: 20px 0 12px 0; padding-top: 12px; border-top: 1px solid #ddd;">
+                    <strong>Breakdown by Key:</strong>
+                </div>
     `;
 
     sortedItems.forEach(item => {
@@ -708,12 +851,22 @@ function showLocalStorageUsage() {
             ? `${item.sizeMB} MB`
             : `${item.sizeKB} KB`;
 
-        html += `<p style="margin: 8px 0;">
-            <strong>${item.key}:</strong> ${sizeDisplay} (${item.percentage}%)
-        </p>`;
+        html += `
+                <div style="margin: 8px 0; padding-left: 12px;">
+                    <strong>${item.key}:</strong> ${sizeDisplay} (${item.percentage}%)
+                </div>
+        `;
     });
 
     html += `
+            </div>
+        </div>
+
+        <div>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
         </div>
     `;
 
@@ -774,26 +927,63 @@ function showValidationResults() {
     currentView = 'validation';
 
     const results = runAllValidations();
+    const timestamp = new Date().toLocaleTimeString();
+
+    // Count pass/fail
+    const passCount = results.filter(r => r.valid).length;
+    const failCount = results.filter(r => !r.valid).length;
+    const allPassed = failCount === 0;
+
+    const statusColor = allPassed ? '#166534' : '#dc2626';
+    const bgColor = allPassed ? '#f0fdf4' : '#fef2f2';
+    const borderColor = allPassed ? '#166534' : '#dc2626';
+    const statusIcon = allPassed ? '✓' : '⚠️';
 
     let html = `
-        <h4>Validation Results</h4>
-        <div style="line-height: 1.8;">
+        <h4 style="margin-top: 0; color: #111827;">Validation Results</h4>
+
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} ${allPassed ? 'All Checks Passed' : `${failCount} Issue${failCount > 1 ? 's' : ''} Detected`}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
     `;
 
     results.forEach(result => {
         const icon = result.valid ? '✅' : '⚠️';
-        html += `<p><strong>${icon} ${result.name}:</strong> ${result.message}</p>`;
+        const checkColor = result.valid ? '#065f46' : '#dc2626';
+
+        html += `
+            <div style="margin: 12px 0;">
+                <div style="color: ${checkColor}; font-weight: 600;">
+                    ${icon} ${result.name}: ${result.message}
+                </div>
+        `;
 
         if (result.details && result.details.length > 0) {
+            html += `<div style="margin-left: 20px; margin-top: 4px; color: #666; font-size: 13px;">`;
             result.details.forEach(detail => {
-                html += `<p style="margin-left: 20px; color: #666; font-size: 13px;">${detail}</p>`;
+                html += `<div style="margin: 2px 0;">• ${detail}</div>`;
             });
+            html += `</div>`;
         }
+
+        html += `</div>`;
     });
 
     html += `
-            <hr style="margin: 20px 0; border: none; border-top: 1px solid #ddd;">
-            <p style="font-size: 13px; color: #666;">Last validated: ${new Date().toLocaleTimeString()}</p>
+            </div>
+        </div>
+
+        <div style="color: #666; font-size: 13px; margin-bottom: 30px;">
+            Validated at: ${timestamp}
+        </div>
+
+        <div>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
         </div>
     `;
 
