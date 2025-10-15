@@ -94,6 +94,8 @@ border-color: #dc2626;
 hover: background #fef2f2;
 ```
 
+**Important:** All buttons throughout the application use these flat design classes (`.btn`, `.btn-success`, `.btn-warning`, `.btn-danger`). Never use inline styles with filled backgrounds or colored backgrounds on buttons - this breaks the flat design consistency.
+
 ### Hover Effects
 - **Border-based feedback** instead of background changes
 - **Left borders** (3px) that appear on hover
@@ -246,3 +248,7 @@ When applying these principles to other pages:
 - **Backside background**: `#f7f7f7`
 - **Active orange**: `rgba(180, 83, 9, 1)`
 - **Action green**: `#166534`
+
+---
+
+*Document updated 2025-10-15 to clarify button styling consistency across all components including modals.*
