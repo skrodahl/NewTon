@@ -1229,7 +1229,8 @@ a:hover { color: #1e40af; }
 .cc-match-card-header {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+  min-height: 36px;
 }
 
 .cc-match-id {

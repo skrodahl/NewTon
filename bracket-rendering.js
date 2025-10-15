@@ -3167,12 +3167,12 @@ function showCommandCenterModal(matchData) {
                     // Create two-column layout for LIVE matches
                     const liveTwoColumnHTML = `
                         <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                            <div style="flex: 1; min-width: 0; padding-right: 10px;">
+                            <div style="flex: 1; min-width: 0;">
                                 <div class="cc-matches-container">
                                     ${liveFrontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches live</p>'}
                                 </div>
                             </div>
-                            <div style="flex: 1; min-width: 0; padding-left: 10px; border-left: 2px solid #e5e7eb;">
+                            <div style="flex: 1; min-width: 0;">
                                 <div class="cc-matches-container">
                                     ${liveBacksideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches live</p>'}
                                 </div>
@@ -3278,7 +3278,7 @@ function showCommandCenterModal(matchData) {
                             <div style="flex: 1; min-width: 0;">
                                 ${frontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches ready</p>'}
                             </div>
-                            <div style="flex: 1; min-width: 0; border-left: 2px solid #e5e7eb;">
+                            <div style="flex: 1; min-width: 0;">
                                 ${backsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches ready</p>'}
                             </div>
                         </div>
