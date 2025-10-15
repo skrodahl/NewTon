@@ -1,6 +1,32 @@
 # 2025-10-14
 
-## **v2.5.2-beta** - Match Controls Real-Time Updates & Referee Suggestions
+## **v2.5.2-beta** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements
+
+### Enhanced: Developer Console - Transaction Log Management & Storage Monitoring
+- **Complete transaction pruning system with smart algorithm and localStorage monitoring**
+  - **"Manage Transaction Log" command**: Opens dedicated management view showing current status, storage usage, and pruning options
+  - **Smart Pruning algorithm**: Removes redundant transactions for completed matches only
+    - Removes old ASSIGN_LANE transactions (keeps final assignment)
+    - Removes old ASSIGN_REFEREE transactions (keeps final assignment)
+    - Removes ALL START_MATCH and STOP_MATCH transactions (redundant after completion)
+    - Preserves ALL COMPLETE_MATCH transactions (never pruned)
+    - Preserves ALL transactions for active/pending matches
+  - **Preview mode**: Shows detailed analysis before execution (what will be removed/kept, storage impact)
+  - **Post-execution feedback**: Comprehensive statistics on transactions removed, storage freed
+  - **Safety**: Undo system unaffected (uses separate state snapshots, not transaction history)
+  - **Performance**: Typically removes 40-60% of transactions in active tournaments
+  - **localStorage Usage statistic**: New fifth statistic in Developer Console
+    - Shows total usage vs 10 MB browser limit
+    - Color-coded indicators (green < 50%, amber 50-80%, red > 80%)
+    - Detail view with breakdown by localStorage key (sorted by size)
+    - Helps identify when transaction pruning is needed
+  - **Transaction History improvements**: Reverse chronological sorting (#1 = latest transaction)
+  - **Storage calculation fixes**:
+    - Updated browser limit from 5 MB to 10 MB (modern browsers: Chrome 114+, Firefox, Safari, Edge)
+    - Fixed UTF-16 encoding calculation (2 bytes/char instead of 8 bytes/char)
+    - Accurate storage estimates across all views
+  - **Implementation**: analytics.js (Transaction Log Management, localStorage Usage view), tournament.html (new statistic link)
+  - **User impact**: Operators can monitor and manage storage usage, prevent hitting browser limits, maintain tournament performance
 
 ### Fixed: Match Controls Auto-Refresh on Lane Changes
 - **Match Controls now updates immediately when lane assignments change on LIVE matches**

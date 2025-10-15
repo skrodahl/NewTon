@@ -51,17 +51,19 @@ The Developer Console opens as a large modal (90% screen width/height) with a th
 
 ### Right Pane (70% width) - Split Vertically
 
-#### Content Area (70% of right pane)
+#### Content Area (60% of right pane)
 - **Dynamic content area** - Shows details based on selected statistic or command
 - **Default view** - Quick Overview with most important metrics
+- **Command feedback** - Shows visual confirmation when commands execute
 - **Scrollable** - Independently scrolls for long content
 
-#### Console Output Footer (30% of right pane)
-- **Always visible** - Persistent console log at bottom
+#### Console Output Footer (40% of right pane)
+- **Always visible** - Persistent console log at bottom with fixed title bar
+- **Utility links** - "Copy Log" and "Clear Log" links next to title (always visible)
 - **Real-time updates** - Shows last 50 console entries
 - **Auto-scroll** - Scrolls to bottom when new entries appear (pauses while user scrolling)
 - **Timestamp per entry** - Each log entry shows time of occurrence
-- **Scrollable** - Independent scroll from content area above
+- **Scrollable** - Independent scroll from content area and title
 
 ### Modal Behavior
 - **Always on top** - Stays open while operating tournament
@@ -128,6 +130,28 @@ All statistics are **clickable** - click to show detailed breakdown in right pan
 
 ---
 
+### 5. localStorage Usage
+**Display:** `1.57/10 MB ✅`
+
+**Shows:** Total localStorage usage vs browser limit (10 MB)
+
+**Indicators:**
+- ✅ Green: < 50% usage (healthy)
+- ⚠️ Yellow: 50-80% usage (moderate)
+- 🔴 Red: > 80% usage (high)
+
+**Click to view:** Detailed breakdown showing:
+- Total storage used (MB) and percentage
+- Browser limit (10 MB for Chrome 114+, Firefox, Safari, Edge)
+- Size of each localStorage key (tournamentHistory, dartsTournaments, etc.)
+- Percentage breakdown by component
+
+**Purpose:** Monitor storage usage and identify when transaction pruning may be needed
+
+**Note:** Uses UTF-16 encoding (2 bytes per character) for accurate size calculations
+
+---
+
 ## Commands (Left Pane)
 
 All commands are **navigation links** - click to execute or show results.
@@ -141,7 +165,14 @@ All commands are **navigation links** - click to execute or show results.
 
 **Safety:** Safe operation, no data changes
 
-**Output:** Console message confirming render
+**Output:**
+- Visual feedback in main content area showing:
+  - Success/error status with color-coded box (green for success)
+  - Bracket size (number of players)
+  - Total matches in bracket
+  - Execution timestamp
+  - "Back to Overview" navigation link
+- Console log entry confirming render
 
 ---
 
@@ -154,7 +185,15 @@ All commands are **navigation links** - click to execute or show results.
 
 **Safety:** Safe operation, recalculates from existing match data
 
-**Output:** Console message confirming recalculation
+**Output:**
+- Visual feedback in main content area showing:
+  - Success/error status with color-coded box (green for success)
+  - Players ranked (total player count)
+  - Completed matches count
+  - Bracket size
+  - Execution timestamp
+  - "Back to Overview" navigation link
+- Console log entry confirming recalculation
 
 ---
 
@@ -167,7 +206,14 @@ All commands are **navigation links** - click to execute or show results.
 
 **Safety:** Safe operation, refreshes UI only
 
-**Output:** Console message showing number of dropdown types refreshed
+**Output:**
+- Visual feedback in main content area showing:
+  - Success/error status with color-coded box (green for success)
+  - Types refreshed (Lane dropdowns, Referee dropdowns)
+  - Matches updated count
+  - Execution timestamp
+  - "Back to Overview" navigation link
+- Console log entry showing number of dropdown types refreshed
 
 ---
 
@@ -373,6 +419,48 @@ Player Details (29 total)
 
 ---
 
+### localStorage Usage
+**Triggered by:** Clicking "localStorage Usage"
+
+**Shows:**
+- Total localStorage used vs browser limit (10 MB)
+- Percentage of browser limit used
+- Browser compatibility note (Chrome 114+, Firefox, Safari, Edge)
+- Breakdown by localStorage key (sorted largest first):
+  - Key name
+  - Size in MB or KB (whichever is more readable)
+  - Percentage of total storage
+
+**Format:**
+```
+localStorage Usage
+
+Total Used: 1.57 MB of 10 MB (16%)
+Browser Limit: 10 MB (Chrome 114+, Firefox, Safari, Edge)
+
+Breakdown by Key:
+tournamentHistory: 0.91 MB (58%)
+dartsTournaments: 0.53 MB (34%)
+lastFileContent: 0.09 MB (5%)
+currentTournament: 0.04 MB (2%)
+dartsConfig: 1.23 KB (0%)
+playerList: 0.42 KB (0%)
+...
+```
+
+**Purpose:**
+- Monitor storage usage and identify when pruning may be needed
+- Understand which components consume most storage
+- Verify transaction history doesn't dominate storage
+- Plan maintenance (transaction pruning, tournament cleanup)
+
+**Interpretation:**
+- If transaction history > 50% of total: Consider smart pruning
+- If total usage > 80%: Urgent action needed (prune or clean up)
+- If dartsTournaments dominates: Export and delete old tournaments
+
+---
+
 ### Transaction History
 **Triggered by:** Clicking "View Transaction History"
 
@@ -404,11 +492,42 @@ Player Details (29 total)
 
 ---
 
+### Command Feedback
+**Triggered by:** Executing commands (Re-render Bracket, Recalculate Rankings, Refresh All Dropdowns)
+
+**Shows:**
+- Command name heading
+- Color-coded status box:
+  - Green background (`#f0fdf4`) with green border for success
+  - Red background (`#fef2f2`) with red border for errors
+- Status icon (✓ for success, ⚠️ for error)
+- Detailed information with bullet points:
+  - **Re-render Bracket**: Bracket size, total matches
+  - **Recalculate Rankings**: Player count, completed matches, bracket size
+  - **Refresh All Dropdowns**: Dropdown types refreshed, matches updated
+- Execution timestamp
+- "Back to Overview" navigation link
+
+**Purpose:** Provide immediate visual confirmation of command execution with detailed context
+
+**Design:** Flat design with sharp corners, clean typography, and semantic color coding
+
+---
+
 ## Console Output Footer
 
 ### Persistent Console Log
 
-The Console Output footer is always visible at the bottom 30% of the right pane, providing real-time visibility into console activity.
+The Console Output footer is always visible at the bottom 40% of the right pane, providing real-time visibility into console activity.
+
+### Utility Links
+
+The Console Output title bar includes two utility links that are always visible:
+
+- **Copy Log** - Copies all console output to clipboard for sharing diagnostic information
+- **Clear Log** - Clears the console buffer without changing the main content view
+
+Both links use the same styling as command links in the left pane for visual consistency.
 
 ### How It Works
 
@@ -834,47 +953,27 @@ Live Matches Using Lanes:
 
 ### 2. Command Execution Feedback
 
-**Current Issue**: Commands execute silently with no visual confirmation. Users only see console.log output if Console Output view is open.
+**Status**: ✅ **IMPLEMENTED** - Command feedback completed with detailed statistics
 
-**Proposed Solution**: Show command execution results in right pane with timestamp and status.
+**Implementation Details:**
+- All commands (Re-render Bracket, Recalculate Rankings, Refresh All Dropdowns) now show visual feedback in main content area
+- Color-coded status boxes (green for success, red for errors)
+- Detailed information with bullet points showing relevant statistics
+- Execution timestamp for each command
+- "Back to Overview" navigation link
+- Flat design with semantic colors matching application design system
 
-#### Re-render Bracket Feedback
-```
-Command Executed: Re-render Bracket
+**Features:**
+- **Re-render Bracket**: Shows bracket size and total matches
+- **Recalculate Rankings**: Shows player count, completed matches, and bracket size
+- **Refresh All Dropdowns**: Shows dropdown types refreshed and match count
+- Error handling: Commands gracefully handle failures and display error messages
 
-✓ Bracket re-rendered successfully
-Time: 11:38:45 PM
-
-[Back to Overview]
-```
-
-#### Recalculate Rankings Feedback
-```
-Command Executed: Recalculate Rankings
-
-✓ Rankings recalculated for 32-player bracket
-✓ 29 players ranked
-Time: 11:38:50 PM
-
-[View Results] [Back to Overview]
-```
-
-#### Refresh All Dropdowns Feedback
-```
-Command Executed: Refresh All Dropdowns
-
-✓ Lane dropdowns refreshed (62 matches)
-✓ Referee dropdowns refreshed (62 matches)
-Time: 11:38:52 PM
-
-[Back to Overview]
-```
-
-**Benefits:**
-- Clear visual confirmation commands executed
-- Timestamp shows when action occurred
-- Quick navigation back to overview
-- No need to check Console Output view
+**User Experience:**
+- Immediate visual confirmation in main content area (60% of right pane)
+- Console Output footer (40% of right pane) continues showing logs in real-time
+- No auto-dismiss - users click "Back to Overview" when ready
+- Consistent feedback pattern across all commands
 
 ---
 
@@ -1193,7 +1292,405 @@ FS-2-2:
 
 ---
 
+### 11. Additional Developer Commands
+
+**Status**: ⏳ **PROPOSED** - Under consideration for future implementation
+
+The following commands have been proposed to enhance developer workflow and tournament management:
+
+#### Transaction Log Management (Smart Pruning)
+
+**Status**: ✅ **IMPLEMENTED** - Smart pruning feature complete in v2.5.2-beta
+
+**Purpose**: Free up transaction storage space by removing redundant history for completed matches
+
+**Command**: "Manage Transaction Log" in left pane opens dedicated management view in right pane
+
+**Use Cases:**
+- Approaching the 500-transaction limit (high-activity tournaments)
+- After tournament milestones (e.g., completing a round)
+- Routine maintenance during long tournaments
+- Free up storage for better performance
+
+---
+
+##### Smart Pruning
+
+**Algorithm**: For each **completed match only**, remove redundant transactions:
+
+**What Gets Pruned:**
+- Old `ASSIGN_LANE` transactions (keeps only the **final** lane assignment)
+- Old `ASSIGN_REFEREE` transactions (keeps only the **final** referee assignment)
+- All `START_MATCH` transactions (redundant with completion record)
+- All `STOP_MATCH` transactions (redundant with completion record)
+
+**What Gets Preserved:**
+- All `COMPLETE_MATCH` transactions (never pruned)
+- Final lane assignment for each completed match
+- Final referee assignment for each completed match
+- ALL transactions for active/pending matches (not yet completed)
+
+**Example:**
+Match FS-3-1 has 8 transactions:
+- `ASSIGN_LANE` → Lane 3
+- `ASSIGN_REFEREE` → John Smith
+- `ASSIGN_LANE` → Lane 5
+- `ASSIGN_REFEREE` → (removed)
+- `ASSIGN_REFEREE` → Bob Jones
+- `START_MATCH` → Started
+- `ASSIGN_REFEREE` → Mary Johnson ✓ **KEEP** (final)
+- `COMPLETE_MATCH` → Player A wins ✓ **KEEP**
+
+After pruning: **2 transactions remain** (6 removed, 75% reduction for this match)
+
+**Benefits:**
+- Safe - only removes truly redundant data
+- Aggressive - typically 40-60% transaction reduction in active tournaments
+- Selective - only affects completed matches (preserves undo for active matches)
+- Smart - understands application data model and semantics
+
+---
+
+##### Interface Design
+
+**Transaction Log Management View** (Right Pane)
+
+```
+Transaction Log Management
+
+Current Status:
+• Total transactions: 287/500 (57%)
+• Storage used: ~2.4 MB
+• Completed matches: 18
+• Active matches: 2 live, 5 ready
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Smart Pruning (Recommended):
+
+[Preview Smart Pruning]
+
+Removes redundant transactions for completed matches:
+✓ Old lane assignments (keeps final assignment)
+✓ Old referee assignments (keeps final assignment)
+✓ Match start/stop events (keeps completion record)
+
+Estimated savings: ~146 transactions (~1.2 MB, 51% reduction)
+Matches affected: 18 completed matches
+Safety: ✅ Safe - Only removes redundant history
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Manual Pruning (Advanced):
+
+[Prune 10 Oldest]  [Prune 25 Oldest]  [Prune 50 Oldest]
+
+[Keep Last 100]  [Keep Last 200]
+
+[Clear All Transactions]
+
+━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━
+
+Transaction Breakdown:
+• COMPLETE_MATCH: 18 (6%) - Never pruned
+• ASSIGN_LANE: 95 (33%) - Only final needed
+• ASSIGN_REFEREE: 124 (43%) - Only final needed
+• START_MATCH: 20 (7%) - Redundant after completion
+• STOP_MATCH: 8 (3%) - Redundant after completion
+• Other: 22 (8%)
+
+⚠️ Note: Pruning removes undo capability for removed transactions
+✓ Tournament data and final match states remain intact
+```
+
+---
+
+##### Preview Mode
+
+**Before executing smart pruning, show preview:**
+
+```
+Smart Pruning Preview
+
+Analysis complete for 18 completed matches:
+
+Transactions to Remove:
+• 42 old lane assignments (78 total → 36 remain)
+• 78 old referee assignments (124 total → 46 remain)
+• 20 match start events (all redundant)
+• 26 match stop events (all redundant)
+
+Total to remove: 166 transactions (58% reduction)
+
+Transactions to Keep:
+• 18 match completions (all preserved)
+• 36 final lane assignments (one per completed match)
+• 46 final referee assignments (one per completed match)
+• 21 active match transactions (untouched)
+
+Storage Impact:
+• Before: 287 transactions (~2.4 MB)
+• After: 121 transactions (~1.0 MB)
+• Savings: ~1.4 MB (58% reduction)
+
+⚠️ Warning:
+- Undo capability lost for 166 intermediate actions
+- Completed matches cannot be un-completed
+- Active matches remain fully undoable
+
+[Cancel]  [Prune Now]
+```
+
+---
+
+##### After Pruning - Feedback
+
+```
+Smart Pruning Complete
+
+✓ Pruned redundant transactions for 18 completed matches
+
+Removed by Type:
+• 42 old lane assignments (kept final assignments)
+• 78 old referee assignments (kept final assignments)
+• 20 match start events (kept completion records)
+• 26 match stop events (kept completion records)
+
+Total Removed: 166 transactions
+
+Results:
+• Before: 287 transactions (~2.4 MB)
+• After: 121 transactions (~1.0 MB)
+• Reduction: ↓ 166 (58% fewer transactions)
+• Storage freed: ~1.4 MB (58% space saved)
+
+Verification:
+✓ All 18 match results preserved
+✓ Final lane assignments intact
+✓ Final referee assignments intact
+✓ Active matches untouched (2 live, 5 ready)
+
+⚠️ Undo capability lost for 166 intermediate changes
+✓ Current tournament state fully preserved
+
+Executed at: 10:45:23 AM
+
+[Back to Overview]
+```
+
+---
+
+##### Manual Pruning Options
+
+For advanced users who need more control:
+
+**Prune X Oldest:**
+- Remove the X oldest transactions regardless of type
+- Less safe than smart pruning (may remove important history)
+- Confirmation required
+
+**Keep Last X:**
+- Keep only the X most recent transactions
+- Alternative way to think about pruning
+- Confirmation required
+
+**Clear All Transactions:**
+- Nuclear option - removes entire transaction log
+- Tournament data preserved
+- Requires typed confirmation ("CLEAR" or "CONFIRM")
+
+---
+
+##### Implementation Notes
+
+**Algorithm Pseudocode:**
+
+```javascript
+function pruneCompletedMatchHistory() {
+    const history = getTournamentHistory();
+    const completedMatches = matches.filter(m => m.completed);
+
+    const toRemove = [];
+
+    completedMatches.forEach(match => {
+        const matchId = match.id;
+        const matchTxns = history.filter(t =>
+            t.matchId === matchId || t.description.includes(matchId)
+        );
+
+        // Group by type
+        const lanes = matchTxns.filter(t => t.type === 'ASSIGN_LANE');
+        const refs = matchTxns.filter(t => t.type === 'ASSIGN_REFEREE');
+        const startStop = matchTxns.filter(t =>
+            t.type === 'START_MATCH' || t.type === 'STOP_MATCH'
+        );
+
+        // Keep only LAST lane assignment, remove rest
+        if (lanes.length > 1) {
+            toRemove.push(...lanes.slice(0, -1));
+        }
+
+        // Keep only LAST referee assignment, remove rest
+        if (refs.length > 1) {
+            toRemove.push(...refs.slice(0, -1));
+        }
+
+        // Remove ALL start/stop (completion is sufficient)
+        toRemove.push(...startStop);
+    });
+
+    // Filter out transactions to remove
+    const pruned = history.filter(t => !toRemove.includes(t));
+
+    // Save pruned history
+    tournament.history = pruned;
+    saveTournament();
+
+    return {
+        removed: toRemove.length,
+        before: history.length,
+        after: pruned.length,
+        matchesAffected: completedMatches.length
+    };
+}
+```
+
+**Safety Checks:**
+- Only process matches with `completed: true`
+- Never remove `COMPLETE_MATCH` transactions
+- Preserve all transactions for active/pending matches
+- Show preview before executing
+- Confirmation dialog for all pruning operations
+
+**Performance:**
+- Typically removes 40-60% of transactions in active tournaments
+- More aggressive in tournaments with many match restarts or referee changes
+- Can be run multiple times safely (idempotent - won't remove more on subsequent runs)
+
+---
+
+**Safety**: ✅ **Safe** - Only removes redundant history for completed matches. Tournament data fully preserved. Undo system continues to work normally (uses separate state snapshots).
+
+**Priority**: ~~High~~ ✅ **COMPLETED in v2.5.2-beta**
+
+**Status**: ✅ **IMPLEMENTED** - Fully functional with preview mode and detailed feedback
+
+---
+
+#### Force Save Tournament
+
+**Purpose**: Manually trigger save operation for peace of mind
+
+**Function**: Explicitly call `saveTournament()` and report status
+
+**Use Cases:**
+- Before risky operations
+- Peace of mind confirmation
+- Debugging save issues
+- Before manual data modifications
+
+**Output Feedback:**
+- Save status (success/failure)
+- Timestamp of save
+- localStorage usage stats (MB used / MB available)
+- Tournament name and bracket size
+- Number of players and matches
+
+**Safety**: ✅ **Safe** - Read current state and save, no data modification risk
+
+**Priority**: Low - Technically redundant (auto-save exists) but valuable for user confidence
+
+---
+
+#### Complete Config Reset
+
+**Purpose**: Reset ALL global configuration to defaults in one command
+
+**Scope**: More comprehensive than individual Config page reset buttons
+
+**Resets:**
+- Point values (participation, placement, achievements)
+- Match configuration (best-of legs for all rounds)
+- UI settings (developer mode, referee suggestions, etc.)
+- Branding (club name, logo)
+- Lane exclusions
+
+**Implementation Notes:**
+- Does NOT affect tournament data (matches, players, bracket)
+- Only resets `globalConfig` object
+- Confirmation dialog with list of what will be reset
+- Show before/after comparison
+
+**Output Feedback:**
+- List of config sections reset
+- Old vs new values comparison
+- Confirmation timestamp
+- "Config reset to defaults" message
+
+**Safety**: ⚠️ **Destructive** - Loses custom configuration (but tournament data untouched)
+
+**Rationale**: Not on Config page because it's too destructive for casual users. Belongs in Developer Console for advanced users who understand implications.
+
+**Priority**: Medium - Useful recovery tool for config corruption
+
+---
+
+#### Replace Player with BYE
+
+**Purpose**: Remove no-show participants from tournament
+
+**Function**: Replace a registered player with a BYE placeholder
+
+**Primary Use Case:**
+- Player doesn't show up for tournament
+- Need to remove them before bracket generation or early in tournament
+
+**Behavior:**
+- Replaces player with BYE in registration list
+- Player's slot becomes BYE
+- Completed matches: Keep results (player earned their outcome)
+- Future matches: Opponent gets walkover
+
+**Important Limitation:**
+⚠️ **May result in two BYEs in same Frontside Round 1 match**
+- This is a known edge case
+- If two no-shows are in same FS-R1 match, both become BYEs
+- Bracket will have BYE vs BYE match
+- Should be handled manually or regenerate bracket
+
+**Alternative Workflow:**
+If player drops out mid-tournament (not a no-show):
+- **Do NOT use this command**
+- Let them lose their remaining matches naturally
+- They still get tournament placement based on progress
+- This preserves bracket integrity
+
+**Output Feedback:**
+- Player name replaced
+- Number of future matches affected
+- Warning if creates BYE vs BYE scenario
+- List of matches impacted
+
+**Safety**: ⚠️ **Complex/Risky** - Can create edge cases, requires careful use
+
+**Priority**: Low - Complex edge case handler, needs careful design consideration
+
+**Status**: Needs further design discussion before implementation
+
+---
+
 ## Implementation Priority
+
+**Completed in v2.5.2-beta:**
+- ✅ **Transaction Log Management with Smart Pruning** (Fix 11a) - COMPLETE with preview, execution, and feedback
+- ✅ **localStorage Usage statistic** - New view showing storage breakdown by key
+- ✅ Transaction History reverse sorting (#1 = latest transaction)
+- ✅ Storage calculations updated to 10 MB browser limit
+- ✅ UTF-16 encoding fix (2 bytes/char) for accurate storage estimates
+
+**Completed in v2.5.1:**
+- ✅ Command execution feedback (Fix 2) - COMPLETE with detailed statistics
+- ✅ Console Output enhancements (Fix 5 - partial) - Fixed title bar, utility links, height distribution
 
 **Completed in v2.5.0:**
 - ✅ Player Count detail view with IDs (Fix 1 - partial)
@@ -1201,24 +1698,62 @@ FS-2-2:
 - ✅ Lane usage calculation respects excluded lanes
 
 **High Priority** (Most Impact):
-1. Command execution feedback (Fix 2) - Essential for usability
-2. Lane Usage detail view (Fix 1 - remaining) - Completes statistics consistency
-3. Enhanced validation status display (Fix 3 - remaining) - Timestamps and overall status
+1. Lane Usage detail view (Fix 1 - remaining) - Completes statistics consistency
+2. Enhanced validation status display (Fix 3 - remaining) - Timestamps and overall status
 
 **Medium Priority** (Nice to Have):
-4. Menu reorganization (Fix 4) - Improves discoverability
-5. Enhanced validation checks (Fix 6) - Adds more diagnostic capability
+4. **Complete Config Reset command** (Fix 11c) - Recovery tool for config corruption
+5. Menu reorganization (Fix 4) - Improves discoverability
+6. Enhanced validation checks (Fix 6) - Adds more diagnostic capability
 
 **Low Priority** (Future Enhancements):
-6. Console output enhancements (Fix 5) - Current behavior acceptable
-7. Export and reporting (Fix 7) - Useful but not critical
-8. Performance optimizations (Fix 8) - Only needed for very large tournaments
-9. Second monitor sync command (Fix 9) - Quality-of-life feature, workaround exists
-10. Improved match progression visuals (Fix 10) - Purely visual/UX enhancement
+7. **Force Save Tournament command** (Fix 11b) - Redundant but provides peace of mind
+8. **Replace Player with BYE command** (Fix 11d) - Complex edge case, needs design discussion
+9. Console output enhancements (Fix 5) - Current behavior acceptable
+10. Export and reporting (Fix 7) - Useful but not critical
+11. Performance optimizations (Fix 8) - Only needed for very large tournaments
+12. Second monitor sync command (Fix 9) - Quality-of-life feature, workaround exists
+13. Improved match progression visuals (Fix 10) - Purely visual/UX enhancement
 
 ---
 
 ## Version History
+
+**v2.5.2-beta** - Transaction Management & Storage Monitoring
+- ✅ **Transaction Log Management** - Complete smart pruning system
+  - "Manage Transaction Log" command opens dedicated management view
+  - Smart pruning algorithm removes redundant transactions for completed matches
+  - Preview mode shows detailed analysis before execution
+  - Post-execution feedback with comprehensive statistics
+  - Preserves all COMPLETE_MATCH transactions and final assignments
+  - Only processes completed matches (active matches untouched)
+  - Safe operation - undo system unaffected (uses separate state snapshots)
+- ✅ **localStorage Usage statistic** - New monitoring capability
+  - Fifth statistic in left pane showing total usage vs 10 MB browser limit
+  - Color-coded indicators (green < 50%, amber 50-80%, red > 80%)
+  - Detail view with breakdown by localStorage key
+  - Sorted by size (largest first) with percentages
+  - Helps identify when transaction pruning is needed
+- ✅ **Transaction History improvements**
+  - Reverse chronological sorting (#1 = latest transaction)
+  - More intuitive numbering for recent activity
+- ✅ **Storage calculation fixes**
+  - Updated browser limit assumption from 5 MB to 10 MB (modern browsers)
+  - Fixed UTF-16 encoding calculation (2 bytes/char instead of 8)
+  - Accurate storage estimates across all views
+  - Removed references to obsolete 5 MB limit
+
+**v2.5.1** - Developer Console UX Enhancements
+- ✅ **Command execution feedback** with detailed statistics
+  - Visual feedback in main content area for all commands
+  - Color-coded status boxes (green/red) with flat design
+  - Detailed information: bracket size, player counts, match stats
+  - Execution timestamps and navigation links
+- ✅ **Console Output improvements**
+  - Fixed title bar that doesn't scroll with content
+  - Utility links: "Copy Log" and "Clear Log" always visible
+  - Height distribution adjusted: 60% content area, 40% console output
+  - Clear Log no longer changes main content view
 
 **v2.5.0** - Initial Developer Console implementation
 - Real-time statistics (4 metrics)

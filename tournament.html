@@ -612,6 +612,12 @@
                                 <strong>Lane Usage</strong><br>
                                 <span id="stat-lanes" style="font-size: 13px; color: #666;">Loading...</span>
                             </a>
+
+                            <a href="#" onclick="showLocalStorageUsage(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 12px;">
+                                <strong>localStorage Usage</strong><br>
+                                <span id="stat-storage" style="font-size: 13px; color: #666;">Loading...</span>
+                            </a>
                         </div>
 
                         <!-- Commands Section -->
@@ -636,6 +642,10 @@
                                 style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Validate
                                 Everything</a>
 
+                            <a href="#" onclick="showTransactionLogManagement(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Manage
+                                Transaction Log</a>
+
                             <a href="#" onclick="showTransactionHistory(); return false;"
                                 style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
                                 Transaction History</a>
@@ -655,16 +665,22 @@
                     <!-- Right pane: Split into content area and console footer -->
                     <div class="analytics-right-pane" style="flex: 1; display: flex; flex-direction: column; overflow: hidden;">
 
-                        <!-- Main content area (70%) -->
-                        <div id="analyticsContentArea" style="flex: 0 0 70%; overflow-y: auto; padding: 24px; border-bottom: 1px solid #ddd;">
+                        <!-- Main content area (60%) -->
+                        <div id="analyticsContentArea" style="flex: 0 0 60%; overflow-y: auto; padding: 24px; border-bottom: 1px solid #ddd;">
                             <h4>Loading...</h4>
                             <p>Initializing Developer Console...</p>
                         </div>
 
-                        <!-- Console output footer (30%) -->
-                        <div id="analyticsConsoleFooter" style="flex: 0 0 30%; overflow-y: auto; padding: 24px; background: #f9fafb;">
-                            <h4 style="margin-top: 0; margin-bottom: 10px; font-size: 14px; color: #666;">Console Output</h4>
-                            <div id="consoleOutputContent" style="font-family: monospace; font-size: 12px; line-height: 1.6;">
+                        <!-- Console output footer (40%) -->
+                        <div id="analyticsConsoleFooter" style="flex: 0 0 40%; display: flex; flex-direction: column; background: #f9fafb; min-height: 0;">
+                            <div style="margin: 0; padding: 24px 24px 10px 24px; flex-shrink: 0; display: flex; justify-content: space-between; align-items: center;">
+                                <h4 style="margin: 0; font-size: 14px; color: #666;">Console Output</h4>
+                                <div style="display: flex; gap: 12px;">
+                                    <a href="#" onclick="copyConsoleOutput(); return false;" style="text-decoration: none; color: #065f46; font-size: 14px;">Copy Log</a>
+                                    <a href="#" onclick="clearConsoleOutput(); return false;" style="text-decoration: none; color: #065f46; font-size: 14px;">Clear Log</a>
+                                </div>
+                            </div>
+                            <div id="consoleOutputContent" style="flex: 1; overflow-y: auto; padding: 0 24px 24px 24px; font-family: monospace; font-size: 12px; line-height: 1.6; min-height: 0;">
                                 <div style="color: #666; font-style: italic;">Console output will appear here...</div>
                             </div>
                         </div>
