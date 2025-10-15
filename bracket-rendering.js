@@ -3275,10 +3275,10 @@ function showCommandCenterModal(matchData) {
                     // Create two-column layout
                     const twoColumnHTML = `
                         <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                            <div style="flex: 1; min-width: 0; padding-right: 10px;">
+                            <div style="flex: 1; min-width: 0;">
                                 ${frontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches ready</p>'}
                             </div>
-                            <div style="flex: 1; min-width: 0; padding-left: 10px; border-left: 2px solid #e5e7eb;">
+                            <div style="flex: 1; min-width: 0; border-left: 2px solid #e5e7eb;">
                                 ${backsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches ready</p>'}
                             </div>
                         </div>
