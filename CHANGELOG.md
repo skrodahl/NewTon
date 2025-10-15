@@ -1,6 +1,6 @@
 # 2025-10-15
 
-## **v2.5.2-beta** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements
+## **v2.6.0-beta** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements
 
 ### Enhanced: Developer Console - Transaction Log Management & Storage Monitoring
 - **Complete transaction pruning system with smart algorithm and localStorage monitoring**
