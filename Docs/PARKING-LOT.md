@@ -3,6 +3,41 @@
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
 
+### Immediate Pruning of START_MATCH and STOP_MATCH on Match Completion
+**Idea:** Automatically remove START_MATCH and STOP_MATCH transactions for a match immediately when COMPLETE_MATCH is saved
+
+**Current Behavior:**
+- START_MATCH and STOP_MATCH transactions remain in transaction history after match completion
+- These transactions serve no purpose after completion (only track live match duration)
+- Accumulate unnecessarily throughout tournament
+- Only removed when user manually runs "Smart Pruning" in Developer Console
+
+**Proposed Behavior:**
+- When `completeMatch()` saves COMPLETE_MATCH transaction, immediately remove all START_MATCH and STOP_MATCH transactions for that specific match
+- Surgical removal (only affects completed match, not other matches)
+- Silent operation (no user notification)
+- Runs inline during match completion flow
+
+**Benefits:**
+- Reduces transaction history growth by ~40-60% automatically
+- No user action required
+- Zero storage waste for obsolete timing data
+- Simpler than full auto-pruning (no background jobs, no thresholds)
+- Safe - these transactions are never used after completion
+
+**Implementation:**
+- Add pruning logic to `completeMatch()` in clean-match-progression.js
+- Filter transaction history: remove entries where `type IN ('START_MATCH', 'STOP_MATCH') AND matchId === completedMatchId`
+- Save updated transaction history to localStorage
+- ~5-10 lines of code
+
+**Distinction from "Auto-Pruning on Match Completion":**
+- This is immediate, surgical removal of specific obsolete transactions
+- The other idea is full smart pruning algorithm running after each match (more complex, more considerations)
+- This could be implemented quickly with zero design decisions needed
+
+**Status:** Ready for implementation - no design questions, completely safe
+
 ## Next
 *Items ready for implementation*
 
