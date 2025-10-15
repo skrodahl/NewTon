@@ -1,4 +1,4 @@
-# 2025-10-14
+# 2025-10-15
 
 ## **v2.5.2-beta** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements
 
