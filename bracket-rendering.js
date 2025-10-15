@@ -3110,7 +3110,7 @@ function showCommandCenterModal(matchData) {
                         addPlayerHTML = `
                             <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
                                 <div style="font-size: 13px; font-weight: 500; color: #374151;">Add Player:</div>
-                                <div style="margin-top: 8px; display: flex; gap: 8px; width: 70%; margin: 8px auto 0 auto;">
+                                <div style="margin-top: 8px; display: flex; gap: 8px; max-width: 400px; margin: 8px auto 0 auto;">
                                     <input type="text" id="ccPlayerName" placeholder="Player name" style="flex: 1; padding: 4px 8px; border: 1px solid #ccc;" onkeypress="if(event.key==='Enter') addPlayerFromCC()">
                                     <button onclick="addPlayerFromCC()" style="padding: 4px 12px; background: #065f46; color: white; border: none; cursor: pointer;">Add</button>
                                 </div>
@@ -3148,51 +3148,94 @@ function showCommandCenterModal(matchData) {
             case 'active':
             default:
                 // Tournament active - show matches (guaranteed to exist in active state)
-                // Populate LIVE matches
+                // Populate LIVE matches with two-column layout (Frontside/Backside)
                 if (matchData.live && matchData.live.length > 0) {
                     liveSection.style.display = 'block';
-                    let liveHTML = '';
-                    matchData.live.forEach(match => {
-                        liveHTML += createMatchCard(match);
-                    });
-                    liveContainer.innerHTML = liveHTML;
+
+                    // Separate LIVE matches into Frontside and Backside
+                    const liveFrontside = matchData.live.filter(m =>
+                        m.id.startsWith('FS-') || m.id === 'GRAND-FINAL'
+                    );
+                    const liveBackside = matchData.live.filter(m =>
+                        m.id.startsWith('BS-') || m.id === 'BS-FINAL'
+                    );
+
+                    // Build HTML for each column
+                    const liveFrontsideHTML = liveFrontside.map(match => createMatchCard(match)).join('');
+                    const liveBacksideHTML = liveBackside.map(match => createMatchCard(match)).join('');
+
+                    // Create two-column layout for LIVE matches
+                    const liveTwoColumnHTML = `
+                        <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
+                            <div style="flex: 1; min-width: 0; padding-right: 10px;">
+                                <div class="cc-matches-container">
+                                    ${liveFrontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches live</p>'}
+                                </div>
+                            </div>
+                            <div style="flex: 1; min-width: 0; padding-left: 10px; border-left: 2px solid #e5e7eb;">
+                                <div class="cc-matches-container">
+                                    ${liveBacksideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches live</p>'}
+                                </div>
+                            </div>
+                        </div>
+                    `;
+
+                    liveContainer.innerHTML = liveTwoColumnHTML;
                 }
 
-                // Populate Round-based matches
+                // Populate Round-based matches with two-column layout (Frontside/Backside)
                 if (matchData.rounds && Object.keys(matchData.rounds).length > 0) {
-                    // Sort round keys for logical display order
-                    const sortedRoundKeys = Object.keys(matchData.rounds).sort((a, b) => {
-                        // Custom sorting for logical round progression
-                        const order = {
-                            'FS-R1': 1, 'BS-R1': 2, 'FS-R2': 3, 'BS-R2': 4, 'FS-R3': 5, 'BS-R3': 6,
-                            'FS-R4': 7, 'BS-R4': 8, 'FS-R5': 9, 'BS-R5': 10, 'BS-R6': 11, 'BS-R7': 12,
-                            'BS-FINAL': 13, 'GRAND-FINAL': 14, 'OTHER': 15
-                        };
-                        return (order[a] || 99) - (order[b] || 99);
+                    // Separate rounds into Frontside and Backside groups
+                    const frontsideRounds = {};
+                    const backsideRounds = {};
+
+                    Object.keys(matchData.rounds).forEach(roundKey => {
+                        if (roundKey.startsWith('FS-')) {
+                            frontsideRounds[roundKey] = matchData.rounds[roundKey];
+                        } else if (roundKey.startsWith('BS-') || roundKey === 'BS-FINAL') {
+                            backsideRounds[roundKey] = matchData.rounds[roundKey];
+                        } else if (roundKey === 'GRAND-FINAL') {
+                            // Grand Final goes in Frontside column
+                            frontsideRounds[roundKey] = matchData.rounds[roundKey];
+                        } else {
+                            // OTHER goes in Frontside column
+                            frontsideRounds[roundKey] = matchData.rounds[roundKey];
+                        }
                     });
 
-                    // Create dynamic sections for each round
-                    let allRoundsHTML = '';
-                    sortedRoundKeys.forEach(roundKey => {
-                        const roundMatches = matchData.rounds[roundKey];
+                    // Sort round keys for each side
+                    const sortFrontsideKeys = (a, b) => {
+                        const order = {
+                            'FS-R1': 1, 'FS-R2': 2, 'FS-R3': 3, 'FS-R4': 4, 'FS-R5': 5,
+                            'GRAND-FINAL': 10, 'OTHER': 99
+                        };
+                        return (order[a] || 99) - (order[b] || 99);
+                    };
+
+                    const sortBacksideKeys = (a, b) => {
+                        const order = {
+                            'BS-R1': 1, 'BS-R2': 2, 'BS-R3': 3, 'BS-R4': 4, 'BS-R5': 5,
+                            'BS-R6': 6, 'BS-R7': 7, 'BS-FINAL': 10
+                        };
+                        return (order[a] || 99) - (order[b] || 99);
+                    };
+
+                    // Build Frontside column HTML
+                    let frontsideHTML = '';
+                    Object.keys(frontsideRounds).sort(sortFrontsideKeys).forEach(roundKey => {
+                        const roundMatches = frontsideRounds[roundKey];
                         if (roundMatches && roundMatches.length > 0) {
-                            // Create user-friendly round names
                             let roundDisplayName;
                             if (roundKey === 'GRAND-FINAL') {
                                 roundDisplayName = '🏆 Grand Final';
-                            } else if (roundKey === 'BS-FINAL') {
-                                roundDisplayName = '🥈 Backside Final';
                             } else if (roundKey.startsWith('FS-R')) {
                                 const roundNum = roundKey.replace('FS-R', '');
                                 roundDisplayName = `⚪ Round ${roundNum} (Frontside)`;
-                            } else if (roundKey.startsWith('BS-R')) {
-                                const roundNum = roundKey.replace('BS-R', '');
-                                roundDisplayName = `⚫ Round ${roundNum} (Backside)`;
                             } else {
                                 roundDisplayName = `📋 ${roundKey}`;
                             }
 
-                            allRoundsHTML += `
+                            frontsideHTML += `
                                 <div class="cc-match-section" style="display: block;">
                                     <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
                                     <div class="cc-matches-container">
@@ -3203,8 +3246,46 @@ function showCommandCenterModal(matchData) {
                         }
                     });
 
-                    // Use frontContainer for all round content (repurposing existing container)
-                    frontContainer.innerHTML = allRoundsHTML;
+                    // Build Backside column HTML
+                    let backsideHTML = '';
+                    Object.keys(backsideRounds).sort(sortBacksideKeys).forEach(roundKey => {
+                        const roundMatches = backsideRounds[roundKey];
+                        if (roundMatches && roundMatches.length > 0) {
+                            let roundDisplayName;
+                            if (roundKey === 'BS-FINAL') {
+                                roundDisplayName = '🥈 Backside Final';
+                            } else if (roundKey.startsWith('BS-R')) {
+                                const roundNum = roundKey.replace('BS-R', '');
+                                roundDisplayName = `⚫ Round ${roundNum} (Backside)`;
+                            } else {
+                                roundDisplayName = `📋 ${roundKey}`;
+                            }
+
+                            backsideHTML += `
+                                <div class="cc-match-section" style="display: block;">
+                                    <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
+                                    <div class="cc-matches-container">
+                                        ${roundMatches.map(match => createMatchCard(match)).join('')}
+                                    </div>
+                                </div>
+                            `;
+                        }
+                    });
+
+                    // Create two-column layout
+                    const twoColumnHTML = `
+                        <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
+                            <div style="flex: 1; min-width: 0; padding-right: 10px;">
+                                ${frontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches ready</p>'}
+                            </div>
+                            <div style="flex: 1; min-width: 0; padding-left: 10px; border-left: 2px solid #e5e7eb;">
+                                ${backsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches ready</p>'}
+                            </div>
+                        </div>
+                    `;
+
+                    // Use frontContainer for two-column layout
+                    frontContainer.innerHTML = twoColumnHTML;
                     frontSection.style.display = 'block';
                 }
 

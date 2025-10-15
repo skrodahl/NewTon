@@ -60,6 +60,20 @@
   - **Implementation**: Modified modal display check in clean-match-progression.js:1412-1414
   - **User impact**: Real-time sorting and resource availability updates during tournament operations
 
+### Enhanced: Match Controls - Two-Column Layout & Modal Optimization
+- **Complete redesign with Frontside/Backside visual separation for better tournament flow visibility**
+  - **Two-column layout**: Match cards split into Frontside (left) and Backside (right) columns for both LIVE and Ready to Start sections
+  - **Visual separation**: 2px vertical separator line between columns for clear bracket side distinction
+  - **Modal sizing**: Increased to 80% width and 90% height for maximum screen utilization
+  - **Referee sidebar optimization**: Fixed 350px width (user-adjustable via CSS) instead of flex-based, providing more space for match cards
+  - **Tournament completion centering**: Celebration card constrained to 800px max-width and horizontally centered
+  - **Setup mode input**: "Add Player" field constrained to 400px max-width for better proportions
+  - **At-a-glance visibility**: Operators can instantly see both bracket sides simultaneously without scrolling
+  - **Smart grouping**: Grand Final appears in Frontside column, BS-FINAL in Backside column
+  - **Independent sorting**: Each column maintains proper round progression order (FS-R1, FS-R2... and BS-R1, BS-R2...)
+  - **Implementation**: bracket-rendering.js:3150-3285 (two-column rendering logic), tournament.html:774 (modal dimensions), styles.css:1772 (referee sidebar width), styles.css:1391 (celebration centering)
+  - **User impact**: Tournament operators gain significantly improved spatial awareness of tournament state, can manage both bracket sides efficiently, and make faster operational decisions during active tournaments
+
 ### Enhanced: Player List - Payment Status Indicator & Smart Sorting
 - **"In Tournament" section now shows payment status and prioritizes unpaid players**
   - **Payment status indicator**: Players who have paid entrance fee show "(Paid)" label in green (13px font, subtle styling)

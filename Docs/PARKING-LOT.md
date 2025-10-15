@@ -3,44 +3,6 @@
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
 
-### Match Controls - Two-Column Layout for Frontside/Backside
-**Idea:** Widen Match Controls modal and split matches into two columns (Frontside left, Backside right)
-
-**Current Behavior:**
-- Match Controls modal uses standard width
-- All matches (Frontside and Backside) displayed in single vertical column
-- Referee Suggestions sidebar on right takes up space
-- Lots of unused horizontal space on wider screens
-
-**Proposed Behavior:**
-- Widen Match Controls modal to utilize more available screen width
-- Make individual match cards narrower
-- Split into two-column layout:
-  - Left column: Frontside matches
-  - Right column: Backside matches
-- Referee Suggestions sidebar remains on far right
-- Better utilization of horizontal space
-
-**Benefits:**
-- See more matches at once without scrolling
-- Clear visual separation between Frontside and Backside progression
-- More efficient use of screen real estate on larger displays
-- Reduced vertical scrolling during tournament operations
-
-**Considerations:**
-- Responsive design for smaller screens (should it stack vertically on narrow displays?)
-- Match card minimum width to maintain readability
-- Round headers need to work in two-column layout
-- Sorting by lane number needs to work within each column
-
-**Implementation:**
-- Update modal width in tournament.html or bracket-rendering.js
-- Add CSS Grid or Flexbox layout for two columns
-- Adjust match card width styling
-- Test on various screen sizes
-
-**Status:** Awaiting triage
-
 ### Config Page Dynamic Help - Add Developer Console
 **Idea:** Update Config page dynamic help system to include information about Developer Console
 
