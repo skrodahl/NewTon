@@ -1595,10 +1595,20 @@ function updateMatchReferee(matchId, refereeId) {
 
     // Create transaction for referee assignment
     if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
+        let description;
+        if (parsedRefereeId) {
+            // Look up player name
+            const referee = players && players.find(p => p.id === parsedRefereeId);
+            const refereeName = referee ? referee.name : 'Unknown';
+            description = `${matchId}: Referee assigned to ${refereeName} (ID: ${parsedRefereeId})`;
+        } else {
+            description = `${matchId}: Referee cleared`;
+        }
+
         const transaction = {
             id: `tx_${Date.now()}`,
             type: 'ASSIGN_REFEREE',
-            description: `${matchId}: Referee assigned to player ${parsedRefereeId}`,
+            description: description,
             timestamp: new Date().toISOString(),
             matchId: matchId,
             beforeState: { referee: oldReferee },

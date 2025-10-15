@@ -21,12 +21,25 @@
     - Detail view with breakdown by localStorage key (sorted by size)
     - Helps identify when transaction pruning is needed
   - **Transaction History improvements**: Reverse chronological sorting (#1 = latest transaction)
+  - **Transaction History filtering system**: Comprehensive search and filter capabilities
+    - **Layout optimization**: Developer Console left pane reduced from 30% to fixed 240px width for better space utilization
+    - **Vertical sidebar layout**: Filter panel positioned as right sidebar next to transaction list
+    - **Three-filter system** with AND logic:
+      - Transaction Type dropdown (All Types, COMPLETE_MATCH, ASSIGN_REFEREE, ASSIGN_LANE, START_MATCH, STOP_MATCH)
+      - Match ID text input (searches matchId field and description)
+      - Search String text input (searches player names and any text in description)
+    - **Enhanced transaction descriptions**: All transactions now include both player names and IDs for better debugging
+      - COMPLETE_MATCH: "FS-1-3: Liam (ID: 123) defeats Peter (ID: 456)"
+      - ASSIGN_REFEREE: "FS-1-1: Referee assigned to Chris (ID: 1760441429772)"
+    - **Filter state preservation**: Selected filters maintained in UI when applied
+    - **Results counter**: Shows "X of Y total" when filtered, "Y total" when unfiltered
+    - **Clean UI**: Professional layout with proper spacing and visual hierarchy
   - **Storage calculation fixes**:
     - Updated browser limit from 5 MB to 10 MB (modern browsers: Chrome 114+, Firefox, Safari, Edge)
     - Fixed UTF-16 encoding calculation (2 bytes/char instead of 8 bytes/char)
     - Accurate storage estimates across all views
-  - **Implementation**: analytics.js (Transaction Log Management, localStorage Usage view), tournament.html (new statistic link)
-  - **User impact**: Operators can monitor and manage storage usage, prevent hitting browser limits, maintain tournament performance
+  - **Implementation**: analytics.js (Transaction Log Management, localStorage Usage view, Transaction History filtering), tournament.html (layout optimization), bracket-rendering.js (ASSIGN_REFEREE descriptions), clean-match-progression.js (COMPLETE_MATCH descriptions)
+  - **User impact**: Operators can monitor and manage storage usage, prevent hitting browser limits, maintain tournament performance, and quickly debug tournament issues with powerful filtering capabilities
 
 ### Fixed: Match Controls Auto-Refresh on Lane Changes
 - **Match Controls now updates immediately when lane assignments change on LIVE matches**

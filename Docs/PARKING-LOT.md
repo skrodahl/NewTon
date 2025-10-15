@@ -9,6 +9,47 @@
 ## Later
 *Not urgent but worth tracking*
 
+### Auto-Pruning on Match Completion
+**Idea:** Automatically run smart transaction pruning after each match completion to maintain optimal storage usage throughout tournament
+
+**Current Behavior:**
+- Transaction history grows continuously during tournament
+- Users must manually open Developer Console and run "Manage Transaction Log" → "Preview Smart Pruning" → "Prune Now"
+- Storage usage can approach limits before user notices
+
+**Proposed Behavior:**
+- After each COMPLETE_MATCH transaction, automatically trigger smart pruning in background
+- Silent operation (no user notification unless error occurs)
+- Keeps transaction log lean throughout tournament lifecycle
+- Users still have manual pruning option via Developer Console
+
+**Benefits:**
+- Zero-maintenance storage management
+- Prevents storage limit warnings/errors
+- Maintains optimal performance throughout tournament
+- Reduces localStorage Usage statistic (stays green)
+
+**Considerations:**
+- **Performance**: Pruning operation needs to be fast enough to run after every match (~50ms target)
+- **Timing**: Should run asynchronously after match completion to avoid blocking UI
+- **User awareness**: Users might wonder why transaction count doesn't grow as expected (need documentation)
+- **Override option**: Should there be a config setting to disable auto-pruning? (some users may want full history)
+- **Frequency**: Every match? Every N matches? Every round completion?
+- **Threshold-based**: Only auto-prune when transaction count > X or storage usage > Y%?
+
+**Implementation Reference:**
+- See **Docs/ANALYTICS.md** - Transaction Log Management section for smart pruning algorithm details
+- Existing pruning logic in `analytics.js` (executeSmartPruning function)
+- Hook into match completion in `clean-match-progression.js` after COMPLETE_MATCH transaction is saved
+
+**Design Questions to Resolve:**
+1. Should auto-pruning be opt-in (config setting) or always-on?
+2. Should it show any UI feedback (toast notification, console log)?
+3. Should it be threshold-based (only prune when needed) or run every match?
+4. Should there be a "preserve full history" mode for debugging/analytics purposes?
+
+**Status:** Idea stage - needs design discussion before implementation
+
 ## Decided against
 - None
 

@@ -291,7 +291,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             id: `tx_${Date.now()}`,
             type: 'COMPLETE_MATCH',
             completionType: completionType,
-            description: `${matchId}: ${winner.name} defeats ${loser.name}`,
+            description: `${matchId}: ${winner.name} (ID: ${winner.id}) defeats ${loser.name} (ID: ${loser.id})`,
             timestamp: new Date().toISOString(),
             matchId: matchId,
             winner: winner,

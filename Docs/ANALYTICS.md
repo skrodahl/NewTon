@@ -44,12 +44,12 @@ The Developer Console is a hidden diagnostic tool designed for developers to mon
 
 The Developer Console opens as a large modal (90% screen width/height) with a three-pane layout:
 
-### Left Pane (30% width)
+### Left Pane (240px fixed width)
 - **Statistics** - Real-time tournament metrics (clickable for details)
 - **Commands** - Developer action buttons
 - **Timestamp** - Last update time
 
-### Right Pane (70% width) - Split Vertically
+### Right Pane (flexible, fills remaining space) - Split Vertically
 
 #### Content Area (60% of right pane)
 - **Dynamic content area** - Shows details based on selected statistic or command
@@ -468,6 +468,22 @@ playerList: 0.42 KB (0%)
 - All transactions in reverse chronological order (latest first)
 - Format: `#ID | Time | Type | Description`
 - Scrollable for long histories (169+ transactions)
+- **Enhanced with player names and IDs**: All transactions now include both player names and IDs for better debugging
+  - COMPLETE_MATCH: "FS-1-3: Liam (ID: 123) defeats Peter (ID: 456)"
+  - ASSIGN_REFEREE: "FS-1-1: Referee assigned to Chris (ID: 1760441429772)"
+
+**Filtering System:**
+- **Three-filter search** with AND logic for precise transaction lookup
+- **Vertical sidebar layout**: Filter panel positioned on right side of transaction list
+- **Filter controls**:
+  - **Transaction Type dropdown**: Filter by All Types, COMPLETE_MATCH, ASSIGN_REFEREE, ASSIGN_LANE, START_MATCH, STOP_MATCH
+  - **Match ID input**: Searches matchId field and description (e.g., "FS-1-3")
+  - **Search String input**: Searches player names and any text in description (e.g., "Chris")
+- **Filter and Clear buttons**: Apply filters or reset to show all transactions
+- **Results counter**: Shows "X of Y total" when filtered, "Y total" when showing all
+- **Filter state preservation**: Selected filters maintained in UI when applied
+
+**Purpose:** Debug tournament issues, understand event timeline, verify undo system, search for specific players or matches
 
 ---
 
@@ -629,6 +645,7 @@ window.commandValidateEverything()    // Run all validations
 window.debugAnalytics()              // Run all validations, log to console
 window.clearConsoleOutput()          // Clear console buffer
 window.copyConsoleOutput()           // Copy console output to clipboard
+window.applyTransactionFilters()     // Apply transaction history filters
 ```
 
 ---

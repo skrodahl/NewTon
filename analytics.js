@@ -487,32 +487,118 @@ function showMatchStateDetails() {
 /**
  * Show Transaction History
  */
-function showTransactionHistory() {
+function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSearch = '') {
     currentView = 'history';
 
     const history = getTournamentHistory ? getTournamentHistory() : [];
 
+    // Apply filters
+    let filteredHistory = [...history];
+
+    // Filter by type
+    if (filterType && filterType !== 'all') {
+        filteredHistory = filteredHistory.filter(tx => tx.type === filterType);
+    }
+
+    // Filter by match ID
+    if (filterMatchId && filterMatchId.trim() !== '') {
+        const matchIdLower = filterMatchId.trim().toLowerCase();
+        filteredHistory = filteredHistory.filter(tx =>
+            (tx.matchId && tx.matchId.toLowerCase().includes(matchIdLower)) ||
+            (tx.description && tx.description.toLowerCase().includes(matchIdLower))
+        );
+    }
+
+    // Filter by search text
+    if (filterSearch && filterSearch.trim() !== '') {
+        const searchLower = filterSearch.trim().toLowerCase();
+        filteredHistory = filteredHistory.filter(tx =>
+            tx.description && tx.description.toLowerCase().includes(searchLower)
+        );
+    }
+
+    const totalCount = history.length;
+    const filteredCount = filteredHistory.length;
+    const countText = filteredCount < totalCount
+        ? `${filteredCount} of ${totalCount} total`
+        : `${totalCount} total`;
+
     let html = `
-        <h4>Transaction History (${history.length} total)</h4>
-        <div style="font-family: monospace; font-size: 12px; line-height: 1.6;">
+        <h4 style="margin-bottom: 16px;">Transaction History (${countText})</h4>
+
+        <div style="display: flex; gap: 12px; align-items: flex-start;">
+            <!-- Transaction List -->
+            <div style="flex: 1; font-family: monospace; font-size: 12px; line-height: 1.6;">
     `;
 
-    if (history.length === 0) {
-        html += `<p style="color: #666;">No transactions recorded</p>`;
+    if (filteredHistory.length === 0) {
+        if (totalCount === 0) {
+            html += `<p style="color: #666;">No transactions recorded</p>`;
+        } else {
+            html += `<p style="color: #666;">No transactions match filters</p>`;
+        }
     } else {
         // Reverse to show latest first (#1 is the most recent)
-        const reversedHistory = [...history].reverse();
+        const reversedHistory = [...filteredHistory].reverse();
 
         reversedHistory.forEach((tx, index) => {
             const time = new Date(tx.timestamp).toLocaleTimeString();
             const number = index + 1; // #1 is the latest transaction
-            html += `<p>#${number} | ${time} | ${tx.type} | ${tx.description || 'No description'}</p>`;
+            html += `<p style="margin: 2px 0;">#${number} | ${time} | ${tx.type} | ${tx.description || 'No description'}</p>`;
         });
     }
 
-    html += `</div>`;
+    html += `
+            </div>
+
+            <!-- Filter Panel -->
+            <div style="flex: 0 0 280px; padding: 16px; background: #f8f9fa; border: 1px solid #ddd;">
+                <h5 style="margin: 0 0 16px 0; font-size: 14px; font-weight: bold;">Search Transaction History</h5>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Transaction Type:</label>
+                    <select id="filterType" style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
+                        <option value="all" ${filterType === 'all' ? 'selected' : ''}>All Types</option>
+                        <option value="COMPLETE_MATCH" ${filterType === 'COMPLETE_MATCH' ? 'selected' : ''}>COMPLETE_MATCH</option>
+                        <option value="ASSIGN_REFEREE" ${filterType === 'ASSIGN_REFEREE' ? 'selected' : ''}>ASSIGN_REFEREE</option>
+                        <option value="ASSIGN_LANE" ${filterType === 'ASSIGN_LANE' ? 'selected' : ''}>ASSIGN_LANE</option>
+                        <option value="START_MATCH" ${filterType === 'START_MATCH' ? 'selected' : ''}>START_MATCH</option>
+                        <option value="STOP_MATCH" ${filterType === 'STOP_MATCH' ? 'selected' : ''}>STOP_MATCH</option>
+                    </select>
+                </div>
+
+                <div style="margin-bottom: 16px;">
+                    <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Match ID:</label>
+                    <input type="text" id="filterMatchId" placeholder="Match ID" value="${filterMatchId}"
+                           style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
+                </div>
+
+                <div style="margin-bottom: 20px;">
+                    <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Search String:</label>
+                    <input type="text" id="filterSearch" placeholder="Search..." value="${filterSearch}"
+                           style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
+                </div>
+
+                <div style="display: flex; gap: 8px;">
+                    <button class="btn" onclick="applyTransactionFilters()" style="flex: 1; margin: 0; padding: 8px; font-size: 12px;">Filter</button>
+                    <button class="btn" onclick="showTransactionHistory()" style="flex: 1; margin: 0; padding: 8px; font-size: 12px;">Clear</button>
+                </div>
+            </div>
+        </div>
+    `;
 
     updateRightPane(html);
+}
+
+/**
+ * Apply transaction filters from form inputs
+ */
+function applyTransactionFilters() {
+    const filterType = document.getElementById('filterType')?.value || 'all';
+    const filterMatchId = document.getElementById('filterMatchId')?.value || '';
+    const filterSearch = document.getElementById('filterSearch')?.value || '';
+
+    showTransactionHistory(filterType, filterMatchId, filterSearch);
 }
 
 /**
@@ -1617,6 +1703,7 @@ if (typeof window !== 'undefined') {
     window.previewSmartPruning = previewSmartPruning;
     window.executeSmartPruning = executeSmartPruning;
     window.showLocalStorageUsage = showLocalStorageUsage;
+    window.applyTransactionFilters = applyTransactionFilters;
 }
 
 console.log('✓ Analytics module loaded');
