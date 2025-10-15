@@ -46,7 +46,8 @@
     - **Back to Overview navigation**: All detail views include "← Back to Overview" link for easy navigation
     - **Multi-column player list**: Player Details view uses CSS Grid (4+ columns) to efficiently display player names and IDs
     - **Visual hierarchy**: Clear status headings (16px, bold, colored) with proper spacing and typography throughout
-  - **Implementation**: analytics.js (Transaction Log Management, localStorage Usage view, Transaction History filtering, UI styling updates), tournament.html (layout optimization), bracket-rendering.js (ASSIGN_REFEREE descriptions), clean-match-progression.js (COMPLETE_MATCH descriptions)
+  - **Modal width optimization**: Reduced from 90% to 75% screen width for more comfortable viewing on larger displays
+  - **Implementation**: analytics.js (Transaction Log Management, localStorage Usage view, Transaction History filtering, UI styling updates), tournament.html (layout optimization, modal width), bracket-rendering.js (ASSIGN_REFEREE descriptions), clean-match-progression.js (COMPLETE_MATCH descriptions)
   - **User impact**: Operators can monitor and manage storage usage, prevent hitting browser limits, maintain tournament performance, and quickly debug tournament issues with powerful filtering capabilities. The unified UI provides a professional, consistent experience across all Developer Console views.
 
 ### Fixed: Match Controls Auto-Refresh on Lane Changes

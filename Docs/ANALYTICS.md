@@ -42,7 +42,7 @@ The Developer Console is a hidden diagnostic tool designed for developers to mon
 
 ## Interface Layout
 
-The Developer Console opens as a large modal (90% screen width/height) with a three-pane layout:
+The Developer Console opens as a large modal (75% screen width, 90% height) with a three-pane layout:
 
 ### Left Pane (240px fixed width)
 - **Statistics** - Real-time tournament metrics (clickable for details)
