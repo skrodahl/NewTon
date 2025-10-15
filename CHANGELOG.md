@@ -59,6 +59,15 @@
   - **Implementation**: Modified modal display check in clean-match-progression.js:1412-1414
   - **User impact**: Real-time sorting and resource availability updates during tournament operations
 
+### Enhanced: Player List - Payment Status Indicator & Smart Sorting
+- **"In Tournament" section now shows payment status and prioritizes unpaid players**
+  - **Payment status indicator**: Players who have paid entrance fee show "(Paid)" label in green (13px font, subtle styling)
+  - **Smart sorting**: Unpaid players appear first, paid players at bottom (both groups alphabetically sorted)
+  - **Real-time sync**: Payment status and sort order update immediately when toggled in "Tournament Players" section
+  - **Visual feedback**: Quick at-a-glance confirmation of who still needs to pay
+  - **Implementation**: player-management.js:95-114 (sorting logic), player-management.js:107-114 (payment indicator), player-management.js:448 (sync on toggle)
+  - **User impact**: Tournament organizers can instantly see which players haven't paid during registration/check-in, reducing confusion and missed payments
+
 ### Improved: Referee Suggestions Logic
 - **Complete rewrite of referee suggestions system with timeline-based event tracking**
   - **Timeline approach**: Lists show history of events, not unique players (e.g., "Jack, Ken, Bob, Ken, Nick, Ken")

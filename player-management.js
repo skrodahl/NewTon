@@ -92,6 +92,23 @@ function renderPlayerList() {
         tournamentPlayerNames.includes(name.toLowerCase())
     );
 
+    // Sort "In Tournament" players: unpaid first, then paid (both alphabetically within groups)
+    inTournamentPlayers.sort((a, b) => {
+        const playerA = players.find(p => p.name.toLowerCase() === a.toLowerCase());
+        const playerB = players.find(p => p.name.toLowerCase() === b.toLowerCase());
+
+        const paidA = playerA?.paid || false;
+        const paidB = playerB?.paid || false;
+
+        // If payment status differs, unpaid comes first (false < true)
+        if (paidA !== paidB) {
+            return paidA ? 1 : -1;
+        }
+
+        // If same payment status, sort alphabetically
+        return a.toLowerCase().localeCompare(b.toLowerCase());
+    });
+
     // Helper function to render player cards
     const renderPlayerCard = (playerName, isInTournament) => {
         const itemClass = isInTournament ? 'player-list-item in-tournament' : 'player-list-item';
@@ -104,10 +121,19 @@ function renderPlayerList() {
             ? `<button class="player-list-delete-btn" onclick="event.stopPropagation(); deleteFromPlayerList('${playerName}')" title="Remove from saved players">×</button>`
             : '';
 
+        // Add "(Paid)" indicator for players in tournament who have paid
+        let displayName = playerName;
+        if (isInTournament) {
+            const player = players.find(p => p.name.toLowerCase() === playerName.toLowerCase());
+            if (player && player.paid) {
+                displayName = `${playerName} <span style="font-weight: normal; font-size: 13px; color: #059669;">(Paid)</span>`;
+            }
+        }
+
         return `
             <div class="${itemClass}" ${clickHandler} style="cursor: pointer;">
                 <div class="player-list-item-name">
-                    <span>${playerName}</span>
+                    <span>${displayName}</span>
                 </div>
                 <div class="player-list-item-actions">
                     ${deleteButton}
@@ -417,6 +443,9 @@ function togglePaid(playerId) {
         updatePlayerCount();
         saveTournament();
         updateResultsTable();
+
+        // Re-render Player List to show updated payment status and re-sort
+        renderPlayerList();
 
         // HELP SYSTEM INTEGRATION
         const paidPlayers = players.filter(p => p.paid).length;

@@ -3,26 +3,6 @@
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
 
-### Saved Players: Payment Status in "In Tournament" Section
-**Idea:** Add "(Paid)" indicator next to player names in the "In Tournament" section of Saved Players tab
-
-**Current Behavior:**
-- "In Tournament" section shows players registered in active tournament
-- No indication of payment status
-- Users must remember which players have paid or check elsewhere
-
-**Proposed Behavior:**
-- Display "(Paid)" after player name if `hasPaid: true`
-- Example: "John Smith (Paid)"
-- Only show indicator for paid players (no "(Unpaid)" label needed - absence = unpaid)
-
-**Benefits:**
-- Quick visual confirmation of payment status at a glance
-- Useful during tournament registration/check-in
-- Reduces need to switch between Player List and Tournament tabs
-
-**Status:** Awaiting triage
-
 ## Next
 *Items ready for implementation*
 
