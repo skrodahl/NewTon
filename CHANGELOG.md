@@ -110,6 +110,23 @@
   - **Implementation**: tournament.html:907-918 (UI), bracket-rendering.js:3422-3446 (Match Controls sync), results-config.js:304-308 (Config page sync)
   - **User impact**: Users can toggle auto-open behavior directly from Match Controls without navigating to Config page. Setting is immediately available and stays in sync across both locations.
 
+### Enhanced: Real-Time Clocks for Fullscreen Tournament Operation
+- **Two clocks added for tournament operators running in fullscreen mode**
+  - **Match Controls clock**: Displayed in top-right corner of Match Controls modal title bar
+    - Format: 24-hour HH:MM (e.g., "23:05")
+    - Updates every 10 seconds automatically
+    - Visual styling: 1px gray border (#ccc), 8px vertical padding, 16px horizontal padding, 6px border radius
+    - Normal font weight to distinguish from bold title text
+    - Right-aligned using flexbox layout
+  - **Status Panel clock**: Displayed in tournament watermark header (bottom-right box)
+    - Format: 24-hour HH:MM
+    - Updates every 10 seconds automatically
+    - Right-aligned in Status Panel header next to tournament name
+  - **Rationale**: When running tournaments in Chrome fullscreen, OS clock is hidden and operators frequently ask for time
+  - **Update mechanism**: `setInterval()` functions ensure clocks stay current without manual refresh
+  - **Implementation**: bracket-rendering.js:3059-3079 (Match Controls clock display), bracket-rendering.js:4064-4075 (Match Controls update function), tournament-management.js:1202-1225 (Status Panel clock), tournament-management.js:1269-1281 (Status Panel update function)
+  - **User impact**: Tournament operators can see current time at a glance without exiting fullscreen mode. Match Controls clock is most prominent since operators spend majority of time in that modal.
+
 ### Fixed: Config Page - Removed Auto-Save for Point Values and Match Configuration
 - **Point System and Match Configuration now require explicit Save button click**
   - **Removed auto-save behavior**: Deleted `setupConfigAutoSave()` function and all event listeners
