@@ -3,32 +3,6 @@
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
 
-### Config Page Dynamic Help - Add Developer Console
-**Idea:** Update Config page dynamic help system to include information about Developer Console
-
-**Current Behavior:**
-- Config page has comprehensive dynamic help for all sections (Point System, Match Configuration, User Interface, Branding, Advanced)
-- Developer Console is not mentioned in Config page help
-- Users may not discover Developer Console exists
-
-**Proposed Behavior:**
-- Add Developer Console section to Config page dynamic help
-- Explain what it is, when to use it, and how to access it (click version number in CAD box when Developer Mode is enabled)
-- Brief overview of key features (transaction history, validation, storage monitoring, transaction pruning)
-- Position it logically (perhaps in User Interface or Advanced section, near Developer Mode toggle)
-
-**Benefits:**
-- Improved discoverability of Developer Console
-- Users learn about advanced debugging tools
-- Consistent with Config page's comprehensive help approach
-- Clarifies relationship between Developer Mode and Developer Console
-
-**Implementation:**
-- Update `dynamic-help-system.js` Config page help content
-- Add Developer Console subsection with access instructions and feature overview
-
-**Status:** Awaiting triage
-
 ### Immediate Pruning of START_MATCH and STOP_MATCH on Match Completion
 **Idea:** Automatically remove START_MATCH and STOP_MATCH transactions for a match immediately when COMPLETE_MATCH is saved
 
@@ -125,5 +99,6 @@
 - **Player List Tab Reordering** (v2.4.1): Player List tab now appears first and is selected by default
 - **Favicon** (v2.4.1): Added favicon support using club logo
 - **Sort Player List Alphabetically** (v2.4.1): Player List displays in alphabetical order for easier scanning
+- **Config Page Dynamic Help - Add Developer Console** (v2.6.0-beta): Updated Config page dynamic help to include comprehensive Developer Console information with feature overview, access instructions, and key capabilities including Lane Usage monitoring
 ---
-**Last updated:** October 7, 2025
+**Last updated:** October 15, 2025

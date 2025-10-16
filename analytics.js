@@ -190,9 +190,11 @@ function refreshAnalytics() {
     updateStatisticsPane();
     updateTimestamp();
 
-    // Only refresh Overview automatically, other views stay static until user clicks
+    // Refresh current view (some views update in real-time, others stay static)
     if (currentView === 'overview') {
         showQuickOverview();
+    } else if (currentView === 'lanes') {
+        showLaneUsageDetails();
     }
 
     // Always update console footer
@@ -231,7 +233,9 @@ function updateStatisticsPane() {
     // Update Lane Usage
     const laneEl = document.getElementById('stat-lanes');
     if (laneEl) {
-        const status = laneStats.conflicts > 0 ? '⚠️' : '✅';
+        const hasLiveConflicts = laneStats.conflicts > 0;
+        const hasReadyConflicts = laneStats.readyConflicts > 0;
+        const status = hasLiveConflicts ? '🔴' : (hasReadyConflicts ? '⚠️' : '✅');
         laneEl.innerHTML = `${laneStats.inUse}/${laneStats.max} in use ${status}`;
     }
 
@@ -331,7 +335,7 @@ function getLaneStats() {
     const maxLanes = (config && config.lanes && config.lanes.maxLanes) || 10;
     const excludedLanes = (config && config.lanes && config.lanes.excludedLanes) || [];
     const usedLanes = getUsedLanes ? getUsedLanes() : [];
-    const validation = validateLaneAssignments ? validateLaneAssignments() : { valid: true, conflicts: [] };
+    const validation = validateLaneAssignments ? validateLaneAssignments() : { valid: true, conflicts: [], readyConflicts: [] };
 
     // Calculate effective available lanes (total minus excluded)
     const availableLanes = maxLanes - excludedLanes.length;
@@ -339,7 +343,8 @@ function getLaneStats() {
     return {
         max: availableLanes,
         inUse: usedLanes.length,
-        conflicts: validation.conflicts.length
+        conflicts: validation.conflicts.length,
+        readyConflicts: validation.readyConflicts ? validation.readyConflicts.length : 0
     };
 }
 
@@ -389,15 +394,17 @@ function showQuickOverview() {
     const transactionPercentage = Math.round((stats.total / 500) * 100);
     const matchPercentage = matchStats.total > 0 ? Math.round((matchStats.completed / matchStats.total) * 100) : 0;
 
-    const laneHasConflicts = laneStats.conflicts > 0;
+    const laneHasLiveConflicts = laneStats.conflicts > 0;
+    const laneHasReadyConflicts = laneStats.readyConflicts > 0;
     const refereeValidation = validateRefereeAssignments();
     const refereeHasConflicts = !refereeValidation.valid;
 
-    const allHealthy = !laneHasConflicts && !refereeHasConflicts;
-    const statusColor = allHealthy ? '#166534' : '#dc2626';
-    const bgColor = allHealthy ? '#f0fdf4' : '#fef2f2';
-    const borderColor = allHealthy ? '#166534' : '#dc2626';
-    const statusIcon = allHealthy ? '✓' : '⚠️';
+    const allHealthy = !laneHasLiveConflicts && !laneHasReadyConflicts && !refereeHasConflicts;
+    const hasCriticalIssues = laneHasLiveConflicts || refereeHasConflicts;
+    const statusColor = hasCriticalIssues ? '#dc2626' : (laneHasReadyConflicts ? '#ca8a04' : '#166534');
+    const bgColor = hasCriticalIssues ? '#fef2f2' : (laneHasReadyConflicts ? '#fefce8' : '#f0fdf4');
+    const borderColor = hasCriticalIssues ? '#dc2626' : (laneHasReadyConflicts ? '#ca8a04' : '#166534');
+    const statusIcon = hasCriticalIssues ? '⚠️' : (laneHasReadyConflicts ? '⚠️' : '✓');
 
     const html = `
         <h4 style="margin-top: 0; color: #111827;">Quick Overview</h4>
@@ -417,7 +424,10 @@ function showQuickOverview() {
                     <strong>Active:</strong> ${matchStats.live} live matches, ${matchStats.ready} ready
                 </div>
                 <div style="margin: 8px 0;">
-                    <strong>Lane conflicts:</strong> ${laneHasConflicts ? `⚠️ ${laneStats.conflicts}` : '✅ None'}
+                    <strong>Lane conflicts (LIVE):</strong> ${laneHasLiveConflicts ? `🔴 ${laneStats.conflicts}` : '✅ None'}
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Lane conflicts (READY):</strong> ${laneHasReadyConflicts ? `⚠️ ${laneStats.readyConflicts}` : '✅ None'}
                 </div>
                 <div style="margin: 8px 0;">
                     <strong>Referee conflicts:</strong> ${refereeHasConflicts ? `⚠️ ${refereeValidation.conflicts.length}` : '✅ None'}
@@ -791,6 +801,184 @@ function showPlayerDetails() {
         </div>
 
         <div>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
+        </div>
+    `;
+
+    updateRightPane(html);
+}
+
+/**
+ * Show Lane Usage Details
+ */
+function showLaneUsageDetails() {
+    currentView = 'lanes';
+
+    const laneStats = getLaneStats();
+    const maxLanes = (config && config.lanes && config.lanes.maxLanes) || 10;
+    const excludedLanes = (config && config.lanes && config.lanes.excludedLanes) || [];
+    const validation = validateLaneAssignments ? validateLaneAssignments() : { valid: true, conflicts: [], readyConflicts: [] };
+
+    const hasLiveConflicts = validation.conflicts.length > 0;
+    const hasReadyConflicts = validation.readyConflicts && validation.readyConflicts.length > 0;
+    const hasAnyIssues = hasLiveConflicts || hasReadyConflicts;
+
+    // Color coding: red for live conflicts, yellow for ready conflicts, green for all clear
+    const statusColor = hasLiveConflicts ? '#dc2626' : (hasReadyConflicts ? '#ca8a04' : '#166534');
+    const bgColor = hasLiveConflicts ? '#fef2f2' : (hasReadyConflicts ? '#fefce8' : '#f0fdf4');
+    const borderColor = hasLiveConflicts ? '#dc2626' : (hasReadyConflicts ? '#ca8a04' : '#166534');
+    const statusIcon = hasLiveConflicts ? '🔴' : (hasReadyConflicts ? '⚠️' : '✓');
+
+    // Get live matches with lanes
+    const liveMatchesWithLanes = [];
+    const readyMatchesWithLanes = [];
+
+    if (matches && matches.length > 0) {
+        matches.forEach(match => {
+            const state = getMatchState ? getMatchState(match) : 'unknown';
+            if (match.lane) {
+                const player1Name = match.player1?.name || 'TBD';
+                const player2Name = match.player2?.name || 'TBD';
+                const matchInfo = {
+                    id: match.id,
+                    lane: match.lane,
+                    players: `${player1Name} vs ${player2Name}`
+                };
+
+                if (state === 'live') {
+                    liveMatchesWithLanes.push(matchInfo);
+                } else if (state === 'ready') {
+                    readyMatchesWithLanes.push(matchInfo);
+                }
+            }
+        });
+    }
+
+    // Sort by lane number
+    liveMatchesWithLanes.sort((a, b) => a.lane - b.lane);
+    readyMatchesWithLanes.sort((a, b) => a.lane - b.lane);
+
+    // Build available lanes list (all non-excluded)
+    const availableLanesList = [];
+    for (let i = 1; i <= maxLanes; i++) {
+        if (!excludedLanes.includes(i)) {
+            availableLanesList.push(i);
+        }
+    }
+
+    // Build active lanes list (lanes currently in use)
+    const activeLanes = [...new Set([...liveMatchesWithLanes.map(m => m.lane), ...readyMatchesWithLanes.map(m => m.lane)])].sort((a, b) => a - b);
+    const activeLanesCount = activeLanes.length;
+
+    // Build status message
+    let statusMessage = 'No Issues Detected';
+    if (hasLiveConflicts && hasReadyConflicts) {
+        statusMessage = `${validation.conflicts.length} Live Conflict${validation.conflicts.length > 1 ? 's' : ''} + ${validation.readyConflicts.length} Ready Conflict${validation.readyConflicts.length > 1 ? 's' : ''}`;
+    } else if (hasLiveConflicts) {
+        statusMessage = `${validation.conflicts.length} Live Conflict${validation.conflicts.length > 1 ? 's' : ''} Detected`;
+    } else if (hasReadyConflicts) {
+        statusMessage = `${validation.readyConflicts.length} Ready Match${validation.readyConflicts.length > 1 ? 'es' : ''} with Duplicate Lanes`;
+    }
+
+    let html = `
+        <h4 style="margin-top: 0; color: #111827;">Lane Usage Details</h4>
+
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} ${statusMessage}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+                <div style="margin: 8px 0;">
+                    <strong>Available Lanes:</strong> ${availableLanesList.join(', ')} (${laneStats.max} total)
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Excluded Lanes:</strong> ${excludedLanes.length > 0 ? excludedLanes.join(', ') : 'None'}
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Active Lanes:</strong> ${activeLanes.length > 0 ? activeLanes.join(', ') : 'None'} (${activeLanesCount} in use)
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Live Matches section
+    if (liveMatchesWithLanes.length > 0) {
+        html += `
+        <div style="margin: 20px 0;">
+            <div style="color: #dc2626; font-weight: 600; font-size: 15px; margin-bottom: 10px;">
+                Live Matches Using Lanes:
+            </div>
+            <div style="margin-left: 20px; line-height: 1.8; font-size: 14px; color: #374151;">
+        `;
+        liveMatchesWithLanes.forEach(match => {
+            html += `<div style="margin: 4px 0;">• Lane ${match.lane}: ${match.id} (${match.players})</div>`;
+        });
+        html += `</div></div>`;
+    } else {
+        html += `
+        <div style="margin: 20px 0;">
+            <div style="color: #666; font-style: italic; font-size: 14px;">
+                No lanes currently in use
+            </div>
+        </div>
+        `;
+    }
+
+    // Ready Matches section
+    if (readyMatchesWithLanes.length > 0) {
+        html += `
+        <div style="margin: 20px 0;">
+            <div style="color: #ca8a04; font-weight: 600; font-size: 15px; margin-bottom: 10px;">
+                Ready Matches with Lane Assignments:
+            </div>
+            <div style="margin-left: 20px; line-height: 1.8; font-size: 14px; color: #374151;">
+        `;
+        readyMatchesWithLanes.forEach(match => {
+            html += `<div style="margin: 4px 0;">• Lane ${match.lane}: ${match.id} (Ready - waiting to start)</div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    // Live Conflicts section (critical)
+    if (hasLiveConflicts) {
+        html += `
+        <div style="margin: 20px 0; padding: 15px; background: #fef2f2; border: 1px solid #dc2626;">
+            <div style="color: #dc2626; font-weight: 600; font-size: 15px; margin-bottom: 10px;">
+                🔴 Lane Conflicts Detected (LIVE matches):
+            </div>
+            <div style="margin-left: 20px; line-height: 1.8; font-size: 14px; color: #374151;">
+        `;
+        validation.conflicts.forEach(conflict => {
+            html += `<div style="margin: 4px 0;">• Lane ${conflict.lane}: ${conflict.matches.join(' and ')} (both LIVE)</div>`;
+        });
+        html += `</div></div>`;
+    }
+
+    // Ready Conflicts section (warning)
+    if (hasReadyConflicts) {
+        html += `
+        <div style="margin: 20px 0; padding: 15px; background: #fefce8; border: 1px solid #ca8a04;">
+            <div style="color: #ca8a04; font-weight: 600; font-size: 15px; margin-bottom: 10px;">
+                ⚠️ Duplicate Lane Assignments (READY matches):
+            </div>
+            <div style="margin-left: 20px; line-height: 1.8; font-size: 14px; color: #374151;">
+        `;
+        validation.readyConflicts.forEach(conflict => {
+            html += `<div style="margin: 4px 0;">• Lane ${conflict.lane}: ${conflict.matches.join(', ')} (all READY)</div>`;
+        });
+        html += `
+            </div>
+            <div style="margin-top: 10px; padding: 10px; background: #fffbeb; font-size: 13px; color: #666; font-style: italic;">
+                ℹ️ These matches will conflict when started. Reassign lanes before starting matches.
+            </div>
+        </div>`;
+    }
+
+    html += `
+        <div style="margin-top: 30px;">
             <a href="#" onclick="showQuickOverview(); return false;"
                style="text-decoration: none; color: #065f46; font-size: 14px;">
                 ← Back to Overview
@@ -1532,7 +1720,7 @@ function showTransactionLogManagement() {
                     const typePercentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
                     let note = '';
                     if (type === 'COMPLETE_MATCH') note = ' - Never pruned';
-                    else if (type === 'ASSIGN_LANE' || type === 'ASSIGN_REFEREE') note = ' - Only final needed';
+                    else if (type === 'ASSIGN_LANE' || type === 'ASSIGN_REFEREE') note = ' - Redundant after completion';
                     else if (type === 'START_MATCH' || type === 'STOP_MATCH') note = ' - Redundant after completion';
                     return `<p style="margin: 3px 0;">• ${type}: ${count} (${typePercentage}%)${note}</p>`;
                 }).join('')}
@@ -1881,6 +2069,7 @@ if (typeof window !== 'undefined') {
     window.showTransactionHistory = showTransactionHistory;
     window.showConsoleOutput = showConsoleOutput;
     window.showPlayerDetails = showPlayerDetails;
+    window.showLaneUsageDetails = showLaneUsageDetails;
     window.showMatchProgression = showMatchProgression;
     window.showValidationResults = showValidationResults;
     window.commandReRenderBracket = commandReRenderBracket;

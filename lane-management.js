@@ -79,29 +79,56 @@ function isLaneInUse(laneNumber, excludeMatchId = null) {
  * Validate lane assignments across all matches
  */
 function validateLaneAssignments() {
-    if (!matches || matches.length === 0) return { valid: true, conflicts: [] };
+    if (!matches || matches.length === 0) return { valid: true, conflicts: [], readyConflicts: [] };
 
-    const laneMap = new Map();
-    const conflicts = [];
+    const liveLaneMap = new Map();
+    const readyLaneMap = new Map();
+    const liveConflicts = [];
+    const readyConflicts = [];
 
     matches.forEach(match => {
-        if (match.lane && getMatchState && getMatchState(match) === 'live') {
+        if (match.lane && getMatchState) {
+            const state = getMatchState(match);
             const lane = parseInt(match.lane);
 
-            if (laneMap.has(lane)) {
-                conflicts.push({
-                    lane: lane,
-                    matches: [laneMap.get(lane), match.id]
-                });
-            } else {
-                laneMap.set(lane, match.id);
+            // Check LIVE matches for conflicts (critical)
+            if (state === 'live') {
+                if (liveLaneMap.has(lane)) {
+                    const existingMatches = liveLaneMap.get(lane);
+                    liveConflicts.push({
+                        lane: lane,
+                        matches: [existingMatches, match.id]
+                    });
+                } else {
+                    liveLaneMap.set(lane, match.id);
+                }
+            }
+
+            // Check READY matches for conflicts (warning)
+            if (state === 'ready') {
+                if (readyLaneMap.has(lane)) {
+                    const existingMatches = readyLaneMap.get(lane);
+                    // Check if we already have a conflict entry for this lane
+                    const existingConflict = readyConflicts.find(c => c.lane === lane);
+                    if (existingConflict) {
+                        existingConflict.matches.push(match.id);
+                    } else {
+                        readyConflicts.push({
+                            lane: lane,
+                            matches: [existingMatches, match.id]
+                        });
+                    }
+                } else {
+                    readyLaneMap.set(lane, match.id);
+                }
             }
         }
     });
 
     return {
-        valid: conflicts.length === 0,
-        conflicts: conflicts
+        valid: liveConflicts.length === 0,
+        conflicts: liveConflicts,
+        readyConflicts: readyConflicts
     };
 }
 

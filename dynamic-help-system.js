@@ -323,8 +323,13 @@ const HELP_CONTENT = {
                         <li><strong>Enable Developer Analytics:</strong> Show advanced diagnostics and developer tools
                             <ul>
                                 <li>When enabled, click version number in Tournament page to open Developer Console</li>
-                                <li>Provides real-time statistics, validation checks, and developer commands</li>
-                                <li>Hidden developer tool - no visual changes when enabled</li>
+                                <li><strong>Real-time statistics:</strong> Transaction health, match states, player counts, lane usage, localStorage usage</li>
+                                <li><strong>Lane Usage monitoring:</strong> Track dartboard lane availability, detect conflicts in LIVE matches (critical), and READY matches (preventive warnings)</li>
+                                <li><strong>Validation checks:</strong> Lane conflicts, referee conflicts, match state integrity, transaction limits, player IDs, progression integrity</li>
+                                <li><strong>Developer commands:</strong> Re-render bracket, recalculate rankings, refresh dropdowns, validate everything, manage transaction log</li>
+                                <li><strong>Transaction management:</strong> Smart pruning to free up storage space while preserving tournament data</li>
+                                <li>Hidden developer tool - no visual changes when enabled, only version number becomes clickable</li>
+                                <li>Auto-refreshes every 2 seconds for real-time monitoring during tournaments</li>
                             </ul>
                         </li>
                     </ul>

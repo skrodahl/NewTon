@@ -120,11 +120,22 @@ All statistics are **clickable** - click to show detailed breakdown in right pan
 
 **Indicators:**
 - ✅ Green: No lane conflicts
-- ⚠️ Yellow: Lane conflicts detected
+- ⚠️ Yellow: READY match lane conflicts detected (warning)
+- 🔴 Red: LIVE match lane conflicts detected (critical)
 
-**Click to view:** (Currently shows same info - may be expanded in future)
+**Click to view:** Detailed lane usage breakdown showing:
+- Available lanes (total minus excluded)
+- Excluded lanes list
+- Active lanes currently in use
+- Live matches using lanes (with player names)
+- Ready matches with pre-assigned lanes
+- Lane conflict warnings for both LIVE and READY matches
 
-**Purpose:** Monitor lane assignments and detect conflicts
+**Purpose:** Monitor lane assignments and detect conflicts before they become critical
+
+**Conflict Detection:**
+- **LIVE conflicts** (critical): Multiple live matches assigned to the same lane
+- **READY conflicts** (warning): Multiple ready matches pre-assigned to the same lane (will conflict when started)
 
 **Note:** The denominator reflects available lanes (total lanes minus excluded lanes from Config)
 
@@ -358,14 +369,20 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 ### Quick Overview (Default)
 **Shows:**
 - Color-coded status box showing tournament health
-- Status: "Tournament Health: Good" (green) or "Issues Detected" (red) based on lane/referee conflicts
+- Status: "Tournament Health: Good" (green), warnings (yellow), or "Issues Detected" (red)
 - Matches: X/62 completed (%)
 - Transactions: X/500 (%)
 - Active: X live matches, Y ready
-- Lane conflicts: None/Count ✅/⚠️
+- Lane conflicts (LIVE): None/Count ✅/🔴
+- Lane conflicts (READY): None/Count ✅/⚠️
 - Referee conflicts: None/Count ✅/⚠️
 
-**Design:** Flat design with status-based color coding (green for healthy, red for issues)
+**Color Coding:**
+- Green: All healthy, no issues detected
+- Yellow: Warnings detected (READY match lane conflicts)
+- Red: Critical issues detected (LIVE match lane conflicts or referee conflicts)
+
+**Design:** Flat design with three-level status-based color coding
 
 **Updates:** Every 2 seconds (auto-refresh)
 
@@ -428,6 +445,48 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 **Design:** Flat design with green for paid players, red for unpaid players
 
 **Purpose:** Quick player lookup by name or ID, verify payment status
+
+---
+
+### Lane Usage Details
+**Triggered by:** Clicking "Lane Usage"
+
+**Shows:**
+- Color-coded status box: Green (no conflicts), Yellow (READY conflicts), Red (LIVE conflicts)
+- Status heading: "No Issues Detected", "X Ready Match(es) with Duplicate Lanes", or "X Live Conflict(s) Detected"
+- Available lanes (list of non-excluded lanes with total count)
+- Excluded lanes (list or "None")
+- Active lanes (list of unique lanes in use with count)
+- Live matches using lanes:
+  - Lane number, match ID, and player names for each live match
+  - Example: "Lane 3: FS-2-1 (John Smith vs Mary Jones)"
+- Ready matches with pre-assigned lanes:
+  - Lane number and match ID for each ready match
+  - Example: "Lane 5: BS-1-2 (Ready - waiting to start)"
+- LIVE conflict warnings (critical - red box):
+  - Lists all lanes with multiple live matches
+  - Example: "Lane 3: FS-2-1 and BS-1-5 (both LIVE)"
+- READY conflict warnings (warning - yellow box):
+  - Lists all lanes with multiple ready matches pre-assigned
+  - Example: "Lane 2: FS-3-1, FS-3-2, BS-3-2 (all READY)"
+  - Helpful message: "These matches will conflict when started. Reassign lanes before starting matches."
+- "Back to Overview" navigation link
+
+**Auto-Refresh:** View updates every 2 seconds with real-time lane status
+
+**Design:** Flat design with three-level color coding (green/yellow/red) and semantic section headers
+
+**Purpose:**
+- Monitor dartboard lane availability in real-time
+- Detect lane conflicts before matches start
+- Identify which matches are using which lanes
+- Prevent scheduling conflicts by catching duplicate lane assignments in READY matches
+
+**Use Cases:**
+- **Tournament organizer**: Quickly see which lanes are free for next match
+- **Conflict prevention**: Catch duplicate lane assignments before starting matches
+- **Lane planning**: View all ready matches and their lane assignments to plan tournament flow
+- **Debugging**: Diagnose why matches can't start due to lane conflicts
 
 ---
 
@@ -958,30 +1017,26 @@ The following UX improvements have been identified for future implementation:
 
 ### 1. Statistics Click Behavior Improvements
 
-**Status**: ✅ **Partially Implemented** - Player Count detail view completed in v2.5.0
+**Status**: ✅ **IMPLEMENTED** - All detail views completed
 
-#### Player Count Detail View ✅ IMPLEMENTED
+#### Player Count Detail View ✅ IMPLEMENTED (v2.5.0)
 When clicking "Player Count", shows:
 - Complete alphabetically sorted list of paid players with IDs
 - Complete alphabetically sorted list of unpaid players with IDs
 - Total counts for each category
 
-#### Lane Usage Detail View ⏳ PLANNED
-When clicking "Lane Usage", show:
-```
-Lane Usage Details
-
-Available: 1-10 (10 total lanes)
-Excluded: None
-In Use: 3, 5, 7 (3 lanes)
-
-✅ No conflicts detected
-
-Live Matches Using Lanes:
-- Lane 3: FS-2-1 (John vs Mary)
-- Lane 5: BS-1-2 (Bob vs Sue)
-- Lane 7: FS-3-1 (Tom vs Lisa)
-```
+#### Lane Usage Detail View ✅ IMPLEMENTED (v2.6.0-beta)
+When clicking "Lane Usage", shows:
+- Color-coded status (green/yellow/red)
+- Available lanes (non-excluded lanes list)
+- Excluded lanes list
+- Active lanes in use with count
+- Live matches using lanes (with player names)
+- Ready matches with pre-assigned lanes
+- LIVE conflict warnings (critical - red box)
+- READY conflict warnings (preventive - yellow box)
+- Auto-refresh every 2 seconds
+- "Back to Overview" navigation link
 
 ---
 
@@ -1715,6 +1770,11 @@ If player drops out mid-tournament (not a no-show):
 
 ## Implementation Priority
 
+**Completed in v2.6.0-beta:**
+- ✅ **Lane Usage detail view** (Fix 1 - remaining) - COMPLETE with real-time updates and conflict warnings
+- ✅ **Enhanced lane conflict detection** - Now detects both LIVE and READY match conflicts
+- ✅ **Preventive conflict warnings** - Catches duplicate lane assignments before matches start
+
 **Completed in v2.5.2-beta:**
 - ✅ **Transaction Log Management with Smart Pruning** (Fix 11a) - COMPLETE with preview, execution, and feedback
 - ✅ **localStorage Usage statistic** - New view showing storage breakdown by key
@@ -1732,8 +1792,7 @@ If player drops out mid-tournament (not a no-show):
 - ✅ Lane usage calculation respects excluded lanes
 
 **High Priority** (Most Impact):
-1. Lane Usage detail view (Fix 1 - remaining) - Completes statistics consistency
-2. Enhanced validation status display (Fix 3 - remaining) - Timestamps and overall status
+1. Enhanced validation status display (Fix 3 - remaining) - Timestamps and overall status
 
 **Medium Priority** (Nice to Have):
 4. **Complete Config Reset command** (Fix 11c) - Recovery tool for config corruption
@@ -1752,6 +1811,35 @@ If player drops out mid-tournament (not a no-show):
 ---
 
 ## Version History
+
+**v2.6.0-beta** - Lane Usage Enhancements & Preventive Conflict Detection
+- ✅ **Lane Usage detail view** - Complete implementation
+  - Clickable "Lane Usage" statistic now shows comprehensive lane breakdown
+  - Color-coded status: Green (no conflicts), Yellow (READY conflicts), Red (LIVE conflicts)
+  - Available lanes list (non-excluded lanes with total count)
+  - Excluded lanes list (or "None")
+  - Active lanes list (unique lanes in use with accurate count)
+  - Live matches section: Shows lane, match ID, and player names
+  - Ready matches section: Shows pre-assigned lanes for upcoming matches
+  - Auto-refresh every 2 seconds for real-time lane monitoring
+- ✅ **Enhanced lane conflict detection** - Preventive validation
+  - `validateLaneAssignments()` now checks both LIVE and READY match states
+  - LIVE conflicts (critical): Multiple live matches on same lane - immediate issue
+  - READY conflicts (warning): Multiple ready matches pre-assigned to same lane - future issue
+  - Returns separate conflict arrays for each type
+  - Properly handles 3+ matches on same lane (not just pairs)
+- ✅ **Conflict warning displays**
+  - LIVE conflicts shown in red warning box with critical alert
+  - READY conflicts shown in yellow warning box with preventive message
+  - Helpful guidance: "These matches will conflict when started. Reassign lanes before starting matches."
+  - Both conflict types displayed in Lane Usage detail view
+- ✅ **Updated Quick Overview**
+  - Separate display for LIVE and READY lane conflicts
+  - Three-level color coding: Green (healthy), Yellow (warnings), Red (critical)
+  - Overall status reflects most severe issue detected
+- ✅ **Left pane statistics updates**
+  - Lane Usage indicator shows 🔴 for LIVE conflicts, ⚠️ for READY conflicts, ✅ for all clear
+  - Accurate in-use count based on unique active lanes
 
 **v2.5.2-beta** - Transaction Management & Storage Monitoring
 - ✅ **Transaction Log Management** - Complete smart pruning system
