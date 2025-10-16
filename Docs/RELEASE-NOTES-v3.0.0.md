@@ -11,16 +11,7 @@
 
 This release contains no breaking changes, and is a drop-in replacement for any v2.x deployments.
 
-**NewTon DC Tournament Manager** is still offline first, and further improves our already sky-high resilience for trustworty tournament management.
-
-**Tournament Fairness:**
-The new fair seeding algorithm eliminates the systematic structural bias that existed in v2.x. Previously, sequential BYE placement created a predictable chain reaction where losing in the top half of FS-R2 was consistently easier than losing in the bottom half. The new randomized BYE distribution ensures no correlation between bracket position and opponent difficulty.
-
-**Operational Improvements:**
-Match Controls provides real-time tournament management with two-column layout, lane-based sorting, referee suggestions, and resource conflict prevention. Operators can see both bracket sides simultaneously, prevent problems before they occur, and make faster decisions during active tournaments. The improved undo system now properly clears resource assignments, eliminating orphaned lane/referee blocks. For those who run tournaments in fullscreen, there is even a clock!
-
-**Usability Enhancements:**
-A saved players registry reduces repetition for clubs with regular members. Payment status tracking provides clear visibility of who hasn't paid entrance fees. The completed design system unification creates consistent visual language throughout the application. Hover zoom makes navigating crowded brackets significantly easier.
+**NewTon DC Tournament Manager** continues to be offline first, and further improves the already sky-high resilience for trustworty tournament management.
 
 **What's New:**
 - Match Controls interface for real-time tournament operations
