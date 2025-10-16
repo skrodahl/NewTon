@@ -34,6 +34,36 @@
   - **Implementation**: lane-management.js:81-133 (enhanced validation), analytics.js:807-981 (detail view), analytics.js:233-240 (statistics), analytics.js:397-434 (quick overview), tournament.html:610 (click handler)
   - **User impact**: Tournament organizers can now catch duplicate lane assignments BEFORE matches start, preventing scheduling conflicts and improving tournament flow. Real-time monitoring shows exactly which lanes are free and which matches are using them.
 
+### Enhanced: Developer Console - Match Progression View Redesign
+- **Complete Match Progression view redesign with side-by-side layout and improved readability**
+  - **Two-column side-by-side layout**: Frontside and Backside brackets displayed in equal-width columns for maximum overview capability
+    - CSS Grid layout: `repeat(2, minmax(0, 1fr))` ensures perfectly balanced columns
+    - Columns maintain position even when one side has no matches (stays in lane)
+    - Grand Final displayed below in special green-highlighted section
+    - Single-column mode when filtering by specific side
+  - **Improved match card layout**: Two-line design for optimal readability
+    - **Line 1**: Status (left-aligned, 80px width) and Match ID (center-aligned, 18px font)
+    - **Line 2**: `FROM: sources → TO: destinations` (center-aligned with labeled sections)
+    - Clear "FROM:" and "TO:" labels eliminate ambiguity in progression flow
+    - Bold arrow separator (→) between sections
+  - **Enhanced state visualization**: Each match reference includes state icon
+    - Example: "FROM: FS-1-3 ✅, FS-1-4 ✅" shows source match states at a glance
+    - Example: "TO: ⏸️ FS-3-1, ⏸️ BS-2-6" shows destination match states
+    - Round 1 matches: "FROM: R1" (italicized, gray)
+    - Champion: "TO: 🏆", Eliminated: "TO: ❌"
+  - **Progression Code view**: New debugging view showing raw MATCH_PROGRESSION lookup table
+    - Access via "Progression Code" button in filter bar
+    - Monospace text display of hardcoded progression rules
+    - Traditional format: "Winner → FS-2-1 (player1)" for verifying bracket logic
+    - "← Back to Match Progression" button at top for quick return to rich view
+  - **Collapsible Console Output**: Console footer now collapsible and hidden by default
+    - Click "Console Output" header to toggle visibility (▶ collapsed, ▼ expanded)
+    - Main content area expands to fill available space when console collapsed
+    - Console limited to 400px max-height when expanded
+    - Flexible layout automatically adjusts content area size
+  - **Implementation**: analytics.js:1067-1453 (progression views), analytics.js:2559-2575 (toggle function), tournament.html:675-700 (flexible layout)
+  - **User impact**: Tournament operators get complete bracket overview at a glance with clear progression flow. Developers can verify hardcoded logic with Progression Code view. More screen space available with collapsible console.
+
 ### Enhanced: Developer Console - Reset All Config Command
 - **New "Reset All Config" developer command for recovering from config corruption**
   - **Command location**: Developer Console Commands section (bottom of list, red text for visual distinction)

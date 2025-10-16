@@ -572,7 +572,7 @@ function showMatchStateDetails() {
 
         <div>
             <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
+               style="text-decoration: none; color: #065f46; font-size: 14;">
                 ← Back to Overview
             </a>
         </div>
@@ -1064,11 +1064,11 @@ function showLocalStorageUsage() {
 /**
  * Show Match Progression Rules
  */
-function showMatchProgression() {
+function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {
     currentView = 'progression';
 
     if (!tournament || !tournament.bracketSize) {
-        updateRightPane(`<h4>Match Progression Rules</h4><p style="color: #666;">No tournament loaded</p>`);
+        updateRightPane(`<h4>Match Progression</h4><p style="color: #666;">No tournament loaded</p>`);
         return;
     }
 
@@ -1076,34 +1076,383 @@ function showMatchProgression() {
     const progression = MATCH_PROGRESSION ? MATCH_PROGRESSION[bracketSize] : null;
 
     if (!progression) {
-        updateRightPane(`<h4>Match Progression Rules</h4><p style="color: #666;">No progression rules found for ${bracketSize}-player bracket</p>`);
+        updateRightPane(`<h4>Match Progression</h4><p style="color: #666;">No progression rules found for ${bracketSize}-player bracket</p>`);
+        return;
+    }
+
+    // Build reverse lookup: which matches lead INTO each match
+    const leadsFrom = {};
+    for (const [sourceMatchId, rule] of Object.entries(progression)) {
+        // Winner destination
+        if (rule.winner) {
+            const [destMatchId, destSlot] = rule.winner;
+            if (!leadsFrom[destMatchId]) leadsFrom[destMatchId] = { winners: [], losers: [] };
+            leadsFrom[destMatchId].winners.push({ matchId: sourceMatchId, slot: destSlot });
+        }
+        // Loser destination
+        if (rule.loser) {
+            const [destMatchId, destSlot] = rule.loser;
+            if (!leadsFrom[destMatchId]) leadsFrom[destMatchId] = { winners: [], losers: [] };
+            leadsFrom[destMatchId].losers.push({ matchId: sourceMatchId, slot: destSlot });
+        }
+    }
+
+    // Get match states
+    const matchStates = {};
+    if (matches && matches.length > 0) {
+        matches.forEach(match => {
+            matchStates[match.id] = getMatchState ? getMatchState(match) : 'unknown';
+        });
+    }
+
+    // Helper: Get match state display info
+    const getStateInfo = (matchId) => {
+        const state = matchStates[matchId] || 'pending';
+        switch (state) {
+            case 'live':
+                return { icon: '🔴', label: 'LIVE', color: '#dc2626', bg: '#fef2f2', border: '#dc2626' };
+            case 'ready':
+                return { icon: '⚠️', label: 'READY', color: '#ca8a04', bg: '#fefce8', border: '#ca8a04' };
+            case 'completed':
+                return { icon: '✅', label: 'DONE', color: '#166534', bg: '#f0fdf4', border: '#166534' };
+            default:
+                return { icon: '⏸️', label: 'PENDING', color: '#6b7280', bg: '#ffffff', border: '#e5e7eb' };
+        }
+    };
+
+    // Helper: Check if match passes filters
+    const passesFilters = (matchId) => {
+        const state = matchStates[matchId] || 'pending';
+
+        // Status filter
+        let passesStatus = false;
+        switch (statusFilter) {
+            case 'all':
+                passesStatus = true;
+                break;
+            case 'live-ready':
+                passesStatus = state === 'live' || state === 'ready';
+                break;
+            case 'live':
+                passesStatus = state === 'live';
+                break;
+            case 'ready':
+                passesStatus = state === 'ready';
+                break;
+            case 'pending':
+                passesStatus = state === 'pending';
+                break;
+            case 'completed':
+                passesStatus = state === 'completed';
+                break;
+            default:
+                passesStatus = true;
+        }
+
+        // Side filter
+        let passesSide = false;
+        const isFrontside = matchId.startsWith('FS-') || matchId === 'GRAND-FINAL';
+        const isBackside = matchId.startsWith('BS-');
+
+        switch (sideFilter) {
+            case 'all':
+                passesSide = true;
+                break;
+            case 'frontside':
+                passesSide = isFrontside;
+                break;
+            case 'backside':
+                passesSide = isBackside;
+                break;
+            default:
+                passesSide = true;
+        }
+
+        return passesStatus && passesSide;
+    };
+
+    // Build HTML
+    let html = `
+        <h4 style="margin-top: 0; color: #111827;">Match Progression (${bracketSize}-player bracket)</h4>
+
+        <!-- Filter Bar -->
+        <div style="margin: 20px 0; padding: 15px; background: #f9fafb; border: 1px solid #e5e7eb;">
+            <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
+                <div>
+                    <label style="font-size: 13px; color: #666; margin-right: 5px;">Status:</label>
+                    <select id="progressionStatusFilter" onchange="applyProgressionFilters()"
+                            style="padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+                        <option value="live-ready" ${statusFilter === 'live-ready' ? 'selected' : ''}>Live + Ready (default)</option>
+                        <option value="all" ${statusFilter === 'all' ? 'selected' : ''}>All Matches</option>
+                        <option value="live" ${statusFilter === 'live' ? 'selected' : ''}>Live Only</option>
+                        <option value="ready" ${statusFilter === 'ready' ? 'selected' : ''}>Ready Only</option>
+                        <option value="pending" ${statusFilter === 'pending' ? 'selected' : ''}>Pending Only</option>
+                        <option value="completed" ${statusFilter === 'completed' ? 'selected' : ''}>Completed Only</option>
+                    </select>
+                </div>
+                <div>
+                    <label style="font-size: 13px; color: #666; margin-right: 5px;">Side:</label>
+                    <select id="progressionSideFilter" onchange="applyProgressionFilters()"
+                            style="padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+                        <option value="all" ${sideFilter === 'all' ? 'selected' : ''}>All Sides</option>
+                        <option value="frontside" ${sideFilter === 'frontside' ? 'selected' : ''}>Frontside Only</option>
+                        <option value="backside" ${sideFilter === 'backside' ? 'selected' : ''}>Backside Only</option>
+                    </select>
+                </div>
+                <button onclick="showMatchProgression('all', 'all')"
+                        style="padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 4px; background: white; cursor: pointer; font-size: 13px;">
+                    Show All Matches
+                </button>
+                <button onclick="showProgressionCode()"
+                        style="padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 4px; background: white; cursor: pointer; font-size: 13px;">
+                    Progression Code
+                </button>
+            </div>
+        </div>
+
+        <div style="font-size: 14px; line-height: 1.8;">
+    `;
+
+    // Separate frontside and backside matches
+    const frontsideMatches = [];
+    const backsideMatches = [];
+    const grandFinalMatch = [];
+
+    for (const [matchId, rule] of Object.entries(progression)) {
+        if (!passesFilters(matchId)) continue;
+
+        if (matchId === 'GRAND-FINAL') {
+            grandFinalMatch.push({ matchId, rule });
+        } else if (matchId.startsWith('FS-')) {
+            frontsideMatches.push({ matchId, rule });
+        } else if (matchId.startsWith('BS-')) {
+            backsideMatches.push({ matchId, rule });
+        }
+    }
+
+    const displayedCount = frontsideMatches.length + backsideMatches.length + grandFinalMatch.length;
+
+    // Helper function to render a match row
+    const renderMatchRow = (matchId, rule) => {
+        const stateInfo = getStateInfo(matchId);
+        const sources = leadsFrom[matchId];
+
+        // Build sources list
+        let sourcesHtml = '';
+        if (sources && (sources.winners.length > 0 || sources.losers.length > 0)) {
+            const allSources = [];
+            if (sources.winners.length > 0) {
+                sources.winners.forEach(source => {
+                    const srcState = getStateInfo(source.matchId);
+                    allSources.push(`${source.matchId} ${srcState.icon}`);
+                });
+            }
+            if (sources.losers.length > 0) {
+                sources.losers.forEach(source => {
+                    const srcState = getStateInfo(source.matchId);
+                    allSources.push(`${source.matchId} ${srcState.icon}`);
+                });
+            }
+            sourcesHtml = `<span style="color: #666; font-size: 12px;">${allSources.join(', ')}</span>`;
+        } else {
+            sourcesHtml = `<span style="color: #9ca3af; font-style: italic; font-size: 12px;">R1</span>`;
+        }
+
+        // Build destinations list
+        const destinations = [];
+        if (rule.winner) {
+            const [destMatchId] = rule.winner;
+            const destState = getStateInfo(destMatchId);
+            destinations.push(`${destState.icon} ${destMatchId}`);
+        } else {
+            destinations.push(`<span style="color: #16a34a; font-weight: 600;">🏆</span>`);
+        }
+        if (rule.loser) {
+            const [destMatchId] = rule.loser;
+            const destState = getStateInfo(destMatchId);
+            destinations.push(`${destState.icon} ${destMatchId}`);
+        } else if (matchId !== 'GRAND-FINAL') {
+            destinations.push(`<span style="color: #dc2626;">❌</span>`);
+        }
+        const destinationsHtml = `<span style="color: #666; font-size: 12px;">${destinations.join(', ')}</span>`;
+
+        return `
+            <div style="padding: 10px 12px; margin: 2px 0; border-left: 4px solid ${stateInfo.border}; background: #ffffff; border: 1px solid #e5e7eb; border-left: 4px solid ${stateInfo.border};">
+                <div style="display: flex; align-items: center; margin-bottom: 6px;">
+                    <div style="flex: 0 0 auto;">
+                        <span style="color: ${stateInfo.color}; font-weight: 600; font-size: 11px;">${stateInfo.icon} ${stateInfo.label}</span>
+                    </div>
+                    <div style="flex: 1; text-align: center;">
+                        <span style="font-weight: 600; color: #111827; font-size: 18px;">${matchId}</span>
+                    </div>
+                </div>
+                <div style="display: flex; align-items: center; justify-content: center; font-size: 12px; color: #666;">
+                    <span style="margin-right: 8px;">FROM: ${sourcesHtml}</span>
+                    <span style="margin: 0 8px; font-weight: 600; color: #111827;">→</span>
+                    <span style="margin-left: 8px;">TO: ${destinationsHtml}</span>
+                </div>
+            </div>
+        `;
+    };
+
+    // Build two-column layout
+    if (sideFilter === 'all') {
+        // Always use side-by-side layout when showing all sides
+        html += `
+            <div style="display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; margin-bottom: 20px;">
+                <!-- Frontside Column -->
+                <div>
+                    <h5 style="margin: 0 0 10px 0; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; font-weight: 600; color: #374151;">
+                        FRONTSIDE BRACKET (${frontsideMatches.length} matches)
+                    </h5>
+        `;
+        frontsideMatches.forEach(({ matchId, rule }) => {
+            html += renderMatchRow(matchId, rule);
+        });
+        html += `
+                </div>
+                <!-- Backside Column -->
+                <div>
+                    <h5 style="margin: 0 0 10px 0; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; font-weight: 600; color: #374151;">
+                        BACKSIDE BRACKET (${backsideMatches.length} matches)
+                    </h5>
+        `;
+        backsideMatches.forEach(({ matchId, rule }) => {
+            html += renderMatchRow(matchId, rule);
+        });
+        html += `
+                </div>
+            </div>
+        `;
+
+        // Grand Final below (if shown)
+        if (grandFinalMatch.length > 0) {
+            html += `
+                <div style="margin-top: 10px;">
+                    <h5 style="margin: 0 0 10px 0; padding: 10px; background: #f0fdf4; border: 1px solid #166534; font-weight: 600; color: #166534;">
+                        GRAND FINAL
+                    </h5>
+            `;
+            html += renderMatchRow(grandFinalMatch[0].matchId, grandFinalMatch[0].rule);
+            html += `</div>`;
+        }
+    } else {
+        // Single column layout (when filtered by side)
+        html += `<div>`;
+
+        if (frontsideMatches.length > 0) {
+            html += `<h5 style="margin: 0 0 10px 0; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; font-weight: 600; color: #374151;">FRONTSIDE BRACKET (${frontsideMatches.length})</h5>`;
+            frontsideMatches.forEach(({ matchId, rule }) => {
+                html += renderMatchRow(matchId, rule);
+            });
+        }
+
+        if (backsideMatches.length > 0) {
+            html += `<h5 style="margin: 10px 0 10px 0; padding: 10px; background: #f9fafb; border: 1px solid #e5e7eb; font-weight: 600; color: #374151;">BACKSIDE BRACKET (${backsideMatches.length})</h5>`;
+            backsideMatches.forEach(({ matchId, rule }) => {
+                html += renderMatchRow(matchId, rule);
+            });
+        }
+
+        if (grandFinalMatch.length > 0) {
+            html += `<h5 style="margin: 10px 0 10px 0; padding: 10px; background: #f0fdf4; border: 1px solid #166534; font-weight: 600; color: #166534;">GRAND FINAL</h5>`;
+            html += renderMatchRow(grandFinalMatch[0].matchId, grandFinalMatch[0].rule);
+        }
+
+        html += `</div>`;
+    }
+
+    if (displayedCount === 0) {
+        html += `<p style="color: #9ca3af; font-style: italic; text-align: center; margin: 40px 0;">No matches match the selected filters</p>`;
+    } else {
+        html += `<p style="color: #9ca3af; font-size: 13px; margin-top: 20px;">Showing ${displayedCount} of ${Object.keys(progression).length} matches</p>`;
+    }
+    html += `
+        <div style="margin-top: 30px;">
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
+        </div>
+    `;
+
+    updateRightPane(html);
+}
+
+/**
+ * Apply progression filters (called from filter dropdowns)
+ */
+function applyProgressionFilters() {
+    const statusFilter = document.getElementById('progressionStatusFilter')?.value || 'live-ready';
+    const sideFilter = document.getElementById('progressionSideFilter')?.value || 'all';
+    showMatchProgression(statusFilter, sideFilter);
+}
+
+/**
+ * Show raw MATCH_PROGRESSION code (original text-based view for debugging)
+ */
+function showProgressionCode() {
+    currentView = 'progression-code';
+
+    if (!tournament || !tournament.bracketSize) {
+        updateRightPane(`<h4>Progression Code</h4><p style="color: #666;">No tournament loaded</p>`);
+        return;
+    }
+
+    const bracketSize = tournament.bracketSize;
+    const progression = MATCH_PROGRESSION ? MATCH_PROGRESSION[bracketSize] : null;
+
+    if (!progression) {
+        updateRightPane(`<h4>Progression Code</h4><p style="color: #666;">No progression rules found for ${bracketSize}-player bracket</p>`);
         return;
     }
 
     let html = `
-        <h4>Match Progression Rules (${bracketSize}-player bracket)</h4>
-        <div style="font-family: monospace; font-size: 13px; line-height: 1.8;">
-    `;
+        <h4 style="margin-top: 0; color: #111827;">Progression Code (${bracketSize}-player bracket)</h4>
+        <p style="color: #666; font-size: 13px; margin-bottom: 10px;">Raw MATCH_PROGRESSION lookup table for debugging</p>
 
+        <button onclick="showMatchProgression('all', 'all')"
+                style="padding: 6px 12px; margin-bottom: 20px; border: 1px solid #d1d5db; border-radius: 4px; background: white; cursor: pointer; font-size: 13px;">
+            ← Back to Match Progression
+        </button>
+
+        <div style="background: #f9fafb; padding: 15px; border: 1px solid #e5e7eb; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-x: auto;">`;
+
+    // Display progression rules in original text format
     for (const [matchId, rule] of Object.entries(progression)) {
-        html += `<p><strong>${matchId}:</strong></p>`;
+        html += `<strong>${matchId}:</strong>\n`;
 
         if (rule.winner) {
-            html += `<p style="margin-left: 20px;">Winner → ${rule.winner[0]} (${rule.winner[1]})</p>`;
+            const [destMatch, destSlot] = rule.winner;
+            html += `  Winner → ${destMatch} (${destSlot})\n`;
         } else {
-            html += `<p style="margin-left: 20px;">Winner → Tournament Champion</p>`;
+            html += `  Winner → <span style="color: #16a34a; font-weight: 600;">Tournament Champion 🏆</span>\n`;
         }
 
         if (rule.loser) {
-            html += `<p style="margin-left: 20px;">Loser → ${rule.loser[0]} (${rule.loser[1]})</p>`;
+            const [destMatch, destSlot] = rule.loser;
+            html += `  Loser → ${destMatch} (${destSlot})\n`;
         } else {
-            html += `<p style="margin-left: 20px;">Loser → Eliminated</p>`;
+            html += `  Loser → <span style="color: #dc2626;">Eliminated</span>\n`;
         }
 
-        html += `<br>`;
+        html += `\n`;
     }
 
     html += `</div>`;
+
+    html += `
+        <div style="margin-top: 30px;">
+            <a href="#" onclick="showMatchProgression('all', 'all'); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px; margin-right: 20px;">
+                ← Back to Match Progression
+            </a>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
+        </div>
+    `;
 
     updateRightPane(html);
 }
@@ -2208,6 +2557,24 @@ function copyConsoleOutput() {
 }
 
 /**
+ * Toggle Console Output visibility
+ */
+function toggleConsoleOutput() {
+    const content = document.getElementById('consoleOutputContent');
+    const icon = document.getElementById('consoleToggleIcon');
+
+    if (content && icon) {
+        if (content.style.display === 'none') {
+            content.style.display = 'block';
+            icon.textContent = '▼';
+        } else {
+            content.style.display = 'none';
+            icon.textContent = '▶';
+        }
+    }
+}
+
+/**
  * Debug Analytics (callable from browser console)
  */
 function debugAnalytics() {
@@ -2239,6 +2606,8 @@ if (typeof window !== 'undefined') {
     window.showPlayerDetails = showPlayerDetails;
     window.showLaneUsageDetails = showLaneUsageDetails;
     window.showMatchProgression = showMatchProgression;
+    window.applyProgressionFilters = applyProgressionFilters;
+    window.showProgressionCode = showProgressionCode;
     window.showValidationResults = showValidationResults;
     window.commandReRenderBracket = commandReRenderBracket;
     window.commandRecalculateRankings = commandRecalculateRankings;
@@ -2248,6 +2617,7 @@ if (typeof window !== 'undefined') {
     window.executeResetAllConfig = executeResetAllConfig;
     window.clearConsoleOutput = clearConsoleOutput;
     window.copyConsoleOutput = copyConsoleOutput;
+    window.toggleConsoleOutput = toggleConsoleOutput;
     window.showTransactionLogManagement = showTransactionLogManagement;
     window.previewSmartPruning = previewSmartPruning;
     window.executeSmartPruning = executeSmartPruning;

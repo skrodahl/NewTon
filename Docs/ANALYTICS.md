@@ -299,20 +299,130 @@ All commands are **navigation links** - click to execute or show results.
 ---
 
 ### View Match Progression
-**Function:** Displays MATCH_PROGRESSION lookup tables
+**Function:** Displays bi-directional match progression with filtering and side-by-side bracket layout
 
-**Purpose:** Reference match advancement rules for current bracket size
+**Purpose:** Understand tournament bracket flow, trace match relationships, and focus on active matches
 
-**Use case:** Verify progression logic, understand winner/loser destinations
+**Use cases:**
+- **Tournament operators**: See only LIVE and READY matches during active tournament (default view)
+- **Developers**: Verify progression logic, debug bracket issues, understand complete tournament structure
+- **Planning**: Trace paths from Round 1 to Grand Final, understand which matches feed into later rounds
 
-**Display:** All matches with winner/loser destination rules
+**✅ Phase 1 Features (Implemented):**
 
-**Format:**
-```
-FS-1-1:
-  Winner → FS-2-1 (player1)
-  Loser → BS-1-1 (player1)
-```
+**Two-Column Side-by-Side Layout:**
+- **Frontside and Backside brackets displayed side-by-side** for maximum overview capability
+- **CSS Grid layout**: Two equal-width columns (`repeat(2, minmax(0, 1fr))`) with 20px gap for perfect balance
+- **Section headers**: "FRONTSIDE BRACKET" (dark gray) and "BACKSIDE BRACKET" (dark gray)
+- **Grand Final section**: Displayed below side-by-side columns with green header "GRAND FINAL"
+- **Single-column mode**: When filtering by side (Frontside Only/Backside Only), switches to single column layout
+- **Always side-by-side**: Columns maintain position even when one side has no matches (stays in lane)
+- **Compact cards**: Two-line layout per match for optimal readability
+
+**Bi-directional Display:**
+- **Two-line card layout**:
+  - **Line 1**: Status (left-aligned) and Match ID (center-aligned, 18px font)
+  - **Line 2**: `FROM: sources → TO: destinations` (center-aligned with labels)
+- **Leads FROM (sources)**: Shows which matches feed INTO this match
+  - Example: "FROM: FS-1-3 ✅, FS-1-4 ✅" with state icons
+  - Round 1 matches show: "FROM: R1" (italicized, gray)
+- **Leads TO (destinations)**: Shows where this match's winner and loser advance
+  - Example: "TO: ⏸️ FS-3-1, ⏸️ BS-2-6" with state icons
+  - Champion: "TO: 🏆" for Grand Final winner
+  - Eliminated: "TO: ❌" for terminal losers
+- **Bold arrow separator**: `→` between FROM and TO sections
+- **State icons**: Each match reference includes its current state icon for quick status recognition
+
+**Match State Visualization:**
+- 🔴 **LIVE** (red): Matches currently in progress
+- ⚠️ **READY** (yellow/amber): Matches ready to start
+- ✅ **DONE** (green): Completed matches
+- ⏸️ **PENDING** (gray): Waiting for incoming matches to complete
+- **Color-coded left borders**: 4px left border matching match state
+- **State labels**: Icons + abbreviated text (e.g., "🔴 LIVE", "⚠️ READY", "✅ DONE")
+
+**Filtering System:**
+- **Status Filter (dropdown):**
+  - **Live + Ready (default)**: Shows only active and upcoming matches - most useful for tournament operators
+  - All Matches: Complete bracket view
+  - Live Only: Currently in-progress matches
+  - Ready Only: Matches ready to start
+  - Pending Only: Waiting matches
+  - Completed Only: Finished matches
+- **Bracket Side Filter (dropdown):**
+  - **All Sides (default)**: Show frontside and backside side-by-side
+  - Frontside Only: FS- matches and GRAND-FINAL (single column)
+  - Backside Only: BS- matches (single column)
+- **"Show All Matches" button**: Quick reset to show complete bracket
+- **Filter logic**: Filters work together with AND logic
+- **Results counter**: "Showing X of Y matches" at bottom
+
+**Display Features:**
+- **Compact match cards**: Two-line layout with clear visual hierarchy
+- **Labeled sections**: "FROM:" and "TO:" labels make progression flow immediately obvious
+- **Visual hierarchy**: Section headers with background colors distinguish brackets
+- **Grand Final**: Special green-highlighted section below columns
+- **Progression Code button**: Access raw MATCH_PROGRESSION lookup table for debugging
+- Consistent with Developer Console design (flat, sharp corners)
+- "Back to Overview" navigation link
+
+**Implementation:**
+- Function: `showMatchProgression(statusFilter, sideFilter)` in analytics.js:1067-1367
+- Reverse lookup builder: Parses `MATCH_PROGRESSION` to create "leads from" relationships
+- State detection: Uses `getMatchState()` to determine match status
+- Filter helpers: `passesFilters()` applies AND logic to status and side filters
+- Layout logic: Separates matches into frontsideMatches, backsideMatches, grandFinalMatch arrays
+- Render helper: `renderMatchRow()` generates compact HTML for each match card
+
+**Default Behavior:**
+- Opens with "Live + Ready" filter (most useful for operators)
+- Shows all bracket sides in side-by-side layout
+- Auto-updates when matches change state (via Developer Console refresh every 2 seconds)
+
+**Progression Code View:**
+- **Access**: Click "Progression Code" button in filter bar
+- **Purpose**: Developer debugging view showing raw MATCH_PROGRESSION lookup table
+- **Display**: Monospace font in gray box with traditional text format
+- **Format**:
+  ```
+  FS-1-1:
+    Winner → FS-2-1 (player1)
+    Loser → BS-1-1 (player1)
+  ```
+- **Navigation**: "← Back to Match Progression" button at top returns to rich view
+- **Use case**: Verify hardcoded progression rules, debug bracket logic issues
+
+**Information Density:**
+- Two-line card layout balances density with readability
+- Side-by-side layout provides complete bracket overview at a glance
+- "FROM:" and "TO:" labels eliminate ambiguity in progression flow
+
+---
+
+**⏳ Phase 2 Features (Planned for Future):**
+
+**Round Filtering:**
+- Filter by specific rounds (R1, R2, R3, Semifinals, Finals)
+- Useful for large brackets (16, 32 players)
+
+**Specific Match Search:**
+- Search box to jump to specific match ID (e.g., "FS-2-1")
+- Quick lookup for debugging
+
+**Player Name Display:**
+- Show current occupants: "FS-2-1: John Smith vs Mary Jones"
+- Show completed match scores: "FS-2-1: John (2-1) vs Mary"
+- Player names in leads FROM/TO sections
+
+**Path Tracing:**
+- "Show my path" feature: Trace from one match up to Grand Final
+- Visual path highlighting
+- Useful for understanding player journey through bracket
+
+**Compact vs. Detailed View Toggle:**
+- Compact: Just match IDs and states (current view)
+- Detailed: Adds player names, scores, timestamps
+- User preference saved
 
 ---
 
@@ -648,9 +758,19 @@ playerList: 0.42 KB (0%)
 
 ## Console Output Footer
 
-### Persistent Console Log
+### Collapsible Console Log
 
-The Console Output footer is always visible at the bottom 40% of the right pane, providing real-time visibility into console activity.
+The Console Output footer is collapsible and **hidden by default**, allowing maximum space for main content.
+
+**Collapse/Expand:**
+- Click the "Console Output" header to toggle visibility
+- **Collapsed (default)**: Shows only header bar with triangle icon (▶), main content area expands to fill available space
+- **Expanded**: Shows up to 400px of console logs with triangle icon (▼), main content area shrinks to share space
+
+**Benefits:**
+- More screen space for Match Progression, Transaction History, and other views
+- Console available when needed but not intrusive
+- Main content area automatically adjusts size (flexible layout)
 
 ### Utility Links
 
@@ -659,7 +779,7 @@ The Console Output title bar includes two utility links that are always visible:
 - **Copy Log** - Copies all console output to clipboard for sharing diagnostic information
 - **Clear Log** - Clears the console buffer without changing the main content view
 
-Both links use the same styling as command links in the left pane for visual consistency.
+Both links use the same styling as command links in the left pane for visual consistency. Clicking these links does not trigger collapse/expand.
 
 ### How It Works
 
