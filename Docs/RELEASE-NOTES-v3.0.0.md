@@ -9,7 +9,7 @@
 
 Version 3.0.0 is a major release focused on mature features, improving tournament fairness, operational efficiency, and intentional workflows.
 
-This release contains no breaking changes, and is a drop-in replacement for any v2 deployments.
+This release contains no breaking changes, and is a drop-in replacement for any v2.x deployments.
 
 **Tournament Fairness:**
 The new fair seeding algorithm eliminates the systematic structural bias that existed in v2.x. Previously, sequential BYE placement created a predictable chain reaction where losing in the top half of FS-R2 was consistently easier than losing in the bottom half. The new randomized BYE distribution ensures no correlation between bracket position and opponent difficulty.
