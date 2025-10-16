@@ -185,6 +185,15 @@
   - **All UI components now unified under flat design button system**
   - **User impact**: Cleaner, more maintainable codebase with consistent button UX across entire application
 
+### Project Structure: Code Organization
+- **Reorganized JavaScript and CSS files into dedicated folders for cleaner project structure**
+  - Created `js/` folder and moved all 11 JavaScript files
+  - Created `css/` folder and moved styles.css
+  - Updated tournament.html with new file paths
+  - Updated CLAUDE.md and Docs/ANALYTICS.md documentation
+  - **Result**: tournament.html now clearly visible as main entry point in root folder
+  - **User impact**: More intuitive project structure, easier navigation for developers and contributors
+
 ---
 
 ## **v2.5.1** - Match Controls and UI Improvements

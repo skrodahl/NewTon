@@ -754,18 +754,18 @@ Relies on existing global functions:
 - Global arrays: `matches`, `players`, `tournament`, `config`
 
 ### Module Loading
-analytics.js is loaded last in tournament.html after all other modules:
+All JavaScript files are loaded from the `js/` folder. analytics.js is loaded last in tournament.html after all other modules:
 ```html
-<script src="main.js"></script>
-<script src="lane-management.js"></script>
-<script src="tournament-management.js"></script>
-<script src="player-management.js"></script>
-<script src="clean-match-progression.js"></script>
-<script src="bracket-lines.js"></script>
-<script src="bracket-rendering.js"></script>
-<script src="results-config.js"></script>
-<script src="dynamic-help-system.js"></script>
-<script src="analytics.js"></script>  <!-- LAST -->
+<script src="js/main.js"></script>
+<script src="js/lane-management.js"></script>
+<script src="js/tournament-management.js"></script>
+<script src="js/player-management.js"></script>
+<script src="js/clean-match-progression.js"></script>
+<script src="js/bracket-lines.js"></script>
+<script src="js/bracket-rendering.js"></script>
+<script src="js/results-config.js"></script>
+<script src="js/dynamic-help-system.js"></script>
+<script src="js/analytics.js"></script>  <!-- LAST -->
 ```
 
 ---
