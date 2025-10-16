@@ -39,7 +39,7 @@ Real-time tournament operations interface that provides centralized management o
 - Timeline-based referee suggestions (Recent Winners, Losers, Assignments)
 - Tournament completion celebration with achievements and export
 - Auto-refresh when resources are assigned or changed
-- 24H clock in the upper right corner
+- 24H clock for those who run tournaments in full-screen
 
 **Why It Matters:**
 Operators can see both bracket sides simultaneously, prevent resource conflicts before matches start, and make faster decisions during active tournaments.
