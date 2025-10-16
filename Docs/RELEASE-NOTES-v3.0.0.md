@@ -7,7 +7,7 @@
 
 ## Overview
 
-Version 3.0.0 is a major release focused on mature features, improving tournament fairness, operational efficiency, and intentional workflows.
+**NewTon DC Tournament Manager Version 3.0.0** marks our most ambitious release yet. It brings powerful new tools and a full overhaul of many core components. Building on version 2’s groundwork, this update refines every aspect of the system to enhance fairness, streamline operations, and deliver smarter, more intentional workflows.
 
 This release contains no breaking changes, and is a drop-in replacement for any v2.x deployments.
 
