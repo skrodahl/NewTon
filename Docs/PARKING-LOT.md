@@ -6,6 +6,11 @@
 ## Next
 *Items ready for implementation*
 
+### URGENT: Setup Page Scrollable Areas Broken
+**Issue:** Scrollable areas on the Setup page are not functioning properly
+
+**Status:** Needs investigation and fix
+
 ## Later
 *Not urgent but worth tracking*
 
