@@ -20,8 +20,9 @@ This release contains no breaking changes, and is a drop-in replacement for any 
 - Improved undo system with proper resource clearing
 - Read-only protection of completed tournaments
 - Saved players registry with payment status tracking
-- Complete flat design system unification
 - Server-side tournament sharing (optional, when deployed to PHP server)
+- Complete flat design system unification
+
 
 ---
 
