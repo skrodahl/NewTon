@@ -6,11 +6,6 @@
 ## Next
 *Items ready for implementation*
 
-### URGENT: Setup Page Scrollable Areas Broken
-**Issue:** Scrollable areas on the Setup page are not functioning properly
-
-**Status:** Needs investigation and fix
-
 ## Later
 *Not urgent but worth tracking*
 
@@ -69,5 +64,6 @@
 - **Favicon** (v2.4.1): Added favicon support using club logo
 - **Sort Player List Alphabetically** (v2.4.1): Player List displays in alphabetical order for easier scanning
 - **Config Page Dynamic Help - Add Developer Console** (v2.6.0-beta): Updated Config page dynamic help to include comprehensive Developer Console information with feature overview, access instructions, and key capabilities including Lane Usage monitoring
+- **Setup Page Scrollable Areas Broken** (v2.6.0-beta): Fixed missing `overflow-y: auto` on `.scrollable-column-content` - both "Recent Tournaments" and "Match Results" boxes now scroll properly
 ---
 **Last updated:** October 16, 2025

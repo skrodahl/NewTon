@@ -34,6 +34,57 @@
   - **Implementation**: lane-management.js:81-133 (enhanced validation), analytics.js:807-981 (detail view), analytics.js:233-240 (statistics), analytics.js:397-434 (quick overview), tournament.html:610 (click handler)
   - **User impact**: Tournament organizers can now catch duplicate lane assignments BEFORE matches start, preventing scheduling conflicts and improving tournament flow. Real-time monitoring shows exactly which lanes are free and which matches are using them.
 
+### Enhanced: Developer Console - Reset All Config Command
+- **New "Reset All Config" developer command for recovering from config corruption**
+  - **Command location**: Developer Console Commands section (bottom of list, red text for visual distinction)
+  - **Typed confirmation required**: Must type "RESET" in confirmation box to proceed
+  - **Before/after comparison**: Shows detailed comparison for all config sections before reset
+    - Point values (all 11 point types)
+    - Match configuration (5 round types)
+    - UI settings (4 settings)
+    - Branding (club name)
+    - Lane configuration (max lanes, excluded lanes)
+    - Server settings
+  - **Tournament data preserved**: Only resets config, never touches tournament data (matches, players, brackets, history)
+  - **Auto-refresh**: Page reloads after 2 seconds to apply changes
+  - **Visual warnings**: Red warning box with "⚠️ Warning: Destructive Action" alert
+  - **Success feedback**: Summary of changes with automatic page refresh countdown
+  - **Hidden from casual users**: Only available in Developer Console (not on Config page) to prevent accidental use
+  - **Use cases**: Config corruption recovery, misconfiguration fixes, fresh start scenarios
+  - **Implementation**: analytics.js:1656-1822 (command functions), tournament.html:645-647 (UI integration), Docs/ANALYTICS.md:248-285 (documentation)
+  - **User impact**: Tournament operators can recover from config corruption or misconfiguration without losing tournament data. Provides safe recovery tool for extreme situations.
+
+### Enhanced: Config Page - Help System Documentation Update
+- **Developer Console comprehensive documentation added to Config page dynamic help**
+  - **Updated help for "Enable Developer Analytics" setting**: Now includes detailed feature list
+  - **Real-time statistics**: Lists all 5 statistics tracked (Transaction Health, Match States, Player Counts, Lane Usage, localStorage Usage)
+  - **Lane Usage monitoring**: Specific mention of LIVE/READY conflict detection capabilities
+  - **Validation checks**: Lists all 6 validation checks (lane conflicts, referee conflicts, match state integrity, transaction limits, player IDs, progression integrity)
+  - **Developer commands**: Lists all commands (Re-render Bracket, Recalculate Rankings, Refresh Dropdowns, Validate Everything, Manage Transaction Log, Reset All Config)
+  - **Transaction management**: Notes Smart Pruning capability for storage optimization
+  - **Auto-refresh behavior**: Mentions 2-second auto-refresh for real-time monitoring
+  - **Implementation**: dynamic-help-system.js:321-335 (help content update)
+  - **User impact**: Users can discover Developer Console features and capabilities directly from Config page help, improving discoverability
+
+### Fixed: Config Page - Removed Auto-Save for Point Values and Match Configuration
+- **Point System and Match Configuration now require explicit Save button click**
+  - **Removed auto-save behavior**: Deleted `setupConfigAutoSave()` function and all event listeners
+  - **Consistent save workflow**: All config sections now require deliberate Save button click
+  - **Added "Save Point Values" button**: Green primary button in Point Values section
+  - **Added "Save Match Configuration" button**: Green primary button in Match Configuration section
+  - **Removed "(autosave)" labels**: Cleaned up section headers for clarity
+  - **Success alerts**: Both save functions show "✓ saved successfully!" confirmation alerts
+  - **Rationale**: Auto-save was too aggressive for deliberate configuration changes - users expect explicit save control
+  - **Implementation**: main.js:274-353 (removed auto-save function), results-config.js:351-392 (new save functions), tournament.html:452-508 (UI updates)
+  - **User impact**: Configuration changes now require explicit user action before being persisted. More predictable behavior - users have control over when changes are saved, preventing accidental configuration modifications.
+
+### Fixed: Setup Page - Scrolling in Recent Tournaments and Match Results
+- **Scrollable areas now work properly with overflow-y: auto**
+  - **Root cause**: `.scrollable-column-content` was missing `overflow-y: auto` CSS property
+  - **Fixed sections**: Both "Recent Tournaments" and "Match Results" boxes now scroll when content exceeds height
+  - **Implementation**: css/styles.css:2242 (added overflow-y property)
+  - **User impact**: Long tournament lists and match results are now accessible through scrolling instead of being cut off
+
 ### Enhanced: Developer Console - Transaction Log Management & Storage Monitoring
 - **Complete transaction pruning system with smart algorithm and localStorage monitoring**
   - **"Manage Transaction Log" command**: Opens dedicated management view showing current status, storage usage, and pruning options

@@ -271,85 +271,10 @@ function setupEventListeners() {
         });
     }
 
-    // Auto-save configuration on config page changes
-    setupConfigAutoSave();
-
     // Initialize bracket controls
     if (typeof initializeBracketControls === 'function') {
         initializeBracketControls();
     }
-}
-
-function setupConfigAutoSave() {
-    // Auto-save point configuration
-    const pointFields = [
-        'participationPoints', 'firstPlacePoints', 'secondPlacePoints', 'thirdPlacePoints',
-        'fourthPlacePoints', 'fifthSixthPlacePoints', 'seventhEighthPlacePoints',
-        'highOutPoints', 'tonPoints', 'oneEightyPoints', 'shortLegPoints'
-    ];
-
-    pointFields.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('change', function () {
-                // Save immediately when config changes
-                if (typeof saveConfiguration === 'function') {
-                    console.log(`💾 Auto-saving config change: ${id} = ${this.value}`);
-
-                    // Update global config object
-                    const configKey = id.replace('Points', '')
-                        .replace('participation', 'participation')
-                        .replace('firstPlace', 'first')
-                        .replace('secondPlace', 'second')
-                        .replace('thirdPlace', 'third')
-                        .replace('fourthPlace', 'fourth')
-                        .replace('fifthSixthPlace', 'fifthSixth')
-                        .replace('seventhEighthPlace', 'seventhEighth')
-                        .replace('highOut', 'highOut')
-                        .replace('ton', 'ton')
-                        .replace('oneEighty', 'oneEighty')
-                        .replace('shortLeg', 'shortLeg');
-
-                    if (config && config.points) {
-                        config.points[configKey] = parseInt(this.value) || 0;
-                    }
-
-                    // Save to localStorage immediately
-                    if (typeof saveGlobalConfig === 'function') {
-                        saveGlobalConfig();
-                    }
-                }
-            });
-        }
-    });
-
-    // Auto-save match leg configuration - Updated for split semifinals
-    const legFields = ['regularRoundsLegs', 'frontsideSemifinalLegs', 'backsideSemifinalLegs', 'backsideFinalLegs', 'grandFinalLegs'];
-
-    legFields.forEach(id => {
-        const element = document.getElementById(id);
-        if (element) {
-            element.addEventListener('change', function () {
-                if (typeof saveConfiguration === 'function') {
-                    console.log(`💾 Auto-saving leg config: ${id} = ${this.value}`);
-
-                    // Update global config object
-                    if (config && config.legs) {
-                        if (id === 'regularRoundsLegs') config.legs.regularRounds = parseInt(this.value) || 3;
-                        else if (id === 'frontsideSemifinalLegs') config.legs.frontsideSemifinal = parseInt(this.value) || 5;  // NEW
-                        else if (id === 'backsideSemifinalLegs') config.legs.backsideSemifinal = parseInt(this.value) || 3;    // NEW
-                        else if (id === 'backsideFinalLegs') config.legs.backsideFinal = parseInt(this.value) || 5;
-                        else if (id === 'grandFinalLegs') config.legs.grandFinal = parseInt(this.value) || 5;
-                    }
-
-                    // Save to localStorage immediately
-                    if (typeof saveGlobalConfig === 'function') {
-                        saveGlobalConfig();
-                    }
-                }
-            });
-        }
-    });
 }
 
 function showPage(pageId) {

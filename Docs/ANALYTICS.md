@@ -245,6 +245,46 @@ All commands are **navigation links** - click to execute or show results.
 
 ---
 
+### Reset All Config
+**Function:** Resets all global configuration settings to factory defaults
+
+**Purpose:** Recover from config corruption or misconfiguration
+
+**Use case:** When config is corrupted, settings are wrong, or need fresh start
+
+**Safety:** ⚠️ **Destructive** - Resets all config settings (but preserves tournament data)
+
+**What Gets Reset:**
+- Point values (participation, placement, achievements)
+- Match configuration (best-of legs for all rounds)
+- UI settings (developer mode, winner confirmations, auto-open Match Controls, referee suggestions)
+- Branding (club name, logo path)
+- Lane configuration (max lanes, excluded lanes)
+- Server settings (delete permissions)
+
+**What Is Preserved:**
+- Tournament data (matches, players, brackets, history)
+- Tournament list (all tournaments remain intact)
+- Current tournament selection
+
+**Confirmation Required:**
+- Must type "RESET" in confirmation box to proceed
+- Shows detailed before/after comparison for all settings
+
+**Output:**
+- Before/after comparison for all config sections
+- Success feedback with summary of changes
+- Automatic page refresh after 2 seconds to apply changes
+- Detailed comparison displayed in right pane
+
+**Important Notes:**
+- Hidden in Developer Console (not on Config page) to prevent accidental use by casual users
+- Visual warning with red color coding (⚠️ Warning: Destructive Action)
+- Cannot be undone - only way to recover is re-entering settings manually
+- Consider exporting tournament before reset if unsure
+
+---
+
 ### View Transaction History
 **Function:** Displays all transactions in chronological order
 
@@ -1720,7 +1760,9 @@ function pruneCompletedMatchHistory() {
 
 **Rationale**: Not on Config page because it's too destructive for casual users. Belongs in Developer Console for advanced users who understand implications.
 
-**Priority**: Medium - Useful recovery tool for config corruption
+**Priority**: ~~Medium~~ ✅ **COMPLETED in v2.6.0-beta**
+
+**Status**: ✅ **IMPLEMENTED** - Fully functional with typed confirmation, before/after comparison, and automatic page refresh
 
 ---
 
@@ -1774,6 +1816,7 @@ If player drops out mid-tournament (not a no-show):
 - ✅ **Lane Usage detail view** (Fix 1 - remaining) - COMPLETE with real-time updates and conflict warnings
 - ✅ **Enhanced lane conflict detection** - Now detects both LIVE and READY match conflicts
 - ✅ **Preventive conflict warnings** - Catches duplicate lane assignments before matches start
+- ✅ **Reset All Config command** (Fix 11c) - Recovery tool for config corruption with typed confirmation
 
 **Completed in v2.5.2-beta:**
 - ✅ **Transaction Log Management with Smart Pruning** (Fix 11a) - COMPLETE with preview, execution, and feedback
@@ -1795,9 +1838,8 @@ If player drops out mid-tournament (not a no-show):
 1. Enhanced validation status display (Fix 3 - remaining) - Timestamps and overall status
 
 **Medium Priority** (Nice to Have):
-4. **Complete Config Reset command** (Fix 11c) - Recovery tool for config corruption
-5. Menu reorganization (Fix 4) - Improves discoverability
-6. Enhanced validation checks (Fix 6) - Adds more diagnostic capability
+2. Menu reorganization (Fix 4) - Improves discoverability
+3. Enhanced validation checks (Fix 6) - Adds more diagnostic capability
 
 **Low Priority** (Future Enhancements):
 7. **Force Save Tournament command** (Fix 11b) - Redundant but provides peace of mind

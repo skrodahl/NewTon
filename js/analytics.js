@@ -1653,6 +1653,174 @@ function commandValidateEverything() {
     showValidationResults();
 }
 
+/**
+ * Command: Reset All Config to Defaults
+ */
+function commandResetAllConfig() {
+    currentView = 'reset-config';
+
+    // Get current config for comparison
+    const currentConfig = config ? JSON.parse(JSON.stringify(config)) : {};
+
+    // Get default config
+    const defaultConfig = typeof DEFAULT_CONFIG !== 'undefined' ? DEFAULT_CONFIG : null;
+
+    if (!defaultConfig) {
+        showCommandFeedback('Reset All Config', 'error', 'DEFAULT_CONFIG not available');
+        return;
+    }
+
+    // Build comparison HTML
+    let comparisonHtml = '<div style="margin: 20px 0;">';
+
+    // Points section
+    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Point Values:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
+    comparisonHtml += `<li>Participation: ${currentConfig.points?.participation} → ${defaultConfig.points.participation}</li>`;
+    comparisonHtml += `<li>1st place: ${currentConfig.points?.first} → ${defaultConfig.points.first}</li>`;
+    comparisonHtml += `<li>2nd place: ${currentConfig.points?.second} → ${defaultConfig.points.second}</li>`;
+    comparisonHtml += `<li>3rd place: ${currentConfig.points?.third} → ${defaultConfig.points.third}</li>`;
+    comparisonHtml += `<li>4th place: ${currentConfig.points?.fourth} → ${defaultConfig.points.fourth}</li>`;
+    comparisonHtml += `<li>5th/6th place: ${currentConfig.points?.fifthSixth} → ${defaultConfig.points.fifthSixth}</li>`;
+    comparisonHtml += `<li>7th/8th place: ${currentConfig.points?.seventhEighth} → ${defaultConfig.points.seventhEighth}</li>`;
+    comparisonHtml += `<li>High Out: ${currentConfig.points?.highOut} → ${defaultConfig.points.highOut}</li>`;
+    comparisonHtml += `<li>Ton: ${currentConfig.points?.ton} → ${defaultConfig.points.ton}</li>`;
+    comparisonHtml += `<li>180: ${currentConfig.points?.oneEighty} → ${defaultConfig.points.oneEighty}</li>`;
+    comparisonHtml += `<li>Short Leg: ${currentConfig.points?.shortLeg} → ${defaultConfig.points.shortLeg}</li>`;
+    comparisonHtml += '</ul></div>';
+
+    // Match configuration section
+    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Match Configuration (Best-of Legs):</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
+    comparisonHtml += `<li>Regular Rounds: ${currentConfig.legs?.regularRounds} → ${defaultConfig.legs.regularRounds}</li>`;
+    comparisonHtml += `<li>Frontside Semifinal: ${currentConfig.legs?.frontsideSemifinal} → ${defaultConfig.legs.frontsideSemifinal}</li>`;
+    comparisonHtml += `<li>Backside Semifinal: ${currentConfig.legs?.backsideSemifinal} → ${defaultConfig.legs.backsideSemifinal}</li>`;
+    comparisonHtml += `<li>Backside Final: ${currentConfig.legs?.backsideFinal} → ${defaultConfig.legs.backsideFinal}</li>`;
+    comparisonHtml += `<li>Grand Final: ${currentConfig.legs?.grandFinal} → ${defaultConfig.legs.grandFinal}</li>`;
+    comparisonHtml += '</ul></div>';
+
+    // UI settings section
+    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">User Interface Settings:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
+    comparisonHtml += `<li>Winner Confirmation: ${currentConfig.ui?.confirmWinnerSelection ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.confirmWinnerSelection ? 'Enabled' : 'Disabled'}</li>`;
+    comparisonHtml += `<li>Auto-open Match Controls: ${currentConfig.ui?.autoOpenMatchControls ? 'Yes' : 'No'} → ${defaultConfig.ui.autoOpenMatchControls ? 'Yes' : 'No'}</li>`;
+    comparisonHtml += `<li>Developer Analytics: ${currentConfig.ui?.developerMode ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.developerMode ? 'Enabled' : 'Disabled'}</li>`;
+    comparisonHtml += `<li>Referee Suggestions: ${currentConfig.ui?.refereeSuggestionsLimit || 10} → ${defaultConfig.ui.refereeSuggestionsLimit}</li>`;
+    comparisonHtml += '</ul></div>';
+
+    // Branding section
+    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Branding:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
+    comparisonHtml += `<li>Club Name: "${currentConfig.clubName || 'NewTon DC'}" → "${defaultConfig.clubName}"</li>`;
+    comparisonHtml += '</ul></div>';
+
+    // Lane configuration section
+    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Lane Configuration:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
+    comparisonHtml += `<li>Max Lanes: ${currentConfig.lanes?.maxLanes || 4} → ${defaultConfig.lanes.maxLanes}</li>`;
+    const excludedLanes = currentConfig.lanes?.excludedLanes || [];
+    comparisonHtml += `<li>Excluded Lanes: ${excludedLanes.length > 0 ? excludedLanes.join(', ') : 'None'} → None</li>`;
+    comparisonHtml += '</ul></div>';
+
+    comparisonHtml += '</div>';
+
+    const html = `
+        <h4 style="margin-top: 0; color: #111827;">Reset All Config to Defaults</h4>
+
+        <div style="margin: 20px 0; padding: 20px; background: #fef2f2; border: 1px solid #dc2626; border-radius: 0;">
+            <div style="color: #dc2626; font-weight: 600; font-size: 16px; margin-bottom: 10px;">
+                ⚠️ Warning: Destructive Action
+            </div>
+            <div style="color: #374151; line-height: 1.6; font-size: 14px;">
+                This will reset ALL configuration settings to factory defaults. Your tournament data (matches, players, brackets, history) will NOT be affected.
+            </div>
+        </div>
+
+        <h5 style="color: #111827; margin: 20px 0 10px 0;">What will be reset:</h5>
+        ${comparisonHtml}
+
+        <div style="margin: 30px 0; padding: 20px; background: #f0fdf4; border: 1px solid #166534; border-radius: 0;">
+            <div style="font-weight: 600; margin-bottom: 10px;">To confirm this action:</div>
+            <div style="margin-bottom: 15px; line-height: 1.6;">Type <strong>RESET</strong> in the box below and click "Reset Config"</div>
+            <div style="margin-bottom: 10px;">
+                <input type="text" id="resetConfirmInput"
+                       style="width: 200px; padding: 8px 12px; border: 1px solid #c0c0c0; border-radius: 0; font-size: 14px;"
+                       placeholder="Type RESET">
+            </div>
+            <button onclick="executeResetAllConfig()" class="btn btn-danger"
+                    style="background: #dc2626; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: 600;">
+                Reset Config to Defaults
+            </button>
+        </div>
+
+        <div style="margin-top: 30px;">
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
+        </div>
+    `;
+
+    updateRightPane(html);
+}
+
+/**
+ * Execute Reset All Config (called from confirmation button)
+ */
+function executeResetAllConfig() {
+    const confirmInput = document.getElementById('resetConfirmInput');
+
+    if (!confirmInput || confirmInput.value.trim().toUpperCase() !== 'RESET') {
+        alert('Please type RESET to confirm');
+        return;
+    }
+
+    console.log('Resetting all config to defaults...');
+
+    // Save current config for comparison
+    const oldConfig = config ? JSON.parse(JSON.stringify(config)) : {};
+
+    // Get default config
+    const defaultConfig = typeof DEFAULT_CONFIG !== 'undefined' ? DEFAULT_CONFIG : null;
+
+    if (!defaultConfig) {
+        console.error('DEFAULT_CONFIG not available');
+        showCommandFeedback('Reset All Config', 'error', 'DEFAULT_CONFIG not available');
+        return;
+    }
+
+    try {
+        // Reset config to defaults
+        config = JSON.parse(JSON.stringify(defaultConfig));
+
+        // Save to localStorage
+        if (typeof saveGlobalConfig === 'function') {
+            saveGlobalConfig();
+        } else {
+            localStorage.setItem('dartsConfig', JSON.stringify(config));
+        }
+
+        console.log('✓ Config reset to defaults');
+        console.log('✓ Saved to localStorage');
+
+        // Build success feedback with comparison
+        let feedback = 'Configuration reset successfully! The page will reload in 2 seconds to apply changes.\n\n';
+        feedback += 'Changed settings:\n';
+        feedback += `• Point values: Reset to defaults\n`;
+        feedback += `• Match configuration: Reset to defaults\n`;
+        feedback += `• UI settings: Reset to defaults\n`;
+        feedback += `• Branding: "${oldConfig.clubName || 'NewTon DC'}" → "${defaultConfig.clubName}"\n`;
+        feedback += `• Lane configuration: Reset to defaults\n`;
+
+        showCommandFeedback('Reset All Config', 'success', feedback);
+
+        // Auto-refresh after 2 seconds
+        setTimeout(() => {
+            console.log('Reloading page to apply config changes...');
+            location.reload();
+        }, 2000);
+
+    } catch (error) {
+        console.error('❌ Error resetting config:', error);
+        showCommandFeedback('Reset All Config', 'error', `Error resetting config: ${error.message}`);
+    }
+}
+
 // ============================================================================
 // TRANSACTION LOG MANAGEMENT
 // ============================================================================
@@ -2076,6 +2244,8 @@ if (typeof window !== 'undefined') {
     window.commandRecalculateRankings = commandRecalculateRankings;
     window.commandRefreshDropdowns = commandRefreshDropdowns;
     window.commandValidateEverything = commandValidateEverything;
+    window.commandResetAllConfig = commandResetAllConfig;
+    window.executeResetAllConfig = executeResetAllConfig;
     window.clearConsoleOutput = clearConsoleOutput;
     window.copyConsoleOutput = copyConsoleOutput;
     window.showTransactionLogManagement = showTransactionLogManagement;

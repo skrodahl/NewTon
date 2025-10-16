@@ -401,7 +401,7 @@
 
                     <!-- Point Values Section -->
                     <div class="config-section">
-                        <h3>Point Values (autosave)</h3>
+                        <h3>Point Values</h3>
                         <div class="config-content">
                             <div class="config-grid">
                                 <div class="form-group">
@@ -449,13 +449,16 @@
                                     <input type="number" id="oneEightyPoints" value="1" min="0">
                                 </div>
                             </div>
-                            <button class="btn" onclick="resetPointValuesToDefaults()">Reset to Defaults</button>
+                            <div class="config-buttons">
+                                <button class="btn btn-success" onclick="savePointConfiguration()">Save Point Values</button>
+                                <button class="btn" onclick="resetPointValuesToDefaults()">Reset to Defaults</button>
+                            </div>
                         </div>
                     </div>
 
                     <!-- Match Configuration Section -->
                     <div class="config-section">
-                        <h3>Match Configuration (autosave)</h3>
+                        <h3>Match Configuration</h3>
                         <div class="config-content">
                             <div class="config-grid">
                                 <div class="form-group">
@@ -499,7 +502,10 @@
                                     </select>
                                 </div>
                             </div>
-                            <button class="btn" onclick="resetMatchConfigToDefaults()">Reset to Defaults</button>
+                            <div class="config-buttons">
+                                <button class="btn btn-success" onclick="saveMatchConfiguration()">Save Match Configuration</button>
+                                <button class="btn" onclick="resetMatchConfigToDefaults()">Reset to Defaults</button>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -653,6 +659,10 @@
                             <a href="#" onclick="showMatchProgression(); return false;"
                                 style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">View
                                 Match Progression</a>
+
+                            <a href="#" onclick="commandResetAllConfig(); return false;"
+                                style="text-decoration: none; color: #dc2626; display: block; margin-bottom: 8px; font-size: 14px; font-weight: 600;">Reset
+                                All Config</a>
                         </div>
 
                         <!-- Timestamp -->
