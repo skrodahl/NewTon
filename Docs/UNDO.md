@@ -220,7 +220,37 @@ const targetTransaction = history.find(t =>
 const targetTransaction = history.find(t => t.id === transactionId);
 ```
 
-### Step 2: Find All Consequential Matches
+### Step 2: Collect ALL Transactions for the Match Being Undone
+**Critical**: Remove all operational transactions for the target match, not just the COMPLETE_MATCH:
+
+```javascript
+const transactionsToRemove = [transactionId]; // Target COMPLETE_MATCH transaction
+
+// Remove ALL transactions for the match being undone (gives it a clean slate)
+// This includes: ASSIGN_LANE, ASSIGN_REFEREE, START_MATCH, STOP_MATCH, and COMPLETE_MATCH
+const targetMatchTransactions = history.filter(t => t.matchId === targetTransaction.matchId);
+targetMatchTransactions.forEach(t => {
+    if (!transactionsToRemove.includes(t.id)) {
+        transactionsToRemove.push(t.id);
+    }
+});
+```
+
+**Why this is critical**:
+- Undoing a match should return it to a **completely clean state** - as if nothing was ever done to it
+- Lane and referee assignments must be cleared to prevent resource conflicts
+- START_MATCH and STOP_MATCH history is irrelevant after undo - we don't care how many times it was started/stopped
+- Without this step, transactions remain in history but the match object gets cleared → **mismatch between history and state**
+
+**What happens without this step**:
+1. User assigns Lane 1 and Referee Adam to match → Creates ASSIGN_LANE and ASSIGN_REFEREE transactions
+2. User starts match → Creates START_MATCH transaction
+3. User completes match → Creates COMPLETE_MATCH transaction
+4. User undoes match → Only removes COMPLETE_MATCH transaction
+5. **Problem**: Match is reverted to READY but lane/referee assignments remain in match object AND in transaction history
+6. **Result**: Lane 1 and Referee Adam appear "in use" but match shows as READY → Resource conflicts and blocking
+
+### Step 3: Find All Consequential Matches
 Uses `getConsequentialMatches()` to follow winner/loser paths and collect:
 - Immediate destination matches
 - All intermediate walkover matches in the chain
@@ -233,10 +263,8 @@ Uses `getConsequentialMatches()` to follow winner/loser paths and collect:
 // Consequential matches: [FS-3-4, BS-2-4, BS-3-1, BS-3-2]
 ```
 
-### Step 3: Collect Transactions to Remove
+### Step 4: Collect Transactions for Consequential Matches
 ```javascript
-const transactionsToRemove = [transactionId]; // Target transaction
-
 // Add all transactions for consequential matches
 consequentialMatches.forEach(match => {
     const matchTransactions = history.filter(t => t.matchId === match.id);
@@ -248,18 +276,18 @@ consequentialMatches.forEach(match => {
 });
 ```
 
-### Step 4: Clean History
+### Step 5: Clean History
 ```javascript
 const cleanHistory = history.filter(t => !transactionsToRemove.includes(t.id));
 localStorage.setItem('tournamentHistory', JSON.stringify(cleanHistory));
 ```
 
-### Step 5: Surgical State Rollback
+### Step 6: Surgical State Rollback
 For each transaction being removed:
 1. Find the match using `matches.find(m => m.id === transaction.matchId)`
 2. Use hardcoded progression to find where winner/loser went
 3. Remove advancing players from their destination matches
-4. Reset match to READY state
+4. Reset match to READY state with **ALL assignments cleared**
 
 ```javascript
 // Remove winner from destination
@@ -269,12 +297,23 @@ if (matchProgression.winner) {
     winnerDestMatch[winnerSlot] = { name: 'TBD', id: null };
 }
 
-// Roll back the match itself
+// Roll back the match itself - CRITICAL: Clear ALL state
 match.completed = false;
 match.winner = null;
 match.loser = null;
+match.active = false;
 match.state = 'READY';
+match.lane = null;      // CRITICAL: Clear lane assignment
+match.referee = null;   // CRITICAL: Clear referee assignment
+// Keep original players - they came from upstream completed matches
 ```
+
+**Why lane and referee clearing is critical**:
+- Without clearing these fields, the match object retains assignments even though transactions are removed
+- This causes **resource conflicts**: lanes and referees appear "in use" but aren't shown in transaction history
+- The conflict handler blocks assignment of these resources to other matches
+- After hard refresh, assignments persist (loaded from saved tournament data)
+- **Result**: Match appears clean in transaction log but still has assignments → System inconsistency
 
 ## Auto-advancement Chain Handling
 

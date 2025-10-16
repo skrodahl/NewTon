@@ -1,4 +1,4 @@
-# 2025-10-15
+# 2025-10-16
 
 ## **v2.6.0-beta** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements
 
@@ -105,6 +105,20 @@
   - **Independent sorting**: Each column maintains proper round progression order (FS-R1, FS-R2... and BS-R1, BS-R2...)
   - **Implementation**: bracket-rendering.js:3150-3285 (two-column rendering logic), tournament.html:774 (modal dimensions), styles.css:1772 (referee sidebar width), styles.css:1391 (celebration centering)
   - **User impact**: Tournament operators gain significantly improved spatial awareness of tournament state, can manage both bracket sides efficiently, and make faster operational decisions during active tournaments
+
+### Fixed: Undo System - Complete Match State Restoration & Resource Clearing
+- **Match undo now properly clears ALL assignments and returns match to completely clean state**
+  - **Critical bug fixed**: Lane and referee assignments were persisting after undoing completed matches
+  - **Root cause**: Two separate data stores (transaction history AND match objects) were not being synchronized during undo
+  - **Two-part fix implemented**:
+    1. **Transaction history cleanup**: Remove ALL transaction types for undone match (COMPLETE_MATCH, ASSIGN_LANE, ASSIGN_REFEREE, START_MATCH, STOP_MATCH)
+    2. **Match object clearing**: Reset `match.lane = null` and `match.referee = null` during rollback
+  - **Resource conflict prevention**: Without proper clearing, lanes and referees appeared "in use" but weren't shown in transaction history
+  - **Clean slate principle**: Undoing a match now returns it to pristine READY state as if nothing was ever done to it
+  - **Why critical**: Prevents resource conflicts, eliminates blocking of available lanes/referees, maintains data consistency between history and state
+  - **Implementation**: bracket-rendering.js:2185-2194 (transaction removal), bracket-rendering.js:2273-2274 (match object clearing)
+  - **Documentation**: Comprehensive update to Docs/UNDO.md explaining transaction types, data synchronization, and clean state restoration
+  - **User impact**: Tournament operators can now safely undo matches without worrying about orphaned resource assignments or availability conflicts. The undo system properly releases all resources for reassignment to other matches.
 
 ### Enhanced: Player List - Payment Status Indicator & Smart Sorting
 - **"In Tournament" section now shows payment status and prioritizes unpaid players**

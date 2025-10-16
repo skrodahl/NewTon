@@ -1910,6 +1910,23 @@ function undoTransactions(transactionIds) {
         return false;
     }
 
+    // Collect all match IDs from the transactions being undone
+    const affectedMatchIds = new Set(transactionsToUndo.map(t => t.matchId).filter(Boolean));
+
+    // Find ALL related transactions for these matches (ASSIGN_LANE, ASSIGN_REFEREE, START_MATCH, STOP_MATCH)
+    const relatedTransactionTypes = ['ASSIGN_LANE', 'ASSIGN_REFEREE', 'START_MATCH', 'STOP_MATCH'];
+    const relatedTransactions = history.filter(t =>
+        affectedMatchIds.has(t.matchId) && relatedTransactionTypes.includes(t.type)
+    );
+
+    // Combine all transactions to be removed (original + related)
+    const allTransactionsToRemove = new Set([
+        ...transactionIds,
+        ...relatedTransactions.map(t => t.id)
+    ]);
+
+    console.log(`🔄 Undo: Removing ${transactionsToUndo.length} COMPLETE_MATCH transactions + ${relatedTransactions.length} related transactions`);
+
     // Track matches that have been cleared by downstream cleanup
     const clearedMatches = new Set();
     
@@ -1982,13 +1999,15 @@ function undoTransactions(transactionIds) {
         }
     });
 
-    // Move undone transactions to the undone list
+    // Move undone transactions to the undone list (only the COMPLETE_MATCH transactions)
     transactionsToUndo.forEach(t => undone.unshift(t));
     saveUndoneTransactions(undone);
 
-    // Remove undone transactions from the history
-    const newHistory = history.filter(t => !transactionIds.includes(t.id));
+    // Remove ALL related transactions from the history (COMPLETE_MATCH + ASSIGN_LANE/REFEREE + START/STOP_MATCH)
+    const newHistory = history.filter(t => !allTransactionsToRemove.has(t.id));
     localStorage.setItem('tournamentHistory', JSON.stringify(newHistory));
+
+    console.log(`✅ Removed ${allTransactionsToRemove.size} total transactions from history`);
 
     // FIXED: Clear tournament completion state when undoing GRAND-FINAL
     const isUndoingGrandFinal = transactionsToUndo.some(t => t.matchId === 'GRAND-FINAL');

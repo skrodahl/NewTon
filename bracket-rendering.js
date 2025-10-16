@@ -2179,8 +2179,19 @@ function undoManualTransaction(transactionId) {
         return;
     }
 
-    // 1. Identify transactions to remove: target + downstream dependencies
+    // 1. Identify transactions to remove: target + all transactions for the match being undone + downstream dependencies
     const transactionsToRemove = [transactionId];
+
+    // Remove ALL transactions for the match being undone (gives it a completely clean slate)
+    // This includes: ASSIGN_LANE, ASSIGN_REFEREE, START_MATCH, STOP_MATCH, and the COMPLETE_MATCH
+    const targetMatchTransactions = history.filter(t => t.matchId === targetTransaction.matchId);
+    targetMatchTransactions.forEach(t => {
+        if (!transactionsToRemove.includes(t.id)) {
+            transactionsToRemove.push(t.id);
+        }
+    });
+
+    console.log(`🔍 Undo ${targetTransaction.matchId} - Removing ${targetMatchTransactions.length} transactions for target match`);
 
     // Find all downstream matches affected by this transaction
     const consequentialMatches = getConsequentialMatches(targetTransaction);
@@ -2197,7 +2208,7 @@ function undoManualTransaction(transactionId) {
         });
     });
 
-    console.log(`Clean undo ${targetTransaction.matchId}: removing ${transactionsToRemove.length} transactions`);
+    console.log(`✅ Clean undo ${targetTransaction.matchId}: removing ${transactionsToRemove.length} total transactions`);
 
     // 2. Check if we're undoing GRAND-FINAL (need to reset tournament status)
     const isUndoingGrandFinal = targetTransaction.matchId === 'GRAND-FINAL';
@@ -2259,6 +2270,8 @@ function undoManualTransaction(transactionId) {
         match.loser = null;
         match.active = false;
         match.state = 'READY';
+        match.lane = null;
+        match.referee = null;
         // Keep original players - they came from upstream completed matches
         console.log(`✅ ${transaction.matchId} rolled back: ${match.player1?.name || 'TBD'} vs ${match.player2?.name || 'TBD'}`);
     });
