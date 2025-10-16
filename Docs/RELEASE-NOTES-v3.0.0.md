@@ -58,10 +58,11 @@ Diagnostic and monitoring tool for tournament health and system management.
 
 **Core Capabilities:**
 - **Real-time monitoring**: Transaction health, match state, player count, lane usage, localStorage usage
-- **Six validation checks**: Lane assignments, referee assignments, match state integrity, transaction count, player ID integrity, progression integrity
-- **System commands**: Re-render bracket, recalculate rankings, refresh dropdowns, validate everything
+- **Six validation checks**: Lane assignments (LIVE + READY), referee assignments, match state integrity, transaction count, player ID integrity, progression integrity
+- **Match Progression view**: Side-by-side bracket visualization with labeled progression flow, state icons, and raw code debugging view
+- **System commands**: Re-render bracket, recalculate rankings, refresh dropdowns, validate everything, reset all config
 - **Transaction management**: View history with advanced filtering, smart pruning to remove redundant data
-- **Three-pane interface**: Statistics (240px), dynamic content area, persistent console footer
+- **Collapsible interface**: Statistics (240px), flexible content area, collapsible console footer (hidden by default)
 
 **Transaction Pruning:**
 Safely removes redundant operational transactions for completed matches while preserving all COMPLETE_MATCH records. Typically removes 40-60% of transactions in active tournaments. Preview mode shows impact before execution.
