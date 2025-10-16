@@ -3066,14 +3066,14 @@ function showCommandCenterModal(matchData) {
                 titleElement.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <span>Match Controls - ${tournament.name}</span>
-                        <div id="match-controls-clock" style="font-weight: normal;">${currentTime}</div>
+                        <div id="match-controls-clock" style="display: inline-block; font-weight: normal; border: 1px solid #ccc; padding: 8px 16px; border-radius: 6px;">${currentTime}</div>
                     </div>
                 `;
             } else {
                 titleElement.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <span>Match Controls</span>
-                        <div id="match-controls-clock" style="font-weight: normal;">${currentTime}</div>
+                        <div id="match-controls-clock" style="display: inline-block; font-weight: normal; border: 1px solid #ccc; padding: 8px 16px; border-radius: 6px;">${currentTime}</div>
                     </div>
                 `;
             }
