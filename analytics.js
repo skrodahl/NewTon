@@ -1720,7 +1720,7 @@ function showTransactionLogManagement() {
                     const typePercentage = stats.total > 0 ? Math.round((count / stats.total) * 100) : 0;
                     let note = '';
                     if (type === 'COMPLETE_MATCH') note = ' - Never pruned';
-                    else if (type === 'ASSIGN_LANE' || type === 'ASSIGN_REFEREE') note = ' - Redundant after completion';
+                    else if (type === 'ASSIGN_LANE' || type === 'ASSIGN_REFEREE') note = ' - Keep only last selection';
                     else if (type === 'START_MATCH' || type === 'STOP_MATCH') note = ' - Redundant after completion';
                     return `<p style="margin: 3px 0;">• ${type}: ${count} (${typePercentage}%)${note}</p>`;
                 }).join('')}
