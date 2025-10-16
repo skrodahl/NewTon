@@ -190,7 +190,7 @@
   - Created `js/` folder and moved all 11 JavaScript files
   - Created `css/` folder and moved styles.css
   - Updated tournament.html with new file paths
-  - Updated CLAUDE.md and Docs/ANALYTICS.md documentation
+  - Updated documentation
   - **Result**: tournament.html now clearly visible as main entry point in root folder
   - **User impact**: More intuitive project structure, easier navigation for developers and contributors
 
