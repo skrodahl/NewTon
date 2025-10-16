@@ -97,10 +97,69 @@ function createTournament() {
     }
 }
 
+// Helper function to prune transaction history for completed tournaments
+// Uses same smart pruning algorithm as Developer Console
+function pruneTransactionHistory(history, completedMatches) {
+    if (!history || history.length === 0 || !completedMatches || completedMatches.length === 0) {
+        return history; // Nothing to prune
+    }
+
+    const toRemove = [];
+
+    completedMatches.forEach(match => {
+        const matchId = match.id;
+        const matchTxns = history.filter(t =>
+            (t.matchId === matchId) || (t.description && t.description.includes(matchId))
+        );
+
+        const lanes = matchTxns.filter(t => t.type === 'ASSIGN_LANE');
+        const refs = matchTxns.filter(t => t.type === 'ASSIGN_REFEREE');
+        const starts = matchTxns.filter(t => t.type === 'START_MATCH');
+        const stops = matchTxns.filter(t => t.type === 'STOP_MATCH');
+
+        // Keep only last lane assignment, remove rest
+        if (lanes.length > 1) {
+            toRemove.push(...lanes.slice(0, -1));
+        }
+
+        // Keep only last referee assignment, remove rest
+        if (refs.length > 1) {
+            toRemove.push(...refs.slice(0, -1));
+        }
+
+        // Remove ALL start/stop (completion is sufficient)
+        toRemove.push(...starts, ...stops);
+    });
+
+    // Filter out transactions to remove
+    const idsToRemove = new Set(toRemove.map(t => t.id || t.timestamp));
+    const prunedHistory = history.filter(t => !idsToRemove.has(t.id || t.timestamp));
+
+    console.log(`✓ Export pruning: Removed ${toRemove.length} redundant transactions from export`);
+    return prunedHistory;
+}
+
 function exportTournament() {
     if (!tournament) {
         alert('No active tournament to export');
         return;
+    }
+
+    // Get transaction history (if exists)
+    let history = null;
+    try {
+        const historyData = localStorage.getItem('tournamentHistory');
+        if (historyData) {
+            history = JSON.parse(historyData);
+        }
+    } catch (e) {
+        console.warn('Could not load tournament history for pruning');
+    }
+
+    // Prune history for completed tournaments only
+    if (tournament.status === 'completed' && history) {
+        const completedMatches = matches.filter(m => m.completed);
+        history = pruneTransactionHistory(history, completedMatches);
     }
 
     // Export ONLY tournament data, never global config
@@ -113,6 +172,11 @@ function exportTournament() {
         // NO CONFIG DATA in export
     };
 
+    // Include pruned history if it exists
+    if (history) {
+        tournamentData.history = history;
+    }
+
     const dataStr = JSON.stringify(tournamentData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
@@ -121,7 +185,10 @@ function exportTournament() {
     link.download = `${tournament.name}_${tournament.date}.json`;
     link.click();
 
-    console.log('✓ Tournament exported (config excluded)');
+    const statusMsg = tournament.status === 'completed' && history
+        ? '✓ Tournament exported (config excluded, transaction history optimized)'
+        : '✓ Tournament exported (config excluded)';
+    console.log(statusMsg);
 }
 
 // Upload tournament file to server (bonus feature - file picker based)
