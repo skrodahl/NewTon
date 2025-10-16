@@ -54,7 +54,7 @@ Operators can see both bracket sides simultaneously, prevent resource conflicts 
 ### Developer Console
 Diagnostic and monitoring tool for tournament health and system management.
 
-**Access:** Config → User Interface → Enable Developer Analytics, then click version number in Tournament CAD-box
+**Access:** Config → User Interface → Enable Developer Analytics, then click version number in Tournament Status Panel
 
 **Core Capabilities:**
 - **Real-time monitoring**: Transaction health, match state, player count, lane usage, localStorage usage
@@ -107,7 +107,7 @@ Clubs can maintain centralized tournament archives, share results across members
 
 ### Visual Enhancements
 
-**CAD-Style Information Box:**
+**Tournament Status Panel:**
 Technical drawing-style status display in bottom-right corner showing club name, tournament name, format, player count, match count, date, version, and status (SETUP → ACTIVE → COMPLETE).
 
 **Bracket Improvements:**
@@ -180,7 +180,7 @@ Complete branding system integrating club identity throughout tournament experie
 - Club name configuration (changed from "Application Title" for clarity)
 - Logo system supporting `.png`, `.jpg`, `.jpeg`, or `.svg` in root folder
 - Automatic favicon using logo file
-- Club name displayed in tournament headers and CAD-box
+- Club name displayed in tournament headers and Status Panel
 - Droid Serif title font for visual distinction
 
 **Why It Matters:**

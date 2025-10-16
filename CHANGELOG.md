@@ -371,7 +371,7 @@
 ### New Feature: Developer Console
 - **Hidden developer tool for real-time tournament diagnostics**
   - **Purpose**: Monitor tournament health, run validation checks, and execute developer commands without browser console
-  - **Access**: Enable in Config → User Interface → "Enable Developer Analytics", then click version number in Tournament page CAD-box
+  - **Access**: Enable in Config → User Interface → "Enable Developer Analytics", then click version number in Tournament Status Panel
   - **Design**: Large modal (90% screen) with three-pane layout:
     - Left pane (30%): Statistics and commands
     - Right pane content area (49%): Dynamic detail views
@@ -979,10 +979,10 @@ This release establishes a comprehensive design system foundation for the entire
   - Root cause: `autoLoadCurrentTournament()` in main.js missing players, matches, and readOnly fields
   - Solution: Added complete tournament data structure matching import/load processes
   - Impact: All tournament data and protection state preserved on app startup
-- **Fixed CAD-Box Import Updates**: CAD watermark wasn't updating when importing tournaments
+- **Fixed Status Panel Import Updates**: Status Panel wasn't updating when importing tournaments
   - Root cause: Import process missing `updateTournamentWatermark()` call
   - Solution: Added watermark update to `continueImportProcess()` display updates
-  - Impact: CAD-box now updates immediately for both loading and importing operations
+  - Impact: Status Panel now updates immediately for both loading and importing operations
 
 ### Technical Implementation
 - **Three-Layer Protection**: Read-only checks in `isMatchUndoable()`, `handleSurgicalUndo()`, and `getDetailedMatchState()`
@@ -991,7 +991,7 @@ This release establishes a comprehensive design system foundation for the entire
 - **Complete Undo Prevention**: UI-level prevention (no styling) + interaction-level prevention (early blocking)
 
 ### Files Modified
-- `tournament-management.js` - Read-only flags, complete data structures, CAD-box updates
+- `tournament-management.js` - Read-only flags, complete data structures, Status Panel updates
 - `bracket-rendering.js` - Undo prevention, status messaging, match state detection
 - `main.js` - App initialization with complete tournament data preservation
 - `clean-match-progression.js` - Read-only undo prevention
