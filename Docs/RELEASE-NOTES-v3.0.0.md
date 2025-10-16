@@ -7,15 +7,17 @@
 
 ## Overview
 
-**NewTon DC Tournament Manager Version 3.0.0** marks our most ambitious release yet. It brings powerful new tools and a full overhaul of many core components. Building on version 2’s groundwork, this update refines every aspect of the system to enhance fairness, streamline operations, and deliver smarter, more intentional workflows.
+**NewTon DC Tournament Manager Version 3.0.0** marks our most ambitious release yet. It brings powerful new tools and a full overhaul of many core components. Building on version 2’s groundwork, this update refines every aspect of the system to increase reliability, enhance fairness, streamline operations, and deliver smarter, more intentional workflows.
 
 This release contains no breaking changes, and is a drop-in replacement for any v2.x deployments.
+
+**NewTon DC Tournament Manager** is still offline first, and further improves our already sky-high resilience for trustworty tournament management.
 
 **Tournament Fairness:**
 The new fair seeding algorithm eliminates the systematic structural bias that existed in v2.x. Previously, sequential BYE placement created a predictable chain reaction where losing in the top half of FS-R2 was consistently easier than losing in the bottom half. The new randomized BYE distribution ensures no correlation between bracket position and opponent difficulty.
 
 **Operational Improvements:**
-Match Controls provides real-time tournament management with two-column layout, lane-based sorting, referee suggestions, and resource conflict prevention. Operators can see both bracket sides simultaneously, prevent problems before they occur, and make faster decisions during active tournaments. The improved undo system now properly clears resource assignments, eliminating orphaned lane/referee blocks.
+Match Controls provides real-time tournament management with two-column layout, lane-based sorting, referee suggestions, and resource conflict prevention. Operators can see both bracket sides simultaneously, prevent problems before they occur, and make faster decisions during active tournaments. The improved undo system now properly clears resource assignments, eliminating orphaned lane/referee blocks. For those who run tournaments in fullscreen, there is even a clock!
 
 **Usability Enhancements:**
 A saved players registry reduces repetition for clubs with regular members. Payment status tracking provides clear visibility of who hasn't paid entrance fees. The completed design system unification creates consistent visual language throughout the application. Hover zoom makes navigating crowded brackets significantly easier.
@@ -45,6 +47,7 @@ Real-time tournament operations interface that provides centralized management o
 - Timeline-based referee suggestions (Recent Winners, Losers, Assignments)
 - Tournament completion celebration with achievements and export
 - Auto-refresh when resources are assigned or changed
+- 24H clock in the upper right corner
 
 **Why It Matters:**
 Operators can see both bracket sides simultaneously, prevent resource conflicts before matches start, and make faster decisions during active tournaments.
@@ -73,7 +76,7 @@ Operators can monitor tournament health in real-time, catch problems early, and 
 ---
 
 ### Saved Players Registry
-Persistent player database that maintains consistency across weekly tournaments.
+Our persistent player database has been completely overhauled. Maintaining consistency across weekly tournaments is now a breeze.
 
 **Key Features:**
 - Players automatically added to registry when added to tournaments
@@ -144,7 +147,7 @@ Consistent visual language throughout the application, cleaner codebase, and bet
 ---
 
 ### Undo System Improvements
-Fixed critical bugs and extended capabilities for proper tournament management.
+Complete rewrite fixes critical bugs and extends capabilities for proper and reliable tournament management.
 
 **Key Fixes:**
 1. **Resource clearing**: Lane and referee assignments now properly cleared when undoing matches (previously persisted and blocked resources)
@@ -198,6 +201,7 @@ Professional appearance for clubs, clean branding for streamed/recorded tourname
 
 **Referee Suggestions:**
 - Complete reimplementation with timeline-based approach
+- Fair selection of referee candidates at any stage of the tournament
 - Configurable display limit (5-20, default 10)
 - Real-time updates when assignments change
 - Smart filtering logic
@@ -206,6 +210,7 @@ Professional appearance for clubs, clean branding for streamed/recorded tourname
 - Reorganized Config page with logical section grouping
 - Reset to defaults available for all sections
 - Dynamic help system updated for new features
+- All configuration sections have save buttons for deliberate changes
 
 **Read-Only Tournament Protection:**
 - Completed tournaments loaded from files or localStorage are automatically set to read-only
@@ -293,4 +298,4 @@ None at time of release. Please report issues through GitHub repository.
 
 ---
 
-**NewTon DC Tournament Manager v3.0.0** - Tournament management with real-time operations and diagnostics.
+**NewTon DC Tournament Manager v3.0.0** - Rock solid tournament management with real-time operations and diagnostics.
