@@ -1199,8 +1199,17 @@ function updateTournamentWatermark() {
             const versionStyle = developerMode ? 'cursor: pointer;' : '';
             const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
 
+            // Get current time in HH:MM format
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTime = `${hours}:${minutes}`;
+
             watermark.innerHTML = `
-                <div class="cad-header"> ${truncatedName}</div>
+                <div class="cad-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>${truncatedName}</span>
+                    <span id="cad-clock">${currentTime}</span>
+                </div>
                 <div class="cad-grid">
                     <div class="cad-cell cad-format">${formatText}</div>
                     <div class="cad-cell cad-players">
@@ -1229,8 +1238,17 @@ function updateTournamentWatermark() {
             const versionStyle = developerMode ? 'cursor: pointer;' : '';
             const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
 
+            // Get current time in HH:MM format
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTime = `${hours}:${minutes}`;
+
             watermark.innerHTML = `
-                <div class="cad-header">NO TOURNAMENT</div>
+                <div class="cad-header" style="display: flex; justify-content: space-between; align-items: center;">
+                    <span>NO TOURNAMENT</span>
+                    <span id="cad-clock">${currentTime}</span>
+                </div>
                 <div class="cad-grid">
                     <div class="cad-cell cad-format">-</div>
                     <div class="cad-cell cad-players">
@@ -1247,6 +1265,20 @@ function updateTournamentWatermark() {
         }
     }
 }
+
+// Update clock in Status Panel every minute
+function updateClock() {
+    const clockElement = document.getElementById('cad-clock');
+    if (clockElement) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        clockElement.textContent = `${hours}:${minutes}`;
+    }
+}
+
+// Start clock update interval (every 10 seconds to catch minute changes quickly)
+setInterval(updateClock, 10000);
 
 // Make functions globally available
 if (typeof window !== 'undefined') {

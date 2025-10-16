@@ -3056,10 +3056,26 @@ function showCommandCenterModal(matchData) {
         // Update title based on tournament state
         const titleElement = document.getElementById('commandCenterTitle');
         if (titleElement) {
+            // Get current time in HH:MM format
+            const now = new Date();
+            const hours = String(now.getHours()).padStart(2, '0');
+            const minutes = String(now.getMinutes()).padStart(2, '0');
+            const currentTime = `${hours}:${minutes}`;
+
             if (tournament.name && (tournament.status === 'setup' || tournament.status === 'active')) {
-                titleElement.textContent = `Match Controls - ${tournament.name}`;
+                titleElement.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>Match Controls - ${tournament.name}</span>
+                        <div id="match-controls-clock">${currentTime}</div>
+                    </div>
+                `;
             } else {
-                titleElement.textContent = 'Match Controls';
+                titleElement.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
+                        <span>Match Controls</span>
+                        <div id="match-controls-clock">${currentTime}</div>
+                    </div>
+                `;
             }
         }
 
@@ -4043,6 +4059,20 @@ function getMatchProgressionText(matchId) {
 }
 
 // --- END: Status Center Functions ---
+
+// Update clock in Match Controls modal title
+function updateMatchControlsClock() {
+    const clockElement = document.getElementById('match-controls-clock');
+    if (clockElement) {
+        const now = new Date();
+        const hours = String(now.getHours()).padStart(2, '0');
+        const minutes = String(now.getMinutes()).padStart(2, '0');
+        clockElement.textContent = `${hours}:${minutes}`;
+    }
+}
+
+// Start clock update interval (every 10 seconds to catch minute changes)
+setInterval(updateMatchControlsClock, 10000);
 
 // UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
 
