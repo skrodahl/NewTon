@@ -7,7 +7,7 @@
 
 ## Overview
 
-Version 3.0.0 is a major release focused on improving tournament fairness, operational efficiency, and usability.
+Version 3.0.0 is a major release focused on mature features, improving tournament fairness, operational efficiency, and intentional workflows.
 
 This release contains no breaking changes, and is a drop-in replacement for any v2 deployments.
 
