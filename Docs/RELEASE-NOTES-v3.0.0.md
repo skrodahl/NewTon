@@ -13,7 +13,7 @@ This release contains no breaking changes, and is a drop-in replacement for any 
 
 **NewTon DC Tournament Manager** continues to be offline first, and further improves the already sky-high resilience for trustworty tournament management.
 
-**What's New:**
+**Selected Highlights:**
 - Match Controls interface for real-time tournament operations
 - Developer Console for diagnostics and system management
 - Fair seeding algorithm eliminating structural bias
