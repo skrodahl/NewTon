@@ -3419,6 +3419,32 @@ function showCommandCenterModal(matchData) {
 
     // Set up event handlers
 
+    // Auto-open Match Controls checkbox handler
+    const autoOpenCheckbox = document.getElementById('autoOpenMatchControlsToggle');
+    if (autoOpenCheckbox) {
+        // Sync checkbox with current config setting
+        autoOpenCheckbox.checked = config?.ui?.autoOpenMatchControls || false;
+
+        // Update config when checkbox is toggled
+        autoOpenCheckbox.onchange = function() {
+            if (config && config.ui) {
+                config.ui.autoOpenMatchControls = this.checked;
+                if (typeof saveGlobalConfig === 'function') {
+                    saveGlobalConfig();
+                    console.log('Auto-open Match Controls:', this.checked ? 'enabled' : 'disabled');
+
+                    // Sync with Config page checkbox in real-time
+                    const configPageCheckbox = document.getElementById('autoOpenMatchControls');
+                    if (configPageCheckbox) {
+                        configPageCheckbox.checked = this.checked;
+                    }
+                } else {
+                    console.error('saveGlobalConfig function not available');
+                }
+            }
+        };
+    }
+
     // Statistics button handler
     const statsBtn = document.getElementById('showStatisticsBtn');
     if (statsBtn) {

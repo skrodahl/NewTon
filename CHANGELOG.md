@@ -96,6 +96,20 @@
   - **Implementation**: dynamic-help-system.js:321-335 (help content update)
   - **User impact**: Users can discover Developer Console features and capabilities directly from Config page help, improving discoverability
 
+### Enhanced: Match Controls - In-Modal Auto-Open Setting Toggle
+- **"Automatically open Match Controls" checkbox added to Match Controls modal for convenient access**
+  - **Location**: Bottom-right corner of Match Controls modal, aligned with Statistics/Close buttons
+  - **Styling**: Matches button font (14px, font-weight 500) for visual consistency
+  - **Bidirectional sync**: Changes sync in real-time between Match Controls modal and Config page
+    - Toggle in Match Controls → Config page checkbox updates immediately
+    - Toggle in Config page → Match Controls checkbox updates immediately
+    - No page refresh required for sync
+  - **Persistent storage**: Both checkboxes read/write from same `config.ui.autoOpenMatchControls` setting
+  - **Auto-save**: Calls `saveGlobalConfig()` immediately on toggle
+  - **Layout**: Buttons centered, checkbox positioned absolutely on right side
+  - **Implementation**: tournament.html:907-918 (UI), bracket-rendering.js:3422-3446 (Match Controls sync), results-config.js:304-308 (Config page sync)
+  - **User impact**: Users can toggle auto-open behavior directly from Match Controls without navigating to Config page. Setting is immediately available and stays in sync across both locations.
+
 ### Fixed: Config Page - Removed Auto-Save for Point Values and Match Configuration
 - **Point System and Match Configuration now require explicit Save button click**
   - **Removed auto-save behavior**: Deleted `setupConfigAutoSave()` function and all event listeners
