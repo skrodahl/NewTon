@@ -195,7 +195,7 @@
   - **User impact**: More intuitive project structure, easier navigation for developers and contributors
 
 ### Enhanced: Tournament Export - Automatic Transaction History Optimization
-- **Completed tournament exports now automatically optimize transaction history for reduced file size**
+- **Completed tournament exports now automatically optimize transaction history to reduce localStorage usage on import**
   - **Smart Pruning on Export**: Uses same algorithm as Developer Console to remove redundant transactions
   - **Conditional Optimization**: Only prunes when `tournament.status === 'completed'`
   - **Mid-Tournament Exports**: Preserve complete transaction history for backup/debugging purposes
@@ -205,11 +205,12 @@
     - Keeps only LAST ASSIGN_REFEREE transaction per completed match
     - Removes ALL START_MATCH transactions (redundant after completion)
     - Removes ALL STOP_MATCH transactions (redundant after completion)
-  - **Performance**: Typically removes 40-60% of transactions in completed tournaments
-  - **File Size Reduction**: Completed tournament exports are significantly smaller without losing critical match data
+  - **Storage Optimization**: Typically removes 40-60% of transactions in completed tournaments
+  - **Primary Benefit**: When importing a completed tournament, pruned history consumes significantly less localStorage space
+  - **Secondary Benefit**: Smaller JSON file size makes sharing and archiving more convenient
   - **Silent Operation**: No user notification, happens automatically during export
   - **Implementation**: tournament-management.js:100-192 (pruneTransactionHistory helper, modified exportTournament)
-  - **User impact**: Smaller export files for completed tournaments make sharing and archiving easier. Mid-tournament exports retain full history for safety and debugging. No manual pruning action required.
+  - **User impact**: Importing completed tournaments uses less localStorage space (helps prevent hitting 10 MB browser limits). Mid-tournament exports retain full history for safety and debugging. No manual pruning action required.
 
 ---
 

@@ -1,6 +1,6 @@
 # NewTon DC Tournament Manager
 
-**Version 2.5.1**
+**Version 3.0.0-beta**
 
 **NewTon DC Tournament Manager** is a Command & Control Center for running double-elimination darts tournaments.
 
