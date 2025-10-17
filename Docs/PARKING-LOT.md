@@ -6,6 +6,7 @@
 ## Next
 *Items ready for implementation*
 No Tournament state is unhandled. Handle it? Avoid it? Be able to un-load a tournament?
+Match timing statistics, Developer Console: Only display if state=active AND ! read-only
 
 ## Later
 *Not urgent but worth tracking*
