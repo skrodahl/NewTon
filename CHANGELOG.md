@@ -34,6 +34,30 @@
   - **Implementation**: lane-management.js:81-133 (enhanced validation), analytics.js:807-981 (detail view), analytics.js:233-240 (statistics), analytics.js:397-434 (quick overview), tournament.html:610 (click handler)
   - **User impact**: Tournament organizers can now catch duplicate lane assignments BEFORE matches start, preventing scheduling conflicts and improving tournament flow. Real-time monitoring shows exactly which lanes are free and which matches are using them.
 
+### Enhanced: Developer Console - Quick Overview Menu Link & Tournament Timing Statistics
+- **New "Quick Overview" menu link added to Statistics section for easy navigation**
+  - **Direct navigation**: "Quick Overview" now appears as first item in Statistics section of left pane
+  - **Always visible**: Provides permanent way to return to overview from any detailed view
+  - **Real-time tournament duration**: Shows "Duration: HH:MM:SS" (e.g., "Duration: 43:26")
+  - **Dynamic updates**: Duration refreshes every 2 seconds during active tournaments
+  - **Format variations**: "Duration: Not started" (setup), "Duration: 43:26" (active), "Duration: 3:45:12" (completed)
+  - **Complements existing navigation**: Works alongside "← Back to Overview" links in detail views
+- **New tournament timing statistics added to Quick Overview**
+  - **Tournament duration**: Total elapsed time from first match start
+    - **Dynamic during active tournament**: Updates every 2 seconds, calculated from first START_MATCH to current time (e.g., "43:26")
+    - **Static after completion**: Fixed historical value from first START_MATCH to last COMPLETE_MATCH (e.g., "3:45:12")
+    - **Setup state**: Shows "Not started" when no matches have begun
+    - **Undo-aware**: Clock resumes if Grand Final is undone, reverting tournament from completed to active state
+  - **Average match time**: Mean duration of all completed matches (e.g., "14:23")
+  - **Shortest match**: Fastest completed match with match ID (e.g., "8:15 (FS-1-2)")
+  - **Longest match**: Slowest completed match with match ID (e.g., "32:45 (BS-FINAL)")
+  - **Time format**: HH:MM:SS with hours omitted when zero (e.g., "14:23" instead of "0:14:23")
+  - **Seconds precision**: Shows exact match durations for accurate tournament pacing analysis
+  - **Separator line**: Timing statistics appear below health checks with visual separator for clear section distinction
+  - **Edge case handling**: Shows "N/A" when no completed matches exist, "0:XX" for test matches under 1 minute
+- **Implementation**: tournament.html:598-602 (menu link), analytics.js:251-257 (duration subtitle), analytics.js:404-497 (timing calculations), analytics.js:550-561 (timing display), Docs/ANALYTICS.md:80-94 (documentation)
+- **User impact**: Tournament duration visible at a glance in left menu, updating in real-time. Easy one-click access to Quick Overview from any view. Tournament organizers can now monitor tournament duration continuously, track match pacing, and identify fastest/slowest matches for scheduling insights.
+
 ### Enhanced: Developer Console - Match Progression View Redesign
 - **Complete Match Progression view redesign with side-by-side layout and improved readability**
   - **Two-column side-by-side layout**: Frontside and Backside brackets displayed in equal-width columns for maximum overview capability

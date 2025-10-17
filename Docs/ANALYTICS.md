@@ -77,6 +77,29 @@ The Developer Console opens as a large modal (75% screen width, 90% height) with
 
 All statistics are **clickable** - click to show detailed breakdown in right pane.
 
+### 0. Quick Overview
+**Display:** `Duration: HH:MM:SS`
+
+**Shows:** Real-time tournament duration
+
+**Examples:**
+- `Duration: Not started` - Tournament in setup state
+- `Duration: 43:26` - Active tournament, 43 minutes 26 seconds elapsed
+- `Duration: 3:45:12` - Completed tournament, 3 hours 45 minutes 12 seconds total
+
+**Dynamic behavior:**
+- Updates every 2 seconds during active tournaments
+- Becomes static when tournament completes
+- Resumes if Grand Final is undone (tournament reverts to active)
+
+**Click to view:** Complete health summary with match progress, transaction usage, active matches, and detailed conflict information
+
+**Purpose:** At-a-glance tournament health check - the most important diagnostic metric
+
+**Note:** This is the **default view** when Developer Console opens
+
+---
+
 ### 1. Transaction Health
 **Display:** `169/500 (34%) ✅`
 
@@ -526,6 +549,16 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 - Lane conflicts (LIVE): None/Count ✅/🔴
 - Lane conflicts (READY): None/Count ✅/⚠️
 - Referee conflicts: None/Count ✅/⚠️
+- **Tournament timing statistics** (below separator line):
+  - **Tournament duration**: Total elapsed time from first match start
+    - Dynamic during active tournament (e.g., "43:26" updates every 2 seconds)
+    - Static after completion (e.g., "3:45:12")
+    - Shows "Not started" in setup state
+  - **Average match time**: Mean duration of all completed matches (e.g., "14:23")
+  - **Shortest match**: Fastest match with ID (e.g., "8:15 (FS-1-2)")
+  - **Longest match**: Slowest match with ID (e.g., "32:45 (BS-FINAL)")
+  - All times in HH:MM:SS format (hours omitted when zero)
+  - Shows "N/A" when no completed matches exist
 
 **Color Coding:**
 - Green: All healthy, no issues detected
@@ -535,6 +568,12 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 **Design:** Flat design with three-level status-based color coding
 
 **Updates:** Every 2 seconds (auto-refresh)
+
+**Timing Behavior:**
+- Tournament duration dynamically updates during active tournaments
+- Clock stops when tournament completes (shows final duration)
+- Clock resumes if Grand Final is undone (tournament reverts to active state)
+- Calculates from START_MATCH and COMPLETE_MATCH transaction timestamps
 
 ---
 
@@ -1974,6 +2013,24 @@ If player drops out mid-tournament (not a no-show):
 
 ## Version History
 
+**v3.0.0-beta** - Quick Overview Menu Link & Tournament Timing Statistics
+- ✅ **Quick Overview menu link** - Direct access to overview
+  - Added "Quick Overview" as first item in Statistics section of left pane
+  - Always visible for easy navigation back to overview from any detailed view
+  - Shows real-time tournament duration: "Duration: HH:MM:SS"
+  - Dynamic duration updates every 2 seconds during active tournaments
+  - Format variations: "Duration: Not started" (setup), "Duration: 43:26" (active), "Duration: 3:45:12" (completed)
+  - Complements existing "← Back to Overview" links in detail views
+- ✅ **Tournament timing statistics** - Match and tournament duration tracking
+  - Tournament duration: Dynamic during active state (updates every 2 seconds), static after completion
+  - Average match time: Calculated from all completed matches
+  - Shortest match: Fastest completed match with match ID
+  - Longest match: Slowest completed match with match ID
+  - HH:MM:SS format with hours omitted when zero (e.g., "14:23" or "2:34:15")
+  - Undo-aware: Clock resumes if Grand Final undone
+  - Calculated from START_MATCH and COMPLETE_MATCH transaction timestamps
+  - Displays "N/A" when no completed matches exist
+
 **v2.6.0-beta** - Lane Usage Enhancements & Preventive Conflict Detection
 - ✅ **Lane Usage detail view** - Complete implementation
   - Clickable "Lane Usage" statistic now shows comprehensive lane breakdown
@@ -2013,7 +2070,7 @@ If player drops out mid-tournament (not a no-show):
   - Only processes completed matches (active matches untouched)
   - Safe operation - undo system unaffected (uses separate state snapshots)
 - ✅ **localStorage Usage statistic** - New monitoring capability
-  - Fifth statistic in left pane showing total usage vs 10 MB browser limit
+  - Sixth statistic in left pane showing total usage vs 10 MB browser limit
   - Color-coded indicators (green < 50%, amber 50-80%, red > 80%)
   - Detail view with breakdown by localStorage key
   - Sorted by size (largest first) with percentages
@@ -2040,7 +2097,7 @@ If player drops out mid-tournament (not a no-show):
   - Clear Log no longer changes main content view
 
 **v2.5.0** - Initial Developer Console implementation
-- Real-time statistics (4 metrics)
+- Real-time statistics (5 metrics)
 - 6 validation checks with enhanced console output
 - 8 commands/views (added Player Details view)
 - Console output capture with always-visible footer

@@ -247,6 +247,14 @@ function updateStatisticsPane() {
         const status = percentage < 50 ? '✅' : (percentage < 80 ? '⚠️' : '🔴');
         storageEl.innerHTML = `${storageStats.used.toFixed(2)}/${storageStats.limit} MB ${status}`;
     }
+
+    // Update Quick Overview (tournament duration)
+    const overviewEl = document.getElementById('stat-overview');
+    if (overviewEl) {
+        // Get tournament duration
+        const timingStats = getTournamentTimingStats();
+        overviewEl.innerHTML = `Duration: ${timingStats.tournamentDuration}`;
+    }
 }
 
 /**
@@ -381,6 +389,104 @@ function getLocalStorageStats() {
 // ============================================================================
 
 /**
+ * Calculate tournament timing statistics from transaction history
+ */
+function getTournamentTimingStats() {
+    const history = getTournamentHistory ? getTournamentHistory() : [];
+    const status = tournament?.status || 'setup';
+
+    // Find all START_MATCH and COMPLETE_MATCH transactions
+    const startTxns = history.filter(t => t.type === 'START_MATCH');
+    const completeTxns = history.filter(t => t.type === 'COMPLETE_MATCH');
+
+    if (completeTxns.length === 0) {
+        return {
+            tournamentDuration: status === 'setup' ? 'Not started' : '0m',
+            avgMatchTime: 'N/A',
+            shortestMatch: 'N/A',
+            longestMatch: 'N/A'
+        };
+    }
+
+    // Calculate match durations
+    const matchDurations = [];
+    completeTxns.forEach(completeTxn => {
+        const matchId = completeTxn.matchId;
+        // Find corresponding START_MATCH
+        const startTxn = startTxns.find(t => t.matchId === matchId);
+        if (startTxn) {
+            const startTime = new Date(startTxn.timestamp);
+            const endTime = new Date(completeTxn.timestamp);
+            const durationMs = endTime - startTime;
+            matchDurations.push({
+                matchId: matchId,
+                duration: durationMs,
+                durationMinutes: Math.round(durationMs / 1000 / 60)
+            });
+        }
+    });
+
+    // Calculate tournament duration
+    let tournamentDuration = 'N/A';
+    if (startTxns.length > 0) {
+        const firstStart = new Date(Math.min(...startTxns.map(t => new Date(t.timestamp))));
+        let endTime;
+
+        if (status === 'completed') {
+            // Use last COMPLETE_MATCH timestamp
+            endTime = new Date(Math.max(...completeTxns.map(t => new Date(t.timestamp))));
+        } else {
+            // Use current time (dynamic)
+            endTime = new Date();
+        }
+
+        const totalMs = endTime - firstStart;
+        tournamentDuration = formatDuration(totalMs);
+    }
+
+    // Calculate average match time
+    let avgMatchTime = 'N/A';
+    if (matchDurations.length > 0) {
+        const avgMs = matchDurations.reduce((sum, m) => sum + m.duration, 0) / matchDurations.length;
+        avgMatchTime = formatDuration(avgMs);
+    }
+
+    // Find shortest and longest matches
+    let shortestMatch = 'N/A';
+    let longestMatch = 'N/A';
+    if (matchDurations.length > 0) {
+        const shortest = matchDurations.reduce((min, m) => m.duration < min.duration ? m : min);
+        const longest = matchDurations.reduce((max, m) => m.duration > max.duration ? m : max);
+        shortestMatch = `${formatDuration(shortest.duration)} (${shortest.matchId})`;
+        longestMatch = `${formatDuration(longest.duration)} (${longest.matchId})`;
+    }
+
+    return {
+        tournamentDuration,
+        avgMatchTime,
+        shortestMatch,
+        longestMatch
+    };
+}
+
+/**
+ * Format duration from milliseconds to HH:MM:SS string
+ */
+function formatDuration(ms) {
+    const totalSeconds = Math.floor(ms / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
+
+    // Always show hours if > 0, otherwise start with minutes
+    if (hours > 0) {
+        return `${hours}:${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+    } else {
+        return `${minutes}:${String(seconds).padStart(2, '0')}`;
+    }
+}
+
+/**
  * Show Quick Overview (default view)
  */
 function showQuickOverview() {
@@ -390,6 +496,7 @@ function showQuickOverview() {
     const matchStats = getMatchStateStats();
     const laneStats = getLaneStats();
     const validation = validateLaneAssignments ? validateLaneAssignments() : { valid: true };
+    const timingStats = getTournamentTimingStats();
 
     const transactionPercentage = Math.round((stats.total / 500) * 100);
     const matchPercentage = matchStats.total > 0 ? Math.round((matchStats.completed / matchStats.total) * 100) : 0;
@@ -431,6 +538,18 @@ function showQuickOverview() {
                 </div>
                 <div style="margin: 8px 0;">
                     <strong>Referee conflicts:</strong> ${refereeHasConflicts ? `⚠️ ${refereeValidation.conflicts.length}` : '✅ None'}
+                </div>
+                <div style="margin: 16px 0 8px 0; padding-top: 12px; border-top: 1px solid #ddd;">
+                    <strong>Tournament duration:</strong> ${timingStats.tournamentDuration}
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Average match time:</strong> ${timingStats.avgMatchTime}
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Shortest match:</strong> ${timingStats.shortestMatch}
+                </div>
+                <div style="margin: 8px 0;">
+                    <strong>Longest match:</strong> ${timingStats.longestMatch}
                 </div>
             </div>
         </div>
