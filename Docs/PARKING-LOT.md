@@ -5,6 +5,7 @@
 
 ## Next
 *Items ready for implementation*
+No Tournament state is unhandled. Handle it? Avoid it? Be able to un-load a tournament?
 
 ## Later
 *Not urgent but worth tracking*
