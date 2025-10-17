@@ -1206,9 +1206,9 @@ function updateTournamentWatermark() {
             const currentTime = `${hours}:${minutes}`;
 
             watermark.innerHTML = `
-                <div class="cad-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>${truncatedName}</span>
-                    <span id="cad-clock">${currentTime}</span>
+                <div class="cad-header-container">
+                    <div class="cad-header-title">${truncatedName}</div>
+                    <div class="cad-header-clock" id="cad-clock">${currentTime}</div>
                 </div>
                 <div class="cad-grid">
                     <div class="cad-cell cad-format">${formatText}</div>
@@ -1245,9 +1245,9 @@ function updateTournamentWatermark() {
             const currentTime = `${hours}:${minutes}`;
 
             watermark.innerHTML = `
-                <div class="cad-header" style="display: flex; justify-content: space-between; align-items: center;">
-                    <span>NO TOURNAMENT</span>
-                    <span id="cad-clock">${currentTime}</span>
+                <div class="cad-header-container">
+                    <div class="cad-header-title">NO TOURNAMENT</div>
+                    <div class="cad-header-clock" id="cad-clock">${currentTime}</div>
                 </div>
                 <div class="cad-grid">
                     <div class="cad-cell cad-format">-</div>

@@ -574,15 +574,30 @@ body {
 }
 
 /* CAD Title Block Structure */
-#watermark-right .cad-header {
+#watermark-right .cad-header-container {
+  display: flex;
   background: #ecf0f1;
   border-bottom: 1px solid #34495e;
+}
+
+#watermark-right .cad-header-title {
+  flex: 1;
   padding: 7px 10px;
   text-align: left;
   font-weight: 600;
   font-size: 12px;
   color: #2c3e50;
   letter-spacing: 1px;
+}
+
+#watermark-right .cad-header-clock {
+  width: auto;
+  padding: 7px 10px;
+  text-align: center;
+  font-weight: 600;
+  font-size: 12px;
+  color: #2c3e50;
+  border-left: 1px solid #34495e;
 }
 
 #watermark-right .cad-grid {
