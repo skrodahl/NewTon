@@ -539,6 +539,7 @@ function showQuickOverview() {
                 <div style="margin: 8px 0;">
                     <strong>Referee conflicts:</strong> ${refereeHasConflicts ? `⚠️ ${refereeValidation.conflicts.length}` : '✅ None'}
                 </div>
+                ${!tournament.readOnly ? `
                 <div style="margin: 16px 0 8px 0; padding-top: 12px; border-top: 1px solid #ddd;">
                     <strong>Tournament duration:</strong> ${timingStats.tournamentDuration}
                 </div>
@@ -551,6 +552,7 @@ function showQuickOverview() {
                 <div style="margin: 8px 0;">
                     <strong>Longest match:</strong> ${timingStats.longestMatch}
                 </div>
+                ` : ''}
             </div>
         </div>
     `;
