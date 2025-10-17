@@ -1268,54 +1268,13 @@ When clicking "Lane Usage", shows:
 
 ### 3. Validation UX Improvements
 
-**Status**: ✅ **Partially Implemented** - Console output added in v2.5.0
+**Status**: ✅ **IMPLEMENTED** - Console output added in v2.5.0
 
 **Implemented in v2.5.0:**
 - ✅ "Validate Everything" now logs summary to console footer
 - ✅ Individual check results with ✅/⚠️ icons in console
 - ✅ Failure details logged with indentation
 - ✅ Pass/fail counts displayed
-
-**Remaining Improvements:**
-
-#### Add Validation Status to Statistics
-```
-Lane Usage
-0/8 in use ✅ (validated 11:38:45)
-
-Transaction Health
-93/500 (19%) ✅ (validated 11:38:45)
-```
-
-#### Enhanced Validation Results Display
-```
-Validation Results (ran at 11:38:45 PM)
-
-✅ Lane Assignments: No conflicts
-✅ Referee Assignments: No conflicts
-⚠️ Match State Integrity: 2 issues detected
-   - FS-2-1: Completed but missing winner
-   - BS-1-3: Completed but missing loser
-✅ Transaction Count: 93/500 (healthy)
-✅ Player ID Integrity: All valid
-✅ Progression Integrity: All valid
-
-Overall Status: ⚠️ 2 issues require attention
-
-[Re-run Validation] [Export Report] [Back to Overview]
-```
-
-#### Validation Timing Options
-Consider adding:
-- **Manual validation**: User clicks "Run Validation" (current behavior)
-- **Auto-validation on open**: Run validation when Developer Console opens (initial health check)
-- **Periodic validation**: Run automatically every 2 seconds with stats refresh (shows issues immediately)
-
-**Benefits:**
-- Clear visibility of when validation last ran
-- Actionable results with specific issue descriptions
-- Export capability for bug reports
-- Overall health status at a glance
 
 ---
 
@@ -1994,21 +1953,13 @@ If player drops out mid-tournament (not a no-show):
 - ✅ Validation console output (Fix 3 - partial)
 - ✅ Lane usage calculation respects excluded lanes
 
-**High Priority** (Most Impact):
-1. Enhanced validation status display (Fix 3 - remaining) - Timestamps and overall status
-
 **Medium Priority** (Nice to Have):
 2. Menu reorganization (Fix 4) - Improves discoverability
 3. Enhanced validation checks (Fix 6) - Adds more diagnostic capability
 
 **Low Priority** (Future Enhancements):
-7. **Force Save Tournament command** (Fix 11b) - Redundant but provides peace of mind
-8. **Replace Player with BYE command** (Fix 11d) - Complex edge case, needs design discussion
-9. Console output enhancements (Fix 5) - Current behavior acceptable
-10. Export and reporting (Fix 7) - Useful but not critical
-11. Performance optimizations (Fix 8) - Only needed for very large tournaments
-12. Second monitor sync command (Fix 9) - Quality-of-life feature, workaround exists
-13. Improved match progression visuals (Fix 10) - Purely visual/UX enhancement
+5. Console output enhancements (Fix 5) - Current behavior acceptable
+9. Second monitor sync command (Fix 9) - Quality-of-life feature, workaround exists
 
 ---
 
