@@ -171,8 +171,8 @@ const HELP_CONTENT = {
                         <li><strong>Mouse:</strong> Click and drag to pan around the bracket</li>
                         <li><strong>Zoom:</strong> Use + and - buttons or mouse wheel</li>
                         <li><strong>Hover Zoom:</strong> When zoomed out, hover over any match for 1 second to automatically scale it to readable size</li>
-                        <li><strong>Players/Points (⬅):</strong> Exit the tournament view</li>
-                        <li><strong>Stats/Results (≡):</strong> View tournament statistics, rankings, and detailed results</li>
+                        <li><strong>Registration (⬅):</strong> Exit the tournament view</li>
+                        <li><strong>Statistics (≡):</strong> View tournament statistics, rankings, and detailed results</li>
                         <li><strong>Reset (⌂):</strong> Return to default view</li>
                         <li><strong>Match Controls (➹):</strong> Manage LIVE and ready matches - start, complete, assign lanes/referees</li>
                     </ul>

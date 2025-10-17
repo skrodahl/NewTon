@@ -138,12 +138,31 @@
   - **Implementation**: tournament.html:907-918 (UI), bracket-rendering.js:3422-3446 (Match Controls sync), results-config.js:304-308 (Config page sync)
   - **User impact**: Users can toggle auto-open behavior directly from Match Controls without navigating to Config page. Setting is immediately available and stays in sync across both locations.
 
+### Enhanced: Tournament Page - Navigation Buttons for Quick Page Access
+- **Five navigation buttons added to Tournament page for easy access to other pages**
+  - **Button layout**: Positioned in top-left corner, stacked vertically
+    - **Top row**: Statistics, Match Controls (green)
+    - **Middle row**: Setup, Registration, Config (stacked vertically below)
+  - **Button styling**: 150px width, consistent dark background with white text
+    - Left-aligned icons (≡, ➹, ⬅) with 20px fixed width
+    - Centered button text with balanced padding (32px left, 12px right)
+    - Statistics button opens Statistics modal
+    - Match Controls button opens Match Controls modal (green highlight)
+    - Setup/Registration/Config buttons navigate to respective pages using `showPage()`
+  - **Visual consistency**: All buttons use `.nav-btn` class with unified icon/text layout
+    - Icons positioned absolutely at left: 12px
+    - Text centered in remaining button space
+  - **Rationale**: Direct navigation from Tournament page improves workflow - operators can quickly access Setup, Registration, Config, or view Statistics without returning to main navigation
+  - **Implementation**: tournament.html:203-222 (button structure), css/styles.css:504-525 (navigation button styling), dynamic-help-system.js:174-177 (help text updates)
+  - **User impact**: Tournament operators can navigate between all major pages directly from the bracket view, reducing clicks and improving tournament management efficiency.
+
 ### Enhanced: Real-Time Clocks for Fullscreen Tournament Operation
 - **Two clocks added for tournament operators running in fullscreen mode**
   - **Match Controls clock**: Displayed in top-right corner of Match Controls modal title bar
     - Format: 24-hour HH:MM (e.g., "23:05")
     - Updates every 10 seconds automatically
     - Visual styling: 1px gray border (#ccc), 8px vertical padding, 16px horizontal padding, 6px border radius
+    - Monospace font (SF Mono, Consolas, Monaco, Menlo) for stable width
     - Normal font weight to distinguish from bold title text
     - Right-aligned using flexbox layout
   - **Status Panel clock**: Displayed in tournament watermark header (bottom-right box)
