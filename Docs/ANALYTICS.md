@@ -550,6 +550,7 @@ Clicking **"Validate Everything"** runs 6 comprehensive checks and displays resu
 - Lane conflicts (READY): None/Count ✅/⚠️
 - Referee conflicts: None/Count ✅/⚠️
 - **Tournament timing statistics** (below separator line):
+  - **Note**: This section is **hidden for read-only tournaments** (completed tournaments loaded from Recent Tournaments)
   - **Tournament duration**: Total elapsed time from first match start
     - Dynamic during active tournament (e.g., "43:26" updates every 2 seconds)
     - Static after completion (e.g., "3:45:12")
@@ -2030,6 +2031,7 @@ If player drops out mid-tournament (not a no-show):
   - Undo-aware: Clock resumes if Grand Final undone
   - Calculated from START_MATCH and COMPLETE_MATCH transaction timestamps
   - Displays "N/A" when no completed matches exist
+  - **Hidden for read-only tournaments**: Entire timing section omitted for completed tournaments loaded from Recent Tournaments (timing data cannot be trusted for historical imports)
 
 **v2.6.0-beta** - Lane Usage Enhancements & Preventive Conflict Detection
 - ✅ **Lane Usage detail view** - Complete implementation

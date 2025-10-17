@@ -55,8 +55,12 @@
   - **Seconds precision**: Shows exact match durations for accurate tournament pacing analysis
   - **Separator line**: Timing statistics appear below health checks with visual separator for clear section distinction
   - **Edge case handling**: Shows "N/A" when no completed matches exist, "0:XX" for test matches under 1 minute
-- **Implementation**: tournament.html:598-602 (menu link), analytics.js:251-257 (duration subtitle), analytics.js:404-497 (timing calculations), analytics.js:550-561 (timing display), Docs/ANALYTICS.md:80-94 (documentation)
-- **User impact**: Tournament duration visible at a glance in left menu, updating in real-time. Easy one-click access to Quick Overview from any view. Tournament organizers can now monitor tournament duration continuously, track match pacing, and identify fastest/slowest matches for scheduling insights.
+  - **Read-only tournament handling**: Timing statistics section hidden for read-only tournaments (completed tournaments loaded from Recent Tournaments)
+    - **Rationale**: Read-only tournaments are historical imports where timing data cannot be trusted or verified
+    - **Active completed tournaments**: Timing stats remain visible for tournaments completed during current session
+    - **Clean presentation**: Entire timing section (including separator) omitted for read-only imports
+- **Implementation**: tournament.html:598-602 (menu link), analytics.js:251-257 (duration subtitle), analytics.js:404-497 (timing calculations), analytics.js:542-555 (conditional timing display), Docs/ANALYTICS.md:80-94 (documentation)
+- **User impact**: Tournament duration visible at a glance in left menu, updating in real-time. Easy one-click access to Quick Overview from any view. Tournament organizers can now monitor tournament duration continuously, track match pacing, and identify fastest/slowest matches for scheduling insights. Read-only tournaments keep Quick Overview focused on relevant validation data.
 
 ### Enhanced: Developer Console - Match Progression View Redesign
 - **Complete Match Progression view redesign with side-by-side layout and improved readability**
