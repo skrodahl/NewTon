@@ -257,7 +257,9 @@ function setupEventListeners() {
     document.querySelectorAll('.nav-btn').forEach(btn => {
         btn.addEventListener('click', function () {
             const page = this.dataset.page;
-            showPage(page);
+            if (page) {  // Only call showPage if data-page attribute exists
+                showPage(page);
+            }
         });
     });
 
