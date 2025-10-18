@@ -156,6 +156,24 @@
   - **Implementation**: tournament.html:203-222 (button structure), css/styles.css:504-525 (navigation button styling), dynamic-help-system.js:174-177 (help text updates)
   - **User impact**: Tournament operators can navigate between all major pages directly from the bracket view, reducing clicks and improving tournament management efficiency.
 
+### Enhanced: Navigation Menu - Sliding Underline Indicator
+- **Animated sliding underline added to main navigation menu for polished visual feedback**
+  - **Sliding underline animation**: 1px black line smoothly transitions between active menu items
+    - 0.3s CSS transition with easing for responsive, elegant movement
+    - Pixel-perfect alignment under each menu item (Setup, Registration, Tournament, Config)
+    - Uses CSS `:has()` selector for pure CSS implementation (no JavaScript required)
+  - **Consistent menu styling**: Removed color and font-weight changes from active menu items
+    - All menu items stay same color (`#444444` default, `#222222` on hover)
+    - All menu items maintain `font-weight: 400` (no bold text causing layout shift)
+    - Active state indicated solely by animated underline
+  - **Removed button focus outlines**: Eliminated blue focus outline from all button types
+    - Removed outline from `.btn`, `.zoom-btn`, and `.nav-btn` buttons
+    - Cleaner interface without persistent blue glow after clicking
+    - Buttons return to neutral state immediately after interaction
+  - **Rationale**: Sliding underline provides modern, sophisticated navigation feedback without causing layout shifts or visual noise. Removing focus outlines eliminates visual artifacts while maintaining clean, professional appearance.
+  - **Implementation**: css/styles.css:108-147 (sliding underline), css/styles.css:164-167 (active state), css/styles.css:271-276 (focus outline removal)
+  - **User impact**: Navigation feels more polished and modern with smooth animated feedback. Menu bar no longer shifts position when changing pages. Buttons throughout the application have cleaner, more professional appearance without blue focus artifacts.
+
 ### Enhanced: Real-Time Clocks for Fullscreen Tournament Operation
 - **Two clocks added for tournament operators running in fullscreen mode**
   - **Match Controls clock**: Displayed in top-right corner of Match Controls modal title bar

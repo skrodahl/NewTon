@@ -105,6 +105,45 @@ body {
   justify-content: flex-start;
   flex-wrap: wrap;
   position: relative;
+  padding-bottom: 8px;
+}
+
+/* Sliding underline indicator */
+.nav::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 1px;
+  background: #222222;
+  transition: all 0.3s ease;
+  width: 0;
+  opacity: 0;
+}
+
+/* Position underline based on active button */
+.nav:has(.nav-btn:nth-child(1).active)::after {
+  width: 41px; /* Width of "Setup" */
+  left: 0;
+  opacity: 1;
+}
+
+.nav:has(.nav-btn:nth-child(2).active)::after {
+  width: 87px; /* Width of "Registration" */
+  left: calc(42px + 32px); /* Previous button width + gap */
+  opacity: 1;
+}
+
+.nav:has(.nav-btn:nth-child(3).active)::after {
+  width: 91px; /* Width of "Tournament" */
+  left: calc(42px + 32px + 87px + 32px); /* Sum of previous widths + gaps */
+  opacity: 1;
+}
+
+.nav:has(.nav-btn:nth-child(4).active)::after {
+  width: 49px; /* Width of "Config" */
+  left: calc(42px + 32px + 87px + 32px + 82px + 32px); /* Sum of previous widths + gaps */
+  opacity: 1;
 }
 
 .nav-btn {
@@ -123,8 +162,8 @@ body {
 }
 
 .nav-btn.active {
-  color: rgba(180, 83, 9, 1);
-  font-weight: 700;
+  color: #222222;
+  font-weight: 400;
 }
 
 .header-tournament-status {
