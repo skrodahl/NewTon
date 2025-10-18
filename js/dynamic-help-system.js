@@ -164,19 +164,30 @@ const HELP_CONTENT = {
                 `
             },
             navigation: {
-                title: "Bracket Navigation",
+                title: "Bracket Navigation & Quick Access",
                 content: `
+                    <p><strong>Top-Left Navigation Buttons:</strong></p>
+                    <ul>
+                        <li><strong>Statistics (≡):</strong> View tournament statistics, rankings, and detailed results</li>
+                        <li><strong>Match Controls (➹):</strong> Manage LIVE and ready matches - start, complete, assign lanes/referees</li>
+                        <li><strong>Setup (⬅):</strong> Return to Setup page for tournament management</li>
+                        <li><strong>Registration (⬅):</strong> Navigate to Registration page to manage players</li>
+                        <li><strong>Config (⬅):</strong> Access Config page for point values and match formats</li>
+                    </ul>
                     <p><strong>Bracket Controls:</strong></p>
                     <ul>
                         <li><strong>Mouse:</strong> Click and drag to pan around the bracket</li>
                         <li><strong>Zoom:</strong> Use + and - buttons or mouse wheel</li>
                         <li><strong>Hover Zoom:</strong> When zoomed out, hover over any match for 1 second to automatically scale it to readable size</li>
-                        <li><strong>Registration (⬅):</strong> Exit the tournament view</li>
-                        <li><strong>Statistics (≡):</strong> View tournament statistics, rankings, and detailed results</li>
                         <li><strong>Reset (⌂):</strong> Return to default view</li>
-                        <li><strong>Match Controls (➹):</strong> Manage LIVE and ready matches - start, complete, assign lanes/referees</li>
                     </ul>
-                    <p><strong>💡 Tip:</strong> Use zoom controls to focus on active areas, or hover over individual matches when zoomed out to read them clearly.</p>
+                    <p><strong>Developer Console:</strong></p>
+                    <ul>
+                        <li><strong>Enable in Config page:</strong> Turn on "Enable Developer Analytics"</li>
+                        <li><strong>Access:</strong> Click version number (bottom-right watermark) on Tournament page</li>
+                        <li><strong>Features:</strong> Real-time statistics, validation checks, lane usage monitoring, transaction management, and developer commands</li>
+                    </ul>
+                    <p><strong>💡 Tip:</strong> Use the top-left navigation buttons to quickly access other pages without leaving the bracket view.</p>
                 `
             },
             matches: {
