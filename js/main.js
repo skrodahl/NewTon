@@ -286,7 +286,12 @@ function showPage(pageId) {
     });
 
     document.getElementById(pageId).classList.add('active');
-    document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+
+    // Only update nav button if it exists (may not exist when navigating from Tournament page)
+    const navBtn = document.querySelector(`[data-page="${pageId}"]`);
+    if (navBtn) {
+        navBtn.classList.add('active');
+    }
 }
 
 // AUTO-LOAD CURRENT TOURNAMENT - Never loads config, only tournament data
@@ -390,7 +395,12 @@ function showPage(pageId) {
     });
 
     document.getElementById(pageId).classList.add('active');
-    document.querySelector(`[data-page="${pageId}"]`).classList.add('active');
+
+    // Only update nav button if it exists (may not exist when navigating from Tournament page)
+    const navBtn = document.querySelector(`[data-page="${pageId}"]`);
+    if (navBtn) {
+        navBtn.classList.add('active');
+    }
 
     // Update match history when showing setup page
     if (pageId === 'setup') {
