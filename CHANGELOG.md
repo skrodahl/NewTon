@@ -273,7 +273,11 @@
 - **Complete redesign with Frontside/Backside visual separation for better tournament flow visibility**
   - **Two-column layout**: Match cards split into Frontside (left) and Backside (right) columns for both LIVE and Ready to Start sections
   - **Visual separation**: 2px vertical separator line between columns for clear bracket side distinction
-  - **Modal sizing**: Increased to 80% width and 90% height for maximum screen utilization
+  - **Modal sizing**: Maximized vertical space with 98vh max-height and 1% top margin for optimal screen utilization on all display sizes
+    - **Height optimization**: Changed from 80vh to 98vh max-height, gaining ~18% more vertical space for match display
+    - **Positioning**: Reduced top margin from 5% to 1%, allowing modal to sit higher and extend nearly full viewport height
+    - **Lower resolution support**: Critical improvement for laptops and smaller monitors (1366x768, 1280x720) where vertical space is premium
+    - **Active tournament benefit**: Can display more LIVE and READY matches simultaneously without scrolling during busy tournament periods
   - **Referee sidebar optimization**: Fixed 350px width (user-adjustable via CSS) instead of flex-based, providing more space for match cards
   - **Tournament completion centering**: Celebration card constrained to 800px max-width and horizontally centered
   - **Setup mode input**: "Add Player" field constrained to 400px max-width for better proportions
@@ -284,7 +288,7 @@
   - **At-a-glance visibility**: Operators can instantly see both bracket sides simultaneously without scrolling
   - **Smart grouping**: Grand Final appears in Frontside column, BS-FINAL in Backside column
   - **Independent sorting**: Each column maintains proper round progression order (FS-R1, FS-R2... and BS-R1, BS-R2...)
-  - **Implementation**: bracket-rendering.js:3150-3285 (two-column rendering logic), bracket-rendering.js:3578-3584 (celebration width), bracket-rendering.js:3082-3086 (width reset), tournament.html:774 (modal dimensions), styles.css:1772 (referee sidebar width), styles.css:1391 (celebration centering)
+  - **Implementation**: bracket-rendering.js:3150-3285 (two-column rendering logic), bracket-rendering.js:3578-3584 (celebration width), bracket-rendering.js:3082-3086 (width reset), tournament.html:774 (modal dimensions), styles.css:1816-1822 (modal height optimization), styles.css:1772 (referee sidebar width), styles.css:1391 (celebration centering)
   - **User impact**: Tournament operators gain significantly improved spatial awareness of tournament state, can manage both bracket sides efficiently, and make faster operational decisions during active tournaments. Celebration view is optimally sized for comfortable viewing.
 
 ### Fixed: Undo System - Complete Match State Restoration & Resource Clearing

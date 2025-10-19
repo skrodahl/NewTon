@@ -1816,7 +1816,8 @@ a:hover { color: #1e40af; }
 .match-controls-modal {
   display: flex !important;
   flex-direction: column !important;
-  max-height: 80vh !important;
+  margin: 1% auto !important;
+  max-height: 98vh !important;
   overflow: hidden !important;
 }
 
