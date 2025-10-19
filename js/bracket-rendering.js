@@ -3079,6 +3079,12 @@ function showCommandCenterModal(matchData) {
             }
         }
 
+        // Reset modal width to 90% for setup/active states (celebration sets to 65%)
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent && (tournament.status === 'setup' || tournament.status === 'active')) {
+            modalContent.style.width = '90%';
+        }
+
         switch (tournament.status) {
             case 'setup':
                 // Tournament in setup - show enhanced setup interface
@@ -3562,10 +3568,19 @@ if (typeof window !== 'undefined') {
 function showTournamentCelebration() {
     const celebrationDiv = document.getElementById('tournamentCelebration');
     const refereeSuggestionsContainer = document.querySelector('.referee-suggestions-container');
+    const modal = document.getElementById('matchCommandCenterModal');
 
     if (!celebrationDiv || !tournament || !tournament.placements) {
         console.error('Cannot show celebration: missing elements or tournament data');
         return;
+    }
+
+    // Set modal width to 75% for celebration view
+    if (modal) {
+        const modalContent = modal.querySelector('.modal-content');
+        if (modalContent) {
+            modalContent.style.width = '75%';
+        }
     }
 
     // Show the celebration container

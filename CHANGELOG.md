@@ -277,11 +277,12 @@
   - **Referee sidebar optimization**: Fixed 350px width (user-adjustable via CSS) instead of flex-based, providing more space for match cards
   - **Tournament completion centering**: Celebration card constrained to 800px max-width and horizontally centered
   - **Setup mode input**: "Add Player" field constrained to 400px max-width for better proportions
+  - **Dynamic width adjustment**: Modal width automatically adjusts to 75% when showing tournament completion celebration (from standard 90%), then resets to 90% when tournament returns to setup/active state
   - **At-a-glance visibility**: Operators can instantly see both bracket sides simultaneously without scrolling
   - **Smart grouping**: Grand Final appears in Frontside column, BS-FINAL in Backside column
   - **Independent sorting**: Each column maintains proper round progression order (FS-R1, FS-R2... and BS-R1, BS-R2...)
-  - **Implementation**: bracket-rendering.js:3150-3285 (two-column rendering logic), tournament.html:774 (modal dimensions), styles.css:1772 (referee sidebar width), styles.css:1391 (celebration centering)
-  - **User impact**: Tournament operators gain significantly improved spatial awareness of tournament state, can manage both bracket sides efficiently, and make faster operational decisions during active tournaments
+  - **Implementation**: bracket-rendering.js:3150-3285 (two-column rendering logic), bracket-rendering.js:3578-3584 (celebration width), bracket-rendering.js:3082-3086 (width reset), tournament.html:774 (modal dimensions), styles.css:1772 (referee sidebar width), styles.css:1391 (celebration centering)
+  - **User impact**: Tournament operators gain significantly improved spatial awareness of tournament state, can manage both bracket sides efficiently, and make faster operational decisions during active tournaments. Celebration view is optimally sized for comfortable viewing.
 
 ### Fixed: Undo System - Complete Match State Restoration & Resource Clearing
 - **Match undo now properly clears ALL assignments and returns match to completely clean state**
