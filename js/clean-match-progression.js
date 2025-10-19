@@ -1566,7 +1566,11 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     }
 
     // Use dialog stack to show modal
-    pushDialog('winnerConfirmModal', () => showWinnerConfirmation(matchId, winner, loser, onConfirm));
+    // Don't reinitialize on restore - just show the modal to preserve input values
+    pushDialog('winnerConfirmModal', () => {
+        const modal = document.getElementById('winnerConfirmModal');
+        if (modal) modal.style.display = 'block';
+    }, true); // Enable Escape key via dialog stack
 
     // Focus cancel button by default
     setTimeout(() => {
@@ -1666,15 +1670,14 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     };
 
     const handleKeyPress = (e) => {
-        if (e.key === 'Escape') {
-            handleCancel();
-        } else if (e.key === 'Enter') {
+        if (e.key === 'Enter') {
             // Only confirm if validation passes
             const validation = validateInputs();
             if (validation.valid) {
                 handleConfirm();
             }
         }
+        // Escape key handled by dialog stack
     };
 
     // Remove any existing event listeners first (in case this is a restoration)
@@ -2186,46 +2189,38 @@ function debugHistory() {
 }
 
 /**
- * Open stats modal from winner confirmation dialog with proper z-index handling
+ * Open stats modal from winner confirmation dialog using dialog stack
  */
 function openStatsModalFromConfirmation(playerId, matchId) {
-    // Save current leg score values before hiding modal
+    // Save current leg score values
     const winnerLegsInput = document.getElementById('winnerLegs');
     const loserLegsInput = document.getElementById('loserLegs');
     const savedWinnerLegs = winnerLegsInput ? winnerLegsInput.value : '';
     const savedLoserLegs = loserLegsInput ? loserLegsInput.value : '';
 
-    // Temporarily hide the winner confirmation modal
-    const winnerModal = document.getElementById('winnerConfirmModal');
-    if (winnerModal) {
-        winnerModal.style.display = 'none';
-    }
-
-    // Open stats modal
+    // Open stats modal - dialog stack will handle hiding winner modal
     openStatsModal(playerId);
 
-    // Override the stats modal close function to return to winner confirmation
+    // Override closeStatsModal to restore input values after dialog stack restoration
     const originalClose = window.closeStatsModal;
-    window.closeStatsModal = function () {
-        // Call original close function
+    window.closeStatsModal = function() {
+        // Call original close (which calls popDialog)
         if (originalClose) {
             originalClose();
         }
 
-        // Show winner confirmation modal again
-        if (winnerModal) {
-            winnerModal.style.display = 'block';
-        }
-
-        // Restore the saved leg score values
-        const winnerLegsInputRestore = document.getElementById('winnerLegs');
-        const loserLegsInputRestore = document.getElementById('loserLegs');
-        if (winnerLegsInputRestore && savedWinnerLegs !== '') {
-            winnerLegsInputRestore.value = savedWinnerLegs;
-        }
-        if (loserLegsInputRestore && savedLoserLegs !== '') {
-            loserLegsInputRestore.value = savedLoserLegs;
-        }
+        // Restore input values after dialog stack has restored winner modal
+        // Use setTimeout to run after dialog stack's restore function completes
+        setTimeout(() => {
+            const winnerLegsInputRestore = document.getElementById('winnerLegs');
+            const loserLegsInputRestore = document.getElementById('loserLegs');
+            if (winnerLegsInputRestore && savedWinnerLegs !== '') {
+                winnerLegsInputRestore.value = savedWinnerLegs;
+            }
+            if (loserLegsInputRestore && savedLoserLegs !== '') {
+                loserLegsInputRestore.value = savedLoserLegs;
+            }
+        }, 0);
 
         // Restore original close function
         window.closeStatsModal = originalClose;
