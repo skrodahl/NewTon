@@ -473,6 +473,16 @@
   - **Implementation**: Removed `animation: pulse 2s infinite` from `.match-live` in css/styles.css:844
   - **User impact**: Consistent, smooth hover zoom behavior across all match states. Cleaner, more professional tournament bracket interaction.
 
+### Enhanced: Tournament Bracket - READY Match Border Color
+- **READY match border changed to yellow-gold for better visual distinction**
+  - Border color changed from dark brown (`rgba(180, 83, 9, 0.9)`) to yellow-gold (`rgba(240, 196, 25, 0.9)`)
+  - Yellow-gold border complements the yellow gradient interior and clearly distinguishes READY matches from LIVE matches (orange)
+  - Maintains 90% opacity for subtle transparency consistent with original design
+  - Hover state changes to fully opaque yellow-gold for clear interaction feedback
+  - **Rationale**: With pulse animation removed from LIVE matches, the dark brown READY border was too similar to LIVE orange border, causing visual confusion
+  - **Implementation**: Updated `.match-ready` border colors in css/styles.css:831-836
+  - **User impact**: Clear visual hierarchy across match states - yellow for READY, orange for LIVE. More intuitive and cohesive bracket appearance.
+
 ---
 
 # 2025-10-12

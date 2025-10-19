@@ -828,12 +828,12 @@ body {
 
 .bracket-match.match-ready {
   background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border-color: rgba(180, 83, 9, 0.9);
+  border-color: rgba(240, 196, 25, 0.9);
   border-width: 3px;
 }
 .bracket-match.match-ready:hover {
-  border-color: rgba(180, 83, 9, 1);
-  box-shadow: 0 8px 22px rgba(180, 83, 9, 0.35);
+  border-color: rgba(240, 196, 25, 1);
+  box-shadow: 0 8px 22px rgba(240, 196, 25, 0.35);
 }
 
 .bracket-match.match-live,
