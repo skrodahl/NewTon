@@ -483,6 +483,17 @@
   - **Implementation**: Updated `.match-ready` border colors in css/styles.css:831-836
   - **User impact**: Clear visual hierarchy across match states - yellow for READY, orange for LIVE. More intuitive and cohesive bracket appearance.
 
+### Enhanced: Tournament Bracket - Simplified Finals Match Styling
+- **Removed all special styling for finals matches (BS-FINAL, GRAND-FINAL)**
+  - Finals matches now use standard state-based styling like all other matches
+  - PENDING: Gray, READY: Yellow, LIVE: Orange, COMPLETED: Green
+  - No special borders, backgrounds, or visual treatments
+  - **Rationale**: Physical placement in the tournament bracket is sufficient distinction. Special styling added complexity and created confusing edge cases (finals looking READY when LIVE, etc.)
+  - **Previous behavior**: Finals had special cream/yellow gradients and custom borders that required `:not(.match-live)` selectors and explicit LIVE overrides to prevent visual confusion
+  - **New behavior**: Completely consistent visual language across entire bracket - state colors mean the same thing everywhere
+  - **Implementation**: Removed `.backside-final-match` and `.grand-final-match` styling rules from css/styles.css
+  - **User impact**: Simpler, more predictable bracket appearance. Match state is immediately clear regardless of position. Finals are distinguished by their prominent position at the end of the bracket, not by visual decoration.
+
 ---
 
 # 2025-10-12

@@ -866,26 +866,6 @@ body {
   box-shadow: 0 8px 22px rgba(22, 101, 52, 0.32);
 }
 
-/* Special matches */
-.bracket-match.important-match {
-  border-width: 3px;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.12);
-}
-.bracket-match.backside-final-match {
-  border-color: rgba(180, 83, 9, 0.9);
-  background: linear-gradient(135deg, #fffaf0 0%, #fff3cd 100%);
-}
-.bracket-match.backside-final-match.completed {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border-color: rgba(22, 101, 52, 1);
-}
-.bracket-match.grand-final-match {
-  border-color: #dc2626;
-  background: linear-gradient(135deg, #fff5f5 0%, #f8d7da 100%);
-  border-width: 3px;
-  box-shadow: 0 10px 26px rgba(220,38,38,0.28);
-}
-
 /* Match internals */
 .match-header {
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
