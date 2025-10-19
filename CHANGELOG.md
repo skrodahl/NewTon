@@ -1,6 +1,6 @@
 # 2025-10-16
 
-## **v3.0.0-beta** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements
+## **v3.0.0** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements
 
 ### Enhanced: Developer Console - Lane Usage Details & Preventive Conflict Detection
 - **Complete Lane Usage detail view implementation with real-time monitoring and preventive warnings**
