@@ -3079,10 +3079,15 @@ function showCommandCenterModal(matchData) {
             }
         }
 
-        // Reset modal width to 90% for setup/active states (celebration sets to 65%)
+        // Set modal width based on tournament status
         const modalContent = modal.querySelector('.modal-content');
-        if (modalContent && (tournament.status === 'setup' || tournament.status === 'active')) {
-            modalContent.style.width = '90%';
+        if (modalContent) {
+            if (tournament.status === 'setup') {
+                modalContent.style.width = '75%';
+            } else if (tournament.status === 'active') {
+                modalContent.style.width = '90%';
+            }
+            // Note: 'completed' status sets width to 75% in showTournamentCelebration()
         }
 
         switch (tournament.status) {
