@@ -463,6 +463,16 @@
     - Save and restore input values after dialog stack restoration completes
   - **Implementation**: Enhanced `openStatsModalFromConfirmation()` and `showWinnerConfirmation()` in clean-match-progression.js:1570-1681, 2195-2229
 
+### Enhanced: Tournament Bracket - Smooth Hover Zoom for LIVE Matches
+- **LIVE matches now have smooth zoom transition on hover, matching other match states**
+  - Removed pulsing animation from LIVE matches that conflicted with hover zoom
+  - LIVE matches now smoothly zoom in when hovered (at zoom levels < 1.0) with consistent 0.3s transition
+  - Previously, LIVE matches would "pop" to zoomed state without transition to avoid horrible pulsating zoom effect
+  - **Visual distinction maintained**: LIVE matches still prominent with orange gradient background, thicker orange border (3px), and orange glow on hover
+  - **Rationale**: Pulse animation was visually noisy and caused disorienting pulsating zoom when hovering over tiny match cards while zoomed out
+  - **Implementation**: Removed `animation: pulse 2s infinite` from `.match-live` in css/styles.css:844
+  - **User impact**: Consistent, smooth hover zoom behavior across all match states. Cleaner, more professional tournament bracket interaction.
+
 ---
 
 # 2025-10-12

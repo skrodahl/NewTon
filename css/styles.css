@@ -841,7 +841,6 @@ body {
   background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
   border-color: #ff6b35;
   border-width: 3px;
-  animation: pulse 2s infinite;
 }
 .bracket-match.match-live:hover,
 .bracket-match.active:hover {
