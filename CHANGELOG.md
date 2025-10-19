@@ -277,7 +277,10 @@
   - **Referee sidebar optimization**: Fixed 350px width (user-adjustable via CSS) instead of flex-based, providing more space for match cards
   - **Tournament completion centering**: Celebration card constrained to 800px max-width and horizontally centered
   - **Setup mode input**: "Add Player" field constrained to 400px max-width for better proportions
-  - **Dynamic width adjustment**: Modal width automatically adjusts to 75% when showing tournament completion celebration (from standard 90%), then resets to 90% when tournament returns to setup/active state
+  - **Dynamic width adjustment**: Modal width intelligently adjusts based on tournament status
+    - **Setup mode**: 75% width (optimized for centered player registration content)
+    - **Active mode**: 90% width (maximum space for two-column Frontside/Backside match layout)
+    - **Completed mode**: 75% width (optimized for centered celebration display)
   - **At-a-glance visibility**: Operators can instantly see both bracket sides simultaneously without scrolling
   - **Smart grouping**: Grand Final appears in Frontside column, BS-FINAL in Backside column
   - **Independent sorting**: Each column maintains proper round progression order (FS-R1, FS-R2... and BS-R1, BS-R2...)
