@@ -1,3 +1,34 @@
+# 2025-10-20
+
+## **v3.0.1-beta** - Help System & Payment Information UI Enhancements
+
+### Enhanced: Help System with Info Icons
+- **Replaced floating help button with context-aware info icons**
+  - **Info icons (ℹ️)**: Added next to page headers on Setup, Registration, and Config pages
+  - **Direct click access**: Click icon to open contextual help modal for current page
+  - **Clean design**: Removes positioning conflicts from floating help button
+  - **Hover effect**: Icons scale and change color on hover for clear interactivity
+  - **Orange accent color**: Icons use `#ff6b35` to match application theme
+  - **F1 shortcut**: Keyboard shortcut remains available for all pages
+  - **Tournament page unchanged**: Watermark "Press F1 for help" remains on bracket page
+- **Implementation**: tournament.html:50,110,273 (info icons), css/styles.css:2997-3013 (icon styles), js/dynamic-help-system.js:437-450 (click handlers)
+- **User impact**: Cleaner, more intuitive help access without UI clutter. Users can immediately identify where to get help for each page.
+
+### Enhanced: Registration Page with Payment Information Display
+- **New payment QR code display in registration header**
+  - **Two-column grid layout**: Registration header now uses CSS Grid with left (forms) and right (payment info) columns
+  - **QR code placement**: Displays `payment.png` in right column at 200px height with border and shadow
+  - **Graceful fallback**: Image hidden automatically if `payment.png` file doesn't exist (no broken image icon)
+  - **Player count repositioned**: Moved from below buttons to bottom-right of header area
+  - **Dynamic bottom alignment**: Player count uses `margin-top: auto` to stay at bottom regardless of image presence
+  - **Responsive layout**: Grid with `1fr auto` columns adapts to content size
+- **Visual improvements**
+  - **Structured form layout**: Registration controls organized in left column with consistent spacing
+  - **Professional appearance**: QR code styled with subtle border and shadow matching application design
+  - **Maintained functionality**: All existing registration features work identically
+- **Implementation**: tournament.html:108-132 (restructured header), css/styles.css:2473-2564 (grid layout and column styles)
+- **User impact**: Tournament organizers can display payment information directly on registration page. Players see payment QR code immediately when registering. Clean integration without disrupting existing workflow.
+
 # 2025-10-16
 
 ## **v3.0.0** - Match Controls Real-Time Updates, Referee Suggestions & Developer Console Enhancements

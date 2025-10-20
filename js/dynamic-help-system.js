@@ -415,8 +415,8 @@ let helpState = {
 function initializeHelpSystem() {
     console.log('🔧 Initializing dynamic help system...');
 
-    // Create help button for each page
-    createHelpButtons();
+    // Initialize help icons with tooltips
+    initializeHelpIcons();
 
     // Create help modal
     createHelpModal();
@@ -431,70 +431,21 @@ function initializeHelpSystem() {
 }
 
 /**
- * CREATE HELP BUTTONS
- * Add help buttons to each page header
+ * INITIALIZE HELP ICONS
+ * Add click functionality to help info icons
  */
-function createHelpButtons() {
-    const pages = ['setup', 'registration', 'tournament', 'config'];
+function initializeHelpIcons() {
+    const helpIcons = document.querySelectorAll('.help-info-icon');
 
-    pages.forEach(pageId => {
-        const page = document.getElementById(pageId);
-        if (!page) return;
+    helpIcons.forEach(icon => {
+        const pageId = icon.getAttribute('data-page');
+        if (!pageId) return;
 
-        // Find the page header container (setup-page-header, registration-page-header, config-page-header)
-        let headerContainer = page.querySelector('.setup-page-header, .registration-page-header, .config-page-header');
-
-        // Fallback: if no header container found, find h2 (for Tournament page)
-        if (!headerContainer) {
-            const h2 = page.querySelector('h2');
-            if (!h2) return;
-            headerContainer = h2;
-        }
-
-        // Create help button
-        const helpBtn = document.createElement('button');
-        helpBtn.className = 'help-btn';
-        helpBtn.innerHTML = '?';
-        helpBtn.title = `Get help with ${pageId}`;
-        helpBtn.onclick = () => showHelp(pageId);
-
-        // Style the help button
-        helpBtn.style.cssText = `
-            position: absolute;
-            right: 20px;
-            top: 20px;
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            border: 2px solid #ff6b35;
-            background: #ffffff;
-            color: #ff6b35;
-            font-weight: bold;
-            font-size: 16px;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            transition: all 0.2s ease;
-            z-index: 10;
-        `;
-
-        // Add hover effect
-        helpBtn.addEventListener('mouseenter', () => {
-            helpBtn.style.background = '#ff6b35';
-            helpBtn.style.color = '#ffffff';
-            helpBtn.style.transform = 'scale(1.1)';
+        // Click icon to open help
+        icon.addEventListener('click', (e) => {
+            e.stopPropagation();
+            showHelp(pageId);
         });
-
-        helpBtn.addEventListener('mouseleave', () => {
-            helpBtn.style.background = '#ffffff';
-            helpBtn.style.color = '#ff6b35';
-            helpBtn.style.transform = 'scale(1)';
-        });
-
-        // Make header container relative for positioning
-        headerContainer.style.position = 'relative';
-        headerContainer.appendChild(helpBtn);
     });
 }
 

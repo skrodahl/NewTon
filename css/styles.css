@@ -2993,3 +2993,21 @@ a:hover { color: #1e40af; }
   border: 1px solid #e8e8e8;
   border-radius: 4px;
 }
+
+/* Help Info Icon */
+.help-info-icon {
+  display: inline-block;
+  margin-left: 8px;
+  font-size: 1.2rem;
+  color: #ff6b35;
+  cursor: pointer;
+  transition: transform 0.2s ease, color 0.2s ease;
+  position: relative;
+  vertical-align: middle;
+  user-select: none;
+}
+
+.help-info-icon:hover {
+  transform: scale(1.15);
+  color: #e55a2b;
+}
