@@ -441,9 +441,15 @@ function createHelpButtons() {
         const page = document.getElementById(pageId);
         if (!page) return;
 
-        // Find the h2 header in the page
-        const header = page.querySelector('h2');
-        if (!header) return;
+        // Find the page header container (setup-page-header, registration-page-header, config-page-header)
+        let headerContainer = page.querySelector('.setup-page-header, .registration-page-header, .config-page-header');
+
+        // Fallback: if no header container found, find h2 (for Tournament page)
+        if (!headerContainer) {
+            const h2 = page.querySelector('h2');
+            if (!h2) return;
+            headerContainer = h2;
+        }
 
         // Create help button
         const helpBtn = document.createElement('button');
@@ -486,10 +492,9 @@ function createHelpButtons() {
             helpBtn.style.transform = 'scale(1)';
         });
 
-        // Make page header relative for positioning
-        header.style.position = 'relative';
-        header.style.minHeight = '60px';
-        header.appendChild(helpBtn);
+        // Make header container relative for positioning
+        headerContainer.style.position = 'relative';
+        headerContainer.appendChild(helpBtn);
     });
 }
 
