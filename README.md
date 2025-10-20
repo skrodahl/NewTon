@@ -129,6 +129,7 @@ Intuitive traffic light system for instant priority assessment:
 - **Import/Export**: JSON files for backup and computer-to-computer transfers
 - **Privacy**: Complete local storage, no cloud or external data sharing
 - **Undo System**: Reverse recent match results with transaction history
+- **Developer Console**: Debug, view tournament health, transaction log management
 
 ---
 
