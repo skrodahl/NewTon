@@ -106,22 +106,26 @@
         <!-- Registration Page -->
         <div id="registration" class="page registration-page-flex">
             <div class="registration-page-header">
-                <h2>Player Registration</h2>
+                <div class="header-left-content">
+                    <h2>Player Registration</h2>
 
-                <div class="player-registration-row">
-                    <div class="form-group player-name-field">
-                        <label for="playerName">Add New Player</label>
-                        <input type="text" id="playerName" placeholder="Enter player name">
+                    <div class="player-registration-row">
+                        <div class="form-group player-name-field">
+                            <label for="playerName">Add New Player</label>
+                            <input type="text" id="playerName" placeholder="Enter player name">
+                        </div>
+                        <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
                     </div>
-                    <button class="btn btn-success" onclick="addPlayer()">Add Player</button>
-                </div>
 
-                <div class="controls-row">
                     <div class="control-buttons">
                         <button class="btn btn-success" onclick="exportResultsJSON()">Export JSON</button>
                         <button class="btn btn-success" onclick="exportResultsCSV()">Export CSV</button>
                         <button class="btn" onclick="showPage('tournament')">Go to Tournament</button>
                     </div>
+                </div>
+
+                <div class="header-right-content">
+                    <img src="payment.png" alt="Payment Information" onerror="this.style.display='none'">
                     <div class="player-count"><span id="playerCount">0</span> Registered Players (<span
                             id="paidCount">0</span> paid)</div>
                 </div>

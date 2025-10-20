@@ -2477,6 +2477,11 @@ a:hover { color: #1e40af; }
   border-bottom: 1px solid #e8e8e8;
   border: 1px solid #e8e8e8;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 32px;
+  align-items: stretch;
+  position: relative;
 }
 
 .registration-page-header h2 {
@@ -2511,17 +2516,45 @@ a:hover { color: #1e40af; }
   width: 441px;
 }
 
-.controls-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 0;
-  margin-top: -6px;
-}
-
 .control-buttons {
   display: flex;
   gap: 16px;
+}
+
+/* Registration Header - Two Column Layout */
+.header-left-content {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.header-left-content h2 {
+  margin-bottom: 0;
+}
+
+.header-right-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding-top: 8px;
+  min-height: 100%;
+}
+
+.header-right-content img {
+  height: 200px;
+  width: auto;
+  border: 1px solid #e8e8e8;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.header-right-content .player-count {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #222222;
+  text-align: center;
+  margin-top: auto;
 }
 
 .player-count {
