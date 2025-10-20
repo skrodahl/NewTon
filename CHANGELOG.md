@@ -1,6 +1,6 @@
 # 2025-10-20
 
-## **v3.0.1-beta** - Critical Storage Optimization & UI Enhancements
+## **v3.0.1** - Critical Storage Optimization & UI Enhancements
 
 ### Enhanced: Match Controls - Referee Conflict Prevention
 - **Visual warnings prevent starting matches when players are already refereeing**

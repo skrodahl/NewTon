@@ -1,4 +1,4 @@
-# NewTon DC Tournament Manager v3.0.0 Release Notes
+# NewTon DC Tournament Manager v3.0.1 Release Notes
 
 **Release Date:** October 2025
 **Major Version Release**
@@ -7,7 +7,7 @@
 
 ## Overview
 
-**NewTon DC Tournament Manager Version 3.0.0** marks our most ambitious release yet. It brings powerful new tools and a full overhaul of many core components. Building on version 2’s groundwork, this update refines every aspect of the system to increase reliability, enhance fairness, streamline operations, and deliver smarter, more intentional workflows.
+**NewTon DC Tournament Manager Version 3.0.1** marks our most ambitious release yet. It brings powerful new tools and a full overhaul of many core components. Building on version 2's groundwork, this update refines every aspect of the system to increase reliability, enhance fairness, streamline operations, and deliver smarter, more intentional workflows.
 
 This release contains no breaking changes, and is a drop-in replacement for any v2.x deployments.
 
@@ -276,10 +276,10 @@ Professional appearance for clubs, clean branding for streamed/recorded tourname
 5. Configure payment tracking for entrance fees
 
 ### Compatibility
-- All exports from v2.x load in v3.0.0
-- v3.0.0 exports backward compatible with v2.3.0+ (basic tournaments)
-- New features (Saved Players, Transaction Pruning) require v3.0.0
-- Server features require v2.3.0 or later, no breaking changes in v3.0.0
+- All exports from v2.x load in v3.0.1
+- v3.0.1 exports backward compatible with v2.3.0+ (basic tournaments)
+- New features (Saved Players, Transaction Pruning) require v3.0.1
+- Server features require v2.3.0 or later, no breaking changes in v3.0.1
 
 ---
 
@@ -299,4 +299,4 @@ None at time of release. Please report issues through GitHub repository.
 
 ---
 
-**NewTon DC Tournament Manager v3.0.0** - Rock solid tournament management with real-time operations and diagnostics.
+**NewTon DC Tournament Manager v3.0.1** - Rock solid tournament management with real-time operations and diagnostics.
