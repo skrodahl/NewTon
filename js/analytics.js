@@ -2291,6 +2291,40 @@ function executeResetAllConfig() {
     }
 }
 
+/**
+ * Command: Toggle Read-Only Status
+ */
+function commandToggleReadOnly() {
+    if (!tournament) {
+        showCommandFeedback('Toggle Read-Only', 'error', 'No active tournament');
+        return;
+    }
+
+    const wasReadOnly = tournament.readOnly || false;
+    const newReadOnly = !wasReadOnly;
+
+    console.log(`Toggling read-only status: ${wasReadOnly} → ${newReadOnly}`);
+
+    // Toggle the read-only flag
+    tournament.readOnly = newReadOnly;
+
+    // Save the tournament with new status
+    if (typeof saveTournament === 'function') {
+        saveTournament();
+    }
+
+    const statusText = newReadOnly ? 'READ-ONLY' : 'READ-WRITE';
+    const statusColor = newReadOnly ? '#dc2626' : '#059669';
+    const icon = newReadOnly ? '🔒' : '🔓';
+
+    console.log(`✓ Tournament is now ${statusText}`);
+
+    showCommandFeedback('Toggle Read-Only', 'success',
+        `${icon} Tournament set to ${statusText}\n\n${newReadOnly ?
+            '• Undo operations disabled\n• Match modifications disabled\n• Tournament data protected' :
+            '• Undo operations enabled\n• Match modifications enabled\n• Tournament fully editable'}`);
+}
+
 // ============================================================================
 // TRANSACTION LOG MANAGEMENT
 // ============================================================================
@@ -2735,6 +2769,7 @@ if (typeof window !== 'undefined') {
     window.commandRefreshDropdowns = commandRefreshDropdowns;
     window.commandValidateEverything = commandValidateEverything;
     window.commandResetAllConfig = commandResetAllConfig;
+    window.commandToggleReadOnly = commandToggleReadOnly;
     window.executeResetAllConfig = executeResetAllConfig;
     window.clearConsoleOutput = clearConsoleOutput;
     window.copyConsoleOutput = copyConsoleOutput;

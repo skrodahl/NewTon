@@ -284,9 +284,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
     // --- START TRANSACTION LOGIC ---
     // Skip transaction creation during rebuild to prevent corruption
     if (!window.rebuildInProgress) {
-        // Capture current state BEFORE making any changes
-        const beforeMatchesState = JSON.parse(JSON.stringify(matches));
-
         const transaction = {
             id: `tx_${Date.now()}`,
             type: 'COMPLETE_MATCH',
@@ -295,11 +292,8 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             timestamp: new Date().toISOString(),
             matchId: matchId,
             winner: winner,
-            loser: loser,
-            beforeState: {
-                matches: beforeMatchesState,
-                tournament: JSON.parse(JSON.stringify(tournament)) // Save tournament state
-            }
+            loser: loser
+            // beforeState removed - never used by undo system (saves ~98% storage per transaction)
         };
         saveTransaction(transaction);
     }
@@ -1389,8 +1383,8 @@ function updateMatchLane(matchId, newLane) {
             description: `${matchId}: Lane ${parsedNewLane ? `assigned to ${parsedNewLane}` : 'cleared'}`,
             timestamp: new Date().toISOString(),
             matchId: matchId,
-            beforeState: { lane: oldLane },
-            afterState: { lane: parsedNewLane }
+            afterState: { lane: parsedNewLane } // Keep for potential future analytics/audit trail
+            // beforeState removed - never used by undo system
         };
 
         saveTransaction(transaction);

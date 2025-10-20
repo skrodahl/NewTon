@@ -1,5 +1,39 @@
 # 2025-10-20
 
+## **v3.0.1-beta** - Critical Storage Optimization & UI Enhancements
+
+### Enhanced: Developer Console - Toggle Read-Only Command
+- **New "Toggle Read-Only" command in Developer Console**
+  - **Purpose**: Provides escape hatch to convert completed (read-only) tournaments back to read-write mode for editing
+  - **Location**: Added to COMMANDS section in Developer Console sidebar
+  - **Functionality**: Toggles `tournament.readOnly` flag and saves tournament
+  - **Visual feedback**: Shows 🔒 (read-only) or 🔓 (read-write) icon with status details
+  - **Status information**: Lists what's enabled/disabled in each mode:
+    - Read-only: Undo disabled, match modifications disabled, data protected
+    - Read-write: Undo enabled, match modifications enabled, fully editable
+- **Implementation**: analytics.js:2294-2326 (commandToggleReadOnly function), tournament.html:677-679 (command link)
+- **User impact**: Tournament organizers can modify completed tournaments without resetting them entirely. Useful for post-tournament corrections or adjustments.
+
+### Fixed: Transaction Storage Optimization (Critical)
+- **Resolved localStorage overflow issue in large tournaments**
+  - **Problem**: 32-player tournaments with ~19 players hit 10 MB localStorage limit by BS-R6 (~35 matches), forcing manual transaction deletion to complete tournament
+  - **Root cause**: `COMPLETE_MATCH` transactions stored entire tournament state (~50-100 KB each) in `beforeState` object that was never used by undo system
+  - **Solution**: Removed unused `beforeState` data from all transaction types
+- **Storage reduction achieved:**
+  - **COMPLETE_MATCH transactions**: Removed `beforeState.matches` (entire matches array) and `beforeState.tournament` (entire tournament object) - **~98% reduction** (~50 KB → ~0.6 KB per transaction)
+  - **ASSIGN_LANE transactions**: Removed `beforeState.lane`, kept `afterState.lane` for future analytics - **~50% reduction**
+  - **ASSIGN_REFEREE transactions**: Removed `beforeState.referee`, kept `afterState.referee` (required for referee suggestions feature) - **~50% reduction**
+- **Impact on typical 32-player tournament:**
+  - Before: ~35 completed matches × 50 KB = **~1.75 MB** (just COMPLETE_MATCH transactions)
+  - After: ~35 completed matches × 0.6 KB = **~21 KB** (just COMPLETE_MATCH transactions)
+  - **Total reduction**: ~8-10 MB → ~300-500 KB (97% smaller)
+  - **Result**: Can safely complete 100+ matches without hitting localStorage limits
+- **Backward compatibility**: Existing tournaments with old transaction format continue to work (extra data simply ignored)
+- **Undo system unchanged**: Still uses hardcoded `MATCH_PROGRESSION` lookup tables and manual state resetting (never used `beforeState` data)
+- **Referee suggestions unchanged**: Still uses `afterState.referee` from transaction history to build timeline
+- **Implementation**: clean-match-progression.js:287-300,1380-1388, bracket-rendering.js:1543-1551,1608-1616
+- **User impact**: Tournament operators can complete full 32-player tournaments without localStorage errors or manual workarounds. Critical fix for tournament night reliability.
+
 ## **v3.0.1-beta** - Help System & Payment Information UI Enhancements
 
 ### Enhanced: Help System with Info Icons

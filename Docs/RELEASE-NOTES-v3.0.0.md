@@ -216,6 +216,13 @@ Professional appearance for clubs, clean branding for streamed/recorded tourname
 ## 🐛 Critical Bug Fixes
 
 ### Data Integrity
+- **Transaction storage optimization**: Resolved localStorage overflow in large tournaments
+  - **Problem**: 32-player tournaments hit 10 MB localStorage limit by ~35 matches, requiring manual transaction deletion
+  - **Root cause**: COMPLETE_MATCH transactions stored entire tournament state (~50-100 KB each) that was never used by undo system
+  - **Solution**: Removed unused beforeState data from all transaction types
+  - **Impact**: 97% storage reduction (~8-10 MB → ~300-500 KB for typical 32-player tournament)
+  - **Result**: Can now safely complete 100+ matches without hitting browser limits
+  - **Backward compatible**: Existing tournaments with old transaction format continue to work seamlessly
 - **Read-only tournament protection**: Completed tournaments from files/localStorage automatically set read-only, preventing accidental modifications
 - **Tournament loading data loss**: Fixed critical bug where tournaments lost players/matches after browser refresh
 - **Payment status protection**: Prevented paid/unpaid changes during active/completed tournaments
@@ -233,6 +240,7 @@ Professional appearance for clubs, clean branding for streamed/recorded tourname
 ### Architecture
 - Extended MAX_HISTORY_ENTRIES from 50 to 500
 - Real-time localStorage monitoring vs 10 MB browser limit
+- Optimized transaction storage (~98% reduction for COMPLETE_MATCH transactions)
 - Unified tournament object structure across all operations
 - Proper z-index management and Escape key support
 

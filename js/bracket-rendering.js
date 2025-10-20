@@ -1546,8 +1546,8 @@ function updateMatchReferee(matchId, refereeId) {
                 description: `${matchId}: Referee cleared`,
                 timestamp: new Date().toISOString(),
                 matchId: matchId,
-                beforeState: { referee: oldReferee },
-                afterState: { referee: null }
+                afterState: { referee: null } // Keep for referee suggestions timeline
+                // beforeState removed - never used by undo system
             };
 
             saveTransaction(transaction);
@@ -1611,8 +1611,8 @@ function updateMatchReferee(matchId, refereeId) {
             description: description,
             timestamp: new Date().toISOString(),
             matchId: matchId,
-            beforeState: { referee: oldReferee },
-            afterState: { referee: parsedRefereeId }
+            afterState: { referee: parsedRefereeId } // Keep for referee suggestions timeline
+            // beforeState removed - never used by undo system
         };
 
         saveTransaction(transaction);
