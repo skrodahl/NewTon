@@ -2,6 +2,19 @@
 
 ## **v3.0.1-beta** - Critical Storage Optimization & UI Enhancements
 
+### Enhanced: Match Controls - Referee Conflict Prevention
+- **Visual warnings prevent starting matches when players are already refereeing**
+  - **Problem**: Tournament operators could accidentally start a READY match where one player is currently assigned as referee to another match, creating scheduling conflicts at the venue
+  - **Visual indicators**:
+    - Player name shows warning: "⚠️ Bob (Referee)" in player vs player display
+    - Match card background changes to yellow (#fef3c7 frontside, #fde68a backside)
+    - Start Match button becomes disabled (grayed out, not clickable)
+  - **Scope**: Player counts as "refereeing" if assigned as referee to ANY match with status READY or LIVE
+  - **Dynamic updates**: Warning appears immediately when referee assigned, disappears when unassigned
+  - **Prevents venue conflicts**: Impossible to start match where player is simultaneously playing and refereeing
+- **Implementation**: bracket-rendering.js:2544-2578 (conflict detection in createMatchCard), styles.css:1442-1461 (warning colors and disabled button styling)
+- **User impact**: Critical safety feature prevents double-booking players as both participants and referees. Tournament operators see clear visual warnings before attempting to start conflicting matches.
+
 ### Enhanced: Developer Console - Toggle Read-Only Command
 - **New "Toggle Read-Only" command in Developer Console**
   - **Purpose**: Provides escape hatch to convert completed (read-only) tournaments back to read-write mode for editing

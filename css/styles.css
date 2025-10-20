@@ -1439,6 +1439,27 @@ a:hover { color: #1e40af; }
   background: #d1d5db !important; /* Same darker gray as ready backside matches */
 }
 
+/* Referee conflict warning - frontside matches */
+.cc-match-card-referee-conflict {
+  background: #f5f0e8 !important; /* Muted beige for conflict warning */
+}
+
+/* Referee conflict warning - backside matches (darker beige) */
+.cc-match-card-backside.cc-match-card-referee-conflict {
+  background: #e8e0d5 !important; /* Darker beige for backside conflict */
+}
+
+/* Disabled start button for referee conflicts */
+.cc-btn-start:disabled {
+  background: #9ca3af;
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.cc-btn-start:disabled:hover {
+  background: #9ca3af;
+}
+
 .cc-no-matches-message {
   text-align: center;
   color: #6b7280;

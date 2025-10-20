@@ -37,12 +37,13 @@ Real-time tournament operations interface that provides centralized management o
 - Lane-based sorting organizing matches by physical venue layout
 - Assign and reassign lanes and referees during tournament
 - Timeline-based referee suggestions (Recent Winners, Losers, Assignments)
+- Referee conflict prevention with visual warnings when players are already refereeing
 - Tournament completion celebration with achievements and export
 - Auto-refresh when resources are assigned or changed
 - 24H clock for those who run tournaments in full-screen
 
 **Why It Matters:**
-Operators can see both bracket sides simultaneously, prevent resource conflicts before matches start, and make faster decisions during active tournaments.
+Operators can see both bracket sides simultaneously, prevent resource conflicts before matches start, and make faster decisions during active tournaments. Visual warnings prevent scheduling disasters by making it impossible to start matches where players are simultaneously playing and refereeing.
 
 ---
 

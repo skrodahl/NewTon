@@ -2540,27 +2540,49 @@ function createMatchCard(match) {
     const player2Name = match.player2?.name || 'TBD';
     const player1Id = match.player1?.id || '';
     const player2Id = match.player2?.id || '';
-    
+
+    // Check if either player is currently assigned as referee to any ready/live match
+    let player1IsReferee = false;
+    let player2IsReferee = false;
+
+    if (matches && player1Id && player2Id) {
+        matches.forEach(m => {
+            const matchState = getMatchState(m);
+            if ((matchState === 'ready' || matchState === 'live') && m.referee) {
+                if (m.referee === player1Id) player1IsReferee = true;
+                if (m.referee === player2Id) player2IsReferee = true;
+            }
+        });
+    }
+
+    // Modify player names if they're refereeing
+    const displayPlayer1 = player1IsReferee ? `⚠️ ${player1Name} (Referee)` : player1Name;
+    const displayPlayer2 = player2IsReferee ? `⚠️ ${player2Name} (Referee)` : player2Name;
+
+    const hasRefereeConflict = player1IsReferee || player2IsReferee;
+
     // Use same button logic as tournament bracket, but add Command Center refresh
     const originalClickHandler = getButtonClickHandler(state, match.id);
     const commandCenterClickHandler = originalClickHandler ?
         `${originalClickHandler}; setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100)` :
         '';
-    
+
     // For live matches, show stop button; for non-live matches, show start button
+    // Disable start button if there's a referee conflict
     const actionButton = state === 'live' ?
         `<button class="cc-match-action-btn cc-btn-stop" onclick="toggleActive('${match.id}'); setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100);">Stop Match</button>` :
-        `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}">Start Match</button>`;
-    
+        `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}"${hasRefereeConflict ? ' disabled' : ''}>Start Match</button>`;
+
     const liveClass = state === 'live' ? ' cc-match-card-live' : '';
     const backsideClass = (match.side === 'backside' || match.id.startsWith('BS-')) ? ' cc-match-card-backside' : '';
+    const conflictClass = hasRefereeConflict ? ' cc-match-card-referee-conflict' : '';
 
     // Get progression text
     const progressionInfo = getMatchProgressionText(match.id);
     const progressionText = progressionInfo ? progressionInfo.line2 : '';
 
     return `
-        <div id="cc-match-card-${match.id}" class="cc-match-card${liveClass}${backsideClass}">
+        <div id="cc-match-card-${match.id}" class="cc-match-card${liveClass}${backsideClass}${conflictClass}">
             <div class="cc-match-card-header">
                 <div class="cc-match-id">${match.id}${progressionText ? ` • <span style="font-weight: 400; color: #6b7280;">${progressionText}</span>` : ''}</div>
                 <div class="cc-match-format">${format} • <strong>${round}</strong></div>
@@ -2568,11 +2590,11 @@ function createMatchCard(match) {
 
             <div class="cc-match-players">
                 ${state === 'live' ?
-                    `<button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 1)">${player1Name} Wins</button>
-                     <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 2)">${player2Name} Wins</button>` :
-                    `<span class="cc-player-name" onclick="openStatsModal(${player1Id})">${player1Name}</span>
+                    `<button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 1)">${displayPlayer1} Wins</button>
+                     <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 2)">${displayPlayer2} Wins</button>` :
+                    `<span class="cc-player-name" onclick="openStatsModal(${player1Id})">${displayPlayer1}</span>
                      <span class="cc-vs-divider">vs</span>
-                     <span class="cc-player-name" onclick="openStatsModal(${player2Id})">${player2Name}</span>`
+                     <span class="cc-player-name" onclick="openStatsModal(${player2Id})">${displayPlayer2}</span>`
                 }
             </div>
             
