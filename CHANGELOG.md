@@ -7,7 +7,7 @@
   - **Problem**: Tournament operators could accidentally start a READY match where one player is currently assigned as referee to another match, creating scheduling conflicts at the venue
   - **Visual indicators**:
     - Player name shows warning: "⚠️ Bob (Referee)" in player vs player display
-    - Match card background changes to yellow (#fef3c7 frontside, #fde68a backside)
+    - Match card background changes to signal that the match can't be started
     - Start Match button becomes disabled (grayed out, not clickable)
   - **Scope**: Player counts as "refereeing" if assigned as referee to ANY match with status READY or LIVE
   - **Dynamic updates**: Warning appears immediately when referee assigned, disappears when unassigned
