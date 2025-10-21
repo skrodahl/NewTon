@@ -7,20 +7,24 @@
   - **nginx + PHP-FPM Alpine** - Lightweight (~60MB) container with full PHP REST API support
   - **Multi-architecture builds** - Supports linux/amd64 (Intel/AMD) and linux/arm64 (Apple Silicon, Raspberry Pi)
   - **Persistent tournament storage** - Volume mount for `/tournaments` directory preserves uploaded tournament data
+  - **10MB upload limit** - Supports large tournament files (nginx `client_max_body_size` and PHP `upload_max_filesize` set to 10MB)
+  - **UTF-8 encoding** - Proper handling of international characters (Swedish/Norwegian å, ä, ö, etc.)
   - **GitHub Container Registry** - Automated builds on Git tags publish to `ghcr.io/skrodahl/newton`
   - **GitHub Actions workflow** - Automatic multi-arch builds and publishing on version tags
 - **Docker configuration files:**
   - `docker/Dockerfile` - nginx + PHP-FPM Alpine-based image
   - `docker/docker-compose.yml` - Easy deployment with persistent storage
   - `docker/nginx.conf` - Web server configuration for static files and PHP API
+  - `docker/php.ini` - PHP configuration for upload limits and UTF-8 encoding
   - `docker/README.md` - Quick start guide
   - `.dockerignore` - Excludes unnecessary files from image
   - `.github/workflows/docker-build.yml` - Automated build pipeline
 - **Documentation:**
+  - `DOCKER-QUICKSTART.md` - Step-by-step quick start guide (under 2 minutes)
   - `Docs/DOCKER.md` - Comprehensive Docker deployment guide (hosting options, reverse proxy setup, troubleshooting)
   - `README.md` - Added Docker deployment section with quick start
-- **Implementation:** docker/Dockerfile, docker/docker-compose.yml, docker/nginx.conf, .github/workflows/docker-build.yml
-- **User impact:** Self-hosters can easily deploy NewTon Tournament Manager on their own servers using Docker. Perfect for clubs wanting to host their own instance with full tournament sharing capabilities via PHP REST API.
+- **Implementation:** docker/Dockerfile, docker/docker-compose.yml, docker/nginx.conf, docker/php.ini, .github/workflows/docker-build.yml
+- **User impact:** Self-hosters can easily deploy NewTon Tournament Manager on their own servers using Docker. Perfect for clubs wanting to host their own instance with full tournament sharing capabilities via PHP REST API. Supports large tournament files up to 10MB and properly handles international characters.
 
 ### Enhanced: Referee Conflict Detection - Self-Refereeing Support
 - **Players can now referee their own matches without triggering conflict warnings**

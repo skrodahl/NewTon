@@ -173,6 +173,9 @@ server {
     root /var/www/html;
     index tournament.html index.html index.htm;
 
+    # Allow large tournament file uploads (up to 10MB)
+    client_max_body_size 10M;
+
     # Default location - serve static files
     location / {
         try_files $uri $uri/ =404;
@@ -182,13 +185,32 @@ server {
     location ~ \.php$ {
         try_files $uri =404;
         fastcgi_split_path_info ^(.+\.php)(/.+)$;
-        fastcgi_pass unix:/var/run/php-fpm.sock;
+        fastcgi_pass 127.0.0.1:9000;
         fastcgi_index index.php;
         fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
         include fastcgi_params;
     }
 }
 ```
+
+**PHP Configuration (docker/php.ini):**
+
+```ini
+; Custom PHP configuration for NewTon Tournament Manager Docker container
+; Increases upload limits to support large tournament files (up to 10MB)
+
+; File upload limits
+upload_max_filesize = 10M
+post_max_size = 10M
+
+; Memory limit
+memory_limit = 128M
+
+; UTF-8 encoding for international characters (Swedish/Norwegian å, ä, ö, etc.)
+default_charset = "UTF-8"
+```
+
+**Note:** The 10MB upload limit supports large tournament files with extensive match history, player statistics, and international characters. Most tournaments are much smaller (<1MB), but complex 32-player tournaments with full transaction history can reach 2-3MB.
 
 ---
 
