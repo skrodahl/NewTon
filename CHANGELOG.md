@@ -1,6 +1,26 @@
-# 2025-10-20
+# 2025-10-21
 
-## **v3.0.2-beta** - Extended Transaction History Capacity & UI Refinements
+## **v3.0.2** - Docker Deployment, Extended Transaction History & UI Refinements
+
+### New: Docker Deployment Support
+- **Full Docker containerization for self-hosting**
+  - **nginx + PHP-FPM Alpine** - Lightweight (~60MB) container with full PHP REST API support
+  - **Multi-architecture builds** - Supports linux/amd64 (Intel/AMD) and linux/arm64 (Apple Silicon, Raspberry Pi)
+  - **Persistent tournament storage** - Volume mount for `/tournaments` directory preserves uploaded tournament data
+  - **GitHub Container Registry** - Automated builds on Git tags publish to `ghcr.io/skrodahl/newton-darts`
+  - **GitHub Actions workflow** - Automatic multi-arch builds and publishing on version tags
+- **Docker configuration files:**
+  - `docker/Dockerfile` - nginx + PHP-FPM Alpine-based image
+  - `docker/docker-compose.yml` - Easy deployment with persistent storage
+  - `docker/nginx.conf` - Web server configuration for static files and PHP API
+  - `docker/README.md` - Quick start guide
+  - `.dockerignore` - Excludes unnecessary files from image
+  - `.github/workflows/docker-build.yml` - Automated build pipeline
+- **Documentation:**
+  - `Docs/DOCKER.md` - Comprehensive Docker deployment guide (hosting options, reverse proxy setup, troubleshooting)
+  - `README.md` - Added Docker deployment section with quick start
+- **Implementation:** docker/Dockerfile, docker/docker-compose.yml, docker/nginx.conf, .github/workflows/docker-build.yml
+- **User impact:** Self-hosters can easily deploy NewTon Tournament Manager on their own servers using Docker. Perfect for clubs wanting to host their own instance with full tournament sharing capabilities via PHP REST API.
 
 ### Enhanced: Referee Conflict Detection - Self-Refereeing Support
 - **Players can now referee their own matches without triggering conflict warnings**

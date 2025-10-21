@@ -1,6 +1,6 @@
 # NewTon DC Tournament Manager
 
-**[Version 3.0.1](https://github.com/skrodahl/NewTon/releases/tag/v3.0.1)**   
+**[Version 3.0.2](https://github.com/skrodahl/NewTon/releases/tag/v3.0.2)**   
 **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)**
 
 **NewTon DC Tournament Manager** is a Command & Control Center for running double-elimination darts tournaments.
@@ -53,6 +53,38 @@ It is a fully self-contained web application that runs entirely in your browser 
 7. **Run**: Manage matches, assign lanes, and track results in real-time
 
 *No installation, no servers, no complexity — just pure tournament management.*
+
+---
+
+## 🐳 Docker Deployment (Self-Hosting)
+
+**Want to host NewTon Tournament Manager on your own server?** Docker makes it effortless.
+
+### 📋 [**Docker Quick Start Guide →**](DOCKER-QUICKSTART.md)
+
+**Get running in under 2 minutes:**
+
+```bash
+# Download docker-compose.yml
+curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-compose.yml
+
+# Start the container
+docker compose up -d
+
+# Access at http://localhost:8080
+```
+
+**What's Included:**
+- ✅ Lightweight Alpine container (~60MB)
+- ✅ PHP REST API for tournament sharing
+- ✅ nginx + PHP-FPM for optimal performance
+- ✅ Multi-architecture support (Intel/AMD + Apple Silicon/Raspberry Pi)
+- ✅ Persistent storage for tournaments
+- ✅ Custom logo and payment QR code support
+
+**Documentation:**
+- **[Quick Start Guide](DOCKER-QUICKSTART.md)** - Get running in 2 minutes
+- **[Docs/DOCKER.md](Docs/DOCKER.md)** - Complete guide (reverse proxy, production setup, troubleshooting)
 
 ---
 

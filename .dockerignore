@@ -1,0 +1,19 @@
+# Git files
+.git
+.gitignore
+.github
+
+# Documentation (keep README.md)
+*.md
+!README.md
+Docs/
+
+# Development files
+.DS_Store
+.vscode
+.idea
+
+# Docker files (don't copy into image)
+Dockerfile
+docker-compose.yml
+.dockerignore

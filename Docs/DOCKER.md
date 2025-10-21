@@ -15,7 +15,7 @@ Host the Docker image directly in your existing GitHub repository using GitHub's
 **Advantages:**
 - Same repository, no second repo needed
 - Free for public images
-- Image lives at `ghcr.io/USERNAME/newton-tournament-manager`
+- Image lives at `ghcr.io/skrodahl/newton-darts`
 - Integrates perfectly with GitHub Actions for automated builds
 - Version tags automatically match Git releases
 
@@ -26,8 +26,8 @@ Host the Docker image directly in your existing GitHub repository using GitHub's
 
 **Usage:**
 ```bash
-docker pull ghcr.io/USERNAME/newton-tournament-manager:latest
-docker pull ghcr.io/USERNAME/newton-tournament-manager:v3.0.2
+docker pull ghcr.io/skrodahl/newton-darts:latest
+docker pull ghcr.io/skrodahl/newton-darts:v3.0.2
 ```
 
 ### Option 2: Docker Hub
@@ -37,7 +37,7 @@ Traditional approach - link your GitHub repository to Docker Hub for automatic b
 **Advantages:**
 - Most discoverable (selfhosters check Docker Hub first)
 - Auto-builds on push
-- Image at `dockerhub.io/USERNAME/newton-tournament-manager`
+- Image at `dockerhub.io/skrodahl/newton-darts`
 
 **Disadvantages:**
 - Separate service to manage
@@ -66,15 +66,18 @@ No second repository needed - Docker files live in the existing project:
 ├── tournament.html
 ├── js/
 ├── css/
-├── Dockerfile                    # NEW - Container build instructions
-├── docker-compose.yml            # NEW - Easy deployment example (optional)
-├── .dockerignore                 # NEW - Exclude unnecessary files from image
+├── docker/                       # NEW - Docker configuration directory
+│   ├── Dockerfile                # Container build instructions
+│   ├── docker-compose.yml        # Easy deployment example
+│   ├── nginx.conf                # nginx configuration for container
+│   └── README.md                 # Quick start guide
+├── .dockerignore                 # Exclude unnecessary files from image
 ├── .github/
 │   └── workflows/
-│       └── docker-build.yml      # NEW - Auto-build on release tags
+│       └── docker-build.yml      # Auto-build on release tags
 ├── Docs/
 │   └── DOCKER.md                 # This file
-└── README.md                     # Update with Docker deployment instructions
+└── README.md                     # Updated with Docker deployment instructions
 ```
 
 ---
@@ -121,50 +124,70 @@ FROM nginx:alpine
 
 ### Recommendation
 
-Use **PHP with Apache** (Option A) - provides full feature set including tournament sharing, well-known to selfhosters, and image size is negligible for the value provided.
+Use **nginx + PHP-FPM Alpine** (Option B) - provides full feature set including tournament sharing, small image size (~60MB), and excellent performance. This is the implementation used in the official Docker image.
 
 ---
 
-## Dockerfile Template
+## Dockerfile (Actual Implementation)
 
-**Basic PHP + Apache Dockerfile:**
+**nginx + PHP-FPM with Persistent Tournament Storage:**
 
 ```dockerfile
-FROM php:8.2-apache
+FROM php:8.2-fpm-alpine
+
+# Install nginx
+RUN apk add --no-cache nginx
 
 # Copy application files
 COPY . /var/www/html/
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html
+# Copy nginx configuration
+COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
-# Enable Apache mod_rewrite (if needed for REST API)
-RUN a2enmod rewrite
+# Create tournaments directory for persistent storage
+RUN mkdir -p /var/www/html/tournaments
+
+# Set proper permissions
+RUN chown -R www-data:www-data /var/www/html && \
+    chmod -R 755 /var/www/html
+
+# Create directory for nginx pid
+RUN mkdir -p /run/nginx
+
+# Volume for persistent tournament storage
+VOLUME ["/var/www/html/tournaments"]
 
 # Expose port 80
 EXPOSE 80
 
-# Apache runs automatically via base image CMD
+# Start both PHP-FPM and nginx
+CMD php-fpm -D && nginx -g 'daemon off;'
 ```
 
-**With custom logo support:**
+**nginx Configuration (docker/nginx.conf):**
 
-```dockerfile
-FROM php:8.2-apache
+```nginx
+server {
+    listen 80;
+    server_name localhost;
+    root /var/www/html;
+    index tournament.html index.html index.htm;
 
-# Copy application files
-COPY . /var/www/html/
+    # Default location - serve static files
+    location / {
+        try_files $uri $uri/ =404;
+    }
 
-# Set proper permissions
-RUN chown -R www-data:www-data /var/www/html
-
-# Enable Apache modules
-RUN a2enmod rewrite
-
-EXPOSE 80
-
-# Volume for custom logo (optional)
-VOLUME ["/var/www/html/logo.png"]
+    # PHP handler for ALL .php files (REST API in api/ directory)
+    location ~ \.php$ {
+        try_files $uri =404;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass unix:/var/run/php-fpm.sock;
+        fastcgi_index index.php;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
 ```
 
 ---
@@ -178,18 +201,40 @@ version: '3.8'
 
 services:
   newton-tournament:
-    image: ghcr.io/USERNAME/newton-tournament-manager:latest
+    image: ghcr.io/skrodahl/newton-darts:latest
     container_name: newton-darts
     ports:
       - "8080:80"
     volumes:
+      # Persistent tournament storage (PHP REST API uploads)
+      - ./tournaments:/var/www/html/tournaments
       # Optional: Mount custom logo
-      - ./logo.png:/var/www/html/logo.png
+      - ./logo.png:/var/www/html/logo.png:ro
       # Optional: Mount payment QR code
-      - ./payment.png:/var/www/html/payment.png
+      - ./payment.png:/var/www/html/payment.png:ro
     restart: unless-stopped
     environment:
-      - TZ=Europe/Oslo  # Set timezone for PHP
+      - TZ=Europe/Oslo
+```
+
+**For local development (build from source):**
+
+```yaml
+version: '3.8'
+
+services:
+  newton-tournament:
+    build: .
+    container_name: newton-darts
+    ports:
+      - "8080:80"
+    volumes:
+      - ./tournaments:/var/www/html/tournaments
+      - ./logo.png:/var/www/html/logo.png:ro
+      - ./payment.png:/var/www/html/payment.png:ro
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Oslo
 ```
 
 **Usage:**
@@ -271,7 +316,7 @@ jobs:
 **Workflow triggers:**
 - Push a Git tag: `git tag v3.0.2 && git push origin v3.0.2`
 - GitHub Action automatically builds and publishes to GHCR
-- Image available at `ghcr.io/USERNAME/newton-tournament-manager:v3.0.2`
+- Image available at `ghcr.io/USERNAME/newton-darts:v3.0.2`
 - Also tagged as `latest` if from default branch
 
 ---
@@ -303,7 +348,7 @@ Docs/*.md
 mkdir newton-tournament && cd newton-tournament
 
 # Download docker-compose.yml
-curl -O https://raw.githubusercontent.com/USERNAME/newton-tournament-manager/main/docker-compose.yml
+curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-compose.yml
 
 # Start container
 docker-compose up -d
@@ -316,8 +361,9 @@ docker-compose up -d
 docker run -d \
   --name newton-tournament \
   -p 8080:80 \
+  -v ./tournaments:/var/www/html/tournaments \
   --restart unless-stopped \
-  ghcr.io/USERNAME/newton-tournament-manager:latest
+  ghcr.io/skrodahl/newton-darts:latest
 ```
 
 ### Custom Logo/Branding
@@ -327,10 +373,11 @@ Mount custom logo as volume:
 docker run -d \
   --name newton-tournament \
   -p 8080:80 \
-  -v ./logo.png:/var/www/html/logo.png \
-  -v ./payment.png:/var/www/html/payment.png \
+  -v ./tournaments:/var/www/html/tournaments \
+  -v ./logo.png:/var/www/html/logo.png:ro \
+  -v ./payment.png:/var/www/html/payment.png:ro \
   --restart unless-stopped \
-  ghcr.io/USERNAME/newton-tournament-manager:latest
+  ghcr.io/skrodahl/newton-darts:latest
 ```
 
 ### Reverse Proxy Setup
@@ -371,7 +418,7 @@ tournament.example.com {
 ✅ **Zero database** - No PostgreSQL, MySQL, MongoDB setup required
 ✅ **Static files** - Runs entirely in browser after initial load
 ✅ **Professional-grade** - Solves real problems for darts clubs worldwide
-✅ **Lightweight** - ~150MB Docker image with full PHP support
+✅ **Lightweight** - ~60MB Alpine-based Docker image with nginx + PHP-FPM
 ✅ **Battle-tested** - Used in production at NewTon Darts Club with tens of players
 
 ---
@@ -379,9 +426,9 @@ tournament.example.com {
 ## Versioning Strategy
 
 **Git tags → Docker tags:**
-- `v3.0.2` → `ghcr.io/USERNAME/newton-tournament-manager:3.0.2`
-- `v3.0.2` → `ghcr.io/USERNAME/newton-tournament-manager:3.0`
-- `main` branch → `ghcr.io/USERNAME/newton-tournament-manager:latest`
+- `v3.0.2` → `ghcr.io/skrodahl/newton-darts:3.0.2`
+- `v3.0.2` → `ghcr.io/skrodahl/newton-darts:3.0`
+- `main` branch → `ghcr.io/skrodahl/newton-darts:latest`
 
 **Selfhosters can choose:**
 - `latest` - Always get newest features (auto-updates)
