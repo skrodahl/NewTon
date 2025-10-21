@@ -146,6 +146,76 @@ cp -r tournaments/ tournaments-backup/
 
 ---
 
+## Advanced: Homelab & Absolute Paths
+
+If you're managing a homelab or prefer absolute paths for better control:
+
+### Using Absolute Paths
+
+Edit your `docker-compose.yml` to use absolute paths instead of relative paths:
+
+```yaml
+services:
+  newton-tournament:
+    image: ghcr.io/skrodahl/newton-darts:latest
+    container_name: newton-darts
+    ports:
+      - "8080:80"
+    volumes:
+      # Use absolute paths for better control
+      - /home/user/docker-data/newton/tournaments:/var/www/html/tournaments
+      - /home/user/docker-data/newton/logo.png:/var/www/html/logo.png:ro
+      - /home/user/docker-data/newton/payment.png:/var/www/html/payment.png:ro
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Oslo
+```
+
+**Benefits:**
+- Clear visibility of where data is stored
+- Easier to manage with existing backup systems
+- Works better with NFS/shared storage
+- No confusion about working directories
+
+### Named Volumes (Alternative)
+
+For more portable deployments, use Docker named volumes:
+
+```yaml
+services:
+  newton-tournament:
+    image: ghcr.io/skrodahl/newton-darts:latest
+    container_name: newton-darts
+    ports:
+      - "8080:80"
+    volumes:
+      - newton-tournaments:/var/www/html/tournaments
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Oslo
+
+volumes:
+  newton-tournaments:
+    driver: local
+```
+
+**To find where Docker stores the volume:**
+```bash
+docker volume inspect newton-tournaments
+```
+
+**To backup a named volume:**
+```bash
+docker run --rm -v newton-tournaments:/data -v $(pwd):/backup alpine tar czf /backup/tournaments-backup.tar.gz -C /data .
+```
+
+**To restore a named volume:**
+```bash
+docker run --rm -v newton-tournaments:/data -v $(pwd):/backup alpine tar xzf /backup/tournaments-backup.tar.gz -C /data
+```
+
+---
+
 ## Troubleshooting
 
 ### Port Already in Use
