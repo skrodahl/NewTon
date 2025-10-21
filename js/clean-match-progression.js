@@ -1801,7 +1801,7 @@ if (typeof window !== 'undefined') {
 }
 // TOURNAMENT HISTORY MANAGEMENT (TRANSACTIONAL)
 
-const MAX_HISTORY_ENTRIES = 500; // Keep last 300 transactions (covers 62 matches + operational transactions for 32-player bracket)
+const MAX_HISTORY_ENTRIES = 1000; // Keep last 1000 transactions (covers extensive 32-player tournaments with full operational history)
 
 /**
  * NEW: Save a single transaction to the history log.

@@ -525,7 +525,7 @@ function showQuickOverview() {
                     <strong>Matches:</strong> ${matchStats.completed}/${matchStats.total} completed (${matchPercentage}%)
                 </div>
                 <div style="margin: 8px 0;">
-                    <strong>Transactions:</strong> ${stats.total}/500 (${transactionPercentage}%)
+                    <strong>Transactions:</strong> ${stats.total}/1000 (${transactionPercentage}%)
                 </div>
                 <div style="margin: 8px 0;">
                     <strong>Active:</strong> ${matchStats.live} live matches, ${matchStats.ready} ready

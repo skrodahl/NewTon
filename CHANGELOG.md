@@ -1,5 +1,20 @@
 # 2025-10-20
 
+## **v3.0.2-beta** - Extended Transaction History Capacity
+
+### Enhanced: Transaction History Limit
+- **Increased MAX_HISTORY_ENTRIES from 500 to 1000**
+  - **Purpose**: Provide even more headroom for extensive 32-player tournaments with heavy operational activity
+  - **Previous limit**: 500 transactions
+  - **New limit**: 1000 transactions
+  - **Impact**: Doubles the transaction history capacity, allowing for extremely complex tournaments with extensive lane/referee reassignments and match operations
+  - **Storage impact**: Minimal - with optimized transaction storage (v3.0.1), even 1000 transactions remain well within localStorage limits
+  - **Use case**: Supports tournaments with 100+ completed matches plus full operational transaction history
+- **Implementation**: clean-match-progression.js:1804 (MAX_HISTORY_ENTRIES constant), analytics.js:528 (Developer Console display)
+- **User impact**: Tournament operators can run even the most complex tournaments without any concern about hitting transaction limits. The combination of optimized storage (v3.0.1) and doubled capacity (v3.0.2) provides exceptional operational headroom.
+
+---
+
 ## **v3.0.1** - Critical Storage Optimization & UI Enhancements
 
 ### Enhanced: Match Controls - Referee Conflict Prevention
