@@ -1,6 +1,31 @@
 # 2025-10-20
 
-## **v3.0.2-beta** - Extended Transaction History Capacity
+## **v3.0.2-beta** - Extended Transaction History Capacity & UI Refinements
+
+### Enhanced: Referee Conflict Detection - Self-Refereeing Support
+- **Players can now referee their own matches without triggering conflict warnings**
+  - **Previous behavior**: If a player was assigned as referee to their own match (e.g., "Chris vs Albin, Ref: Chris"), the conflict detection would block starting the match
+  - **New behavior**: Conflict detection now excludes the current match being checked, allowing self-refereeing while still preventing double-booking
+  - **Logic**: Added single-line check `if (m.id === match.id) return;` to skip the current match during referee conflict validation
+  - **Use case**: Common in smaller tournaments where players referee their own matches
+  - **Safety maintained**: Still prevents players from playing in one match while refereeing a different match
+- **Implementation**: bracket-rendering.js:2550-2551 (skip current match in conflict detection loop)
+- **User impact**: More flexible referee assignment without losing safety checks. Tournament operators can assign players as referees to their own matches, which is blocked appropriately when they're refereeing other matches.
+
+### Enhanced: UI Spacing Consistency
+- **Fixed spacing inconsistency between Setup and Registration page headers**
+  - **Issue**: Setup page had tight spacing between "Tournament Setup" title and "Tournament Name" field due to negative margin
+  - **Fix**: Changed `.setup-page-header .form-group` margin-top from `-6px` to `16px` to match Registration page spacing
+- **Implementation**: styles.css:2228
+- **User impact**: Consistent visual rhythm across all page headers
+
+### Enhanced: Payment QR Code Size Adjustment
+- **Reduced payment.png display height for better visual balance**
+  - **Previous height**: 200px
+  - **New height**: 175px
+  - **Location**: Registration page header, right column
+- **Implementation**: styles.css:2567
+- **User impact**: More balanced layout on Registration page, particularly on lower resolution displays
 
 ### Enhanced: Transaction History Limit
 - **Increased MAX_HISTORY_ENTRIES from 500 to 1000**

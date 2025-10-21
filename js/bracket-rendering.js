@@ -2547,6 +2547,9 @@ function createMatchCard(match) {
 
     if (matches && player1Id && player2Id) {
         matches.forEach(m => {
+            // Skip the current match - players can referee their own matches
+            if (m.id === match.id) return;
+
             const matchState = getMatchState(m);
             if ((matchState === 'ready' || matchState === 'live') && m.referee) {
                 if (m.referee === player1Id) player1IsReferee = true;
