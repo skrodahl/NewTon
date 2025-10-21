@@ -213,9 +213,9 @@ function updateStatisticsPane() {
     // Update Transaction Health
     const transactionEl = document.getElementById('stat-transactions');
     if (transactionEl) {
-        const percentage = Math.round((stats.total / 500) * 100);
+        const percentage = Math.round((stats.total / 1000) * 100);
         const status = percentage < 50 ? '✅' : (percentage < 80 ? '⚠️' : '🔴');
-        transactionEl.innerHTML = `${stats.total}/500 (${percentage}%) ${status}`;
+        transactionEl.innerHTML = `${stats.total}/1000 (${percentage}%) ${status}`;
     }
 
     // Update Match State
@@ -498,7 +498,7 @@ function showQuickOverview() {
     const validation = validateLaneAssignments ? validateLaneAssignments() : { valid: true };
     const timingStats = getTournamentTimingStats();
 
-    const transactionPercentage = Math.round((stats.total / 500) * 100);
+    const transactionPercentage = Math.round((stats.total / 1000) * 100);
     const matchPercentage = matchStats.total > 0 ? Math.round((matchStats.completed / matchStats.total) * 100) : 0;
 
     const laneHasLiveConflicts = laneStats.conflicts > 0;
@@ -567,8 +567,8 @@ function showTransactionBreakdown() {
     currentView = 'transactions';
 
     const stats = getTransactionStats();
-    const percentage = Math.round((stats.total / 500) * 100);
-    const remaining = 500 - stats.total;
+    const percentage = Math.round((stats.total / 1000) * 100);
+    const remaining = 1000 - stats.total;
 
     const isHealthy = percentage < 50;
     const statusColor = isHealthy ? '#166534' : (percentage < 80 ? '#ca8a04' : '#dc2626');
@@ -598,7 +598,7 @@ function showTransactionBreakdown() {
 
     html += `
                 <div style="margin: 16px 0 8px 0; padding-top: 12px; border-top: 1px solid #ddd;">
-                    <strong>Storage:</strong> ${stats.total}/500 entries (${percentage}%)
+                    <strong>Storage:</strong> ${stats.total}/1000 entries (${percentage}%)
                 </div>
                 <div style="margin: 8px 0;">
                     <strong>Capacity remaining:</strong> ${remaining} entries
@@ -1814,15 +1814,15 @@ function validateMatchStateIntegrity() {
 function validateTransactionCount() {
     const history = getTournamentHistory ? getTournamentHistory() : [];
     const count = history.length;
-    const percentage = Math.round((count / 500) * 100);
+    const percentage = Math.round((count / 1000) * 100);
 
-    const valid = count < 400; // Warn if over 80%
-    const status = count < 250 ? 'Healthy' : (count < 400 ? 'Moderate' : 'High');
+    const valid = count < 800; // Warn if over 80%
+    const status = count < 500 ? 'Healthy' : (count < 800 ? 'Moderate' : 'High');
 
     return {
         name: 'Transaction Count',
         valid: valid,
-        message: `${count}/500 entries (${percentage}%) - ${status}`,
+        message: `${count}/1000 entries (${percentage}%) - ${status}`,
         details: []
     };
 }
@@ -2345,7 +2345,7 @@ function showTransactionLogManagement() {
     // Calculate storage (rough estimate: ~2 bytes per char in UTF-16)
     const storageEstimate = ((JSON.stringify(history).length * 2) / 1024 / 1024).toFixed(2);
 
-    const percentage = Math.round((stats.total / 500) * 100);
+    const percentage = Math.round((stats.total / 1000) * 100);
 
     // Estimate smart pruning savings
     const estimate = estimateSmartPruning();
@@ -2359,7 +2359,7 @@ function showTransactionLogManagement() {
         <div style="background: #f8f9fa; padding: 15px; margin: 15px 0; border: 1px solid #c0c0c0;">
             <h5 style="margin: 0 0 10px 0;">Current Status:</h5>
             <div style="line-height: 1.8; font-size: 14px;">
-                <p style="margin: 5px 0;">• Total transactions: <strong>${stats.total}/500 (${percentage}%)</strong></p>
+                <p style="margin: 5px 0;">• Total transactions: <strong>${stats.total}/1000 (${percentage}%)</strong></p>
                 <p style="margin: 5px 0;">• Storage used: <strong>~${storageEstimate} MB</strong></p>
                 <p style="margin: 5px 0;">• Completed matches: <strong>${completedMatches.length}</strong></p>
                 <p style="margin: 5px 0;">• Active matches: <strong>${activeMatches} (${matchStats.live} live, ${matchStats.ready} ready)</strong></p>

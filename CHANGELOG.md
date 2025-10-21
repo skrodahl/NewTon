@@ -59,8 +59,17 @@
   - **Impact**: Doubles the transaction history capacity, allowing for extremely complex tournaments with extensive lane/referee reassignments and match operations
   - **Storage impact**: Minimal - with optimized transaction storage (v3.0.1), even 1000 transactions remain well within localStorage limits
   - **Use case**: Supports tournaments with 100+ completed matches plus full operational transaction history
-- **Implementation**: clean-match-progression.js:1804 (MAX_HISTORY_ENTRIES constant), analytics.js:528 (Developer Console display)
+- **Implementation**: clean-match-progression.js:1804 (MAX_HISTORY_ENTRIES constant)
 - **User impact**: Tournament operators can run even the most complex tournaments without any concern about hitting transaction limits. The combination of optimized storage (v3.0.1) and doubled capacity (v3.0.2) provides exceptional operational headroom.
+
+### Fixed: Developer Console Transaction Display
+- **Updated all hardcoded 500 transaction references to 1000 in analytics.js**
+  - **Issue**: Developer Console displayed incorrect transaction percentages and capacity (showed /500 instead of /1000)
+  - **Fix**: Updated 11 locations in analytics.js where transaction capacity was hardcoded to 500
+  - **Affected displays**: Quick Overview, Transaction Breakdown, Transaction Log Management, validation thresholds
+  - **Validation thresholds updated**: Healthy (<500), Moderate (500-799), High (800+) to maintain 50%/80% warning levels
+- **Implementation**: analytics.js:216, 218, 501, 528, 570, 571, 601, 1817, 1819-1820, 2348, 2362
+- **User impact**: Developer Console now correctly shows transaction capacity as X/1000 with accurate percentages. Status indicators (✅⚠️🔴) trigger at correct thresholds relative to 1000-transaction limit.
 
 ---
 
