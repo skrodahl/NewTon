@@ -44,7 +44,8 @@ docker run -d \
 Clubs can now easily host their own tournament manager instance on a server, enabling centralized tournament archives and multi-device access without relying on external services.
 
 **Documentation:**
-- `docker/README.md` - Quick start guide
+- **[DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md)** - Step-by-step guide to get running in under 2 minutes
+- `docker/README.md` - Docker-specific quick reference
 - `Docs/DOCKER.md` - Comprehensive deployment guide with reverse proxy setup
 
 ---
@@ -90,7 +91,7 @@ Consistent visual rhythm across all pages and improved layout density for compac
 
 ### For Self-Hosters
 If you want to deploy using Docker:
-1. See `docker/README.md` for quick start
+1. See **[DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md)** for step-by-step setup
 2. Review `Docs/DOCKER.md` for production deployment
 3. Configure reverse proxy if needed (nginx/Caddy examples included)
 
@@ -104,7 +105,8 @@ If you want to deploy using Docker:
 
 ## 📖 Additional Resources
 
-- **docker/README.md**: Docker quick start guide
+- **[DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md)**: Get Docker running in under 2 minutes
+- **docker/README.md**: Docker-specific quick reference
 - **Docs/DOCKER.md**: Complete Docker deployment documentation
 - **Docs/UNDO.md**: Undo system documentation
 - **Docs/ANALYTICS.md**: Developer Console guide
