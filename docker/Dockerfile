@@ -9,6 +9,9 @@ COPY . /var/www/html/
 # Copy nginx configuration
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
+# Copy PHP configuration (upload limits, UTF-8 encoding)
+COPY docker/php.ini /usr/local/etc/php/conf.d/uploads.ini
+
 # Create tournaments directory for persistent storage
 RUN mkdir -p /var/www/html/tournaments
 
