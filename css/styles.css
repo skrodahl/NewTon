@@ -2225,7 +2225,7 @@ a:hover { color: #1e40af; }
 
 .setup-page-header .form-group {
   margin-bottom: 0;
-  margin-top: -6px;
+  margin-top: 16px;
 }
 
 .setup-page-header .btn {
@@ -2564,7 +2564,7 @@ a:hover { color: #1e40af; }
 }
 
 .header-right-content img {
-  height: 200px;
+  height: 175px;
   width: auto;
   border: 1px solid #e8e8e8;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
