@@ -1,27 +1,27 @@
 services:
   newton-tournament:
-    build:
-      context: ..
-      dockerfile: docker/Dockerfile
+    image: ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
       - "8080:80"
     volumes:
       # Persistent tournament storage
-      - ../tournaments:/var/www/html/tournaments
+      - ./tournaments:/var/www/html/tournaments
       # Optional: Mount custom logo
-      - ../logo.png:/var/www/html/logo.png:ro
+      - ./logo.png:/var/www/html/logo.png:ro
       # Optional: Mount payment QR code
-      - ../payment.png:/var/www/html/payment.png:ro
+      - ./payment.png:/var/www/html/payment.png:ro
     restart: unless-stopped
     environment:
       - TZ=Europe/Oslo
 
-  # For production deployment using published image:
-  # Uncomment the section below and comment out the build section above
+  # For developers building from source:
+  # Uncomment the section below and comment out the image section above
   #
   # newton-tournament:
-  #   image: ghcr.io/skrodahl/newton:latest
+  #   build:
+  #     context: ..
+  #     dockerfile: docker/Dockerfile
   #   container_name: newton
   #   ports:
   #     - "8080:80"
