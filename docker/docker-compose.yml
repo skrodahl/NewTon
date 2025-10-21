@@ -3,7 +3,7 @@ services:
     build:
       context: ..
       dockerfile: docker/Dockerfile
-    container_name: newton-darts
+    container_name: newton
     ports:
       - "8080:80"
     volumes:
@@ -21,8 +21,8 @@ services:
   # Uncomment the section below and comment out the build section above
   #
   # newton-tournament:
-  #   image: ghcr.io/skrodahl/newton-darts:latest
-  #   container_name: newton-darts
+  #   image: ghcr.io/skrodahl/newton:latest
+  #   container_name: newton
   #   ports:
   #     - "8080:80"
   #   volumes:

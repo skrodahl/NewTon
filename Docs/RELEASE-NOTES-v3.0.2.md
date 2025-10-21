@@ -37,7 +37,7 @@ docker run -d \
   --name newton-tournament \
   -p 8080:80 \
   -v ./tournaments:/var/www/html/tournaments \
-  ghcr.io/skrodahl/newton-darts:latest
+  ghcr.io/skrodahl/newton:latest
 ```
 
 **Why It Matters:**
@@ -98,7 +98,7 @@ If you want to deploy using Docker:
 ### Compatibility
 - All v3.0.1 tournaments work in v3.0.2
 - v3.0.2 exports remain compatible with v3.0.1
-- Docker images published to `ghcr.io/skrodahl/newton-darts`
+- Docker images published to `ghcr.io/skrodahl/newton`
 - Multi-architecture support: linux/amd64, linux/arm64
 
 ---

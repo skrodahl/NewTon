@@ -18,14 +18,14 @@ docker-compose up -d
 
 ```bash
 # Build the image
-docker build -t newton-darts -f docker/Dockerfile .
+docker build -t newton -f docker/Dockerfile .
 
 # Run the container
 docker run -d \
   --name newton-tournament \
   -p 8080:80 \
   -v ./tournaments:/var/www/html/tournaments \
-  newton-darts
+  newton
 ```
 
 ### Using Published Image
@@ -35,7 +35,7 @@ docker run -d \
   --name newton-tournament \
   -p 8080:80 \
   -v ./tournaments:/var/www/html/tournaments \
-  ghcr.io/skrodahl/newton-darts:latest
+  ghcr.io/skrodahl/newton:latest
 ```
 
 ---

@@ -15,7 +15,7 @@ Host the Docker image directly in your existing GitHub repository using GitHub's
 **Advantages:**
 - Same repository, no second repo needed
 - Free for public images
-- Image lives at `ghcr.io/skrodahl/newton-darts`
+- Image lives at `ghcr.io/skrodahl/newton`
 - Integrates perfectly with GitHub Actions for automated builds
 - Version tags automatically match Git releases
 
@@ -26,8 +26,8 @@ Host the Docker image directly in your existing GitHub repository using GitHub's
 
 **Usage:**
 ```bash
-docker pull ghcr.io/skrodahl/newton-darts:latest
-docker pull ghcr.io/skrodahl/newton-darts:v3.0.2
+docker pull ghcr.io/skrodahl/newton:latest
+docker pull ghcr.io/skrodahl/newton:v3.0.2
 ```
 
 ### Option 2: Docker Hub
@@ -37,7 +37,7 @@ Traditional approach - link your GitHub repository to Docker Hub for automatic b
 **Advantages:**
 - Most discoverable (selfhosters check Docker Hub first)
 - Auto-builds on push
-- Image at `dockerhub.io/skrodahl/newton-darts`
+- Image at `dockerhub.io/skrodahl/newton`
 
 **Disadvantages:**
 - Separate service to manage
@@ -201,8 +201,8 @@ version: '3.8'
 
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton-darts:latest
-    container_name: newton-darts
+    image: ghcr.io/skrodahl/newton:latest
+    container_name: newton
     ports:
       - "8080:80"
     volumes:
@@ -225,7 +225,7 @@ version: '3.8'
 services:
   newton-tournament:
     build: .
-    container_name: newton-darts
+    container_name: newton
     ports:
       - "8080:80"
     volumes:
@@ -316,7 +316,7 @@ jobs:
 **Workflow triggers:**
 - Push a Git tag: `git tag v3.0.2 && git push origin v3.0.2`
 - GitHub Action automatically builds and publishes to GHCR
-- Image available at `ghcr.io/USERNAME/newton-darts:v3.0.2`
+- Image available at `ghcr.io/USERNAME/newton:v3.0.2`
 - Also tagged as `latest` if from default branch
 
 ---
@@ -363,7 +363,7 @@ docker run -d \
   -p 8080:80 \
   -v ./tournaments:/var/www/html/tournaments \
   --restart unless-stopped \
-  ghcr.io/skrodahl/newton-darts:latest
+  ghcr.io/skrodahl/newton:latest
 ```
 
 ### Custom Logo/Branding
@@ -377,7 +377,7 @@ docker run -d \
   -v ./logo.png:/var/www/html/logo.png:ro \
   -v ./payment.png:/var/www/html/payment.png:ro \
   --restart unless-stopped \
-  ghcr.io/skrodahl/newton-darts:latest
+  ghcr.io/skrodahl/newton:latest
 ```
 
 ### Reverse Proxy Setup
@@ -426,9 +426,9 @@ tournament.example.com {
 ## Versioning Strategy
 
 **Git tags → Docker tags:**
-- `v3.0.2` → `ghcr.io/skrodahl/newton-darts:3.0.2`
-- `v3.0.2` → `ghcr.io/skrodahl/newton-darts:3.0`
-- `main` branch → `ghcr.io/skrodahl/newton-darts:latest`
+- `v3.0.2` → `ghcr.io/skrodahl/newton:3.0.2`
+- `v3.0.2` → `ghcr.io/skrodahl/newton:3.0`
+- `main` branch → `ghcr.io/skrodahl/newton:latest`
 
 **Selfhosters can choose:**
 - `latest` - Always get newest features (auto-updates)

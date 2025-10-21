@@ -157,8 +157,8 @@ Edit your `docker-compose.yml` to use absolute paths instead of relative paths:
 ```yaml
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton-darts:latest
-    container_name: newton-darts
+    image: ghcr.io/skrodahl/newton:latest
+    container_name: newton
     ports:
       - "8080:80"
     volumes:
@@ -184,8 +184,8 @@ For more portable deployments, use Docker named volumes:
 ```yaml
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton-darts:latest
-    container_name: newton-darts
+    image: ghcr.io/skrodahl/newton:latest
+    container_name: newton
     ports:
       - "8080:80"
     volumes:

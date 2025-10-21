@@ -7,7 +7,7 @@
   - **nginx + PHP-FPM Alpine** - Lightweight (~60MB) container with full PHP REST API support
   - **Multi-architecture builds** - Supports linux/amd64 (Intel/AMD) and linux/arm64 (Apple Silicon, Raspberry Pi)
   - **Persistent tournament storage** - Volume mount for `/tournaments` directory preserves uploaded tournament data
-  - **GitHub Container Registry** - Automated builds on Git tags publish to `ghcr.io/skrodahl/newton-darts`
+  - **GitHub Container Registry** - Automated builds on Git tags publish to `ghcr.io/skrodahl/newton`
   - **GitHub Actions workflow** - Automatic multi-arch builds and publishing on version tags
 - **Docker configuration files:**
   - `docker/Dockerfile` - nginx + PHP-FPM Alpine-based image
