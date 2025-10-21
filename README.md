@@ -5,7 +5,7 @@
 
 **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
-You can even [self-host NewTon DC Tournament Manager with Docker](https://github.com/skrodahl/NewTon#-docker-deployment-self-hosting).
+You can even [self-host NewTon DC Tournament Manager](https://github.com/skrodahl/NewTon#-docker-deployment-self-hosting) with Docker.
 
 [Download NewTon DC Tournament Manager here!](https://github.com/skrodahl/NewTon/releases/latest)
 
