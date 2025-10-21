@@ -3,6 +3,23 @@
 ## Inbox
 *Raw ideas and suggestions awaiting triage*
 
+### DOCKER-QUICKSTART.md Enhancements
+**Context:** Current quick start guide covers basic setup and customization, but could be enhanced with additional common scenarios
+
+**Missing sections to add:**
+1. **Version Updates:** How to update to a new release version
+   - Currently has "Update to Latest Version" with `docker compose pull`, but could be more explicit about version pinning
+   - Should explain difference between `:latest`, `:3.0.2`, and `:3` tags
+   - Instructions for upgrading from one version to another safely
+
+2. **Network Security:** How to run Docker container without exposing port externally
+   - Current setup exposes on `0.0.0.0:8080` which is accessible from network
+   - Should document `127.0.0.1:8080` for localhost-only access
+   - Use case: Local development, single-machine use, or when behind reverse proxy
+   - Security consideration for users who don't need external network access
+
+**Priority:** Low - Nice to have, but not critical. Current quick start covers the essentials.
+
 ## Next
 *Items ready for implementation*
 
@@ -66,4 +83,4 @@
 - **Config Page Dynamic Help - Add Developer Console** (v2.6.0-beta): Updated Config page dynamic help to include comprehensive Developer Console information with feature overview, access instructions, and key capabilities including Lane Usage monitoring
 - **Setup Page Scrollable Areas Broken** (v2.6.0-beta): Fixed missing `overflow-y: auto` on `.scrollable-column-content` - both "Recent Tournaments" and "Match Results" boxes now scroll properly
 ---
-**Last updated:** October 16, 2025
+**Last updated:** October 22, 2025
