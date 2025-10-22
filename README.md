@@ -86,7 +86,6 @@ docker compose up -d
 
 **Documentation:**
 - **[Quick Start Guide](DOCKER-QUICKSTART.md)** - Get running in 2 minutes
-- **[Docs/DOCKER.md](Docs/DOCKER.md)** - Complete guide (reverse proxy, production setup, troubleshooting)
 
 ---
 
