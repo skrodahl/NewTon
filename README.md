@@ -12,7 +12,7 @@
 ## Try the Live Demo
 🎯 [**darts.skrodahl.net**](https://darts.skrodahl.net)
 
-*All data stays in your browser - nothing is stored on the server.*
+*All data, player names, tournaments, and config stay in your browser - nothing is stored on the server or shared with anyone else*
 
 ## Screenshots
 **Player Registration, Saved Players, and Dynamic Help**:
