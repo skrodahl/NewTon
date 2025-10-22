@@ -9,7 +9,7 @@
 ---
 # See It in Action
 
-**Try the live demo:** [**darts.skrodahl.net**](https://darts.skrodahl.net)
+**Try the live demo:** [**darts.skrodahl.net**](https://darts.skrodahl.net)   
 *All data stays in your browser - nothing is stored on the server.*
 
 **Player Registration, Saved Players, and Dynamic Help**:
