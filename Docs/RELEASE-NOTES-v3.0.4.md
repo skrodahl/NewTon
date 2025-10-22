@@ -1,6 +1,6 @@
-# NewTon DC Tournament Manager v3.0.4 Release Notes
+## NewTon DC Tournament Manager v3.0.4 Release Notes
 
-**Release Date:** October 2025
+**Release Date:** October 22, 2025
 **Configuration Release**
 
 ---
@@ -50,7 +50,7 @@ Public demo sites (like https://darts.skrodahl.net) can now use the standard Doc
 
 ## 🎯 Port 2020: "Double 20"
 
-The internal nginx port has been changed from 80 to **2020** - a thematic nod to darts' highest scoring segment!
+The internal nginx port has been changed from 80 to **2020** - a thematic nod to the "double tops" check-out!
 
 **What Changed:**
 - nginx now listens on port **2020** internally (was port 80)
@@ -58,7 +58,7 @@ The internal nginx port has been changed from 80 to **2020** - a thematic nod to
 - Reverse proxy users now point to `newton:2020` instead of `newton:80`
 
 **Why It Matters:**
-When using reverse proxies like Nginx Proxy Manager with Docker networks, many containers listen on port 80, causing conflicts. Port 2020 virtually eliminates this conflict while adding a fun thematic touch - "Double 20" is the highest scoring segment in darts! 🎯🎯
+When using reverse proxies like Nginx Proxy Manager with Docker networks, many containers listen on port 80, causing conflicts. Port 2020 virtually eliminates this conflict while adding a fun thematic touch - "Double 20"! 🎯🎯
 
 **For Reverse Proxy Users:**
 Update your proxy configuration to point to `newton:2020`:
@@ -157,7 +157,7 @@ Self-hosters using reverse proxies now have clear, tested examples for common se
 
 - **[DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md)**: Configuration options and reverse proxy setup
 - **docker/README.md**: Docker-specific quick reference
-- **Docs/DOCKER.md**: Complete Docker deployment documentation
+deployment documentation
 - **CHANGELOG.md**: Detailed version history
 
 ---
