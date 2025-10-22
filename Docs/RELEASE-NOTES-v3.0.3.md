@@ -80,7 +80,6 @@ This prevents accidental data loss in scenarios like:
 - **[DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md)**: Get Docker running in under 2 minutes
 - **docker/README.md**: Docker-specific quick reference
 - **Docs/DOCKER.md**: Complete Docker deployment documentation
-- **Docs/SECURITY.md**: Security best practices for self-hosted deployments
 - **CHANGELOG.md**: Detailed version history
 
 ---
