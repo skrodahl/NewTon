@@ -9,9 +9,11 @@
 ---
 # See It in Action
 
-**Try the live demo:** [**darts.skrodahl.net**](https://darts.skrodahl.net)   
+## Try the live demo
+[**darts.skrodahl.net**](https://darts.skrodahl.net)   
 *All data stays in your browser - nothing is stored on the server.*
 
+## Screenshots
 **Player Registration, Saved Players, and Dynamic Help**:
 
 ![Player Registration and Dynamic Help](https://github.com/skrodahl/NewTon/blob/main/Screenshots/player-registration-help.png)
