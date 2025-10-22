@@ -6,6 +6,9 @@ RUN apk add --no-cache nginx
 # Copy application files
 COPY . /var/www/html/
 
+# Rename tournament.html to tournament.php for PHP-FPM processing
+RUN mv /var/www/html/tournament.html /var/www/html/tournament.php
+
 # Copy nginx configuration
 COPY docker/nginx.conf /etc/nginx/http.d/default.conf
 
