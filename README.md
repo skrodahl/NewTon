@@ -10,7 +10,7 @@
 # See It in Action
 
 ## Try the Live Demo
-🎯 [**darts.skrodahl.net**](https://darts.skrodahl.net)
+🎯 [**https://darts.skrodahl.net**](https://darts.skrodahl.net)
 
 *All data, player names, tournaments, and config stay in your browser - nothing is stored on the server or shared with anyone else.*
 
