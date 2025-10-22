@@ -10,7 +10,8 @@
 # See It in Action
 
 ## Try the Live Demo
-🎯 [**darts.skrodahl.net**](https://darts.skrodahl.net)   
+🎯 [**darts.skrodahl.net**](https://darts.skrodahl.net)
+
 *All data stays in your browser - nothing is stored on the server.*
 
 ## Screenshots
