@@ -1,5 +1,58 @@
 # 2025-10-22
 
+## **v3.0.4** - Environment Variables & Port 2020 ("Double 20" 🎯)
+
+### New: Environment Variable Configuration
+- **Flexible Docker configuration via environment variables**
+  - **`NEWTON_API_ENABLED`** (default: `true`) - Enable/disable REST API endpoints
+    - Set to `false` to disable upload/download/delete endpoints (returns HTTP 403)
+    - Use case: Demo sites, security-conscious deployments, read-only mode
+  - **`NEWTON_DEMO_MODE`** (default: `false`) - Show demo privacy banner
+    - Displays banner: "Demo Site. Everything you do is stored locally in your browser. Your data never leaves your device."
+    - Use case: Public demo sites (like https://darts.skrodahl.net) that clarify privacy
+  - **`NEWTON_GITHUB_URL`** (default: `https://github.com/skrodahl/NewTon`) - Customize GitHub link
+    - Allows forks to link to their own repository in demo banner
+  - **`NEWTON_HOST_PORT`** (default: `8080`) - Configurable host port mapping
+    - Avoid port conflicts with other services on host machine
+- **Implementation**:
+  - `api/api-check.php` - Shared API access check (DRY approach)
+  - `api/*.php` - All API endpoints include api-check.php
+  - `tournament.html` - PHP config block + JavaScript demo banner injection
+  - `docker-compose.yml` - Environment variable definitions with inline documentation
+- **Backward compatible**: Environment variables have sensible defaults, existing deployments work unchanged
+
+### Changed: Internal Port 2020 ("Double 20" 🎯)
+- **nginx now listens on port 2020 internally** instead of port 80
+  - **Thematic choice**: Port 2020 = "Double 20" (highest scoring segment in darts!)
+  - **Practical benefit**: Avoids port conflicts when using reverse proxies (Nginx Proxy Manager, Caddy, Traefik)
+  - **Docker networking**: When multiple containers share a network (e.g., with NPM), port 80 is commonly used by many services. Port 2020 reduces conflicts.
+  - **Host port unchanged**: Default `8080:2020` mapping means users still access via `http://localhost:8080`
+  - **Reverse proxy users**: Point to `newton:2020` (not `newton:80`)
+- **Files updated**:
+  - `docker/nginx.conf` - `listen 2020;` with "Double 20" comment
+  - `docker/Dockerfile` - `EXPOSE 2020` with darts reference
+  - `docker-compose.yml` - Port mapping `8080:2020` with emoji and explanation
+  - `DOCKER-QUICKSTART.md` - Comprehensive updates with "Double 20" references throughout
+- **User impact**:
+  - **NPM/reverse proxy users**: No more port 80 conflicts in Docker networks
+  - **Direct users**: No change (still access via localhost:8080)
+  - **Fun detail**: Port choice has thematic significance for darts tournament software!
+
+### Enhanced: DOCKER-QUICKSTART.md
+- **New "Configuration" section** documenting all environment variables with use cases
+- **Reverse Proxy Setup guide** for NPM/Caddy users (explains port 2020)
+- **Demo Site Setup example** showing how to replicate darts.skrodahl.net
+- **Updated Security Notice** - Added `NEWTON_API_ENABLED=false` option, removed broken Docs/SECURITY.md reference
+- **All port references updated** from `:80` to `:2020` throughout
+- **Multiple "Double 20" callouts** explaining the thematic port choice
+
+### Technical Notes
+- **Demo banner preserves static HTML**: PHP block only executes when served via nginx/PHP-FPM, gracefully ignored when opening tournament.html directly (file://). Core feature preserved: double-click tournament.html still works!
+- **API check is DRY**: Shared `api/api-check.php` prevents code duplication across all API endpoints
+- **Independent control**: Environment variables work independently (can enable demo mode with API enabled, or disable API without demo mode, etc.)
+
+---
+
 ## **v3.0.3** - REST API Duplicate Prevention
 
 ### Enhanced: Tournament Upload Duplicate Prevention

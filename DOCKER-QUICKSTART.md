@@ -46,6 +46,9 @@ http://localhost:8080
 
 You should see the NewTon Tournament Manager interface!
 
+> **Port 2020 = "Double 20" 🎯**
+> The container runs nginx on **port 2020** internally (a darts reference - the highest scoring segment!). The default host port (8080) maps to this internal port. This non-standard port also helps avoid conflicts when using reverse proxies like Nginx Proxy Manager.
+
 ---
 
 ## What Just Happened?
@@ -83,15 +86,112 @@ docker compose up -d
 
 ---
 
-## Customization
+## Configuration
 
-### Change the Port
+### Environment Variables
 
-Edit `docker-compose.yml` and change the port mapping:
+The application supports several configuration options via environment variables in `docker-compose.yml`:
+
+#### `NEWTON_API_ENABLED` (default: `true`)
+Enable or disable the REST API endpoints for tournament upload/download/delete.
+
+**Use case:** Demo sites or security-conscious deployments can disable the API entirely.
 
 ```yaml
+environment:
+  - NEWTON_API_ENABLED=false  # Disables API, returns HTTP 403
+```
+
+#### `NEWTON_DEMO_MODE` (default: `false`)
+Show a demo banner at the top of the page explaining that data is stored locally.
+
+**Use case:** Public demo sites that want to clarify privacy (like https://darts.skrodahl.net).
+
+```yaml
+environment:
+  - NEWTON_DEMO_MODE=true  # Shows privacy banner
+```
+
+#### `NEWTON_GITHUB_URL` (default: `https://github.com/skrodahl/NewTon`)
+Customize the GitHub link shown in the demo banner.
+
+**Use case:** Forks or customized versions that want to link to their own repository.
+
+```yaml
+environment:
+  - NEWTON_GITHUB_URL=https://github.com/yourname/yourfork
+```
+
+#### `NEWTON_HOST_PORT` (default: `8080`)
+Change the host port that the container is accessible on.
+
+**Use case:** Avoid port conflicts with other services on your host machine.
+
+```bash
+# Set via environment variable
+NEWTON_HOST_PORT=9000 docker compose up -d
+
+# Or edit docker-compose.yml
 ports:
-  - "8009:80"  # Change 8080 to your preferred port
+  - "${NEWTON_HOST_PORT:-9000}:2020"
+```
+
+### Reverse Proxy Setup (Nginx Proxy Manager, Caddy, etc.)
+
+The container listens on **port 2020** internally ("Double 20" 🎯). When using a reverse proxy like Nginx Proxy Manager:
+
+1. Add the container to the same Docker network as your reverse proxy
+2. Point your reverse proxy to `newton:2020` (not 80!)
+3. Optionally remove the `ports:` mapping (not needed when using reverse proxy)
+
+**Example for NPM users:**
+
+```yaml
+services:
+  newton-tournament:
+    image: ghcr.io/skrodahl/newton:latest
+    container_name: newton
+    # Remove ports mapping when using reverse proxy
+    # ports:
+    #   - "8080:2020"
+    networks:
+      - proxy_network  # Same network as NPM
+    volumes:
+      - ./tournaments:/var/www/html/tournaments
+    environment:
+      - NEWTON_API_ENABLED=true
+      - NEWTON_DEMO_MODE=false
+
+networks:
+  proxy_network:
+    external: true
+```
+
+Then in NPM, configure proxy host to forward to `newton:2020`.
+
+### Demo Site Setup
+
+To replicate a demo site like https://darts.skrodahl.net:
+
+```yaml
+environment:
+  - NEWTON_API_ENABLED=false  # Disable API for security
+  - NEWTON_DEMO_MODE=true     # Show privacy banner
+```
+
+### Change the Host Port
+
+The default host port is 8080. To change it:
+
+**Option 1: Environment variable**
+```bash
+NEWTON_HOST_PORT=9000 docker compose up -d
+```
+
+**Option 2: Edit docker-compose.yml**
+```yaml
+ports:
+  - "9000:2020"  # Change 8080 to your preferred port
 ```
 
 Then restart:
@@ -160,7 +260,7 @@ services:
     image: ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
-      - "8080:80"
+      - "8080:2020"  # Internal port 2020 ("Double 20" 🎯)
     volumes:
       # Use absolute paths for better control
       - /home/user/docker-data/newton/tournaments:/var/www/html/tournaments
@@ -169,6 +269,8 @@ services:
     restart: unless-stopped
     environment:
       - TZ=Europe/Oslo
+      - NEWTON_API_ENABLED=true
+      - NEWTON_DEMO_MODE=false
 ```
 
 **Benefits:**
@@ -187,12 +289,14 @@ services:
     image: ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
-      - "8080:80"
+      - "8080:2020"  # Internal port 2020 ("Double 20" 🎯)
     volumes:
       - newton-tournaments:/var/www/html/tournaments
     restart: unless-stopped
     environment:
       - TZ=Europe/Oslo
+      - NEWTON_API_ENABLED=true
+      - NEWTON_DEMO_MODE=false
 
 volumes:
   newton-tournaments:
@@ -222,17 +326,22 @@ docker run --rm -v newton-tournaments:/data -v $(pwd):/backup alpine tar xzf /ba
 
 **Safe deployment options:**
 - ✅ **Local network only** (home/club WiFi) - Default setup is fine
-- ✅ **Localhost only** - Change port binding to `127.0.0.1:8080:80` in docker-compose.yml
+- ✅ **Localhost only** - Change port binding to `127.0.0.1:8080:2020` in docker-compose.yml
 - ✅ **Behind VPN** - Tailscale, WireGuard, or similar
 - ✅ **Reverse proxy with auth** - nginx/Caddy with HTTP basic authentication
-
-**For detailed security guidance, see:**
-- [Docs/SECURITY.md](Docs/SECURITY.md) - Complete security options and best practices
+- ✅ **Disable API** - Set `NEWTON_API_ENABLED=false` to disable all REST API endpoints
 
 **Quick localhost-only configuration:**
 ```yaml
 ports:
-  - "127.0.0.1:8080:80"  # Only accessible from this machine
+  - "127.0.0.1:8080:2020"  # Only accessible from this machine
+```
+
+**Disable API entirely (demo mode):**
+```yaml
+environment:
+  - NEWTON_API_ENABLED=false  # Returns HTTP 403 for all API calls
+  - NEWTON_DEMO_MODE=true     # Optional: Show privacy banner
 ```
 
 Then access via SSH tunnel or VPN when remote.
@@ -243,7 +352,16 @@ Then access via SSH tunnel or VPN when remote.
 
 ### Port Already in Use
 
-If port 8080 is already taken, edit `docker-compose.yml` and change `8080:80` to another port like `8009:80`.
+If port 8080 is already taken, change the host port:
+
+```bash
+# Use environment variable
+NEWTON_HOST_PORT=9000 docker compose up -d
+
+# Or edit docker-compose.yml
+ports:
+  - "9000:2020"  # Change 8080 to another port
+```
 
 ### Container Won't Start
 
@@ -263,7 +381,7 @@ docker compose logs
    ```bash
    docker compose ps
    ```
-   Should show: `0.0.0.0:8080->80/tcp`
+   Should show: `0.0.0.0:8080->2020/tcp`
 
 3. Try http://127.0.0.1:8080 instead
 

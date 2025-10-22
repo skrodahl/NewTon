@@ -8,6 +8,18 @@
     <link rel="icon" type="image/jpeg" href="logo.jpg">
     <link rel="stylesheet" href="css/styles.css">
 
+    <!-- Docker Configuration (only executes when served via PHP) -->
+    <script><?php
+    if (function_exists('getenv')) {
+        $demoMode = getenv('NEWTON_DEMO_MODE') === 'true' ? 'true' : 'false';
+        $githubUrl = getenv('NEWTON_GITHUB_URL') ?: 'https://github.com/skrodahl/NewTon';
+        echo "\n        window.NEWTON_CONFIG = {\n";
+        echo "            demoMode: $demoMode,\n";
+        echo "            githubUrl: '$githubUrl'\n";
+        echo "        };\n    ";
+    }
+    ?></script>
+
     <script>
         // Initialize help system when DOM is ready
         document.addEventListener('DOMContentLoaded', function () {
@@ -17,6 +29,15 @@
                     initializeHelpSystem();
                 }
             }, 500);
+
+            // Show demo banner if demo mode is enabled (Docker only)
+            if (typeof window.NEWTON_CONFIG !== 'undefined' && window.NEWTON_CONFIG.demoMode) {
+                const banner = document.createElement('div');
+                banner.style.cssText = 'background: #2196F3; color: white; padding: 12px; text-align: center; font-size: 14px;';
+                banner.innerHTML = '📍 Demo Site. Everything you do is stored locally in your browser. Your data never leaves your device. ' +
+                                  '<a href="' + window.NEWTON_CONFIG.githubUrl + '" style="color: white; text-decoration: underline;">View on GitHub</a>';
+                document.body.insertBefore(banner, document.body.firstChild);
+            }
         });
     </script>
 </head>

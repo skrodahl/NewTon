@@ -5,6 +5,9 @@
  * Requires write permissions to tournaments directory
  */
 
+// Check if API is enabled
+require_once 'api-check.php';
+
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');

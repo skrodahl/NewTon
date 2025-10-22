@@ -25,8 +25,8 @@ RUN mkdir -p /run/nginx
 # Volume for persistent tournament storage
 VOLUME ["/var/www/html/tournaments"]
 
-# Expose port 80
-EXPOSE 80
+# Expose port 2020 ("Double 20" - darts reference) 🎯
+EXPOSE 2020
 
 # Start both PHP-FPM and nginx
 CMD php-fpm -D && nginx -g 'daemon off;'
