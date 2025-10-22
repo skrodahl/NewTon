@@ -1604,6 +1604,620 @@ QR codes aren't just digital - **they're printable data**. The same QR code that
 
 ---
 
+## Optional Enhancement: MQTT Tournament Board with E-Ink Display
+
+### Overview
+
+A **wireless, battery-powered central tournament board** that displays real-time lane assignments using MQTT pub/sub architecture and a 4-color e-ink display. This system provides professional tournament visibility without consumables or ongoing costs.
+
+**Status:** Future consideration (post-v3.1)
+**Cost:** ~$150 one-time investment
+**Battery Life:** 6-12 months per charge for weekly tournaments
+**Benefit:** Professional lane overview, zero consumables, "charge once per season" operation
+
+### Why MQTT + E-Ink is Genius
+
+**The "Charge Once Per Season" Solution:**
+
+This isn't just a digital display - it's a **battery-powered tournament board that runs for months** on a single charge. Perfect for weekly tournament schedules where the device sleeps between events and wakes for match assignments.
+
+**Key Advantages:**
+
+- ✅ **Extraordinary battery life** - 6-12 months between charges for weekly tournaments
+- ✅ **Zero consumables** - No paper, no ink, no ongoing costs
+- ✅ **Real-time updates** - MQTT push notifications update display instantly
+- ✅ **4-color visual coding** - Red (LIVE), Yellow (READY), Black (text), White (background)
+- ✅ **Central placement** - Visible to all players, organizers, spectators
+- ✅ **Professional appearance** - Like an airport departure board for darts
+- ✅ **Wireless operation** - No power cables, clean wall-mount installation
+- ✅ **Automated data flow** - Tournament Manager → Chalker iPads via MQTT (no QR scanning)
+- ✅ **Physical backup** - E-ink display persists even if power fails
+
+**Compare to alternatives:**
+- **vs Thermal Printing:** No consumables ($0 vs $6/tournament), reusable display
+- **vs LCD Displays:** Weeks of battery life vs hours, readable in any lighting
+- **vs Paper Boards:** Automated updates vs manual writing, always current
+
+### The Power Profile (Why Battery Life is Measured in Months)
+
+**E-Ink's Superpower:** Image persists WITHOUT power consumption
+
+**Component Power Draw:**
+- **Deep sleep (99% of time):** 10µA (FireBeetle ESP32-E)
+- **E-ink static display:** 0mA (image stays visible without power!)
+- **MQTT check (every 30s):** ~2-3mA for <1 second
+- **Display update:** 100mA for 22 seconds when match assignments change
+
+**Real-World Battery Calculation (Weekly Tournaments):**
+
+**Per Tournament (5 hours active):**
+- 50 match assignments: 50 × (22s × 100mA) = 0.3 mAh
+- MQTT checks: 5 hours × 120 checks/hour × 3mA × 1s = 1.8 mAh
+- Deep sleep: 5 hours × 0.01mA = 0.05 mAh
+- **Total per tournament: ~2 mAh**
+
+**Between Tournaments (162 hours dormant per week):**
+- Deep sleep: 162 hours × 0.01mA = 1.6 mAh
+- **Total dormant: ~2 mAh**
+
+**Weekly Total: ~4 mAh**
+**3000mAh battery ÷ 4 mAh/week = 750 weeks theoretical**
+
+**Practical battery life: 6-12 months between charges**
+
+Even accounting for battery self-discharge, temperature effects, and conservative estimates, you can charge the tournament board once at the start of the season and not touch it again until the season ends.
+
+### Hardware Architecture
+
+**Complete Bill of Materials (~$150):**
+
+| Component | Spec | Price | Purpose |
+|-----------|------|-------|---------|
+| Raspberry Pi 4 (2GB) | WiFi AP + MQTT broker | $45 | Central hub |
+| Power supply + SD card | For Raspberry Pi | $15 | Infrastructure |
+| FireBeetle ESP32-E | Low-power MCU with battery mgmt | $12 | Display controller |
+| Waveshare 7.5" E-Ink | 4-color (800×480) Red/Yellow/Black/White | $50 | Visual display |
+| 3000mAh LiPo battery | 3.7V with JST connector | $12 | Power source |
+| Buttons + enclosure | Navigation + wall mount | $10 | User interface |
+| USB-C cable | Charging | $5 | Maintenance |
+| **TOTAL** | | **~$150** | Complete system |
+
+**FireBeetle ESP32-E Advantages:**
+- Built-in LiPo charging circuit (JST connector + USB-C)
+- Ultra-low deep sleep current (10µA) - designed for e-ink displays
+- Battery voltage monitoring (show battery % on display)
+- WiFi 2.4GHz for MQTT connection
+- Well-documented for e-ink projects
+
+**Waveshare 7.5" 4-Color E-Ink Advantages:**
+- Red, Yellow, Black, White colors (perfect for NewTon's color coding)
+- 800×480 resolution (fits ~8-10 lane assignments visible)
+- SPI interface (works with ESP32)
+- Fast refresh (~22 seconds full update)
+- Wide viewing angle
+- No backlight needed (readable in daylight)
+
+**Raspberry Pi 4 Role:**
+- WiFi Access Point (SSID: `NewTon-Tournament`)
+- Mosquitto MQTT broker (port 1883)
+- DHCP server for device network
+- No internet required (isolated network)
+- Plug in, forget it
+
+### Communication Architecture
+
+**MQTT Pub/Sub Model:**
+
+```
+Tournament Manager (iPad/Laptop)
+        ↓ MQTT publish/subscribe
+    Raspberry Pi MQTT Broker
+        ↓ MQTT publish/subscribe
+    ├─→ Central E-Ink Display (subscribes to all lanes)
+    └─→ Chalker iPads 1-20 (subscribe to assigned lane)
+```
+
+**MQTT Topic Structure:**
+
+```
+tournament/
+├── assignments/
+│   ├── lane1    → Match assignment for Lane 1
+│   ├── lane2    → Match assignment for Lane 2
+│   └── lane20   → Match assignment for Lane 20
+├── results/
+│   └── completed → Match completion notifications
+├── display/
+│   └── refresh  → Force e-ink display refresh
+└── status/
+    └── heartbeat → Device health monitoring
+```
+
+**Message Flow:**
+
+**1. Match Assignment (Tournament Manager → Chalker iPad):**
+```json
+Topic: tournament/assignments/lane5
+Payload: {
+  "matchId": "FS-2-1",
+  "player1": {"id": "123", "name": "Chris"},
+  "player2": {"id": "456", "name": "Albin"},
+  "format": "best-of-3",
+  "timestamp": 1729123456789
+}
+```
+
+**2. E-Ink Display Update (Automatic):**
+- E-ink subscribes to `tournament/assignments/#` (all lanes)
+- Receives all match assignments
+- Rebuilds lane overview display
+- Updates e-ink screen (22 second refresh)
+
+**3. Match Completion (Chalker iPad → Tournament Manager):**
+```json
+Topic: tournament/results/completed
+Payload: {
+  "matchId": "FS-2-1",
+  "winner": {"id": "123", "name": "Chris", "score": 2},
+  "loser": {"id": "456", "name": "Albin", "score": 1},
+  "stats": { ... },
+  "timestamp": 1729125678901
+}
+```
+
+**Key Benefits:**
+- ✅ **No QR scanning needed** - Direct MQTT data transfer
+- ✅ **Real-time updates** - Match assignments appear instantly on iPads
+- ✅ **Push notifications** - ESP32 wakes from deep sleep when message arrives
+- ✅ **Reliable** - MQTT has built-in QoS levels and reconnection
+- ✅ **Scalable** - Easy to add more displays or devices
+- ✅ **Standard protocol** - Battle-tested in industrial IoT
+
+### Display Design (7.5" 4-Color E-Ink)
+
+**Visual Layout:**
+
+```
+╔═══════════════════════════════════════════╗
+║  LANE ASSIGNMENTS          🔋 87%  14:23  ║
+╠═══════════════════════════════════════════╣
+║                                           ║
+║  Lane 1:  FS-1-1  Chris vs Albin    ● RED║
+║  Lane 2:  FS-1-2  John vs Erik      ● RED║
+║  Lane 3:  [Available]               BLACK ║
+║  Lane 4:  FS-1-3  Sarah vs Mike    ●YELLOW║
+║  Lane 5:  BS-2-1  Alex vs Tom       ● RED║
+║  Lane 6:  [Available]               BLACK ║
+║  Lane 7:  FS-2-2  Lisa vs Anna      BLACK ║
+║  Lane 8:  [Available]               BLACK ║
+║                                           ║
+║  ● RED Live (3)  ●YELLOW Ready (1)        ║
+║                                           ║
+║  [◄ Prev] Page 1/3        [Next ►]       ║
+╚═══════════════════════════════════════════╝
+```
+
+**Color Usage (Matches NewTon's Existing Color System):**
+- 🔴 **RED** - LIVE matches (DO THIS NOW - highest priority)
+- 🟡 **YELLOW** - READY matches (NEXT UP - can be started)
+- ⚫ **BLACK** - Text, available lanes, completed matches
+- ⚪ **WHITE** - Background
+
+**Display Elements:**
+- **Header:** Tournament board title, battery percentage, current time
+- **Lane List:** 8-10 visible lanes with match ID, player names, status
+- **Status Summary:** Count of live/ready matches
+- **Navigation:** Buttons to scroll through lanes (if more than 10)
+- **Battery Indicator:** Color-coded battery level (Black >50%, Yellow 20-50%, Red <20%)
+
+**Low Battery Handling:**
+
+At 5% battery, display updates to warning screen:
+```
+╔═══════════════════════════════════════════╗
+║                                           ║
+║          ⚠️  LOW BATTERY  ⚠️              ║
+║                                           ║
+║     Please charge tournament board        ║
+║          before next tournament           ║
+║                                           ║
+║     Connect USB-C cable to charge         ║
+║                                           ║
+╚═══════════════════════════════════════════╝
+```
+
+**At 2% battery, final update:**
+```
+╔═══════════════════════════════════════════╗
+║                                           ║
+║          🔋 BATTERY DEPLETED              ║
+║                                           ║
+║     Tournament board in sleep mode        ║
+║                                           ║
+║     Connect charger to resume             ║
+║                                           ║
+╚═══════════════════════════════════════════╝
+```
+
+**E-ink advantage:** This message persists on screen even when ESP32 is completely dead. Plug in USB-C, wait 10 minutes, resume operations.
+
+### Data Flow Comparison: MQTT vs QR Codes
+
+**MQTT Flow (Automated):**
+```
+Tournament Manager
+    ↓ Assign match to Lane 5
+MQTT publish (instant)
+    ↓
+Chalker iPad 5 receives match (auto-loads)
+    ↓
+E-Ink Display updates lane list (22 seconds)
+    ↓
+Match scored on iPad
+    ↓
+MQTT publish result (instant)
+    ↓
+Tournament Manager receives result (auto-processes)
+```
+
+**QR Flow (Manual Scanning):**
+```
+Tournament Manager
+    ↓ Generate QR code
+Display on screen
+    ↓ Referee walks over
+Scan QR with iPad camera (5-10 seconds)
+    ↓
+Match scored on iPad
+    ↓ Generate completion QR
+Display on iPad screen
+    ↓ Referee shows to manager
+Scan QR with camera (5-10 seconds)
+    ↓
+Tournament Manager processes result
+```
+
+**MQTT Advantages:**
+- ⚡ **Faster** - No walking, no scanning, no aiming camera
+- 🎯 **Fewer errors** - No scan failures, no wrong QR codes
+- 🤖 **Automated** - iPads auto-load matches when assigned
+- 📊 **Real-time overview** - E-ink shows all lanes simultaneously
+
+**QR Advantages:**
+- 📴 **No infrastructure** - Works without network
+- 🔄 **Fallback** - Camera fails? Use clipboard paste
+- 🎒 **Portable** - Take iPads anywhere, no hub needed
+
+**Hybrid Approach (Best of Both):**
+- Primary: MQTT for speed and automation
+- Backup: QR codes if MQTT fails or for portability
+- Both workflows supported in v3.1+
+
+### Physical Deployment
+
+**Central Tournament Board Placement Options:**
+
+1. **Wall-mounted behind Tournament Manager** - Everyone knows where to look
+2. **Near registration/check-in area** - Players see assignments when arriving
+3. **Central pillar or stand** - Visible from multiple angles in playing area
+4. **Next to dartboards** - In main playing area where matches happen
+
+**Mounting Considerations:**
+- **Keyhole slots** in enclosure for easy wall mounting
+- **Access panel** for USB-C charging port (charge 1-2 times per season)
+- **Clean appearance** - No dangling cables, wireless operation
+- **Optional portable stand** - Tripod or desktop stand for flexible placement
+
+**Raspberry Pi Placement:**
+- Small enclosure near power outlet
+- Can be hidden (doesn't need to be visible)
+- Ethernet port available if needed
+- Runs 24/7, very low power consumption
+
+### Implementation Phases
+
+**Phase 1: MQTT Infrastructure (1-2 weeks)**
+- Set up Raspberry Pi as WiFi AP
+- Install Mosquitto MQTT broker
+- Configure network (SSID, DHCP, firewall)
+- Test MQTT pub/sub with computer clients
+- **Deliverable:** Working MQTT broker, devices can connect
+
+**Phase 2: Tournament Manager MQTT Client (2-3 weeks)**
+- Add MQTT.js library to tournament.html
+- Publish match assignments to `tournament/assignments/lane#`
+- Subscribe to `tournament/results/completed` for match completions
+- Update Match Controls UI (show MQTT status)
+- **Deliverable:** Tournament Manager can send/receive via MQTT
+
+**Phase 3: Chalker iPad MQTT Client (2-3 weeks)**
+- Add MQTT library to chalker.html
+- Subscribe to assigned lane topic
+- Auto-load matches when received via MQTT
+- Publish results to `tournament/results/completed`
+- **Deliverable:** Chalker iPads work with MQTT (QR codes remain as fallback)
+
+**Phase 4: E-Ink Display Hardware (2-4 weeks)**
+- Assemble ESP32 + e-ink display + battery
+- Flash firmware (Arduino/ESP-IDF)
+- Test e-ink refresh and display quality
+- Build enclosure with buttons and wall-mount
+- **Deliverable:** Working e-ink hardware (standalone)
+
+**Phase 5: E-Ink Display Firmware (2-3 weeks)**
+- Connect ESP32 to MQTT broker
+- Subscribe to `tournament/assignments/#` (all lanes)
+- Parse lane data and render to e-ink screen
+- Implement deep sleep and wake-on-MQTT
+- Add battery monitoring and low-power warnings
+- **Deliverable:** E-ink display shows live lane assignments
+
+**Phase 6: Integration & Testing (1-2 weeks)**
+- Test full workflow: TM → MQTT → Chalker → Result → TM
+- Test e-ink display updates in real-time
+- Measure battery life in tournament conditions
+- Test fallback to QR codes when MQTT unavailable
+- **Deliverable:** Complete system ready for deployment
+
+**Total Timeline: 10-17 weeks (2.5-4 months)**
+
+### ESP32 Firmware Architecture
+
+**High-Level Logic:**
+
+```cpp
+// ESP32 Deep Sleep + MQTT Wake Cycle
+
+void setup() {
+  initEInk();
+  connectWiFi("NewTon-Tournament");
+  connectMQTT("192.168.42.1", 1883);
+  subscribeTopic("tournament/assignments/#");
+  subscribeTopic("tournament/display/refresh");
+}
+
+void loop() {
+  // Check for MQTT messages
+  if (mqtt.connected()) {
+    mqtt.loop();  // Process any pending messages
+  } else {
+    reconnectMQTT();
+  }
+
+  // Go to deep sleep for 30 seconds
+  esp_sleep_enable_timer_wakeup(30 * 1000000);  // 30 seconds
+  esp_light_sleep_start();
+}
+
+void onMessage(String topic, String payload) {
+  // Parse lane assignment data
+  DynamicJsonDocument doc = parseJSON(payload);
+
+  // Update lane data array
+  updateLaneData(doc);
+
+  // Refresh e-ink display (22 seconds)
+  renderLaneAssignments();
+
+  // Check battery and display warning if low
+  checkBattery();
+}
+```
+
+**Key Firmware Features:**
+- ✅ **Deep sleep between MQTT checks** - 10µA idle power
+- ✅ **Wake every 30 seconds** - Check for new messages
+- ✅ **Push notification wake** - Some ESP32 variants support wake-on-WiFi packet
+- ✅ **Battery monitoring** - ADC read of battery voltage via voltage divider
+- ✅ **OTA updates** - Update firmware over WiFi
+- ✅ **Graceful degradation** - Show last known state if MQTT connection lost
+
+### Cost Comparison: Tournament Board vs Alternatives
+
+| Solution | Initial Cost | Consumables/Year | Total Year 1 | Total Year 5 |
+|----------|-------------|------------------|--------------|-------------|
+| **MQTT E-Ink Board** | $150 | $0 | $150 | $150 |
+| **Thermal Printer** | $110 | $300 (50 tournaments) | $410 | $1,610 |
+| **LCD Display (wired)** | $80 | $0 | $80 | $80 |
+| **Paper Whiteboard** | $20 | $50 (dry-erase markers) | $70 | $270 |
+
+**MQTT E-Ink Board Advantages:**
+- ✅ **No consumables** - Zero ongoing cost
+- ✅ **Wireless** - Battery-powered, clean installation
+- ✅ **Always current** - Automated updates
+- ✅ **Professional appearance** - 4-color display, crisp text
+- ✅ **Months of battery life** - Charge 1-2 times per season
+
+**LCD Display Disadvantages:**
+- ❌ **Power cable required** - Not wireless, limits placement
+- ❌ **Higher power consumption** - Backlight drains batteries in hours
+- ❌ **Not readable in bright light** - Requires dimmer environment
+
+**Why E-Ink is Perfect:**
+- Only uses power during updates (22 seconds every few minutes)
+- Readable in direct sunlight (no backlight)
+- Image persists without power
+- Designed for "always-on" applications like this
+
+### Integration with QR Code Workflow
+
+**The systems complement each other:**
+
+**Primary Workflow (MQTT):**
+- Fast, automated, no scanning
+- Works when all devices on same network
+- Best for permanent installations
+
+**Fallback Workflow (QR Codes):**
+- Works without network infrastructure
+- Portable (take iPads to different venues)
+- Clipboard paste if camera fails
+
+**Example Tournament Scenarios:**
+
+**Scenario 1: Home Venue (MQTT)**
+- Raspberry Pi + MQTT broker always running
+- E-ink display on wall
+- iPads connect to NewTon-Tournament WiFi
+- All communication via MQTT (no QR scanning)
+- **Fast, automated, professional**
+
+**Scenario 2: Away Venue (QR Codes)**
+- Tournament Manager on laptop
+- Chalker iPads (standalone)
+- No Raspberry Pi
+- QR code workflow (screens only)
+- **Portable, no infrastructure needed**
+
+**Scenario 3: MQTT Failure (Hybrid)**
+- MQTT broker crashes mid-tournament
+- Tournament Manager detects failure
+- Falls back to QR code generation
+- iPads continue scanning QR codes
+- **Resilient, never blocks operation**
+
+### Future Expansion Possibilities
+
+Once MQTT infrastructure exists, additional features become trivial:
+
+**1. Live Scoreboards** (subscribe to match updates)
+```
+Topic: tournament/matches/live/FS-2-1
+Payload: {
+  "player1Score": 301,
+  "player2Score": 180,
+  "currentThrow": "T20, T20, S15 (115)"
+}
+```
+
+**2. Spectator Mobile App** (watch any match on phone)
+- Subscribe to match topics
+- See live scoring
+- View bracket progression
+- No special hardware needed
+
+**3. Statistics Dashboards** (real-time tournament stats)
+```
+Topic: tournament/stats/summary
+Payload: {
+  "matchesCompleted": 15,
+  "matchesLive": 3,
+  "highest180s": "Chris (5)",
+  "highestAverage": "Albin (82.5)"
+}
+```
+
+**4. Announcer Display** (next matches, standings)
+- Large screen showing upcoming matches
+- Player rankings
+- Recent results
+- Subscribe to relevant MQTT topics
+
+**5. Multiple Tournament Boards**
+- Add e-ink displays for specific areas
+- "Frontside Bracket" display
+- "Backside Bracket" display
+- Each subscribes to relevant topics
+
+**All use the same MQTT infrastructure - add features without rewiring.**
+
+### Why This Complements QR Codes (Not Replaces)
+
+**QR Code Strengths:**
+- Zero infrastructure required
+- Works anywhere, anytime
+- Visual confirmation of data transfer
+- Offline-first resilience
+- Perfect for portable tournaments
+
+**MQTT + E-Ink Strengths:**
+- Automated data flow
+- Real-time physical overview
+- Professional appearance
+- Months of battery life
+- Zero consumables
+
+**Together:**
+- MQTT for speed and automation (primary)
+- QR codes for portability and resilience (fallback)
+- E-ink display for physical tournament board (visual overview)
+- Best of all worlds: Fast, professional, resilient
+
+### When to Implement
+
+**Recommended Timeline:**
+
+**v3.1 (Q2 2026):**
+- Ship digital chalking with QR codes
+- Prove the workflow works
+- Gather user feedback
+- **No MQTT, no e-ink (keep it simple)**
+
+**v3.2+ (Q4 2026 or later):**
+- After QR workflow proven successful
+- If users request "faster assignment" or "central board"
+- Buy Raspberry Pi + e-ink hardware ($150)
+- Implement MQTT infrastructure
+- Add e-ink tournament board
+- **Enhancement, not replacement**
+
+**Decision Criteria:**
+- Is QR scanning proving cumbersome?
+- Do organizers want central lane overview?
+- Is venue suitable for permanent installation?
+- Do we want automated iPad assignment?
+
+**Current Assessment:** QR workflow likely sufficient for v3.1. MQTT + E-ink is a premium enhancement for permanent installations.
+
+### Bill of Materials (Detailed)
+
+**Central Hub:**
+| Item | Spec | Vendor | Price |
+|------|------|--------|-------|
+| Raspberry Pi 4 | 2GB RAM | Element14/Adafruit | $45 |
+| SD Card | 32GB Class 10 | SanDisk | $8 |
+| Power Supply | USB-C 15W | Official RPi | $8 |
+
+**Tournament Board Display:**
+| Item | Spec | Vendor | Price |
+|------|------|--------|-------|
+| FireBeetle ESP32-E | DFRobot low-power board | DFRobot/Amazon | $12 |
+| Waveshare 7.5" E-Ink | 4-color (RYBW), 800×480 | Waveshare/Amazon | $50 |
+| LiPo Battery | 3000mAh 3.7V JST | Adafruit/Amazon | $12 |
+| Tactile Buttons | 12mm push buttons (4×) | DigiKey/AliExpress | $2 |
+| Enclosure | Custom 3D print or project box | Thingiverse/Hammond | $8 |
+| USB-C Cable | 1m charging cable | Amazon | $5 |
+
+**Total: ~$150**
+
+**Optional Accessories:**
+- Wall mount bracket: $5
+- Portable tripod stand: $15
+- Spare battery: $12
+- Extra enclosure: $8
+
+### Marketing Pitch
+
+> **NewTon Tournament Board - Charge Once Per Season**
+>
+> Wireless, battery-powered tournament display that runs for months on a single charge.
+>
+> - **Set it up in September**
+> - **Run tournaments every week**
+> - **Charge it again in March**
+>
+> No wires. No consumables. No maintenance. Just works.
+
+**Key Selling Points:**
+- 🔋 **6-12 months battery life** - Charge once per season
+- 🎨 **4-color e-ink display** - Red/Yellow/Black/White status coding
+- 📡 **MQTT automation** - Real-time lane assignments
+- 💰 **$150 one-time cost** - No consumables, no ongoing expenses
+- 🏆 **Professional appearance** - Like an airport departure board
+- 🔌 **Wireless operation** - Clean wall mount, no cables
+
+---
+
 ## Conclusion
 
 **Digital Chalking via Bidirectional QR Codes** is the right solution for NewTon DC Tournament Manager's next phase of evolution.
