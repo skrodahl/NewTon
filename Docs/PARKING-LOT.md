@@ -11,8 +11,7 @@ Ideas and suggestions for future consideration.
 **Priority:** Low
 
 **Missing sections:**
-1. **Version Updates** - Explain `:latest`, `:3.0.2`, and `:3` tags; safe upgrade procedures
-2. **Network Security** - Document `127.0.0.1:8080` for localhost-only access (vs `0.0.0.0:8080` network exposure)
+**Version Updates** - Explain `:latest`, `:3.0.2`, and `:3` tags; safe upgrade procedures
 
 ---
 
