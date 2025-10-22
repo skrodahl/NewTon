@@ -1,3 +1,25 @@
+# 2025-10-22
+
+## **v3.0.3** - REST API Duplicate Prevention
+
+### Enhanced: Tournament Upload Duplicate Prevention
+- **Prevent silent overwrites when uploading tournaments to server**
+  - **Previous behavior**: Uploading a tournament with the same filename would silently overwrite the existing file without warning
+  - **New behavior**: Upload API returns 409 Conflict if file already exists, prompting user to confirm overwrite
+  - **User flow**:
+    1. Upload tournament that already exists → Confirmation dialog appears
+    2. User confirms → Retry with `?overwrite=true` parameter
+    3. User cancels → Upload aborted, existing file preserved
+  - **API changes**:
+    - `POST /api/upload-tournament.php` - Now checks `file_exists()` before writing
+    - Query parameter `?overwrite=true` - Explicitly allows overwriting existing files
+    - Response includes `overwritten: true` when file was replaced
+  - **Safety improvement**: Prevents accidental data loss from uploading older tournament versions over newer ones
+- **Implementation**: api/upload-tournament.php (duplicate check), tournament-management.js:195-264 (confirmation dialog and retry logic)
+- **User impact**: Users are now warned before overwriting existing tournaments on the server, preventing accidental data loss while still allowing intentional updates.
+
+---
+
 # 2025-10-21
 
 ## **v3.0.2** - Docker Deployment, Extended Transaction History & UI Refinements

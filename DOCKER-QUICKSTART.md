@@ -216,6 +216,29 @@ docker run --rm -v newton-tournaments:/data -v $(pwd):/backup alpine tar xzf /ba
 
 ---
 
+## ⚠️ Security Notice
+
+**Important:** The REST API has no built-in authentication. Do not expose the Docker container directly to the public internet without additional security measures.
+
+**Safe deployment options:**
+- ✅ **Local network only** (home/club WiFi) - Default setup is fine
+- ✅ **Localhost only** - Change port binding to `127.0.0.1:8080:80` in docker-compose.yml
+- ✅ **Behind VPN** - Tailscale, WireGuard, or similar
+- ✅ **Reverse proxy with auth** - nginx/Caddy with HTTP basic authentication
+
+**For detailed security guidance, see:**
+- [Docs/SECURITY.md](Docs/SECURITY.md) - Complete security options and best practices
+
+**Quick localhost-only configuration:**
+```yaml
+ports:
+  - "127.0.0.1:8080:80"  # Only accessible from this machine
+```
+
+Then access via SSH tunnel or VPN when remote.
+
+---
+
 ## Troubleshooting
 
 ### Port Already in Use

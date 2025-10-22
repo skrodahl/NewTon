@@ -77,6 +77,20 @@ if (strpos($filename, '..') !== false || strpos($filename, '/') !== false || str
 
 // Save tournament data
 $filepath = $tournamentsDir . $filename;
+
+// Check if file already exists and overwrite not explicitly requested
+$overwriteRequested = isset($_GET['overwrite']) && $_GET['overwrite'] === 'true';
+if (file_exists($filepath) && !$overwriteRequested) {
+    http_response_code(409); // Conflict
+    echo json_encode([
+        'error' => 'Tournament file already exists',
+        'filename' => $filename,
+        'exists' => true,
+        'message' => 'A tournament with this filename already exists. Delete it first or use overwrite option.'
+    ]);
+    exit;
+}
+
 $jsonData = json_encode($data, JSON_PRETTY_PRINT);
 
 if ($jsonData === false) {
@@ -92,9 +106,11 @@ if (file_put_contents($filepath, $jsonData) === false) {
 }
 
 // Success
+$wasOverwritten = file_exists($filepath) && $overwriteRequested;
 echo json_encode([
     'success' => true,
     'filename' => $filename,
     'path' => '/tournaments/' . $filename,
-    'message' => 'Tournament uploaded successfully'
+    'message' => $wasOverwritten ? 'Tournament updated successfully' : 'Tournament uploaded successfully',
+    'overwritten' => $wasOverwritten
 ]);

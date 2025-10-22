@@ -192,7 +192,7 @@ function exportTournament() {
 }
 
 // Upload tournament file to server (bonus feature - file picker based)
-async function uploadTournamentFile(event) {
+async function uploadTournamentFile(event, overwrite = false) {
     const file = event.target.files[0];
     if (!file) return;
 
@@ -203,7 +203,12 @@ async function uploadTournamentFile(event) {
 
         const filename = file.name;
 
-        const response = await fetch('/api/upload-tournament.php', {
+        // Build URL with optional overwrite parameter
+        const url = overwrite
+            ? '/api/upload-tournament.php?overwrite=true'
+            : '/api/upload-tournament.php';
+
+        const response = await fetch(url, {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',
@@ -214,14 +219,35 @@ async function uploadTournamentFile(event) {
             })
         });
 
-        if (!response.ok) {
-            const errorData = await response.json();
-            alert(`Upload failed: ${errorData.error || 'Unknown error'}`);
+        const result = await response.json();
+
+        // Handle 409 Conflict (file already exists)
+        if (response.status === 409) {
+            const confirmOverwrite = confirm(
+                `Tournament "${filename}" already exists on the server.\n\n` +
+                `Do you want to overwrite it?`
+            );
+
+            if (confirmOverwrite) {
+                // Retry with overwrite flag
+                await uploadTournamentFile(event, true);
+            } else {
+                // Clear file input
+                event.target.value = '';
+            }
             return;
         }
 
-        const result = await response.json();
-        alert(`✓ Tournament uploaded to server successfully!\n\n${filename}`);
+        if (!response.ok) {
+            alert(`Upload failed: ${result.error || 'Unknown error'}`);
+            return;
+        }
+
+        const message = result.overwritten
+            ? `✓ Tournament updated on server successfully!\n\n${filename}`
+            : `✓ Tournament uploaded to server successfully!\n\n${filename}`;
+
+        alert(message);
 
         // Reload tournament list to show newly uploaded tournament
         if (typeof loadRecentTournaments === 'function') {
