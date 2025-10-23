@@ -1808,7 +1808,12 @@ const MAX_HISTORY_ENTRIES = 1000; // Keep last 1000 transactions (covers extensi
  * @param {object} transaction The transaction object to save.
  */
 function saveTransaction(transaction) {
-    if (!tournament) return;
+    if (!tournament || !tournament.id) {
+        console.warn('No active tournament - transaction not saved');
+        return;
+    }
+
+    const historyKey = `tournament_${tournament.id}_history`;
     let history = getTournamentHistory();
     history.unshift(transaction); // Add to the beginning
 
@@ -1816,27 +1821,27 @@ function saveTransaction(transaction) {
         history = history.slice(0, MAX_HISTORY_ENTRIES);
     }
 
-    localStorage.setItem('tournamentHistory', JSON.stringify(history));
+    localStorage.setItem(historyKey, JSON.stringify(history));
 }
 
 /**
  * Get tournament history from localStorage.
- * Also handles clearing old snapshot-based history.
+ * Per-tournament isolation - reads from tournament-specific key.
  */
 function getTournamentHistory() {
+    if (!tournament || !tournament.id) {
+        return [];
+    }
+
     try {
-        const historyData = localStorage.getItem('tournamentHistory');
-        if (!historyData || historyData === 'undefined') { // Add check for "undefined"
+        const historyKey = `tournament_${tournament.id}_history`;
+        const historyData = localStorage.getItem(historyKey);
+
+        if (!historyData || historyData === 'undefined') {
             return [];
         }
 
         const history = JSON.parse(historyData);
-        // Check if history is in the old snapshot format and clear it if so
-        if (history.length > 0 && history[0].state && history[0].state.matches) {
-            console.warn('Old history format detected. Clearing history for new transactional system.');
-            clearTournamentHistory();
-            return [];
-        }
         return history;
     } catch (error) {
         console.error('Error loading tournament history:', error);
@@ -1846,10 +1851,17 @@ function getTournamentHistory() {
 
 /**
  * Clear tournament history.
+ * Per-tournament isolation - clears only current tournament's history.
  */
 function clearTournamentHistory() {
-    localStorage.removeItem('tournamentHistory');
-    console.log('✓ Tournament history cleared');
+    if (!tournament || !tournament.id) {
+        console.warn('No active tournament - cannot clear history');
+        return;
+    }
+
+    const historyKey = `tournament_${tournament.id}_history`;
+    localStorage.removeItem(historyKey);
+    console.log(`✓ Tournament history cleared for ${tournament.name}`);
 }
 
 /**
@@ -2002,7 +2014,11 @@ function undoTransactions(transactionIds) {
 
     // Remove ALL related transactions from the history (COMPLETE_MATCH + ASSIGN_LANE/REFEREE + START/STOP_MATCH)
     const newHistory = history.filter(t => !allTransactionsToRemove.has(t.id));
-    localStorage.setItem('tournamentHistory', JSON.stringify(newHistory));
+
+    if (tournament && tournament.id) {
+        const historyKey = `tournament_${tournament.id}_history`;
+        localStorage.setItem(historyKey, JSON.stringify(newHistory));
+    }
 
     console.log(`✅ Removed ${allTransactionsToRemove.size} total transactions from history`);
 
