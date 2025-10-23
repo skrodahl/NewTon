@@ -38,17 +38,19 @@
 
 ### Fixed: Referee Conflict Detection Logic
 - **Corrected referee conflict validation to only detect actual error states**
-  - **Previous behavior**: Flagged players refereeing their own match as conflicts
-  - **Issue**: This is allowed by design in club tournaments (player is at that dartboard anyway), causing false positives in Developer Console
-  - **Actual error state**: One person assigned as referee to multiple LIVE matches simultaneously (physically impossible - can't be at two dartboards)
-  - **Solution**: Changed validation to only check for duplicate LIVE referee assignments
+  - **Previous behavior**: Flagged players refereeing a match AND being a participant in another READY match as a tournament error state
+  - **Issue**: This is not a tournament error state, causing false positives in Developer Console
+  - **Actual error state**: One person assigned as referee to multiple active matches (regardless of state: PENDING, READY, or LIVE)
+  - **Solution**: Changed validation to check for duplicate referee assignments across all active matches
     - Removed check for "referee is player in same match" (allowed, not an error)
-    - Added check for "referee assigned to multiple LIVE matches" (actual error)
+    - Added check for "referee assigned to multiple active matches" (PENDING, READY, or LIVE)
+    - Completed matches are excluded (referees can be assigned to new matches after completing previous ones)
   - **Impact**:
     - ✅ Developer Console "Referee conflicts" now only shows genuine errors
     - ✅ No false positives for normal tournament operations
     - ✅ Player refereeing own match no longer flagged (allowed by design)
     - ✅ Player busy refereeing while their match is READY handled as operational constraint (not error)
+    - ✅ Prevents assigning same referee to multiple active matches (error state)
     - ✅ Cleaner, more accurate analytics for tournament organizers
 - **Files updated**:
   - `js/analytics.js` - Updated `validateRefereeAssignments()` function (lines 1757-1772)
