@@ -36,6 +36,23 @@
 - **Files updated**:
   - `js/analytics.js` - Fixed property reference in Quick Overview section
 
+### Fixed: Referee Conflict Detection Logic
+- **Corrected referee conflict validation to only detect actual error states**
+  - **Previous behavior**: Flagged players refereeing their own match as conflicts
+  - **Issue**: This is allowed by design in club tournaments (player is at that dartboard anyway), causing false positives in Developer Console
+  - **Actual error state**: One person assigned as referee to multiple LIVE matches simultaneously (physically impossible - can't be at two dartboards)
+  - **Solution**: Changed validation to only check for duplicate LIVE referee assignments
+    - Removed check for "referee is player in same match" (allowed, not an error)
+    - Added check for "referee assigned to multiple LIVE matches" (actual error)
+  - **Impact**:
+    - ✅ Developer Console "Referee conflicts" now only shows genuine errors
+    - ✅ No false positives for normal tournament operations
+    - ✅ Player refereeing own match no longer flagged (allowed by design)
+    - ✅ Player busy refereeing while their match is READY handled as operational constraint (not error)
+    - ✅ Cleaner, more accurate analytics for tournament organizers
+- **Files updated**:
+  - `js/analytics.js` - Updated `validateRefereeAssignments()` function (lines 1757-1772)
+
 ---
 
 ## **v3.0.5** - Independent Tournament List Controls

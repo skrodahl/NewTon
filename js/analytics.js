@@ -1755,15 +1755,18 @@ function validateRefereeAssignments() {
     }
 
     const conflicts = [];
+    const liveReferees = new Map(); // Track referee ID -> match ID for LIVE matches
 
     matches.forEach(match => {
-        if (match.referee && match.active) {
-            // Check if referee is playing in this match
-            if (match.player1 && match.player1.id === match.referee) {
-                conflicts.push(`${match.id}: Referee is player1`);
-            }
-            if (match.player2 && match.player2.id === match.referee) {
-                conflicts.push(`${match.id}: Referee is player2`);
+        // Only check LIVE matches for duplicate referee assignments
+        // (A referee can't be at two dartboards simultaneously)
+        if (match.state === 'live' && match.referee) {
+            if (liveReferees.has(match.referee)) {
+                // ERROR: This referee is already assigned to another LIVE match
+                const firstMatch = liveReferees.get(match.referee);
+                conflicts.push(`Referee assigned to both ${firstMatch} and ${match.id}`);
+            } else {
+                liveReferees.set(match.referee, match.id);
             }
         }
     });
