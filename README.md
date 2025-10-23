@@ -1,6 +1,6 @@
 # NewTon DC Tournament Manager
 
-**[Version 3.0.3](https://github.com/skrodahl/NewTon/releases/tag/v3.0.3)** | **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)**
+**[Version 3.0.4](https://github.com/skrodahl/NewTon/releases/tag/v3.0.4)** | **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)**
 
 **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
