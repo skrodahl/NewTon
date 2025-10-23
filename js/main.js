@@ -238,7 +238,7 @@ function loadClubLogo() {
         img.onerror = function () {
             // Logo not found - keep placeholder
         };
-        img.src = '/' + filename;  // Absolute path from site root
+        img.src = filename;  // Relative path (works for both file:// and web server)
     });
 }
 

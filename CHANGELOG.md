@@ -2,20 +2,25 @@
 
 ## **v3.0.5-beta** - Asset Path Fix
 
-### Fixed: Font and Logo Loading
-- **Corrected font and logo paths to use absolute paths**
-  - **Previous behavior**: Asset paths were relative (`url('fonts/...')`, `img.src = 'logo.png'`), which resolved to wrong location when files are in subdirectories
+### Fixed: Font and Logo Loading Paths
+- **Corrected asset paths to work in both file:// and web server contexts**
+  - **Previous behavior**: Asset paths were simple relative (`url('fonts/...')`, `img.src = 'logo.png'`)
   - **Issue**:
-    - Fonts attempted to load from `https://domain/css/fonts/` instead of `https://domain/fonts/`
-    - Logo attempted to load from relative path, causing timeouts and delays
-  - **Fix**: Changed to absolute paths (`url('/fonts/...')`, `img.src = '/logo.png'`) to load from site root
+    - CSS in `/css/styles.css` using `url('fonts/...')` looked for fonts in `/css/fonts/` instead of `/fonts/`
+    - This caused fonts to fail loading on web servers (Docker, demo site)
+    - Original paths worked for `file://` protocol but failed for `http://` protocol
+  - **Solution**: Use context-appropriate relative paths
+    - **CSS fonts**: Changed to `url('../fonts/...')` - goes up one directory from `/css/` to root, then into `/fonts/`
+    - **JavaScript logo**: Kept simple relative path `logo.png` - resolved relative to HTML page location (works for both protocols)
   - **Impact**:
-    - Droid Serif title font now loads correctly in Docker deployments and demo site
-    - Club logo loads immediately without timeout delays
-    - Page load time significantly improved
+    - ✅ Droid Serif fonts load correctly in Docker/web deployments
+    - ✅ Club logo loads correctly in Docker/web deployments
+    - ✅ Fonts and logo still work when opening `tournament.html` directly (file:// protocol)
+    - ✅ Preserves core "double-click to open" feature
+    - ✅ Page load time improved (no timeout delays)
 - **Files updated**:
-  - `css/styles.css` - Updated `@font-face` declarations for DroidSerif-Regular.ttf and DroidSerif-Bold.ttf
-  - `js/main.js` - Updated `loadClubLogo()` function to use absolute paths
+  - `css/styles.css` - Updated `@font-face` to use `../fonts/` relative paths
+  - `js/main.js` - Logo loading uses simple relative path (context-aware)
 
 ---
 
