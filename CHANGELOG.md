@@ -1,6 +1,62 @@
 # 2025-10-23
 
-## **v3.0.5-beta** - Asset Paths and Analytics Fix
+## **v4.0.0-beta** - Per-Tournament History Architecture
+
+### New: Per-Tournament History Storage
+- **Implemented isolated transaction history for each tournament**
+  - **Previous behavior**: Global `tournamentHistory` accumulated transactions from all tournaments, causing exports to bloat to 9.9MB with contaminated multi-tournament data
+  - **New behavior**: Each tournament stores its own history in `tournament_${id}_history` localStorage key
+  - **Benefits**:
+    - ✅ Clean exports (~110KB vs 9.9MB for 32-player tournaments)
+    - ✅ No cross-contamination between tournaments
+    - ✅ History exports with tournament data
+    - ✅ History deleted when tournament deleted
+    - ✅ Complete data portability with undo functionality preserved
+  - **Implementation**:
+    - Updated `saveTransaction()`, `getTournamentHistory()`, `clearTournamentHistory()` in `clean-match-progression.js`
+    - Updated undo/redo functions in `bracket-rendering.js`
+    - Updated smart pruning in `analytics.js`
+    - Updated reset tournament in `tournament-management.js`
+  - **Files updated**:
+    - `js/clean-match-progression.js` - Per-tournament history functions
+    - `js/bracket-rendering.js` - Undo/redo system references
+    - `js/analytics.js` - Smart pruning
+    - `js/tournament-management.js` - Reset tournament, import/export
+
+### New: Export Format v4.0
+- **Versioned export format with validation**
+  - **New field**: `exportVersion: "4.0"` in all exports
+  - **Includes**: Per-tournament history, playerList snapshot, complete tournament data
+  - **Structure**: Tournament data + isolated history + saved players
+  - **File naming**: `{TournamentName}_{YYYY-MM-DD}.json`
+  - **Console logging**: Shows transaction count on export
+  - **Impact**:
+    - ✅ Version validation on import
+    - ✅ Complete tournament portability
+    - ✅ History restoration works seamlessly
+    - ✅ Undo functionality preserved after import
+
+### New: Import Validation System
+- **Strict version checking prevents old format imports**
+  - **Validation**: Rejects exports without `exportVersion` field
+  - **Version check**: Rejects exports with version < 4.0
+  - **Error handling**: Clear alert dialogs explain rejection
+  - **History restoration**: Imports restore per-tournament history to correct key
+  - **PlayerList restoration**: Imports restore saved players snapshot
+  - **ID preservation**: Tournament IDs preserved on import for idempotent imports
+  - **No backwards compatibility**: Clean break from pre-4.0 for data integrity
+  - **Impact**:
+    - ✅ Only v4.0+ exports can be imported
+    - ✅ Clear error messages guide users
+    - ✅ Complete history restoration
+    - ✅ Undo works after import
+
+### Documentation
+- **New comprehensive import/export documentation**
+  - Created `Docs/IMPORT_EXPORT.md` with complete specification
+  - Covers export format v4.0 schema, localStorage architecture, validation, error handling
+  - Includes testing procedures and troubleshooting guide
+  - Documents transaction history system and undo integration
 
 ### Fixed: Font and Logo Loading Paths
 - **Corrected asset paths to work in both file:// and web server contexts**

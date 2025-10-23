@@ -1094,6 +1094,7 @@ function processImportedTournament(importedData) {
 
     const validation = validateTournamentData(importedData);
     if (!validation.valid) {
+        alert(`Invalid tournament data:\n\n${validation.error}`);
         showImportStatus('error', `Invalid tournament data: ${validation.error}`);
         return;
     }
@@ -1121,8 +1122,7 @@ function validateTournamentData(data) {
         return {
             valid: false,
             error: 'This export file is from an older version and cannot be imported.\n\n' +
-                   'Only export files from version 4.0 or later are supported.\n\n' +
-                   'If you need to import this tournament, please re-export it using the latest version of the software.'
+                   'Only export files from version 4.0 or later are supported.'
         };
     }
 
@@ -1131,8 +1131,7 @@ function validateTournamentData(data) {
         return {
             valid: false,
             error: `Export version ${data.exportVersion} is not supported.\n\n` +
-                   'Only export files from version 4.0 or later can be imported.\n\n' +
-                   'Please re-export this tournament using the latest version of the software.'
+                   'Only export files from version 4.0 or later can be imported.'
         };
     }
 
