@@ -1,15 +1,21 @@
 # 2025-10-23
 
-## **v3.0.5-beta** - Font Path Fix
+## **v3.0.5-beta** - Asset Path Fix
 
-### Fixed: Droid Serif Font Loading
-- **Corrected font paths in CSS to use absolute paths**
-  - **Previous behavior**: Font paths were relative (`url('fonts/...')`), which resolved to wrong location when CSS is in `/css/` subdirectory
-  - **Issue**: Fonts attempted to load from `https://domain/css/fonts/` instead of `https://domain/fonts/`
-  - **Fix**: Changed to absolute paths (`url('/fonts/...')`) to load from site root
-  - **Impact**: Droid Serif title font now loads correctly in Docker deployments and demo site
+### Fixed: Font and Logo Loading
+- **Corrected font and logo paths to use absolute paths**
+  - **Previous behavior**: Asset paths were relative (`url('fonts/...')`, `img.src = 'logo.png'`), which resolved to wrong location when files are in subdirectories
+  - **Issue**:
+    - Fonts attempted to load from `https://domain/css/fonts/` instead of `https://domain/fonts/`
+    - Logo attempted to load from relative path, causing timeouts and delays
+  - **Fix**: Changed to absolute paths (`url('/fonts/...')`, `img.src = '/logo.png'`) to load from site root
+  - **Impact**:
+    - Droid Serif title font now loads correctly in Docker deployments and demo site
+    - Club logo loads immediately without timeout delays
+    - Page load time significantly improved
 - **Files updated**:
   - `css/styles.css` - Updated `@font-face` declarations for DroidSerif-Regular.ttf and DroidSerif-Bold.ttf
+  - `js/main.js` - Updated `loadClubLogo()` function to use absolute paths
 
 ---
 
