@@ -27,7 +27,7 @@
 
 ![16-player bracket with "Match Card Magic Zoom"](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
 
-**Match Controls**:
+**Match Controls with Referee Suggestions and Match/Referee Conflict Detection**:
 
 ![Match Controls](https://github.com/skrodahl/NewTon/blob/main/Screenshots/match-controls.png)
 
