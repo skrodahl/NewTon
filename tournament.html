@@ -1163,6 +1163,56 @@
             </div>
         </div>
 
+        <!-- Import Tournament Confirmation Modal -->
+        <div id="importConfirmModal" class="modal">
+            <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
+                <h3>📥 Import Tournament Confirmation</h3>
+                <div style="margin: 15px 0; line-height: 1.4;">
+                    <div
+                        style="background: #d1ecf1; padding: 12px; margin-bottom: 15px; border-left: 4px solid #17a2b8;">
+                        <p style="margin: 0; font-weight: 600; color: #0c5460;">ℹ️ Data Safety Guaranteed</p>
+                        <p style="margin: 6px 0 0 0; color: #0c5460;">Your current tournament data is automatically
+                            saved and can be reloaded at any time. Importing a tournament will not cause any
+                            data loss.</p>
+                    </div>
+
+                    <!-- Old Format Warning (conditionally shown) -->
+                    <div id="oldFormatWarningSection"
+                        style="background: #faf8f3; padding: 12px; margin-bottom: 15px; border-left: 4px solid rgba(180, 83, 9, 1); display: none;">
+                        <p style="margin: 0; font-weight: 600; color: #856404;">⚠️ Undo History Unavailable</p>
+                        <p style="margin: 6px 0 0 0; color: #856404;">This tournament is from an older version. It will
+                            import successfully but undo functionality will not be available. All other features work
+                            normally.</p>
+                    </div>
+
+                    <div style="background: #e7f3ff; padding: 12px; margin: 12px 0; border-left: 4px solid #0056b3;">
+                        <h4 style="margin: 0 0 8px 0; color: #0056b3;">Tournament to Import:</h4>
+                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
+                                id="importConfirmName">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="importConfirmDate">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="importConfirmMatches">-</span></p>
+                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="importConfirmPlayers">-</span></p>
+                    </div>
+
+                    <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">
+                        <p style="margin: 0; font-weight: 600; color: #155724;">✓ What will be imported:</p>
+                        <ul style="margin: 8px 0; padding-left: 18px; color: #155724;">
+                            <li>Tournament data and settings</li>
+                            <li>All registered players</li>
+                            <li>Match results and bracket structure</li>
+                            <li>Final placements (if tournament completed)</li>
+                            <li id="importUndoHistoryNote">Full undo history</li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel Import</button>
+                    <button class="btn btn-primary" id="confirmImportBtn" onclick="confirmImport()">Import
+                        Tournament</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Load Tournament Confirmation Modal -->
         <div id="loadTournamentModal" class="modal">
             <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">

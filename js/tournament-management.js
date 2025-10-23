@@ -566,8 +566,8 @@ async function loadSharedTournament(filename) {
 
         const tournamentData = await response.json();
 
-        // Continue with same import logic as local tournaments
-        continueImportProcess(tournamentData, filename);
+        // Use same validation as file imports
+        processImportedTournament(tournamentData);
 
     } catch (error) {
         console.error('Error loading shared tournament:', error);
@@ -841,6 +841,64 @@ function confirmOverwriteTournament() {
     continueImportProcess(importedData);
 }
 
+function showImportConfirmModal(importedData, isOldFormat) {
+    // Store import data for later
+    window.pendingImportData = importedData;
+    window.isOldFormatImport = isOldFormat;
+
+    // Populate modal with tournament details
+    document.getElementById('importConfirmName').textContent = importedData.name;
+    document.getElementById('importConfirmDate').textContent = importedData.date;
+    document.getElementById('importConfirmPlayers').textContent =
+        `${(importedData.players || []).length} registered`;
+
+    const completedMatches = (importedData.matches || []).filter(m => m.completed).length;
+    const totalMatches = (importedData.matches || []).length;
+    document.getElementById('importConfirmMatches').textContent =
+        `${completedMatches}/${totalMatches} matches completed`;
+
+    // Show/hide old format warning
+    const warningSection = document.getElementById('oldFormatWarningSection');
+    const undoHistoryNote = document.getElementById('importUndoHistoryNote');
+
+    if (isOldFormat) {
+        warningSection.style.display = 'block';
+        // Hide undo history note for old formats
+        if (undoHistoryNote) {
+            undoHistoryNote.style.display = 'none';
+        }
+    } else {
+        warningSection.style.display = 'none';
+        // Show undo history note for v4.0+ formats
+        if (undoHistoryNote) {
+            undoHistoryNote.style.display = 'list-item';
+        }
+    }
+
+    // Update button text
+    const confirmBtn = document.getElementById('confirmImportBtn');
+    confirmBtn.textContent = isOldFormat ? 'Import Anyway' : 'Import Tournament';
+
+    // Show modal
+    pushDialog('importConfirmModal', null, true);
+}
+
+function confirmImport() {
+    const importedData = window.pendingImportData;
+
+    if (!importedData) {
+        alert('Import data not found.');
+        popDialog();
+        return;
+    }
+
+    // Close modal
+    popDialog();
+
+    // Proceed with import
+    continueImportProcess(importedData);
+}
+
 function continueImportProcess(importedData) {
     try {
         // Calculate bracketSize if missing (for older exported tournaments)
@@ -1108,8 +1166,8 @@ function processImportedTournament(importedData) {
         return; // Exit here, modal will handle the decision
     }
 
-    // No existing tournament, proceed with import
-    continueImportProcess(importedData);
+    // Show import confirmation modal
+    showImportConfirmModal(importedData, validation.isOldFormat);
 }
 
 function validateTournamentData(data) {
@@ -1117,22 +1175,18 @@ function validateTournamentData(data) {
         return { valid: false, error: 'Data must be a valid tournament object' };
     }
 
-    // EXPORT VERSION VALIDATION - v4.0 Format Required
-    if (!data.exportVersion) {
-        return {
-            valid: false,
-            error: 'This export file is from an older version and cannot be imported.\n\n' +
-                   'Only export files from version 4.0 or later are supported.'
-        };
-    }
+    // EXPORT VERSION DETECTION - Support old formats with warning
+    let isOldFormat = false;
 
-    const exportVersion = parseFloat(data.exportVersion);
-    if (exportVersion < 4.0) {
-        return {
-            valid: false,
-            error: `Export version ${data.exportVersion} is not supported.\n\n` +
-                   'Only export files from version 4.0 or later can be imported.'
-        };
+    if (!data.exportVersion) {
+        // Old format (pre-v4.0) - no exportVersion field
+        isOldFormat = true;
+    } else {
+        const exportVersion = parseFloat(data.exportVersion);
+        if (exportVersion < 4.0) {
+            // Old format with version number < 4.0
+            isOldFormat = true;
+        }
     }
 
     if (!data.name || typeof data.name !== 'string') {
@@ -1191,7 +1245,7 @@ function validateTournamentData(data) {
         }
     }
 
-    return { valid: true };
+    return { valid: true, isOldFormat: isOldFormat };
 }
 
 function showImportStatus(type, message) {

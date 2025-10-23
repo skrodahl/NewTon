@@ -2,17 +2,16 @@
 
 ## **v4.0.0-beta** - Per-Tournament History Architecture
 
-### ⚠️ BREAKING CHANGE: Import Compatibility
+### Backwards Compatibility with Pre-v4.0 Exports
 
-**This version cannot import tournament exports created before v4.0.0.**
+**Old tournament exports are supported with limited functionality.**
 
-- **What this means**: Tournament JSON files exported from versions prior to v4.0 will be rejected on import
-- **Why this change**: Previous exports contained contaminated data from multiple tournaments due to global history accumulation, making them unreliable for data restoration
-- **First breaking change**: This is the first breaking change in the software's existence. This architectural fix is designed to prevent the need for breaking changes in the future by establishing a solid foundation for tournament data management
-- **Impact**: Users with pre-4.0 exports can still reference them for historical data, but cannot re-import them into the application
-- **Migration path**: No migration available - this is a clean break for data integrity
-
-**Going forward**: All v4.0+ exports include version validation and will be importable in future versions.
+- **What works**: Pre-v4.0 tournament exports can be imported successfully
+- **Import process**: Shows a warning modal explaining limitations before import
+- **Full functionality**: All tournament features work normally (players, matches, bracket, placements, results)
+- **Limitation**: Undo history is not available for imported old tournaments (new matches will generate history normally)
+- **User experience**: Import confirmation modal clearly indicates whether full undo functionality is available
+- **Going forward**: All v4.0+ exports include full undo functionality and version validation
 
 ### New: Per-Tournament History Storage
 - **Implemented isolated transaction history for each tournament**
@@ -48,20 +47,21 @@
     - ✅ History restoration works seamlessly
     - ✅ Undo functionality preserved after import
 
-### New: Import Validation System
-- **Strict version checking prevents old format imports**
-  - **Validation**: Rejects exports without `exportVersion` field
-  - **Version check**: Rejects exports with version < 4.0
-  - **Error handling**: Clear alert dialogs explain rejection
-  - **History restoration**: Imports restore per-tournament history to correct key
+### New: Import Confirmation and Validation System
+- **Import confirmation modal for all imports**
+  - **Consistent UX**: Both "Shared Tournaments" and "Import Tournament" show confirmation modal before importing
+  - **Version detection**: Automatically detects old format (pre-v4.0) vs new format exports
+  - **Old format warning**: Yellow warning box explains undo history will not be available
+  - **New format confirmation**: Green indicators show full functionality including undo history
+  - **User choice**: Users can cancel or proceed with import after seeing details
+  - **History restoration**: v4.0+ imports restore per-tournament history to correct key
   - **PlayerList restoration**: Imports restore saved players snapshot
   - **ID preservation**: Tournament IDs preserved on import for idempotent imports
-  - **No backwards compatibility**: Clean break from pre-4.0 for data integrity
   - **Impact**:
-    - ✅ Only v4.0+ exports can be imported
-    - ✅ Clear error messages guide users
-    - ✅ Complete history restoration
-    - ✅ Undo works after import
+    - ✅ All imports show confirmation before proceeding
+    - ✅ Clear warnings for old format limitations
+    - ✅ Complete history restoration for v4.0+ exports
+    - ✅ Backwards compatible with pre-v4.0 exports
 
 ### Documentation
 - **New comprehensive import/export documentation**
