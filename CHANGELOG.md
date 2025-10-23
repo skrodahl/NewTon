@@ -2,6 +2,18 @@
 
 ## **v4.0.0-beta** - Per-Tournament History Architecture
 
+### ⚠️ BREAKING CHANGE: Import Compatibility
+
+**This version cannot import tournament exports created before v4.0.0.**
+
+- **What this means**: Tournament JSON files exported from versions prior to v4.0 will be rejected on import
+- **Why this change**: Previous exports contained contaminated data from multiple tournaments due to global history accumulation, making them unreliable for data restoration
+- **First breaking change**: This is the first breaking change in the software's existence. This architectural fix is designed to prevent the need for breaking changes in the future by establishing a solid foundation for tournament data management
+- **Impact**: Users with pre-4.0 exports can still reference them for historical data, but cannot re-import them into the application
+- **Migration path**: No migration available - this is a clean break for data integrity
+
+**Going forward**: All v4.0+ exports include version validation and will be importable in future versions.
+
 ### New: Per-Tournament History Storage
 - **Implemented isolated transaction history for each tournament**
   - **Previous behavior**: Global `tournamentHistory` accumulated transactions from all tournaments, causing exports to bloat to 9.9MB with contaminated multi-tournament data
