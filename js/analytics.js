@@ -537,7 +537,7 @@ function showQuickOverview() {
                     <strong>Lane conflicts (READY):</strong> ${laneHasReadyConflicts ? `⚠️ ${laneStats.readyConflicts}` : '✅ None'}
                 </div>
                 <div style="margin: 8px 0;">
-                    <strong>Referee conflicts:</strong> ${refereeHasConflicts ? `⚠️ ${refereeValidation.conflicts.length}` : '✅ None'}
+                    <strong>Referee conflicts:</strong> ${refereeHasConflicts ? `⚠️ ${refereeValidation.details.length}` : '✅ None'}
                 </div>
                 ${!tournament.readOnly ? `
                 <div style="margin: 16px 0 8px 0; padding-top: 12px; border-top: 1px solid #ddd;">
