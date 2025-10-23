@@ -1,0 +1,33 @@
+services:
+  newton-tournament:
+    image: ghcr.io/skrodahl/newton:3.0.5-beta
+    container_name: newton
+
+    ports:
+      - "2020:2020"  # Host port 2020 → Container port 2020 ("Double 20" 🎯)
+
+    networks:
+      - npm_default
+
+    volumes:
+      # Persistent tournament storage
+      - /var/lib/docker/volumes/newton/tournaments:/var/www/html/tournaments
+      # Optional: Mount custom logo
+      - /var/lib/docker/volumes/newton/logo.png:/var/www/html/logo.png:ro
+      # Optional: Mount payment QR code
+      - /var/lib/docker/volumes/newton/payment.png:/var/www/html/payment.png:ro
+
+    restart: unless-stopped
+
+    environment:
+      # Timezone configuration
+      - TZ=Europe/Oslo
+      # Application configuration
+      - NEWTON_API_ENABLED=false          # Disabled for demo site security
+      - NEWTON_DEMO_MODE=true             # Show demo banner
+      - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon
+
+# Networks declaration at ROOT level (same indentation as 'services:')
+networks:
+  npm_default:
+    external: true

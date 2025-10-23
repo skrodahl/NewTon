@@ -1,5 +1,18 @@
 # 2025-10-23
 
+## **v3.0.5-beta** - Font Path Fix
+
+### Fixed: Droid Serif Font Loading
+- **Corrected font paths in CSS to use absolute paths**
+  - **Previous behavior**: Font paths were relative (`url('fonts/...')`), which resolved to wrong location when CSS is in `/css/` subdirectory
+  - **Issue**: Fonts attempted to load from `https://domain/css/fonts/` instead of `https://domain/fonts/`
+  - **Fix**: Changed to absolute paths (`url('/fonts/...')`) to load from site root
+  - **Impact**: Droid Serif title font now loads correctly in Docker deployments and demo site
+- **Files updated**:
+  - `css/styles.css` - Updated `@font-face` declarations for DroidSerif-Regular.ttf and DroidSerif-Bold.ttf
+
+---
+
 ## **v3.0.5** - Independent Tournament List Controls
 
 ### Enhanced: Tournament List UX

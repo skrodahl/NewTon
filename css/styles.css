@@ -9,7 +9,7 @@
 /* Fonts */
 @font-face {
   font-family: 'Droid Serif';
-  src: url('fonts/DroidSerif-Regular.ttf') format('truetype');
+  src: url('/fonts/DroidSerif-Regular.ttf') format('truetype');
   font-weight: 400;
   font-style: normal;
   font-display: swap;
@@ -17,7 +17,7 @@
 
 @font-face {
   font-family: 'Droid Serif';
-  src: url('fonts/DroidSerif-Bold.ttf') format('truetype');
+  src: url('/fonts/DroidSerif-Bold.ttf') format('truetype');
   font-weight: 700;
   font-style: normal;
   font-display: swap;
