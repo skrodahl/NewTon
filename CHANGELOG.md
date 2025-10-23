@@ -57,7 +57,7 @@
 
 ---
 
-## **v3.0.5** - Independent Tournament List Controls
+## **v3.0.5-beta** - Independent Tournament List Controls
 
 ### Enhanced: Tournament List UX
 - **Independent "Show All" toggle buttons for Shared and Local tournament sections**
