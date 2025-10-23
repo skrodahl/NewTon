@@ -868,6 +868,30 @@ function continueImportProcess(importedData) {
         players = tournament.players;
         matches = tournament.matches;
 
+        // Restore per-tournament history (v4.0 format)
+        if (importedData.history && Array.isArray(importedData.history) && importedData.history.length > 0) {
+            const historyKey = `tournament_${tournament.id}_history`;
+            try {
+                localStorage.setItem(historyKey, JSON.stringify(importedData.history));
+                console.log(`✓ Restored ${importedData.history.length} transaction history entries to ${historyKey}`);
+            } catch (e) {
+                console.warn('Could not restore tournament history:', e);
+            }
+        }
+
+        // Clear any undone transactions (fresh import)
+        localStorage.removeItem('undoneTransactions');
+
+        // Restore playerList if included in export (v4.0 snapshot)
+        if (importedData.playerList && Array.isArray(importedData.playerList)) {
+            try {
+                localStorage.setItem('savedPlayers', JSON.stringify(importedData.playerList));
+                console.log(`✓ Restored ${importedData.playerList.length} saved players from export snapshot`);
+            } catch (e) {
+                console.warn('Could not restore saved players:', e);
+            }
+        }
+
         // Save tournament (but not global config)
         saveTournamentOnly();
 
@@ -893,9 +917,11 @@ function continueImportProcess(importedData) {
         }
 
         // Show success with detailed info
+        const historyCount = importedData.history ? importedData.history.length : 0;
         showImportStatus('success',
             `✓ Tournament "${tournament.name}" imported successfully! ` +
-            `${players.length} players and ${matches.filter(m => m.completed).length} completed matches loaded.`
+            `${players.length} players, ${matches.filter(m => m.completed).length} completed matches, ` +
+            `and ${historyCount} transaction history entries loaded.`
         );
 
         // Auto-switch to registration page
@@ -906,7 +932,7 @@ function continueImportProcess(importedData) {
         // Update watermark
         updateTournamentWatermark();
 
-        console.log('✓ Tournament imported (global config preserved)');
+        console.log(`✓ Tournament imported (v${importedData.exportVersion} format, global config preserved)`);
     } catch (error) {
         showImportStatus('error', 'Error importing tournament. Please check the file format.');
         console.error('Import error:', error);
@@ -1090,6 +1116,26 @@ function validateTournamentData(data) {
         return { valid: false, error: 'Data must be a valid tournament object' };
     }
 
+    // EXPORT VERSION VALIDATION - v4.0 Format Required
+    if (!data.exportVersion) {
+        return {
+            valid: false,
+            error: 'This export file is from an older version and cannot be imported.\n\n' +
+                   'Only export files from version 4.0 or later are supported.\n\n' +
+                   'If you need to import this tournament, please re-export it using the latest version of the software.'
+        };
+    }
+
+    const exportVersion = parseFloat(data.exportVersion);
+    if (exportVersion < 4.0) {
+        return {
+            valid: false,
+            error: `Export version ${data.exportVersion} is not supported.\n\n` +
+                   'Only export files from version 4.0 or later can be imported.\n\n' +
+                   'Please re-export this tournament using the latest version of the software.'
+        };
+    }
+
     if (!data.name || typeof data.name !== 'string') {
         return { valid: false, error: 'Tournament name is required' };
     }
@@ -1120,11 +1166,17 @@ function validateTournamentData(data) {
         return { valid: false, error: 'Matches must be an array' };
     }
 
+    // Validate history array (v4.0 requirement)
+    if (data.history && !Array.isArray(data.history)) {
+        return { valid: false, error: 'History must be an array' };
+    }
+
     // Set default values for missing optional fields
     if (!data.status) data.status = 'setup';
     if (!data.players) data.players = [];
     if (!data.matches) data.matches = [];
     if (!data.created) data.created = new Date().toISOString();
+    if (!data.history) data.history = [];
 
     // Validate each player has required fields
     if (data.players.length > 0) {

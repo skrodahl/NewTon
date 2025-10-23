@@ -41,12 +41,29 @@
 ---
 
 ### Phase 3: Update Import with v4.0 Validation
-**Status:** Not Started
+**Status:** ✅ COMPLETE
+
+**Changes Made:**
+- ✅ `js/tournament-management.js` - Updated `validateTournamentData()` function
+  - Added `exportVersion` field validation
+  - Rejects files without `exportVersion` field (old format)
+  - Rejects files with version < 4.0
+  - Clear error messages guide users to re-export with latest version
+  - Added history array validation
+  - Set default empty history array if missing
+
+- ✅ `js/tournament-management.js` - Updated `continueImportProcess()` function
+  - Restores per-tournament history to `tournament_${id}_history` key
+  - Restores playerList snapshot to `savedPlayers` (if included)
+  - Clears `undoneTransactions` for fresh import
+  - Console logs show restored transaction count
+  - Success message includes history count
+  - Logs export version in console
 
 ---
 
 ### Phase 4: Testing and Cleanup
-**Status:** Not Started
+**Status:** Ready for Testing
 
 ---
 
@@ -113,10 +130,47 @@ JSON.parse(localStorage.getItem(historyKey)).length // 31+
 
 ---
 
+---
+
+## Phase 3 Testing Instructions
+
+### Test 1: Import v4.0 Export (Happy Path)
+1. Import the test export: `Docs/test1_2025-10-23.json`
+2. Verify success message shows transaction count
+3. Check console for restoration messages
+4. Verify localStorage:
+   ```javascript
+   // Check tournament history restored
+   let historyKey = Object.keys(localStorage).filter(k => k.endsWith('_history'))[0]
+   JSON.parse(localStorage.getItem(historyKey)).length // Should be 31
+
+   // Check tournament data
+   let t = JSON.parse(localStorage.getItem('currentTournament'))
+   t.name // "test1-2025-10-23"
+   t.players.length // 9
+   t.matches.filter(m => m.completed).length // some number
+   ```
+5. Test undo functionality works
+6. Navigate to Results page and verify data displays correctly
+
+### Test 2: Reject Old Export Format
+1. Create a fake old export (JSON without `exportVersion` field)
+2. Try to import
+3. Verify error message: "This export file is from an older version and cannot be imported"
+
+### Test 3: Complete Import Cycle
+1. Delete the imported tournament
+2. Delete per-tournament history key
+3. Re-import the same export
+4. Verify everything restored correctly
+5. Test undo again
+
+---
+
 ## Issues Encountered
 
 *Any problems will be documented here*
 
 ---
 
-**Last Updated:** 2025-10-23 (Starting implementation)
+**Last Updated:** 2025-10-23 (Phase 3 complete, ready for testing)
