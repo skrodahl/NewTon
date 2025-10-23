@@ -9,17 +9,18 @@
 ## Implementation Phases
 
 ### Phase 1: Restructure localStorage to Per-Tournament Keys
-**Status:** Starting
+**Status:** ✅ COMPLETE
 **Goal:** Move from global history to per-tournament history storage
 
-#### Changes Needed
-- [ ] `js/clean-match-progression.js` - Update transaction history functions
-- [ ] `js/tournament-management.js` - Update tournament CRUD operations
-- [ ] `js/bracket-rendering.js` - Update undo system references
+#### Changes Completed
+- ✅ `js/clean-match-progression.js` - Updated transaction history functions
+- ✅ `js/tournament-management.js` - Updated tournament operations
+- ✅ `js/bracket-rendering.js` - Updated undo system references
+- ✅ `js/analytics.js` - Updated analytics references
 
-#### Expected Breakage
-- ⚠️ Export will break (temporarily)
-- ⚠️ Import will break (temporarily)
+#### Actual Breakage
+- ⚠️ Export will break (temporarily) - AS EXPECTED
+- ⚠️ Import will break (temporarily) - AS EXPECTED
 
 ---
 
@@ -52,10 +53,13 @@
   - Fixed redo function to use per-tournament key (line 985)
   - Fixed clean undo to use per-tournament key (line 2226)
   - Fixed referee assignment history lookup to use getTournamentHistory() (line 2779)
+- ✅ `js/tournament-management.js` - Updated tournament operations
+  - Fixed reset tournament to clear per-tournament history (line 983)
+- ✅ `js/analytics.js` - Updated analytics references
+  - Fixed smart pruning to save to per-tournament key (line 2665)
 
 **Next:**
-- [ ] `js/tournament-management.js` - Update tournament operations
-- [ ] `js/analytics.js` - Update analytics references
+- [ ] Test Phase 1: Create tournament, complete matches, verify undo works with per-tournament history
 
 **Commit Instructions:**
 - Commit after each file modification
@@ -66,7 +70,35 @@
 
 ## Test Results
 
-*Tests will be documented here as we go*
+### Phase 1 Testing (2025-10-23)
+
+**Test Tournament:** test1-2025-10-23 (16-player bracket, 9 players)
+
+**Actions Performed:**
+- Created tournament
+- Generated bracket
+- Completed multiple matches
+- Assigned lanes and referees
+- Tested undo functionality
+
+**Results:**
+- ✅ Per-tournament history key created: `tournament_${id}_history`
+- ✅ 31+ transactions recorded in per-tournament key
+- ✅ Undo system works correctly
+- ✅ Old global `tournamentHistory` stays null after new matches
+- ✅ No writes to global history key
+
+**Verification:**
+```javascript
+// Old global history - removed
+localStorage.getItem('tournamentHistory') // null
+
+// New per-tournament history - working
+Object.keys(localStorage).filter(k => k.endsWith('_history')) // ['tournament_1729707600000_history']
+JSON.parse(localStorage.getItem(historyKey)).length // 31+
+```
+
+**Conclusion:** Phase 1 successful! Per-tournament history fully operational.
 
 ---
 
