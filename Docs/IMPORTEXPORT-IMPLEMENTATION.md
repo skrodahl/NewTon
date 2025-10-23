@@ -48,9 +48,12 @@
   - `getTournamentHistory()` - reads from per-tournament key
   - `clearTournamentHistory()` - clears per-tournament key
   - Fixed undo function to use per-tournament key (line 2020)
+- ✅ `js/bracket-rendering.js` - Updated undo system references
+  - Fixed redo function to use per-tournament key (line 985)
+  - Fixed clean undo to use per-tournament key (line 2226)
+  - Fixed referee assignment history lookup to use getTournamentHistory() (line 2779)
 
 **Next:**
-- [ ] `js/bracket-rendering.js` - Update undo system references
 - [ ] `js/tournament-management.js` - Update tournament operations
 - [ ] `js/analytics.js` - Update analytics references
 

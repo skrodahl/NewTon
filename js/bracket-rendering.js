@@ -979,7 +979,11 @@ function handleRedoClick(matchId) {
 
     const history = getTournamentHistory();
     history.unshift(transactionToRedo);
-    localStorage.setItem('tournamentHistory', JSON.stringify(history));
+
+    if (tournament && tournament.id) {
+        const historyKey = `tournament_${tournament.id}_history`;
+        localStorage.setItem(historyKey, JSON.stringify(history));
+    }
 
     refreshTournamentUI();
 }
@@ -2217,7 +2221,10 @@ function undoManualTransaction(transactionId) {
     const cleanHistory = history.filter(t => !transactionsToRemove.includes(t.id));
 
     // 4. Save clean history
-    localStorage.setItem('tournamentHistory', JSON.stringify(cleanHistory));
+    if (tournament && tournament.id) {
+        const historyKey = `tournament_${tournament.id}_history`;
+        localStorage.setItem(historyKey, JSON.stringify(cleanHistory));
+    }
 
     // 5. Reset tournament status if undoing GRAND-FINAL
     if (isUndoingGrandFinal && tournament) {
@@ -2769,7 +2776,7 @@ function getRefereeSuggestions() {
     };
 
     // Get transaction history for referee assignments
-    const history = JSON.parse(localStorage.getItem('tournamentHistory') || '[]');
+    const history = getTournamentHistory();
 
     // Build a map of most recent referee assignment timestamp for each player
     const playerRefereeAssignments = new Map(); // playerId -> {timestamp, matchId}
