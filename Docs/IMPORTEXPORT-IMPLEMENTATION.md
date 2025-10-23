@@ -25,7 +25,18 @@
 ---
 
 ### Phase 2: Update Export to v4.0 Format
-**Status:** Not Started
+**Status:** ✅ COMPLETE
+
+**Changes Made:**
+- ✅ `js/tournament-management.js` - Updated `exportTournament()` function
+  - Now reads from per-tournament history key (`tournament_${id}_history`)
+  - Added `exportVersion: "4.0"` field
+  - Explicit tournament data structure (not spread operator for critical fields)
+  - Includes all tournament fields: id, name, date, created, status, bracketSize, readOnly
+  - Includes players, matches, bracket, placements
+  - Includes per-tournament history
+  - Includes playerList snapshot (for separate import)
+  - Console log shows transaction count
 
 ---
 

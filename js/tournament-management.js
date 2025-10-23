@@ -142,42 +142,50 @@ function pruneTransactionHistory(history, completedMatches) {
 }
 
 function exportTournament() {
-    if (!tournament) {
+    if (!tournament || !tournament.id) {
         alert('No active tournament to export');
         return;
     }
 
-    // Get transaction history (if exists)
-    let history = null;
+    // Get per-tournament history
+    const historyKey = `tournament_${tournament.id}_history`;
+    let history = [];
     try {
-        const historyData = localStorage.getItem('tournamentHistory');
+        const historyData = localStorage.getItem(historyKey);
         if (historyData) {
             history = JSON.parse(historyData);
         }
     } catch (e) {
-        console.warn('Could not load tournament history for pruning');
+        console.warn('Could not load tournament history:', e);
     }
 
     // Prune history for completed tournaments only
-    if (tournament.status === 'completed' && history) {
+    if (tournament.status === 'completed' && history.length > 0) {
         const completedMatches = matches.filter(m => m.completed);
         history = pruneTransactionHistory(history, completedMatches);
     }
 
-    // Export ONLY tournament data, never global config
+    // Get current Saved Players (snapshot)
+    const playerList = getPlayerList();
+
+    // Export v4.0 format - tournament data with per-tournament history
     const tournamentData = {
-        ...tournament,
+        exportVersion: "4.0",
+        id: tournament.id,
+        name: tournament.name,
+        date: tournament.date,
+        created: tournament.created,
+        status: tournament.status,
+        bracketSize: tournament.bracketSize,
+        readOnly: tournament.readOnly || false,
         players: players,
         matches: matches,
-        playerList: getPlayerList(), // Include Player List backup
+        bracket: tournament.bracket,
+        placements: tournament.placements || {},
+        history: history,
+        playerList: playerList,
         exportedAt: new Date().toISOString()
-        // NO CONFIG DATA in export
     };
-
-    // Include pruned history if it exists
-    if (history) {
-        tournamentData.history = history;
-    }
 
     const dataStr = JSON.stringify(tournamentData, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
@@ -187,10 +195,7 @@ function exportTournament() {
     link.download = `${tournament.name}_${tournament.date}.json`;
     link.click();
 
-    const statusMsg = tournament.status === 'completed' && history
-        ? '✓ Tournament exported (config excluded, transaction history optimized)'
-        : '✓ Tournament exported (config excluded)';
-    console.log(statusMsg);
+    console.log(`✓ Tournament exported (v4.0 format, ${history.length} transactions)`);
 }
 
 // Upload tournament file to server (bonus feature - file picker based)
@@ -976,7 +981,12 @@ function confirmReset() {
     tournament.status = 'setup';
     tournament.placements = {};
     tournament.readOnly = false; // Clear read-only flag (escape hatch)
-    localStorage.removeItem('tournamentHistory');
+
+    // Clear per-tournament history
+    if (tournament && tournament.id) {
+        const historyKey = `tournament_${tournament.id}_history`;
+        localStorage.removeItem(historyKey);
+    }
     localStorage.removeItem('undoneTransactions');
 
     // Reset bracket rendering flag for proper zoom/pan on new bracket
