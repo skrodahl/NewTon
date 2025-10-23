@@ -2,6 +2,8 @@
 // NEVER touches global config - only tournament-specific data
 
 let showingAllTournaments = false;
+let showingAllSharedTournaments = false;
+let showingAllLocalTournaments = false;
 
 // Helper function to clear tournament input fields
 function clearTournamentFields() {
@@ -414,7 +416,12 @@ async function loadRecentTournaments() {
             return dateB - dateA;
         });
 
-        const sharedHtml = sortedShared.map(t => {
+        // Determine which shared tournaments to show
+        const sharedToShow = showingAllSharedTournaments ?
+            sortedShared :
+            sortedShared.slice(0, 5);
+
+        const sharedHtml = sharedToShow.map(t => {
             const playerCount = t.players || '?';
             const allowDelete = config.server && config.server.allowSharedTournamentDelete;
             const deleteButton = allowDelete
@@ -435,8 +442,16 @@ async function loadRecentTournaments() {
             `;
         }).join('');
 
+        // Add toggle button inline with header if more than 5 shared tournaments
+        const toggleButton = sortedShared.length > 5
+            ? `<button class="btn" style="padding: 5px 10px; font-size: 14px; margin-left: 10px;" onclick="toggleSharedTournamentView()">${showingAllSharedTournaments ? 'Show Less' : 'Show All'}</button>`
+            : '';
+
         htmlSections.push(`
-            <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #555;">Shared Tournaments</h3>
+            <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #555; display: flex; align-items: center;">
+                Shared Tournaments
+                ${toggleButton}
+            </h3>
             ${sharedHtml}
         `);
     }
@@ -468,7 +483,7 @@ async function loadRecentTournaments() {
         });
 
         // Determine which tournaments to show
-        const tournamentsToShow = showingAllTournaments ?
+        const tournamentsToShow = showingAllLocalTournaments ?
             sortedTournaments :
             sortedTournaments.slice(0, 5);
 
@@ -490,24 +505,26 @@ async function loadRecentTournaments() {
             `;
         }).join('');
 
-        const headerText = sharedTournaments && sharedTournaments.length > 0 ?
-            '<h3 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px; color: #555;">My Tournaments</h3>' :
-            '';
+        // Add toggle button inline with header if more than 5 local tournaments
+        const toggleButton = sortedTournaments.length > 5
+            ? `<button class="btn" style="padding: 5px 10px; font-size: 14px; margin-left: 10px;" onclick="toggleLocalTournamentView()">${showingAllLocalTournaments ? 'Show Less' : 'Show All'}</button>`
+            : '';
+
+        // Always show "My Tournaments" header when local tournaments exist
+        const headerMarginTop = sharedTournaments && sharedTournaments.length > 0 ? '20px' : '0';
 
         htmlSections.push(`
-            ${headerText}
+            <h3 style="margin-top: ${headerMarginTop}; margin-bottom: 10px; font-size: 16px; color: #555; display: flex; align-items: center;">
+                My Tournaments
+                ${toggleButton}
+            </h3>
             ${localHtml}
         `);
 
-        // Update the toggle button
+        // Hide the old standalone toggle button (will be removed from HTML next)
         const toggleBtn = document.getElementById('toggleTournamentsBtn');
         if (toggleBtn) {
-            if (tournaments.length <= 5) {
-                toggleBtn.style.display = 'none';
-            } else {
-                toggleBtn.style.display = 'inline-block';
-                toggleBtn.textContent = showingAllTournaments ? 'Show Recent' : 'Show All';
-            }
+            toggleBtn.style.display = 'none';
         }
     }
 
@@ -516,6 +533,16 @@ async function loadRecentTournaments() {
 
 function toggleTournamentView() {
     showingAllTournaments = !showingAllTournaments;
+    loadRecentTournaments();
+}
+
+function toggleSharedTournamentView() {
+    showingAllSharedTournaments = !showingAllSharedTournaments;
+    loadRecentTournaments();
+}
+
+function toggleLocalTournamentView() {
+    showingAllLocalTournaments = !showingAllLocalTournaments;
     loadRecentTournaments();
 }
 

@@ -1,3 +1,29 @@
+# 2025-10-23
+
+## **v3.0.5** - Independent Tournament List Controls
+
+### Enhanced: Tournament List UX
+- **Independent "Show All" toggle buttons for Shared and Local tournament sections**
+  - **Previous behavior**: Single external "Show All" button controlled only local tournaments, shared tournaments showed all items (no pagination)
+  - **New behavior**: Each section (Shared Tournaments and My Tournaments) has its own inline toggle button
+  - **Benefits**:
+    - **Consistent UX**: Both sections limited to 5 items by default with independent expansion
+    - **Better scrolling**: When server has 20+ shared tournaments, users don't have to scroll excessively to reach local tournaments
+    - **Visual clarity**: Toggle buttons inline with section headers make control more intuitive
+    - **Always visible header**: "My Tournaments" header now always appears when local tournaments exist (previously only showed when shared tournaments were present)
+  - **Implementation**:
+    - Two new state variables: `showingAllSharedTournaments` and `showingAllLocalTournaments`
+    - Two new toggle functions: `toggleSharedTournamentView()` and `toggleLocalTournamentView()`
+    - Shared tournaments now limited to 5 by default (previously showed all)
+    - Toggle buttons only appear when section has >5 items
+    - Removed standalone `toggleTournamentsBtn` from tournament.html
+  - **Files updated**:
+    - `js/tournament-management.js` - Independent state management and toggle logic
+    - `tournament.html` - Removed external toggle button (now inline with headers)
+- **User impact**: Cleaner, more consistent UI that scales better with large numbers of shared tournaments
+
+---
+
 # 2025-10-22
 
 ## **v3.0.4** - Environment Variables & Port 2020 ("Double 20" 🎯)
