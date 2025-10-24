@@ -1965,7 +1965,8 @@ function validateRefereeAssignments() {
     matches.forEach(match => {
         // Check all active matches (PENDING, READY, LIVE) for duplicate referee assignments
         // A referee can only be assigned to one active match at a time (completed matches are fine)
-        if (match.referee && match.state !== 'completed') {
+        // Ignore "None" or empty referee assignments (not actual conflicts)
+        if (match.referee && match.referee !== 'None' && match.referee !== '' && !match.completed) {
             if (activeReferees.has(match.referee)) {
                 // ERROR: This referee is already assigned to another active match
                 const firstMatch = activeReferees.get(match.referee);

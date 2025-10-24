@@ -147,6 +147,21 @@
     - ✅ Prevents assigning same referee to multiple active matches (error state)
     - ✅ Cleaner, more accurate analytics for tournament organizers
 - **Files updated**:
+  - `js/analytics.js` - Updated referee conflict detection logic
+
+### Fixed: Referee Conflict False Positives for Completed Matches
+- **Fixed validation incorrectly checking completed matches for referee conflicts**
+  - **Issue**: Validation was checking `match.state !== 'completed'` but matches don't have a `.state` property
+  - **Root cause**: Match state is calculated dynamically by `getMatchState()` function, not stored on match object
+  - **Symptom**: Completed matches with assigned referees were flagged as conflicts because `undefined !== 'completed'` evaluated to `true`
+  - **Solution**: Changed validation to check `!match.completed` instead of `match.state !== 'completed'`
+  - **Impact**:
+    - ✅ Completed matches no longer flagged as having referee conflicts
+    - ✅ Validation correctly ignores matches with `referee: null` or `referee: undefined`
+    - ✅ Validation correctly ignores matches with referee set to empty string (dropdown "None" selection)
+    - ✅ Only active matches (PENDING, READY, LIVE) are checked for duplicate referee assignments
+    - ✅ Works correctly for both new v4.0 tournaments and imported pre-v4.0 tournaments
+- **Files updated**:
   - `js/analytics.js` - Updated `validateRefereeAssignments()` function (lines 1757-1772)
 
 ---
