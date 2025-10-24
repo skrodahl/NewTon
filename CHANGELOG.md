@@ -164,6 +164,43 @@
 - **Files updated**:
   - `js/analytics.js` - Updated `validateRefereeAssignments()` function (lines 1757-1772)
 
+### Enhanced: Match Elimination Displays Final Placement
+- **Winner confirmation modal now shows eliminated player's final placement rank**
+  - **Previous behavior**: Modal showed "• Player is eliminated" for all backside bracket eliminations
+  - **New behavior**: Modal shows "• Player is placed 13th-16th" (or appropriate rank) when eliminated from backside bracket
+  - **How it works**: Uses hardcoded elimination rank mappings based on which backside match the player loses
+  - **Examples**:
+    - BS-3-4 loser (32-player): "• Chris is placed 13th-16th"
+    - BS-7-1 loser (32-player): "• Player is placed 4th"
+    - BS-FINAL loser: "• Player is placed 3rd"
+    - GRAND-FINAL loser: "• Player is placed 2nd"
+  - **Dependency**: Relies on `tournament.bracketSize` being correct (set at bracket creation, persisted everywhere)
+  - **Fallback**: Shows "is eliminated" if rank lookup fails for any reason
+  - **Impact**:
+    - ✅ Players immediately know their final placement when eliminated
+    - ✅ More informative and satisfying UX
+    - ✅ Uses existing hardcoded rank mappings (same as Results Table calculations)
+    - ✅ Works for all bracket sizes (8, 16, 32 players)
+- **Files updated**:
+  - `js/clean-match-progression.js` - Updated winner confirmation progression display (lines 1509-1523)
+
+### Enhanced: Backside Final Placement Consistency
+- **BS-FINAL loser now gets 3rd place set immediately, consistent with all other backside matches**
+  - **Previous behavior**: BS-FINAL loser didn't get placement set until Grand Final completed
+  - **Inconsistency**: All other backside matches (BS-1-1 through BS-7-1) set placement immediately, but BS-FINAL didn't
+  - **User impact**: 3rd place didn't appear in Results Table until tournament was fully complete
+  - **Solution**: Added BS-FINAL completion hook to set 3rd place immediately when match completes
+  - **Safety**: Placement is cleared and recalculated when Grand Final completes (atomic recalculation preserved)
+  - **Undo safety**: All placements cleared and recalculated on any match undo (existing safeguard)
+  - **Impact**:
+    - ✅ Consistent UX across all backside bracket matches
+    - ✅ 3rd place shows in Results Table immediately after BS-FINAL completes
+    - ✅ Confirmation modal shows "• Player is placed 3rd" instead of "• Player is eliminated"
+    - ✅ Makes placement system more predictable and understandable
+    - ✅ No risk - existing Grand Final and undo operations already clear/recalculate all placements
+- **Files updated**:
+  - `js/clean-match-progression.js` - Added BS-FINAL completion hook (lines 332-353)
+
 ---
 
 ## **v3.0.5-beta** - Independent Tournament List Controls

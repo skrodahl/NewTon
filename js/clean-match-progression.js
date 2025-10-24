@@ -329,6 +329,29 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             }
         }
 
+        // BS-FINAL completion hook: set 3rd place immediately for consistent UX
+        try {
+            if (matchId === 'BS-FINAL') {
+                console.log('🥉 Backside Final completed - setting 3rd place...');
+
+                // Set 3rd place for the loser
+                if (!tournament.placements) {
+                    tournament.placements = {};
+                }
+                tournament.placements[String(loser.id)] = 3;
+
+                console.log(`✓ 3rd place: ${loser.name}`);
+
+                if (typeof saveTournament === 'function') saveTournament();
+                if (typeof updateResultsTable === 'function') updateResultsTable();
+
+                // Note: This placement will be cleared and recalculated when Grand Final completes
+                // This ensures consistency with other backside matches that set placement immediately
+            }
+        } catch (e) {
+            console.error('BS-FINAL completion error', { matchId, winner, loser, error: e });
+        }
+
         // Grand Final completion hook: set placements and complete tournament
         try {
             if (matchId === 'GRAND-FINAL') {
@@ -1510,7 +1533,16 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
             if (progression.loser) {
                 progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> moves to <strong>${progression.loser[0]}</strong></div>`;
             } else {
-                progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> is eliminated</div>`;
+                // Player is eliminated - show placement rank
+                const rank = typeof getEliminationRankForMatch === 'function'
+                    ? getEliminationRankForMatch(matchId, tournament.bracketSize)
+                    : null;
+                if (rank && typeof formatRanking === 'function') {
+                    const rankText = formatRanking(rank);
+                    progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> is placed <strong>${rankText}</strong></div>`;
+                } else {
+                    progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> is eliminated</div>`;
+                }
             }
             
             progressionInfo += '</div>';
