@@ -41,7 +41,7 @@
 
 ![Configuration Page](https://github.com/skrodahl/NewTon/blob/main/Screenshots/config-page.png)
 
-**Developer Console**
+**Developer Console**:
 
 ![Configuration Page](https://github.com/skrodahl/NewTon/blob/main/Screenshots/developer-console.png)
 ---
