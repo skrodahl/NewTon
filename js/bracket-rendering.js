@@ -2303,6 +2303,16 @@ function undoManualTransaction(transactionId) {
         calculateAllRankings();
     }
 
+    // If BS-FINAL is completed, restore 3rd place (consistent with BS-FINAL completion behavior)
+    const bsFinal = matches.find(m => m.id === 'BS-FINAL');
+    if (bsFinal && bsFinal.completed && bsFinal.loser && bsFinal.loser.id) {
+        if (!tournament.placements) {
+            tournament.placements = {};
+        }
+        tournament.placements[String(bsFinal.loser.id)] = 3;
+        console.log(`✓ Restored 3rd place after undo: ${bsFinal.loser.name}`);
+    }
+
     // Save tournament state with updated rankings
     if (typeof saveTournament === 'function') {
         saveTournament();
