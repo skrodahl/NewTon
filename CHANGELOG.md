@@ -200,6 +200,41 @@
     - ✅ No risk - existing Grand Final and undo operations already clear/recalculate all placements
 - **Files updated**:
   - `js/clean-match-progression.js` - Added BS-FINAL completion hook (lines 332-353)
+  - `js/bracket-rendering.js` - Added 3rd place restoration after undo operations (lines 2306-2314)
+
+### Enhanced: Security Headers
+- **Docker image now includes comprehensive security headers by default**
+  - **Previous behavior**: No security headers configured in nginx, PHP version exposed in X-Powered-By header
+  - **New behavior**: Six security headers configured for defense-in-depth protection, server version information hidden
+  - **Headers included**:
+    - **X-Frame-Options: SAMEORIGIN** - Prevents clickjacking attacks
+    - **X-Content-Type-Options: nosniff** - Prevents MIME-type sniffing attacks
+    - **Referrer-Policy: strict-origin-when-cross-origin** - Controls referrer information leakage
+    - **Permissions-Policy** - Disables unused browser features (geolocation, microphone, camera, payment, USB, magnetometer, gyroscope, accelerometer)
+    - **Content-Security-Policy (CSP)** - Prevents loading external scripts/styles/resources
+    - **Server tokens hidden** - `server_tokens off` hides nginx version from attackers
+    - **PHP version hidden** - `expose_php = Off` removes X-Powered-By header that reveals PHP version
+  - **CSP 'unsafe-inline' requirement**:
+    - CSP includes `'unsafe-inline'` for script-src and style-src
+    - Required due to 68+ inline event handlers (`onclick`, `onchange`) and 217+ inline styles in tournament.html
+    - This is an architectural requirement, not an oversight
+    - CSP still prevents loading external scripts/styles/resources (primary XSS vector)
+    - NewTon has no user-generated content or XSS attack vectors
+    - Security rating: A grade on securityheaders.com (with informational warning about 'unsafe-inline')
+  - **HSTS not included**:
+    - Strict-Transport-Security should be added at reverse proxy level (user choice)
+    - Allows flexibility for HTTP-only local deployments
+    - Self-hosters can enable HSTS in their reverse proxy (NPM, Caddy, Traefik)
+  - **Impact**:
+    - ✅ Defense-in-depth security by default
+    - ✅ Protects against clickjacking, MIME-sniffing, external resource loading
+    - ✅ Hides nginx and PHP version information from attackers
+    - ✅ A-grade security headers rating
+    - ✅ No breaking changes - headers are additive only
+    - ✅ Maintains compatibility with both HTTP and HTTPS deployments
+- **Files updated**:
+  - `docker/nginx.conf` - Added security headers configuration
+  - `docker/php.ini` - Added `expose_php = Off` to hide PHP version
 
 ---
 
