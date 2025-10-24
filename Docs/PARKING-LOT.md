@@ -7,29 +7,37 @@ Ideas and suggestions for future consideration.
 ## Inbox
 *Raw ideas awaiting triage*
 
-### Transaction Log Editor
-**Priority:** TBD
+### Enhanced Tournament Validation
+**Priority:** Medium (v4.0.1 or v4.1.0)
 
-Add JavaScript functions to manually edit transaction history - WITH CAUTION!
-- **Access:** Browser console only (F12) - ZERO UI exposure
-- **Use case:** Emergency fixes for corrupted tournament states
-- **Implementation ideas:**
-  - `editTransaction(index, newData)` - Edit specific transaction
-  - `deleteTransaction(index)` - Remove transaction from history
-  - `validateTransactionLog()` - Check integrity before/after edits
-  - Functions print strong warnings to console when called
-  - **Automatic safety backup:** Export current tournament JSON before any edit
-  - Automatic backup of transaction log before any edit
-  - Validation to prevent creating impossible states
-- **Risk:** Could break tournament integrity if misused
-- **Philosophy:** Hidden power tool for experts who know how to open browser console
-- **Security by obscurity:** Only accessible to users who understand JavaScript and transaction structure
+**Goal:** Catch tournament integrity problems early, before they become emergencies
 
-### DOCKER-QUICKSTART.md Enhancements
-**Priority:** Low
+**Implementation ideas:**
+- Expand Developer Console validation beyond basic health checks
+- Test for integrity issues:
 
-**Missing sections:**
-**Version Updates** - Explain `:latest`, `:3.0.2`, and `:3` tags; safe upgrade procedures
+  **Essential checks:**
+  - Player in multiple simultaneous matches
+  - History-state mismatch (corruption indicator)
+  - Impossible bracket progression paths
+  - localStorage bloat indicators (early warning)
+  - Duplicate match completions in history
+
+  **Nice to have:**
+  - Orphaned players (referenced in matches but don't exist)
+  - Referee in multiple simultaneous matches
+  - Lane conflicts (two matches on same lane simultaneously)
+  - Transaction timestamp anomalies
+  - Invalid match state transitions
+  - Missing required transaction data
+
+**Validation mode:**
+- **Passive**: Run on-demand from Developer Console (Health Check)
+- Display clear problem descriptions with severity levels (essential/warning/info)
+- Suggestions for resolution when problems found
+- Export button available if critical issues detected (emergency escape)
+
+**Philosophy:** Prevent emergencies through early detection, not emergency editing tools
 
 ---
 
@@ -47,4 +55,4 @@ Add JavaScript functions to manually edit transaction history - WITH CAUTION!
 
 ---
 
-**Last updated:** October 22, 2025
+**Last updated:** October 25, 2025
