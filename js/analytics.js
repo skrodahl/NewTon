@@ -1125,15 +1125,233 @@ function showLocalStorageUsage() {
     const statusIcon = isHealthy ? '✓' : (storageStats.percentage < 80 ? '⚠️' : '🔴');
     const statusText = isHealthy ? 'Healthy' : (storageStats.percentage < 80 ? 'Moderate' : 'High');
 
-    // Sort items by size (largest first)
-    const sortedItems = Object.entries(storageStats.items)
-        .map(([key, sizeBytes]) => ({
-            key,
-            sizeKB: (sizeBytes / 1024).toFixed(2),
-            sizeMB: (sizeBytes / 1024 / 1024).toFixed(2),
-            percentage: Math.round((sizeBytes / (storageStats.used * 1024 * 1024)) * 100)
-        }))
-        .sort((a, b) => parseFloat(b.sizeKB) - parseFloat(a.sizeKB));
+    // Categorize storage items
+    const tournamentData = {};
+    const tournamentHistory = {};
+    const globalStorage = {};
+    const cleanupCandidates = {};
+
+    for (const [key, sizeBytes] of Object.entries(storageStats.items)) {
+        if (key.startsWith('tournament_') && key.endsWith('_history')) {
+            tournamentHistory[key] = sizeBytes;
+        } else if (key.startsWith('tournament_') && !key.endsWith('_history')) {
+            tournamentData[key] = sizeBytes;
+        } else if (key === 'tournamentHistory') {
+            // Old global history - cleanup candidate
+            cleanupCandidates[key] = sizeBytes;
+        } else {
+            globalStorage[key] = sizeBytes;
+        }
+    }
+
+    // Get current tournament info
+    let currentTournamentHtml = '';
+    if (tournament && tournament.id) {
+        const tournamentKey = `tournament_${tournament.id}`;
+        const historyKey = `tournament_${tournament.id}_history`;
+
+        const dataSize = tournamentData[tournamentKey] || 0;
+        const historySize = tournamentHistory[historyKey] || 0;
+
+        // Parse tournament data for breakdown
+        // Use in-memory tournament object if localStorage doesn't have it
+        let tournamentDataObj = null;
+        let actualDataSize = dataSize;
+
+        try {
+            const tournamentDataStr = localStorage.getItem(tournamentKey);
+            if (tournamentDataStr) {
+                tournamentDataObj = JSON.parse(tournamentDataStr);
+                actualDataSize = dataSize;
+            } else {
+                // Use in-memory tournament object
+                tournamentDataObj = tournament;
+                // Calculate actual size from in-memory data
+                actualDataSize = (JSON.stringify(tournament).length) * 2;
+            }
+        } catch (e) {
+            console.warn('Could not parse tournament data', e);
+            // Fallback to in-memory tournament
+            tournamentDataObj = tournament;
+            actualDataSize = (JSON.stringify(tournament).length) * 2;
+        }
+
+        // Get history info
+        const history = getTournamentHistory ? getTournamentHistory() : [];
+        const oldestTxn = history.length > 0 ? new Date(history[history.length - 1].timestamp) : null;
+        const newestTxn = history.length > 0 ? new Date(history[0].timestamp) : null;
+        const avgTxnSize = history.length > 0 ? (historySize / history.length) : 0;
+
+        // Calculate data breakdown
+        let playersSize = 0, matchesSize = 0, bracketSize = 0, placementsSize = 0, metadataSize = 0;
+        if (tournamentDataObj) {
+            playersSize = (JSON.stringify(tournamentDataObj.players || players || []).length) * 2;
+            matchesSize = (JSON.stringify(tournamentDataObj.matches || matches || []).length) * 2;
+            bracketSize = (JSON.stringify(tournamentDataObj.bracket || []).length) * 2;
+            placementsSize = (JSON.stringify(tournamentDataObj.placements || {}).length) * 2;
+            metadataSize = actualDataSize - playersSize - matchesSize - bracketSize - placementsSize;
+        }
+
+        const completedMatches = matches ? matches.filter(m => m.completed).length : 0;
+        const totalMatches = matches ? matches.length : 0;
+
+        // Calculate total size using actual data size
+        const totalSize = actualDataSize + historySize;
+
+        currentTournamentHtml = `
+        <div style="margin: 20px 0; padding: 15px; background: #e7f3ff; border-left: 4px solid #0056b3;">
+            <div style="font-weight: 600; font-size: 15px; color: #0056b3; margin-bottom: 12px;">
+                📊 Current Tournament: ${tournament.name} (${tournament.date})
+            </div>
+
+            <div style="margin: 12px 0; padding: 10px; background: #fff; border: 1px solid #ddd;">
+                <div style="font-weight: 600; margin-bottom: 8px;">Tournament Data (${(actualDataSize / 1024 / 1024).toFixed(2)} MB):</div>
+                <div style="padding-left: 12px; font-size: 13px; line-height: 1.6;">
+                    ${playersSize > 0 ? `- Players array: ${(playersSize / 1024).toFixed(2)} KB (${players ? players.length : 0} players)<br>` : ''}
+                    ${matchesSize > 0 ? `- Matches array: ${(matchesSize / 1024).toFixed(2)} KB (${totalMatches} matches, ${completedMatches} completed)<br>` : ''}
+                    ${bracketSize > 0 ? `- Bracket structure: ${(bracketSize / 1024).toFixed(2)} KB<br>` : ''}
+                    ${placementsSize > 0 ? `- Placements: ${(placementsSize / 1024).toFixed(2)} KB<br>` : ''}
+                    ${metadataSize > 0 ? `- Metadata: ${(metadataSize / 1024).toFixed(2)} KB<br>` : ''}
+                </div>
+            </div>
+
+            ${history.length > 0 ? `
+            <div style="margin: 12px 0; padding: 10px; background: #fff; border: 1px solid #ddd;">
+                <div style="font-weight: 600; margin-bottom: 8px;">Transaction History (${(historySize / 1024 / 1024).toFixed(2)} MB):</div>
+                <div style="padding-left: 12px; font-size: 13px; line-height: 1.6;">
+                    - Total transactions: ${history.length}<br>
+                    - Average per transaction: ${(avgTxnSize / 1024).toFixed(2)} KB<br>
+                    ${oldestTxn ? `- Oldest: ${oldestTxn.toLocaleString()}<br>` : ''}
+                    ${newestTxn ? `- Newest: ${newestTxn.toLocaleString()}<br>` : ''}
+                </div>
+            </div>
+            ` : ''}
+
+            <div style="margin-top: 10px; font-weight: 600;">
+                Total: ${(totalSize / 1024 / 1024).toFixed(2)} MB (${Math.round((totalSize / (storageStats.used * 1024 * 1024)) * 100)}%)
+            </div>
+            ${history.length > 10 ? `
+            <div style="margin-top: 8px; padding: 8px; background: #fef3c7; border-left: 3px solid #f59e0b; font-size: 13px;">
+                💡 Smart pruning could reduce history size by ~30-40%
+            </div>
+            ` : ''}
+        </div>
+        `;
+    }
+
+    // Other tournaments summary
+    let otherTournamentsHtml = '';
+    const allTournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const otherTournaments = allTournaments.filter(t => !tournament || t.id !== tournament.id);
+
+    if (otherTournaments.length > 0) {
+        let otherTotalSize = 0;
+        let otherHtml = '';
+
+        otherTournaments.forEach(t => {
+            const tDataKey = `tournament_${t.id}`;
+            const tHistoryKey = `tournament_${t.id}_history`;
+            const tDataSize = tournamentData[tDataKey] || 0;
+            const tHistorySize = tournamentHistory[tHistoryKey] || 0;
+            const tTotalSize = tDataSize + tHistorySize;
+            otherTotalSize += tTotalSize;
+
+            otherHtml += `
+                <div style="padding-left: 12px; font-size: 13px;">
+                    - ${t.name} (${t.date}): ${(tTotalSize / 1024 / 1024).toFixed(2)} MB
+                </div>
+            `;
+        });
+
+        otherTournamentsHtml = `
+        <div style="margin: 20px 0; padding: 15px; background: #f0fdf4; border-left: 4px solid #166534;">
+            <div style="font-weight: 600; font-size: 15px; color: #166534; margin-bottom: 12px;">
+                📦 Other Tournaments: ${otherTournaments.length} tournament${otherTournaments.length > 1 ? 's' : ''}
+            </div>
+            ${otherHtml}
+            <div style="margin-top: 10px; font-weight: 600;">
+                Total: ${(otherTotalSize / 1024 / 1024).toFixed(2)} MB (${Math.round((otherTotalSize / (storageStats.used * 1024 * 1024)) * 100)}%)
+            </div>
+        </div>
+        `;
+    }
+
+    // Global storage
+    let globalHtml = '';
+    let globalTotal = 0;
+    for (const [key, sizeBytes] of Object.entries(globalStorage)) {
+        globalTotal += sizeBytes;
+        const sizeDisplay = sizeBytes >= 1024
+            ? `${(sizeBytes / 1024 / 1024).toFixed(2)} MB`
+            : `${(sizeBytes / 1024).toFixed(2)} KB`;
+
+        let displayName = key;
+        if (key === 'dartsTournaments') displayName = 'Tournament registry';
+        else if (key === 'dartsConfig') displayName = 'Config';
+        else if (key === 'savedPlayers') displayName = 'Saved Players';
+        else if (key === 'currentTournament') displayName = 'Current Tournament pointer';
+        else if (key === 'playerList') displayName = 'Player List (legacy)';
+
+        globalHtml += `
+            <div style="padding-left: 12px; font-size: 13px;">
+                - ${displayName}: ${sizeDisplay}
+            </div>
+        `;
+    }
+
+    let globalStorageHtml = globalTotal > 0 ? `
+        <div style="margin: 20px 0; padding: 15px; background: #e0f2fe; border-left: 4px solid #0284c7;">
+            <div style="font-weight: 600; font-size: 15px; color: #0284c7; margin-bottom: 12px;">
+                🌍 Global Storage
+            </div>
+            ${globalHtml}
+            <div style="margin-top: 10px; font-weight: 600;">
+                Total: ${(globalTotal / 1024 / 1024).toFixed(2)} MB (${Math.round((globalTotal / (storageStats.used * 1024 * 1024)) * 100)}%)
+            </div>
+        </div>
+    ` : '';
+
+    // Cleanup candidates
+    let cleanupHtml = '';
+    if (Object.keys(cleanupCandidates).length > 0) {
+        let cleanupTotal = 0;
+        let cleanupItems = '';
+        for (const [key, sizeBytes] of Object.entries(cleanupCandidates)) {
+            cleanupTotal += sizeBytes;
+            cleanupItems += `
+                <div style="padding-left: 12px; font-size: 13px;">
+                    - ${key}: ${(sizeBytes / 1024 / 1024).toFixed(2)} MB (old global history - can be safely deleted)
+                </div>
+            `;
+        }
+
+        cleanupHtml = `
+        <div style="margin: 20px 0; padding: 15px; background: #fef2f2; border-left: 4px solid #dc2626;">
+            <div style="font-weight: 600; font-size: 15px; color: #dc2626; margin-bottom: 12px;">
+                ⚠️ Cleanup Opportunities
+            </div>
+            ${cleanupItems}
+            <div style="margin-top: 10px; font-size: 13px; color: #666;">
+                These are orphaned keys that can be deleted to free up space.
+            </div>
+        </div>
+        `;
+    }
+
+    // High usage warning
+    let highUsageWarning = '';
+    if (storageStats.percentage >= 80) {
+        highUsageWarning = `
+        <div style="margin: 20px 0; padding: 15px; background: #fef2f2; border-left: 4px solid #dc2626;">
+            <div style="font-weight: 600; font-size: 15px; color: #dc2626; margin-bottom: 8px;">
+                🔴 High Storage Usage Warning
+            </div>
+            <div style="font-size: 13px; line-height: 1.6; color: #666;">
+                Consider deleting older tournaments to free up space. You can export them first to preserve the data.
+            </div>
+        </div>
+        `;
+    }
 
     let html = `
         <h4 style="margin-top: 0; color: #111827;">localStorage Usage</h4>
@@ -1149,29 +1367,16 @@ function showLocalStorageUsage() {
                 <div style="margin: 8px 0;">
                     <strong>Browser Limit:</strong> ${storageStats.limit} MB (Chrome 114+, Firefox, Safari, Edge)
                 </div>
-
-                <div style="margin: 20px 0 12px 0; padding-top: 12px; border-top: 1px solid #ddd;">
-                    <strong>Breakdown by Key:</strong>
-                </div>
-    `;
-
-    sortedItems.forEach(item => {
-        const sizeDisplay = parseFloat(item.sizeMB) >= 0.01
-            ? `${item.sizeMB} MB`
-            : `${item.sizeKB} KB`;
-
-        html += `
-                <div style="margin: 8px 0; padding-left: 12px;">
-                    <strong>${item.key}:</strong> ${sizeDisplay} (${item.percentage}%)
-                </div>
-        `;
-    });
-
-    html += `
             </div>
         </div>
 
-        <div>
+        ${highUsageWarning}
+        ${currentTournamentHtml}
+        ${otherTournamentsHtml}
+        ${globalStorageHtml}
+        ${cleanupHtml}
+
+        <div style="margin-top: 20px;">
             <a href="#" onclick="showQuickOverview(); return false;"
                style="text-decoration: none; color: #065f46; font-size: 14px;">
                 ← Back to Overview
@@ -2654,8 +2859,15 @@ function executeSmartPruning() {
     const storageSaved = (storageBefore - storageAfter).toFixed(2);
 
     // Save pruned history to localStorage
+    if (!tournament || !tournament.id) {
+        console.error('No active tournament - cannot save pruned history');
+        showCommandFeedback('Smart Pruning', 'error', 'No active tournament');
+        return;
+    }
+
     try {
-        localStorage.setItem('tournamentHistory', JSON.stringify(prunedHistory));
+        const historyKey = `tournament_${tournament.id}_history`;
+        localStorage.setItem(historyKey, JSON.stringify(prunedHistory));
         console.log(`✓ Smart pruning complete: ${totalRemoved} transactions removed`);
         console.log(`✓ Pruned history saved to localStorage`);
     } catch (error) {

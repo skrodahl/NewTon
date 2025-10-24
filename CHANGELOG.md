@@ -63,6 +63,32 @@
     - ✅ Complete history restoration for v4.0+ exports
     - ✅ Backwards compatible with pre-v4.0 exports
 
+### Enhanced: Developer Console Storage Display
+- **Granular localStorage usage breakdown**
+  - **Current Tournament** detailed view:
+    - Tournament data breakdown: players array, matches array, bracket structure, placements, metadata (with sizes and counts)
+    - Transaction history details: total count, average size, oldest/newest timestamps
+    - Total size and percentage of overall storage
+    - Smart pruning suggestions for optimization
+  - **Other Tournaments** summary:
+    - Shows tournament names (not IDs) for easy identification
+    - Combined data + history size per tournament
+    - Total storage for all inactive tournaments
+  - **Global Storage** section:
+    - Human-readable names (Tournament registry, Config, Saved Players)
+    - Individual sizes for each global key
+  - **Cleanup Opportunities**:
+    - Detects orphaned keys (old global `tournamentHistory`)
+    - Shows size and suggests safe deletion
+  - **High Storage Warning**:
+    - Alert when usage >= 80%
+    - Suggests deleting older tournaments with export reminder
+  - **Impact**:
+    - ✅ Complete visibility into storage usage patterns
+    - ✅ Easy identification of storage optimization opportunities
+    - ✅ Tournament names instead of IDs for better UX
+    - ✅ Actionable insights for storage management
+
 ### Documentation
 - **New comprehensive import/export documentation**
   - Created `Docs/IMPORT_EXPORT.md` with complete specification
