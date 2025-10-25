@@ -274,6 +274,32 @@
 - **Files updated**:
   - `js/tournament-management.js` - Added per-tournament history cleanup to confirmDeleteTournament() (lines 812-814)
 
+### Enhanced: Developer Console Orphaned Data Detection
+- **Added detection and cleanup guidance for orphaned tournament data in localStorage**
+  - **Purpose**: Identify and clean up leftover data from tournaments deleted with old buggy delete function (before above fix)
+  - **What it detects**:
+    - Orphaned `tournament_${id}_history` keys not in registry
+    - Orphaned `tournament_${id}` keys not in registry
+    - Old `tournamentHistory` key (pre-v4.0 global history)
+  - **How it works**:
+    - Compares all tournament-related localStorage keys against the tournament registry
+    - Shows orphaned data in "⚠️ Orphaned Data (Not in Registry)" section
+    - Provides exact `localStorage.removeItem()` commands for manual deletion
+    - Labels each orphan type (Orphaned history, Orphaned tournament data, Old global history)
+  - **Design decisions**:
+    - Detection only, no delete buttons - surgical manual cleanup prevents accidental data loss
+    - Shows sizes (MB/KB) to help users understand storage impact
+    - Clear messaging: "To delete a tournament properly, use the Setup page"
+    - Doesn't flag random localStorage keys, only tournament naming patterns
+  - **User experience**:
+    - F12 → Click version number → Click "localStorage Usage"
+    - See orphaned data (if any) with exact removal commands
+    - Copy/paste commands into console for surgical cleanup
+    - Refresh view to verify deletion and see freed storage
+  - **Testing**: Verified detection accuracy with orphaned history from old bug, false-positive resistance with random localStorage keys
+- **Files updated**:
+  - `js/analytics.js` - Added orphaned data detection logic (lines 1134-1167) and display section (lines 1339-1383)
+
 ---
 
 ## **v3.0.5-beta** - Independent Tournament List Controls

@@ -1131,11 +1131,33 @@ function showLocalStorageUsage() {
     const globalStorage = {};
     const cleanupCandidates = {};
 
+    // Get valid tournament IDs from registry
+    const allTournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const validTournamentIds = new Set(allTournaments.map(t => t.id));
+
     for (const [key, sizeBytes] of Object.entries(storageStats.items)) {
         if (key.startsWith('tournament_') && key.endsWith('_history')) {
-            tournamentHistory[key] = sizeBytes;
+            // Extract tournament ID from history key
+            const tournamentId = key.replace('tournament_', '').replace('_history', '');
+
+            if (validTournamentIds.has(parseInt(tournamentId))) {
+                // Valid tournament history
+                tournamentHistory[key] = sizeBytes;
+            } else {
+                // Orphaned history - not in registry
+                cleanupCandidates[key] = sizeBytes;
+            }
         } else if (key.startsWith('tournament_') && !key.endsWith('_history')) {
-            tournamentData[key] = sizeBytes;
+            // Extract tournament ID from data key
+            const tournamentId = key.replace('tournament_', '');
+
+            if (validTournamentIds.has(parseInt(tournamentId))) {
+                // Valid tournament data
+                tournamentData[key] = sizeBytes;
+            } else {
+                // Orphaned tournament data - not in registry
+                cleanupCandidates[key] = sizeBytes;
+            }
         } else if (key === 'tournamentHistory') {
             // Old global history - cleanup candidate
             cleanupCandidates[key] = sizeBytes;
@@ -1241,7 +1263,6 @@ function showLocalStorageUsage() {
 
     // Other tournaments summary
     let otherTournamentsHtml = '';
-    const allTournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const otherTournaments = allTournaments.filter(t => !tournament || t.id !== tournament.id);
 
     if (otherTournaments.length > 0) {
@@ -1271,6 +1292,9 @@ function showLocalStorageUsage() {
             ${otherHtml}
             <div style="margin-top: 10px; font-weight: 600;">
                 Total: ${(otherTotalSize / 1024 / 1024).toFixed(2)} MB (${Math.round((otherTotalSize / (storageStats.used * 1024 * 1024)) * 100)}%)
+            </div>
+            <div style="margin-top: 10px; font-size: 13px; color: #666; font-style: italic;">
+                💡 To delete tournaments, use the Setup page
             </div>
         </div>
         `;
@@ -1311,16 +1335,34 @@ function showLocalStorageUsage() {
         </div>
     ` : '';
 
-    // Cleanup candidates
+    // Cleanup candidates - Orphaned data not in registry
     let cleanupHtml = '';
     if (Object.keys(cleanupCandidates).length > 0) {
         let cleanupTotal = 0;
         let cleanupItems = '';
         for (const [key, sizeBytes] of Object.entries(cleanupCandidates)) {
             cleanupTotal += sizeBytes;
+
+            // Determine label for this orphaned data
+            let label = '';
+            if (key === 'tournamentHistory') {
+                label = 'Old global history - pre-v4.0';
+            } else if (key.endsWith('_history')) {
+                label = 'Orphaned history';
+            } else {
+                label = 'Orphaned tournament data';
+            }
+
+            const sizeDisplay = sizeBytes >= 1024 * 1024
+                ? `${(sizeBytes / 1024 / 1024).toFixed(2)} MB`
+                : `${(sizeBytes / 1024).toFixed(2)} KB`;
+
             cleanupItems += `
-                <div style="padding-left: 12px; font-size: 13px;">
-                    - ${key}: ${(sizeBytes / 1024 / 1024).toFixed(2)} MB (old global history - can be safely deleted)
+                <div style="padding-left: 12px; font-size: 13px; margin-bottom: 8px;">
+                    <div>- ${key} (${sizeDisplay}) [${label}]</div>
+                    <div style="padding-left: 12px; color: #666; font-family: monospace; font-size: 12px;">
+                        To delete: localStorage.removeItem('${key}')
+                    </div>
                 </div>
             `;
         }
@@ -1328,11 +1370,12 @@ function showLocalStorageUsage() {
         cleanupHtml = `
         <div style="margin: 20px 0; padding: 15px; background: #fef2f2; border-left: 4px solid #dc2626;">
             <div style="font-weight: 600; font-size: 15px; color: #dc2626; margin-bottom: 12px;">
-                ⚠️ Cleanup Opportunities
+                ⚠️ Orphaned Data (Not in Registry)
             </div>
             ${cleanupItems}
-            <div style="margin-top: 10px; font-size: 13px; color: #666;">
-                These are orphaned keys that can be deleted to free up space.
+            <div style="margin-top: 10px; font-size: 13px; color: #666; font-style: italic;">
+                💡 To delete a tournament properly, use the Setup page.<br>
+                This section only shows data that isn't associated with any tournament.
             </div>
         </div>
         `;
