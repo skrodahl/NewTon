@@ -55,9 +55,10 @@ You should see the NewTon Tournament Manager interface!
 
 Docker Compose:
 - ✅ Downloaded the pre-built image from GitHub Container Registry
-- ✅ Created a persistent storage directory for tournaments (`tournaments/`)
+- ✅ Created persistent storage directories (`tournaments/` and `images/`)
 - ✅ Started nginx + PHP-FPM serving your tournament manager
 - ✅ Made it accessible on port 8080
+- ✅ Included default logo and payment QR code
 
 ---
 
@@ -158,6 +159,7 @@ services:
       - proxy_network  # Same network as NPM
     volumes:
       - ./tournaments:/var/www/html/tournaments
+      - ./images:/var/www/html/images:ro
     environment:
       - NEWTON_API_ENABLED=true
       - NEWTON_DEMO_MODE=false
@@ -200,28 +202,29 @@ docker compose down
 docker compose up -d
 ```
 
-### Add Your Club Logo
+### Customize Logo and Payment QR Code
 
-Place your logo file in the same directory as `docker-compose.yml`:
+The application includes default images, but you can customize them by placing your own files in the `images/` folder:
 
 ```bash
-# Copy your logo
-cp /path/to/your/logo.png ./logo.png
+# Create images folder if it doesn't exist
+mkdir -p images
 
-# Restart container
+# Copy your custom logo (supports .png, .jpg, .jpeg, or .svg)
+cp /path/to/your/logo.jpg ./images/logo.jpg
+
+# Copy your custom payment QR code
+cp /path/to/your/payment-qr.png ./images/payment.png
+
+# Restart container to apply changes
 docker compose restart
 ```
 
-The logo will automatically appear in the tournament manager!
+**Default images included:**
+- `images/logo.jpg` - Default club logo
+- `images/payment.png` - GitHub project QR code
 
-### Add Payment QR Code
-
-Similarly, for a payment QR code on the registration page:
-
-```bash
-cp /path/to/your/payment-qr.png ./payment.png
-docker compose restart
-```
+Simply replace these files with your own to customize!
 
 ---
 
@@ -264,8 +267,7 @@ services:
     volumes:
       # Use absolute paths for better control
       - /home/user/docker-data/newton/tournaments:/var/www/html/tournaments
-      - /home/user/docker-data/newton/logo.png:/var/www/html/logo.png:ro
-      - /home/user/docker-data/newton/payment.png:/var/www/html/payment.png:ro
+      - /home/user/docker-data/newton/images:/var/www/html/images:ro
     restart: unless-stopped
     environment:
       - TZ=Europe/Oslo

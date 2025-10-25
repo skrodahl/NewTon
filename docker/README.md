@@ -23,8 +23,9 @@ docker build -t newton -f docker/Dockerfile .
 # Run the container
 docker run -d \
   --name newton-tournament \
-  -p 8080:80 \
+  -p 8080:2020 \
   -v ./tournaments:/var/www/html/tournaments \
+  -v ./images:/var/www/html/images:ro \
   newton
 ```
 
@@ -33,8 +34,9 @@ docker run -d \
 ```bash
 docker run -d \
   --name newton-tournament \
-  -p 8080:80 \
+  -p 8080:2020 \
   -v ./tournaments:/var/www/html/tournaments \
+  -v ./images:/var/www/html/images:ro \
   ghcr.io/skrodahl/newton:latest
 ```
 
@@ -52,12 +54,14 @@ docker run -d \
 
 ### Port Mapping
 
-Default: `8080:80` (host:container)
+Default: `8080:2020` (host:container)
+
+The container runs nginx on **port 2020** internally ("Double 20" 🎯 - highest scoring segment in darts).
 
 Change in `docker-compose.yml`:
 ```yaml
 ports:
-  - "8009:80"  # Change 8080 to your preferred port
+  - "9000:2020"  # Change 8080 to your preferred port
 ```
 
 ### Persistent Storage
@@ -71,13 +75,21 @@ volumes:
 
 ### Custom Branding
 
-Mount your logo and payment QR code:
+The application includes default logo and payment QR code in the `images/` folder.
+
+To customize, mount your own images folder:
 
 ```yaml
 volumes:
-  - ./logo.png:/var/www/html/logo.png:ro
-  - ./payment.png:/var/www/html/payment.png:ro
+  - ./tournaments:/var/www/html/tournaments
+  - ./images:/var/www/html/images:ro  # Your custom logo.jpg and payment.png
 ```
+
+**Default images included:**
+- `images/logo.jpg` - Default club logo
+- `images/payment.png` - GitHub project QR code
+
+Place your custom images in the `images/` folder to replace the defaults.
 
 ---
 
