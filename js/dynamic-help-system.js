@@ -101,6 +101,7 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Important:</strong> Only paid players are included in the tournament bracket.</p>
                     <p><strong>Minimum Players:</strong> You need at least 4 paid players to generate an 8-player bracket.</p>
+                    <p><strong>Payment QR Code:</strong> Display your payment information (Swish, bank account, etc.) by adding payment.png to the images/ folder. The QR code appears in the top-right corner of the registration page.</p>
                 `
             },
             statistics: {
@@ -321,7 +322,7 @@ const HELP_CONTENT = {
                     <p><strong>Customization Options:</strong></p>
                     <ul>
                         <li><strong>Application Title:</strong> Customize header text and browser title</li>
-                        <li><strong>Club Logo:</strong> Add logo.png/jpg/jpeg/svg file to root folder</li>
+                        <li><strong>Club Logo:</strong> Add logo.png/jpg/jpeg/svg file to images/ folder</li>
                         <li><strong>Lane Management:</strong> Set maximum lanes and requirements</li>
                     </ul>
                     <p><strong>UI Settings:</strong></p>
