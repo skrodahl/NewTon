@@ -300,6 +300,16 @@
 - **Files updated**:
   - `js/analytics.js` - Added orphaned data detection logic (lines 1134-1167) and display section (lines 1339-1383)
 
+### Enhanced: Developer Console Transaction History Display Order
+- **Reversed display order to show newest transactions first**
+  - **Previous behavior**: Transaction history displayed chronologically (#1 at top, newest at bottom)
+  - **New behavior**: Reversed display order with newest transactions at top, oldest at bottom
+  - **Transaction numbering**: Original indices preserved (#1 is still the first/oldest transaction, displayed at bottom)
+  - **Rationale**: Most recent transactions are most important for diagnostics and verification
+  - **Impact**: No scrolling required to see latest tournament actions, better UX for monitoring live tournaments
+- **Files updated**:
+  - `js/analytics.js` - Reversed display order in `showTransactionHistory()` function (lines 759-765)
+
 ---
 
 ## **v3.0.5-beta** - Independent Tournament List Controls

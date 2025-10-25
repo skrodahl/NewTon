@@ -756,12 +756,11 @@ function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSe
             html += `<p style="color: #666;">No transactions match filters</p>`;
         }
     } else {
-        // Reverse to show latest first (#1 is the most recent)
-        const reversedHistory = [...filteredHistory].reverse();
-
-        reversedHistory.forEach((tx, index) => {
+        // Display in reverse order (newest first) while keeping original transaction numbers
+        // Transaction #1 is the first/oldest transaction, but we display it at the bottom
+        filteredHistory.reverse().forEach((tx, index) => {
             const time = new Date(tx.timestamp).toLocaleTimeString();
-            const number = index + 1; // #1 is the latest transaction
+            const number = filteredHistory.length - index; // Keep original transaction number
             html += `<p style="margin: 2px 0;">#${number} | ${time} | ${tx.type} | ${tx.description || 'No description'}</p>`;
         });
     }
