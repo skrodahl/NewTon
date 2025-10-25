@@ -339,6 +339,23 @@
 - **Files updated**:
   - `js/analytics.js` - Added `renderBracket()` call to `commandToggleReadOnly()` function (lines 2569-2572)
 
+### Fixed: Developer Console Transaction History Filter Renumbering
+- **Fixed transaction numbers being renumbered when filtering history**
+  - **Bug**: Filtering transaction history renumbered results instead of preserving original transaction numbers
+  - **Previous behavior**:
+    - Full history: #8, #7, #6, #5, #4, #3, #2, #1
+    - Filter for FS-1-2 (3 results): #3, #2, #1 (renumbered based on filtered count)
+  - **New behavior**: Original transaction numbers preserved when filtering
+    - Full history: #8, #7, #6, #5, #4, #3, #2, #1
+    - Filter for FS-1-2 (3 results): #7, #6, #5 (original numbers preserved)
+  - **Impact**:
+    - Transaction numbers serve as true identifiers regardless of filtering
+    - Easy to cross-reference with console logs and debugging output
+    - Maintains chronological context when viewing filtered results
+    - Fulfills the intention of transaction log as audit trail
+- **Files updated**:
+  - `js/analytics.js` - Added `originalNumber` property preservation in `showTransactionHistory()` function (lines 713-718, 766-771)
+
 ---
 
 ## **v3.0.5-beta** - Independent Tournament List Controls
