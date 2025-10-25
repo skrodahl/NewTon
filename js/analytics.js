@@ -710,8 +710,15 @@ function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSe
 
     const history = getTournamentHistory ? getTournamentHistory() : [];
 
+    // Add original transaction numbers before filtering
+    // History is stored newest first, so index 0 = newest transaction
+    const historyWithNumbers = history.map((tx, idx) => ({
+        ...tx,
+        originalNumber: history.length - idx  // #N for newest, #1 for oldest
+    }));
+
     // Apply filters
-    let filteredHistory = [...history];
+    let filteredHistory = [...historyWithNumbers];
 
     // Filter by type
     if (filterType && filterType !== 'all') {
@@ -756,14 +763,11 @@ function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSe
             html += `<p style="color: #666;">No transactions match filters</p>`;
         }
     } else {
-        // History is stored with newest first (unshift), so index 0 = newest
-        // Transaction numbers count up: #1 = oldest, #N = newest
-        // Display as-is (newest first), number in reverse (#N at top, #1 at bottom)
-        filteredHistory.forEach((tx, index) => {
+        // Display transactions with their original numbers preserved (even when filtered)
+        // Transactions are already in newest-first order from storage
+        filteredHistory.forEach((tx) => {
             const time = new Date(tx.timestamp).toLocaleTimeString();
-            // index 0 = newest = #N, so number = length - index
-            const number = filteredHistory.length - index;
-            html += `<p style="margin: 2px 0;">#${number} | ${time} | ${tx.type} | ${tx.description || 'No description'}</p>`;
+            html += `<p style="margin: 2px 0;">#${tx.originalNumber} | ${time} | ${tx.type} | ${tx.description || 'No description'}</p>`;
         });
     }
 
