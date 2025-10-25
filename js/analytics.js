@@ -756,11 +756,13 @@ function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSe
             html += `<p style="color: #666;">No transactions match filters</p>`;
         }
     } else {
-        // Display in reverse order (newest first) while keeping original transaction numbers
-        // Transaction #1 is the first/oldest transaction, but we display it at the bottom
-        filteredHistory.reverse().forEach((tx, index) => {
+        // History is stored with newest first (unshift), so index 0 = newest
+        // Transaction numbers count up: #1 = oldest, #N = newest
+        // Display as-is (newest first), number in reverse (#N at top, #1 at bottom)
+        filteredHistory.forEach((tx, index) => {
             const time = new Date(tx.timestamp).toLocaleTimeString();
-            const number = filteredHistory.length - index; // Keep original transaction number
+            // index 0 = newest = #N, so number = length - index
+            const number = filteredHistory.length - index;
             html += `<p style="margin: 2px 0;">#${number} | ${time} | ${tx.type} | ${tx.description || 'No description'}</p>`;
         });
     }
