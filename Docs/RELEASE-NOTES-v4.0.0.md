@@ -167,9 +167,11 @@ The Developer Console now provides comprehensive storage visibility and cleanup 
 - Human-readable names (Tournament registry, Config, Saved Players)
 - Individual sizes for each global key
 
-**Cleanup Opportunities:**
-- Detects orphaned keys (old global `tournamentHistory`)
-- Shows size and suggests safe deletion
+**Orphaned Data Detection:**
+- Detects tournament data not in registry (orphaned from deleted tournaments or v3.x migration)
+- Shows exact removal commands for surgical cleanup
+- Labels each orphan type (history, data, old global history)
+- Manual deletion prevents accidental data loss
 
 **High Storage Warning:**
 - Alert when usage >= 80%
@@ -385,6 +387,64 @@ header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 - Referrer-Policy reduces data leakage
 - CSP prevents unauthorized network requests
 - See [Docs/PRIVACY.md](PRIVACY.md) for complete privacy documentation
+
+---
+
+## 🖼️ Docker Images Folder
+
+Version 4.0.0 improves the Docker image customization workflow with a dedicated images folder and default assets.
+
+### What Changed
+
+**Previous Behavior:**
+- Individual file mounts: `./logo.png:/var/www/html/logo.png`, `./payment.png:/var/www/html/payment.png`
+- **Bug:** If files don't exist, Docker creates directories instead
+- **Impact:** 10-second browser hang when loading tournament page
+
+**New Behavior:**
+- Single folder mount: `./images:/var/www/html/images:ro`
+- Default images included: `logo.jpg` (club logo) and `payment.png` (GitHub QR code)
+- Missing images result in fast 404 instead of hang
+
+### Benefits
+
+**Professional Out-of-Box Experience:**
+- Working logo and payment QR code from first run
+- No confusing slow loads for new users
+- Professional appearance without customization
+
+**Easy Customization:**
+- Drop files in `images/` folder on host
+- Supports: `logo.png`, `logo.jpg`, `logo.jpeg`, `logo.svg`
+- Payment image: `payment.png`
+- Container automatically picks up changes
+
+**Cleaner Configuration:**
+- Single mount instead of two individual file mounts
+- No directory creation bug
+- Files go in correct location when copied into container
+
+### Default Images
+
+**images/logo.jpg:**
+- Generic club logo placeholder
+- Professional appearance for demos and testing
+
+**images/payment.png:**
+- GitHub project QR code
+- Links to https://github.com/Havajos/newtondc
+
+### Customization
+
+To customize your Docker deployment:
+
+1. Create `images/` folder in your Docker Compose directory
+2. Add your files:
+   - `images/logo.png` (or .jpg, .jpeg, .svg)
+   - `images/payment.png`
+3. Restart container: `docker compose restart`
+
+Files are mounted read-only for security.
 
 ---
 
