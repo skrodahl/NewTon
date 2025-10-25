@@ -2566,6 +2566,11 @@ function commandToggleReadOnly() {
         saveTournament();
     }
 
+    // Re-render bracket to update match icons (checkmark ✓ vs undo ↻)
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    }
+
     const statusText = newReadOnly ? 'READ-ONLY' : 'READ-WRITE';
     const statusColor = newReadOnly ? '#dc2626' : '#059669';
     const icon = newReadOnly ? '🔒' : '🔓';

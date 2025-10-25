@@ -310,6 +310,35 @@
 - **Files updated**:
   - `js/analytics.js` - Reversed display order in `showTransactionHistory()` function (lines 759-765)
 
+### Fixed: Results Table Empty Value Display Consistency
+- **Fixed inconsistent display of empty achievement values in Results table**
+  - **Bug**: Short Legs column showed blank for empty arrays instead of `—` dash
+  - **Previous behavior**: High Outs showed `—` for empty, Short Legs showed blank
+  - **New behavior**: Both Short Legs and High Outs show `—` when empty
+  - **Design rationale**:
+    - Short Legs and High Outs display **actual values** (leg numbers, checkout amounts) → use `—` for empty
+    - 180s, Tons, Legs Won, Legs Lost display **counts** → use `0` for empty
+  - **Impact**: Consistent visual presentation, clearer distinction between "no data" and "zero count"
+- **Files updated**:
+  - `js/results-config.js` - Added length check for shortLegs and highOuts arrays (lines 547-548)
+
+### Fixed: Developer Console Toggle Read-Only Not Updating Bracket Display
+- **Fixed bracket display not updating when toggling read-only status**
+  - **Bug**: Toggling read-only OFF on imported tournaments updated data but not visual display
+  - **Previous behavior**:
+    - Imported completed tournaments showed checkmarks (✓) on completed matches
+    - After toggling read-only OFF, checkmarks remained - clicking did nothing
+    - Required manual "Re-render Bracket" command to update icons
+  - **New behavior**: Toggling read-only automatically re-renders bracket with correct icons
+  - **Impact**:
+    - Imported tournaments now behave identically to non-imported tournaments
+    - Completed matches show undo icon (↻) immediately after toggling read-only OFF
+    - Clicking matches works correctly - triggers undo confirmation dialog
+    - Seamless UX for the "backdoor" feature (fixing errors in completed tournaments)
+  - **Use case**: Toggle read-only is designed as a backdoor to fix errors in completed tournaments - now works as intended
+- **Files updated**:
+  - `js/analytics.js` - Added `renderBracket()` call to `commandToggleReadOnly()` function (lines 2569-2572)
+
 ---
 
 ## **v3.0.5-beta** - Independent Tournament List Controls
