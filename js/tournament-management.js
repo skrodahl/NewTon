@@ -805,9 +805,13 @@ function confirmDeleteTournament() {
     // Close modal first
     popDialog();
 
-    // Delete the tournament
+    // Delete the tournament from registry
     const updatedTournaments = tournaments.filter(t => t.id !== tournamentId);
     localStorage.setItem('dartsTournaments', JSON.stringify(updatedTournaments));
+
+    // Delete the per-tournament history key (v4.0+ storage isolation)
+    const historyKey = `tournament_${tournamentId}_history`;
+    localStorage.removeItem(historyKey);
 
     loadRecentTournaments();
     alert(`✓ Tournament "${tournamentToDelete.name}" has been deleted successfully.`);

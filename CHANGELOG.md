@@ -236,6 +236,44 @@
   - `docker/nginx.conf` - Added security headers configuration
   - `docker/php.ini` - Added `expose_php = Off` to hide PHP version
 
+### Enhanced: Docker Image Mount Structure
+- **Moved logo and payment images to dedicated images/ folder**
+  - **Previous behavior**: Individual file mounts (`./logo.png:/var/www/html/logo.png`, `./payment.png:/var/www/html/payment.png`)
+  - **Previous bug**: If files don't exist, Docker creates directories instead, causing 10-second browser hang when loading
+  - **New behavior**: Single folder mount (`./images:/var/www/html/images:ro`)
+  - **Benefits**:
+    - ✅ No directory creation bug - missing images result in fast 404 instead of hang
+    - ✅ Default images included (logo.jpg and payment.png with GitHub QR code)
+    - ✅ Cleaner Docker Compose configuration (single mount instead of two)
+    - ✅ Easy customization - drop files in images/ folder
+    - ✅ Files go in correct location when copied
+  - **Default images**:
+    - `images/logo.jpg` - Default club logo
+    - `images/payment.png` - GitHub project QR code
+  - **Impact**:
+    - ✅ Professional out-of-box experience with working defaults
+    - ✅ No confusing slow loads or missing images for new users
+    - ✅ Simple customization workflow
+- **Files updated**:
+  - `tournament.html` - Updated favicon and payment image paths to use images/ prefix
+  - `js/main.js` - Updated logo loading logic to use images/ prefix
+  - `docker/docker-compose.yml` - Changed from individual file mounts to folder mount
+  - `docker/docker-compose-demo.yml` - Changed from individual file mounts to folder mount
+  - `DOCKER-QUICKSTART.md` - Updated documentation for images/ folder structure
+  - `docker/README.md` - Updated documentation and examples
+  - `js/dynamic-help-system.js` - Updated help text for Config and Registration pages
+
+### Fixed: Tournament Deletion Not Freeing Storage
+- **Critical bug fix: Tournament deletion now properly removes per-tournament history**
+  - **Bug**: Deleting tournaments only removed them from registry, leaving orphaned history keys in localStorage
+  - **Impact**: Deleting a 32-player tournament left 4.3 MB orphaned data, defeating v4.0.0's storage isolation goals
+  - **Root cause**: `confirmDeleteTournament()` didn't clean up `tournament_${id}_history` keys
+  - **Fix**: Added `localStorage.removeItem(tournament_${tournamentId}_history)` to delete function
+  - **Testing**: Verified with Developer Console that history keys are now properly removed
+  - **Critical for v4.0.0**: Without this fix, "deletions actually delete" promise would be false
+- **Files updated**:
+  - `js/tournament-management.js` - Added per-tournament history cleanup to confirmDeleteTournament() (lines 812-814)
+
 ---
 
 ## **v3.0.5-beta** - Independent Tournament List Controls
