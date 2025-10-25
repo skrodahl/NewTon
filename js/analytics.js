@@ -1288,9 +1288,9 @@ function showLocalStorageUsage() {
         let displayName = key;
         if (key === 'dartsTournaments') displayName = 'Tournament registry';
         else if (key === 'dartsConfig') displayName = 'Config';
-        else if (key === 'savedPlayers') displayName = 'Saved Players';
+        else if (key === 'savedPlayers') displayName = 'Saved Players (legacy - unused)';
         else if (key === 'currentTournament') displayName = 'Current Tournament pointer';
-        else if (key === 'playerList') displayName = 'Player List (legacy)';
+        else if (key === 'playerList') displayName = 'Player List';
 
         globalHtml += `
             <div style="padding-left: 12px; font-size: 13px;">
