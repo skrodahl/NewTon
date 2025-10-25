@@ -217,7 +217,7 @@ function loadClubLogo() {
     if (!logoContainer) return;
 
     // Try different logo file extensions
-    const logoFiles = ['logo.png', 'logo.jpg', 'logo.jpeg', 'logo.svg'];
+    const logoFiles = ['images/logo.png', 'images/logo.jpg', 'images/logo.jpeg', 'images/logo.svg'];
     let logoLoaded = false;
 
     logoFiles.forEach(filename => {

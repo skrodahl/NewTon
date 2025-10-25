@@ -12,10 +12,8 @@ services:
     volumes:
       # Persistent tournament storage
       - /var/lib/docker/volumes/newton/tournaments:/var/www/html/tournaments
-      # Optional: Mount custom logo
-      - /var/lib/docker/volumes/newton/logo.png:/var/www/html/logo.png:ro
-      # Optional: Mount payment QR code
-      - /var/lib/docker/volumes/newton/payment.png:/var/www/html/payment.png:ro
+      # Optional: Mount custom images (logo and payment QR code)
+      - /var/lib/docker/volumes/newton/images:/var/www/html/images:ro
 
     restart: unless-stopped
 

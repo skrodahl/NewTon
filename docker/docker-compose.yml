@@ -7,10 +7,8 @@ services:
     volumes:
       # Persistent tournament storage
       - ./tournaments:/var/www/html/tournaments
-      # Optional: Mount custom logo
-      - ./logo.png:/var/www/html/logo.png:ro
-      # Optional: Mount payment QR code
-      - ./payment.png:/var/www/html/payment.png:ro
+      # Optional: Mount custom images (logo and payment QR code)
+      - ./images:/var/www/html/images:ro
     restart: unless-stopped
     environment:
       # Timezone configuration
@@ -33,10 +31,8 @@ services:
   #   volumes:
   #     # Persistent tournament storage
   #     - ../tournaments:/var/www/html/tournaments
-  #     # Optional: Mount custom logo
-  #     - ../logo.png:/var/www/html/logo.png:ro
-  #     # Optional: Mount payment QR code
-  #     - ../payment.png:/var/www/html/payment.png:ro
+  #     # Optional: Mount custom images (logo and payment QR code)
+  #     - ../images:/var/www/html/images:ro
   #   restart: unless-stopped
   #   environment:
   #     # Timezone configuration
