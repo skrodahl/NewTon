@@ -41,11 +41,17 @@
   - **Structure**: Tournament data + isolated history + saved players
   - **File naming**: `{TournamentName}_{YYYY-MM-DD}.json`
   - **Console logging**: Shows transaction count on export
+  - **Pristine history exports**: Complete, unpruned transaction history
+    - **Previous behavior (pre-v4.0)**: Exports pruned redundant transactions (START_MATCH, STOP_MATCH after completion, kept only last ASSIGN_LANE/ASSIGN_REFEREE)
+    - **New behavior**: All transactions preserved exactly as they occurred
+    - **Why the change**: Per-tournament isolation makes history small enough (~110KB for 32-player tournament) that pruning is unnecessary
+    - **Benefit**: Complete audit trail of all tournament actions, better debugging and verification
   - **Impact**:
     - ✅ Version validation on import
     - ✅ Complete tournament portability
     - ✅ History restoration works seamlessly
     - ✅ Undo functionality preserved after import
+    - ✅ Full transaction audit trail without pruning
 
 ### New: Import Confirmation and Validation System
 - **Import confirmation modal for all imports**
