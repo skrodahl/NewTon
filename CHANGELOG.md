@@ -1,6 +1,6 @@
 # 2025-10-23
 
-## **v4.0.0-beta** - Per-Tournament History Architecture
+## **v4.0.0** - Per-Tournament History Architecture
 
 ### Backwards Compatibility with Pre-v4.0 Exports
 
