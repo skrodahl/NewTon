@@ -1,6 +1,6 @@
-# NewTon DC Tournament Manager v4.0.0 Release Notes
+## NewTon DC Tournament Manager v4.0.0 Release Notes
 
-**Release Date:** October 2025
+**Release Date:** October 26, 2025
 **Architecture Release**
 
 ---
@@ -9,7 +9,7 @@
 
 **NewTon DC Tournament Manager Version 4.0.0** represents a fundamental rebuild of the application's data architecture. This major release isolates tournament storage, improves data portability, and strengthens the foundations that make NewTon reliable for live tournament operations.
 
-This is a **major version bump** because it changes how tournament data is stored internally. The release maintains data compatibility with pre-v4.0 exports (undo history not preserved for pre-import matches).
+This is a **major version bump** because it changes how tournament data is stored internally. The release maintains data compatibility with previous exports (undo history not preserved for pre-v4.0 tournaments).
 
 **Key Highlights:**
 - Per-tournament history isolation eliminates cross-contamination
@@ -21,9 +21,9 @@ This is a **major version bump** because it changes how tournament data is store
 
 ---
 
-## Why v4.0.0: Architecture Foundations
+## v4.0.0: Architecture Foundation Rebuild
 
-Version 4.0.0 represents a comprehensive rebuild of six core systems:
+Version 4.0.0 represents a comprehensive rebuild of six core systems, for maximum reliability:
 
 ### 1. Transaction History
 **Previous Architecture:** Global `tournamentHistory` accumulated transactions from all tournaments ever played, creating bloated exports and potential data contamination.
@@ -483,8 +483,6 @@ Version 4.0.0 represents a fundamental investment in NewTon's architecture. By r
 - Easy tournament management across installations
 - Clear upgrade path
 - No breaking changes to worry about
-
-The foundations are solid. The system is trustworthy. NewTon v4.0.0 is ready for production tournament operations.
 
 ---
 
