@@ -160,6 +160,7 @@ services:
     volumes:
       - ./tournaments:/var/www/html/tournaments
       - ./images:/var/www/html/images:ro
+      - ./logs:/var/log/nginx  # Optional: nginx logs
     environment:
       - NEWTON_API_ENABLED=true
       - NEWTON_DEMO_MODE=false
@@ -230,6 +231,8 @@ Simply replace these files with your own to customize!
 
 ## Persistent Data
 
+### Tournament Data
+
 Tournament data uploaded via the REST API is stored in:
 
 ```
@@ -246,6 +249,39 @@ ls tournaments/
 # Backup
 cp -r tournaments/ tournaments-backup/
 ```
+
+### Nginx Logs (Optional)
+
+To persist nginx access and error logs, add a logs volume mount to your `docker-compose.yml`:
+
+```yaml
+volumes:
+  - ./tournaments:/var/www/html/tournaments
+  - ./images:/var/www/html/images:ro
+  - ./logs:/var/log/nginx  # Add this line for persistent nginx logs
+```
+
+The `logs/` directory will contain:
+- `access.log` - All HTTP requests to the server
+- `error.log` - Nginx errors and warnings
+
+**Viewing logs:**
+```bash
+# Watch access log in real-time
+tail -f logs/access.log
+
+# Check error log
+tail -f logs/error.log
+
+# Or use docker compose logs for container output
+docker compose logs -f
+```
+
+**Why you might want this:**
+- Troubleshooting HTTP issues
+- Monitoring API usage
+- Security auditing
+- Performance analysis
 
 ---
 
@@ -268,6 +304,7 @@ services:
       # Use absolute paths for better control
       - /home/user/docker-data/newton/tournaments:/var/www/html/tournaments
       - /home/user/docker-data/newton/images:/var/www/html/images:ro
+      - /home/user/docker-data/newton/logs:/var/log/nginx  # Optional: nginx logs
     restart: unless-stopped
     environment:
       - TZ=Europe/Oslo

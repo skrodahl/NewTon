@@ -9,6 +9,8 @@ services:
       - ./tournaments:/var/www/html/tournaments
       # Optional: Mount custom images (logo and payment QR code)
       - ./images:/var/www/html/images:ro
+      # Optional: Persist nginx logs (access.log and error.log)
+      # - ./logs:/var/log/nginx
     restart: unless-stopped
     environment:
       # Timezone configuration
@@ -33,6 +35,8 @@ services:
   #     - ../tournaments:/var/www/html/tournaments
   #     # Optional: Mount custom images (logo and payment QR code)
   #     - ../images:/var/www/html/images:ro
+  #     # Optional: Persist nginx logs (access.log and error.log)
+  #     # - ../logs:/var/log/nginx
   #   restart: unless-stopped
   #   environment:
   #     # Timezone configuration

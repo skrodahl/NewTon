@@ -1,3 +1,78 @@
+# 2025-10-27
+
+## **v4.0.1** - Code Cleanup and Documentation Updates
+
+### Code Cleanup
+- **Removed unused history-management.js**
+  - **Previous state**: Legacy snapshot-based undo system file remained in codebase
+  - **Issue**: File was not loaded in tournament.html and functions were never called
+  - **Action taken**: Deleted from codebase
+  - **Impact**:
+    - ✅ Cleaner codebase with only actively used files
+    - ✅ No functionality affected (file was already unused)
+    - ✅ Completes migration to transaction-based history system introduced in v4.0.0
+  - **Context**: v4.0.0 introduced per-tournament transaction-based history in `clean-match-progression.js`, making the old snapshot-based system in `history-management.js` obsolete
+  - **Files removed**: `js/history-management.js`
+
+### Documentation Updates
+- **Overhauled IMPORT_EXPORT.md to match current reality**
+  - **Export Schema Section**:
+    - Fixed `shortLegs` type documentation: Changed from `number` to `array of integers`
+    - Updated all example IDs and timestamps to match real export data
+    - Added inline comments explaining each field type
+    - Fixed `status` field to show all three states: `"setup|active|completed"`
+  - **New Detailed Sections Added**:
+    - `playerList` field format: Documented as simple array of strings (not player objects)
+    - `placements` field format: Documented key-value structure (playerID → rank)
+    - Player Object Structure: Complete schema with all fields and types
+    - Match Object Structure: Added ALL missing fields (`numericId`, `positionInRound`, `autoAdvanced`, `completedAt`, `finalScore`)
+    - Walkover player structure: Documented `isBye` flag and ID format
+    - TBD player structure: Documented incomplete bracket placeholder format
+  - **Transaction History Complete Rewrite**:
+    - Replaced misleading simplified examples with actual transaction structures
+    - Documented all 5 transaction types: `COMPLETE_MATCH`, `START_MATCH`, `STOP_MATCH`, `ASSIGN_LANE`, `ASSIGN_REFEREE`
+    - Documented transaction ID format: `tx_{timestamp}`
+    - Documented `completionType`: `MANUAL` vs `AUTO`
+    - Showed that `COMPLETE_MATCH` transactions contain full player objects (not just IDs)
+  - **Critical Clarification: Stats in Match Objects**:
+    - **Added important note**: Stats embedded in match objects are historical snapshots only
+    - **Single source of truth**: Global `players` array is ONLY source for Statistics table and points
+    - **Never used for calculations**: Match/transaction stats are for audit trail and history keeping
+    - **Architecture benefit**: Stat corrections immediately affect results without recalculating historical data
+    - **Impact**: Prevents confusion about which stats data is authoritative
+  - **Import/Export Function Updates**:
+    - Updated `validateTournamentData` to match actual implementation
+    - Fixed variable naming: `isPreV4` → `isOldFormat`
+    - Updated `continueImportProcess` to match actual code flow
+    - Updated all console output examples to match reality
+  - **Overall Impact**:
+    - ✅ Documentation now 100% accurate to v4.0 implementation
+    - ✅ All code examples match actual codebase
+    - ✅ Developers can trust documentation as authoritative reference
+    - ✅ Clear explanation of stats architecture prevents data corruption
+
+- **Updated Docker documentation with nginx logs information**
+  - **DOCKER-QUICKSTART.md**:
+    - Added "Nginx Logs (Optional)" subsection in Persistent Data section
+    - Documented how to persist nginx access and error logs
+    - Added viewing commands (`tail -f logs/access.log`)
+    - Updated all docker-compose.yml examples (Reverse Proxy, Absolute Paths)
+    - Explained use cases: troubleshooting, monitoring, security auditing, performance analysis
+  - **docker/README.md**:
+    - Added nginx logs section to Persistent Storage
+    - Updated both Docker CLI examples (build and published image)
+  - **docker/docker-compose.yml**:
+    - Added commented-out logs volume mount for easy enablement
+    - Updated both production and developer build sections
+  - **Log Location**: `/var/log/nginx` inside container
+  - **Log Files**: `access.log` (HTTP requests), `error.log` (nginx errors/warnings)
+  - **Impact**:
+    - ✅ Users can now easily persist nginx logs for troubleshooting
+    - ✅ All documentation consistently shows logs volume mount
+    - ✅ Simple uncomment to enable in docker-compose.yml
+
+---
+
 # 2025-10-23
 
 ## **v4.0.0** - Per-Tournament History Architecture

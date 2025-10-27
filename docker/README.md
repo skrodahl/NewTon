@@ -26,6 +26,7 @@ docker run -d \
   -p 8080:2020 \
   -v ./tournaments:/var/www/html/tournaments \
   -v ./images:/var/www/html/images:ro \
+  -v ./logs:/var/log/nginx \
   newton
 ```
 
@@ -37,6 +38,7 @@ docker run -d \
   -p 8080:2020 \
   -v ./tournaments:/var/www/html/tournaments \
   -v ./images:/var/www/html/images:ro \
+  -v ./logs:/var/log/nginx \
   ghcr.io/skrodahl/newton:latest
 ```
 
@@ -66,12 +68,24 @@ ports:
 
 ### Persistent Storage
 
-Tournament data (uploaded via REST API) persists in `./tournaments` directory:
+**Tournament data** (uploaded via REST API) persists in `./tournaments` directory:
 
 ```yaml
 volumes:
   - ./tournaments:/var/www/html/tournaments
 ```
+
+**Nginx logs** (optional) can be persisted by adding a logs volume:
+
+```yaml
+volumes:
+  - ./tournaments:/var/www/html/tournaments
+  - ./logs:/var/log/nginx  # Access and error logs
+```
+
+The `logs/` directory will contain:
+- `access.log` - All HTTP requests
+- `error.log` - Nginx errors and warnings
 
 ### Custom Branding
 

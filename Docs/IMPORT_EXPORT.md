@@ -31,20 +31,20 @@ Tournaments are exported as JSON files with the following naming convention:
 ```json
 {
   "exportVersion": "4.0",
-  "id": 1234567890,
+  "id": 1761554559925,
   "name": "Tournament Name",
-  "date": "2025-10-23",
-  "created": "2025-10-23T20:29:17.350Z",
-  "status": "active|completed",
+  "date": "2025-10-27",
+  "created": "2025-10-27T08:42:39.925Z",
+  "status": "setup|active|completed",
   "bracketSize": 8|16|32,
   "readOnly": false,
-  "players": [...],
-  "matches": [...],
-  "bracket": [...],
-  "placements": {...},
-  "history": [...],
-  "playerList": [...],
-  "exportedAt": "2025-10-23T22:46:00.000Z"
+  "players": [...],          // Array of player objects (see Player Object Structure)
+  "matches": [...],          // Array of match objects (see Match Object Structure)
+  "bracket": [...],          // Ordered array of players for bracket seeding
+  "placements": {...},       // Map of playerID to final placement rank
+  "history": [...],          // Array of transaction objects (see Transaction History)
+  "playerList": [...],       // Simple array of player name strings
+  "exportedAt": "2025-10-27T08:45:46.347Z"
 }
 ```
 
@@ -65,8 +65,160 @@ Tournaments are exported as JSON files with the following naming convention:
 | `bracket` | array | No | Bracket structure (null if not generated) |
 | `placements` | object | No | Final placements (empty if tournament not finished) |
 | `history` | array | Yes | Per-tournament transaction history |
-| `playerList` | array | Yes | Snapshot of saved players database |
+| `playerList` | array | Yes | Simple array of player name strings (snapshot of saved players database) |
 | `exportedAt` | string | Yes | ISO 8601 timestamp of export |
+
+### playerList Field Format
+
+The `playerList` field contains a **simple array of player name strings** (not full player objects):
+
+```json
+"playerList": [
+  "John",
+  "Adam",
+  "Chris",
+  "Edmond",
+  "Henry",
+  "James",
+  "Tom",
+  "Andy",
+  "Ron"
+]
+```
+
+This is a snapshot of the "Saved Players" database at the time of export. It allows tournament organizers to maintain a consistent player roster across multiple tournaments. When importing, this list is restored to the saved players database.
+
+### placements Field Format
+
+The `placements` object maps player IDs to their final placement rank:
+
+```json
+"placements": {
+  "walkover-5": 13,
+  "walkover-8": 13,
+  "walkover-13": 13,
+  "walkover-0": 13,
+  "walkover-14": 9,
+  "walkover-7": 9,
+  "1761554570908": 9,
+  "walkover-11": 9
+}
+```
+
+- **Keys**: Player IDs (can be numeric IDs or walkover IDs)
+- **Values**: Placement rank (1 = winner, 2 = 2nd place, etc.)
+- Tied placements share the same rank (e.g., four players tied for 9th-12th all have rank 9)
+- This object is empty until players are eliminated
+- When tournament completes, all players have placements (1st through last)
+
+### Player Object Structure
+
+Each player in the `players` array has the following structure:
+
+```json
+{
+  "id": 1761554573051,
+  "name": "James",
+  "paid": true,
+  "stats": {
+    "shortLegs": [],        // Array of integers (e.g., [19, 15])
+    "highOuts": [101],      // Array of checkout values >= 100
+    "tons": 3,              // Number (count of 100+ scores)
+    "oneEighties": 0        // Number (count of 180s)
+  },
+  "placement": null,        // Number (1, 2, 3, etc.) or null if not eliminated
+  "eliminated": false       // Boolean
+}
+```
+
+**Important Notes:**
+- `shortLegs` is an **array** of integers, not a single number. The array can be empty `[]` or contain leg counts.
+- `highOuts` is an array of checkout values >= 100
+- `placement` is set when player is eliminated (e.g., 1 for winner, 2 for 2nd place, 9 for tied 9th-12th)
+- `eliminated` flag tracks if player has been knocked out
+- **Stats in the `players` array are the ONLY source of truth** for Statistics table and points calculations
+- Stats are updated independently through the Player Management UI, not from match results
+
+### Match Object Structure
+
+Each match in the `matches` array has this comprehensive structure:
+
+```json
+{
+  "id": "FS-2-1",
+  "numericId": 9,
+  "round": 2,
+  "side": "frontside",
+  "player1": {
+    "id": 1761554573051,
+    "name": "James",
+    "paid": true,
+    "stats": { /* full stats object */ }
+  },
+  "player2": { /* full player object or TBD player */ },
+  "winner": { /* full player object or null */ },
+  "loser": { /* full player object or null */ },
+  "lane": 6,                    // Number (1-20) or null
+  "legs": 3,                    // Number of legs (best-of)
+  "referee": 1761554565121,     // Player ID or null
+  "active": false,              // Boolean (currently being played)
+  "completed": true,            // Boolean (match finished)
+  "positionInRound": 0,         // Position within the round (0-indexed)
+  "autoAdvanced": true,         // Boolean (present if completed via walkover)
+  "completedAt": 1761554703660, // Timestamp (present if completed)
+  "finalScore": {               // Present if completed and not walkover
+    "winnerLegs": 2,
+    "loserLegs": 1,
+    "winnerId": 1761554566009,
+    "loserId": 1761554573051
+  }
+}
+```
+
+**Match ID Format:**
+- Frontside: `FS-{round}-{matchNumber}` (e.g., `FS-1-1`, `FS-2-3`)
+- Backside: `BS-{round}-{matchNumber}` (e.g., `BS-1-1`, `BS-3-2`)
+- Special: `BS-FINAL`, `GRAND-FINAL`
+
+**Side Values:**
+- `"frontside"` - Winner's bracket matches
+- `"backside"` - Loser's bracket matches
+- `"backside-final"` - Backside final match
+- `"grand-final"` - Grand final match
+
+**Walkover Matches:**
+When a match involves a bye (walkover), the player object has:
+```json
+{
+  "id": "walkover-0",
+  "name": "Walkover",
+  "isBye": true
+}
+```
+
+**TBD Players (Incomplete Brackets):**
+For matches not yet populated with real players:
+```json
+{
+  "id": "fs-4-0-1",
+  "name": "TBD"
+}
+```
+
+**Important: Stats in Match Objects**
+
+Match objects contain full player objects (including `stats`) in the `player1`, `player2`, `winner`, and `loser` fields. These are **historical snapshots only** and serve the following purposes:
+
+- **Audit Trail**: Record of player state at the time of match completion
+- **History Keeping**: Useful for debugging and transaction history
+- **Never Used for Calculations**: Statistics table and points calculations ONLY read from the global `players` array
+
+The stats embedded in match objects are frozen snapshots. If you update a player's stats through the Player Management UI, the changes will:
+- ✅ Immediately affect the Statistics table and points calculations
+- ✅ Be reflected in future match records
+- ❌ NOT update stats in previously completed matches (by design)
+
+This architecture ensures that stat corrections always affect current results immediately, without having to recalculate historical match data.
 
 ---
 
@@ -93,29 +245,100 @@ dartsTournaments           // Tournament registry (legacy, to be phased out)
 Each tournament maintains its own transaction history in a separate localStorage key:
 
 ```javascript
-// Example: tournament_1729712462714_history
+// Example: tournament_1761554559925_history
 [
   {
-    "type": "match_complete",
-    "matchId": "FS-1-1",
-    "timestamp": "2025-10-23T20:32:28.428Z",
-    "beforeState": {
-      "match": {...}
+    "id": "tx_1761554632323",
+    "type": "COMPLETE_MATCH",
+    "completionType": "MANUAL",
+    "description": "FS-1-2: Chris (ID: 1761554566009) defeats Henry (ID: 1761554570908)",
+    "timestamp": "2025-10-27T08:43:52.323Z",
+    "matchId": "FS-1-2",
+    "winner": {
+      "id": 1761554566009,
+      "name": "Chris",
+      "paid": true,
+      "stats": {
+        "shortLegs": [],
+        "highOuts": [],
+        "tons": 2,
+        "oneEighties": 1
+      },
+      "placement": null,
+      "eliminated": false
     },
-    "afterState": {
-      "match": {...},
-      "placements": {...}
+    "loser": {
+      "id": 1761554570908,
+      "name": "Henry",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": null,
+      "eliminated": false
     }
   },
+  {
+    "id": "tx_1761554609001",
+    "type": "START_MATCH",
+    "description": "FS-1-2: Started",
+    "timestamp": "2025-10-27T08:43:29.001Z",
+    "matchId": "FS-1-2",
+    "beforeState": {
+      "active": false
+    },
+    "afterState": {
+      "active": true
+    }
+  },
+  {
+    "id": "tx_1761554599125",
+    "type": "ASSIGN_LANE",
+    "description": "FS-1-2: Lane assigned to 1",
+    "timestamp": "2025-10-27T08:43:19.125Z",
+    "matchId": "FS-1-2",
+    "afterState": {
+      "lane": 1
+    }
+  },
+  {
+    "id": "tx_1761554604778",
+    "type": "ASSIGN_REFEREE",
+    "description": "FS-1-2: Referee assigned to Chris (ID: 1761554566009)",
+    "timestamp": "2025-10-27T08:43:24.778Z",
+    "matchId": "FS-1-2",
+    "afterState": {
+      "referee": 1761554566009
+    }
+  }
   // ... more transactions
 ]
 ```
+
+**Transaction Types:**
+- `COMPLETE_MATCH` - Match completion with winner/loser
+- `START_MATCH` - Match marked as active/in-progress
+- `STOP_MATCH` - Match stopped (not completed)
+- `ASSIGN_LANE` - Dartboard lane assignment
+- `ASSIGN_REFEREE` - Referee assignment
+
+**Transaction ID Format:**
+- Format: `tx_{timestamp}` (e.g., `tx_1761554632323`)
+- Unique identifier for each transaction
+
+**Completion Types:**
+- `MANUAL` - Match completed by user clicking winner button
+- `AUTO` - Match auto-advanced due to walkover/bye
 
 **Benefits:**
 - **Isolation**: No cross-contamination between tournaments
 - **Portability**: History exports with tournament data
 - **Clean Deletion**: Removing a tournament removes its history
 - **Reduced Storage**: No accumulated history from all tournaments
+- **Full Undo Support**: Complete state snapshots for reliable undo/redo
 
 ---
 
@@ -177,13 +400,22 @@ function exportTournament() {
     link.href = url;
     link.download = `${tournament.name}_${tournament.date}.json`;
     link.click();
+
+    console.log(`✓ Tournament exported (v4.0 format, ${history.length} transactions)`);
 }
 ```
 
 ### Console Output
 
+Example console output when exporting:
 ```
-✓ Tournament exported (v4.0 format, 31 transactions)
+✓ Tournament exported (v4.0 format, 41 transactions)
+```
+
+For completed tournaments with history pruning enabled:
+```
+✓ Export pruning: Removed 15 redundant transactions from export
+✓ Tournament exported (v4.0 format, 26 transactions)
 ```
 
 ---
@@ -204,33 +436,63 @@ The import process includes validation with automatic format detection:
 ```javascript
 function validateTournamentData(data) {
     // 1. Detect format version
-    const isPreV4 = !data.exportVersion;
+    let isOldFormat = false;
 
-    if (isPreV4) {
-        // Pre-4.0 format - validate basic structure
-        console.log('Detected pre-4.0 export format - will import without history');
+    if (!data.exportVersion) {
+        // Old format (pre-v4.0) - no exportVersion field
+        isOldFormat = true;
+    } else {
+        const exportVersion = parseFloat(data.exportVersion);
+        if (exportVersion < 4.0) {
+            // Old format with version number < 4.0
+            isOldFormat = true;
+        }
     }
 
-    // 2. Validate required fields (works for both v3.x and v4.0)
-    if (!data.name || !data.date) {
-        return { valid: false, error: 'Missing required tournament fields (name, date)' };
+    // 2. Validate required fields
+    if (!data.name || typeof data.name !== 'string') {
+        return { valid: false, error: 'Tournament name is required' };
     }
 
-    // 3. Validate data types
-    if (!Array.isArray(data.players) || !Array.isArray(data.matches)) {
-        return { valid: false, error: 'Invalid data structure (players and matches must be arrays)' };
+    if (!data.date || typeof data.date !== 'string') {
+        return { valid: false, error: 'Tournament date is required' };
+    }
+
+    // 3. Validate date format (YYYY-MM-DD)
+    const dateRegex = /^\d{4}-\d{2}-\d{2}$/;
+    if (!dateRegex.test(data.date)) {
+        return { valid: false, error: 'Tournament date must be in YYYY-MM-DD format' };
     }
 
     // 4. Generate ID if missing (pre-4.0 exports may not have ID)
     if (!data.id) {
-        data.id = Date.now(); // Generate new ID for pre-4.0 imports
-        console.log(`Generated new tournament ID: ${data.id}`);
+        data.id = Date.now();
+        console.warn('Generated new ID for imported tournament:', data.id);
     }
+
+    // 5. Validate arrays
+    if (data.players && !Array.isArray(data.players)) {
+        return { valid: false, error: 'Players must be an array' };
+    }
+
+    if (data.matches && !Array.isArray(data.matches)) {
+        return { valid: false, error: 'Matches must be an array' };
+    }
+
+    if (data.history && !Array.isArray(data.history)) {
+        return { valid: false, error: 'History must be an array' };
+    }
+
+    // 6. Set defaults for missing fields
+    if (!data.status) data.status = 'setup';
+    if (!data.players) data.players = [];
+    if (!data.matches) data.matches = [];
+    if (!data.created) data.created = new Date().toISOString();
+    if (!data.history) data.history = [];
 
     return {
         valid: true,
-        isPreV4: isPreV4,
-        message: isPreV4 ? 'Pre-4.0 format detected' : 'v4.0+ format detected'
+        isOldFormat: isOldFormat
     };
 }
 ```
@@ -238,65 +500,90 @@ function validateTournamentData(data) {
 ### Import Function Flow
 
 ```javascript
-function continueImportProcess(importedData, isPreV4 = false) {
-    // 1. Build tournament object (preserve or generate ID)
+function continueImportProcess(importedData) {
+    // 1. Calculate bracketSize if missing (for older tournaments)
+    let bracketSize = importedData.bracketSize;
+    if (!bracketSize && importedData.bracket) {
+        bracketSize = importedData.bracket.length;
+    }
+
+    // 2. Build tournament object (strip any config contamination)
     tournament = {
-        id: importedData.id || Date.now(),  // Generate ID for pre-4.0 exports
+        id: importedData.id,
         name: importedData.name,
         date: importedData.date,
-        created: importedData.created || new Date().toISOString(),
+        created: importedData.created,
         status: importedData.status || 'setup',
         players: importedData.players || [],
         matches: importedData.matches || [],
         bracket: importedData.bracket || null,
         placements: importedData.placements || {},
-        bracketSize: importedData.bracketSize,
+        bracketSize: bracketSize,
         readOnly: (importedData.status === 'completed')
     };
 
-    // 2. Restore per-tournament history (empty for pre-4.0)
-    const historyKey = `tournament_${tournament.id}_history`;
-    const history = importedData.history || [];  // Empty array for pre-4.0
-    localStorage.setItem(historyKey, JSON.stringify(history));
+    // 3. Set global arrays
+    players = tournament.players;
+    matches = tournament.matches;
 
-    // 3. Restore saved players snapshot (optional, v4.0+ only)
-    if (importedData.playerList) {
-        localStorage.setItem('savedPlayers', JSON.stringify(importedData.playerList));
+    // 4. Restore per-tournament history (v4.0 format)
+    if (importedData.history && Array.isArray(importedData.history) && importedData.history.length > 0) {
+        const historyKey = `tournament_${tournament.id}_history`;
+        try {
+            localStorage.setItem(historyKey, JSON.stringify(importedData.history));
+            console.log(`✓ Restored ${importedData.history.length} transaction history entries`);
+        } catch (e) {
+            console.warn('Could not restore tournament history:', e);
+        }
     }
 
-    // 4. Clear undone transactions (fresh import)
+    // 5. Clear any undone transactions (fresh import)
     localStorage.removeItem('undoneTransactions');
 
-    // 5. Save tournament data to new per-tournament key
-    const tournamentKey = `tournament_${tournament.id}`;
-    localStorage.setItem(tournamentKey, JSON.stringify(tournament));
-
-    // 6. Update tournament registry
-    updateTournamentRegistry(tournament.id);
-
-    // 7. Update displays
-    updateTournamentStatus();
-    updatePlayersDisplay();
-    if (tournament.bracket) renderBracket();
-    displayResults();
-
-    // 8. Show success message with format-specific info
-    if (isPreV4) {
-        showImportStatus('success',
-            `✓ Tournament "${tournament.name}" imported from pre-4.0 format! ` +
-            `${players.length} players, ${completedMatches} completed matches. ` +
-            `Transaction history not available (starts fresh from now).`
-        );
-    } else {
-        showImportStatus('success',
-            `✓ Tournament "${tournament.name}" imported successfully! ` +
-            `${players.length} players, ${completedMatches} completed matches, ` +
-            `and ${history.length} transaction history entries restored.`
-        );
+    // 6. Restore playerList snapshot (v4.0 feature)
+    if (importedData.playerList && Array.isArray(importedData.playerList)) {
+        try {
+            localStorage.setItem('savedPlayers', JSON.stringify(importedData.playerList));
+            console.log(`✓ Restored ${importedData.playerList.length} saved players from export snapshot`);
+        } catch (e) {
+            console.warn('Could not restore saved players:', e);
+        }
     }
 
-    // 9. Navigate to registration page
-    showPage('registration');
+    // 7. Save tournament (preserves global config)
+    saveTournamentOnly();
+
+    // 8. Update all displays
+    updateTournamentStatus();
+    updatePlayersDisplay();
+    updatePlayerCount();
+    updateTournamentWatermark();
+    loadRecentTournaments();
+
+    // 9. Render bracket if exists
+    if (tournament.bracket && typeof renderBracket === 'function') {
+        renderBracket();
+    }
+
+    // 10. Display results using global config
+    if (typeof displayResults === 'function') {
+        displayResults();
+    }
+
+    // 11. Show success message
+    const historyCount = importedData.history ? importedData.history.length : 0;
+    showImportStatus('success',
+        `✓ Tournament "${tournament.name}" imported successfully! ` +
+        `${players.length} players, ${matches.filter(m => m.completed).length} completed matches, ` +
+        `and ${historyCount} transaction history entries loaded.`
+    );
+
+    // 12. Auto-switch to registration page
+    setTimeout(() => {
+        showPage('registration');
+    }, 1500);
+
+    console.log(`✓ Tournament imported (v${importedData.exportVersion} format, global config preserved)`);
 }
 ```
 
@@ -304,18 +591,22 @@ function continueImportProcess(importedData, isPreV4 = false) {
 
 **v4.0+ Import (with history):**
 ```
-✓ Restored 31 transaction history entries to tournament_1729712462714_history
-✓ Restored 19 saved players from export snapshot
+📥 Processing imported tournament (stripping any config data)...
+✓ Restored 41 transaction history entries
+✓ Restored 9 saved players from export snapshot
+✓ Saved tournament "My Tournament" as current tournament
 ✓ Tournament imported (v4.0 format, global config preserved)
 ```
 
 **Pre-4.0 Import (without history):**
 ```
-Detected pre-4.0 export format - will import without history
-Generated new tournament ID: 1729800000000
-✓ Created empty history array at tournament_1729800000000_history
-✓ Tournament imported from pre-4.0 format (transaction history starts fresh)
+📥 Processing imported tournament (stripping any config data)...
+Generated new ID for imported tournament: 1729800000000
+✓ Saved tournament "Old Tournament" as current tournament
+✓ Tournament imported (v3.x format, global config preserved)
 ```
+
+**Note:** Pre-4.0 imports do not restore transaction history. Undo functionality will only work for matches completed after import.
 
 ---
 
@@ -403,35 +694,81 @@ function getTournamentHistory() {
 
 ### Transaction Structure
 
+Transactions vary by type. Here are the main structures:
+
+#### COMPLETE_MATCH Transaction
 ```json
 {
-  "type": "match_complete",
-  "matchId": "FS-1-1",
-  "timestamp": "2025-10-23T20:32:28.428Z",
+  "id": "tx_1761554632323",
+  "type": "COMPLETE_MATCH",
+  "completionType": "MANUAL",
+  "description": "FS-1-2: Chris defeats Henry",
+  "timestamp": "2025-10-27T08:43:52.323Z",
+  "matchId": "FS-1-2",
+  "winner": { /* full player object */ },
+  "loser": { /* full player object */ }
+}
+```
+
+#### START_MATCH Transaction
+```json
+{
+  "id": "tx_1761554609001",
+  "type": "START_MATCH",
+  "description": "FS-1-2: Started",
+  "timestamp": "2025-10-27T08:43:29.001Z",
+  "matchId": "FS-1-2",
   "beforeState": {
-    "match": {
-      "id": "FS-1-1",
-      "completed": false,
-      "winner": null
-    }
+    "active": false
   },
   "afterState": {
-    "match": {
-      "id": "FS-1-1",
-      "completed": true,
-      "winner": 1,
-      "player1": {...},
-      "player2": {...}
-    },
-    "placements": {
-      "1": 5,
-      "2": 3
-    }
+    "active": true
   }
 }
 ```
 
-**Note:** Starting v3.0.1, `beforeState.matches` arrays are excluded for 98% storage reduction.
+#### ASSIGN_LANE Transaction
+```json
+{
+  "id": "tx_1761554599125",
+  "type": "ASSIGN_LANE",
+  "description": "FS-1-2: Lane assigned to 1",
+  "timestamp": "2025-10-27T08:43:19.125Z",
+  "matchId": "FS-1-2",
+  "afterState": {
+    "lane": 1
+  }
+}
+```
+
+#### ASSIGN_REFEREE Transaction
+```json
+{
+  "id": "tx_1761554604778",
+  "type": "ASSIGN_REFEREE",
+  "description": "FS-1-2: Referee assigned to Chris (ID: 1761554566009)",
+  "timestamp": "2025-10-27T08:43:24.778Z",
+  "matchId": "FS-1-2",
+  "afterState": {
+    "referee": 1761554566009
+  }
+}
+```
+
+**Important Notes:**
+- `COMPLETE_MATCH` transactions contain full player objects (not just IDs) for winner and loser
+- `completionType` can be `"MANUAL"` (user action) or `"AUTO"` (walkover)
+- Transaction `id` format is `tx_{timestamp}` for uniqueness
+- Some transaction types use `beforeState`/`afterState` for state changes
+- Match completion transactions store complete player state at time of completion
+
+**Player Stats in Transactions:**
+The `winner` and `loser` objects in `COMPLETE_MATCH` transactions include the full `stats` object as a historical snapshot. These stats are:
+- **For history/audit purposes only** - never read back for calculations
+- **Frozen at time of match completion** - represent player state at that moment
+- **Not the source of truth** - the global `players` array is the only source for Statistics table and points
+
+This means if you correct a player's stats (e.g., add a forgotten 180), the change immediately affects the Statistics table and points, but won't alter the historical snapshots in completed match transactions.
 
 ### History Pruning
 
