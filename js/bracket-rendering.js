@@ -1024,6 +1024,12 @@ function renderMatch(match, x, y, section, roundIndex) {
     matchElement.style.top = y + 'px';
     matchElement.id = `bracket-match-${match.id}`;
 
+    // Check for referee conflicts before rendering - will be used for button disable and styling
+    const conflictInfo = checkRefereeConflict(match.id);
+    if (conflictInfo.hasConflict) {
+        matchElement.classList.add('match-referee-conflict');
+    }
+
     // Add round indicator
     let roundIndicator = '';
     if (section === 'frontside') {
@@ -1038,7 +1044,8 @@ function renderMatch(match, x, y, section, roundIndex) {
 
     // Get button properties
     const buttonText = getMatchButtonText(matchState);
-    const buttonDisabled = matchState === 'pending' || matchState === 'completed';
+    // Disable button if pending, completed, OR if there's a referee conflict
+    const buttonDisabled = matchState === 'pending' || matchState === 'completed' || conflictInfo.hasConflict;
     const buttonColor = matchState === 'live' ? '#ff6b35' : '#28a745';
     const buttonTextColor = 'white';
 
@@ -1057,6 +1064,14 @@ function renderMatch(match, x, y, section, roundIndex) {
 
     const winnerCheck1 = player1WinnerClass ? `<span class="winner-check"><span class="checkmark">✓</span><span class="undo-icon">↺</span></span>` : '';
     const winnerCheck2 = player2WinnerClass ? `<span class="winner-check"><span class="checkmark">✓</span><span class="undo-icon">↺</span></span>` : '';
+
+    // Modify player display names if they're refereeing other matches
+    const player1Display = conflictInfo.player1IsReferee
+        ? `⚠️ ${match.player1.name} (Referee)`
+        : getPlayerDisplayName(match.player1);
+    const player2Display = conflictInfo.player2IsReferee
+        ? `⚠️ ${match.player2.name} (Referee)`
+        : getPlayerDisplayName(match.player2);
 
     // --- START: Redo UI Logic ---
     //const redoableMatches = getRedoableMatches();
@@ -1087,12 +1102,12 @@ function renderMatch(match, x, y, section, roundIndex) {
         <div class="match-players">
             <div class="match-player ${match.player1?.isBye || match.player1?.name === 'Walkover' ? 'bye first-throw' : 'first-throw'} ${player1WinnerClass} ${player1UndoableClass}"
                  onclick="${player1ClickHandler}">
-                <span class="player-name-short">${getPlayerDisplayName(match.player1)}</span>
+                <span class="player-name-short">${player1Display}</span>
                 ${winnerCheck1}
             </div>
             <div class="match-player ${match.player2?.isBye || match.player2?.name === 'Walkover' ? 'bye' : ''} ${player2WinnerClass} ${player2UndoableClass}"
                  onclick="${player2ClickHandler}">
-                <span class="player-name-short">${getPlayerDisplayName(match.player2)}</span>
+                <span class="player-name-short">${player2Display}</span>
                 ${winnerCheck2}
             </div>
         </div>
@@ -1532,6 +1547,54 @@ function isPlayerAvailableAsReferee(playerId, excludeMatchId = null) {
     return !assignedReferees.includes(playerIdInt) && !playersInLiveMatches.includes(playerIdInt);
 }
 
+/**
+ * Check if a match has referee conflicts (players are refereeing other matches)
+ * @param {string} matchId - The match ID to check
+ * @returns {Object} - {hasConflict: boolean, player1IsReferee: boolean, player2IsReferee: boolean, conflictedPlayers: string[]}
+ */
+function checkRefereeConflict(matchId) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match || !match.player1 || !match.player2) {
+        return { hasConflict: false, player1IsReferee: false, player2IsReferee: false, conflictedPlayers: [] };
+    }
+
+    const player1Id = match.player1.id;
+    const player2Id = match.player2.id;
+    let player1IsReferee = false;
+    let player2IsReferee = false;
+    const conflictedPlayers = [];
+
+    if (matches && player1Id && player2Id) {
+        matches.forEach(m => {
+            // Skip the current match - players can referee their own matches
+            if (m.id === matchId) return;
+
+            const matchState = getMatchState(m);
+            if ((matchState === 'ready' || matchState === 'live') && m.referee) {
+                if (m.referee === player1Id) {
+                    player1IsReferee = true;
+                    if (!conflictedPlayers.includes(match.player1.name)) {
+                        conflictedPlayers.push(match.player1.name);
+                    }
+                }
+                if (m.referee === player2Id) {
+                    player2IsReferee = true;
+                    if (!conflictedPlayers.includes(match.player2.name)) {
+                        conflictedPlayers.push(match.player2.name);
+                    }
+                }
+            }
+        });
+    }
+
+    return {
+        hasConflict: player1IsReferee || player2IsReferee,
+        player1IsReferee,
+        player2IsReferee,
+        conflictedPlayers
+    };
+}
+
 function updateMatchReferee(matchId, refereeId) {
     const match = matches.find(m => m.id === matchId);
     if (!match) return false;
@@ -1919,6 +1982,7 @@ if (typeof window !== 'undefined') {
     window.getAssignedReferees = getAssignedReferees;
     window.getPlayersInLiveMatches = getPlayersInLiveMatches;
     window.isPlayerAvailableAsReferee = isPlayerAvailableAsReferee;
+    window.checkRefereeConflict = checkRefereeConflict;
     window.getRedoableMatches = getRedoableMatches;
     window.handleRedoClick = handleRedoClick;
 }
@@ -2558,28 +2622,14 @@ function createMatchCard(match) {
     const player1Id = match.player1?.id || '';
     const player2Id = match.player2?.id || '';
 
-    // Check if either player is currently assigned as referee to any ready/live match
-    let player1IsReferee = false;
-    let player2IsReferee = false;
-
-    if (matches && player1Id && player2Id) {
-        matches.forEach(m => {
-            // Skip the current match - players can referee their own matches
-            if (m.id === match.id) return;
-
-            const matchState = getMatchState(m);
-            if ((matchState === 'ready' || matchState === 'live') && m.referee) {
-                if (m.referee === player1Id) player1IsReferee = true;
-                if (m.referee === player2Id) player2IsReferee = true;
-            }
-        });
-    }
+    // Use shared utility function to check for referee conflicts
+    const conflictInfo = checkRefereeConflict(match.id);
 
     // Modify player names if they're refereeing
-    const displayPlayer1 = player1IsReferee ? `⚠️ ${player1Name} (Referee)` : player1Name;
-    const displayPlayer2 = player2IsReferee ? `⚠️ ${player2Name} (Referee)` : player2Name;
+    const displayPlayer1 = conflictInfo.player1IsReferee ? `⚠️ ${player1Name} (Referee)` : player1Name;
+    const displayPlayer2 = conflictInfo.player2IsReferee ? `⚠️ ${player2Name} (Referee)` : player2Name;
 
-    const hasRefereeConflict = player1IsReferee || player2IsReferee;
+    const hasRefereeConflict = conflictInfo.hasConflict;
 
     // Use same button logic as tournament bracket, but add Command Center refresh
     const originalClickHandler = getButtonClickHandler(state, match.id);
@@ -3975,7 +4025,16 @@ function getDetailedMatchState(matchId) {
         let stateText;
         switch (basicState) {
             case 'pending': stateText = 'Pending'; break;
-            case 'ready': stateText = 'Ready to Start'; break;
+            case 'ready':
+                // Check for referee conflicts
+                const conflictInfo = checkRefereeConflict(matchId);
+                if (conflictInfo.hasConflict) {
+                    const playerNames = conflictInfo.conflictedPlayers.join(' and ');
+                    stateText = `Blocked: ${playerNames} refereeing`;
+                } else {
+                    stateText = 'Ready to Start';
+                }
+                break;
             case 'live': stateText = 'Started'; break;
             default: stateText = 'Unknown'; break;
         }

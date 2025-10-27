@@ -1,3 +1,29 @@
+# 2025-10-28
+
+## **v4.0.2-beta** - Referee Conflict Detection in Tournament Bracket
+
+### Bug Fixes
+- **Fixed referee conflict detection bypass in Tournament Bracket**
+  - **Previous behavior**: Match Controls prevented starting matches when players were refereeing other matches, showing "⚠️ [Name] (Referee)" warnings and disabling Start buttons
+  - **Issue discovered**: Tournament Bracket view had no referee conflict validation - matches could be started directly from bracket, bypassing the conflict check
+  - **Root cause**: Match Controls had its own duplicate conflict detection logic, while bracket rendering had none
+  - **Solution implemented**:
+    - Created shared `checkRefereeConflict()` utility function in `bracket-rendering.js`
+    - Created `toggleActiveWithValidation()` wrapper in `clean-match-progression.js` that validates before starting matches
+    - Updated bracket rendering to show visual warnings ("⚠️ [Name] (Referee)") and disable Start buttons when conflicts exist
+    - Replaced duplicate conflict detection in Match Controls with shared utility function
+    - Updated match state notification box to show "Blocked: [Name] refereeing" instead of "Ready to Start"
+  - **Impact**:
+    - ✅ Both Tournament Bracket and Match Controls now use identical referee conflict validation
+    - ✅ Eliminates code duplication and maintains single source of truth
+    - ✅ Prevents tournament state corruption from simultaneous player participation and refereeing
+    - ✅ Consistent user experience across all views
+  - **Implementation details**:
+    - Base `toggleActive()` function preserved for backward compatibility (Developer Console, programmatic operations)
+    - Follows existing pattern: base function + validation wrapper (similar to `updateMatchLane` / `updateMatchLaneWithValidation`)
+    - Visual conflict indicators update on bracket re-render
+  - **Files modified**: `js/bracket-rendering.js`, `js/clean-match-progression.js`
+
 # 2025-10-27
 
 ## **v4.0.1** - Code Cleanup and Documentation Updates

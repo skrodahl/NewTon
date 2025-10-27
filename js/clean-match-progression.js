@@ -1354,6 +1354,38 @@ function toggleActive(matchId) {
 }
 
 /**
+ * TOGGLE ACTIVE WITH VALIDATION - Wrapper that validates referee conflicts before toggling
+ * @param {string} matchId - The match ID to toggle
+ * @returns {boolean} - True if successful, false if validation failed
+ */
+function toggleActiveWithValidation(matchId) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) {
+        console.error(`Match ${matchId} not found`);
+        return false;
+    }
+
+    const currentState = getMatchState(match);
+
+    // Only validate when trying to START a match (transition from ready to live)
+    // Don't validate when stopping a match
+    if (currentState === 'ready') {
+        // Check for referee conflicts using shared utility function
+        if (typeof checkRefereeConflict === 'function') {
+            const conflictInfo = checkRefereeConflict(matchId);
+            if (conflictInfo.hasConflict) {
+                const playerNames = conflictInfo.conflictedPlayers.join(' and ');
+                alert(`Cannot start match: ${playerNames} is currently refereeing another match`);
+                return false;
+            }
+        }
+    }
+
+    // If validation passes (or we're stopping a match), call base toggle function
+    return toggleActive(matchId);
+}
+
+/**
  * SIMPLE MATCH STATE GETTER - Determines current match state
  */
 function getMatchState(match) {
@@ -1485,6 +1517,7 @@ if (typeof window !== 'undefined') {
     window.generateCleanBracket = generateCleanBracket;
     window.debugBracketGeneration = debugBracketGeneration;
     window.toggleActive = toggleActive;
+    window.toggleActiveWithValidation = toggleActiveWithValidation;
     window.getMatchState = getMatchState;
     window.updateMatchLane = updateMatchLane;
     window.MATCH_PROGRESSION = MATCH_PROGRESSION;
@@ -2463,6 +2496,7 @@ if (typeof window !== 'undefined') {
     window.generateCleanBracket = generateCleanBracket;
     window.debugBracketGeneration = debugBracketGeneration;
     window.toggleActive = toggleActive;
+    window.toggleActiveWithValidation = toggleActiveWithValidation;
     window.getMatchState = getMatchState;
     window.updateMatchLane = updateMatchLane;
     window.MATCH_PROGRESSION = MATCH_PROGRESSION;
