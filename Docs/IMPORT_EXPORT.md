@@ -13,7 +13,7 @@ The NewTon DC Tournament Manager uses a JSON-based import/export system for tour
 - **Version Validation**: Import validates export format version for compatibility
 - **Per-Tournament Isolation**: Each tournament maintains its own transaction history
 - **Idempotent Imports**: Importing the same file multiple times produces consistent results
-- **No Backwards Compatibility**: Clean break from pre-4.0 formats for data integrity
+- **Backwards Compatible**: Automatic migration from pre-4.0 formats (tournament data preserved, history starts fresh)
 
 ---
 
@@ -199,53 +199,52 @@ function exportTournament() {
 
 ### Import Validation
 
-The import process includes strict validation:
+The import process includes validation with automatic format detection:
 
 ```javascript
 function validateTournamentData(data) {
-    // 1. Check exportVersion field exists
-    if (!data.exportVersion) {
-        return {
-            valid: false,
-            error: 'This export file is from an older version and cannot be imported.\n\n' +
-                   'Only export files from version 4.0 or later are supported.'
-        };
+    // 1. Detect format version
+    const isPreV4 = !data.exportVersion;
+
+    if (isPreV4) {
+        // Pre-4.0 format - validate basic structure
+        console.log('Detected pre-4.0 export format - will import without history');
     }
 
-    // 2. Check version is 4.0 or higher
-    const exportVersion = parseFloat(data.exportVersion);
-    if (exportVersion < 4.0) {
-        return {
-            valid: false,
-            error: `Export version ${data.exportVersion} is not supported.\n\n` +
-                   'Only export files from version 4.0 or later can be imported.'
-        };
+    // 2. Validate required fields (works for both v3.x and v4.0)
+    if (!data.name || !data.date) {
+        return { valid: false, error: 'Missing required tournament fields (name, date)' };
     }
 
-    // 3. Validate required fields
-    if (!data.name || !data.date || !data.id) {
-        return { valid: false, error: 'Missing required tournament fields' };
-    }
-
-    // 4. Validate data types
+    // 3. Validate data types
     if (!Array.isArray(data.players) || !Array.isArray(data.matches)) {
-        return { valid: false, error: 'Invalid data structure' };
+        return { valid: false, error: 'Invalid data structure (players and matches must be arrays)' };
     }
 
-    return { valid: true };
+    // 4. Generate ID if missing (pre-4.0 exports may not have ID)
+    if (!data.id) {
+        data.id = Date.now(); // Generate new ID for pre-4.0 imports
+        console.log(`Generated new tournament ID: ${data.id}`);
+    }
+
+    return {
+        valid: true,
+        isPreV4: isPreV4,
+        message: isPreV4 ? 'Pre-4.0 format detected' : 'v4.0+ format detected'
+    };
 }
 ```
 
 ### Import Function Flow
 
 ```javascript
-function continueImportProcess(importedData) {
-    // 1. Build tournament object (preserve original ID)
+function continueImportProcess(importedData, isPreV4 = false) {
+    // 1. Build tournament object (preserve or generate ID)
     tournament = {
-        id: importedData.id,
+        id: importedData.id || Date.now(),  // Generate ID for pre-4.0 exports
         name: importedData.name,
         date: importedData.date,
-        created: importedData.created,
+        created: importedData.created || new Date().toISOString(),
         status: importedData.status || 'setup',
         players: importedData.players || [],
         matches: importedData.matches || [],
@@ -255,11 +254,12 @@ function continueImportProcess(importedData) {
         readOnly: (importedData.status === 'completed')
     };
 
-    // 2. Restore per-tournament history
+    // 2. Restore per-tournament history (empty for pre-4.0)
     const historyKey = `tournament_${tournament.id}_history`;
-    localStorage.setItem(historyKey, JSON.stringify(importedData.history));
+    const history = importedData.history || [];  // Empty array for pre-4.0
+    localStorage.setItem(historyKey, JSON.stringify(history));
 
-    // 3. Restore saved players snapshot (optional)
+    // 3. Restore saved players snapshot (optional, v4.0+ only)
     if (importedData.playerList) {
         localStorage.setItem('savedPlayers', JSON.stringify(importedData.playerList));
     }
@@ -267,58 +267,72 @@ function continueImportProcess(importedData) {
     // 4. Clear undone transactions (fresh import)
     localStorage.removeItem('undoneTransactions');
 
-    // 5. Save tournament data
-    saveTournamentOnly();
+    // 5. Save tournament data to new per-tournament key
+    const tournamentKey = `tournament_${tournament.id}`;
+    localStorage.setItem(tournamentKey, JSON.stringify(tournament));
 
-    // 6. Update displays
+    // 6. Update tournament registry
+    updateTournamentRegistry(tournament.id);
+
+    // 7. Update displays
     updateTournamentStatus();
     updatePlayersDisplay();
     if (tournament.bracket) renderBracket();
     displayResults();
 
-    // 7. Show success message
-    showImportStatus('success',
-        `✓ Tournament "${tournament.name}" imported successfully! ` +
-        `${players.length} players, ${completedMatches} completed matches, ` +
-        `and ${history.length} transaction history entries loaded.`
-    );
+    // 8. Show success message with format-specific info
+    if (isPreV4) {
+        showImportStatus('success',
+            `✓ Tournament "${tournament.name}" imported from pre-4.0 format! ` +
+            `${players.length} players, ${completedMatches} completed matches. ` +
+            `Transaction history not available (starts fresh from now).`
+        );
+    } else {
+        showImportStatus('success',
+            `✓ Tournament "${tournament.name}" imported successfully! ` +
+            `${players.length} players, ${completedMatches} completed matches, ` +
+            `and ${history.length} transaction history entries restored.`
+        );
+    }
 
-    // 8. Navigate to registration page
+    // 9. Navigate to registration page
     showPage('registration');
 }
 ```
 
 ### Console Output
 
+**v4.0+ Import (with history):**
 ```
 ✓ Restored 31 transaction history entries to tournament_1729712462714_history
 ✓ Restored 19 saved players from export snapshot
 ✓ Tournament imported (v4.0 format, global config preserved)
 ```
 
+**Pre-4.0 Import (without history):**
+```
+Detected pre-4.0 export format - will import without history
+Generated new tournament ID: 1729800000000
+✓ Created empty history array at tournament_1729800000000_history
+✓ Tournament imported from pre-4.0 format (transaction history starts fresh)
+```
+
 ---
 
 ## Error Handling
 
-### Version Validation Errors
+### Version Validation Messages
 
 **Old Format (No exportVersion field):**
-```
-Invalid tournament data:
+- System automatically detects pre-4.0 format
+- Imports tournament data successfully
+- Creates empty transaction history
+- User notified: "Imported pre-4.0 tournament (transaction history not available)"
 
-This export file is from an older version and cannot be imported.
-
-Only export files from version 4.0 or later are supported.
-```
-
-**Unsupported Version:**
-```
-Invalid tournament data:
-
-Export version 3.0 is not supported.
-
-Only export files from version 4.0 or later can be imported.
-```
+**v4.0+ Format:**
+- Full import with complete transaction history
+- Undo functionality preserved
+- User notified: "Tournament imported (v4.0 format, X transactions restored)"
 
 ### Data Validation Errors
 
@@ -461,26 +475,64 @@ undoLastMatch(); // Should work correctly with imported history
 
 ## Migration from Pre-4.0
 
-### Breaking Changes
+### Backwards Compatibility
 
-**v4.0 does NOT support importing pre-4.0 exports:**
-- No `exportVersion` field → Import rejected
-- Global history accumulation → Fixed with per-tournament keys
-- Missing transaction isolation → Resolved
+**v4.0 DOES support importing pre-4.0 exports with automatic migration:**
 
-### Why No Backwards Compatibility?
+**What gets imported:**
+- ✅ Tournament data (name, date, bracket size, status)
+- ✅ Players (with all statistics and payment status)
+- ✅ Matches (with completion state, winners, leg scores)
+- ✅ Bracket structure
+- ✅ Placements (final rankings)
 
-1. **Data Integrity**: Pre-4.0 exports contain contaminated history from multiple tournaments
-2. **Clean Architecture**: Per-tournament isolation requires structural changes
-3. **User Intent**: Users on v4.0 likely have already aggregated historical data externally
-4. **Simplicity**: No complex migration logic to maintain
+**What does NOT get imported:**
+- ❌ Transaction history (pre-4.0 history was contaminated from multiple tournaments)
+- ❌ Undo capability (no history = no undo after import)
+
+### Automatic Migration Process
+
+When importing a pre-4.0 export (missing `exportVersion` field):
+
+1. **Detection**: System recognizes old format by absence of `exportVersion` field
+2. **Validation**: Validates tournament data structure (name, date, players, matches)
+3. **Migration**: Imports tournament data into new per-tournament storage model
+4. **Storage**: Stores in `tournament_${id}` key with isolated history key
+5. **History**: Creates empty history array (undo not available for pre-import state)
+6. **Success**: Tournament fully functional in v4.0 architecture
+
+### Import Flow Example
+
+```javascript
+// Old format (no exportVersion)
+{
+  "name": "My Tournament",
+  "date": "2025-10-20",
+  "players": [...],
+  "matches": [...]
+}
+
+// After import → stored as:
+// tournament_1729434000000 (tournament data)
+// tournament_1729434000000_history (empty array)
+```
+
+### User Impact
+
+**For tournaments exported from v3.x:**
+- ✅ All tournament data preserved
+- ✅ Results, placements, and statistics intact
+- ✅ Works seamlessly in v4.0
+- ⚠️ Cannot undo matches that were completed before import
+- ✅ Can undo new matches completed after import
 
 ### Recommendation
 
-For users with pre-4.0 exports:
-- Export data is preserved for external analysis
-- Tournament results likely already recorded in spreadsheets/databases
-- Fresh start with v4.0 for new tournaments
+For users migrating from pre-4.0:
+- Import old tournaments directly - migration is automatic
+- Transaction history starts fresh after import
+- Future exports will include proper per-tournament history
+- Undo functionality works for all post-import actions
 
 ---
 
@@ -514,9 +566,20 @@ For users with pre-4.0 exports:
 
 ### Test Validation
 
-1. Create an old format export (remove `exportVersion` field)
+**Test Pre-4.0 Import:**
+1. Create an old format export (remove `exportVersion` field from v4.0 export)
 2. Attempt import
-3. Verify rejection with clear error message
+3. Verify successful import with warning message about missing history
+4. Check tournament data is intact
+5. Verify empty history array created
+6. Test undo button (should be disabled/no history)
+
+**Test v4.0+ Import:**
+1. Export tournament from v4.0
+2. Import the file
+3. Verify full restoration including history
+4. Test undo functionality (should work)
+5. Verify all transaction history restored
 
 ---
 
