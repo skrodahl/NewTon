@@ -18,10 +18,51 @@ The NewTon DC Tournament Manager includes an optional REST API for shared tourna
 ## Architecture
 
 ### Server Requirements
-- PHP 7.0 or higher
+- PHP 7.0 or higher (PHP 8.2+ recommended)
 - PHP-FPM or FastCGI
 - Write permissions to `/tournaments` directory
 - Web server (nginx, Apache, etc.) configured to execute PHP
+
+### Docker Deployment (Recommended)
+
+The easiest way to deploy with API support is using the official Docker image:
+
+```bash
+docker run -d \
+  --name newton-tournament \
+  -p 8080:2020 \
+  -v ./tournaments:/var/www/html/tournaments \
+  ghcr.io/skrodahl/newton:latest
+```
+
+**What's included in the Docker image:**
+- Alpine Linux with nginx + PHP 8.2-FPM
+- All API endpoints pre-configured and working out of the box
+- Persistent tournament storage via volume mount
+- Internal port 2020 ("Double 20" 🎯)
+- No additional configuration needed
+
+**Environment Variables:**
+- `NEWTON_API_ENABLED=true` (default) - Enable/disable API endpoints
+- `NEWTON_DEMO_MODE=false` (default) - Show demo banner for public sites
+- Set `NEWTON_API_ENABLED=false` to disable all API endpoints (returns HTTP 403)
+
+**Docker Compose example:**
+```yaml
+services:
+  newton-tournament:
+    image: ghcr.io/skrodahl/newton:latest
+    container_name: newton
+    ports:
+      - "8080:2020"
+    volumes:
+      - ./tournaments:/var/www/html/tournaments
+    environment:
+      - NEWTON_API_ENABLED=true
+      - NEWTON_DEMO_MODE=false
+```
+
+See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for complete Docker setup guide.
 
 ### Directory Structure
 ```
@@ -449,6 +490,38 @@ Potential API extensions:
 - Verify JSON files are valid
 - Check file permissions (644 for files, 755 for directory)
 
+### Docker-Specific Issues
+
+**API returns 403 Forbidden:**
+- Check `NEWTON_API_ENABLED` environment variable is set to `true`
+- Restart container after changing environment variables
+
+**Tournaments not persisting after container restart:**
+- Verify volume mount is configured: `-v ./tournaments:/var/www/html/tournaments`
+- Check host directory permissions
+- Verify data is being written to `/var/www/html/tournaments` inside container
+
+**Can't access API on port 8080:**
+- Container runs on internal port 2020, ensure port mapping is correct: `-p 8080:2020`
+- Check if port 8080 is already in use on host: `docker compose ps`
+- Try accessing via `http://localhost:8080/api/list-tournaments.php`
+
+**View Docker container logs:**
+```bash
+# Using docker compose
+docker compose logs -f
+
+# Using docker run
+docker logs -f newton-tournament
+```
+
+**Access container shell for debugging:**
+```bash
+docker exec -it newton bash
+# or
+docker compose exec newton-tournament sh
+```
+
 ---
 
 ## Security Best Practices
@@ -463,5 +536,14 @@ Potential API extensions:
 
 ---
 
-*For deployment instructions, see `/api/README.md`*
-*For general documentation, see project README.md*
+## Additional Resources
+
+- **[DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md)** - Quick start guide for Docker deployment
+- **[docker/README.md](../docker/README.md)** - Docker-specific configuration reference
+- **[IMPORT_EXPORT.md](IMPORT_EXPORT.md)** - Tournament data format specification
+- **[/api/README.md](../api/README.md)** - API implementation notes
+- **[README.md](../README.md)** - General project documentation
+
+---
+
+*The Docker image provides the easiest path to deployment with all API endpoints pre-configured and ready to use.*

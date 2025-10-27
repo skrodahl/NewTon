@@ -12,11 +12,37 @@ When deployed to a PHP-enabled web server, these scripts enable:
 
 ## Requirements
 
-- PHP 7.0 or higher
+- PHP 7.0 or higher (PHP 8.2+ recommended)
 - Write permissions to `/tournaments` directory
 - Web server (Apache, Nginx, etc.)
 
-## Setup
+## Quick Start with Docker (Recommended)
+
+The easiest way to get the API running is with the official Docker image:
+
+```bash
+docker run -d \
+  --name newton-tournament \
+  -p 8080:2020 \
+  -v ./tournaments:/var/www/html/tournaments \
+  ghcr.io/skrodahl/newton:latest
+```
+
+**Benefits:**
+- ✅ All API endpoints pre-configured and working
+- ✅ nginx + PHP 8.2-FPM included
+- ✅ No manual setup required
+- ✅ Persistent tournament storage via volume mount
+
+**Test endpoints:**
+- List: `http://localhost:8080/api/list-tournaments.php`
+- Upload: POST to `http://localhost:8080/api/upload-tournament.php`
+
+See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for complete Docker deployment guide.
+
+## Manual Setup (Traditional Deployment)
+
+If you prefer to deploy without Docker:
 
 1. **Create tournaments directory:**
    ```bash
