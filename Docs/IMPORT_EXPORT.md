@@ -794,13 +794,14 @@ if (tournament.status === 'completed' && history.length > 0) {
 - Complete audit trail of match completions
 
 **Why Only Completed Tournaments:**
-Active tournaments need full transaction history for proper undo functionality. Completed tournaments are read-only, so redundant operational transactions can be safely removed to reduce export file size.
+Active tournaments need full transaction history including all operational transactions (lane changes, start/stop) for proper UI undo functionality. Completed tournaments are read-only by design, so redundant operational transactions can be safely removed while preserving all COMPLETE_MATCH transactions.
 
 **Impact:**
 - Reduces export file size by ~40-60% for typical tournaments
-- Maintains complete match completion history
+- Maintains complete match completion history (all COMPLETE_MATCH transactions preserved)
 - Tournament remains fully viewable and statistics remain accurate
-- No undo functionality lost (completed tournaments are read-only)
+- Undo capability preserved (COMPLETE_MATCH transactions contain full state snapshots)
+- Completed tournaments remain read-only in UI regardless of pruning
 
 ---
 
