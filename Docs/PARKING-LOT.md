@@ -11,6 +11,10 @@ Ideas and suggestions for future consideration.
 **Priority:**: High (v4.0.2)
 Match Progression in Developer Console should say placement instead of "x" for eliminated.
 
+### Import Saved Players from Shared Tournaments
+**Priority:**: High (v4.0.2)
+Exports contain list of Saved Players. These exports are available in the folder tournaments/ (using REST API). It should be possible to import Saved Players from these exports.
+
 ### Enhanced Tournament Validation
 **Priority:** Medium (v4.1.0)
 
