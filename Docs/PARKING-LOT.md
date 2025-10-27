@@ -7,8 +7,12 @@ Ideas and suggestions for future consideration.
 ## Inbox
 *Raw ideas awaiting triage*
 
+### Show placements in "View Match Progression" in Developer console
+**Priority:**: High (v4.0.2)
+Match Progression in Developer Console should say placement instead of "x" for eliminated.
+
 ### Enhanced Tournament Validation
-**Priority:** Medium (v4.0.1 or v4.1.0)
+**Priority:** Medium (v4.1.0)
 
 **Goal:** Catch tournament integrity problems early, before they become emergencies
 
