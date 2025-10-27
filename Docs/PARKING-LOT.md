@@ -10,6 +10,10 @@ Ideas and suggestions for future consideration.
 **Priority:** High (v4.0.2)
 The transaction log was saved at every match_complete, should be recoverable...
 
+### Match/Referee conflict detection in tournament bracket
+**Priority:** High (v4.0.2)
+Matches that can't be started because one/two players are already referees, can still be started in the tournament bracket.
+
 ### Show placements in "View Match Progression" in Developer console
 **Priority:** High (v4.0.2)
 Match Progression in Developer Console should say placement instead of "x" for eliminated.
