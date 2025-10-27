@@ -7,11 +7,11 @@ Ideas and suggestions for future consideration.
 ## Inbox
 *Raw ideas awaiting triage*
 ### Check if pre-v4.0 transaction log *can* be imported
-**Priority:**: High (v4.0.2)
+**Priority:** High (v4.0.2)
 The transaction log was saved at every match_complete, should be recoverable...
 
 ### Show placements in "View Match Progression" in Developer console
-**Priority:**: High (v4.0.2)
+**Priority:** High (v4.0.2)
 Match Progression in Developer Console should say placement instead of "x" for eliminated.
 
 ### Import Saved Players from Shared Tournaments
