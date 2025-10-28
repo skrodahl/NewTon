@@ -1,6 +1,6 @@
 # 2025-10-28
 
-## **v4.0.2-beta** - Referee Conflict Detection in Tournament Bracket
+## **v4.0.2-beta** - Referee Conflict Detection and Pre-v4.0 Import Optimization
 
 ### Bug Fixes
 - **Fixed referee conflict detection bypass in Tournament Bracket**
@@ -23,6 +23,31 @@
     - Follows existing pattern: base function + validation wrapper (similar to `updateMatchLane` / `updateMatchLaneWithValidation`)
     - Visual conflict indicators update on bracket re-render
   - **Files modified**: `js/bracket-rendering.js`, `js/clean-match-progression.js`
+
+### Performance Improvements
+- **Optimized pre-v4.0 tournament import to prevent localStorage bloat**
+  - **Issue discovered**: Pre-v4.0 exports contain snapshot-based transaction history where each transaction includes a full copy of the entire tournament state in `beforeState`. A typical 32-player tournament had 178 transactions totaling 8.56 MB of redundant data.
+  - **Root cause**: Pre-v4.0 used snapshot-based undo system (save full state before each action). v4.0 switched to replay-based undo (save only changes, reconstruct state by replaying). The formats are incompatible - v4.0 cannot use pre-v4.0 snapshots for undo operations.
+  - **Problem**: Importing pre-v4.0 history consumed massive localStorage space (8+ MB per tournament) and provided no functionality since v4.0 undo system cannot use the snapshots.
+  - **Solution implemented**:
+    - Modified import logic to detect old format exports
+    - Skip importing transaction history for pre-v4.0 formats
+    - Continue importing all tournament data (players, matches, bracket, placements, results)
+    - Log clear message: "⚠ Skipped importing X pre-v4.0 history entries (incompatible snapshot format, ~Y MB)"
+  - **Impact**:
+    - ✅ Prevents localStorage bloat (saves 8-10 MB per pre-v4.0 tournament import)
+    - ✅ Eliminates risk of hitting browser localStorage quota limits
+    - ✅ Tournament data (players, matches, results, placements) still imports correctly
+    - ✅ Faster imports (no need to parse/store massive history)
+    - ✅ Existing "Pre-v4.0 format: Undo not available" warning remains accurate
+    - ✅ v4.0+ tournament imports continue to work normally with full undo functionality
+  - **Technical details**:
+    - Pre-v4.0 snapshot format: Each transaction stored entire tournament state (~50 KB each)
+    - v4.0 replay format: Each transaction stores only changes (~200 bytes each)
+    - Size reduction: 98.8% less localStorage usage for imported pre-v4.0 tournaments
+    - The incompatible snapshot data was being imported but never used by v4.0 undo system
+  - **Files modified**: `js/tournament-management.js`
+  - **Related**: Resolved PARKING-LOT item "Check if pre-v4.0 transaction log can be imported" - determined that pre-v4.0 history exists but is incompatible with v4.0 undo system and should be skipped
 
 # 2025-10-27
 

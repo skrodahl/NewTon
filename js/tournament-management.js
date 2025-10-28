@@ -930,14 +930,22 @@ function continueImportProcess(importedData) {
         players = tournament.players;
         matches = tournament.matches;
 
-        // Restore per-tournament history (v4.0 format)
+        // Restore per-tournament history (v4.0+ format only)
+        // Pre-v4.0 formats use incompatible snapshot-based history (too large, won't work with v4.0 undo)
+        const isOldFormat = window.isOldFormatImport;
         if (importedData.history && Array.isArray(importedData.history) && importedData.history.length > 0) {
-            const historyKey = `tournament_${tournament.id}_history`;
-            try {
-                localStorage.setItem(historyKey, JSON.stringify(importedData.history));
-                console.log(`✓ Restored ${importedData.history.length} transaction history entries to ${historyKey}`);
-            } catch (e) {
-                console.warn('Could not restore tournament history:', e);
+            if (!isOldFormat) {
+                // v4.0+ format: lightweight transaction log compatible with replay-based undo
+                const historyKey = `tournament_${tournament.id}_history`;
+                try {
+                    localStorage.setItem(historyKey, JSON.stringify(importedData.history));
+                    console.log(`✓ Restored ${importedData.history.length} transaction history entries to ${historyKey}`);
+                } catch (e) {
+                    console.warn('Could not restore tournament history:', e);
+                }
+            } else {
+                // Pre-v4.0 format: skip bloated snapshot-based history
+                console.log(`⚠ Skipped importing ${importedData.history.length} pre-v4.0 history entries (incompatible snapshot format, ~${Math.round(JSON.stringify(importedData.history).length / 1024 / 1024 * 10) / 10} MB)`);
             }
         }
 

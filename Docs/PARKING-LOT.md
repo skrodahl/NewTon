@@ -6,21 +6,9 @@ Ideas and suggestions for future consideration.
 
 ## Inbox
 *Raw ideas awaiting triage*
-### Check if pre-v4.0 transaction log *can* be imported
-**Priority:** High (v4.0.2)
-The transaction log was saved at every match_complete, should be recoverable...
-
-### Match/Referee conflict detection in tournament bracket
-**Priority:** High (v4.0.2)
-Matches that can't be started because one/two players are already referees, can still be started in the tournament bracket.
-
 ### Show placements in "View Match Progression" in Developer console
 **Priority:** High (v4.0.2)
 Match Progression in Developer Console should say placement instead of "x" for eliminated.
-
-### Import Saved Players from Shared Tournaments
-**Priority:**: High (v4.0.2)
-Exports contain list of Saved Players. These exports are available in the folder tournaments/ (using REST API). It should be possible to import Saved Players from these exports.
 
 ### Enhanced Tournament Validation
 **Priority:** Medium (v4.1.0)
@@ -70,4 +58,37 @@ Exports contain list of Saved Players. These exports are available in the folder
 
 ---
 
-**Last updated:** October 25, 2025
+## Decided Against
+*Features that were considered but explicitly rejected*
+
+### Import Pre-v4.0 Transaction History
+**Date resolved:** October 28, 2025
+**Original priority:** High (v4.0.2)
+
+**Question:** Can pre-v4.0 transaction log be imported to enable undo functionality?
+
+**Investigation results:** Pre-v4.0 exports DO contain complete transaction history, but it uses an incompatible snapshot-based format. Each transaction stores the entire tournament state in `beforeState` (~50 KB per transaction), resulting in 8+ MB of data for a typical tournament.
+
+**Decision:** Do NOT import pre-v4.0 history. Import only tournament data (players, matches, bracket, placements).
+
+**Why:**
+- Pre-v4.0 snapshot format is incompatible with v4.0's replay-based undo system
+- Massive localStorage bloat (8-10 MB per tournament) with zero functionality
+- v4.0 cannot use pre-v4.0 snapshots for undo operations
+- Tournament data imports correctly without history
+
+**Implementation:** Modified import logic to skip pre-v4.0 history while preserving all tournament data. Results in 98.8% reduction in localStorage usage for imported tournaments.
+
+### Import Saved Players from Shared Tournaments (Automatic)
+**Date rejected:** October 28, 2025
+**Original priority:** High (v4.0.2)
+
+**Proposal:** When loading a tournament from server (REST API), automatically offer to import the `playerList` included in the export.
+
+**Why rejected:** Corner case that doesn't justify added complexity. The existing "Import Saved Players" button already handles this workflow adequately. Automatic import would add code complexity and potential user annoyance for minimal benefit. The manual workflow (download file → click Import Saved Players) works fine for the rare occasions when this is needed.
+
+**Workaround:** Use existing "Import Saved Players" button on Player Registration page to manually import from tournament export file.
+
+---
+
+**Last updated:** October 28, 2025
