@@ -1,5 +1,25 @@
 # 2025-10-28
 
+## **v4.0.3-beta** - Developer Console Enhancement
+
+### Enhancement
+- **Developer Console: Show placement ranks in "View Match Progression"**
+  - **Previous behavior**: When viewing match progression in Developer Console, eliminated players showed only "→ TO: ❌" with no placement information
+  - **New behavior**: Now shows placement rank alongside elimination icon (e.g., "→ TO: ❌ 3rd" for BS-FINAL loser, "→ TO: ❌ 5th-6th" for BS-2 losers)
+  - **Implementation**:
+    - Reuses existing `getEliminationRankForMatch()` function from `main.js` (hardcoded rank mappings for 8/16/32 player brackets)
+    - Reuses existing `formatRanking()` function from `results-config.js` (formats ranks as "3rd", "5th-6th", "13th-16th", etc.)
+    - Added defensive programming with function availability checks
+    - Zero code duplication - leverages same rank display logic used in Winner Confirmation modal, Match Controls, and Match History
+  - **Impact**:
+    - ✅ Developer Console now shows consistent placement information with rest of UI
+    - ✅ Makes "View Match Progression" more informative for tournament analysis
+    - ✅ Displays exact elimination rank for all backside bracket matches
+    - ✅ Single source of truth for all placement displays across application
+  - **Files modified**: `js/analytics.js`
+
+---
+
 ## **v4.0.2-beta** - Referee Conflict Detection and Pre-v4.0 Import Optimization
 
 ### Bug Fixes

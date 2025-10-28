@@ -1646,7 +1646,17 @@ function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {
             const destState = getStateInfo(destMatchId);
             destinations.push(`${destState.icon} ${destMatchId}`);
         } else if (matchId !== 'GRAND-FINAL') {
-            destinations.push(`<span style="color: #dc2626;">❌</span>`);
+            // Show elimination with placement rank
+            const rank = typeof getEliminationRankForMatch === 'function'
+                ? getEliminationRankForMatch(matchId, tournament.bracketSize)
+                : null;
+
+            if (rank && typeof formatRanking === 'function') {
+                const rankText = formatRanking(rank);
+                destinations.push(`<span style="color: #dc2626;">❌ ${rankText}</span>`);
+            } else {
+                destinations.push(`<span style="color: #dc2626;">❌</span>`);
+            }
         }
         const destinationsHtml = `<span style="color: #666; font-size: 12px;">${destinations.join(', ')}</span>`;
 
