@@ -1,6 +1,6 @@
 # 2025-10-28
 
-## **v4.0.3-beta** - Developer Console Enhancement
+## **v4.0.3** - Developer Console Enhancement
 
 ### Enhancement
 - **Developer Console: Show placement ranks in "View Match Progression"**
@@ -20,7 +20,7 @@
 
 ---
 
-## **v4.0.2-beta** - Referee Conflict Detection and Pre-v4.0 Import Optimization
+## **v4.0.2** - Referee Conflict Detection and Pre-v4.0 Import Optimization
 
 ### Bug Fixes
 - **Fixed referee conflict detection bypass in Tournament Bracket**
