@@ -1627,8 +1627,8 @@ function updateMatchReferee(matchId, refereeId) {
             refreshAllRefereeDropdowns();
         }
 
-        // Note: No renderBracket() call needed - dropdown refresh is sufficient
-        // and prevents losing match card hover zoom state
+        // Re-render bracket to update referee conflict indicators
+        renderBracket();
 
         // Refresh Match Controls if it's open
         const modal = document.getElementById('matchCommandCenterModal');
@@ -1688,8 +1688,8 @@ function updateMatchReferee(matchId, refereeId) {
     saveTournament();
     refreshAllRefereeDropdowns();
 
-    // Note: No renderBracket() call needed - dropdown refresh is sufficient
-    // and prevents losing match card hover zoom state
+    // Re-render bracket to update referee conflict indicators
+    renderBracket();
 
     // Refresh Match Controls if it's open
     const modal = document.getElementById('matchCommandCenterModal');
