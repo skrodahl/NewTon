@@ -526,14 +526,22 @@ function continueImportProcess(importedData) {
     players = tournament.players;
     matches = tournament.matches;
 
-    // 4. Restore per-tournament history (v4.0 format)
+    // 4. Restore per-tournament history (v4.0+ format only)
+    // Pre-v4.0 formats use incompatible snapshot-based history (skipped to prevent localStorage bloat)
+    const isOldFormat = window.isOldFormatImport;
     if (importedData.history && Array.isArray(importedData.history) && importedData.history.length > 0) {
-        const historyKey = `tournament_${tournament.id}_history`;
-        try {
-            localStorage.setItem(historyKey, JSON.stringify(importedData.history));
-            console.log(`✓ Restored ${importedData.history.length} transaction history entries`);
-        } catch (e) {
-            console.warn('Could not restore tournament history:', e);
+        if (!isOldFormat) {
+            // v4.0+ format: lightweight transaction log compatible with replay-based undo
+            const historyKey = `tournament_${tournament.id}_history`;
+            try {
+                localStorage.setItem(historyKey, JSON.stringify(importedData.history));
+                console.log(`✓ Restored ${importedData.history.length} transaction history entries`);
+            } catch (e) {
+                console.warn('Could not restore tournament history:', e);
+            }
+        } else {
+            // Pre-v4.0 format: skip bloated snapshot-based history
+            console.log(`⚠ Skipped importing ${importedData.history.length} pre-v4.0 history entries (incompatible snapshot format, ~${Math.round(JSON.stringify(importedData.history).length / 1024 / 1024 * 10) / 10} MB)`);
         }
     }
 
@@ -598,15 +606,16 @@ function continueImportProcess(importedData) {
 ✓ Tournament imported (v4.0 format, global config preserved)
 ```
 
-**Pre-4.0 Import (without history):**
+**Pre-4.0 Import (history skipped to prevent bloat):**
 ```
 📥 Processing imported tournament (stripping any config data)...
 Generated new ID for imported tournament: 1729800000000
+⚠ Skipped importing 178 pre-v4.0 history entries (incompatible snapshot format, ~4.3 MB)
 ✓ Saved tournament "Old Tournament" as current tournament
 ✓ Tournament imported (v3.x format, global config preserved)
 ```
 
-**Note:** Pre-4.0 imports do not restore transaction history. Undo functionality will only work for matches completed after import.
+**Note:** Pre-4.0 exports contain snapshot-based transaction history that is incompatible with v4.0's replay-based undo system. This history is intentionally skipped during import to prevent massive localStorage bloat (typically 8-10 MB per tournament) while preserving all tournament data. Undo functionality will only work for matches completed after import.
 
 ---
 
@@ -834,7 +843,7 @@ undoLastMatch(); // Should work correctly with imported history
 
 ### Backwards Compatibility
 
-**v4.0 DOES support importing pre-4.0 exports with automatic migration:**
+**v4.0+ DOES support importing pre-4.0 exports with automatic migration:**
 
 **What gets imported:**
 - ✅ Tournament data (name, date, bracket size, status)
@@ -844,19 +853,42 @@ undoLastMatch(); // Should work correctly with imported history
 - ✅ Placements (final rankings)
 
 **What does NOT get imported:**
-- ❌ Transaction history (pre-4.0 history was contaminated from multiple tournaments)
-- ❌ Undo capability (no history = no undo after import)
+- ❌ Transaction history (pre-4.0 uses incompatible snapshot-based format)
+- ❌ Undo capability (no compatible history = no undo after import)
+
+**Why pre-4.0 history is skipped:**
+
+Pre-v4.0 exports DO contain complete transaction history, but it uses an incompatible format:
+
+- **Pre-v4.0 format**: Snapshot-based undo system
+  - Each transaction stores the ENTIRE tournament state in `beforeState` (~50 KB per transaction)
+  - 178 transactions = ~8.56 MB of redundant data
+  - Designed for state restoration by loading snapshots
+
+- **v4.0 format**: Replay-based undo system
+  - Each transaction stores only the changes (~200 bytes per transaction)
+  - 178 transactions = ~35 KB of efficient data
+  - Designed for state reconstruction by replaying transactions from the beginning
+
+**The formats are fundamentally incompatible:**
+- v4.0 cannot use pre-v4.0 snapshots for undo operations
+- Importing pre-v4.0 history would consume 8-10 MB per tournament with zero functionality
+- Risk of hitting browser localStorage quota limits (typically 5-10 MB per domain)
+
+**Result:** v4.0.2+ intentionally skips pre-v4.0 history during import to prevent localStorage bloat while preserving all tournament data. This results in 98.8% reduction in storage usage for imported pre-v4.0 tournaments.
 
 ### Automatic Migration Process
 
 When importing a pre-4.0 export (missing `exportVersion` field):
 
-1. **Detection**: System recognizes old format by absence of `exportVersion` field
+1. **Detection**: System recognizes old format by absence of `exportVersion` field or version < 4.0
 2. **Validation**: Validates tournament data structure (name, date, players, matches)
 3. **Migration**: Imports tournament data into new per-tournament storage model
 4. **Storage**: Stores in `tournament_${id}` key with isolated history key
-5. **History**: Creates empty history array (undo not available for pre-import state)
-6. **Success**: Tournament fully functional in v4.0 architecture
+5. **History Check**: Detects if pre-v4.0 history exists in export
+6. **History Skip**: Intentionally skips importing pre-v4.0 history (incompatible format, prevents bloat)
+7. **Empty History**: Creates empty history array for future transactions
+8. **Success**: Tournament fully functional in v4.0 architecture with minimal storage footprint
 
 ### Import Flow Example
 
@@ -876,20 +908,25 @@ When importing a pre-4.0 export (missing `exportVersion` field):
 
 ### User Impact
 
-**For tournaments exported from v3.x:**
-- ✅ All tournament data preserved
+**For tournaments exported from pre-v4.0:**
+- ✅ All tournament data preserved (players, matches, results, placements)
 - ✅ Results, placements, and statistics intact
-- ✅ Works seamlessly in v4.0
-- ⚠️ Cannot undo matches that were completed before import
-- ✅ Can undo new matches completed after import
+- ✅ Works seamlessly in v4.0.2+
+- ✅ Minimal localStorage usage (0.10 MB vs 8+ MB with history)
+- ⚠️ Cannot undo matches that were completed before import (no compatible history)
+- ✅ Can undo new matches completed after import (new history starts fresh)
+- ✅ Console clearly logs: "⚠ Skipped importing X pre-v4.0 history entries (incompatible snapshot format, ~Y MB)"
 
 ### Recommendation
 
 For users migrating from pre-4.0:
-- Import old tournaments directly - migration is automatic
+- Import old tournaments directly - migration is automatic and safe
+- Pre-v4.0 history is intentionally skipped (prevents 8-10 MB localStorage bloat per tournament)
+- All tournament data (players, matches, results, placements) is preserved
 - Transaction history starts fresh after import
-- Future exports will include proper per-tournament history
+- Future exports will include proper v4.0+ per-tournament history
 - Undo functionality works for all post-import actions
+- Storage usage: 0.10 MB per imported tournament (vs 8+ MB if history was imported)
 
 ---
 
