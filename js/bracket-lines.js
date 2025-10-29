@@ -85,7 +85,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     tournamentHeader.style.position = 'absolute';
     tournamentHeader.style.left = `${bracketCenterX}px`;
     tournamentHeader.style.top = `${tournamentHeaderY}px`;
-    tournamentHeader.style.fontFamily = 'Arial, sans-serif';
+    tournamentHeader.style.fontFamily = 'Inter, sans-serif';
     tournamentHeader.style.fontSize = tournamentHeaderFontSize;
     tournamentHeader.style.color = '#333333';
     tournamentHeader.style.textAlign = 'center';
@@ -100,7 +100,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     frontsideLabel.style.position = 'absolute';
     frontsideLabel.style.left = `${frontsideX}px`;
     frontsideLabel.style.top = `${labelY}px`;
-    frontsideLabel.style.fontFamily = 'Arial, sans-serif';
+    frontsideLabel.style.fontFamily = 'Inter, sans-serif';
     frontsideLabel.style.fontSize = fontSize;
     frontsideLabel.style.fontWeight = 'bold';
     frontsideLabel.style.color = '#333333';
@@ -116,7 +116,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     backsideLabel.style.position = 'absolute';
     backsideLabel.style.left = `${backsideX}px`;
     backsideLabel.style.top = `${labelY}px`;
-    backsideLabel.style.fontFamily = 'Arial, sans-serif';
+    backsideLabel.style.fontFamily = 'Inter, sans-serif';
     backsideLabel.style.fontSize = fontSize;
     backsideLabel.style.fontWeight = 'bold';
     backsideLabel.style.color = '#333333';
@@ -138,7 +138,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     finalsLabel.style.position = 'absolute';
     finalsLabel.style.left = `${finalsX + (grid.matchWidth / 2)}px`; // Center on the finals match column
     finalsLabel.style.top = `${grid.centerY - 80 - 60}px`; // 60px above BS-FINAL match (20px higher than before)
-    finalsLabel.style.fontFamily = 'Arial, sans-serif';
+    finalsLabel.style.fontFamily = 'Inter, sans-serif';
     finalsLabel.style.fontSize = fontSize;
     finalsLabel.style.fontWeight = 'bold';
     finalsLabel.style.color = '#333333';
@@ -441,7 +441,7 @@ function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing,
 
         label.style.left = `${roundX}px`;
         label.style.top = `${labelY}px`;
-        label.style.fontFamily = 'Arial, sans-serif';
+        label.style.fontFamily = 'Inter, sans-serif';
         label.style.fontSize = '24px'; // Slightly smaller than bracket labels
         label.style.fontWeight = 'bold';
         label.style.color = '#666666'; // Match progression line color
@@ -787,7 +787,7 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCen
     text.style.position = 'absolute';
     text.style.left = `${textX}px`;
     text.style.top = `${textY}px`;
-    text.style.fontFamily = 'Arial, sans-serif';
+    text.style.fontFamily = 'Inter, sans-serif';
     text.style.fontSize = '12px';
     text.style.fontWeight = 'bold';
     text.style.color = '#333333';
@@ -859,7 +859,7 @@ function create16PlayerBSFinalIndicator(bs5X, bs51CenterY, finalsX, backsideFina
     text.style.position = 'absolute';
     text.style.left = `${textX}px`;
     text.style.top = `${textY}px`;
-    text.style.fontFamily = 'Arial, sans-serif';
+    text.style.fontFamily = 'Ïnter, sans-serif';
     text.style.fontSize = '12px';
     text.style.fontWeight = 'bold';
     text.style.color = '#333333';
@@ -1439,7 +1439,7 @@ function create32PlayerBSFinalIndicator(bs7X, bs71CenterY, finalsX, backsideFina
     text.style.position = 'absolute';
     text.style.left = `${textX}px`;
     text.style.top = `${textY}px`;
-    text.style.fontFamily = 'Arial, sans-serif';
+    text.style.fontFamily = 'Inter, sans-serif';
     text.style.fontSize = '12px';
     text.style.fontWeight = 'bold';
     text.style.color = '#333333';

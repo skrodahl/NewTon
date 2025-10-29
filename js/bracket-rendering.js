@@ -3158,14 +3158,14 @@ function showCommandCenterModal(matchData) {
                 titleElement.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <span>Match Controls - ${tournament.name}</span>
-                        <div id="match-controls-clock" style="display: inline-block; font-weight: normal; font-family: 'SF Mono', 'Consolas', 'Monaco', 'Menlo', monospace; border: 1px solid #ccc; padding: 8px 16px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.24);">${currentTime}</div>
+                        <div id="match-controls-clock" class="match-controls-clock">${currentTime}</div>
                     </div>
                 `;
             } else {
                 titleElement.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
                         <span>Match Controls</span>
-                        <div id="match-controls-clock" style="display: inline-block; font-weight: normal; font-family: 'SF Mono', 'Consolas', 'Monaco', 'Menlo', monospace; border: 1px solid #ccc; padding: 8px 16px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.24);">${currentTime}</div>
+                        <div id="match-controls-clock" class="match-controls-clock">${currentTime}</div>
                     </div>
                 `;
             }

@@ -1,5 +1,29 @@
 # 2025-10-28
 
+## **v4.0.4** - Font System Improvements
+
+### Enhancements
+- **Unified font architecture with CSS variable control**
+  - **Previous behavior**: Fonts were inconsistently applied across the application with hardcoded inline styles and varying system font fallbacks
+  - **New implementation**:
+    - Added `--font-body` CSS variable for centralized body text font control (currently set to Manrope)
+    - Added `--font-clock` CSS variable for Match Controls clock font control (modern monospace: SF Mono/Cascadia Code)
+    - Created `.match-controls-clock` CSS class to replace 150+ character inline style strings
+  - **Font standardization**:
+    - Bracket placement titles ("7th-8th Place", "FRONTSIDE", "BACKSIDE") → Inter font
+    - Watermarks (left and center) → Inter font
+    - Tournament header (bracket page title and date) → Inter font (changed from Arial in JavaScript)
+    - Match Controls clock → SF Mono/Cascadia Code/Consolas (distinctive modern monospace, avoids console-style Courier New)
+  - **Impact**:
+    - ✅ Consistent cross-platform font rendering (Mac, Windows, Linux)
+    - ✅ Single point of control: Change `--font-body` or `--font-clock` CSS variables to update fonts application-wide
+    - ✅ Match Controls clock uses distinctive monospace (maintains consistent width while avoiding Courier's terminal aesthetic)
+    - ✅ Clean code: CSS classes replace inline style strings in JavaScript
+    - ✅ CAD watermark preserves technical monospace aesthetic (Courier/Monaco) for engineering/technical appearance
+  - **Files modified**: `css/styles.css`, `js/bracket-lines.js`, `js/bracket-rendering.js`
+
+---
+
 ## **v4.0.3** - Developer Console Enhancement
 
 ### Enhancement

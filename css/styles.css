@@ -23,6 +23,52 @@
   font-display: swap;
 }
 
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/Inter-Italic-VariableFont_opsz,wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Manrope';
+  src: url('../fonts/Manrope-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cascadia Code';
+  src: url('../fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: 'Cascadia Code';
+  src: url('../fonts/CascadiaCode-Italic-VariableFont_wght.ttf') format('truetype');
+  font-weight: 100 900;
+  font-style: italic;
+  font-display: swap;
+}
+
+/* CSS Variables */
+:root {
+  --font-body: 'Manrope', sans-serif;
+  --font-clock:'Cascadia Code', 'SF Mono', 'Monaco', 'Consolas', monospace;
+}
+
 /* Reset */
 * {
   margin: 0;
@@ -32,7 +78,7 @@
 
 /* App shell */
 body {
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, Noto Sans, Apple Color Emoji, Segoe UI Emoji;
+  font-family: var(--font-body);
   background: #f1f5f5;
   min-height: 100vh;
   color: #2a2a2a;
@@ -594,6 +640,7 @@ body {
 .watermark-left {
   position: absolute;
   left: 30px;
+  font-family: 'Inter';
   font-size: 16px;
   color: #696969;
 }
@@ -602,6 +649,7 @@ body {
   position: absolute;
   left: 50%;
   transform: translateX(-50%);
+  font-family: 'Inter';
   font-size: 16px;
   font-weight: 500;
   color: #333333;
@@ -768,6 +816,7 @@ body {
 /* Bracket section titles */
 .bracket-title {
   position: absolute;
+  font-family: 'Inter';
   font-size: 28px;
   font-weight: 900;
   color: rgba(17,24,39,0.35);
@@ -1175,7 +1224,7 @@ a:hover { color: #1e40af; }
 }
 
 .help-modal {
-    font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif !important;
+    font-family: var(--font-body) !important;
 }
 
 .help-modal h4 {
@@ -1961,6 +2010,17 @@ a:hover { color: #1e40af; }
   margin-top: 20px;
 }
 
+/* Match Controls Clock */
+.match-controls-clock {
+  display: inline-block;
+  font-weight: normal;
+  font-family: var(--font-clock);
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.24);
+}
+
 /* Match History Styles */
 .match-history-item {
   background: #ffffff;
@@ -2106,7 +2166,7 @@ a:hover { color: #1e40af; }
   font-weight: 400;
   color: #6b7280;
   font-style: italic;
-  font-family: Inter, ui-sans-serif, system-ui, -apple-system, sans-serif;
+  font-family: var(--font-body);
 }
 
 /* Stats Modal Scrolling Fixes */
