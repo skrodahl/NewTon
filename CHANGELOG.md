@@ -1,4 +1,49 @@
-# 2025-10-28
+# 2025-10-30
+
+## **v4.0.5** - UI Terminology Updates
+
+### Enhancements
+- **Renamed "Statistics" to "Leaderboard" throughout the application**
+  - **Previous terminology**: Various UI elements referred to the player rankings table as "Statistics" or "Tournament Results"
+  - **New terminology**: Unified naming to "Leaderboard" for clarity and consistency
+  - **Changes made**:
+    - Tournament page navigation button: "Statistics" → "Leaderboard"
+    - Statistics modal heading: "Tournament Statistics" → "Leaderboard"
+    - Registration page heading: "Tournament Results" → "Leaderboard"
+    - Match Controls modal button: "Statistics" → "Leaderboard"
+    - Help system updated with new terminology (2 references)
+  - **Context preserved**: "Player Statistics" (individual player achievements editor) remains unchanged, as it feeds data into the Leaderboard
+  - **Impact**:
+    - ✅ Clearer user interface - "Leaderboard" immediately conveys competitive ranking
+    - ✅ Consistent terminology across Tournament, Registration, Match Controls, and Help system
+    - ✅ Distinguishes between individual player stats (achievements) and tournament rankings (leaderboard)
+  - **Files modified**: `tournament.html`, `js/dynamic-help-system.js`
+
+- **Renamed "Tournament" header to "Active Tournament"**
+  - **Previous behavior**: Header showed "Tournament: My Tournament (2025-10-27)"
+  - **New behavior**: Header shows "Active Tournament: My Tournament (2025-10-27)"
+  - **Impact**: More descriptive label indicates the currently active/selected tournament
+  - **Files modified**: `tournament.html`, `js/tournament-management.js`
+
+- **Renamed "Match Results" to "Match History" on Setup page**
+  - **Previous behavior**: Setup page showed "Match Results" heading for completed matches
+  - **New behavior**: Shows "Match History: My Tournament (2025-10-27)" with dynamic tournament name
+  - **Implementation**:
+    - Heading now updates dynamically with active tournament name and date
+    - Date portion uses normal font weight (not bold) for better visual hierarchy
+    - Shows "Match History: None" when no tournament is active
+  - **Impact**:
+    - ✅ More descriptive label clarifies this is a historical log, not just results
+    - ✅ Consistent with tournament context (shows which tournament's history)
+  - **Files modified**: `tournament.html`, `js/main.js`, `js/dynamic-help-system.js`
+
+- **Adjusted column header font size**
+  - **Previous size**: 1rem
+  - **New size**: 1.15rem
+  - **Impact**: Improved readability and visual hierarchy for section headings
+  - **Files modified**: `css/styles.css`
+
+---
 
 ## **v4.0.4** - Font System Improvements
 

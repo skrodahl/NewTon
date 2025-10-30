@@ -60,7 +60,7 @@
                 <button class="nav-btn" data-page="config">Config</button>
                 <!-- NEW: Tournament status moved to bottom right of header -->
                 <div id="headerTournamentStatus" class="header-tournament-status">
-                    Tournament: <strong>None</strong>
+                    Active Tournament: <strong>None</strong>
                 </div>
             </div>
         </div>
@@ -112,7 +112,7 @@
                 </div>
 
                 <div class="scrollable-column">
-                    <h3>Match Results</h3>
+                    <h3 id="matchHistoryHeading">Match History</h3>
                     <div class="scrollable-column-content">
                         <div id="matchResults">
                             <p style="color: #6b7280; font-style: italic;">No match results yet</p>
@@ -184,7 +184,7 @@
 
                     <!-- Tournament Results Section (shown during tournament) -->
                     <div id="tournamentResultsSection" style="display: none;">
-                        <h3>Tournament Results</h3>
+                        <h3>Leaderboard</h3>
                         <div class="scrollable-column-content">
                             <div class="results-table-container">
                                 <table class="results-table" id="resultsSection">
@@ -224,7 +224,7 @@
                     <div class="bracket-controls-top">
                         <div class="bracket-controls-top-left">
                             <button class="zoom-btn nav-btn" onclick="showStatisticsModal()"
-                                title="View tournament statistics and rankings"><span class="nav-icon">≡</span><span class="nav-text">Statistics</span></button>
+                                title="View tournament statistics and rankings"><span class="nav-icon">≡</span><span class="nav-text">Leaderboard</span></button>
                             <button class="zoom-btn match-controls-btn nav-btn" onclick="showMatchCommandCenter()"
                                 title="Show LIVE and UPCOMING matches"><span class="nav-icon">➹</span><span class="nav-text">Match Controls</span></button>
                         </div>
@@ -943,7 +943,7 @@
 
                 <div class="text-center mt-20" style="display: flex; justify-content: center; align-items: center; position: relative;">
                     <div>
-                        <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Statistics</button>
+                        <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Leaderboard</button>
                         <button class="btn" id="commandCenterOK">Close</button>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px; position: absolute; right: 0;">
@@ -959,7 +959,7 @@
         <!-- Statistics Modal -->
         <div id="statisticsModal" class="modal">
             <div class="modal-content" style="width: 90%; max-width: 1200px;">
-                <h3 style="text-align: center; margin-bottom: 20px;">📊 Tournament Statistics</h3>
+                <h3 style="text-align: center; margin-bottom: 20px;">📊 Leaderboard</h3>
 
                 <div class="statistics-container" style="max-height: 70vh; overflow-y: auto;">
                     <table class="results-table" id="statisticsTable">

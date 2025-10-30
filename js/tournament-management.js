@@ -335,7 +335,7 @@ function updateTournamentStatus() {
     const headerStatusDiv = document.getElementById('headerTournamentStatus');
 
     if (tournament) {
-        const statusText = `Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
+        const statusText = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
 
         // Update main status div (in Setup page)
         if (statusDiv) {
@@ -358,7 +358,7 @@ function updateTournamentStatus() {
 
         // Update header to show "None" (NEW)
         if (headerStatusDiv) {
-            headerStatusDiv.innerHTML = 'Tournament: <strong>None</strong>';
+            headerStatusDiv.innerHTML = 'Active Tournament: <strong>None</strong>';
         }
     }
 

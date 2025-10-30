@@ -55,9 +55,9 @@ const HELP_CONTENT = {
                 `
             },
             results: {
-                title: "Match Results",
+                title: "Match History",
                 content: `
-                    <p><strong>Live Match Results:</strong> View completed matches with enhanced progression information.</p>
+                    <p><strong>Live Match History:</strong> View completed matches with enhanced progression information.</p>
                     <p><strong>Display Format:</strong></p>
                     <ul>
                         <li><strong>Player Names:</strong> Winner highlighted in green</li>
@@ -169,7 +169,7 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Top-Left Navigation Buttons:</strong></p>
                     <ul>
-                        <li><strong>Statistics (≡):</strong> View tournament statistics, rankings, and detailed results</li>
+                        <li><strong>Leaderboard (≡):</strong> View tournament leaderboard, rankings, and detailed results</li>
                         <li><strong>Match Controls (➹):</strong> Manage LIVE and ready matches - start, complete, assign lanes/referees</li>
                         <li><strong>Setup (⬅):</strong> Return to Setup page for tournament management</li>
                         <li><strong>Registration (⬅):</strong> Navigate to Registration page to manage players</li>
@@ -275,7 +275,7 @@ const HELP_CONTENT = {
                         <li><strong>Start Match:</strong> Move ready matches to LIVE status</li>
                         <li><strong>[Player Name] Wins:</strong> Direct winner selection buttons</li>
                         <li><strong>Lane/Referee Assignment:</strong> Dropdowns for each match</li>
-                        <li><strong>Statistics Button:</strong> Access tournament and player statistics without leaving the Tournament page</li>
+                        <li><strong>Leaderboard Button:</strong> Access tournament leaderboard and player rankings without leaving the Tournament page</li>
                     </ul>
                     <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action</p>
                     <p><strong>💡 Tip:</strong> Use Match Controls for efficient tournament management - everything in one place!</p>

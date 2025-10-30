@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '4.0.4';
+const APP_VERSION = '4.0.5';
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -525,7 +525,17 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
 // Update match history for Setup page
 function updateMatchHistory() {
     const matchResultsContainer = document.getElementById('matchResults');
+    const matchHistoryHeading = document.getElementById('matchHistoryHeading');
     if (!matchResultsContainer) return;
+
+    // Update heading with tournament info
+    if (matchHistoryHeading) {
+        if (tournament && tournament.name && tournament.date) {
+            matchHistoryHeading.innerHTML = `Match History: ${tournament.name} <span style="font-weight: normal;">(${tournament.date})</span>`;
+        } else {
+            matchHistoryHeading.textContent = 'Match History: None';
+        }
+    }
 
     // If no tournament or no matches, show empty state
     if (!tournament || !matches || matches.length === 0) {
