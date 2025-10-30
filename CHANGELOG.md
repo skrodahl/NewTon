@@ -1,5 +1,46 @@
 # 2025-10-30
 
+## **v4.0.6** - Dynamic Navigation Menu Enhancement
+
+### Enhancements
+- **Navigation menu underline now dynamically calculated**
+  - **Previous implementation**: Hardcoded pixel values for menu underline position (41px, 87px, 91px, 49px) and manually calculated left positions based on cumulative widths + gaps
+  - **Issue**: Fragile and required manual remeasurement whenever fonts, text, or styling changed
+  - **New implementation**:
+    - JavaScript automatically measures button dimensions and positions using `getBoundingClientRect()`
+    - CSS custom properties (`--nav-underline-left`, `--nav-underline-width`, `--nav-underline-opacity`) control underline position
+    - Updates on page load, page navigation, and window resize
+  - **Impact**:
+    - ✅ Maintenance-free - no more manual pixel measurements
+    - ✅ Font-agnostic - adapts to any font family, size, or weight changes
+    - ✅ Text-agnostic - menu items can be renamed without touching CSS
+    - ✅ Layout-agnostic - adapts to gap, padding, or spacing adjustments
+    - ✅ Responsive - automatically recalculates on window resize
+  - **Code cleanup**: Removed 36 lines of hardcoded CSS positioning rules, replaced with 11 lines using CSS variables
+  - **Files modified**: `css/styles.css`, `js/main.js`
+
+- **Improved navigation menu clarity**
+  - **Previous labels**: "Setup", "Registration", "Tournament", "Config"
+  - **New labels**: "Tournament Setup", "Player Registration", "Tournament Bracket", "Global Settings"
+  - **Impact**:
+    - ✅ More descriptive and immediately understandable for new users
+    - ✅ Reduces need for trial-and-error navigation
+    - ✅ Professional and consistent naming pattern
+    - ✅ Takes advantage of desktop screen space for clarity
+  - **Files modified**: `tournament.html`
+
+### Code Cleanup
+- **Removed duplicate `showPage()` function**
+  - **Issue**: Two identical `showPage()` function definitions existed in main.js (lines 292-307 and 391-434)
+  - **Action**: Removed the simpler unused version, kept the full-featured version with help system integration, match controls, and navigation underline updates
+  - **Impact**: Eliminated 15 lines of dead code
+  - **Files modified**: `js/main.js`
+
+### Documentation
+- **PARKING-LOT.md now empty**
+  - All known polish items and technical debt resolved
+  - "Header Menu" dynamic underline rewrite completed and removed from backlog
+
 ## **v4.0.5** - UI Terminology Updates
 
 ### Enhancements

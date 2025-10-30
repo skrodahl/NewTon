@@ -154,42 +154,17 @@ body {
   padding-bottom: 8px;
 }
 
-/* Sliding underline indicator */
+/* Sliding underline indicator - positions controlled dynamically by JavaScript */
 .nav::after {
   content: '';
   position: absolute;
   bottom: 0;
-  left: 0;
+  left: var(--nav-underline-left, 0);
+  width: var(--nav-underline-width, 0);
   height: 1px;
   background: rgba(22, 101, 52, 1);
   transition: all 0.3s ease;
-  width: 0;
-  opacity: 0;
-}
-
-/* Position underline based on active button */
-.nav:has(.nav-btn:nth-child(1).active)::after {
-  width: 41px; /* Width of "Setup" */
-  left: 0;
-  opacity: 1;
-}
-
-.nav:has(.nav-btn:nth-child(2).active)::after {
-  width: 87px; /* Width of "Registration" */
-  left: calc(42px + 32px); /* Previous button width + gap */
-  opacity: 1;
-}
-
-.nav:has(.nav-btn:nth-child(3).active)::after {
-  width: 91px; /* Width of "Tournament" */
-  left: calc(42px + 32px + 87px + 32px); /* Sum of previous widths + gaps */
-  opacity: 1;
-}
-
-.nav:has(.nav-btn:nth-child(4).active)::after {
-  width: 49px; /* Width of "Config" */
-  left: calc(42px + 32px + 87px + 32px + 82px + 32px); /* Sum of previous widths + gaps */
-  opacity: 1;
+  opacity: var(--nav-underline-opacity, 0);
 }
 
 .nav-btn {

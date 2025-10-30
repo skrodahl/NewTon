@@ -7,9 +7,7 @@ Ideas and suggestions for future consideration.
 ## Inbox
 *Raw ideas awaiting triage*
 
-### Header Menu
-- Rewrite animated line in js so it's dynamic and can handle changing of titles, fonts, and sizes
-- Control font choice, if needed
+*(empty)*
 
 ---
 
@@ -34,4 +32,4 @@ Ideas and suggestions for future consideration.
 
 ---
 
-**Last updated:** October 28, 2025
+**Last updated:** October 30, 2025
