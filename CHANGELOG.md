@@ -43,6 +43,20 @@
   - **Impact**: Improved readability and visual hierarchy for section headings
   - **Files modified**: `css/styles.css`
 
+- **Unified "Saved Players" header structure with other column headers**
+  - **Previous behavior**: "Saved Players" header used custom `.player-list-header` div with 16px font size, inconsistent with other column headers
+  - **New behavior**: Uses standard `<h3>` element matching "Tournament Players", "Leaderboard", and "Match History" headers
+  - **Implementation**:
+    - Replaced custom `.player-list-header` div with standard `<h3>` element
+    - "Saved Players" title now uses consistent 1.15rem font size
+    - Right-aligned content (hint text + Import button) flows naturally using existing `justify-content: space-between` CSS
+    - Button styling adjusted to maintain compact appearance (12px font, 28px height)
+  - **Impact**:
+    - ✅ Consistent visual hierarchy across all Registration page column headers
+    - ✅ Simpler codebase - eliminates custom header structure
+    - ✅ All headers now use same styling pattern
+  - **Files modified**: `tournament.html`
+
 ---
 
 ## **v4.0.4** - Font System Improvements

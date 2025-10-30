@@ -166,15 +166,12 @@
                 <div class="scrollable-column">
                     <!-- Player List Section (shown during setup) -->
                     <div id="playerListSection">
-                        <div class="player-list-header">
-                            <span id="playerListCount">Saved Players</span>
-                            <div style="display: flex; align-items: center; gap: 12px;">
-                                <span style="font-size: 13px; color: #6b7280; font-weight: normal;">Import from
-                                    tournament export file</span>
-                                <button class="btn btn-success" onclick="importPlayerListFromFile()">Import Saved
-                                    Players</button>
-                            </div>
-                        </div>
+                        <h3><span id="playerListCount">Saved Players</span>
+                            <span style="display: inline-flex; align-items: center; gap: 12px; font-size: 13px; color: #6b7280; font-weight: normal;">
+                                Import from tournament export file
+                                <button class="btn btn-success" onclick="importPlayerListFromFile()" style="font-size: 12px; padding: 6px 12px; height: 28px;">Import Saved Players</button>
+                            </span>
+                        </h3>
                         <div class="scrollable-column-content">
                             <div id="playerListContainer">
                                 <!-- Player List will be rendered here -->
