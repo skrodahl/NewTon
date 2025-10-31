@@ -503,14 +503,14 @@ docker compose logs
 
 - **Configure your tournament** - Set up point systems, match formats, etc.
 - **Add your logo** - Customize branding
-- **Read full documentation** - See [Docs/DOCKER.md](Docs/DOCKER.md) for advanced setup
+- **Read full documentation** - See [docker/README.md](docker/README.md) for advanced setup
 - **Set up reverse proxy** - For production deployments with SSL
 
 ---
 
 ## Need Help?
 
-- **Full Docker documentation:** [Docs/DOCKER.md](Docs/DOCKER.md)
+- **Full Docker documentation:** [docker/README.md](docker/README.md)
 - **Application help:** Press F1 in the tournament manager
 - **Issues:** [GitHub Issues](https://github.com/skrodahl/NewTon/issues)
 
