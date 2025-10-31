@@ -284,6 +284,29 @@ environment:
 
 **Self-hosting means data sovereignty.** Your tournament data lives on your infrastructure, under your control.
 
+### Security Headers and Privacy
+
+Version 4.0.0 Docker images include comprehensive security headers that complement NewTon's privacy-by-architecture model:
+
+**Privacy-Enhancing Headers:**
+- **Referrer-Policy: strict-origin-when-cross-origin** - Reduces data leakage by limiting referrer information sent to other sites
+- **Content-Security-Policy (CSP)** - Prevents unauthorized network requests and blocks loading external resources, ensuring data cannot be exfiltrated
+- **Permissions-Policy** - Disables browser features (geolocation, microphone, camera) that could compromise privacy
+
+**Additional Security Headers:**
+- X-Frame-Options (prevents clickjacking)
+- X-Content-Type-Options (prevents MIME sniffing)
+- Server tokens hidden (reduces information disclosure)
+
+These headers are enabled by default in Docker deployments with no configuration required. They achieve an **A grade** on [securityheaders.com](https://securityheaders.com).
+
+**Why This Matters for Privacy:**
+- CSP prevents any script from making unauthorized network requests
+- Referrer-Policy limits what information leaks when you click links
+- Combined with localhost-only storage, these headers create multiple layers of privacy protection
+
+See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for complete security headers documentation.
+
 ---
 
 ## Offline Operation: No Internet Required

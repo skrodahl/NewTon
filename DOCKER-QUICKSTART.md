@@ -387,6 +387,79 @@ Then access via SSH tunnel or VPN when remote.
 
 ---
 
+## 🛡️ Security Headers
+
+Version 4.0.0 includes comprehensive security headers configured by default in the Docker image for defense-in-depth protection.
+
+### Headers Included by Default
+
+The Docker image includes the following security headers automatically:
+
+- **X-Frame-Options: SAMEORIGIN** - Prevents clickjacking attacks
+- **X-Content-Type-Options: nosniff** - Prevents MIME-type sniffing attacks
+- **Referrer-Policy: strict-origin-when-cross-origin** - Protects privacy by limiting data leakage
+- **Permissions-Policy** - Disables unused browser features (geolocation, microphone, camera, etc.)
+- **Content-Security-Policy (CSP)** - Prevents loading external resources and protects against XSS attacks
+- **Server tokens hidden** - nginx and PHP versions not exposed in headers
+
+### Security Rating
+
+NewTon achieves an **A grade** on [securityheaders.com](https://securityheaders.com) with these headers.
+
+**Test your deployment:**
+```bash
+# Visit securityheaders.com and enter your NewTon URL
+# Expected: A grade with 6+ security headers present
+```
+
+### Content Security Policy
+
+The CSP is configured to prevent loading scripts, styles, and resources from external domains:
+
+```
+default-src 'self';
+script-src 'self' 'unsafe-inline';
+style-src 'self' 'unsafe-inline';
+img-src 'self' data:;
+```
+
+**Why 'unsafe-inline' is required:** NewTon's single-file architecture uses inline JavaScript and CSS for offline operation. Despite this, CSP still protects against:
+- ✅ Loading scripts from external domains (primary XSS vector)
+- ✅ Unauthorized API calls to external servers
+- ✅ Data exfiltration attempts
+- ✅ Embedding in malicious iframes
+
+### HSTS (Optional)
+
+Strict-Transport-Security (HSTS) is **not** included by default to avoid breaking HTTP-only deployments. If you're using HTTPS via a reverse proxy, add HSTS there:
+
+**Nginx Proxy Manager:**
+```nginx
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload" always;
+```
+
+**Caddy:**
+```
+header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
+```
+
+This approach is safer because the reverse proxy handles SSL/TLS termination and knows if HTTPS is actually working.
+
+### Impact
+
+**For self-hosters:**
+- Security headers enabled by default (no configuration needed)
+- A-grade security rating from day one
+- No breaking changes (headers are additive only)
+
+**For privacy:**
+- Security headers complement NewTon's privacy-by-architecture model
+- Referrer-Policy reduces data leakage
+- CSP prevents unauthorized network requests
+- See [Docs/PRIVACY.md](Docs/PRIVACY.md) for complete privacy documentation
+
+---
+
 ## Troubleshooting
 
 ### Port Already in Use
