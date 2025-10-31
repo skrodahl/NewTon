@@ -182,7 +182,6 @@ docker pull skrodahl/newton:latest
 **For Discoverability:**
 - Docker Hub is the default registry most users search
 - Better SEO and visibility in Docker ecosystem
-- Complements selfh.st newsletter feature with broader reach
 
 **For Users:**
 - Choice of registry (Docker Hub familiar to most users)
