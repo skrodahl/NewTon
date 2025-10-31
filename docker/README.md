@@ -58,7 +58,7 @@ docker run -d \
 
 Default: `8080:2020` (host:container)
 
-The container runs nginx on **port 2020** internally ("Double 20" 🎯 - highest scoring segment in darts).
+The container runs nginx on **port 2020** internally ("Double 20" 🎯).
 
 Change in `docker-compose.yml`:
 ```yaml
