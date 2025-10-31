@@ -143,28 +143,6 @@ Privacy-conscious users understand how security headers enhance the existing pri
 
 ---
 
-### Documentation Impact Summary
-
-**For New Self-Hosters:**
-- Immediately understand security posture when evaluating NewTon
-- See A-grade security rating prominently featured in quickstart guide
-- Gain confidence that security is handled by default
-
-**For Security-Conscious Deployers:**
-- Complete technical details available in docker/README.md
-- Understand CSP trade-offs and rationale
-- Know exactly what's protected and what's not
-
-**For Privacy Advocates:**
-- See how security headers enhance privacy guarantees
-- Understand data leakage prevention mechanisms
-- Recognize defense-in-depth approach
-
-**For Featured Visibility:**
-Perfect timing for selfh.st newsletter feature - security documentation is now prominent and comprehensive.
-
----
-
 ## 🚢 Distribution Enhancements
 
 ### Docker Hub Publishing Workflow
