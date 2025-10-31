@@ -305,8 +305,74 @@ header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 See [Docs/DOCKER.md](../Docs/DOCKER.md) for:
 - Detailed deployment guide
 - Reverse proxy setup (nginx, Caddy)
-- GitHub Container Registry publishing
+- Docker registry publishing (GHCR and Docker Hub)
 - Troubleshooting
+
+---
+
+## 🚢 Publishing to Docker Registries
+
+NewTon automatically publishes to both GitHub Container Registry (GHCR) and Docker Hub when version tags are pushed.
+
+### GitHub Container Registry (GHCR)
+
+**Workflow:** `.github/workflows/docker-build.yml`
+
+Published to: `ghcr.io/skrodahl/newton`
+
+**Trigger:**
+```bash
+git tag v4.0.7
+git push origin v4.0.7
+```
+
+**Pull:**
+```bash
+docker pull ghcr.io/skrodahl/newton:latest
+docker pull ghcr.io/skrodahl/newton:4.0.7
+```
+
+### Docker Hub
+
+**Workflow:** `.github/workflows/docker-hub-publish.yml`
+
+Published to: `skrodahl/newton`
+
+**Trigger:**
+- Automatically triggered by version tags (same as GHCR)
+- Manual trigger via GitHub Actions → "Publish to Docker Hub" → "Run workflow"
+
+**Pull:**
+```bash
+docker pull skrodahl/newton:latest
+docker pull skrodahl/newton:4.0.7
+```
+
+### Setup Requirements
+
+**For Docker Hub publishing:**
+1. Create repository on https://hub.docker.com (name: `newton`)
+2. Generate access token at https://hub.docker.com/settings/security
+3. Add GitHub repository secrets:
+   - `DOCKERHUB_USERNAME` - Your Docker Hub username
+   - `DOCKERHUB_TOKEN` - Access token from step 2
+
+**For GHCR publishing:**
+- No additional setup required (uses `GITHUB_TOKEN` automatically)
+
+### Multi-Architecture Support
+
+Both workflows build for:
+- **linux/amd64** - Intel/AMD processors
+- **linux/arm64** - Apple Silicon (M1/M2/M3), Raspberry Pi
+
+### Tagging Strategy
+
+Version tag `v4.0.7` creates:
+- `latest` (on main branch only)
+- `4.0.7` (full version)
+- `4.0` (major.minor)
+- `4` (major)
 
 ---
 

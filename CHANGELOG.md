@@ -1,3 +1,40 @@
+# 2025-10-31
+
+## **v4.0.7** - Documentation & Distribution Enhancements
+
+### Documentation
+- **Security headers documentation added to Docker deployment guides**
+  - **DOCKER-QUICKSTART.md**: Added comprehensive "Security Headers" section with overview of all headers included by default (X-Frame-Options, X-Content-Type-Options, Referrer-Policy, Permissions-Policy, CSP), A-grade security rating information, CSP configuration details, HSTS guidance for reverse proxies, and impact summary
+  - **docker/README.md**: Added detailed "Security Headers" section with full explanation of each header, CSP rationale (why 'unsafe-inline' is required and acceptable), HSTS configuration examples for Nginx Proxy Manager and Caddy, testing instructions, and expected security rating results
+  - **Docs/PRIVACY.md**: Added "Security Headers and Privacy" subsection under "Self-Hosting Considerations" explaining how security headers complement the privacy-by-architecture model, focusing on privacy-enhancing headers (Referrer-Policy, CSP, Permissions-Policy)
+  - **Impact**:
+    - ✅ Security features now prominently documented for self-hosters
+    - ✅ Comprehensive technical explanation available for developers
+    - ✅ Privacy documentation shows how headers enhance privacy guarantees
+    - ✅ Clear guidance on HSTS configuration at reverse proxy level
+    - ✅ Testing instructions for verifying A-grade security rating
+  - **Context**: Security headers were implemented in v4.0.0 but not fully documented in Docker deployment guides
+  - **Files modified**: `DOCKER-QUICKSTART.md`, `docker/README.md`, `Docs/PRIVACY.md`
+
+### Distribution
+- **Docker Hub publishing workflow added**
+  - **New workflow**: `.github/workflows/docker-hub-publish.yml` - Separate GitHub Action workflow for publishing to Docker Hub
+  - **Architecture**: Independent from existing GHCR workflow to avoid disrupting current publishing
+  - **Features**:
+    - Multi-architecture support (AMD64 + ARM64)
+    - Triggered by version tags (v4.0.7, etc.) or manual dispatch
+    - Uses GitHub secrets for authentication (DOCKERHUB_USERNAME, DOCKERHUB_TOKEN)
+    - Automatic tagging: latest, semantic versions (major.minor.patch, major.minor, major)
+    - GitHub Actions cache for faster builds
+  - **Impact**:
+    - ✅ Images now available on Docker Hub for better discoverability
+    - ✅ No impact on existing GHCR publishing workflow
+    - ✅ Both registries updated automatically on version tags
+    - ✅ Self-hosters can choose preferred registry (Docker Hub or GHCR)
+  - **Files added**: `.github/workflows/docker-hub-publish.yml`
+
+---
+
 # 2025-10-30
 
 ## **v4.0.6** - Dynamic Navigation Menu Enhancement
