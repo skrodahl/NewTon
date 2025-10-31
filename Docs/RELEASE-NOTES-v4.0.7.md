@@ -257,42 +257,6 @@ Developers and maintainers have complete reference for both distribution channel
 
 ---
 
-## 🎯 User Experience Summary
-
-### For Self-Hosters Finding NewTon
-
-**Before v4.0.7:**
-1. Find NewTon via selfh.st newsletter or GitHub
-2. Read Docker quickstart guide
-3. Security headers exist but not prominently documented
-4. Pull from GHCR (may be unfamiliar registry)
-
-**After v4.0.7:**
-1. Find NewTon via selfh.st newsletter, GitHub, or Docker Hub
-2. Read Docker quickstart guide with prominent security section
-3. See A-grade security rating immediately
-4. Pull from familiar Docker Hub or GHCR (user's choice)
-
-**Impact:**
-- Security features now visible at decision-making stage
-- Docker Hub presence increases legitimacy
-- Better first impression for security-conscious homelabbers
-
-### For Documentation Readers
-
-**Before v4.0.7:**
-- Security headers mentioned briefly in v4.0.0 release notes
-- Implementation details scattered or in nginx config comments
-- No comprehensive guide for self-hosters
-
-**After v4.0.7:**
-- Overview in quickstart guide (appropriate for target audience)
-- Technical deep-dive in docker/README.md (for developers)
-- Privacy integration in PRIVACY.md (contextual explanation)
-- Complete information hierarchy matching user needs
-
----
-
 ## 🚀 Migration from v4.0.6
 
 ### Automatic
