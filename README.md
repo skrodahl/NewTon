@@ -1,6 +1,12 @@
 # NewTon DC Tournament Manager
 
-**[Version 4.0.7](https://github.com/skrodahl/NewTon/releases/tag/v4.0.7)** | **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)**
+[![Version](https://img.shields.io/github/v/release/skrodahl/NewTon?label=version&color=blue)](https://github.com/skrodahl/NewTon/releases/latest)
+[![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](https://github.com/skrodahl/NewTon/blob/main/LICENSE)
+[![Docker Pulls](https://img.shields.io/docker/pulls/skrodahl/newton?logo=docker&logoColor=white)](https://hub.docker.com/r/skrodahl/newton)
+[![Docker Image Size](https://img.shields.io/docker/image-size/skrodahl/newton/latest?logo=docker&logoColor=white)](https://hub.docker.com/r/skrodahl/newton)
+[![GitHub Stars](https://img.shields.io/github/stars/skrodahl/NewTon?style=social)](https://github.com/skrodahl/NewTon/stargazers)
+
+**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**
 
 ➷ **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
