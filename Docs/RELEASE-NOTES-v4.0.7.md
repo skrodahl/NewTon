@@ -189,23 +189,6 @@ Separate Docker Hub publishing workflow added for broader distribution and disco
 - **Multi-architecture support** - Builds for linux/amd64 and linux/arm64
 - **Automatic tagging** - Creates latest, major.minor.patch, major.minor, and major tags
 - **GitHub Actions cache** - Faster builds using cache-from/cache-to
-- **GitHub secrets integration** - Uses DOCKERHUB_USERNAME and DOCKERHUB_TOKEN
-
-**Setup Requirements:**
-1. Create repository on Docker Hub (name: `newton`)
-2. Generate access token at https://hub.docker.com/settings/security
-3. Add GitHub secrets: DOCKERHUB_USERNAME and DOCKERHUB_TOKEN
-
-**Publishing Flow:**
-```bash
-# Tag a release
-git tag v4.0.7
-git push origin v4.0.7
-
-# Both workflows trigger automatically:
-# 1. docker-build.yml → publishes to ghcr.io/skrodahl/newton
-# 2. docker-hub-publish.yml → publishes to skrodahl/newton
-```
 
 **Pull from Either Registry:**
 ```bash
