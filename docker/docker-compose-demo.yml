@@ -1,6 +1,7 @@
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton:3.0.5-beta
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
     container_name: newton
 
     ports:

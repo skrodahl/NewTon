@@ -33,13 +33,23 @@ docker run -d \
 ### Using Published Image
 
 ```bash
+# Docker Hub (recommended)
 docker run -d \
   --name newton-tournament \
   -p 8080:2020 \
   -v ./tournaments:/var/www/html/tournaments \
   -v ./images:/var/www/html/images:ro \
   -v ./logs:/var/log/nginx \
-  ghcr.io/skrodahl/newton:latest
+  skrodahl/newton:latest
+
+# Alternative (GitHub Container Registry)
+# docker run -d \
+#   --name newton-tournament \
+#   -p 8080:2020 \
+#   -v ./tournaments:/var/www/html/tournaments \
+#   -v ./images:/var/www/html/images:ro \
+#   -v ./logs:/var/log/nginx \
+#   ghcr.io/skrodahl/newton:latest
 ```
 
 ---
@@ -302,17 +312,34 @@ header Strict-Transport-Security "max-age=31536000; includeSubDomains; preload"
 
 ## 📚 Complete Documentation
 
-See [Docs/DOCKER.md](../Docs/DOCKER.md) for:
-- Detailed deployment guide
-- Reverse proxy setup (nginx, Caddy)
-- Docker registry publishing (GHCR and Docker Hub)
+See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for:
+- Step-by-step quick start guide (under 2 minutes)
+- Environment variables and configuration options
+- Reverse proxy setup (Nginx Proxy Manager, Caddy)
+- Security headers documentation
 - Troubleshooting
 
 ---
 
 ## 🚢 Publishing to Docker Registries
 
-NewTon automatically publishes to both GitHub Container Registry (GHCR) and Docker Hub when version tags are pushed.
+NewTon automatically publishes to both Docker Hub and GitHub Container Registry (GHCR) when version tags are pushed.
+
+### Docker Hub (Primary)
+
+**Workflow:** `.github/workflows/docker-hub-publish.yml`
+
+Published to: `skrodahl/newton`
+
+**Trigger:**
+- Automatically triggered by version tags
+- Manual trigger via GitHub Actions → "Publish to Docker Hub" → "Run workflow"
+
+**Pull:**
+```bash
+docker pull skrodahl/newton:latest
+docker pull skrodahl/newton:4.0.7
+```
 
 ### GitHub Container Registry (GHCR)
 
@@ -332,23 +359,10 @@ docker pull ghcr.io/skrodahl/newton:latest
 docker pull ghcr.io/skrodahl/newton:4.0.7
 ```
 
-### Docker Hub
-
-**Workflow:** `.github/workflows/docker-hub-publish.yml`
-
-Published to: `skrodahl/newton`
-
-**Trigger:**
-- Automatically triggered by version tags (same as GHCR)
-- Manual trigger via GitHub Actions → "Publish to Docker Hub" → "Run workflow"
-
-**Pull:**
-```bash
-docker pull skrodahl/newton:latest
-docker pull skrodahl/newton:4.0.7
-```
-
 ### Setup Requirements
+
+**For GHCR publishing:**
+- No additional setup required (uses `GITHUB_TOKEN` automatically)
 
 **For Docker Hub publishing:**
 1. Create repository on https://hub.docker.com (name: `newton`)
@@ -356,9 +370,6 @@ docker pull skrodahl/newton:4.0.7
 3. Add GitHub repository secrets:
    - `DOCKERHUB_USERNAME` - Your Docker Hub username
    - `DOCKERHUB_TOKEN` - Access token from step 2
-
-**For GHCR publishing:**
-- No additional setup required (uses `GITHUB_TOKEN` automatically)
 
 ### Multi-Architecture Support
 

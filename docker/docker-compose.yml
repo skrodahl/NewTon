@@ -1,6 +1,7 @@
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton:latest
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
       - "${NEWTON_HOST_PORT:-8080}:2020"  # Host port configurable, internal port 2020 ("Double 20" 🎯)

@@ -47,14 +47,14 @@ http://localhost:8080
 You should see the NewTon Tournament Manager interface!
 
 > **Port 2020 = "Double 20" 🎯**
-> The container runs nginx on **port 2020** internally (a darts reference - the highest scoring segment!). The default host port (8080) maps to this internal port. This non-standard port also helps avoid conflicts when using reverse proxies like Nginx Proxy Manager.
+> The container runs nginx on **port 2020** internally. The default host port (8080) maps to this internal port. This non-standard port also helps avoid conflicts when using reverse proxies like Nginx Proxy Manager.
 
 ---
 
 ## What Just Happened?
 
 Docker Compose:
-- ✅ Downloaded the pre-built image from GitHub Container Registry
+- ✅ Downloaded the pre-built image from Docker Hub
 - ✅ Created persistent storage directories (`tournaments/` and `images/`)
 - ✅ Started nginx + PHP-FPM serving your tournament manager
 - ✅ Made it accessible on port 8080
@@ -150,7 +150,8 @@ The container listens on **port 2020** internally ("Double 20" 🎯). When using
 ```yaml
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton:latest
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
     container_name: newton
     # Remove ports mapping when using reverse proxy
     # ports:
@@ -296,7 +297,8 @@ Edit your `docker-compose.yml` to use absolute paths instead of relative paths:
 ```yaml
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton:latest
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
       - "8080:2020"  # Internal port 2020 ("Double 20" 🎯)
@@ -325,7 +327,8 @@ For more portable deployments, use Docker named volumes:
 ```yaml
 services:
   newton-tournament:
-    image: ghcr.io/skrodahl/newton:latest
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
       - "8080:2020"  # Internal port 2020 ("Double 20" 🎯)
