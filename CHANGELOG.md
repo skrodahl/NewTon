@@ -1,3 +1,37 @@
+# 2025-11-01
+
+## **v4.0.8** - Docker Documentation & Match Controls Fix
+
+### Docker Documentation
+- **Updated all Docker documentation to prioritize Docker Hub over GHCR**
+  - **DOCKER-QUICKSTART.md**: Changed primary registry from GHCR to Docker Hub in all examples and documentation
+  - **docker/README.md**: Reordered "Publishing to Docker Registries" section to show Docker Hub first, updated "Using Published Image" section with Docker Hub as recommended option
+  - **docker/docker-compose.yml**: Changed default image from `ghcr.io/skrodahl/newton:latest` to `skrodahl/newton:latest` with GHCR as commented alternative
+  - **docker/docker-compose-demo.yml**: Updated image to `skrodahl/newton:latest` (also updated version from 3.0.5-beta to latest)
+  - **Rationale**: Aligns documentation with actual user behavior (90+ Docker Hub pulls vs 8 GHCR pulls), provides simpler syntax, and matches user expectations
+  - **Impact**:
+    - ✅ Documentation now reflects real-world usage patterns
+    - ✅ Cleaner syntax for users (`skrodahl/newton` vs `ghcr.io/skrodahl/newton`)
+    - ✅ GHCR still documented as alternative for GitHub-native users
+    - ✅ All docker-compose files use consistent registry by default
+  - **Files modified**: `DOCKER-QUICKSTART.md`, `docker/README.md`, `docker/docker-compose.yml`, `docker/docker-compose-demo.yml`
+
+### Bug Fixes
+- **Fixed Match Controls match sorting to use numerical order instead of alphabetical**
+  - **Issue**: Matches sorted alphabetically (FS-1-1, FS-1-10, FS-1-11, FS-1-15, FS-1-16, FS-1-2) instead of numerically
+  - **Root cause**: `localeCompare()` string sorting on match IDs treated them as text
+  - **Fix**: Parse match number from ID (third segment after second hyphen) and sort numerically
+  - **Applies to**:
+    - Ready matches grouped by round (Frontside and Backside)
+    - LIVE matches when lanes are equal or both missing (fallback sort)
+  - **Impact**:
+    - ✅ Match Controls now displays matches in correct numerical order: FS-1-1, FS-1-2, FS-1-10, FS-1-11, FS-1-15, FS-1-16
+    - ✅ Consistent sorting for both Frontside and Backside brackets
+    - ✅ Lane-based sorting for LIVE matches still prioritized, numerical sort as tiebreaker
+  - **Files modified**: `js/bracket-rendering.js` (lines 2730-2762)
+
+---
+
 # 2025-10-31
 
 ## **v4.0.7** - Documentation & Distribution Enhancements
