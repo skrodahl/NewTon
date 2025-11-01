@@ -2727,9 +2727,14 @@ function showMatchCommandCenter() {
         roundGroups[roundKey].push(match);
     });
 
-    // Sort matches within each round group by match ID
+    // Sort matches within each round group by match ID (numerically)
     Object.keys(roundGroups).forEach(roundKey => {
-        roundGroups[roundKey].sort((a, b) => a.id.localeCompare(b.id));
+        roundGroups[roundKey].sort((a, b) => {
+            // Extract match numbers from IDs like "FS-1-11" -> 11
+            const matchNumA = parseInt(a.id.split('-')[2]) || 0;
+            const matchNumB = parseInt(b.id.split('-')[2]) || 0;
+            return matchNumA - matchNumB;
+        });
     });
 
     // Sort live matches by lane (ascending), then by match ID
@@ -2751,8 +2756,10 @@ function showMatchCommandCenter() {
             }
         }
 
-        // If lanes are equal (or both missing), sort by match ID
-        return a.id.localeCompare(b.id);
+        // If lanes are equal (or both missing), sort by match ID (numerically)
+        const matchNumA = parseInt(a.id.split('-')[2]) || 0;
+        const matchNumB = parseInt(b.id.split('-')[2]) || 0;
+        return matchNumA - matchNumB;
     });
 
     const matchData = {
