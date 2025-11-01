@@ -3,9 +3,10 @@
 [![Version](https://img.shields.io/github/v/release/skrodahl/NewTon?label=version&color=blue)](https://github.com/skrodahl/NewTon/releases/latest)
 [![License](https://img.shields.io/badge/license-BSD--3--Clause-green.svg)](https://github.com/skrodahl/NewTon/blob/main/LICENSE)
 [![Docker Pulls](https://img.shields.io/docker/pulls/skrodahl/newton?logo=docker&logoColor=white)](https://hub.docker.com/r/skrodahl/newton)
-[![GHCR Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fipitio.github.io%2Fbackage%2Fskrodahl%2FNewTon%2Fnewton.json&query=%24.downloads&logo=github&label=ghcr%20pulls)](https://github.com/skrodahl/NewTon/pkgs/container/newton)
+ [![GHCR](https://img.shields.io/badge/ghcr-available-blue?logo=github)](https://github.com/skrodahl/NewTon/pkgs/container/newton)
 [![Docker Image Size](https://img.shields.io/docker/image-size/skrodahl/newton/latest?logo=docker&logoColor=white)](https://hub.docker.com/r/skrodahl/newton)
 [![GitHub Stars](https://img.shields.io/github/stars/skrodahl/NewTon?style=social)](https://github.com/skrodahl/NewTon/stargazers)
+<!-- [![GHCR Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fipitio.github.io%2Fbackage%2Fskrodahl%2FNewTon%2Fnewton.json&query=%24.downloads&logo=github&label=ghcr%20pulls)](https://github.com/skrodahl/NewTon/pkgs/container/newton) -->
 
 **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**
 
