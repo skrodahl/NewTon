@@ -1,6 +1,6 @@
-# NewTon DC Tournament Manager v4.0.10 Release Notes
+## NewTon DC Tournament Manager v4.0.10 Release Notes
 
-**Release Date:** November 2025
+**Release Date:** November 4, 2025
 **Incremental Release**
 
 ---
@@ -29,7 +29,7 @@ Operators can no longer accidentally generate brackets with unpaid players remai
 - Bracket generation only proceeds when all players have paid status
 
 **Why It Matters:**
-Prevents operator errors that previously led to confusion during tournaments. In real-world scenarios, forgetting to mark a player as paid before the draw resulted in that player being excluded from the bracket, requiring manual workarounds with BYE slots that were unfeasible to manage.
+Prevents operator errors that previously led to confusion during tournaments. In real-world scenarios, forgetting to mark a player as paid before the draw resulted in that player being excluded from the bracket.
 
 **User Experience:**
 1. Operator clicks "Generate Bracket" with unpaid players present
