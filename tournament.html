@@ -34,7 +34,7 @@
             if (typeof window.NEWTON_CONFIG !== 'undefined' && window.NEWTON_CONFIG.demoMode) {
                 const banner = document.createElement('div');
                 banner.style.cssText = 'background: #2196F3; color: white; padding: 12px; text-align: center; font-size: 14px;';
-                banner.innerHTML = 'Darts double elimination tournament software. Free, open-source, secure,offline first, self-hostable.</br></br>📍 Demo Site: Everything you do is stored locally in your browser. Your data never leaves your device.' +
+                banner.innerHTML = 'Darts double elimination tournament software. Free, open-source, secure, offline first, self-hostable.</br></br>📍 Demo Site: Everything you do is stored locally in your browser. Your data never leaves your device.' +
                                   '<a href="' + window.NEWTON_CONFIG.githubUrl + '" style="color: white; text-decoration: underline;">View on GitHub</a>';
                 document.body.insertBefore(banner, document.body.firstChild);
             }
@@ -103,7 +103,7 @@
 
             <div class="two-column-container setup-page-main">
                 <div class="scrollable-column">
-                    <h3>Recent Tournaments</h3>
+                    <h3>Recent Tournaments <a href="#" id="storage-indicator-link" class="storage-link" onclick="showStorageModal(); return false;" title="View storage usage">Storage: --</a></h3>
                     <div class="scrollable-column-content">
                         <div id="recentTournaments">
                             <p>No tournaments found</p>

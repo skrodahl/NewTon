@@ -325,6 +325,11 @@ function saveTournament() {
         updateTournamentWatermark();
     }
 
+    // Update storage indicator
+    if (typeof updateStorageIndicator === 'function') {
+        updateStorageIndicator();
+    }
+
     if (shouldLog) {
         lastSaveTime = now;
     }
@@ -814,6 +819,12 @@ function confirmDeleteTournament() {
     localStorage.removeItem(historyKey);
 
     loadRecentTournaments();
+
+    // Update storage indicator
+    if (typeof updateStorageIndicator === 'function') {
+        updateStorageIndicator();
+    }
+
     alert(`✓ Tournament "${tournamentToDelete.name}" has been deleted successfully.`);
 }
 
@@ -975,6 +986,11 @@ function continueImportProcess(importedData) {
         updatePlayerCount();
         updateTournamentWatermark();
         loadRecentTournaments();
+
+        // Update storage indicator
+        if (typeof updateStorageIndicator === 'function') {
+            updateStorageIndicator();
+        }
 
         // Render bracket if exists
         if (tournament.bracket && typeof renderBracket === 'function') {
@@ -1460,6 +1476,192 @@ function updateClock() {
 // Start clock update interval (every 10 seconds to catch minute changes quickly)
 setInterval(updateClock, 10000);
 
+/**
+ * Get storage color class based on percentage thresholds
+ * @param {number} percentage - Storage usage percentage
+ * @returns {string} Color class name
+ */
+function getStorageColor(percentage) {
+    if (percentage < 75) return 'green';
+    if (percentage < 90) return 'yellow';
+    return 'amber';
+}
+
+/**
+ * Update the storage indicator link in the Recent Tournaments header
+ */
+function updateStorageIndicator() {
+    const link = document.getElementById('storage-indicator-link');
+    if (!link) return;
+
+    // Get storage stats from analytics.js
+    if (typeof getLocalStorageStats !== 'function') {
+        link.textContent = 'Storage: N/A';
+        return;
+    }
+
+    const stats = getLocalStorageStats();
+    const percentage = Math.round(stats.percentage);
+    const colorClass = getStorageColor(percentage);
+
+    // Update link text and color
+    link.textContent = `Storage: ${percentage}%`;
+    link.className = `storage-link storage-${colorClass}`;
+}
+
+/**
+ * Format bytes to human-readable size
+ * @param {number} bytes - Size in bytes
+ * @returns {string} Formatted size
+ */
+function formatBytes(bytes) {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / (1024 * 1024)).toFixed(1) + ' MB';
+}
+
+/**
+ * Show the storage modal with usage details and instructions
+ */
+function showStorageModal() {
+    // Get storage stats
+    if (typeof getLocalStorageStats !== 'function') {
+        alert('Storage statistics are not available');
+        return;
+    }
+
+    const stats = getLocalStorageStats();
+    const percentage = Math.round(stats.percentage);
+    const colorClass = getStorageColor(percentage);
+    const usedMB = stats.used.toFixed(1);
+    const limitMB = stats.limit.toFixed(0);
+
+    // Calculate status message
+    let statusMessage;
+    if (percentage < 75) {
+        statusMessage = 'Good - Plenty of space available';
+    } else if (percentage < 90) {
+        statusMessage = 'Running low - Consider freeing up space soon';
+    } else {
+        statusMessage = 'Almost full - Free up space to avoid issues';
+    }
+
+    // Calculate breakdown
+    let tournamentsSize = 0;
+    let historySize = 0;
+    let globalSize = 0;
+    let tournamentCount = 0;
+
+    for (const [key, size] of Object.entries(stats.items)) {
+        if (key.startsWith('tournament_') && !key.includes('_history')) {
+            tournamentsSize += size;
+            tournamentCount++;
+        } else if (key.includes('_history')) {
+            historySize += size;
+        } else {
+            globalSize += size;
+        }
+    }
+
+    // Create modal HTML
+    const modalHTML = `
+        <div id="storageModal" class="modal" style="display: block;">
+            <div class="modal-content">
+                <h3>Storage Space</h3>
+                <div class="storage-status">
+                    <div class="storage-progress-bar">
+                        <div class="storage-progress-fill storage-${colorClass}" style="width: ${percentage}%"></div>
+                    </div>
+                    <div class="storage-details">
+                        <strong>Using ${usedMB} MB of ${limitMB} MB available (${percentage}%)</strong>
+                        <div style="margin-top: 4px; color: #6b7280;">${statusMessage}</div>
+                    </div>
+                </div>
+
+                <div class="storage-breakdown">
+                    <h4>What's Using Space</h4>
+                    <div class="storage-breakdown-item">
+                        <span>Tournaments:</span>
+                        <strong>${formatBytes(tournamentsSize)} (${tournamentCount} tournaments)</strong>
+                    </div>
+                    <div class="storage-breakdown-item">
+                        <span>Tournament History:</span>
+                        <strong>${formatBytes(historySize)}</strong>
+                    </div>
+                    <div class="storage-breakdown-item">
+                        <span>Settings & Players:</span>
+                        <strong>${formatBytes(globalSize)}</strong>
+                    </div>
+                </div>
+
+                <div class="storage-instructions">
+                    <h4>How to Free Up Space</h4>
+                    <ol>
+                        <li>
+                            <strong>Export old tournaments you want to keep</strong>
+                            <ul>
+                                <li>Click on a tournament name to load it</li>
+                                <li>Click "Export Tournament" button to save it</li>
+                            </ul>
+                        </li>
+                        <li>
+                            <strong>Delete tournaments you no longer need</strong>
+                            <ul>
+                                <li>Click the X button next to old tournaments in the list above</li>
+                                <li>Deleted tournaments can't be recovered (unless you exported them)</li>
+                            </ul>
+                        </li>
+                    </ol>
+                    <p style="margin: 12px 0 0 0; font-style: italic; color: #6b7280;">
+                        Tip: Focus on older tournaments from several months ago.
+                    </p>
+                </div>
+
+                ${historySize > 1024 * 1024 ? `
+                <div class="storage-advanced">
+                    <strong>Advanced:</strong> Your tournament history is using ${formatBytes(historySize)}.
+                    History allows you to undo match results.
+                    <br><br>
+                    If you're running low on space, you can clean up old history
+                    from the Developer Console (press Ctrl+Shift+D).
+                </div>
+                ` : ''}
+
+                <div style="text-align: center; margin-top: 25px;">
+                    <button class="btn" onclick="closeStorageModal()">Close</button>
+                </div>
+            </div>
+        </div>
+    `;
+
+    // Add modal to page
+    const container = document.createElement('div');
+    container.id = 'storageModalContainer';
+    container.innerHTML = modalHTML;
+    document.body.appendChild(container);
+
+    // Show modal using dialog stack system
+    if (typeof window.pushDialog === 'function') {
+        window.pushDialog('storageModal', null, true); // true enables ESC key
+    }
+    // Modal is already visible via inline style="display: block;"
+}
+
+/**
+ * Close the storage modal
+ */
+function closeStorageModal() {
+    const container = document.getElementById('storageModalContainer');
+    if (container) {
+        // Use dialog stack system if available
+        if (typeof window.popDialog === 'function') {
+            window.popDialog();
+        }
+
+        container.remove();
+    }
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.showResetTournamentModal = showResetTournamentModal;
@@ -1470,4 +1672,7 @@ if (typeof window !== 'undefined') {
     window.confirmOverwriteTournament = confirmOverwriteTournament;
     window.showLoadTournamentModal = showLoadTournamentModal;
     window.confirmLoadTournament = confirmLoadTournament;
+    window.updateStorageIndicator = updateStorageIndicator;
+    window.showStorageModal = showStorageModal;
+    window.closeStorageModal = closeStorageModal;
 }

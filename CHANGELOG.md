@@ -1,3 +1,44 @@
+# 2025-11-03
+
+## **v4.0.9** - localStorage Storage Indicator & Demo Banner Update
+
+### Features
+- **Added visible localStorage storage utilization indicator**
+  - **Storage link in Recent Tournaments header**: Right-aligned "Storage: X%" link with color-coded thresholds
+  - **Color coding**:
+    - Green (<75%): Healthy storage usage
+    - Yellow (75-90%): Running low on space
+    - Amber (>90%): Almost full, action needed
+  - **Interactive modal with usage details**:
+    - Horizontal progress bar matching color threshold
+    - Current usage (X MB of Y MB available)
+    - Status message (Good/Running low/Almost full)
+    - Breakdown: Tournaments, Tournament History, Settings & Players
+    - Non-technical instructions for freeing space (export then delete old tournaments)
+    - Optional advanced section when history exceeds 1MB (suggests Developer Console cleanup)
+  - **ESC key support**: Integrates with existing modal stack system
+  - **Automatic updates**: Storage indicator refreshes after tournament save/delete/import and on page load
+  - **Reuses existing code**: Leverages `getLocalStorageStats()` from analytics.js and modal stack system
+  - **Impact**:
+    - ✅ Prevents localStorage-full situations during tournaments
+    - ✅ User-friendly visibility of storage usage (no need to open Developer Console)
+    - ✅ Clear, non-technical guidance for operators
+    - ✅ Proactive warning system before storage becomes critical
+  - **Files modified**: `tournament.html` (line 106), `css/styles.css` (lines 3071-3262), `js/tournament-management.js` (lines 329-331, 823-826, 990-993, 1463-1669), `js/main.js` (lines 189-194)
+
+### UI Improvements
+- **Updated demo-mode header banner text**
+  - **Previous text**: "Demo Site. Everything you do is stored locally in your browser. Your data never leaves your device."
+  - **New text**: "Darts double elimination tournament software. Free, open-source, secure, offline first, self-hostable. 📍 Demo Site: Everything you do is stored locally in your browser. Your data never leaves your device."
+  - **Rationale**: Provides more context about the software itself for first-time visitors to demo site
+  - **Impact**:
+    - ✅ More informative for new users discovering the project
+    - ✅ Highlights key features (free, open-source, secure, offline-first, self-hostable)
+    - ✅ Maintains privacy transparency with location pin emoji separator
+  - **Files modified**: `tournament.html` (line 37)
+
+---
+
 # 2025-11-01
 
 ## **v4.0.8** - Docker Documentation & Match Controls Fix

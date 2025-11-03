@@ -3067,3 +3067,130 @@ a:hover { color: #1e40af; }
   transform: scale(1.15);
   color: #e55a2b;
 }
+
+/* Storage Indicator */
+.storage-link {
+  float: right;
+  font-size: 0.9rem;
+  font-weight: normal;
+  text-decoration: none;
+  margin-left: 10px;
+  transition: text-decoration 0.2s ease;
+}
+
+.storage-link:hover {
+  text-decoration: underline;
+}
+
+.storage-link.storage-green {
+  color: #166534;
+}
+
+.storage-link.storage-yellow {
+  color: #ca8a04;
+}
+
+.storage-link.storage-amber {
+  color: #dc2626;
+}
+
+/* Storage Modal Content Styles */
+.storage-status {
+  margin-bottom: 25px;
+  margin-top: 15px;
+}
+
+.storage-progress-bar {
+  width: 100%;
+  height: 24px;
+  background: #e5e7eb;
+  border-radius: 4px;
+  overflow: hidden;
+  margin: 10px 0;
+}
+
+.storage-progress-fill {
+  height: 100%;
+  transition: width 0.3s ease, background-color 0.3s ease;
+}
+
+.storage-progress-fill.storage-green {
+  background-color: #166534;
+}
+
+.storage-progress-fill.storage-yellow {
+  background-color: #ca8a04;
+}
+
+.storage-progress-fill.storage-amber {
+  background-color: #dc2626;
+}
+
+.storage-details {
+  font-size: 0.95rem;
+  color: #374151;
+  margin-top: 8px;
+}
+
+.storage-breakdown {
+  margin: 20px 0;
+  padding: 15px;
+  background: #f9fafb;
+  border-radius: 6px;
+  border: 1px solid #e5e7eb;
+}
+
+.storage-breakdown h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #111827;
+}
+
+.storage-breakdown-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 0;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.storage-breakdown-item:last-child {
+  border-bottom: none;
+}
+
+.storage-instructions {
+  margin-top: 20px;
+  padding: 15px;
+  background: #eff6ff;
+  border-left: 4px solid #3b82f6;
+  border-radius: 4px;
+}
+
+.storage-instructions h4 {
+  margin: 0 0 12px 0;
+  font-size: 1rem;
+  color: #1e40af;
+}
+
+.storage-instructions ol {
+  margin: 8px 0;
+  padding-left: 20px;
+}
+
+.storage-instructions li {
+  margin-bottom: 12px;
+}
+
+.storage-instructions ul {
+  margin: 4px 0;
+  padding-left: 20px;
+  list-style-type: disc;
+}
+
+.storage-advanced {
+  margin-top: 20px;
+  padding: 12px;
+  background: #fef3c7;
+  border-left: 4px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 0.9rem;
+}

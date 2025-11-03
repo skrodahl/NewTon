@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '4.0.8';
+const APP_VERSION = '4.0.9';
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -184,6 +184,13 @@ document.addEventListener('DOMContentLoaded', function () {
     // Step 7: Update match history on initial load (since Setup page is default)
     setTimeout(() => {
         updateMatchHistory();
+    }, 200);
+
+    // Step 8: Update storage indicator
+    setTimeout(() => {
+        if (typeof updateStorageIndicator === 'function') {
+            updateStorageIndicator();
+        }
     }, 200);
 
     // Update footer with version
