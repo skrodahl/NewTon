@@ -1,3 +1,33 @@
+# 2025-11-04
+
+## **v4.0.10** - Unpaid Players Validation
+
+### Enhancements
+- **Added validation to prevent bracket generation when unpaid players exist**
+  - **Issue**: Operators could accidentally generate brackets with unpaid players still in the tournament, leading to confusion and manual workarounds with BYE slots
+  - **Solution**: Added validation check that blocks bracket generation if any players have unpaid status
+  - **Validation behavior**:
+    - Runs before bracket generation, after tournament existence and duplicate bracket checks
+    - Checks for any players with `paid: false` status
+    - If unpaid players detected: Shows alert and blocks generation
+    - If all players paid: Proceeds with normal bracket generation
+  - **Alert message**: "All players must be marked as paid to generate bracket. Go to Player Registration to update payment status or remove players."
+  - **Operator workflow**:
+    1. Attempt to generate bracket with unpaid players
+    2. Receive clear alert with guidance
+    3. Navigate to Player Registration page
+    4. Either mark players as paid or remove them from tournament
+    5. Return to Setup and generate bracket successfully
+  - **Impact**:
+    - ✅ Prevents operator error: Forgetting to mark players as paid before draw
+    - ✅ Eliminates need for manual BYE slot workarounds
+    - ✅ Clear guidance: Directs operators to exact location to fix issue
+    - ✅ Maintains data integrity: Bracket only generated when all players properly registered
+    - ✅ Console logging: Error logged with unpaid player count for debugging
+  - **Files modified**: `js/clean-match-progression.js` (lines 884-890)
+
+---
+
 # 2025-11-03
 
 ## **v4.0.9** - localStorage Storage Indicator & Demo Banner Update

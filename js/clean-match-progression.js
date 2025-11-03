@@ -880,6 +880,15 @@ function generateCleanBracket() {
     }
 
     const paidPlayers = players.filter(p => p.paid);
+
+    // Check for unpaid players
+    const unpaidPlayers = players.filter(p => !p.paid);
+    if (unpaidPlayers.length > 0) {
+        alert('All players must be marked as paid to generate bracket. Go to Player Registration to update payment status or remove players.');
+        console.error(`Bracket generation blocked: ${unpaidPlayers.length} unpaid player(s) detected`);
+        return false;
+    }
+
     if (paidPlayers.length < 4) {
         alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
         console.error('Bracket generation blocked: fewer than 4 paid players');
