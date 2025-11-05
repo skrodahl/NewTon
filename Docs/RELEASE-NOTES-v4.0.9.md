@@ -1,42 +1,59 @@
-# NewTon DC Tournament Manager v4.0.9 Release Notes
+## NewTon DC Tournament Manager v4.0.9 Release Notes
 
-**Release Date:** November 2025
+**Release Date:** November 3, 2025
 **Incremental Release**
 
 ---
 
 ## Overview
 
-**NewTon DC Tournament Manager Version 4.0.9** adds validation to prevent bracket generation when unpaid players exist, eliminating a common operator error that previously required manual workarounds.
+**NewTon DC Tournament Manager Version 4.0.9** adds a localStorage storage indicator to prevent critical storage situations and updates the demo site banner with more descriptive text.
 
 This release contains no breaking changes and is a drop-in replacement for v4.0.8.
 
-**Key Highlight:**
-- Bracket generation now blocked until all players are marked as paid or removed from tournament
+**Key Highlights:**
+- Visible localStorage storage indicator prevents storage-full situations during tournaments
+- Updated demo banner provides better project context for first-time visitors
 
 ---
 
-## ✨ Enhancements
+## ✨ New Features
 
-**Unpaid Players Validation:**
+**localStorage Storage Indicator:**
 
-Operators can no longer accidentally generate brackets with unpaid players remaining in the tournament. The system now validates payment status before bracket generation and provides clear guidance for resolution.
+A color-coded storage utilization indicator now appears in the Recent Tournaments header, preventing critical situations where localStorage fills up during tournaments.
 
-**What Changed:**
-- Attempting to generate bracket with unpaid players shows validation alert
-- Clear error message directs operators to Player Registration page
-- Operators must either mark players as paid or remove them before proceeding
-- Bracket generation only proceeds when all players have paid status
+**What's New:**
+- Right-aligned "Storage: X%" link with click-to-view modal
+- Color-coded thresholds:
+  - **Green (<75%)**: Healthy storage usage
+  - **Yellow (75-90%)**: Running low on space
+  - **Amber (>90%)**: Almost full, action needed
+- Interactive modal shows:
+  - Horizontal progress bar matching color threshold
+  - Current usage breakdown (Tournaments, History, Settings)
+  - Non-technical instructions for freeing space
+  - Optional advanced section for cleaning up history (when >1MB)
+- Automatically updates after save/delete/import operations
+- ESC key support via modal stack system
 
 **Why It Matters:**
-Prevents operator errors that previously led to confusion during tournaments. In real-world scenarios, forgetting to mark a player as paid before the draw resulted in that player being excluded from the bracket.
+Proactive visibility prevents localStorage-full situations during tournaments. Clear, non-technical guidance helps operators manage storage without needing Developer Console access.
 
-**User Experience:**
-1. Operator clicks "Generate Bracket" with unpaid players present
-2. Alert appears: "All players must be marked as paid to generate bracket. Go to Player Registration to update payment status or remove players."
-3. Operator navigates to Player Registration
-4. Updates payment status or removes players
-5. Returns to Setup and successfully generates bracket
+---
+
+## 🎨 UI Improvements
+
+**Updated Demo Site Banner:**
+
+The demo-mode header banner now provides better context about the software itself, helping first-time visitors understand what NewTon is.
+
+**What Changed:**
+- **Before**: "Demo Site. Everything you do is stored locally in your browser. Your data never leaves your device."
+- **After**: "Darts double elimination tournament software. Free, open-source, secure, offline first, self-hostable. 📍 Demo Site: Everything you do is stored locally in your browser. Your data never leaves your device."
+
+**Why It Matters:**
+First-time visitors immediately understand NewTon's purpose and key features (free, open-source, secure, offline-first, self-hostable) while maintaining privacy transparency.
 
 ---
 
@@ -48,24 +65,26 @@ Prevents operator errors that previously led to confusion during tournaments. In
 - No functional changes to existing tournament behavior
 
 ### What's New
-When generating brackets:
-1. System validates all players have paid status
-2. Clear alerts guide operators to fix payment issues before generation
-3. No action required for tournaments with all players properly marked as paid
+After upgrading to v4.0.9:
+1. **Storage indicator appears automatically** in Recent Tournaments header
+2. **Monitor storage usage** by clicking the "Storage: X%" link
+3. **Follow clear instructions** in the modal to free up space when needed
+4. **Demo site banner updated** (if using `NEWTON_DEMO_MODE=true`)
 
 ### Compatibility
 - All v4.0.x tournaments work in v4.0.9
-- No changes to bracket generation logic (only adds validation)
-- No changes to payment status tracking or player management
+- Storage indicator works immediately (no configuration needed)
+- Modal integrates with existing ESC key handling
 
 ---
 
 ## 📖 Additional Resources
 
 - **CHANGELOG.md**: Detailed version history with technical implementation details
-- **Docs/RELEASE-NOTES-v4.0.8.md**: Docker Hub documentation and Match Controls sorting fix
+- **Docs/RELEASE-NOTES-v4.0.8.md**: Docker documentation updates and Match Controls fix
 - **Docs/RELEASE-NOTES-v4.0.7.md**: Security headers documentation and Docker Hub publishing
-- **Docs/RELEASE-NOTES-v4.0.3.md**: Developer Console placement rank enhancement
+- **Docs/RELEASE-NOTES-v4.0.6.md**: Dynamic navigation menu enhancement
+- **Docs/RELEASE-NOTES-v4.0.0.md**: Per-tournament history architecture overview
 
 ---
 
@@ -75,4 +94,4 @@ None at time of release. Please report issues through GitHub repository.
 
 ---
 
-**NewTon DC Tournament Manager v4.0.9** - Preventing operator errors with payment validation.
+**NewTon DC Tournament Manager v4.0.9** - Proactive storage monitoring and improved first-time user experience.
