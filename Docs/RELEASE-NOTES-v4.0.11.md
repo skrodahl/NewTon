@@ -12,7 +12,7 @@
 This release contains no breaking changes and is a drop-in replacement for v4.0.10.
 
 **Key Highlights:**
-- Page headers now use Insignia Regular font (Unicorn darts certificate font)
+- Page header now uses Insignia Regular font (Unicorn darts certificate font)
 - Improved visual spacing in demo mode header
 
 ---
@@ -21,10 +21,10 @@ This release contains no breaking changes and is a drop-in replacement for v4.0.
 
 **Darts-Themed Typography:**
 
-The page title, logo, and headers now use "Insignia Regular" font instead of "Droid Serif". This is the font Unicorn uses on their dart weight certificates - a subtle nod to darts culture for tournament organizers.
+The page title now used "Insignia Regular" font instead of "Droid Serif". This is the font Unicorn uses on their dart weight certificates - a subtle nod to darts culture for tournament organizers.
 
 **What Changed:**
-- All page headers and titles updated to Insignia Regular font
+- Main application title updated to Insignia Regular font
 - Professional appearance maintained with improved thematic consistency
 - Font file included in project (`fonts/Insignia-Regular.otf`)
 
