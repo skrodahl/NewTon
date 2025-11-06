@@ -21,7 +21,7 @@ This release contains no breaking changes and is a drop-in replacement for v4.0.
 
 **Darts-Themed Typography:**
 
-The page title now used "Insignia Regular" font instead of "Droid Serif". This is the font Unicorn uses on their dart weight certificates - a subtle nod to darts culture for tournament organizers.
+The page title now uses "Insignia Regular" font instead of "Droid Serif". This is the font Unicorn uses on their dart weight certificates - a subtle nod to darts culture for tournament organizers.
 
 **What Changed:**
 - Main application title updated to Insignia Regular font
