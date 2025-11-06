@@ -24,6 +24,14 @@
 }
 
 @font-face {
+  font-family: 'Insignia';
+  src: url('../fonts/Insignia-Regular.otf') format('opentype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
   font-family: 'Inter';
   src: url('../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype');
   font-weight: 100 900;
@@ -109,12 +117,13 @@ body {
 
 .header h1 {
   color: #000000;
-  font-size: 1.95rem;
-  font-weight: 600;
+  font-size: 2.25rem;
+  font-weight: 400;
   display: flex;
   align-items: center;
   gap: 15px;
-  font-family: 'Droid Serif', serif;
+  /* font-family: 'Droid Serif', serif; */
+  font-family: 'Insignia';
 }
 
 .logo-placeholder {

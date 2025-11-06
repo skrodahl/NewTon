@@ -1,3 +1,26 @@
+# 2025-11-06
+
+## **v4.0.11** - UI Typography & Demo Header Spacing
+
+### UI Improvements
+- **Updated page title/logo/header font from "Droid Serif" to "Insignia Regular"**
+  - **Font choice**: Insignia Regular is the font used on Unicorn darts weight certificates
+  - **Rationale**: Subtle darts-themed branding reference for the tournament management software
+  - **Impact**:
+    - ✅ Darts-specific typography adds thematic consistency
+    - ✅ Maintains professional appearance
+    - ✅ Easter egg for Unicorn darts users
+  - **Files modified**: CSS font-family declarations for page headers
+
+- **Improved demo mode header spacing**
+  - **Change**: Added spacing and hyphen between descriptive text and "View on GitHub" link
+  - **Impact**:
+    - ✅ Better visual separation between information and action link
+    - ✅ Improved readability
+  - **Files modified**: `tournament.html` (demo banner section)
+
+---
+
 # 2025-11-04
 
 ## **v4.0.10** - Unpaid Players Validation
