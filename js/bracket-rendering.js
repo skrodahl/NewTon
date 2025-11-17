@@ -1066,10 +1066,11 @@ function renderMatch(match, x, y, section, roundIndex) {
     const winnerCheck2 = player2WinnerClass ? `<span class="winner-check"><span class="checkmark">✓</span><span class="undo-icon">↺</span></span>` : '';
 
     // Modify player display names if they're refereeing other matches
-    const player1Display = conflictInfo.player1IsReferee
+    // Only show referee conflict indicator for non-completed matches
+    const player1Display = (conflictInfo.player1IsReferee && matchState !== 'completed')
         ? `⚠️ ${match.player1.name} (Referee)`
         : getPlayerDisplayName(match.player1);
-    const player2Display = conflictInfo.player2IsReferee
+    const player2Display = (conflictInfo.player2IsReferee && matchState !== 'completed')
         ? `⚠️ ${match.player2.name} (Referee)`
         : getPlayerDisplayName(match.player2);
 

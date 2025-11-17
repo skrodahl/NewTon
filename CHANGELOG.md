@@ -1,5 +1,27 @@
 # 2025-11-06
 
+## **v4.0.12** - Referee Conflict Indicator Display Fix
+
+### Bug Fixes
+- **Fixed referee conflict indicator showing on completed matches**
+  - **Issue**: Completed matches were displaying "⚠️ [Name] (Referee)" when players were refereeing other matches, causing visual clutter and confusion
+  - **Problem**: The referee conflict warning is only relevant for matches that can be started (pending/ready/live). For completed matches, this information is unnecessary since:
+    - The match is already finished and cannot be restarted
+    - Conflict detection doesn't apply to past matches
+    - It creates visual confusion when combined with the actual referee assignment (e.g., "Nick (Referee)" displayed alongside "Ref: Benedict")
+  - **Solution**: Modified referee conflict indicator to only display when `matchState !== 'completed'`
+  - **Behavior**:
+    - **Completed matches**: Display clean player names without referee conflict indicators
+    - **Pending/Ready/Live matches**: Continue to show "⚠️ [Name] (Referee)" warning when player is refereeing another match
+  - **Impact**:
+    - ✅ Cleaner visual presentation of completed matches
+    - ✅ Eliminates confusing dual-referee display ("Nick (Referee)" + "Ref: Benedict")
+    - ✅ Maintains important conflict warnings for active/future matches
+    - ✅ Reduces visual noise in bracket view
+  - **Files modified**: `js/bracket-rendering.js` (lines 1068-1075)
+
+---
+
 ## **v4.0.11** - UI Typography & Demo Header Spacing
 
 ### UI Improvements
