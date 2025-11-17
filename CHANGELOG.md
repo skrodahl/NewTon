@@ -1,5 +1,22 @@
 # 2025-11-17
 
+## **v4.0.13** - Results Table Column Width Adjustments
+
+### UI Improvements
+- **Adjusted results table column widths to prevent text wrapping**
+  - **Issue**: "Rank" column text was splitting over two lines, and "Legs Lost" column header had unwanted line breaks
+  - **Changes**:
+    - **Rank column**: Increased width from 5% to 9% (prevents "Rank" from wrapping)
+    - **Player Name column**: Decreased width from 25% to 24% (compensate for rank increase)
+    - **Points column**: Decreased width from 10% to 9% (balance layout)
+  - **Impact**:
+    - ✅ Cleaner table presentation with no text wrapping
+    - ✅ Improved readability of leaderboard
+    - ✅ Better column balance across different screen sizes
+  - **Files modified**: `css/styles.css` (lines 2927, 2933, 2941)
+
+---
+
 ## **v4.0.12** - Referee Conflict Indicator Fix & Tournament Configuration Display
 
 ### Features

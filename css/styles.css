@@ -2924,21 +2924,21 @@ a:hover { color: #1e40af; }
 .results-table .rank {
   font-weight: 600;
   color: #333333;
-  width: 5%;
+  width: 9%;
   text-align: center;
 }
 
 .results-table .player-name {
   font-weight: 500;
   color: #333333;
-  width: 25%;
+  width: 24%;
 }
 
 .results-table .points {
   font-weight: 600;
   color: #166534;
   font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
-  width: 10%;
+  width: 9%;
   text-align: center;
 }
 
