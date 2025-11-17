@@ -1,4 +1,4 @@
-# 2025-11-06
+# 2025-11-17
 
 ## **v4.0.12** - Referee Conflict Indicator Fix & Tournament Configuration Display
 
