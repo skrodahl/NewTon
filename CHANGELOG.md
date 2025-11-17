@@ -1,5 +1,24 @@
 # 2025-11-17
 
+## **v4.0.14** - Match Controls Configuration Display Fix
+
+### Bug Fixes
+- **Fixed tournament configuration display showing in active and completed tournament states**
+  - **Issue**: Tournament configuration settings were visible in Match Controls during active and completed tournament states, not just setup mode
+  - **Root cause**: The `updateTournamentConfigDisplay()` function was only called in the `'setup'` case but always set `display: 'block'`. Once shown, the configuration was never hidden when tournament status changed
+  - **Fix**: Added explicit hide logic in both `'completed'` and `'active'` cases to ensure configuration display only appears during setup mode
+  - **Behavior**:
+    - **Setup mode**: Configuration display shows tournament settings (point values, match configuration, lanes)
+    - **Active mode**: Configuration display hidden, referee suggestions shown
+    - **Completed mode**: Configuration display hidden, tournament achievements shown
+  - **Impact**:
+    - ✅ Configuration settings only visible when relevant (setup mode)
+    - ✅ Cleaner Match Controls interface during active tournaments
+    - ✅ Consistent state-driven UI behavior across tournament lifecycle
+  - **Files modified**: `js/bracket-rendering.js` (lines 3510-3511, 3520-3521)
+
+---
+
 ## **v4.0.13** - Results Table Column Width Adjustments
 
 ### UI Improvements

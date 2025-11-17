@@ -3505,12 +3505,20 @@ function showCommandCenterModal(matchData) {
             case 'completed':
                 // Tournament completed - show achievements
                 showTournamentAchievements();
+
+                // Hide tournament configuration display (only shown in setup)
+                const configDisplayCompleted = document.getElementById('tournamentConfigDisplay');
+                if (configDisplayCompleted) configDisplayCompleted.style.display = 'none';
                 break;
 
             case 'active':
             default:
                 // Tournament active - show referee suggestions
                 if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
+
+                // Hide tournament configuration display (only shown in setup)
+                const configDisplayActive = document.getElementById('tournamentConfigDisplay');
+                if (configDisplayActive) configDisplayActive.style.display = 'none';
 
                 // Reset subsection headers to their original values for active state
                 const losersSection = document.getElementById('refereeLosersSection');
