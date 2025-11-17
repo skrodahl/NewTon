@@ -3497,6 +3497,9 @@ function showCommandCenterModal(matchData) {
                 } else if (noRefereeSuggestionsMessage) {
                     noRefereeSuggestionsMessage.style.display = 'block'; // Fallback
                 }
+
+                // Show and populate tournament configuration display
+                updateTournamentConfigDisplay();
                 break;
 
             case 'completed':
@@ -4202,6 +4205,44 @@ function updateMatchControlsClock() {
 
 // Start clock update interval (every 10 seconds to catch minute changes)
 setInterval(updateMatchControlsClock, 10000);
+
+/**
+ * Update Tournament Configuration Display
+ * Populates the configuration display in Setup Actions panel with current config values
+ */
+function updateTournamentConfigDisplay() {
+    const configDisplay = document.getElementById('tournamentConfigDisplay');
+    if (!configDisplay) return;
+
+    // Show the configuration display
+    configDisplay.style.display = 'block';
+
+    // Point values
+    document.getElementById('cfg-participation').textContent = config.points.participation;
+    document.getElementById('cfg-first').textContent = config.points.first;
+    document.getElementById('cfg-second').textContent = config.points.second;
+    document.getElementById('cfg-third').textContent = config.points.third;
+    document.getElementById('cfg-fourth').textContent = config.points.fourth;
+    document.getElementById('cfg-fifth').textContent = config.points.fifthSixth;
+    document.getElementById('cfg-seventh').textContent = config.points.seventhEighth;
+    document.getElementById('cfg-highout').textContent = config.points.highOut;
+    document.getElementById('cfg-ton').textContent = config.points.ton;
+    document.getElementById('cfg-180').textContent = config.points.oneEighty;
+    document.getElementById('cfg-shortleg').textContent = config.points.shortLeg;
+
+    // Match configuration
+    document.getElementById('cfg-regular').textContent = `Best of ${config.legs.regularRounds}`;
+    document.getElementById('cfg-fs-semi').textContent = `Best of ${config.legs.frontsideSemifinal}`;
+    document.getElementById('cfg-bs-semi').textContent = `Best of ${config.legs.backsideSemifinal}`;
+    document.getElementById('cfg-bs-final').textContent = `Best of ${config.legs.backsideFinal}`;
+    document.getElementById('cfg-grand').textContent = `Best of ${config.legs.grandFinal}`;
+
+    // Lanes
+    const maxLanes = config.lanes.maxLanes || 4;
+    const excludedLanes = config.lanes.excludedLanes || [];
+    document.getElementById('cfg-lanes-avail').textContent = `1-${maxLanes}`;
+    document.getElementById('cfg-lanes-excl').textContent = excludedLanes.length > 0 ? excludedLanes.join(', ') : 'None';
+}
 
 // UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
 

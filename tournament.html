@@ -853,6 +853,50 @@
                                 tournament to generate matches.</p>
                         </div>
 
+                        <!-- Tournament Configuration Display -->
+                        <div id="tournamentConfigDisplay" class="cc-setup-message" style="display: none;">
+                            <p>Tournament Configuration (Change in Global Settings Page)</p>
+                            <div class="config-display-grid" style="margin-top: 15px;">
+                                <!-- Column 1: Point Values -->
+                                <div>
+                                    <p style="font-weight: 600; margin-bottom: 8px;">Point Values</p>
+                                    <div style="font-size: 14px; color: #666;"><b>Participation:</b> <span id="cfg-participation">5</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>1st</b> <span id="cfg-first">15</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>2nd:</b> <span id="cfg-second">13</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>3rd:</b> <span id="cfg-third">10</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>4th:</b> <span id="cfg-fourth">9</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>5th-6th:</b> <span id="cfg-fifth">8</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>7th-8th:</b> <span id="cfg-seventh">7</span></div>
+                                </div>
+
+                                <!-- Column 2: Achievement Points (no header) -->
+                                <div>
+                                    <p style="font-weight: 600; margin-bottom: 8px;">&nbsp;</p>
+                                    <div style="font-size: 14px; color: #666;"><b>High Out:</b> <span id="cfg-highout">1</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Short Leg:</b> <span id="cfg-shortleg">1</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>180:</b> <span id="cfg-180">1</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Ton:</b> <span id="cfg-ton">0</span></div>
+                                </div>
+
+                                <!-- Column 3: Match Configuration -->
+                                <div>
+                                    <p style="font-weight: 600; margin-bottom: 8px;">Match Configuration</p>
+                                    <div style="font-size: 14px; color: #666;"><b>Regular Rounds:</b> <span id="cfg-regular">Best of 3</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Frontside Semifinal:</b> <span id="cfg-fs-semi">Best of 5</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Backside Semifinal:</b> <span id="cfg-bs-semi">Best of 3</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Backside Final:</b> <span id="cfg-bs-final">Best of 5</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Grand Final:</b> <span id="cfg-grand">Best of 5</span></div>
+                                </div>
+
+                                <!-- Column 4: Lanes -->
+                                <div>
+                                    <p style="font-weight: 600; margin-bottom: 8px;">Lanes</p>
+                                    <div style="font-size: 14px; color: #666;"><b>Available:</b> <span id="cfg-lanes-avail">1-4</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Excluded:</b> <span id="cfg-lanes-excl">None</span></div>
+                                </div>
+                            </div>
+                        </div>
+
                         <!-- Empty state message -->
                         <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
                             <p>No matches currently active or ready to start.</p>

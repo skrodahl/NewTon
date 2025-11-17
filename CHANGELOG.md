@@ -1,6 +1,31 @@
 # 2025-11-06
 
-## **v4.0.12** - Referee Conflict Indicator Display Fix
+## **v4.0.12** - Referee Conflict Indicator Fix & Tournament Configuration Display
+
+### Features
+- **Added tournament configuration display in Match Controls**
+  - **Motivation**: Tournament operators frequently need to reference configuration settings during setup and active tournaments without navigating away from Match Controls
+  - **Location**: Displays in main Match Controls panel below participant list during setup mode
+  - **Layout**: 4-column grid layout for optimal space usage
+    - **Column 1 (17%)**: Point Values - Participation and placement points (1st through 7th-8th)
+    - **Column 2 (20%)**: Achievement Points - High Out, Short Leg, 180, Ton (no header for visual continuity)
+    - **Column 3 (35%)**: Match Configuration - Regular Rounds, FS/BS Semifinals, BS Final, Grand Final
+    - **Column 4 (23%)**: Lanes - Available range and excluded lanes
+  - **Styling**: Matches existing Match Controls aesthetic with simple headers and gray text values
+  - **Header**: "Tournament Configuration (Change in Global Settings Page)" - clearly indicates where to make changes
+  - **Implementation**:
+    - JavaScript function `updateTournamentConfigDisplay()` populates values from global `config` object
+    - Called automatically when Match Controls opens in setup mode
+    - Minimal CSS: Single `.config-display-grid` class with 4-column layout (17% 20% 35% 23%)
+  - **Impact**:
+    - ✅ Quick reference to all configuration settings without navigation
+    - ✅ Helps operators verify settings before generating bracket
+    - ✅ Reduces need to switch between Match Controls and Global Settings pages
+    - ✅ Clean, non-intrusive display that matches existing UI patterns
+  - **Files modified**:
+    - `tournament.html` (lines 856-898): Configuration display HTML structure
+    - `css/styles.css` (lines 1513-1519): 4-column grid CSS
+    - `js/bracket-rendering.js` (lines 3502, 4209-4245): Population function and call in setup mode
 
 ### Bug Fixes
 - **Fixed referee conflict indicator showing on completed matches**

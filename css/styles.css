@@ -1510,6 +1510,15 @@ a:hover { color: #1e40af; }
   border-radius: 0;
 }
 
+/* Tournament Configuration Display Grid */
+.config-display-grid {
+  display: grid;
+  grid-template-columns: 17% 20% 35% 23%;
+  gap: 20px;
+  text-align: left;
+  padding-left: 40px;
+}
+
 /* Tournament Completion Celebration Podium */
 .tournament-celebration {
   background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
