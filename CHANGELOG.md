@@ -1,3 +1,35 @@
+# 2025-11-18
+
+## **v4.0.15** - JSDoc Type Definitions
+
+### Developer Experience
+- **Added comprehensive JSDoc type definitions for all core data structures**
+  - **New file**: `js/types.js` - Centralized type definitions for IDE support
+  - **Core types defined**:
+    - `Player` - All properties including stats, placement, eliminated, isBye
+    - `PlayerStats` - shortLegs, highOuts, tons, oneEighties
+    - `Match` - Complete with 16+ properties including finalScore
+    - `Tournament` - Full structure with placements map
+    - `Config` - All 5 sub-configs (Points, Legs, Lanes, UI, Server)
+    - `Transaction` - Complete undo/history system types
+    - `MatchProgression` - Lookup table structure
+  - **Supporting types**: MatchState, TournamentStatus, TransactionType, CompletionType, MatchSide
+  - **Global variable documentation**: @global tags for tournament, players, matches, config
+  - **MATCH_PROGRESSION constant**: Documented with @global, @constant, @type, @example tags
+  - **Prioritized TODO list**: Documents which functions to annotate incrementally
+  - **Benefits**:
+    - ✅ IDE autocomplete for all properties
+    - ✅ Hover documentation in VSCode
+    - ✅ Type checking and error detection
+    - ✅ Self-documenting codebase
+    - ✅ Easier onboarding for contributors
+  - **Implementation**: Pure documentation file with no executable code - works with plain JavaScript via JSDoc
+  - **Motivation**: Implements Gemini code review suggestion to "make implicit contracts explicit"
+  - **Files added**: `js/types.js`
+  - **Files modified**: `tournament.html` (added types.js to script loading)
+
+---
+
 # 2025-11-17
 
 ## **v4.0.14** - Match Controls Configuration Display Fix
