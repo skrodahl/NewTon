@@ -19,6 +19,7 @@
  * - processAutoAdvancements() → void
  *
  * Priority 2 - Tournament management (tournament-management.js):
+ * - createTournament() → void
  * - saveTournament() → void
  * - saveTournamentOnly(shouldLog) → void
  * - loadSpecificTournament(id) → void (shows confirmation modal)

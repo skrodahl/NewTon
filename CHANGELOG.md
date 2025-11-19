@@ -29,6 +29,7 @@
   - **Files modified**: `js/clean-match-progression.js`
 
 - **Added JSDoc annotations to Priority 2 tournament management functions**
+  - **createTournament()** - Entry point for new tournaments, state initialization
   - **saveTournament()** - Debounced wrapper with UI updates
   - **saveTournamentOnly()** - Core save logic, config separation
   - **loadSpecificTournament()** - Entry point showing confirmation modal

@@ -17,7 +17,20 @@ function clearTournamentFields() {
     }
 }
 
-// UPDATE: Enhanced createTournament function with help integration
+/**
+ * Creates a new tournament from form inputs and initializes global state.
+ * Entry point for starting a new tournament - clears all existing data.
+ *
+ * @returns {void}
+ *
+ * @description
+ * - Reads name and date from DOM form elements
+ * - Validates required fields and checks for duplicates
+ * - Creates clean tournament object with 'setup' status
+ * - Resets global players and matches arrays
+ * - Clears UI and saves to localStorage
+ * - Navigates to Setup page
+ */
 function createTournament() {
     const name = document.getElementById('tournamentName').value.trim();
     const date = document.getElementById('tournamentDate').value;
