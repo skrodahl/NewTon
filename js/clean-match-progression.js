@@ -203,8 +203,19 @@ const MATCH_PROGRESSION = {
 };
 
 /**
- * CORE FUNCTION: Advance player using lookup table
- * This is the ONLY function that moves players between matches
+ * Advances winner and loser to their next matches using MATCH_PROGRESSION lookup table.
+ * This is the ONLY function that moves players between matches - single source of truth.
+ *
+ * @param {string} matchId - The match ID (e.g., 'FS-1-1', 'BS-2-3')
+ * @param {Player} winner - The winning player object
+ * @param {Player} loser - The losing player object
+ * @returns {boolean} True if advancement succeeded, false if tournament/progression missing
+ *
+ * @example
+ * // After completing match FS-1-1
+ * advancePlayer('FS-1-1', winnerPlayer, loserPlayer);
+ * // Winner goes to FS-2-1 player1 slot
+ * // Loser goes to BS-1-1 player1 slot
  */
 function advancePlayer(matchId, winner, loser) {
     if (!tournament || !tournament.bracketSize) {
@@ -262,10 +273,25 @@ function advancePlayer(matchId, winner, loser) {
     return true;
 }
 
-/* SIMPLE MATCH COMPLETION: Sets winner/loser and advances using lookup table
- * MODIFIED: Now saves to history before making changes
+/**
+ * Completes a match by setting winner/loser and advancing players using lookup table.
+ * Records transaction to history before making changes for undo support.
+ *
+ * @param {string} matchId - The match ID to complete (e.g., 'FS-1-1')
+ * @param {number} winnerPlayerNumber - Which player won: 1 for player1, 2 for player2
+ * @param {number} [winnerLegs=0] - Number of legs won by winner (for score display)
+ * @param {number} [loserLegs=0] - Number of legs won by loser (for score display)
+ * @param {CompletionType} [completionType='MANUAL'] - 'MANUAL' for user action, 'AUTO' for walkover
+ * @returns {boolean} True if match completed successfully, false on error
+ *
+ * @example
+ * // Complete match with player 1 winning 3-1
+ * completeMatch('FS-1-1', 1, 3, 1, 'MANUAL');
+ *
+ * @example
+ * // Auto-advance walkover match
+ * completeMatch('FS-1-2', 2, 0, 0, 'AUTO');
  */
-// UPDATE: Enhanced completeMatch with help integration for first match
 function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0, completionType = 'MANUAL') {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
@@ -456,8 +482,16 @@ function getDownstreamMatches(matchId, bracketSize) {
 }
 
 /**
- * CALCULATE ALL RANKINGS - Called only when tournament is completed
- * Determines 4th place and beyond for all bracket sizes
+ * Calculates final tournament placements for all players based on match outcomes.
+ * Called when Grand Final is completed. Determines 4th place and beyond using
+ * which backside match each player lost.
+ *
+ * @returns {void}
+ *
+ * @description
+ * - 1st-3rd: Set by Grand Final and BS-FINAL match outcomes
+ * - 4th+: Determined by which backside match the player lost
+ * - Updates tournament.placements with player ID to rank mapping
  */
 function calculateAllRankings() {
     if (!tournament || !tournament.bracketSize) {
@@ -732,7 +766,17 @@ function processAutoAdvancement(match) {
 }
 
 /**
- * PROCESS ALL AUTO-ADVANCEMENTS
+ * Processes all pending walkover matches where one player is a BYE.
+ * Automatically advances real players past walkover opponents.
+ * Skipped during rebuild operations to prevent transaction corruption.
+ *
+ * @returns {void}
+ *
+ * @description
+ * - Iterates through all matches looking for walkover conditions
+ * - Auto-completes matches where one player is BYE and one is real
+ * - Uses completion type 'AUTO' to distinguish from manual completions
+ * - Protected against recursive calls and rebuild interference
  */
 function processAutoAdvancements() {
     if (!matches || matches.length === 0) return;
@@ -864,9 +908,25 @@ function disableOldProgressionSystem() {
 disableOldProgressionSystem();
 
 /**
- * CLEAN BRACKET GENERATION: Real players first, walkovers last, never walkover vs walkover
+ * Generates the tournament bracket structure with optimized player placement.
+ * Places real players first, walkovers (BYEs) last, ensuring no walkover vs walkover.
+ *
+ * @returns {boolean} True if bracket generated successfully, false on validation failure
+ *
+ * @description
+ * - Validates minimum 4 players, maximum 32 players
+ * - All players must be marked as paid
+ * - Determines bracket size (8, 16, or 32) based on player count
+ * - Creates all match objects for frontside, backside, and grand final
+ * - Triggers auto-advancements for initial walkover matches
+ * - Sets tournament status to 'active'
+ *
+ * @example
+ * // Generate bracket after registering players
+ * if (generateCleanBracket()) {
+ *     console.log('Tournament started!');
+ * }
  */
-// UPDATE: Enhanced generateCleanBracket with help integration
 function generateCleanBracket() {
     if (!tournament) {
         alert('Please create a tournament first');

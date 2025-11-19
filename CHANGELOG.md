@@ -1,3 +1,23 @@
+# 2025-11-19
+
+## **v4.0.16** - JSDoc Function Annotations (Priority 1)
+
+### Developer Experience
+- **Added JSDoc annotations to Priority 1 core progression functions**
+  - **advancePlayer()** - Parameters, return type, example with winner/loser flow
+  - **completeMatch()** - All 5 parameters documented with types and defaults
+  - **calculateAllRankings()** - Description of ranking logic by bracket size
+  - **processAutoAdvancements()** - Walkover handling and rebuild protection notes
+  - **generateCleanBracket()** - Validation rules, bracket sizing, usage example
+  - **Benefits**:
+    - ✅ Full hover documentation in VSCode for core functions
+    - ✅ Parameter descriptions visible on function calls
+    - ✅ Return types and examples in tooltips
+    - ✅ Types reference defined typedefs (e.g., `Player`, `CompletionType`)
+  - **Files modified**: `js/clean-match-progression.js`
+
+---
+
 # 2025-11-18
 
 ## **v4.0.15** - JSDoc Type Definitions
