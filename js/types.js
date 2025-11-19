@@ -20,10 +20,11 @@
  *
  * Priority 2 - Tournament management (tournament-management.js):
  * - saveTournament() → void
- * - saveTournamentOnly() → void
- * - loadTournament(id) → void
+ * - saveTournamentOnly(shouldLog) → void
+ * - loadSpecificTournament(id) → void (shows confirmation modal)
+ * - continueLoadProcess(selectedTournament) → void (actual loading)
  * - exportTournament() → void
- * - importTournament(data) → boolean
+ * - importTournament(event) → void
  *
  * Priority 3 - Player management (player-management.js):
  * - addPlayer(name) → Player

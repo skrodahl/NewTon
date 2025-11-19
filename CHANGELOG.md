@@ -1,26 +1,6 @@
 # 2025-11-19
 
-## **v4.0.16** - JSDoc Function Annotations (Priority 1)
-
-### Developer Experience
-- **Added JSDoc annotations to Priority 1 core progression functions**
-  - **advancePlayer()** - Parameters, return type, example with winner/loser flow
-  - **completeMatch()** - All 5 parameters documented with types and defaults
-  - **calculateAllRankings()** - Description of ranking logic by bracket size
-  - **processAutoAdvancements()** - Walkover handling and rebuild protection notes
-  - **generateCleanBracket()** - Validation rules, bracket sizing, usage example
-  - **Benefits**:
-    - ✅ Full hover documentation in VSCode for core functions
-    - ✅ Parameter descriptions visible on function calls
-    - ✅ Return types and examples in tooltips
-    - ✅ Types reference defined typedefs (e.g., `Player`, `CompletionType`)
-  - **Files modified**: `js/clean-match-progression.js`
-
----
-
-# 2025-11-18
-
-## **v4.0.15** - JSDoc Type Definitions
+## **v4.0.15** - JSDoc Type Definitions & Function Annotations
 
 ### Developer Experience
 - **Added comprehensive JSDoc type definitions for all core data structures**
@@ -37,16 +17,38 @@
   - **Global variable documentation**: @global tags for tournament, players, matches, config
   - **MATCH_PROGRESSION constant**: Documented with @global, @constant, @type, @example tags
   - **Prioritized TODO list**: Documents which functions to annotate incrementally
-  - **Benefits**:
-    - ✅ IDE autocomplete for all properties
-    - ✅ Hover documentation in VSCode
-    - ✅ Type checking and error detection
-    - ✅ Self-documenting codebase
-    - ✅ Easier onboarding for contributors
-  - **Implementation**: Pure documentation file with no executable code - works with plain JavaScript via JSDoc
-  - **Motivation**: Implements Gemini code review suggestion to "make implicit contracts explicit"
   - **Files added**: `js/types.js`
   - **Files modified**: `tournament.html` (added types.js to script loading)
+
+- **Added JSDoc annotations to Priority 1 core progression functions**
+  - **advancePlayer()** - Parameters, return type, example with winner/loser flow
+  - **completeMatch()** - All 5 parameters documented with types and defaults
+  - **calculateAllRankings()** - Description of ranking logic by bracket size
+  - **processAutoAdvancements()** - Walkover handling and rebuild protection notes
+  - **generateCleanBracket()** - Validation rules, bracket sizing, usage example
+  - **Files modified**: `js/clean-match-progression.js`
+
+- **Added JSDoc annotations to Priority 2 tournament management functions**
+  - **saveTournament()** - Debounced wrapper with UI updates
+  - **saveTournamentOnly()** - Core save logic, config separation
+  - **loadSpecificTournament()** - Entry point showing confirmation modal
+  - **continueLoadProcess()** - Actual loading into global state
+  - **exportTournament()** - Export format, history pruning, file download
+  - **importTournament()** - File handling, JSON parsing, format support
+  - **Updated types.js TODO**: Corrected function names to match actual implementation
+  - **Files modified**: `js/tournament-management.js`, `js/types.js`
+
+- **Benefits**:
+  - ✅ IDE autocomplete for all properties
+  - ✅ Full hover documentation in VSCode for types and functions
+  - ✅ Parameter descriptions visible on function calls
+  - ✅ Return types and examples in tooltips
+  - ✅ Types reference defined typedefs (e.g., `Player`, `CompletionType`)
+  - ✅ Type checking and error detection
+  - ✅ Self-documenting codebase
+  - ✅ Easier onboarding for contributors
+
+- **Motivation**: Implements Gemini code review suggestion to "make implicit contracts explicit"
 
 ---
 

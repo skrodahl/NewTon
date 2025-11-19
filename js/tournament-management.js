@@ -141,6 +141,19 @@ function pruneTransactionHistory(history, completedMatches) {
     return prunedHistory;
 }
 
+/**
+ * Exports current tournament to a JSON file for backup or sharing.
+ * Includes tournament data, players, matches, bracket, and transaction history.
+ * Prunes redundant transactions for completed tournaments to reduce file size.
+ *
+ * @returns {void}
+ *
+ * @description
+ * - Creates downloadable JSON file with v4.0 export format
+ * - Includes per-tournament transaction history for undo support
+ * - Prunes history for completed tournaments (removes superseded transactions)
+ * - Includes Saved Players snapshot for player list restoration
+ */
 function exportTournament() {
     if (!tournament || !tournament.id) {
         alert('No active tournament to export');
@@ -270,7 +283,19 @@ async function uploadTournamentFile(event, overwrite = false) {
     }
 }
 
-// SAVE TOURNAMENT ONLY - Never touches global config
+/**
+ * Saves current tournament to localStorage without touching global config.
+ * This is the core save function - saveTournament() is a wrapper around this.
+ *
+ * @param {boolean} [shouldLog=true] - Whether to log save confirmation to console
+ * @returns {void}
+ *
+ * @description
+ * - Saves to both 'dartsTournaments' array and 'currentTournament' snapshot
+ * - Never modifies global config (point values, UI settings, etc.)
+ * - Includes all tournament-specific data: players, matches, bracket, placements
+ * - Called frequently during tournament operations
+ */
 function saveTournamentOnly(shouldLog = true) {
     if (!tournament) return;
 
@@ -313,7 +338,18 @@ function saveTournamentOnly(shouldLog = true) {
 let lastSaveTime = 0;
 const SAVE_DEBOUNCE_MS = 100; // Wait 100ms between save logs
 
-// WRAPPER FOR BACKWARD COMPATIBILITY  
+/**
+ * Saves current tournament with debounced logging and UI updates.
+ * Wrapper around saveTournamentOnly() for backward compatibility.
+ *
+ * @returns {void}
+ *
+ * @description
+ * - Debounces console logging to prevent spam (100ms threshold)
+ * - Updates tournament watermark display after save
+ * - Updates storage indicator to show current usage
+ * - Primary save function called throughout the application
+ */
 function saveTournament() {
     const now = Date.now();
     const shouldLog = (now - lastSaveTime) > SAVE_DEBOUNCE_MS;
@@ -615,7 +651,18 @@ async function deleteSharedTournament(filename) {
     }
 }
 
-// LOAD TOURNAMENT - Never touches global config
+/**
+ * Initiates tournament loading by showing confirmation modal.
+ * Entry point for loading a tournament from the Recent Tournaments list.
+ *
+ * @param {number} id - Tournament ID (timestamp-based) to load
+ * @returns {void}
+ *
+ * @description
+ * - Finds tournament in localStorage by ID
+ * - Shows confirmation modal with current vs selected tournament details
+ * - User must confirm before actual loading occurs via continueLoadProcess()
+ */
 function loadSpecificTournament(id) {
     console.log(`🔄 Loading tournament ${id} (config will stay global)...`);
 
@@ -690,6 +737,20 @@ function confirmLoadTournament() {
     continueLoadProcess(selectedTournament);
 }
 
+/**
+ * Actually loads tournament data into global state after user confirmation.
+ * Called by confirmLoadTournament() after modal is closed.
+ *
+ * @param {Object} selectedTournament - Tournament object from localStorage
+ * @returns {void}
+ *
+ * @description
+ * - Sets global tournament, players, and matches from selected data
+ * - Calculates bracketSize for legacy tournaments if missing
+ * - Sets readOnly flag for completed tournaments
+ * - Never overrides global config (point values, UI settings)
+ * - Navigates to Setup page and renders bracket
+ */
 function continueLoadProcess(selectedTournament) {
     // Calculate bracketSize if missing (for older tournaments)
     let bracketSize = selectedTournament.bracketSize;
@@ -1143,6 +1204,20 @@ function confirmReset() {
     alert(`✓ Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket using Match Controls.`);
 }
 
+/**
+ * Imports a tournament from a JSON file selected by the user.
+ * Handles file reading, JSON parsing, and passes to processImportedTournament().
+ *
+ * @param {Event} event - File input change event containing selected file
+ * @returns {void}
+ *
+ * @description
+ * - Validates file is JSON format
+ * - Reads file content asynchronously
+ * - Parses JSON and delegates to processImportedTournament()
+ * - Shows error status for invalid files
+ * - Supports both v4.0 and legacy export formats
+ */
 function importTournament(event) {
     const file = event.target.files[0];
     if (!file) return;
