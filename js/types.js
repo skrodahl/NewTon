@@ -28,10 +28,9 @@
  * - importTournament(event) → void
  *
  * Priority 3 - Player management (player-management.js):
- * - addPlayer(name) → Player
- * - removePlayer(id) → void
- * - togglePaid(id) → void
- * - updatePlayerStats(id, stats) → void
+ * - addPlayer() → void (reads name from DOM)
+ * - removePlayer(playerId) → void
+ * - togglePaid(playerId) → void
  *
  * Priority 4 - Match state functions (bracket-rendering.js):
  * - getMatchState(match) → MatchState

@@ -39,6 +39,13 @@
   - **Updated types.js TODO**: Corrected function names to match actual implementation
   - **Files modified**: `js/tournament-management.js`, `js/types.js`
 
+- **Added JSDoc annotations to Priority 3 player management functions**
+  - **addPlayer()** - Creates player from form input, validation, auto-adds to Saved Players
+  - **removePlayer()** - Removes player by ID, blocked during active tournament
+  - **togglePaid()** - Toggles payment status, help hints for bracket readiness
+  - **Updated types.js TODO**: Corrected function signatures to match actual implementation
+  - **Files modified**: `js/player-management.js`, `js/types.js`
+
 - **Benefits**:
   - ✅ IDE autocomplete for all properties
   - ✅ Full hover documentation in VSCode for types and functions

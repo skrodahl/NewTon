@@ -352,7 +352,19 @@ function closeImportDialog() {
     delete window._importPlayerListData;
 }
 
-// UPDATE: Enhanced addPlayer function with help integration
+/**
+ * Adds a new player to the tournament from form input.
+ * Blocked if tournament bracket already exists.
+ *
+ * @returns {void}
+ *
+ * @description
+ * - Reads player name from DOM input element
+ * - Validates name is not empty and not duplicate
+ * - Creates player object with default stats and unpaid status
+ * - Auto-adds to Saved Players list
+ * - Updates UI and saves tournament
+ */
 function addPlayer() {
     // Check if tournament is in progress (bracket exists)
     if (tournament && tournament.bracket && matches.length > 0) {
@@ -411,13 +423,25 @@ function addPlayer() {
     }
 }
 
+/**
+ * Removes a player from the tournament by ID.
+ * Blocked if tournament bracket already exists.
+ *
+ * @param {number} playerId - The player ID to remove
+ * @returns {void}
+ *
+ * @description
+ * - Filters player from global players array
+ * - Updates UI displays and saves tournament
+ * - Re-renders Player List
+ */
 function removePlayer(playerId) {
     // Check if tournament is in progress (bracket exists)
     if (tournament && tournament.bracket && matches.length > 0) {
         showTournamentProgressWarning();
         return;
     }
-    
+
     players = players.filter(p => p.id !== playerId);
     updatePlayersDisplay();
     updatePlayerCount();
@@ -428,7 +452,19 @@ function removePlayer(playerId) {
     renderPlayerList();
 }
 
-// UPDATE: Enhanced player paid toggle with help integration
+/**
+ * Toggles a player's paid status.
+ * Blocked if tournament is active or completed.
+ *
+ * @param {number} playerId - The player ID to toggle
+ * @returns {void}
+ *
+ * @description
+ * - Flips player.paid boolean value
+ * - Updates UI displays and saves tournament
+ * - Re-renders Player List with new sort order
+ * - Shows help hint when 4 players are paid
+ */
 function togglePaid(playerId) {
     // Prevent changes if tournament is active or completed
     if (tournament && (tournament.status === 'active' || tournament.status === 'completed')) {
