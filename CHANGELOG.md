@@ -53,6 +53,14 @@
   - **Updated types.js TODO**: Corrected Priority 5 function names to match actual implementation
   - **Files modified**: `js/bracket-rendering.js`, `js/types.js`
 
+- **Added JSDoc annotations to Priority 5 history/undo system functions**
+  - **isMatchUndoable()** - Checks if match can be safely undone without breaking integrity
+  - **getConsequentialMatches()** - Finds all matches affected by undoing a transaction
+  - **handleSurgicalUndo()** - Entry point showing confirmation modal with affected matches
+  - **undoManualTransaction()** - Performs surgical undo by removing transaction and rebuilding
+  - **rebuildBracketFromHistory()** - Rebuilds entire bracket state from transaction history
+  - **Files modified**: `js/bracket-rendering.js`
+
 - **Benefits**:
   - ✅ IDE autocomplete for all properties
   - ✅ Full hover documentation in VSCode for types and functions

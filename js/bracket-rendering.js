@@ -2002,6 +2002,21 @@ if (typeof window !== 'undefined') {
 
 // --- START: Surgical Undo Implementation ---
 
+/**
+ * Checks if a match can be safely undone without breaking tournament integrity.
+ *
+ * @param {string} matchId - The match ID to check (e.g., 'FS-1-1', 'BS-2-3')
+ * @returns {boolean} True if match can be undone, false otherwise
+ *
+ * @description
+ * A match is undoable only if:
+ * - Tournament is not read-only (completed)
+ * - Match has a MANUAL completion transaction (not AUTO walkover)
+ * - No downstream matches have MANUAL completions
+ *
+ * Uses MATCH_PROGRESSION to check winner/loser destinations.
+ * Prevents undo when it would corrupt manually-entered results.
+ */
 function isMatchUndoable(matchId) {
     // Read-only tournaments cannot be undone
     if (tournament && tournament.readOnly) return false;
@@ -2088,6 +2103,21 @@ function collectWalkoverChain(matchId, progression) {
     return chainMatches;
 }
 
+/**
+ * Finds all matches affected by undoing a transaction.
+ * Traces winner and loser paths through walkover chains.
+ *
+ * @param {Transaction} transaction - The transaction to analyze
+ * @returns {Array<{id: string, match: Match, isFrontside: boolean}>} Affected matches sorted by side
+ *
+ * @description
+ * Uses MATCH_PROGRESSION to find:
+ * - Winner's destination match and walkover chain
+ * - Loser's destination match and walkover chain
+ *
+ * Returns matches sorted with frontside first, then backside.
+ * Used to show user what will be reset before confirming undo.
+ */
 function getConsequentialMatches(transaction) {
     const consequentialMatches = [];
     const addedMatchIds = new Set(); // Prevent duplicates
@@ -2195,6 +2225,22 @@ function createUndoModalContent(matchId, consequentialMatches) {
 // Global debounce state for undo operations
 let undoDebounceActive = false;
 
+/**
+ * Entry point for undoing a match result. Shows confirmation modal with affected matches.
+ *
+ * @param {string} matchId - The match ID to undo (e.g., 'FS-1-1', 'BS-2-3')
+ * @returns {void}
+ *
+ * @description
+ * 1. Validates tournament is not read-only
+ * 2. Applies debounce to prevent rapid clicks
+ * 3. Finds MANUAL transaction for this match
+ * 4. Calculates consequential matches to show user
+ * 5. Shows confirmation modal with match cards
+ * 6. On confirm, calls undoManualTransaction()
+ *
+ * Clears debounce after 1.5s or immediately on cancel.
+ */
 function handleSurgicalUndo(matchId) {
     // Check if tournament is read-only (completed tournament)
     if (tournament && tournament.readOnly) {
@@ -2244,7 +2290,24 @@ function handleSurgicalUndo(matchId) {
     });
 }
 
-// Clean undo: Remove target transaction and consequences, rebuild from clean history
+/**
+ * Performs surgical undo by removing transaction and rebuilding affected matches.
+ *
+ * @param {string} transactionId - The transaction ID to undo (e.g., 'tx_1234567890')
+ * @returns {void}
+ *
+ * @description
+ * Surgical undo process:
+ * 1. Find all transactions to remove (target + downstream consequences)
+ * 2. Remove ALL transactions for affected matches (lanes, refs, starts, completions)
+ * 3. Save clean history to localStorage
+ * 4. Reset tournament status if undoing GRAND-FINAL
+ * 5. Roll back match states and remove players from downstream slots
+ * 6. Rebuild bracket from clean history using rebuildBracketFromHistory()
+ * 7. Recalculate rankings and update UI
+ *
+ * Uses MATCH_PROGRESSION for deterministic rollback.
+ */
 function undoManualTransaction(transactionId) {
     // Check if tournament is read-only (imported completed tournament)
     if (tournament && tournament.readOnly) {
@@ -2403,7 +2466,28 @@ function undoManualTransaction(transactionId) {
     console.log(`Clean undo complete: surgically rolled back ${targetTransaction.matchId}`);
 }
 
-// Rebuild entire bracket from clean transaction history (single source of truth approach)
+/**
+ * Rebuilds entire bracket state from transaction history.
+ * Single source of truth approach - history IS the state.
+ *
+ * @param {Transaction[]} cleanHistory - Array of transactions to replay chronologically
+ * @returns {void}
+ *
+ * @description
+ * Rebuild process:
+ * 1. Set global flags to prevent new transactions during rebuild
+ * 2. Clear all matches and placements
+ * 3. Regenerate bracket structure using generateAllMatches()
+ * 4. Replay transactions chronologically:
+ *    - COMPLETE_MATCH: Re-complete with winner/loser
+ *    - ASSIGN_LANE: Restore lane assignment
+ *    - ASSIGN_REFEREE: Restore referee assignment
+ *    - START_MATCH/STOP_MATCH: Restore active state
+ * 5. Run processAutoAdvancements() for walkovers
+ * 6. Recalculate rankings and update UI
+ *
+ * Called after surgical undo or tournament reset.
+ */
 function rebuildBracketFromHistory(cleanHistory) {
     if (!tournament || !tournament.bracketSize) {
         console.error('Cannot rebuild bracket: no tournament or bracket size');
