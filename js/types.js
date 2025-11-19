@@ -38,9 +38,11 @@
  * - populateRefereeSuggestions() → void
  *
  * Priority 5 - History/Undo system (bracket-rendering.js):
- * - addToHistory(transaction) → void
- * - undoLastAction() → boolean
- * - rebuildFromHistory() → void
+ * - handleSurgicalUndo(matchId) → void
+ * - undoManualTransaction(transactionId) → void
+ * - rebuildBracketFromHistory(cleanHistory) → void
+ * - getConsequentialMatches(transaction) → Match[]
+ * - isMatchUndoable(matchId) → boolean
  */
 
 // ============================================================================

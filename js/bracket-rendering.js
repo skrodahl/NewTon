@@ -1346,6 +1346,18 @@ function renderTitles(grid) {
 
 // HELPER FUNCTIONS
 
+/**
+ * Determines the current state of a match for UI rendering.
+ *
+ * @param {Match} match - The match object to evaluate
+ * @returns {MatchState} 'pending', 'ready', 'live', or 'completed'
+ *
+ * @description
+ * - pending: Waiting for players (TBD slots)
+ * - ready: Both players assigned, can start
+ * - live: Match in progress (active = true)
+ * - completed: Match finished with winner/loser
+ */
 function getMatchState(match) {
     if (!match) return 'pending';
 
@@ -2691,7 +2703,21 @@ function createMatchCard(match) {
     `;
 }
 
-// Main function to show the command center
+/**
+ * Opens the Match Command Center modal with live and ready matches.
+ * Main UI hub for managing active tournament matches.
+ *
+ * @returns {void}
+ *
+ * @description
+ * Displays a modal with two sections:
+ * - Live matches: Currently active (sorted by lane, then match ID)
+ * - Ready matches: Both players assigned, grouped by round
+ *
+ * Shows empty state if no matches exist. Updates UI elements:
+ * - liveMatchesContainer, frontMatchesContainer, backMatchesContainer
+ * - Referee suggestions panel
+ */
 function showMatchCommandCenter() {
     if (!matches || matches.length === 0) {
         showCommandCenterModal([]); // Show empty state
@@ -3034,7 +3060,22 @@ function getRefereeSuggestions() {
     };
 }
 
-// Function to populate referee suggestions in the UI
+/**
+ * Populates the referee suggestions panel in the Match Command Center.
+ * Shows available players categorized by priority.
+ *
+ * @returns {void}
+ *
+ * @description
+ * Updates three referee suggestion sections:
+ * - Losers: Recently eliminated players (highest priority)
+ * - Winners: Players waiting for next match
+ * - Recent assignments: Previously assigned referees
+ *
+ * Excludes players currently in live matches.
+ * Shows empty state if no suggestions available.
+ * Respects config.ui.refereeSuggestionsLimit setting.
+ */
 function populateRefereeSuggestions() {
     console.log('🎯 populateRefereeSuggestions called');
 
