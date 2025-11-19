@@ -9,16 +9,16 @@
  * - Type checking and error detection
  * - Self-documenting codebase
  *
- * TODO: Function Annotations (add incrementally as you touch these files)
+ * Function Annotations (add incrementally as you touch these files)
  *
- * Priority 1 - Core progression functions (clean-match-progression.js):
+ * Priority 1 - Core progression functions (clean-match-progression.js): ✅ DONE
  * - advancePlayer(matchId, winner, loser) → boolean
  * - completeMatch(matchId, winnerNumber, score1, score2, type) → boolean
  * - calculateAllRankings() → void
  * - generateCleanBracket() → boolean
  * - processAutoAdvancements() → void
  *
- * Priority 2 - Tournament management (tournament-management.js):
+ * Priority 2 - Tournament management (tournament-management.js): ✅ DONE
  * - createTournament() → void
  * - saveTournament() → void
  * - saveTournamentOnly(shouldLog) → void
@@ -27,17 +27,17 @@
  * - exportTournament() → void
  * - importTournament(event) → void
  *
- * Priority 3 - Player management (player-management.js):
+ * Priority 3 - Player management (player-management.js): ✅ DONE
  * - addPlayer() → void (reads name from DOM)
  * - removePlayer(playerId) → void
  * - togglePaid(playerId) → void
  *
- * Priority 4 - Match state functions (bracket-rendering.js):
+ * Priority 4 - Match state functions (bracket-rendering.js): ✅ DONE
  * - getMatchState(match) → MatchState
  * - showMatchCommandCenter() → void
  * - populateRefereeSuggestions() → void
  *
- * Priority 5 - History/Undo system (bracket-rendering.js):
+ * Priority 5 - History/Undo system (bracket-rendering.js): ✅ DONE
  * - handleSurgicalUndo(matchId) → void
  * - undoManualTransaction(transactionId) → void
  * - rebuildBracketFromHistory(cleanHistory) → void
