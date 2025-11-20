@@ -43,6 +43,14 @@
  * - rebuildBracketFromHistory(cleanHistory) → void
  * - getConsequentialMatches(transaction) → Match[]
  * - isMatchUndoable(matchId) → boolean
+ *
+ * Optional Enhancements (add when touching functions):
+ * - @throws tags for functions that can throw errors
+ *   Example: @throws {Error} If tournament data is corrupted
+ * - Document side effects in @description
+ *   Example: "Updates global players array, saves to localStorage, triggers UI refresh"
+ * - @see tags to link related functions
+ *   Example: @see saveTournamentOnly, @see loadSpecificTournament
  */
 
 // ============================================================================
