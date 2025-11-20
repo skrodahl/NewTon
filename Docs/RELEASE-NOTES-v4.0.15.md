@@ -29,7 +29,7 @@ Added type definitions and function annotations across all core files, enabling 
 - Type checking for parameters and return values
 
 **Why It Matters:**
-Implements code review suggestion to "make implicit contracts explicit." Provides TypeScript-level developer experience in pure JavaScript, improving maintainability and reducing bugs.
+Implements Gemini code review suggestion to "make implicit contracts explicit." Provides TypeScript-level developer experience in pure JavaScript, improving maintainability and reducing bugs. See `Docs/CodeReview/` for the complete architectural analysis that informed this work.
 
 **For Developers:**
 - See `js/types.js` for all type definitions
