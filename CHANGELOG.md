@@ -1,3 +1,17 @@
+# 2025-11-21
+
+## **v4.0.16** - Header Clock
+
+### New Features
+- **Added clock to main header**
+  - Clock displayed in upper right corner, aligned with title/logo
+  - Styled identically to Match Controls clock (border, shadow, monospace font)
+  - Visible on all pages (Setup, Registration, Tournament, Config)
+  - Updates every 10 seconds to catch minute changes
+  - **Files modified**: `tournament.html`, `css/styles.css`, `js/tournament-management.js`
+
+---
+
 # 2025-11-19
 
 ## **v4.0.15** - JSDoc Type Definitions & Function Annotations

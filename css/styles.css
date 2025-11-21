@@ -196,6 +196,17 @@ body {
   font-weight: 400;
 }
 
+/* Header clock - matches Match Controls clock styling */
+.header-clock {
+  font-family: var(--font-clock);
+  font-size: 18px;
+  font-weight: normal;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 6px;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.24);
+}
+
 .header-tournament-status {
   position: absolute;
   right: 0;

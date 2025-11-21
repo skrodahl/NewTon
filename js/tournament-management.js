@@ -1550,19 +1550,31 @@ function updateTournamentWatermark() {
     }
 }
 
-// Update clock in Status Panel every minute
+// Update clocks in Status Panel and header
 function updateClock() {
-    const clockElement = document.getElementById('cad-clock');
-    if (clockElement) {
-        const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        clockElement.textContent = `${hours}:${minutes}`;
+    const now = new Date();
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    const timeString = `${hours}:${minutes}`;
+
+    // Update Status Panel clock (CAD modal)
+    const cadClockElement = document.getElementById('cad-clock');
+    if (cadClockElement) {
+        cadClockElement.textContent = timeString;
+    }
+
+    // Update header clock (visible on all pages)
+    const headerClockElement = document.getElementById('headerClock');
+    if (headerClockElement) {
+        headerClockElement.textContent = timeString;
     }
 }
 
 // Start clock update interval (every 10 seconds to catch minute changes quickly)
 setInterval(updateClock, 10000);
+
+// Initialize clock immediately when script loads
+updateClock();
 
 /**
  * Get storage color class based on percentage thresholds
