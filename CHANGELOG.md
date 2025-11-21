@@ -5,6 +5,7 @@
 ### New Features
 - **Added clock to main header**
   - Clock displayed in upper right corner, aligned with title/logo
+  - The clock is useful, since the app often runs in full-screen which hides the system clock
   - Styled identically to Match Controls clock (border, shadow, monospace font)
   - Visible on all pages (Setup, Registration, Tournament, Config)
   - Updates every 10 seconds to catch minute changes
