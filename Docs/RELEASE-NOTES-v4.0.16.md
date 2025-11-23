@@ -28,7 +28,7 @@ Added a clock to the upper right corner of the main header, aligned with the tit
 - Updates every 10 seconds
 
 **Why It Matters:**
-Operators can now see the current time at a glance without opening Match Controls, useful during tournament setup and player registration phases.
+Operators can now see the current time at a glance from all pages, useful during tournament setup and player registration phases, and when browser is in full-screen mode.
 
 ---
 
