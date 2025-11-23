@@ -1,6 +1,6 @@
 ## NewTon DC Tournament Manager v4.0.16 Release Notes
 
-**Release Date:** November 21, 2025
+**Release Date:** November 23, 2025
 **Incremental Release**
 
 ---
