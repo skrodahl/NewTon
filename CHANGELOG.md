@@ -1,3 +1,60 @@
+# 2025-12-09
+
+## **v4.1.0** - NewTon Chalker App
+
+### New Feature: Companion Scoring App
+- **NewTon Chalker**: Tablet-optimized x01 dart scoring application for referees/chalkers
+  - Standalone companion app to the main Tournament Manager
+  - Designed for portrait tablet use at dartboards
+  - Fully offline - no server or internet required
+
+### Chalker Features
+- **Match Configuration**
+  - Player names entry
+  - Starting score selection (101-1001)
+  - Best-of legs (1-11)
+  - Max rounds configuration (7-20 rounds / 21-60 darts)
+  - Double-in toggle option
+
+- **Scoring Interface**
+  - Large, readable score display with active player highlight (green tint)
+  - Chalkboard-style ledger showing scored/to-go for both players
+  - Inline score input directly in chalkboard cells
+  - Tap-to-edit any previously recorded score
+  - Touch-friendly numpad with DEL and OK buttons
+  - Tons (100+) highlighted in blue, 180s in green
+
+- **Match Flow**
+  - Automatic player turn alternation
+  - Checkout detection with dart count prompt (1/2/3 darts)
+  - Leg win tracking with automatic new leg start
+  - Match completion detection based on best-of setting
+
+- **End-of-Match Statistics**
+  - Winner/loser display with final leg score
+  - Tons (100+) count per player
+  - 180s count per player
+  - Short legs (≤21 darts) count
+  - High checkouts (101+) count
+  - First 9 dart average per player
+  - Overall match average per player
+  - Per-leg averages breakdown
+
+- **Match Management**
+  - Menu with Rematch and New Match options
+  - Confirmation dialogs to prevent accidental data loss
+  - Edit mode for correcting previously entered scores
+
+### Technical Details
+- **Files added**:
+  - `chalker.html` - Main HTML structure
+  - `styles/chalker.css` - Tablet-optimized styling
+  - `js/chalker.js` - Complete scoring logic and state management
+- **Architecture**: Self-contained IIFE with clean state management
+- **Styling**: Reuses NewTon font stack (Manrope, Cascadia Code)
+
+---
+
 # 2025-11-21
 
 ## **v4.0.16** - Header Clock
