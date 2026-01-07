@@ -12,10 +12,10 @@ Players can currently be assigned as referee in their own match. This is intenti
 
 **Consideration**: Would need a new config option (e.g., `config.lanes.preventSelfReferee`) and validation in referee assignment logic.
 
-### Backside Match Source Visibility
-No easy way to see, from a backside match, which frontside matches feed into it. Currently requires mental tracing through the bracket structure.
+### ~~Backside Match Source Visibility~~ ✅ IMPLEMENTED (v4.1.0)
+~~No easy way to see, from a backside match, which frontside matches feed into it.~~
 
-**Consideration**: Could show source match IDs in Match Command Center or as hover tooltip on backside matches.
+**Implemented**: Status bar now shows "Fed by FS-X-X, FS-X-X" when hovering over backside matches, indicating which frontside matches feed into them.
 
 ---
 
@@ -40,4 +40,4 @@ No easy way to see, from a backside match, which frontside matches feed into it.
 
 ---
 
-**Last updated:** November 19, 2025
+**Last updated:** January 7, 2025

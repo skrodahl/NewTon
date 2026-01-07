@@ -4260,11 +4260,13 @@ function updateStatusCenter(content) {
             // Backwards compatibility for single-line strings
             centerElement.textContent = content;
         } else if (content && content.line1 && content.line2) {
-            // Two-line object format
-            centerElement.innerHTML = `
-                <div class="status-line1">${content.line1}</div>
-                <div class="status-line2">${content.line2}</div>
-            `;
+            // Multi-line object format
+            let html = `<div class="status-line1">${content.line1}</div>`;
+            if (content.line3) {
+                html += `<div class="status-line2">${content.line3}</div>`;
+            }
+            html += `<div class="status-line2">${content.line2}</div>`;
+            centerElement.innerHTML = html;
         }
         centerElement.classList.add('active');
     }
@@ -4317,9 +4319,23 @@ function getMatchProgressionText(matchId) {
         line2 = `Leads to ${destinations[0]} and ${destinations[1]}`;
     }
 
+    // For backside matches, show which matches feed into this one
+    let line3 = null;
+    if (matchId.startsWith('BS-')) {
+        const sourcesLookup = buildMatchSourcesLookup(tournament.bracketSize);
+        const sources = sourcesLookup[matchId];
+        if (sources) {
+            const allSources = [...sources.losers, ...sources.winners];
+            if (allSources.length > 0) {
+                line3 = `Fed by ${allSources.join(', ')}`;
+            }
+        }
+    }
+
     return {
         line1: line1,
-        line2: line2
+        line2: line2,
+        line3: line3
     };
 }
 

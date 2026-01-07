@@ -1436,6 +1436,31 @@ function showLocalStorageUsage() {
 }
 
 /**
+ * Build reverse lookup: which matches feed INTO each match
+ * @param {number} bracketSize - Tournament bracket size (8, 16, or 32)
+ * @returns {Object} Map of matchId -> { winners: [], losers: [] }
+ */
+function buildMatchSourcesLookup(bracketSize) {
+    const progression = MATCH_PROGRESSION?.[bracketSize];
+    if (!progression) return {};
+
+    const leadsFrom = {};
+    for (const [sourceMatchId, rule] of Object.entries(progression)) {
+        if (rule.winner) {
+            const [destMatchId] = rule.winner;
+            if (!leadsFrom[destMatchId]) leadsFrom[destMatchId] = { winners: [], losers: [] };
+            leadsFrom[destMatchId].winners.push(sourceMatchId);
+        }
+        if (rule.loser) {
+            const [destMatchId] = rule.loser;
+            if (!leadsFrom[destMatchId]) leadsFrom[destMatchId] = { winners: [], losers: [] };
+            leadsFrom[destMatchId].losers.push(sourceMatchId);
+        }
+    }
+    return leadsFrom;
+}
+
+/**
  * Show Match Progression Rules
  */
 function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {

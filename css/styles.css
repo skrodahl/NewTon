@@ -630,6 +630,7 @@ body {
   pointer-events: none;
   display: flex;
   align-items: center;
+  overflow: visible;
 }
 
 .watermark-left {
@@ -643,6 +644,7 @@ body {
 .watermark-center {
   position: absolute;
   left: 50%;
+  bottom: 8px;
   transform: translateX(-50%);
   font-family: 'Inter';
   font-size: 16px;

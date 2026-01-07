@@ -1,6 +1,13 @@
 # 2025-01-07
 
-## **v4.1.0** - NewTon Chalker App
+## **v4.1.0** - NewTon Chalker App & Bracket Enhancements
+
+### Tournament Manager Improvements
+- **Backside Match Source Visibility**: Hovering over backside matches now shows which matches feed into them
+  - Status bar displays "Fed by FS-X-X, FS-X-X" between match state and destination
+  - Extracted reusable `buildMatchSourcesLookup()` function in analytics.js
+  - Helps referees and organizers track player progression through losers bracket
+- **Status Bar Styling**: Floating tooltip now has slight offset from bottom edge for cleaner appearance
 
 ### New Feature: Companion Scoring App
 - **NewTon Chalker**: Tablet-optimized x01 dart scoring application for referees/chalkers
