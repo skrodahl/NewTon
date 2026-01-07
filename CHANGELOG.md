@@ -18,6 +18,8 @@
 
 - **Scoring Interface**
   - Large, readable score display with active player highlight (green tint)
+  - Leg starter indicated by green player name in header (alternates each leg)
+  - Centered leg score display in header
   - Chalkboard-style ledger with continuous grid lines (HTML table)
   - Inline score input directly in chalkboard cells with blinking cursor
   - Excel-like editing: tap any recorded score to edit (pre-populates existing value)

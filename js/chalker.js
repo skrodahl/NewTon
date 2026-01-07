@@ -713,6 +713,10 @@
     if (activeCell) {
       activeCell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
     }
+
+    // Mark leg starter in header
+    elements.player1Header.classList.toggle('leg-starter', legStarter === 1);
+    elements.player2Header.classList.toggle('leg-starter', legStarter === 2);
   }
 
   /**

@@ -293,9 +293,16 @@ body {
   color: var(--text-light);
   padding: var(--spacing-md) var(--spacing-lg);
   display: grid;
-  grid-template-columns: 1fr auto 1fr auto;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--spacing-sm);
+  position: relative;
+}
+
+.scoring-header .btn-icon {
+  position: absolute;
+  right: var(--spacing-lg);
+  color: var(--text-light);
 }
 
 .header-player {
@@ -303,6 +310,14 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
+}
+
+.header-player:last-of-type {
+  padding-right: 2.5rem;
+}
+
+.header-player.leg-starter {
+  color: var(--accent-success);
 }
 
 .header-player:first-child {
@@ -324,10 +339,7 @@ body {
   font-family: var(--font-mono);
   font-size: 1.5rem;
   font-weight: 700;
-}
-
-.scoring-header .btn-icon {
-  color: var(--text-light);
+  text-align: center;
 }
 
 /* Score anchors */
