@@ -1,4 +1,4 @@
-# 2025-12-09
+# 2025-01-07
 
 ## **v4.1.0** - NewTon Chalker App
 
@@ -18,11 +18,13 @@
 
 - **Scoring Interface**
   - Large, readable score display with active player highlight (green tint)
-  - Chalkboard-style ledger showing scored/to-go for both players
-  - Inline score input directly in chalkboard cells
-  - Tap-to-edit any previously recorded score
+  - Chalkboard-style ledger with continuous grid lines (HTML table)
+  - Inline score input directly in chalkboard cells with blinking cursor
+  - Excel-like editing: tap any recorded score to edit (pre-populates existing value)
+  - Auto-scroll to keep active input row visible
   - Touch-friendly numpad with DEL and OK buttons
   - Tons (100+) highlighted in blue, 180s in green
+  - Grey background on dart count column for visual separation
 
 - **Match Flow**
   - Automatic player turn alternation
@@ -47,8 +49,8 @@
 
 ### Technical Details
 - **Files added**:
-  - `chalker.html` - Main HTML structure
-  - `styles/chalker.css` - Tablet-optimized styling
+  - `chalker.html` - Main HTML structure with semantic table for chalkboard
+  - `styles/chalker.css` - Tablet-optimized styling with CSS variables
   - `js/chalker.js` - Complete scoring logic and state management
 - **Architecture**: Self-contained IIFE with clean state management
 - **Styling**: Reuses NewTon font stack (Manrope, Cascadia Code)

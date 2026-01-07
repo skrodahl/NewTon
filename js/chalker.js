@@ -633,13 +633,13 @@
 
     // Row 0: Starting scores (no dart count shown)
     html += `
-      <div class="chalk-row">
-        <span class="col-scored"></span>
-        <span class="col-togo">${state.config.startingScore}</span>
-        <span class="col-darts"></span>
-        <span class="col-togo">${state.config.startingScore}</span>
-        <span class="col-scored"></span>
-      </div>
+      <tr>
+        <td class="col-scored"></td>
+        <td class="col-togo">${state.config.startingScore}</td>
+        <td class="col-darts"></td>
+        <td class="col-togo">${state.config.startingScore}</td>
+        <td class="col-scored"></td>
+      </tr>
     `;
 
     // Rows 1-maxRounds: Pre-rendered with dart counts
@@ -677,7 +677,7 @@
 
       // Row is empty if no scores and not the active row
       const hasData = data.p1Scored !== '' || data.p2Scored !== '' || p1IsActive || p2IsActive;
-      const rowClass = hasData ? 'chalk-row' : 'chalk-row chalk-row-empty';
+      const rowClass = hasData ? '' : 'chalk-row-empty';
 
       // Show To Go values only if there's data in that column
       const p1ToGo = data.p1ToGo !== '' ? data.p1ToGo : '';
@@ -688,17 +688,17 @@
       const p2DataAttr = data.p2VisitIndex >= 0 && !p2IsActive ? `data-visit="${data.p2VisitIndex}"` : '';
 
       html += `
-        <div class="${rowClass}">
-          <span class="col-scored ${p1Class}" ${p1DataAttr}>${p1Content}</span>
-          <span class="col-togo">${p1ToGo}</span>
-          <span class="col-darts">${dartCount}</span>
-          <span class="col-togo">${p2ToGo}</span>
-          <span class="col-scored ${p2Class}" ${p2DataAttr}>${p2Content}</span>
-        </div>
+        <tr class="${rowClass}">
+          <td class="col-scored ${p1Class}" ${p1DataAttr}>${p1Content}</td>
+          <td class="col-togo">${p1ToGo}</td>
+          <td class="col-darts">${dartCount}</td>
+          <td class="col-togo">${p2ToGo}</td>
+          <td class="col-scored ${p2Class}" ${p2DataAttr}>${p2Content}</td>
+        </tr>
       `;
     }
 
-    elements.chalkboardBody.innerHTML = html;
+    document.getElementById('chalk-tbody').innerHTML = html;
 
     // Add click handlers for tap-to-edit
     elements.chalkboardBody.querySelectorAll('[data-visit]').forEach(cell => {
@@ -707,6 +707,12 @@
         startEditingVisit(visitIdx);
       });
     });
+
+    // Auto-scroll to keep active input cell visible
+    const activeCell = elements.chalkboardBody.querySelector('.input-active');
+    if (activeCell) {
+      activeCell.scrollIntoView({ block: 'nearest', behavior: 'smooth' });
+    }
   }
 
   /**
@@ -718,7 +724,8 @@
     if (!currentLeg || visitIdx < 0 || visitIdx >= currentLeg.visits.length) return;
 
     editingVisitIndex = visitIdx;
-    inputBuffer = '';
+    // Pre-populate input buffer with existing score (like Excel)
+    inputBuffer = String(currentLeg.visits[visitIdx].score);
     renderChalkboard();
   }
 

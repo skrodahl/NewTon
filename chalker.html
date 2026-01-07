@@ -112,15 +112,21 @@
 
         <!-- Chalkboard ledger -->
         <div class="chalkboard">
-            <div class="chalkboard-header">
-                <span class="col-scored">Scored</span>
-                <span class="col-togo">To Go</span>
-                <span class="col-darts"></span>
-                <span class="col-togo">To Go</span>
-                <span class="col-scored">Scored</span>
-            </div>
             <div class="chalkboard-body" id="chalkboard-body">
-                <!-- Rows rendered by JS -->
+                <table class="chalk-table">
+                    <thead>
+                        <tr>
+                            <th>Scored</th>
+                            <th>To Go</th>
+                            <th></th>
+                            <th>To Go</th>
+                            <th>Scored</th>
+                        </tr>
+                    </thead>
+                    <tbody id="chalk-tbody">
+                        <!-- Rows rendered by JS -->
+                    </tbody>
+                </table>
             </div>
         </div>
 
