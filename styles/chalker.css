@@ -649,35 +649,41 @@ body {
 
 .result-display {
   background: var(--bg-secondary);
-  padding: var(--spacing-xl);
+  padding: var(--spacing-lg);
   text-align: center;
   border-bottom: 1px solid var(--border-light);
 }
 
-.winner-section {
+.match-players {
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: var(--spacing-lg);
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-sm);
 }
 
 .winner-name {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 700;
   color: var(--accent-success);
 }
 
-.final-score {
-  font-family: var(--font-mono);
-  font-size: 2.5rem;
-  font-weight: 700;
-  color: var(--text-primary);
+.vs-text {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
 }
 
 .loser-name {
-  font-size: 1.25rem;
+  font-size: 1.125rem;
   font-weight: 600;
   color: var(--text-secondary);
+}
+
+.final-score {
+  font-family: var(--font-mono);
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--text-primary);
 }
 
 /* Stats */
@@ -814,28 +820,22 @@ body {
 }
 
 .leg-stat-avg,
-.leg-stat-checkout,
-.leg-stat-scoring {
+.leg-stat-detail {
   display: block;
-  line-height: 1.5;
+  line-height: 1.4;
 }
 
 .leg-stat-avg {
   font-weight: 600;
 }
 
-.leg-stat-checkout {
-  font-size: 0.8rem;
-  color: var(--text-secondary);
-}
-
-.leg-stat-checkout.highlight {
-  color: var(--accent-success);
-}
-
-.leg-stat-scoring {
+.leg-stat-detail {
   font-size: 0.75rem;
   color: var(--text-secondary);
+}
+
+.leg-stat-detail.highlight {
+  color: var(--accent-success);
 }
 
 /* End buttons */

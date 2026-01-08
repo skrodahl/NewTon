@@ -1218,45 +1218,39 @@
     // Render per-leg stats with explicit labels
     elements.legStatsContainer.innerHTML = '';
     stats.legs.forEach((leg, idx) => {
-      // Helper to build stat lines for a player
+      // Helper to build stat lines for a player (each stat on its own line)
       const buildPlayerStats = (playerData, isWinner, isTiebreak) => {
         const lines = [];
 
-        // Line 1: Average (always show if available)
+        // Average (always show if available)
         if (playerData.avg !== null) {
           lines.push(`<span class="leg-stat-avg">${playerData.avg.toFixed(1)} avg</span>`);
         }
 
-        // Line 2: Checkout info (winner only, non-tiebreak)
+        // Winner-specific stats (each on separate line)
         if (isWinner && !isTiebreak) {
-          const checkoutParts = [];
+          // Darts (short leg)
           if (playerData.darts <= shortLegThreshold) {
-            checkoutParts.push(`${playerData.darts} darts`);
+            lines.push(`<span class="leg-stat-detail highlight">${playerData.darts} darts</span>`);
           }
-          if (playerData.checkoutScore >= 101) {
-            checkoutParts.push(`${playerData.checkoutScore} out`);
-          } else if (playerData.checkoutScore !== null) {
-            checkoutParts.push(`${playerData.checkoutScore} out`);
-          }
-          if (checkoutParts.length > 0) {
-            const isHighlight = playerData.darts <= shortLegThreshold || playerData.checkoutScore >= 101;
-            lines.push(`<span class="leg-stat-checkout${isHighlight ? ' highlight' : ''}">${checkoutParts.join(', ')}</span>`);
+          // Checkout score
+          if (playerData.checkoutScore !== null) {
+            const isHighOut = playerData.checkoutScore >= 101;
+            lines.push(`<span class="leg-stat-detail${isHighOut ? ' highlight' : ''}">${playerData.checkoutScore} out</span>`);
           }
         } else if (isWinner && isTiebreak) {
-          lines.push(`<span class="leg-stat-checkout">Tie-break win</span>`);
+          lines.push(`<span class="leg-stat-detail">Tie-break win</span>`);
         }
 
-        // Line 3: Scoring achievements (180s, tons)
-        const scoringParts = [];
+        // 180s (separate line)
         if (playerData.ton80s > 0) {
-          scoringParts.push(`${playerData.ton80s} × 180`);
+          lines.push(`<span class="leg-stat-detail">${playerData.ton80s} × 180</span>`);
         }
+
+        // Tons (separate line, excluding 180s)
         const nonMaxTons = playerData.tons - playerData.ton80s;
         if (nonMaxTons > 0) {
-          scoringParts.push(`${nonMaxTons} ton${nonMaxTons > 1 ? 's' : ''}`);
-        }
-        if (scoringParts.length > 0) {
-          lines.push(`<span class="leg-stat-scoring">${scoringParts.join(', ')}</span>`);
+          lines.push(`<span class="leg-stat-detail">${nonMaxTons} ton${nonMaxTons > 1 ? 's' : ''}</span>`);
         }
 
         return lines.length > 0 ? lines.join('') : '-';

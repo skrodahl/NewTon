@@ -1,5 +1,25 @@
 # 2025-01-08
 
+## **v4.1.2** - Chalker Mobile Display Improvements
+
+### Chalker Enhancements
+- **Two-line result display**: End-of-match result now shows on two lines for better mobile readability
+  - Line 1: "Player 1 vs Player 2" with winner highlighted in green
+  - Line 2: Final leg score (e.g., "2 - 1")
+- **Per-leg stats reorganization**: Each stat now displays on its own line for clearer reading
+  - Average (bold)
+  - Darts count (highlighted if short leg)
+  - Checkout score (highlighted if 101+)
+  - 180s count
+  - Tons count
+
+### Technical Details
+- Restructured result display HTML with `.match-players` container
+- Added `.leg-stat-detail` CSS class for individual stat lines
+- Updated `buildPlayerStats()` function to generate separate line elements
+
+---
+
 ## **v4.1.1** - Chalker Stats Improvements
 
 ### Chalker Enhancements
