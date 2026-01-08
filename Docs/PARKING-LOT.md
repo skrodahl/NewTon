@@ -7,9 +7,9 @@ Ideas and suggestions for future consideration.
 ## Inbox
 *Raw ideas awaiting triage*
 
-### Chalker Persistence & PWA
+### Chalker Persistence
 
-**Goal:** Match data survives page reload, history of past matches, installable as native-like app.
+**Goal:** Match data survives page reload, history of past matches.
 
 **Storage decision: IndexedDB**
 
@@ -31,14 +31,24 @@ Chose IndexedDB over localStorage for these reasons:
 - History screen to view past matches
 - Option to continue incomplete matches
 
-**PWA components:**
-- manifest.json (app metadata, icons, display mode)
-- Service worker (offline caching)
-- Home screen icons
-
 **Open questions:**
 - How much history to retain? (last 10? 50? configurable?)
 - Cleanup threshold (delete matches older than X days?)
+
+---
+
+### Nginx: /chalker redirect issue
+
+**Problem:** `/chalker` (without trailing slash) doesn't redirect to `/chalker/` when behind Nginx Proxy Manager.
+
+**Attempted fixes:**
+- `location = /chalker { return 301 /chalker/; }` — redirects to internal port 2020
+- `location ~ ^/chalker$ { return 301 $uri/; }` — same issue
+- `location ~ ^/chalker$ { return 301 chalker/; }` — relative redirect, still not working
+
+**Status:** Deferred. `/chalker/` works fine, only the no-trailing-slash URL is broken.
+
+**Workaround:** Use `/chalker/` URL directly.
 
 ---
 
