@@ -21,7 +21,9 @@ Chose IndexedDB over localStorage for these reasons:
 
 **Database structure (draft):**
 - Database: `newton`
-- Stores: `chalker_current`, `chalker_history`, `tournaments`, `config`
+- Stores: `chalker_current`, `chalker_history`
+
+*Note: Tournament Manager stays on localStorage - storage needs are modest after optimization. No need for shared database.*
 
 **Features to consider:**
 - Auto-save current match on every score entry
