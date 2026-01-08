@@ -1,5 +1,40 @@
 # 2025-01-08
 
+## **v4.1.3** - Chalker PWA (Progressive Web App)
+
+### Chalker Enhancements
+- **PWA Support**: Chalker can now be installed as a standalone app on mobile devices and desktops
+  - Works fully offline after first visit
+  - Add to home screen for native app-like experience
+  - No browser chrome in standalone mode (clean, full-screen interface)
+  - Portrait orientation locked
+  - Dark theme status bar (#1a1a1a)
+
+- **Self-Contained App Structure**: Chalker moved to dedicated `/chalker/` subfolder
+  - Clean URL: `https://your-domain/chalker/`
+  - All assets (JS, CSS, fonts, icons) contained within subfolder
+  - Completely independent from Tournament Manager
+
+### PWA Components
+- **manifest.json**: App metadata for installation (name, icons, display mode, orientation)
+- **sw.js**: Service worker with cache-first strategy for offline functionality
+- **Icons**: 192×192 and 512×512 PNG icons generated from NewTon logo
+
+### Technical Details
+- Service worker caches: index.html, chalker.js, chalker.css, both fonts, both icons, manifest.json
+- Cache versioning via `CACHE_NAME` constant (bump to force update)
+- `skipWaiting()` and `clients.claim()` for immediate activation
+- Apple-specific meta tags for iOS home screen support
+
+### File Structure Change
+```
+Before: /chalker.html, /js/chalker.js, /styles/chalker.css
+After:  /chalker/index.html, /chalker/js/chalker.js, /chalker/styles/chalker.css
+        + /chalker/manifest.json, /chalker/sw.js, /chalker/fonts/, /chalker/images/
+```
+
+---
+
 ## **v4.1.2** - Chalker Mobile Display Improvements
 
 ### Chalker Enhancements
