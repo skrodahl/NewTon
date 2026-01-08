@@ -1,3 +1,24 @@
+# 2025-01-08
+
+## **v4.1.1** - Chalker Stats Improvements
+
+### Chalker Enhancements
+- **Format-specific short leg thresholds**: Short legs now use correct dart thresholds based on starting score format (101: 4, 201: 8, 301: 13, 401: 17, 501: 21, 601: 25, 701: 29, 801: 34, 901: 38, 1001: 42)
+- **Dynamic short legs label**: End-of-match stats screen now shows format-specific threshold (e.g., "Short Legs (≤21)" for 501)
+- **Improved per-leg stats display**: Reorganized leg stats with better visual hierarchy
+  - Line 1: Average (bold, primary stat)
+  - Line 2: Checkout info showing darts and checkout score (e.g., "15 darts, 107 out")
+  - Line 3: Scoring achievements (e.g., "1 × 180, 4 tons")
+- **Compact keypad**: Reduced keypad height for better phone display
+- **Chalkboard row overflow fix**: Reduced font size and row height to prevent 3-digit scores with cursor from wrapping
+
+### Technical Details
+- Added `SHORT_LEG_THRESHOLDS` constant mapping starting scores to dart thresholds
+- Added `id="short-legs-label"` to HTML for dynamic label updates
+- New CSS classes: `.leg-stat-avg`, `.leg-stat-checkout`, `.leg-stat-scoring` for visual hierarchy
+
+---
+
 # 2025-01-07
 
 ## **v4.1.0** - NewTon Chalker App & Bracket Enhancements

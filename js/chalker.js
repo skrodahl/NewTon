@@ -58,6 +58,9 @@
   /** @type {number|null} - Index of visit being edited (null = new entry mode) */
   let editingVisitIndex = null;
 
+  /** @type {'tiebreak'|'starting'|null} - Current mode of the selection modal */
+  let selectionModalMode = null;
+
   // ============
   // DOM Elements
   // ============
@@ -93,6 +96,13 @@
 
     // Modals
     checkoutModal: document.getElementById('checkout-modal'),
+    checkoutCancelBtn: document.getElementById('checkout-cancel-btn'),
+    tiebreakModal: document.getElementById('tiebreak-modal'),
+    tiebreakTitle: document.getElementById('tiebreak-title'),
+    tiebreakMessage: document.getElementById('tiebreak-message'),
+    tiebreakP1Btn: document.getElementById('tiebreak-p1'),
+    tiebreakP2Btn: document.getElementById('tiebreak-p2'),
+    tiebreakRandomBtn: document.getElementById('tiebreak-random'),
     menuModal: document.getElementById('menu-modal'),
     rematchBtn: document.getElementById('rematch-btn'),
     newMatchBtn: document.getElementById('new-match-btn'),
@@ -115,13 +125,16 @@
     p2180s: document.getElementById('p2-180s'),
     p1ShortLegs: document.getElementById('p1-short-legs'),
     p2ShortLegs: document.getElementById('p2-short-legs'),
+    shortLegsLabel: document.getElementById('short-legs-label'),
     p1HighOuts: document.getElementById('p1-high-outs'),
     p2HighOuts: document.getElementById('p2-high-outs'),
     p1First9: document.getElementById('p1-first9'),
     p2First9: document.getElementById('p2-first9'),
     p1MatchAvg: document.getElementById('p1-match-avg'),
     p2MatchAvg: document.getElementById('p2-match-avg'),
-    legAveragesContainer: document.getElementById('leg-averages-container'),
+    legStatsContainer: document.getElementById('leg-stats-container'),
+    legStatsP1: document.getElementById('leg-stats-p1'),
+    legStatsP2: document.getElementById('leg-stats-p2'),
     endRematchBtn: document.getElementById('end-rematch-btn'),
     endNewMatchBtn: document.getElementById('end-new-match-btn')
   };
@@ -195,18 +208,45 @@
       player1Score: config.startingScore,
       player2Score: config.startingScore,
       matchComplete: false,
-      matchWinner: null
+      matchWinner: null,
+      firstLegStarter: 1 // Will be set by selection modal
     };
-
-    // Start first leg
-    startNewLeg();
 
     // Update UI
     elements.player1Header.textContent = config.player1Name;
     elements.player2Header.textContent = config.player2Name;
 
+    // Show starting player selection
+    showStartingPlayerModal();
+  }
+
+  /**
+   * Complete match start after starting player selection
+   * @param {number} starter - 1 or 2
+   */
+  function completeMatchStart(starter) {
+    state.firstLegStarter = starter;
+
+    // Start first leg
+    startNewLeg();
+
     updateDisplay();
     showScreen('scoring');
+  }
+
+  /**
+   * Get which player starts the current leg
+   * Alternates based on firstLegStarter and leg number
+   * @returns {number} 1 or 2
+   */
+  function getLegStarter() {
+    const legIndex = state.legs.length - 1; // 0-indexed
+    // First leg: firstLegStarter, then alternate
+    if (legIndex % 2 === 0) {
+      return state.firstLegStarter;
+    } else {
+      return state.firstLegStarter === 1 ? 2 : 1;
+    }
   }
 
   /**
@@ -222,8 +262,8 @@
     state.player1Score = state.config.startingScore;
     state.player2Score = state.config.startingScore;
 
-    // Alternate who starts based on leg number (odd legs: P1 starts, even legs: P2 starts)
-    state.currentPlayer = state.legs.length % 2 === 1 ? 1 : 2;
+    // Set current player based on leg starter
+    state.currentPlayer = getLegStarter();
   }
 
   /**
@@ -258,6 +298,17 @@
     } else {
       // Switch player
       state.currentPlayer = state.currentPlayer === 1 ? 2 : 1;
+
+      // Check for tie-break: max rounds reached by both players, no checkout
+      const maxRounds = state.config.maxRounds;
+      const p1Visits = currentLeg.visits.filter(v => v.player === 1).length;
+      const p2Visits = currentLeg.visits.filter(v => v.player === 2).length;
+
+      if (p1Visits >= maxRounds && p2Visits >= maxRounds && !currentLeg.winner) {
+        updateDisplay();
+        showTiebreakModal();
+        return;
+      }
     }
 
     updateDisplay();
@@ -296,24 +347,73 @@
    * Handle score submission
    * @param {number} score
    */
+  // Scores impossible to achieve with 3 darts
+  const ILLEGAL_SCORES = [163, 166, 169, 172, 173, 175, 176, 178, 179];
+
+  // Checkouts impossible to finish on a double
+  const ILLEGAL_CHECKOUTS = [159, 162, 163, 165, 166, 168, 169];
+
+  // Short leg thresholds by starting score format
+  const SHORT_LEG_THRESHOLDS = {
+    101: 4,
+    201: 8,
+    301: 13,
+    401: 17,
+    501: 21,
+    601: 25,
+    701: 29,
+    801: 34,
+    901: 38,
+    1001: 42
+  };
+
+  /**
+   * Check if a score is valid (achievable with 3 darts)
+   * @param {number} score
+   * @returns {boolean}
+   */
+  function isValidScore(score) {
+    if (score < 0 || score > 180) return false;
+    if (ILLEGAL_SCORES.includes(score)) return false;
+    return true;
+  }
+
+  /**
+   * Check if a checkout score is valid (can be finished on a double)
+   * @param {number} score
+   * @returns {boolean}
+   */
+  function isValidCheckout(score) {
+    if (score > 170) return false;
+    if (ILLEGAL_CHECKOUTS.includes(score)) return false;
+    return true;
+  }
+
+  /**
+   * Handle score submission
+   * @param {number} score
+   */
   function submitScore(score) {
     const currentScore = state.currentPlayer === 1 ? state.player1Score : state.player2Score;
     const newScore = currentScore - score;
 
     // Validate score
-    if (score < 0 || score > 180) {
-      // Invalid score range
+    if (!isValidScore(score)) {
+      // Invalid/impossible score
       return;
     }
 
     // Check for checkout
     if (newScore === 0) {
+      // Validate checkout is possible (remaining score must be checkable)
+      if (!isValidCheckout(currentScore)) {
+        return;
+      }
       // Checkout! Ask for darts used
       showCheckoutModal(score);
-    } else if (newScore < 0 || newScore === 1) {
-      // Bust - referee should enter 0, but we'll accept if they enter the actual score
-      // Just record as normal (referee handles bust by entering 0)
-      recordVisit(score);
+    } else if (newScore < 2) {
+      // Bust (score would leave < 2 remaining) - record as 0
+      recordVisit(0);
     } else {
       // Normal score
       recordVisit(score);
@@ -323,13 +423,150 @@
   }
 
   /**
+   * Get minimum darts needed for a checkout
+   * @param {number} score - Remaining score before checkout
+   * @returns {number} 1, 2, or 3
+   */
+  function getMinDartsForCheckout(score) {
+    // 1-dart: doubles (2-40) and bull (50)
+    if ((score >= 2 && score <= 40 && score % 2 === 0) || score === 50) {
+      return 1;
+    }
+    // 2-dart checkouts: 41-98, 100, 101, 104, 107, 110
+    const twoDartCheckouts = [100, 101, 104, 107, 110];
+    if ((score >= 41 && score <= 98) || twoDartCheckouts.includes(score)) {
+      return 2;
+    }
+    // Everything else requires 3 darts
+    return 3;
+  }
+
+  /**
    * Show checkout modal to ask for darts used
    * @param {number} checkoutScore
    */
   function showCheckoutModal(checkoutScore) {
+    const currentScore = state.currentPlayer === 1 ? state.player1Score : state.player2Score;
+    const minDarts = getMinDartsForCheckout(currentScore);
+
     // Store the checkout score for when we get the darts count
     elements.checkoutModal.dataset.checkoutScore = checkoutScore;
+
+    // Show/hide dart buttons based on minimum darts needed
+    const dartButtons = elements.checkoutModal.querySelectorAll('.btn-dart');
+    dartButtons.forEach(btn => {
+      const darts = parseInt(btn.dataset.darts, 10);
+      btn.style.display = darts >= minDarts ? 'block' : 'none';
+    });
+
     showModal(elements.checkoutModal);
+  }
+
+  /**
+   * Show starting player selection modal
+   */
+  function showStartingPlayerModal() {
+    selectionModalMode = 'starting';
+    const p1Name = state.config.player1Name;
+    const p2Name = state.config.player2Name;
+
+    // Set modal content for starting player selection
+    elements.tiebreakTitle.textContent = 'Starting Player';
+    elements.tiebreakMessage.textContent = 'Select who throws first:';
+
+    // Player 1 shown first (as registered)
+    elements.tiebreakP1Btn.textContent = p1Name;
+    elements.tiebreakP2Btn.textContent = p2Name;
+    elements.tiebreakP1Btn.dataset.player = '1';
+    elements.tiebreakP2Btn.dataset.player = '2';
+
+    // Show random button
+    elements.tiebreakRandomBtn.style.display = 'block';
+
+    showModal(elements.tiebreakModal);
+  }
+
+  /**
+   * Show tie-break modal when max rounds reached without checkout
+   */
+  function showTiebreakModal() {
+    selectionModalMode = 'tiebreak';
+    const legStarter = getLegStarter();
+    const p1Name = state.config.player1Name;
+    const p2Name = state.config.player2Name;
+
+    // Set modal content for tie-break
+    elements.tiebreakTitle.textContent = 'Tie-Break';
+    elements.tiebreakMessage.textContent = 'Max rounds reached. Each player throws 3 darts - highest score wins.';
+
+    // Show leg starter first
+    if (legStarter === 1) {
+      elements.tiebreakP1Btn.textContent = p1Name;
+      elements.tiebreakP2Btn.textContent = p2Name;
+      elements.tiebreakP1Btn.dataset.player = '1';
+      elements.tiebreakP2Btn.dataset.player = '2';
+    } else {
+      elements.tiebreakP1Btn.textContent = p2Name;
+      elements.tiebreakP2Btn.textContent = p1Name;
+      elements.tiebreakP1Btn.dataset.player = '2';
+      elements.tiebreakP2Btn.dataset.player = '1';
+    }
+
+    // Hide random button
+    elements.tiebreakRandomBtn.style.display = 'none';
+
+    showModal(elements.tiebreakModal);
+  }
+
+  /**
+   * Handle player selection from modal
+   * @param {number} buttonIndex - 1, 2, or 'random'
+   */
+  function handleSelectionModalChoice(buttonIndex) {
+    let player;
+
+    if (buttonIndex === 'random') {
+      player = Math.random() < 0.5 ? 1 : 2;
+    } else {
+      player = parseInt(elements[`tiebreakP${buttonIndex}Btn`].dataset.player, 10);
+    }
+
+    hideModal(elements.tiebreakModal);
+
+    if (selectionModalMode === 'starting') {
+      completeMatchStart(player);
+    } else if (selectionModalMode === 'tiebreak') {
+      completeTiebreak(player);
+    }
+
+    selectionModalMode = null;
+  }
+
+  /**
+   * Complete tie-break with winner
+   * @param {number} player - 1 or 2
+   */
+  function completeTiebreak(player) {
+    const currentLeg = state.legs[state.legs.length - 1];
+    currentLeg.winner = player;
+    currentLeg.tiebreak = true; // Mark as tie-break win
+
+    // Update leg scores
+    if (player === 1) {
+      state.player1Legs++;
+    } else {
+      state.player2Legs++;
+    }
+
+    // Check for match end or start new leg
+    const legsToWin = Math.ceil(state.config.bestOf / 2);
+    if (state.player1Legs >= legsToWin || state.player2Legs >= legsToWin) {
+      state.matchComplete = true;
+      state.matchWinner = state.player1Legs >= legsToWin ? 1 : 2;
+      showEndScreen();
+    } else {
+      startNewLeg();
+    }
   }
 
   /**
@@ -351,6 +588,20 @@
       // Normal new checkout
       recordVisit(checkoutScore, dartsUsed, true);
     }
+  }
+
+  /**
+   * Cancel checkout and return to scoring
+   */
+  function cancelCheckout() {
+    hideModal(elements.checkoutModal);
+    // Clear any stored data
+    delete elements.checkoutModal.dataset.checkoutScore;
+    delete elements.checkoutModal.dataset.editVisitIndex;
+    // Clear input and re-render
+    inputBuffer = '';
+    editingVisitIndex = null;
+    renderChalkboard();
   }
 
   /**
@@ -561,7 +812,7 @@
     if (!currentLeg) return;
 
     const maxRounds = state.config.maxRounds;
-    const legStarter = state.legs.length % 2 === 1 ? 1 : 2;
+    const legStarter = getLegStarter();
 
     // Build data from visits, tracking visit indices for each cell
     const roundData = [];
@@ -637,8 +888,8 @@
         <td class="col-scored"></td>
         <td class="col-togo">${state.config.startingScore}</td>
         <td class="col-darts"></td>
-        <td class="col-togo">${state.config.startingScore}</td>
         <td class="col-scored"></td>
+        <td class="col-togo">${state.config.startingScore}</td>
       </tr>
     `;
 
@@ -692,8 +943,8 @@
           <td class="col-scored ${p1Class}" ${p1DataAttr}>${p1Content}</td>
           <td class="col-togo">${p1ToGo}</td>
           <td class="col-darts">${dartCount}</td>
-          <td class="col-togo">${p2ToGo}</td>
           <td class="col-scored ${p2Class}" ${p2DataAttr}>${p2Content}</td>
+          <td class="col-togo">${p2ToGo}</td>
         </tr>
       `;
     }
@@ -779,33 +1030,34 @@
    * @returns {Object} Statistics object
    */
   function calculateStats() {
+    const shortLegThreshold = SHORT_LEG_THRESHOLDS[state.config.startingScore] || 21;
+
     const stats = {
       player1: {
         tons: 0,
         ton80s: 0,
-        shortLegs: 0,
-        highOuts: 0,
+        shortLegs: [],      // Array of dart counts for short legs
+        highOuts: [],       // Array of checkout scores >= 101
         first9Scores: [],
-        legAverages: [],
         totalScore: 0,
         totalDarts: 0
       },
       player2: {
         tons: 0,
         ton80s: 0,
-        shortLegs: 0,
-        highOuts: 0,
+        shortLegs: [],
+        highOuts: [],
         first9Scores: [],
-        legAverages: [],
         totalScore: 0,
         totalDarts: 0
-      }
+      },
+      legs: []              // Per-leg stats for display
     };
 
     state.legs.forEach((leg, legIndex) => {
       const legStats = {
-        player1: { score: 0, darts: 0, visits: 0 },
-        player2: { score: 0, darts: 0, visits: 0 }
+        player1: { score: 0, darts: 0, visits: 0, checkoutScore: null, tons: 0, ton80s: 0 },
+        player2: { score: 0, darts: 0, visits: 0, checkoutScore: null, tons: 0, ton80s: 0 }
       };
 
       leg.visits.forEach((visit) => {
@@ -815,16 +1067,22 @@
         // Count tons (100+)
         if (visit.score >= 100) {
           playerStats.tons++;
+          playerLegStats.tons++;
         }
 
         // Count 180s
         if (visit.score === 180) {
           playerStats.ton80s++;
+          playerLegStats.ton80s++;
         }
 
-        // High outs (101+)
-        if (visit.isCheckout && visit.score >= 101) {
-          playerStats.highOuts++;
+        // Track checkout score
+        if (visit.isCheckout) {
+          playerLegStats.checkoutScore = visit.remainingBefore;
+          // High outs (101+)
+          if (visit.remainingBefore >= 101) {
+            playerStats.highOuts.push(visit.remainingBefore);
+          }
         }
 
         // First 9 (first 3 visits per player per leg)
@@ -842,27 +1100,42 @@
       });
 
       // Calculate leg averages
-      if (legStats.player1.darts > 0) {
-        stats.player1.legAverages.push({
-          leg: legIndex + 1,
-          avg: (legStats.player1.score / legStats.player1.darts) * 3
-        });
-      }
-      if (legStats.player2.darts > 0) {
-        stats.player2.legAverages.push({
-          leg: legIndex + 1,
-          avg: (legStats.player2.score / legStats.player2.darts) * 3
-        });
-      }
+      const p1Avg = legStats.player1.darts > 0
+        ? (legStats.player1.score / legStats.player1.darts) * 3
+        : null;
+      const p2Avg = legStats.player2.darts > 0
+        ? (legStats.player2.score / legStats.player2.darts) * 3
+        : null;
 
-      // Short legs (<=21 darts to checkout)
+      // Track short legs (winner only)
       if (leg.winner) {
         const winnerLegStats = leg.winner === 1 ? legStats.player1 : legStats.player2;
         const winnerStats = leg.winner === 1 ? stats.player1 : stats.player2;
-        if (winnerLegStats.darts <= 21) {
-          winnerStats.shortLegs++;
+        if (winnerLegStats.darts <= shortLegThreshold) {
+          winnerStats.shortLegs.push(winnerLegStats.darts);
         }
       }
+
+      // Store per-leg stats for display
+      stats.legs.push({
+        leg: legIndex + 1,
+        winner: leg.winner,
+        tiebreak: leg.tiebreak || false,
+        player1: {
+          avg: p1Avg,
+          darts: legStats.player1.darts,
+          checkoutScore: legStats.player1.checkoutScore,
+          tons: legStats.player1.tons,
+          ton80s: legStats.player1.ton80s
+        },
+        player2: {
+          avg: p2Avg,
+          darts: legStats.player2.darts,
+          checkoutScore: legStats.player2.checkoutScore,
+          tons: legStats.player2.tons,
+          ton80s: legStats.player2.ton80s
+        }
+      });
     });
 
     // Calculate first 9 averages (average of first 9 darts = first 3 visits)
@@ -915,36 +1188,92 @@
     elements.statsPlayer1.textContent = state.config.player1Name;
     elements.statsPlayer2.textContent = state.config.player2Name;
 
+    // Update short legs label with format-specific threshold
+    const shortLegThreshold = SHORT_LEG_THRESHOLDS[state.config.startingScore] || 21;
+    elements.shortLegsLabel.textContent = `Short Legs (≤${shortLegThreshold})`;
+
     // Populate stats
     elements.p1Tons.textContent = stats.player1.tons;
     elements.p2Tons.textContent = stats.player2.tons;
     elements.p1180s.textContent = stats.player1.ton80s;
     elements.p2180s.textContent = stats.player2.ton80s;
-    elements.p1ShortLegs.textContent = stats.player1.shortLegs;
-    elements.p2ShortLegs.textContent = stats.player2.shortLegs;
-    elements.p1HighOuts.textContent = stats.player1.highOuts;
-    elements.p2HighOuts.textContent = stats.player2.highOuts;
+
+    // Short legs: show count
+    elements.p1ShortLegs.textContent = stats.player1.shortLegs.length;
+    elements.p2ShortLegs.textContent = stats.player2.shortLegs.length;
+
+    // High outs: show count
+    elements.p1HighOuts.textContent = stats.player1.highOuts.length;
+    elements.p2HighOuts.textContent = stats.player2.highOuts.length;
+
     elements.p1First9.textContent = stats.player1.first9Avg > 0 ? stats.player1.first9Avg.toFixed(1) : '-';
     elements.p2First9.textContent = stats.player2.first9Avg > 0 ? stats.player2.first9Avg.toFixed(1) : '-';
     elements.p1MatchAvg.textContent = stats.player1.matchAvg > 0 ? stats.player1.matchAvg.toFixed(1) : '-';
     elements.p2MatchAvg.textContent = stats.player2.matchAvg > 0 ? stats.player2.matchAvg.toFixed(1) : '-';
 
-    // Leg averages
-    elements.legAveragesContainer.innerHTML = '';
-    const maxLegs = Math.max(stats.player1.legAverages.length, stats.player2.legAverages.length);
-    for (let i = 0; i < maxLegs; i++) {
-      const p1Avg = stats.player1.legAverages[i]?.avg;
-      const p2Avg = stats.player2.legAverages[i]?.avg;
+    // Leg stats table headers
+    elements.legStatsP1.textContent = state.config.player1Name;
+    elements.legStatsP2.textContent = state.config.player2Name;
 
-      const row = document.createElement('div');
-      row.className = 'leg-avg-row';
+    // Render per-leg stats with explicit labels
+    elements.legStatsContainer.innerHTML = '';
+    stats.legs.forEach((leg, idx) => {
+      // Helper to build stat lines for a player
+      const buildPlayerStats = (playerData, isWinner, isTiebreak) => {
+        const lines = [];
+
+        // Line 1: Average (always show if available)
+        if (playerData.avg !== null) {
+          lines.push(`<span class="leg-stat-avg">${playerData.avg.toFixed(1)} avg</span>`);
+        }
+
+        // Line 2: Checkout info (winner only, non-tiebreak)
+        if (isWinner && !isTiebreak) {
+          const checkoutParts = [];
+          if (playerData.darts <= shortLegThreshold) {
+            checkoutParts.push(`${playerData.darts} darts`);
+          }
+          if (playerData.checkoutScore >= 101) {
+            checkoutParts.push(`${playerData.checkoutScore} out`);
+          } else if (playerData.checkoutScore !== null) {
+            checkoutParts.push(`${playerData.checkoutScore} out`);
+          }
+          if (checkoutParts.length > 0) {
+            const isHighlight = playerData.darts <= shortLegThreshold || playerData.checkoutScore >= 101;
+            lines.push(`<span class="leg-stat-checkout${isHighlight ? ' highlight' : ''}">${checkoutParts.join(', ')}</span>`);
+          }
+        } else if (isWinner && isTiebreak) {
+          lines.push(`<span class="leg-stat-checkout">Tie-break win</span>`);
+        }
+
+        // Line 3: Scoring achievements (180s, tons)
+        const scoringParts = [];
+        if (playerData.ton80s > 0) {
+          scoringParts.push(`${playerData.ton80s} × 180`);
+        }
+        const nonMaxTons = playerData.tons - playerData.ton80s;
+        if (nonMaxTons > 0) {
+          scoringParts.push(`${nonMaxTons} ton${nonMaxTons > 1 ? 's' : ''}`);
+        }
+        if (scoringParts.length > 0) {
+          lines.push(`<span class="leg-stat-scoring">${scoringParts.join(', ')}</span>`);
+        }
+
+        return lines.length > 0 ? lines.join('') : '-';
+      };
+
+      const p1Content = buildPlayerStats(leg.player1, leg.winner === 1, leg.tiebreak);
+      const p2Content = buildPlayerStats(leg.player2, leg.winner === 2, leg.tiebreak);
+
+      const row = document.createElement('tr');
+      if (idx > 0) row.className = 'leg-separator';
       row.innerHTML = `
-        <span>${p1Avg ? p1Avg.toFixed(1) : '-'}</span>
-        <span class="leg-label">Leg ${i + 1}</span>
-        <span>${p2Avg ? p2Avg.toFixed(1) : '-'}</span>
+        <td>${p1Content}</td>
+        <td>Leg ${leg.leg}</td>
+        <td>${p2Content}</td>
       `;
-      elements.legAveragesContainer.appendChild(row);
-    }
+      elements.legStatsContainer.appendChild(row);
+    });
 
     showScreen('end');
   }
@@ -1000,7 +1329,7 @@
     if (!visit) return;
 
     // Validate score
-    if (newScore < 0 || newScore > 180) {
+    if (!isValidScore(newScore)) {
       return;
     }
 
@@ -1017,6 +1346,10 @@
 
     // Check if this would be a checkout (exactly 0)
     if (newRemaining === 0) {
+      // Validate checkout is possible
+      if (!isValidCheckout(scoreBeforeVisit)) {
+        return;
+      }
       // This edit results in a checkout - show checkout modal
       showEditCheckoutModal(newScore, editingVisitIndex);
       return;
@@ -1060,8 +1393,28 @@
    * @param {number} visitIdx
    */
   function showEditCheckoutModal(checkoutScore, visitIdx) {
+    // Calculate score before the visit being edited
+    const currentLeg = state.legs[state.legs.length - 1];
+    const visit = currentLeg.visits[visitIdx];
+    let scoreBeforeVisit = state.config.startingScore;
+    for (let i = 0; i < visitIdx; i++) {
+      if (currentLeg.visits[i].player === visit.player) {
+        scoreBeforeVisit -= currentLeg.visits[i].score;
+      }
+    }
+
+    const minDarts = getMinDartsForCheckout(scoreBeforeVisit);
+
     elements.checkoutModal.dataset.checkoutScore = checkoutScore;
     elements.checkoutModal.dataset.editVisitIndex = visitIdx;
+
+    // Show/hide dart buttons based on minimum darts needed
+    const dartButtons = elements.checkoutModal.querySelectorAll('.btn-dart');
+    dartButtons.forEach(btn => {
+      const darts = parseInt(btn.dataset.darts, 10);
+      btn.style.display = darts >= minDarts ? 'block' : 'none';
+    });
+
     showModal(elements.checkoutModal);
   }
 
@@ -1116,6 +1469,12 @@
     document.querySelectorAll('.btn-dart').forEach(btn => {
       btn.addEventListener('click', () => completeCheckout(parseInt(btn.dataset.darts, 10)));
     });
+    elements.checkoutCancelBtn.addEventListener('click', cancelCheckout);
+
+    // Selection modal (starting player / tie-break)
+    elements.tiebreakP1Btn.addEventListener('click', () => handleSelectionModalChoice(1));
+    elements.tiebreakP2Btn.addEventListener('click', () => handleSelectionModalChoice(2));
+    elements.tiebreakRandomBtn.addEventListener('click', () => handleSelectionModalChoice('random'));
 
     // End screen buttons (no confirmation needed - match is already over)
     elements.endRematchBtn.addEventListener('click', rematch);

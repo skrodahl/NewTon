@@ -119,8 +119,8 @@
                             <th>Scored</th>
                             <th>To Go</th>
                             <th></th>
-                            <th>To Go</th>
                             <th>Scored</th>
+                            <th>To Go</th>
                         </tr>
                     </thead>
                     <tbody id="chalk-tbody">
@@ -158,6 +158,20 @@
                 <button class="btn btn-dart" data-darts="1">1</button>
                 <button class="btn btn-dart" data-darts="2">2</button>
                 <button class="btn btn-dart" data-darts="3">3</button>
+            </div>
+            <button id="checkout-cancel-btn" class="btn btn-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Selection Modal (Starting Player / Tie-Break) -->
+    <div id="tiebreak-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="tiebreak-title"></h2>
+            <p id="tiebreak-message"></p>
+            <div class="tiebreak-buttons">
+                <button class="btn btn-primary btn-tiebreak" id="tiebreak-p1"></button>
+                <button class="btn btn-primary btn-tiebreak" id="tiebreak-p2"></button>
+                <button class="btn btn-secondary btn-tiebreak" id="tiebreak-random" style="display: none;">Random</button>
             </div>
         </div>
     </div>
@@ -220,7 +234,7 @@
                     </tr>
                     <tr>
                         <td id="p1-short-legs">0</td>
-                        <td class="stat-label">Short Legs (≤21)</td>
+                        <td class="stat-label" id="short-legs-label">Short Legs (≤21)</td>
                         <td id="p2-short-legs">0</td>
                     </tr>
                     <tr>
@@ -241,9 +255,18 @@
                 </tbody>
             </table>
 
-            <div class="leg-averages">
-                <h3>Leg Averages</h3>
-                <div id="leg-averages-container"></div>
+            <div class="leg-stats">
+                <h3>Leg Stats</h3>
+                <table class="leg-stats-table">
+                    <thead>
+                        <tr>
+                            <th id="leg-stats-p1">P1</th>
+                            <th></th>
+                            <th id="leg-stats-p2">P2</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leg-stats-container"></tbody>
+                </table>
             </div>
         </div>
 
