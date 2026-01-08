@@ -7,15 +7,36 @@ Ideas and suggestions for future consideration.
 ## Inbox
 *Raw ideas awaiting triage*
 
-### Self-Refereeing Prevention (Optional)
-Players can currently be assigned as referee in their own match. This is intentional behavior, but could be made configurable for clubs that want to prevent it.
+### Chalker Persistence & PWA
 
-**Consideration**: Would need a new config option (e.g., `config.lanes.preventSelfReferee`) and validation in referee assignment logic.
+**Goal:** Match data survives page reload, history of past matches, installable as native-like app.
 
-### ~~Backside Match Source Visibility~~ ✅ IMPLEMENTED (v4.1.0)
-~~No easy way to see, from a backside match, which frontside matches feed into it.~~
+**Storage decision: IndexedDB**
 
-**Implemented**: Status bar now shows "Fed by FS-X-X, FS-X-X" when hovering over backside matches, indicating which frontside matches feed into them.
+Chose IndexedDB over localStorage for these reasons:
+- Larger storage (~50MB+ vs ~5MB)
+- Selective cleanup: can delete matches older than X days using indexes
+- Potential to share unified database with Tournament Manager later
+- Complexity is manageable with a thin wrapper (~40 lines)
+
+**Database structure (draft):**
+- Database: `newton`
+- Stores: `chalker_current`, `chalker_history`, `tournaments`, `config`
+
+**Features to consider:**
+- Auto-save current match on every score entry
+- Resume unfinished match on page load
+- History screen to view past matches
+- Option to continue incomplete matches
+
+**PWA components:**
+- manifest.json (app metadata, icons, display mode)
+- Service worker (offline caching)
+- Home screen icons
+
+**Open questions:**
+- How much history to retain? (last 10? 50? configurable?)
+- Cleanup threshold (delete matches older than X days?)
 
 ---
 
@@ -40,4 +61,4 @@ Players can currently be assigned as referee in their own match. This is intenti
 
 ---
 
-**Last updated:** January 7, 2025
+**Last updated:** January 8, 2025
