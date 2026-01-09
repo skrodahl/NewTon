@@ -3,16 +3,16 @@
 ## **v4.1.4** - Chalker Tablet Scaling
 
 ### Chalker Enhancements
-- **Tablet-optimized interface**: Responsive scaling for screens 768px and wider
-  - Score anchors: 3rem → 4.5rem
-  - Chalkboard cells: 44px → 64px height, larger fonts
-  - Keypad buttons: significantly larger touch targets
+- **Tablet-optimized interface**: Responsive scaling for screens 768px and wider (~1.8x from phone)
+  - Score anchors: 3rem → 5.5rem
+  - Chalkboard cells: 44px → 80px height, 2.75rem fonts
+  - Keypad buttons: 1.125rem → 2.25rem with larger touch targets
   - Form inputs, modals, and buttons all scaled up
-  - Increased spacing throughout
+  - Increased spacing throughout (8-56px vs 4-32px)
 
 ### Technical Details
 - Added `@media screen and (min-width: 768px)` breakpoint
-- CSS custom properties (spacing) scaled ~1.5x for tablets
+- CSS custom properties (spacing) scaled ~1.8x for tablets
 - All screens affected: config, scoring, modals, end-of-match stats
 
 ---

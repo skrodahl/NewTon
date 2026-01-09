@@ -23,12 +23,12 @@ The Chalker interface was designed for phones and appeared too small on tablets.
 
 | Element | Phone | Tablet (768px+) |
 |---------|-------|-----------------|
-| Score anchors | 3rem | 4.5rem |
-| Chalkboard rows | 44px | 64px |
-| Chalkboard font | 1.75rem | 2.25rem |
-| Keypad buttons | 1.125rem | 1.75rem |
-| Form inputs | 1.125rem | 1.5rem |
-| Base spacing | 4-32px | 6-44px |
+| Score anchors | 3rem | 5.5rem |
+| Chalkboard rows | 44px | 80px |
+| Chalkboard font | 1.75rem | 2.75rem |
+| Keypad buttons | 1.125rem | 2.25rem |
+| Form inputs | 1.125rem | 1.875rem |
+| Base spacing | 4-32px | 8-56px |
 
 **Affected Screens:**
 - Configuration screen (form inputs, labels, buttons)
@@ -41,9 +41,9 @@ The Chalker interface was designed for phones and appeared too small on tablets.
 ## Technical Details
 
 - Single `@media screen and (min-width: 768px)` breakpoint
-- CSS custom properties scaled ~1.5x for tablet spacing
+- CSS custom properties scaled ~1.8x for tablet spacing
 - No JavaScript changes required
-- Service worker cache version bumped to `chalker-v2`
+- Service worker cache version bumped to `chalker-v3`
 
 ---
 

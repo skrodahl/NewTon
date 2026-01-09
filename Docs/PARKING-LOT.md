@@ -52,6 +52,27 @@ Chose IndexedDB over localStorage for these reasons:
 
 ---
 
+### Chalker tablet scaling needs more work
+
+**Problem:** Current 1.8x scaling at 768px+ breakpoint isn't noticeable enough on 9" tablets.
+
+**Device details:**
+- Lenovo 9" tablet: 1340x800 resolution
+- Portrait mode: 800x1340 (800px width barely triggers 768px breakpoint)
+- Also needs to work on iPad
+
+**Current state:** v4.1.4 has ~1.8x scaling, but it's not dramatic enough for the screen size.
+
+**Options to explore:**
+- Increase scaling another 1.25x (total ~2.25x from phone)
+- Use viewport-based units (`vh`/`vw`) for key elements
+- Lower breakpoint to 600px
+- Add a second breakpoint for larger tablets (1024px+)
+
+**Status:** Deferred. Current scaling is functional, just not optimal.
+
+---
+
 ## Next
 *Ready for implementation when time permits*
 
@@ -73,4 +94,4 @@ Chose IndexedDB over localStorage for these reasons:
 
 ---
 
-**Last updated:** January 8, 2025
+**Last updated:** January 9, 2025
