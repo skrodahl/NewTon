@@ -159,6 +159,7 @@
     detailP2180s: document.getElementById('detail-p2-180s'),
     detailP1ShortLegs: document.getElementById('detail-p1-short-legs'),
     detailP2ShortLegs: document.getElementById('detail-p2-short-legs'),
+    detailShortLegsLabel: document.getElementById('detail-short-legs-label'),
     detailP1HighOuts: document.getElementById('detail-p1-high-outs'),
     detailP2HighOuts: document.getElementById('detail-p2-high-outs'),
     detailP1First9: document.getElementById('detail-p1-first9'),
@@ -686,6 +687,12 @@
     visit.dartsUsed = dartsUsed;
     visit.isCheckout = true;
 
+    // Remove all visits that came after this checkout
+    // (opponent may have entered scores before the edit was made)
+    if (visitIdx < currentLeg.visits.length - 1) {
+      currentLeg.visits.splice(visitIdx + 1);
+    }
+
     // Set the leg winner
     currentLeg.winner = visit.player;
     if (visit.player === 1) {
@@ -708,12 +715,14 @@
     editingVisitIndex = null;
     inputBuffer = '';
 
-    // Update display or show end screen
+    // Show end screen or start next leg
     if (state.matchComplete) {
       showEndScreen();
     } else {
+      startNewLeg();
       updateDisplay();
     }
+    saveCurrentMatch();
   }
 
   /**
@@ -1290,50 +1299,50 @@
   }
 
   /**
-   * Show end screen with statistics (matches history detail format)
+   * Populate match stats into DOM elements (shared by end screen and history detail)
+   * @param {object} match - Match object with config, legs, stats, player1Legs, player2Legs
+   * @param {object} els - Object with DOM element references for stats display
    */
-  function showEndScreen() {
-    const stats = calculateStats();
-    const config = state.config;
+  function populateMatchStats(match, els) {
+    const config = match.config;
+    const stats = match.stats || {};
+    const p1Stats = stats.player1 || {};
+    const p2Stats = stats.player2 || {};
 
-    // Winner/Loser display (show player1 vs player2, not winner vs loser)
-    elements.winnerName.textContent = config.player1Name;
-    elements.loserName.textContent = config.player2Name;
-    elements.finalScore.textContent = `${state.player1Legs} - ${state.player2Legs}`;
-
-    // Match info line
-    const bestOf = config.bestOf || 3;
-    elements.endMatchInfo.textContent = `Best of ${bestOf}`;
+    // Player names and score
+    els.player1Name.textContent = config.player1Name;
+    els.player2Name.textContent = config.player2Name;
+    els.finalScore.textContent = `${match.player1Legs} - ${match.player2Legs}`;
 
     // Stats table headers
-    elements.statsPlayer1.textContent = config.player1Name;
-    elements.statsPlayer2.textContent = config.player2Name;
+    els.statsP1.textContent = config.player1Name;
+    els.statsP2.textContent = config.player2Name;
 
     // Update short legs label with format-specific threshold
     const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
-    elements.shortLegsLabel.textContent = `Short Legs (≤${shortLegThreshold})`;
+    els.shortLegsLabel.textContent = `Short Legs (≤${shortLegThreshold})`;
 
-    // Populate stats
-    elements.p1Tons.textContent = stats.player1.tons;
-    elements.p2Tons.textContent = stats.player2.tons;
-    elements.p1180s.textContent = stats.player1.ton80s;
-    elements.p2180s.textContent = stats.player2.ton80s;
+    // Populate stats - handle both array and number formats for shortLegs/highOuts
+    els.p1Tons.textContent = p1Stats.tons || 0;
+    els.p2Tons.textContent = p2Stats.tons || 0;
+    els.p1180s.textContent = p1Stats.ton80s || 0;
+    els.p2180s.textContent = p2Stats.ton80s || 0;
 
-    // Short legs: show count
-    elements.p1ShortLegs.textContent = stats.player1.shortLegs.length;
-    elements.p2ShortLegs.textContent = stats.player2.shortLegs.length;
+    // Short legs: stored as array, display count
+    els.p1ShortLegs.textContent = Array.isArray(p1Stats.shortLegs) ? p1Stats.shortLegs.length : (p1Stats.shortLegs || 0);
+    els.p2ShortLegs.textContent = Array.isArray(p2Stats.shortLegs) ? p2Stats.shortLegs.length : (p2Stats.shortLegs || 0);
 
-    // High outs: show count
-    elements.p1HighOuts.textContent = stats.player1.highOuts.length;
-    elements.p2HighOuts.textContent = stats.player2.highOuts.length;
+    // High outs: stored as array, display count
+    els.p1HighOuts.textContent = Array.isArray(p1Stats.highOuts) ? p1Stats.highOuts.length : (p1Stats.highOuts || 0);
+    els.p2HighOuts.textContent = Array.isArray(p2Stats.highOuts) ? p2Stats.highOuts.length : (p2Stats.highOuts || 0);
 
-    elements.p1First9.textContent = stats.player1.first9Avg > 0 ? stats.player1.first9Avg.toFixed(1) : '-';
-    elements.p2First9.textContent = stats.player2.first9Avg > 0 ? stats.player2.first9Avg.toFixed(1) : '-';
-    elements.p1MatchAvg.textContent = stats.player1.matchAvg > 0 ? stats.player1.matchAvg.toFixed(1) : '-';
-    elements.p2MatchAvg.textContent = stats.player2.matchAvg > 0 ? stats.player2.matchAvg.toFixed(1) : '-';
+    els.p1First9.textContent = p1Stats.first9Avg > 0 ? p1Stats.first9Avg.toFixed(1) : '-';
+    els.p2First9.textContent = p2Stats.first9Avg > 0 ? p2Stats.first9Avg.toFixed(1) : '-';
+    els.p1MatchAvg.textContent = p1Stats.matchAvg > 0 ? p1Stats.matchAvg.toFixed(1) : '-';
+    els.p2MatchAvg.textContent = p2Stats.matchAvg > 0 ? p2Stats.matchAvg.toFixed(1) : '-';
 
     // Calculate and display leg averages
-    const legs = state.legs || [];
+    const legs = match.legs || [];
     const p1LegAvgs = [];
     const p2LegAvgs = [];
 
@@ -1361,161 +1370,61 @@
       }
     });
 
-    elements.p1LegAvgs.textContent = p1LegAvgs.join(', ') || '-';
-    elements.p2LegAvgs.textContent = p2LegAvgs.join(', ') || '-';
-
-    // Render leg scoresheets (same format as history detail)
-    renderEndScreenLegScoresheets();
-
-    showScreen('end');
-
-    // Save to history
-    saveMatchToHistory();
+    els.p1LegAvgs.textContent = p1LegAvgs.join(', ') || '-';
+    els.p2LegAvgs.textContent = p2LegAvgs.join(', ') || '-';
   }
 
   /**
-   * Render leg scoresheets for end screen (reuses history detail format)
+   * Show end screen with statistics (matches history detail format)
    */
-  function renderEndScreenLegScoresheets() {
-    const config = state.config;
-    const legs = state.legs || [];
+  function showEndScreen() {
+    // Build match object from current state (same structure as saved to history)
+    const stats = calculateStats();
+    const match = {
+      config: state.config,
+      legs: state.legs,
+      player1Legs: state.player1Legs,
+      player2Legs: state.player2Legs,
+      matchWinner: state.matchWinner,
+      stats: stats
+    };
 
-    if (legs.length === 0) {
-      elements.endLegsContainer.innerHTML = '<p>No leg data available</p>';
-      return;
-    }
+    // Match info line (end screen specific - shows format without date)
+    const bestOf = match.config.bestOf || 3;
+    elements.endMatchInfo.textContent = `${match.config.startingScore} • Best of ${bestOf}`;
 
-    let html = '<h3>Leg Scoresheets</h3>';
+    // Populate stats using shared function
+    const endScreenEls = {
+      player1Name: elements.winnerName,
+      player2Name: elements.loserName,
+      finalScore: elements.finalScore,
+      statsP1: elements.statsPlayer1,
+      statsP2: elements.statsPlayer2,
+      shortLegsLabel: elements.shortLegsLabel,
+      p1Tons: elements.p1Tons,
+      p2Tons: elements.p2Tons,
+      p1180s: elements.p1180s,
+      p2180s: elements.p2180s,
+      p1ShortLegs: elements.p1ShortLegs,
+      p2ShortLegs: elements.p2ShortLegs,
+      p1HighOuts: elements.p1HighOuts,
+      p2HighOuts: elements.p2HighOuts,
+      p1First9: elements.p1First9,
+      p2First9: elements.p2First9,
+      p1MatchAvg: elements.p1MatchAvg,
+      p2MatchAvg: elements.p2MatchAvg,
+      p1LegAvgs: elements.p1LegAvgs,
+      p2LegAvgs: elements.p2LegAvgs
+    };
+    populateMatchStats(match, endScreenEls);
 
-    // Track running score after each leg
-    let p1LegsWon = 0;
-    let p2LegsWon = 0;
+    // Render leg scoresheets using shared function
+    renderLegScoresheets(match, elements.endLegsContainer);
 
-    legs.forEach((leg, legIndex) => {
-      const winnerName = leg.winner === 1 ? config.player1Name : config.player2Name;
+    showScreen('end');
 
-      // Update running score after this leg
-      if (leg.winner === 1) {
-        p1LegsWon++;
-      } else if (leg.winner === 2) {
-        p2LegsWon++;
-      }
-
-      const runningScore = `${p1LegsWon} - ${p2LegsWon}`;
-
-      // Calculate total darts for this leg to determine if short leg
-      const visits = leg.visits || [];
-      const winnerVisits = visits.filter(v => v.player === leg.winner);
-      const totalDarts = winnerVisits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-      const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
-      const isShortLeg = totalDarts <= shortLegThreshold;
-      const shortLegBadge = isShortLeg ? '<span class="short-leg-badge">Short Leg</span>' : '';
-
-      html += `
-        <div class="leg-scoresheet">
-          <div class="leg-scoresheet-header">
-            <span class="leg-scoresheet-title">Leg ${legIndex + 1}</span>
-            <span class="leg-scoresheet-score">${runningScore}</span>
-            <span class="leg-scoresheet-winner">${winnerName} wins ${shortLegBadge}</span>
-          </div>
-          <table class="leg-scoresheet-table">
-            <thead>
-              <tr>
-                <th class="col-darts">Darts</th>
-                <th class="col-scored">${config.player1Name.substring(0, 8)}</th>
-                <th class="col-remaining">Left</th>
-                <th class="col-scored">${config.player2Name.substring(0, 8)}</th>
-                <th class="col-remaining">Left</th>
-                <th class="col-darts">Darts</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      // Build visit data by round
-      const startingScore = leg.startingScore || config.startingScore;
-      const p1Visits = visits.filter(v => v.player === 1);
-      const p2Visits = visits.filter(v => v.player === 2);
-      const maxRounds = Math.max(p1Visits.length, p2Visits.length);
-
-      let p1Remaining = startingScore;
-      let p2Remaining = startingScore;
-      let p1Darts = 0;
-      let p2Darts = 0;
-
-      for (let round = 0; round < maxRounds; round++) {
-        const p1Visit = p1Visits[round];
-        const p2Visit = p2Visits[round];
-
-        let p1Scored = '';
-        let p1Left = '';
-        let p2Scored = '';
-        let p2Left = '';
-        let p1DartDisplay = '';
-        let p2DartDisplay = '';
-
-        if (p1Visit) {
-          p1Darts += p1Visit.dartsUsed || 3;
-          p1DartDisplay = p1Darts;
-          p1Remaining -= p1Visit.score;
-          p1Scored = p1Visit.score;
-          p1Left = p1Remaining;
-
-          // Color coding
-          if (p1Visit.isCheckout) {
-            const isHighOut = p1Visit.score >= 101;
-            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
-            p1Scored = `<span class="${cssClass}">${p1Visit.score}</span>`;
-            p1Left = `<span class="checkout-score">0</span>`;
-            p1DartDisplay = `<span class="checkout-score">${p1Darts}</span>`;
-          } else if (p1Visit.score === 180) {
-            p1Scored = `<span class="ton-180-score">${p1Visit.score}</span>`;
-          } else if (p1Visit.score >= 100) {
-            p1Scored = `<span class="ton-score">${p1Visit.score}</span>`;
-          }
-        }
-
-        if (p2Visit) {
-          p2Darts += p2Visit.dartsUsed || 3;
-          p2DartDisplay = p2Darts;
-          p2Remaining -= p2Visit.score;
-          p2Scored = p2Visit.score;
-          p2Left = p2Remaining;
-
-          // Color coding
-          if (p2Visit.isCheckout) {
-            const isHighOut = p2Visit.score >= 101;
-            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
-            p2Scored = `<span class="${cssClass}">${p2Visit.score}</span>`;
-            p2Left = `<span class="checkout-score">0</span>`;
-            p2DartDisplay = `<span class="checkout-score">${p2Darts}</span>`;
-          } else if (p2Visit.score === 180) {
-            p2Scored = `<span class="ton-180-score">${p2Visit.score}</span>`;
-          } else if (p2Visit.score >= 100) {
-            p2Scored = `<span class="ton-score">${p2Visit.score}</span>`;
-          }
-        }
-
-        html += `
-          <tr>
-            <td class="col-darts">${p1DartDisplay}</td>
-            <td class="col-scored">${p1Scored}</td>
-            <td class="col-remaining">${p1Left}</td>
-            <td class="col-scored">${p2Scored}</td>
-            <td class="col-remaining">${p2Left}</td>
-            <td class="col-darts">${p2DartDisplay}</td>
-          </tr>
-        `;
-      }
-
-      html += `
-            </tbody>
-          </table>
-        </div>
-      `;
-    });
-
-    elements.endLegsContainer.innerHTML = html;
+    // Save to history (pass pre-built match to avoid recalculating stats)
+    saveMatchToHistory(match);
   }
 
   // ==============
@@ -1847,22 +1756,28 @@
 
   /**
    * Save completed match to history
+   * @param {object} [matchData] - Optional pre-built match object (avoids recalculating stats)
    */
-  async function saveMatchToHistory() {
+  async function saveMatchToHistory(matchData) {
     if (!state || !state.matchComplete) return;
     try {
-      const stats = calculateStats();
-      const match = {
+      // Use provided match data or build from state
+      const match = matchData ? {
+        timestamp: Date.now(),
+        config: matchData.config,
+        legs: matchData.legs,
+        player1Legs: matchData.player1Legs,
+        player2Legs: matchData.player2Legs,
+        matchWinner: matchData.matchWinner,
+        stats: matchData.stats
+      } : {
         timestamp: Date.now(),
         config: state.config,
         legs: state.legs,
         player1Legs: state.player1Legs,
         player2Legs: state.player2Legs,
         matchWinner: state.matchWinner,
-        stats: {
-          player1: stats.player1,
-          player2: stats.player2
-        }
+        stats: calculateStats()
       };
       await dbPut('match_history', match);
       await clearCurrentMatch();
@@ -1941,7 +1856,7 @@
         <div class="history-item" data-index="${index}">
           <div class="history-players">${m.config.player1Name} vs ${m.config.player2Name}</div>
           <div class="history-score">${m.player1Legs} - ${m.player2Legs}</div>
-          <div class="history-date">${dateStr} ${timeStr} • Best of ${bestOf} • ${winnerName} wins</div>
+          <div class="history-date">${dateStr} ${timeStr} • ${m.config.startingScore} • Best of ${bestOf} • ${winnerName} wins</div>
         </div>
       `;
     }).join('');
@@ -1961,89 +1876,56 @@
    */
   function showHistoryDetail(match) {
     const config = match.config;
-    const stats = match.stats || {};
 
-    // Header info
-    elements.detailPlayer1.textContent = config.player1Name;
-    elements.detailPlayer2.textContent = config.player2Name;
-    elements.detailScore.textContent = `${match.player1Legs} - ${match.player2Legs}`;
-
+    // Date line (history specific - includes timestamp)
     const date = new Date(match.timestamp);
     const bestOf = config.bestOf || 3;
     elements.detailDate.textContent = formatDateYMD(date) + ' ' +
       date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) +
-      ` • Best of ${bestOf}`;
+      ` • ${config.startingScore} • Best of ${bestOf}`;
 
-    // Stats table
-    elements.detailStatsP1.textContent = config.player1Name;
-    elements.detailStatsP2.textContent = config.player2Name;
+    // Populate stats using shared function
+    const historyDetailEls = {
+      player1Name: elements.detailPlayer1,
+      player2Name: elements.detailPlayer2,
+      finalScore: elements.detailScore,
+      statsP1: elements.detailStatsP1,
+      statsP2: elements.detailStatsP2,
+      shortLegsLabel: elements.detailShortLegsLabel,
+      p1Tons: elements.detailP1Tons,
+      p2Tons: elements.detailP2Tons,
+      p1180s: elements.detailP1180s,
+      p2180s: elements.detailP2180s,
+      p1ShortLegs: elements.detailP1ShortLegs,
+      p2ShortLegs: elements.detailP2ShortLegs,
+      p1HighOuts: elements.detailP1HighOuts,
+      p2HighOuts: elements.detailP2HighOuts,
+      p1First9: elements.detailP1First9,
+      p2First9: elements.detailP2First9,
+      p1MatchAvg: elements.detailP1Avg,
+      p2MatchAvg: elements.detailP2Avg,
+      p1LegAvgs: elements.detailP1LegAvgs,
+      p2LegAvgs: elements.detailP2LegAvgs
+    };
+    populateMatchStats(match, historyDetailEls);
 
-    const p1Stats = stats.player1 || {};
-    const p2Stats = stats.player2 || {};
-
-    elements.detailP1Tons.textContent = p1Stats.tons || 0;
-    elements.detailP2Tons.textContent = p2Stats.tons || 0;
-    elements.detailP1180s.textContent = p1Stats.ton80s || 0;
-    elements.detailP2180s.textContent = p2Stats.ton80s || 0;
-    elements.detailP1ShortLegs.textContent = p1Stats.shortLegs || 0;
-    elements.detailP2ShortLegs.textContent = p2Stats.shortLegs || 0;
-    elements.detailP1HighOuts.textContent = p1Stats.highOuts || 0;
-    elements.detailP2HighOuts.textContent = p2Stats.highOuts || 0;
-    elements.detailP1First9.textContent = p1Stats.first9Avg ? p1Stats.first9Avg.toFixed(1) : '-';
-    elements.detailP2First9.textContent = p2Stats.first9Avg ? p2Stats.first9Avg.toFixed(1) : '-';
-    elements.detailP1Avg.textContent = p1Stats.matchAvg ? p1Stats.matchAvg.toFixed(1) : '-';
-    elements.detailP2Avg.textContent = p2Stats.matchAvg ? p2Stats.matchAvg.toFixed(1) : '-';
-
-    // Calculate and display leg averages
-    const legs = match.legs || [];
-    const p1LegAvgs = [];
-    const p2LegAvgs = [];
-
-    legs.forEach(leg => {
-      const visits = leg.visits || [];
-      const p1Visits = visits.filter(v => v.player === 1);
-      const p2Visits = visits.filter(v => v.player === 2);
-
-      // Calculate P1 leg average
-      if (p1Visits.length > 0) {
-        const p1TotalScore = p1Visits.reduce((sum, v) => sum + v.score, 0);
-        const p1TotalDarts = p1Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-        const p1Avg = (p1TotalScore / p1TotalDarts) * 3;
-        p1LegAvgs.push(p1Avg.toFixed(1));
-      } else {
-        p1LegAvgs.push('-');
-      }
-
-      // Calculate P2 leg average
-      if (p2Visits.length > 0) {
-        const p2TotalScore = p2Visits.reduce((sum, v) => sum + v.score, 0);
-        const p2TotalDarts = p2Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-        const p2Avg = (p2TotalScore / p2TotalDarts) * 3;
-        p2LegAvgs.push(p2Avg.toFixed(1));
-      } else {
-        p2LegAvgs.push('-');
-      }
-    });
-
-    elements.detailP1LegAvgs.textContent = p1LegAvgs.join(', ') || '-';
-    elements.detailP2LegAvgs.textContent = p2LegAvgs.join(', ') || '-';
-
-    // Render leg scoresheets
-    renderLegScoresheets(match);
+    // Render leg scoresheets using shared function
+    renderLegScoresheets(match, elements.detailLegsContainer);
 
     showScreen('history-detail');
   }
 
   /**
-   * Render leg scoresheets for history detail
-   * @param {object} match
+   * Render leg scoresheets for match detail (shared by end screen and history)
+   * @param {object} match - Match object with config, legs
+   * @param {HTMLElement} container - Container element to render into
    */
-  function renderLegScoresheets(match) {
+  function renderLegScoresheets(match, container) {
     const config = match.config;
     const legs = match.legs || [];
 
     if (legs.length === 0) {
-      elements.detailLegsContainer.innerHTML = '<p>No leg data available</p>';
+      container.innerHTML = '<p>No leg data available</p>';
       return;
     }
 
@@ -2181,7 +2063,7 @@
       `;
     });
 
-    elements.detailLegsContainer.innerHTML = html;
+    container.innerHTML = html;
   }
 
   /**

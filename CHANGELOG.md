@@ -1,5 +1,21 @@
 # 2025-01-09
 
+## **v4.1.9** - Chalker Edit Checkout Bug Fix
+
+### Bug Fixes
+- **Edit-after-opponent-entry checkout**: Fixed bug where editing a previous score to create a checkout after the opponent had already entered a visit would leave orphaned visit data and fail to advance to the next leg
+  - Orphaned visits after the edited checkout are now removed
+  - UI correctly advances to the next leg
+  - Statistics and dart counts calculate correctly
+
+### Technical Details
+- Added `visits.splice()` in `completeEditCheckout()` to remove orphaned visits
+- Changed to call `startNewLeg()` + `updateDisplay()` instead of just `updateDisplay()`
+- Added `saveCurrentMatch()` call to persist state
+- Service worker cache version bumped to v33
+
+---
+
 ## **v4.1.8** - Chalker End Screen Unification
 
 ### Chalker Enhancements

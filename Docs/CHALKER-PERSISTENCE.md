@@ -207,22 +207,21 @@ Stores:
 
 ## Known Issues
 
+*(none)*
+
+---
+
+## Fixed Issues
+
 ### Edit-after-opponent-entry checkout bug
-**Status:** Open
+**Status:** Fixed (January 2025)
 
 **Scenario:**
-1. Player 1 vs Player 2, score is 0-0, Player 1 starts
-2. Player 1 has an outshot (e.g., 40 left), but wrong score is entered (e.g., 48)
-3. Player 1 still shows 40 remaining
-4. Score is entered for Player 2's next visit
-5. User notices mistake, goes back and edits Player 1's score to 40 (checkout)
-6. Dart count modal appears (selects 3 darts)
-7. Total score shows 1-0, but Player 2's score cell still has a value (cannot delete it)
-8. **Bug:** Leg doesn't advance. If user enters another checkout for Player 1 on the next row, leg advances but total dart count is incorrect.
+When editing a previous score to create a checkout after the opponent had already entered a visit, the leg count updated but the UI stayed on the same leg with orphaned visit data, causing incorrect dart counts.
 
-**Root cause:** When editing a previous score to create a checkout after the opponent has already entered a score, the leg completion logic doesn't trigger correctly, and the opponent's orphaned visit isn't cleaned up.
+**Root cause:** `completeEditCheckout()` didn't remove visits that came after the edited checkout, and called `updateDisplay()` instead of `startNewLeg()`.
 
-**Workaround:** Use Undo to remove Player 2's visit before editing Player 1's checkout score.
+**Fix:** Added `visits.splice()` to remove orphaned visits, and changed to call `startNewLeg()` to properly advance to the next leg.
 
 ---
 
