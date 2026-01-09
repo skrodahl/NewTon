@@ -1,6 +1,6 @@
 # 2025-01-09
 
-## **v4.1.9** - Chalker Edit Checkout Bug Fix
+## **v4.1.9** - Chalker Edit Checkout Bug Fix & Touch Improvements
 
 ### Bug Fixes
 - **Edit-after-opponent-entry checkout**: Fixed bug where editing a previous score to create a checkout after the opponent had already entered a visit would leave orphaned visit data and fail to advance to the next leg
@@ -8,11 +8,14 @@
   - UI correctly advances to the next leg
   - Statistics and dart counts calculate correctly
 
+### Improvements
+- **Disable double-tap zoom on iOS**: Added `touch-action: manipulation` to prevent accidental zoom when tapping quickly on the keypad
+
 ### Technical Details
 - Added `visits.splice()` in `completeEditCheckout()` to remove orphaned visits
 - Changed to call `startNewLeg()` + `updateDisplay()` instead of just `updateDisplay()`
 - Added `saveCurrentMatch()` call to persist state
-- Service worker cache version bumped to v33
+- Service worker cache version bumped to v34
 
 ---
 

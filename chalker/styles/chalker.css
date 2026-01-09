@@ -66,6 +66,11 @@
   box-sizing: border-box;
 }
 
+/* Disable double-tap zoom on iOS */
+html {
+  touch-action: manipulation;
+}
+
 /* Portrait lock via CSS - uncomment for tablet deployment
 @media screen and (orientation: landscape) {
   html {
