@@ -54,6 +54,11 @@
 
         <!-- Input section -->
         <div class="input-section">
+            <div class="keypad-actions">
+                <button class="key key-action" id="key-new">NEW</button>
+                <button class="key key-action" id="key-history">HISTORY</button>
+                <button class="key key-action" id="key-settings">SETTINGS</button>
+            </div>
             <div class="keypad">
                 <button class="key" data-value="1">1</button>
                 <button class="key" data-value="2">2</button>
@@ -67,11 +72,6 @@
                 <button class="key key-delete" data-action="delete">DEL</button>
                 <button class="key" data-value="0">0</button>
                 <button class="key key-enter" data-action="enter">OK</button>
-            </div>
-            <div class="keypad-actions">
-                <button class="key key-action" id="key-new">NEW</button>
-                <button class="key key-action" id="key-history">HISTORY</button>
-                <button class="key key-action" id="key-settings">&#9881;</button>
             </div>
         </div>
     </div>
@@ -184,12 +184,13 @@
         </div>
     </div>
 
-    <!-- Settings Modal -->
+    <!-- New Match Modal (shown via NEW button during match) -->
     <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <h2>Settings</h2>
+            <h2>New Match?</h2>
+            <p>Current match will be lost.</p>
             <button id="rematch-btn" class="btn btn-primary">Rematch</button>
-            <button id="abandon-btn" class="btn btn-danger">Abandon Match</button>
+            <button id="new-match-btn" class="btn btn-secondary">New Match</button>
             <button id="settings-cancel-btn" class="btn btn-cancel">Cancel</button>
         </div>
     </div>
@@ -217,82 +218,155 @@
         </div>
     </div>
 
+    <!-- History Detail Screen -->
+    <div id="history-detail-screen" class="screen">
+        <header class="history-header">
+            <button id="history-detail-back-btn" class="btn-icon" aria-label="Back">←</button>
+            <h1>Match Details</h1>
+        </header>
+        <div class="history-detail-content">
+            <div class="history-detail-header">
+                <div class="history-detail-players">
+                    <span id="detail-player1" class="detail-player"></span>
+                    <span class="detail-vs">vs</span>
+                    <span id="detail-player2" class="detail-player"></span>
+                </div>
+                <div id="detail-score" class="detail-score"></div>
+                <div id="detail-date" class="detail-date"></div>
+            </div>
+
+            <div class="history-detail-stats">
+                <h3>Match Statistics</h3>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th id="detail-stats-p1">P1</th>
+                            <th class="stat-label">Stat</th>
+                            <th id="detail-stats-p2">P2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="detail-p1-tons">0</td>
+                            <td class="stat-label">Tons (100+)</td>
+                            <td id="detail-p2-tons">0</td>
+                        </tr>
+                        <tr>
+                            <td id="detail-p1-180s">0</td>
+                            <td class="stat-label">180s</td>
+                            <td id="detail-p2-180s">0</td>
+                        </tr>
+                        <tr>
+                            <td id="detail-p1-short-legs">0</td>
+                            <td class="stat-label">Short Legs</td>
+                            <td id="detail-p2-short-legs">0</td>
+                        </tr>
+                        <tr>
+                            <td id="detail-p1-high-outs">0</td>
+                            <td class="stat-label">High Outs (101+)</td>
+                            <td id="detail-p2-high-outs">0</td>
+                        </tr>
+                        <tr>
+                            <td id="detail-p1-first9">-</td>
+                            <td class="stat-label">First 9 Avg</td>
+                            <td id="detail-p2-first9">-</td>
+                        </tr>
+                        <tr>
+                            <td id="detail-p1-avg">-</td>
+                            <td class="stat-label">Match Avg</td>
+                            <td id="detail-p2-avg">-</td>
+                        </tr>
+                        <tr>
+                            <td id="detail-p1-leg-avgs" class="leg-avgs">-</td>
+                            <td class="stat-label">Leg Avgs</td>
+                            <td id="detail-p2-leg-avgs" class="leg-avgs">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="history-detail-legs" id="detail-legs-container">
+                <!-- Leg tables populated by JavaScript -->
+            </div>
+        </div>
+    </div>
+
     <!-- End-of-Match Screen -->
     <div id="end-screen" class="screen">
         <header class="end-header">
             <h1>Match Complete</h1>
         </header>
 
-        <div class="result-display">
-            <div class="match-players">
-                <span id="winner-name" class="winner-name">Player 1</span>
-                <span class="vs-text">vs</span>
-                <span id="loser-name" class="loser-name">Player 2</span>
+        <div class="history-detail-content">
+            <div class="history-detail-header">
+                <div class="history-detail-players">
+                    <span id="winner-name" class="detail-player"></span>
+                    <span class="detail-vs">vs</span>
+                    <span id="loser-name" class="detail-player"></span>
+                </div>
+                <div id="final-score" class="detail-score"></div>
+                <div id="end-match-info" class="detail-date"></div>
             </div>
-            <div id="final-score" class="final-score">2 - 1</div>
-        </div>
 
-        <div class="stats-container">
-            <table class="stats-table">
-                <thead>
-                    <tr>
-                        <th id="stats-player1">Player 1</th>
-                        <th class="stat-label">Stat</th>
-                        <th id="stats-player2">Player 2</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td id="p1-tons">0</td>
-                        <td class="stat-label">Tons (100+)</td>
-                        <td id="p2-tons">0</td>
-                    </tr>
-                    <tr>
-                        <td id="p1-180s">0</td>
-                        <td class="stat-label">180s</td>
-                        <td id="p2-180s">0</td>
-                    </tr>
-                    <tr>
-                        <td id="p1-short-legs">0</td>
-                        <td class="stat-label" id="short-legs-label">Short Legs (≤21)</td>
-                        <td id="p2-short-legs">0</td>
-                    </tr>
-                    <tr>
-                        <td id="p1-high-outs">0</td>
-                        <td class="stat-label">High Outs (101+)</td>
-                        <td id="p2-high-outs">0</td>
-                    </tr>
-                    <tr>
-                        <td id="p1-first9">-</td>
-                        <td class="stat-label">First 9 Avg</td>
-                        <td id="p2-first9">-</td>
-                    </tr>
-                    <tr>
-                        <td id="p1-match-avg">-</td>
-                        <td class="stat-label">Match Avg</td>
-                        <td id="p2-match-avg">-</td>
-                    </tr>
-                </tbody>
-            </table>
-
-            <div class="leg-stats">
-                <h3>Leg Stats</h3>
-                <table class="leg-stats-table">
+            <div class="history-detail-stats">
+                <h3>Match Statistics</h3>
+                <table class="stats-table">
                     <thead>
                         <tr>
-                            <th id="leg-stats-p1">P1</th>
-                            <th></th>
-                            <th id="leg-stats-p2">P2</th>
+                            <th id="stats-player1">P1</th>
+                            <th class="stat-label">Stat</th>
+                            <th id="stats-player2">P2</th>
                         </tr>
                     </thead>
-                    <tbody id="leg-stats-container"></tbody>
+                    <tbody>
+                        <tr>
+                            <td id="p1-tons">0</td>
+                            <td class="stat-label">Tons (100+)</td>
+                            <td id="p2-tons">0</td>
+                        </tr>
+                        <tr>
+                            <td id="p1-180s">0</td>
+                            <td class="stat-label">180s</td>
+                            <td id="p2-180s">0</td>
+                        </tr>
+                        <tr>
+                            <td id="p1-short-legs">0</td>
+                            <td class="stat-label" id="short-legs-label">Short Legs</td>
+                            <td id="p2-short-legs">0</td>
+                        </tr>
+                        <tr>
+                            <td id="p1-high-outs">0</td>
+                            <td class="stat-label">High Outs (101+)</td>
+                            <td id="p2-high-outs">0</td>
+                        </tr>
+                        <tr>
+                            <td id="p1-first9">-</td>
+                            <td class="stat-label">First 9 Avg</td>
+                            <td id="p2-first9">-</td>
+                        </tr>
+                        <tr>
+                            <td id="p1-match-avg">-</td>
+                            <td class="stat-label">Match Avg</td>
+                            <td id="p2-match-avg">-</td>
+                        </tr>
+                        <tr>
+                            <td id="p1-leg-avgs" class="leg-avgs">-</td>
+                            <td class="stat-label">Leg Avgs</td>
+                            <td id="p2-leg-avgs" class="leg-avgs">-</td>
+                        </tr>
+                    </tbody>
                 </table>
+            </div>
+
+            <div class="history-detail-legs" id="end-legs-container">
+                <!-- Leg scoresheets populated by JavaScript -->
             </div>
         </div>
 
         <div class="end-buttons">
             <button id="end-rematch-btn" class="btn btn-primary">Rematch</button>
             <button id="end-new-match-btn" class="btn btn-secondary">New Match</button>
+            <button id="end-history-btn" class="btn btn-tertiary">History</button>
         </div>
     </div>
 

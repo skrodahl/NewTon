@@ -1,5 +1,28 @@
 # 2025-01-09
 
+## **v4.1.8** - Chalker End Screen Unification
+
+### Chalker Enhancements
+- **Unified Match Complete screen**: End-of-match screen now matches History Detail format
+  - Same stats table with tons, 180s, short legs, high outs, first 9 avg, match avg, and leg averages
+  - Full leg-by-leg scoresheets with color coding (tons=blue, 180s=gold, short legs=purple, checkouts=green)
+  - Consistent layout between viewing completed matches and finishing a match
+- **History button on end screen**: Quick navigation to match history from Match Complete screen
+- **24-hour time format**: Timestamps now display in 24H format instead of AM/PM
+- **Dynamic short leg indicator**: Short leg threshold now varies by game variant using lookup table
+  - 501: 21 darts, 301: 15 darts, 701: 27 darts, etc.
+
+### Technical Details
+- Replaced old end screen HTML with `history-detail-content` structure
+- Added `renderEndScreenLegScoresheets()` function reusing history detail logic
+- Changed `toLocaleTimeString()` calls to use `hour12: false`
+- Short leg detection now uses `SHORT_LEG_THRESHOLDS[config.startingScore]`
+- Added `.btn-tertiary` CSS class for History button
+- Removed obsolete CSS (`.result-display`, `.match-players`, old `.winner-name`)
+- Service worker cache version bumped to v29
+
+---
+
 ## **v4.1.7** - Chalker Legibility & Bug Fixes
 
 ### Chalker Enhancements

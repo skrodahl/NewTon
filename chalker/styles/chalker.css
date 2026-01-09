@@ -249,6 +249,17 @@ body {
   background: var(--bg-primary);
 }
 
+.btn-tertiary {
+  background: transparent;
+  color: var(--text-secondary);
+  border: 1px solid var(--border-light);
+}
+
+.btn-tertiary:hover {
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+}
+
 .btn-cancel {
   background: transparent;
   color: var(--text-secondary);
@@ -549,9 +560,9 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-xs);
-  margin-top: var(--spacing-xs);
-  border-top: 1px solid var(--border-light);
-  padding-top: var(--spacing-xs);
+  margin-bottom: var(--spacing-xs);
+  border-bottom: 1px solid var(--border-light);
+  padding-bottom: var(--spacing-xs);
 }
 
 .key-action {
@@ -723,52 +734,6 @@ body {
   font-weight: 700;
 }
 
-.result-display {
-  background: var(--bg-secondary);
-  padding: var(--spacing-lg);
-  text-align: center;
-  border-bottom: 1px solid var(--border-light);
-}
-
-.match-players {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  margin-bottom: var(--spacing-sm);
-}
-
-.winner-name {
-  font-size: 1.125rem;
-  font-weight: 700;
-  color: var(--accent-success);
-}
-
-.vs-text {
-  font-size: 0.875rem;
-  color: var(--text-secondary);
-}
-
-.loser-name {
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: var(--text-secondary);
-}
-
-.final-score {
-  font-family: var(--font-mono);
-  font-size: 2rem;
-  font-weight: 700;
-  color: var(--text-primary);
-}
-
-/* Stats */
-.stats-container {
-  flex: 1;
-  padding: var(--spacing-md);
-  overflow-y: auto;
-}
-
 .stats-table {
   width: 100%;
   border-collapse: collapse;
@@ -801,6 +766,11 @@ body {
   font-family: var(--font-mono);
   font-weight: 600;
   font-size: 1rem;
+}
+
+.stats-table td.leg-avgs {
+  font-size: 0.875rem;
+  white-space: nowrap;
 }
 
 .stats-table tbody tr {
@@ -946,6 +916,10 @@ body {
   flex: 1;
 }
 
+.history-header .btn-icon {
+  color: white;
+}
+
 .history-list {
   flex: 1;
   overflow-y: auto;
@@ -961,6 +935,12 @@ body {
   border-radius: 8px;
   margin-bottom: var(--spacing-sm);
   border: 1px solid var(--border-light);
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.history-item:active {
+  background: var(--border-light);
 }
 
 .history-players {
@@ -984,6 +964,175 @@ body {
   text-align: center;
   padding: var(--spacing-xl);
   color: var(--text-secondary);
+}
+
+/* History Detail Screen */
+.history-detail-content {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-md);
+}
+
+.history-detail-header {
+  text-align: center;
+  margin-bottom: var(--spacing-lg);
+}
+
+.history-detail-players {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-xs);
+}
+
+.detail-player {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.detail-vs {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.detail-score {
+  font-size: 2rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.detail-date {
+  font-size: 0.875rem;
+  color: var(--text-secondary);
+}
+
+.history-detail-stats {
+  margin-bottom: var(--spacing-lg);
+}
+
+.history-detail-stats h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-primary);
+}
+
+.history-detail-legs h3 {
+  font-size: 1rem;
+  font-weight: 600;
+  margin-bottom: var(--spacing-sm);
+  color: var(--text-primary);
+}
+
+/* Leg scoresheet tables */
+.leg-scoresheet {
+  margin-bottom: var(--spacing-lg);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  overflow: hidden;
+  border: 1px solid var(--border-light);
+}
+
+.leg-scoresheet-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--spacing-sm) var(--spacing-md);
+  background: var(--bg-dark);
+  color: white;
+}
+
+.leg-scoresheet-title {
+  font-weight: 600;
+}
+
+.leg-scoresheet-score {
+  font-size: 1rem;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.leg-scoresheet-winner {
+  font-size: 0.75rem;
+  color: var(--accent-success);
+}
+
+.leg-scoresheet-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--font-mono);
+  font-size: 0.875rem;
+}
+
+.leg-scoresheet-table th,
+.leg-scoresheet-table td {
+  padding: var(--spacing-xs) var(--spacing-sm);
+  border-bottom: 1px solid var(--border-light);
+}
+
+.leg-scoresheet-table th {
+  background: var(--bg-primary);
+  font-weight: 600;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+  text-transform: uppercase;
+}
+
+.leg-scoresheet-table td {
+  text-align: center;
+}
+
+.leg-scoresheet-table .col-darts {
+  width: 2.5rem;
+  color: var(--text-secondary);
+}
+
+.leg-scoresheet-table .col-scored {
+  width: 3.5rem;
+}
+
+.leg-scoresheet-table .col-remaining {
+  width: 3.5rem;
+  color: var(--text-secondary);
+}
+
+.leg-scoresheet-table .checkout-score {
+  color: var(--accent-success);
+  font-weight: 600;
+}
+
+.leg-scoresheet-table .high-out-score {
+  color: var(--accent-success);
+  font-weight: 700;
+  text-decoration: underline;
+}
+
+.leg-scoresheet-table .ton-180-score {
+  color: #ffc107;
+  font-weight: 700;
+}
+
+.leg-scoresheet-table .ton-score {
+  color: var(--accent-primary);
+  font-weight: 600;
+}
+
+.short-leg-badge {
+  display: inline-block;
+  background: var(--accent-success);
+  color: var(--bg-dark);
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  margin-left: 4px;
+  text-transform: uppercase;
+}
+
+.leg-scoresheet-table tr:last-child td {
+  border-bottom: none;
 }
 
 /* ===================== */
@@ -1106,8 +1255,8 @@ body {
   /* Action row */
   .keypad-actions {
     gap: var(--spacing-sm);
-    margin-top: var(--spacing-sm);
-    padding-top: var(--spacing-sm);
+    margin-bottom: var(--spacing-sm);
+    padding-bottom: var(--spacing-sm);
   }
 
   .key-action {

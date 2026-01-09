@@ -95,7 +95,7 @@
     configCancelBtn: document.getElementById('config-cancel-btn'),
     settingsModal: document.getElementById('settings-modal'),
     settingsCancelBtn: document.getElementById('settings-cancel-btn'),
-    abandonBtn: document.getElementById('abandon-btn'),
+    newMatchBtn: document.getElementById('new-match-btn'),
     checkoutModal: document.getElementById('checkout-modal'),
     checkoutCancelBtn: document.getElementById('checkout-cancel-btn'),
     tiebreakModal: document.getElementById('tiebreak-modal'),
@@ -131,16 +131,43 @@
     p2First9: document.getElementById('p2-first9'),
     p1MatchAvg: document.getElementById('p1-match-avg'),
     p2MatchAvg: document.getElementById('p2-match-avg'),
-    legStatsContainer: document.getElementById('leg-stats-container'),
-    legStatsP1: document.getElementById('leg-stats-p1'),
-    legStatsP2: document.getElementById('leg-stats-p2'),
+    p1LegAvgs: document.getElementById('p1-leg-avgs'),
+    p2LegAvgs: document.getElementById('p2-leg-avgs'),
+    endMatchInfo: document.getElementById('end-match-info'),
+    endLegsContainer: document.getElementById('end-legs-container'),
     endRematchBtn: document.getElementById('end-rematch-btn'),
     endNewMatchBtn: document.getElementById('end-new-match-btn'),
+    endHistoryBtn: document.getElementById('end-history-btn'),
 
     // History
     historyScreen: document.getElementById('history-screen'),
     historyList: document.getElementById('history-list'),
     historyBackBtn: document.getElementById('history-back-btn'),
+
+    // History Detail
+    historyDetailScreen: document.getElementById('history-detail-screen'),
+    historyDetailBackBtn: document.getElementById('history-detail-back-btn'),
+    detailPlayer1: document.getElementById('detail-player1'),
+    detailPlayer2: document.getElementById('detail-player2'),
+    detailScore: document.getElementById('detail-score'),
+    detailDate: document.getElementById('detail-date'),
+    detailStatsP1: document.getElementById('detail-stats-p1'),
+    detailStatsP2: document.getElementById('detail-stats-p2'),
+    detailP1Tons: document.getElementById('detail-p1-tons'),
+    detailP2Tons: document.getElementById('detail-p2-tons'),
+    detailP1180s: document.getElementById('detail-p1-180s'),
+    detailP2180s: document.getElementById('detail-p2-180s'),
+    detailP1ShortLegs: document.getElementById('detail-p1-short-legs'),
+    detailP2ShortLegs: document.getElementById('detail-p2-short-legs'),
+    detailP1HighOuts: document.getElementById('detail-p1-high-outs'),
+    detailP2HighOuts: document.getElementById('detail-p2-high-outs'),
+    detailP1First9: document.getElementById('detail-p1-first9'),
+    detailP2First9: document.getElementById('detail-p2-first9'),
+    detailP1Avg: document.getElementById('detail-p1-avg'),
+    detailP2Avg: document.getElementById('detail-p2-avg'),
+    detailP1LegAvgs: document.getElementById('detail-p1-leg-avgs'),
+    detailP2LegAvgs: document.getElementById('detail-p2-leg-avgs'),
+    detailLegsContainer: document.getElementById('detail-legs-container'),
 
     // Keypad action buttons
     keyNew: document.getElementById('key-new'),
@@ -154,12 +181,13 @@
 
   /**
    * Show a specific screen
-   * @param {'scoring'|'end'|'history'} screenName
+   * @param {'scoring'|'end'|'history'|'history-detail'} screenName
    */
   function showScreen(screenName) {
     elements.scoringScreen.classList.remove('active');
     elements.endScreen.classList.remove('active');
     elements.historyScreen.classList.remove('active');
+    elements.historyDetailScreen.classList.remove('active');
 
     switch (screenName) {
       case 'scoring':
@@ -170,6 +198,9 @@
         break;
       case 'history':
         elements.historyScreen.classList.add('active');
+        break;
+      case 'history-detail':
+        elements.historyDetailScreen.classList.add('active');
         break;
     }
   }
@@ -289,6 +320,9 @@
    * @param {boolean} isCheckout - Whether this is a checkout
    */
   function recordVisit(score, dartsUsed = 3, isCheckout = false) {
+    // Clear input buffer before saving (prevents old input appearing after resume)
+    inputBuffer = '';
+
     const currentLeg = state.legs[state.legs.length - 1];
     const remainingBefore = state.currentPlayer === 1 ? state.player1Score : state.player2Score;
 
@@ -749,7 +783,6 @@
     elements.confirmTitle.textContent = title;
     elements.confirmMessage.textContent = message;
     pendingConfirmAction = onConfirm;
-    hideModal(elements.menuModal);
     showModal(elements.confirmModal);
   }
 
@@ -773,19 +806,25 @@
   }
 
   /**
-   * Request rematch with confirmation
+   * Handle Rematch button from New Match modal
+   * Starts new match with same config (no additional confirmation needed)
    */
-  function requestRematch() {
+  function handleRematchFromModal() {
     hideModal(elements.settingsModal);
-    showConfirm(
-      'Start Rematch?',
-      'Current match will be lost.',
-      rematch
-    );
+    startMatch();
   }
 
   /**
-   * Start a rematch (same config)
+   * Handle New Match button from New Match modal
+   * Opens config modal to change settings
+   */
+  function handleNewMatchFromModal() {
+    hideModal(elements.settingsModal);
+    showModal(elements.configModal);
+  }
+
+  /**
+   * Start a rematch (same config) - used from end screen
    */
   function rematch() {
     startMatch();
@@ -799,42 +838,10 @@
   }
 
   /**
-   * Show settings modal
+   * Show new match modal (Rematch / New Match options)
    */
   function showSettingsModal() {
     showModal(elements.settingsModal);
-  }
-
-  /**
-   * Abandon current match
-   */
-  function abandonMatch() {
-    hideModal(elements.settingsModal);
-    state = null;
-    clearCurrentMatch();
-    updateIdleDisplay();
-  }
-
-  /**
-   * Request to abandon match with confirmation
-   */
-  function requestAbandonMatch() {
-    hideModal(elements.settingsModal);
-    showConfirm(
-      'Abandon Match?',
-      'Current match will be lost.',
-      abandonMatch
-    );
-  }
-
-  /**
-   * Start a new match (clear state and show idle)
-   */
-  function newMatch() {
-    state = null;
-    clearCurrentMatch();
-    updateIdleDisplay();
-    showScreen('scoring');
   }
 
   // =======
@@ -1283,28 +1290,27 @@
   }
 
   /**
-   * Show end screen with statistics
+   * Show end screen with statistics (matches history detail format)
    */
   function showEndScreen() {
     const stats = calculateStats();
+    const config = state.config;
 
-    // Winner/Loser display
-    const winner = state.matchWinner;
-    const winnerName = winner === 1 ? state.config.player1Name : state.config.player2Name;
-    const loserName = winner === 1 ? state.config.player2Name : state.config.player1Name;
-    const winnerLegs = winner === 1 ? state.player1Legs : state.player2Legs;
-    const loserLegs = winner === 1 ? state.player2Legs : state.player1Legs;
+    // Winner/Loser display (show player1 vs player2, not winner vs loser)
+    elements.winnerName.textContent = config.player1Name;
+    elements.loserName.textContent = config.player2Name;
+    elements.finalScore.textContent = `${state.player1Legs} - ${state.player2Legs}`;
 
-    elements.winnerName.textContent = winnerName;
-    elements.loserName.textContent = loserName;
-    elements.finalScore.textContent = `${winnerLegs} - ${loserLegs}`;
+    // Match info line
+    const bestOf = config.bestOf || 3;
+    elements.endMatchInfo.textContent = `Best of ${bestOf}`;
 
     // Stats table headers
-    elements.statsPlayer1.textContent = state.config.player1Name;
-    elements.statsPlayer2.textContent = state.config.player2Name;
+    elements.statsPlayer1.textContent = config.player1Name;
+    elements.statsPlayer2.textContent = config.player2Name;
 
     // Update short legs label with format-specific threshold
-    const shortLegThreshold = SHORT_LEG_THRESHOLDS[state.config.startingScore] || 21;
+    const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
     elements.shortLegsLabel.textContent = `Short Legs (≤${shortLegThreshold})`;
 
     // Populate stats
@@ -1326,68 +1332,190 @@
     elements.p1MatchAvg.textContent = stats.player1.matchAvg > 0 ? stats.player1.matchAvg.toFixed(1) : '-';
     elements.p2MatchAvg.textContent = stats.player2.matchAvg > 0 ? stats.player2.matchAvg.toFixed(1) : '-';
 
-    // Leg stats table headers
-    elements.legStatsP1.textContent = state.config.player1Name;
-    elements.legStatsP2.textContent = state.config.player2Name;
+    // Calculate and display leg averages
+    const legs = state.legs || [];
+    const p1LegAvgs = [];
+    const p2LegAvgs = [];
 
-    // Render per-leg stats with explicit labels
-    elements.legStatsContainer.innerHTML = '';
-    stats.legs.forEach((leg, idx) => {
-      // Helper to build stat lines for a player (each stat on its own line)
-      const buildPlayerStats = (playerData, isWinner, isTiebreak) => {
-        const lines = [];
+    legs.forEach(leg => {
+      const visits = leg.visits || [];
+      const p1Visits = visits.filter(v => v.player === 1);
+      const p2Visits = visits.filter(v => v.player === 2);
 
-        // Average (always show if available)
-        if (playerData.avg !== null) {
-          lines.push(`<span class="leg-stat-avg">${playerData.avg.toFixed(1)} avg</span>`);
-        }
+      if (p1Visits.length > 0) {
+        const p1TotalScore = p1Visits.reduce((sum, v) => sum + v.score, 0);
+        const p1TotalDarts = p1Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+        const p1Avg = (p1TotalScore / p1TotalDarts) * 3;
+        p1LegAvgs.push(p1Avg.toFixed(1));
+      } else {
+        p1LegAvgs.push('-');
+      }
 
-        // Winner-specific stats (each on separate line)
-        if (isWinner && !isTiebreak) {
-          // Darts (short leg)
-          if (playerData.darts <= shortLegThreshold) {
-            lines.push(`<span class="leg-stat-detail highlight">${playerData.darts} darts</span>`);
-          }
-          // Checkout score
-          if (playerData.checkoutScore !== null) {
-            const isHighOut = playerData.checkoutScore >= 101;
-            lines.push(`<span class="leg-stat-detail${isHighOut ? ' highlight' : ''}">${playerData.checkoutScore} out</span>`);
-          }
-        } else if (isWinner && isTiebreak) {
-          lines.push(`<span class="leg-stat-detail">Tie-break win</span>`);
-        }
-
-        // 180s (separate line)
-        if (playerData.ton80s > 0) {
-          lines.push(`<span class="leg-stat-detail">${playerData.ton80s} × 180</span>`);
-        }
-
-        // Tons (separate line, excluding 180s)
-        const nonMaxTons = playerData.tons - playerData.ton80s;
-        if (nonMaxTons > 0) {
-          lines.push(`<span class="leg-stat-detail">${nonMaxTons} ton${nonMaxTons > 1 ? 's' : ''}</span>`);
-        }
-
-        return lines.length > 0 ? lines.join('') : '-';
-      };
-
-      const p1Content = buildPlayerStats(leg.player1, leg.winner === 1, leg.tiebreak);
-      const p2Content = buildPlayerStats(leg.player2, leg.winner === 2, leg.tiebreak);
-
-      const row = document.createElement('tr');
-      if (idx > 0) row.className = 'leg-separator';
-      row.innerHTML = `
-        <td>${p1Content}</td>
-        <td>Leg ${leg.leg}</td>
-        <td>${p2Content}</td>
-      `;
-      elements.legStatsContainer.appendChild(row);
+      if (p2Visits.length > 0) {
+        const p2TotalScore = p2Visits.reduce((sum, v) => sum + v.score, 0);
+        const p2TotalDarts = p2Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+        const p2Avg = (p2TotalScore / p2TotalDarts) * 3;
+        p2LegAvgs.push(p2Avg.toFixed(1));
+      } else {
+        p2LegAvgs.push('-');
+      }
     });
+
+    elements.p1LegAvgs.textContent = p1LegAvgs.join(', ') || '-';
+    elements.p2LegAvgs.textContent = p2LegAvgs.join(', ') || '-';
+
+    // Render leg scoresheets (same format as history detail)
+    renderEndScreenLegScoresheets();
 
     showScreen('end');
 
     // Save to history
     saveMatchToHistory();
+  }
+
+  /**
+   * Render leg scoresheets for end screen (reuses history detail format)
+   */
+  function renderEndScreenLegScoresheets() {
+    const config = state.config;
+    const legs = state.legs || [];
+
+    if (legs.length === 0) {
+      elements.endLegsContainer.innerHTML = '<p>No leg data available</p>';
+      return;
+    }
+
+    let html = '<h3>Leg Scoresheets</h3>';
+
+    // Track running score after each leg
+    let p1LegsWon = 0;
+    let p2LegsWon = 0;
+
+    legs.forEach((leg, legIndex) => {
+      const winnerName = leg.winner === 1 ? config.player1Name : config.player2Name;
+
+      // Update running score after this leg
+      if (leg.winner === 1) {
+        p1LegsWon++;
+      } else if (leg.winner === 2) {
+        p2LegsWon++;
+      }
+
+      const runningScore = `${p1LegsWon} - ${p2LegsWon}`;
+
+      // Calculate total darts for this leg to determine if short leg
+      const visits = leg.visits || [];
+      const winnerVisits = visits.filter(v => v.player === leg.winner);
+      const totalDarts = winnerVisits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+      const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
+      const isShortLeg = totalDarts <= shortLegThreshold;
+      const shortLegBadge = isShortLeg ? '<span class="short-leg-badge">Short Leg</span>' : '';
+
+      html += `
+        <div class="leg-scoresheet">
+          <div class="leg-scoresheet-header">
+            <span class="leg-scoresheet-title">Leg ${legIndex + 1}</span>
+            <span class="leg-scoresheet-score">${runningScore}</span>
+            <span class="leg-scoresheet-winner">${winnerName} wins ${shortLegBadge}</span>
+          </div>
+          <table class="leg-scoresheet-table">
+            <thead>
+              <tr>
+                <th class="col-darts">Darts</th>
+                <th class="col-scored">${config.player1Name.substring(0, 8)}</th>
+                <th class="col-remaining">Left</th>
+                <th class="col-scored">${config.player2Name.substring(0, 8)}</th>
+                <th class="col-remaining">Left</th>
+                <th class="col-darts">Darts</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      // Build visit data by round
+      const startingScore = leg.startingScore || config.startingScore;
+      const p1Visits = visits.filter(v => v.player === 1);
+      const p2Visits = visits.filter(v => v.player === 2);
+      const maxRounds = Math.max(p1Visits.length, p2Visits.length);
+
+      let p1Remaining = startingScore;
+      let p2Remaining = startingScore;
+      let p1Darts = 0;
+      let p2Darts = 0;
+
+      for (let round = 0; round < maxRounds; round++) {
+        const p1Visit = p1Visits[round];
+        const p2Visit = p2Visits[round];
+
+        let p1Scored = '';
+        let p1Left = '';
+        let p2Scored = '';
+        let p2Left = '';
+        let p1DartDisplay = '';
+        let p2DartDisplay = '';
+
+        if (p1Visit) {
+          p1Darts += p1Visit.dartsUsed || 3;
+          p1DartDisplay = p1Darts;
+          p1Remaining -= p1Visit.score;
+          p1Scored = p1Visit.score;
+          p1Left = p1Remaining;
+
+          // Color coding
+          if (p1Visit.isCheckout) {
+            const isHighOut = p1Visit.score >= 101;
+            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
+            p1Scored = `<span class="${cssClass}">${p1Visit.score}</span>`;
+            p1Left = `<span class="checkout-score">0</span>`;
+            p1DartDisplay = `<span class="checkout-score">${p1Darts}</span>`;
+          } else if (p1Visit.score === 180) {
+            p1Scored = `<span class="ton-180-score">${p1Visit.score}</span>`;
+          } else if (p1Visit.score >= 100) {
+            p1Scored = `<span class="ton-score">${p1Visit.score}</span>`;
+          }
+        }
+
+        if (p2Visit) {
+          p2Darts += p2Visit.dartsUsed || 3;
+          p2DartDisplay = p2Darts;
+          p2Remaining -= p2Visit.score;
+          p2Scored = p2Visit.score;
+          p2Left = p2Remaining;
+
+          // Color coding
+          if (p2Visit.isCheckout) {
+            const isHighOut = p2Visit.score >= 101;
+            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
+            p2Scored = `<span class="${cssClass}">${p2Visit.score}</span>`;
+            p2Left = `<span class="checkout-score">0</span>`;
+            p2DartDisplay = `<span class="checkout-score">${p2Darts}</span>`;
+          } else if (p2Visit.score === 180) {
+            p2Scored = `<span class="ton-180-score">${p2Visit.score}</span>`;
+          } else if (p2Visit.score >= 100) {
+            p2Scored = `<span class="ton-score">${p2Visit.score}</span>`;
+          }
+        }
+
+        html += `
+          <tr>
+            <td class="col-darts">${p1DartDisplay}</td>
+            <td class="col-scored">${p1Scored}</td>
+            <td class="col-remaining">${p1Left}</td>
+            <td class="col-scored">${p2Scored}</td>
+            <td class="col-remaining">${p2Left}</td>
+            <td class="col-darts">${p2DartDisplay}</td>
+          </tr>
+        `;
+      }
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    });
+
+    elements.endLegsContainer.innerHTML = html;
   }
 
   // ==============
@@ -1569,31 +1697,23 @@
   }
 
   /**
-   * Handle NEW button - shows config modal or confirms if match in progress
+   * Handle NEW button - shows settings modal during match, config modal when idle
    */
   function handleNewButton() {
     if (state && !state.matchComplete) {
-      showConfirm(
-        'Start New Match?',
-        'Current match will be lost.',
-        () => {
-          clearCurrentMatch();
-          showConfigModal();
-        }
-      );
+      // During match: show Rematch/Abandon options
+      showSettingsModal();
     } else {
+      // Idle: show config modal to start new match
       showConfigModal();
     }
   }
 
   /**
-   * Handle Settings button
+   * Handle Settings button - reserved for future use
    */
   function handleSettingsButton() {
-    if (state && !state.matchComplete) {
-      showSettingsModal();
-    }
-    // When idle, settings button does nothing for now
+    // Reserved for future: clear history, reset defaults, app info, etc.
   }
 
   /**
@@ -1604,10 +1724,10 @@
     elements.startMatchBtn.addEventListener('click', startMatch);
     elements.configCancelBtn.addEventListener('click', () => hideModal(elements.configModal));
 
-    // Settings modal
+    // New Match modal (Rematch / New Match)
     elements.settingsCancelBtn.addEventListener('click', () => hideModal(elements.settingsModal));
-    elements.rematchBtn.addEventListener('click', requestRematch);
-    elements.abandonBtn.addEventListener('click', requestAbandonMatch);
+    elements.rematchBtn.addEventListener('click', handleRematchFromModal);
+    elements.newMatchBtn.addEventListener('click', handleNewMatchFromModal);
 
     // Keypad number keys
     document.querySelectorAll('.keypad .key[data-value]').forEach(key => {
@@ -1641,9 +1761,11 @@
     // End screen buttons (no confirmation needed - match is already over)
     elements.endRematchBtn.addEventListener('click', rematch);
     elements.endNewMatchBtn.addEventListener('click', showConfigModal);
+    elements.endHistoryBtn.addEventListener('click', showHistoryScreen);
 
     // History
     elements.historyBackBtn.addEventListener('click', historyBack);
+    elements.historyDetailBackBtn.addEventListener('click', historyDetailBack);
 
     // Keyboard support (for testing on desktop)
     document.addEventListener('keydown', (e) => {
@@ -1782,29 +1904,291 @@
     showScreen('history');
   }
 
+  /** @type {Array} Cached history matches for detail view */
+  let historyMatches = [];
+
+  /**
+   * Format date as YYYY-MM-DD
+   * @param {Date} date
+   * @returns {string}
+   */
+  function formatDateYMD(date) {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  }
+
   /**
    * Render history list
    * @param {array} matches
    */
   function renderHistoryList(matches) {
+    historyMatches = matches; // Cache for detail view
+
     if (matches.length === 0) {
       elements.historyList.innerHTML = '<div class="history-empty">No match history yet</div>';
       return;
     }
 
-    elements.historyList.innerHTML = matches.map(m => {
+    elements.historyList.innerHTML = matches.map((m, index) => {
       const date = new Date(m.timestamp);
-      const dateStr = date.toLocaleDateString();
-      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const dateStr = formatDateYMD(date);
+      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false });
       const winnerName = m.matchWinner === 1 ? m.config.player1Name : m.config.player2Name;
+      const bestOf = m.config.bestOf || 3;
       return `
-        <div class="history-item">
+        <div class="history-item" data-index="${index}">
           <div class="history-players">${m.config.player1Name} vs ${m.config.player2Name}</div>
           <div class="history-score">${m.player1Legs} - ${m.player2Legs}</div>
-          <div class="history-date">${dateStr} ${timeStr} • ${winnerName} wins</div>
+          <div class="history-date">${dateStr} ${timeStr} • Best of ${bestOf} • ${winnerName} wins</div>
         </div>
       `;
     }).join('');
+
+    // Add click handlers for each item
+    elements.historyList.querySelectorAll('.history-item').forEach(item => {
+      item.addEventListener('click', () => {
+        const index = parseInt(item.dataset.index, 10);
+        showHistoryDetail(historyMatches[index]);
+      });
+    });
+  }
+
+  /**
+   * Show history detail for a match
+   * @param {object} match
+   */
+  function showHistoryDetail(match) {
+    const config = match.config;
+    const stats = match.stats || {};
+
+    // Header info
+    elements.detailPlayer1.textContent = config.player1Name;
+    elements.detailPlayer2.textContent = config.player2Name;
+    elements.detailScore.textContent = `${match.player1Legs} - ${match.player2Legs}`;
+
+    const date = new Date(match.timestamp);
+    const bestOf = config.bestOf || 3;
+    elements.detailDate.textContent = formatDateYMD(date) + ' ' +
+      date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', hour12: false }) +
+      ` • Best of ${bestOf}`;
+
+    // Stats table
+    elements.detailStatsP1.textContent = config.player1Name;
+    elements.detailStatsP2.textContent = config.player2Name;
+
+    const p1Stats = stats.player1 || {};
+    const p2Stats = stats.player2 || {};
+
+    elements.detailP1Tons.textContent = p1Stats.tons || 0;
+    elements.detailP2Tons.textContent = p2Stats.tons || 0;
+    elements.detailP1180s.textContent = p1Stats.ton80s || 0;
+    elements.detailP2180s.textContent = p2Stats.ton80s || 0;
+    elements.detailP1ShortLegs.textContent = p1Stats.shortLegs || 0;
+    elements.detailP2ShortLegs.textContent = p2Stats.shortLegs || 0;
+    elements.detailP1HighOuts.textContent = p1Stats.highOuts || 0;
+    elements.detailP2HighOuts.textContent = p2Stats.highOuts || 0;
+    elements.detailP1First9.textContent = p1Stats.first9Avg ? p1Stats.first9Avg.toFixed(1) : '-';
+    elements.detailP2First9.textContent = p2Stats.first9Avg ? p2Stats.first9Avg.toFixed(1) : '-';
+    elements.detailP1Avg.textContent = p1Stats.matchAvg ? p1Stats.matchAvg.toFixed(1) : '-';
+    elements.detailP2Avg.textContent = p2Stats.matchAvg ? p2Stats.matchAvg.toFixed(1) : '-';
+
+    // Calculate and display leg averages
+    const legs = match.legs || [];
+    const p1LegAvgs = [];
+    const p2LegAvgs = [];
+
+    legs.forEach(leg => {
+      const visits = leg.visits || [];
+      const p1Visits = visits.filter(v => v.player === 1);
+      const p2Visits = visits.filter(v => v.player === 2);
+
+      // Calculate P1 leg average
+      if (p1Visits.length > 0) {
+        const p1TotalScore = p1Visits.reduce((sum, v) => sum + v.score, 0);
+        const p1TotalDarts = p1Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+        const p1Avg = (p1TotalScore / p1TotalDarts) * 3;
+        p1LegAvgs.push(p1Avg.toFixed(1));
+      } else {
+        p1LegAvgs.push('-');
+      }
+
+      // Calculate P2 leg average
+      if (p2Visits.length > 0) {
+        const p2TotalScore = p2Visits.reduce((sum, v) => sum + v.score, 0);
+        const p2TotalDarts = p2Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+        const p2Avg = (p2TotalScore / p2TotalDarts) * 3;
+        p2LegAvgs.push(p2Avg.toFixed(1));
+      } else {
+        p2LegAvgs.push('-');
+      }
+    });
+
+    elements.detailP1LegAvgs.textContent = p1LegAvgs.join(', ') || '-';
+    elements.detailP2LegAvgs.textContent = p2LegAvgs.join(', ') || '-';
+
+    // Render leg scoresheets
+    renderLegScoresheets(match);
+
+    showScreen('history-detail');
+  }
+
+  /**
+   * Render leg scoresheets for history detail
+   * @param {object} match
+   */
+  function renderLegScoresheets(match) {
+    const config = match.config;
+    const legs = match.legs || [];
+
+    if (legs.length === 0) {
+      elements.detailLegsContainer.innerHTML = '<p>No leg data available</p>';
+      return;
+    }
+
+    let html = '<h3>Leg Scoresheets</h3>';
+
+    // Track running score after each leg
+    let p1LegsWon = 0;
+    let p2LegsWon = 0;
+
+    legs.forEach((leg, legIndex) => {
+      const winnerName = leg.winner === 1 ? config.player1Name : config.player2Name;
+
+      // Update running score after this leg (before rendering)
+      if (leg.winner === 1) {
+        p1LegsWon++;
+      } else if (leg.winner === 2) {
+        p2LegsWon++;
+      }
+
+      const runningScore = `${p1LegsWon} - ${p2LegsWon}`;
+
+      // Calculate total darts for this leg to determine if short leg
+      const visits = leg.visits || [];
+      const winnerVisits = visits.filter(v => v.player === leg.winner);
+      const totalDarts = winnerVisits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+      const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
+      const isShortLeg = totalDarts <= shortLegThreshold;
+      const shortLegBadge = isShortLeg ? '<span class="short-leg-badge">Short Leg</span>' : '';
+
+      html += `
+        <div class="leg-scoresheet">
+          <div class="leg-scoresheet-header">
+            <span class="leg-scoresheet-title">Leg ${legIndex + 1}</span>
+            <span class="leg-scoresheet-score">${runningScore}</span>
+            <span class="leg-scoresheet-winner">${winnerName} wins ${shortLegBadge}</span>
+          </div>
+          <table class="leg-scoresheet-table">
+            <thead>
+              <tr>
+                <th class="col-darts">Darts</th>
+                <th class="col-scored">${config.player1Name.substring(0, 8)}</th>
+                <th class="col-remaining">Left</th>
+                <th class="col-scored">${config.player2Name.substring(0, 8)}</th>
+                <th class="col-remaining">Left</th>
+                <th class="col-darts">Darts</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      // Build visit data by round
+      const startingScore = leg.startingScore || config.startingScore;
+
+      // Group visits by round (visits already defined above for short leg calculation)
+      const p1Visits = visits.filter(v => v.player === 1);
+      const p2Visits = visits.filter(v => v.player === 2);
+      const maxRounds = Math.max(p1Visits.length, p2Visits.length);
+
+      let p1Remaining = startingScore;
+      let p2Remaining = startingScore;
+      let p1Darts = 0;
+      let p2Darts = 0;
+
+      for (let round = 0; round < maxRounds; round++) {
+        const p1Visit = p1Visits[round];
+        const p2Visit = p2Visits[round];
+
+        let p1Scored = '';
+        let p1Left = '';
+        let p2Scored = '';
+        let p2Left = '';
+        let p1DartDisplay = '';
+        let p2DartDisplay = '';
+
+        if (p1Visit) {
+          // Add darts for this visit (use actual dartsUsed for checkout, otherwise 3)
+          p1Darts += p1Visit.dartsUsed || 3;
+          p1DartDisplay = p1Darts;
+          p1Remaining -= p1Visit.score;
+          p1Scored = p1Visit.score;
+          p1Left = p1Remaining;
+
+          // Color coding: checkout (green), 180 (gold), ton (blue), high out (green)
+          if (p1Visit.isCheckout) {
+            const isHighOut = p1Visit.score >= 101;
+            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
+            p1Scored = `<span class="${cssClass}">${p1Visit.score}</span>`;
+            p1Left = `<span class="checkout-score">0</span>`;
+            p1DartDisplay = `<span class="checkout-score">${p1Darts}</span>`;
+          } else if (p1Visit.score === 180) {
+            p1Scored = `<span class="ton-180-score">${p1Visit.score}</span>`;
+          } else if (p1Visit.score >= 100) {
+            p1Scored = `<span class="ton-score">${p1Visit.score}</span>`;
+          }
+        }
+
+        if (p2Visit) {
+          // Add darts for this visit (use actual dartsUsed for checkout, otherwise 3)
+          p2Darts += p2Visit.dartsUsed || 3;
+          p2DartDisplay = p2Darts;
+          p2Remaining -= p2Visit.score;
+          p2Scored = p2Visit.score;
+          p2Left = p2Remaining;
+
+          // Color coding: checkout (green), 180 (gold), ton (blue), high out (green)
+          if (p2Visit.isCheckout) {
+            const isHighOut = p2Visit.score >= 101;
+            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
+            p2Scored = `<span class="${cssClass}">${p2Visit.score}</span>`;
+            p2Left = `<span class="checkout-score">0</span>`;
+            p2DartDisplay = `<span class="checkout-score">${p2Darts}</span>`;
+          } else if (p2Visit.score === 180) {
+            p2Scored = `<span class="ton-180-score">${p2Visit.score}</span>`;
+          } else if (p2Visit.score >= 100) {
+            p2Scored = `<span class="ton-score">${p2Visit.score}</span>`;
+          }
+        }
+
+        html += `
+          <tr>
+            <td class="col-darts">${p1DartDisplay}</td>
+            <td class="col-scored">${p1Scored}</td>
+            <td class="col-remaining">${p1Left}</td>
+            <td class="col-scored">${p2Scored}</td>
+            <td class="col-remaining">${p2Left}</td>
+            <td class="col-darts">${p2DartDisplay}</td>
+          </tr>
+        `;
+      }
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    });
+
+    elements.detailLegsContainer.innerHTML = html;
+  }
+
+  /**
+   * Go back from history detail to history list
+   */
+  function historyDetailBack() {
+    showScreen('history');
   }
 
   /**

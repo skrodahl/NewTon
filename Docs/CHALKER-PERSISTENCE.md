@@ -24,13 +24,13 @@ Make Chalker crash-proof with persistent match data, settings, and match history
 - No separate config screen - config is now a modal
 - Idle state (no match): scores show "---", numpad disabled except action row
 
-### New keypad row (5th row, below DEL/0/OK)
+### New keypad row (above numpad)
 ```
-| NEW | HISTORY | ⚙ |
+| NEW | HISTORY | SETTINGS |
 ```
-- **NEW** - Opens config modal to start new match (confirms if match in progress)
-- **HISTORY** - Opens history screen
-- **⚙** - Opens settings modal during match (rematch, abandon)
+- **NEW** - Opens "New Match?" modal during match (Rematch/New Match), config modal when idle
+- **HISTORY** - Opens history screen with match list, tap for details
+- **SETTINGS** - Reserved for future use (clear history, app info, etc.)
 
 ### Simplified header
 - Removed hamburger menu
@@ -88,18 +88,18 @@ Stores:
 
 - [x] `saveMatchToHistory()` - Save completed match with stats
 - [x] `trimHistory()` - Delete oldest when > 1000 matches
-- [x] History screen with match list
+- [x] History screen with match list (sorted newest first)
 - [x] Display: player names, score, date/time, winner
 - [x] Navigate back to scoring screen
 
 ### Phase 5: UI Restructure ✓
 **Files:** `chalker/index.html`, `chalker/styles/chalker.css`, `chalker/js/chalker.js`
 
-- [x] Add 5th keypad row (NEW, HISTORY, ⚙)
+- [x] Add action row (NEW, HISTORY, SETTINGS)
 - [x] Convert config screen to modal
 - [x] Remove hamburger menu from header
 - [x] `updateIdleDisplay()` - Idle state display (scores "---", numpad disabled)
-- [x] Settings modal (⚙ button) with Rematch and Abandon Match options
+- [x] "New Match?" modal with Rematch and New Match options
 - [x] Scoring screen is now always active on load
 
 ### Phase 6: Polish ✓
@@ -107,7 +107,27 @@ Stores:
 - [x] CSS for action row (`.keypad-actions`, `.key-action`)
 - [x] `updateKeypadState()` - Disable numpad when idle
 - [x] Tablet scaling for action row in media query
-- [x] Service worker cache version bumped to v9
+- [x] Service worker cache version bumped to v21
+
+### Phase 7: History Detail View ✓
+**Files:** `chalker/js/chalker.js`, `chalker/index.html`, `chalker/styles/chalker.css`
+
+- [x] History detail screen with match statistics
+- [x] Leg-by-leg scoresheets with cumulative dart counts
+- [x] Separate dart columns for each player (P1 left, P2 right)
+- [x] Green highlighting for checkout scores
+- [x] Back navigation to history list
+
+### Phase 8: End Screen Unification ✓
+**Files:** `chalker/js/chalker.js`, `chalker/index.html`, `chalker/styles/chalker.css`
+
+- [x] Match Complete screen redesigned to match History Detail format
+- [x] Same stats table structure with leg averages row
+- [x] Leg-by-leg scoresheets with color coding on end screen
+- [x] History button added to navigate to history from end screen
+- [x] 24-hour timestamp format (removed AM/PM)
+- [x] Dynamic short leg indicator (uses SHORT_LEG_THRESHOLDS lookup table)
+- [x] Service worker cache version bumped to v29
 
 ---
 
@@ -116,10 +136,10 @@ Stores:
 | File | Changes |
 |------|---------|
 | `chalker/js/db.js` | New file - IndexedDB wrapper |
-| `chalker/js/chalker.js` | Save/load hooks, idle state, UI logic, removed config screen |
-| `chalker/index.html` | Config modal, settings modal, action row, removed hamburger menu |
-| `chalker/styles/chalker.css` | Action row styles, idle state styles, modal styles |
-| `chalker/sw.js` | Add db.js to cache, bumped to v9 |
+| `chalker/js/chalker.js` | Save/load hooks, idle state, UI logic, history detail view |
+| `chalker/index.html` | Config modal, settings modal, action row, history detail screen |
+| `chalker/styles/chalker.css` | Action row styles, idle state styles, history detail styles |
+| `chalker/sw.js` | Add db.js to cache, bumped to v21 |
 
 ---
 
@@ -128,13 +148,14 @@ Stores:
 - [x] Settings persist after closing app
 - [x] Match survives page reload mid-leg
 - [x] App opens to chalkboard (idle or active match)
-- [x] NEW button opens config modal
+- [x] NEW button opens config modal (idle) or "New Match?" modal (during match)
 - [x] HISTORY button shows match history
-- [x] ⚙ button shows settings/abandon during match
+- [x] Tapping history item shows match details with stats and leg scoresheets
 - [x] Numpad disabled when no active match
 - [x] Completed matches appear in history
 - [x] History limited to 1000 entries
 - [x] History sorted newest first
+- [x] Leg scoresheets show cumulative dart counts per player
 
 ---
 
@@ -172,6 +193,17 @@ Stores:
 }
 ```
 
+### Visit record (in leg.visits array)
+```javascript
+{
+  player: 1 | 2,
+  score: number,
+  dartsUsed: number,  // Default 3, actual count on checkout
+  isCheckout: boolean
+}
+```
+
 ---
 
-**Completed:** January 9, 2025
+**Completed:** January 9, 2025 (Phases 1-7)
+**Updated:** January 9, 2025 (Phase 8 - End Screen Unification)
