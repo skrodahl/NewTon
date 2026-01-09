@@ -24,6 +24,7 @@
 :root {
   --font-body: 'Manrope', sans-serif;
   --font-mono: 'Cascadia Code', 'SF Mono', 'Monaco', 'Consolas', monospace;
+  --font-scores: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
 
   /* NewTon colors with enhanced contrast */
   --bg-primary: #f1f5f5;
@@ -367,7 +368,8 @@ body {
 }
 
 .anchor-score {
-  font-family: var(--font-mono);
+  font-family: var(--font-scores);
+  font-variant-numeric: tabular-nums;
   font-size: 3rem;
   font-weight: 700;
   color: var(--text-primary);
@@ -394,7 +396,8 @@ body {
 .chalk-table {
   width: 100%;
   border-collapse: collapse;
-  font-family: var(--font-mono);
+  font-family: var(--font-scores);
+  font-variant-numeric: tabular-nums;
   table-layout: fixed;
 }
 
@@ -962,7 +965,7 @@ body {
 
   .key {
     font-size: 2.25rem;
-    padding: var(--spacing-md) var(--spacing-lg);
+    padding: var(--spacing-lg) var(--spacing-lg);
   }
 
   .key-delete {

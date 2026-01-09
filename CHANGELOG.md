@@ -1,5 +1,21 @@
 # 2025-01-09
 
+## **v4.1.6** - Chalker Legibility Improvements
+
+### Chalker Enhancements
+- **System font for scores**: Scores now use native system fonts instead of Cascadia Code monospace
+  - San Francisco on iOS, Roboto on Android, Segoe UI on Windows
+  - Much cleaner and more legible at a distance
+  - Tabular numerals keep digits aligned
+- **Larger tablet keypad**: Increased button height on tablets for easier tapping
+
+### Technical Details
+- Added `--font-scores` CSS variable with system font stack
+- Applied `font-variant-numeric: tabular-nums` for aligned digits
+- Increased tablet keypad vertical padding from `--spacing-md` to `--spacing-lg`
+
+---
+
 ## **v4.1.5** - Chalker Viewport-Based Row Heights
 
 ### Chalker Enhancements
