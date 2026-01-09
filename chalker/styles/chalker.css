@@ -297,13 +297,6 @@ body {
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: var(--spacing-sm);
-  position: relative;
-}
-
-.scoring-header .btn-icon {
-  position: absolute;
-  right: var(--spacing-lg);
-  color: var(--text-light);
 }
 
 .header-player {
@@ -311,10 +304,6 @@ body {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-}
-
-.header-player:last-of-type {
-  padding-right: 2.5rem;
 }
 
 .header-player.leg-starter {
@@ -555,6 +544,45 @@ body {
   background: var(--accent-primary-hover);
 }
 
+/* Action row (NEW, HISTORY, settings) */
+.keypad-actions {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-xs);
+  margin-top: var(--spacing-xs);
+  border-top: 1px solid var(--border-light);
+  padding-top: var(--spacing-xs);
+}
+
+.key-action {
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: var(--bg-primary);
+  color: var(--text-secondary);
+}
+
+.key-action:active {
+  background: var(--border-light);
+}
+
+/* Disabled keys (idle state) */
+.key:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
+.key:disabled:active {
+  transform: none;
+  background: var(--bg-secondary);
+}
+
+/* Idle state scores */
+.anchor-score.idle {
+  color: var(--text-secondary);
+  opacity: 0.5;
+}
+
 #undo-btn {
   margin-top: var(--spacing-sm);
 }
@@ -597,6 +625,52 @@ body {
 
 .modal-content p {
   color: var(--text-secondary);
+}
+
+/* Config modal (larger, scrollable) */
+.config-modal-content {
+  max-width: 400px;
+  max-height: 90vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.config-form-modal {
+  flex: 1;
+  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  margin-bottom: var(--spacing-md);
+  padding-right: var(--spacing-xs);
+}
+
+.config-form-modal .form-group {
+  flex-shrink: 0;
+}
+
+.config-form-modal .form-group label {
+  font-size: 0.75rem;
+}
+
+.config-form-modal .form-group input,
+.config-form-modal .form-group select {
+  font-size: 1rem;
+  padding: var(--spacing-sm);
+}
+
+.config-form-modal .toggle {
+  width: 48px;
+  height: 28px;
+}
+
+.config-form-modal .toggle-slider::before {
+  height: 20px;
+  width: 20px;
+}
+
+.config-form-modal .toggle input:checked + .toggle-slider::before {
+  transform: translateX(20px);
 }
 
 .dart-buttons {
@@ -855,6 +929,63 @@ body {
   display: none !important;
 }
 
+/* History Screen */
+.history-header {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md);
+  background: var(--bg-dark);
+  color: white;
+}
+
+.history-header h1 {
+  font-size: 1.25rem;
+  font-weight: 600;
+  margin: 0;
+  flex: 1;
+}
+
+.history-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--spacing-sm);
+}
+
+.history-item {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: var(--spacing-xs);
+  padding: var(--spacing-md);
+  background: var(--bg-secondary);
+  border-radius: 8px;
+  margin-bottom: var(--spacing-sm);
+  border: 1px solid var(--border-light);
+}
+
+.history-players {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.history-score {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--accent-primary);
+}
+
+.history-date {
+  grid-column: 1 / -1;
+  font-size: 0.75rem;
+  color: var(--text-secondary);
+}
+
+.history-empty {
+  text-align: center;
+  padding: var(--spacing-xl);
+  color: var(--text-secondary);
+}
+
 /* ===================== */
 /* Tablet Scaling (768px+) */
 /* ===================== */
@@ -970,6 +1101,18 @@ body {
 
   .key-delete {
     font-size: 1.875rem;
+  }
+
+  /* Action row */
+  .keypad-actions {
+    gap: var(--spacing-sm);
+    margin-top: var(--spacing-sm);
+    padding-top: var(--spacing-sm);
+  }
+
+  .key-action {
+    font-size: 1.5rem;
+    padding: var(--spacing-lg) var(--spacing-md);
   }
 
   /* Modals */

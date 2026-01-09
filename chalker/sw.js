@@ -3,12 +3,13 @@
  * Provides offline caching for PWA functionality
  */
 
-const CACHE_NAME = 'chalker-v7';
+const CACHE_NAME = 'chalker-v9';
 
 // Files to cache for offline use
 const CACHE_FILES = [
   './',
   './index.html',
+  './js/db.js',
   './js/chalker.js',
   './styles/chalker.css',
   './fonts/Manrope-VariableFont_wght.ttf',

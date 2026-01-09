@@ -67,11 +67,10 @@
 
   const elements = {
     // Screens
-    configScreen: document.getElementById('config-screen'),
     scoringScreen: document.getElementById('scoring-screen'),
     endScreen: document.getElementById('end-screen'),
 
-    // Config inputs
+    // Config inputs (now in modal)
     laneName: document.getElementById('lane-name'),
     player1Name: document.getElementById('player1-name'),
     player2Name: document.getElementById('player2-name'),
@@ -91,10 +90,12 @@
     player2Score: document.getElementById('player2-score'),
     chalkboardBody: document.getElementById('chalkboard-body'),
 
-    // Buttons
-    menuBtn: document.getElementById('menu-btn'),
-
     // Modals
+    configModal: document.getElementById('config-modal'),
+    configCancelBtn: document.getElementById('config-cancel-btn'),
+    settingsModal: document.getElementById('settings-modal'),
+    settingsCancelBtn: document.getElementById('settings-cancel-btn'),
+    abandonBtn: document.getElementById('abandon-btn'),
     checkoutModal: document.getElementById('checkout-modal'),
     checkoutCancelBtn: document.getElementById('checkout-cancel-btn'),
     tiebreakModal: document.getElementById('tiebreak-modal'),
@@ -104,10 +105,7 @@
     tiebreakP2Btn: document.getElementById('tiebreak-p2'),
     tiebreakRandomBtn: document.getElementById('tiebreak-random'),
     tiebreakCancelBtn: document.getElementById('tiebreak-cancel-btn'),
-    menuModal: document.getElementById('menu-modal'),
     rematchBtn: document.getElementById('rematch-btn'),
-    newMatchBtn: document.getElementById('new-match-btn'),
-    cancelMenuBtn: document.getElementById('cancel-menu-btn'),
     confirmModal: document.getElementById('confirm-modal'),
     confirmTitle: document.getElementById('confirm-title'),
     confirmMessage: document.getElementById('confirm-message'),
@@ -137,7 +135,17 @@
     legStatsP1: document.getElementById('leg-stats-p1'),
     legStatsP2: document.getElementById('leg-stats-p2'),
     endRematchBtn: document.getElementById('end-rematch-btn'),
-    endNewMatchBtn: document.getElementById('end-new-match-btn')
+    endNewMatchBtn: document.getElementById('end-new-match-btn'),
+
+    // History
+    historyScreen: document.getElementById('history-screen'),
+    historyList: document.getElementById('history-list'),
+    historyBackBtn: document.getElementById('history-back-btn'),
+
+    // Keypad action buttons
+    keyNew: document.getElementById('key-new'),
+    keyHistory: document.getElementById('key-history'),
+    keySettings: document.getElementById('key-settings')
   };
 
   // ===========
@@ -146,22 +154,22 @@
 
   /**
    * Show a specific screen
-   * @param {'config'|'scoring'|'end'} screenName
+   * @param {'scoring'|'end'|'history'} screenName
    */
   function showScreen(screenName) {
-    elements.configScreen.classList.remove('active');
     elements.scoringScreen.classList.remove('active');
     elements.endScreen.classList.remove('active');
+    elements.historyScreen.classList.remove('active');
 
     switch (screenName) {
-      case 'config':
-        elements.configScreen.classList.add('active');
-        break;
       case 'scoring':
         elements.scoringScreen.classList.add('active');
         break;
       case 'end':
         elements.endScreen.classList.add('active');
+        break;
+      case 'history':
+        elements.historyScreen.classList.add('active');
         break;
     }
   }
@@ -189,7 +197,7 @@
   /**
    * Start a new match with current config
    */
-  function startMatch() {
+  async function startMatch() {
     const config = {
       laneName: elements.laneName.value.trim() || 'Lane',
       player1Name: elements.player1Name.value.trim() || 'Player 1',
@@ -199,6 +207,12 @@
       maxRounds: parseInt(elements.maxRounds.value, 10),
       doubleIn: elements.doubleIn.checked
     };
+
+    // Save settings for next time
+    saveSettings(config);
+
+    // Close config modal
+    hideModal(elements.configModal);
 
     state = {
       config: config,
@@ -233,6 +247,7 @@
 
     updateDisplay();
     showScreen('scoring');
+    saveCurrentMatch();
   }
 
   /**
@@ -313,6 +328,7 @@
     }
 
     updateDisplay();
+    saveCurrentMatch();
   }
 
   /**
@@ -571,6 +587,7 @@
       startNewLeg();
       updateDisplay();
     }
+    saveCurrentMatch();
   }
 
   /**
@@ -703,6 +720,7 @@
 
     updateDisplay();
     showScreen('scoring');
+    saveCurrentMatch();
   }
 
   /**
@@ -758,21 +776,11 @@
    * Request rematch with confirmation
    */
   function requestRematch() {
+    hideModal(elements.settingsModal);
     showConfirm(
       'Start Rematch?',
       'Current match will be lost.',
       rematch
-    );
-  }
-
-  /**
-   * Request new match with confirmation
-   */
-  function requestNewMatch() {
-    showConfirm(
-      'Start New Match?',
-      'Current match will be lost.',
-      newMatch
     );
   }
 
@@ -784,11 +792,49 @@
   }
 
   /**
-   * Start a new match (back to config)
+   * Show config modal for new match
+   */
+  function showConfigModal() {
+    showModal(elements.configModal);
+  }
+
+  /**
+   * Show settings modal
+   */
+  function showSettingsModal() {
+    showModal(elements.settingsModal);
+  }
+
+  /**
+   * Abandon current match
+   */
+  function abandonMatch() {
+    hideModal(elements.settingsModal);
+    state = null;
+    clearCurrentMatch();
+    updateIdleDisplay();
+  }
+
+  /**
+   * Request to abandon match with confirmation
+   */
+  function requestAbandonMatch() {
+    hideModal(elements.settingsModal);
+    showConfirm(
+      'Abandon Match?',
+      'Current match will be lost.',
+      abandonMatch
+    );
+  }
+
+  /**
+   * Start a new match (clear state and show idle)
    */
   function newMatch() {
     state = null;
-    showScreen('config');
+    clearCurrentMatch();
+    updateIdleDisplay();
+    showScreen('scoring');
   }
 
   // =======
@@ -796,10 +842,62 @@
   // =======
 
   /**
+   * Update display for idle state (no match)
+   */
+  function updateIdleDisplay() {
+    // Show idle scores
+    elements.player1Score.textContent = '---';
+    elements.player2Score.textContent = '---';
+    elements.player1Score.classList.add('idle');
+    elements.player2Score.classList.add('idle');
+
+    // Reset leg display
+    elements.legDisplay.textContent = '0 - 0';
+
+    // Reset player names to default or last used
+    elements.player1Header.textContent = elements.player1Name.value || 'Player 1';
+    elements.player2Header.textContent = elements.player2Name.value || 'Player 2';
+
+    // Remove active state from anchors
+    elements.player1Anchor.classList.remove('active');
+    elements.player2Anchor.classList.remove('active');
+
+    // Clear chalkboard
+    document.getElementById('chalk-tbody').innerHTML = '';
+
+    // Disable numpad keys
+    updateKeypadState();
+  }
+
+  /**
+   * Update keypad enabled/disabled state
+   */
+  function updateKeypadState() {
+    const isIdle = !state || state.matchComplete;
+
+    // Disable numpad keys when idle, but keep action buttons enabled
+    document.querySelectorAll('.keypad .key').forEach(key => {
+      key.disabled = isIdle;
+    });
+
+    // Action buttons are always enabled
+    document.querySelectorAll('.keypad-actions .key').forEach(key => {
+      key.disabled = false;
+    });
+  }
+
+  /**
    * Update all display elements
    */
   function updateDisplay() {
-    if (!state) return;
+    if (!state) {
+      updateIdleDisplay();
+      return;
+    }
+
+    // Remove idle state
+    elements.player1Score.classList.remove('idle');
+    elements.player2Score.classList.remove('idle');
 
     // Update anchor scores
     elements.player1Score.textContent = state.player1Score;
@@ -811,6 +909,9 @@
     // Update active player indicator
     elements.player1Anchor.classList.toggle('active', state.currentPlayer === 1);
     elements.player2Anchor.classList.toggle('active', state.currentPlayer === 2);
+
+    // Enable keypad
+    updateKeypadState();
 
     // Render chalkboard
     renderChalkboard();
@@ -1284,6 +1385,9 @@
     });
 
     showScreen('end');
+
+    // Save to history
+    saveMatchToHistory();
   }
 
   // ==============
@@ -1297,7 +1401,8 @@
   function isModalActive() {
     return elements.checkoutModal.classList.contains('active') ||
            elements.tiebreakModal.classList.contains('active') ||
-           elements.menuModal.classList.contains('active') ||
+           elements.configModal.classList.contains('active') ||
+           elements.settingsModal.classList.contains('active') ||
            elements.confirmModal.classList.contains('active');
   }
 
@@ -1407,6 +1512,7 @@
     editingVisitIndex = null;
     inputBuffer = '';
     updateDisplay();
+    saveCurrentMatch();
   }
 
   /**
@@ -1463,25 +1569,58 @@
   }
 
   /**
+   * Handle NEW button - shows config modal or confirms if match in progress
+   */
+  function handleNewButton() {
+    if (state && !state.matchComplete) {
+      showConfirm(
+        'Start New Match?',
+        'Current match will be lost.',
+        () => {
+          clearCurrentMatch();
+          showConfigModal();
+        }
+      );
+    } else {
+      showConfigModal();
+    }
+  }
+
+  /**
+   * Handle Settings button
+   */
+  function handleSettingsButton() {
+    if (state && !state.matchComplete) {
+      showSettingsModal();
+    }
+    // When idle, settings button does nothing for now
+  }
+
+  /**
    * Initialize event listeners
    */
   function initEventListeners() {
-    // Start match
+    // Start match (from config modal)
     elements.startMatchBtn.addEventListener('click', startMatch);
+    elements.configCancelBtn.addEventListener('click', () => hideModal(elements.configModal));
 
-    // Keypad
-    document.querySelectorAll('.key[data-value]').forEach(key => {
+    // Settings modal
+    elements.settingsCancelBtn.addEventListener('click', () => hideModal(elements.settingsModal));
+    elements.rematchBtn.addEventListener('click', requestRematch);
+    elements.abandonBtn.addEventListener('click', requestAbandonMatch);
+
+    // Keypad number keys
+    document.querySelectorAll('.keypad .key[data-value]').forEach(key => {
       key.addEventListener('click', () => handleKeyPress(key.dataset.value));
     });
 
     document.querySelector('.key[data-action="delete"]').addEventListener('click', handleDelete);
     document.querySelector('.key[data-action="enter"]').addEventListener('click', handleEnter);
 
-    // Menu
-    elements.menuBtn.addEventListener('click', () => showModal(elements.menuModal));
-    elements.cancelMenuBtn.addEventListener('click', () => hideModal(elements.menuModal));
-    elements.rematchBtn.addEventListener('click', requestRematch);
-    elements.newMatchBtn.addEventListener('click', requestNewMatch);
+    // Keypad action buttons
+    elements.keyNew.addEventListener('click', handleNewButton);
+    elements.keyHistory.addEventListener('click', showHistoryScreen);
+    elements.keySettings.addEventListener('click', handleSettingsButton);
 
     // Confirm modal
     elements.confirmYesBtn.addEventListener('click', handleConfirmYes);
@@ -1501,7 +1640,10 @@
 
     // End screen buttons (no confirmation needed - match is already over)
     elements.endRematchBtn.addEventListener('click', rematch);
-    elements.endNewMatchBtn.addEventListener('click', newMatch);
+    elements.endNewMatchBtn.addEventListener('click', showConfigModal);
+
+    // History
+    elements.historyBackBtn.addEventListener('click', historyBack);
 
     // Keyboard support (for testing on desktop)
     document.addEventListener('keydown', (e) => {
@@ -1521,9 +1663,197 @@
   // Initialize
   // ==========
 
-  function init() {
+  /**
+   * Load saved settings and pre-fill config form
+   */
+  async function loadSettings() {
+    try {
+      const saved = await dbGet('settings', 'default');
+      if (saved) {
+        elements.laneName.value = saved.laneName || '';
+        elements.player1Name.value = saved.player1Name || '';
+        elements.player2Name.value = saved.player2Name || '';
+        elements.startingScore.value = saved.startingScore || 501;
+        elements.bestOf.value = saved.bestOf || 3;
+        elements.maxRounds.value = saved.maxRounds || 20;
+        elements.doubleIn.checked = saved.doubleIn || false;
+      }
+    } catch (e) {
+      console.warn('Failed to load settings:', e);
+    }
+  }
+
+  /**
+   * Save current settings to IndexedDB
+   * @param {object} config - Match configuration
+   */
+  async function saveSettings(config) {
+    try {
+      await dbPut('settings', { id: 'default', ...config });
+    } catch (e) {
+      console.warn('Failed to save settings:', e);
+    }
+  }
+
+  /**
+   * Save current match state to IndexedDB
+   */
+  async function saveCurrentMatch() {
+    if (!state) return;
+    try {
+      await dbPut('current_match', {
+        id: 'active',
+        state: state,
+        inputBuffer: inputBuffer,
+        timestamp: Date.now()
+      });
+    } catch (e) {
+      console.warn('Failed to save match:', e);
+    }
+  }
+
+  /**
+   * Clear saved match from IndexedDB
+   */
+  async function clearCurrentMatch() {
+    try {
+      await dbDelete('current_match', 'active');
+    } catch (e) {
+      console.warn('Failed to clear match:', e);
+    }
+  }
+
+  /**
+   * Save completed match to history
+   */
+  async function saveMatchToHistory() {
+    if (!state || !state.matchComplete) return;
+    try {
+      const stats = calculateStats();
+      const match = {
+        timestamp: Date.now(),
+        config: state.config,
+        legs: state.legs,
+        player1Legs: state.player1Legs,
+        player2Legs: state.player2Legs,
+        matchWinner: state.matchWinner,
+        stats: {
+          player1: stats.player1,
+          player2: stats.player2
+        }
+      };
+      await dbPut('match_history', match);
+      await clearCurrentMatch();
+      await trimHistory();
+    } catch (e) {
+      console.warn('Failed to save match to history:', e);
+    }
+  }
+
+  /**
+   * Trim history to MAX_HISTORY matches
+   */
+  async function trimHistory() {
+    try {
+      const count = await dbCount('match_history');
+      if (count > MAX_HISTORY) {
+        const all = await dbGetAllByIndex('match_history', 'timestamp', 'next'); // oldest first
+        const toDelete = all.slice(0, count - MAX_HISTORY);
+        for (const match of toDelete) {
+          await dbDelete('match_history', match.id);
+        }
+      }
+    } catch (e) {
+      console.warn('Failed to trim history:', e);
+    }
+  }
+
+  /**
+   * Show match history screen
+   */
+  async function showHistoryScreen() {
+    try {
+      const matches = await dbGetAllByIndex('match_history', 'timestamp', 'prev');
+      renderHistoryList(matches);
+    } catch (e) {
+      console.warn('Failed to load history:', e);
+      renderHistoryList([]);
+    }
+    showScreen('history');
+  }
+
+  /**
+   * Render history list
+   * @param {array} matches
+   */
+  function renderHistoryList(matches) {
+    if (matches.length === 0) {
+      elements.historyList.innerHTML = '<div class="history-empty">No match history yet</div>';
+      return;
+    }
+
+    elements.historyList.innerHTML = matches.map(m => {
+      const date = new Date(m.timestamp);
+      const dateStr = date.toLocaleDateString();
+      const timeStr = date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      const winnerName = m.matchWinner === 1 ? m.config.player1Name : m.config.player2Name;
+      return `
+        <div class="history-item">
+          <div class="history-players">${m.config.player1Name} vs ${m.config.player2Name}</div>
+          <div class="history-score">${m.player1Legs} - ${m.player2Legs}</div>
+          <div class="history-date">${dateStr} ${timeStr} • ${winnerName} wins</div>
+        </div>
+      `;
+    }).join('');
+  }
+
+  /**
+   * Go back from history to scoring screen
+   */
+  function historyBack() {
+    showScreen('scoring');
+    if (!state || state.matchComplete) {
+      updateIdleDisplay();
+    }
+  }
+
+  /**
+   * Check for active match on load and offer to resume
+   */
+  async function checkForActiveMatch() {
+    try {
+      const saved = await dbGet('current_match', 'active');
+      if (saved && saved.state && !saved.state.matchComplete) {
+        // Resume the match
+        state = saved.state;
+        inputBuffer = saved.inputBuffer || '';
+
+        // Update UI with match info
+        elements.player1Header.textContent = state.config.player1Name;
+        elements.player2Header.textContent = state.config.player2Name;
+
+        updateDisplay();
+        showScreen('scoring');
+        return true;
+      }
+    } catch (e) {
+      console.warn('Failed to check for active match:', e);
+    }
+    return false;
+  }
+
+  async function init() {
+    await openDB();
     initEventListeners();
-    showScreen('config');
+    await loadSettings();
+
+    // Check for active match to resume
+    const resumed = await checkForActiveMatch();
+    if (!resumed) {
+      // Show scoring screen in idle state
+      showScreen('scoring');
+      updateIdleDisplay();
+    }
   }
 
   // Start the app

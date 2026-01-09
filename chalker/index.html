@@ -14,94 +14,12 @@
     <link rel="apple-touch-icon" href="images/icon-192.png">
 </head>
 <body>
-    <!-- Configuration Screen -->
-    <div id="config-screen" class="screen active">
-        <header class="config-header">
-            <h1>NewTon Chalker</h1>
-        </header>
-
-        <main class="config-form">
-            <div class="form-group">
-                <label for="lane-name">Lane Name</label>
-                <input type="text" id="lane-name" placeholder="e.g., Lane 1">
-            </div>
-
-            <div class="form-group">
-                <label for="player1-name">Player 1</label>
-                <input type="text" id="player1-name" placeholder="Player 1 name">
-            </div>
-
-            <div class="form-group">
-                <label for="player2-name">Player 2</label>
-                <input type="text" id="player2-name" placeholder="Player 2 name">
-            </div>
-
-            <div class="form-group">
-                <label for="starting-score">Starting Score</label>
-                <select id="starting-score">
-                    <option value="101">101</option>
-                    <option value="201">201</option>
-                    <option value="301">301</option>
-                    <option value="401">401</option>
-                    <option value="501" selected>501</option>
-                    <option value="601">601</option>
-                    <option value="701">701</option>
-                    <option value="901">901</option>
-                    <option value="1001">1001</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="best-of">Best Of</label>
-                <select id="best-of">
-                    <option value="1">1</option>
-                    <option value="3" selected>3</option>
-                    <option value="5">5</option>
-                    <option value="7">7</option>
-                    <option value="9">9</option>
-                    <option value="11">11</option>
-                </select>
-            </div>
-
-            <div class="form-group">
-                <label for="max-rounds">Max Rounds</label>
-                <select id="max-rounds">
-                    <option value="7">7 (21 darts)</option>
-                    <option value="8">8 (24 darts)</option>
-                    <option value="9">9 (27 darts)</option>
-                    <option value="10">10 (30 darts)</option>
-                    <option value="11">11 (33 darts)</option>
-                    <option value="12">12 (36 darts)</option>
-                    <option value="13" selected>13 (39 darts)</option>
-                    <option value="14">14 (42 darts)</option>
-                    <option value="15">15 (45 darts)</option>
-                    <option value="16">16 (48 darts)</option>
-                    <option value="17">17 (51 darts)</option>
-                    <option value="18">18 (54 darts)</option>
-                    <option value="19">19 (57 darts)</option>
-                    <option value="20">20 (60 darts)</option>
-                </select>
-            </div>
-
-            <div class="form-group toggle-group">
-                <label for="double-in">Double-In Required</label>
-                <label class="toggle">
-                    <input type="checkbox" id="double-in">
-                    <span class="toggle-slider"></span>
-                </label>
-            </div>
-
-            <button id="start-match-btn" class="btn btn-primary btn-large">Start Match</button>
-        </main>
-    </div>
-
-    <!-- Scoring Screen -->
-    <div id="scoring-screen" class="screen">
+    <!-- Scoring Screen (always shown) -->
+    <div id="scoring-screen" class="screen active">
         <header class="scoring-header">
             <span id="player1-header" class="header-player">Player 1</span>
             <span id="leg-display" class="leg-score">0 - 0</span>
             <span id="player2-header" class="header-player">Player 2</span>
-            <button id="menu-btn" class="btn-icon" aria-label="Menu">☰</button>
         </header>
 
         <!-- Score anchors at top -->
@@ -150,6 +68,11 @@
                 <button class="key" data-value="0">0</button>
                 <button class="key key-enter" data-action="enter">OK</button>
             </div>
+            <div class="keypad-actions">
+                <button class="key key-action" id="key-new">NEW</button>
+                <button class="key key-action" id="key-history">HISTORY</button>
+                <button class="key key-action" id="key-settings">&#9881;</button>
+            </div>
         </div>
     </div>
 
@@ -181,13 +104,93 @@
         </div>
     </div>
 
-    <!-- Menu Modal -->
-    <div id="menu-modal" class="modal">
+    <!-- Config Modal (New Match) -->
+    <div id="config-modal" class="modal">
+        <div class="modal-content config-modal-content">
+            <h2>New Match</h2>
+            <div class="config-form-modal">
+                <div class="form-group">
+                    <label for="lane-name">Lane Name</label>
+                    <input type="text" id="lane-name" placeholder="e.g., Lane 1">
+                </div>
+
+                <div class="form-group">
+                    <label for="player1-name">Player 1</label>
+                    <input type="text" id="player1-name" placeholder="Player 1 name">
+                </div>
+
+                <div class="form-group">
+                    <label for="player2-name">Player 2</label>
+                    <input type="text" id="player2-name" placeholder="Player 2 name">
+                </div>
+
+                <div class="form-group">
+                    <label for="starting-score">Starting Score</label>
+                    <select id="starting-score">
+                        <option value="101">101</option>
+                        <option value="201">201</option>
+                        <option value="301">301</option>
+                        <option value="401">401</option>
+                        <option value="501" selected>501</option>
+                        <option value="601">601</option>
+                        <option value="701">701</option>
+                        <option value="901">901</option>
+                        <option value="1001">1001</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="best-of">Best Of</label>
+                    <select id="best-of">
+                        <option value="1">1</option>
+                        <option value="3" selected>3</option>
+                        <option value="5">5</option>
+                        <option value="7">7</option>
+                        <option value="9">9</option>
+                        <option value="11">11</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label for="max-rounds">Max Rounds</label>
+                    <select id="max-rounds">
+                        <option value="7">7 (21 darts)</option>
+                        <option value="8">8 (24 darts)</option>
+                        <option value="9">9 (27 darts)</option>
+                        <option value="10">10 (30 darts)</option>
+                        <option value="11">11 (33 darts)</option>
+                        <option value="12">12 (36 darts)</option>
+                        <option value="13" selected>13 (39 darts)</option>
+                        <option value="14">14 (42 darts)</option>
+                        <option value="15">15 (45 darts)</option>
+                        <option value="16">16 (48 darts)</option>
+                        <option value="17">17 (51 darts)</option>
+                        <option value="18">18 (54 darts)</option>
+                        <option value="19">19 (57 darts)</option>
+                        <option value="20">20 (60 darts)</option>
+                    </select>
+                </div>
+
+                <div class="form-group toggle-group">
+                    <label for="double-in">Double-In Required</label>
+                    <label class="toggle">
+                        <input type="checkbox" id="double-in">
+                        <span class="toggle-slider"></span>
+                    </label>
+                </div>
+            </div>
+            <button id="start-match-btn" class="btn btn-primary btn-large">Start Match</button>
+            <button id="config-cancel-btn" class="btn btn-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Settings Modal -->
+    <div id="settings-modal" class="modal">
         <div class="modal-content">
-            <h2>Menu</h2>
+            <h2>Settings</h2>
             <button id="rematch-btn" class="btn btn-primary">Rematch</button>
-            <button id="new-match-btn" class="btn btn-secondary">New Match</button>
-            <button id="cancel-menu-btn" class="btn btn-cancel">Cancel</button>
+            <button id="abandon-btn" class="btn btn-danger">Abandon Match</button>
+            <button id="settings-cancel-btn" class="btn btn-cancel">Cancel</button>
         </div>
     </div>
 
@@ -200,6 +203,17 @@
                 <button id="confirm-yes-btn" class="btn btn-danger">Yes, abandon</button>
                 <button id="confirm-no-btn" class="btn btn-cancel">Cancel</button>
             </div>
+        </div>
+    </div>
+
+    <!-- History Screen -->
+    <div id="history-screen" class="screen">
+        <header class="history-header">
+            <button id="history-back-btn" class="btn-icon" aria-label="Back">←</button>
+            <h1>Match History</h1>
+        </header>
+        <div id="history-list" class="history-list">
+            <!-- Populated by JavaScript -->
         </div>
     </div>
 
@@ -282,6 +296,7 @@
         </div>
     </div>
 
+    <script src="js/db.js"></script>
     <script src="js/chalker.js"></script>
     <script>
         // Register service worker for PWA functionality
