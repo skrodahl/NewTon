@@ -205,5 +205,44 @@ Stores:
 
 ---
 
+## Known Issues
+
+### Edit-after-opponent-entry checkout bug
+**Status:** Open
+
+**Scenario:**
+1. Player 1 vs Player 2, score is 0-0, Player 1 starts
+2. Player 1 has an outshot (e.g., 40 left), but wrong score is entered (e.g., 48)
+3. Player 1 still shows 40 remaining
+4. Score is entered for Player 2's next visit
+5. User notices mistake, goes back and edits Player 1's score to 40 (checkout)
+6. Dart count modal appears (selects 3 darts)
+7. Total score shows 1-0, but Player 2's score cell still has a value (cannot delete it)
+8. **Bug:** Leg doesn't advance. If user enters another checkout for Player 1 on the next row, leg advances but total dart count is incorrect.
+
+**Root cause:** When editing a previous score to create a checkout after the opponent has already entered a score, the leg completion logic doesn't trigger correctly, and the opponent's orphaned visit isn't cleaned up.
+
+**Workaround:** Use Undo to remove Player 2's visit before editing Player 1's checkout score.
+
+---
+
+## Future Enhancements
+
+### Resume unfinished matches from history
+**Status:** Planned
+
+Allow users to pick up and continue matches that were abandoned mid-game from the history screen. Currently only completed matches are shown in history; unfinished matches are only auto-resumed on app reload.
+
+### Show game format in history display
+**Status:** Planned
+
+Update history list and match detail screens to show the full game format instead of just "Best of X":
+- Current: `Best of 3`
+- Desired: `501 • Best of 3`
+
+Should display the starting score (101, 201, 301, 401, 501, 601, 701, 901, 1001) alongside the match length.
+
+---
+
 **Completed:** January 9, 2025 (Phases 1-7)
 **Updated:** January 9, 2025 (Phase 8 - End Screen Unification)
