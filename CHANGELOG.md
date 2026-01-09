@@ -1,3 +1,22 @@
+# 2025-01-09
+
+## **v4.1.4** - Chalker Tablet Scaling
+
+### Chalker Enhancements
+- **Tablet-optimized interface**: Responsive scaling for screens 768px and wider
+  - Score anchors: 3rem → 4.5rem
+  - Chalkboard cells: 44px → 64px height, larger fonts
+  - Keypad buttons: significantly larger touch targets
+  - Form inputs, modals, and buttons all scaled up
+  - Increased spacing throughout
+
+### Technical Details
+- Added `@media screen and (min-width: 768px)` breakpoint
+- CSS custom properties (spacing) scaled ~1.5x for tablets
+- All screens affected: config, scoring, modals, end-of-match stats
+
+---
+
 # 2025-01-08
 
 ## **v4.1.3** - Chalker PWA (Progressive Web App)

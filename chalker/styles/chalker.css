@@ -852,3 +852,202 @@ body {
 .hidden {
   display: none !important;
 }
+
+/* ===================== */
+/* Tablet Scaling (768px+) */
+/* ===================== */
+
+@media screen and (min-width: 768px) {
+  /* Increase base spacing */
+  :root {
+    --spacing-xs: 6px;
+    --spacing-sm: 12px;
+    --spacing-md: 20px;
+    --spacing-lg: 32px;
+    --spacing-xl: 44px;
+  }
+
+  /* Config screen */
+  .config-header h1 {
+    font-size: 2.5rem;
+  }
+
+  .form-group label {
+    font-size: 1.125rem;
+  }
+
+  .form-group input,
+  .form-group select {
+    font-size: 1.5rem;
+    padding: var(--spacing-md);
+  }
+
+  .toggle {
+    width: 72px;
+    height: 40px;
+  }
+
+  .toggle-slider::before {
+    height: 32px;
+    width: 32px;
+  }
+
+  .toggle input:checked + .toggle-slider::before {
+    transform: translateX(32px);
+  }
+
+  .btn {
+    font-size: 1.25rem;
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .btn-large {
+    font-size: 1.75rem;
+    padding: var(--spacing-lg);
+  }
+
+  /* Scoring header */
+  .scoring-header {
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .header-player {
+    font-size: 1.375rem;
+  }
+
+  .leg-score {
+    font-size: 2rem;
+  }
+
+  .btn-icon {
+    font-size: 2rem;
+  }
+
+  /* Score anchors */
+  .score-anchor {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .anchor-score {
+    font-size: 4.5rem;
+  }
+
+  /* Chalkboard */
+  .chalk-table thead th {
+    font-size: 0.875rem;
+    padding: var(--spacing-sm);
+  }
+
+  .chalk-table thead th:nth-child(3) {
+    width: 60px;
+  }
+
+  .chalk-table td {
+    font-size: 2.25rem;
+    height: 64px;
+    max-height: 64px;
+    line-height: 64px;
+    padding: 0 var(--spacing-sm);
+  }
+
+  .chalk-table .col-darts {
+    font-size: 1.5rem;
+  }
+
+  /* Keypad */
+  .input-section {
+    padding: var(--spacing-md);
+  }
+
+  .keypad {
+    gap: var(--spacing-sm);
+  }
+
+  .key {
+    font-size: 1.75rem;
+    padding: var(--spacing-md) var(--spacing-lg);
+  }
+
+  .key-delete {
+    font-size: 1.5rem;
+  }
+
+  /* Modals */
+  .modal-content {
+    max-width: 420px;
+    padding: var(--spacing-xl);
+  }
+
+  .modal-content h2 {
+    font-size: 2rem;
+  }
+
+  .modal-content p {
+    font-size: 1.25rem;
+  }
+
+  .btn-dart {
+    font-size: 2.5rem;
+    padding: var(--spacing-lg);
+  }
+
+  .btn-tiebreak {
+    font-size: 1.5rem;
+    padding: var(--spacing-md);
+  }
+
+  /* End screen */
+  .end-header h1 {
+    font-size: 2rem;
+  }
+
+  .winner-name,
+  .loser-name {
+    font-size: 1.5rem;
+  }
+
+  .vs-text {
+    font-size: 1.125rem;
+  }
+
+  .final-score {
+    font-size: 3rem;
+  }
+
+  .stats-table {
+    font-size: 1.125rem;
+  }
+
+  .stats-table th {
+    font-size: 1rem;
+  }
+
+  .stats-table .stat-label {
+    font-size: 1rem;
+  }
+
+  .stats-table td:not(.stat-label) {
+    font-size: 1.375rem;
+  }
+
+  .leg-stats h3 {
+    font-size: 1.125rem;
+  }
+
+  .leg-stats-table {
+    font-size: 1.125rem;
+  }
+
+  .leg-stats-table th {
+    font-size: 1rem;
+  }
+
+  .leg-stat-detail {
+    font-size: 1rem;
+  }
+
+  .end-buttons {
+    padding: var(--spacing-lg);
+    gap: var(--spacing-md);
+  }
+}
