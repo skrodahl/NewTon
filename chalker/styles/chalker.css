@@ -422,9 +422,8 @@ body {
   text-align: center;
   padding: 0 var(--spacing-xs);
   font-size: 1.75rem;
-  height: 44px;
-  max-height: 44px;
-  line-height: 44px;
+  height: 6vh;
+  line-height: 6vh;
   overflow: hidden;
   white-space: nowrap;
 }
@@ -944,9 +943,7 @@ body {
 
   .chalk-table td {
     font-size: 2.75rem;
-    height: 80px;
-    max-height: 80px;
-    line-height: 80px;
+    /* height/line-height use vh from base styles - no override needed */
     padding: 0 var(--spacing-sm);
   }
 

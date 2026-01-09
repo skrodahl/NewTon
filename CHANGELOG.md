@@ -1,5 +1,20 @@
 # 2025-01-09
 
+## **v4.1.5** - Chalker Viewport-Based Row Heights
+
+### Chalker Enhancements
+- **Viewport-based chalkboard rows**: Row heights now use `vh` units instead of fixed pixels
+  - Rows automatically scale to show ~7-8 rounds on any screen size
+  - Phones and tablets now display the same number of visible rows
+  - Eliminates the "too many rows visible" problem on larger screens
+
+### Technical Details
+- Changed `.chalk-table td` height from fixed `44px`/`80px` to `6vh`
+- Removed tablet-specific height override (no longer needed)
+- Font sizes still scale via media query for readability
+
+---
+
 ## **v4.1.4** - Chalker Tablet Scaling
 
 ### Chalker Enhancements
