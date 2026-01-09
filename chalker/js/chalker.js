@@ -103,6 +103,7 @@
     tiebreakP1Btn: document.getElementById('tiebreak-p1'),
     tiebreakP2Btn: document.getElementById('tiebreak-p2'),
     tiebreakRandomBtn: document.getElementById('tiebreak-random'),
+    tiebreakCancelBtn: document.getElementById('tiebreak-cancel-btn'),
     menuModal: document.getElementById('menu-modal'),
     rematchBtn: document.getElementById('rematch-btn'),
     newMatchBtn: document.getElementById('new-match-btn'),
@@ -480,8 +481,9 @@
     elements.tiebreakP1Btn.dataset.player = '1';
     elements.tiebreakP2Btn.dataset.player = '2';
 
-    // Show random button
+    // Show random button, hide cancel button
     elements.tiebreakRandomBtn.style.display = 'block';
+    elements.tiebreakCancelBtn.style.display = 'none';
 
     showModal(elements.tiebreakModal);
   }
@@ -512,8 +514,9 @@
       elements.tiebreakP2Btn.dataset.player = '1';
     }
 
-    // Hide random button
+    // Hide random button, show cancel button
     elements.tiebreakRandomBtn.style.display = 'none';
+    elements.tiebreakCancelBtn.style.display = 'block';
 
     showModal(elements.tiebreakModal);
   }
@@ -566,7 +569,18 @@
       showEndScreen();
     } else {
       startNewLeg();
+      updateDisplay();
     }
+  }
+
+  /**
+   * Cancel tie-break modal and return to chalkboard
+   * Allows referee to correct a score before declaring tie-break winner
+   */
+  function cancelTiebreak() {
+    hideModal(elements.tiebreakModal);
+    selectionModalMode = null;
+    // Stay on current leg - referee can tap a score to edit it
   }
 
   /**
@@ -1277,10 +1291,22 @@
   // ==============
 
   /**
+   * Check if any modal is currently active
+   * @returns {boolean}
+   */
+  function isModalActive() {
+    return elements.checkoutModal.classList.contains('active') ||
+           elements.tiebreakModal.classList.contains('active') ||
+           elements.menuModal.classList.contains('active') ||
+           elements.confirmModal.classList.contains('active');
+  }
+
+  /**
    * Handle keypad button press
    * @param {string} value
    */
   function handleKeyPress(value) {
+    if (isModalActive()) return;
     if (inputBuffer.length < 3) {
       inputBuffer += value;
       updateInputDisplay();
@@ -1291,6 +1317,7 @@
    * Handle delete button
    */
   function handleDelete() {
+    if (isModalActive()) return;
     inputBuffer = inputBuffer.slice(0, -1);
     updateInputDisplay();
   }
@@ -1299,6 +1326,7 @@
    * Handle enter button
    */
   function handleEnter() {
+    if (isModalActive()) return;
     if (inputBuffer === '') return;
 
     const score = parseInt(inputBuffer, 10);
@@ -1469,6 +1497,7 @@
     elements.tiebreakP1Btn.addEventListener('click', () => handleSelectionModalChoice(1));
     elements.tiebreakP2Btn.addEventListener('click', () => handleSelectionModalChoice(2));
     elements.tiebreakRandomBtn.addEventListener('click', () => handleSelectionModalChoice('random'));
+    elements.tiebreakCancelBtn.addEventListener('click', cancelTiebreak);
 
     // End screen buttons (no confirmation needed - match is already over)
     elements.endRematchBtn.addEventListener('click', rematch);
@@ -1476,7 +1505,7 @@
 
     // Keyboard support (for testing on desktop)
     document.addEventListener('keydown', (e) => {
-      if (elements.scoringScreen.classList.contains('active') && !elements.checkoutModal.classList.contains('active')) {
+      if (elements.scoringScreen.classList.contains('active') && !isModalActive()) {
         if (e.key >= '0' && e.key <= '9') {
           handleKeyPress(e.key);
         } else if (e.key === 'Backspace') {

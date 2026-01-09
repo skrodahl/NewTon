@@ -859,7 +859,7 @@ body {
 /* Tablet Scaling (768px+) */
 /* ===================== */
 
-@media screen and (min-width: 768px) {
+@media screen and (min-width: 768px) and (orientation: portrait) {
   /* Increase base spacing (~1.8x from phone) */
   :root {
     --spacing-xs: 8px;
@@ -965,7 +965,7 @@ body {
 
   .key {
     font-size: 2.25rem;
-    padding: var(--spacing-lg) var(--spacing-lg);
+    padding: var(--spacing-xl) var(--spacing-lg);
   }
 
   .key-delete {

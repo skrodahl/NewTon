@@ -1,6 +1,6 @@
 # 2025-01-09
 
-## **v4.1.6** - Chalker Legibility Improvements
+## **v4.1.7** - Chalker Legibility & Bug Fixes
 
 ### Chalker Enhancements
 - **System font for scores**: Scores now use native system fonts instead of Cascadia Code monospace
@@ -9,10 +9,16 @@
   - Tabular numerals keep digits aligned
 - **Larger tablet keypad**: Increased button height on tablets for easier tapping
 
+### Bug Fixes
+- **Tie-break display fix**: Selecting a tie-break winner now correctly updates the display and starts the new leg
+- **Tablet styles portrait-only**: Tablet scaling now only applies in portrait orientation, fixing oversized UI on desktop browsers
+
 ### Technical Details
 - Added `--font-scores` CSS variable with system font stack
 - Applied `font-variant-numeric: tabular-nums` for aligned digits
-- Increased tablet keypad vertical padding from `--spacing-md` to `--spacing-lg`
+- Increased tablet keypad vertical padding from `--spacing-md` to `--spacing-xl`
+- Added `updateDisplay()` call after tie-break winner selection
+- Changed tablet media query to `(min-width: 768px) and (orientation: portrait)`
 
 ---
 
