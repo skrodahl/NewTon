@@ -1,5 +1,20 @@
 # 2025-01-11
 
+## **v4.1.11** - Chalker Ton Ring Styling
+
+### Chalker Enhancements
+- **Ton ring on chalkboard**: Ton scores (100+) now display with a black oval ring around the number
+  - Follows traditional darts chalking convention
+  - Tight oval fit around just the digits (not the entire cell)
+  - Maintains existing color coding (blue for 100-179, green for 180s)
+
+### Technical Details
+- Updated `renderChalkboard()` to wrap ton scores in `<span>` elements
+- Added CSS for `.chalk-table .col-scored.ton span` with border styling
+- Service worker cache version bumped to v47
+
+---
+
 ## **v4.1.10** - Chalker Live Stats & Best-Of Indicator
 
 ### Chalker Enhancements

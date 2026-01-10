@@ -1068,17 +1068,19 @@
       const p1IsEditing = editingVisitIndex !== null && data.p1VisitIndex === editingVisitIndex;
       const p2IsEditing = editingVisitIndex !== null && data.p2VisitIndex === editingVisitIndex;
 
-      // Content for cells
+      // Content for cells - wrap tons in span for ring styling
       let p1Content, p2Content;
       if (p1IsNewEntry || p1IsEditing) {
         p1Content = inputBuffer || '';
       } else {
-        p1Content = data.p1Scored;
+        const p1Num = parseInt(data.p1Scored, 10);
+        p1Content = p1Num >= 100 ? `<span>${data.p1Scored}</span>` : data.p1Scored;
       }
       if (p2IsNewEntry || p2IsEditing) {
         p2Content = inputBuffer || '';
       } else {
-        p2Content = data.p2Scored;
+        const p2Num = parseInt(data.p2Scored, 10);
+        p2Content = p2Num >= 100 ? `<span>${data.p2Scored}</span>` : data.p2Scored;
       }
 
       // Classes for cells

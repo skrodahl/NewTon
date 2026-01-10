@@ -480,6 +480,15 @@ body {
   font-weight: 700;
 }
 
+.chalk-table .col-scored.ton span,
+.chalk-table .col-scored.ton80 span {
+  display: inline-block;
+  border: 2px solid #000;
+  border-radius: 0.7em;
+  padding: 0 0.25em;
+  line-height: 1.1;
+}
+
 .chalk-table .col-scored.ton80 {
   color: var(--accent-success);
   font-weight: 700;
@@ -1125,11 +1134,17 @@ body {
 .leg-scoresheet-table .ton-180-score {
   color: #ffc107;
   font-weight: 700;
+  border: 2px solid #000;
+  border-radius: 0.8em;
+  padding: 0.1em 0.3em;
 }
 
 .leg-scoresheet-table .ton-score {
   color: var(--accent-primary);
   font-weight: 600;
+  border: 2px solid #000;
+  border-radius: 0.8em;
+  padding: 0.1em 0.3em;
 }
 
 .short-leg-badge {

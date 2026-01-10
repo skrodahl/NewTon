@@ -142,6 +142,15 @@ Stores:
 - [x] Back button returns to scoring screen
 - [x] Service worker cache version bumped to v44
 
+### Phase 10: Ton Ring Styling ✓
+**Files:** `chalker/js/chalker.js`, `chalker/styles/chalker.css`
+
+- [x] Ton scores (100+) on chalkboard display with black oval ring
+- [x] Traditional darts chalking convention
+- [x] Tight fit around digits (span-based styling, not cell-based)
+- [x] Maintains existing color coding (blue for tons, green for 180s)
+- [x] Service worker cache version bumped to v47
+
 ---
 
 ## Files Modified
@@ -268,4 +277,4 @@ When viewing Live Stats or Match History, allow swiping left/right between compl
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 11, 2025 (Phase 9 - Live Stats Screen)
+**Updated:** January 11, 2025 (Phase 10 - Ton Ring Styling)
