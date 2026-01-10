@@ -1,3 +1,29 @@
+# 2025-01-11
+
+## **v4.1.10** - Chalker Live Stats & Best-Of Indicator
+
+### Chalker Enhancements
+- **Live Stats screen**: New STATS button (replaced SETTINGS) shows real-time match statistics
+  - Same layout as Match Complete and History Detail screens
+  - Full statistics table: tons, 180s, short legs, high outs, first 9 avg, match avg, leg averages
+  - Completed leg scoresheets with color coding (tons=blue, 180s=gold, checkouts=green)
+  - Current leg in progress with "In Progress" badge and yellow highlight border
+  - Current remaining scores shown at bottom of in-progress leg
+  - Back button returns to scoring screen
+- **Best-of indicator on chalkboard**: First row center cell now shows match length (e.g., "Bo3", "Bo5")
+  - Replaces empty dart count cell in row 0
+  - Styled distinctly from other numbers (smaller, secondary color)
+
+### Technical Details
+- Added Live Stats screen HTML with stats table and legs container
+- Added `showLiveStats()` and `renderLiveStatsScoresheets()` functions
+- Added CSS for `.in-progress-badge`, `.leg-in-progress`, `.current-remaining`
+- Added `.col-bestof` styling for best-of indicator
+- Updated `renderChalkboard()` to show `Bo${bestOf}` in first row
+- Service worker cache version bumped to v44
+
+---
+
 # 2025-01-09
 
 ## **v4.1.9** - Chalker Edit Checkout Bug Fix & Touch Improvements

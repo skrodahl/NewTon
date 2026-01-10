@@ -173,7 +173,33 @@
     // Keypad action buttons
     keyNew: document.getElementById('key-new'),
     keyHistory: document.getElementById('key-history'),
-    keySettings: document.getElementById('key-settings')
+    keyStats: document.getElementById('key-stats'),
+
+    // Live Stats screen
+    statsScreen: document.getElementById('stats-screen'),
+    statsBackBtn: document.getElementById('stats-back-btn'),
+    statsPlayer1Name: document.getElementById('stats-player1-name'),
+    statsPlayer2Name: document.getElementById('stats-player2-name'),
+    statsLiveScore: document.getElementById('stats-live-score'),
+    statsMatchInfo: document.getElementById('stats-match-info'),
+    statsHeaderP1: document.getElementById('stats-header-p1'),
+    statsHeaderP2: document.getElementById('stats-header-p2'),
+    statsP1Tons: document.getElementById('stats-p1-tons'),
+    statsP2Tons: document.getElementById('stats-p2-tons'),
+    statsP1180s: document.getElementById('stats-p1-180s'),
+    statsP2180s: document.getElementById('stats-p2-180s'),
+    statsP1ShortLegs: document.getElementById('stats-p1-short-legs'),
+    statsP2ShortLegs: document.getElementById('stats-p2-short-legs'),
+    statsShortLegsLabel: document.getElementById('stats-short-legs-label'),
+    statsP1HighOuts: document.getElementById('stats-p1-high-outs'),
+    statsP2HighOuts: document.getElementById('stats-p2-high-outs'),
+    statsP1First9: document.getElementById('stats-p1-first9'),
+    statsP2First9: document.getElementById('stats-p2-first9'),
+    statsP1MatchAvg: document.getElementById('stats-p1-match-avg'),
+    statsP2MatchAvg: document.getElementById('stats-p2-match-avg'),
+    statsP1LegAvgs: document.getElementById('stats-p1-leg-avgs'),
+    statsP2LegAvgs: document.getElementById('stats-p2-leg-avgs'),
+    statsLegsContainer: document.getElementById('stats-legs-container')
   };
 
   // ===========
@@ -182,13 +208,14 @@
 
   /**
    * Show a specific screen
-   * @param {'scoring'|'end'|'history'|'history-detail'} screenName
+   * @param {'scoring'|'end'|'history'|'history-detail'|'stats'} screenName
    */
   function showScreen(screenName) {
     elements.scoringScreen.classList.remove('active');
     elements.endScreen.classList.remove('active');
     elements.historyScreen.classList.remove('active');
     elements.historyDetailScreen.classList.remove('active');
+    elements.statsScreen.classList.remove('active');
 
     switch (screenName) {
       case 'scoring':
@@ -202,6 +229,9 @@
         break;
       case 'history-detail':
         elements.historyDetailScreen.classList.add('active');
+        break;
+      case 'stats':
+        elements.statsScreen.classList.add('active');
         break;
     }
   }
@@ -1013,12 +1043,12 @@
     // Build all rows (starting score + maxRounds)
     let html = '';
 
-    // Row 0: Starting scores (no dart count shown)
+    // Row 0: Starting scores (shows match length instead of dart count)
     html += `
       <tr>
         <td class="col-scored"></td>
         <td class="col-togo">${state.config.startingScore}</td>
-        <td class="col-darts"></td>
+        <td class="col-darts col-bestof">Bo${state.config.bestOf}</td>
         <td class="col-scored"></td>
         <td class="col-togo">${state.config.startingScore}</td>
       </tr>
@@ -1619,10 +1649,232 @@
   }
 
   /**
-   * Handle Settings button - reserved for future use
+   * Show live stats for the current match
    */
-  function handleSettingsButton() {
-    // Reserved for future: clear history, reset defaults, app info, etc.
+  function showLiveStats() {
+    if (!state) return;
+
+    // Build match object from current state
+    const stats = calculateStats();
+    const match = {
+      config: state.config,
+      legs: state.legs,
+      player1Legs: state.player1Legs,
+      player2Legs: state.player2Legs,
+      stats: stats
+    };
+
+    // Match info line
+    const bestOf = match.config.bestOf || 3;
+    elements.statsMatchInfo.textContent = `${match.config.startingScore} • Best of ${bestOf}`;
+
+    // Populate stats using shared function
+    const statsEls = {
+      player1Name: elements.statsPlayer1Name,
+      player2Name: elements.statsPlayer2Name,
+      finalScore: elements.statsLiveScore,
+      statsP1: elements.statsHeaderP1,
+      statsP2: elements.statsHeaderP2,
+      shortLegsLabel: elements.statsShortLegsLabel,
+      p1Tons: elements.statsP1Tons,
+      p2Tons: elements.statsP2Tons,
+      p1180s: elements.statsP1180s,
+      p2180s: elements.statsP2180s,
+      p1ShortLegs: elements.statsP1ShortLegs,
+      p2ShortLegs: elements.statsP2ShortLegs,
+      p1HighOuts: elements.statsP1HighOuts,
+      p2HighOuts: elements.statsP2HighOuts,
+      p1First9: elements.statsP1First9,
+      p2First9: elements.statsP2First9,
+      p1MatchAvg: elements.statsP1MatchAvg,
+      p2MatchAvg: elements.statsP2MatchAvg,
+      p1LegAvgs: elements.statsP1LegAvgs,
+      p2LegAvgs: elements.statsP2LegAvgs
+    };
+    populateMatchStats(match, statsEls);
+
+    // Render leg scoresheets (includes current leg in progress)
+    renderLiveStatsScoresheets(match);
+
+    showScreen('stats');
+  }
+
+  /**
+   * Render leg scoresheets for live stats (includes current leg in progress)
+   * @param {object} match - Match object with config, legs
+   */
+  function renderLiveStatsScoresheets(match) {
+    const config = match.config;
+    const legs = match.legs || [];
+
+    if (legs.length === 0) {
+      elements.statsLegsContainer.innerHTML = '<p>No leg data yet</p>';
+      return;
+    }
+
+    let html = '<h3>Leg Scoresheets</h3>';
+
+    // Track running score after each leg
+    let p1LegsWon = 0;
+    let p2LegsWon = 0;
+
+    legs.forEach((leg, legIndex) => {
+      const isInProgress = !leg.winner;
+      const winnerName = leg.winner
+        ? (leg.winner === 1 ? config.player1Name : config.player2Name)
+        : null;
+
+      // Update running score after this leg (only for completed legs)
+      if (leg.winner === 1) {
+        p1LegsWon++;
+      } else if (leg.winner === 2) {
+        p2LegsWon++;
+      }
+
+      const runningScore = `${p1LegsWon} - ${p2LegsWon}`;
+
+      // Calculate total darts for this leg to determine if short leg
+      const visits = leg.visits || [];
+      const winnerVisits = leg.winner ? visits.filter(v => v.player === leg.winner) : [];
+      const totalDarts = winnerVisits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+      const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
+      const isShortLeg = leg.winner && totalDarts <= shortLegThreshold;
+      const shortLegBadge = isShortLeg ? '<span class="short-leg-badge">Short Leg</span>' : '';
+
+      // Status text
+      let statusText;
+      if (isInProgress) {
+        statusText = '<span class="in-progress-badge">In Progress</span>';
+      } else {
+        statusText = `${winnerName} wins ${shortLegBadge}`;
+      }
+
+      html += `
+        <div class="leg-scoresheet${isInProgress ? ' leg-in-progress' : ''}">
+          <div class="leg-scoresheet-header">
+            <span class="leg-scoresheet-title">Leg ${legIndex + 1}</span>
+            <span class="leg-scoresheet-score">${isInProgress ? '' : runningScore}</span>
+            <span class="leg-scoresheet-winner">${statusText}</span>
+          </div>
+          <table class="leg-scoresheet-table">
+            <thead>
+              <tr>
+                <th class="col-darts">Darts</th>
+                <th class="col-scored">${config.player1Name.substring(0, 8)}</th>
+                <th class="col-remaining">Left</th>
+                <th class="col-scored">${config.player2Name.substring(0, 8)}</th>
+                <th class="col-remaining">Left</th>
+                <th class="col-darts">Darts</th>
+              </tr>
+            </thead>
+            <tbody>
+      `;
+
+      // Build visit data by round
+      const startingScore = leg.startingScore || config.startingScore;
+
+      // Group visits by round
+      const p1Visits = visits.filter(v => v.player === 1);
+      const p2Visits = visits.filter(v => v.player === 2);
+      const maxRounds = Math.max(p1Visits.length, p2Visits.length, 1);
+
+      let p1Remaining = startingScore;
+      let p2Remaining = startingScore;
+      let p1Darts = 0;
+      let p2Darts = 0;
+
+      for (let round = 0; round < maxRounds; round++) {
+        const p1Visit = p1Visits[round];
+        const p2Visit = p2Visits[round];
+
+        let p1Scored = '';
+        let p1Left = '';
+        let p2Scored = '';
+        let p2Left = '';
+        let p1DartDisplay = '';
+        let p2DartDisplay = '';
+
+        if (p1Visit) {
+          p1Darts += p1Visit.dartsUsed || 3;
+          p1DartDisplay = p1Darts;
+          p1Remaining -= p1Visit.score;
+          p1Scored = p1Visit.score;
+          p1Left = p1Remaining;
+
+          if (p1Visit.isCheckout) {
+            const isHighOut = p1Visit.score >= 101;
+            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
+            p1Scored = `<span class="${cssClass}">${p1Visit.score}</span>`;
+            p1Left = `<span class="checkout-score">0</span>`;
+            p1DartDisplay = `<span class="checkout-score">${p1Darts}</span>`;
+          } else if (p1Visit.score === 180) {
+            p1Scored = `<span class="ton-180-score">${p1Visit.score}</span>`;
+          } else if (p1Visit.score >= 100) {
+            p1Scored = `<span class="ton-score">${p1Visit.score}</span>`;
+          }
+        }
+
+        if (p2Visit) {
+          p2Darts += p2Visit.dartsUsed || 3;
+          p2DartDisplay = p2Darts;
+          p2Remaining -= p2Visit.score;
+          p2Scored = p2Visit.score;
+          p2Left = p2Remaining;
+
+          if (p2Visit.isCheckout) {
+            const isHighOut = p2Visit.score >= 101;
+            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
+            p2Scored = `<span class="${cssClass}">${p2Visit.score}</span>`;
+            p2Left = `<span class="checkout-score">0</span>`;
+            p2DartDisplay = `<span class="checkout-score">${p2Darts}</span>`;
+          } else if (p2Visit.score === 180) {
+            p2Scored = `<span class="ton-180-score">${p2Visit.score}</span>`;
+          } else if (p2Visit.score >= 100) {
+            p2Scored = `<span class="ton-score">${p2Visit.score}</span>`;
+          }
+        }
+
+        html += `
+          <tr>
+            <td class="col-darts">${p1DartDisplay}</td>
+            <td class="col-scored">${p1Scored}</td>
+            <td class="col-remaining">${p1Left}</td>
+            <td class="col-scored">${p2Scored}</td>
+            <td class="col-remaining">${p2Left}</td>
+            <td class="col-darts">${p2DartDisplay}</td>
+          </tr>
+        `;
+      }
+
+      // Show remaining scores for in-progress leg
+      if (isInProgress && (p1Remaining !== startingScore || p2Remaining !== startingScore)) {
+        html += `
+          <tr class="current-remaining-row">
+            <td class="col-darts"></td>
+            <td class="col-scored"></td>
+            <td class="col-remaining current-remaining">${p1Remaining}</td>
+            <td class="col-scored"></td>
+            <td class="col-remaining current-remaining">${p2Remaining}</td>
+            <td class="col-darts"></td>
+          </tr>
+        `;
+      }
+
+      html += `
+            </tbody>
+          </table>
+        </div>
+      `;
+    });
+
+    elements.statsLegsContainer.innerHTML = html;
+  }
+
+  /**
+   * Go back from stats to scoring screen
+   */
+  function statsBack() {
+    showScreen('scoring');
   }
 
   /**
@@ -1649,7 +1901,10 @@
     // Keypad action buttons
     elements.keyNew.addEventListener('click', handleNewButton);
     elements.keyHistory.addEventListener('click', showHistoryScreen);
-    elements.keySettings.addEventListener('click', handleSettingsButton);
+    elements.keyStats.addEventListener('click', showLiveStats);
+
+    // Stats back button
+    elements.statsBackBtn.addEventListener('click', statsBack);
 
     // Confirm modal
     elements.confirmYesBtn.addEventListener('click', handleConfirmYes);

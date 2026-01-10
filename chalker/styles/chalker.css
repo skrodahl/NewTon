@@ -360,7 +360,7 @@ body {
   display: flex;
   flex-direction: column;
   align-items: center;
-  padding: var(--spacing-md) var(--spacing-sm);
+  padding: 8px;
   position: relative;
 }
 
@@ -375,7 +375,7 @@ body {
 .anchor-score {
   font-family: var(--font-scores);
   font-variant-numeric: tabular-nums;
-  font-size: 3rem;
+  font-size: 4.5rem;
   font-weight: 700;
   color: var(--text-primary);
   line-height: 1;
@@ -428,8 +428,8 @@ body {
 .chalk-table td {
   border: 1px solid var(--border-color);
   text-align: center;
-  padding: 0 var(--spacing-xs);
-  font-size: 1.75rem;
+  padding: 0;
+  font-size: 2.25rem;
   height: 6vh;
   line-height: 6vh;
   overflow: hidden;
@@ -450,6 +450,14 @@ body {
   font-size: 1.25rem;
   color: var(--text-secondary);
   background: var(--bg-primary);
+}
+
+/* Best-of indicator in row 0 center cell */
+.chalk-table .col-bestof {
+  font-family: var(--font-body);
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: var(--text-secondary);
 }
 
 /* Tappable cells (recorded scores) */
@@ -1136,6 +1144,33 @@ body {
   text-transform: uppercase;
 }
 
+/* In-progress badge for live stats */
+.in-progress-badge {
+  display: inline-block;
+  background: var(--accent-warning);
+  color: var(--bg-dark);
+  font-size: 0.625rem;
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 4px;
+  text-transform: uppercase;
+}
+
+/* Leg in progress styling */
+.leg-in-progress {
+  border: 2px solid var(--accent-warning);
+}
+
+/* Current remaining row in live stats */
+.current-remaining-row {
+  background: var(--bg-dark);
+}
+
+.current-remaining {
+  font-weight: 700;
+  color: var(--accent-warning);
+}
+
 .leg-scoresheet-table tr:last-child td {
   border-bottom: none;
 }
@@ -1212,11 +1247,11 @@ body {
 
   /* Score anchors */
   .score-anchor {
-    padding: var(--spacing-lg) var(--spacing-md);
+    padding: 8px;
   }
 
   .anchor-score {
-    font-size: 5.5rem;
+    font-size: 8rem;
   }
 
   /* Chalkboard */
@@ -1230,9 +1265,9 @@ body {
   }
 
   .chalk-table td {
-    font-size: 2.75rem;
+    font-size: 3.25rem;
     /* height/line-height use vh from base styles - no override needed */
-    padding: 0 var(--spacing-sm);
+    padding: 0;
   }
 
   .chalk-table .col-darts {

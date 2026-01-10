@@ -26,11 +26,11 @@ Make Chalker crash-proof with persistent match data, settings, and match history
 
 ### New keypad row (above numpad)
 ```
-| NEW | HISTORY | SETTINGS |
+| NEW | HISTORY | STATS |
 ```
 - **NEW** - Opens "New Match?" modal during match (Rematch/New Match), config modal when idle
 - **HISTORY** - Opens history screen with match list, tap for details
-- **SETTINGS** - Reserved for future use (clear history, app info, etc.)
+- **STATS** - Shows live statistics for the current match (same layout as Match Complete/History Detail)
 
 ### Simplified header
 - Removed hamburger menu
@@ -128,6 +128,19 @@ Stores:
 - [x] 24-hour timestamp format (removed AM/PM)
 - [x] Dynamic short leg indicator (uses SHORT_LEG_THRESHOLDS lookup table)
 - [x] Service worker cache version bumped to v29
+
+### Phase 9: Live Stats Screen ✓
+**Files:** `chalker/js/chalker.js`, `chalker/index.html`, `chalker/styles/chalker.css`
+
+- [x] Renamed SETTINGS button to STATS
+- [x] New Live Stats screen with same layout as Match Complete/History Detail
+- [x] Shows current match statistics (tons, 180s, short legs, high outs, averages)
+- [x] Displays completed leg scoresheets with color coding
+- [x] Current leg in progress shown with "In Progress" badge and yellow border
+- [x] Current remaining scores displayed at bottom of in-progress leg
+- [x] Best-of indicator ("Bo3") shown in chalkboard center column
+- [x] Back button returns to scoring screen
+- [x] Service worker cache version bumped to v44
 
 ---
 
@@ -241,7 +254,18 @@ Update history list and match detail screens to show the full game format instea
 
 Should display the starting score (101, 201, 301, 401, 501, 601, 701, 901, 1001) alongside the match length.
 
+### Swipe navigation between legs
+**Status:** Idea
+
+When viewing Live Stats or Match History, allow swiping left/right between completed legs instead of scrolling through a vertical list. This would enable:
+- Quick lookup of earlier legs
+- Editing erroneous scores in past legs (would require additional editing logic)
+- Undo if a leg was ended by mistake (would require additional undo logic)
+- More intuitive mobile-native navigation
+
+**Note:** The swipe UI would be the navigation layer; the underlying edit/undo functionality for past legs doesn't exist yet. Building swipe without that functionality has limited value.
+
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 9, 2025 (Phase 8 - End Screen Unification)
+**Updated:** January 11, 2025 (Phase 9 - Live Stats Screen)

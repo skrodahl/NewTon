@@ -57,7 +57,7 @@
             <div class="keypad-actions">
                 <button class="key key-action" id="key-new">NEW</button>
                 <button class="key key-action" id="key-history">HISTORY</button>
-                <button class="key key-action" id="key-settings">SETTINGS</button>
+                <button class="key key-action" id="key-stats">STATS</button>
             </div>
             <div class="keypad">
                 <button class="key" data-value="1">1</button>
@@ -367,6 +367,79 @@
             <button id="end-rematch-btn" class="btn btn-primary">Rematch</button>
             <button id="end-new-match-btn" class="btn btn-secondary">New Match</button>
             <button id="end-history-btn" class="btn btn-tertiary">History</button>
+        </div>
+    </div>
+
+    <!-- Live Stats Screen -->
+    <div id="stats-screen" class="screen">
+        <header class="history-header">
+            <button id="stats-back-btn" class="btn-icon" aria-label="Back">←</button>
+            <h1>Live Stats</h1>
+        </header>
+        <div class="history-detail-content">
+            <div class="history-detail-header">
+                <div class="history-detail-players">
+                    <span id="stats-player1-name" class="detail-player"></span>
+                    <span class="detail-vs">vs</span>
+                    <span id="stats-player2-name" class="detail-player"></span>
+                </div>
+                <div id="stats-live-score" class="detail-score"></div>
+                <div id="stats-match-info" class="detail-date"></div>
+            </div>
+
+            <div class="history-detail-stats">
+                <h3>Match Statistics</h3>
+                <table class="stats-table">
+                    <thead>
+                        <tr>
+                            <th id="stats-header-p1">P1</th>
+                            <th class="stat-label">Stat</th>
+                            <th id="stats-header-p2">P2</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td id="stats-p1-tons">0</td>
+                            <td class="stat-label">Tons (100+)</td>
+                            <td id="stats-p2-tons">0</td>
+                        </tr>
+                        <tr>
+                            <td id="stats-p1-180s">0</td>
+                            <td class="stat-label">180s</td>
+                            <td id="stats-p2-180s">0</td>
+                        </tr>
+                        <tr>
+                            <td id="stats-p1-short-legs">0</td>
+                            <td class="stat-label" id="stats-short-legs-label">Short Legs</td>
+                            <td id="stats-p2-short-legs">0</td>
+                        </tr>
+                        <tr>
+                            <td id="stats-p1-high-outs">0</td>
+                            <td class="stat-label">High Outs (101+)</td>
+                            <td id="stats-p2-high-outs">0</td>
+                        </tr>
+                        <tr>
+                            <td id="stats-p1-first9">-</td>
+                            <td class="stat-label">First 9 Avg</td>
+                            <td id="stats-p2-first9">-</td>
+                        </tr>
+                        <tr>
+                            <td id="stats-p1-match-avg">-</td>
+                            <td class="stat-label">Match Avg</td>
+                            <td id="stats-p2-match-avg">-</td>
+                        </tr>
+                        <tr>
+                            <td id="stats-p1-leg-avgs" class="leg-avgs">-</td>
+                            <td class="stat-label">Leg Avgs</td>
+                            <td id="stats-p2-leg-avgs" class="leg-avgs">-</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="history-detail-legs" id="stats-legs-container">
+                <!-- Leg scoresheets populated by JavaScript -->
+            </div>
         </div>
     </div>
 
