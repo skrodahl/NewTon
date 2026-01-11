@@ -169,6 +169,18 @@ Stores:
 - [x] Cumulative counting: Tons includes 140+, 140+ includes 180s
 - [x] Service worker cache version bumped to v53
 
+### Phase 13: Edit Validation Fix & Delete Last Visit ✓
+**Files:** `chalker/js/chalker.js`
+
+- [x] Fixed edit validation to prevent invalid game states
+  - Simulates subsequent visits after proposed edit
+  - Rejects edits that would leave remaining ≤1 (bust, impossible finish, or unprocessed checkout)
+- [x] Added delete last visit feature
+  - Submit empty edit (OK with no digits) to delete most recent visit
+  - Only works on the very last visit in the current leg
+  - Restores deleted player's turn
+- [x] Service worker cache version bumped to v55
+
 ---
 
 ## Files Modified
@@ -295,4 +307,4 @@ When viewing Live Stats or Match History, allow swiping left/right between compl
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 11, 2025 (Phase 11 - Responsive Layout Cleanup)
+**Updated:** January 11, 2025 (Phase 13 - Edit Validation Fix & Delete Last Visit)

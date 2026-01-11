@@ -1,5 +1,26 @@
 # 2025-01-11
 
+## **v4.1.14** - Chalker Edit Validation Fix & Delete Last Visit
+
+### Bug Fixes
+- **Edit validation fix**: Editing previous scores can no longer create invalid game states
+  - Rejects edits that would make subsequent visits result in negative remaining (bust)
+  - Rejects edits that would leave remaining of 1 (impossible finish)
+  - Rejects edits that would create unprocessed checkouts (remaining = 0)
+
+### Chalker Enhancements
+- **Delete last visit**: Submit empty edit to delete the most recent visit
+  - Tap the last score, press OK without entering digits
+  - Visit is removed and player's turn is restored
+  - Only works on the very last visit in the current leg
+
+### Technical Details
+- Added validation loop in `submitEditedScore()` to simulate subsequent visits
+- Added empty input handling to delete last visit
+- Service worker cache version bumped to v55
+
+---
+
 ## **v4.1.13** - Chalker 140+ Stats
 
 ### Chalker Enhancements

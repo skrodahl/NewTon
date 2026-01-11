@@ -1541,6 +1541,20 @@
     const visit = currentLeg.visits[editingVisitIndex];
     if (!visit) return;
 
+    // Handle empty input as delete request
+    if (inputBuffer === '') {
+      // Only allow deleting the very last visit
+      if (editingVisitIndex === currentLeg.visits.length - 1) {
+        const deletedVisit = currentLeg.visits.pop();
+        state.currentPlayer = deletedVisit.player;
+        recalculateScores();
+        editingVisitIndex = null;
+        updateDisplay();
+        saveCurrentMatch();
+      }
+      return;
+    }
+
     // Validate score
     if (!isValidScore(newScore)) {
       return;
@@ -1556,6 +1570,20 @@
     }
 
     const newRemaining = scoreBeforeVisit - newScore;
+
+    // Check if edit would make subsequent visits invalid
+    // Replay this player's remaining visits with the new score
+    let simulatedRemaining = newRemaining;
+    for (let i = editingVisitIndex + 1; i < currentLeg.visits.length; i++) {
+      if (currentLeg.visits[i].player === visit.player) {
+        simulatedRemaining -= currentLeg.visits[i].score;
+        // Invalid if any subsequent visit would cause bust or checkout
+        // (checkout at 0 requires editing that visit directly)
+        if (simulatedRemaining <= 1) {
+          return; // Reject edit silently
+        }
+      }
+    }
 
     // Check if this would be a checkout (exactly 0)
     if (newRemaining === 0) {
