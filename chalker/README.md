@@ -6,7 +6,7 @@ A mobile-first darts scoring app designed for quick, reliable match tracking.
 
 ## Install as App
 
-Chalker is a **Progressive Web App (PWA)** - install it on your phone for the best experience:
+Chalker is a **Progressive Web App (PWA)** - install it on your phone or tablet for the best experience:
 
 1. Visit [darts.skrodahl.net/chalker](https://darts.skrodahl.net/chalker/) in Safari (iOS) or Chrome (Android)
 2. Tap "Add to Home Screen"
