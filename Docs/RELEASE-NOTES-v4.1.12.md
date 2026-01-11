@@ -40,15 +40,28 @@ The ton ring styling added in v4.1.11 wraps scores 100+ in a bordered span. The 
 
 ---
 
+## Larger Keypad Buttons
+
+**What Changed:**
+
+Increased keypad button vertical padding from 8px to 10px.
+
+**Why This Matters:**
+
+Slightly taller buttons provide larger touch targets, making it easier to tap numbers accurately during fast-paced match scoring.
+
+---
+
 ## Technical Details
 
 ### CSS Changes (chalker.css)
 - Removed entire `@media screen and (min-width: 768px) and (orientation: portrait)` block (~200 lines)
 - Changed `.chalk-table td { font-size: 2.25rem }` to `font-size: 1.9rem`
+- Changed `.key { padding: var(--spacing-sm) }` to `padding: 10px` (vertical only)
 - Only remaining media query: landscape rotation for horizontal phone orientation
 
 ### Service Worker
-- Cache version bumped from `chalker-v47` to `chalker-v51`
+- Cache version bumped from `chalker-v47` to `chalker-v52`
 
 ---
 

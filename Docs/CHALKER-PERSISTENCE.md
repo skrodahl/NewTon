@@ -157,8 +157,9 @@ Stores:
 - [x] Removed broken 768-1023px portrait media query (~200 lines)
 - [x] All screen sizes now use same base styles
 - [x] Reduced chalkboard font size from 2.25rem to 1.9rem for ton ring fit
+- [x] Increased keypad button vertical padding from 8px to 10px for larger touch targets
 - [x] Only remaining media query: landscape rotation for horizontal phones
-- [x] Service worker cache version bumped to v51
+- [x] Service worker cache version bumped to v52
 
 ---
 

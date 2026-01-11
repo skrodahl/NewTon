@@ -547,7 +547,7 @@ body {
   font-family: var(--font-mono);
   font-size: 1.125rem;
   font-weight: 600;
-  padding: var(--spacing-sm) var(--spacing-md);
+  padding: 10px var(--spacing-md);
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
   border-radius: 4px;

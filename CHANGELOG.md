@@ -10,11 +10,13 @@
 - **Optimized chalkboard font size**: Reduced from 2.25rem to 1.9rem
   - Better fit for ton rings without clipping
   - Maintains readability across all device sizes
+- **Larger keypad buttons**: Increased vertical padding from 8px to 10px
+  - Improved touch targets for easier tapping
 
 ### Technical Details
 - Removed ~200 lines of tablet-specific CSS scaling rules
 - Only remaining media query: landscape rotation for horizontal phone orientation
-- Service worker cache version bumped to v51
+- Service worker cache version bumped to v52
 
 ---
 
