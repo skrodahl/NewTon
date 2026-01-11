@@ -161,6 +161,14 @@ Stores:
 - [x] Only remaining media query: landscape rotation for horizontal phones
 - [x] Service worker cache version bumped to v52
 
+### Phase 12: 140+ Score Tracking ✓
+**Files:** `chalker/js/chalker.js`, `chalker/index.html`
+
+- [x] Added `ton40s` counter to stats calculation (scores ≥140)
+- [x] Added 140+ row to all three stats tables (Live Stats, Match Complete, History Detail)
+- [x] Cumulative counting: Tons includes 140+, 140+ includes 180s
+- [x] Service worker cache version bumped to v53
+
 ---
 
 ## Files Modified

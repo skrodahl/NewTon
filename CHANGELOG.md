@@ -1,5 +1,21 @@
 # 2025-01-11
 
+## **v4.1.13** - Chalker 140+ Stats
+
+### Chalker Enhancements
+- **140+ score tracking**: Stats now show three tiers of high scores
+  - Tons (100+): All scores 100 and above (cumulative)
+  - 140+: All scores 140 and above (cumulative, includes 180s)
+  - 180s: Maximum scores only
+- Displayed on Live Stats, Match Complete, and History Detail screens
+
+### Technical Details
+- Added `ton40s` counter to `calculateStats()` function
+- Added 140+ row to all three stats tables in HTML
+- Service worker cache version bumped to v53
+
+---
+
 ## **v4.1.12** - Chalker Responsive Layout Fix
 
 ### Chalker Enhancements

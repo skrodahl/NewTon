@@ -120,6 +120,8 @@
     statsPlayer2: document.getElementById('stats-player2'),
     p1Tons: document.getElementById('p1-tons'),
     p2Tons: document.getElementById('p2-tons'),
+    p1140s: document.getElementById('p1-140s'),
+    p2140s: document.getElementById('p2-140s'),
     p1180s: document.getElementById('p1-180s'),
     p2180s: document.getElementById('p2-180s'),
     p1ShortLegs: document.getElementById('p1-short-legs'),
@@ -155,6 +157,8 @@
     detailStatsP2: document.getElementById('detail-stats-p2'),
     detailP1Tons: document.getElementById('detail-p1-tons'),
     detailP2Tons: document.getElementById('detail-p2-tons'),
+    detailP1140s: document.getElementById('detail-p1-140s'),
+    detailP2140s: document.getElementById('detail-p2-140s'),
     detailP1180s: document.getElementById('detail-p1-180s'),
     detailP2180s: document.getElementById('detail-p2-180s'),
     detailP1ShortLegs: document.getElementById('detail-p1-short-legs'),
@@ -186,6 +190,8 @@
     statsHeaderP2: document.getElementById('stats-header-p2'),
     statsP1Tons: document.getElementById('stats-p1-tons'),
     statsP2Tons: document.getElementById('stats-p2-tons'),
+    statsP1140s: document.getElementById('stats-p1-140s'),
+    statsP2140s: document.getElementById('stats-p2-140s'),
     statsP1180s: document.getElementById('stats-p1-180s'),
     statsP2180s: document.getElementById('stats-p2-180s'),
     statsP1ShortLegs: document.getElementById('stats-p1-short-legs'),
@@ -1198,6 +1204,7 @@
     const stats = {
       player1: {
         tons: 0,
+        ton40s: 0,
         ton80s: 0,
         shortLegs: [],      // Array of dart counts for short legs
         highOuts: [],       // Array of checkout scores >= 101
@@ -1207,6 +1214,7 @@
       },
       player2: {
         tons: 0,
+        ton40s: 0,
         ton80s: 0,
         shortLegs: [],
         highOuts: [],
@@ -1231,6 +1239,11 @@
         if (visit.score >= 100) {
           playerStats.tons++;
           playerLegStats.tons++;
+        }
+
+        // Count 140+ (includes 180s)
+        if (visit.score >= 140) {
+          playerStats.ton40s++;
         }
 
         // Count 180s
@@ -1357,6 +1370,8 @@
     // Populate stats - handle both array and number formats for shortLegs/highOuts
     els.p1Tons.textContent = p1Stats.tons || 0;
     els.p2Tons.textContent = p2Stats.tons || 0;
+    els.p1140s.textContent = p1Stats.ton40s || 0;
+    els.p2140s.textContent = p2Stats.ton40s || 0;
     els.p1180s.textContent = p1Stats.ton80s || 0;
     els.p2180s.textContent = p2Stats.ton80s || 0;
 
@@ -1435,6 +1450,8 @@
       shortLegsLabel: elements.shortLegsLabel,
       p1Tons: elements.p1Tons,
       p2Tons: elements.p2Tons,
+      p1140s: elements.p1140s,
+      p2140s: elements.p2140s,
       p1180s: elements.p1180s,
       p2180s: elements.p2180s,
       p1ShortLegs: elements.p1ShortLegs,
@@ -1680,6 +1697,8 @@
       shortLegsLabel: elements.statsShortLegsLabel,
       p1Tons: elements.statsP1Tons,
       p2Tons: elements.statsP2Tons,
+      p1140s: elements.statsP1140s,
+      p2140s: elements.statsP2140s,
       p1180s: elements.statsP1180s,
       p2180s: elements.statsP2180s,
       p1ShortLegs: elements.statsP1ShortLegs,
@@ -2151,6 +2170,8 @@
       shortLegsLabel: elements.detailShortLegsLabel,
       p1Tons: elements.detailP1Tons,
       p2Tons: elements.detailP2Tons,
+      p1140s: elements.detailP1140s,
+      p2140s: elements.detailP2140s,
       p1180s: elements.detailP1180s,
       p2180s: elements.detailP2180s,
       p1ShortLegs: elements.detailP1ShortLegs,
