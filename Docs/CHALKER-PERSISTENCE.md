@@ -151,6 +151,15 @@ Stores:
 - [x] Maintains existing color coding (blue for tons, green for 180s)
 - [x] Service worker cache version bumped to v47
 
+### Phase 11: Responsive Layout Cleanup ✓
+**Files:** `chalker/styles/chalker.css`
+
+- [x] Removed broken 768-1023px portrait media query (~200 lines)
+- [x] All screen sizes now use same base styles
+- [x] Reduced chalkboard font size from 2.25rem to 1.9rem for ton ring fit
+- [x] Only remaining media query: landscape rotation for horizontal phones
+- [x] Service worker cache version bumped to v51
+
 ---
 
 ## Files Modified
@@ -277,4 +286,4 @@ When viewing Live Stats or Match History, allow swiping left/right between compl
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 11, 2025 (Phase 10 - Ton Ring Styling)
+**Updated:** January 11, 2025 (Phase 11 - Responsive Layout Cleanup)

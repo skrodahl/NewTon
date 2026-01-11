@@ -1,5 +1,23 @@
 # 2025-01-11
 
+## **v4.1.12** - Chalker Responsive Layout Fix
+
+### Chalker Enhancements
+- **Unified responsive layout**: Removed problematic 768-1023px portrait media query
+  - All screen sizes now use the same base styles
+  - Fixes broken layout on laptop browsers in portrait window orientation
+  - Phone and tablet devices unaffected (they already worked correctly)
+- **Optimized chalkboard font size**: Reduced from 2.25rem to 1.9rem
+  - Better fit for ton rings without clipping
+  - Maintains readability across all device sizes
+
+### Technical Details
+- Removed ~200 lines of tablet-specific CSS scaling rules
+- Only remaining media query: landscape rotation for horizontal phone orientation
+- Service worker cache version bumped to v51
+
+---
+
 ## **v4.1.11** - Chalker Ton Ring Styling
 
 ### Chalker Enhancements
