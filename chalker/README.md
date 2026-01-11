@@ -2,11 +2,13 @@
 
 A mobile-first darts scoring app designed for quick, reliable match tracking.
 
+**Live version:** [darts.skrodahl.net/chalker](https://darts.skrodahl.net/chalker/)
+
 ## Install as App
 
 Chalker is a **Progressive Web App (PWA)** - install it on your phone for the best experience:
 
-1. Open Chalker in Safari (iOS) or Chrome (Android)
+1. Visit [darts.skrodahl.net/chalker](https://darts.skrodahl.net/chalker/) in Safari (iOS) or Chrome (Android)
 2. Tap "Add to Home Screen"
 3. Launch from your home screen like a native app
 
