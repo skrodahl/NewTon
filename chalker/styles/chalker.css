@@ -503,6 +503,28 @@ body {
   opacity: 1;
 }
 
+/* Tiebreak warning gradient - last 3 rows before tiebreak */
+.chalk-table tr.tiebreak-warning-3 td {
+  background: rgba(255, 193, 7, 0.1);
+}
+.chalk-table tr.tiebreak-warning-3 .col-darts {
+  font-weight: 500;
+}
+
+.chalk-table tr.tiebreak-warning-2 td {
+  background: rgba(255, 193, 7, 0.2);
+}
+.chalk-table tr.tiebreak-warning-2 .col-darts {
+  font-weight: 600;
+}
+
+.chalk-table tr.tiebreak-warning-1 td {
+  background: rgba(255, 193, 7, 0.3);
+}
+.chalk-table tr.tiebreak-warning-1 .col-darts {
+  font-weight: 700;
+}
+
 /* Input section */
 .input-section {
   background: var(--bg-secondary);

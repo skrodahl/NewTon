@@ -1,5 +1,25 @@
 # 2025-01-11
 
+## **v4.1.15** - Chalker Tiebreak Warning & Bust Validation
+
+### Chalker Enhancements
+- **Tiebreak warning gradient**: Last 3 rows before tiebreak display with escalating amber background
+  - Visual cue that the leg is approaching round limit
+  - Dart count column gets progressively bolder (500 → 600 → 700)
+- **Bust score rejection**: Scores exceeding remaining are now rejected instead of silently becoming 0
+  - Consistent with other invalid score handling (>180, illegal scores, leaving 1)
+  - To record a bust, explicitly enter 0
+
+### Documentation
+- Added `chalker/README.md` with feature overview and PWA installation guide
+
+### Technical Details
+- Added `.tiebreak-warning-1/2/3` CSS classes with escalating opacity and font-weight
+- Changed bust handling from `recordVisit(0)` to `return` (reject)
+- Service worker cache version bumped to v58
+
+---
+
 ## **v4.1.14** - Chalker Edit Validation Fix & Delete Last Visit
 
 ### Bug Fixes

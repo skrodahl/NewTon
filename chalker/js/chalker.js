@@ -499,9 +499,9 @@
       }
       // Checkout! Ask for darts used
       showCheckoutModal(score);
-    } else if (newScore < 2) {
-      // Bust (score would leave < 2 remaining) - record as 0
-      recordVisit(0);
+    } else if (newScore < 0 || newScore === 1) {
+      // Bust (score exceeds remaining or leaves 1) - reject, user must enter 0 explicitly
+      return;
     } else {
       // Normal score
       recordVisit(score);
@@ -1097,7 +1097,13 @@
 
       // Row is empty if no scores and not the active row
       const hasData = data.p1Scored !== '' || data.p2Scored !== '' || p1IsActive || p2IsActive;
-      const rowClass = hasData ? '' : 'chalk-row-empty';
+      let rowClass = hasData ? '' : 'chalk-row-empty';
+
+      // Tiebreak warning gradient for last 3 rows
+      const roundsFromEnd = maxRounds - r;
+      if (roundsFromEnd <= 3) {
+        rowClass += ` tiebreak-warning-${roundsFromEnd}`;
+      }
 
       // Show To Go values only if there's data in that column
       const p1ToGo = data.p1ToGo !== '' ? data.p1ToGo : '';

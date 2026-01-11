@@ -181,6 +181,17 @@ Stores:
   - Restores deleted player's turn
 - [x] Service worker cache version bumped to v55
 
+### Phase 14: Tiebreak Warning & Bust Validation ✓
+**Files:** `chalker/js/chalker.js`, `chalker/styles/chalker.css`
+
+- [x] Tiebreak warning gradient on last 3 rows before tiebreak
+  - Escalating amber background (10% → 20% → 30% opacity)
+  - Dart count column gets progressively bolder (500 → 600 → 700)
+- [x] Bust scores now rejected instead of silently becoming 0
+  - Consistent validation: must explicitly enter 0 for a bust
+- [x] Added `chalker/README.md` with feature overview and PWA guide
+- [x] Service worker cache version bumped to v58
+
 ---
 
 ## Files Modified
@@ -307,4 +318,4 @@ When viewing Live Stats or Match History, allow swiping left/right between compl
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 11, 2025 (Phase 13 - Edit Validation Fix & Delete Last Visit)
+**Updated:** January 11, 2025 (Phase 14 - Tiebreak Warning & Bust Validation)
