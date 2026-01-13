@@ -1,5 +1,18 @@
 # 2025-01-13
 
+## **v4.1.18** - Chalker Keypad Spacing Fix
+
+### Chalker Polish
+- **Action row padding**: Balanced vertical padding around NEW/HISTORY/STATS buttons
+  - Added 2px extra space above to compensate for darker top border
+  - Visual balance between top and bottom spacing
+
+### Technical Details
+- Changed `.keypad-actions` margin-top from `-4px` to `-2px`
+- Service worker cache version bumped to v78
+
+---
+
 ## **v4.1.17** - Chalker Info Bar Redesign
 
 ### Chalker Enhancements

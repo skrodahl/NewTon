@@ -621,6 +621,7 @@ body {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: var(--spacing-xs);
+  margin-top: -2px;
   margin-bottom: var(--spacing-xs);
   border-bottom: 1px solid var(--border-light);
   padding-bottom: var(--spacing-xs);
