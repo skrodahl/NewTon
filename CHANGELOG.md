@@ -1,5 +1,20 @@
 # 2025-01-13
 
+## **v4.1.17** - Chalker Info Bar Redesign
+
+### Chalker Enhancements
+- **Centered info bar**: Match info now displayed as a single centered line
+  - Format: "Lane 5 • 501 • Best of 3" (or "501 • Best of 3" without lane)
+  - Cleaner visual hierarchy: Big scores → Medium info → Small chalkboard
+- **Dart column symbol**: Changed header from "#" to "➹" (dart arrow)
+
+### Technical Details
+- Simplified `.match-info-bar` from 3-cell flexbox to single centered text
+- Updated `updateDisplay()` to build info string with bullet separators
+- Service worker cache version bumped to v76
+
+---
+
 ## **v4.1.16** - Chalker Lane Dropdown & Chalkboard Info
 
 ### Chalker Enhancements

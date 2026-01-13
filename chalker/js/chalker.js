@@ -88,6 +88,7 @@
     player1Score: document.getElementById('player1-score'),
     player2Score: document.getElementById('player2-score'),
     chalkboardBody: document.getElementById('chalkboard-body'),
+    matchInfoBar: document.getElementById('match-info-bar'),
 
     // Modals
     configModal: document.getElementById('config-modal'),
@@ -915,6 +916,9 @@
     // Clear chalkboard
     document.getElementById('chalk-tbody').innerHTML = '';
 
+    // Clear match info bar
+    elements.matchInfoBar.textContent = '';
+
     // Disable numpad keys
     updateKeypadState();
   }
@@ -955,6 +959,13 @@
 
     // Update leg display
     elements.legDisplay.textContent = `${state.player1Legs} - ${state.player2Legs}`;
+
+    // Update match info bar
+    const infoParts = [];
+    if (state.config.laneName) infoParts.push(state.config.laneName);
+    infoParts.push(state.config.startingScore);
+    infoParts.push(`Best of ${state.config.bestOf}`);
+    elements.matchInfoBar.textContent = infoParts.join(' • ');
 
     // Update active player indicator
     elements.player1Anchor.classList.toggle('active', state.currentPlayer === 1);
@@ -1044,22 +1055,10 @@
     const activeRound = Math.floor(totalVisits / 2);
     const activePlayer = state.currentPlayer;
 
-    // Build all rows (starting score + maxRounds)
+    // Build all rows
     let html = '';
 
-    // Row 0: Starting scores with lane name (left) and match format (right)
-    const laneName = state.config.laneName || '';
-    html += `
-      <tr>
-        <td class="col-scored col-info">${laneName}</td>
-        <td class="col-togo">${state.config.startingScore}</td>
-        <td class="col-darts col-bestof"></td>
-        <td class="col-scored col-info">Bo${state.config.bestOf}</td>
-        <td class="col-togo">${state.config.startingScore}</td>
-      </tr>
-    `;
-
-    // Rows 1-maxRounds: Pre-rendered with dart counts
+    // Rows for each round (no starting score row - info bar shows variant)
     for (let r = 0; r < maxRounds; r++) {
       const dartCount = (r + 1) * 3;
       const data = roundData[r];

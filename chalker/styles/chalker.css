@@ -381,6 +381,18 @@ body {
   line-height: 1;
 }
 
+/* Match info bar */
+.match-info-bar {
+  text-align: center;
+  padding: 2px 8px;
+  background: var(--bg-primary);
+  border-bottom: 1px solid var(--border-color);
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
 /* Chalkboard ledger */
 .chalkboard {
   flex: 1;
@@ -464,19 +476,6 @@ body {
   background: var(--bg-primary);
 }
 
-/* Info cells in row 0 (lane name, match format) */
-.chalk-table .col-info {
-  background: var(--bg-primary);
-  color: var(--text-secondary);
-  font-family: var(--font-body);
-  font-size: 0.875rem;
-  font-weight: 600;
-}
-
-/* Empty center cell in row 0 */
-.chalk-table .col-bestof {
-  background: var(--bg-primary);
-}
 
 /* Tappable cells (recorded scores) */
 .chalk-table .col-scored[data-visit] {
