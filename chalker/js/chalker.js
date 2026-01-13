@@ -964,7 +964,7 @@
     const infoParts = [];
     if (state.config.laneName) infoParts.push(state.config.laneName);
     infoParts.push(state.config.startingScore);
-    infoParts.push(`Best of ${state.config.bestOf}`);
+    infoParts.push(`Leg ${state.legs.length} of ${state.config.bestOf}`);
     elements.matchInfoBar.textContent = infoParts.join(' • ');
 
     // Update active player indicator

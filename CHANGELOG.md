@@ -1,15 +1,22 @@
 # 2025-01-13
 
-## **v4.1.18** - Chalker Keypad Spacing Fix
+## **v4.1.18** - Chalker Info Bar & UI Polish
+
+### Chalker Enhancements
+- **Dynamic leg indicator**: Info bar now shows "Leg X of Y" instead of static "Best of Y"
+  - Example: "Lane 3 • 501 • Leg 1 of 3" → "Lane 3 • 501 • Leg 2 of 3"
+  - Shows match progress at a glance without checking the leg score
+- **Larger dart symbol**: Dart column header (➹) increased to 1rem for better visibility
+  - Uses `line-height: 1` to prevent row height increase
 
 ### Chalker Polish
 - **Action row padding**: Balanced vertical padding around NEW/HISTORY/STATS buttons
   - Added 2px extra space above to compensate for darker top border
-  - Visual balance between top and bottom spacing
 
 ### Technical Details
-- Changed `.keypad-actions` margin-top from `-4px` to `-2px`
-- Service worker cache version bumped to v78
+- Changed info bar from `Best of ${bestOf}` to `Leg ${legs.length} of ${bestOf}`
+- Added `font-size: 1rem; line-height: 1` to `.chalk-table thead th:nth-child(3)`
+- Service worker cache version bumped to v80
 
 ---
 

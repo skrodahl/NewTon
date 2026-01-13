@@ -210,6 +210,20 @@ Stores:
   - One-sided borders prevent disappearing lines at certain widths
 - [x] Service worker cache version bumped to v63
 
+### Phase 16: Info Bar & UI Polish ✓
+**Files:** `chalker/js/chalker.js`, `chalker/styles/chalker.css`
+
+- [x] Dynamic leg indicator in info bar
+  - Changed from "Best of X" to "Leg Y of X"
+  - Shows current leg number and match length
+  - Updates automatically as match progresses
+- [x] Larger dart symbol in chalkboard header
+  - Increased from 0.625rem to 1rem
+  - Uses `line-height: 1` to prevent row height increase
+- [x] Action row padding balance
+  - Adjusted spacing above NEW/HISTORY/STATS buttons
+- [x] Service worker cache version bumped to v80
+
 ---
 
 ## Files Modified
@@ -336,4 +350,4 @@ When viewing Live Stats or Match History, allow swiping left/right between compl
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 13, 2025 (Phase 15 - Lane Dropdown & Chalkboard Info Cells)
+**Updated:** January 13, 2025 (Phase 16 - Info Bar & UI Polish)

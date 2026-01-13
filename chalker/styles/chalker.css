@@ -442,6 +442,8 @@ body {
 
 .chalk-table thead th:nth-child(3) {
   width: 40px;
+  font-size: 1rem;
+  line-height: 1;
 }
 
 .chalk-table td {
