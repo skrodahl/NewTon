@@ -12,7 +12,9 @@
 
 ➷ **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
-🔒 **Total Privacy**: Your tournament data lives in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://github.com/skrodahl/NewTon/blob/main/Docs/PRIVACY.md), not by policy.
+🎯 **NewTon Chalker** is a companion x01 scoring app designed for tablets at the dartboard. Crash-proof with persistent match data, match history, and live statistics. Install as a PWA for a native app experience.
+
+🔒 **Total Privacy**: Your tournament and match data lives in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://github.com/skrodahl/NewTon/blob/main/Docs/PRIVACY.md), not by policy.
 
 **[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)** or **[self-host with Docker](#-docker-deployment-self-hosting)**.
 
@@ -20,9 +22,11 @@
 # See It in Action
 
 ## Try the Live Demo
-🎯 [**https://darts.skrodahl.net**](https://darts.skrodahl.net)
+🎯 **Tournament Manager:** [**https://darts.skrodahl.net**](https://darts.skrodahl.net)
 
-*All data, player names, tournaments, and config stay in your browser - nothing is stored on the server or shared with anyone else.*
+🎯 **Chalker:** [**https://darts.skrodahl.net/chalker**](https://darts.skrodahl.net/chalker)
+
+*All data stays in your browser - nothing is stored on the server or shared with anyone else.*
 
 ## Screenshots
 **Player Registration, Saved Players, and Dynamic Help**:
