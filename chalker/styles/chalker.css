@@ -400,7 +400,8 @@ body {
 /* Chalk table */
 .chalk-table {
   width: 100%;
-  border-collapse: collapse;
+  border-collapse: separate;
+  border-spacing: 0;
   font-family: var(--font-scores);
   font-variant-numeric: tabular-nums;
   table-layout: fixed;
@@ -415,10 +416,16 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   padding: var(--spacing-xs) var(--spacing-sm);
-  border: 1px solid var(--border-color);
+  border-top: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
   position: sticky;
   top: 0;
   z-index: 1;
+}
+
+.chalk-table thead th:last-child {
+  border-right: 1px solid var(--border-color);
 }
 
 .chalk-table thead th:nth-child(3) {
@@ -426,7 +433,8 @@ body {
 }
 
 .chalk-table td {
-  border: 1px solid var(--border-color);
+  border-bottom: 1px solid var(--border-color);
+  border-left: 1px solid var(--border-color);
   text-align: center;
   padding: 0;
   font-size: 1.9rem;
@@ -434,6 +442,10 @@ body {
   line-height: 6vh;
   overflow: hidden;
   white-space: nowrap;
+}
+
+.chalk-table td:last-child {
+  border-right: 1px solid var(--border-color);
 }
 
 .chalk-table .col-scored {
@@ -452,12 +464,18 @@ body {
   background: var(--bg-primary);
 }
 
-/* Best-of indicator in row 0 center cell */
-.chalk-table .col-bestof {
-  font-family: var(--font-body);
-  font-size: 0.75rem;
-  font-weight: 600;
+/* Info cells in row 0 (lane name, match format) */
+.chalk-table .col-info {
+  background: var(--bg-primary);
   color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+/* Empty center cell in row 0 */
+.chalk-table .col-bestof {
+  background: var(--bg-primary);
 }
 
 /* Tappable cells (recorded scores) */

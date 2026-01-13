@@ -1,3 +1,33 @@
+# 2025-01-13
+
+## **v4.1.16** - Chalker Lane Dropdown & Chalkboard Info
+
+### Chalker Enhancements
+- **Lane dropdown**: Lane input changed from free-text to dropdown (1-20)
+  - Options: "No lane" (default), Lane 1-20
+  - Prevents invalid lane entries
+- **Chalkboard info cells**: Row 0 now displays lane and match format
+  - Left cell shows lane name (e.g., "Lane 5")
+  - Right cell shows best-of format (e.g., "Bo3")
+  - Same gray styling as other header cells
+
+### Cleanup
+- **Removed Double-In toggle**: Was stored but never used in game logic
+  - Can't validate double-in without individual dart values
+  - Simplifies config form
+
+### Bug Fixes
+- **Table border rendering fix**: Fixed disappearing borders at certain browser widths
+  - Changed from `border-collapse: collapse` to `border-collapse: separate`
+  - One-sided borders prevent subpixel rendering issues in Chrome/Edge
+
+### Technical Details
+- Lane stored as "Lane X" format string, extracted on settings load
+- Added `.col-info` CSS class for info cells
+- Service worker cache version bumped to v63
+
+---
+
 # 2025-01-11
 
 ## **v4.1.15** - Chalker Tiebreak Warning & Bust Validation

@@ -33,7 +33,7 @@
    * @property {string} player2Name - Player 2 display name
    * @property {number} startingScore - Starting score (101-1001)
    * @property {number} bestOf - Number of legs to play (1-11)
-   * @property {boolean} doubleIn - Whether double-in is required
+   * @property {number} maxRounds - Maximum rounds before tiebreak
    */
 
   /**
@@ -77,7 +77,6 @@
     startingScore: document.getElementById('starting-score'),
     bestOf: document.getElementById('best-of'),
     maxRounds: document.getElementById('max-rounds'),
-    doubleIn: document.getElementById('double-in'),
     startMatchBtn: document.getElementById('start-match-btn'),
 
     // Scoring display
@@ -267,13 +266,12 @@
    */
   async function startMatch() {
     const config = {
-      laneName: elements.laneName.value.trim() || 'Lane',
+      laneName: elements.laneName.value ? `Lane ${elements.laneName.value}` : '',
       player1Name: elements.player1Name.value.trim() || 'Player 1',
       player2Name: elements.player2Name.value.trim() || 'Player 2',
       startingScore: parseInt(elements.startingScore.value, 10),
       bestOf: parseInt(elements.bestOf.value, 10),
-      maxRounds: parseInt(elements.maxRounds.value, 10),
-      doubleIn: elements.doubleIn.checked
+      maxRounds: parseInt(elements.maxRounds.value, 10)
     };
 
     // Save settings for next time
@@ -1049,13 +1047,14 @@
     // Build all rows (starting score + maxRounds)
     let html = '';
 
-    // Row 0: Starting scores (shows match length instead of dart count)
+    // Row 0: Starting scores with lane name (left) and match format (right)
+    const laneName = state.config.laneName || '';
     html += `
       <tr>
-        <td class="col-scored"></td>
+        <td class="col-scored col-info">${laneName}</td>
         <td class="col-togo">${state.config.startingScore}</td>
-        <td class="col-darts col-bestof">Bo${state.config.bestOf}</td>
-        <td class="col-scored"></td>
+        <td class="col-darts col-bestof"></td>
+        <td class="col-scored col-info">Bo${state.config.bestOf}</td>
         <td class="col-togo">${state.config.startingScore}</td>
       </tr>
     `;
@@ -2011,13 +2010,14 @@
     try {
       const saved = await dbGet('settings', 'default');
       if (saved) {
-        elements.laneName.value = saved.laneName || '';
+        // Extract lane number from "Lane X" format, or empty for no lane
+        const laneMatch = saved.laneName?.match(/Lane (\d+)/);
+        elements.laneName.value = laneMatch ? laneMatch[1] : '';
         elements.player1Name.value = saved.player1Name || '';
         elements.player2Name.value = saved.player2Name || '';
         elements.startingScore.value = saved.startingScore || 501;
         elements.bestOf.value = saved.bestOf || 3;
         elements.maxRounds.value = saved.maxRounds || 20;
-        elements.doubleIn.checked = saved.doubleIn || false;
       }
     } catch (e) {
       console.warn('Failed to load settings:', e);

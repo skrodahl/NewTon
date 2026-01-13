@@ -72,7 +72,7 @@ Stores:
 - [x] `loadSettings()` - Load saved settings on init
 - [x] Pre-fill config form with last used values
 - [x] `saveSettings()` - Save settings when match starts
-- [x] Settings: laneName, player1Name, player2Name, startingScore, bestOf, maxRounds, doubleIn
+- [x] Settings: laneName, player1Name, player2Name, startingScore, bestOf, maxRounds
 
 ### Phase 3: Current Match Persistence ✓
 **File:** `chalker/js/chalker.js`
@@ -192,6 +192,24 @@ Stores:
 - [x] Added `chalker/README.md` with feature overview and PWA guide
 - [x] Service worker cache version bumped to v58
 
+### Phase 15: Lane Dropdown & Chalkboard Info Cells ✓
+**Files:** `chalker/index.html`, `chalker/js/chalker.js`, `chalker/styles/chalker.css`
+
+- [x] Removed non-functional Double-In toggle
+  - Was stored but never used in game logic (can't validate without individual dart values)
+- [x] Lane input changed from free-text to dropdown
+  - Options: "No lane" (default), Lane 1-20
+  - Stored as "Lane X" format string in config
+  - `loadSettings()` extracts lane number for form pre-fill
+- [x] Chalkboard row 0 now displays lane and match format
+  - Left cell: Lane name (e.g., "Lane 5")
+  - Right cell: Best-of format (e.g., "Bo3")
+  - Same gray background as other header cells
+- [x] Fixed table border subpixel rendering issue
+  - Changed from `border-collapse: collapse` to `border-collapse: separate`
+  - One-sided borders prevent disappearing lines at certain widths
+- [x] Service worker cache version bumped to v63
+
 ---
 
 ## Files Modified
@@ -229,7 +247,7 @@ Stores:
 {
   id: 'active',
   state: {
-    config: { laneName, player1Name, player2Name, startingScore, bestOf, maxRounds, doubleIn },
+    config: { laneName, player1Name, player2Name, startingScore, bestOf, maxRounds },
     legs: [{ startingScore, visits: [...], winner, tiebreak }],
     player1Legs, player2Legs,
     currentPlayer, player1Score, player2Score,
@@ -318,4 +336,4 @@ When viewing Live Stats or Match History, allow swiping left/right between compl
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 11, 2025 (Phase 14 - Tiebreak Warning & Bust Validation)
+**Updated:** January 13, 2025 (Phase 15 - Lane Dropdown & Chalkboard Info Cells)
