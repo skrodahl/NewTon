@@ -224,6 +224,30 @@ Stores:
   - Adjusted spacing above NEW/HISTORY/STATS buttons
 - [x] Service worker cache version bumped to v80
 
+### Phase 17: Network Mode Foundation ✓
+**Files:** `chalker/js/chalker.js`, `chalker/index.html`, `chalker/styles/chalker.css`
+
+- [x] Removed lane selection from local mode config
+  - Lane is for network device identification, not match configuration
+  - `startMatch()` now sets `laneName: ''` by default
+- [x] Added Network button to settings modal
+  - Appears alongside Rematch and New Match options
+  - Opens network mode configuration modal
+- [x] Created network modal with lane selection
+  - Dropdown with Lane 1-20 options
+  - License notice indicating feature is not yet available
+  - Lane selection persisted to IndexedDB settings
+- [x] Implemented network waiting state
+  - Info bar shows "Lane X • Waiting..." format
+  - Scoring screen with "---" placeholders (like idle mode)
+  - Deep blue header (#1e3a5f) distinguishes from local mode
+- [x] Improved NEW button confirmation flow
+  - Active match: Confirmation dialog before showing options
+  - Idle state: Direct access to options (no Rematch shown)
+- [x] Added idle screen hint
+  - Info bar shows "Tap NEW to start" when no match active
+- [x] Service worker cache version bumped to v88
+
 ---
 
 ## Files Modified
@@ -350,4 +374,4 @@ When viewing Live Stats or Match History, allow swiping left/right between compl
 ---
 
 **Completed:** January 9, 2025 (Phases 1-7)
-**Updated:** January 13, 2025 (Phase 16 - Info Bar & UI Polish)
+**Updated:** January 14, 2025 (Phase 17 - Network Mode Foundation)

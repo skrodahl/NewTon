@@ -1,4 +1,34 @@
-# 2025-01-13
+# 2025-01-14
+
+## **v4.1.19** - Chalker Network Mode Foundation
+
+### Chalker Enhancements
+- **Dynamic leg indicator**: Info bar now shows "Leg X of Y" instead of static "Best of Y"
+  - Example: "501 • Leg 1 of 3" → "501 • Leg 2 of 3"
+  - Shows match progress at a glance without checking the leg score
+- **Larger dart symbol**: Dart column header (➹) increased to 1rem for better visibility
+  - Uses `line-height: 1` to prevent row height increase
+- **Network mode foundation**: Prepared infrastructure for future tournament integration
+  - Removed lane selection from local mode (lane is for network device identification)
+  - Added "Network" button to NEW menu for future licensed network mode
+  - Network modal with lane selection (1-20) and license notice
+  - Network waiting state with "Lane X • Waiting..." info bar
+  - Deep blue header (#1e3a5f) distinguishes network mode from local mode
+  - Lane selection persisted in IndexedDB settings
+- **Improved NEW button flow**: Better confirmation handling
+  - Active match: Shows confirmation dialog before presenting options
+  - Idle state: Shows options directly (no Rematch option when idle)
+- **Idle screen hint**: Info bar shows "Tap NEW to start" when no match is active
+
+### Technical Details
+- Removed lane dropdown from config modal
+- Added Network button, modal, and waiting state logic
+- Added `.network-mode` CSS class for blue header styling
+- Changed info bar from `Best of ${bestOf}` to `Leg ${legs.length} of ${bestOf}`
+- Added `font-size: 1rem; line-height: 1` to `.chalk-table thead th:nth-child(3)`
+- Service worker cache version bumped to v88
+
+---
 
 ## **v4.1.18** - Chalker Info Bar & UI Polish
 
@@ -11,7 +41,6 @@
 
 ### Chalker Polish
 - **Action row padding**: Balanced vertical padding around NEW/HISTORY/STATS buttons
-  - Added 2px extra space above to compensate for darker top border
 
 ### Technical Details
 - Changed info bar from `Best of ${bestOf}` to `Leg ${legs.length} of ${bestOf}`
@@ -19,6 +48,8 @@
 - Service worker cache version bumped to v80
 
 ---
+
+# 2025-01-13
 
 ## **v4.1.17** - Chalker Info Bar Redesign
 

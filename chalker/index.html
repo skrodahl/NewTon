@@ -16,7 +16,7 @@
 <body>
     <!-- Scoring Screen (always shown) -->
     <div id="scoring-screen" class="screen active">
-        <header class="scoring-header">
+        <header id="scoring-header" class="scoring-header">
             <span id="player1-header" class="header-player">Player 1</span>
             <span id="leg-display" class="leg-score">0 - 0</span>
             <span id="player2-header" class="header-player">Player 2</span>
@@ -113,33 +113,6 @@
             <h2>New Match</h2>
             <div class="config-form-modal">
                 <div class="form-group">
-                    <label for="lane-name">Lane</label>
-                    <select id="lane-name">
-                        <option value="" selected>No lane</option>
-                        <option value="1">Lane 1</option>
-                        <option value="2">Lane 2</option>
-                        <option value="3">Lane 3</option>
-                        <option value="4">Lane 4</option>
-                        <option value="5">Lane 5</option>
-                        <option value="6">Lane 6</option>
-                        <option value="7">Lane 7</option>
-                        <option value="8">Lane 8</option>
-                        <option value="9">Lane 9</option>
-                        <option value="10">Lane 10</option>
-                        <option value="11">Lane 11</option>
-                        <option value="12">Lane 12</option>
-                        <option value="13">Lane 13</option>
-                        <option value="14">Lane 14</option>
-                        <option value="15">Lane 15</option>
-                        <option value="16">Lane 16</option>
-                        <option value="17">Lane 17</option>
-                        <option value="18">Lane 18</option>
-                        <option value="19">Lane 19</option>
-                        <option value="20">Lane 20</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
                     <label for="player1-name">Player 1</label>
                     <input type="text" id="player1-name" placeholder="Player 1 name">
                 </div>
@@ -202,14 +175,52 @@
         </div>
     </div>
 
-    <!-- New Match Modal (shown via NEW button during match) -->
+    <!-- New Match Modal (shown via NEW button) -->
     <div id="settings-modal" class="modal">
         <div class="modal-content">
             <h2>New Match?</h2>
-            <p>Current match will be lost.</p>
+            <p id="settings-modal-message">Current match will be lost.</p>
             <button id="rematch-btn" class="btn btn-primary">Rematch</button>
             <button id="new-match-btn" class="btn btn-secondary">New Match</button>
+            <button id="network-mode-btn" class="btn btn-secondary">Network</button>
             <button id="settings-cancel-btn" class="btn btn-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- Network Mode Modal -->
+    <div id="network-modal" class="modal">
+        <div class="modal-content config-modal-content">
+            <h2>Network Mode</h2>
+            <p class="network-notice">This feature requires a license and is not yet available.</p>
+            <div class="config-form-modal">
+                <div class="form-group">
+                    <label for="network-lane">Lane</label>
+                    <select id="network-lane">
+                        <option value="1">Lane 1</option>
+                        <option value="2">Lane 2</option>
+                        <option value="3">Lane 3</option>
+                        <option value="4">Lane 4</option>
+                        <option value="5">Lane 5</option>
+                        <option value="6">Lane 6</option>
+                        <option value="7">Lane 7</option>
+                        <option value="8">Lane 8</option>
+                        <option value="9">Lane 9</option>
+                        <option value="10">Lane 10</option>
+                        <option value="11">Lane 11</option>
+                        <option value="12">Lane 12</option>
+                        <option value="13">Lane 13</option>
+                        <option value="14">Lane 14</option>
+                        <option value="15">Lane 15</option>
+                        <option value="16">Lane 16</option>
+                        <option value="17">Lane 17</option>
+                        <option value="18">Lane 18</option>
+                        <option value="19">Lane 19</option>
+                        <option value="20">Lane 20</option>
+                    </select>
+                </div>
+            </div>
+            <button id="network-start-btn" class="btn btn-primary btn-large">Start</button>
+            <button id="network-cancel-btn" class="btn btn-cancel">Cancel</button>
         </div>
     </div>
 

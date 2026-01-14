@@ -71,7 +71,7 @@
     endScreen: document.getElementById('end-screen'),
 
     // Config inputs (now in modal)
-    laneName: document.getElementById('lane-name'),
+    // laneName removed - reserved for network mode
     player1Name: document.getElementById('player1-name'),
     player2Name: document.getElementById('player2-name'),
     startingScore: document.getElementById('starting-score'),
@@ -80,6 +80,7 @@
     startMatchBtn: document.getElementById('start-match-btn'),
 
     // Scoring display
+    scoringHeader: document.getElementById('scoring-header'),
     player1Header: document.getElementById('player1-header'),
     player2Header: document.getElementById('player2-header'),
     legDisplay: document.getElementById('leg-display'),
@@ -94,8 +95,14 @@
     configModal: document.getElementById('config-modal'),
     configCancelBtn: document.getElementById('config-cancel-btn'),
     settingsModal: document.getElementById('settings-modal'),
+    settingsModalMessage: document.getElementById('settings-modal-message'),
     settingsCancelBtn: document.getElementById('settings-cancel-btn'),
     newMatchBtn: document.getElementById('new-match-btn'),
+    networkModeBtn: document.getElementById('network-mode-btn'),
+    networkModal: document.getElementById('network-modal'),
+    networkLane: document.getElementById('network-lane'),
+    networkStartBtn: document.getElementById('network-start-btn'),
+    networkCancelBtn: document.getElementById('network-cancel-btn'),
     checkoutModal: document.getElementById('checkout-modal'),
     checkoutCancelBtn: document.getElementById('checkout-cancel-btn'),
     tiebreakModal: document.getElementById('tiebreak-modal'),
@@ -267,7 +274,7 @@
    */
   async function startMatch() {
     const config = {
-      laneName: elements.laneName.value ? `Lane ${elements.laneName.value}` : '',
+      laneName: '', // Reserved for network mode
       player1Name: elements.player1Name.value.trim() || 'Player 1',
       player2Name: elements.player2Name.value.trim() || 'Player 2',
       startingScore: parseInt(elements.startingScore.value, 10),
@@ -868,6 +875,99 @@
   }
 
   /**
+   * Handle Network button from New Match modal
+   * Opens network modal for lane selection (future feature)
+   */
+  function handleNetworkModeFromModal() {
+    hideModal(elements.settingsModal);
+    loadNetworkLane();
+    showModal(elements.networkModal);
+  }
+
+  /**
+   * Load saved network lane selection
+   */
+  async function loadNetworkLane() {
+    try {
+      const saved = await dbGet('settings', 'networkLane');
+      if (saved && saved.lane) {
+        elements.networkLane.value = saved.lane;
+      }
+    } catch (e) {
+      console.warn('Failed to load network lane:', e);
+    }
+  }
+
+  /**
+   * Save network lane selection (for future use)
+   * @param {string} lane - Lane number
+   */
+  async function saveNetworkLane(lane) {
+    try {
+      await dbPut('settings', { id: 'networkLane', lane: lane });
+    } catch (e) {
+      console.warn('Failed to save network lane:', e);
+    }
+  }
+
+  /**
+   * Start network mode - show scoring screen in waiting state
+   */
+  async function startNetworkMode() {
+    const lane = elements.networkLane.value;
+    await saveNetworkLane(lane);
+
+    // Clear any active match
+    state = null;
+    await clearCurrentMatch();
+
+    // Set network waiting state
+    networkWaitingLane = lane;
+
+    // Hide modal and show scoring screen
+    hideModal(elements.networkModal);
+    showScreen('scoring');
+    updateDisplayForNetworkWaiting();
+  }
+
+  /** @type {string|null} - Lane number when waiting for network match */
+  let networkWaitingLane = null;
+
+  /**
+   * Update display for network waiting state
+   */
+  function updateDisplayForNetworkWaiting() {
+    // Update info bar with lane and waiting status
+    elements.matchInfoBar.textContent = `Lane ${networkWaitingLane} • Waiting...`;
+
+    // Show network mode styling
+    elements.scoringHeader.classList.add('network-mode');
+
+    // Show idle-style placeholders
+    elements.player1Score.textContent = '---';
+    elements.player2Score.textContent = '---';
+    elements.player1Score.classList.add('idle');
+    elements.player2Score.classList.add('idle');
+
+    // Reset leg display
+    elements.legDisplay.textContent = '0 - 0';
+
+    // Show placeholder player names
+    elements.player1Header.textContent = '---';
+    elements.player2Header.textContent = '---';
+
+    // Remove active state from anchors
+    elements.player1Anchor.classList.remove('active');
+    elements.player2Anchor.classList.remove('active');
+
+    // Clear chalkboard
+    document.getElementById('chalk-tbody').innerHTML = '';
+
+    // Disable keypad
+    updateKeypadState();
+  }
+
+  /**
    * Start a rematch (same config) - used from end screen
    */
   function rematch() {
@@ -896,6 +996,9 @@
    * Update display for idle state (no match)
    */
   function updateIdleDisplay() {
+    // Remove network mode styling
+    elements.scoringHeader.classList.remove('network-mode');
+
     // Show idle scores
     elements.player1Score.textContent = '---';
     elements.player2Score.textContent = '---';
@@ -916,8 +1019,8 @@
     // Clear chalkboard
     document.getElementById('chalk-tbody').innerHTML = '';
 
-    // Clear match info bar
-    elements.matchInfoBar.textContent = '';
+    // Show hint in info bar
+    elements.matchInfoBar.textContent = 'Tap NEW to start';
 
     // Disable numpad keys
     updateKeypadState();
@@ -949,9 +1052,10 @@
       return;
     }
 
-    // Remove idle state
+    // Remove idle/network state
     elements.player1Score.classList.remove('idle');
     elements.player2Score.classList.remove('idle');
+    elements.scoringHeader.classList.remove('network-mode');
 
     // Update anchor scores
     elements.player1Score.textContent = state.player1Score;
@@ -1493,7 +1597,8 @@
            elements.tiebreakModal.classList.contains('active') ||
            elements.configModal.classList.contains('active') ||
            elements.settingsModal.classList.contains('active') ||
-           elements.confirmModal.classList.contains('active');
+           elements.confirmModal.classList.contains('active') ||
+           elements.networkModal.classList.contains('active');
   }
 
   /**
@@ -1687,16 +1792,29 @@
   }
 
   /**
-   * Handle NEW button - shows settings modal during match, config modal when idle
+   * Handle NEW button - shows options modal (with confirmation during active match)
    */
   function handleNewButton() {
     if (state && !state.matchComplete) {
-      // During match: show Rematch/Abandon options
-      showSettingsModal();
+      // During match: confirm first, then show options
+      showConfirm('New Match?', 'Current match will be lost.', () => {
+        showSettingsModalForState(false);
+      });
     } else {
-      // Idle: show config modal to start new match
-      showConfigModal();
+      // Idle: show options directly (no Rematch)
+      showSettingsModalForState(true);
     }
+  }
+
+  /**
+   * Show settings modal configured for current state
+   * @param {boolean} isIdle - Whether we're in idle state (no active match)
+   */
+  function showSettingsModalForState(isIdle) {
+    // Hide/show Rematch button and message based on state
+    elements.rematchBtn.style.display = isIdle ? 'none' : 'block';
+    elements.settingsModalMessage.style.display = 'none'; // Message shown in confirm dialog
+    showModal(elements.settingsModal);
   }
 
   /**
@@ -1938,10 +2056,15 @@
     elements.startMatchBtn.addEventListener('click', startMatch);
     elements.configCancelBtn.addEventListener('click', () => hideModal(elements.configModal));
 
-    // New Match modal (Rematch / New Match)
+    // New Match modal (Rematch / New Match / Network)
     elements.settingsCancelBtn.addEventListener('click', () => hideModal(elements.settingsModal));
     elements.rematchBtn.addEventListener('click', handleRematchFromModal);
     elements.newMatchBtn.addEventListener('click', handleNewMatchFromModal);
+    elements.networkModeBtn.addEventListener('click', handleNetworkModeFromModal);
+
+    // Network modal
+    elements.networkStartBtn.addEventListener('click', startNetworkMode);
+    elements.networkCancelBtn.addEventListener('click', () => hideModal(elements.networkModal));
 
     // Keypad number keys
     document.querySelectorAll('.keypad .key[data-value]').forEach(key => {
@@ -2009,9 +2132,7 @@
     try {
       const saved = await dbGet('settings', 'default');
       if (saved) {
-        // Extract lane number from "Lane X" format, or empty for no lane
-        const laneMatch = saved.laneName?.match(/Lane (\d+)/);
-        elements.laneName.value = laneMatch ? laneMatch[1] : '';
+        // laneName not loaded - reserved for network mode
         elements.player1Name.value = saved.player1Name || '';
         elements.player2Name.value = saved.player2Name || '';
         elements.startingScore.value = saved.startingScore || 501;

@@ -79,7 +79,7 @@ The larger symbol uses `line-height: 1` to prevent it from affecting the row hei
   ```
 
 ### Service Worker
-- Cache version bumped from `chalker-v78` to `chalker-v80`
+- Cache version bumped from `chalker-v76` to `chalker-v80`
 
 ---
 

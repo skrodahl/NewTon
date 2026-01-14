@@ -315,6 +315,10 @@ body {
   gap: var(--spacing-sm);
 }
 
+.scoring-header.network-mode {
+  background: #1e3a5f;
+}
+
 .header-player {
   font-size: 1rem;
   font-weight: 600;
@@ -700,6 +704,16 @@ body {
 
 .modal-content p {
   color: var(--text-secondary);
+}
+
+.modal-content .network-notice {
+  background: rgba(255, 193, 7, 0.15);
+  border: 1px solid rgba(255, 193, 7, 0.4);
+  border-radius: 6px;
+  padding: var(--spacing-sm) var(--spacing-md);
+  margin-bottom: var(--spacing-md);
+  color: var(--text-primary);
+  font-size: 0.9rem;
 }
 
 /* Config modal (larger, scrollable) */
