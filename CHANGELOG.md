@@ -1,3 +1,21 @@
+# 2025-01-17
+
+## **v4.1.20** - Chalker First 9 Average Fix
+
+### Bug Fixes
+- **First 9 Average calculation**: Now correctly averages first 9 darts across all legs
+  - Previously only used first leg's data (showed 167.0 instead of 101.6 in multi-leg matches)
+  - Now includes first 3 visits from every leg played
+  - Works correctly for variable match lengths (2-leg, 3-leg, etc.)
+  - Applies to Match Complete, History Detail, and Live Stats views
+
+### Technical Details
+- Removed erroneous `.slice(0, 3)` that limited calculation to first leg only
+- `first9Scores` array now properly averaged across all collected visits
+- Service worker cache version bumped to v89
+
+---
+
 # 2025-01-14
 
 ## **v4.1.19** - Chalker Network Mode Foundation
