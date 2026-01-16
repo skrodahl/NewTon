@@ -1422,22 +1422,14 @@
       });
     });
 
-    // Calculate first 9 averages (average of first 9 darts = first 3 visits)
+    // Calculate first 9 averages across all legs
+    // first9Scores contains first 3 visits (9 darts) from each leg
+    // Average all of them for the match first-9 average
     stats.player1.first9Avg = stats.player1.first9Scores.length > 0
-      ? (stats.player1.first9Scores.reduce((a, b) => a + b, 0) / stats.player1.first9Scores.length) * 3 / 3
+      ? stats.player1.first9Scores.reduce((a, b) => a + b, 0) / stats.player1.first9Scores.length
       : 0;
     stats.player2.first9Avg = stats.player2.first9Scores.length > 0
-      ? (stats.player2.first9Scores.reduce((a, b) => a + b, 0) / stats.player2.first9Scores.length) * 3 / 3
-      : 0;
-
-    // Wait, first 9 avg should be: total of first 9 darts / 9 * 3 (per 3 darts)
-    // Since we store per-visit scores (3 darts each), first 3 visits = 9 darts
-    // Avg per 3 darts = sum of first 3 visits / 3
-    stats.player1.first9Avg = stats.player1.first9Scores.slice(0, 3).length > 0
-      ? stats.player1.first9Scores.slice(0, 3).reduce((a, b) => a + b, 0) / stats.player1.first9Scores.slice(0, 3).length
-      : 0;
-    stats.player2.first9Avg = stats.player2.first9Scores.slice(0, 3).length > 0
-      ? stats.player2.first9Scores.slice(0, 3).reduce((a, b) => a + b, 0) / stats.player2.first9Scores.slice(0, 3).length
+      ? stats.player2.first9Scores.reduce((a, b) => a + b, 0) / stats.player2.first9Scores.length
       : 0;
 
     // Match averages (per 3 darts)
