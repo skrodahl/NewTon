@@ -1,3 +1,28 @@
+# 2026-02-09
+
+## **v4.1.21** - Bracket Generation Confirmation
+
+### Enhancements
+- **Bracket generation confirmation dialog**: Generates bracket only after explicit review
+  - Shows bracket size, player count, and bye count
+  - Displays all registered players as read-only cards in 4-column grid
+  - Cancel is the default action (Enter cancels, prevents accidental generation)
+  - Warning: "Make sure all players are registered before proceeding."
+  - Prevents the common mistake of forgetting to add a player before starting
+- **Visual polish for Match Controls panels**:
+  - Subtle box-shadow on Tournament Setup and Referee Suggestion cards
+  - Referee suggestions: larger font, bolder names, more padding
+  - Color-coded left borders on suggestion categories (losers, winners, assignments)
+
+### Technical Details
+- Added `bracketConfirmModal` to tournament.html
+- Split `generateCleanBracket()` into validation + confirmation + execution
+- Added `showBracketConfirmation()` and `confirmBracketGeneration()` functions
+- Reuses `.player-list-item.in-tournament` styling with subtle box-shadow
+- Uses `pushDialog`/`popDialog` stack with Esc support
+
+---
+
 # 2025-01-17
 
 ## **v4.1.20** - Chalker First 9 Average Fix

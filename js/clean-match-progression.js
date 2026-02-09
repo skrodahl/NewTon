@@ -960,24 +960,67 @@ function generateCleanBracket() {
         return false;
     }
 
-    // Determine bracket size
-    let bracketSize;
-    if (paidPlayers.length <= 8) bracketSize = 8;
-    else if (paidPlayers.length <= 16) bracketSize = 16;
-    else if (paidPlayers.length <= 32) bracketSize = 32;
-    else bracketSize = 48;
-
-    if (paidPlayers.length < 4) {
-        alert('At least 4 paid players are required to generate a double-elimination tournament.');
-        console.error('Bracket generation blocked: fewer than 4 paid players');
-        return false;
-    }
-
     if (paidPlayers.length > 32) {
         alert('Maximum 32 paid players supported. Please remove some players to generate bracket.');
         console.error('Bracket generation blocked: more than 32 paid players');
         return false;
     }
+
+    // Determine bracket size
+    let bracketSize;
+    if (paidPlayers.length <= 8) bracketSize = 8;
+    else if (paidPlayers.length <= 16) bracketSize = 16;
+    else if (paidPlayers.length <= 32) bracketSize = 32;
+
+    const byeCount = bracketSize - paidPlayers.length;
+
+    // Show confirmation dialog with player list
+    showBracketConfirmation(paidPlayers, bracketSize, byeCount);
+    return false;
+}
+
+/**
+ * Show bracket generation confirmation dialog with player cards
+ * @param {Array} paidPlayers - Array of paid player objects
+ * @param {number} bracketSize - Bracket size (8, 16, 32)
+ * @param {number} byeCount - Number of byes
+ */
+function showBracketConfirmation(paidPlayers, bracketSize, byeCount) {
+    const titleEl = document.getElementById('bracketConfirmTitle');
+    const subtitleEl = document.getElementById('bracketConfirmSubtitle');
+    const playersEl = document.getElementById('bracketConfirmPlayers');
+
+    titleEl.textContent = `Generate ${bracketSize}-Player Bracket?`;
+
+    const byeText = byeCount > 0 ? `, ${byeCount} bye${byeCount > 1 ? 's' : ''}` : '';
+    subtitleEl.textContent = `${paidPlayers.length} players registered${byeText}`;
+
+    // Render read-only player cards sorted alphabetically
+    const sorted = [...paidPlayers].sort((a, b) => a.name.localeCompare(b.name));
+    playersEl.innerHTML = sorted.map(p =>
+        `<div class="player-list-item in-tournament" style="cursor: default; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${p.name}</div>`
+    ).join('');
+
+    pushDialog('bracketConfirmModal', null, true);
+
+    // Focus the Cancel button after dialog is shown
+    const cancelBtn = document.querySelector('#bracketConfirmModal .btn:not(.btn-success)');
+    if (cancelBtn) cancelBtn.focus();
+}
+
+/**
+ * Execute bracket generation after user confirmation
+ */
+function confirmBracketGeneration() {
+    popDialog();
+
+    const paidPlayers = players.filter(p => p.paid);
+
+    // Determine bracket size
+    let bracketSize;
+    if (paidPlayers.length <= 8) bracketSize = 8;
+    else if (paidPlayers.length <= 16) bracketSize = 16;
+    else if (paidPlayers.length <= 32) bracketSize = 32;
 
     // Create optimized bracket: real players first, walkovers strategically placed
     console.log(`Generating ${bracketSize}-player bracket for ${paidPlayers.length} players`);
@@ -2574,6 +2617,7 @@ if (typeof window !== 'undefined') {
     window.selectWinnerWithValidation = selectWinnerClean;
     window.selectWinnerWithAutoAdvancement = selectWinnerClean;
     window.generateBracket = generateCleanBracket;
+    window.confirmBracketGeneration = confirmBracketGeneration;
     window.showWinnerConfirmation = showWinnerConfirmation;
     window.validateLegScores = validateLegScores;
     window.updateValidationDisplay = updateValidationDisplay;

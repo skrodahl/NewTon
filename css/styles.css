@@ -1521,6 +1521,7 @@ a:hover { color: #1e40af; }
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Tournament Configuration Display Grid */
@@ -1959,8 +1960,9 @@ a:hover { color: #1e40af; }
   background: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 0;
-  padding: 8px 10px;
-  font-size: 13px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
+  padding: 10px 12px;
+  font-size: 14px;
   color: #374151;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -1972,8 +1974,21 @@ a:hover { color: #1e40af; }
 }
 
 .referee-suggestion-name {
-  font-weight: 500;
+  font-weight: 600;
   color: #111827;
+}
+
+/* Color-coded left borders per category */
+#refereeLosersContainer .referee-suggestion-item {
+  border-left: 3px solid #d4a0a0;
+}
+
+#refereeWinnersContainer .referee-suggestion-item {
+  border-left: 3px solid #a0c4a0;
+}
+
+#refereeAssignmentsContainer .referee-suggestion-item {
+  border-left: 3px solid #a0b4c4;
 }
 
 .referee-suggestion-round {
@@ -2008,6 +2023,7 @@ a:hover { color: #1e40af; }
   background-color: #f9fafb;
   border: 1px solid #e5e7eb;
   border-radius: 0;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
 /* Match Controls modal button container - keep buttons at bottom */

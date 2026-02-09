@@ -1043,6 +1043,22 @@
             </div>
         </div>
 
+        <!-- Bracket Generation Confirmation Modal -->
+        <div id="bracketConfirmModal" class="modal">
+            <div class="modal-content" style="max-width: 700px;">
+                <h3 id="bracketConfirmTitle"></h3>
+                <div style="margin: 15px 0; line-height: 1.6;">
+                    <p id="bracketConfirmSubtitle" style="color: #666; font-size: 14px;"></p>
+                    <div id="bracketConfirmPlayers" class="player-list-items" style="margin: 15px 0; max-height: 50vh; overflow-y: auto;"></div>
+                    <p style="margin-top: 15px; font-size: 14px; color: #b45309; font-weight: 500;">Make sure all players are registered before proceeding.</p>
+                </div>
+                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                    <button class="btn" onclick="popDialog()" autofocus>Cancel</button>
+                    <button class="btn btn-success" onclick="confirmBracketGeneration()">Generate</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Tournament In Progress Warning Modal -->
         <div id="tournamentProgressModal" class="modal">
             <div class="modal-content">
