@@ -99,9 +99,9 @@ The `sid` (server ID) is a UUID generated once per TM installation and persisted
   "p1": "John Smith",
   "p2": "Jane Doe",
   "legs": [
-    { "w": 1, "d1": 15, "d2": 18, "co": 84, "a1": 48.2, "a2": 35.1, "tb": false },
-    { "w": 2, "d1": 21, "d2": 15, "co": 40, "a1": 38.5, "a2": 42.7, "tb": false },
-    { "w": 1, "d1": 12, "d2": 18, "co": 104, "a1": 52.1, "a2": 36.8, "tb": false }
+    { "w": 1, "d1": 15, "d2": 18, "co": 84, "wr": 0, "lr": 156, "a1": 48.2, "a2": 35.1, "tb": false },
+    { "w": 2, "d1": 21, "d2": 15, "co": 40, "wr": 0, "lr": 201, "a1": 38.5, "a2": 42.7, "tb": false },
+    { "w": 1, "d1": 12, "d2": 18, "co": 104, "wr": 0, "lr": 88, "a1": 52.1, "a2": 36.8, "tb": false }
   ],
   "s1": { "t": 3, "t4": 1, "t8": 0, "ho": [104], "sl": [12], "a": 45.2, "f9": 85.3 },
   "s2": { "t": 2, "t4": 0, "t8": 1, "ho": [], "sl": [], "a": 38.1, "f9": 72.1 },
@@ -125,7 +125,9 @@ The `sid` (server ID) is a UUID generated once per TM installation and persisted
 | `legs[].w` | 1 or 2 | Leg winner |
 | `legs[].d1` | number | Player 1 darts thrown |
 | `legs[].d2` | number | Player 2 darts thrown |
-| `legs[].co` | number | Checkout score (winning double) |
+| `legs[].co` | number | Checkout score (remaining before final visit; 0 for tiebreak) |
+| `legs[].wr` | number | Winner remaining after leg (0 for normal checkout, non-zero for tiebreak) |
+| `legs[].lr` | number | Loser remaining after leg |
 | `legs[].a1` | number | Player 1 leg average (per 3 darts) |
 | `legs[].a2` | number | Player 2 leg average (per 3 darts) |
 | `legs[].tb` | boolean | Tiebreak leg |
