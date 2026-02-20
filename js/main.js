@@ -518,11 +518,11 @@ function humanizeMatchId(matchId) {
 
 // Helper function to get player progression info for display
 function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
-    if (!tournament || !tournament.bracketSize || !MATCH_PROGRESSION) {
+    if (!tournament || !tournament.bracketSize || !DE_MATCH_PROGRESSION) {
         return '';
     }
 
-    const progression = MATCH_PROGRESSION[tournament.bracketSize] && MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize] && DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
     if (!progression) {
         return '';
     }

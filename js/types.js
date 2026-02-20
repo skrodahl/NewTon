@@ -331,7 +331,7 @@
  * @type {MatchProgression}
  * @example
  * // Get progression rule for a match
- * const rule = MATCH_PROGRESSION[tournament.bracketSize]['FS-1-1'];
+ * const rule = DE_MATCH_PROGRESSION[tournament.bracketSize]['FS-1-1'];
  * // rule.winner = ['FS-2-1', 'player1']
  * // rule.loser = ['BS-1-1', 'player1']
  */

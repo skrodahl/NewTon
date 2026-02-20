@@ -6,7 +6,7 @@
  * Based on proper double elimination mirroring rules
  * Format: matchId -> { winner: [targetMatchId, slot], loser: [targetMatchId, slot] }
  */
-const MATCH_PROGRESSION = {
+const DE_MATCH_PROGRESSION = {
     8: {
         // === FRONTSIDE ===
         'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BS-1-1', 'player1'] },
@@ -203,7 +203,117 @@ const MATCH_PROGRESSION = {
 };
 
 /**
- * Advances winner and loser to their next matches using MATCH_PROGRESSION lookup table.
+ * SINGLE ELIMINATION: Match progression lookup tables
+ * Derived from DE_MATCH_PROGRESSION frontside entries with loser paths removed.
+ * Format: matchId -> { winner: [targetMatchId, slot] }
+ * The final match in each bracket has {} — tournament complete.
+ *
+ * These tables are separate from DE to eliminate any risk of interference.
+ * Verify by inspection: each SE table should match the FS- entries of the
+ * corresponding DE table, with loser entries stripped and the last round
+ * match having {} instead of advancing to GRAND-FINAL.
+ */
+const SE_MATCH_PROGRESSION = {
+    2: {
+        // Single match — the Final
+        'FS-1-1': {} // Tournament complete
+    },
+
+    4: {
+        // Round 1 (2 matches)
+        'FS-1-1': { winner: ['FS-2-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-2-1', 'player2'] },
+
+        // Round 2 — Final
+        'FS-2-1': {} // Tournament complete
+    },
+
+    8: {
+        // Round 1 — Quarterfinals (4 matches)
+        'FS-1-1': { winner: ['FS-2-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-2-1', 'player2'] },
+        'FS-1-3': { winner: ['FS-2-2', 'player1'] },
+        'FS-1-4': { winner: ['FS-2-2', 'player2'] },
+
+        // Round 2 — Semifinals (2 matches)
+        'FS-2-1': { winner: ['FS-3-1', 'player1'] },
+        'FS-2-2': { winner: ['FS-3-1', 'player2'] },
+
+        // Round 3 — Final
+        'FS-3-1': {} // Tournament complete
+    },
+
+    16: {
+        // Round 1 (8 matches)
+        'FS-1-1': { winner: ['FS-2-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-2-1', 'player2'] },
+        'FS-1-3': { winner: ['FS-2-2', 'player1'] },
+        'FS-1-4': { winner: ['FS-2-2', 'player2'] },
+        'FS-1-5': { winner: ['FS-2-3', 'player1'] },
+        'FS-1-6': { winner: ['FS-2-3', 'player2'] },
+        'FS-1-7': { winner: ['FS-2-4', 'player1'] },
+        'FS-1-8': { winner: ['FS-2-4', 'player2'] },
+
+        // Round 2 — Quarterfinals (4 matches)
+        'FS-2-1': { winner: ['FS-3-1', 'player1'] },
+        'FS-2-2': { winner: ['FS-3-1', 'player2'] },
+        'FS-2-3': { winner: ['FS-3-2', 'player1'] },
+        'FS-2-4': { winner: ['FS-3-2', 'player2'] },
+
+        // Round 3 — Semifinals (2 matches)
+        'FS-3-1': { winner: ['FS-4-1', 'player1'] },
+        'FS-3-2': { winner: ['FS-4-1', 'player2'] },
+
+        // Round 4 — Final
+        'FS-4-1': {} // Tournament complete
+    },
+
+    32: {
+        // Round 1 (16 matches)
+        'FS-1-1': { winner: ['FS-2-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-2-1', 'player2'] },
+        'FS-1-3': { winner: ['FS-2-2', 'player1'] },
+        'FS-1-4': { winner: ['FS-2-2', 'player2'] },
+        'FS-1-5': { winner: ['FS-2-3', 'player1'] },
+        'FS-1-6': { winner: ['FS-2-3', 'player2'] },
+        'FS-1-7': { winner: ['FS-2-4', 'player1'] },
+        'FS-1-8': { winner: ['FS-2-4', 'player2'] },
+        'FS-1-9': { winner: ['FS-2-5', 'player1'] },
+        'FS-1-10': { winner: ['FS-2-5', 'player2'] },
+        'FS-1-11': { winner: ['FS-2-6', 'player1'] },
+        'FS-1-12': { winner: ['FS-2-6', 'player2'] },
+        'FS-1-13': { winner: ['FS-2-7', 'player1'] },
+        'FS-1-14': { winner: ['FS-2-7', 'player2'] },
+        'FS-1-15': { winner: ['FS-2-8', 'player1'] },
+        'FS-1-16': { winner: ['FS-2-8', 'player2'] },
+
+        // Round 2 (8 matches)
+        'FS-2-1': { winner: ['FS-3-1', 'player1'] },
+        'FS-2-2': { winner: ['FS-3-1', 'player2'] },
+        'FS-2-3': { winner: ['FS-3-2', 'player1'] },
+        'FS-2-4': { winner: ['FS-3-2', 'player2'] },
+        'FS-2-5': { winner: ['FS-3-3', 'player1'] },
+        'FS-2-6': { winner: ['FS-3-3', 'player2'] },
+        'FS-2-7': { winner: ['FS-3-4', 'player1'] },
+        'FS-2-8': { winner: ['FS-3-4', 'player2'] },
+
+        // Round 3 — Quarterfinals (4 matches)
+        'FS-3-1': { winner: ['FS-4-1', 'player1'] },
+        'FS-3-2': { winner: ['FS-4-1', 'player2'] },
+        'FS-3-3': { winner: ['FS-4-2', 'player1'] },
+        'FS-3-4': { winner: ['FS-4-2', 'player2'] },
+
+        // Round 4 — Semifinals (2 matches)
+        'FS-4-1': { winner: ['FS-5-1', 'player1'] },
+        'FS-4-2': { winner: ['FS-5-1', 'player2'] },
+
+        // Round 5 — Final
+        'FS-5-1': {} // Tournament complete
+    }
+};
+
+/**
+ * Advances winner and loser to their next matches using DE_MATCH_PROGRESSION lookup table.
  * This is the ONLY function that moves players between matches - single source of truth.
  *
  * @param {string} matchId - The match ID (e.g., 'FS-1-1', 'BS-2-3')
@@ -223,7 +333,7 @@ function advancePlayer(matchId, winner, loser) {
         return false;
     }
 
-    const progression = MATCH_PROGRESSION[tournament.bracketSize];
+    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
     if (!progression) {
         console.error(`No progression rules for ${tournament.bracketSize}-player bracket`);
         return false;
@@ -443,7 +553,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
  * @returns {Set<string>} A set of all downstream match IDs.
  */
 function getDownstreamMatches(matchId, bracketSize) {
-    const progression = MATCH_PROGRESSION[bracketSize];
+    const progression = DE_MATCH_PROGRESSION[bracketSize];
     if (!progression) return new Set();
 
     const downstream = new Set();
@@ -868,7 +978,7 @@ function debugProgression(matchId) {
         return;
     }
 
-    const progression = MATCH_PROGRESSION[tournament.bracketSize];
+    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
     const rule = progression?.[matchId];
 
     if (rule) {
@@ -1632,7 +1742,7 @@ if (typeof window !== 'undefined') {
     window.toggleActiveWithValidation = toggleActiveWithValidation;
     window.getMatchState = getMatchState;
     window.updateMatchLane = updateMatchLane;
-    window.MATCH_PROGRESSION = MATCH_PROGRESSION;
+    window.DE_MATCH_PROGRESSION = DE_MATCH_PROGRESSION;
 
     // OVERRIDE OLD FUNCTIONS - Replace with clean versions
     window.selectWinner = selectWinnerClean;
@@ -1661,8 +1771,8 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     // Get progression information for this match
     let progressionInfo = '';
-    if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
-        const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
+        const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
         if (progression) {
             progressionInfo += '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #065f46;">';
             progressionInfo += '<div style="font-weight: 600; color: #065f46; margin-bottom: 5px;">Match Progression:</div>';
@@ -2133,8 +2243,8 @@ function undoTransactions(transactionIds) {
             }
 
             // 2. Clear downstream effects using progression rules
-            if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
-                const progression = MATCH_PROGRESSION[tournament.bracketSize][transaction.matchId];
+            if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
+                const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][transaction.matchId];
                 if (progression && transaction.winner && transaction.loser) {
                     const winnerId = transaction.winner.id;
                     const loserId = transaction.loser.id;
@@ -2296,8 +2406,8 @@ function clearPlayerFromDownstream(playerId, currentMatchId) {
         console.log(`Clearing completed match ${currentMatchId}`);
         
         // Continue clearing downstream BEFORE we clear this match
-        if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
-            const progression = MATCH_PROGRESSION[tournament.bracketSize][currentMatchId];
+        if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
+            const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][currentMatchId];
             if (progression) {
                 if (progression.winner) {
                     const [nextMatchId, slot] = progression.winner;
@@ -2611,7 +2721,7 @@ if (typeof window !== 'undefined') {
     window.toggleActiveWithValidation = toggleActiveWithValidation;
     window.getMatchState = getMatchState;
     window.updateMatchLane = updateMatchLane;
-    window.MATCH_PROGRESSION = MATCH_PROGRESSION;
+    window.DE_MATCH_PROGRESSION = DE_MATCH_PROGRESSION;
     window.selectWinner = selectWinnerClean;
     window.selectWinnerV2 = selectWinnerClean;
     window.selectWinnerWithValidation = selectWinnerClean;

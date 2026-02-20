@@ -1441,7 +1441,7 @@ function showLocalStorageUsage() {
  * @returns {Object} Map of matchId -> { winners: [], losers: [] }
  */
 function buildMatchSourcesLookup(bracketSize) {
-    const progression = MATCH_PROGRESSION?.[bracketSize];
+    const progression = DE_MATCH_PROGRESSION?.[bracketSize];
     if (!progression) return {};
 
     const leadsFrom = {};
@@ -1472,7 +1472,7 @@ function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {
     }
 
     const bracketSize = tournament.bracketSize;
-    const progression = MATCH_PROGRESSION ? MATCH_PROGRESSION[bracketSize] : null;
+    const progression = DE_MATCH_PROGRESSION ? DE_MATCH_PROGRESSION[bracketSize] : null;
 
     if (!progression) {
         updateRightPane(`<h4>Match Progression</h4><p style="color: #666;">No progression rules found for ${bracketSize}-player bracket</p>`);
@@ -1798,7 +1798,7 @@ function applyProgressionFilters() {
 }
 
 /**
- * Show raw MATCH_PROGRESSION code (original text-based view for debugging)
+ * Show raw DE_MATCH_PROGRESSION code (original text-based view for debugging)
  */
 function showProgressionCode() {
     currentView = 'progression-code';
@@ -1809,7 +1809,7 @@ function showProgressionCode() {
     }
 
     const bracketSize = tournament.bracketSize;
-    const progression = MATCH_PROGRESSION ? MATCH_PROGRESSION[bracketSize] : null;
+    const progression = DE_MATCH_PROGRESSION ? DE_MATCH_PROGRESSION[bracketSize] : null;
 
     if (!progression) {
         updateRightPane(`<h4>Progression Code</h4><p style="color: #666;">No progression rules found for ${bracketSize}-player bracket</p>`);
@@ -1818,7 +1818,7 @@ function showProgressionCode() {
 
     let html = `
         <h4 style="margin-top: 0; color: #111827;">Progression Code (${bracketSize}-player bracket)</h4>
-        <p style="color: #666; font-size: 13px; margin-bottom: 10px;">Raw MATCH_PROGRESSION lookup table for debugging</p>
+        <p style="color: #666; font-size: 13px; margin-bottom: 10px;">Raw DE_MATCH_PROGRESSION lookup table for debugging</p>
 
         <button onclick="showMatchProgression('all', 'all')"
                 style="padding: 6px 12px; margin-bottom: 20px; border: 1px solid #d1d5db; border-radius: 4px; background: white; cursor: pointer; font-size: 13px;">
@@ -2201,7 +2201,7 @@ function validateProgressionIntegrity() {
         };
     }
 
-    const progression = MATCH_PROGRESSION ? MATCH_PROGRESSION[tournament.bracketSize] : null;
+    const progression = DE_MATCH_PROGRESSION ? DE_MATCH_PROGRESSION[tournament.bracketSize] : null;
     if (!progression) {
         return {
             name: 'Progression Integrity',

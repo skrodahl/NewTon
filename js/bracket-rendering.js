@@ -130,15 +130,15 @@ function renderCleanBracket() {
 
 /**
  * GET STRUCTURE FROM LOOKUP TABLES
- * Extract bracket structure directly from our MATCH_PROGRESSION lookup tables
+ * Extract bracket structure directly from our DE_MATCH_PROGRESSION lookup tables
  */
 function getStructureFromLookupTables(bracketSize) {
-    if (!MATCH_PROGRESSION[bracketSize]) {
+    if (!DE_MATCH_PROGRESSION[bracketSize]) {
         console.error(`No progression rules for ${bracketSize}-player bracket`);
         return { frontside: [], backside: [] };
     }
 
-    const progression = MATCH_PROGRESSION[bracketSize];
+    const progression = DE_MATCH_PROGRESSION[bracketSize];
     const frontside = [];
     const backside = [];
 
@@ -2014,7 +2014,7 @@ if (typeof window !== 'undefined') {
  * - Match has a MANUAL completion transaction (not AUTO walkover)
  * - No downstream matches have MANUAL completions
  *
- * Uses MATCH_PROGRESSION to check winner/loser destinations.
+ * Uses DE_MATCH_PROGRESSION to check winner/loser destinations.
  * Prevents undo when it would corrupt manually-entered results.
  */
 function isMatchUndoable(matchId) {
@@ -2036,8 +2036,8 @@ function isMatchUndoable(matchId) {
     }
 
     // Check downstream matches - block undo if any downstream match was completed via MANUAL transaction
-    if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
-        const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
+        const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
         if (progression) {
             // Check if winner's destination has a MANUAL completion
             if (progression.winner) {
@@ -2111,7 +2111,7 @@ function collectWalkoverChain(matchId, progression) {
  * @returns {Array<{id: string, match: Match, isFrontside: boolean}>} Affected matches sorted by side
  *
  * @description
- * Uses MATCH_PROGRESSION to find:
+ * Uses DE_MATCH_PROGRESSION to find:
  * - Winner's destination match and walkover chain
  * - Loser's destination match and walkover chain
  *
@@ -2126,8 +2126,8 @@ function getConsequentialMatches(transaction) {
         return consequentialMatches;
     }
 
-    // Use hardcoded MATCH_PROGRESSION to find exact destinations
-    const progression = MATCH_PROGRESSION[tournament.bracketSize];
+    // Use hardcoded DE_MATCH_PROGRESSION to find exact destinations
+    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
     if (!progression || !progression[transaction.matchId]) {
         return consequentialMatches;
     }
@@ -2306,7 +2306,7 @@ function handleSurgicalUndo(matchId) {
  * 6. Rebuild bracket from clean history using rebuildBracketFromHistory()
  * 7. Recalculate rankings and update UI
  *
- * Uses MATCH_PROGRESSION for deterministic rollback.
+ * Uses DE_MATCH_PROGRESSION for deterministic rollback.
  */
 function undoManualTransaction(transactionId) {
     // Check if tournament is read-only (imported completed tournament)
@@ -2375,7 +2375,7 @@ function undoManualTransaction(transactionId) {
 
     // 6. Roll back ALL affected matches and remove advancing players from downstream matches
     // Process all transactions being removed (handles auto-advancement chains)
-    const progression = MATCH_PROGRESSION[tournament.bracketSize];
+    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
 
     transactionsToRemove.forEach(transactionId => {
         const transaction = history.find(t => t.id === transactionId);
@@ -4209,8 +4209,8 @@ function getDetailedMatchState(matchId) {
     }
 
     // Check for blocking downstream matches
-    if (tournament.bracketSize && MATCH_PROGRESSION[tournament.bracketSize]) {
-        const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
+        const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
         if (progression) {
             const blockingMatches = [];
 
@@ -4281,13 +4281,13 @@ function clearStatusCenter() {
     }
 }
 
-// Generate two-line match information using MATCH_PROGRESSION and state logic
+// Generate two-line match information using DE_MATCH_PROGRESSION and state logic
 function getMatchProgressionText(matchId) {
-    if (!tournament || !tournament.bracketSize || !MATCH_PROGRESSION[tournament.bracketSize]) {
+    if (!tournament || !tournament.bracketSize || !DE_MATCH_PROGRESSION[tournament.bracketSize]) {
         return null;
     }
 
-    const progression = MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
     if (!progression) {
         return null;
     }
