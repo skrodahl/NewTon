@@ -13,14 +13,27 @@
   - Backward compatible: existing tournaments without the field are treated as DE
   - Persisted through save, load, export, and import
 
+### SE Bracket Generation & Completion
+- **SE bracket generation works end-to-end**: `generateAllMatches()` skips backside and finals for SE format
+- `createOptimizedBracketV2()` now supports 2-player and 4-player bracket sizes (SE-only)
+- Match progression is fully format-aware — winners advance correctly, losers are eliminated (no backside)
+- **Tournament completion** detects any match with `{}` progression — works for both SE and DE finals
+- 1st/2nd place set from final winner/loser; 3rd place from BS-FINAL loser (DE only)
+- Undo of tournament-ending match is format-aware
+- **SE rankings**: Placement derived from elimination round — generic formula works for all bracket sizes
+  - R1 losers in 8-player → 5th-8th, R2 losers → 3rd-4th, final loser → 2nd
+  - Live rankings update after every match completion
+
 ### Technical Details
 - Added `getFormat()` helper in tournament-management.js (returns 'DE' when field is absent)
 - Added `calculateBracketSize(playerCount, format)` in clean-match-progression.js
+- Added `getProgressionTable()` helper — returns SE or DE progression table based on tournament format
+- All progression table lookups in clean-match-progression.js now use `getProgressionTable()` instead of hardcoded `DE_MATCH_PROGRESSION`
 - Added `pendingFormat` flow: format cards → showBracketConfirmation → confirmBracketGeneration → tournament.format
 - `format` field threaded through all 5 tournament object construction sites (create, load, import, save, export)
 - Tournament typedef updated in types.js
-- SE_MATCH_PROGRESSION and calculateBracketSize exposed via window for debugging
-- **Note**: SE bracket generation, rendering, and match completion are not yet implemented (Steps 3-8 of the SE roadmap). Generating an SE bracket currently produces a DE bracket structure.
+- SE_MATCH_PROGRESSION, calculateBracketSize, and getProgressionTable exposed via window for debugging
+- **Remaining work**: SE bracket rendering (Step 5), SE rankings (Step 6), Match Controls two-column layout (Step 7)
 
 ---
 

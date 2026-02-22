@@ -95,6 +95,12 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 - **Points system** — generic placement-based, works with any tier structure
 - **Auto-advancement/walkovers** — uses `advancePlayer()` which handles missing loser paths
 
+### Format-aware progression table lookup — IMPLEMENTED
+- **`getProgressionTable()`** helper returns `SE_MATCH_PROGRESSION` or `DE_MATCH_PROGRESSION` based on `getFormat()`
+- All 8 `DE_MATCH_PROGRESSION[...]` lookups in `clean-match-progression.js` replaced with format-aware versions
+- `getDownstreamMatches()` also format-aware (uses explicit format check since it takes bracketSize as param)
+- Remaining lookups in `bracket-rendering.js`, `main.js`, `analytics.js` are display/rendering code — will be updated in later steps
+
 ### Need conditional branching (extend existing functions)
 - **`completeMatch()`** — hardcoded BS-FINAL and GRAND-FINAL hooks need `format` check
 - **`generateAllMatches()`** — conditionally skip backside/finals generation
@@ -171,6 +177,7 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 - Placement = which round you were eliminated in, shown as labels on the bracket
 - 8-player: 1st (final winner), 2nd (final loser), 3rd-4th (SF losers), 5th-8th (QF losers)
 - Calculated generically from round number — no separate placement mapping needed
+- **Dropout zones**: Without a bronze match, players eliminated in the same round share a placement tier (e.g., both semifinal losers are "3rd-4th"). This is the same concept as DE's shared tiers (5th-6th, 7th-8th). The bronze match is what promotes a shared zone to definitive 3rd vs 4th positions.
 
 ### Bronze Final (Decided: Global Config, SE-only)
 - Optional 3rd place match between the two semifinal losers
@@ -291,15 +298,18 @@ Suggested next steps, roughly in dependency order. Each step is designed to be l
 - `pendingFormat` flow carries the chosen format from card → confirmation → `tournament.format`
 - **Note**: SE bracket generation logic (Step 3) not yet implemented — generating SE currently produces DE match structure
 
-### Step 3: SE bracket generation (`generateAllMatches()`)
-- When `format === 'SE'`: use `SE_MATCH_PROGRESSION`, skip backside/finals match creation
-- Fewer matches created, but same generation logic otherwise
-- Auto-advancement/walkovers work unchanged (same `advancePlayer()`)
+### Step 3: SE bracket generation (`generateAllMatches()`) — IMPLEMENTED
+- `generateAllMatches()` checks `getFormat()` — for SE, skips `generateBacksideMatches()` and `generateFinalMatches()`
+- `createOptimizedBracketV2()` bracket size whitelist expanded to include 2 and 4
+- `calculateCleanBracketStructure()` already generic (uses `Math.log2`) — works for all sizes
+- `generateFrontsideMatches()` already generic — iterates structure, works for all sizes
+- Auto-advancement/walkovers work unchanged (same `advancePlayer()` which checks `if (rule.loser && loser)`)
 
-### Step 4: SE match completion (`completeMatch()`)
-- Add `format` check around BS-FINAL and GRAND-FINAL hooks
-- SE tournament completion: detect when the `{}` match is completed
-- Transaction history works unchanged
+### Step 4: SE match completion (`completeMatch()`) — IMPLEMENTED
+- Tournament completion now detects any match with `{}` progression (empty object = tournament final)
+- Works for both DE (GRAND-FINAL has `{}`) and SE (last FS round has `{}`) — same detection logic
+- 1st/2nd place set from final match winner/loser; 3rd place from BS-FINAL loser only in DE
+- Undo of tournament-ending match also format-aware (detects `{}` instead of hardcoded GRAND-FINAL)
 
 ### Step 5: SE bracket rendering
 - New rendering path in `renderCleanBracket()` for SE
@@ -307,9 +317,12 @@ Suggested next steps, roughly in dependency order. Each step is designed to be l
 - Winner-only progression lines
 - No backside, no gradient, no FRONTSIDE/BACKSIDE headers
 
-### Step 6: SE rankings (`calculateAllRankings()`)
-- Placement derived from elimination round
-- Feed into existing leaderboard points system
+### Step 6: SE rankings (`calculateAllRankings()`) — IMPLEMENTED
+- `calculateSERankings()` derives placement from which round a player was eliminated in
+- Generic formula: losers in round R get placement `2^(totalRounds - R) + 1`
+- Works for all bracket sizes (2, 4, 8, 16, 32) — no hardcoded match ID lookups
+- Live rankings update after every match completion (same as DE)
+- Feeds into existing leaderboard points system unchanged
 
 ### Step 7: Match Controls adaptation
 - Rolling two-column layout for SE

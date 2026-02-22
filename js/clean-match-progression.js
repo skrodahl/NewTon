@@ -5,6 +5,18 @@
 let pendingFormat = 'DE';
 
 /**
+ * Returns the correct match progression table for the current tournament format.
+ * Uses SE_MATCH_PROGRESSION for Single Elimination, DE_MATCH_PROGRESSION for Double Elimination.
+ *
+ * @returns {Object} The progression table for the current format and bracket size
+ */
+function getProgressionTable() {
+    const format = getFormat();
+    const table = format === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
+    return table[tournament.bracketSize];
+}
+
+/**
  * Calculates the smallest power-of-2 bracket size that fits the given player count.
  * SE supports smaller brackets (2, 4) that DE doesn't.
  *
@@ -356,7 +368,7 @@ function advancePlayer(matchId, winner, loser) {
         return false;
     }
 
-    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
+    const progression = getProgressionTable();
     if (!progression) {
         console.error(`No progression rules for ${tournament.bracketSize}-player bracket`);
         return false;
@@ -511,30 +523,38 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             console.error('BS-FINAL completion error', { matchId, winner, loser, error: e });
         }
 
-        // Grand Final completion hook: set placements and complete tournament
+        // Tournament completion hook: detect final match and set placements
+        // DE: GRAND-FINAL has {} progression. SE: last FS round has {} progression.
+        const completionTable = getProgressionTable();
+        const completionRule = completionTable && completionTable[matchId];
+        const isTournamentFinal = completionRule && Object.keys(completionRule).length === 0;
+
         try {
-            if (matchId === 'GRAND-FINAL') {
-                console.log('🏆 Grand Final completed - calculating all rankings...');
+            if (isTournamentFinal) {
+                const format = getFormat();
+                console.log(`🏆 ${format} Final completed - calculating all rankings...`);
 
                 // Clear any existing placements
                 tournament.placements = {};
 
-                // 1st and 2nd place (Grand Final)
+                // 1st and 2nd place (final match winner/loser)
                 tournament.placements[String(winner.id)] = 1;
                 tournament.placements[String(loser.id)] = 2;
 
-                // 3rd place (BS-FINAL loser)
-                const bsFinal = matches.find(m => m.id === 'BS-FINAL');
-                if (bsFinal && bsFinal.completed && bsFinal.loser && bsFinal.loser.id) {
-                    tournament.placements[String(bsFinal.loser.id)] = 3;
+                if (format === 'DE') {
+                    // 3rd place (BS-FINAL loser)
+                    const bsFinal = matches.find(m => m.id === 'BS-FINAL');
+                    if (bsFinal && bsFinal.completed && bsFinal.loser && bsFinal.loser.id) {
+                        tournament.placements[String(bsFinal.loser.id)] = 3;
+                    }
                 }
 
-                // Calculate remaining rankings based on bracket size
+                // Calculate remaining rankings based on bracket size and format
                 calculateAllRankings();
 
                 tournament.status = 'completed';
 
-                console.log(`✓ Tournament completed with full rankings — Grand Final: ${winner.name} defeats ${loser.name}`);
+                console.log(`✓ Tournament completed with full rankings — Final: ${winner.name} defeats ${loser.name}`);
 
                 if (typeof saveTournament === 'function') saveTournament();
                 if (typeof updateMatchHistory === 'function') updateMatchHistory();
@@ -554,7 +574,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 }
             }
         } catch (e) {
-            console.error('Grand-final completion error', { matchId, winner, loser, error: e });
+            console.error('Tournament completion error', { matchId, winner, loser, error: e });
         }
 
         // Skip auto-advancements during rebuild to prevent transaction corruption
@@ -576,7 +596,9 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
  * @returns {Set<string>} A set of all downstream match IDs.
  */
 function getDownstreamMatches(matchId, bracketSize) {
-    const progression = DE_MATCH_PROGRESSION[bracketSize];
+    const format = getFormat();
+    const table = format === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
+    const progression = table[bracketSize];
     if (!progression) return new Set();
 
     const downstream = new Set();
@@ -626,6 +648,36 @@ function getDownstreamMatches(matchId, bracketSize) {
  * - 4th+: Determined by which backside match the player lost
  * - Updates tournament.placements with player ID to rank mapping
  */
+/**
+ * Calculates SE rankings based on which round each player was eliminated in.
+ * Generic formula: losers in round R of a bracket with totalRounds rounds
+ * get placement 2^(totalRounds - R) + 1.
+ *
+ * Examples (8-player, 3 rounds): R1 losers → 5th, R2 losers → 3rd, R3 loser → 2nd
+ * Examples (4-player, 2 rounds): R1 losers → 3rd, R2 loser → 2nd
+ */
+function calculateSERankings() {
+    const bracketSize = tournament.bracketSize;
+    const totalRounds = Math.ceil(Math.log2(bracketSize));
+
+    console.log(`Calculating SE rankings for ${bracketSize}-player bracket (${totalRounds} rounds)...`);
+
+    // Scan all completed FS matches and assign placements to losers based on round
+    const completedMatches = matches.filter(m => m.completed && m.loser && m.loser.id && m.id.startsWith('FS-'));
+
+    for (const match of completedMatches) {
+        const loserId = String(match.loser.id);
+
+        // Skip if already placed (e.g., 2nd place set by completion hook)
+        if (tournament.placements[loserId]) continue;
+
+        const round = match.round;
+        const placement = Math.pow(2, totalRounds - round) + 1;
+        tournament.placements[loserId] = placement;
+        console.log(`SE placement: ${match.loser.name} eliminated in R${round} → ${placement}${placement === 3 ? 'rd' : 'th'}`);
+    }
+}
+
 function calculateAllRankings() {
     if (!tournament || !tournament.bracketSize) {
         console.error('Cannot calculate rankings: missing tournament or bracket size');
@@ -634,6 +686,12 @@ function calculateAllRankings() {
 
     const bracketSize = tournament.bracketSize;
     console.log(`Calculating rankings for ${bracketSize}-player bracket...`);
+
+    const format = getFormat();
+    if (format === 'SE') {
+        calculateSERankings();
+        return;
+    }
 
     if (bracketSize === 8) {
         calculate8PlayerRankings();
@@ -1001,7 +1059,7 @@ function debugProgression(matchId) {
         return;
     }
 
-    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
+    const progression = getProgressionTable();
     const rule = progression?.[matchId];
 
     if (rule) {
@@ -1250,7 +1308,7 @@ function createOptimizedBracketV2(players, bracketSize) {
         console.error('createOptimizedBracketV2: players must be an array');
         return null;
     }
-    if (![8, 16, 32].includes(bracketSize)) {
+    if (![2, 4, 8, 16, 32].includes(bracketSize)) {
         console.warn(`createOptimizedBracketV2: unexpected bracketSize=${bracketSize}; proceeding with distributed seeding`);
     }
 
@@ -1337,22 +1395,25 @@ function createWalkoverPlayer(index) {
  */
 function generateAllMatches(bracket, bracketSize) {
     matches = []; // Clear existing matches
+    const format = getFormat();
 
     const structure = calculateCleanBracketStructure(bracketSize);
     let matchId = 1;
 
-    console.log('Generating frontside matches...');
+    console.log(`Generating ${format} frontside matches...`);
     generateFrontsideMatches(bracket, structure, matchId);
-    matchId = matches.length + 1;
 
-    console.log('Generating backside matches...');
-    generateBacksideMatches(structure, matchId);
-    matchId = matches.length + 1;
+    if (format === 'DE') {
+        matchId = matches.length + 1;
+        console.log('Generating backside matches...');
+        generateBacksideMatches(structure, matchId);
 
-    console.log('Generating final matches...');
-    generateFinalMatches(matchId);
+        matchId = matches.length + 1;
+        console.log('Generating final matches...');
+        generateFinalMatches(matchId);
+    }
 
-    console.log(`✓ Generated ${matches.length} matches total`);
+    console.log(`✓ Generated ${matches.length} ${format} matches total`);
 }
 
 /**
@@ -1780,6 +1841,7 @@ if (typeof window !== 'undefined') {
     window.DE_MATCH_PROGRESSION = DE_MATCH_PROGRESSION;
     window.SE_MATCH_PROGRESSION = SE_MATCH_PROGRESSION;
     window.calculateBracketSize = calculateBracketSize;
+    window.getProgressionTable = getProgressionTable;
 
     // OVERRIDE OLD FUNCTIONS - Replace with clean versions
     window.selectWinner = selectWinnerClean;
@@ -1808,8 +1870,9 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     // Get progression information for this match
     let progressionInfo = '';
-    if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
-        const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    const progressionTable = getProgressionTable();
+    if (progressionTable) {
+        const progression = progressionTable[matchId];
         if (progression) {
             progressionInfo += '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #065f46;">';
             progressionInfo += '<div style="font-weight: 600; color: #065f46; margin-bottom: 5px;">Match Progression:</div>';
@@ -2280,8 +2343,9 @@ function undoTransactions(transactionIds) {
             }
 
             // 2. Clear downstream effects using progression rules
-            if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
-                const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][transaction.matchId];
+            const undoProgressionTable = getProgressionTable();
+            if (undoProgressionTable) {
+                const progression = undoProgressionTable[transaction.matchId];
                 if (progression && transaction.winner && transaction.loser) {
                     const winnerId = transaction.winner.id;
                     const loserId = transaction.loser.id;
@@ -2346,24 +2410,29 @@ function undoTransactions(transactionIds) {
 
     console.log(`✅ Removed ${allTransactionsToRemove.size} total transactions from history`);
 
-    // FIXED: Clear tournament completion state when undoing GRAND-FINAL
-    const isUndoingGrandFinal = transactionsToUndo.some(t => t.matchId === 'GRAND-FINAL');
-    if (isUndoingGrandFinal) {
+    // Clear tournament completion state when undoing the tournament-ending match
+    // DE: GRAND-FINAL, SE: the final FS match (has {} in progression table)
+    const undoTable = getProgressionTable();
+    const isUndoingFinal = transactionsToUndo.some(t => {
+        const rule = undoTable && undoTable[t.matchId];
+        return rule && Object.keys(rule).length === 0;
+    });
+    if (isUndoingFinal) {
         clearTournamentCompletionState();
     }
 
     // Save and refresh
     saveTournament();
-    
-    // FIXED: Refresh results table after clearing tournament state
-    if (isUndoingGrandFinal && typeof updateResultsTable === 'function') {
-        console.log('🔄 Refreshing results table after GRAND-FINAL undo');
+
+    // Refresh results table after clearing tournament state
+    if (isUndoingFinal && typeof updateResultsTable === 'function') {
+        console.log('🔄 Refreshing results table after final undo');
         updateResultsTable();
     }
     
     // DEBUG: Show tournament state after undo
-    if (isUndoingGrandFinal) {
-        console.log('DEBUG: Tournament state after GRAND-FINAL undo:');
+    if (isUndoingFinal) {
+        console.log('DEBUG: Tournament state after final undo:');
         console.log(`- Status: ${tournament.status}`);
         console.log(`- Placements: ${Object.keys(tournament.placements || {}).length} entries`);
         console.log(`- Players with placement: ${players.filter(p => p.placement).length}`);
@@ -2443,8 +2512,9 @@ function clearPlayerFromDownstream(playerId, currentMatchId) {
         console.log(`Clearing completed match ${currentMatchId}`);
         
         // Continue clearing downstream BEFORE we clear this match
-        if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
-            const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][currentMatchId];
+        const clearProgressionTable = getProgressionTable();
+        if (clearProgressionTable) {
+            const progression = clearProgressionTable[currentMatchId];
             if (progression) {
                 if (progression.winner) {
                     const [nextMatchId, slot] = progression.winner;
@@ -2761,6 +2831,7 @@ if (typeof window !== 'undefined') {
     window.DE_MATCH_PROGRESSION = DE_MATCH_PROGRESSION;
     window.SE_MATCH_PROGRESSION = SE_MATCH_PROGRESSION;
     window.calculateBracketSize = calculateBracketSize;
+    window.getProgressionTable = getProgressionTable;
     window.selectWinner = selectWinnerClean;
     window.selectWinnerV2 = selectWinnerClean;
     window.selectWinnerWithValidation = selectWinnerClean;
