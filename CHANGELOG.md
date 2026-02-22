@@ -1,3 +1,29 @@
+# 2026-02-22
+
+## **v4.2.0** - Single Elimination Support (Foundation)
+
+### New Features
+- **Tournament format selection**: Operators now choose between Single Elimination Cup and Double Elimination Cup when generating a bracket
+  - Two distinct format cards in Setup Actions with descriptions
+  - SE: "Players are eliminated after one loss"
+  - DE: "Players get a second chance through the backside"
+  - Each card shows format-aware bracket sizes (SE supports 2/4/8/16/32, DE supports 8/16/32)
+- **Bracket confirmation dialog** now shows the chosen format: "Generate 8-Player Single Elimination Bracket?" or "Generate 8-Player Double Elimination Bracket?"
+- **`format` field** stored on tournament object at bracket generation time
+  - Backward compatible: existing tournaments without the field are treated as DE
+  - Persisted through save, load, export, and import
+
+### Technical Details
+- Added `getFormat()` helper in tournament-management.js (returns 'DE' when field is absent)
+- Added `calculateBracketSize(playerCount, format)` in clean-match-progression.js
+- Added `pendingFormat` flow: format cards → showBracketConfirmation → confirmBracketGeneration → tournament.format
+- `format` field threaded through all 5 tournament object construction sites (create, load, import, save, export)
+- Tournament typedef updated in types.js
+- SE_MATCH_PROGRESSION and calculateBracketSize exposed via window for debugging
+- **Note**: SE bracket generation, rendering, and match completion are not yet implemented (Steps 3-8 of the SE roadmap). Generating an SE bracket currently produces a DE bracket structure.
+
+---
+
 # 2026-02-09
 
 ## **v4.1.21** - Bracket Generation Confirmation

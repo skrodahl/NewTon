@@ -3594,20 +3594,36 @@ function showCommandCenterModal(matchData) {
                 // Tournament in setup - show setup actions
                 if (refereeHeader) refereeHeader.textContent = '⚙️ Setup Actions';
                 if (refereeSetupMessage) {
-                    // Create action buttons below the setup message
+                    // Build format-aware bracket generation cards
                     const paidPlayers = players ? players.filter(p => p.paid).length : 0;
-                    let bracketSize, buttonText;
 
-                    if (paidPlayers < 4) {
-                        buttonText = 'Generate Bracket (need 4+ players)';
+                    // SE card: min 2 players, supports 2/4/8/16/32 brackets
+                    let seButtonText, seDisabled = '';
+                    const seBracketSize = calculateBracketSize(paidPlayers, 'SE');
+                    if (paidPlayers < 2) {
+                        seButtonText = 'Need 2+ players';
+                        seDisabled = 'disabled';
                     } else if (paidPlayers > 32) {
-                        buttonText = 'Generate Bracket (max 32 players)';
+                        seButtonText = 'Max 32 players';
+                        seDisabled = 'disabled';
                     } else {
-                        if (paidPlayers <= 8) bracketSize = 8;
-                        else if (paidPlayers <= 16) bracketSize = 16;
-                        else if (paidPlayers <= 32) bracketSize = 32;
-                        buttonText = `Generate ${bracketSize}-Player Bracket`;
+                        seButtonText = `Generate ${seBracketSize}-Player Bracket`;
                     }
+
+                    // DE card: min 4 players, supports 8/16/32 brackets
+                    let deButtonText, deDisabled = '';
+                    const deBracketSize = calculateBracketSize(paidPlayers, 'DE');
+                    if (paidPlayers < 4) {
+                        deButtonText = 'Need 4+ players';
+                        deDisabled = 'disabled';
+                    } else if (paidPlayers > 32) {
+                        deButtonText = 'Max 32 players';
+                        deDisabled = 'disabled';
+                    } else {
+                        deButtonText = `Generate ${deBracketSize}-Player Bracket`;
+                    }
+
+                    const cardStyle = 'border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; background: #fafafa; box-shadow: 0 2px 4px rgba(0,0,0,0.08);';
 
                     refereeSetupMessage.innerHTML = `
                         <p>🔧 Tournament in setup mode</p>
@@ -3615,7 +3631,18 @@ function showCommandCenterModal(matchData) {
                         <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
                             <button class="btn" onclick="popDialog(); showPage('registration')" style="padding: 8px 16px; font-size: 14px;">Player Registration Page</button>
                             <button class="btn" onclick="popDialog(); showPage('config')" style="padding: 8px 16px; font-size: 14px;">Global Settings Page</button>
-                            <button class="btn btn-success" onclick="generateBracket()" style="padding: 8px 16px; font-size: 14px;">${buttonText}</button>
+                        </div>
+                        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 10px;">
+                            <div style="${cardStyle}">
+                                <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">Single Elimination Cup</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players are eliminated after one loss</div>
+                                <button class="btn btn-success" onclick="generateBracket('SE')" ${seDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${seButtonText}</button>
+                            </div>
+                            <div style="${cardStyle}">
+                                <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">Double Elimination Cup</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players get a second chance through the backside</div>
+                                <button class="btn btn-success" onclick="generateBracket('DE')" ${deDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${deButtonText}</button>
+                            </div>
                         </div>
                     `;
                     refereeSetupMessage.style.display = 'block';

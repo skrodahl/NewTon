@@ -172,16 +172,24 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 - 8-player: 1st (final winner), 2nd (final loser), 3rd-4th (SF losers), 5th-8th (QF losers)
 - Calculated generically from round number — no separate placement mapping needed
 
-## Open Design Questions
+### Bronze Final (Decided: Global Config, SE-only)
+- Optional 3rd place match between the two semifinal losers
+- **Configurable in Global Config** — on/off toggle with best-of setting (e.g., "Bronze Final: Best of 3")
+- Fits naturally alongside existing match-length settings (Frontside Semifinal, Backside Final, Grand Final)
+- **SE-only** — DE already determines 3rd place through the backside bracket
+- **Shown in bracket confirmation dialog** — when generating an SE bracket, the dialog displays "Bronze Final: Yes (Best of 3)" or "Bronze Final: Off" so the operator sees the full picture before committing
+- **Relevant for 4+ player brackets** — a 4-player SE bracket has 2 semifinal losers, so a bronze match makes sense. Meaningless for 2-player brackets (only 1 match)
+- When enabled: semifinal losers route to a BRONZE match instead of sharing 3rd-4th place. Winner = 3rd, loser = 4th
+- Structurally similar to how DE routes the frontside final loser to BS-FINAL — a consolation match for placement
 
-### 3rd Place Match
-Should SE include an optional 3rd place match (bronze match between semifinal losers)? Common in cup formats but adds complexity. Could be added later.
+## Open Design Questions
 
 ### SE Match Configuration
 What match-length settings does SE need? Possibilities:
 - Regular rounds (best-of)
 - Semifinal (best-of)
 - Final (best-of)
+- Bronze Final (best-of) — see resolved decision above
 
 ---
 
@@ -274,11 +282,14 @@ Suggested next steps, roughly in dependency order. Each step is designed to be l
 - `format` property added to Tournament typedef in `types.js`
 - Purely additive — no behavior change, just plumbing for Step 2
 
-### Step 2: Format selection UI (Setup Actions)
-- Replace single "Generate Bracket" button with two format cards
-- Update confirmation dialog to reflect chosen format
-- Wire format choice into bracket generation so `format` gets stored
-- This is where operators first see SE as an option
+### Step 2: Format selection UI (Setup Actions) — IMPLEMENTED
+- Two format cards in Setup Actions: "Single Elimination Cup" and "Double Elimination Cup"
+- Each card has a description and its own format-aware generate button
+- `calculateBracketSize(playerCount, format)` helper added for format-aware sizing
+- SE supports bracket sizes 2, 4, 8, 16, 32 (minimum 2 players); DE supports 8, 16, 32 (minimum 4 players)
+- Confirmation dialog title shows format: "Generate X-Player Single/Double Elimination Bracket?"
+- `pendingFormat` flow carries the chosen format from card → confirmation → `tournament.format`
+- **Note**: SE bracket generation logic (Step 3) not yet implemented — generating SE currently produces DE match structure
 
 ### Step 3: SE bracket generation (`generateAllMatches()`)
 - When `format === 'SE'`: use `SE_MATCH_PROGRESSION`, skip backside/finals match creation

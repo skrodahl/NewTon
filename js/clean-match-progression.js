@@ -1,6 +1,29 @@
 // clean-match-progression.js - Single Source of Truth Lookup System
 // Based on the *_players.md files - hardcoded bracket progressions
 
+// Pending format selection — set by showBracketConfirmation(), read by confirmBracketGeneration()
+let pendingFormat = 'DE';
+
+/**
+ * Calculates the smallest power-of-2 bracket size that fits the given player count.
+ * SE supports smaller brackets (2, 4) that DE doesn't.
+ *
+ * @param {number} playerCount - Number of paid players
+ * @param {'DE'|'SE'} format - Tournament format
+ * @returns {2|4|8|16|32|null} Bracket size, or null if player count is out of range
+ */
+function calculateBracketSize(playerCount, format) {
+    if (playerCount > 32) return null;
+    if (format === 'SE') {
+        if (playerCount <= 2) return 2;
+        if (playerCount <= 4) return 4;
+    }
+    if (playerCount <= 8) return 8;
+    if (playerCount <= 16) return 16;
+    if (playerCount <= 32) return 32;
+    return null;
+}
+
 /**
  * SINGLE SOURCE OF TRUTH: CORRECTED Match progression lookup tables
  * Based on proper double elimination mirroring rules
@@ -1037,7 +1060,16 @@ disableOldProgressionSystem();
  *     console.log('Tournament started!');
  * }
  */
-function generateCleanBracket() {
+/**
+ * Validates player count and shows bracket generation confirmation dialog.
+ * Entry point for bracket generation — called from format selection cards in Setup Actions.
+ *
+ * @param {'DE'|'SE'} [format='DE'] - Tournament format
+ * @returns {false} Always returns false (prevents form submission)
+ */
+function generateCleanBracket(format) {
+    format = format || 'DE';
+
     if (!tournament) {
         alert('Please create a tournament first');
         return false;
@@ -1059,13 +1091,14 @@ function generateCleanBracket() {
         return false;
     }
 
-    if (paidPlayers.length < 4) {
-        alert('At least 4 paid players are required to generate an 8-player double-elimination tournament.');
-        console.error('Bracket generation blocked: fewer than 4 paid players');
+    const minPlayers = format === 'SE' ? 2 : 4;
+    if (paidPlayers.length < minPlayers) {
+        alert(`At least ${minPlayers} paid players are required to generate a ${format === 'SE' ? 'Single' : 'Double'} Elimination bracket.`);
+        console.error(`Bracket generation blocked: fewer than ${minPlayers} paid players`);
 
         // HELP SYSTEM INTEGRATION
         if (typeof showHelpHint === 'function') {
-            showHelpHint('Need at least 4 paid players to generate bracket. Add more players on Registration page.', 5000);
+            showHelpHint(`Need at least ${minPlayers} paid players to generate bracket. Add more players on Registration page.`, 5000);
         }
         return false;
     }
@@ -1076,31 +1109,33 @@ function generateCleanBracket() {
         return false;
     }
 
-    // Determine bracket size
-    let bracketSize;
-    if (paidPlayers.length <= 8) bracketSize = 8;
-    else if (paidPlayers.length <= 16) bracketSize = 16;
-    else if (paidPlayers.length <= 32) bracketSize = 32;
-
+    // Determine bracket size (format-aware: SE supports 2 and 4 player brackets)
+    const bracketSize = calculateBracketSize(paidPlayers.length, format);
     const byeCount = bracketSize - paidPlayers.length;
 
     // Show confirmation dialog with player list
-    showBracketConfirmation(paidPlayers, bracketSize, byeCount);
+    showBracketConfirmation(paidPlayers, bracketSize, byeCount, format);
     return false;
 }
 
 /**
- * Show bracket generation confirmation dialog with player cards
+ * Shows bracket generation confirmation dialog with player cards.
+ * Stores the chosen format in pendingFormat for confirmBracketGeneration() to read.
+ *
  * @param {Array} paidPlayers - Array of paid player objects
- * @param {number} bracketSize - Bracket size (8, 16, 32)
+ * @param {number} bracketSize - Bracket size (2, 4, 8, 16, 32)
  * @param {number} byeCount - Number of byes
+ * @param {'DE'|'SE'} format - Tournament format
  */
-function showBracketConfirmation(paidPlayers, bracketSize, byeCount) {
+function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
+    pendingFormat = format;
+
     const titleEl = document.getElementById('bracketConfirmTitle');
     const subtitleEl = document.getElementById('bracketConfirmSubtitle');
     const playersEl = document.getElementById('bracketConfirmPlayers');
 
-    titleEl.textContent = `Generate ${bracketSize}-Player Bracket?`;
+    const formatLabel = format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+    titleEl.textContent = `Generate ${bracketSize}-Player ${formatLabel} Bracket?`;
 
     const byeText = byeCount > 0 ? `, ${byeCount} bye${byeCount > 1 ? 's' : ''}` : '';
     subtitleEl.textContent = `${paidPlayers.length} players registered${byeText}`;
@@ -1119,21 +1154,20 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount) {
 }
 
 /**
- * Execute bracket generation after user confirmation
+ * Executes bracket generation after user confirmation.
+ * Reads pendingFormat (set by showBracketConfirmation) and stores it on the tournament object.
  */
 function confirmBracketGeneration() {
     popDialog();
 
+    const format = pendingFormat;
     const paidPlayers = players.filter(p => p.paid);
 
-    // Determine bracket size
-    let bracketSize;
-    if (paidPlayers.length <= 8) bracketSize = 8;
-    else if (paidPlayers.length <= 16) bracketSize = 16;
-    else if (paidPlayers.length <= 32) bracketSize = 32;
+    // Determine bracket size (format-aware)
+    const bracketSize = calculateBracketSize(paidPlayers.length, format);
 
     // Create optimized bracket: real players first, walkovers strategically placed
-    console.log(`Generating ${bracketSize}-player bracket for ${paidPlayers.length} players`);
+    console.log(`Generating ${bracketSize}-player ${format} bracket for ${paidPlayers.length} players`);
 
     const bracket = createOptimizedBracketV2(paidPlayers, bracketSize);
     if (!bracket) {
@@ -1145,6 +1179,7 @@ function confirmBracketGeneration() {
     // Store bracket info
     tournament.bracket = bracket;
     tournament.bracketSize = bracketSize;
+    tournament.format = format;
     tournament.status = 'active';
 
     // Generate all match structures with clean TBD placeholders
@@ -1743,6 +1778,8 @@ if (typeof window !== 'undefined') {
     window.getMatchState = getMatchState;
     window.updateMatchLane = updateMatchLane;
     window.DE_MATCH_PROGRESSION = DE_MATCH_PROGRESSION;
+    window.SE_MATCH_PROGRESSION = SE_MATCH_PROGRESSION;
+    window.calculateBracketSize = calculateBracketSize;
 
     // OVERRIDE OLD FUNCTIONS - Replace with clean versions
     window.selectWinner = selectWinnerClean;
@@ -2722,6 +2759,8 @@ if (typeof window !== 'undefined') {
     window.getMatchState = getMatchState;
     window.updateMatchLane = updateMatchLane;
     window.DE_MATCH_PROGRESSION = DE_MATCH_PROGRESSION;
+    window.SE_MATCH_PROGRESSION = SE_MATCH_PROGRESSION;
+    window.calculateBracketSize = calculateBracketSize;
     window.selectWinner = selectWinnerClean;
     window.selectWinnerV2 = selectWinnerClean;
     window.selectWinnerWithValidation = selectWinnerClean;
