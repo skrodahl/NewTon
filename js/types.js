@@ -137,7 +137,8 @@
  * @property {Player[]} players - Array of registered players
  * @property {Match[]} matches - Array of all tournament matches
  * @property {Player[]} bracket - Array of players in bracket positions
- * @property {8|16|32} [bracketSize] - Bracket size
+ * @property {2|4|8|16|32} [bracketSize] - Bracket size (2 and 4 are SE-only)
+ * @property {('DE'|'SE')} [format] - Tournament format: 'DE' (Double Elimination) or 'SE' (Single Elimination). Absent = DE for backward compatibility
  * @property {Object.<string, number>} placements - Map of player ID (string) to placement rank
  * @property {boolean} [readOnly] - Optional: true for completed tournaments to prevent modifications
  * @property {string} [lastSaved] - Optional: ISO timestamp of last save

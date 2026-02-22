@@ -268,10 +268,11 @@ This makes the bracket self-documenting — the operator can see at a glance wha
 
 Suggested next steps, roughly in dependency order. Each step is designed to be low-risk and independently testable.
 
-### Step 1: `format` field on tournament object
-- Add `format` to tournament data at bracket generation time
-- Helper function: `getFormat()` that returns `'DE'` when field is absent (backward compat)
-- Small, safe change — no behavior difference yet, just data
+### Step 1: `format` field on tournament object — IMPLEMENTED
+- `getFormat()` helper added to `tournament-management.js` — returns `'DE'` when field is absent (backward compat)
+- `format` field added to all 5 tournament object construction sites (create, load, import, save, export)
+- `format` property added to Tournament typedef in `types.js`
+- Purely additive — no behavior change, just plumbing for Step 2
 
 ### Step 2: Format selection UI (Setup Actions)
 - Replace single "Generate Bracket" button with two format cards

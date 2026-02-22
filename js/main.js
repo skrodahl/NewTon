@@ -320,6 +320,7 @@ function autoLoadCurrentTournament() {
             matches: tournamentData.matches || [],
             bracket: tournamentData.bracket,
             bracketSize: tournamentData.bracketSize, // ✅ Fixed: Include bracketSize
+            format: tournamentData.format, // SE/DE format (absent = DE for backward compat)
             placements: tournamentData.placements || {},
             readOnly: tournamentData.readOnly // ✅ Fixed: Include readOnly flag
             // NO CONFIG loading - config stays global

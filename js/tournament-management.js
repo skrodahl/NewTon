@@ -5,6 +5,16 @@ let showingAllTournaments = false;
 let showingAllSharedTournaments = false;
 let showingAllLocalTournaments = false;
 
+/**
+ * Returns the current tournament's format, defaulting to 'DE' for backward compatibility.
+ * Tournaments created before SE support have no format field — they are always DE.
+ *
+ * @returns {'DE'|'SE'} The tournament format
+ */
+function getFormat() {
+    return (tournament && tournament.format) || 'DE';
+}
+
 // Helper function to clear tournament input fields
 function clearTournamentFields() {
     const nameElement = document.getElementById('tournamentName');
@@ -203,6 +213,7 @@ function exportTournament() {
         created: tournament.created,
         status: tournament.status,
         bracketSize: tournament.bracketSize,
+        format: tournament.format, // SE/DE format (absent = DE for backward compat)
         readOnly: tournament.readOnly || false,
         players: players,
         matches: matches,
@@ -323,6 +334,7 @@ function saveTournamentOnly(shouldLog = true) {
         matches: matches, // Tournament-specific match data
         bracket: tournament.bracket,
         bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
+        format: tournament.format, // SE/DE format (absent = DE for backward compat)
         placements: tournament.placements || {},
         readOnly: tournament.readOnly, // ✅ Fixed: Include readOnly flag
         lastSaved: new Date().toISOString()
@@ -785,6 +797,7 @@ function continueLoadProcess(selectedTournament) {
         matches: selectedTournament.matches || [],
         bracket: selectedTournament.bracket,
         bracketSize: bracketSize,
+        format: selectedTournament.format, // SE/DE format (absent = DE for backward compat)
         placements: selectedTournament.placements || {},
         readOnly: (selectedTournament.status === 'completed') // Read-only for completed tournaments
         // NO CONFIG loading - config stays global
@@ -1008,6 +1021,7 @@ function continueImportProcess(importedData) {
             bracket: importedData.bracket || null,
             placements: importedData.placements || {},
             bracketSize: bracketSize,
+            format: importedData.format, // SE/DE format (absent = DE for backward compat)
             readOnly: (importedData.status === 'completed') // Read-only for completed imports
         };
 
