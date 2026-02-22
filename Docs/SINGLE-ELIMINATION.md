@@ -158,6 +158,7 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 - All existing CSS selectors, match ID parsing, Match Command Center grouping, and rendering code works unchanged
 - The absence of `BS-` matches is what makes it SE, not a different prefix
 - Zero code changes needed for match ID handling
+- **Display labels**: SE strips the `FS-` prefix at render time — operators see `1-1`, `2-1`, `3-1` instead of `FS-1-1`, `FS-2-1`, `FS-3-1`. The "Frontside" concept doesn't exist in SE, so the prefix is meaningless to the operator. Internal IDs remain `FS-` for code reuse.
 
 ### Tournament Data Format (Decided: `format` field)
 - New `format` field on the tournament object, set at bracket generation time
