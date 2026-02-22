@@ -33,7 +33,7 @@
 - `format` field threaded through all 5 tournament object construction sites (create, load, import, save, export)
 - Tournament typedef updated in types.js
 - SE_MATCH_PROGRESSION, calculateBracketSize, and getProgressionTable exposed via window for debugging
-- **Remaining work**: SE bracket rendering (Step 5), SE rankings (Step 6), Match Controls two-column layout (Step 7)
+- **Remaining work**: SE bracket rendering (Step 5), Match Controls two-column layout (Step 7)
 
 ---
 

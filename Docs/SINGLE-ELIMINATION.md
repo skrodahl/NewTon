@@ -1,6 +1,6 @@
 # Single Elimination Support - Design & Planning
 
-**Status:** Early design discussion
+**Status:** Core engine implemented — bracket rendering next (Step 5)
 **Last Updated:** February 2026
 
 ---
@@ -188,6 +188,7 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 - **Relevant for 4+ player brackets** — a 4-player SE bracket has 2 semifinal losers, so a bronze match makes sense. Meaningless for 2-player brackets (only 1 match)
 - When enabled: semifinal losers route to a BRONZE match instead of sharing 3rd-4th place. Winner = 3rd, loser = 4th
 - Structurally similar to how DE routes the frontside final loser to BS-FINAL — a consolation match for placement
+- **When disabled**: The podium 3rd place slot should show "3rd-4th" with both semifinal losers listed, reflecting the shared dropout zone. This makes it visually clear that 3rd place is undecided without a bronze match. Implement alongside the bronze final toggle.
 
 ## Open Design Questions
 
