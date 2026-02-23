@@ -27,7 +27,6 @@ function getProgressionTable() {
 function calculateBracketSize(playerCount, format) {
     if (playerCount > 32) return null;
     if (format === 'SE') {
-        if (playerCount <= 2) return 2;
         if (playerCount <= 4) return 4;
     }
     if (playerCount <= 8) return 8;
@@ -249,18 +248,16 @@ const DE_MATCH_PROGRESSION = {
  * match having {} instead of advancing to GRAND-FINAL.
  */
 const SE_MATCH_PROGRESSION = {
-    2: {
-        // Single match — the Final
-        'FS-1-1': {} // Tournament complete
-    },
-
     4: {
-        // Round 1 (2 matches)
-        'FS-1-1': { winner: ['FS-2-1', 'player1'] },
-        'FS-1-2': { winner: ['FS-2-1', 'player2'] },
+        // Round 1 — Semifinals (2 matches)
+        'FS-1-1': { winner: ['FS-3-1', 'player1'], loser: ['FS-2-1', 'player1'] },
+        'FS-1-2': { winner: ['FS-3-1', 'player2'], loser: ['FS-2-1', 'player2'] },
 
-        // Round 2 — Final
-        'FS-2-1': {} // Tournament complete
+        // Round 2 — Bronze (semifinal losers)
+        'FS-2-1': {}, // No further progression
+
+        // Round 3 — Final (semifinal winners)
+        'FS-3-1': {} // Tournament complete
     },
 
     8: {
@@ -271,11 +268,14 @@ const SE_MATCH_PROGRESSION = {
         'FS-1-4': { winner: ['FS-2-2', 'player2'] },
 
         // Round 2 — Semifinals (2 matches)
-        'FS-2-1': { winner: ['FS-3-1', 'player1'] },
-        'FS-2-2': { winner: ['FS-3-1', 'player2'] },
+        'FS-2-1': { winner: ['FS-4-1', 'player1'], loser: ['FS-3-1', 'player1'] },
+        'FS-2-2': { winner: ['FS-4-1', 'player2'], loser: ['FS-3-1', 'player2'] },
 
-        // Round 3 — Final
-        'FS-3-1': {} // Tournament complete
+        // Round 3 — Bronze (semifinal losers)
+        'FS-3-1': {}, // No further progression
+
+        // Round 4 — Final (semifinal winners)
+        'FS-4-1': {} // Tournament complete
     },
 
     16: {
@@ -296,11 +296,14 @@ const SE_MATCH_PROGRESSION = {
         'FS-2-4': { winner: ['FS-3-2', 'player2'] },
 
         // Round 3 — Semifinals (2 matches)
-        'FS-3-1': { winner: ['FS-4-1', 'player1'] },
-        'FS-3-2': { winner: ['FS-4-1', 'player2'] },
+        'FS-3-1': { winner: ['FS-5-1', 'player1'], loser: ['FS-4-1', 'player1'] },
+        'FS-3-2': { winner: ['FS-5-1', 'player2'], loser: ['FS-4-1', 'player2'] },
 
-        // Round 4 — Final
-        'FS-4-1': {} // Tournament complete
+        // Round 4 — Bronze (semifinal losers)
+        'FS-4-1': {}, // No further progression
+
+        // Round 5 — Final (semifinal winners)
+        'FS-5-1': {} // Tournament complete
     },
 
     32: {
@@ -339,11 +342,14 @@ const SE_MATCH_PROGRESSION = {
         'FS-3-4': { winner: ['FS-4-2', 'player2'] },
 
         // Round 4 — Semifinals (2 matches)
-        'FS-4-1': { winner: ['FS-5-1', 'player1'] },
-        'FS-4-2': { winner: ['FS-5-1', 'player2'] },
+        'FS-4-1': { winner: ['FS-6-1', 'player1'], loser: ['FS-5-1', 'player1'] },
+        'FS-4-2': { winner: ['FS-6-1', 'player2'], loser: ['FS-5-1', 'player2'] },
 
-        // Round 5 — Final
-        'FS-5-1': {} // Tournament complete
+        // Round 5 — Bronze (semifinal losers)
+        'FS-5-1': {}, // No further progression
+
+        // Round 6 — Final (semifinal winners)
+        'FS-6-1': {} // Tournament complete
     }
 };
 
@@ -523,11 +529,34 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             console.error('BS-FINAL completion error', { matchId, winner, loser, error: e });
         }
 
+        // SE Bronze completion hook: set 3rd and 4th place immediately
+        try {
+            const format = getFormat();
+            if (format === 'SE' && isSEBronzeMatch(matchId, tournament.bracketSize)) {
+                console.log('🥉 Bronze match completed - setting 3rd/4th place...');
+
+                if (!tournament.placements) {
+                    tournament.placements = {};
+                }
+                tournament.placements[String(winner.id)] = 3;
+                tournament.placements[String(loser.id)] = 4;
+
+                console.log(`✓ 3rd place: ${winner.name}, 4th place: ${loser.name}`);
+
+                if (typeof saveTournament === 'function') saveTournament();
+                if (typeof updateResultsTable === 'function') updateResultsTable();
+            }
+        } catch (e) {
+            console.error('Bronze completion error', { matchId, winner, loser, error: e });
+        }
+
         // Tournament completion hook: detect final match and set placements
         // DE: GRAND-FINAL has {} progression. SE: last FS round has {} progression.
+        // SE bronze also has {} but should NOT trigger completion — only the SE final does.
         const completionTable = getProgressionTable();
         const completionRule = completionTable && completionTable[matchId];
-        const isTournamentFinal = completionRule && Object.keys(completionRule).length === 0;
+        const isSEBronze = getFormat() === 'SE' && isSEBronzeMatch(matchId, tournament.bracketSize);
+        const isTournamentFinal = completionRule && Object.keys(completionRule).length === 0 && !isSEBronze;
 
         try {
             if (isTournamentFinal) {
@@ -660,21 +689,33 @@ function calculateSERankings() {
     const bracketSize = tournament.bracketSize;
     const totalRounds = Math.ceil(Math.log2(bracketSize));
 
-    console.log(`Calculating SE rankings for ${bracketSize}-player bracket (${totalRounds} rounds)...`);
+    console.log(`Calculating SE rankings for ${bracketSize}-player bracket (${totalRounds} natural rounds)...`);
 
-    // Scan all completed FS matches and assign placements to losers based on round
-    const completedMatches = matches.filter(m => m.completed && m.loser && m.loser.id && m.id.startsWith('FS-'));
+    // Scan completed FS matches (excluding bronze and final rounds — those are handled by completion hooks)
+    const completedMatches = matches.filter(m =>
+        m.completed && m.loser && m.loser.id && m.id.startsWith('FS-') &&
+        !isSEBronzeMatch(m.id, bracketSize) && !isSEFinalMatch(m.id, bracketSize)
+    );
 
     for (const match of completedMatches) {
         const loserId = String(match.loser.id);
 
-        // Skip if already placed (e.g., 2nd place set by completion hook)
+        // Skip if already placed (e.g., by bronze completion hook)
         if (tournament.placements[loserId]) continue;
 
+        // Generic formula: losers in round R get placement 2^(totalRounds - R) + 1
         const round = match.round;
         const placement = Math.pow(2, totalRounds - round) + 1;
         tournament.placements[loserId] = placement;
         console.log(`SE placement: ${match.loser.name} eliminated in R${round} → ${placement}${placement === 3 ? 'rd' : 'th'}`);
+    }
+
+    // Bronze match overrides: if played, winner = 3rd, loser = 4th
+    const bronzeMatch = matches.find(m => isSEBronzeMatch(m.id, bracketSize) && m.completed);
+    if (bronzeMatch && bronzeMatch.winner && bronzeMatch.loser) {
+        tournament.placements[String(bronzeMatch.winner.id)] = 3;
+        tournament.placements[String(bronzeMatch.loser.id)] = 4;
+        console.log(`SE bronze: ${bronzeMatch.winner.name} → 3rd, ${bronzeMatch.loser.name} → 4th`);
     }
 }
 
@@ -1149,7 +1190,7 @@ function generateCleanBracket(format) {
         return false;
     }
 
-    const minPlayers = format === 'SE' ? 2 : 4;
+    const minPlayers = 4;
     if (paidPlayers.length < minPlayers) {
         alert(`At least ${minPlayers} paid players are required to generate a ${format === 'SE' ? 'Single' : 'Double'} Elimination bracket.`);
         console.error(`Bracket generation blocked: fewer than ${minPlayers} paid players`);
@@ -1308,7 +1349,7 @@ function createOptimizedBracketV2(players, bracketSize) {
         console.error('createOptimizedBracketV2: players must be an array');
         return null;
     }
-    if (![2, 4, 8, 16, 32].includes(bracketSize)) {
+    if (![4, 8, 16, 32].includes(bracketSize)) {
         console.warn(`createOptimizedBracketV2: unexpected bracketSize=${bracketSize}; proceeding with distributed seeding`);
     }
 
@@ -1412,6 +1453,8 @@ function generateAllMatches(bracket, bracketSize) {
         console.log('Generating final matches...');
         generateFinalMatches(matchId);
     }
+    // SE bronze + final rounds are included in the frontside structure
+    // (added by calculateCleanBracketStructure), so no extra generation needed
 
     console.log(`✓ Generated ${matches.length} ${format} matches total`);
 }
@@ -1461,6 +1504,15 @@ function calculateCleanBracketStructure(bracketSize) {
         ];
     }
 
+    // SE brackets with 4+ players: add bronze round + final round after natural bracket
+    const format = getFormat();
+    if (format === 'SE' && bracketSize >= 4) {
+        // Bronze round: 1 match (receives semifinal losers)
+        frontside.push({ round: frontsideRounds + 1, matches: 1 });
+        // Final round: 1 match (receives semifinal winners)
+        frontside.push({ round: frontsideRounds + 2, matches: 1 });
+    }
+
     return { frontside, backside, frontsideRounds };
 }
 
@@ -1488,8 +1540,12 @@ function generateFrontsideMatches(bracket, structure, startId) {
             // Determine leg count based on match type
             let legCount;
             const matchId = `FS-${roundInfo.round}-${matchIndex + 1}`;
+            const format = getFormat();
 
-            if (isFrontsideSemifinal(matchId, tournament.bracketSize)) {
+            if (format === 'SE' && (isSEBronzeMatch(matchId, tournament.bracketSize) || isSEFinalMatch(matchId, tournament.bracketSize))) {
+                // SE bronze and final use semifinal leg count
+                legCount = config.legs.frontsideSemifinal;
+            } else if (isFrontsideSemifinal(matchId, tournament.bracketSize)) {
                 legCount = config.legs.frontsideSemifinal;
             } else {
                 legCount = config.legs.regularRounds;
@@ -1602,6 +1658,9 @@ function generateFinalMatches(startId) {
     matches.push(backsideFinal);
     matches.push(grandFinal);
 }
+
+// generateBronzeMatch() removed — bronze is now a regular FS round match
+// generated by generateFrontsideMatches() via calculateCleanBracketStructure()
 
 /**
  * CREATE TBD PLAYER OBJECT
@@ -2796,6 +2855,63 @@ function isBacksideSemifinal(matchId, bracketSize) {
 }
 
 /**
+ * Check if a match is the SE bronze match (penultimate round, 1 match).
+ * Bronze match IDs by bracket size: 4→FS-2-1, 8→FS-3-1, 16→FS-4-1, 32→FS-5-1
+ *
+ * @param {string} matchId - The match ID to check
+ * @param {number} bracketSize - The bracket size
+ * @returns {boolean} True if this is the SE bronze match
+ */
+function isSEBronzeMatch(matchId, bracketSize) {
+    const seBronzeMatches = {
+        4: 'FS-2-1',
+        8: 'FS-3-1',
+        16: 'FS-4-1',
+        32: 'FS-5-1'
+    };
+    return seBronzeMatches[bracketSize] === matchId;
+}
+
+/**
+ * Check if a match is the SE final match (last round, 1 match).
+ * Final match IDs by bracket size: 4→FS-3-1, 8→FS-4-1, 16→FS-5-1, 32→FS-6-1
+ *
+ * @param {string} matchId - The match ID to check
+ * @param {number} bracketSize - The bracket size
+ * @returns {boolean} True if this is the SE final match
+ */
+function isSEFinalMatch(matchId, bracketSize) {
+    const seFinalMatches = {
+        4: 'FS-3-1',
+        8: 'FS-4-1',
+        16: 'FS-5-1',
+        32: 'FS-6-1'
+    };
+    return seFinalMatches[bracketSize] === matchId;
+}
+
+/**
+ * Returns the display name for a given SE round number.
+ * Named from the end backwards: Final, Bronze Final, Semifinals, Quarterfinals, Round N.
+ * Single source of truth — used by both Match Controls and bracket rendering.
+ *
+ * @param {number} round - The round number (1-based)
+ * @param {number} bracketSize - The bracket size (4, 8, 16, 32)
+ * @returns {string} Display name for the round
+ */
+function getSERoundDisplayName(round, bracketSize) {
+    const totalRounds = { 4: 3, 8: 4, 16: 5, 32: 6 };
+    const total = totalRounds[bracketSize];
+    if (!total) return `Round ${round}`;
+
+    if (round === total) return 'Final';
+    if (round === total - 1) return 'Bronze Final';
+    if (round === total - 2) return 'Semifinals';
+    if (round === total - 3) return 'Quarterfinals';
+    return `Round ${round}`;
+}
+
+/**
  * Show tournament in progress warning modal
  * Replaces browser alert with user-friendly modal dialog
  */
@@ -2848,6 +2964,9 @@ if (typeof window !== 'undefined') {
     window.handleBracketGenerationError = handleBracketGenerationError;
     window.isFrontsideSemifinal = isFrontsideSemifinal;
     window.isBacksideSemifinal = isBacksideSemifinal;
+    window.isSEBronzeMatch = isSEBronzeMatch;
+    window.isSEFinalMatch = isSEFinalMatch;
+    window.getSERoundDisplayName = getSERoundDisplayName;
     window.calculateAllRankings = calculateAllRankings;
     window.calculate8PlayerRankings = calculate8PlayerRankings;
     window.getDownstreamMatches = getDownstreamMatches;

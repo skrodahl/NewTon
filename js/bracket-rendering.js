@@ -1376,7 +1376,19 @@ function canMatchStart(match) {
     const player1Valid = match.player1.name !== 'TBD' && !match.player1.isBye;
     const player2Valid = match.player2.name !== 'TBD' && !match.player2.isBye;
 
-    return player1Valid && player2Valid;
+    if (!player1Valid || !player2Valid) return false;
+
+    // SE Final gating: can't start the Final until Bronze is completed
+    if (typeof isSEFinalMatch === 'function' && typeof isSEBronzeMatch === 'function' &&
+        tournament && tournament.format === 'SE' &&
+        isSEFinalMatch(match.id, tournament.bracketSize)) {
+        const bronzeMatch = matches.find(m => isSEBronzeMatch(m.id, tournament.bracketSize));
+        if (bronzeMatch && !bronzeMatch.completed) {
+            return false;
+        }
+    }
+
+    return true;
 }
 
 function getMatchButtonText(matchState) {
@@ -2683,16 +2695,23 @@ function getMatchFormatDescription(match) {
 function getRoundDescription(match) {
     if (match.id === 'GRAND-FINAL') return 'Grand Final';
     if (match.id === 'BS-FINAL') return 'Backside Final';
-    
-    // Check for semifinals
+
+    // SE tournaments: use getSERoundDisplayName for all FS- matches
+    const format = typeof getFormat === 'function' ? getFormat() : null;
+    if (format === 'SE' && match.id.startsWith('FS-') && typeof getSERoundDisplayName === 'function') {
+        const roundNum = parseInt(match.id.split('-')[1]);
+        return getSERoundDisplayName(roundNum, tournament?.bracketSize);
+    }
+
+    // DE: Check for semifinals
     if (typeof isFrontsideSemifinal === 'function' && isFrontsideSemifinal(match.id, tournament?.bracketSize)) {
         return 'Frontside Semifinal';
     }
     if (typeof isBacksideSemifinal === 'function' && isBacksideSemifinal(match.id, tournament?.bracketSize)) {
         return 'Backside Semifinal';
     }
-    
-    // Default round naming
+
+    // DE: Default round naming
     if (match.id.startsWith('FS-')) {
         const parts = match.id.split('-');
         return `Frontside Round ${parts[1]}`;
@@ -2701,7 +2720,7 @@ function getRoundDescription(match) {
         const parts = match.id.split('-');
         return `Backside Round ${parts[1]}`;
     }
-    
+
     return 'Match';
 }
 
@@ -3411,145 +3430,194 @@ function showCommandCenterModal(matchData) {
                 break;
 
             case 'active':
-            default:
+            default: {
                 // Tournament active - show matches (guaranteed to exist in active state)
-                // Populate LIVE matches with two-column layout (Frontside/Backside)
+                const activeFormat = typeof getFormat === 'function' ? getFormat() : null;
+                const isSE = activeFormat === 'SE';
+
+                // Populate LIVE matches
                 if (matchData.live && matchData.live.length > 0) {
                     liveSection.style.display = 'block';
 
-                    // Separate LIVE matches into Frontside and Backside
-                    const liveFrontside = matchData.live.filter(m =>
-                        m.id.startsWith('FS-') || m.id === 'GRAND-FINAL'
-                    );
-                    const liveBackside = matchData.live.filter(m =>
-                        m.id.startsWith('BS-') || m.id === 'BS-FINAL'
-                    );
+                    if (isSE) {
+                        // SE: two-column layout — live matches in left column
+                        const allLiveHTML = matchData.live.map(match => createMatchCard(match)).join('');
+                        liveContainer.innerHTML = `
+                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div class="cc-matches-container">${allLiveHTML}</div>
+                                </div>
+                                <div style="flex: 1; min-width: 0;"></div>
+                            </div>
+                        `;
+                    } else {
+                        // DE: two-column layout (Frontside/Backside)
+                        const liveFrontside = matchData.live.filter(m =>
+                            m.id.startsWith('FS-') || m.id === 'GRAND-FINAL'
+                        );
+                        const liveBackside = matchData.live.filter(m =>
+                            m.id.startsWith('BS-') || m.id === 'BS-FINAL'
+                        );
 
-                    // Build HTML for each column
-                    const liveFrontsideHTML = liveFrontside.map(match => createMatchCard(match)).join('');
-                    const liveBacksideHTML = liveBackside.map(match => createMatchCard(match)).join('');
+                        const liveFrontsideHTML = liveFrontside.map(match => createMatchCard(match)).join('');
+                        const liveBacksideHTML = liveBackside.map(match => createMatchCard(match)).join('');
 
-                    // Create two-column layout for LIVE matches
-                    const liveTwoColumnHTML = `
-                        <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="cc-matches-container">
-                                    ${liveFrontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches live</p>'}
+                        liveContainer.innerHTML = `
+                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
+                                <div style="flex: 1; min-width: 0;">
+                                    <div class="cc-matches-container">
+                                        ${liveFrontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches live</p>'}
+                                    </div>
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    <div class="cc-matches-container">
+                                        ${liveBacksideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches live</p>'}
+                                    </div>
                                 </div>
                             </div>
-                            <div style="flex: 1; min-width: 0;">
-                                <div class="cc-matches-container">
-                                    ${liveBacksideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches live</p>'}
-                                </div>
-                            </div>
-                        </div>
-                    `;
-
-                    liveContainer.innerHTML = liveTwoColumnHTML;
+                        `;
+                    }
                 }
 
-                // Populate Round-based matches with two-column layout (Frontside/Backside)
+                // Populate Round-based matches with two-column layout
                 if (matchData.rounds && Object.keys(matchData.rounds).length > 0) {
-                    // Separate rounds into Frontside and Backside groups
-                    const frontsideRounds = {};
-                    const backsideRounds = {};
+                    let twoColumnHTML;
 
-                    Object.keys(matchData.rounds).forEach(roundKey => {
-                        if (roundKey.startsWith('FS-')) {
-                            frontsideRounds[roundKey] = matchData.rounds[roundKey];
-                        } else if (roundKey.startsWith('BS-') || roundKey === 'BS-FINAL') {
-                            backsideRounds[roundKey] = matchData.rounds[roundKey];
-                        } else if (roundKey === 'GRAND-FINAL') {
-                            // Grand Final goes in Frontside column
-                            frontsideRounds[roundKey] = matchData.rounds[roundKey];
-                        } else {
-                            // OTHER goes in Frontside column
-                            frontsideRounds[roundKey] = matchData.rounds[roundKey];
-                        }
-                    });
+                    if (isSE) {
+                        // SE: left = earliest ready round, right = remaining rounds
+                        const bracketSize = tournament?.bracketSize;
+                        const sortedKeys = Object.keys(matchData.rounds).sort((a, b) => {
+                            const numA = parseInt(a.replace('FS-R', '')) || 99;
+                            const numB = parseInt(b.replace('FS-R', '')) || 99;
+                            return numA - numB;
+                        });
 
-                    // Sort round keys for each side
-                    const sortFrontsideKeys = (a, b) => {
-                        const order = {
-                            'FS-R1': 1, 'FS-R2': 2, 'FS-R3': 3, 'FS-R4': 4, 'FS-R5': 5,
-                            'GRAND-FINAL': 10, 'OTHER': 99
-                        };
-                        return (order[a] || 99) - (order[b] || 99);
-                    };
-
-                    const sortBacksideKeys = (a, b) => {
-                        const order = {
-                            'BS-R1': 1, 'BS-R2': 2, 'BS-R3': 3, 'BS-R4': 4, 'BS-R5': 5,
-                            'BS-R6': 6, 'BS-R7': 7, 'BS-FINAL': 10
-                        };
-                        return (order[a] || 99) - (order[b] || 99);
-                    };
-
-                    // Build Frontside column HTML
-                    let frontsideHTML = '';
-                    Object.keys(frontsideRounds).sort(sortFrontsideKeys).forEach(roundKey => {
-                        const roundMatches = frontsideRounds[roundKey];
-                        if (roundMatches && roundMatches.length > 0) {
-                            let roundDisplayName;
-                            if (roundKey === 'GRAND-FINAL') {
-                                roundDisplayName = '🏆 Grand Final';
-                            } else if (roundKey.startsWith('FS-R')) {
-                                const roundNum = roundKey.replace('FS-R', '');
-                                roundDisplayName = `⚪ Round ${roundNum} (Frontside)`;
-                            } else {
-                                roundDisplayName = `📋 ${roundKey}`;
-                            }
-
-                            frontsideHTML += `
+                        // Helper to build SE round section HTML
+                        const buildSERoundHTML = (roundKey) => {
+                            const roundMatches = matchData.rounds[roundKey];
+                            if (!roundMatches || roundMatches.length === 0) return '';
+                            const roundNum = parseInt(roundKey.replace('FS-R', ''));
+                            const name = getSERoundDisplayName(roundNum, bracketSize);
+                            const emoji = name === 'Final' ? '🏆' : name === 'Bronze Final' ? '🥉' : '⚪';
+                            return `
                                 <div class="cc-match-section" style="display: block;">
-                                    <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
+                                    <h4 class="cc-section-header">${emoji} ${name} - Ready to Start</h4>
                                     <div class="cc-matches-container">
                                         ${roundMatches.map(match => createMatchCard(match)).join('')}
                                     </div>
                                 </div>
                             `;
-                        }
-                    });
+                        };
 
-                    // Build Backside column HTML
-                    let backsideHTML = '';
-                    Object.keys(backsideRounds).sort(sortBacksideKeys).forEach(roundKey => {
-                        const roundMatches = backsideRounds[roundKey];
-                        if (roundMatches && roundMatches.length > 0) {
-                            let roundDisplayName;
-                            if (roundKey === 'BS-FINAL') {
-                                roundDisplayName = '🥈 Backside Final';
-                            } else if (roundKey.startsWith('BS-R')) {
-                                const roundNum = roundKey.replace('BS-R', '');
-                                roundDisplayName = `⚫ Round ${roundNum} (Backside)`;
-                            } else {
-                                roundDisplayName = `📋 ${roundKey}`;
-                            }
+                        // Left column: earliest round
+                        const leftHTML = sortedKeys.length > 0 ? buildSERoundHTML(sortedKeys[0]) : '';
 
-                            backsideHTML += `
-                                <div class="cc-match-section" style="display: block;">
-                                    <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
-                                    <div class="cc-matches-container">
-                                        ${roundMatches.map(match => createMatchCard(match)).join('')}
-                                    </div>
+                        // Right column: all remaining rounds
+                        const rightHTML = sortedKeys.slice(1).map(buildSERoundHTML).join('');
+
+                        twoColumnHTML = `
+                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
+                                <div style="flex: 1; min-width: 0;">
+                                    ${leftHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No matches ready</p>'}
                                 </div>
-                            `;
-                        }
-                    });
-
-                    // Create two-column layout
-                    const twoColumnHTML = `
-                        <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                            <div style="flex: 1; min-width: 0;">
-                                ${frontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches ready</p>'}
+                                <div style="flex: 1; min-width: 0;">
+                                    ${rightHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No upcoming matches</p>'}
+                                </div>
                             </div>
-                            <div style="flex: 1; min-width: 0;">
-                                ${backsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches ready</p>'}
-                            </div>
-                        </div>
-                    `;
+                        `;
+                    } else {
+                        // DE: two-column layout (Frontside / Backside)
+                        const frontsideRounds = {};
+                        const backsideRounds = {};
 
-                    // Use frontContainer for two-column layout
+                        Object.keys(matchData.rounds).forEach(roundKey => {
+                            if (roundKey.startsWith('FS-') || roundKey === 'GRAND-FINAL') {
+                                frontsideRounds[roundKey] = matchData.rounds[roundKey];
+                            } else if (roundKey.startsWith('BS-') || roundKey === 'BS-FINAL') {
+                                backsideRounds[roundKey] = matchData.rounds[roundKey];
+                            } else {
+                                frontsideRounds[roundKey] = matchData.rounds[roundKey];
+                            }
+                        });
+
+                        const sortFrontsideKeys = (a, b) => {
+                            const order = {
+                                'FS-R1': 1, 'FS-R2': 2, 'FS-R3': 3, 'FS-R4': 4, 'FS-R5': 5,
+                                'GRAND-FINAL': 10, 'OTHER': 99
+                            };
+                            return (order[a] || 99) - (order[b] || 99);
+                        };
+
+                        const sortBacksideKeys = (a, b) => {
+                            const order = {
+                                'BS-R1': 1, 'BS-R2': 2, 'BS-R3': 3, 'BS-R4': 4, 'BS-R5': 5,
+                                'BS-R6': 6, 'BS-R7': 7, 'BS-FINAL': 10
+                            };
+                            return (order[a] || 99) - (order[b] || 99);
+                        };
+
+                        let frontsideHTML = '';
+                        Object.keys(frontsideRounds).sort(sortFrontsideKeys).forEach(roundKey => {
+                            const roundMatches = frontsideRounds[roundKey];
+                            if (roundMatches && roundMatches.length > 0) {
+                                let roundDisplayName;
+                                if (roundKey === 'GRAND-FINAL') {
+                                    roundDisplayName = '🏆 Grand Final';
+                                } else if (roundKey.startsWith('FS-R')) {
+                                    const roundNum = roundKey.replace('FS-R', '');
+                                    roundDisplayName = `⚪ Round ${roundNum} (Frontside)`;
+                                } else {
+                                    roundDisplayName = `📋 ${roundKey}`;
+                                }
+
+                                frontsideHTML += `
+                                    <div class="cc-match-section" style="display: block;">
+                                        <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
+                                        <div class="cc-matches-container">
+                                            ${roundMatches.map(match => createMatchCard(match)).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        let backsideHTML = '';
+                        Object.keys(backsideRounds).sort(sortBacksideKeys).forEach(roundKey => {
+                            const roundMatches = backsideRounds[roundKey];
+                            if (roundMatches && roundMatches.length > 0) {
+                                let roundDisplayName;
+                                if (roundKey === 'BS-FINAL') {
+                                    roundDisplayName = '🥈 Backside Final';
+                                } else if (roundKey.startsWith('BS-R')) {
+                                    const roundNum = roundKey.replace('BS-R', '');
+                                    roundDisplayName = `⚫ Round ${roundNum} (Backside)`;
+                                } else {
+                                    roundDisplayName = `📋 ${roundKey}`;
+                                }
+
+                                backsideHTML += `
+                                    <div class="cc-match-section" style="display: block;">
+                                        <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
+                                        <div class="cc-matches-container">
+                                            ${roundMatches.map(match => createMatchCard(match)).join('')}
+                                        </div>
+                                    </div>
+                                `;
+                            }
+                        });
+
+                        twoColumnHTML = `
+                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
+                                <div style="flex: 1; min-width: 0;">
+                                    ${frontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches ready</p>'}
+                                </div>
+                                <div style="flex: 1; min-width: 0;">
+                                    ${backsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches ready</p>'}
+                                </div>
+                            </div>
+                        `;
+                    }
+
                     frontContainer.innerHTML = twoColumnHTML;
                     frontSection.style.display = 'block';
                 }
@@ -3561,6 +3629,7 @@ function showCommandCenterModal(matchData) {
                     noMatchesMessage.style.display = 'block';
                 }
                 break;
+            }
         }
     }
 
@@ -3597,11 +3666,11 @@ function showCommandCenterModal(matchData) {
                     // Build format-aware bracket generation cards
                     const paidPlayers = players ? players.filter(p => p.paid).length : 0;
 
-                    // SE card: min 2 players, supports 2/4/8/16/32 brackets
+                    // SE card: min 4 players, supports 4/8/16/32 brackets
                     let seButtonText, seDisabled = '';
                     const seBracketSize = calculateBracketSize(paidPlayers, 'SE');
-                    if (paidPlayers < 2) {
-                        seButtonText = 'Need 2+ players';
+                    if (paidPlayers < 4) {
+                        seButtonText = 'Need 4+ players';
                         seDisabled = 'disabled';
                     } else if (paidPlayers > 32) {
                         seButtonText = 'Max 32 players';

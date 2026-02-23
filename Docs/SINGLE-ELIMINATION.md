@@ -1,6 +1,6 @@
 # Single Elimination Support - Design & Planning
 
-**Status:** Core engine implemented — bracket rendering next (Step 5)
+**Status:** Core engine + Match Controls implemented — bracket rendering next (Step 5)
 **Last Updated:** February 2026
 
 ---
@@ -119,10 +119,14 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 
 ### Power-of-2 Brackets with Byes
 - SE uses the same power-of-2 rounding and bye system as DE
-- Supported bracket sizes: **2, 4, 8, 16, 32**
-- SE supports smaller brackets (2, 4) that DE doesn't — practical for small club events or quick pickup tournaments
+- Supported bracket sizes: **4, 8, 16, 32** (minimum 4 players, same as DE)
 - Non-power-of-2 player counts are handled with byes in R1, same as DE today
 - The existing seeding and auto-advancement system handles this identically
+
+### Why Minimum 4 Players?
+- 2-player SE is a single match — the full bracket system is overkill
+- 3-player SE puts one player directly in the final via bye — unfair with no backside safety net
+- 4 players is where SE becomes meaningful: 2 real semifinals, a real final, and a real bronze match
 
 ### Why Not Compact (Non-Power-of-2) Brackets?
 - 5 players without rounding: the 5th player would skip to the Final having played zero matches (unfair)
@@ -130,36 +134,34 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 - Reuses existing seeding, auto-advancement, and bracket generation logic
 
 ### Examples
-- **2 players** → 2-bracket: 1 match (Final)
-- **3 players** → 4-bracket, 1 bye: 1 auto-advance in R1, 1 real R1 match, 1 Final = 2 real matches
-- **4 players** → 4-bracket: 2 semis + 1 Final = 3 matches
-- **5 players** → 8-bracket, 3 byes: 1 real R1 match, 2 real R2 matches, 1 Final = 4 real matches
-- **8 players** → 8-bracket: 4 QF + 2 SF + 1 Final = 7 matches
+- **4 players** → 4-bracket: 2 semis + Final + Bronze = 4 matches
+- **5 players** → 8-bracket, 3 byes: 1 real R1 match, 2 SF + Final + Bronze = 5 real matches
+- **8 players** → 8-bracket: 4 QF + 2 SF + Final + Bronze = 8 matches
 
 ### SE Progression Tables (Minimal)
-**2-player:** `{ 'FS-1-1': {} }`
+Bronze and Final are regular FS rounds (no standalone `BRONZE` ID). Semifinal losers route to the Bronze round, semifinal winners route to the Final round. Final gating: the Final cannot start until the Bronze match is completed.
 
-**4-player:**
+**4-player:** (Semis → Bronze → Final)
 ```
-'FS-1-1': { winner: ['FS-2-1', 'player1'], loser: ['BRONZE', 'player1'] }
-'FS-1-2': { winner: ['FS-2-1', 'player2'], loser: ['BRONZE', 'player2'] }
-'FS-2-1': {}    // Final
-'BRONZE':  {}   // Bronze match (no further progression)
+'FS-1-1': { winner: ['FS-3-1', 'player1'], loser: ['FS-2-1', 'player1'] }
+'FS-1-2': { winner: ['FS-3-1', 'player2'], loser: ['FS-2-1', 'player2'] }
+'FS-2-1': {}    // Bronze (no further progression)
+'FS-3-1': {}    // Final (triggers tournament completion)
 ```
 
-**8-player (example — semifinal has loser paths to BRONZE):**
+**8-player:** (QF → SF → Bronze → Final)
 ```
 'FS-1-1': { winner: ['FS-2-1', 'player1'] }
 'FS-1-2': { winner: ['FS-2-1', 'player2'] }
 'FS-1-3': { winner: ['FS-2-2', 'player1'] }
 'FS-1-4': { winner: ['FS-2-2', 'player2'] }
-'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BRONZE', 'player1'] }
-'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BRONZE', 'player2'] }
-'FS-3-1': {}    // Final
-'BRONZE':  {}   // Bronze match
+'FS-2-1': { winner: ['FS-4-1', 'player1'], loser: ['FS-3-1', 'player1'] }
+'FS-2-2': { winner: ['FS-4-1', 'player2'], loser: ['FS-3-1', 'player2'] }
+'FS-3-1': {}    // Bronze
+'FS-4-1': {}    // Final
 ```
 
-**16, 32-player:** Same pattern — only the semifinal round has loser paths (to BRONZE). All earlier rounds have winner paths only.
+**16, 32-player:** Same pattern — only the semifinal round has loser paths (to the Bronze round). All earlier rounds have winner paths only. Bronze is always the penultimate round, Final is always the last round.
 
 ---
 
@@ -182,43 +184,61 @@ Single Elimination is the Frontside only of Double Elimination. This means massi
 - New tournaments always set the field explicitly; the fallback-to-DE logic only matters for importing legacy data
 - Export/import naturally compatible: old exports without `format` import as DE, new exports carry the field
 
-### SE Final Match (Decided: Last FS round = Final)
-- The last FS round match (e.g., `FS-3-1` for 8-player) has `{}` in the progression table — triggers tournament completion
+### SE Final Match (Decided: Last FS round = Final, gated behind Bronze)
+- The last FS round match (e.g., `FS-4-1` for 8-player) has `{}` in the progression table — triggers tournament completion
 - No GRAND-FINAL, no BS-FINAL — those are DE-only concepts
-- The `BRONZE` match also has `{}` (no further progression), but only the Final triggers tournament completion
-- Tournament completion = Final match completed, regardless of BRONZE match state
+- The Bronze round also has `{}` (no further progression), but only the Final triggers tournament completion (identified by `isSEFinalMatch()` vs `isSEBronzeMatch()`)
+- **Final gating**: The Final match cannot be started until the Bronze match is completed. Both matches receive their players simultaneously (from the semifinals), but the `canMatchStart()` function blocks the Final while Bronze is pending. This ensures the natural order: Bronze → Final
+- Tournament completion = Final match completed (Bronze is always completed first due to gating)
 
 ### SE Placements (Decided: Derived from round + bronze match)
 - Placement = which round you were eliminated in, shown as labels on the bracket
 - 8-player: 1st (final winner), 2nd (final loser), 3rd (bronze winner), 4th (bronze loser), 5th-8th (QF losers)
 - Earlier rounds calculated generically from round number — no separate placement mapping needed
-- **Bronze match resolves 3rd/4th**: When played, BRONZE winner = 3rd, loser = 4th. When skipped (operator choice), both SF losers share 3rd-4th placement — same as DE's shared tiers (5th-6th, 7th-8th)
-- **Dropout zones**: Players eliminated in the same round share a placement tier (e.g., all QF losers are "5th-8th"). The bronze match is the only mechanism that splits a shared zone into definitive positions
+- **Bronze match resolves 3rd/4th**: Bronze is always played before the Final (gated). Winner = 3rd, loser = 4th
+- **Dropout zones**: Players eliminated in the same round share a placement tier (e.g., all QF losers are "5th-8th"). The bronze match splits the semifinal losers into definitive 3rd and 4th positions
 
-### Bronze Match (Decided: Always included, never blocks tournament)
+### Bronze Match (Decided: Always included, gates the Final)
 - 3rd place match between the two semifinal losers — **always generated** for 4+ player SE brackets
 - **Not configurable** — no toggle needed. Simplifies code, progression tables, and operator experience
-- **Match ID**: `BRONZE` — standalone special ID, parallel to DE's `GRAND-FINAL` and `BS-FINAL`
-- **Display label**: "BRONZE" on the match card badge (not "BRONZE-FINAL" — insufficient space)
+- **Match ID**: Regular FS-prefixed ID in its own round (e.g., `FS-3-1` for 8-player, `FS-2-1` for 4-player) — no standalone special ID
+- **Display label**: "BRONZE" on the match card badge (render-time label based on `isSEBronzeMatch()`)
 - **SE-only** — DE already determines 3rd place through the backside bracket
-- **Relevant for 4+ player brackets** — meaningless for 2-player brackets (only 1 match)
-- Semifinal losers route to `BRONZE` via loser paths in the progression table:
+- **Relevant for 4+ player brackets** — minimum SE bracket size is 4 players
+- Semifinal losers route to Bronze via loser paths in the progression table (8-player example):
   ```
-  'FS-2-1': { winner: ['FS-3-1', 'player1'], loser: ['BRONZE', 'player1'] }
-  'FS-2-2': { winner: ['FS-3-1', 'player2'], loser: ['BRONZE', 'player2'] }
-  'FS-3-1': {}  // Final — triggers tournament completion
-  'BRONZE': {}  // Bronze — no further progression
+  'FS-2-1': { winner: ['FS-4-1', 'player1'], loser: ['FS-3-1', 'player1'] }
+  'FS-2-2': { winner: ['FS-4-1', 'player2'], loser: ['FS-3-1', 'player2'] }
+  'FS-3-1': {}  // Bronze — no further progression
+  'FS-4-1': {}  // Final — triggers tournament completion
   ```
-- **Never blocks tournament completion** — the Final (`FS-3-1`) triggers completion regardless of whether BRONZE has been played. If the operator skips the bronze match (time pressure), both SF losers share 3rd-4th placement automatically. This gives "optional" behavior without any configuration
-- **`advancePlayer()` handles this naturally** — already checks `if (rule.loser && loser)`, so the loser paths to BRONZE work without any engine changes
-- **Bracket rendering**: BRONZE and FINAL positioned identically to DE's BS-FINAL and GRAND-FINAL — two matches stacked vertically to the right of the semifinal round, with BRONZE on top and FINAL on bottom. Same coordinates, same connector pattern. Reuses `renderFinalMatches()` positioning logic
+- **Gates the Final** — the Final cannot start until the Bronze match is completed. This is enforced by `canMatchStart()` in bracket-rendering.js. The Final shows as "Waiting" while Bronze is pending. This ensures the natural tournament order: Bronze → Final
+- **`advancePlayer()` handles this naturally** — already checks `if (rule.loser && loser)`, so the loser paths to Bronze work without any engine changes
+- **Bracket rendering**: Bronze and Final positioned identically to DE's BS-FINAL and GRAND-FINAL — two matches stacked vertically to the right of the semifinal round, with Bronze on top and Final on bottom. Same coordinates, same connector pattern. Reuses `renderFinalMatches()` positioning logic
 
 ### SE Match Display Labels (Decided: Strip FS- prefix, special labels for Final/Bronze)
 - Regular SE matches strip the `FS-` prefix at render time: `FS-1-1` → `1-1`, `FS-2-1` → `2-1`
-- The SE Final match displays **"FINAL"** as its badge label (not `3-1` or `FS-3-1`)
-- The Bronze match displays **"BRONZE"** as its badge label
-- Internal match IDs remain unchanged (`FS-3-1`, `BRONZE`) — only the visual badge changes
+- The SE Final match displays **"FINAL"** as its badge label (identified by `isSEFinalMatch()`)
+- The Bronze match displays **"BRONZE"** as its badge label (identified by `isSEBronzeMatch()`)
+- Internal match IDs are all `FS-` prefixed — only the visual badge changes
 - Consistent with DE where `BS-FINAL` and `GRAND-FINAL` have special display treatment
+
+### SE Round Display Names (Decided: Named from the end)
+Round names are assigned from the Final backwards. The last four rounds always have fixed names; anything earlier is "Round N".
+
+**Rule:** Final → Bronze Final → Semifinals → Quarterfinals → Round N (counting from 1)
+
+| Bracket | R1 | R2 | R3 | R4 | R5 | R6 |
+|---------|----|----|----|----|----|----|
+| 4-player | Semifinals | Bronze Final | Final | | | |
+| 8-player | Quarterfinals | Semifinals | Bronze Final | Final | | |
+| 16-player | Round 1 | Quarterfinals | Semifinals | Bronze Final | Final | |
+| 32-player | Round 1 | Round 2 | Quarterfinals | Semifinals | Bronze Final | Final |
+
+- Displayed on match cards (replaces "Frontside Round X") and Match Controls section headers
+- Internal match IDs and round numbers unchanged — display names are render-time only
+- `getSERoundDisplayName(round, bracketSize)` in `clean-match-progression.js` — single source of truth
+- `getRoundDescription(match)` in `bracket-rendering.js` calls it for SE matches; DE path unchanged
 
 ## Open Design Questions
 
@@ -275,7 +295,7 @@ The bracket page has format-agnostic chrome and format-specific content. For SE:
 | Progression arrows/lines | Winner + loser paths | **Winner paths only** (except SF → Bronze loser feed) |
 | Placement labels | On backside rounds | **On each round column** |
 | Match cards | Same | **Same** — identical structure, styling, interaction |
-| Finals area | BS-FINAL + GRAND-FINAL | **BRONZE + FINAL** — same layout, same positions |
+| Finals area | BS-FINAL + GRAND-FINAL | **Bronze round + Final round** — same layout, same positions |
 
 ### Layout
 - SE renders as a clean **left-to-right tournament tree**, starting from the left edge
@@ -283,7 +303,7 @@ The bracket page has format-agnostic chrome and format-specific content. For SE:
 - No centering — avoids dead negative space on the left half of the screen
 - Same match cards, different coordinate map — positioning is the only difference
 - No "FRONTSIDE" label needed — the bracket type is established at generation time
-- **Finals area** (4+ player brackets): BRONZE (top) and FINAL (bottom) positioned identically to DE's BS-FINAL and GRAND-FINAL — two matches stacked to the right of the semifinal round, with SF winners feeding to FINAL and SF losers feeding to BRONZE
+- **Finals area** (4+ player brackets): Bronze (top) and Final (bottom) positioned identically to DE's BS-FINAL and GRAND-FINAL — two matches stacked to the right of the semifinal round, with SF winners feeding to Final and SF losers feeding to Bronze
 
 ### Round Placement Labels
 Same concept as DE's backside placement labels, applied to each round column. Losers of each round get the corresponding placement:
@@ -357,9 +377,16 @@ Suggested next steps, roughly in dependency order. Each step is designed to be l
 - Live rankings update after every match completion (same as DE)
 - Feeds into existing leaderboard points system unchanged
 
-### Step 7: Match Controls adaptation
-- Rolling two-column layout for SE
-- Match Command Center shows only FS- groups
+### Step 7: Match Controls adaptation — IMPLEMENTED
+- `getSERoundDisplayName(round, bracketSize)` added to `clean-match-progression.js` — single source of truth for SE round names
+- `getRoundDescription(match)` updated in `bracket-rendering.js` to use it for SE matches (DE unchanged)
+- Rolling two-column layout: left = earliest ready round, right = remaining rounds
+- SE live matches render in left column only (no frontside/backside split)
+- Section headers show proper round names with emojis: 🏆 Final, 🥉 Bronze Final, ⚪ Semifinals/Quarterfinals/Round N
+- **Known polish items** (not yet addressed):
+  - Referee suggestions show raw round keys ("FS-R1") instead of display names ("Semifinals")
+  - Match card headers show raw match IDs ("FS-3-1") instead of friendly labels for Bronze/Final
+  - Progression text shows DE destinations for SE matches (e.g., "Leads to GRAND-FINAL and BS-FINAL" on Bronze match, "Leads to FS-2-1 and BS-1-1" on QF matches) — `getMatchProgressionText()` needs to be format-aware
 
 ### Step 8: Testing & polish
 - Test all five bracket sizes (2, 4, 8, 16, 32)

@@ -1,4 +1,4 @@
-# 2026-02-22
+# 2026-02-23
 
 ## **v4.2.0** - Single Elimination Support (Foundation)
 
@@ -7,21 +7,30 @@
   - Two distinct format cards in Setup Actions with descriptions
   - SE: "Players are eliminated after one loss"
   - DE: "Players get a second chance through the backside"
-  - Each card shows format-aware bracket sizes (SE supports 2/4/8/16/32, DE supports 8/16/32)
+  - Both formats require minimum 4 players; SE supports 4/8/16/32 brackets, DE supports 8/16/32
 - **Bracket confirmation dialog** now shows the chosen format: "Generate 8-Player Single Elimination Bracket?" or "Generate 8-Player Double Elimination Bracket?"
 - **`format` field** stored on tournament object at bracket generation time
   - Backward compatible: existing tournaments without the field are treated as DE
   - Persisted through save, load, export, and import
+- **Bronze match** for SE brackets (4+ players): 3rd place match between semifinal losers
+  - Always generated as a regular FS round (penultimate round, e.g., `FS-3-1` for 8-player)
+  - Winner = 3rd, loser = 4th
+  - **Gates the Final**: Final cannot start until Bronze is completed
+- **Final gating**: SE Final shows as "Waiting" while Bronze is pending — enforced by `canMatchStart()` in bracket-rendering.js
+- **SE round display names** in Match Controls: Final, Bronze Final, Semifinals, Quarterfinals, Round N — named from the end backwards
+- **SE Match Controls layout**: Rolling two-column view — left column shows earliest ready round, right column shows upcoming rounds
 
 ### SE Bracket Generation & Completion
-- **SE bracket generation works end-to-end**: `generateAllMatches()` skips backside and finals for SE format
-- `createOptimizedBracketV2()` now supports 2-player and 4-player bracket sizes (SE-only)
-- Match progression is fully format-aware — winners advance correctly, losers are eliminated (no backside)
-- **Tournament completion** detects any match with `{}` progression — works for both SE and DE finals
-- 1st/2nd place set from final winner/loser; 3rd place from BS-FINAL loser (DE only)
+- **SE bracket generation works end-to-end**: `generateAllMatches()` skips backside and finals for SE; Bronze and Final are extra FS rounds added by `calculateCleanBracketStructure()`
+- `createOptimizedBracketV2()` supports 4-player bracket size (SE-only)
+- SE progression tables: semifinal losers route to Bronze round, semifinal winners route to Final round
+- Match progression is fully format-aware — winners advance correctly, SF losers route to Bronze, earlier losers are eliminated
+- **Tournament completion** detects final match via `{}` progression — Bronze excluded via `isSEBronzeMatch()` check
+- 1st/2nd place set from final winner/loser; 3rd/4th from Bronze (SE) or BS-FINAL loser (DE)
 - Undo of tournament-ending match is format-aware
-- **SE rankings**: Placement derived from elimination round — generic formula works for all bracket sizes
-  - R1 losers in 8-player → 5th-8th, R2 losers → 3rd-4th, final loser → 2nd
+- **SE rankings**: Placement derived from elimination round + bronze match results
+  - R1 losers in 8-player → 5th-8th, bronze winner → 3rd, bronze loser → 4th, final loser → 2nd
+  - Bronze is always played before Final (gated), so 3rd/4th are always resolved
   - Live rankings update after every match completion
 
 ### Technical Details
@@ -32,8 +41,14 @@
 - Added `pendingFormat` flow: format cards → showBracketConfirmation → confirmBracketGeneration → tournament.format
 - `format` field threaded through all 5 tournament object construction sites (create, load, import, save, export)
 - Tournament typedef updated in types.js
+- Added `isSEBronzeMatch()` and `isSEFinalMatch()` helpers for identifying SE special matches
+- Bronze completion hook sets 3rd/4th place immediately (parallel to BS-FINAL hook)
+- `canMatchStart()` enforces Final gating behind Bronze in SE
 - SE_MATCH_PROGRESSION, calculateBracketSize, and getProgressionTable exposed via window for debugging
-- **Remaining work**: SE bracket rendering (Step 5), Match Controls two-column layout (Step 7)
+- Added `getSERoundDisplayName(round, bracketSize)` in clean-match-progression.js — single source of truth for SE round display names
+- `getRoundDescription(match)` in bracket-rendering.js uses it for SE matches; DE path unchanged
+- Match Controls SE layout: left column = earliest ready round, right = remaining rounds; live matches in left column only
+- **Remaining work**: SE bracket rendering (Step 5), polish (referee round labels, match card IDs)
 
 ---
 
