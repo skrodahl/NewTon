@@ -125,23 +125,7 @@
     loserName: document.getElementById('loser-name'),
     statsPlayer1: document.getElementById('stats-player1'),
     statsPlayer2: document.getElementById('stats-player2'),
-    p1Tons: document.getElementById('p1-tons'),
-    p2Tons: document.getElementById('p2-tons'),
-    p1140s: document.getElementById('p1-140s'),
-    p2140s: document.getElementById('p2-140s'),
-    p1180s: document.getElementById('p1-180s'),
-    p2180s: document.getElementById('p2-180s'),
-    p1ShortLegs: document.getElementById('p1-short-legs'),
-    p2ShortLegs: document.getElementById('p2-short-legs'),
-    shortLegsLabel: document.getElementById('short-legs-label'),
-    p1HighOuts: document.getElementById('p1-high-outs'),
-    p2HighOuts: document.getElementById('p2-high-outs'),
-    p1First9: document.getElementById('p1-first9'),
-    p2First9: document.getElementById('p2-first9'),
-    p1MatchAvg: document.getElementById('p1-match-avg'),
-    p2MatchAvg: document.getElementById('p2-match-avg'),
-    p1LegAvgs: document.getElementById('p1-leg-avgs'),
-    p2LegAvgs: document.getElementById('p2-leg-avgs'),
+    endStatsBody: document.getElementById('end-stats-body'),
     endMatchInfo: document.getElementById('end-match-info'),
     endLegsContainer: document.getElementById('end-legs-container'),
     endRematchBtn: document.getElementById('end-rematch-btn'),
@@ -162,23 +146,7 @@
     detailDate: document.getElementById('detail-date'),
     detailStatsP1: document.getElementById('detail-stats-p1'),
     detailStatsP2: document.getElementById('detail-stats-p2'),
-    detailP1Tons: document.getElementById('detail-p1-tons'),
-    detailP2Tons: document.getElementById('detail-p2-tons'),
-    detailP1140s: document.getElementById('detail-p1-140s'),
-    detailP2140s: document.getElementById('detail-p2-140s'),
-    detailP1180s: document.getElementById('detail-p1-180s'),
-    detailP2180s: document.getElementById('detail-p2-180s'),
-    detailP1ShortLegs: document.getElementById('detail-p1-short-legs'),
-    detailP2ShortLegs: document.getElementById('detail-p2-short-legs'),
-    detailShortLegsLabel: document.getElementById('detail-short-legs-label'),
-    detailP1HighOuts: document.getElementById('detail-p1-high-outs'),
-    detailP2HighOuts: document.getElementById('detail-p2-high-outs'),
-    detailP1First9: document.getElementById('detail-p1-first9'),
-    detailP2First9: document.getElementById('detail-p2-first9'),
-    detailP1Avg: document.getElementById('detail-p1-avg'),
-    detailP2Avg: document.getElementById('detail-p2-avg'),
-    detailP1LegAvgs: document.getElementById('detail-p1-leg-avgs'),
-    detailP2LegAvgs: document.getElementById('detail-p2-leg-avgs'),
+    detailStatsBody: document.getElementById('detail-stats-body'),
     detailLegsContainer: document.getElementById('detail-legs-container'),
 
     // Keypad action buttons
@@ -195,23 +163,7 @@
     statsMatchInfo: document.getElementById('stats-match-info'),
     statsHeaderP1: document.getElementById('stats-header-p1'),
     statsHeaderP2: document.getElementById('stats-header-p2'),
-    statsP1Tons: document.getElementById('stats-p1-tons'),
-    statsP2Tons: document.getElementById('stats-p2-tons'),
-    statsP1140s: document.getElementById('stats-p1-140s'),
-    statsP2140s: document.getElementById('stats-p2-140s'),
-    statsP1180s: document.getElementById('stats-p1-180s'),
-    statsP2180s: document.getElementById('stats-p2-180s'),
-    statsP1ShortLegs: document.getElementById('stats-p1-short-legs'),
-    statsP2ShortLegs: document.getElementById('stats-p2-short-legs'),
-    statsShortLegsLabel: document.getElementById('stats-short-legs-label'),
-    statsP1HighOuts: document.getElementById('stats-p1-high-outs'),
-    statsP2HighOuts: document.getElementById('stats-p2-high-outs'),
-    statsP1First9: document.getElementById('stats-p1-first9'),
-    statsP2First9: document.getElementById('stats-p2-first9'),
-    statsP1MatchAvg: document.getElementById('stats-p1-match-avg'),
-    statsP2MatchAvg: document.getElementById('stats-p2-match-avg'),
-    statsP1LegAvgs: document.getElementById('stats-p1-leg-avgs'),
-    statsP2LegAvgs: document.getElementById('stats-p2-leg-avgs'),
+    statsStatsBody: document.getElementById('stats-stats-body'),
     statsLegsContainer: document.getElementById('stats-legs-container')
   };
 
@@ -1284,6 +1236,38 @@
   }
 
   /**
+   * Format a visit for scoresheet display (scored, left, dart count)
+   * Single source of truth for visit rendering across all contexts
+   * @param {Visit} visit - The visit to format
+   * @param {number} cumulativeDarts - Running dart total after this visit
+   * @returns {{scored: string, left: string|number, dartDisplay: string|number}}
+   */
+  function formatVisitDisplay(visit) {
+    if (visit.isCheckout) {
+      return {
+        scored: `<span class="checkout-score">x${visit.dartsUsed || 3}</span>`,
+        left: ''
+      };
+    }
+    if (visit.score === 180) {
+      return {
+        scored: `<span class="ton-180-score">${visit.score}</span>`,
+        left: visit.remainingBefore - visit.score
+      };
+    }
+    if (visit.score >= 100) {
+      return {
+        scored: `<span class="ton-score">${visit.score}</span>`,
+        left: visit.remainingBefore - visit.score
+      };
+    }
+    return {
+      scored: visit.score,
+      left: visit.remainingBefore - visit.score
+    };
+  }
+
+  /**
    * Clear the input buffer
    */
   function clearInput() {
@@ -1309,28 +1293,30 @@
   function calculateStats() {
     const shortLegThreshold = SHORT_LEG_THRESHOLDS[state.config.startingScore] || 21;
 
-    const stats = {
-      player1: {
-        tons: 0,
-        ton40s: 0,
-        ton80s: 0,
+    function makePlayerStats() {
+      return {
+        score60plus: 0,     // Visits scoring 60+
+        score80plus: 0,     // Visits scoring 80+
+        tons: 0,            // Visits scoring 100+
+        score120plus: 0,    // Visits scoring 120+
+        ton40s: 0,          // Visits scoring 140+
+        score170plus: 0,    // Visits scoring 170+
+        ton80s: 0,          // Visits scoring 180
+        highFinish: 0,      // Highest checkout score
+        bestLeg: null,      // Fewest darts in a won leg
+        worstLeg: null,     // Most darts in a won leg
         shortLegs: [],      // Array of dart counts for short legs
-        highOuts: [],       // Array of checkout scores >= 101
+        highOuts: [],       // Array of checkout scores >= 100
         first9Scores: [],
         totalScore: 0,
         totalDarts: 0
-      },
-      player2: {
-        tons: 0,
-        ton40s: 0,
-        ton80s: 0,
-        shortLegs: [],
-        highOuts: [],
-        first9Scores: [],
-        totalScore: 0,
-        totalDarts: 0
-      },
-      legs: []              // Per-leg stats for display
+      };
+    }
+
+    const stats = {
+      player1: makePlayerStats(),
+      player2: makePlayerStats(),
+      legs: []
     };
 
     state.legs.forEach((leg, legIndex) => {
@@ -1343,18 +1329,16 @@
         const playerStats = visit.player === 1 ? stats.player1 : stats.player2;
         const playerLegStats = visit.player === 1 ? legStats.player1 : legStats.player2;
 
-        // Count tons (100+)
+        // Score range counts (cumulative)
+        if (visit.score >= 60) playerStats.score60plus++;
+        if (visit.score >= 80) playerStats.score80plus++;
         if (visit.score >= 100) {
           playerStats.tons++;
           playerLegStats.tons++;
         }
-
-        // Count 140+ (includes 180s)
-        if (visit.score >= 140) {
-          playerStats.ton40s++;
-        }
-
-        // Count 180s
+        if (visit.score >= 120) playerStats.score120plus++;
+        if (visit.score >= 140) playerStats.ton40s++;
+        if (visit.score >= 170) playerStats.score170plus++;
         if (visit.score === 180) {
           playerStats.ton80s++;
           playerLegStats.ton80s++;
@@ -1363,8 +1347,12 @@
         // Track checkout score
         if (visit.isCheckout) {
           playerLegStats.checkoutScore = visit.remainingBefore;
-          // High outs (101+)
-          if (visit.remainingBefore >= 101) {
+          // High finish tracking
+          if (visit.remainingBefore > playerStats.highFinish) {
+            playerStats.highFinish = visit.remainingBefore;
+          }
+          // 100+ finishes
+          if (visit.remainingBefore >= 100) {
             playerStats.highOuts.push(visit.remainingBefore);
           }
         }
@@ -1391,12 +1379,18 @@
         ? (legStats.player2.score / legStats.player2.darts) * 3
         : null;
 
-      // Track short legs (winner only)
+      // Track short legs, best/worst legs (winner only)
       if (leg.winner) {
         const winnerLegStats = leg.winner === 1 ? legStats.player1 : legStats.player2;
         const winnerStats = leg.winner === 1 ? stats.player1 : stats.player2;
         if (winnerLegStats.darts <= shortLegThreshold) {
           winnerStats.shortLegs.push(winnerLegStats.darts);
+        }
+        if (winnerStats.bestLeg === null || winnerLegStats.darts < winnerStats.bestLeg) {
+          winnerStats.bestLeg = winnerLegStats.darts;
+        }
+        if (winnerStats.worstLeg === null || winnerLegStats.darts > winnerStats.worstLeg) {
+          winnerStats.worstLeg = winnerLegStats.darts;
         }
       }
 
@@ -1423,8 +1417,6 @@
     });
 
     // Calculate first 9 averages across all legs
-    // first9Scores contains first 3 visits (9 darts) from each leg
-    // Average all of them for the match first-9 average
     stats.player1.first9Avg = stats.player1.first9Scores.length > 0
       ? stats.player1.first9Scores.reduce((a, b) => a + b, 0) / stats.player1.first9Scores.length
       : 0;
@@ -1444,15 +1436,16 @@
   }
 
   /**
-   * Populate match stats into DOM elements (shared by end screen and history detail)
+   * Populate match stats into DOM elements (shared by end screen, live stats, and history detail)
+   * Dynamically generates stats table rows - single source of truth for all stat definitions
    * @param {object} match - Match object with config, legs, stats, player1Legs, player2Legs
-   * @param {object} els - Object with DOM element references for stats display
+   * @param {object} els - { player1Name, player2Name, finalScore, statsP1, statsP2, statsBody }
    */
   function populateMatchStats(match, els) {
     const config = match.config;
     const stats = match.stats || {};
-    const p1Stats = stats.player1 || {};
-    const p2Stats = stats.player2 || {};
+    const p1 = stats.player1 || {};
+    const p2 = stats.player2 || {};
 
     // Player names and score
     els.player1Name.textContent = config.player1Name;
@@ -1463,32 +1456,9 @@
     els.statsP1.textContent = config.player1Name;
     els.statsP2.textContent = config.player2Name;
 
-    // Update short legs label with format-specific threshold
     const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
-    els.shortLegsLabel.textContent = `Short Legs (≤${shortLegThreshold})`;
 
-    // Populate stats - handle both array and number formats for shortLegs/highOuts
-    els.p1Tons.textContent = p1Stats.tons || 0;
-    els.p2Tons.textContent = p2Stats.tons || 0;
-    els.p1140s.textContent = p1Stats.ton40s || 0;
-    els.p2140s.textContent = p2Stats.ton40s || 0;
-    els.p1180s.textContent = p1Stats.ton80s || 0;
-    els.p2180s.textContent = p2Stats.ton80s || 0;
-
-    // Short legs: stored as array, display count
-    els.p1ShortLegs.textContent = Array.isArray(p1Stats.shortLegs) ? p1Stats.shortLegs.length : (p1Stats.shortLegs || 0);
-    els.p2ShortLegs.textContent = Array.isArray(p2Stats.shortLegs) ? p2Stats.shortLegs.length : (p2Stats.shortLegs || 0);
-
-    // High outs: stored as array, display count
-    els.p1HighOuts.textContent = Array.isArray(p1Stats.highOuts) ? p1Stats.highOuts.length : (p1Stats.highOuts || 0);
-    els.p2HighOuts.textContent = Array.isArray(p2Stats.highOuts) ? p2Stats.highOuts.length : (p2Stats.highOuts || 0);
-
-    els.p1First9.textContent = p1Stats.first9Avg > 0 ? p1Stats.first9Avg.toFixed(1) : '-';
-    els.p2First9.textContent = p2Stats.first9Avg > 0 ? p2Stats.first9Avg.toFixed(1) : '-';
-    els.p1MatchAvg.textContent = p1Stats.matchAvg > 0 ? p1Stats.matchAvg.toFixed(1) : '-';
-    els.p2MatchAvg.textContent = p2Stats.matchAvg > 0 ? p2Stats.matchAvg.toFixed(1) : '-';
-
-    // Calculate and display leg averages
+    // Calculate leg averages
     const legs = match.legs || [];
     const p1LegAvgs = [];
     const p2LegAvgs = [];
@@ -1499,26 +1469,51 @@
       const p2Visits = visits.filter(v => v.player === 2);
 
       if (p1Visits.length > 0) {
-        const p1TotalScore = p1Visits.reduce((sum, v) => sum + v.score, 0);
-        const p1TotalDarts = p1Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-        const p1Avg = (p1TotalScore / p1TotalDarts) * 3;
-        p1LegAvgs.push(p1Avg.toFixed(1));
+        const score = p1Visits.reduce((sum, v) => sum + v.score, 0);
+        const darts = p1Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+        p1LegAvgs.push(((score / darts) * 3).toFixed(1));
       } else {
         p1LegAvgs.push('-');
       }
 
       if (p2Visits.length > 0) {
-        const p2TotalScore = p2Visits.reduce((sum, v) => sum + v.score, 0);
-        const p2TotalDarts = p2Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-        const p2Avg = (p2TotalScore / p2TotalDarts) * 3;
-        p2LegAvgs.push(p2Avg.toFixed(1));
+        const score = p2Visits.reduce((sum, v) => sum + v.score, 0);
+        const darts = p2Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
+        p2LegAvgs.push(((score / darts) * 3).toFixed(1));
       } else {
         p2LegAvgs.push('-');
       }
     });
 
-    els.p1LegAvgs.textContent = p1LegAvgs.join(', ') || '-';
-    els.p2LegAvgs.textContent = p2LegAvgs.join(', ') || '-';
+    // Helper: format count from array or number (backward compat with old history data)
+    const count = (val) => Array.isArray(val) ? val.length : (val || 0);
+
+    // Define all stat rows
+    const rows = [
+      { label: '60+', p1: p1.score60plus || 0, p2: p2.score60plus || 0 },
+      { label: '80+', p1: p1.score80plus || 0, p2: p2.score80plus || 0 },
+      { label: '100+', p1: p1.tons || 0, p2: p2.tons || 0 },
+      { label: '120+', p1: p1.score120plus || 0, p2: p2.score120plus || 0 },
+      { label: '140+', p1: p1.ton40s || 0, p2: p2.ton40s || 0 },
+      { label: '170+', p1: p1.score170plus || 0, p2: p2.score170plus || 0 },
+      { label: '180', p1: p1.ton80s || 0, p2: p2.ton80s || 0 },
+      { label: 'High Finish', p1: p1.highFinish || 0, p2: p2.highFinish || 0 },
+      { label: 'Best Leg', p1: p1.bestLeg || 0, p2: p2.bestLeg || 0 },
+      { label: 'Worst Leg', p1: p1.worstLeg || 0, p2: p2.worstLeg || 0 },
+      { label: `Short Legs (\u2264${shortLegThreshold})`, p1: count(p1.shortLegs), p2: count(p2.shortLegs) },
+      { label: '100+ Finishes', p1: count(p1.highOuts), p2: count(p2.highOuts) },
+      { label: 'First 9 Avg', p1: p1.first9Avg > 0 ? p1.first9Avg.toFixed(1) : '-', p2: p2.first9Avg > 0 ? p2.first9Avg.toFixed(1) : '-' },
+      { label: 'Match Avg', p1: p1.matchAvg > 0 ? p1.matchAvg.toFixed(1) : '-', p2: p2.matchAvg > 0 ? p2.matchAvg.toFixed(1) : '-' },
+      { label: 'Leg Avgs', p1: p1LegAvgs.join(', ') || '-', p2: p2LegAvgs.join(', ') || '-', cls: 'leg-avgs' }
+    ];
+
+    // Generate table body HTML
+    let html = '';
+    for (const row of rows) {
+      const tdCls = row.cls ? ` class="${row.cls}"` : '';
+      html += `<tr><td${tdCls}>${row.p1}</td><td class="stat-label">${row.label}</td><td${tdCls}>${row.p2}</td></tr>`;
+    }
+    els.statsBody.innerHTML = html;
   }
 
   /**
@@ -1533,6 +1528,7 @@
       player1Legs: state.player1Legs,
       player2Legs: state.player2Legs,
       matchWinner: state.matchWinner,
+      firstLegStarter: state.firstLegStarter,
       stats: stats
     };
 
@@ -1541,31 +1537,14 @@
     elements.endMatchInfo.textContent = `${match.config.startingScore} • Best of ${bestOf}`;
 
     // Populate stats using shared function
-    const endScreenEls = {
+    populateMatchStats(match, {
       player1Name: elements.winnerName,
       player2Name: elements.loserName,
       finalScore: elements.finalScore,
       statsP1: elements.statsPlayer1,
       statsP2: elements.statsPlayer2,
-      shortLegsLabel: elements.shortLegsLabel,
-      p1Tons: elements.p1Tons,
-      p2Tons: elements.p2Tons,
-      p1140s: elements.p1140s,
-      p2140s: elements.p2140s,
-      p1180s: elements.p1180s,
-      p2180s: elements.p2180s,
-      p1ShortLegs: elements.p1ShortLegs,
-      p2ShortLegs: elements.p2ShortLegs,
-      p1HighOuts: elements.p1HighOuts,
-      p2HighOuts: elements.p2HighOuts,
-      p1First9: elements.p1First9,
-      p2First9: elements.p2First9,
-      p1MatchAvg: elements.p1MatchAvg,
-      p2MatchAvg: elements.p2MatchAvg,
-      p1LegAvgs: elements.p1LegAvgs,
-      p2LegAvgs: elements.p2LegAvgs
-    };
-    populateMatchStats(match, endScreenEls);
+      statsBody: elements.endStatsBody
+    });
 
     // Render leg scoresheets using shared function
     renderLegScoresheets(match, elements.endLegsContainer);
@@ -1822,6 +1801,7 @@
       legs: state.legs,
       player1Legs: state.player1Legs,
       player2Legs: state.player2Legs,
+      firstLegStarter: state.firstLegStarter,
       stats: stats
     };
 
@@ -1830,48 +1810,33 @@
     elements.statsMatchInfo.textContent = `${match.config.startingScore} • Best of ${bestOf}`;
 
     // Populate stats using shared function
-    const statsEls = {
+    populateMatchStats(match, {
       player1Name: elements.statsPlayer1Name,
       player2Name: elements.statsPlayer2Name,
       finalScore: elements.statsLiveScore,
       statsP1: elements.statsHeaderP1,
       statsP2: elements.statsHeaderP2,
-      shortLegsLabel: elements.statsShortLegsLabel,
-      p1Tons: elements.statsP1Tons,
-      p2Tons: elements.statsP2Tons,
-      p1140s: elements.statsP1140s,
-      p2140s: elements.statsP2140s,
-      p1180s: elements.statsP1180s,
-      p2180s: elements.statsP2180s,
-      p1ShortLegs: elements.statsP1ShortLegs,
-      p2ShortLegs: elements.statsP2ShortLegs,
-      p1HighOuts: elements.statsP1HighOuts,
-      p2HighOuts: elements.statsP2HighOuts,
-      p1First9: elements.statsP1First9,
-      p2First9: elements.statsP2First9,
-      p1MatchAvg: elements.statsP1MatchAvg,
-      p2MatchAvg: elements.statsP2MatchAvg,
-      p1LegAvgs: elements.statsP1LegAvgs,
-      p2LegAvgs: elements.statsP2LegAvgs
-    };
-    populateMatchStats(match, statsEls);
+      statsBody: elements.statsStatsBody
+    });
 
     // Render leg scoresheets (includes current leg in progress)
-    renderLiveStatsScoresheets(match);
+    renderLegScoresheets(match, elements.statsLegsContainer);
 
     showScreen('stats');
   }
 
   /**
-   * Render leg scoresheets for live stats (includes current leg in progress)
+   * Render leg scoresheets into a container
+   * Used by live stats, match complete, and history detail screens
    * @param {object} match - Match object with config, legs
+   * @param {HTMLElement} container - Target container element
    */
-  function renderLiveStatsScoresheets(match) {
+  function renderLegScoresheets(match, container) {
     const config = match.config;
     const legs = match.legs || [];
 
     if (legs.length === 0) {
-      elements.statsLegsContainer.innerHTML = '<p>No leg data yet</p>';
+      container.innerHTML = '<p>No leg data available</p>';
       return;
     }
 
@@ -1904,6 +1869,15 @@
       const isShortLeg = leg.winner && totalDarts <= shortLegThreshold;
       const shortLegBadge = isShortLeg ? '<span class="short-leg-badge">Short Leg</span>' : '';
 
+      // Determine who throws first this leg (alternating from firstLegStarter)
+      const firstLegStarter = match.firstLegStarter || null;
+      let p1Marker = '', p2Marker = '';
+      if (firstLegStarter) {
+        const legStarter = legIndex % 2 === 0 ? firstLegStarter : (firstLegStarter === 1 ? 2 : 1);
+        p1Marker = legStarter === 1 ? '* ' : '';
+        p2Marker = legStarter === 2 ? '* ' : '';
+      }
+
       // Status text
       let statusText;
       if (isInProgress) {
@@ -1922,12 +1896,11 @@
           <table class="leg-scoresheet-table">
             <thead>
               <tr>
-                <th class="col-darts">Darts</th>
-                <th class="col-scored">${config.player1Name.substring(0, 8)}</th>
-                <th class="col-remaining">Left</th>
-                <th class="col-scored">${config.player2Name.substring(0, 8)}</th>
-                <th class="col-remaining">Left</th>
-                <th class="col-darts">Darts</th>
+                <th class="col-scored">${p1Marker}${config.player1Name.substring(0, 8)}</th>
+                <th class="col-remaining">To Go</th>
+                <th class="col-darts"></th>
+                <th class="col-scored">${p2Marker}${config.player2Name.substring(0, 8)}</th>
+                <th class="col-remaining">To Go</th>
               </tr>
             </thead>
             <tbody>
@@ -1935,92 +1908,55 @@
 
       // Build visit data by round
       const startingScore = leg.startingScore || config.startingScore;
-
-      // Group visits by round
       const p1Visits = visits.filter(v => v.player === 1);
       const p2Visits = visits.filter(v => v.player === 2);
-      const maxRounds = Math.max(p1Visits.length, p2Visits.length, 1);
-
-      let p1Remaining = startingScore;
-      let p2Remaining = startingScore;
-      let p1Darts = 0;
-      let p2Darts = 0;
+      const maxRounds = Math.max(p1Visits.length, p2Visits.length, isInProgress ? 1 : 0);
 
       for (let round = 0; round < maxRounds; round++) {
         const p1Visit = p1Visits[round];
         const p2Visit = p2Visits[round];
 
-        let p1Scored = '';
-        let p1Left = '';
-        let p2Scored = '';
-        let p2Left = '';
-        let p1DartDisplay = '';
-        let p2DartDisplay = '';
+        let p1Scored = '', p1Left = '';
+        let p2Scored = '', p2Left = '';
 
         if (p1Visit) {
-          p1Darts += p1Visit.dartsUsed || 3;
-          p1DartDisplay = p1Darts;
-          p1Remaining -= p1Visit.score;
-          p1Scored = p1Visit.score;
-          p1Left = p1Remaining;
-
-          if (p1Visit.isCheckout) {
-            const isHighOut = p1Visit.score >= 101;
-            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
-            p1Scored = `<span class="${cssClass}">${p1Visit.score}</span>`;
-            p1Left = `<span class="checkout-score">0</span>`;
-            p1DartDisplay = `<span class="checkout-score">${p1Darts}</span>`;
-          } else if (p1Visit.score === 180) {
-            p1Scored = `<span class="ton-180-score">${p1Visit.score}</span>`;
-          } else if (p1Visit.score >= 100) {
-            p1Scored = `<span class="ton-score">${p1Visit.score}</span>`;
-          }
+          const fmt = formatVisitDisplay(p1Visit);
+          p1Scored = fmt.scored;
+          p1Left = fmt.left;
         }
 
         if (p2Visit) {
-          p2Darts += p2Visit.dartsUsed || 3;
-          p2DartDisplay = p2Darts;
-          p2Remaining -= p2Visit.score;
-          p2Scored = p2Visit.score;
-          p2Left = p2Remaining;
-
-          if (p2Visit.isCheckout) {
-            const isHighOut = p2Visit.score >= 101;
-            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
-            p2Scored = `<span class="${cssClass}">${p2Visit.score}</span>`;
-            p2Left = `<span class="checkout-score">0</span>`;
-            p2DartDisplay = `<span class="checkout-score">${p2Darts}</span>`;
-          } else if (p2Visit.score === 180) {
-            p2Scored = `<span class="ton-180-score">${p2Visit.score}</span>`;
-          } else if (p2Visit.score >= 100) {
-            p2Scored = `<span class="ton-score">${p2Visit.score}</span>`;
-          }
+          const fmt = formatVisitDisplay(p2Visit);
+          p2Scored = fmt.scored;
+          p2Left = fmt.left;
         }
 
         html += `
           <tr>
-            <td class="col-darts">${p1DartDisplay}</td>
             <td class="col-scored">${p1Scored}</td>
             <td class="col-remaining">${p1Left}</td>
+            <td class="col-darts">${(round + 1) * 3}</td>
             <td class="col-scored">${p2Scored}</td>
             <td class="col-remaining">${p2Left}</td>
-            <td class="col-darts">${p2DartDisplay}</td>
           </tr>
         `;
       }
 
       // Show remaining scores for in-progress leg
-      if (isInProgress && (p1Remaining !== startingScore || p2Remaining !== startingScore)) {
-        html += `
-          <tr class="current-remaining-row">
-            <td class="col-darts"></td>
-            <td class="col-scored"></td>
-            <td class="col-remaining current-remaining">${p1Remaining}</td>
-            <td class="col-scored"></td>
-            <td class="col-remaining current-remaining">${p2Remaining}</td>
-            <td class="col-darts"></td>
-          </tr>
-        `;
+      if (isInProgress) {
+        const p1Remaining = startingScore - p1Visits.reduce((sum, v) => sum + v.score, 0);
+        const p2Remaining = startingScore - p2Visits.reduce((sum, v) => sum + v.score, 0);
+        if (p1Remaining !== startingScore || p2Remaining !== startingScore) {
+          html += `
+            <tr class="current-remaining-row">
+              <td class="col-scored"></td>
+              <td class="col-remaining current-remaining">${p1Remaining}</td>
+              <td class="col-darts"></td>
+              <td class="col-scored"></td>
+              <td class="col-remaining current-remaining">${p2Remaining}</td>
+            </tr>
+          `;
+        }
       }
 
       html += `
@@ -2030,7 +1966,7 @@
       `;
     });
 
-    elements.statsLegsContainer.innerHTML = html;
+    container.innerHTML = html;
   }
 
   /**
@@ -2191,6 +2127,7 @@
         player1Legs: matchData.player1Legs,
         player2Legs: matchData.player2Legs,
         matchWinner: matchData.matchWinner,
+        firstLegStarter: matchData.firstLegStarter || null,
         stats: matchData.stats
       } : {
         timestamp: Date.now(),
@@ -2199,6 +2136,7 @@
         player1Legs: state.player1Legs,
         player2Legs: state.player2Legs,
         matchWinner: state.matchWinner,
+        firstLegStarter: state.firstLegStarter || null,
         stats: calculateStats()
       };
       await dbPut('match_history', match);
@@ -2307,187 +2245,19 @@
       ` • ${config.startingScore} • Best of ${bestOf}`;
 
     // Populate stats using shared function
-    const historyDetailEls = {
+    populateMatchStats(match, {
       player1Name: elements.detailPlayer1,
       player2Name: elements.detailPlayer2,
       finalScore: elements.detailScore,
       statsP1: elements.detailStatsP1,
       statsP2: elements.detailStatsP2,
-      shortLegsLabel: elements.detailShortLegsLabel,
-      p1Tons: elements.detailP1Tons,
-      p2Tons: elements.detailP2Tons,
-      p1140s: elements.detailP1140s,
-      p2140s: elements.detailP2140s,
-      p1180s: elements.detailP1180s,
-      p2180s: elements.detailP2180s,
-      p1ShortLegs: elements.detailP1ShortLegs,
-      p2ShortLegs: elements.detailP2ShortLegs,
-      p1HighOuts: elements.detailP1HighOuts,
-      p2HighOuts: elements.detailP2HighOuts,
-      p1First9: elements.detailP1First9,
-      p2First9: elements.detailP2First9,
-      p1MatchAvg: elements.detailP1Avg,
-      p2MatchAvg: elements.detailP2Avg,
-      p1LegAvgs: elements.detailP1LegAvgs,
-      p2LegAvgs: elements.detailP2LegAvgs
-    };
-    populateMatchStats(match, historyDetailEls);
+      statsBody: elements.detailStatsBody
+    });
 
     // Render leg scoresheets using shared function
     renderLegScoresheets(match, elements.detailLegsContainer);
 
     showScreen('history-detail');
-  }
-
-  /**
-   * Render leg scoresheets for match detail (shared by end screen and history)
-   * @param {object} match - Match object with config, legs
-   * @param {HTMLElement} container - Container element to render into
-   */
-  function renderLegScoresheets(match, container) {
-    const config = match.config;
-    const legs = match.legs || [];
-
-    if (legs.length === 0) {
-      container.innerHTML = '<p>No leg data available</p>';
-      return;
-    }
-
-    let html = '<h3>Leg Scoresheets</h3>';
-
-    // Track running score after each leg
-    let p1LegsWon = 0;
-    let p2LegsWon = 0;
-
-    legs.forEach((leg, legIndex) => {
-      const winnerName = leg.winner === 1 ? config.player1Name : config.player2Name;
-
-      // Update running score after this leg (before rendering)
-      if (leg.winner === 1) {
-        p1LegsWon++;
-      } else if (leg.winner === 2) {
-        p2LegsWon++;
-      }
-
-      const runningScore = `${p1LegsWon} - ${p2LegsWon}`;
-
-      // Calculate total darts for this leg to determine if short leg
-      const visits = leg.visits || [];
-      const winnerVisits = visits.filter(v => v.player === leg.winner);
-      const totalDarts = winnerVisits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-      const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
-      const isShortLeg = totalDarts <= shortLegThreshold;
-      const shortLegBadge = isShortLeg ? '<span class="short-leg-badge">Short Leg</span>' : '';
-
-      html += `
-        <div class="leg-scoresheet">
-          <div class="leg-scoresheet-header">
-            <span class="leg-scoresheet-title">Leg ${legIndex + 1}</span>
-            <span class="leg-scoresheet-score">${runningScore}</span>
-            <span class="leg-scoresheet-winner">${winnerName} wins ${shortLegBadge}</span>
-          </div>
-          <table class="leg-scoresheet-table">
-            <thead>
-              <tr>
-                <th class="col-darts">Darts</th>
-                <th class="col-scored">${config.player1Name.substring(0, 8)}</th>
-                <th class="col-remaining">Left</th>
-                <th class="col-scored">${config.player2Name.substring(0, 8)}</th>
-                <th class="col-remaining">Left</th>
-                <th class="col-darts">Darts</th>
-              </tr>
-            </thead>
-            <tbody>
-      `;
-
-      // Build visit data by round
-      const startingScore = leg.startingScore || config.startingScore;
-
-      // Group visits by round (visits already defined above for short leg calculation)
-      const p1Visits = visits.filter(v => v.player === 1);
-      const p2Visits = visits.filter(v => v.player === 2);
-      const maxRounds = Math.max(p1Visits.length, p2Visits.length);
-
-      let p1Remaining = startingScore;
-      let p2Remaining = startingScore;
-      let p1Darts = 0;
-      let p2Darts = 0;
-
-      for (let round = 0; round < maxRounds; round++) {
-        const p1Visit = p1Visits[round];
-        const p2Visit = p2Visits[round];
-
-        let p1Scored = '';
-        let p1Left = '';
-        let p2Scored = '';
-        let p2Left = '';
-        let p1DartDisplay = '';
-        let p2DartDisplay = '';
-
-        if (p1Visit) {
-          // Add darts for this visit (use actual dartsUsed for checkout, otherwise 3)
-          p1Darts += p1Visit.dartsUsed || 3;
-          p1DartDisplay = p1Darts;
-          p1Remaining -= p1Visit.score;
-          p1Scored = p1Visit.score;
-          p1Left = p1Remaining;
-
-          // Color coding: checkout (green), 180 (gold), ton (blue), high out (green)
-          if (p1Visit.isCheckout) {
-            const isHighOut = p1Visit.score >= 101;
-            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
-            p1Scored = `<span class="${cssClass}">${p1Visit.score}</span>`;
-            p1Left = `<span class="checkout-score">0</span>`;
-            p1DartDisplay = `<span class="checkout-score">${p1Darts}</span>`;
-          } else if (p1Visit.score === 180) {
-            p1Scored = `<span class="ton-180-score">${p1Visit.score}</span>`;
-          } else if (p1Visit.score >= 100) {
-            p1Scored = `<span class="ton-score">${p1Visit.score}</span>`;
-          }
-        }
-
-        if (p2Visit) {
-          // Add darts for this visit (use actual dartsUsed for checkout, otherwise 3)
-          p2Darts += p2Visit.dartsUsed || 3;
-          p2DartDisplay = p2Darts;
-          p2Remaining -= p2Visit.score;
-          p2Scored = p2Visit.score;
-          p2Left = p2Remaining;
-
-          // Color coding: checkout (green), 180 (gold), ton (blue), high out (green)
-          if (p2Visit.isCheckout) {
-            const isHighOut = p2Visit.score >= 101;
-            const cssClass = isHighOut ? 'high-out-score' : 'checkout-score';
-            p2Scored = `<span class="${cssClass}">${p2Visit.score}</span>`;
-            p2Left = `<span class="checkout-score">0</span>`;
-            p2DartDisplay = `<span class="checkout-score">${p2Darts}</span>`;
-          } else if (p2Visit.score === 180) {
-            p2Scored = `<span class="ton-180-score">${p2Visit.score}</span>`;
-          } else if (p2Visit.score >= 100) {
-            p2Scored = `<span class="ton-score">${p2Visit.score}</span>`;
-          }
-        }
-
-        html += `
-          <tr>
-            <td class="col-darts">${p1DartDisplay}</td>
-            <td class="col-scored">${p1Scored}</td>
-            <td class="col-remaining">${p1Left}</td>
-            <td class="col-scored">${p2Scored}</td>
-            <td class="col-remaining">${p2Left}</td>
-            <td class="col-darts">${p2DartDisplay}</td>
-          </tr>
-        `;
-      }
-
-      html += `
-            </tbody>
-          </table>
-        </div>
-      `;
-    });
-
-    container.innerHTML = html;
   }
 
   /**

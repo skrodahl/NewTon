@@ -35,11 +35,11 @@ This protocol is the **foundation for all future data exchange** — the same pa
 | `t` | Message type | `"a"` (assign) or `"r"` (result) |
 | `mid` | Match ID (from TM) | `"FS-1-3"` |
 | `tid` | Tournament ID | `"1708123456789"` |
-| `sid` | Server/TM instance ID (UUID) | `"f47ac10b-58cc..."` |
+| `sid` | Server/TM instance ID (12-char hex) | `"f47ac10b58cc"` |
 | `ts` | Unix timestamp (seconds) | `1708123456` |
 | `crc` | CRC-32 of all other fields | `"a1b2c3d4"` |
 
-The `sid` (server ID) is a UUID generated once per TM installation and persisted in global config. It identifies which TM instance created the match. A `lic` (licensee) field will be added when licensing is implemented — the schema version bump will handle this.
+The `sid` (server ID) is a 12-character hex string generated once per TM installation and persisted in global config. It identifies which TM instance created the match. 12 hex chars = 48 bits of entropy (281 trillion possible values) — collision risk is negligible for local tournament use. A `lic` (licensee) field will be added when licensing is implemented — the schema version bump will handle this.
 
 ---
 
@@ -53,7 +53,7 @@ The `sid` (server ID) is a UUID generated once per TM installation and persisted
   "t": "a",
   "mid": "FS-1-3",
   "tid": "1708123456789",
-  "sid": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "sid": "f47ac10b58cc",
   "p1": "John Smith",
   "p2": "Jane Doe",
   "sc": 501,
@@ -66,7 +66,7 @@ The `sid` (server ID) is a UUID generated once per TM installation and persisted
 }
 ```
 
-**Estimated size: ~200-250 bytes** → QR version ~8-10, very easy to scan.
+**Estimated size: ~180-220 bytes** → QR version ~7-9, very easy to scan.
 
 | Field | Type | Description |
 |-------|------|-------------|
@@ -75,12 +75,27 @@ The `sid` (server ID) is a UUID generated once per TM installation and persisted
 | `sc` | number | Starting score (501, 301, etc.) |
 | `bo` | number | Best-of legs |
 | `mr` | number | Max rounds before forced tiebreak (requires new Global Settings field in TM) |
-| `ln` | number/null | Lane number (1-20, null if unassigned) |
-| `ref` | string/null | Referee name (null if none) |
+| `ln` | number | Lane number (1-20). **Omitted if unassigned.** |
+| `ref` | string | Referee name. **Omitted if none.** |
 
 > **Note:** The TM does not currently have a max rounds setting. This needs to be added to the Global Settings page (Config) as a prerequisite for QR match assignment. Default value: 13 rounds (39 darts).
 
 ### Match Result (Chalker → TM QR)
+
+The result payload carries **raw visit scores only** — no computed stats. The TM derives everything (averages, score ranges, high finishes, best/worst leg, etc.) from the raw scores. This keeps the payload minimal and makes the TM the single source of truth for statistics and report generation.
+
+**What the TM derives from raw scores:**
+- Tiebreak detection: neither player's scores sum to starting score
+- Who threw first each leg: `fls` + alternating
+- All score ranges (60+, 80+, 100+, 120+, 140+, 170+, 180)
+- All averages (Match, First 9, Leg)
+- High Finish, Best/Worst Leg, Short Legs, 100+ Finishes
+- Dart counts per player per leg
+- Complete n01 scoresheet with asterisks and xN notation
+
+**What the TM cannot derive (must be in payload):**
+- Tiebreak leg winners (`w` per leg) — the tiebreak deciding round is not on the scoresheet. When max rounds is reached without checkout, a separate 3-dart tiebreak round is played (highest score wins). This round is not recorded in the visit scores.
+- Checkout dart count (`cd`) — how many darts used on the final visit (1, 2, or 3)
 
 ```json
 {
@@ -88,57 +103,82 @@ The `sid` (server ID) is a UUID generated once per TM installation and persisted
   "t": "r",
   "mid": "FS-1-3",
   "tid": "1708123456789",
-  "sid": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+  "sid": "f47ac10b58cc",
+  "p1": "Klas Krantz",
+  "p2": "Hans Blomqvist",
+  "t1": "Nya Pikado C",
+  "t2": "Newton A",
   "sc": 501,
-  "bo": 3,
+  "bo": 5,
   "mr": 13,
   "ln": 3,
-  "w": 1,
-  "wl": 2,
-  "ll": 1,
-  "p1": "John Smith",
-  "p2": "Jane Doe",
+  "w": 2,
+  "fls": 2,
   "legs": [
-    { "w": 1, "d1": 15, "d2": 18, "co": 84, "wr": 0, "lr": 156, "a1": 48.2, "a2": 35.1, "tb": false },
-    { "w": 2, "d1": 21, "d2": 15, "co": 40, "wr": 0, "lr": 201, "a1": 38.5, "a2": 42.7, "tb": false },
-    { "w": 1, "d1": 12, "d2": 18, "co": 104, "wr": 0, "lr": 88, "a1": 52.1, "a2": 36.8, "tb": false }
+    { "w": 2, "s": "SSkoFlEcNxULExU7AA==|GVFCXzwKKTkhAQgMAA==", "cd": 0 },
+    { "w": 2, "s": "LS0DLV8NHTYpPw==|KBpRPFUcNChJEA==", "cd": 3 },
+    { "w": 1, "s": "GgtfHTkZDR48NwkGVQ==|ZBoWCxwaGlMsZRIA", "cd": 3 }
   ],
-  "s1": { "t": 3, "t4": 1, "t8": 0, "ho": [104], "sl": [12], "a": 45.2, "f9": 85.3 },
-  "s2": { "t": 2, "t4": 0, "t8": 1, "ho": [], "sl": [], "a": 38.1, "f9": 72.1 },
   "ts": 1708123789,
   "crc": "d4c3b2a1"
 }
 ```
 
-**Estimated size: ~700-900 bytes** → QR version ~18-22, still comfortable.
+**Estimated size: ~380-500 bytes** (typical Bo3-Bo5) → QR version ~12-16, easy to scan.
 
 | Field | Type | Description |
 |-------|------|-------------|
-| `sc` | number | Starting score (echoed from assignment) |
-| `bo` | number | Best-of legs (echoed from assignment) |
-| `mr` | number | Max rounds before tiebreak (echoed from assignment) |
-| `ln` | number/null | Lane number (echoed from assignment) |
-| `w` | 1 or 2 | Winner (player number) |
-| `wl` | number | Winner's legs won |
-| `ll` | number | Loser's legs won |
-| `legs` | array | Per-leg detail |
-| `legs[].w` | 1 or 2 | Leg winner |
-| `legs[].d1` | number | Player 1 darts thrown |
-| `legs[].d2` | number | Player 2 darts thrown |
-| `legs[].co` | number | Checkout score (remaining before final visit; 0 for tiebreak) |
-| `legs[].wr` | number | Winner remaining after leg (0 for normal checkout, non-zero for tiebreak) |
-| `legs[].lr` | number | Loser remaining after leg |
-| `legs[].a1` | number | Player 1 leg average (per 3 darts) |
-| `legs[].a2` | number | Player 2 leg average (per 3 darts) |
-| `legs[].tb` | boolean | Tiebreak leg |
-| `s1`, `s2` | object | Per-player stats |
-| `s_.t` | number | Tons (100+) |
-| `s_.t4` | number | 140+ |
-| `s_.t8` | number | 180s |
-| `s_.ho` | number[] | High outs (101+) list |
-| `s_.sl` | number[] | Short legs (dart counts) list |
-| `s_.a` | number | Match average (per 3 darts) |
-| `s_.f9` | number | First 9 average |
+| `p1` | string | Player 1 name |
+| `p2` | string | Player 2 name |
+| `t1` | string | Team 1 name. **Omitted if not set.** |
+| `t2` | string | Team 2 name. **Omitted if not set.** |
+| `sc` | number | Starting score (501, 301, etc.) |
+| `bo` | number | Best-of legs |
+| `mr` | number | Max rounds before tiebreak |
+| `ln` | number | Lane number. **Omitted if unassigned.** |
+| `w` | 1 or 2 | Match winner (player number) |
+| `fls` | 1 or 2 | First leg starter (alternates each leg) |
+| `legs` | array | Per-leg data |
+| `legs[].w` | 1 or 2 | Leg winner (essential for tiebreaks — see below) |
+| `legs[].s` | string | Base64-encoded visit scores: `P1_SCORES\|P2_SCORES` (see encoding below) |
+| `legs[].cd` | 0-3 | Checkout darts used (0 = tiebreak, 1-3 = darts on final visit) |
+
+**Dropped fields:** `wl` (winner's legs) and `ll` (loser's legs) are not in the payload — the TM derives them by counting `legs[].w` values.
+
+**Null field omission:** Fields with no value (`t1`, `t2`, `ln`) are omitted entirely rather than sent as `null`. The TM treats missing fields as unset.
+
+**Score encoding:**
+
+Each visit score (0-180) fits in a single unsigned byte. Per leg, both players' visit scores are packed into byte arrays, base64-encoded, and joined with `|` (pipe is not in the base64 alphabet, so it's a safe separator).
+
+```
+Encode: [73, 45, 40, 22, 81, ...] → Uint8Array → btoa() → "SSkoFlE..."
+Decode: atob("SSkoFlE...") → Uint8Array → [73, 45, 40, 22, 81, ...]
+Combined: "SSkoFlEcNxULExU7AA==|GVFCXzwKKTkhAQgMAA=="
+           ← Player 1 scores →  ← Player 2 scores →
+```
+
+This saves ~45% compared to JSON number arrays. A 13-round leg goes from ~90 chars (`"v1":[73,45,...],"v2":[25,81,...]`) to ~50 chars (`"s":"...base64...|...base64..."`).
+
+**Tiebreak handling:**
+
+When max rounds (`mr`) is reached without a checkout, a separate tiebreak round is played: 3 darts each, highest score wins the leg. This deciding round is **not** recorded on the scoresheet — it's a separate mechanism. The scoresheet shows only the regular rounds. The `legs[].w` field is the only record of who won, and `legs[].cd = 0` signals the leg was a tiebreak.
+
+**Size analysis (with base64 score encoding):**
+
+| Format | Legs × Rounds | Payload | QR Version |
+|--------|--------------|---------|------------|
+| Bo3, typical | 2-3 × 8 | ~380 bytes | ~12 |
+| Bo5, all 5 legs | 5 × 10 | ~520 bytes | ~16 |
+| Bo7, all max rounds | 7 × 13 | ~680 bytes | ~20 |
+| Bo13, all max rounds | 13 × 13 | ~1100 bytes | ~30 |
+| QR v40 limit (EC-M) | — | 2331 bytes | 40 |
+
+Even the absolute worst case (Bo13, all legs going to max rounds with long player/team names) stays well within QR capacity with ~50% headroom.
+
+**Future optimization — full binary encoding:**
+
+The entire payload could be binary-encoded (MessagePack or custom binary format) instead of JSON, potentially halving the size again. The TM can decode either format. Marked as an interesting future option if payload size ever becomes a concern — current JSON + base64 scores is well within limits and much easier to debug.
 
 ---
 
@@ -197,17 +237,40 @@ This is simple, robust, and doesn't require tracking nonces or timestamps.
 
 ---
 
+## TM-Side Score Validation
+
+After CRC verification passes, the TM performs arithmetic validation on the decoded scores. This catches encoding/decoding bugs and Chalker scoring bugs that CRC cannot detect (CRC only proves the data wasn't corrupted in transit, not that it was correct in the first place).
+
+**Validation checks (per leg):**
+
+| Check | Rule | Catches |
+|-------|------|---------|
+| Score range | Every visit score is 0-180 | Encoding errors, byte overflow |
+| Visit count parity | Both players have equal visits, or first-thrower has exactly +1 | Data corruption, missing visits |
+| Checkout sum | Normal leg (`cd > 0`): winner's scores sum to `sc` | Scoring bugs, wrong winner |
+| Tiebreak sum | Tiebreak leg (`cd == 0`): neither player's scores sum to `sc` | Misclassified tiebreak |
+| Winner consistency | `legs[].w` matches the player whose scores sum to `sc` (normal legs) | Wrong leg winner assignment |
+| Leg count | Winner has exactly `ceil(bo/2)` legs won | Impossible match outcome |
+
+**Soft warning, not hard rejection:** If validation fails, the TM accepts the data but flags it visually (e.g., warning icon on the match). The operator can review. Rejecting the QR would force manual entry — worse UX for what might be a harmless edge case. The derived stats will also look visibly wrong, which is self-correcting.
+
+**Cost:** Negligible — the TM is already decoding and summing scores to derive statistics. Validation is just checking what's already being computed.
+
+---
+
 ## Server ID
 
-A UUID generated once when the TM is first used, stored in global config (localStorage):
+A 12-character hex string generated once when the TM is first used, stored in global config (localStorage):
 
 ```javascript
 // In results-config.js or a new config section
 if (!config.serverId) {
-  config.serverId = crypto.randomUUID();
+  config.serverId = crypto.randomUUID().replace(/-/g, '').substring(0, 12);
   saveGlobalConfig();
 }
 ```
+
+12 hex chars = 48 bits of entropy (281 trillion possible values). More than sufficient for identifying local TM instances — collision risk is negligible.
 
 Purpose:
 - Identifies this TM instance in QR payloads
@@ -332,7 +395,7 @@ Both sides need both generation and scanning. Libraries loaded on-demand (not at
 
 7. **Self-signed SSL**: Works for camera access. Browser shows a one-time certificate warning; once accepted, `getUserMedia` (camera API) works normally. Docker can auto-generate a self-signed cert.
 
-8. **Stats the TM doesn't currently track**: The result QR carries leg-level detail (per-leg dart counts, checkout scores) and player stats (tons, 180s, averages) that the TM currently doesn't store beyond winner/loser and leg score. A future enhancement could display these in the bracket or leaderboard.
+8. **Stats the TM doesn't currently track**: The result QR carries raw visit scores from which the TM can derive everything (averages, score ranges, high finishes, best/worst leg, etc.). The TM currently doesn't store this detail beyond winner/loser and leg score. A future enhancement could display derived stats in the bracket or leaderboard.
 
 ---
 

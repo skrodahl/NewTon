@@ -1155,7 +1155,6 @@ body {
   font-weight: 600;
   font-size: 0.75rem;
   color: var(--text-secondary);
-  text-transform: uppercase;
 }
 
 .leg-scoresheet-table td {

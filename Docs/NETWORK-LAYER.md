@@ -1,7 +1,7 @@
 # NewTon Network Layer - App Integration
 
 **Status:** Planning
-**Last Updated:** January 2025
+**Last Updated:** February 2026
 
 ---
 
@@ -28,9 +28,19 @@ The apps must work identically in all scenarios:
 - The newton-app Docker image must work standalone without newton-hub.
 - Hub connectivity is an optional enhancement, not a requirement.
 - Users who deploy only newton-app get the same experience as opening HTML directly.
-- Network features require a valid license from the hub.
 - Network mode is toggled on/off in TM (master control).
-- QR codes only appear in Chalker when running a network match (license-gated).
+
+### Licensing Boundaries
+
+| Feature | License Required | Notes |
+|---------|:---:|-------|
+| Tournament Manager (DE, future SE) | No | Fully open source with all features |
+| Chalker | No | Fully open source, no limitations |
+| QR code generation & scanning | No | Open source — the free path for match assignment and result transfer |
+| Network bridge (MQTT) | **Yes** | Encryption is the license gate — TM cannot read unencrypted MQTT traffic |
+| Series / League | **Yes** | Only available through the network bridge (no QR workflow) |
+
+**Key principle:** Encryption serves double duty — it protects data in transit AND enforces licensing. No license = no decryption keys = MQTT is non-functional. QR bypasses this naturally because it's a visual/local channel requiring no encryption.
 
 ---
 
@@ -166,40 +176,17 @@ const ChalkerNetwork = {
 
 ---
 
-## QR Code Result Transfer
+## QR Code Communication (Open Source)
 
-QR codes are a licensed feature - only available for network matches.
+QR is the **free, unlicensed path** for match assignment and result transfer. It works in all scenarios — standalone, Docker, with or without a hub. No network or license required.
 
-### When QR Appears
-- Chalker is in network mode (match dispatched from TM)
-- Match completes successfully
-- Acts as fallback if network transmission fails
-- NOT available in standalone/manual mode (no license)
+- **TM → Chalker**: Match assignment QR (player names, format, match/tournament IDs)
+- **Chalker → TM**: Match result QR (raw visit scores, leg winners, checkout darts)
+- **Fallback for network mode**: If MQTT delivery fails, QR is always available
 
-### Chalker: Generate QR
+The TM derives all statistics (averages, score ranges, high finishes, etc.) from raw visit scores in the result payload. Base64-encoded scores keep the payload compact (~380-500 bytes for typical Bo3-Bo5).
 
-On network match completion, generate QR encoding:
-```javascript
-{
-  v: 1,                      // Schema version
-  m: 'FS-1-3',              // Match ID (if from TM)
-  w: 1,                      // Winner (1 or 2)
-  s: '2-1',                  // Score (legs)
-  p1: 'John Smith',
-  p2: 'Jane Doe',
-  stats: { /* compact stats */ }
-}
-```
-
-Display as QR code on result screen.
-
-### TM: Scan QR
-
-- Camera button on match card
-- Scan QR, parse result
-- Confirm and apply to bracket
-
-**Library consideration:** Lightweight QR library, loaded only when needed.
+> **Full protocol specification:** See **Docs/QR.md** for payload schemas, field definitions, size analysis, encoding details, integrity checking, and verification procedures.
 
 ---
 
@@ -241,36 +228,13 @@ async function initNetwork() {
 
 ## Message Schemas
 
-### Match Assignment (Hub → Chalker)
-```json
-{
-  "type": "match:assign",
-  "matchId": "FS-1-3",
-  "tournamentId": "uuid",
-  "player1": "John Smith",
-  "player2": "Jane Doe",
-  "startingScore": 501,
-  "bestOf": 3
-}
-```
+### Match Assignment & Result (via MQTT)
 
-### Match Result (Chalker → Hub)
-```json
-{
-  "type": "match:result",
-  "matchId": "FS-1-3",
-  "winner": "player1",
-  "legs": [
-    { "winner": "player1", "p1Darts": 15, "p2Darts": 12 },
-    { "winner": "player2", "p1Darts": 18, "p2Darts": 21 },
-    { "winner": "player1", "p1Darts": 12, "p2Darts": 15 }
-  ],
-  "stats": {
-    "player1": { "tons": 3, "ton40": 1, "ton80": 0, "highOut": 84 },
-    "player2": { "tons": 2, "ton40": 0, "ton80": 1, "highOut": 72 }
-  }
-}
-```
+MQTT uses the **same payload schemas** as QR (see **Docs/QR.md**), wrapped in an encrypted envelope. The `t` field distinguishes message types (`"a"` for assignment, `"r"` for result). This means one schema definition, two transports.
+
+The encrypted MQTT envelope adds:
+- Encryption layer (license-gated — TM cannot decrypt without valid license keys)
+- CRC-32 inside the encrypted payload for post-decryption integrity verification
 
 ### Lane Registration (Chalker → Hub)
 ```json
@@ -365,6 +329,7 @@ chalker/
 
 ## Related Documents
 
+- **Docs/QR.md**: QR communication protocol (payload schemas, encoding, integrity)
 - **CHALKER-PERSISTENCE.md**: Chalker's offline storage architecture
 - **CHANGELOG.md**: Version history
 - **README.md**: Project overview
