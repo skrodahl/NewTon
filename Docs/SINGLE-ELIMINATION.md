@@ -387,6 +387,7 @@ Suggested next steps, roughly in dependency order. Each step is designed to be l
   - Referee suggestions show raw round keys ("FS-R1") instead of display names ("Semifinals")
   - Match card headers show raw match IDs ("FS-3-1") instead of friendly labels for Bronze/Final
   - Progression text shows DE destinations for SE matches (e.g., "Leads to GRAND-FINAL and BS-FINAL" on Bronze match, "Leads to FS-2-1 and BS-1-1" on QF matches) — `getMatchProgressionText()` needs to be format-aware
+  - Leaderboard ranking tier labels use DE sizing — 8-player SE QF losers show "5th-6th" instead of correct "5th-8th". The `calculateSERankings()` placement tiers need SE-specific labels
 
 ### Step 8: Testing & polish
 - Test all five bracket sizes (2, 4, 8, 16, 32)
