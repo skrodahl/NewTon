@@ -1712,3 +1712,396 @@ function create32PlayerBacksideLines(grid, matches, positions) {
 
     return progressionLines;
 }
+
+// ================================
+// SE BRACKET LINE FUNCTIONS
+// ================================
+
+/**
+ * Creates tournament header and FINALS label for SE bracket.
+ * Simpler than createBracketLabels() — no FRONTSIDE/BACKSIDE section labels.
+ * @param {Object} grid - Grid configuration object
+ * @param {number} bracketCenterX - Horizontal center of the SE bracket
+ * @param {number} finalsX - X position of the finals column
+ * @param {number} bracketSize - Tournament bracket size (4, 8, 16, or 32)
+ * @returns {Array} Array of 2 DOM elements [tournamentHeader, finalsLabel]
+ */
+function createSEBracketLabels(grid, bracketCenterX, finalsX, bracketSize) {
+    const labels = [];
+
+    // Get tournament and club info
+    let tournamentName = 'Tournament';
+    let tournamentDate = 'Date';
+    let clubName = 'NewTon DC';
+
+    const currentTournament = localStorage.getItem('currentTournament');
+    if (currentTournament) {
+        try {
+            const t = JSON.parse(currentTournament);
+            tournamentName = t.name || 'Tournament';
+            tournamentDate = t.date || 'Date';
+        } catch (e) {
+            console.warn('Could not parse tournament data for SE bracket labels');
+        }
+    }
+
+    try {
+        const globalConfig = JSON.parse(localStorage.getItem('dartsConfig') || '{}');
+        if (globalConfig.clubName) {
+            clubName = globalConfig.clubName;
+        } else if (globalConfig.applicationTitle) {
+            clubName = globalConfig.applicationTitle.replace(' - Tournament Manager', '');
+        }
+    } catch (e) {
+        console.warn('Could not parse global config for SE bracket labels');
+    }
+
+    // Header font size scales with bracket size
+    let headerFontSize;
+    switch (bracketSize) {
+        case 4:  headerFontSize = '48px'; break;
+        case 8:  headerFontSize = '54px'; break;
+        case 16: headerFontSize = '64px'; break;
+        case 32: headerFontSize = '78px'; break;
+        default: headerFontSize = '64px';
+    }
+
+    // Header anchored near the top of the canvas
+    const bronzeY = bracketSize >= 8
+        ? grid.centerY - (grid.matchHeight + grid.verticalSpacing)
+        : grid.centerY - 160;
+    const headerY = 30;
+
+    const tournamentHeader = document.createElement('div');
+    tournamentHeader.id = 'tournamentHeader';
+    tournamentHeader.style.position = 'absolute';
+    tournamentHeader.style.left = `${bracketCenterX}px`;
+    tournamentHeader.style.top = `${headerY}px`;
+    tournamentHeader.style.fontFamily = 'Inter, sans-serif';
+    tournamentHeader.style.fontSize = headerFontSize;
+    tournamentHeader.style.color = '#333333';
+    tournamentHeader.style.textAlign = 'center';
+    tournamentHeader.style.transform = 'translateX(-50%)';
+    tournamentHeader.style.zIndex = '5';
+    tournamentHeader.innerHTML = `<strong>${clubName} - ${tournamentName}</strong><br><span style="font-size: 0.8em; font-weight: normal;">${tournamentDate}</span>`;
+    labels.push(tournamentHeader);
+
+    // FINALS label 60px above the Bronze match top
+    const finalsLabelY = bronzeY - 60;
+    const finalsLabel = document.createElement('div');
+    finalsLabel.id = 'seFinalsLabel';
+    finalsLabel.style.position = 'absolute';
+    finalsLabel.style.left = `${finalsX + grid.matchWidth / 2}px`;
+    finalsLabel.style.top = `${finalsLabelY}px`;
+    finalsLabel.style.fontFamily = 'Inter, sans-serif';
+    finalsLabel.style.fontSize = '24px';
+    finalsLabel.style.fontWeight = 'bold';
+    finalsLabel.style.color = '#666666';
+    finalsLabel.style.textAlign = 'center';
+    finalsLabel.style.transform = 'translateX(-50%)';
+    finalsLabel.style.zIndex = '5';
+    finalsLabel.textContent = 'FINALS';
+    labels.push(finalsLabel);
+
+    return labels;
+}
+
+/**
+ * Creates placement labels above SE round columns showing the finish range for losers.
+ * 4-player: none (all SF losers go to Bronze).
+ * 8-player: "5th-8th Place" above round 1.
+ * 16-player: "9th-16th Place" above round 1, "5th-8th Place" above round 2 (QF).
+ * 32-player: "17th-32nd Place" above round 1, "9th-16th Place" above round 2, "5th-8th Place" above round 3 (QF).
+ * @param {Object} grid - Grid configuration object
+ * @param {number} bracketSize - Tournament bracket size
+ * @param {Object} positions - Match positions object (contains round1X, round2X etc.)
+ * @returns {Array} Array of DOM elements for placement labels
+ */
+function createSEPlacementLabels(grid, bracketSize, positions) {
+    const placementLabels = [];
+
+    let placements = [];
+    switch (bracketSize) {
+        case 8:
+            placements = [
+                { text: '5th-8th Place', x: positions.round1X, y: positions.round1StartY - 70 },
+                { text: 'SEMIFINALS',    x: positions.round2X, y: positions.sf1Y - 60 }
+            ];
+            break;
+        case 16:
+            placements = [
+                { text: '9th-16th Place', x: positions.round1X, y: positions.round1StartY - 70 },
+                { text: '5th-8th Place',  x: positions.round2X, y: positions.qf1Y - 70 },
+                { text: 'SEMIFINALS',     x: positions.round3X, y: positions.sf1Y - 60 }
+            ];
+            break;
+        case 32:
+            placements = [
+                { text: '17th-32nd Place', x: positions.round1X, y: positions.round1StartY - 70 },
+                { text: '9th-16th Place',  x: positions.round2X, y: positions.r2Ys[0] - 70 },
+                { text: '5th-8th Place',   x: positions.round3X, y: positions.qfYs[0] - 70 },
+                { text: 'SEMIFINALS',      x: positions.round4X, y: positions.sf1Y - 60 }
+            ];
+            break;
+        // case 4: placements stays []
+    }
+
+    placements.forEach(placement => {
+        const label = document.createElement('div');
+        label.style.position = 'absolute';
+        label.style.left = `${placement.x + grid.matchWidth / 2}px`;
+        label.style.top = `${placement.y}px`;
+        label.style.fontFamily = 'Inter, sans-serif';
+        label.style.fontSize = '24px';
+        label.style.fontWeight = 'bold';
+        label.style.color = '#666666';
+        label.style.textAlign = 'center';
+        label.style.transform = 'translateX(-50%)';
+        label.style.zIndex = '5';
+        label.style.pointerEvents = 'none';
+        label.style.whiteSpace = 'nowrap';
+        label.textContent = placement.text;
+        placementLabels.push(label);
+    });
+
+    return placementLabels;
+}
+
+/**
+ * Creates SE finals area progression lines.
+ * Both SFs connect via horizontal lines to a shared vertical spine,
+ * which branches horizontally to Bronze and Final.
+ * @param {number} lastRoundX - X of the last SE round column (SFs)
+ * @param {number} sf1CenterY - Center Y of SF1 match
+ * @param {number} sf2CenterY - Center Y of SF2 match
+ * @param {number} finalsX - X of the finals column (left edge of Bronze/Final matches)
+ * @param {number} bronzeCenterY - Center Y of Bronze match
+ * @param {number} finalCenterY - Center Y of Final match
+ * @param {Object} grid - Grid configuration object
+ * @returns {Array} Array of DOM elements (5 lines)
+ */
+function createSEFinalsLines(lastRoundX, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid) {
+    const elements = [];
+    const sfRightEdge = lastRoundX + grid.matchWidth;
+    const finalsVerticalX = sfRightEdge + grid.horizontalSpacing / 2; // Same offset as QF→SF connector
+
+    function makeHLine(x, y, w) {
+        const el = document.createElement('div');
+        el.style.position = 'absolute';
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.style.width = `${w}px`;
+        el.style.height = '3px';
+        el.style.backgroundColor = '#666666';
+        el.style.zIndex = '1';
+        return el;
+    }
+
+    function makeVLine(x, y, h) {
+        const el = document.createElement('div');
+        el.style.position = 'absolute';
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.style.width = '3px';
+        el.style.height = `${h}px`;
+        el.style.backgroundColor = '#666666';
+        el.style.zIndex = '1';
+        return el;
+    }
+
+    // SF1 right edge → vertical spine
+    elements.push(makeHLine(sfRightEdge, sf1CenterY, finalsVerticalX - sfRightEdge));
+
+    // SF2 right edge → vertical spine
+    elements.push(makeHLine(sfRightEdge, sf2CenterY, finalsVerticalX - sfRightEdge));
+
+    // Vertical spine spanning all four center Y values
+    const spineTop    = Math.min(sf1CenterY, sf2CenterY, bronzeCenterY, finalCenterY);
+    const spineBottom = Math.max(sf1CenterY, sf2CenterY, bronzeCenterY, finalCenterY);
+    elements.push(makeVLine(finalsVerticalX, spineTop, spineBottom - spineTop));
+
+    // Spine → Bronze left edge
+    elements.push(makeHLine(finalsVerticalX, bronzeCenterY, finalsX - finalsVerticalX));
+
+    // Spine → Final left edge
+    elements.push(makeHLine(finalsVerticalX, finalCenterY, finalsX - finalsVerticalX));
+
+    return elements;
+}
+
+/**
+ * Creates all SE progression lines for 4-player bracket.
+ * @param {Object} grid - Grid configuration object
+ * @param {Array} matches - Array of match objects
+ * @param {Object} positions - Match positions (round1X, finalsX, sf1Y, sf2Y)
+ * @returns {Array} Array of DOM elements
+ */
+function create4PlayerSELines(grid, matches, positions) {
+    const lines = [];
+    const { round1X, finalsX, sf1Y, sf2Y } = positions;
+
+    // Bracket header + FINALS label
+    const bracketCenterX = (round1X + finalsX + grid.matchWidth) / 2;
+    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 4));
+
+    // Finals lines: both SFs connect to shared spine → Bronze and Final
+    const sf1CenterY   = sf1Y + grid.matchHeight / 2;
+    const sf2CenterY   = sf2Y + grid.matchHeight / 2;
+    const bronzeCenterY = (grid.centerY - 160) + grid.matchHeight / 2;
+    const finalCenterY  = grid.centerY + grid.matchHeight / 2;
+    lines.push(...createSEFinalsLines(round1X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid));
+
+    return lines;
+}
+
+/**
+ * Creates all SE progression lines for 8-player bracket.
+ * @param {Object} grid - Grid configuration object
+ * @param {Array} matches - Array of match objects
+ * @param {Object} positions - Match positions object
+ * @returns {Array} Array of DOM elements
+ */
+function create8PlayerSELines(grid, matches, positions) {
+    const lines = [];
+    const { round1X, round2X, finalsX, round1StartY, spacing, sf1Y, sf2Y } = positions;
+
+    // Bracket header + FINALS label
+    const bracketCenterX = (round1X + finalsX + grid.matchWidth) / 2;
+    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 8));
+
+    // Placement labels: "5th-8th Place" above QF column
+    lines.push(...createSEPlacementLabels(grid, 8, positions));
+
+    // QF center Y values (4 QF matches)
+    const qfCenterYs = [0, 1, 2, 3].map(i => round1StartY + i * spacing + grid.matchHeight / 2);
+
+    // SF center Y values
+    const sf1CenterY = sf1Y + grid.matchHeight / 2;
+    const sf2CenterY = sf2Y + grid.matchHeight / 2;
+
+    // QF → SF L-shaped lines (QF1+QF2→SF1, QF3+QF4→SF2)
+    for (let i = 0; i < 4; i++) {
+        const sfCenterY = i < 2 ? sf1CenterY : sf2CenterY;
+        const [h1, v, h2] = createLShapedProgressionLine(round1X + grid.matchWidth, qfCenterYs[i], round2X, sfCenterY);
+        lines.push(h1, v, h2);
+    }
+
+    // SF → Finals lines
+    const bronzeCenterY = sf1CenterY; // BRONZE at same Y as SF1
+    const finalCenterY  = grid.centerY + grid.matchHeight / 2;
+    lines.push(...createSEFinalsLines(round2X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid));
+
+    return lines;
+}
+
+/**
+ * Creates all SE progression lines for 16-player bracket.
+ * @param {Object} grid - Grid configuration object
+ * @param {Array} matches - Array of match objects
+ * @param {Object} positions - Match positions object
+ * @returns {Array} Array of DOM elements
+ */
+function create16PlayerSELines(grid, matches, positions) {
+    const lines = [];
+    const { round1X, round2X, round3X, finalsX, round1StartY, spacing } = positions;
+    const { qf1Y, qf2Y, qf3Y, qf4Y, sf1Y, sf2Y } = positions;
+
+    // Bracket header + FINALS label
+    const bracketCenterX = (round1X + finalsX + grid.matchWidth) / 2;
+    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 16));
+
+    // Placement labels
+    lines.push(...createSEPlacementLabels(grid, 16, positions));
+
+    // R1 center Y values (8 R1 matches)
+    const r1CenterYs = [0, 1, 2, 3, 4, 5, 6, 7].map(i => round1StartY + i * spacing + grid.matchHeight / 2);
+
+    // QF center Y values
+    const qfCenterYs = [qf1Y, qf2Y, qf3Y, qf4Y].map(y => y + grid.matchHeight / 2);
+
+    // SF center Y values
+    const sf1CenterY = sf1Y + grid.matchHeight / 2;
+    const sf2CenterY = sf2Y + grid.matchHeight / 2;
+
+    // R1 → QF L-shaped lines (pairs: R1_1+R1_2→QF1, ..., R1_7+R1_8→QF4)
+    for (let i = 0; i < 8; i++) {
+        const qfIdx = Math.floor(i / 2);
+        const [h1, v, h2] = createLShapedProgressionLine(round1X + grid.matchWidth, r1CenterYs[i], round2X, qfCenterYs[qfIdx]);
+        lines.push(h1, v, h2);
+    }
+
+    // QF → SF L-shaped lines (QF1+QF2→SF1, QF3+QF4→SF2)
+    for (let i = 0; i < 4; i++) {
+        const sfCenterY = i < 2 ? sf1CenterY : sf2CenterY;
+        const [h1, v, h2] = createLShapedProgressionLine(round2X + grid.matchWidth, qfCenterYs[i], round3X, sfCenterY);
+        lines.push(h1, v, h2);
+    }
+
+    // SF → Finals lines
+    const bronzeCenterY = sf1CenterY; // BRONZE at same Y as SF1
+    const finalCenterY  = grid.centerY + grid.matchHeight / 2;
+    lines.push(...createSEFinalsLines(round3X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid));
+
+    return lines;
+}
+
+/**
+ * Creates all SE progression lines for 32-player bracket.
+ * @param {Object} grid - Grid configuration object
+ * @param {Array} matches - Array of match objects
+ * @param {Object} positions - Match positions object
+ * @returns {Array} Array of DOM elements
+ */
+function create32PlayerSELines(grid, matches, positions) {
+    const lines = [];
+    const { round1X, round2X, round3X, round4X, finalsX, round1StartY, spacing } = positions;
+    const { r2Ys, qfYs, sf1Y, sf2Y } = positions;
+
+    // Bracket header + FINALS label
+    const bracketCenterX = (round1X + finalsX + grid.matchWidth) / 2;
+    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 32));
+
+    // Placement labels
+    lines.push(...createSEPlacementLabels(grid, 32, positions));
+
+    // R1 center Y values (16 R1 matches)
+    const r1CenterYs = Array.from({ length: 16 }, (_, i) => round1StartY + i * spacing + grid.matchHeight / 2);
+
+    // R2 center Y values
+    const r2CenterYs = r2Ys.map(y => y + grid.matchHeight / 2);
+
+    // QF center Y values
+    const qfCenterYs = qfYs.map(y => y + grid.matchHeight / 2);
+
+    // SF center Y values
+    const sf1CenterY = sf1Y + grid.matchHeight / 2;
+    const sf2CenterY = sf2Y + grid.matchHeight / 2;
+
+    // R1 → R2 L-shaped lines (pairs: R1_1+R1_2→R2_1, ..., R1_15+R1_16→R2_8)
+    for (let i = 0; i < 16; i++) {
+        const r2Idx = Math.floor(i / 2);
+        const [h1, v, h2] = createLShapedProgressionLine(round1X + grid.matchWidth, r1CenterYs[i], round2X, r2CenterYs[r2Idx]);
+        lines.push(h1, v, h2);
+    }
+
+    // R2 → QF L-shaped lines (pairs: R2_1+R2_2→QF1, ..., R2_7+R2_8→QF4)
+    for (let i = 0; i < 8; i++) {
+        const qfIdx = Math.floor(i / 2);
+        const [h1, v, h2] = createLShapedProgressionLine(round2X + grid.matchWidth, r2CenterYs[i], round3X, qfCenterYs[qfIdx]);
+        lines.push(h1, v, h2);
+    }
+
+    // QF → SF L-shaped lines (QF1+QF2→SF1, QF3+QF4→SF2)
+    for (let i = 0; i < 4; i++) {
+        const sfCenterY = i < 2 ? sf1CenterY : sf2CenterY;
+        const [h1, v, h2] = createLShapedProgressionLine(round3X + grid.matchWidth, qfCenterYs[i], round4X, sfCenterY);
+        lines.push(h1, v, h2);
+    }
+
+    // SF → Finals lines
+    const bronzeCenterY = sf1CenterY; // BRONZE at same Y as SF1
+    const finalCenterY  = grid.centerY + grid.matchHeight / 2;
+    lines.push(...createSEFinalsLines(round4X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid));
+
+    return lines;
+}

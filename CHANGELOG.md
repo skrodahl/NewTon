@@ -48,7 +48,19 @@
 - Added `getSERoundDisplayName(round, bracketSize)` in clean-match-progression.js — single source of truth for SE round display names
 - `getRoundDescription(match)` in bracket-rendering.js uses it for SE matches; DE path unchanged
 - Match Controls SE layout: left column = earliest ready round, right = remaining rounds; live matches in left column only
-- **Remaining work**: SE bracket rendering (Step 5), polish (referee round labels, match card IDs)
+- **SE bracket rendering** (Step 5): Visual bracket displayed for all 4 SE bracket sizes
+  - `renderSEBracket()` called from `renderCleanBracket()` when `tournament.format === 'SE'` — DE path untouched
+  - Size-specific functions: `render4/8/16/32PlayerSEMatches()` — same grid/coordinate system as DE, frontside-only
+  - 4-player: 2 SFs aligned at Bronze/Final Y for clean horizontal connections to finals column
+  - 8/16/32-player: SF positions mirror DE frontside semi positions (Y=335/665 for all sizes)
+  - `create4/8/16/32PlayerSELines()` in bracket-lines.js: L-shaped progression lines through rounds, shared vertical spine at finalsX-40 branching to Bronze and Final
+  - `createSEBracketLabels()`: tournament header (centered on bracket) + FINALS label (above finals column)
+  - `createSEPlacementLabels()`: placement range labels above each round column where losers are eliminated
+  - `createSEFinalsLines()`: reusable finals spine — both SFs connect to vertical spine, spine branches to Bronze and Final
+  - Match badge shows "BRONZE" / "FINAL" for SE special matches (via `isSEBronzeMatch()` / `isSEFinalMatch()`)
+  - SE zoom/pan defaults per bracket size (tunable): 4P zoom=0.8, 8P zoom=0.65, 16P zoom=0.45, 32P zoom=0.33
+  - `resetZoom()` updated with SE-specific defaults
+- **Remaining work**: SE polish (referee round labels, match card IDs, leaderboard tier labels)
 
 ---
 

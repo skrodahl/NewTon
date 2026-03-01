@@ -364,11 +364,18 @@ Suggested next steps, roughly in dependency order. Each step is designed to be l
 - 1st/2nd place set from final match winner/loser; 3rd place from BS-FINAL loser only in DE
 - Undo of tournament-ending match also format-aware (detects `{}` instead of hardcoded GRAND-FINAL)
 
-### Step 5: SE bracket rendering
-- New rendering path in `renderCleanBracket()` for SE
-- Left-to-right tree layout with round placement labels
-- Winner-only progression lines
-- No backside, no gradient, no FRONTSIDE/BACKSIDE headers
+### Step 5: SE bracket rendering — IMPLEMENTED
+- `renderCleanBracket()` branches to `renderSEBracket()` when `tournament.format === 'SE'`; DE path completely untouched
+- `renderSEBracket()` dispatches to `render4/8/16/32PlayerSEMatches()` — same grid/coordinate system as DE, frontside-only
+- **4-player**: SFs at Bronze/Final Y positions (420/580) for clean horizontal connections; finalsX = round1X + matchWidth + 4×horizontalSpacing
+- **8/16/32-player**: SF positions mirror DE frontside semi positions — always Y=335/665 regardless of bracket size; preliminary rounds use identical Y formulas as their DE counterparts
+- **Progression lines** (`create4/8/16/32PlayerSELines()` in bracket-lines.js):
+  - L-shaped lines connect each round to the next (same `createLShapedProgressionLine()` as DE)
+  - Shared vertical spine at `finalsX - 40` with horizontal branches to Bronze (upper) and Final (lower)
+  - `createSEFinalsLines()` is a reusable helper called by all four size functions
+- **Labels**: `createSEBracketLabels()` adds tournament header (centered on bracket) + FINALS label; `createSEPlacementLabels()` adds placement range labels above each round column where losers are eliminated (e.g., "5th-8th Place" above QF column)
+- **Match badges**: "BRONZE" / "FINAL" shown on SE special match cards (via `isSEBronzeMatch()` / `isSEFinalMatch()`)
+- **Zoom/pan defaults** (tunable): 4P zoom=0.8, 8P zoom=0.65, 16P zoom=0.45, 32P zoom=0.33; `resetZoom()` updated with SE-specific values
 
 ### Step 6: SE rankings (`calculateAllRankings()`) — IMPLEMENTED
 - `calculateSERankings()` derives placement from which round a player was eliminated in

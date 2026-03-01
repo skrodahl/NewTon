@@ -2905,9 +2905,9 @@ function getSERoundDisplayName(round, bracketSize) {
     if (!total) return `Round ${round}`;
 
     if (round === total) return 'Final';
-    if (round === total - 1) return 'Bronze Final';
-    if (round === total - 2) return 'Semifinals';
-    if (round === total - 3) return 'Quarterfinals';
+    if (round === total - 1) return 'Bronze';
+    if (round === total - 2) return 'Semifinal';
+    if (round === total - 3) return 'Quarterfinal';
     return `Round ${round}`;
 }
 

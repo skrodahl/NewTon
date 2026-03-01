@@ -52,21 +52,42 @@ function renderBracket() {
 
     // Set default zoom and position for initial bracket render
     if (initialBracketRender && tournament && tournament.bracket) {
-        // Different zoom/pan settings for each bracket size
-        if (tournament.bracketSize === 32) {
-            zoomLevel = 0.33;
-            panOffset.x = 750;
-            panOffset.y = 360;
-        } else if (tournament.bracketSize === 16) {
-            // TODO: Test and adjust for 16-player bracket
-            zoomLevel = 0.45;
-            panOffset.x = 645;
-            panOffset.y = 275;
-        } else if (tournament.bracketSize === 8) {
-            // TODO: Test and adjust for 8-player bracket
-            zoomLevel = 0.61;
-            panOffset.x = 450;
-            panOffset.y = 175;
+        if (tournament.format === 'SE') {
+            // SE-specific zoom/pan defaults (bracket is entirely right-of-center, no backside)
+            if (tournament.bracketSize === 32) {
+                zoomLevel = 0.33;
+                panOffset.x = 200;
+                panOffset.y = 210;
+            } else if (tournament.bracketSize === 16) {
+                zoomLevel = 0.45;
+                panOffset.x = 100;
+                panOffset.y = 140;
+            } else if (tournament.bracketSize === 8) {
+                zoomLevel = 0.65;
+                panOffset.x = -50;
+                panOffset.y = 25;
+            } else { // 4-player
+                zoomLevel = 0.8;
+                panOffset.x = -80;
+                panOffset.y = -60;
+            }
+        } else {
+            // DE zoom/pan defaults
+            if (tournament.bracketSize === 32) {
+                zoomLevel = 0.33;
+                panOffset.x = 750;
+                panOffset.y = 360;
+            } else if (tournament.bracketSize === 16) {
+                // TODO: Test and adjust for 16-player bracket
+                zoomLevel = 0.45;
+                panOffset.x = 645;
+                panOffset.y = 275;
+            } else if (tournament.bracketSize === 8) {
+                // TODO: Test and adjust for 8-player bracket
+                zoomLevel = 0.61;
+                panOffset.x = 450;
+                panOffset.y = 175;
+            }
         }
 
         initialBracketRender = false;
@@ -101,6 +122,12 @@ function clearBracket() {
 }
 
 function renderCleanBracket() {
+    // SE uses its own rendering path — DE path completely untouched
+    if (tournament.format === 'SE') {
+        renderSEBracket();
+        return;
+    }
+
     const bracketSize = tournament.bracketSize;
 
     // Get structure from our lookup tables instead of calculating
@@ -914,6 +941,318 @@ function renderFinalMatches(grid, frontsideStructure) {
     }
 }
 
+// ================================
+// SE BRACKET RENDERING FUNCTIONS
+// ================================
+
+/**
+ * Main SE bracket rendering function — called from renderCleanBracket() for SE format.
+ * Uses the same grid as DE but only renders frontside matches (no backside).
+ */
+function renderSEBracket() {
+    const grid = {
+        matchWidth: 280,
+        matchHeight: 150,
+        horizontalSpacing: 75,
+        verticalSpacing: 15,
+        canvasWidth: 3000,
+        canvasHeight: 1200,
+        centerX: 500,
+        centerY: 500,
+        centerBuffer: 50
+    };
+
+    const bracketSize = tournament.bracketSize;
+    if (bracketSize === 4) {
+        render4PlayerSEMatches(grid);
+    } else if (bracketSize === 8) {
+        render8PlayerSEMatches(grid);
+    } else if (bracketSize === 16) {
+        render16PlayerSEMatches(grid);
+    } else if (bracketSize === 32) {
+        render32PlayerSEMatches(grid);
+    }
+
+    renderSETitles(grid);
+}
+
+/**
+ * Renders 4-player SE bracket: 2 Semifinals + Bronze + Final.
+ * SFs are aligned vertically with Bronze/Final for a clean horizontal connection.
+ * @param {Object} grid - Grid configuration object
+ */
+function render4PlayerSEMatches(grid) {
+    if (!tournament || !matches || matches.length === 0) return;
+
+    const hasRealMatches = matches.some(m =>
+        m && m.player1 && m.player1 !== 'TBD' &&
+        m.player2 && m.player2 !== 'TBD'
+    );
+    if (!hasRealMatches) return;
+
+    const round1X = grid.centerX + grid.centerBuffer; // 550
+    const bronzeY = grid.centerY - 160; // 340
+    const finalY  = grid.centerY;       // 500
+    const finalsX = round1X + grid.matchWidth + 4 * grid.horizontalSpacing; // 1130
+
+    // SFs aligned with Bronze/Final Y positions for clean direct connections
+    const sf1Y = bronzeY; // 420
+    const sf2Y = finalY;  // 580
+
+    const sf1    = matches.find(m => m.id === 'FS-1-1');
+    const sf2    = matches.find(m => m.id === 'FS-1-2');
+    const bronze = matches.find(m => m.id === 'FS-2-1');
+    const final_ = matches.find(m => m.id === 'FS-3-1');
+
+    if (sf1)    renderMatch(sf1,    round1X, sf1Y,    'frontside', 2);
+    if (sf2)    renderMatch(sf2,    round1X, sf2Y,    'frontside', 2);
+    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
+
+    const positions = { round1X, finalsX, sf1Y, sf2Y };
+    const progressionLines = create4PlayerSELines(grid, matches, positions);
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    progressionLines.forEach(line => bracketCanvas.appendChild(line));
+}
+
+/**
+ * Renders 8-player SE bracket: 4 Quarterfinals + 2 Semifinals + Bronze + Final.
+ * QF positions mirror 8-player DE frontside round 1.
+ * @param {Object} grid - Grid configuration object
+ */
+function render8PlayerSEMatches(grid) {
+    if (!tournament || !matches || matches.length === 0) return;
+
+    const hasRealMatches = matches.some(m =>
+        m && m.player1 && m.player1 !== 'TBD' &&
+        m.player2 && m.player2 !== 'TBD'
+    );
+    if (!hasRealMatches) return;
+
+    const spacing  = grid.matchHeight + grid.verticalSpacing; // 165
+    const round1X  = grid.centerX + grid.centerBuffer;                          // 550 (QFs)
+    const round2X  = round1X + grid.matchWidth + grid.horizontalSpacing;        // 905 (SFs)
+    const bronzeY  = grid.centerY - spacing; // 335 (= sf1Y)
+    const finalY   = grid.centerY;           // 500
+    const finalsX  = round2X + grid.matchWidth + 4 * grid.horizontalSpacing;   // 1485
+
+    // QF positions: 4 matches centered around centerY (identical to 8P DE FS-R1)
+    const round1StartY = grid.centerY - 1.5 * spacing; // 252.5
+    for (let i = 1; i <= 4; i++) {
+        const match = matches.find(m => m.id === `FS-1-${i}`);
+        if (match) renderMatch(match, round1X, round1StartY + (i - 1) * spacing, 'frontside', 0);
+    }
+
+    // SF positions: centered between pairs of QFs
+    const sf1Y = round1StartY + spacing / 2;       // 335
+    const sf2Y = round1StartY + 2.5 * spacing;     // 665
+
+    const sf1    = matches.find(m => m.id === 'FS-2-1');
+    const sf2    = matches.find(m => m.id === 'FS-2-2');
+    const bronze = matches.find(m => m.id === 'FS-3-1');
+    const final_ = matches.find(m => m.id === 'FS-4-1');
+
+    if (sf1)    renderMatch(sf1,    round2X, sf1Y,    'frontside', 2);
+    if (sf2)    renderMatch(sf2,    round2X, sf2Y,    'frontside', 2);
+    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
+
+    const positions = { round1X, round2X, finalsX, round1StartY, spacing, sf1Y, sf2Y };
+    const progressionLines = create8PlayerSELines(grid, matches, positions);
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    progressionLines.forEach(line => bracketCanvas.appendChild(line));
+}
+
+/**
+ * Renders 16-player SE bracket: 8 R1 + 4 QF + 2 SF + Bronze + Final.
+ * Round positions mirror 16-player DE frontside.
+ * @param {Object} grid - Grid configuration object
+ */
+function render16PlayerSEMatches(grid) {
+    if (!tournament || !matches || matches.length === 0) return;
+
+    const hasRealMatches = matches.some(m =>
+        m && m.player1 && m.player1 !== 'TBD' &&
+        m.player2 && m.player2 !== 'TBD'
+    );
+    if (!hasRealMatches) return;
+
+    const spacing  = grid.matchHeight + grid.verticalSpacing; // 165
+    const round1X  = grid.centerX + grid.centerBuffer;                          // 550 (R1)
+    const round2X  = round1X + grid.matchWidth + grid.horizontalSpacing;        // 905 (QF)
+    const round3X  = round2X + grid.matchWidth + grid.horizontalSpacing;        // 1260 (SF)
+    const bronzeY  = grid.centerY - spacing; // 335 (= sf1Y)
+    const finalY   = grid.centerY;           // 500
+    const finalsX  = round3X + grid.matchWidth + 4 * grid.horizontalSpacing;   // 1840
+
+    // R1 positions: 8 matches centered around centerY (identical to 16P DE FS-R1)
+    const round1StartY = grid.centerY - 3.5 * spacing; // -77.5
+    for (let i = 1; i <= 8; i++) {
+        const match = matches.find(m => m.id === `FS-1-${i}`);
+        if (match) renderMatch(match, round1X, round1StartY + (i - 1) * spacing, 'frontside', 0);
+    }
+
+    // QF positions: 4 matches, each centered between a pair of R1 matches
+    const qf1Y = round1StartY + spacing / 2;              // 5
+    const qf2Y = round1StartY + 2 * spacing + spacing / 2; // 335
+    const qf3Y = round1StartY + 4 * spacing + spacing / 2; // 665
+    const qf4Y = round1StartY + 6 * spacing + spacing / 2; // 995
+
+    const qf1 = matches.find(m => m.id === 'FS-2-1');
+    const qf2 = matches.find(m => m.id === 'FS-2-2');
+    const qf3 = matches.find(m => m.id === 'FS-2-3');
+    const qf4 = matches.find(m => m.id === 'FS-2-4');
+
+    if (qf1) renderMatch(qf1, round2X, qf1Y, 'frontside', 1);
+    if (qf2) renderMatch(qf2, round2X, qf2Y, 'frontside', 1);
+    if (qf3) renderMatch(qf3, round2X, qf3Y, 'frontside', 1);
+    if (qf4) renderMatch(qf4, round2X, qf4Y, 'frontside', 1);
+
+    // SF positions: aligned with QF2/QF3 (same as 16P DE FS-3-1/FS-3-2)
+    const sf1Y = qf2Y; // 335
+    const sf2Y = qf3Y; // 665
+
+    const sf1    = matches.find(m => m.id === 'FS-3-1');
+    const sf2    = matches.find(m => m.id === 'FS-3-2');
+    const bronze = matches.find(m => m.id === 'FS-4-1');
+    const final_ = matches.find(m => m.id === 'FS-5-1');
+
+    if (sf1)    renderMatch(sf1,    round3X, sf1Y,    'frontside', 2);
+    if (sf2)    renderMatch(sf2,    round3X, sf2Y,    'frontside', 2);
+    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
+
+    const positions = {
+        round1X, round2X, round3X, finalsX,
+        round1StartY, spacing,
+        qf1Y, qf2Y, qf3Y, qf4Y, sf1Y, sf2Y
+    };
+    const progressionLines = create16PlayerSELines(grid, matches, positions);
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    progressionLines.forEach(line => bracketCanvas.appendChild(line));
+}
+
+/**
+ * Renders 32-player SE bracket: 16 R1 + 8 R2 + 4 QF + 2 SF + Bronze + Final.
+ * Round positions mirror 32-player DE frontside rounds.
+ * @param {Object} grid - Grid configuration object
+ */
+function render32PlayerSEMatches(grid) {
+    if (!tournament || !matches || matches.length === 0) return;
+
+    const hasRealMatches = matches.some(m =>
+        m && m.player1 && m.player1 !== 'TBD' &&
+        m.player2 && m.player2 !== 'TBD'
+    );
+    if (!hasRealMatches) return;
+
+    const spacing  = grid.matchHeight + grid.verticalSpacing; // 165
+    const round1X  = grid.centerX + grid.centerBuffer;                          // 550 (R1)
+    const round2X  = round1X + grid.matchWidth + grid.horizontalSpacing;        // 905 (R2)
+    const round3X  = round2X + grid.matchWidth + grid.horizontalSpacing;        // 1260 (QF)
+    const round4X  = round3X + grid.matchWidth + grid.horizontalSpacing;        // 1615 (SF)
+    const bronzeY  = grid.centerY - spacing; // 335 (= sf1Y)
+    const finalY   = grid.centerY;           // 500
+    const finalsX  = round4X + grid.matchWidth + 4 * grid.horizontalSpacing;   // 2195
+
+    // R1 positions: 16 matches centered around centerY (identical to 32P DE FS-R1)
+    const round1StartY = grid.centerY - 7.5 * spacing; // -737.5
+    for (let i = 1; i <= 16; i++) {
+        const match = matches.find(m => m.id === `FS-1-${i}`);
+        if (match) renderMatch(match, round1X, round1StartY + (i - 1) * spacing, 'frontside', 0);
+    }
+
+    // R2 positions: 8 matches, each centered between a pair of R1
+    const r2Ys = [];
+    for (let i = 0; i < 8; i++) {
+        const y1 = round1StartY + (2 * i) * spacing;
+        const y2 = round1StartY + (2 * i + 1) * spacing;
+        r2Ys.push((y1 + y2) / 2);
+    }
+    for (let i = 1; i <= 8; i++) {
+        const match = matches.find(m => m.id === `FS-2-${i}`);
+        if (match) renderMatch(match, round2X, r2Ys[i - 1], 'frontside', 1);
+    }
+
+    // QF positions: 4 matches, each centered between a pair of R2
+    const qfYs = [];
+    for (let i = 0; i < 4; i++) {
+        qfYs.push((r2Ys[2 * i] + r2Ys[2 * i + 1]) / 2);
+    }
+    for (let i = 1; i <= 4; i++) {
+        const match = matches.find(m => m.id === `FS-3-${i}`);
+        if (match) renderMatch(match, round3X, qfYs[i - 1], 'frontside', 1);
+    }
+
+    // SF positions: aligned with R2-4 and R2-5 (same as 32P DE FS-4-1/FS-4-2)
+    const sf1Y = r2Ys[3]; // 335
+    const sf2Y = r2Ys[4]; // 665
+
+    const sf1    = matches.find(m => m.id === 'FS-4-1');
+    const sf2    = matches.find(m => m.id === 'FS-4-2');
+    const bronze = matches.find(m => m.id === 'FS-5-1');
+    const final_ = matches.find(m => m.id === 'FS-6-1');
+
+    if (sf1)    renderMatch(sf1,    round4X, sf1Y,    'frontside', 2);
+    if (sf2)    renderMatch(sf2,    round4X, sf2Y,    'frontside', 2);
+    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
+
+    const positions = {
+        round1X, round2X, round3X, round4X, finalsX,
+        round1StartY, spacing,
+        r2Ys, qfYs, sf1Y, sf2Y
+    };
+    const progressionLines = create32PlayerSELines(grid, matches, positions);
+    const bracketCanvas = document.getElementById('bracketCanvas');
+    progressionLines.forEach(line => bracketCanvas.appendChild(line));
+}
+
+/**
+ * Renders SE bracket titles: watermark only (no FRONTSIDE/BACKSIDE section labels).
+ * @param {Object} grid - Grid configuration object
+ */
+function renderSETitles(grid) {
+    // Remove any existing titles and watermark
+    document.querySelectorAll('.bracket-title').forEach(title => title.remove());
+    const existingWatermark = document.getElementById('tournament-watermark');
+    if (existingWatermark) existingWatermark.remove();
+
+    const watermark = document.createElement('div');
+    watermark.id = 'tournament-watermark';
+    watermark.textContent = String.fromCharCode(..._0x7a, ..._0x9b);
+    watermark.style.position = 'absolute';
+    watermark.style.fontSize = '16px';
+    watermark.style.color = 'rgba(17,24,39,0.5)';
+    watermark.style.letterSpacing = '1px';
+    watermark.style.pointerEvents = 'none';
+    watermark.style.width = grid.matchWidth + 'px';
+    watermark.style.textAlign = 'center';
+
+    // Position below the last match in round 1 (mirrors DE watermark logic)
+    const spacing  = grid.matchHeight + grid.verticalSpacing;
+    const round1X  = grid.centerX + grid.centerBuffer;
+    const bracketSize = tournament?.bracketSize || 8;
+    let watermarkY;
+    if (bracketSize === 32) {
+        const round1StartY = grid.centerY - (7.5 * spacing);
+        watermarkY = round1StartY + 15 * spacing + grid.matchHeight + 40;
+    } else if (bracketSize === 16) {
+        const round1StartY = grid.centerY - (3.5 * spacing);
+        watermarkY = round1StartY + 7 * spacing + grid.matchHeight + 40;
+    } else if (bracketSize === 8) {
+        const round1StartY = grid.centerY - (1.5 * spacing);
+        watermarkY = round1StartY + 3 * spacing + grid.matchHeight + 40;
+    } else {
+        // 4-player: below the lower SF (at finalY = centerY)
+        watermarkY = grid.centerY + grid.matchHeight + 40;
+    }
+    watermark.style.left = round1X + 'px';
+    watermark.style.top  = watermarkY + 'px';
+
+    document.getElementById('bracketCanvas').appendChild(watermark);
+}
+
 /**
  * NEW: Get all matches that are in a state where they can be redone.
  * @returns {Set<string>} A set of match IDs that are redoable.
@@ -1033,7 +1372,24 @@ function renderMatch(match, x, y, section, roundIndex) {
     // Add round indicator
     let roundIndicator = '';
     if (section === 'frontside') {
-        roundIndicator = `<span class="round-indicator">R${match.round}</span>`;
+        // SE tournaments: show friendly badge for Bronze and Final matches
+        if (tournament && tournament.format === 'SE' &&
+            typeof isSEBronzeMatch === 'function' && typeof isSEFinalMatch === 'function') {
+            if (isSEBronzeMatch(match.id, tournament.bracketSize)) {
+                roundIndicator = `<span class="round-indicator final">BRONZE</span>`;
+            } else if (isSEFinalMatch(match.id, tournament.bracketSize)) {
+                roundIndicator = `<span class="round-indicator grand">FINAL</span>`;
+            } else {
+                const seName = typeof getSERoundDisplayName === 'function'
+                    ? getSERoundDisplayName(match.round, tournament.bracketSize)
+                    : `Round ${match.round}`;
+                const matchNum = match.id.split('-')[2];
+                const badgeText = matchNum ? `${seName} ${matchNum}` : seName;
+                roundIndicator = `<span class="round-indicator">${badgeText.toUpperCase()}</span>`;
+            }
+        } else {
+            roundIndicator = `<span class="round-indicator">R${match.round}</span>`;
+        }
     } else if (section === 'backside') {
         roundIndicator = `<span class="round-indicator backside">B${match.round}</span>`;
     } else if (match.id === 'BS-FINAL') {
@@ -1474,20 +1830,41 @@ function zoomOut() {
 }
 
 function resetZoom() {
-    // Set zoom and pan based on current bracket size (matching initial render values)
+    // Set zoom and pan based on current bracket format and size
     if (tournament && tournament.bracketSize) {
-        if (tournament.bracketSize === 32) {
-            zoomLevel = 0.33;
-            panOffset.x = 750;
-            panOffset.y = 360;
-        } else if (tournament.bracketSize === 16) {
-            zoomLevel = 0.45;
-            panOffset.x = 645;
-            panOffset.y = 275;
-        } else if (tournament.bracketSize === 8) {
-            zoomLevel = 0.61;
-            panOffset.x = 450;
-            panOffset.y = 175;
+        if (tournament.format === 'SE') {
+            if (tournament.bracketSize === 32) {
+                zoomLevel = 0.33;
+                panOffset.x = 200;
+                panOffset.y = 210;
+            } else if (tournament.bracketSize === 16) {
+                zoomLevel = 0.45;
+                panOffset.x = 100;
+                panOffset.y = 140;
+            } else if (tournament.bracketSize === 8) {
+                zoomLevel = 0.65;
+                panOffset.x = -50;
+                panOffset.y = 25;
+            } else { // 4-player
+                zoomLevel = 0.8;
+                panOffset.x = -80;
+                panOffset.y = -60;
+            }
+        } else {
+            // DE zoom/pan defaults
+            if (tournament.bracketSize === 32) {
+                zoomLevel = 0.33;
+                panOffset.x = 750;
+                panOffset.y = 360;
+            } else if (tournament.bracketSize === 16) {
+                zoomLevel = 0.45;
+                panOffset.x = 645;
+                panOffset.y = 275;
+            } else if (tournament.bracketSize === 8) {
+                zoomLevel = 0.61;
+                panOffset.x = 450;
+                panOffset.y = 175;
+            }
         }
     } else {
         // Fallback for safety
@@ -3498,7 +3875,7 @@ function showCommandCenterModal(matchData) {
                             if (!roundMatches || roundMatches.length === 0) return '';
                             const roundNum = parseInt(roundKey.replace('FS-R', ''));
                             const name = getSERoundDisplayName(roundNum, bracketSize);
-                            const emoji = name === 'Final' ? '🏆' : name === 'Bronze Final' ? '🥉' : '⚪';
+                            const emoji = name === 'Final' ? '🏆' : name === 'Bronze' ? '🥉' : '⚪';
                             return `
                                 <div class="cc-match-section" style="display: block;">
                                     <h4 class="cc-section-header">${emoji} ${name} - Ready to Start</h4>
