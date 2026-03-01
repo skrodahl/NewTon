@@ -1034,7 +1034,7 @@ function render8PlayerSEMatches(grid) {
     const round2X  = round1X + grid.matchWidth + grid.horizontalSpacing;        // 905 (SFs)
     const bronzeY  = grid.centerY - spacing; // 335 (= sf1Y)
     const finalY   = grid.centerY;           // 500
-    const finalsX  = round2X + grid.matchWidth + 4 * grid.horizontalSpacing;   // 1485
+    const finalsX  = round2X + 2 * (grid.matchWidth + grid.horizontalSpacing);  // 1615
 
     // QF positions: 4 matches centered around centerY (identical to 8P DE FS-R1)
     const round1StartY = grid.centerY - 1.5 * spacing; // 252.5
@@ -1052,12 +1052,14 @@ function render8PlayerSEMatches(grid) {
     const bronze = matches.find(m => m.id === 'FS-3-1');
     const final_ = matches.find(m => m.id === 'FS-4-1');
 
+    const bronzeX = round2X + grid.matchWidth + grid.horizontalSpacing; // Same column gap as QF→SF (75px)
+
     if (sf1)    renderMatch(sf1,    round2X, sf1Y,    'frontside', 2);
     if (sf2)    renderMatch(sf2,    round2X, sf2Y,    'frontside', 2);
-    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (bronze) renderMatch(bronze, bronzeX, bronzeY, 'frontside', 2);
     if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
 
-    const positions = { round1X, round2X, finalsX, round1StartY, spacing, sf1Y, sf2Y };
+    const positions = { round1X, round2X, finalsX, bronzeX, round1StartY, spacing, sf1Y, sf2Y };
     const progressionLines = create8PlayerSELines(grid, matches, positions);
     const bracketCanvas = document.getElementById('bracketCanvas');
     progressionLines.forEach(line => bracketCanvas.appendChild(line));
