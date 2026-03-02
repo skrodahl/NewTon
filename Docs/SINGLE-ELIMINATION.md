@@ -303,24 +303,115 @@ The bracket page has format-agnostic chrome and format-specific content. For SE:
 - No centering — avoids dead negative space on the left half of the screen
 - Same match cards, different coordinate map — positioning is the only difference
 - No "FRONTSIDE" label needed — the bracket type is established at generation time
-- **Finals area** (4+ player brackets): Bronze (top) and Final (bottom) positioned identically to DE's BS-FINAL and GRAND-FINAL — two matches stacked to the right of the semifinal round, with SF winners feeding to Final and SF losers feeding to Bronze
+- **Finals area** (4+ player brackets): Bronze and Final in separate columns for 8-player; shared column for 4/16/32-player. See below for the 8P staggered layout.
+
+### 8-Player Finals Area (Staggered Layout)
+The 8P bracket uses a staggered finals layout to visually represent round progression. BRONZE FINAL and FINAL are in separate columns, each spaced the same gap apart as all other round columns:
+
+```
+QF (550)    SF (905)    BRONZE (1279)    FINAL (1615)
+```
+
+- Column spacing = `matchWidth + horizontalSpacing` = 355px throughout
+- BRONZE is at `sf1Y` (same height as SF1, Y=335)
+- FINAL is at `centerY` (vertically centered between SF1 and SF2, Y=500)
+- BRONZE center is at the midpoint of the FINAL horizontal line
+- A vertical line drops from BRONZE's bottom-center down to the FINAL horizontal, making the SF2 → BRONZE path visually legible (SF2 loser travels right along the FINAL line, then branches up to BRONZE)
+- The SF1→BRONZE direct horizontal is intentionally omitted — BRONZE is fed only from below
+
+This layout is unique (no established convention exists for SE bronze visualization). It reads as left-to-right round progression: QF → SF → Bronze → Final.
+
+**Open question: communicating that BRONZE is played between SF losers**
+The bracket currently doesn't make it explicit that the two players in BRONZE FINAL are the losers of SF1 and SF2 — a viewer unfamiliar with the format might not know who ends up there. Options under consideration:
+- A subtitle on the BRONZE match card: *"Loser SF1 vs Loser SF2"* (or just *"3rd place match"*)
+- A small annotation label below the BRONZE FINAL column header
+- The connector line style (dotted = loser path) doing the work implicitly — see refinement below
+- Some combination of the above
+
+No decision yet — noting for later.
+
+**Refinement under consideration: dotted vertical connector**
+The vertical line from BRONZE's bottom-center down to the FINAL horizontal could be rendered dotted/dashed instead of solid. This would:
+- Visually distinguish the loser path (dotted) from the winner path (solid)
+- Reinforce that BRONZE is a secondary destination — losers arrive via this connector
+- Require only a single line style change (`border-style: dashed` on one element) — minimal rendering complexity
+- Pairs naturally with the Loser-Branch layout concept (see below), where loser paths are already styled differently
+
+**Decision pending.**
+
+### Alternative: Drop-Down Bronze Layout (Under Consideration)
+
+An alternative where SF losers "drop down" below the main bracket to reach BRONZE, keeping the winner path clean and horizontal:
+
+```
+QUARTERFINALS         SEMIFINALS            FINAL
+[ FS-1-1 ] ───┐
+              ├───── [ FS-2-1 ] ──────┐
+[ FS-1-2 ] ───┘           │           │
+                          │           ├────────── [ FS-4-1 ] (GOLD FINAL)
+[ FS-1-3 ] ───┐           │           │
+              ├───── [ FS-2-2 ] ──────┘
+[ FS-1-4 ] ───┘           │
+                          │
+                  (Losing Players Drop)
+                          │
+                          ▼
+                    [ FS-3-1 ] (BRONZE FINAL)
+                    (Loser FS-2-1 vs. Loser FS-2-2)
+```
+
+**Key differences from the staggered layout:**
+- Winner path (QF → SF → Final) is a pure left-to-right flow — no visual interruption
+- BRONZE sits below the main bracket, fed by a downward drop from the SF spine
+- Suggests a natural hierarchy: winners go right, losers drop down
+- Also note: FINAL relabeled as "GOLD FINAL" in this concept — worth considering whether that's more expressive than "FINAL"
+- Would require the bracket canvas to extend downward to accommodate BRONZE below the SF rows
+
+**Decision pending.**
+
+### Alternative: Loser-Branch Bronze Layout (Under Consideration)
+
+A third option where SF winners travel straight right to FINAL (unbroken horizontal), and SF losers branch sideways via dashed/secondary lines to a centrally-positioned BRONZE:
+
+```
+SEMIFINALS (Col 2)      BRONZE (Col 3)         FINAL (Col 4)
+[ FS-2-1 ] ━━━━━━━━━━━(Winner goes past)━━━━━━━━━▶ [ FS-4-1 ]
+    │                      ▲                      ▲
+    └- - -(Loser) - - - ▶[ FS-3-1 ]               ┃
+    ┌- - -(Loser) - - - - -┘                      ┃
+    │                                             ┃
+[ FS-2-2 ] ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┛
+```
+
+**Key differences from the other layouts:**
+- Winner path is the dominant visual — solid, unbroken horizontal to FINAL
+- Loser path is visually secondary — dashed or lighter lines branching to BRONZE
+- BRONZE is in a middle column, vertically centered between the two SFs
+- No ambiguity about which match is the "main" event
+- Requires two distinct line styles (winner vs. loser) — adds rendering complexity
+- Most closely resembles how DE brackets already distinguish winner/loser paths
+
+**Decision pending.**
 
 ### Round Placement Labels
-Same concept as DE's backside placement labels, applied to each round column. Losers of each round get the corresponding placement:
+Round labels appear above each column. They use the round display name (from `getSERoundDisplayName()`), not the placement range. This is more natural for operators than placement tiers and keeps the bracket self-documenting.
 
-**8-player example:**
+**8-player column labels (implemented):**
 ```
-R1 (Quarterfinals)    R2 (Semifinals)    R3 (Final)
-5th-8th Place          3rd-4th Place       1st / 2nd Place
-```
-
-**16-player example:**
-```
-R1                R2 (QF)           R3 (SF)          R4 (Final)
-9th-16th Place    5th-8th Place     3rd-4th Place     1st / 2nd Place
+QUARTERFINALS    SEMIFINALS    BRONZE FINAL    FINAL
 ```
 
-This makes the bracket self-documenting — the operator can see at a glance what placement each round's losers receive. Also resolves the open design question about SE placements: they're inherently tied to the round.
+**16-player column labels (planned):**
+```
+ROUND 1    QUARTERFINALS    SEMIFINALS    BRONZE FINAL    FINAL
+```
+
+**32-player column labels (planned):**
+```
+ROUND 1    ROUND 2    QUARTERFINALS    SEMIFINALS    BRONZE FINAL    FINAL
+```
+
+Labels for BRONZE FINAL and FINAL are handled by `createSEBracketLabels()` (which also controls their x-position). Labels for all earlier rounds are handled by `createSEPlacementLabels()`.
 
 ---
 
@@ -373,7 +464,7 @@ Suggested next steps, roughly in dependency order. Each step is designed to be l
   - L-shaped lines connect each round to the next (same `createLShapedProgressionLine()` as DE)
   - Shared vertical spine at `finalsX - 40` with horizontal branches to Bronze (upper) and Final (lower)
   - `createSEFinalsLines()` is a reusable helper called by all four size functions
-- **Labels**: `createSEBracketLabels()` adds tournament header (centered on bracket) + FINALS label; `createSEPlacementLabels()` adds placement range labels above each round column where losers are eliminated (e.g., "5th-8th Place" above QF column)
+- **Labels**: `createSEBracketLabels()` adds tournament header (centered on bracket) + BRONZE FINAL / FINAL column labels; `createSEPlacementLabels()` adds round name labels above each earlier column (e.g., "QUARTERFINALS" above QF column, "SEMIFINALS" above SF column)
 - **Match badges**: "BRONZE" / "FINAL" shown on SE special match cards (via `isSEBronzeMatch()` / `isSEFinalMatch()`)
 - **Zoom/pan defaults** (tunable): 4P zoom=0.8, 8P zoom=0.65, 16P zoom=0.45, 32P zoom=0.33; `resetZoom()` updated with SE-specific values
 

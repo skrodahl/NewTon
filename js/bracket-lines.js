@@ -1818,7 +1818,7 @@ function createSEBracketLabels(grid, bracketCenterX, finalsX, bracketSize, bronz
 /**
  * Creates placement labels above SE round columns showing the finish range for losers.
  * 4-player: none (all SF losers go to Bronze).
- * 8-player: "5th-8th Place" above round 1.
+ * 8-player: "QUARTERFINALS" above round 1.
  * 16-player: "9th-16th Place" above round 1, "5th-8th Place" above round 2 (QF).
  * 32-player: "17th-32nd Place" above round 1, "9th-16th Place" above round 2, "5th-8th Place" above round 3 (QF).
  * @param {Object} grid - Grid configuration object
@@ -1833,8 +1833,8 @@ function createSEPlacementLabels(grid, bracketSize, positions) {
     switch (bracketSize) {
         case 8:
             placements = [
-                { text: '5th-8th Place', x: positions.round1X, y: positions.round1StartY - 70 },
-                { text: 'SEMIFINALS',    x: positions.round2X, y: positions.sf1Y - 60 }
+                { text: 'QUARTERFINALS', x: positions.round1X, y: positions.round1StartY - 70 },
+                { text: 'SEMIFINALS',   x: positions.round2X, y: positions.sf1Y - 60 }
             ];
             break;
         case 16:
@@ -1929,12 +1929,20 @@ function createSEFinalsLines(lastRoundX, sf1CenterY, sf2CenterY, finalsX, bronze
     const spineBottom = Math.max(sf1CenterY, sf2CenterY, bronzeCenterY, finalCenterY);
     elements.push(makeVLine(finalsVerticalX, spineTop, spineBottom - spineTop));
 
-    // Spine → Bronze left edge (bronzeX overrides finalsX if provided)
-    const bronzeLeft = bronzeX !== undefined ? bronzeX : finalsX;
-    elements.push(makeHLine(finalsVerticalX, bronzeCenterY, bronzeLeft - finalsVerticalX));
+    // Spine → Bronze left edge (skipped for 8P where bronze has a dedicated column with bottom vertical)
+    if (bronzeX === undefined) {
+        elements.push(makeHLine(finalsVerticalX, bronzeCenterY, finalsX - finalsVerticalX));
+    }
 
     // Spine → Final left edge
     elements.push(makeHLine(finalsVerticalX, finalCenterY, finalsX - finalsVerticalX));
+
+    // Bronze bottom-center → FINAL horizontal (8P only: shows SF2 loser path to BRONZE)
+    if (bronzeX !== undefined) {
+        const bronzeBottomCenterX = bronzeX + grid.matchWidth / 2;
+        const bronzeBottom        = bronzeCenterY + grid.matchHeight / 2;
+        elements.push(makeVLine(bronzeBottomCenterX, bronzeBottom, finalCenterY - bronzeBottom));
+    }
 
     return elements;
 }

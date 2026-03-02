@@ -1052,7 +1052,8 @@ function render8PlayerSEMatches(grid) {
     const bronze = matches.find(m => m.id === 'FS-3-1');
     const final_ = matches.find(m => m.id === 'FS-4-1');
 
-    const bronzeX = round2X + grid.matchWidth + grid.horizontalSpacing; // Same column gap as QF→SF (75px)
+    const spineX  = round2X + grid.matchWidth + grid.horizontalSpacing / 2; // 1222.5 (finalsVerticalX)
+    const bronzeX = Math.round((spineX + finalsX) / 2 - grid.matchWidth / 2); // 1279 (centered on FINAL line)
 
     if (sf1)    renderMatch(sf1,    round2X, sf1Y,    'frontside', 2);
     if (sf2)    renderMatch(sf2,    round2X, sf2Y,    'frontside', 2);
