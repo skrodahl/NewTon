@@ -1,7 +1,21 @@
 # NewTon Network Layer - App Integration
 
 **Status:** Planning
-**Last Updated:** February 2026
+**Last Updated:** March 2026
+
+---
+
+## Storage Architecture Decision (March 2026)
+
+The storage layer must move from **localStorage to indexedDB** before this document's features are implemented. This is foundational — full scoresheet storage, Series/League, and multi-season history all require storage capacity that localStorage cannot provide.
+
+**Potential challenges:**
+- localStorage calls are scattered across 11 files with no central abstraction layer
+- The entire codebase is currently synchronous — indexedDB is async, so every storage call cascades into async/await refactoring
+- Data migration: existing tournaments in localStorage must be carried over without data loss
+- Estimated effort: significant — this is a v5.0.0 foundation, not a minor upgrade
+
+The network layer features described below remain valid — only the storage layer beneath them changes.
 
 ---
 

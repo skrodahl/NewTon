@@ -10,7 +10,7 @@
 
 **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**
 
-➷ **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
+➷ **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
 🎯 **NewTon Chalker** is a companion x01 scoring app designed for tablets at the dartboard. Crash-proof with persistent match data, match history, and live statistics. Install as a PWA for a native app experience.
 
@@ -113,8 +113,8 @@ docker compose up -d
 - **Crash Resilient**: Automatic saving prevents data loss
 - **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using REST API
 
-### 🎯 Double Elimination Brackets
-- **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players
+### 🎯 Single and Double Elimination Brackets
+- **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players, single elimination brackets for 4, 8, 16, and 32 players
 - **Smart Generation**: Prevents two walkovers from meeting in first round
 - **Fair Draw**: Byes randomly distributed to prevent unfair advantages and minimize walkover chains
 - **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
