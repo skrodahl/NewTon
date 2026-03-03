@@ -994,7 +994,7 @@ body {
 
 .player-eliminated {
   position: relative;
-  color: #999;
+  color: #b87070;
   overflow: visible; /* allow ::after line to extend beyond clipped text bounds */
 }
 

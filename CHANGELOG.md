@@ -1,7 +1,8 @@
 ## **v4.2.1** - Eliminated Player Strikethrough (2026-03-03)
 
 ### Visual Polish
-- **Eliminated player strikethrough**: Completed match cards now display the eliminated player's name in grey with a slanted strikethrough line, making it immediately clear who has been knocked out
+- **Eliminated player strikethrough**: Completed match cards now display the eliminated player's name in muted red with a slanted strikethrough line, making it immediately clear who has been knocked out
+  - Muted red (`#b87070`) — the natural complementary colour to the green match card background, and intuitively signals elimination
   - Strikethrough appears only in the specific match where the player was eliminated — not in earlier matches they won or lost en route
   - Works correctly in both SE and DE:
     - **SE**: every round loser is eliminated immediately; strikethrough appears in that round's match card
