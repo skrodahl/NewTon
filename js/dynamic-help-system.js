@@ -153,11 +153,17 @@ const HELP_CONTENT = {
                         <li>Use the Setup Command Center to manage players and tournament</li>
                         <li>Add players directly in Match Controls or navigate to Registration page</li>
                         <li>Toggle player paid status by clicking on player names</li>
-                        <li>When ready, click the "<strong>Generate [X]-Player Bracket</strong>" button</li>
+                        <li>When ready, choose a format and click "<strong>Generate [X]-Player Bracket</strong>"</li>
                     </ol>
+                    <p><strong>Tournament Formats:</strong></p>
+                    <ul>
+                        <li><strong>Single Elimination Cup:</strong> One loss and you're out — 4, 8, 16, or 32 players</li>
+                        <li><strong>Double Elimination Cup:</strong> Losers get a second chance through the backside — 8, 16, or 32 players</li>
+                    </ul>
                     <p><strong>Bracket Sizes:</strong></p>
                     <ul>
-                        <li>4-8 players → 8-player bracket</li>
+                        <li>4 players → 4-player bracket (SE only)</li>
+                        <li>5-8 players → 8-player bracket</li>
                         <li>9-16 players → 16-player bracket</li>
                         <li>17-32 players → 32-player bracket</li>
                     </ul>
@@ -309,8 +315,8 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Regular Rounds:</strong> Early bracket matches</li>
                         <li><strong>Semi-Finals:</strong> Last frontside and backside matches</li>
-                        <li><strong>Backside Final:</strong> Qualifier match for Grand Final</li>
-                        <li><strong>Grand Final:</strong> Championship match</li>
+                        <li><strong>Backside Final:</strong> Qualifier match for Grand Final (DE only)</li>
+                        <li><strong>Grand Final:</strong> Championship match (DE only)</li>
                     </ul>
                     <p><strong>Format:</strong> Choose Best of 3, 5, or 7 legs for each round type.</p>
                     <p><strong>Auto-save:</strong> Settings apply immediately to new tournaments.</p>

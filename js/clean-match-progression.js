@@ -582,6 +582,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 calculateAllRankings();
 
                 tournament.status = 'completed';
+                tournament.readOnly = true;
 
                 console.log(`✓ Tournament completed with full rankings — Final: ${winner.name} defeats ${loser.name}`);
 

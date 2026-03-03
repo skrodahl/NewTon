@@ -49,6 +49,12 @@ function openAnalyticsModal() {
     // Setup scroll detection (must be done after modal is displayed)
     setupScrollDetection();
 
+    // Hide DE-only commands for SE format
+    const matchProgressionLink = document.getElementById('devConsoleMatchProgressionLink');
+    if (matchProgressionLink) {
+        matchProgressionLink.style.display = (typeof getFormat === 'function' && getFormat() === 'SE') ? 'none' : 'block';
+    }
+
     // Initial render
     refreshAnalytics();
     showQuickOverview();

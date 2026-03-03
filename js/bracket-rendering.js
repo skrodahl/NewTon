@@ -2434,8 +2434,9 @@ function isMatchUndoable(matchId) {
     }
 
     // Check downstream matches - block undo if any downstream match was completed via MANUAL transaction
-    if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
-        const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    const _undoableTable = getProgressionTable();
+    if (tournament.bracketSize && _undoableTable) {
+        const progression = _undoableTable[matchId];
         if (progression) {
             // Check if winner's destination has a MANUAL completion
             if (progression.winner) {
@@ -2524,8 +2525,8 @@ function getConsequentialMatches(transaction) {
         return consequentialMatches;
     }
 
-    // Use hardcoded DE_MATCH_PROGRESSION to find exact destinations
-    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
+    // Use the correct progression table for the current format (SE or DE)
+    const progression = getProgressionTable();
     if (!progression || !progression[transaction.matchId]) {
         return consequentialMatches;
     }
@@ -2752,8 +2753,10 @@ function undoManualTransaction(transactionId) {
 
     console.log(`✅ Clean undo ${targetTransaction.matchId}: removing ${transactionsToRemove.length} total transactions`);
 
-    // 2. Check if we're undoing GRAND-FINAL (need to reset tournament status)
-    const isUndoingGrandFinal = targetTransaction.matchId === 'GRAND-FINAL';
+    // 2. Check if we're undoing the tournament's terminal match (DE: GRAND-FINAL, SE: final FS round)
+    const _undoFormat = getFormat();
+    const isUndoingFinal = targetTransaction.matchId === 'GRAND-FINAL' ||
+        (_undoFormat === 'SE' && isSEFinalMatch(targetTransaction.matchId, tournament.bracketSize));
 
     // 3. Create clean history by removing target + consequences
     const cleanHistory = history.filter(t => !transactionsToRemove.includes(t.id));
@@ -2764,16 +2767,17 @@ function undoManualTransaction(transactionId) {
         localStorage.setItem(historyKey, JSON.stringify(cleanHistory));
     }
 
-    // 5. Reset tournament status if undoing GRAND-FINAL
-    if (isUndoingGrandFinal && tournament) {
-        console.log('Undoing GRAND-FINAL: resetting tournament to active state');
+    // 5. Reset tournament status if undoing the terminal match
+    if (isUndoingFinal && tournament) {
+        console.log(`Undoing terminal match ${targetTransaction.matchId}: resetting tournament to active state`);
         tournament.status = 'active';
+        tournament.readOnly = false;
         tournament.placements = {}; // Clear final placements
     }
 
     // 6. Roll back ALL affected matches and remove advancing players from downstream matches
     // Process all transactions being removed (handles auto-advancement chains)
-    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize];
+    const progression = getProgressionTable();
 
     transactionsToRemove.forEach(transactionId => {
         const transaction = history.find(t => t.id === transactionId);
@@ -2828,7 +2832,7 @@ function undoManualTransaction(transactionId) {
     }
 
     // 8. Refresh results displays after undo
-    if (isUndoingGrandFinal && typeof displayResults === 'function') {
+    if (isUndoingFinal && typeof displayResults === 'function') {
         displayResults();
     }
 
@@ -4078,26 +4082,26 @@ function showCommandCenterModal(matchData) {
                         deButtonText = `Generate ${deBracketSize}-Player Bracket`;
                     }
 
-                    const cardStyle = 'border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; background: #fafafa; box-shadow: 0 2px 4px rgba(0,0,0,0.08);';
+                    const cardStyle = 'border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; background: #f0f0f0; box-shadow: 0 2px 4px rgba(0,0,0,0.08);';
 
                     refereeSetupMessage.innerHTML = `
                         <p>🔧 Tournament in setup mode</p>
                         <p style="font-size: 14px; color: #666; margin-top: 8px;">Setup actions will help you configure the tournament.</p>
                         <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                            <button class="btn" onclick="popDialog(); showPage('registration')" style="padding: 8px 16px; font-size: 14px;">Player Registration Page</button>
-                            <button class="btn" onclick="popDialog(); showPage('config')" style="padding: 8px 16px; font-size: 14px;">Global Settings Page</button>
-                        </div>
-                        <div style="margin-top: 18px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="${cardStyle}">
-                                <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">Single Elimination Cup</div>
+                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">Single Elimination Cup</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players are eliminated after one loss</div>
                                 <button class="btn btn-success" onclick="generateBracket('SE')" ${seDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${seButtonText}</button>
                             </div>
                             <div style="${cardStyle}">
-                                <div style="font-weight: 600; font-size: 14px; margin-bottom: 2px;">Double Elimination Cup</div>
+                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">Double Elimination Cup</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players get a second chance through the backside</div>
                                 <button class="btn btn-success" onclick="generateBracket('DE')" ${deDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${deButtonText}</button>
                             </div>
+                        </div>
+                        <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
+                            <button class="btn" onclick="popDialog(); showPage('registration')" style="padding: 8px 16px; font-size: 14px;">Player Registration Page</button>
+                            <button class="btn" onclick="popDialog(); showPage('config')" style="padding: 8px 16px; font-size: 14px;">Global Settings Page</button>
                         </div>
                     `;
                     refereeSetupMessage.style.display = 'block';
@@ -4690,9 +4694,10 @@ function getDetailedMatchState(matchId) {
         return { state: 'completed', text: 'Cannot Undo' };
     }
 
-    // Check for blocking downstream matches
-    if (tournament.bracketSize && DE_MATCH_PROGRESSION[tournament.bracketSize]) {
-        const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    // Check for blocking downstream matches (uses correct progression table for SE or DE)
+    const _progressionTable = getProgressionTable();
+    if (tournament.bracketSize && _progressionTable) {
+        const progression = _progressionTable[matchId];
         if (progression) {
             const blockingMatches = [];
 
@@ -4741,13 +4746,15 @@ function updateStatusCenter(content) {
         if (typeof content === 'string') {
             // Backwards compatibility for single-line strings
             centerElement.textContent = content;
-        } else if (content && content.line1 && content.line2) {
-            // Multi-line object format
+        } else if (content && content.line1) {
+            // Multi-line object format (line2 optional — omitted for SE)
             let html = `<div class="status-line1">${content.line1}</div>`;
             if (content.line3) {
                 html += `<div class="status-line2">${content.line3}</div>`;
             }
-            html += `<div class="status-line2">${content.line2}</div>`;
+            if (content.line2) {
+                html += `<div class="status-line2">${content.line2}</div>`;
+            }
             centerElement.innerHTML = html;
         }
         centerElement.classList.add('active');
@@ -4763,13 +4770,18 @@ function clearStatusCenter() {
     }
 }
 
-// Generate two-line match information using DE_MATCH_PROGRESSION and state logic
+// Generate two-line match information using the appropriate progression table and state logic
 function getMatchProgressionText(matchId) {
-    if (!tournament || !tournament.bracketSize || !DE_MATCH_PROGRESSION[tournament.bracketSize]) {
+    if (!tournament || !tournament.bracketSize) {
         return null;
     }
 
-    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
+    const progressionTable = getProgressionTable();
+    if (!progressionTable) {
+        return null;
+    }
+
+    const progression = progressionTable[matchId];
     if (!progression) {
         return null;
     }
@@ -4782,6 +4794,11 @@ function getMatchProgressionText(matchId) {
 
     // Generate first line: Match ID + State
     const line1 = `${matchId} • ${stateInfo.text}`;
+
+    // SE: visual bracket lines make progression self-evident — show state only
+    if (getFormat() === 'SE') {
+        return { line1, line2: null };
+    }
 
     // Generate second line: Progression
     const destinations = [];

@@ -1,6 +1,43 @@
-# 2026-02-23
+## **v4.2.0** - Single Elimination (continued — 2026-03-03)
 
-## **v4.2.0** - Single Elimination Support (Foundation)
+### SE Visual Fixes
+- **4-player SE staggered layout**: BRONZE and FINAL now render in separate columns — BRONZE at a mid-column position, FINAL at the rightmost column — mirroring the 8/16/32-player stagger pattern
+- **4-player SEMIFINALS column label**: Was missing; now rendered above the Round 1 column
+- **SE zoom/pan defaults**: 4P bracket centered correctly at zoom=0.8, pan x=−80 y=65
+
+### SE Info Box (Match Hover)
+- **Hover info box now appears in SE brackets**: `getMatchProgressionText()` was referencing `DE_MATCH_PROGRESSION` directly — fixed to use `getProgressionTable()`
+- **"Leads to / Feeds from" removed for SE**: SE info box shows match ID and state only; visual bracket lines make progression self-evident. `getMatchProgressionText()` returns `line2: null` for SE; `updateStatusCenter()` updated to render when `line2` is absent
+
+### SE Tournament Completion
+- **`readOnly` now set immediately on SE tournament completion**: Was only applied at load time from `status === 'completed'`; now set in-memory at the moment completion is detected — preventing the completed tournament from appearing editable mid-session
+
+### SE Undo System
+- **`getConsequentialMatches()`**: Fixed to use `getProgressionTable()` instead of `DE_MATCH_PROGRESSION` — walkover cascade on undo now works correctly for SE
+- **`undoManualTransaction()`**:
+  - `isUndoingGrandFinal` renamed to `isUndoingFinal` and extended to cover SE terminal match via `isSEFinalMatch()`
+  - Sets `tournament.readOnly = false` when the final match is undone, restoring the tournament to active
+  - Fixed progression table lookup to use `getProgressionTable()`
+- **`isMatchUndoable()` (hard-block enforcer)**: Fixed to use `getProgressionTable()` — SE matches with completed downstream matches now correctly block undo at render time (onclick handler not rendered)
+- **`getDetailedMatchState()` (info box text)**: Same fix — now correctly reports "Cannot Undo, blocked by …" for SE matches with completed downstream matches
+- Hard-block behaviour confirmed across all SE bracket sizes (4P–32P): matches are blocked one-by-one, never cascading — identical to DE
+
+### Developer Console
+- **"View Match Progression" hidden for SE**: The command is DE-specific (shows `DE_MATCH_PROGRESSION` tables); hidden when the console opens for an SE tournament
+
+### Setup Actions UI
+- **Format cards moved to top**: Single Elimination Cup and Double Elimination Cup cards now appear above the navigation buttons — primary action first
+- **Format card background darkened**: `#fafafa` → `#f0f0f0` so cards stand out clearly against the white panel
+- **Format card titles enlarged**: 14px → 17px for stronger visual hierarchy
+- **Spacing between cards and navigation buttons**: 30px gap separates the bracket generation section from the Player Registration / Global Settings buttons
+
+### Help System
+- **Bracket Generation help**: Updated to describe SE and DE format cards; bracket size table now includes 4-player (SE only)
+- **Match Format Configuration help**: Backside Final and Grand Final entries marked as "(DE only)"
+
+---
+
+## **v4.2.0** - Single Elimination Support (Foundation — 2026-02-23)
 
 ### New Features
 - **Tournament format selection**: Operators now choose between Single Elimination Cup and Double Elimination Cup when generating a bracket
