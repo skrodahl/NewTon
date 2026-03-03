@@ -1,3 +1,16 @@
+## **v4.2.1** - Eliminated Player Strikethrough (2026-03-03)
+
+### Visual Polish
+- **Eliminated player strikethrough**: Completed match cards now display the eliminated player's name in grey with a slanted strikethrough line, making it immediately clear who has been knocked out
+  - Strikethrough appears only in the specific match where the player was eliminated — not in earlier matches they won or lost en route
+  - Works correctly in both SE and DE:
+    - **SE**: every round loser is eliminated immediately; strikethrough appears in that round's match card
+    - **DE**: frontside losers who continue to the backside show no strikethrough until their backside elimination match
+  - Walkover slots and match winners are never struck through
+  - Implementation: `isPlayerEliminatedInMatch()` uses round-order comparison (`getMatchRoundOrder()`) to identify the player's final match; CSS `::after` pseudo-element renders the slanted line (`rotate(-10deg)`)
+
+---
+
 ## **v4.2.0** - Single Elimination (continued — 2026-03-03)
 
 ### SE Visual Fixes

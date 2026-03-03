@@ -992,6 +992,23 @@ body {
   color: #111827;
 }
 
+.player-eliminated {
+  position: relative;
+  color: #999;
+  overflow: visible; /* allow ::after line to extend beyond clipped text bounds */
+}
+
+.player-eliminated::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 50%;
+  border-top: 1.5px solid #555;
+  transform: rotate(-10deg);
+  transform-origin: center;
+}
+
 .awaiting-player {
   font-style: italic;
   color: #999;

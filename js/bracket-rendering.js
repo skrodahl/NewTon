@@ -1336,6 +1336,53 @@ function handleRedoClick(matchId) {
     refreshTournamentUI();
 }
 
+/**
+ * Returns a numeric round order for a match ID so later rounds have higher values.
+ * Used to determine which is a player's final (elimination) match.
+ * @param {string} matchId
+ * @returns {number}
+ */
+function getMatchRoundOrder(matchId) {
+    if (matchId === 'FINAL' || matchId === 'GRAND-FINAL') return 1000;
+    if (matchId === 'BRONZE') return 999;
+    if (matchId === 'BS-FINAL') return 900;
+    const fsParts = matchId.match(/^FS-(\d+)-/);
+    if (fsParts) return parseInt(fsParts[1]);
+    const bsParts = matchId.match(/^BS-(\d+)-/);
+    if (bsParts) return 500 + parseInt(bsParts[1]);
+    return 0;
+}
+
+/**
+ * Returns true if this is the specific match where the player was eliminated
+ * (has a placement AND did not appear in any later-round completed match).
+ * Works correctly for both SE (placement = only trigger in elimination round) and
+ * DE (frontside losers continue to backside, so their strikethrough is on the
+ * backside loss, not the earlier frontside loss).
+ * @param {object} match - The match object
+ * @param {string} playerSlot - 'player1' or 'player2'
+ * @returns {boolean}
+ */
+function isPlayerEliminatedInMatch(match, playerSlot) {
+    if (!match.completed) return false;
+    const playerObj = match[playerSlot];
+    if (!playerObj || !playerObj.name || playerObj.name === 'Walkover') return false;
+    if (match.winner?.id === playerObj.id) return false; // winner, not loser
+    if (!tournament.placements?.[String(playerObj.id)]) return false; // no placement = still competing
+    // Show strikethrough only in the player's LAST completed match.
+    // If they appear in any completed match with a higher round order, that is their
+    // actual elimination match and this one is not (e.g. DE frontside vs backside).
+    const matchOrder = getMatchRoundOrder(match.id);
+    const allMatches = Object.values(tournament.matches || {});
+    const eliminatedLater = allMatches.some(m =>
+        m.id !== match.id &&
+        m.completed &&
+        getMatchRoundOrder(m.id) > matchOrder &&
+        (m.player1?.id === playerObj.id || m.player2?.id === playerObj.id)
+    );
+    return !eliminatedLater;
+}
+
 function renderMatch(match, x, y, section, roundIndex) {
     const matchElement = document.createElement('div');
 
@@ -1439,6 +1486,10 @@ function renderMatch(match, x, y, section, roundIndex) {
         ? `⚠️ ${match.player2.name} (Referee)`
         : getPlayerDisplayName(match.player2);
 
+    // Strikethrough for eliminated players (only in the match where they were eliminated)
+    const player1Eliminated = isPlayerEliminatedInMatch(match, 'player1');
+    const player2Eliminated = isPlayerEliminatedInMatch(match, 'player2');
+
     // --- START: Redo UI Logic ---
     //const redoableMatches = getRedoableMatches();
     //const isRedoable = redoableMatches.has(match.id);
@@ -1468,12 +1519,12 @@ function renderMatch(match, x, y, section, roundIndex) {
         <div class="match-players">
             <div class="match-player ${match.player1?.isBye || match.player1?.name === 'Walkover' ? 'bye first-throw' : 'first-throw'} ${player1WinnerClass} ${player1UndoableClass}"
                  onclick="${player1ClickHandler}">
-                <span class="player-name-short">${player1Display}</span>
+                <span class="player-name-short${player1Eliminated ? ' player-eliminated' : ''}">${player1Display}</span>
                 ${winnerCheck1}
             </div>
             <div class="match-player ${match.player2?.isBye || match.player2?.name === 'Walkover' ? 'bye' : ''} ${player2WinnerClass} ${player2UndoableClass}"
                  onclick="${player2ClickHandler}">
-                <span class="player-name-short">${player2Display}</span>
+                <span class="player-name-short${player2Eliminated ? ' player-eliminated' : ''}">${player2Display}</span>
                 ${winnerCheck2}
             </div>
         </div>
