@@ -1766,11 +1766,22 @@ function createSEBracketLabels(grid, bracketCenterX, finalsX, bracketSize, bronz
         default: headerFontSize = '64px';
     }
 
-    // Header anchored near the top of the canvas
+    // Header anchored above the bracket. For large brackets (16P/32P) round1StartY is
+    // negative, so we compute headerY relative to it; for 4P/8P the fixed value of 30 works.
     const bronzeY = bracketSize >= 8
         ? grid.centerY - (grid.matchHeight + grid.verticalSpacing)
         : grid.centerY - 160;
-    const headerY = 30;
+    const _spacing = grid.matchHeight + grid.verticalSpacing;
+    let headerY;
+    if (bracketSize >= 16) {
+        const round1StartY = bracketSize === 32
+            ? grid.centerY - 7.5 * _spacing
+            : grid.centerY - 3.5 * _spacing; // 16P
+        const headerMargin = bracketSize === 32 ? 320 : 230; // 32P uses larger margin for bigger font
+        headerY = round1StartY - headerMargin;
+    } else {
+        headerY = 30; // 4P/8P: fixed near canvas top
+    }
 
     const tournamentHeader = document.createElement('div');
     tournamentHeader.id = 'tournamentHeader';
@@ -1805,7 +1816,25 @@ function createSEBracketLabels(grid, bracketCenterX, finalsX, bracketSize, bronz
 
     if (bronzeX !== undefined) {
         // 8P: BRONZE and FINAL are in separate columns — label each individually
-        labels.push(makeColumnLabel('seBronzeLabel',  'BRONZE FINAL', bronzeX  + grid.matchWidth / 2, bronzeY - 60));
+        const bronzeLabelY = bronzeY - 60;
+        labels.push(makeColumnLabel('seBronzeLabel', 'BRONZE FINAL', bronzeX + grid.matchWidth / 2, bronzeLabelY));
+
+        // Subtitle: "(Semifinal Losers)" below the BRONZE FINAL label
+        const bronzeSubtitle = document.createElement('div');
+        bronzeSubtitle.id = 'seBronzeSubtitle';
+        bronzeSubtitle.style.position = 'absolute';
+        bronzeSubtitle.style.left = `${bronzeX + grid.matchWidth / 2}px`;
+        bronzeSubtitle.style.top = `${bronzeLabelY + 28}px`;
+        bronzeSubtitle.style.fontFamily = 'Inter, sans-serif';
+        bronzeSubtitle.style.fontSize = '20px';
+        bronzeSubtitle.style.fontWeight = 'normal';
+        bronzeSubtitle.style.color = '#888888';
+        bronzeSubtitle.style.textAlign = 'center';
+        bronzeSubtitle.style.transform = 'translateX(-50%)';
+        bronzeSubtitle.style.zIndex = '5';
+        bronzeSubtitle.textContent = '(Semifinal Losers)';
+        labels.push(bronzeSubtitle);
+
         labels.push(makeColumnLabel('seFinalsLabel',  'FINAL',        finalsX  + grid.matchWidth / 2, grid.centerY - 60));
     } else {
         // All other sizes: single FINALS label above the shared finals column
@@ -1839,17 +1868,17 @@ function createSEPlacementLabels(grid, bracketSize, positions) {
             break;
         case 16:
             placements = [
-                { text: '9th-16th Place', x: positions.round1X, y: positions.round1StartY - 70 },
-                { text: '5th-8th Place',  x: positions.round2X, y: positions.qf1Y - 70 },
-                { text: 'SEMIFINALS',     x: positions.round3X, y: positions.sf1Y - 60 }
+                { text: 'ROUND 1',      x: positions.round1X, y: positions.round1StartY - 70 },
+                { text: 'QUARTERFINALS', x: positions.round2X, y: positions.qf1Y - 70 },
+                { text: 'SEMIFINALS',   x: positions.round3X, y: positions.sf1Y - 60 }
             ];
             break;
         case 32:
             placements = [
-                { text: '17th-32nd Place', x: positions.round1X, y: positions.round1StartY - 70 },
-                { text: '9th-16th Place',  x: positions.round2X, y: positions.r2Ys[0] - 70 },
-                { text: '5th-8th Place',   x: positions.round3X, y: positions.qfYs[0] - 70 },
-                { text: 'SEMIFINALS',      x: positions.round4X, y: positions.sf1Y - 60 }
+                { text: 'ROUND 1',       x: positions.round1X, y: positions.round1StartY - 70 },
+                { text: 'ROUND 2',       x: positions.round2X, y: positions.r2Ys[0] - 70 },
+                { text: 'QUARTERFINALS', x: positions.round3X, y: positions.qfYs[0] - 70 },
+                { text: 'SEMIFINALS',    x: positions.round4X, y: positions.sf1Y - 60 }
             ];
             break;
         // case 4: placements stays []
@@ -1918,6 +1947,19 @@ function createSEFinalsLines(lastRoundX, sf1CenterY, sf2CenterY, finalsX, bronze
         return el;
     }
 
+    function makeDottedVLine(x, y, h) {
+        const el = document.createElement('div');
+        el.style.position = 'absolute';
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        el.style.width = '3px';
+        el.style.height = `${h}px`;
+        // 10px dash, 10px gap — visible even when bracket is zoomed out
+        el.style.backgroundImage = 'repeating-linear-gradient(to bottom, #666666 0px, #666666 10px, transparent 10px, transparent 20px)';
+        el.style.zIndex = '1';
+        return el;
+    }
+
     // SF1 right edge → vertical spine
     elements.push(makeHLine(sfRightEdge, sf1CenterY, finalsVerticalX - sfRightEdge));
 
@@ -1937,11 +1979,11 @@ function createSEFinalsLines(lastRoundX, sf1CenterY, sf2CenterY, finalsX, bronze
     // Spine → Final left edge
     elements.push(makeHLine(finalsVerticalX, finalCenterY, finalsX - finalsVerticalX));
 
-    // Bronze bottom-center → FINAL horizontal (8P only: shows SF2 loser path to BRONZE)
+    // Bronze bottom-center → FINAL horizontal (8P only: dotted = loser path to BRONZE)
     if (bronzeX !== undefined) {
         const bronzeBottomCenterX = bronzeX + grid.matchWidth / 2;
         const bronzeBottom        = bronzeCenterY + grid.matchHeight / 2;
-        elements.push(makeVLine(bronzeBottomCenterX, bronzeBottom, finalCenterY - bronzeBottom));
+        elements.push(makeDottedVLine(bronzeBottomCenterX, bronzeBottom, finalCenterY - bronzeBottom));
     }
 
     return elements;
@@ -2021,12 +2063,12 @@ function create8PlayerSELines(grid, matches, positions) {
  */
 function create16PlayerSELines(grid, matches, positions) {
     const lines = [];
-    const { round1X, round2X, round3X, finalsX, round1StartY, spacing } = positions;
+    const { round1X, round2X, round3X, finalsX, bronzeX, round1StartY, spacing } = positions;
     const { qf1Y, qf2Y, qf3Y, qf4Y, sf1Y, sf2Y } = positions;
 
     // Bracket header + FINALS label
     const bracketCenterX = (round1X + finalsX + grid.matchWidth) / 2;
-    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 16));
+    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 16, bronzeX));
 
     // Placement labels
     lines.push(...createSEPlacementLabels(grid, 16, positions));
@@ -2058,7 +2100,7 @@ function create16PlayerSELines(grid, matches, positions) {
     // SF → Finals lines
     const bronzeCenterY = sf1CenterY; // BRONZE at same Y as SF1
     const finalCenterY  = grid.centerY + grid.matchHeight / 2;
-    lines.push(...createSEFinalsLines(round3X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid));
+    lines.push(...createSEFinalsLines(round3X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid, bronzeX));
 
     return lines;
 }
@@ -2072,12 +2114,12 @@ function create16PlayerSELines(grid, matches, positions) {
  */
 function create32PlayerSELines(grid, matches, positions) {
     const lines = [];
-    const { round1X, round2X, round3X, round4X, finalsX, round1StartY, spacing } = positions;
+    const { round1X, round2X, round3X, round4X, finalsX, bronzeX, round1StartY, spacing } = positions;
     const { r2Ys, qfYs, sf1Y, sf2Y } = positions;
 
     // Bracket header + FINALS label
     const bracketCenterX = (round1X + finalsX + grid.matchWidth) / 2;
-    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 32));
+    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 32, bronzeX));
 
     // Placement labels
     lines.push(...createSEPlacementLabels(grid, 32, positions));
@@ -2119,7 +2161,7 @@ function create32PlayerSELines(grid, matches, positions) {
     // SF → Finals lines
     const bronzeCenterY = sf1CenterY; // BRONZE at same Y as SF1
     const finalCenterY  = grid.centerY + grid.matchHeight / 2;
-    lines.push(...createSEFinalsLines(round4X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid));
+    lines.push(...createSEFinalsLines(round4X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid, bronzeX));
 
     return lines;
 }

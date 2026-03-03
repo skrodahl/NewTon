@@ -55,17 +55,17 @@ function renderBracket() {
         if (tournament.format === 'SE') {
             // SE-specific zoom/pan defaults (bracket is entirely right-of-center, no backside)
             if (tournament.bracketSize === 32) {
-                zoomLevel = 0.33;
-                panOffset.x = 200;
-                panOffset.y = 210;
+                zoomLevel = 0.30;
+                panOffset.x = 300;
+                panOffset.y = 342;
             } else if (tournament.bracketSize === 16) {
-                zoomLevel = 0.45;
-                panOffset.x = 100;
-                panOffset.y = 140;
+                zoomLevel = 0.52;
+                panOffset.x = 55;
+                panOffset.y = 229;
             } else if (tournament.bracketSize === 8) {
                 zoomLevel = 0.65;
                 panOffset.x = -50;
-                panOffset.y = 25;
+                panOffset.y = 105;
             } else { // 4-player
                 zoomLevel = 0.8;
                 panOffset.x = -80;
@@ -1086,7 +1086,9 @@ function render16PlayerSEMatches(grid) {
     const round3X  = round2X + grid.matchWidth + grid.horizontalSpacing;        // 1260 (SF)
     const bronzeY  = grid.centerY - spacing; // 335 (= sf1Y)
     const finalY   = grid.centerY;           // 500
-    const finalsX  = round3X + grid.matchWidth + 4 * grid.horizontalSpacing;   // 1840
+    const finalsX  = round3X + 2 * (grid.matchWidth + grid.horizontalSpacing); // 1970
+    const spineX   = round3X + grid.matchWidth + grid.horizontalSpacing / 2;   // 1577.5
+    const bronzeX  = Math.round((spineX + finalsX) / 2 - grid.matchWidth / 2); // 1634 (centered on FINAL line)
 
     // R1 positions: 8 matches centered around centerY (identical to 16P DE FS-R1)
     const round1StartY = grid.centerY - 3.5 * spacing; // -77.5
@@ -1122,12 +1124,12 @@ function render16PlayerSEMatches(grid) {
 
     if (sf1)    renderMatch(sf1,    round3X, sf1Y,    'frontside', 2);
     if (sf2)    renderMatch(sf2,    round3X, sf2Y,    'frontside', 2);
-    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (bronze) renderMatch(bronze, bronzeX, bronzeY, 'frontside', 2);
     if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
 
     const positions = {
-        round1X, round2X, round3X, finalsX,
-        round1StartY, spacing,
+        round1X, round2X, round3X, finalsX, bronzeX,
+        round1StartY, spacing, finalY,
         qf1Y, qf2Y, qf3Y, qf4Y, sf1Y, sf2Y
     };
     const progressionLines = create16PlayerSELines(grid, matches, positions);
@@ -1156,7 +1158,9 @@ function render32PlayerSEMatches(grid) {
     const round4X  = round3X + grid.matchWidth + grid.horizontalSpacing;        // 1615 (SF)
     const bronzeY  = grid.centerY - spacing; // 335 (= sf1Y)
     const finalY   = grid.centerY;           // 500
-    const finalsX  = round4X + grid.matchWidth + 4 * grid.horizontalSpacing;   // 2195
+    const finalsX  = round4X + 2 * (grid.matchWidth + grid.horizontalSpacing); // 2325
+    const spineX   = round4X + grid.matchWidth + grid.horizontalSpacing / 2;   // 1932.5
+    const bronzeX  = Math.round((spineX + finalsX) / 2 - grid.matchWidth / 2); // 1989 (centered on FINAL line)
 
     // R1 positions: 16 matches centered around centerY (identical to 32P DE FS-R1)
     const round1StartY = grid.centerY - 7.5 * spacing; // -737.5
@@ -1198,12 +1202,12 @@ function render32PlayerSEMatches(grid) {
 
     if (sf1)    renderMatch(sf1,    round4X, sf1Y,    'frontside', 2);
     if (sf2)    renderMatch(sf2,    round4X, sf2Y,    'frontside', 2);
-    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (bronze) renderMatch(bronze, bronzeX, bronzeY, 'frontside', 2);
     if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
 
     const positions = {
-        round1X, round2X, round3X, round4X, finalsX,
-        round1StartY, spacing,
+        round1X, round2X, round3X, round4X, finalsX, bronzeX,
+        round1StartY, spacing, finalY,
         r2Ys, qfYs, sf1Y, sf2Y
     };
     const progressionLines = create32PlayerSELines(grid, matches, positions);
@@ -1837,17 +1841,17 @@ function resetZoom() {
     if (tournament && tournament.bracketSize) {
         if (tournament.format === 'SE') {
             if (tournament.bracketSize === 32) {
-                zoomLevel = 0.33;
-                panOffset.x = 200;
-                panOffset.y = 210;
+                zoomLevel = 0.30;
+                panOffset.x = 300;
+                panOffset.y = 342;
             } else if (tournament.bracketSize === 16) {
-                zoomLevel = 0.45;
-                panOffset.x = 100;
-                panOffset.y = 140;
+                zoomLevel = 0.52;
+                panOffset.x = 55;
+                panOffset.y = 229;
             } else if (tournament.bracketSize === 8) {
                 zoomLevel = 0.65;
                 panOffset.x = -50;
-                panOffset.y = 25;
+                panOffset.y = 105;
             } else { // 4-player
                 zoomLevel = 0.8;
                 panOffset.x = -80;

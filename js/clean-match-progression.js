@@ -1504,13 +1504,12 @@ function calculateCleanBracketStructure(bracketSize) {
         ];
     }
 
-    // SE brackets with 4+ players: add bronze round + final round after natural bracket
+    // SE brackets with 4+ players: the last natural round (frontsideRounds, 1 match) is the
+    // bronze final; add only the championship final round on top.
     const format = getFormat();
     if (format === 'SE' && bracketSize >= 4) {
-        // Bronze round: 1 match (receives semifinal losers)
+        // Championship final round: 1 match (receives semifinal winners)
         frontside.push({ round: frontsideRounds + 1, matches: 1 });
-        // Final round: 1 match (receives semifinal winners)
-        frontside.push({ round: frontsideRounds + 2, matches: 1 });
     }
 
     return { frontside, backside, frontsideRounds };

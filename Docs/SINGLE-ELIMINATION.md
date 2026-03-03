@@ -330,14 +330,11 @@ The bracket currently doesn't make it explicit that the two players in BRONZE FI
 
 No decision yet — noting for later.
 
-**Refinement under consideration: dotted vertical connector**
-The vertical line from BRONZE's bottom-center down to the FINAL horizontal could be rendered dotted/dashed instead of solid. This would:
-- Visually distinguish the loser path (dotted) from the winner path (solid)
-- Reinforce that BRONZE is a secondary destination — losers arrive via this connector
-- Require only a single line style change (`border-style: dashed` on one element) — minimal rendering complexity
-- Pairs naturally with the Loser-Branch layout concept (see below), where loser paths are already styled differently
-
-**Decision pending.**
+**Implemented: dashed vertical connector**
+The vertical line from BRONZE's bottom-center down to the FINAL horizontal is rendered as a dashed line (`repeating-linear-gradient`, 10px dash / 10px gap). This:
+- Visually distinguishes the loser path (dashed) from the winner path (solid)
+- Remains clearly visible even when the bracket is zoomed out to 65%
+- Reinforces that BRONZE is a secondary destination — losers arrive via this connector
 
 ### Alternative: Drop-Down Bronze Layout (Under Consideration)
 
