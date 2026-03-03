@@ -1860,6 +1860,11 @@ function createSEPlacementLabels(grid, bracketSize, positions) {
 
     let placements = [];
     switch (bracketSize) {
+        case 4:
+            placements = [
+                { text: 'SEMIFINALS', x: positions.round1X, y: positions.sf1Y - 60 }
+            ];
+            break;
         case 8:
             placements = [
                 { text: 'QUARTERFINALS', x: positions.round1X, y: positions.round1StartY - 70 },
@@ -1998,18 +2003,21 @@ function createSEFinalsLines(lastRoundX, sf1CenterY, sf2CenterY, finalsX, bronze
  */
 function create4PlayerSELines(grid, matches, positions) {
     const lines = [];
-    const { round1X, finalsX, sf1Y, sf2Y } = positions;
+    const { round1X, finalsX, bronzeX, sf1Y, sf2Y } = positions;
 
     // Bracket header + FINALS label
     const bracketCenterX = (round1X + finalsX + grid.matchWidth) / 2;
-    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 4));
+    lines.push(...createSEBracketLabels(grid, bracketCenterX, finalsX, 4, bronzeX));
+
+    // Placement label: "SEMIFINALS" above SF column
+    lines.push(...createSEPlacementLabels(grid, 4, positions));
 
     // Finals lines: both SFs connect to shared spine → Bronze and Final
-    const sf1CenterY   = sf1Y + grid.matchHeight / 2;
-    const sf2CenterY   = sf2Y + grid.matchHeight / 2;
-    const bronzeCenterY = (grid.centerY - 160) + grid.matchHeight / 2;
+    const sf1CenterY    = sf1Y + grid.matchHeight / 2;
+    const sf2CenterY    = sf2Y + grid.matchHeight / 2;
+    const bronzeCenterY = sf1CenterY; // BRONZE at same Y as SF1
     const finalCenterY  = grid.centerY + grid.matchHeight / 2;
-    lines.push(...createSEFinalsLines(round1X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid));
+    lines.push(...createSEFinalsLines(round1X, sf1CenterY, sf2CenterY, finalsX, bronzeCenterY, finalCenterY, grid, bronzeX));
 
     return lines;
 }

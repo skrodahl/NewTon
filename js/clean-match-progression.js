@@ -1463,19 +1463,28 @@ function generateAllMatches(bracket, bracketSize) {
  * CALCULATE CLEAN BRACKET STRUCTURE (rounds and matches per round)
  */
 function calculateCleanBracketStructure(bracketSize) {
-    const frontsideRounds = Math.ceil(Math.log2(bracketSize));
-
-    // Frontside structure
-    const frontside = [];
-    for (let round = 1; round <= frontsideRounds; round++) {
-        const matchesInRound = Math.pow(2, frontsideRounds - round);
-        frontside.push({
-            round: round,
-            matches: matchesInRound
-        });
+    // SE structures are fully hardcoded — bracketSize equals total match count.
+    // Last natural frontside round (1 match) is the bronze final; one extra round
+    // is added for the championship final.
+    const format = getFormat();
+    if (format === 'SE') {
+        const seStructures = {
+            4:  { frontsideRounds: 2, frontside: [{ round: 1, matches: 2 }, { round: 2, matches: 1 }, { round: 3, matches: 1 }], backside: [] },
+            8:  { frontsideRounds: 3, frontside: [{ round: 1, matches: 4 }, { round: 2, matches: 2 }, { round: 3, matches: 1 }, { round: 4, matches: 1 }], backside: [] },
+            16: { frontsideRounds: 4, frontside: [{ round: 1, matches: 8 }, { round: 2, matches: 4 }, { round: 3, matches: 2 }, { round: 4, matches: 1 }, { round: 5, matches: 1 }], backside: [] },
+            32: { frontsideRounds: 5, frontside: [{ round: 1, matches: 16 }, { round: 2, matches: 8 }, { round: 3, matches: 4 }, { round: 4, matches: 2 }, { round: 5, matches: 1 }, { round: 6, matches: 1 }], backside: [] }
+        };
+        return seStructures[bracketSize];
     }
 
-    // Backside structure (hardcoded based on bracket size)
+    // DE: derive frontside dynamically; backside is hardcoded per bracket size.
+    const frontsideRounds = Math.ceil(Math.log2(bracketSize));
+
+    const frontside = [];
+    for (let round = 1; round <= frontsideRounds; round++) {
+        frontside.push({ round, matches: Math.pow(2, frontsideRounds - round) });
+    }
+
     let backside = [];
     if (bracketSize === 8) {
         backside = [
@@ -1500,16 +1509,7 @@ function calculateCleanBracketStructure(bracketSize) {
             { round: 5, matches: 2 },
             { round: 6, matches: 2 },
             { round: 7, matches: 1 }
-
         ];
-    }
-
-    // SE brackets with 4+ players: the last natural round (frontsideRounds, 1 match) is the
-    // bronze final; add only the championship final round on top.
-    const format = getFormat();
-    if (format === 'SE' && bracketSize >= 4) {
-        // Championship final round: 1 match (receives semifinal winners)
-        frontside.push({ round: frontsideRounds + 1, matches: 1 });
     }
 
     return { frontside, backside, frontsideRounds };

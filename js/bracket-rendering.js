@@ -69,7 +69,7 @@ function renderBracket() {
             } else { // 4-player
                 zoomLevel = 0.8;
                 panOffset.x = -80;
-                panOffset.y = -60;
+                panOffset.y = 65;
             }
         } else {
             // DE zoom/pan defaults
@@ -990,14 +990,16 @@ function render4PlayerSEMatches(grid) {
     );
     if (!hasRealMatches) return;
 
-    const round1X = grid.centerX + grid.centerBuffer; // 550
-    const bronzeY = grid.centerY - 160; // 340
-    const finalY  = grid.centerY;       // 500
-    const finalsX = round1X + grid.matchWidth + 4 * grid.horizontalSpacing; // 1130
+    const spacing  = grid.matchHeight + grid.verticalSpacing; // 165
+    const round1X  = grid.centerX + grid.centerBuffer;                         // 550 (SFs)
+    const sf1Y     = grid.centerY - spacing; // 335
+    const sf2Y     = grid.centerY + spacing; // 665
+    const bronzeY  = sf1Y;                   // 335 (= sf1Y, same as 8P pattern)
+    const finalY   = grid.centerY;           // 500 (centered between sf1 and sf2)
+    const finalsX  = round1X + 2 * (grid.matchWidth + grid.horizontalSpacing); // 1260
 
-    // SFs aligned with Bronze/Final Y positions for clean direct connections
-    const sf1Y = bronzeY; // 420
-    const sf2Y = finalY;  // 580
+    const spineX  = round1X + grid.matchWidth + grid.horizontalSpacing / 2;           // 867.5
+    const bronzeX = Math.round((spineX + finalsX) / 2 - grid.matchWidth / 2);         // 924
 
     const sf1    = matches.find(m => m.id === 'FS-1-1');
     const sf2    = matches.find(m => m.id === 'FS-1-2');
@@ -1006,10 +1008,10 @@ function render4PlayerSEMatches(grid) {
 
     if (sf1)    renderMatch(sf1,    round1X, sf1Y,    'frontside', 2);
     if (sf2)    renderMatch(sf2,    round1X, sf2Y,    'frontside', 2);
-    if (bronze) renderMatch(bronze, finalsX, bronzeY, 'frontside', 2);
+    if (bronze) renderMatch(bronze, bronzeX, bronzeY, 'frontside', 2);
     if (final_) renderMatch(final_, finalsX, finalY,  'frontside', 3);
 
-    const positions = { round1X, finalsX, sf1Y, sf2Y };
+    const positions = { round1X, finalsX, bronzeX, spacing, sf1Y, sf2Y };
     const progressionLines = create4PlayerSELines(grid, matches, positions);
     const bracketCanvas = document.getElementById('bracketCanvas');
     progressionLines.forEach(line => bracketCanvas.appendChild(line));
@@ -1855,7 +1857,7 @@ function resetZoom() {
             } else { // 4-player
                 zoomLevel = 0.8;
                 panOffset.x = -80;
-                panOffset.y = -60;
+                panOffset.y = 65;
             }
         } else {
             // DE zoom/pan defaults
