@@ -21,11 +21,11 @@ Ideas and suggestions for future consideration.
 ## Later
 *Worth tracking but not urgent*
 
-### Tournament Manager — IndexedDB Migration (v5.0.0)
+### Match Archive — IndexedDB Store
 
-Replace localStorage with indexedDB throughout the Tournament Manager. Foundational prerequisite for full scoresheet storage, TM/Chalker integration, Series/League, and multi-season history.
+Add a permanent indexedDB match archive alongside localStorage (no migration — localStorage stays untouched). The archive stores raw visit data per match and is the foundation for full scoresheet storage, player statistics, season history, and external reporting.
 
-See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for full rationale and known challenges.
+See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record structure and rationale.
 
 ---
 
@@ -36,4 +36,4 @@ See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for full r
 
 ---
 
-**Last updated:** March 3, 2026
+**Last updated:** March 4, 2026

@@ -5,17 +5,75 @@
 
 ---
 
-## Storage Architecture Decision (March 2026)
+## Storage Architecture Decision (March 2026, revised)
 
-The storage layer must move from **localStorage to indexedDB** before this document's features are implemented. This is foundational — full scoresheet storage, Series/League, and multi-season history all require storage capacity that localStorage cannot provide.
+### Hybrid Storage: localStorage + indexedDB
 
-**Potential challenges:**
-- localStorage calls are scattered across 11 files with no central abstraction layer
-- The entire codebase is currently synchronous — indexedDB is async, so every storage call cascades into async/await refactoring
-- Data migration: existing tournaments in localStorage must be carried over without data loss
-- Estimated effort: significant — this is a v5.0.0 foundation, not a minor upgrade
+The storage layer does **not** need to migrate wholesale to indexedDB. Instead, a hybrid approach separates concerns cleanly:
 
-The network layer features described below remain valid — only the storage layer beneath them changes.
+| Store | What it holds | Nature |
+|-------|--------------|--------|
+| **localStorage** | Tournament structure, match state, config, rankings, undo history | Operational — run the tournament. Ephemeral by design. |
+| **indexedDB** | Raw match archive: visit scores, leg data, timestamps | Archival — permanent record. Independent lifecycle. |
+
+**Why this works:**
+- Everything in localStorage today is small, fast, and synchronous. It works. Leave it alone.
+- The heavy data (visit scores, full scoresheets) does not exist in the codebase yet — it can be built async and indexedDB-native from day one.
+- No migration. No async refactoring of existing code. No risk to what is working.
+
+**The archive is independent:**
+The indexedDB match archive has its own lifecycle. It is not a cache of localStorage — it is a permanent record. Deleting a tournament from localStorage does not orphan the archive; the archive stands on its own. It can be queried for player statistics, trends, head-to-head records, and season history long after the operational tournament data is gone.
+
+### Match Archive Record
+
+```javascript
+{
+  matchId:        'FS-1-3',        // TM match ID
+  tournamentId:   'uuid',          // Soft reference — archive survives tournament deletion
+  timestamp:      'ISO8601',       // Match start time
+  player1:        { id, name },
+  player2:        { id, name },
+  format:         'Bo5',           // Match format
+  startingPlayer: 1,               // 1 or 2
+  visits:         []               // Raw per-visit scores, per leg
+}
+```
+
+All derived values — averages, checkout percentages, high finishes, score ranges, head-to-head records — are calculated on read from the raw visits. The store stays lean; the queries stay flexible.
+
+### What this unblocks
+- Full scoresheet storage (Chalker → TM result import)
+- Series / League season history
+- Player statistics and trends across tournaments
+- External reporting / API hydration
+
+### Data Flow: Live Stream + Final Transfer
+
+When network is active, Chalker sends data to TM in two phases:
+
+**Live stream** — per-visit data flows from Chalker to TM as the match progresses. Provisional and best-effort. Enables real-time display in TM (live score, running averages, spectator view) without waiting for match completion.
+
+**Final transfer** — complete match record sent on match completion. This is the source of truth. TM writes to the archive only if the incoming data differs from what is already present — making the transfer idempotent and safe to receive multiple times.
+
+This means the live infrastructure is in place from the start. If the stream was uninterrupted, the final transfer is a no-op. If the connection dropped mid-match, the final transfer fills any gaps. Either way the archive ends up correct.
+
+Live opportunities enabled from day one:
+- Live score display on the TM bracket during a match
+- Running statistics as legs are played
+- Real-time leaderboard updates
+- Spectator / operator view without manual entry
+
+### Live Feed: MQTT Pub/Sub
+
+External consumers (live-view displays, announcer screens, stats overlays) receive live data via the same MQTT broker already used for TM ↔ Chalker communication. No separate mechanism needed.
+
+**TM publishes** live state updates to a dedicated topic (e.g. `newton/live/{tournamentId}`) as events occur — visit scored, leg completed, match completed, leaderboard updated.
+
+**Any subscriber** — on any computer on the network — receives updates in real time simply by subscribing to the relevant topic. Any number of consumers, no polling, no additional infrastructure.
+
+The hub routes messages. The TM is the publisher and source of truth. Consumers are read-only subscribers. This is MQTT used as intended.
+
+The network layer features described below remain valid and unchanged.
 
 ---
 
