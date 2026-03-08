@@ -13,13 +13,19 @@ body {
     line-height: 1.6;
 }
 
+/* Container - matches tournament app container */
+.landing-container {
+    width: 100%;
+    margin: 0;
+    padding: 20px;
+}
+
 /* Header - matches tournament app header */
 .landing-header {
     background: #ffffff;
     border: 1px solid #666666;
     padding: 24px;
-    margin: 0 auto;
-    max-width: 1400px;
+    margin-bottom: 24px;
 }
 
 .landing-header-top {

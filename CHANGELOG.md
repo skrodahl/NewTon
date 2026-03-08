@@ -4,6 +4,13 @@
 - **Muted "Started" button**: Live match button color changed from bright orange (`#ff6b35`) to a warmer, less distracting muted orange (`#e09060`)
 - **Subtle dropdown backgrounds**: Lane and referee dropdowns on ready/live match cards now use a light gray (`#e8e9ec`) instead of pure white, blending better with the card footer
 
+### SEO & Landing Page
+- **SEO meta tags**: Added `<meta name="description">` and `<meta name="keywords">` to tournament.html for search engine discoverability
+- **Optional landing page**: Docker deployments can enable `NEWTON_LANDING_PAGE=true` to show a feature-rich page with descriptions, screenshots, and Open Graph / Twitter Card meta tags
+  - Landing page embedded in tournament.html (becomes tournament.php in Docker) — no separate files needed
+  - "Launch Tournament Manager" button uses `?launch` to enter the app
+  - Supports `NEWTON_BASE_URL` and `NEWTON_GITHUB_URL` environment variables
+
 ### Eliminated Player Strikethrough (2026-03-03)
 
 ### Visual Polish
