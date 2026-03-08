@@ -8,6 +8,7 @@
 - **SEO meta tags**: Added `<meta name="description">` and `<meta name="keywords">` to tournament.html for search engine discoverability
 - **Optional landing page**: Docker deployments can enable `NEWTON_LANDING_PAGE=true` to show a feature-rich page with descriptions, screenshots, and Open Graph / Twitter Card meta tags
   - Landing page embedded in tournament.html (becomes tournament.php in Docker) — no separate files needed
+  - Centered header with logo and title in Insignia font, body text in Manrope — matching the tournament app
   - "Launch Tournament Manager" button uses `?launch` to enter the app
   - Supports `NEWTON_BASE_URL` and `NEWTON_GITHUB_URL` environment variables
 
