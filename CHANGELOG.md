@@ -1,4 +1,10 @@
-## **v4.2.1** - Eliminated Player Strikethrough (2026-03-03)
+## **v4.2.1** - Visual Polish (2026-03-08)
+
+### Match Card Tweaks
+- **Muted "Started" button**: Live match button color changed from bright orange (`#ff6b35`) to a warmer, less distracting muted orange (`#e09060`)
+- **Subtle dropdown backgrounds**: Lane and referee dropdowns on ready/live match cards now use a light gray (`#e8e9ec`) instead of pure white, blending better with the card footer
+
+### Eliminated Player Strikethrough (2026-03-03)
 
 ### Visual Polish
 - **Eliminated player strikethrough**: Completed match cards now display the eliminated player's name in muted red with a slanted strikethrough line, making it immediately clear who has been knocked out

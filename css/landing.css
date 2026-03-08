@@ -1,0 +1,277 @@
+/* Landing Page Styles */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+}
+
+body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+    background: #f0f2f5;
+    color: #1a1a2e;
+    line-height: 1.6;
+}
+
+/* Header - matches tournament app header */
+.landing-header {
+    background: #ffffff;
+    border: 1px solid #666666;
+    padding: 24px;
+    margin: 0 auto;
+    max-width: 1400px;
+}
+
+.landing-header-top {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+}
+
+.landing-header h1 {
+    color: #000000;
+    font-size: 2.25rem;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    font-family: 'Insignia', Georgia, serif;
+}
+
+.landing-logo {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.landing-logo-placeholder {
+    width: 60px;
+    height: 60px;
+    background: #f5f5f5;
+    border: 1px solid #c0c0c0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #666666;
+    font-weight: 600;
+    font-size: 10px;
+    letter-spacing: 0.5px;
+    text-align: center;
+    line-height: 1.2;
+}
+
+/* Hero Section */
+.hero {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 60px 24px;
+    text-align: center;
+}
+
+.hero-tagline {
+    font-size: 1.5rem;
+    color: #4a4a6a;
+    margin-bottom: 12px;
+    font-weight: 300;
+}
+
+.hero-description {
+    font-size: 1.1rem;
+    color: #666;
+    max-width: 700px;
+    margin: 0 auto 40px;
+}
+
+.hero-buttons {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+
+.btn-launch {
+    display: inline-block;
+    padding: 14px 36px;
+    background: #28a745;
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.btn-launch:hover {
+    background: #218838;
+}
+
+.btn-github {
+    display: inline-block;
+    padding: 14px 36px;
+    background: #24292e;
+    color: white;
+    text-decoration: none;
+    font-size: 1.1rem;
+    font-weight: 600;
+    border-radius: 6px;
+    transition: background 0.2s ease;
+}
+
+.btn-github:hover {
+    background: #1b1f23;
+}
+
+/* Features Section */
+.features {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+}
+
+.features h2 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 40px;
+    color: #1a1a2e;
+}
+
+.features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 24px;
+}
+
+.feature-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 28px;
+    transition: box-shadow 0.2s ease;
+}
+
+.feature-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.feature-card h3 {
+    font-size: 1.15rem;
+    margin-bottom: 10px;
+    color: #1a1a2e;
+}
+
+.feature-card p {
+    color: #555;
+    font-size: 0.95rem;
+    line-height: 1.6;
+}
+
+/* Screenshots Section */
+.screenshots {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+}
+
+.screenshots h2 {
+    text-align: center;
+    font-size: 1.8rem;
+    margin-bottom: 40px;
+    color: #1a1a2e;
+}
+
+.screenshot-item {
+    margin-bottom: 40px;
+}
+
+.screenshot-item h3 {
+    font-size: 1.1rem;
+    color: #4a4a6a;
+    margin-bottom: 12px;
+    text-align: center;
+}
+
+.screenshot-item img {
+    width: 100%;
+    max-width: 1000px;
+    display: block;
+    margin: 0 auto;
+    border: 1px solid #d1d5db;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* Highlights Section */
+.highlights {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 24px 60px;
+}
+
+.highlights-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    text-align: center;
+}
+
+.highlight-item {
+    padding: 20px;
+}
+
+.highlight-item .number {
+    font-size: 2rem;
+    font-weight: 700;
+    color: #28a745;
+}
+
+.highlight-item .label {
+    color: #666;
+    font-size: 0.9rem;
+    margin-top: 4px;
+}
+
+/* Footer */
+.landing-footer {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 30px 24px;
+    text-align: center;
+    color: #888;
+    font-size: 0.85rem;
+    border-top: 1px solid #e0e0e0;
+}
+
+.landing-footer a {
+    color: #555;
+    text-decoration: underline;
+}
+
+.landing-footer a:hover {
+    color: #1a1a2e;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .landing-header h1 {
+        font-size: 1.5rem;
+    }
+
+    .hero {
+        padding: 40px 24px;
+    }
+
+    .hero-tagline {
+        font-size: 1.2rem;
+    }
+
+    .hero-buttons {
+        flex-direction: column;
+        align-items: center;
+    }
+
+    .btn-launch,
+    .btn-github {
+        width: 100%;
+        max-width: 300px;
+        text-align: center;
+    }
+}

@@ -113,6 +113,28 @@ environment:
   - NEWTON_DEMO_MODE=true  # Shows privacy banner
 ```
 
+#### `NEWTON_LANDING_PAGE` (default: `false`)
+Show a landing page with feature descriptions, screenshots, and meta tags for SEO instead of loading the tournament app directly.
+
+**Use case:** Public-facing instances where you want search engines to index a descriptive page with proper meta tags.
+
+```yaml
+environment:
+  - NEWTON_LANDING_PAGE=true  # Shows landing page at root URL
+```
+
+Visitors can click "Launch Tournament Manager" to access the app. Direct access to `tournament.php` always works regardless of this setting.
+
+#### `NEWTON_BASE_URL` (optional)
+Set the canonical base URL for SEO meta tags on the landing page (Open Graph, Twitter Cards).
+
+**Use case:** When the landing page is enabled and you want search engines and social media to use the correct URL.
+
+```yaml
+environment:
+  - NEWTON_BASE_URL=https://darts.example.com
+```
+
 #### `NEWTON_GITHUB_URL` (default: `https://github.com/skrodahl/NewTon`)
 Customize the GitHub link shown in the demo banner.
 

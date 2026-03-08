@@ -97,6 +97,7 @@ docker compose up -d
 - ✅ Multi-architecture support (Intel/AMD + Apple Silicon/Raspberry Pi)
 - ✅ Persistent storage for tournaments
 - ✅ Custom logo and payment QR code support
+- ✅ Optional SEO landing page (`NEWTON_LANDING_PAGE=true`)
 
 **Documentation:**
 - **[Quick Start Guide](DOCKER-QUICKSTART.md)** - Get running in 2 minutes
