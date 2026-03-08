@@ -223,33 +223,36 @@ body {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
 }
 
-/* Highlights Section */
-.highlights {
-    max-width: 1400px;
-    margin: 0 auto;
-    padding: 0 24px 60px;
-}
-
+/* Highlight Cards (inside hero) */
 .highlights-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(4, 1fr);
     gap: 20px;
     text-align: center;
+    max-width: 800px;
+    margin: 0 auto 40px;
 }
 
-.highlight-item {
-    padding: 20px;
+.highlight-card {
+    background: #ffffff;
+    border: 1px solid #e0e0e0;
+    padding: 20px 16px;
+    transition: box-shadow 0.2s ease;
 }
 
-.highlight-item .number {
-    font-size: 2rem;
+.highlight-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+.highlight-card .number {
+    font-size: 1.8rem;
     font-weight: 700;
     color: #28a745;
 }
 
-.highlight-item .label {
+.highlight-card .label {
     color: #666;
-    font-size: 0.9rem;
+    font-size: 0.85rem;
     margin-top: 4px;
 }
 
@@ -285,6 +288,10 @@ body {
 
     .hero-tagline {
         font-size: 1.2rem;
+    }
+
+    .highlights-grid {
+        grid-template-columns: repeat(2, 1fr);
     }
 
     .hero-buttons {
