@@ -45,6 +45,10 @@ Completed match cards now display the eliminated player's name in muted red with
 
 The tournament app now includes `<meta name="description">` and `<meta name="keywords">` tags in the HTML head. This helps search engines accurately describe NewTon in search results, even without the landing page enabled.
 
+### Schema.org Structured Data
+
+The landing page includes JSON-LD `SoftwareApplication` markup, giving search engines machine-readable metadata about the app (category, price, license, features, browser requirements). This can enable rich results in Google search listings.
+
 ### Landing Page
 
 A new optional landing page can be enabled for Docker deployments. When enabled, visitors see a feature-rich page with descriptions, screenshots, and proper Open Graph / Twitter Card meta tags before entering the tournament app.

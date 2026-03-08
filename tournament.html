@@ -15,7 +15,33 @@ if (getenv('NEWTON_LANDING_PAGE') === 'true' && !isset($_GET['launch'])) {
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="Free, open-source darts tournament manager with single and double elimination brackets. Offline-first, self-hostable, zero dependencies. Run professional darts tournaments from your browser.">
-    <meta name="keywords" content="darts, tournament, bracket, double elimination, single elimination, tournament manager, open source, self-hosted, offline, darts scoring">
+    <meta name="keywords" content="darts, tournament, bracket, double elimination, single elimination, tournament manager, darts scoring, score keeper, scoring app, darts app, tournament bracket, offline tournament, offline-first, PWA, self-hosted, open source, free, dart league, darts competition, 4 player tournament, 8 player tournament, 16 player tournament, 32 player tournament, dartboard, match management, referee management, lane management">
+
+    <!-- Schema.org Structured Data -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "SoftwareApplication",
+        "name": "NewTon DC - Tournament Manager",
+        "description": "Free, open-source darts tournament manager with single and double elimination brackets for 4 to 32 players. Offline-first, self-hostable, zero dependencies.",
+        "applicationCategory": "SportsApplication",
+        "applicationSubCategory": "Tournament Management",
+        "operatingSystem": "Web Browser",
+        "browserRequirements": "Chrome 80+, Firefox 75+, Safari 13+, Edge 80+",
+        "offers": {
+            "@type": "Offer",
+            "price": "0",
+            "priceCurrency": "USD"
+        },
+        "license": "https://opensource.org/licenses/BSD-3-Clause",
+        "isAccessibleForFree": true,
+        "url": "<?= htmlspecialchars($githubUrl) ?>",
+        "downloadUrl": "<?= htmlspecialchars($githubUrl) ?>",
+        "screenshot": "<?= htmlspecialchars($baseUrl) ?>/Screenshots/tournament-bracket-zoom.png",
+        "featureList": "Single Elimination, Double Elimination, 4-32 Players, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
+        "keywords": "darts, tournament, bracket, scoring, score keeper, offline, PWA, self-hosted, open source"
+    }
+    </script>
 
     <!-- Open Graph -->
     <meta property="og:type" content="website">

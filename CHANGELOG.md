@@ -6,6 +6,7 @@
 
 ### SEO & Landing Page
 - **SEO meta tags**: Added `<meta name="description">` and `<meta name="keywords">` to tournament.html for search engine discoverability
+- **Schema.org structured data**: JSON-LD `SoftwareApplication` markup on landing page — tells search engines the app category, price (free), license, browser requirements, feature list, and screenshot
 - **Optional landing page**: Docker deployments can enable `NEWTON_LANDING_PAGE=true` to show a feature-rich page with descriptions, screenshots, and Open Graph / Twitter Card meta tags
   - Landing page embedded in tournament.html (becomes tournament.php in Docker) — no separate files needed
   - Centered header with logo and title in Insignia font, body text in Manrope — matching the tournament app
