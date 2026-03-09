@@ -1,3 +1,12 @@
+## **v4.2.2** - Landing Page Fix (2026-03-09)
+
+### Landing Page
+- **Fixed HTML leak**: Landing page content was visible when opening `tournament.html` directly in a browser (without PHP). Moved landing page to separate `landing-page.php` file, included via `<script><?php include ?></script>` pattern — browser treats PHP inside script tags as invalid JS and silently ignores it (same pattern used by demo banner)
+- **Feature cards reorganized**: Added Chalker Scoring App card; removed Magic Zoom card; bracket visualization note added to Single & Double Elimination card
+- **Highlight number cards**: Moved into hero section above the action buttons for better visual flow
+
+---
+
 ## **v4.2.1** - Visual Polish (2026-03-08)
 
 ### Match Card Tweaks
