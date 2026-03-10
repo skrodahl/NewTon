@@ -1,3 +1,18 @@
+## **v4.2.3-beta.1** - Landing Page Redesign (2026-03-10)
+
+### Landing Page — Retro Comic Theme
+- **Hero image**: Nano Banana retro comic illustration added as a prominent hero element with rounded corners, dark border, and warm glow shadow
+- **Complete color overhaul**: Warm parchment background (`#f5ebe0`), rich brown text (`#2b2118`), burnt orange accents (`#c0562a`), amber gold highlights (`#e8a44a`) — all derived from the hero image palette
+- **Feature showcase**: Screenshots section replaced with alternating two-column showcase layout — each item has a category label, heading, description, and screenshot with hover zoom effect
+- **New showcase card**: "Intelligent Seeding & BYE Handling" — fair draw algorithm and automatic BYE advancement
+- **Highlight card updated**: Replaced `~60MB Docker Image Size` with `2 Tournament Formats`
+- **Section dividers**: Gradient orange-to-gold horizontal rules between sections
+- **Card styling**: Cream cards (`#fff8f0`) with warm borders and gradient top accent bars
+- **Standalone test file**: `landing.html` added for local browser testing without Docker/PHP
+- **PHP landing page synced**: `landing-page.php` updated with all new content, preserving env var plumbing
+
+---
+
 ## **v4.2.2** - Landing Page Fix (2026-03-09)
 
 ### Landing Page
