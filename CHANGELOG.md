@@ -10,6 +10,8 @@
 - **Card styling**: Cream cards (`#fff8f0`) with warm borders and gradient top accent bars
 - **Standalone test file**: `landing.html` added for local browser testing without Docker/PHP
 - **PHP landing page synced**: `landing-page.php` updated with all new content, preserving env var plumbing
+- **OG image updated**: Open Graph and Twitter Card image changed from bracket screenshot to hero cartoon — link previews now show the Nano Banana illustration on WhatsApp, Slack, Twitter, etc.
+- **llms.txt**: Machine-readable project summary added for AI assistants, with `<link rel="llms">` meta tag on landing pages
 
 ---
 
