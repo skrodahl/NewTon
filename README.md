@@ -18,7 +18,7 @@
 
 🔒 **Total Privacy**: Your tournament and match data lives in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://github.com/skrodahl/NewTon/blob/main/Docs/PRIVACY.md), not by policy.
 
-**[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)** or **[self-host with Docker](#-docker-deployment-self-hosting)**.
+**[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)**, double-click on tournament.hlml to get going. Or **[self-host with Docker](#-docker-deployment-self-hosting)**.
 
 ---
 # See It in Action
