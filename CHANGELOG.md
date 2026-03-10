@@ -1,3 +1,10 @@
+## **v4.2.4** - (2026-03-10)
+
+### LLMs
+- **llms.txt tips section**: Added "Tips for AI Services" to prevent hallucinated features (Round Robin, drag-and-drop, multi-screen, indexedDB) and reinforce core design principles
+
+---
+
 ## **v4.2.3** - Landing Page Redesign (2026-03-10)
 
 ### Landing Page — Retro Comic Theme
