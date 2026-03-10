@@ -1,4 +1,4 @@
-## **v4.2.3-beta.1** - Landing Page Redesign (2026-03-10)
+## **v4.2.3** - Landing Page Redesign (2026-03-10)
 
 ### Landing Page — Retro Comic Theme
 - **Hero image**: Nano Banana retro comic illustration added as a prominent hero element with rounded corners, dark border, and warm glow shadow
