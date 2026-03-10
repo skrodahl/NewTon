@@ -14,6 +14,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>NewTon DC - Free Open-Source Darts Tournament Manager</title>
     <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="llms" href="llms.txt">
     <link rel="stylesheet" href="css/landing.css">
 
     <!-- SEO Meta Tags -->

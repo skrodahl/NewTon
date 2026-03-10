@@ -1,0 +1,68 @@
+# NewTon DC Tournament Manager
+
+> Free, open-source darts tournament manager. Offline-first, zero dependencies, total privacy by architecture.
+
+## About
+NewTon DC is a fully client-side web application for managing professional darts tournaments. It runs entirely in the browser — no server, database, or internet connection required. All data lives in browser localStorage and never leaves the device.
+
+- **License**: BSD-3-Clause
+- **Repository**: https://github.com/skrodahl/NewTon
+- **Live Demo**: https://darts.skrodahl.net
+- **Privacy**: https://github.com/skrodahl/NewTon/blob/main/Docs/PRIVACY.md
+
+## Technical Stack
+- Pure HTML5, CSS3, and JavaScript (ES6+) — no frameworks, no build step, no external dependencies
+- Persistence: browser localStorage only (no indexedDB, no cookies, no server-side storage)
+- Offline-first: works 100% offline once loaded, installable as PWA (Chalker app)
+- Docker optional: Alpine + nginx + PHP-FPM for self-hosting (internal port 2020)
+
+## Tournament Formats
+- **Double Elimination**: Frontside/backside brackets with grand final, 4–32 players
+- **Single Elimination**: With bronze final, 4–32 players
+- Hardcoded match progression lookup tables for bulletproof bracket advancement
+- Fair draw algorithm with intelligent BYE placement for non-power-of-two fields
+
+## Key Features
+- Interactive zoomable/pannable bracket visualization with click-to-zoom match cards
+- Match Controls panel: lane assignment (1–20 dartboards), referee suggestions with conflict prevention
+- Transaction-based undo system: surgical undo of any match result without resetting the tournament
+- Configurable point system: participation, placement, and achievement points
+- Multi-tournament support with JSON import/export and CSV results export
+- Persistent player registry across tournaments
+- Dynamic context-sensitive help system
+
+## Companion App: NewTon Chalker
+- Tablet-optimized x01 scoring app for referees at the dartboard
+- Installable as a PWA with full offline support
+- Live stats, match history, tiebreak warnings, ton rings
+- Located at `/chalker/` path
+
+## Deployment Options
+- **Local**: Open `tournament.html` directly in any modern browser (Chrome 80+, Firefox 75+, Safari 13+, Edge 80+)
+- **Docker Hub**: `docker run -d -p 8080:2020 skrodahl/newton:latest`
+- **GHCR**: `docker run -d -p 8080:2020 ghcr.io/skrodahl/newton:latest`
+- Internal container port is 2020 ("Double 20" — a darts reference)
+
+## Docker Environment Variables
+- `NEWTON_LANDING_PAGE=true` — show landing page before app (default: not set)
+- `NEWTON_API_ENABLED=true` — enable optional REST API for tournament sharing (default: true)
+- `NEWTON_DEMO_MODE=true` — show demo/privacy banner (default: false)
+- `NEWTON_GITHUB_URL` — GitHub link shown in landing page/demo banner
+- `NEWTON_BASE_URL` — base URL for OG tags and canonical URL
+
+## Privacy Model
+- Zero analytics, zero telemetry, zero tracking, zero cookies
+- No external network calls — all assets bundled, no CDN
+- All data stored in browser localStorage only
+- GDPR-compliant by architecture: no data processing by the application
+- Open source: privacy claims are fully verifiable
+- Optional REST API (disabled on demo site) is the only exception — requires explicit user action to upload
+
+## Architecture Notes
+- `tournament.html` — main application entry point (single HTML file with all inline styles/scripts loaded)
+- `js/` — 11 JavaScript modules loaded in specific order (see tournament.html)
+- `css/landing.css` — separate stylesheet for landing page (does not affect tournament app)
+- `chalker/` — standalone Chalker scoring PWA
+- `docker/` — Dockerfile, nginx.conf, docker-compose files
+- Match progression uses hardcoded lookup tables in `js/clean-match-progression.js` — single source of truth
+- History system provides transaction-based undo with state snapshots
