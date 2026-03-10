@@ -232,6 +232,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             <a href="<?= $githubUrl ?>">GitHub</a> &mdash;
             <a href="<?= $githubUrl ?>/blob/main/Docs/PRIVACY.md">Privacy</a>
         </p>
+        <p><em style="color: #a89080;">No popups? No cookies!</em></p>
     </div>
 
 </body>
