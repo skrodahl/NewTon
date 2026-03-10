@@ -40,7 +40,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         "isAccessibleForFree": true,
         "url": "<?= $githubUrl ?>",
         "downloadUrl": "<?= $githubUrl ?>",
-        "screenshot": "<?= $baseUrl ?>/Screenshots/tournament-bracket-zoom.png",
+        "screenshot": "<?= $baseUrl ?>/Screenshots/newton-cartoon.png",
         "featureList": "Single Elimination, Double Elimination, 4-32 Players, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
         "keywords": "darts, tournament, bracket, scoring, score keeper, offline, PWA, self-hosted, open source"
     }
@@ -50,13 +50,13 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     <meta property="og:type" content="website">
     <meta property="og:title" content="NewTon DC - Free Open-Source Darts Tournament Manager">
     <meta property="og:description" content="Professional single and double elimination darts tournament management. Offline-first, self-hostable, zero dependencies. No signup required.">
-    <meta property="og:image" content="<?= $baseUrl ?>/Screenshots/tournament-bracket-zoom.png"><?= $ogUrlTag ?>
+    <meta property="og:image" content="<?= $baseUrl ?>/Screenshots/newton-cartoon.png"><?= $ogUrlTag ?>
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="NewTon DC - Free Open-Source Darts Tournament Manager">
     <meta name="twitter:description" content="Professional single and double elimination darts tournament management. Offline-first, self-hostable, zero dependencies.">
-    <meta name="twitter:image" content="<?= $baseUrl ?>/Screenshots/tournament-bracket-zoom.png"><?= $canonicalTag ?>
+    <meta name="twitter:image" content="<?= $baseUrl ?>/Screenshots/newton-cartoon.png"><?= $canonicalTag ?>
 </head>
 <body>
 
@@ -158,7 +158,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image">
-                <img src="Screenshots/tournament-bracket-zoom.png" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy">
+                <img src="Screenshots/newton-cartoon.png" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Bracket View</span>
