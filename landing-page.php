@@ -60,7 +60,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 </head>
 <body>
 
-    <!-- Header - matches tournament app style -->
+    <!-- Header -->
     <div class="landing-container">
         <div class="landing-header">
             <div class="landing-header-top">
@@ -80,6 +80,9 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             Run professional single and double elimination darts tournaments entirely from your browser.
             No server, no database, no internet connection required. Your data never leaves your device.
         </p>
+        <div class="hero-image">
+            <img src="Screenshots/newton-cartoon.png" alt="NewTon DC Tournament Manager — retro comic illustration of a darts tournament bracket in action">
+        </div>
         <div class="highlights-grid">
             <div class="highlight-card">
                 <div class="number">0</div>
@@ -90,8 +93,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
                 <div class="label">Players per Tournament</div>
             </div>
             <div class="highlight-card">
-                <div class="number">~60MB</div>
-                <div class="label">Docker Image Size</div>
+                <div class="number">2</div>
+                <div class="label">Tournament Formats</div>
             </div>
             <div class="highlight-card">
                 <div class="number">100%</div>
@@ -103,6 +106,9 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             <a href="<?= $githubUrl ?>" class="btn-github">View on GitHub</a>
         </div>
     </div>
+
+    <!-- Divider -->
+    <div class="section-divider"><hr></div>
 
     <!-- Key Features -->
     <div class="features">
@@ -143,33 +149,77 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         </div>
     </div>
 
-    <!-- Screenshots -->
-    <div class="screenshots">
+    <!-- Divider -->
+    <div class="section-divider"><hr></div>
+
+    <!-- Feature Showcase -->
+    <div class="showcase">
         <h2>See It in Action</h2>
 
-        <div class="screenshot-item">
-            <h3>16-Player Tournament Bracket with Match Card Magic Zoom</h3>
-            <img src="Screenshots/tournament-bracket-zoom.png" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy">
+        <div class="showcase-item">
+            <div class="showcase-image">
+                <img src="Screenshots/tournament-bracket-zoom.png" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Bracket View</span>
+                <h3>Interactive Tournament Bracket</h3>
+                <p>The full bracket rendered as a zoomable, pannable canvas. Click any match card to zoom in and see player details, scores, and match status. Progression lines trace the path from round one to the final. Works beautifully from 4-player brackets all the way up to 32.</p>
+            </div>
         </div>
 
-        <div class="screenshot-item">
-            <h3>Match Controls with Referee Suggestions</h3>
-            <img src="Screenshots/match-controls.png" alt="Match controls showing referee suggestions and conflict detection" loading="lazy">
+        <div class="showcase-item">
+            <div class="showcase-image">
+                <img src="Screenshots/match-controls.png" alt="Match controls showing referee suggestions and conflict detection" loading="lazy">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Match Controls</span>
+                <h3>Run Your Tournament from One Panel</h3>
+                <p>The Match Controls panel is your command center. See which matches are ready, assign lanes and referees, start matches, and record results — all without leaving the page. Smart referee suggestions highlight available players and flag conflicts automatically.</p>
+            </div>
         </div>
 
-        <div class="screenshot-item">
-            <h3>Player Registration with Dynamic Help</h3>
-            <img src="Screenshots/player-registration-help.png" alt="Player registration page with saved players and dynamic help system" loading="lazy">
+        <div class="showcase-item">
+            <div class="showcase-image">
+                <img src="Screenshots/player-registration-help.png" alt="Player registration page with saved players and dynamic help system" loading="lazy">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Player Management</span>
+                <h3>Registration Made Simple</h3>
+                <p>Add players from your saved roster or register new ones on the spot. The dynamic help system guides first-time users through every step. Player data persists across tournaments, so your regulars are always one click away.</p>
+            </div>
         </div>
 
-        <div class="screenshot-item">
-            <h3>Tournament Setup</h3>
-            <img src="Screenshots/tournament-setup.png" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy">
+        <div class="showcase-item">
+            <div class="showcase-image">
+                <img src="Screenshots/tournament-setup.png" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Setup</span>
+                <h3>From Zero to Bracket in 60 Seconds</h3>
+                <p>Name your tournament, pick a date, choose single or double elimination, and you're ready to go. The bracket size adapts automatically to your player count. No configuration rabbit holes — just the essentials.</p>
+            </div>
         </div>
 
-        <div class="screenshot-item">
-            <h3>Tournament Winner Celebration</h3>
-            <img src="Screenshots/celebration.png" alt="Tournament winner celebration screen" loading="lazy">
+        <div class="showcase-item">
+            <div class="showcase-image">
+                <img src="Screenshots/tournament-bracket.png" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Fair Draw</span>
+                <h3>Intelligent Seeding &amp; BYE Handling</h3>
+                <p>The draw algorithm distributes players fairly across the bracket, and when the field isn't a perfect power of two, BYEs are placed strategically so no player gets an unfair advantage. Real players advance automatically past empty slots — no manual intervention needed.</p>
+            </div>
+        </div>
+
+        <div class="showcase-item">
+            <div class="showcase-image">
+                <img src="Screenshots/celebration.png" alt="Tournament winner celebration screen" loading="lazy">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Tournament Complete</span>
+                <h3>Celebrate the Champion</h3>
+                <p>When the final dart lands, the winner gets the spotlight they deserve. Full podium results, final standings, and the satisfaction of a tournament well run. Export results as CSV for your league records or share the JSON for next time.</p>
+            </div>
         </div>
     </div>
 
