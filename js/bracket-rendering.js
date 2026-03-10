@@ -4929,12 +4929,19 @@ function updateTournamentConfigDisplay() {
     document.getElementById('cfg-180').textContent = config.points.oneEighty;
     document.getElementById('cfg-shortleg').textContent = config.points.shortLeg;
 
-    // Match configuration
+    // Match configuration — Double Elimination
     document.getElementById('cfg-regular').textContent = `Best of ${config.legs.regularRounds}`;
     document.getElementById('cfg-fs-semi').textContent = `Best of ${config.legs.frontsideSemifinal}`;
     document.getElementById('cfg-bs-semi').textContent = `Best of ${config.legs.backsideSemifinal}`;
     document.getElementById('cfg-bs-final').textContent = `Best of ${config.legs.backsideFinal}`;
     document.getElementById('cfg-grand').textContent = `Best of ${config.legs.grandFinal}`;
+
+    // Match configuration — Single Elimination
+    document.getElementById('cfg-se-regular').textContent = `Best of ${config.legs.seRegularRounds || 3}`;
+    document.getElementById('cfg-se-qf').textContent = `Best of ${config.legs.seQuarterfinal || 3}`;
+    document.getElementById('cfg-se-semi').textContent = `Best of ${config.legs.seSemifinal || 3}`;
+    document.getElementById('cfg-se-bronze').textContent = `Best of ${config.legs.seBronze || 5}`;
+    document.getElementById('cfg-se-final').textContent = `Best of ${config.legs.seFinal || 5}`;
 
     // Lanes
     const maxLanes = config.lanes.maxLanes || 4;

@@ -1,4 +1,15 @@
-## **v4.2.4** - (2026-03-10)
+## **v4.2.4** - Single Elimination Match Lengths & Chalker Stats (2026-03-10)
+
+### Global Config — Match Configuration
+- **Single Elimination section**: Match Configuration in Global Config now has dedicated SE fields — Regular Rounds, Quarterfinal, Semifinal, Bronze Match, Final — each independently configurable
+- **Double Elimination section**: Existing DE fields unchanged, now clearly labelled under their own heading
+- **SE-first layout**: Single Elimination section appears above Double Elimination in both the config form and the config summary panel
+- **Prominent headings**: Section headings use bold uppercase styling with a bottom border rule for clear visual separation
+- **Correct SE leg assignment**: SE matches now use SE-specific config values instead of borrowing from DE fields — Quarterfinal and Semifinal resolved by round position, Bronze and Final by match ID
+- **Default values**: SE Regular Rounds Bo3, Quarterfinal Bo3, Semifinal Bo3, Bronze Match Bo5, Final Bo5
+
+### Chalker Scoring App — Live Stats
+- **Leg average colour coding**: In the Leg Avgs row of Match Statistics, averages for legs the player started are shown in green (`var(--accent-success)`) — matching the existing leg-starter header colour. Legs not started remain unchanged. Gracefully falls back to plain text for older match records.
 
 ### Landing Page
 - **Chalker button**: Added amber gold "Open Chalker App" button linking to `/chalker` — sits between Launch and GitHub buttons, completes the three-color retro palette

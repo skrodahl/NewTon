@@ -487,6 +487,50 @@
                     <div class="config-section">
                         <h3>Match Configuration</h3>
                         <div class="config-content">
+                            <h4 style="margin: 0 0 10px 0; color: #333; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #ddd; padding-bottom: 6px;">Single Elimination</h4>
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="seRegularRoundsLegs">Regular Rounds</label>
+                                    <select id="seRegularRoundsLegs">
+                                        <option value="3" selected>Best of 3</option>
+                                        <option value="5">Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="seQuarterfinalLegs">Quarterfinal</label>
+                                    <select id="seQuarterfinalLegs">
+                                        <option value="3" selected>Best of 3</option>
+                                        <option value="5">Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="seSemifinalLegs">Semifinal</label>
+                                    <select id="seSemifinalLegs">
+                                        <option value="3" selected>Best of 3</option>
+                                        <option value="5">Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="seBronzeLegs">Bronze Match</label>
+                                    <select id="seBronzeLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="seFinalLegs">Final</label>
+                                    <select id="seFinalLegs">
+                                        <option value="3">Best of 3</option>
+                                        <option value="5" selected>Best of 5</option>
+                                        <option value="7">Best of 7</option>
+                                    </select>
+                                </div>
+                            </div>
+                            <h4 style="margin: 22px 0 10px 0; color: #333; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #ddd; padding-bottom: 6px;">Double Elimination</h4>
                             <div class="config-grid">
                                 <div class="form-group">
                                     <label for="regularRoundsLegs">Regular Rounds</label>
@@ -885,6 +929,13 @@
                                 <!-- Column 3: Match Configuration -->
                                 <div>
                                     <p style="font-weight: 600; margin-bottom: 8px;">Match Configuration</p>
+                                    <p style="font-size: 12px; color: #888; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.05em;">Single Elimination</p>
+                                    <div style="font-size: 14px; color: #666;"><b>Regular Rounds:</b> <span id="cfg-se-regular">Best of 3</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Quarterfinal:</b> <span id="cfg-se-qf">Best of 3</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Semifinal:</b> <span id="cfg-se-semi">Best of 3</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Bronze Match:</b> <span id="cfg-se-bronze">Best of 5</span></div>
+                                    <div style="font-size: 14px; color: #666;"><b>Final:</b> <span id="cfg-se-final">Best of 5</span></div>
+                                    <p style="font-size: 12px; color: #888; margin: 8px 0 4px 0; text-transform: uppercase; letter-spacing: 0.05em;">Double Elimination</p>
                                     <div style="font-size: 14px; color: #666;"><b>Regular Rounds:</b> <span id="cfg-regular">Best of 3</span></div>
                                     <div style="font-size: 14px; color: #666;"><b>Frontside Semifinal:</b> <span id="cfg-fs-semi">Best of 5</span></div>
                                     <div style="font-size: 14px; color: #666;"><b>Backside Semifinal:</b> <span id="cfg-bs-semi">Best of 3</span></div>

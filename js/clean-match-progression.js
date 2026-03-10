@@ -1542,9 +1542,18 @@ function generateFrontsideMatches(bracket, structure, startId) {
             const matchId = `FS-${roundInfo.round}-${matchIndex + 1}`;
             const format = getFormat();
 
-            if (format === 'SE' && (isSEBronzeMatch(matchId, tournament.bracketSize) || isSEFinalMatch(matchId, tournament.bracketSize))) {
-                // SE bronze and final use semifinal leg count
-                legCount = config.legs.frontsideSemifinal;
+            if (format === 'SE') {
+                if (isSEFinalMatch(matchId, tournament.bracketSize)) {
+                    legCount = config.legs.seFinal;
+                } else if (isSEBronzeMatch(matchId, tournament.bracketSize)) {
+                    legCount = config.legs.seBronze;
+                } else if (isSESemifinal(matchId, tournament.bracketSize)) {
+                    legCount = config.legs.seSemifinal;
+                } else if (isSEQuarterfinal(matchId, tournament.bracketSize)) {
+                    legCount = config.legs.seQuarterfinal;
+                } else {
+                    legCount = config.legs.seRegularRounds;
+                }
             } else if (isFrontsideSemifinal(matchId, tournament.bracketSize)) {
                 legCount = config.legs.frontsideSemifinal;
             } else {
@@ -2891,6 +2900,38 @@ function isSEFinalMatch(matchId, bracketSize) {
 }
 
 /**
+ * Check if a match is an SE semifinal match (round total - 2).
+ * Semifinal round by bracket size: 4→R1, 8→R2, 16→R3, 32→R4
+ *
+ * @param {string} matchId - The match ID to check
+ * @param {number} bracketSize - The bracket size
+ * @returns {boolean} True if this is an SE semifinal match
+ */
+function isSESemifinal(matchId, bracketSize) {
+    const seSemifinalRounds = { 4: 1, 8: 2, 16: 3, 32: 4 };
+    const sfRound = seSemifinalRounds[bracketSize];
+    if (!sfRound) return false;
+    const m = matchId.match(/^FS-(\d+)-/);
+    return m && parseInt(m[1]) === sfRound;
+}
+
+/**
+ * Check if a match is an SE quarterfinal match (round total - 3).
+ * Quarterfinal round by bracket size: 8→R1, 16→R2, 32→R3 (not applicable for 4-player)
+ *
+ * @param {string} matchId - The match ID to check
+ * @param {number} bracketSize - The bracket size
+ * @returns {boolean} True if this is an SE quarterfinal match
+ */
+function isSEQuarterfinal(matchId, bracketSize) {
+    const seQuarterfinalRounds = { 8: 1, 16: 2, 32: 3 };
+    const qfRound = seQuarterfinalRounds[bracketSize];
+    if (!qfRound) return false;
+    const m = matchId.match(/^FS-(\d+)-/);
+    return m && parseInt(m[1]) === qfRound;
+}
+
+/**
  * Returns the display name for a given SE round number.
  * Named from the end backwards: Final, Bronze Final, Semifinals, Quarterfinals, Round N.
  * Single source of truth — used by both Match Controls and bracket rendering.
@@ -2966,6 +3007,8 @@ if (typeof window !== 'undefined') {
     window.isBacksideSemifinal = isBacksideSemifinal;
     window.isSEBronzeMatch = isSEBronzeMatch;
     window.isSEFinalMatch = isSEFinalMatch;
+    window.isSESemifinal = isSESemifinal;
+    window.isSEQuarterfinal = isSEQuarterfinal;
     window.getSERoundDisplayName = getSERoundDisplayName;
     window.calculateAllRankings = calculateAllRankings;
     window.calculate8PlayerRankings = calculate8PlayerRankings;

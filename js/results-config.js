@@ -21,7 +21,12 @@ const DEFAULT_CONFIG = {
         frontsideSemifinal: 3,
         backsideSemifinal: 3,
         backsideFinal: 5,
-        grandFinal: 5
+        grandFinal: 5,
+        seRegularRounds: 3,
+        seQuarterfinal: 3,
+        seSemifinal: 3,
+        seBronze: 5,
+        seFinal: 5
     },
     clubName: "NewTon DC",
     lanes: {
@@ -94,12 +99,19 @@ function applyConfigToUI() {
     safeSetValue('shortLegPoints', config.points.shortLeg);
     safeSetValue('oneEightyPoints', config.points.oneEighty);
 
-    // Match leg configuration
+    // Match leg configuration — Double Elimination
     safeSetValue('regularRoundsLegs', config.legs.regularRounds);
     safeSetValue('frontsideSemifinalLegs', config.legs.frontsideSemifinal);
     safeSetValue('backsideSemifinalLegs', config.legs.backsideSemifinal);
     safeSetValue('backsideFinalLegs', config.legs.backsideFinal);
     safeSetValue('grandFinalLegs', config.legs.grandFinal);
+
+    // Match leg configuration — Single Elimination
+    safeSetValue('seRegularRoundsLegs', config.legs.seRegularRounds);
+    safeSetValue('seQuarterfinalLegs', config.legs.seQuarterfinal);
+    safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
+    safeSetValue('seBronzeLegs', config.legs.seBronze);
+    safeSetValue('seFinalLegs', config.legs.seFinal);
 
     // Application title
     if (config.clubName) {
@@ -383,13 +395,20 @@ function savePointConfiguration() {
 
 // SAVE MATCH CONFIGURATION
 function saveMatchConfiguration() {
-    // Read values from UI
+    // Read values from UI — Double Elimination
     config.legs = config.legs || {};
     config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value) || 3;
     config.legs.frontsideSemifinal = parseInt(document.getElementById('frontsideSemifinalLegs').value) || 3;
     config.legs.backsideSemifinal = parseInt(document.getElementById('backsideSemifinalLegs').value) || 3;
     config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value) || 5;
     config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value) || 5;
+
+    // Read values from UI — Single Elimination
+    config.legs.seRegularRounds = parseInt(document.getElementById('seRegularRoundsLegs').value) || 3;
+    config.legs.seQuarterfinal = parseInt(document.getElementById('seQuarterfinalLegs').value) || 3;
+    config.legs.seSemifinal = parseInt(document.getElementById('seSemifinalLegs').value) || 3;
+    config.legs.seBronze = parseInt(document.getElementById('seBronzeLegs').value) || 5;
+    config.legs.seFinal = parseInt(document.getElementById('seFinalLegs').value) || 5;
 
     // Save to localStorage
     saveGlobalConfig();
@@ -434,12 +453,19 @@ function resetMatchConfigToDefaults() {
         // Reset leg configuration to defaults
         config.legs = JSON.parse(JSON.stringify(DEFAULT_CONFIG.legs));
 
-        // Apply to UI
+        // Apply to UI — Double Elimination
         safeSetValue('regularRoundsLegs', config.legs.regularRounds);
         safeSetValue('frontsideSemifinalLegs', config.legs.frontsideSemifinal);
         safeSetValue('backsideSemifinalLegs', config.legs.backsideSemifinal);
         safeSetValue('backsideFinalLegs', config.legs.backsideFinal);
         safeSetValue('grandFinalLegs', config.legs.grandFinal);
+
+        // Apply to UI — Single Elimination
+        safeSetValue('seRegularRoundsLegs', config.legs.seRegularRounds);
+        safeSetValue('seQuarterfinalLegs', config.legs.seQuarterfinal);
+        safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
+        safeSetValue('seBronzeLegs', config.legs.seBronze);
+        safeSetValue('seFinalLegs', config.legs.seFinal);
 
         // Save to localStorage
         saveGlobalConfig();

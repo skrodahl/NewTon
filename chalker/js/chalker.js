@@ -1462,8 +1462,13 @@
     const legs = match.legs || [];
     const p1LegAvgs = [];
     const p2LegAvgs = [];
+    const firstLegStarter = match.firstLegStarter || null;
 
-    legs.forEach(leg => {
+    legs.forEach((leg, legIndex) => {
+      const legStarter = firstLegStarter
+        ? (legIndex % 2 === 0 ? firstLegStarter : (firstLegStarter === 1 ? 2 : 1))
+        : null;
+
       const visits = leg.visits || [];
       const p1Visits = visits.filter(v => v.player === 1);
       const p2Visits = visits.filter(v => v.player === 2);
@@ -1471,7 +1476,8 @@
       if (p1Visits.length > 0) {
         const score = p1Visits.reduce((sum, v) => sum + v.score, 0);
         const darts = p1Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-        p1LegAvgs.push(((score / darts) * 3).toFixed(1));
+        const avg = ((score / darts) * 3).toFixed(1);
+        p1LegAvgs.push(legStarter === 1 ? `<span style="color: var(--accent-success);">${avg}</span>` : avg);
       } else {
         p1LegAvgs.push('-');
       }
@@ -1479,7 +1485,8 @@
       if (p2Visits.length > 0) {
         const score = p2Visits.reduce((sum, v) => sum + v.score, 0);
         const darts = p2Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-        p2LegAvgs.push(((score / darts) * 3).toFixed(1));
+        const avg = ((score / darts) * 3).toFixed(1);
+        p2LegAvgs.push(legStarter === 2 ? `<span style="color: var(--accent-success);">${avg}</span>` : avg);
       } else {
         p2LegAvgs.push('-');
       }
