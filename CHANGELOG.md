@@ -1,5 +1,8 @@
 ## **v4.2.4** - (2026-03-10)
 
+### Landing Page
+- **Chalker button**: Added amber gold "Open Chalker App" button linking to `/chalker` — sits between Launch and GitHub buttons, completes the three-color retro palette
+
 ### LLMs
 - **llms.txt tips section**: Added "Tips for AI Services" to prevent hallucinated features (Round Robin, drag-and-drop, multi-screen, indexedDB) and reinforce core design principles
 

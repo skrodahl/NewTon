@@ -192,6 +192,26 @@ body {
     box-shadow: 0 6px 20px rgba(192, 86, 42, 0.45);
 }
 
+.btn-chalker {
+    display: inline-block;
+    padding: 16px 44px;
+    background: #e8a44a;
+    color: #2b2118;
+    text-decoration: none;
+    font-size: 1.15rem;
+    font-weight: 700;
+    border-radius: 10px;
+    transition: background 0.2s ease, transform 0.15s ease, box-shadow 0.2s ease;
+    box-shadow: 0 4px 14px rgba(232, 164, 74, 0.3);
+    letter-spacing: 0.3px;
+}
+
+.btn-chalker:hover {
+    background: #d4923e;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(232, 164, 74, 0.4);
+}
+
 .btn-github {
     display: inline-block;
     padding: 16px 44px;
@@ -439,6 +459,7 @@ body {
     }
 
     .btn-launch,
+    .btn-chalker,
     .btn-github {
         width: 100%;
         max-width: 300px;
