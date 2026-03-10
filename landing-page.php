@@ -17,6 +17,9 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     <link rel="llms" href="llms.txt">
     <link rel="stylesheet" href="css/landing.css">
 
+    <!-- Google Search Console Verification -->
+    <meta name="google-site-verification" content="ThljhtU_21C5vnMmp7H3GvlWL70ltl-U3Wy46WVe_HU">
+
     <!-- SEO Meta Tags -->
     <meta name="description" content="Free, open-source darts tournament manager with single and double elimination brackets. Offline-first, self-hostable, zero dependencies. Run professional darts tournaments from your browser.">
     <meta name="keywords" content="darts, tournament, bracket, double elimination, single elimination, tournament manager, darts scoring, score keeper, scoring app, darts app, tournament bracket, offline tournament, offline-first, PWA, self-hosted, open source, free, dart league, darts competition, 4 player tournament, 8 player tournament, 16 player tournament, 32 player tournament, dartboard, match management, referee management, lane management">
