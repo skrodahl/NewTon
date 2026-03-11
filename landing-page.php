@@ -44,7 +44,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         "isAccessibleForFree": true,
         "url": "<?= $githubUrl ?>",
         "downloadUrl": "<?= $githubUrl ?>",
-        "screenshot": "<?= $baseUrl ?>/Screenshots/newton-cartoon.png",
+        "screenshot": "<?= $baseUrl ?>/Screenshots/newton-cartoon.jpg",
         "featureList": "Single Elimination, Double Elimination, 4-32 Players, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
         "keywords": "darts, tournament, bracket, scoring, score keeper, offline, PWA, self-hosted, open source"
     }
@@ -54,13 +54,13 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     <meta property="og:type" content="website">
     <meta property="og:title" content="NewTon DC - Free Open-Source Darts Tournament Manager">
     <meta property="og:description" content="Professional single and double elimination darts tournament management. Offline-first, self-hostable, zero dependencies. No signup required.">
-    <meta property="og:image" content="<?= $baseUrl ?>/Screenshots/newton-cartoon.png"><?= $ogUrlTag ?>
+    <meta property="og:image" content="<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg"><?= $ogUrlTag ?>
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="NewTon DC - Free Open-Source Darts Tournament Manager">
     <meta name="twitter:description" content="Professional single and double elimination darts tournament management. Offline-first, self-hostable, zero dependencies.">
-    <meta name="twitter:image" content="<?= $baseUrl ?>/Screenshots/newton-cartoon.png"><?= $canonicalTag ?>
+    <meta name="twitter:image" content="<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg"><?= $canonicalTag ?>
 </head>
 <body>
 
@@ -85,7 +85,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             No server, no database, no internet connection required. Your data never leaves your device.
         </p>
         <div class="hero-image">
-            <img src="Screenshots/newton-cartoon.png" alt="NewTon DC Tournament Manager — retro comic illustration of a darts tournament bracket in action">
+            <img src="Screenshots/newton-cartoon.jpg" alt="NewTon DC Tournament Manager — retro comic illustration of a darts tournament bracket in action">
         </div>
         <div class="highlights-grid">
             <div class="highlight-card">
@@ -125,7 +125,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             </div>
             <div class="feature-card">
                 <h3>Lane &amp; Referee Management</h3>
-                <p>Assign matches to dartboard lanes with conflict prevention. Smart referee suggestions ensure no player referees their own match.</p>
+                <p>Assign matches to dartboard lanes and referees with smart conflict detection. Players officiating a match are blocked from playing until they're free, and players in a live match are excluded from referee selection. Suggestions prioritise recent losers, winners, and referee history.</p>
             </div>
             <div class="feature-card">
                 <h3>Complete Undo System</h3>
