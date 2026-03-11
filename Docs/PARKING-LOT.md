@@ -30,8 +30,11 @@ A mid-tournament bracket editing tool accessible only via the Developer Console 
 2. **Confirmation phrase** — must type "Bracket Editor" to continue (similar to Reset All Config / Reset Tournament gates)
 3. **Forced export** — JSON backup downloads automatically before the editor opens
 4. **Strong warning** — explicit acknowledgement that this can corrupt the tournament
-5. **Minimal editor** — name fields only, nothing structural; edit any slot including BYEs
-6. **Built-in reimport** — one-click restore from the backup taken in step 3
+5. **Player management** — two options before editing slots:
+   - **Add new player** — mini registration dialog reuses the existing registration function (no duplication); same fields, same validation, same code path
+   - **Use existing player** — pick from already-registered players (covers substitution scenarios where the replacement is already in the system)
+6. **Slot editor** — assign any registered player (or free-text name) to any bracket slot, including BYEs
+7. **Built-in reimport** — one-click restore from the backup taken in step 3
 
 The menu entry already exists in the Developer Console (amber, after Toggle Read-Only) and shows an "upcoming feature / here be dragons" placeholder message.
 
