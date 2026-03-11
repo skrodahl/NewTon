@@ -2629,6 +2629,19 @@ function commandToggleReadOnly() {
 }
 
 // ============================================================================
+// Command: Bracket Editor
+// ============================================================================
+
+/**
+ * Command: Bracket Editor (upcoming feature)
+ * Placeholder entry point for the future mid-tournament bracket editing tool.
+ */
+function commandBracketEditor() {
+    showCommandFeedback('Bracket Editor', 'warning',
+        '⚠️ Here be dragons.\n\nThe Bracket Editor is an upcoming feature.\n\nIt will allow direct editing of player names in any bracket slot — including BYEs — in an ongoing tournament.\n\nNot yet implemented.');
+}
+
+// ============================================================================
 // TRANSACTION LOG MANAGEMENT
 // ============================================================================
 
@@ -3080,6 +3093,7 @@ if (typeof window !== 'undefined') {
     window.commandValidateEverything = commandValidateEverything;
     window.commandResetAllConfig = commandResetAllConfig;
     window.commandToggleReadOnly = commandToggleReadOnly;
+    window.commandBracketEditor = commandBracketEditor;
     window.executeResetAllConfig = executeResetAllConfig;
     window.clearConsoleOutput = clearConsoleOutput;
     window.copyConsoleOutput = copyConsoleOutput;

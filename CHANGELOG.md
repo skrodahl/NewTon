@@ -1,3 +1,17 @@
+## **v4.2.5** - Landing Page & Developer Console (2026-03-11)
+
+### Landing Page
+- **Hero image optimised**: Switched from `newton-cartoon.png` (2.1MB) to `newton-cartoon.jpg` (164KB) — 13× smaller, same visual quality
+- **OG & Twitter Card image**: Changed to `newton-poster-throw.jpg` — cleaner, less busy image that reads well at thumbnail size
+- **Lane & Referee Management card**: Rewritten to accurately describe conflict detection — players officiating a match are blocked from playing until free, players in a live match are excluded from referee selection, suggestions prioritise recent losers, winners, and referee history
+- **Google Search Console**: Added site verification meta tag to both `landing.html` and `landing-page.php`
+
+### Developer Console
+- **Bracket Editor entry**: New amber-coloured menu item added after Toggle Read-Only — shows "here be dragons / upcoming feature" placeholder; no bracket logic wired up yet
+- **Parking Lot**: Bracket Editor fully documented in `Docs/PARKING-LOT.md` with 6-step implementation plan
+
+---
+
 ## **v4.2.4** - Single Elimination Match Lengths & Chalker Stats (2026-03-10)
 
 ### Global Config — Match Configuration
