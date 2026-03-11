@@ -423,6 +423,13 @@ body {
     color: #c0562a;
 }
 
+.footer-cheeky {
+    margin-top: 8px;
+    font-size: 0.8rem;
+    font-style: italic;
+    color: #b09a86;
+}
+
 /* ── Responsive ── */
 @media (max-width: 900px) {
     .showcase-item {
