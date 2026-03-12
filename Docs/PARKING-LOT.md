@@ -21,22 +21,31 @@ Ideas and suggestions for future consideration.
 ## Later
 *Worth tracking but not urgent*
 
-### Bracket Editor
+### Late Registration
 
-A mid-tournament bracket editing tool accessible only via the Developer Console (`newton.bracketEditor()`). Allows direct editing of player names in any bracket slot — including BYEs — to recover from registration errors or player substitutions (e.g. someone leaving, replaced by a recent loser).
+A mid-tournament tool accessible via the Developer Console for adding a player who was not registered before the tournament started. Replaces the earlier "Bracket Editor" concept — this is narrower, safer, and fully reversible via the undo system.
 
-**Implementation steps:**
-1. **Hidden access** — not in any menu, only via DevTools console (`newton.bracketEditor()`)
-2. **Confirmation phrase** — must type "Bracket Editor" to continue (similar to Reset All Config / Reset Tournament gates)
-3. **Forced export** — JSON backup downloads automatically before the editor opens
-4. **Strong warning** — explicit acknowledgement that this can corrupt the tournament
-5. **Player management** — two options before editing slots:
-   - **Add new player** — mini registration dialog reuses the existing registration function (no duplication); same fields, same validation, same code path
-   - **Use existing player** — pick from already-registered players (covers substitution scenarios where the replacement is already in the system)
-6. **Slot editor** — assign any registered player (or free-text name) to any bracket slot, including BYEs
-7. **Built-in reimport** — one-click restore from the backup taken in step 3
+**Scope:**
+- Always a new, unregistered player — not a substitution for an existing player
+- New player is automatically placed in a BYE slot in FS-R1 (random selection — never operator-chosen, to preserve draw fairness)
+- Operation is recorded as a transaction; the undo system is the safety net (no forced export required)
+- Dev Console only — the right level of friction for an edge case
 
-The menu entry already exists in the Developer Console (amber, after Toggle Read-Only) and shows an "upcoming feature / here be dragons" placeholder message.
+**Eligibility rules for a FS-R1 BYE slot:**
+- No completed downstream matches (except BYE-vs-BYE downstream matches, which are safe)
+- No live downstream matches
+
+**Warnings shown before any action:**
+- If any FS-R1 BYE slots are ineligible: fairness warning — the draw cannot be fully fair, new player will only be placed in the remaining eligible slots
+- List of specific completed matches that would need to be undone (by name: e.g. "FS-2-1 Edward vs Ben") and live matches that would need to be stopped — with explicit note that all affected matches must be replayed from the beginning
+- If no eligible slots exist at all: clear refusal with explanation
+
+**Implementation stages:**
+1. **Stage 1 — Eligibility checker** (read-only, no data changes): scan FS-R1 BYE slots, apply eligibility rules, report "X of Y slots eligible", list blocking matches by name, display fairness and replay warnings. Verify this logic is correct before proceeding.
+2. **Stage 2 — Player registration**: add the new player to the participant list, reusing the existing registration function (no duplication)
+3. **Stage 3 — Slot placement**: randomly select an eligible BYE slot, undo the auto-advance of the FS-R1 match, place the new player, record as a transaction, re-render the bracket
+
+The Dev Console menu entry (amber, after Toggle Read-Only) already exists and shows a placeholder message.
 
 ### Match Archive — IndexedDB Store
 
@@ -53,4 +62,4 @@ See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record
 
 ---
 
-**Last updated:** March 11, 2026
+**Last updated:** March 12, 2026

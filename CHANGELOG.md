@@ -1,3 +1,11 @@
+## **v4.2.6** - Undo System Bug Fix (2026-03-12)
+
+### Bug Fix
+- **Undo blocked by live downstream matches**: The undo eligibility check (`isMatchUndoable`) previously only checked for completed downstream matches. It did not check for **live** downstream matches, meaning a match could be undone while a downstream match was actively in progress — potentially corrupting the live match's context. Both the winner's and loser's downstream destinations are now checked for live status (`match.active`) before allowing an undo.
+- **Tooltip correctly reflects live blocking**: The bracket hover tooltip also had the same gap — it now shows `Cannot Undo, blocked by FS-2-4 (live)` when a downstream match is in progress, consistent with the undo eligibility logic.
+
+---
+
 ## **v4.2.5** - Landing Page & Developer Console (2026-03-11)
 
 ### Landing Page

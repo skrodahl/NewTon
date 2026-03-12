@@ -2461,10 +2461,10 @@ if (typeof window !== 'undefined') {
  * A match is undoable only if:
  * - Tournament is not read-only (completed)
  * - Match has a MANUAL completion transaction (not AUTO walkover)
- * - No downstream matches have MANUAL completions
+ * - No downstream matches are live or have MANUAL completions
  *
  * Uses DE_MATCH_PROGRESSION to check winner/loser destinations.
- * Prevents undo when it would corrupt manually-entered results.
+ * Prevents undo when it would corrupt manually-entered results or a live match in progress.
  */
 function isMatchUndoable(matchId) {
     // Read-only tournaments cannot be undone
@@ -2484,15 +2484,18 @@ function isMatchUndoable(matchId) {
         return false; // No MANUAL transaction found for this match
     }
 
-    // Check downstream matches - block undo if any downstream match was completed via MANUAL transaction
+    // Check downstream matches - block undo if any downstream match is live or was completed via MANUAL transaction
     const _undoableTable = getProgressionTable();
     if (tournament.bracketSize && _undoableTable) {
         const progression = _undoableTable[matchId];
         if (progression) {
-            // Check if winner's destination has a MANUAL completion
+            // Check if winner's destination is live or has a MANUAL completion
             if (progression.winner) {
                 const [targetMatchId] = progression.winner;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.active) {
+                    return false; // Blocked by live downstream match
+                }
                 if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
@@ -2501,10 +2504,13 @@ function isMatchUndoable(matchId) {
                 }
             }
 
-            // Check if loser's destination has a MANUAL completion
+            // Check if loser's destination is live or has a MANUAL completion
             if (progression.loser) {
                 const [targetMatchId] = progression.loser;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.active) {
+                    return false; // Blocked by live downstream match
+                }
                 if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
@@ -2515,7 +2521,7 @@ function isMatchUndoable(matchId) {
         }
     }
 
-    return true; // Safe to undo - match has MANUAL transaction and no MANUAL downstream dependencies
+    return true; // Safe to undo - match has MANUAL transaction, no live downstream matches, and no MANUAL downstream dependencies
 }
 
 // Helper function to find matches that are directly affected by undoing a specific match
@@ -4756,7 +4762,9 @@ function getDetailedMatchState(matchId) {
             if (progression.winner) {
                 const [targetMatchId] = progression.winner;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.completed) {
+                if (targetMatch && targetMatch.active) {
+                    blockingMatches.push(`${targetMatchId} (live)`);
+                } else if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
                         blockingMatches.push(targetMatchId);
@@ -4768,7 +4776,9 @@ function getDetailedMatchState(matchId) {
             if (progression.loser) {
                 const [targetMatchId] = progression.loser;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.completed) {
+                if (targetMatch && targetMatch.active) {
+                    blockingMatches.push(`${targetMatchId} (live)`);
+                } else if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
                     if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
                         blockingMatches.push(targetMatchId);
