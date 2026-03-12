@@ -1,4 +1,6 @@
 User-agent: *
 Allow: /
 
+Sitemap: https://darts.skrodahl.net/sitemap.xml
+
 # AI language model guidelines: /llms.txt
