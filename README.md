@@ -23,10 +23,13 @@
 ---
 # See It in Action
 
-## Try the Live Demo
-🎯 **Tournament Manager:** [**https://darts.skrodahl.net**](https://darts.skrodahl.net)
+## Official Website and Apps
+Visit the official NewTon DC Tournament Manager Website.
 
-🎯 **Chalker:** [**https://darts.skrodahl.net/chalker**](https://darts.skrodahl.net/chalker)
+Fully functional versions of the latest Tournament Manager and Chalker apps are available for use and testing.
+
+🎯 [**https://darts.skrodahl.net**](https://darts.skrodahl.net)
+
 
 *All data stays in your browser - nothing is stored on the server or shared with anyone else.*
 
