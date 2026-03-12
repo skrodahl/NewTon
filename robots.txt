@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+# AI language model guidelines: /llms.txt

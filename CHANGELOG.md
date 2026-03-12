@@ -1,8 +1,20 @@
-## **v4.2.6** - Undo System Bug Fix (2026-03-12)
+## **v4.2.6** - Undo Bug Fix & Late Registration (Stage 1) (2026-03-12)
+
+### Late Registration — Stage 1 (Eligibility Checker)
+- **New Dev Console command**: "Late Registration" (amber, after Toggle Read-Only) replaces the former "Bracket Editor" placeholder
+- **Eligibility checker**: scans all FS Round 1 BYE slots and reports how many are eligible for late registration — a slot is eligible if neither its winner nor loser downstream match is live or manually completed
+- **Player names in output**: blocking matches are shown with player names (e.g. `FS-2-4 (Frank vs Harry, live)`) for immediate clarity
+- **Fairness warning**: if any slots are ineligible, warns that the draw cannot be fully fair and lists the blocking matches
+- **Replay warning**: explicitly states that stopped or undone matches must be replayed from the beginning
+- **Clear refusal**: if no eligible slots exist at all, the command refuses with a plain explanation
+- **Warning status**: `showCommandFeedback` updated to support amber `'warning'` status alongside existing success/error
 
 ### Bug Fix
 - **Undo blocked by live downstream matches**: The undo eligibility check (`isMatchUndoable`) previously only checked for completed downstream matches. It did not check for **live** downstream matches, meaning a match could be undone while a downstream match was actively in progress — potentially corrupting the live match's context. Both the winner's and loser's downstream destinations are now checked for live status (`match.active`) before allowing an undo.
 - **Tooltip correctly reflects live blocking**: The bracket hover tooltip also had the same gap — it now shows `Cannot Undo, blocked by FS-2-4 (live)` when a downstream match is in progress, consistent with the undo eligibility logic.
+
+### SEO
+- **robots.txt**: Added to repo root — allows all crawling and signposts `/llms.txt` for AI services
 
 ---
 

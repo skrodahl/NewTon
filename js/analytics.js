@@ -2272,9 +2272,9 @@ function showCommandFeedback(commandName, status, details) {
 
     const timestamp = new Date().toLocaleTimeString();
     const statusIcon = status === 'success' ? '✓' : '⚠️';
-    const statusColor = status === 'success' ? '#166534' : '#dc2626';
-    const bgColor = status === 'success' ? '#f0fdf4' : '#fef2f2';
-    const borderColor = status === 'success' ? '#166534' : '#dc2626';
+    const statusColor = status === 'success' ? '#166534' : status === 'warning' ? '#92400e' : '#dc2626';
+    const bgColor = status === 'success' ? '#f0fdf4' : status === 'warning' ? '#fffbeb' : '#fef2f2';
+    const borderColor = status === 'success' ? '#166534' : status === 'warning' ? '#92400e' : '#dc2626';
 
     // Format multi-line details
     const detailsHtml = details.split('\n')
@@ -2293,7 +2293,7 @@ function showCommandFeedback(commandName, status, details) {
         <h4 style="margin-top: 0; color: #111827;">Command Executed: ${commandName}</h4>
         <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
             <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
-                ${statusIcon} ${status === 'success' ? 'Success' : 'Error'}
+                ${statusIcon} ${status === 'success' ? 'Success' : status === 'warning' ? 'Warning' : 'Error'}
             </div>
             <div style="color: #374151; line-height: 1.8; font-size: 14px;">
                 ${detailsHtml}
@@ -2629,16 +2629,103 @@ function commandToggleReadOnly() {
 }
 
 // ============================================================================
-// Command: Bracket Editor
+// Command: Late Registration
 // ============================================================================
 
 /**
- * Command: Bracket Editor (upcoming feature)
- * Placeholder entry point for the future mid-tournament bracket editing tool.
+ * Command: Late Registration — Stage 1 (eligibility checker)
+ * Scans FS Round 1 BYE slots and reports how many are eligible for late registration.
+ * Read-only — no data changes.
  */
-function commandBracketEditor() {
-    showCommandFeedback('Bracket Editor', 'warning',
-        '⚠️ Here be dragons.\n\nThe Bracket Editor is an upcoming feature.\n\nIt will allow direct editing of player names in any bracket slot — including BYEs — in an ongoing tournament.\n\nNot yet implemented.');
+function commandLateRegistration() {
+    if (!tournament || !matches || matches.length === 0) {
+        showCommandFeedback('Late Registration', 'error', 'No active tournament.');
+        return;
+    }
+
+    const progressionTable = getProgressionTable();
+    const history = getTournamentHistory();
+
+    // Find all FS-R1 matches with a BYE slot
+    const byeMatches = matches.filter(m =>
+        m.id && /^FS-1-\d+$/.test(m.id) &&
+        (m.player1?.isBye || m.player2?.isBye)
+    );
+
+    if (byeMatches.length === 0) {
+        showCommandFeedback('Late Registration', 'error',
+            'No BYE slots found in Frontside Round 1.\n\nLate Registration is not possible for this tournament.');
+        return;
+    }
+
+    const eligible = [];
+    const ineligible = [];
+
+    byeMatches.forEach(byeMatch => {
+        const progression = progressionTable && progressionTable[byeMatch.id];
+        const blockingMatches = [];
+
+        if (progression) {
+            const formatBlockingMatch = (targetMatchId, isLive) => {
+                const m = matches.find(x => x.id === targetMatchId);
+                const players = m ? `${m.player1?.name || '?'} vs ${m.player2?.name || '?'}` : '';
+                return isLive ? `${targetMatchId} (${players}, live)` : `${targetMatchId} (${players})`;
+            };
+
+            // Check winner's destination
+            if (progression.winner) {
+                const [targetMatchId] = progression.winner;
+                const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.active) {
+                    blockingMatches.push(formatBlockingMatch(targetMatchId, true));
+                } else if (targetMatch && targetMatch.completed) {
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH' && t.completionType === 'MANUAL');
+                    if (targetTransaction) blockingMatches.push(formatBlockingMatch(targetMatchId, false));
+                }
+            }
+
+            // Check loser's destination
+            if (progression.loser) {
+                const [targetMatchId] = progression.loser;
+                const targetMatch = matches.find(m => m.id === targetMatchId);
+                if (targetMatch && targetMatch.active) {
+                    blockingMatches.push(formatBlockingMatch(targetMatchId, true));
+                } else if (targetMatch && targetMatch.completed) {
+                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH' && t.completionType === 'MANUAL');
+                    if (targetTransaction) blockingMatches.push(formatBlockingMatch(targetMatchId, false));
+                }
+            }
+        }
+
+        if (blockingMatches.length === 0) {
+            eligible.push(byeMatch.id);
+        } else {
+            ineligible.push({ matchId: byeMatch.id, blocking: blockingMatches });
+        }
+    });
+
+    const total = byeMatches.length;
+    const eligibleCount = eligible.length;
+    let message = `${eligibleCount} of ${total} FS Round 1 BYE slot${total !== 1 ? 's' : ''} eligible for late registration.\n\n`;
+
+    if (eligibleCount === 0) {
+        message += '⛔ Late Registration is not possible — all BYE slots are blocked.\n\n';
+    } else if (ineligible.length > 0) {
+        message += '⚠️ Draw fairness warning: not all BYE slots are available. The new player will be placed randomly among the eligible slots only.\n\n';
+    } else {
+        message += '✓ All BYE slots are eligible. The new player will be placed randomly.\n\n';
+    }
+
+    if (ineligible.length > 0) {
+        message += 'Ineligible slots:\n';
+        ineligible.forEach(({ matchId, blocking }) => {
+            message += `• ${matchId} — blocked by: ${blocking.join(', ')}\n`;
+        });
+        message += '\nBlocked matches must be stopped (if live) or undone (if completed) to become eligible. All affected matches will need to be replayed from the beginning.\n';
+    }
+
+    const status = eligibleCount === 0 ? 'error' : (ineligible.length > 0 ? 'warning' : 'success');
+    showCommandFeedback('Late Registration', status, message);
 }
 
 // ============================================================================
@@ -3093,7 +3180,7 @@ if (typeof window !== 'undefined') {
     window.commandValidateEverything = commandValidateEverything;
     window.commandResetAllConfig = commandResetAllConfig;
     window.commandToggleReadOnly = commandToggleReadOnly;
-    window.commandBracketEditor = commandBracketEditor;
+    window.commandLateRegistration = commandLateRegistration;
     window.executeResetAllConfig = executeResetAllConfig;
     window.clearConsoleOutput = clearConsoleOutput;
     window.copyConsoleOutput = copyConsoleOutput;
