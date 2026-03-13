@@ -57,6 +57,16 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 **Fix when addressed:** `isMatchUndoable()` and the bracket tooltip function in `js/bracket-rendering.js` should follow AUTO-completed downstream matches recursively until reaching a non-AUTO match, then apply the existing live/MANUAL checks.
 
+### Landing Page — Screenshot Lightbox
+
+The "See It in Action" showcase section uses full-page screenshots that are too detailed to read at thumbnail size.
+
+**Plan:**
+- Replace current screenshots with focused thumbnails (cropped or purpose-made) that clearly illustrate each specific feature
+- Add a pure JS/CSS lightbox so clicking a thumbnail expands the full-size image — no external libraries, consistent with zero-dependencies philosophy
+
+Both changes can be done independently: new images first, lightbox wired up when images are ready.
+
 ### Match Archive — IndexedDB Store
 
 Add a permanent indexedDB match archive alongside localStorage (no migration — localStorage stays untouched). The archive stores raw visit data per match and is the foundation for full scoresheet storage, player statistics, season history, and external reporting.
@@ -72,4 +82,4 @@ See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record
 
 ---
 
-**Last updated:** March 12, 2026
+**Last updated:** March 13, 2026
