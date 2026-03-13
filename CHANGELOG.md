@@ -1,3 +1,18 @@
+## **v4.2.7** - SEO & Landing Page Polish (2026-03-13)
+
+### SEO
+- **sitemap.xml**: New file added to repo root — lists landing page, Tournament Manager, and Chalker App URLs for Google indexing
+- **robots.txt**: Added `Sitemap:` directive pointing to `https://darts.skrodahl.net/sitemap.xml`
+
+### Landing Page
+- **Meta description**: Shortened from 190 to 155 characters to fit within Google's display window
+- **Font preloading**: Added `<link rel="preload">` hints for both custom fonts (Insignia and Manrope) — eliminates flash of unstyled text on load
+- **font-display: block**: Switched from `swap` to `block` in `landing.css` — combined with preloading, ensures branded fonts appear from first render with no flicker
+- **App buttons open in new tab**: "Launch Tournament Manager" and "Open Chalker App" buttons now open in a new tab, keeping the landing page open
+- **Get Started section**: Two-card section added below the hero buttons — "Local Use" (download release, double-click `tournament.html`) and "Self-Hosted" (Docker quickstart link), with hover effects consistent with the rest of the page
+
+---
+
 ## **v4.2.6** - Undo Bug Fix & Late Registration (Stage 1) (2026-03-12)
 
 ### Late Registration — Stage 1 (Eligibility Checker)

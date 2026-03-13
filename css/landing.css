@@ -6,7 +6,7 @@
     src: url('../fonts/Insignia-Regular.otf') format('opentype');
     font-weight: 400;
     font-style: normal;
-    font-display: swap;
+    font-display: block;
 }
 
 @font-face {
@@ -14,7 +14,7 @@
     src: url('../fonts/Manrope-VariableFont_wght.ttf') format('truetype');
     font-weight: 100 900;
     font-style: normal;
-    font-display: swap;
+    font-display: block;
 }
 
 * {
@@ -90,7 +90,7 @@ body {
 .hero {
     max-width: 1400px;
     margin: 0 auto;
-    padding: 48px 24px 24px;
+    padding: 48px 24px 48px;
     text-align: center;
 }
 
@@ -229,6 +229,83 @@ body {
     background: #3d2e1f;
     transform: translateY(-2px);
     border-color: #d4824a;
+}
+
+/* ── Get Started ── */
+.get-started {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 48px 24px 40px;
+    text-align: center;
+}
+
+.get-started h2 {
+    font-size: 2rem;
+    margin-bottom: 32px;
+    color: #2b2118;
+    font-family: 'Insignia', Georgia, serif;
+    letter-spacing: 0.5px;
+}
+
+.get-started-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+}
+
+.get-started-card {
+    background: #fff8f0;
+    border: 2px solid #e0cdb8;
+    border-radius: 14px;
+    padding: 28px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+}
+
+.get-started-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 6px 20px rgba(43, 33, 24, 0.12);
+    border-color: #d4824a;
+}
+
+.get-started-card h3 {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: #2b2118;
+    margin: 0;
+}
+
+.get-started-card p {
+    color: #5c4a3a;
+    font-size: 1rem;
+    line-height: 1.6;
+    margin: 0;
+    flex: 1;
+}
+
+.get-started-card code {
+    background: #f0e6d8;
+    padding: 1px 6px;
+    border-radius: 4px;
+    font-size: 0.9em;
+    color: #c0562a;
+}
+
+.get-started-card .btn-github {
+    align-self: center;
+}
+
+.get-started-card .btn-github:hover {
+    transform: none;
+}
+
+@media (max-width: 600px) {
+    .get-started-grid {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ── Divider ── */

@@ -15,6 +15,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     <title>NewTon DC - Free Open-Source Darts Tournament Manager</title>
     <link rel="icon" type="image/jpeg" href="images/logo.jpg">
     <link rel="llms" href="llms.txt">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="css/landing.css">
 
     <!-- Google Search Console Verification -->
@@ -106,9 +108,29 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             </div>
         </div>
         <div class="hero-buttons">
-            <a href="?launch" class="btn-launch">Launch Tournament Manager</a>
-            <a href="chalker/" class="btn-chalker">Open Chalker App</a>
+            <a href="?launch" class="btn-launch" target="_blank">Launch Tournament Manager</a>
+            <a href="chalker/" class="btn-chalker" target="_blank">Open Chalker App</a>
             <a href="<?= $githubUrl ?>" class="btn-github">View on GitHub</a>
+        </div>
+    </div>
+
+    <!-- Divider -->
+    <div class="section-divider"><hr></div>
+
+    <!-- Get Started -->
+    <div class="get-started">
+        <h2>Get Started</h2>
+        <div class="get-started-grid">
+            <div class="get-started-card">
+                <h3>Local Use</h3>
+                <p>Download the latest release, unzip, and double-click <code>tournament.html</code>. No installation required — runs entirely in your browser.</p>
+                <a href="https://github.com/skrodahl/NewTon/releases/latest" class="btn-github" target="_blank">Download Latest Release</a>
+            </div>
+            <div class="get-started-card">
+                <h3>Self-Hosted</h3>
+                <p>Deploy on your own server in under 2 minutes. Lightweight Docker container with nginx — perfect for club or venue use.</p>
+                <a href="https://github.com/skrodahl/NewTon/blob/main/DOCKER-QUICKSTART.md" class="btn-github" target="_blank">Docker Quickstart</a>
+            </div>
         </div>
     </div>
 
