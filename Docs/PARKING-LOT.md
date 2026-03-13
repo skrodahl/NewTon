@@ -21,6 +21,10 @@ Ideas and suggestions for future consideration.
 ## Later
 *Worth tracking but not urgent*
 
+### Chalker Link in Tournament Manager Nav
+
+Add a "Chalker" link to the main navigation menu in `tournament.html`, opening the Chalker app in a new tab. No tournament state awareness needed — just a convenient shortcut for referees at the board.
+
 ### Late Registration
 
 A mid-tournament tool accessible via the Developer Console for adding a player who was not registered before the tournament started. Replaces the earlier "Bracket Editor" concept — this is narrower, safer, and fully reversible via the undo system.
