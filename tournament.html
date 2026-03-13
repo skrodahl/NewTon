@@ -162,6 +162,7 @@
                         <div id="playersContainer" class="players-list">
                             <!-- Players will be added here -->
                         </div>
+                        <div id="lateRegBtnContainer"></div>
                     </div>
                 </div>
 
@@ -1431,6 +1432,25 @@
                     <button class="btn" onclick="popDialog()">Cancel</button>
                     <button class="btn btn-success" id="confirmExportBtn" onclick="confirmExport()">Export
                         Results</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Late Registration Info Modal -->
+        <div id="lateRegInfoModal" class="modal">
+            <div class="modal-content">
+                <h3>Registering a Late Arrival</h3>
+                <p style="line-height: 1.6; margin: 16px 0;">
+                    A new player can join a tournament already in progress. They will be placed randomly in an available
+                    walkover spot in Frontside Round 1 and participate as a fully registered, paid player from that point
+                    forward.
+                </p>
+                <p style="line-height: 1.6; margin: 16px 0;">
+                    To register a late arrival, enable the Developer Console in Global Settings, then open it by clicking
+                    the version number in the lower-right corner of the Tournament Bracket.
+                </p>
+                <div class="text-center mt-20">
+                    <button class="btn btn-primary" onclick="popDialog()">Got it</button>
                 </div>
             </div>
         </div>

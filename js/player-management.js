@@ -634,6 +634,20 @@ function updatePlayersDisplay() {
     }).join('');
 
     container.innerHTML = html;
+
+    const tournamentStarted = tournament && tournament.bracket && matches.length > 0;
+    const lateRegBtn = document.getElementById('lateRegBtnContainer');
+    if (lateRegBtn) {
+        lateRegBtn.innerHTML = tournamentStarted
+            ? `<div style="text-align: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
+                <button class="btn btn-warning" onclick="showLateRegInfoModal()">Player arrived late?</button>
+               </div>`
+            : '';
+    }
+}
+
+function showLateRegInfoModal() {
+    pushDialog('lateRegInfoModal', null, true);
 }
 
 function updatePlayerCount() {

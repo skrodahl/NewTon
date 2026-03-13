@@ -2632,31 +2632,27 @@ function commandToggleReadOnly() {
 // Command: Late Registration
 // ============================================================================
 
+/** Module-level state persisted between Late Registration steps. */
+let lateRegState = null;
+
 /**
- * Command: Late Registration — Stage 1 (eligibility checker)
- * Scans FS Round 1 BYE slots and reports how many are eligible for late registration.
- * Read-only — no data changes.
+ * Helper: scans FS Round 1 BYE slots and returns eligibility results.
+ * Used by both the eligibility display step and the execution step.
+ *
+ * @returns {{eligible: string[], ineligible: Array<{matchId: string, blocking: string[]}>, total: number} | null}
  */
-function commandLateRegistration() {
-    if (!tournament || !matches || matches.length === 0) {
-        showCommandFeedback('Late Registration', 'error', 'No active tournament.');
-        return;
-    }
+function runLateRegistrationEligibility() {
+    if (!tournament || !matches || matches.length === 0) return null;
 
     const progressionTable = getProgressionTable();
     const history = getTournamentHistory();
 
-    // Find all FS-R1 matches with a BYE slot
     const byeMatches = matches.filter(m =>
         m.id && /^FS-1-\d+$/.test(m.id) &&
         (m.player1?.isBye || m.player2?.isBye)
     );
 
-    if (byeMatches.length === 0) {
-        showCommandFeedback('Late Registration', 'error',
-            'No BYE slots found in Frontside Round 1.\n\nLate Registration is not possible for this tournament.');
-        return;
-    }
+    if (byeMatches.length === 0) return { eligible: [], ineligible: [], total: 0 };
 
     const eligible = [];
     const ineligible = [];
@@ -2672,7 +2668,6 @@ function commandLateRegistration() {
                 return isLive ? `${targetMatchId} (${players}, live)` : `${targetMatchId} (${players})`;
             };
 
-            // Check winner's destination
             if (progression.winner) {
                 const [targetMatchId] = progression.winner;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
@@ -2684,7 +2679,6 @@ function commandLateRegistration() {
                 }
             }
 
-            // Check loser's destination
             if (progression.loser) {
                 const [targetMatchId] = progression.loser;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
@@ -2704,28 +2698,277 @@ function commandLateRegistration() {
         }
     });
 
-    const total = byeMatches.length;
+    return { eligible, ineligible, total: byeMatches.length };
+}
+
+/**
+ * Command: Late Registration — entry point.
+ * Runs eligibility check and, if slots are available, shows player name input form.
+ */
+function commandLateRegistration() {
+    if (!tournament || !matches || matches.length === 0) {
+        showCommandFeedback('Late Registration', 'error', 'No active tournament.');
+        return;
+    }
+
+    const result = runLateRegistrationEligibility();
+
+    if (!result || result.total === 0) {
+        showCommandFeedback('Late Registration', 'error',
+            'No BYE slots found in Frontside Round 1.\n\nLate Registration is not possible for this tournament.');
+        return;
+    }
+
+    const { eligible, ineligible, total } = result;
     const eligibleCount = eligible.length;
+
     let message = `${eligibleCount} of ${total} BYE slot${total !== 1 ? 's' : ''} are eligible for late registration in FS Round 1.\n\n`;
 
     if (eligibleCount === 0) {
         message += '⛔ Late Registration is not possible — all BYE slots are blocked.\n\n';
-    } else if (ineligible.length > 0) {
-        message += '⚠️ Draw fairness warning: not all BYE slots are available. The new player will be placed randomly among the eligible slots only.\n\n';
-    } else {
-        message += '✓ All BYE slots are eligible. The new player will be placed randomly.\n\n';
+        if (ineligible.length > 0) {
+            message += 'Ineligible slots:\n';
+            ineligible.forEach(({ matchId, blocking }) => {
+                message += `• ${matchId} — blocked by: ${blocking.join(', ')}\n`;
+            });
+        }
+        showCommandFeedback('Late Registration', 'error', message);
+        return;
     }
 
     if (ineligible.length > 0) {
+        message += '⚠️ Draw fairness warning: not all BYE slots are available. The new player will be placed randomly among the eligible slots only.\n\n';
         message += 'Ineligible slots:\n';
         ineligible.forEach(({ matchId, blocking }) => {
             message += `• ${matchId} — blocked by: ${blocking.join(', ')}\n`;
         });
         message += '\nBlocked matches must be stopped (if live) or undone (if completed) to become eligible. All affected matches will need to be replayed from the beginning.\n';
+    } else {
+        message += '✓ All BYE slots are eligible. The new player will be placed randomly.\n\n';
     }
 
-    const status = eligibleCount === 0 ? 'error' : (ineligible.length > 0 ? 'warning' : 'success');
-    showCommandFeedback('Late Registration', status, message);
+    const status = ineligible.length > 0 ? 'warning' : 'success';
+    const statusColor = status === 'success' ? '#166534' : '#92400e';
+    const bgColor = status === 'success' ? '#f0fdf4' : '#fffbeb';
+    const statusIcon = status === 'success' ? '✓' : '⚠️';
+    const statusLabel = status === 'success' ? 'Success' : 'Warning';
+
+    const detailsHtml = message.split('\n')
+        .map(line => line.trim())
+        .filter(line => line.length > 0)
+        .map(line => line.startsWith('•')
+            ? `<div style="margin: 4px 0; padding-left: 8px;">${line}</div>`
+            : `<div style="margin: 8px 0;">${line}</div>`)
+        .join('');
+
+    const html = `
+        <h4 style="margin-top: 0; color: #111827;">Command Executed: Late Registration</h4>
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${statusColor}; border-radius: 0;">
+            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+                ${statusIcon} ${statusLabel}
+            </div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+                ${detailsHtml}
+            </div>
+        </div>
+        <div style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.7;">
+            Late Registration adds a new player to the tournament. The player must be entering the full tournament from the start — they will be placed randomly in an available walkover spot in Frontside Round 1, replacing a BYE.
+        </div>
+        <div style="margin: 20px 0; padding: 20px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 0;">
+            <div style="font-weight: 600; color: #111827; margin-bottom: 12px;">Register New Player</div>
+            <input type="text" id="lateRegPlayerName" placeholder="Enter player name"
+                style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;"
+                onkeydown="if(event.key==='Enter') commandLateRegistrationStep2()">
+            <button onclick="commandLateRegistrationStep2()"
+                style="padding: 8px 20px; background: #92400e; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                Next →
+            </button>
+        </div>
+        <div>
+            <a href="#" onclick="showQuickOverview(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">
+                ← Back to Overview
+            </a>
+        </div>
+    `;
+
+    currentView = 'command-feedback';
+    updateRightPane(html);
+    setTimeout(() => document.getElementById('lateRegPlayerName')?.focus(), 100);
+}
+
+/**
+ * Late Registration Step 2: validate player name, pick random eligible slot, show confirmation gate.
+ */
+function commandLateRegistrationStep2() {
+    const nameInput = document.getElementById('lateRegPlayerName');
+    if (!nameInput) {
+        showCommandFeedback('Late Registration', 'error', 'Session expired. Please run Late Registration again.');
+        return;
+    }
+
+    const playerName = nameInput.value.trim();
+
+    if (!playerName) {
+        nameInput.style.borderColor = '#dc2626';
+        nameInput.focus();
+        return;
+    }
+
+    // Duplicate check
+    if (players.find(p => p.name.toLowerCase() === playerName.toLowerCase())) {
+        currentView = 'command-feedback';
+        updateRightPane(`
+            <h4 style="margin-top: 0; color: #111827;">Command Executed: Late Registration</h4>
+            <div style="margin: 20px 0; padding: 20px; background: #fef2f2; border: 1px solid #dc2626; border-radius: 0;">
+                <div style="color: #dc2626; font-weight: 600; font-size: 16px; margin-bottom: 15px;">⚠️ Error</div>
+                <div style="color: #374151; font-size: 14px;">
+                    <div style="margin: 8px 0;">A player named <strong>${playerName}</strong> is already registered in this tournament.</div>
+                </div>
+            </div>
+            <a href="#" onclick="commandLateRegistration(); return false;"
+               style="text-decoration: none; color: #065f46; font-size: 14px;">← Try again</a>
+        `);
+        return;
+    }
+
+    // Re-run eligibility (state may have changed since Step 1)
+    const result = runLateRegistrationEligibility();
+    if (!result || result.eligible.length === 0) {
+        showCommandFeedback('Late Registration', 'error',
+            'No eligible BYE slots remain. The tournament state may have changed. Please run Late Registration again.');
+        return;
+    }
+
+    // Randomly select a slot — operator never chooses
+    const { eligible } = result;
+    const slotMatchId = eligible[Math.floor(Math.random() * eligible.length)];
+    const slotMatch = matches.find(m => m.id === slotMatchId);
+
+    // Opponent is the non-BYE player in the selected slot
+    const opponent = slotMatch.player1?.isBye ? slotMatch.player2 : slotMatch.player1;
+    const opponentName = opponent?.name || 'TBD';
+
+    // Store state for Step 3
+    lateRegState = { playerName, slotMatchId };
+
+    const html = `
+        <h4 style="margin-top: 0; color: #111827;">Command Executed: Late Registration</h4>
+        <div style="margin: 20px 0; padding: 20px; background: #fffbeb; border: 1px solid #92400e; border-radius: 0;">
+            <div style="color: #92400e; font-weight: 600; font-size: 16px; margin-bottom: 15px;">⚠️ Confirm Placement</div>
+            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+                <div style="margin: 8px 0;"><strong>${playerName}</strong> will be placed in <strong>${slotMatchId}</strong> vs <strong>${opponentName}</strong>.</div>
+                <div style="margin: 8px 0;">This operation cannot be undone.</div>
+            </div>
+        </div>
+        <div style="margin: 20px 0; padding: 20px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 0;">
+            <div style="font-weight: 600; color: #111827; margin-bottom: 8px;">Type <strong>${playerName}</strong> to confirm:</div>
+            <input type="text" id="lateRegConfirmName" placeholder="Type player name exactly"
+                style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;"
+                onkeydown="if(event.key==='Enter') commandLateRegistrationStep3()">
+            <button onclick="commandLateRegistrationStep3()"
+                style="padding: 8px 20px; background: #dc2626; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                Confirm Registration
+            </button>
+        </div>
+        <a href="#" onclick="commandLateRegistration(); return false;"
+           style="text-decoration: none; color: #065f46; font-size: 14px;">← Cancel</a>
+    `;
+
+    currentView = 'command-feedback';
+    updateRightPane(html);
+    setTimeout(() => document.getElementById('lateRegConfirmName')?.focus(), 100);
+}
+
+/**
+ * Late Registration Step 3: execute — register player, undo BYE auto-advance, place in bracket.
+ */
+function commandLateRegistrationStep3() {
+    if (!lateRegState) {
+        showCommandFeedback('Late Registration', 'error', 'Session expired. Please run Late Registration again.');
+        return;
+    }
+
+    const { playerName, slotMatchId } = lateRegState;
+    const confirmInput = document.getElementById('lateRegConfirmName');
+
+    // Exact-match confirmation gate
+    if (!confirmInput || confirmInput.value !== playerName) {
+        if (confirmInput) {
+            confirmInput.style.borderColor = '#dc2626';
+            confirmInput.focus();
+        }
+        return;
+    }
+
+    lateRegState = null;
+
+    // 1. Create and register the player (reusing addPlayer logic, bypassing the in-progress guard)
+    const newPlayer = {
+        id: Date.now(),
+        name: playerName,
+        paid: true,
+        stats: { shortLegs: 0, highOuts: [], tons: 0, oneEighties: 0 },
+        placement: null,
+        eliminated: false
+    };
+    players.push(newPlayer);
+    addToPlayerList(playerName);
+    if (typeof updatePlayersDisplay === 'function') updatePlayersDisplay();
+    if (typeof updatePlayerCount === 'function') updatePlayerCount();
+
+    // 2. Find the AUTO transaction for the BYE auto-advance
+    const history = getTournamentHistory();
+    const autoTransaction = history.find(t =>
+        t.matchId === slotMatchId &&
+        t.type === 'COMPLETE_MATCH' &&
+        t.completionType === 'AUTO'
+    );
+
+    if (!autoTransaction) {
+        showCommandFeedback('Late Registration', 'error',
+            `Could not find the auto-advance transaction for ${slotMatchId}.\n\nPlayer was registered but not placed in the bracket. Please contact support.`);
+        return;
+    }
+
+    // 3. Undo the BYE auto-advance using the surgical undo machinery
+    undoManualTransaction(autoTransaction.id);
+
+    // 4. Replace the BYE slot with the new player
+    const slotMatch = matches.find(m => m.id === slotMatchId);
+    if (slotMatch) {
+        if (slotMatch.player1?.isBye) {
+            slotMatch.player1 = { name: playerName, id: newPlayer.id };
+        } else {
+            slotMatch.player2 = { name: playerName, id: newPlayer.id };
+        }
+    }
+
+    // 5. Persist the updated match data before recording the transaction
+    if (typeof saveTournament === 'function') {
+        saveTournament();
+    }
+
+    // 6. Record LATE_REGISTRATION transaction in the audit log
+    saveTransaction({
+        id: `tx_${Date.now()}`,
+        type: 'LATE_REGISTRATION',
+        completionType: 'MANUAL',
+        description: `Late Registration: ${playerName} placed in ${slotMatchId}`,
+        timestamp: new Date().toISOString(),
+        matchId: slotMatchId,
+        playerName: playerName,
+        playerId: newPlayer.id
+    });
+
+    // 7. Refresh UI with the updated bracket
+    if (typeof refreshTournamentUI === 'function') {
+        refreshTournamentUI();
+    }
+
+    // 7. Show success
+    showCommandFeedback('Late Registration', 'success',
+        `${playerName} has been registered and placed in ${slotMatchId}.\n\nThe bracket has been updated. The match is now ready to play.`);
 }
 
 // ============================================================================
@@ -3181,6 +3424,8 @@ if (typeof window !== 'undefined') {
     window.commandResetAllConfig = commandResetAllConfig;
     window.commandToggleReadOnly = commandToggleReadOnly;
     window.commandLateRegistration = commandLateRegistration;
+    window.commandLateRegistrationStep2 = commandLateRegistrationStep2;
+    window.commandLateRegistrationStep3 = commandLateRegistrationStep3;
     window.executeResetAllConfig = executeResetAllConfig;
     window.clearConsoleOutput = clearConsoleOutput;
     window.copyConsoleOutput = copyConsoleOutput;

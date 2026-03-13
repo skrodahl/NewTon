@@ -1,3 +1,49 @@
+## **v4.2.8** - Late Registration (Stages 2 & 3) (2026-03-13)
+
+### Late Registration — Stage 2: Player Name Entry
+
+- **Name input form**: After the eligibility check in Stage 1, the Dev Console now shows a "Register New Player" form — a text field for the player's name and a "Check & Confirm" button
+- **Descriptive paragraph**: A short explanation is shown above the input field: the new player will be added to the tournament, must participate from the beginning, and will replace a randomly selected available walkover spot in Frontside Round 1
+- **Name validation**: Empty names and names that only contain whitespace are rejected with an inline error — the form remains open for correction
+- **Duplicate detection**: If the name matches an existing player (case-insensitive), the form rejects it with a clear message before any slot is selected
+- **Re-validation at execution time**: Eligibility is re-checked at Step 2 execution — if all slots have become ineligible between Step 1 and Step 2 (e.g. a match went live in the meantime), registration is refused immediately
+- **Random slot selection**: A slot is chosen randomly from the pool of eligible FS Round 1 BYE positions — guarantees fairness, consistent with the existing draw philosophy
+- **Confirmation gate**: Before any data is written, Step 2 shows a confirmation screen: the selected match, the opponent the new player will face, and a text field asking the operator to type the player's name exactly to confirm. This prevents accidental registration.
+
+### Late Registration — Stage 3: Placement & Audit
+
+- **Player creation**: A new player object is created and appended to the players array — fully compatible with the existing player data structure (`id`, `name`, `paid: true`, `stats`, `placement: null`, `eliminated: false`)
+- **Saved players list**: The new player is added to the global saved players list via `addToPlayerList()` — consistent with normal player registration
+- **BYE walkover reversal**: The automatic walkover transaction for the selected slot is undone via the existing `undoManualTransaction()` mechanism — the bracket is restored to its pre-walkover state before the new player is placed
+- **Slot placement**: The BYE placeholder in the selected match is replaced with the new player — player1 or player2, depending on which slot held the BYE
+- **LATE_REGISTRATION transaction**: A transaction of type `LATE_REGISTRATION` is appended to the match history — records player name, player ID, match ID, opponent name, and timestamp. Provides a clear audit trail without enabling undo of the registration itself.
+- **Bracket refresh**: `refreshTournamentUI()` is called after placement — the bracket re-renders immediately and the new player appears in their correct position
+- **Success feedback**: The Dev Console shows a "Late Registration" success card with the player name and match placement
+
+### Eligibility Text Reword
+
+- **Clearer output**: The eligibility summary line was reworded from `"11 of 14 FS Round 1 BYE slots eligible for late registration"` to `"11 of 14 BYE slots are eligible for late registration in FS Round 1"` — more natural phrasing and easier to parse at a glance
+
+### Bug Fix — Late Registration and Undo Not Persisting After Reload
+
+- **Root cause**: `refreshTournamentUI()` attempted to save via `saveCurrentTournament()`, a function that was never defined. The `typeof` guard silently swallowed the failure, so every call to `refreshTournamentUI()` re-rendered the bracket without persisting match data to localStorage
+- **Impact on Late Registration**: After registering a player, the modified match (with the new player replacing the BYE slot) was never saved. On reload, the old tournament data was restored but the BYE auto-advance transaction was already removed from history — leaving the tournament in an invalid state with the player missing from the bracket
+- **Impact on regular undo**: The same missing save affected all undo operations — match rollbacks were not persisted to localStorage (history was saved correctly, but match state was not)
+- **Fix 1**: `refreshTournamentUI()` now calls `saveTournament()` instead of the nonexistent `saveCurrentTournament()`
+- **Fix 2**: `commandLateRegistrationStep3()` now explicitly calls `saveTournament()` immediately after placing the new player in the bracket slot, before recording the LATE_REGISTRATION transaction — guarantees persistence regardless of UI refresh behaviour
+
+### Player Registration Page — Late Arrival Hint
+
+- **"Player arrived late?" button**: When a tournament is active, an amber button appears below the Tournament Players list on the Player Registration page — opens an informational dialog explaining the Late Registration feature and how to access it
+- **Dialog content**: Describes what Late Registration does (random walkover placement, fully registered as paid) and directs the operator to enable the Developer Console in Global Settings, then open it via the version number in the lower-right corner of the Tournament Bracket
+- **ESC and Got It**: Dialog uses the existing dialog stack — ESC and the "Got it" button both close it correctly
+
+### Compatibility
+
+- **Single Elimination**: Late Registration works in SE tournaments — `getProgressionTable()` returns the correct SE table, and FS Round 1 slot detection works identically for both formats. Tested successfully.
+
+---
+
 ## **v4.2.7** - SEO & Landing Page Polish (2026-03-13)
 
 ### SEO

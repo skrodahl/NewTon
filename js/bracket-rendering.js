@@ -2389,8 +2389,8 @@ function refreshTournamentUI() {
         }
 
         // Save tournament
-        if (typeof saveCurrentTournament === 'function') {
-            saveCurrentTournament();
+        if (typeof saveTournament === 'function') {
+            saveTournament();
         }
 
     } catch (error) {
