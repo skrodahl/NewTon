@@ -21,6 +21,10 @@ Ideas and suggestions for future consideration.
 ## Later
 *Worth tracking but not urgent*
 
+### ~~Registration Page — "Add Player" During Active Tournament~~ — ✅ Complete (v4.2.8)
+
+The "Tournament Already in Progress" modal now includes a third amber block pointing operators to the "Player arrived late?" button at the bottom of the Tournament Players list.
+
 ### Chalker Link in Tournament Manager Nav
 
 Add a "Chalker" link to the main navigation menu in `tournament.html`, opening the Chalker app in a new tab. No tournament state awareness needed — just a convenient shortcut for referees at the board.

@@ -32,6 +32,10 @@
 - **Fix 1**: `refreshTournamentUI()` now calls `saveTournament()` instead of the nonexistent `saveCurrentTournament()`
 - **Fix 2**: `commandLateRegistrationStep3()` now explicitly calls `saveTournament()` immediately after placing the new player in the bracket slot, before recording the LATE_REGISTRATION transaction — guarantees persistence regardless of UI refresh behaviour
 
+### "Tournament Already in Progress" Modal — Late Registration Pointer
+
+- **Third block added**: The modal shown when clicking "Add Player" during an active tournament now includes an amber block — "🕐 Player arrived late?" — pointing the operator to the "Player arrived late?" button at the bottom of the Tournament Players list
+
 ### Player Registration Page — Late Arrival Hint
 
 - **"Player arrived late?" button**: When a tournament is active, an amber button appears below the Tournament Players list on the Player Registration page — opens an informational dialog explaining the Late Registration feature and how to access it

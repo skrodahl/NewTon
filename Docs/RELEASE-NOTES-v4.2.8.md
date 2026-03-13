@@ -46,7 +46,7 @@ Clicking it opens a dialog that explains what Late Registration does and how to 
 - `js/analytics.js` — Late Registration command (Stages 1–3)
 - `js/player-management.js` — "Player arrived late?" button and info dialog
 - `js/bracket-rendering.js` — `refreshTournamentUI` save fix
-- `tournament.html` — Late Registration info modal
+- `tournament.html` — Late Registration info modal, Late Registration pointer in "Tournament Already in Progress" modal
 - `CHANGELOG.md` — v4.2.8 entry added
 
 ---
