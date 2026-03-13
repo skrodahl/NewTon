@@ -2706,7 +2706,7 @@ function commandLateRegistration() {
 
     const total = byeMatches.length;
     const eligibleCount = eligible.length;
-    let message = `${eligibleCount} of ${total} FS Round 1 BYE slot${total !== 1 ? 's' : ''} eligible for late registration.\n\n`;
+    let message = `${eligibleCount} of ${total} BYE slot${total !== 1 ? 's' : ''} are eligible for late registration in FS Round 1.\n\n`;
 
     if (eligibleCount === 0) {
         message += '⛔ Late Registration is not possible — all BYE slots are blocked.\n\n';
