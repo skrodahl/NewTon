@@ -1,7 +1,7 @@
 # NewTon Network Layer - App Integration
 
 **Status:** Planning
-**Last Updated:** March 2026
+**Last Updated:** March 14, 2026
 
 ---
 
@@ -335,50 +335,79 @@ New files to add:
 
 ```
 js/
-  network-client.js      # TM network client (new)
-  qr-scanner.js          # QR scanning for TM (new)
+  newton-integrity.js         # CRC-32 integrity module — shared with Chalker (new)
+  qr-bridge.js                # TM: QR generation (assignments) + scanning (results) (new)
+  network-client.js           # TM network client (new)
 
 chalker/
   js/
-    network-client.js    # Chalker network client (new)
-    qr-generator.js      # QR generation for Chalker (new)
+    newton-integrity.js       # CRC-32 integrity module — same file as TM (new)
+    qr-bridge.js              # Chalker: QR scanning (assignments) + generation (results) (new)
+    network-client.js         # Chalker network client (new)
+
+lib/
+  qrcode-generator.min.js     # QR generation library — loaded on demand (new)
+  html5-qrcode.min.js         # QR scanning library — loaded on demand (new)
+
+chalker/lib/
+  qrcode-generator.min.js     # Same, for Chalker (new)
+  html5-qrcode.min.js         # Same, for Chalker (new)
 ```
 
 Existing files to modify:
 
 ```
 js/
+  results-config.js      # Add serverId to global config (QR phase)
   main.js                # Init network client, add status indicator
-  bracket-rendering.js   # Add dispatch button, status display
+  bracket-rendering.js   # Add QR display on Start Match, scan button, dispatch button
 
 chalker/
   js/
-    chalker.js           # Init network, handle incoming matches
-  index.html             # Add network status indicator
+    chalker.js           # Store network fields in state, generate result QR, scan assignment QR
+  index.html             # QR display area on Match Complete, scan UI, network status indicator
+tournament.html          # QR modal markup, camera viewport
 ```
 
 ---
 
 ## Implementation Phases
 
-### Phase 1: Network Mode Toggle (TM)
+QR communication (Docs/QR.md) is the foundation for TM ↔ Chalker data exchange and must be completed before the MQTT network phases. QR is the free, offline path; MQTT is the licensed, networked path. Both use identical payload schemas.
+
+### QR Phase 1: Foundation
+- Create `newton-integrity.js` (CRC-32 module, shared between TM and Chalker)
+- Generate and persist `serverId` in TM global config (`results-config.js`)
+- See **Docs/QR.md** for full phase breakdown
+
+### QR Phase 2: Match Assignment QR (TM → Chalker)
+- TM generates assignment QR on "Start Match"
+- Chalker scans QR to receive match details
+- See **Docs/QR.md**
+
+### QR Phase 3: Match Result QR (Chalker → TM)
+- Chalker generates result QR on Match Complete
+- TM scans result QR and applies to bracket
+- See **Docs/QR.md**
+
+### Network Phase 1: Network Mode Toggle (TM)
 - Add network mode on/off toggle to TM settings
 - When off: current behavior, no network features visible
 - When on: attempt hub connection, show status indicator
 
-### Phase 2: Chalker Network Client
+### Network Phase 2: Chalker Network Client
 - Add network-client.js to Chalker
 - Connection status indicator
 - Receive match assignments
 - Send results on completion
 
-### Phase 3: TM Network Client
+### Network Phase 3: TM Network Client
 - Add network-client.js to TM
 - Lane status display
 - Match dispatch UI
 - Result reception
 
-### Phase 4: Polish
+### Network Phase 4: Polish
 - Reconnection handling
 - Error states and recovery
 - Settings UI for network config
