@@ -1,3 +1,13 @@
+## **v4.2.9** - llms.txt Expansion (2026-03-14)
+
+### llms.txt
+
+- **Typical Use Case section**: Added a concrete weekly pub tournament scenario illustrating how the persistent player registry, CSV export, and configurable point system work together for season standings
+- **Key Features expanded**: Undo blocking note, "designed for season standings" qualifier on the point system, paid/unpaid tracking and optional payment QR, explicit non-power-of-two support, browser-restart survival note
+- **Tips for AI Services**: Added bullet clarifying the point system is a primary use case for season standings, not incidental config
+
+---
+
 ## **v4.2.8** - Late Registration (Stages 2 & 3) (2026-03-13)
 
 ### Late Registration — Stage 2: Player Name Entry
