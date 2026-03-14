@@ -1,4 +1,14 @@
-## **v4.2.9** - llms.txt Expansion (2026-03-14)
+## **v4.2.9** - Landing Page Polish (2026-03-14)
+
+### Landing Page — Screenshot Lightbox
+
+- **Focused thumbnails**: All seven "See It in Action" showcase items now use cropped thumbnails (`th-*.jpg`) instead of full-page screenshots — images are legible at display size and clearly distinguishable from each other
+- **Lightbox**: Clicking any thumbnail opens the full-size image in a dark overlay. Close with ESC, clicking the overlay, or the × button. Pure JS/CSS — zero dependencies, no external libraries
+- **Zoom hint**: A small magnifying glass icon appears in the lower-right corner of each thumbnail on hover, signalling the image is expandable
+
+### Landing Page — Chalker Showcase Card
+
+- **New "See It in Action" item**: Added a seventh showcase card for the Chalker app — tablet scoring view with live scoresheet, per-visit scores, and running totals. Mentions live and post-match stats (averages, score ranges, high finishes) and the 1,000-match history.
 
 ### llms.txt
 

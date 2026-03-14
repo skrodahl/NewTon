@@ -56,15 +56,9 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 **Fix when addressed:** `isMatchUndoable()` and the bracket tooltip function in `js/bracket-rendering.js` should follow AUTO-completed downstream matches recursively until reaching a non-AUTO match, then apply the existing live/MANUAL checks.
 
-### Landing Page — Screenshot Lightbox
+### ~~Landing Page — Screenshot Lightbox~~ — ✅ Complete (v4.2.9)
 
-The "See It in Action" showcase section uses full-page screenshots that are too detailed to read at thumbnail size.
-
-**Plan:**
-- Replace current screenshots with focused thumbnails (cropped or purpose-made) that clearly illustrate each specific feature
-- Add a pure JS/CSS lightbox so clicking a thumbnail expands the full-size image — no external libraries, consistent with zero-dependencies philosophy
-
-Both changes can be done independently: new images first, lightbox wired up when images are ready.
+All six showcase items updated with focused thumbnails (`th-*.jpg`) and a pure JS/CSS lightbox. Clicking a thumbnail expands the full-size image in a dark overlay. ESC, clicking the overlay, or the × button closes it. Zero dependencies.
 
 ### Docker — Bind-mount Content Files for Live Updates
 
