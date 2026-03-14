@@ -66,6 +66,16 @@ The "See It in Action" showcase section uses full-page screenshots that are too 
 
 Both changes can be done independently: new images first, lightbox wired up when images are ready.
 
+### Docker — Bind-mount Content Files for Live Updates
+
+Currently all files are baked into the Docker image at build time, so updating the landing page, llms.txt, robots.txt, or sitemap.xml requires a full image rebuild and redeploy.
+
+**The idea:** Add read-only bind mounts to `docker-compose.yml` for content files that change independently of the application — `landing-page.php`, `css/landing.css`, `robots.txt`, `llms.txt`, `sitemap.xml`. When running from a git checkout on the host, a `git pull` would make changes live instantly without rebuilding the image.
+
+**The tradeoff:** A self-contained deployable image is a genuine advantage — operators can run `docker run` with no local copy of the repo and everything works. Bind mounts add a host dependency and break that guarantee. If a mounted file is missing on the host, Docker silently creates an empty directory at that path, breaking that route.
+
+**Verdict pending:** Useful for the maintainer's own deployment, but complicates the operator experience. May not be worth it given how rarely these files change.
+
 ### Match Archive — IndexedDB Store
 
 Add a permanent indexedDB match archive alongside localStorage (no migration — localStorage stays untouched). The archive stores raw visit data per match and is the foundation for full scoresheet storage, player statistics, season history, and external reporting.
@@ -81,4 +91,4 @@ See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record
 
 ---
 
-**Last updated:** March 13, 2026
+**Last updated:** March 14, 2026
