@@ -184,8 +184,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         <h2>See It in Action</h2>
 
         <div class="showcase-item">
-            <div class="showcase-image">
-                <img src="Screenshots/tournament-bracket-zoom.png" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-tournament-bracket-zoom.jpg" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/tournament-bracket-zoom.png', '16-player tournament bracket showing Match Card Magic Zoom and status bar')">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Bracket View</span>
@@ -195,8 +195,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         </div>
 
         <div class="showcase-item">
-            <div class="showcase-image">
-                <img src="Screenshots/match-controls.png" alt="Match controls showing referee suggestions and conflict detection" loading="lazy">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-match-controls.jpg" alt="Match controls showing referee suggestions and conflict detection" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/match-controls.png', 'Match controls showing referee suggestions and conflict detection')">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Match Controls</span>
@@ -206,8 +206,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         </div>
 
         <div class="showcase-item">
-            <div class="showcase-image">
-                <img src="Screenshots/player-registration-help.png" alt="Player registration page with saved players and dynamic help system" loading="lazy">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-player-registration-help.jpg" alt="Player registration page with saved players and dynamic help system" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/player-registration-help.png', 'Player registration page with saved players and dynamic help system')">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Player Management</span>
@@ -217,8 +217,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         </div>
 
         <div class="showcase-item">
-            <div class="showcase-image">
-                <img src="Screenshots/tournament-setup.png" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-tournament-setup.jpg" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/tournament-setup.png', 'Tournament setup page with name, date, and bracket configuration')">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Setup</span>
@@ -228,8 +228,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         </div>
 
         <div class="showcase-item">
-            <div class="showcase-image">
-                <img src="Screenshots/tournament-bracket.png" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-tournament-bracket.jpg" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/tournament-bracket.png', 'Tournament bracket showing fair draw seeding and BYE placement')">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Fair Draw</span>
@@ -239,8 +239,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         </div>
 
         <div class="showcase-item">
-            <div class="showcase-image">
-                <img src="Screenshots/celebration.png" alt="Tournament winner celebration screen" loading="lazy">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-celebration.jpg" alt="Tournament winner celebration screen" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/celebration.png', 'Tournament winner celebration screen')">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Tournament Complete</span>
@@ -248,7 +248,40 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
                 <p>When the final dart lands, the winner gets the spotlight they deserve. Full podium results, final standings, and the satisfaction of a tournament well run. Export results as CSV for your league records or share the JSON for next time.</p>
             </div>
         </div>
+
+        <div class="showcase-item">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-chalker-scoreboard.jpg" alt="NewTon Chalker scoring app showing live 501 scoresheet with per-visit scores and running totals" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/chalker-scoreboard.png', 'NewTon Chalker scoring app showing live 501 scoresheet with per-visit scores and running totals')">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Chalker App</span>
+                <h3>Tablet Scoring at the Board</h3>
+                <p>NewTon Chalker is a dedicated x01 scoring app for the referee at the dartboard. Runs in any browser, installs as a PWA, works fully offline. Large scores, clear running totals, live leg counter — everything the referee needs and nothing they don't. Full stats are available during the match and after: averages, score ranges, high finishes, and more. The last 1,000 matches are saved in history.</p>
+            </div>
+        </div>
     </div>
+
+    <!-- Lightbox -->
+    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
+        <div class="lightbox-content" onclick="event.stopPropagation()">
+            <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+            <img id="lightboxImg" src="" alt="">
+        </div>
+    </div>
+
+    <script>
+    function openLightbox(src, alt) {
+        document.getElementById('lightboxImg').src = src;
+        document.getElementById('lightboxImg').alt = alt || '';
+        document.getElementById('lightbox').classList.add('is-open');
+        document.addEventListener('keydown', _lbEsc);
+    }
+    function closeLightbox() {
+        document.getElementById('lightbox').classList.remove('is-open');
+        document.removeEventListener('keydown', _lbEsc);
+    }
+    function _lbEsc(e) { if (e.key === 'Escape') { document.getElementById('lightbox').classList.remove('is-open'); document.removeEventListener('keydown', _lbEsc); } }
+    </script>
 
     <!-- Footer -->
     <div class="landing-footer">

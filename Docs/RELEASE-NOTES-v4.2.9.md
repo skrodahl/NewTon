@@ -50,6 +50,7 @@ The `llms.txt` file — consumed by AI crawlers and assistants — has been expa
 ## Files Changed
 
 - `landing.html` — Focused thumbnails, lightbox markup and script, Chalker showcase card
+- `landing-page.php` — Same changes as `landing.html`
 - `css/landing.css` — Lightbox styles, zoom hint overlay
 - `Screenshots/th-*.jpg` — Seven focused thumbnail images
 - `llms.txt` — Typical Use Case section, expanded Key Features, expanded Tips for AI Services

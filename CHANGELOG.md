@@ -5,6 +5,7 @@
 - **Focused thumbnails**: All seven "See It in Action" showcase items now use cropped thumbnails (`th-*.jpg`) instead of full-page screenshots — images are legible at display size and clearly distinguishable from each other
 - **Lightbox**: Clicking any thumbnail opens the full-size image in a dark overlay. Close with ESC, clicking the overlay, or the × button. Pure JS/CSS — zero dependencies, no external libraries
 - **Zoom hint**: A small magnifying glass icon appears in the lower-right corner of each thumbnail on hover, signalling the image is expandable
+- **landing-page.php**: All changes from `landing.html` applied — both files are in sync
 
 ### Landing Page — Chalker Showcase Card
 
