@@ -131,7 +131,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             <div class="get-started-card">
                 <h3>Self-Hosted</h3>
                 <p>Deploy on your own server in under 2 minutes. Lightweight Docker container with nginx — perfect for club or venue use.</p>
-                <a href="https://github.com/skrodahl/NewTon/blob/main/DOCKER-QUICKSTART.md" class="btn-github" target="_blank">Docker Quickstart</a>
+                <a href="docker-quickstart.html" class="btn-github">Docker Quickstart</a>
             </div>
         </div>
     </div>
@@ -290,7 +290,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         <p>
             NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
             <a href="<?= $githubUrl ?>">GitHub</a> &mdash;
-            <a href="<?= $githubUrl ?>/blob/main/Docs/PRIVACY.md">Privacy</a>
+            <a href="privacy.html">Privacy</a>
         </p>
         <p><em style="color: #a89080;">No popups? No cookies!</em></p>
     </div>

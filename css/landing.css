@@ -639,3 +639,234 @@ body {
         font-size: 1.25rem;
     }
 }
+
+/* ── Docs Pages ── */
+
+.docs-back-link {
+    position: fixed;
+    top: 16px;
+    left: 20px;
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 0.85rem;
+    color: #d4824a;
+    text-decoration: none;
+    opacity: 0.65;
+    transition: opacity 0.2s ease;
+    z-index: 100;
+    letter-spacing: 0.5px;
+}
+
+.docs-back-link:hover {
+    opacity: 1;
+}
+
+.docs-content {
+    max-width: 760px;
+    margin: 0 auto;
+    padding: 56px 24px 48px;
+}
+
+.docs-content h1 {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 2rem;
+    font-weight: 400;
+    color: #2b2118;
+    margin-bottom: 6px;
+}
+
+.docs-subtitle {
+    color: #8a7968;
+    font-size: 0.9rem;
+    margin-bottom: 40px;
+    padding-bottom: 24px;
+    border-bottom: 2px solid #d5c4b0;
+}
+
+.docs-toc {
+    background: #ede0d0;
+    border-radius: 8px;
+    padding: 20px 24px;
+    margin-bottom: 40px;
+}
+
+.docs-toc h2 {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 1rem;
+    font-weight: 400;
+    color: #5c4a3a;
+    margin: 0 0 10px;
+    border: none;
+    padding: 0;
+}
+
+.docs-toc ol {
+    margin: 0 0 0 20px;
+    color: #5c4a3a;
+}
+
+.docs-toc li {
+    margin-bottom: 3px;
+    font-size: 0.875rem;
+}
+
+.docs-toc a {
+    color: #5c4a3a;
+    text-decoration: underline;
+    text-decoration-color: #d4824a;
+    text-underline-offset: 2px;
+}
+
+.docs-toc a:hover {
+    color: #c0562a;
+}
+
+.docs-content h2 {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 1.3rem;
+    font-weight: 400;
+    color: #2b2118;
+    margin: 44px 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #d5c4b0;
+}
+
+.docs-content h3 {
+    font-size: 1rem;
+    font-weight: 700;
+    color: #3d2e1f;
+    margin: 22px 0 8px;
+}
+
+.docs-content p {
+    margin-bottom: 14px;
+    color: #3d2e1f;
+}
+
+.docs-content ul,
+.docs-content ol {
+    margin: 0 0 14px 24px;
+    color: #3d2e1f;
+}
+
+.docs-content li {
+    margin-bottom: 5px;
+}
+
+.docs-content hr {
+    border: none;
+    border-top: 2px solid #d5c4b0;
+    margin: 40px 0;
+}
+
+.docs-content a {
+    color: #c0562a;
+    text-decoration: underline;
+    text-decoration-color: #d4824a;
+    text-underline-offset: 3px;
+}
+
+.docs-content a:hover {
+    color: #a03a18;
+}
+
+.docs-content code {
+    background: #ede0d0;
+    padding: 1px 5px;
+    border-radius: 3px;
+    font-size: 0.875em;
+    font-family: 'Courier New', Courier, monospace;
+    color: #2b2118;
+}
+
+.docs-content pre {
+    background: #2d2010;
+    border-radius: 8px;
+    padding: 18px 20px;
+    margin: 12px 0 20px;
+    overflow-x: auto;
+    border: 1px solid #4a3728;
+}
+
+.docs-content pre code {
+    background: none;
+    padding: 0;
+    color: #e8d5b0;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Terminal (bash) blocks */
+.terminal-wrap {
+    margin: 12px 0 20px;
+}
+
+.terminal-bar {
+    background: #2a2a2a;
+    border-radius: 8px 8px 0 0;
+    padding: 8px 14px;
+    display: flex;
+    align-items: center;
+}
+
+.terminal-bar::before {
+    content: '';
+    display: inline-block;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: #e74c3c;
+    box-shadow: 16px 0 0 #f39c12, 32px 0 0 #2ecc71;
+}
+
+.terminal-wrap pre {
+    margin: 0;
+    border-radius: 0 0 8px 8px;
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-top: none;
+    padding: 18px 20px;
+    overflow-x: auto;
+}
+
+.terminal-wrap pre code {
+    background: none;
+    padding: 0;
+    color: #b8e6b8;
+    font-size: 0.85rem;
+    line-height: 1.65;
+    font-family: 'Courier New', Courier, monospace;
+}
+
+/* Docs footer — narrower than landing footer */
+.docs-footer {
+    max-width: 760px;
+}
+
+/* Docs tables */
+.docs-content table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 20px;
+    font-size: 0.875rem;
+}
+
+.docs-content th {
+    background: #ede0d0;
+    padding: 8px 12px;
+    text-align: left;
+    font-weight: 700;
+    color: #3d2e1f;
+    border-bottom: 2px solid #d5c4b0;
+}
+
+.docs-content td {
+    padding: 8px 12px;
+    color: #3d2e1f;
+    border-bottom: 1px solid #e8d5c0;
+    vertical-align: top;
+}
+
+.docs-content tr:last-child td {
+    border-bottom: none;
+}

@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy — NewTon DC</title>
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC</a>
+
+<div class="docs-content">
+
+    <h1>Privacy Architecture</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager: total privacy by design.</p>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#localstorage">How It Works: Browser LocalStorage</a></li>
+            <li><a href="#what-we-dont-do">What NewTon Doesn't Do</a></li>
+            <li><a href="#storage">Storage Architecture</a></li>
+            <li><a href="#exports">Export Privacy</a></li>
+            <li><a href="#demo-site">Demo Site Model</a></li>
+            <li><a href="#self-hosting">Self-Hosting &amp; the REST API</a></li>
+            <li><a href="#offline">Offline Operation</a></li>
+            <li><a href="#faq">FAQ</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p>NewTon's privacy model is simple: <strong>your data lives in your browser, period.</strong> This isn't a privacy policy you have to trust — it's an architectural guarantee. Your tournament data physically cannot leave your device unless you explicitly export and share it.</p>
+    <ul>
+        <li>All tournament data stored in browser localStorage only</li>
+        <li>No analytics, no telemetry, no tracking</li>
+        <li>No external dependencies or CDN calls</li>
+        <li>Works 100% offline — even without internet</li>
+        <li>Demo site operates identically — your data still never leaves your device</li>
+    </ul>
+    <p><strong>Privacy by architecture, not by policy.</strong> The system is designed so that even if we wanted to collect your data, we couldn't.</p>
+
+    <hr>
+
+    <h2 id="localstorage">How It Works: Browser LocalStorage</h2>
+
+    <h3>What Is LocalStorage?</h3>
+    <p>LocalStorage is a browser feature that stores data <strong>on your computer</strong>, isolated per website domain. When NewTon saves your tournament, it goes into your browser's localStorage — a sandboxed area that:</p>
+    <ul>
+        <li><strong>Exists only on your device</strong> — not sent to any server</li>
+        <li><strong>Domain-isolated</strong> — only NewTon can access NewTon's data</li>
+        <li><strong>Persistent</strong> — survives browser restarts and reboots</li>
+        <li><strong>Private</strong> — stored in your browser's profile directory on your hard drive</li>
+    </ul>
+
+    <h3>Technical Details</h3>
+    <p>Storage location examples:</p>
+    <ul>
+        <li><strong>Chrome/Edge (Windows):</strong> <code>%LocalAppData%\Google\Chrome\User Data\Default\Local Storage</code></li>
+        <li><strong>Firefox (Linux/Mac):</strong> <code>~/.mozilla/firefox/[profile]/storage/default</code></li>
+        <li><strong>Safari (Mac):</strong> <code>~/Library/Safari/LocalStorage</code></li>
+    </ul>
+    <p>Most browsers allow 5–10 MB per domain. NewTon uses ~1–2 MB for typical tournaments. A 32-player tournament with full history uses around 110 KB.</p>
+    <p><strong>Who can access your data:</strong></p>
+    <ul>
+        <li>✅ You — through NewTon's interface or browser developer tools</li>
+        <li>❌ Nobody else — not even NewTon's authors</li>
+    </ul>
+
+    <h3>What This Means in Practice</h3>
+    <p>When you run a tournament:</p>
+    <ol>
+        <li>You open <code>tournament.html</code> (locally or on the demo site)</li>
+        <li>NewTon loads data from <strong>your browser's localStorage</strong></li>
+        <li>All processing happens <strong>in your browser</strong></li>
+        <li>Changes are saved back to <strong>your browser's localStorage</strong></li>
+        <li><strong>Nothing is transmitted anywhere</strong></li>
+    </ol>
+    <p>Even on the demo site, the server only delivers the HTML/CSS/JavaScript files once. After that, all data stays in your browser.</p>
+
+    <hr>
+
+    <h2 id="what-we-dont-do">What NewTon Doesn't Do</h2>
+
+    <h3>No Analytics</h3>
+    <p>No Google Analytics, no visitor tracking, no usage statistics, no page view counters.</p>
+
+    <h3>No Telemetry</h3>
+    <p>No error reporting to external servers, no performance metrics, no feature usage tracking.</p>
+
+    <h3>No External Dependencies</h3>
+    <p>No CDN calls, no external fonts from Google or Adobe, no JavaScript libraries loaded from external sources. All assets are served from the same domain or bundled directly in the HTML file.</p>
+
+    <h3>No Cookies</h3>
+    <p>No tracking cookies, no session cookies, no authentication cookies. Browser localStorage only — not cookies.</p>
+
+    <h3>No User Accounts</h3>
+    <p>No registration, no login, no passwords, no email addresses.</p>
+
+    <p>NewTon cannot "phone home" even if it wanted to. There is no analytics endpoint, no telemetry server, no external service to send data to.</p>
+
+    <hr>
+
+    <h2 id="storage">Storage Architecture</h2>
+
+    <h3>Per-Tournament Isolation (v4.0+)</h3>
+    <p>Starting with version 4.0, each tournament stores its data in dedicated localStorage keys:</p>
+    <pre><code>tournament_1729251357350         → Tournament data
+tournament_1729251357350_history → Transaction history
+tournament_1729456789123         → A different tournament
+tournament_1729456789123_history → Its history
+dartsTournaments                 → Tournament registry
+dartsGlobalConfig                → Global settings
+dartsSavedPlayers                → Saved player names</code></pre>
+    <p>When you delete a tournament, all associated keys are removed — no residue, no contamination between tournaments.</p>
+
+    <hr>
+
+    <h2 id="exports">Export Privacy</h2>
+
+    <h3>What's Included in Exports</h3>
+    <p>When you export a tournament, the JSON file contains only:</p>
+    <ul>
+        <li>Tournament name, date, status</li>
+        <li>Player names and match results (what you entered)</li>
+        <li>Bracket structure, placements, and transaction history (for undo)</li>
+    </ul>
+    <p><strong>What's not included:</strong> other tournaments' data, your browser information, your IP address, your global configuration, or any metadata beyond what you typed.</p>
+
+    <h3>Sharing Exports</h3>
+    <p>If you share an export file, recipients see only the tournament name, player names, match results, and final placements. No hidden metadata, no browser fingerprints.</p>
+
+    <hr>
+
+    <h2 id="demo-site">Demo Site Model</h2>
+    <p>The demo site at <a href="https://darts.skrodahl.net" target="_blank" rel="noopener">darts.skrodahl.net</a> follows the same privacy model as local use:</p>
+    <ol>
+        <li>Server delivers HTML/CSS/JavaScript files — a one-time download</li>
+        <li>Your browser runs the application locally</li>
+        <li>All data stored in <strong>your browser's localStorage</strong></li>
+        <li>Server never receives any tournament data</li>
+    </ol>
+    <p>The REST API is disabled on the demo site (<code>NEWTON_API_ENABLED=false</code>), making it architecturally impossible for your data to leave your device.</p>
+    <p>The demo banner says <em>"Everything you do is stored locally in your browser. Your data never leaves your device."</em> — this is an architectural guarantee, not a policy statement. Even the server administrator cannot access your tournament data because it never reaches the server.</p>
+
+    <hr>
+
+    <h2 id="self-hosting">Self-Hosting &amp; the REST API</h2>
+    <p>NewTon includes an <strong>optional REST API</strong> for self-hosters who want to share tournaments across devices. This is the <strong>only exception</strong> to the "data never leaves your device" model.</p>
+
+    <h3>What the API Does</h3>
+    <ul>
+        <li>Upload tournament exports to your server</li>
+        <li>Download shared tournaments from your server</li>
+        <li>Delete tournaments from your server</li>
+        <li>List available shared tournaments</li>
+    </ul>
+    <p>Uploading requires an explicit action — NewTon never uploads anything automatically.</p>
+    <p>Any file uploaded to the server must pass the Tournament Manager's import validation before it can be loaded. Files that don't match the expected tournament structure are rejected by the client — they cannot affect your tournament data.</p>
+
+    <h3>Privacy Implications</h3>
+    <p>If the REST API is enabled on your self-hosted instance, only tournaments you explicitly upload are sent to the server. Tournaments you don't upload, your localStorage content, and all configuration remain entirely local.</p>
+    <p><strong>You control the server</strong> — self-hosted means you own the data. No telemetry or analytics are ever sent anywhere, regardless of API settings.</p>
+
+    <p>For the full API reference including endpoints, request/response format, and security practices, see <a href="rest-api.html">REST API Documentation</a>.</p>
+
+    <h3>Recommended Configurations</h3>
+    <p><strong>Maximum privacy (public deployments):</strong></p>
+    <pre><code>environment:
+  - NEWTON_API_ENABLED=false  # Block all API endpoints
+  - NEWTON_DEMO_MODE=true     # Show privacy banner</code></pre>
+    <p><strong>Private self-hosting (trusted environment):</strong></p>
+    <pre><code>environment:
+  - NEWTON_API_ENABLED=true   # Allow tournament sharing
+  # Data stays on your server, under your control</code></pre>
+
+    <hr>
+
+    <h2 id="offline">Offline Operation</h2>
+    <p>NewTon works completely offline because:</p>
+    <ul>
+        <li>No external dependencies — everything is bundled in the HTML file</li>
+        <li>No API calls required — all processing is local</li>
+        <li>LocalStorage doesn't need internet — it's a browser-native feature</li>
+        <li>No CDN calls — fonts and libraries are included</li>
+    </ul>
+    <p><strong>Typical offline workflow:</strong> Download <code>tournament.html</code> while you have internet, copy to a USB drive, open on the tournament laptop at the venue, run the entire tournament, export results when done.</p>
+
+    <hr>
+
+    <h2 id="faq">Frequently Asked Questions</h2>
+
+    <h3>Can NewTon track me if I run it locally?</h3>
+    <p>No. When you open <code>tournament.html</code> directly from your file system, there's no network connection for data to travel over.</p>
+
+    <h3>Can the demo site see my tournament data?</h3>
+    <p>No. The server only delivers the application files once. All data is stored in your browser's localStorage, which the server cannot access.</p>
+
+    <h3>What if I use browser sync (Chrome sync, Firefox sync)?</h3>
+    <p>If you have browser sync enabled, your browser <em>may</em> sync localStorage data across your devices — depending on browser settings. This is a browser feature, not a NewTon feature. Your data still doesn't go to NewTon; it goes to Google's or Mozilla's sync servers if you've enabled that. To avoid sync: use a profile without sync, use private/incognito mode, or disable localStorage sync in browser settings.</p>
+
+    <h3>What about browser extensions?</h3>
+    <p>Browser extensions with storage permissions can theoretically access localStorage. This is true for any website — it's a browser security model limitation. For maximum privacy, use a clean browser profile without extensions.</p>
+
+    <h3>Does NewTon comply with GDPR?</h3>
+    <p>GDPR doesn't apply to NewTon in most cases because no data is processed by NewTon — data stays on your device — and no personal data is collected by NewTon's authors. If you collect player names for your own club records, you are the data controller (same as using a spreadsheet).</p>
+
+    <h3>Can I verify these privacy claims?</h3>
+    <p>Yes — NewTon is open source. View the source code at <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">github.com/skrodahl/NewTon</a>, inspect network requests in browser DevTools (should be zero outbound), and examine localStorage directly. Don't trust — verify.</p>
+
+    <h3>What if I delete my browser data?</h3>
+    <p>Your tournaments are deleted. LocalStorage is part of browser data. Export your tournaments regularly and keep the files somewhere safe — treat exports as your permanent backup and localStorage as working storage.</p>
+
+    <hr>
+
+    <h2 id="summary">Summary</h2>
+    <p><strong>What NewTon guarantees:</strong></p>
+    <ul>
+        <li>✅ Your data stored in your browser's localStorage only</li>
+        <li>✅ No analytics, telemetry, or tracking of any kind</li>
+        <li>✅ No external dependencies or network calls</li>
+        <li>✅ Works 100% offline without internet</li>
+        <li>✅ Complete data deletion when you delete a tournament</li>
+        <li>✅ Export files contain only the data you entered</li>
+        <li>✅ Demo site operates with the same privacy model</li>
+        <li>✅ Open source — verify the claims yourself</li>
+    </ul>
+    <p><strong>The only exception:</strong></p>
+    <ul>
+        <li>⚠️ The optional REST API (disabled by default on the demo site) can upload exports to a self-hosted server — only when you explicitly trigger it, and only to your own server</li>
+    </ul>
+    <p><strong>Privacy by architecture.</strong> NewTon is designed so your data cannot leave your device unless you explicitly export and share it. This isn't a promise — it's how the system is built.</p>
+
+</div>
+
+<!-- Footer -->
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

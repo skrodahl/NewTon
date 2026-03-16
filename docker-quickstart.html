@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Docker Quick Start — NewTon DC</title>
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC</a>
+
+<div class="docs-content">
+
+    <h1>Docker Quick Start</h1>
+    <p class="docs-subtitle">Get NewTon Tournament Manager running in Docker in under 2 minutes.</p>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#configuration">Configuration</a></li>
+            <li><a href="#reverse-proxy">Reverse Proxy Setup</a></li>
+            <li><a href="#security">Security</a></li>
+            <li><a href="#customization">Customization</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="quick-start">Quick Start</h2>
+
+    <p><strong>Prerequisites:</strong> Docker and Docker Compose installed. <strong>Don't have Docker?</strong> <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">Download Docker Desktop</a> (macOS/Windows) or install via your package manager (Linux).</p>
+
+    <h3>Step 1: Download Configuration</h3>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code># Create a directory for your tournament manager
+mkdir newton-tournament
+cd newton-tournament
+
+# Download docker-compose.yml
+curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-compose.yml</code></pre>
+    </div>
+
+    <h3>Step 2: Start the Container</h3>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code>docker compose up -d</code></pre>
+    </div>
+
+    <h3>Step 3: Access the Application</h3>
+    <p>Open your browser and go to <code>http://localhost:8080</code> — you should see the NewTon Tournament Manager.</p>
+    <p><strong>Port 2020 = "Double 20" 🎯</strong> — The container runs nginx on port 2020 internally. The default host port (8080) maps to this. This non-standard internal port also helps avoid conflicts when using a reverse proxy.</p>
+
+    <h3>What Just Happened?</h3>
+    <ul>
+        <li>✅ Downloaded the pre-built image from Docker Hub</li>
+        <li>✅ Created persistent storage directories (<code>tournaments/</code> and <code>images/</code>)</li>
+        <li>✅ Started nginx + PHP-FPM serving your tournament manager</li>
+        <li>✅ Made it accessible on port 8080</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="configuration">Configuration</h2>
+
+    <p>This is the complete default <code>docker-compose.yml</code>. Inline comments explain each option.</p>
+
+    <pre><code>services:
+  newton-tournament:
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
+    container_name: newton
+    ports:
+      - "${NEWTON_HOST_PORT:-8080}:2020"  # Change host port via env var or edit directly
+    volumes:
+      - ./tournaments:/var/www/html/tournaments  # Persistent tournament storage
+      - ./images:/var/www/html/images:ro         # Custom logo and payment QR
+      # - ./logs:/var/log/nginx                  # Optional: persist nginx logs
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Oslo
+      - NEWTON_API_ENABLED=true        # Set false to disable REST API (upload/download)
+      - NEWTON_DEMO_MODE=false         # Set true to show privacy banner
+      # - NEWTON_LANDING_PAGE=true     # Uncomment to show landing page at root URL
+      # - NEWTON_BASE_URL=https://darts.example.com  # Canonical URL for Open Graph meta tags
+      - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon  # Link in demo banner</code></pre>
+
+    <h3>Persistent Storage</h3>
+    <ul>
+        <li><code>./tournaments</code> — Stores tournament JSON files uploaded via the REST API. Persists across container restarts and updates.</li>
+        <li><code>./images</code> — Custom logo and payment QR code. Mounted read-only; replace files on the host and they are picked up immediately.</li>
+    </ul>
+    <p>The paths above are relative to the directory where <code>docker-compose.yml</code> lives. You can replace them with absolute paths if you prefer explicit control over storage location — for example <code>/var/lib/docker/volumes/newton/tournaments:/var/www/html/tournaments</code>.</p>
+
+    <h3>Environment Variables</h3>
+    <ul>
+        <li><code>NEWTON_API_ENABLED</code> — Enables or disables the REST API endpoints for tournament upload, download, and delete. Set to <code>false</code> on public or demo deployments.</li>
+        <li><code>NEWTON_DEMO_MODE</code> — Shows a banner at the top of the app explaining that data is stored locally in the browser. Useful for public-facing instances.</li>
+        <li><code>NEWTON_LANDING_PAGE</code> — Shows a landing page at the root URL instead of loading the tournament app directly. Visitors click "Launch" to enter. Access the app directly via <code>/?launch</code>.</li>
+        <li><code>NEWTON_BASE_URL</code> — Sets the canonical URL for Open Graph and Twitter Card meta tags on the landing page (e.g. <code>https://darts.example.com</code>).</li>
+        <li><code>NEWTON_GITHUB_URL</code> — Customizes the GitHub link shown in the demo banner. Useful for forks (default: <code>https://github.com/skrodahl/NewTon</code>).</li>
+        <li><code>NEWTON_HOST_PORT</code> — Changes the host port the container is accessible on (default: <code>8080</code>). Can be set as an environment variable before running <code>docker compose up</code>.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="reverse-proxy">Reverse Proxy Setup</h2>
+    <p>The container listens on <strong>port 2020</strong> internally. When using a reverse proxy like Nginx Proxy Manager:</p>
+    <ol>
+        <li>Add the container to the same Docker network as your reverse proxy</li>
+        <li>Point your proxy to <code>newton:2020</code> (not port 80)</li>
+        <li>Remove the <code>ports:</code> mapping — not needed behind a proxy</li>
+    </ol>
+
+    <h3>Example: Nginx Proxy Manager</h3>
+    <pre><code>services:
+  newton-tournament:
+    image: skrodahl/newton:latest
+    container_name: newton
+    # ports:
+    #   - "8080:2020"  # Remove when using reverse proxy
+    networks:
+      - proxy_network
+    volumes:
+      - ./tournaments:/var/www/html/tournaments
+      - ./images:/var/www/html/images:ro
+    environment:
+      - NEWTON_API_ENABLED=true
+      - NEWTON_DEMO_MODE=false
+
+networks:
+  proxy_network:
+    external: true</code></pre>
+    <p>In NPM, configure the proxy host to forward to <code>newton:2020</code>.</p>
+
+    <h3>Demo / Public Site</h3>
+    <p>To replicate a public demo site like <a href="https://darts.skrodahl.net" target="_blank" rel="noopener">darts.skrodahl.net</a>:</p>
+    <pre><code>environment:
+  - NEWTON_API_ENABLED=false   # Disable upload API for security
+  - NEWTON_DEMO_MODE=true      # Show privacy banner
+  - NEWTON_LANDING_PAGE=true   # Show landing page at root</code></pre>
+
+    <hr>
+
+    <h2 id="security">Security</h2>
+
+    <h3>REST API</h3>
+    <p><strong>The REST API has no built-in authentication.</strong> Do not expose the container directly to the public internet without additional protection. Safe options:</p>
+    <ul>
+        <li>✅ <strong>Local network only</strong> — home or club WiFi, default setup is fine</li>
+        <li>✅ <strong>Localhost only</strong> — bind to <code>127.0.0.1:8080:2020</code></li>
+        <li>✅ <strong>Behind VPN</strong> — Tailscale, WireGuard, or similar</li>
+        <li>✅ <strong>Reverse proxy with auth</strong> — nginx or Caddy with HTTP basic authentication</li>
+        <li>✅ <strong>Disable API</strong> — set <code>NEWTON_API_ENABLED=false</code></li>
+    </ul>
+
+    <h3>Security Headers</h3>
+    <p>The Docker image includes comprehensive security headers enabled by default — no configuration needed:</p>
+    <ul>
+        <li><strong>X-Frame-Options: SAMEORIGIN</strong> — Prevents clickjacking</li>
+        <li><strong>X-Content-Type-Options: nosniff</strong> — Prevents MIME-type sniffing</li>
+        <li><strong>Referrer-Policy: strict-origin-when-cross-origin</strong> — Limits referrer data leakage</li>
+        <li><strong>Permissions-Policy</strong> — Disables geolocation, microphone, camera, and other unused features</li>
+        <li><strong>Content-Security-Policy</strong> — Prevents loading external resources</li>
+        <li><strong>Server tokens hidden</strong> — nginx and PHP versions not disclosed</li>
+    </ul>
+    <p>NewTon achieves an <strong>A grade</strong> on <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> out of the box. HSTS is not included by default to avoid breaking HTTP-only deployments — add it at your reverse proxy when using HTTPS.</p>
+
+    <hr>
+
+    <h2 id="customization">Customization</h2>
+
+    <h3>Logo and Payment QR Code</h3>
+    <p>Place your own files in the <code>images/</code> folder. The <code>images/</code> volume is mounted read-only from the host, so changes are picked up immediately — no container restart needed.</p>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code>mkdir -p images
+
+# Custom logo — supports .png, .jpg, .jpeg, or .svg
+cp /path/to/your/logo.jpg ./images/logo.jpg
+
+# Custom payment QR code
+cp /path/to/your/payment-qr.png ./images/payment.png</code></pre>
+    </div>
+    <p>Default images bundled in the Docker image: <code>images/logo.jpg</code> (club logo placeholder) and <code>images/payment.png</code> (GitHub project QR code).</p>
+
+    <hr>
+
+    <h2 id="troubleshooting">Troubleshooting</h2>
+
+    <h3>Port Already in Use</h3>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code>NEWTON_HOST_PORT=9000 docker compose up -d</code></pre>
+    </div>
+
+    <h3>Container Won't Start</h3>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code>docker compose logs</code></pre>
+    </div>
+
+    <h3>Can't Access http://localhost:8080</h3>
+    <ol>
+        <li>Verify the container is running: <code>docker compose ps</code> — should show <code>0.0.0.0:8080->2020/tcp</code></li>
+        <li>Try <code>http://127.0.0.1:8080</code> instead of <code>localhost</code></li>
+        <li>Check logs: <code>docker compose logs</code></li>
+    </ol>
+
+    <hr>
+
+    <h2>Need Help?</h2>
+    <ul>
+        <li><strong>Application help:</strong> Press F1 inside the tournament manager</li>
+        <li><strong>REST API reference:</strong> <a href="rest-api.html">REST API Documentation</a></li>
+        <li><strong>Privacy model:</strong> <a href="privacy.html">Privacy Architecture</a></li>
+        <li><strong>Issues &amp; feedback:</strong> <a href="https://github.com/skrodahl/NewTon/issues" target="_blank" rel="noopener">GitHub Issues</a></li>
+    </ul>
+
+</div>
+
+<!-- Footer -->
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

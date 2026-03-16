@@ -1,0 +1,289 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REST API — NewTon DC</title>
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC</a>
+
+<div class="docs-content">
+
+    <h1>REST API</h1>
+    <p class="docs-subtitle">Optional server API for shared tournament hosting. Base URL: <code>/api</code></p>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#architecture">Architecture</a></li>
+            <li><a href="#endpoints">Endpoints</a></li>
+            <li><a href="#cors">CORS</a></li>
+            <li><a href="#client">Client Integration</a></li>
+            <li><a href="#data-format">Data Format</a></li>
+            <li><a href="#security">Security</a></li>
+            <li><a href="#troubleshooting">Troubleshooting</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p>The REST API is an optional feature for shared tournament hosting. It enables tournament sharing, browsing, and management across multiple users when deployed to a PHP-enabled web server.</p>
+    <ul>
+        <li><strong>Optional:</strong> The API is not required for core functionality — NewTon works fully offline without it</li>
+        <li><strong>Graceful degradation:</strong> The app detects server availability at startup; API features simply don't appear if the server isn't reachable</li>
+        <li><strong>Disabled by default on public deployments:</strong> Set <code>NEWTON_API_ENABLED=false</code> on demo or public-facing instances</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="architecture">Architecture</h2>
+
+    <h3>Server Requirements</h3>
+    <ul>
+        <li>PHP 7.0 or higher (PHP 8.2+ recommended)</li>
+        <li>Write permissions to the <code>/tournaments</code> directory</li>
+        <li>Web server (nginx, Apache) configured to execute PHP</li>
+    </ul>
+
+    <h3>Docker Deployment (Recommended)</h3>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code>docker run -d \
+  --name newton-tournament \
+  -p 8080:2020 \
+  -v ./tournaments:/var/www/html/tournaments \
+  ghcr.io/skrodahl/newton:latest</code></pre>
+    </div>
+    <p>The Docker image includes Alpine Linux with nginx + PHP 8.2-FPM, all API endpoints pre-configured, and persistent tournament storage via volume mount. See <a href="docker-quickstart.html">Docker Quick Start</a> for the full setup guide.</p>
+
+    <h3>Directory Structure</h3>
+    <pre><code>/var/www/html/
+├── api/
+│   ├── list-tournaments.php
+│   ├── upload-tournament.php
+│   └── delete-tournament.php
+├── tournaments/
+│   └── [tournament JSON files]
+└── [application files]</code></pre>
+
+    <h3>Data Storage</h3>
+    <ul>
+        <li>Tournaments stored as JSON files in <code>/tournaments</code></li>
+        <li>Filename format: <code>{TournamentName}_{YYYY-MM-DD}.json</code></li>
+        <li>Unicode characters in filenames fully supported (å, ä, ö, æ, ø, etc.)</li>
+        <li>Files created with 0644 permissions; directory requires 0755</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="endpoints">Endpoints</h2>
+
+    <h3>1. List Tournaments</h3>
+    <p><strong>GET</strong> <code>/api/list-tournaments.php</code></p>
+    <p>Returns a list of all tournaments in the <code>/tournaments</code> directory.</p>
+
+    <p><strong>Success response (200):</strong></p>
+    <pre><code>{
+  "tournaments": [
+    {
+      "filename": "Summer_League_2025-08-15.json",
+      "name": "Summer League",
+      "date": "2025-08-15",
+      "players": 16,
+      "status": "completed"
+    }
+  ],
+  "count": 1
+}</code></pre>
+    <p>Returns an empty array if no tournaments exist. Skips files that can't be read or have invalid JSON.</p>
+
+    <hr>
+
+    <h3>2. Upload Tournament</h3>
+    <p><strong>POST</strong> <code>/api/upload-tournament.php</code></p>
+    <p>Uploads a tournament JSON file to the server.</p>
+
+    <p><strong>Request body:</strong></p>
+    <pre><code>{
+  "filename": "MyTournament_2025-10-02.json",
+  "data": { ... tournament object ... }
+}</code></pre>
+
+    <p><strong>Parameters:</strong></p>
+    <table>
+        <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td><code>filename</code></td><td>string</td><td>Yes</td><td>Must end with <code>.json</code></td></tr>
+        <tr><td><code>data</code></td><td>object</td><td>Yes</td><td>Tournament data object</td></tr>
+    </table>
+
+    <p>Add <code>?overwrite=true</code> to the URL to replace an existing file. Without it, uploading to an existing filename returns <strong>409 Conflict</strong>.</p>
+
+    <p><strong>Success response (200):</strong></p>
+    <pre><code>{
+  "success": true,
+  "filename": "MyTournament_2025-10-02.json",
+  "path": "/tournaments/MyTournament_2025-10-02.json",
+  "message": "Tournament uploaded successfully"
+}</code></pre>
+
+    <p><strong>Error responses:</strong></p>
+    <table>
+        <tr><th>Status</th><th>Error</th><th>Cause</th></tr>
+        <tr><td>400</td><td><code>Invalid JSON payload</code></td><td>Request body is not valid JSON</td></tr>
+        <tr><td>400</td><td><code>Missing filename or data</code></td><td>Required fields absent</td></tr>
+        <tr><td>400</td><td><code>Filename must end with .json</code></td><td>Invalid extension</td></tr>
+        <tr><td>400</td><td><code>Invalid filename - contains dangerous characters</code></td><td>Path traversal attempt</td></tr>
+        <tr><td>409</td><td><code>Tournament file already exists</code></td><td>File exists, no overwrite flag</td></tr>
+        <tr><td>500</td><td><code>Failed to save tournament file</code></td><td>Filesystem write error</td></tr>
+    </table>
+
+    <hr>
+
+    <h3>3. Delete Tournament</h3>
+    <p><strong>POST</strong> <code>/api/delete-tournament.php</code></p>
+    <p>Deletes a tournament file from the server.</p>
+
+    <p><strong>Request body:</strong></p>
+    <pre><code>{
+  "filename": "MyTournament_2025-10-02.json"
+}</code></pre>
+
+    <p><strong>Success response (200):</strong></p>
+    <pre><code>{
+  "success": true,
+  "filename": "MyTournament_2025-10-02.json",
+  "message": "Tournament deleted successfully"
+}</code></pre>
+
+    <p><strong>Error responses:</strong></p>
+    <table>
+        <tr><th>Status</th><th>Error</th><th>Cause</th></tr>
+        <tr><td>400</td><td><code>Missing filename</code></td><td>Required field absent</td></tr>
+        <tr><td>400</td><td><code>Filename must end with .json</code></td><td>Invalid extension</td></tr>
+        <tr><td>400</td><td><code>Invalid filename - contains dangerous characters</code></td><td>Path traversal attempt</td></tr>
+        <tr><td>404</td><td><code>Tournament file not found</code></td><td>File doesn't exist</td></tr>
+        <tr><td>500</td><td><code>Failed to delete tournament file</code></td><td>Filesystem error</td></tr>
+    </table>
+
+    <hr>
+
+    <h2 id="cors">CORS</h2>
+    <p>All endpoints include CORS headers:</p>
+    <pre><code>Access-Control-Allow-Origin: *
+Access-Control-Allow-Methods: GET, POST
+Access-Control-Allow-Headers: Content-Type</code></pre>
+    <p>For production deployments, restrict <code>Access-Control-Allow-Origin</code> to your specific domain.</p>
+
+    <hr>
+
+    <h2 id="client">Client Integration</h2>
+
+    <h3>Feature Detection</h3>
+    <p>The application detects server availability on page load by calling <code>/api/list-tournaments.php</code>. If the server responds, API features (upload button, shared tournaments list, delete buttons) are shown. If not, they are silently hidden — the app works fully without them.</p>
+
+    <h3>Conditional UI</h3>
+    <ul>
+        <li>"Upload to Server" button — shown when API responds</li>
+        <li>"Shared Tournaments" section — shown when tournaments exist on the server</li>
+        <li>Delete buttons — shown on each shared tournament</li>
+    </ul>
+
+    <h3>Import Validation</h3>
+    <p>Any file downloaded from the server must pass the Tournament Manager's import validation before it can be loaded. Files that don't match the expected tournament structure are rejected by the client — they cannot affect your local tournament data.</p>
+
+    <hr>
+
+    <h2 id="data-format">Data Format</h2>
+    <p>Tournaments are stored as JSON with the following top-level structure:</p>
+    <pre><code>{
+  "id": 1234567890,
+  "name": "My Tournament",
+  "date": "2025-10-02",
+  "created": "2025-10-02T10:30:00.000Z",
+  "status": "completed",
+  "bracketSize": 16,
+  "players": [ ... ],
+  "matches": [ ... ],
+  "placements": { "1": 1, "2": 2 },
+  "exportedAt": "2025-10-02T15:45:00.000Z"
+}</code></pre>
+    <p>Match IDs follow the format <code>FS-1-1</code> (Frontside Round 1 Match 1) and <code>BS-FINAL</code> (Backside Final). See the export format for the full schema.</p>
+
+    <hr>
+
+    <h2 id="security">Security</h2>
+
+    <h3>Built-in Protections</h3>
+    <ul>
+        <li>Filename sanitized with <code>basename()</code> — prevents directory traversal</li>
+        <li>Rejects filenames containing <code>..</code>, <code>/</code>, <code>\</code>, or null bytes</li>
+        <li>JSON encoding validated before writing to disk</li>
+        <li>No authentication built in — access control is the operator's responsibility</li>
+    </ul>
+
+    <h3>Recommended Practices</h3>
+    <ul>
+        <li>Restrict <code>Access-Control-Allow-Origin</code> to your domain in production</li>
+        <li>Use HTTPS — terminate TLS at your reverse proxy</li>
+        <li>Don't expose the container directly to the public internet without a reverse proxy or VPN</li>
+        <li>Consider adding HTTP basic authentication at the nginx/Caddy level for write operations</li>
+        <li>Back up the <code>/tournaments</code> directory regularly</li>
+        <li>Disable the API entirely with <code>NEWTON_API_ENABLED=false</code> if you don't need sharing</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="troubleshooting">Troubleshooting</h2>
+
+    <h3>Upload Button Doesn't Appear</h3>
+    <ol>
+        <li>Open the browser console and look for <code>[Shared Tournaments]</code> messages</li>
+        <li>Verify <code>/api/list-tournaments.php</code> returns 200 OK</li>
+        <li>Check <code>NEWTON_API_ENABLED</code> is set to <code>true</code></li>
+        <li>Verify PHP is executing (not returning raw PHP source code)</li>
+    </ol>
+
+    <h3>502 Bad Gateway</h3>
+    <p>PHP-FPM is not running or misconfigured. Check the nginx <code>fastcgi_pass</code> settings and verify PHP-FPM is running inside the container.</p>
+
+    <h3>Tournaments Not Appearing</h3>
+    <p>Check that <code>/tournaments</code> exists and is readable (755 for directory, 644 for files). Verify the JSON files are valid.</p>
+
+    <h3>API Returns 403 Forbidden</h3>
+    <p><code>NEWTON_API_ENABLED</code> is set to <code>false</code>. Restart the container after changing environment variables.</p>
+
+    <h3>Tournaments Not Persisting After Restart</h3>
+    <p>Verify the volume mount is configured: <code>-v ./tournaments:/var/www/html/tournaments</code>. Check host directory permissions.</p>
+
+    <h3>View Container Logs</h3>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code>docker compose logs -f</code></pre>
+    </div>
+
+    <h3>Access Container Shell</h3>
+    <div class="terminal-wrap">
+        <div class="terminal-bar"></div>
+        <pre><code>docker compose exec newton-tournament sh</code></pre>
+    </div>
+
+</div>
+
+<!-- Footer -->
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

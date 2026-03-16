@@ -1,3 +1,32 @@
+## **v4.2.10** - Doc Pages (2026-03-17)
+
+### docker-quickstart.html
+
+- **New page**: `DOCKER-QUICKSTART.md` converted to a standalone HTML page served directly from the Docker container. Sections: Quick Start (3 steps), Configuration (complete `docker-compose.yml` with persistent storage and env var reference), Reverse Proxy Setup, Security, Customization, Troubleshooting.
+- **Landing page link updated**: "Docker Quickstart" button in the Get Started section now points to `docker-quickstart.html` instead of the GitHub markdown file.
+
+### privacy.html
+
+- **New page**: `Docs/PRIVACY.md` converted to a standalone HTML page. Sections: Overview, Browser LocalStorage, What NewTon Doesn't Do, Storage Architecture, Export Privacy, Demo Site Model, Self-Hosting & REST API, Offline Operation, FAQ, Summary.
+- **Footer link updated**: Privacy link in the landing page footer now points to `privacy.html` instead of GitHub.
+
+### rest-api.html
+
+- **New page**: `Docs/REST_API.md` converted to a standalone HTML page. Sections: Overview, Architecture, Endpoints (List/Upload/Delete with request/response examples and error tables), CORS, Client Integration, Data Format, Security, Troubleshooting.
+- **Linked** from both `docker-quickstart.html` and `privacy.html`.
+
+### Docs page styling (css/landing.css)
+
+- **Docs layout**: `.docs-content` centered column (760px), `.docs-back-link` fixed top-left in Insignia font, `.docs-toc` contents box, heading and prose styles for doc pages.
+- **Terminal blocks**: `.terminal-wrap` / `.terminal-bar` — macOS-style traffic light dots (red/amber/green), dark background, soft green monospace text for bash commands.
+- **Docs footer**: `.docs-footer` overrides footer width to match the 760px column.
+
+### Bing Webmaster Tools
+
+- **Meta tag added**: `<meta name="msvalidate.01">` verification tag added to both `landing.html` and `landing-page.php`.
+
+---
+
 ## **v4.2.9** - Landing Page Polish (2026-03-14)
 
 ### Landing Page — Screenshot Lightbox
