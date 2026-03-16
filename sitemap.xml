@@ -5,23 +5,23 @@
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/?launch</loc>
-    <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>https://darts.skrodahl.net/chalker</loc>
-    <priority>0.8</priority>
-  </url>
-  <url>
     <loc>https://darts.skrodahl.net/docker-quickstart.html</loc>
-    <priority>0.5</priority>
-  </url>
-  <url>
-    <loc>https://darts.skrodahl.net/privacy.html</loc>
-    <priority>0.5</priority>
+    <priority>0.8</priority>
   </url>
   <url>
     <loc>https://darts.skrodahl.net/rest-api.html</loc>
-    <priority>0.5</priority>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://darts.skrodahl.net/privacy.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://darts.skrodahl.net/chalker</loc>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://darts.skrodahl.net/?launch</loc>
+    <priority>0.4</priority>
   </url>
 </urlset>
