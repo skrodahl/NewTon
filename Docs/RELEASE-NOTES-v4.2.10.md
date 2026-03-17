@@ -22,6 +22,7 @@ A full user guide is now available at `userguide.html`. It covers the entire tou
 - **Configuration** — Club identity, point system, match configuration, and lane management
 - **Managing a Tournament** — Creating tournaments, registering players, the Saved Players registry, payment tracking, and generating brackets
 - **Running Matches & Match Controls** — Bracket view (navigation panel, pan & zoom, match states, status panel), Match Controls command center (two-column Frontside/Backside layout, live matches sorted by lane, lane/referee conflict management, Referee Suggestions), Confirm Match Winner dialog with Match Progression preview, per-player Statistics dialog, and mid-tournament Leaderboard access
+- **Developer Console** — Statistics panel (Quick Overview, Transaction Health, Match State, Player Count, Lane Usage, localStorage Usage) and a complete command reference including Late Registration
 - **Results & Export** — Live standings, CSV export, JSON export/import
 - **Tips & Tricks** — Undo, Late Registration, F1 help, offline use, multiple tournaments, data safety, self-hosting
 
@@ -65,7 +66,7 @@ New CSS classes shared across all documentation pages:
 
 ## Landing Page — Get Started Section
 
-A third card has been added to the Get Started section linking to the user guide. The card spans the full width of the section (below Local Use and Self-Hosted), with description text on the left and the "Read the Guide" button on the right. Applied to both `landing.html` and `landing-page.php`.
+Two cards have been added to the Get Started section. The User Guide card spans the full width of the section (below Local Use and Self-Hosted), with description text on the left and the "Read the Guide" button on the right. Below it, an Architecture & Reliability card links to `architecture.html`. Both cards use `.get-started-card--wide`. Applied to both `landing.html` and `landing-page.php`.
 
 ---
 
@@ -100,6 +101,12 @@ The `<meta name="msvalidate.01">` verification tag has been added to both `landi
 
 ---
 
+## SEO — Meta Descriptions
+
+`<meta name="description">` tags have been added to all five pages that were missing them — `userguide.html`, `docker-quickstart.html`, `privacy.html`, `rest-api.html`, and `chalker/index.html`. Each description summarises the page content for search engine result snippets.
+
+---
+
 ## Files Changed
 
 - `architecture.html` — New Architecture & Reliability page
@@ -111,6 +118,7 @@ The `<meta name="msvalidate.01">` verification tag has been added to both `landi
 - `landing.html` — Bing meta tag, Docker Quickstart link, Privacy footer link, User Guide card, Architecture & Reliability card
 - `landing-page.php` — Same changes as `landing.html`
 - `sitemap.xml` — Five doc pages added, priorities rebalanced
+- `chalker/index.html` — Meta description added
 - `js/bracket-rendering.js` — Double Elimination moved to top of Setup Actions
 - `CHANGELOG.md` — v4.2.10 entry added
 

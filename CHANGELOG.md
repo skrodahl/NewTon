@@ -26,6 +26,11 @@
 - **New page**: `Docs/REST_API.md` converted to a standalone HTML page. Sections: Overview, Architecture, Endpoints (List/Upload/Delete with request/response examples and error tables), CORS, Client Integration, Data Format, Security, Troubleshooting.
 - **Linked** from both `docker-quickstart.html` and `privacy.html`.
 
+### architecture.html
+
+- **New page**: Design philosophy and internals behind NewTon's crash-proof architecture. Sections: Single Source of Truth (MATCH_PROGRESSION lookup tables), Transaction History & Undo (event sourcing, surgical undo, auto-recovery), Data Separation (tournament data, transaction history, and global config kept strictly isolated), Offline-First Persistence, Strengths, Known Limitations.
+- **Linked** from the landing page Get Started section. Cross-linked to the Developer Console section in `userguide.html`, `privacy.html`, and `rest-api.html`.
+
 ### Docs page styling (css/landing.css)
 
 - **Docs layout**: `.docs-content` centered column (760px), `.docs-back-link` fixed top-left in Insignia font, `.docs-toc` contents box, heading and prose styles for doc pages.
@@ -37,10 +42,11 @@
 ### Landing page — Get Started section
 
 - **User Guide card added**: Third card spanning the full width of the Get Started section, with text left and "Read the Guide" button right (`.get-started-card--wide` in `css/landing.css`).
+- **Architecture & Reliability card added**: Fourth card in the Get Started section linking to `architecture.html`.
 
 ### sitemap.xml
 
-- **Four doc pages added**: `userguide.html` (0.8), `docker-quickstart.html` (0.8), `rest-api.html` (0.7), `privacy.html` (0.7) — all with `noindex` removed.
+- **Five doc pages added**: `userguide.html` (0.8), `docker-quickstart.html` (0.8), `architecture.html` (0.7), `rest-api.html` (0.7), `privacy.html` (0.7) — all with `noindex` removed.
 - **Priorities rebalanced**: Doc pages prioritised by search value rather than click depth — `chalker` 0.6, `/?launch` 0.4.
 
 ### Setup Actions — bracket format order
