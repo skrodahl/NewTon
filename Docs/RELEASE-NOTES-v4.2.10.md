@@ -29,7 +29,11 @@ A full user guide is now available at `userguide.html`. It covers the entire tou
 
 ## Documentation Pages
 
-Three existing markdown documents have been converted to standalone HTML pages, styled consistently with the landing page and served directly from the Docker container:
+Four standalone HTML pages are now served directly from the application, styled consistently with the landing page:
+
+### architecture.html
+
+New page linked from the landing page's Get Started section. Covers the design philosophy and internals behind NewTon's crash-proof design: Single Source of Truth (MATCH_PROGRESSION lookup tables), Transaction History & Undo (event sourcing, surgical undo, auto-recovery), Data Separation (tournament data, transaction history, and global config kept strictly isolated), Offline-First Persistence, Strengths, and Known Limitations. Cross-linked to the Developer Console section in `userguide.html`, Privacy page, and REST API page.
 
 ### docker-quickstart.html
 
@@ -74,6 +78,7 @@ A third card has been added to the Get Started section linking to the user guide
 | `/` | 1.0 |
 | `/userguide.html` | 0.8 |
 | `/docker-quickstart.html` | 0.8 |
+| `/architecture.html` | 0.7 |
 | `/rest-api.html` | 0.7 |
 | `/privacy.html` | 0.7 |
 | `/chalker` | 0.6 |
@@ -103,7 +108,7 @@ The `<meta name="msvalidate.01">` verification tag has been added to both `landi
 - `privacy.html` — New privacy architecture page
 - `rest-api.html` — New REST API reference page
 - `css/landing.css` — Docs page styles, terminal blocks, table styles, `.docs-quickstart`, `.get-started-card--wide`
-- `landing.html` — Bing meta tag, Docker Quickstart link, Privacy footer link, User Guide card
+- `landing.html` — Bing meta tag, Docker Quickstart link, Privacy footer link, User Guide card, Architecture & Reliability card
 - `landing-page.php` — Same changes as `landing.html`
 - `sitemap.xml` — Five doc pages added, priorities rebalanced
 - `js/bracket-rendering.js` — Double Elimination moved to top of Setup Actions
