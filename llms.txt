@@ -8,7 +8,11 @@ NewTon DC is a fully client-side web application for managing professional darts
 - **License**: BSD-3-Clause
 - **Repository**: https://github.com/skrodahl/NewTon
 - **Live Demo**: https://darts.skrodahl.net
-- **Privacy**: https://github.com/skrodahl/NewTon/blob/main/Docs/PRIVACY.md
+- **User Guide**: https://darts.skrodahl.net/userguide.html
+- **Architecture & Reliability**: https://darts.skrodahl.net/architecture.html
+- **Docker Quick Start**: https://darts.skrodahl.net/docker-quickstart.html
+- **REST API Reference**: https://darts.skrodahl.net/rest-api.html
+- **Privacy**: https://darts.skrodahl.net/privacy.html
 
 ## Technical Stack
 - Pure HTML5, CSS3, and JavaScript (ES6+) - no frameworks, no build step, no external dependencies
