@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Architecture &amp; Reliability — NewTon DC</title>
+    <meta name="description" content="How NewTon DC Tournament Manager is built for reliability. Hardcoded lookup tables, transaction-based history, and offline-first design make it virtually crash-proof.">
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC</a>
+
+<div class="docs-content">
+
+    <h1>Architecture &amp; Reliability</h1>
+    <p class="docs-subtitle">How NewTon DC is built to be virtually crash-proof.</p>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#philosophy">Design Philosophy</a></li>
+            <li><a href="#single-source">Single Source of Truth</a></li>
+            <li><a href="#transaction-history">Transaction History &amp; Undo</a></li>
+            <li><a href="#data-separation">Data Separation</a></li>
+            <li><a href="#offline-first">Offline-First Persistence</a></li>
+            <li><a href="#strengths">Strengths</a></li>
+            <li><a href="#limitations">Known Limitations</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="philosophy">Design Philosophy</h2>
+    <p>NewTon DC is built around a single overriding principle: <strong>a tournament that has started must never lose data or end up in an invalid state.</strong> Every architectural decision follows from that.</p>
+    <p>This means no dynamic calculations that could produce different results depending on execution order, no mutable shared state that different code paths can corrupt, and no operations that can half-complete. Instead, NewTon uses <strong>hardcoded lookup tables</strong> as the single source of truth for all bracket logic, and a <strong>transaction-based history system</strong> that logs every match action and enables surgical undo.</p>
+    <p>The result is a system that can survive almost any failure — a misclick, a browser crash, a power cut mid-tournament — and be restored to an exact, consistent state.</p>
+
+    <hr>
+
+    <h2 id="single-source">Single Source of Truth</h2>
+    <p>The most critical architectural decision in NewTon is how bracket progression works. Many systems calculate where a player should go next at runtime — using formulas, round arithmetic, or conditional logic. NewTon does not.</p>
+    <p>Instead, all bracket progression is defined in a single constant object called <code>MATCH_PROGRESSION</code>, hardcoded in <code>clean-match-progression.js</code>:</p>
+
+    <pre><code>const MATCH_PROGRESSION = {
+    8:  { /* all rules for 8-slot brackets  */ },
+    16: { /* all rules for 16-slot brackets */ },
+    32: { /* all rules for 32-slot brackets */ }
+};</code></pre>
+
+    <p>Every match — on the Frontside and Backside — has an explicit entry that defines exactly where the winner goes and where the loser goes:</p>
+
+    <pre><code>'FS-1-1': {
+    winner: ['FS-2-1', 'player1'],
+    loser:  ['BS-1-1', 'player1']
+}</code></pre>
+
+    <p>There is only one function that moves players between matches — <code>advancePlayer()</code> — and it does nothing but look up the rule and apply it. No calculations. No special cases. No branches.</p>
+
+    <h3>Why this matters</h3>
+    <ul>
+        <li><strong>Immutable</strong> — the rules are hardcoded and never changed at runtime. They cannot be corrupted by user actions or application state.</li>
+        <li><strong>Complete</strong> — every possible match outcome in every bracket size is explicitly defined. There are no gaps, no fallbacks, no guesses.</li>
+        <li><strong>Deterministic</strong> — given the same match result, the same progression happens every single time, with no variation.</li>
+        <li><strong>Auditable</strong> — because there is one code path, every advancement is traceable. You always know exactly how a player got to where they are.</li>
+        <li><strong>Protected</strong> — any operation that can directly modify the bracket structure or transaction log is deliberately hidden behind the <a href="userguide.html#devconsole">Developer Console</a>, keeping destructive tools out of reach during normal tournament operation.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="transaction-history">Transaction History &amp; Undo</h2>
+    <p>Every match action in NewTon is recorded as a transaction in a per-tournament log. The tournament's current state is not just a snapshot — it is the sum of every recorded action that has been applied to it.</p>
+    <p>This approach — known as event sourcing — has two important consequences:</p>
+    <ul>
+        <li><strong>Undo is surgical</strong> — because every action is discrete and logged, individual match results can be reversed without affecting the rest of the tournament. NewTon does not need to restore a full snapshot; it replays the history minus the action being undone.</li>
+        <li><strong>Auto-recovery</strong> — if the application state is ever lost or corrupted, the entire bracket can be rebuilt by replaying the transaction log from the beginning. The log is the ground truth.</li>
+    </ul>
+    <p>The transaction log is capped at 1,000 entries, visible and manageable via the Developer Console. The Console also shows a <strong>Transaction Health</strong> indicator so operators can see at a glance how much of the limit is in use.</p>
+
+    <hr>
+
+    <h2 id="data-separation">Data Separation</h2>
+    <p>NewTon maintains strict isolation between three categories of data, each stored independently and never mixed:</p>
+    <table>
+        <tr><th>Category</th><th>What it contains</th><th>Storage key</th></tr>
+        <tr><td><strong>Tournament data</strong></td><td>Players, matches, bracket, placements, status</td><td><code>tournament_{id}</code></td></tr>
+        <tr><td><strong>Transaction history</strong></td><td>Full audit log of every match action</td><td><code>tournament_{id}_history</code></td></tr>
+        <tr><td><strong>Global configuration</strong></td><td>Points, legs, lanes, UI preferences</td><td><code>dartsGlobalConfig</code></td></tr>
+    </table>
+    <p>Configuration is never saved with a tournament. Tournament exports contain only the tournament's own data — not the config of the machine it was exported from. This means a tournament exported from one club's setup can be imported at another without any configuration bleed.</p>
+    <p>When a tournament is deleted, all of its keys are removed completely. No residue, no contamination between tournaments.</p>
+
+    <hr>
+
+    <h2 id="offline-first">Offline-First Persistence</h2>
+    <p>NewTon has no server dependency for any of its core functionality. All data lives in the browser's <code>localStorage</code> — a sandboxed, domain-isolated storage area that persists across browser restarts and reboots without any network connection.</p>
+    <p>Every state change is saved immediately. There is no "save button" because there is no moment where unsaved state exists. If the browser crashes mid-tournament, the last saved state is fully intact and consistent.</p>
+    <ul>
+        <li><strong>No internet required</strong> after the initial download</li>
+        <li><strong>No account, no login, no sync service</strong></li>
+        <li><strong>Export/import</strong> via JSON for backups, sharing, and moving between devices</li>
+        <li><strong>Optional REST API</strong> for self-hosters who want shared tournament access — disabled by default, never automatic</li>
+    </ul>
+    <p>See the <a href="privacy.html">Privacy Architecture</a> page for the full storage model.</p>
+
+    <hr>
+
+    <h2 id="strengths">Strengths</h2>
+    <ul>
+        <li><strong>Correctness</strong> — hardcoded lookup tables eliminate an entire class of calculation bugs. The rules cannot be wrong at runtime because they are not computed at runtime.</li>
+        <li><strong>Crash resistance</strong> — immediate persistence, transaction history, and auto-recovery from replay mean the application survives almost any failure scenario.</li>
+        <li><strong>Maintainability</strong> — clear separation between progression rules, tournament data, and configuration means changes in one area cannot corrupt another.</li>
+        <li><strong>Transparency</strong> — self-documenting match IDs (<code>FS-2-1</code> = Frontside Round 2 Match 1, <code>BS-FINAL</code> = Backside Final), an auditable transaction log, and open-source code mean the system's behaviour is always inspectable.</li>
+        <li><strong>Extensibility</strong> — adding a new bracket size requires only a new lookup table entry. No core logic changes needed.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="limitations">Known Limitations</h2>
+    <p>Honesty is part of reliability. These are the known constraints of the current architecture:</p>
+    <ul>
+        <li><strong>Bracket templates are fixed</strong> — NewTon supports any number of participants from 4 to 32. Unused slots are automatically filled with byes that advance without playing, so a 13-player tournament runs cleanly in a 16-slot bracket with 3 invisible byes. The constraint is the upper limit of 32 participants, and the three available template sizes (8, 16, 32 slots). Adding a larger template requires a new hardcoded lookup table.</li>
+        <li><strong>localStorage limits</strong> — browsers typically allow 5–10 MB per domain. A 32-player tournament with full match history uses around 110 KB. Very large numbers of tournaments with extensive undo history could approach limits; the <a href="userguide.html#devconsole">Developer Console monitors this in real time</a>.</li>
+        <li><strong>Single-user design</strong> — NewTon is designed for one operator per tournament. There is no multi-device sync or conflict resolution for simultaneous edits. The optional REST API enables sharing, but not live collaboration.</li>
+    </ul>
+
+</div>
+
+<!-- Footer -->
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

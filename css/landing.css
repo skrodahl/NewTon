@@ -885,6 +885,11 @@ body {
     flex: 1;
 }
 
+.docs-quickstart li > div > strong:first-child {
+    color: #c0562a;
+    font-size: 1.05rem;
+}
+
 .docs-quickstart li::before {
     content: counter(quickstart-counter);
     font-family: 'Insignia', Georgia, serif;

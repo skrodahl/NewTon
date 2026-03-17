@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>User Guide — NewTon DC</title>
+    <meta name="description" content="Complete user guide for NewTon DC Tournament Manager. Learn how to set up, register players, run matches, record results, and export standings for your darts tournament.">
     <link rel="icon" type="image/jpeg" href="images/logo.jpg">
     <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -27,6 +28,7 @@
             <li><a href="#managing">Managing a Tournament</a></li>
             <li><a href="#running">Running Matches &amp; Match Controls</a></li>
             <li><a href="#results">Results &amp; Export</a></li>
+            <li><a href="#devconsole">Developer Console</a></li>
             <li><a href="#tips">Tips &amp; Tricks</a></li>
         </ol>
     </nav>
@@ -213,6 +215,32 @@
 
     <h3>Importing a Tournament</h3>
     <p>Import a previously exported JSON file to restore a tournament — useful for recovering from a browser data clear, moving to a different device, or loading a shared tournament. NewTon validates the file before importing; invalid files are rejected without affecting existing data.</p>
+
+    <hr>
+
+    <h2 id="devconsole">Developer Console</h2>
+    <p>The Developer Console gives operators a real-time diagnostic view and a set of recovery commands. Enable it in Global Settings, then open it by clicking the version number in the bottom-right corner of the bracket view.</p>
+    <p><strong>Statistics</strong> — updated live as the tournament runs:</p>
+    <ul>
+        <li><strong>Quick Overview</strong> — tournament health, match completion, transaction count, lane and referee conflicts, average and longest/shortest match times</li>
+        <li><strong>Transaction Health</strong> — ratio of transactions used against the 1,000-transaction limit</li>
+        <li><strong>Match State</strong> — completed / ready / live counts at a glance</li>
+        <li><strong>Player Count</strong> — paid vs unpaid</li>
+        <li><strong>Lane Usage</strong> — boards currently in use</li>
+        <li><strong>localStorage Usage</strong> — storage consumption against the 10 MB browser limit</li>
+    </ul>
+    <p><strong>Commands</strong> — diagnostic and recovery tools:</p>
+    <ul>
+        <li><strong>View Transaction History</strong> — full audit log of every match action</li>
+        <li><strong>Manage Transaction Log</strong> — inspect and trim the transaction log if it approaches the limit</li>
+        <li><strong>Re-render Bracket</strong> — redraw the bracket without changing any data</li>
+        <li><strong>Recalculate Rankings</strong> — recompute standings from the current match results</li>
+        <li><strong>Refresh All Dropdowns</strong> — force all lane and referee dropdowns to reload</li>
+        <li><strong>Validate Everything</strong> — run a full integrity check on bracket state</li>
+        <li><strong>Toggle Read-Only</strong> — lock the tournament against accidental changes</li>
+        <li><strong>Late Registration</strong> — register a player who arrived after the bracket was generated (see <a href="#tips">Tips &amp; Tricks</a>)</li>
+        <li><strong>Reset All Config</strong> — wipe global settings back to defaults (destructive — requires confirmation)</li>
+    </ul>
 
     <hr>
 

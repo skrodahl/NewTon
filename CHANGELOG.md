@@ -4,6 +4,8 @@
 
 - **New page**: Comprehensive user guide. Sections: Quick Start (7 styled numbered steps), Tournament Formats (DE vs SE with guidance on when to use each), Configuration, Managing a Tournament (including Saved Players registry and payment tracking), Running Matches & Match Controls, Results & Export, Tips & Tricks (undo, late registration, offline use, data safety, self-hosting).
 - **Quick Start styling**: Numbered step cards with orange Insignia circle badges and accent left border (`.docs-quickstart` in `css/landing.css`).
+- **Quick Start title styling**: Step titles (Download, Open, Configure…) now render in burnt orange — only the first `<strong>` per step is targeted (`.docs-quickstart li > div > strong:first-child`), leaving inline bold text in dark brown.
+- **Developer Console section**: New section added between Results & Export and Tips & Tricks — covers Statistics panel (Quick Overview, Transaction Health, Match State, Player Count, Lane Usage, localStorage Usage) and all Commands with descriptions.
 - **Bracket View**: Covers navigation panel, pan & zoom (mouse drag, scroll wheel, +/− buttons, home reset), match status states, and status panel (bottom-right tournament summary).
 - **Match Controls**: Full description of the command center — two-column Frontside/Backside layout, live matches sorted by lane, ready matches grouped by round, lane/referee conflict management, Referee Suggestions panel (Recent Losers / Recent Winners / Recent Assignments), and the note that all match actions can also be performed directly from the bracket.
 - **Recording Results**: Describes the Confirm Match Winner dialog including Match Progression preview, optional leg score entry, and per-player Statistics dialog (short legs with dart count, high outs with score, 180s and tons with +/− counters).
@@ -48,6 +50,10 @@
 ### Bing Webmaster Tools
 
 - **Meta tag added**: `<meta name="msvalidate.01">` verification tag added to both `landing.html` and `landing-page.php`.
+
+### SEO — Meta Descriptions
+
+- **Meta descriptions added**: `<meta name="description">` added to all five pages missing it — `userguide.html`, `docker-quickstart.html`, `privacy.html`, `rest-api.html`, and `chalker/index.html`.
 
 ---
 

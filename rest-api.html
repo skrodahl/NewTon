@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>REST API — NewTon DC</title>
+    <meta name="description" content="REST API reference for NewTon DC Tournament Manager. Optional server API for shared tournament hosting — list, upload, and delete tournaments via three lightweight endpoints.">
     <link rel="icon" type="image/jpeg" href="images/logo.jpg">
     <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -224,7 +225,7 @@ Access-Control-Allow-Headers: Content-Type</code></pre>
         <li>Filename sanitized with <code>basename()</code> — prevents directory traversal</li>
         <li>Rejects filenames containing <code>..</code>, <code>/</code>, <code>\</code>, or null bytes</li>
         <li>JSON encoding validated before writing to disk</li>
-        <li>No authentication built in — access control is the operator's responsibility</li>
+        <li>No authentication built in — access control is the operator's responsibility (see <a href="privacy.html">Privacy Architecture</a> for the full data model)</li>
     </ul>
 
     <h3>Recommended Practices</h3>
