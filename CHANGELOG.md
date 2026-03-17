@@ -1,4 +1,4 @@
-## **v4.2.10** - Doc Pages & User Guide (2026-03-17)
+## **v4.2.10** - Doc Pages, User Guide & Architecture (2026-03-17)
 
 ### userguide.html
 

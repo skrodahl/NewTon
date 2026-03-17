@@ -7,7 +7,7 @@
 
 ## Overview
 
-**NewTon DC Tournament Manager Version 4.2.10** adds four standalone documentation pages served directly from the application, a comprehensive user guide, sitemap improvements for search engine visibility, and a small UX fix to the Setup Actions panel.
+**NewTon DC Tournament Manager Version 4.2.10** adds five standalone documentation pages served directly from the application, a comprehensive user guide, sitemap improvements for search engine visibility, and a small UX fix to the Setup Actions panel.
 
 This release contains one change to tournament functionality (Double Elimination moved to top of Setup Actions) and is otherwise a drop-in replacement for v4.2.9.
 
@@ -97,6 +97,7 @@ The `<meta name="msvalidate.01">` verification tag has been added to both `landi
 
 ## Files Changed
 
+- `architecture.html` — New Architecture & Reliability page
 - `userguide.html` — New user guide page
 - `docker-quickstart.html` — New Docker quick start page
 - `privacy.html` — New privacy architecture page
