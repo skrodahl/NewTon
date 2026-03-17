@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>User Guide — NewTon DC</title>
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC</a>
+
+<div class="docs-content">
+
+    <h1>User Guide</h1>
+    <p class="docs-subtitle">Everything you need to run a darts tournament with NewTon DC.</p>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#quick-start">Quick Start</a></li>
+            <li><a href="#formats">Tournament Formats</a></li>
+            <li><a href="#configuration">Configuration</a></li>
+            <li><a href="#managing">Managing a Tournament</a></li>
+            <li><a href="#running">Running Matches &amp; Match Controls</a></li>
+            <li><a href="#results">Results &amp; Export</a></li>
+            <li><a href="#tips">Tips &amp; Tricks</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="quick-start">Quick Start</h2>
+    <p>NewTon runs entirely in your browser — no installation, no account, no internet required after the first download.</p>
+    <ol class="docs-quickstart">
+        <li><div><strong>Download</strong> — Get the latest release from <a href="https://github.com/skrodahl/NewTon/releases/latest" target="_blank" rel="noopener">github.com/skrodahl/NewTon/releases/latest</a>. Unzip and place the folder anywhere on your computer.</div></li>
+        <li><div><strong>Open</strong> — Launch <code>tournament.html</code> in your browser. No server needed — double-clicking the file works.</div></li>
+        <li><div><strong>Configure</strong> — Visit the <strong>Config</strong> tab to set your club name, logo, point values, and leg counts. You only need to do this once.</div></li>
+        <li><div><strong>Create</strong> — Click <strong>New Tournament</strong> and enter a name and date.</div></li>
+        <li><div><strong>Register</strong> — Add players by name. Mark payment status as players arrive. NewTon remembers names across tournaments via the Saved Players registry.</div></li>
+        <li><div><strong>Generate</strong> — Choose Single or Double Elimination and the bracket size, then click <strong>Generate Bracket</strong>. The draw is randomised automatically.</div></li>
+        <li><div><strong>Run</strong> — Manage matches from the bracket view. Assign lanes, record results, and track the tournament in real time.</div></li>
+    </ol>
+
+    <hr>
+
+    <h2 id="formats">Tournament Formats</h2>
+
+    <h3>Double Elimination (DE)</h3>
+    <p>Every player gets two chances before they are eliminated. The bracket is split into a <strong>Frontside</strong> (winners) and a <strong>Backside</strong> (losers). A player who loses on the Frontside drops to the Backside and can still win the tournament.</p>
+    <ul>
+        <li><strong>Best for:</strong> most club tournaments — fair, competitive, and players stay involved longer</li>
+        <li><strong>Bracket sizes:</strong> 8, 16, or 32 players</li>
+        <li><strong>Final:</strong> Frontside finalist vs Backside finalist — the Frontside finalist has a one-match advantage</li>
+    </ul>
+
+    <h3>Single Elimination (SE)</h3>
+    <p>One loss and you're out. Straightforward bracket where winners advance and losers are eliminated immediately.</p>
+    <ul>
+        <li><strong>Best for:</strong> time-limited events, warm-up tournaments, or large fields where DE isn't practical</li>
+        <li><strong>Bracket sizes:</strong> 8, 16, or 32 players</li>
+        <li><strong>Includes:</strong> optional bronze match (3rd place play-off)</li>
+    </ul>
+
+    <h3>Which to Choose?</h3>
+    <p>When in doubt, use Double Elimination. It rewards consistency, keeps more players engaged throughout the evening, and produces a more meaningful result. Single Elimination is the right call when you're short on time or boards.</p>
+
+    <hr>
+
+    <h2 id="configuration">Configuration</h2>
+    <p>The <strong>Config</strong> tab stores global settings that apply across all tournaments. Changes take effect immediately and persist across browser sessions.</p>
+
+    <h3>Club Identity</h3>
+    <ul>
+        <li><strong>Club name</strong> — Appears in exports and result sheets</li>
+        <li><strong>Logo</strong> — Place <code>logo.png</code>, <code>logo.jpg</code>, <code>logo.jpeg</code>, or <code>logo.svg</code> in the application folder to replace the default logo</li>
+    </ul>
+
+    <h3>Point System</h3>
+    <p>NewTon calculates season standings automatically from tournament results. Configure point values to match your club's rules:</p>
+    <ul>
+        <li><strong>Participation</strong> — Points just for entering (default: 5)</li>
+        <li><strong>Placements</strong> — 1st through 8th place (defaults: 15, 13, 11, 9, 7, 7, 5, 5)</li>
+        <li><strong>Achievements</strong> — High checkouts, tons, 180s, short legs</li>
+    </ul>
+
+    <h3>Match Configuration</h3>
+    <p>Set the number of legs per round independently for both formats:</p>
+    <ul>
+        <li><strong>Double Elimination</strong> — Configure legs for regular rounds, Frontside and Backside semifinals, Backside Final, and the Grand Final separately</li>
+        <li><strong>Single Elimination</strong> — Configure legs for each round independently (quarterfinals, semifinals, bronze match, final)</li>
+    </ul>
+
+    <h3>Lane Management</h3>
+    <ul>
+        <li><strong>Maximum lanes</strong> — Number of dartboards available at your venue</li>
+        <li><strong>Excluded lanes</strong> — Boards to keep out of rotation (maintenance, reserved, etc.)</li>
+        <li><strong>Require lane before start</strong> — Prevent matches from starting without a lane assigned</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="managing">Managing a Tournament</h2>
+
+    <h3>Creating a Tournament</h3>
+    <p>Click <strong>New Tournament</strong> from the tournament list. Enter a name and date — both appear on exports. Select your format (DE or SE) and bracket size before generating the bracket.</p>
+
+    <h3>Registering Players</h3>
+    <p>Add players from the <strong>Players</strong> tab before generating the bracket. Type a name and press Enter or click Add. The order of entry doesn't matter — the draw is randomised when you generate the bracket.</p>
+
+    <h3>Saved Players Registry</h3>
+    <p>NewTon maintains a persistent registry of player names across all tournaments. When you start typing a name, matching suggestions appear from previous tournaments — select one to add without retyping. The registry grows automatically as you run tournaments.</p>
+    <p>Player names in the registry can be managed from the Config tab — remove old or misspelled entries to keep suggestions clean.</p>
+
+    <h3>Payment Tracking</h3>
+    <p>Each player has a payment status indicator on the Players list. Toggle it to mark who has paid the entry fee. Payment status is visible at a glance and included in the player list — useful for the person collecting fees at the door.</p>
+
+    <h3>Generating the Bracket</h3>
+    <p>Once all players are registered, click <strong>Generate Bracket</strong>. NewTon randomises the draw and sets up all matches. If your player count doesn't fill the bracket exactly, byes are distributed automatically — bye winners advance without playing.</p>
+    <p><strong>The bracket cannot be regenerated once matches have started.</strong> Double-check your player list before generating.</p>
+
+    <hr>
+
+    <h2 id="running">Running Matches</h2>
+
+    <h3>The Bracket View</h3>
+    <p>The bracket is the main view during an active tournament. It displays the full draw — Frontside and Backside — with all matches and their current status.</p>
+
+    <h4>Navigation</h4>
+    <p>The left-hand panel provides quick access to all sections:</p>
+    <ul>
+        <li><strong>Leaderboard</strong> — Current standings and points</li>
+        <li><strong>Match Controls</strong> — Opens the match management panel</li>
+        <li><strong>Setup</strong> — Return to tournament setup</li>
+        <li><strong>Registration</strong> — Player list and payment status</li>
+        <li><strong>Config</strong> — Global settings</li>
+    </ul>
+
+    <h4>Pan &amp; Zoom</h4>
+    <p>The bracket can be panned freely by clicking and dragging. Use the mouse wheel or the <strong>+</strong> / <strong>−</strong> buttons in the top-right corner to zoom in and out. The <strong>home</strong> button between them resets the view to the default zoom and position.</p>
+
+    <h4>Match Status</h4>
+    <p>Matches progress through four states:</p>
+    <ul>
+        <li><strong>Pending</strong> — Waiting for players from earlier rounds</li>
+        <li><strong>Ready</strong> — Both players known, match can be started</li>
+        <li><strong>Live</strong> — Match is in progress</li>
+        <li><strong>Completed</strong> — Result recorded, players have advanced</li>
+    </ul>
+
+    <h4>Status Panel</h4>
+    <p>The bottom-right corner shows a live summary of the tournament: name, elapsed time, completed match count, bracket size, total matches, player count, date, application version, and current status (Active / Completed).</p>
+
+    <h3>Match Controls</h3>
+    <p>The Match Controls panel is the command center for running the tournament. Open it by clicking the <strong>Match Controls</strong> button at the top of the bracket view, or enable <strong>Automatically open Match Controls</strong> to have it open whenever a match completes and new ones become ready.</p>
+    <p>The panel shows all active and ready matches in two columns — <strong>Frontside</strong> on the left, <strong>Backside</strong> on the right — sorted by round. Live matches appear at the top, sorted by lane number. Each match card shows the match ID, where the winner and loser will advance to, and the Best of X format configured for that round.</p>
+    <p>Everything you can do in Match Controls — starting matches, assigning lanes and referees, declaring winners, entering scores and stats — can also be done directly from the bracket view by clicking individual match cards. The one thing exclusive to Match Controls is the Referee Suggestions panel.</p>
+
+    <h3>Starting a Match</h3>
+    <p>Ready matches show a lane dropdown, a referee dropdown, and a <strong>Start Match</strong> button. Select a lane and optionally a referee, then start the match. The match moves to Live status and lane is locked in.</p>
+    <p>NewTon flags conflicts with a <strong>⚠️</strong> warning on the player's name — for example, if a player is currently serving as referee for another match and has a new match ready to start. The conflict is informational; you can still proceed once the referee situation is resolved.</p>
+
+    <h3>Lane &amp; Referee Conflict Management</h3>
+    <p>NewTon tracks all lane and referee assignments in real time:</p>
+    <ul>
+        <li><strong>Lane conflicts</strong> — A lane already in use does not appear as available for a new match</li>
+        <li><strong>Referee conflicts</strong> — A player currently refereeing cannot be assigned as referee for another match, and is flagged with ⚠️ if they have a match ready to play</li>
+    </ul>
+
+    <h3>Referee Suggestions</h3>
+    <p>The right-hand panel shows referee suggestions in priority order:</p>
+    <ul>
+        <li><strong>Recent Losers</strong> — Players who just lost and are free — ideal candidates</li>
+        <li><strong>Recent Winners</strong> — Players who won their last match and may be available</li>
+        <li><strong>Recent Assignments</strong> — Players who have refereed before, with the round noted</li>
+    </ul>
+    <p>This makes it easy to pick a fair referee quickly without having to track who's free manually.</p>
+
+    <h3>Recording Results</h3>
+    <p>Click a winner button on a Live match. The <strong>Confirm Match Winner</strong> dialog appears, showing the declared winner, the opponent, and the match ID. A <strong>Match Progression</strong> box confirms exactly where each player goes next — the winner's next match and the loser's next match — so you can verify before committing.</p>
+    <p>Below that, enter the <strong>Final Score</strong> (optional) — the number of legs won by each player (e.g. Christian: 2, Timothy: 0). The score must give the winner more legs than the loser.</p>
+    <p>Player names in the dialog are clickable — clicking a name opens the <strong>Statistics</strong> dialog for that player:</p>
+    <ul>
+        <li><strong>Short Legs</strong> — Enter the dart count (max 21 darts) and click Add Short Leg. Multiple short legs can be added.</li>
+        <li><strong>High Out</strong> — Enter the checkout score (101+) and click Add High Out.</li>
+        <li><strong>180s</strong> — Increment or decrement with the +/− buttons.</li>
+        <li><strong>Tons (100+)</strong> — Increment or decrement with the +/− buttons.</li>
+    </ul>
+    <p>Stats are saved per player. Click <strong>Confirm Winner</strong> when done — NewTon advances the winner and loser to their next matches automatically.</p>
+
+    <h3>Leaderboard</h3>
+    <p>The <strong>Leaderboard</strong> button at the bottom of the Match Controls panel opens the current standings mid-tournament. Click any player in the leaderboard to open their Statistics dialog and add stats that were missed when the match result was recorded.</p>
+
+    <hr>
+
+    <h2 id="results">Results &amp; Export</h2>
+
+    <h3>Live Standings</h3>
+    <p>The <strong>Results</strong> tab shows current standings and point totals as the tournament progresses. Final placements are confirmed when the Grand Final (DE) or Final (SE) is completed.</p>
+
+    <h3>CSV Export</h3>
+    <p>Export results as a CSV file for use in spreadsheets, season standings trackers, or club management systems. The export includes player names, placements, points earned, and achievement counts.</p>
+
+    <h3>Tournament Export (JSON)</h3>
+    <p>Export the full tournament as a JSON file — a complete snapshot including all matches, results, and transaction history. Use this to:</p>
+    <ul>
+        <li><strong>Back up</strong> a tournament in progress</li>
+        <li><strong>Archive</strong> completed tournaments</li>
+        <li><strong>Share</strong> results with other NewTon instances</li>
+        <li><strong>Upload</strong> to a self-hosted server via the REST API</li>
+    </ul>
+
+    <h3>Importing a Tournament</h3>
+    <p>Import a previously exported JSON file to restore a tournament — useful for recovering from a browser data clear, moving to a different device, or loading a shared tournament. NewTon validates the file before importing; invalid files are rejected without affecting existing data.</p>
+
+    <hr>
+
+    <h2 id="tips">Tips &amp; Tricks</h2>
+
+    <h3>Undo</h3>
+    <p>Made a mistake recording a result? NewTon supports surgical undo — you can reverse a match result without affecting the rest of the tournament. Click the undo button on a completed match to revert it. Matches that have already fed players into subsequent completed matches cannot be undone.</p>
+
+    <h3>Late Registration</h3>
+    <p>A player arrives after the bracket has been generated? Use <strong>Late Registration</strong> — accessible from the Players tab via the amber "Player arrived late?" button (visible on active tournaments). NewTon finds a suitable bye slot and places the late arrival without disturbing existing matches.</p>
+
+    <h3>Built-in Help</h3>
+    <p>Press <strong>F1</strong> at any time inside the tournament manager to open context-sensitive help. The help panel explains the current view and available actions.</p>
+
+    <h3>Offline Use</h3>
+    <p>NewTon works entirely offline. Download the release once, copy it to a USB drive, and run it at any venue without internet. All data is saved automatically in your browser's localStorage — it survives browser restarts and reboots.</p>
+
+    <h3>Multiple Tournaments</h3>
+    <p>NewTon supports multiple tournaments side by side. Switch between them from the tournament list on the home screen. Each tournament has its own isolated data — deleting one doesn't affect the others.</p>
+
+    <h3>Data Safety</h3>
+    <p>LocalStorage is tied to your browser profile. Export tournaments regularly and keep the JSON files somewhere safe — treat exports as your permanent backup and localStorage as working storage. Clearing your browser data will clear localStorage too. See the <a href="privacy.html">Privacy</a> page for full details on how NewTon stores and handles your data.</p>
+
+    <h3>Self-Hosting</h3>
+    <p>Want to run NewTon for your whole club from a central server? See the <a href="docker-quickstart.html">Docker Quick Start</a> guide. Self-hosting enables shared tournament access across devices via the optional REST API.</p>
+
+</div>
+
+<!-- Footer -->
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

@@ -302,6 +302,28 @@ body {
     transform: none;
 }
 
+.get-started-card--wide {
+    grid-column: 1 / -1;
+    flex-direction: row;
+    align-items: center;
+    gap: 32px;
+}
+
+.get-started-card--wide .get-started-card-text {
+    flex: 1;
+}
+
+.get-started-card--wide .get-started-card-text h3,
+.get-started-card--wide .get-started-card-text p {
+    margin: 0;
+    text-align: left;
+}
+
+.get-started-card--wide .btn-github {
+    flex-shrink: 0;
+    align-self: center;
+}
+
 @media (max-width: 600px) {
     .get-started-grid {
         grid-template-columns: 1fr;
@@ -836,6 +858,47 @@ body {
     font-size: 0.85rem;
     line-height: 1.65;
     font-family: 'Courier New', Courier, monospace;
+}
+
+/* Quick Start step list */
+.docs-quickstart {
+    list-style: none;
+    margin: 0 0 14px 0;
+    padding: 0;
+    counter-reset: quickstart-counter;
+}
+
+.docs-quickstart li {
+    counter-increment: quickstart-counter;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+    margin-bottom: 10px;
+    padding: 14px 18px;
+    background: #ede0d0;
+    border-radius: 8px;
+    border-left: 4px solid #d4824a;
+    color: #3d2e1f;
+}
+
+.docs-quickstart li > div {
+    flex: 1;
+}
+
+.docs-quickstart li::before {
+    content: counter(quickstart-counter);
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 1.1rem;
+    color: #fff;
+    background: #d4824a;
+    min-width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    margin-top: 1px;
 }
 
 /* Docs footer — narrower than landing footer */

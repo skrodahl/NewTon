@@ -116,7 +116,7 @@ curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-com
         <li>Remove the <code>ports:</code> mapping — not needed behind a proxy</li>
     </ol>
 
-    <h3>Example: Nginx Proxy Manager</h3>
+    <h3>Example docker-compose.yml: Nginx Proxy Manager</h3>
     <pre><code>services:
   newton-tournament:
     image: skrodahl/newton:latest
@@ -138,7 +138,7 @@ networks:
     <p>In NPM, configure the proxy host to forward to <code>newton:2020</code>.</p>
 
     <h3>Demo / Public Site</h3>
-    <p>To replicate a public demo site like <a href="https://darts.skrodahl.net" target="_blank" rel="noopener">darts.skrodahl.net</a>:</p>
+    <p>To replicate a public demo site like <a href="https://darts.skrodahl.net" target="_blank" rel="noopener">darts.skrodahl.net</a>, add the following to your <code>docker-compose.yml</code>:</p>
     <pre><code>environment:
   - NEWTON_API_ENABLED=false   # Disable upload API for security
   - NEWTON_DEMO_MODE=true      # Show privacy banner

@@ -4146,14 +4146,14 @@ function showCommandCenterModal(matchData) {
                         <p style="font-size: 14px; color: #666; margin-top: 8px;">Setup actions will help you configure the tournament.</p>
                         <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
                             <div style="${cardStyle}">
-                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">Single Elimination Cup</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players are eliminated after one loss</div>
-                                <button class="btn btn-success" onclick="generateBracket('SE')" ${seDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${seButtonText}</button>
-                            </div>
-                            <div style="${cardStyle}">
                                 <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">Double Elimination Cup</div>
                                 <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players get a second chance through the backside</div>
                                 <button class="btn btn-success" onclick="generateBracket('DE')" ${deDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${deButtonText}</button>
+                            </div>
+                            <div style="${cardStyle}">
+                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">Single Elimination Cup</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players are eliminated after one loss</div>
+                                <button class="btn btn-success" onclick="generateBracket('SE')" ${seDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${seButtonText}</button>
                             </div>
                         </div>
                         <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">

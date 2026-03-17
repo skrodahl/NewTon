@@ -133,6 +133,13 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
                 <p>Deploy on your own server in under 2 minutes. Lightweight Docker container with nginx — perfect for club or venue use.</p>
                 <a href="docker-quickstart.html" class="btn-github">Docker Quickstart</a>
             </div>
+            <div class="get-started-card get-started-card--wide">
+                <div class="get-started-card-text">
+                    <h3>User Guide</h3>
+                    <p>From first download to Grand Final — everything you need to run a smooth tournament. Formats, configuration, match management, results, and tips.</p>
+                </div>
+                <a href="userguide.html" class="btn-github">Read the Guide</a>
+            </div>
         </div>
     </div>
 

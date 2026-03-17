@@ -1,4 +1,13 @@
-## **v4.2.10** - Doc Pages (2026-03-17)
+## **v4.2.10** - Doc Pages & User Guide (2026-03-17)
+
+### userguide.html
+
+- **New page**: Comprehensive user guide. Sections: Quick Start (7 styled numbered steps), Tournament Formats (DE vs SE with guidance on when to use each), Configuration, Managing a Tournament (including Saved Players registry and payment tracking), Running Matches & Match Controls, Results & Export, Tips & Tricks (undo, late registration, offline use, data safety, self-hosting).
+- **Quick Start styling**: Numbered step cards with orange Insignia circle badges and accent left border (`.docs-quickstart` in `css/landing.css`).
+- **Bracket View**: Covers navigation panel, pan & zoom (mouse drag, scroll wheel, +/− buttons, home reset), match status states, and status panel (bottom-right tournament summary).
+- **Match Controls**: Full description of the command center — two-column Frontside/Backside layout, live matches sorted by lane, ready matches grouped by round, lane/referee conflict management, Referee Suggestions panel (Recent Losers / Recent Winners / Recent Assignments), and the note that all match actions can also be performed directly from the bracket.
+- **Recording Results**: Describes the Confirm Match Winner dialog including Match Progression preview, optional leg score entry, and per-player Statistics dialog (short legs with dart count, high outs with score, 180s and tons with +/− counters).
+- **Leaderboard**: Mid-tournament standings access and retroactive stat entry via player click.
 
 ### docker-quickstart.html
 
@@ -20,6 +29,21 @@
 - **Docs layout**: `.docs-content` centered column (760px), `.docs-back-link` fixed top-left in Insignia font, `.docs-toc` contents box, heading and prose styles for doc pages.
 - **Terminal blocks**: `.terminal-wrap` / `.terminal-bar` — macOS-style traffic light dots (red/amber/green), dark background, soft green monospace text for bash commands.
 - **Docs footer**: `.docs-footer` overrides footer width to match the 760px column.
+- **Table styles**: `.docs-content table`, `th`, `td` — consistent warm-palette table styling for docs pages.
+- **Quick Start steps**: `.docs-quickstart` — styled ordered list with CSS counter circles for `userguide.html`.
+
+### Landing page — Get Started section
+
+- **User Guide card added**: Third card spanning the full width of the Get Started section, with text left and "Read the Guide" button right (`.get-started-card--wide` in `css/landing.css`).
+
+### sitemap.xml
+
+- **Four doc pages added**: `userguide.html` (0.8), `docker-quickstart.html` (0.8), `rest-api.html` (0.7), `privacy.html` (0.7) — all with `noindex` removed.
+- **Priorities rebalanced**: Doc pages prioritised by search value rather than click depth — `chalker` 0.6, `/?launch` 0.4.
+
+### Setup Actions — bracket format order
+
+- **Double Elimination moved to top**: "Double Elimination Cup" card now appears above "Single Elimination Cup" in the Setup Actions panel, reflecting its status as the primary tournament format.
 
 ### Bing Webmaster Tools
 
