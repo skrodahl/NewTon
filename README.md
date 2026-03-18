@@ -67,7 +67,8 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 
 1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases/latest)** (Run `git clone` or download ZIP for the latest beta)
 2. Visit our [official User Guide](https://darts.skrodahl.net/userguide.html) and follow the Quick Start instructions
-3. All [NewTon DC Tournament Manager](https://darts.skrodahl.net)'s features are described in detail in the [User Guide](https://darts.skrodahl.net/userguide.html)
+
+All [NewTon DC Tournament Manager](https://darts.skrodahl.net)'s features are described in detail in the [User Guide](https://darts.skrodahl.net/userguide.html)
 
 *No installation, no servers, no complexity — just pure tournament management.*
 
@@ -106,6 +107,7 @@ docker compose up -d
 ---
 
 ## ✨ Key Features
+See the [official User Guide](https://darts.skrodahl.net/userguide.html) to learn how to use these features to manage your own tournaments.
 
 ### 🏆 Tournament Management
 - **Multiple Tournaments**: Create, save, and load with automatic browser storage
@@ -156,6 +158,8 @@ Intuitive traffic light system for instant priority assessment:
 - **Match Formats**: Best-of legs for rounds, semifinals, and finals
 - **UI Preferences**: Confirmation dialogs and interface behavior
 
+[Official User Guide](https://darts.skrodahl.net/userguide.html)
+
 ---
 
 ## 🏗️ Technical Details
@@ -169,6 +173,8 @@ Intuitive traffic light system for instant priority assessment:
 **Browser Compatibility:**
 - Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
 - Requires JavaScript and LocalStorage support
+
+The architecture and resilence of NewTon DC Tournament Manager is documented on our [official web site](https://darts.skrodahl.net/architecture.html).
 
 ---
 
