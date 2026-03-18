@@ -34,13 +34,13 @@
     </nav>
 
     <h2 id="quick-start">Quick Start</h2>
-    <p>NewTon runs entirely in your browser — no installation, no account, no internet required after the first download.</p>
+    <p>NewTon DC Tournament Manager runs entirely in your browser — no installation, no account, no internet required after the first download.</p>
     <ol class="docs-quickstart">
         <li><div><strong>Download</strong> — Get the latest release from <a href="https://github.com/skrodahl/NewTon/releases/latest" target="_blank" rel="noopener">github.com/skrodahl/NewTon/releases/latest</a>. Unzip and place the folder anywhere on your computer.</div></li>
         <li><div><strong>Open</strong> — Launch <code>tournament.html</code> in your browser. No server needed — double-clicking the file works.</div></li>
         <li><div><strong>Configure</strong> — Visit the <strong>Config</strong> tab to set your club name, logo, point values, and leg counts. You only need to do this once.</div></li>
         <li><div><strong>Create</strong> — Click <strong>New Tournament</strong> and enter a name and date.</div></li>
-        <li><div><strong>Register</strong> — Add players by name. Mark payment status as players arrive. NewTon remembers names across tournaments via the Saved Players registry.</div></li>
+        <li><div><strong>Register</strong> — Add players by name. Mark payment status as players arrive. NewTon DC Tournament Manager remembers names across tournaments via the Saved Players registry.</div></li>
         <li><div><strong>Generate</strong> — Choose Single or Double Elimination and the bracket size, then click <strong>Generate Bracket</strong>. The draw is randomised automatically.</div></li>
         <li><div><strong>Run</strong> — Manage matches from the bracket view. Assign lanes, record results, and track the tournament in real time.</div></li>
     </ol>
@@ -80,7 +80,7 @@
     </ul>
 
     <h3>Point System</h3>
-    <p>NewTon calculates season standings automatically from tournament results. Configure point values to match your club's rules:</p>
+    <p>NewTon DC Tournament Manager calculates tournament standings automatically from tournament results. Configure point values to match your club's rules:</p>
     <ul>
         <li><strong>Participation</strong> — Points just for entering (default: 5)</li>
         <li><strong>Placements</strong> — 1st through 8th place (defaults: 15, 13, 11, 9, 7, 7, 5, 5)</li>
@@ -112,14 +112,14 @@
     <p>Add players from the <strong>Players</strong> tab before generating the bracket. Type a name and press Enter or click Add. The order of entry doesn't matter — the draw is randomised when you generate the bracket.</p>
 
     <h3>Saved Players Registry</h3>
-    <p>NewTon maintains a persistent registry of player names across all tournaments. When you start typing a name, matching suggestions appear from previous tournaments — select one to add without retyping. The registry grows automatically as you run tournaments.</p>
+    <p>NewTon DC Tournament Manager maintains a persistent registry of player names across all tournaments. When you start typing a name, matching suggestions appear from previous tournaments — select one to add without retyping. The registry grows automatically as you run tournaments.</p>
     <p>Player names in the registry can be managed from the Config tab — remove old or misspelled entries to keep suggestions clean.</p>
 
     <h3>Payment Tracking</h3>
     <p>Each player has a payment status indicator on the Players list. Toggle it to mark who has paid the entry fee. Payment status is visible at a glance and included in the player list — useful for the person collecting fees at the door.</p>
 
     <h3>Generating the Bracket</h3>
-    <p>Once all players are registered, click <strong>Generate Bracket</strong>. NewTon randomises the draw and sets up all matches. If your player count doesn't fill the bracket exactly, byes are distributed automatically — bye winners advance without playing.</p>
+    <p>Once all players are registered, click <strong>Generate Bracket</strong>. NewTon DC Tournament Manager randomises the draw and sets up all matches. If your player count doesn't fill the bracket exactly, byes are distributed automatically — bye winners advance without playing.</p>
     <p><strong>The bracket cannot be regenerated once matches have started.</strong> Double-check your player list before generating.</p>
 
     <hr>
@@ -161,10 +161,10 @@
 
     <h3>Starting a Match</h3>
     <p>Ready matches show a lane dropdown, a referee dropdown, and a <strong>Start Match</strong> button. Select a lane and optionally a referee, then start the match. The match moves to Live status and lane is locked in.</p>
-    <p>NewTon flags conflicts with a <strong>⚠️</strong> warning on the player's name — for example, if a player is currently serving as referee for another match and has a new match ready to start. The conflict is informational; you can still proceed once the referee situation is resolved.</p>
+    <p>NewTon DC Tournament Manager flags conflicts with a <strong>⚠️</strong> warning on the player's name — for example, if a player is currently serving as referee for another match and has a new match ready to start. The conflict is informational; you can still proceed once the referee situation is resolved.</p>
 
     <h3>Lane &amp; Referee Conflict Management</h3>
-    <p>NewTon tracks all lane and referee assignments in real time:</p>
+    <p>NewTon DC Tournament Manager tracks all lane and referee assignments in real time:</p>
     <ul>
         <li><strong>Lane conflicts</strong> — A lane already in use does not appear as available for a new match</li>
         <li><strong>Referee conflicts</strong> — A player currently refereeing cannot be assigned as referee for another match, and is flagged with ⚠️ if they have a match ready to play</li>
@@ -189,7 +189,7 @@
         <li><strong>180s</strong> — Increment or decrement with the +/− buttons.</li>
         <li><strong>Tons (100+)</strong> — Increment or decrement with the +/− buttons.</li>
     </ul>
-    <p>Stats are saved per player. Click <strong>Confirm Winner</strong> when done — NewTon advances the winner and loser to their next matches automatically.</p>
+    <p>Stats are saved per player. Click <strong>Confirm Winner</strong> when done — NewTon DC Tournament Manager advances the winner and loser to their next matches automatically.</p>
 
     <h3>Leaderboard</h3>
     <p>The <strong>Leaderboard</strong> button at the bottom of the Match Controls panel opens the current standings mid-tournament. Click any player in the leaderboard to open their Statistics dialog and add stats that were missed when the match result was recorded.</p>
@@ -209,12 +209,12 @@
     <ul>
         <li><strong>Back up</strong> a tournament in progress</li>
         <li><strong>Archive</strong> completed tournaments</li>
-        <li><strong>Share</strong> results with other NewTon instances</li>
+        <li><strong>Share</strong> results with other NewTon DC Tournament Manager instances</li>
         <li><strong>Upload</strong> to a self-hosted server via the REST API</li>
     </ul>
 
     <h3>Importing a Tournament</h3>
-    <p>Import a previously exported JSON file to restore a tournament — useful for recovering from a browser data clear, moving to a different device, or loading a shared tournament. NewTon validates the file before importing; invalid files are rejected without affecting existing data.</p>
+    <p>Import a previously exported JSON file to restore a tournament — useful for recovering from a browser data clear, moving to a different device, or loading a shared tournament. NewTon DC Tournament Manager validates the file before importing; invalid files are rejected without affecting existing data.</p>
 
     <hr>
 
@@ -247,25 +247,25 @@
     <h2 id="tips">Tips &amp; Tricks</h2>
 
     <h3>Undo</h3>
-    <p>Made a mistake recording a result? NewTon supports surgical undo — you can reverse a match result without affecting the rest of the tournament. Click the undo button on a completed match to revert it. Matches that have already fed players into subsequent completed matches cannot be undone.</p>
+    <p>Made a mistake recording a result? NewTon DC Tournament Manager supports surgical undo — you can reverse a match result without affecting the rest of the tournament. Click the undo button on a completed match to revert it. Matches that have already fed players into subsequent completed matches cannot be undone.</p>
 
     <h3>Late Registration</h3>
-    <p>A player arrives after the bracket has been generated? Use <strong>Late Registration</strong> — accessible from the Players tab via the amber "Player arrived late?" button (visible on active tournaments). NewTon finds a suitable bye slot and places the late arrival without disturbing existing matches.</p>
+    <p>A player arrives after the bracket has been generated? Use <strong>Late Registration</strong> — accessible from the Players tab via the amber "Player arrived late?" button (visible on active tournaments). NewTon DC Tournament Manager finds a suitable bye slot and places the late arrival without disturbing existing matches.</p>
 
     <h3>Built-in Help</h3>
     <p>Press <strong>F1</strong> at any time inside the tournament manager to open context-sensitive help. The help panel explains the current view and available actions.</p>
 
     <h3>Offline Use</h3>
-    <p>NewTon works entirely offline. Download the release once, copy it to a USB drive, and run it at any venue without internet. All data is saved automatically in your browser's localStorage — it survives browser restarts and reboots and new versions brought in on the next USB drive.</p>
+    <p>NewTon DC Tournament Manager works entirely offline. Download the release once, copy it to a USB drive, and run it at any venue without internet. All data is saved automatically in your browser's localStorage — it survives browser restarts and reboots and new versions brought in on the next USB drive.</p>
 
     <h3>Multiple Tournaments</h3>
-    <p>NewTon supports multiple tournaments side by side. Switch between them from the tournament list on the home screen. Each tournament has its own isolated data — deleting one doesn't affect the others.</p>
+    <p>NewTon DC Tournament Manager supports multiple tournaments side by side. Switch between them from the tournament list on the home screen. Each tournament has its own isolated data — deleting one doesn't affect the others.</p>
 
     <h3>Data Safety</h3>
     <p>LocalStorage is tied to your browser profile. Export tournaments regularly and keep the JSON files somewhere safe — treat exports as your permanent backup and localStorage as working storage. Clearing your browser data will clear localStorage too. See the <a href="privacy.html">Privacy</a> page for full details on how NewTon stores and handles your data.</p>
 
     <h3>Self-Hosting</h3>
-    <p>Want to run NewTon for your whole club from a central server? See the <a href="docker-quickstart.html">Docker Quick Start</a> guide. Self-hosting enables shared tournament access across devices via the optional REST API.</p>
+    <p>Want to run NewTon DC Tournament Manager for your whole club from a central server? See the <a href="docker-quickstart.html">Docker Quick Start</a> guide. Self-hosting enables shared tournament access across devices via the optional REST API.</p>
 
 </div>
 

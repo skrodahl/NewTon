@@ -34,13 +34,13 @@
 
     <h2 id="philosophy">Design Philosophy</h2>
     <p>NewTon DC Tournament Manager is built around a single overriding principle: <strong>a tournament that has started must never lose data or end up in an invalid state.</strong> Every architectural decision follows from that.</p>
-    <p>This means no dynamic calculations that could produce different results depending on execution order, no mutable shared state that different code paths can corrupt, and no operations that can half-complete. Instead, NewTon uses <strong>hardcoded lookup tables</strong> as the single source of truth for all bracket logic, and a <strong>transaction-based history system</strong> that logs every match action and enables surgical undo.</p>
+    <p>This means no dynamic calculations that could produce different results depending on execution order, no mutable shared state that different code paths can corrupt, and no operations that can half-complete. Instead, NewTon DC Tournament Manager uses <strong>hardcoded lookup tables</strong> as the single source of truth for all bracket logic, and a <strong>transaction-based history system</strong> that logs every match action and enables surgical undo.</p>
     <p>The result is a system that can survive almost any failure — a misclick, a browser crash, a power cut mid-tournament — and be restored to an exact, consistent state.</p>
 
     <hr>
 
     <h2 id="single-source">Single Source of Truth</h2>
-    <p>The most critical architectural decision in NewTon is how bracket progression works. Many systems calculate where a player should go next at runtime — using formulas, round arithmetic, or conditional logic. NewTon does not.</p>
+    <p>The most critical architectural decision in NewTon DC Tournament Manager is how bracket progression works. Many systems calculate where a player should go next at runtime — using formulas, round arithmetic, or conditional logic. NewTon DC Tournament Manager does not.</p>
     <p>Instead, all bracket progression is defined in a single constant object called <code>MATCH_PROGRESSION</code>, hardcoded in <code>clean-match-progression.js</code>:</p>
 
     <pre><code>const MATCH_PROGRESSION = {
@@ -70,10 +70,10 @@
     <hr>
 
     <h2 id="transaction-history">Transaction History &amp; Undo</h2>
-    <p>Every match action in NewTon is recorded as a transaction in a per-tournament log. The tournament's current state is not just a snapshot — it is the sum of every recorded action that has been applied to it.</p>
+    <p>Every match action in NewTon DC Tournament Manager is recorded as a transaction in a per-tournament log. The tournament's current state is not just a snapshot — it is the sum of every recorded action that has been applied to it.</p>
     <p>This approach — known as event sourcing — has two important consequences:</p>
     <ul>
-        <li><strong>Undo is surgical</strong> — because every action is discrete and logged, individual match results can be reversed without affecting the rest of the tournament. NewTon does not need to restore a full snapshot; it replays the history minus the action being undone.</li>
+        <li><strong>Undo is surgical</strong> — because every action is discrete and logged, individual match results can be reversed without affecting the rest of the tournament. NewTon DC Tournament Manager does not need to restore a full snapshot; it replays the history minus the action being undone.</li>
         <li><strong>Auto-recovery</strong> — if the application state is ever lost or corrupted, the entire bracket can be rebuilt by replaying the transaction log from the beginning. The log is the ground truth.</li>
     </ul>
     <p>The transaction log is capped at 1,000 entries, visible and manageable via the Developer Console. The Console also shows a <strong>Transaction Health</strong> indicator so operators can see at a glance how much of the limit is in use.</p>
@@ -81,7 +81,7 @@
     <hr>
 
     <h2 id="data-separation">Data Separation</h2>
-    <p>NewTon maintains strict isolation between three categories of data, each stored independently and never mixed:</p>
+    <p>NewTon DC Tournament Manager maintains strict isolation between three categories of data, each stored independently and never mixed:</p>
     <table>
         <tr><th>Category</th><th>What it contains</th><th>Storage key</th></tr>
         <tr><td><strong>Tournament data</strong></td><td>Players, matches, bracket, placements, status</td><td><code>tournament_{id}</code></td></tr>
@@ -94,7 +94,7 @@
     <hr>
 
     <h2 id="offline-first">Offline-First Persistence</h2>
-    <p>NewTon has no server dependency for any of its core functionality. All data lives in the browser's <code>localStorage</code> — a sandboxed, domain-isolated storage area that persists across browser restarts and reboots without any network connection.</p>
+    <p>NewTon DC Tournament Manager has no server dependency for any of its core functionality. All data lives in the browser's <code>localStorage</code> — a sandboxed, domain-isolated storage area that persists across browser restarts and reboots without any network connection.</p>
     <p>Every state change is saved immediately. There is no "save button" because there is no moment where unsaved state exists. If the browser crashes mid-tournament, the last saved state is fully intact and consistent.</p>
     <ul>
         <li><strong>No internet required</strong> after the initial download</li>
@@ -120,9 +120,9 @@
     <h2 id="limitations">Known Limitations</h2>
     <p>Honesty is part of reliability. These are the known constraints of the current architecture:</p>
     <ul>
-        <li><strong>Bracket templates are fixed</strong> — NewTon supports any number of participants from 4 to 32. Unused slots are automatically filled with byes that advance without playing, so a 13-player tournament runs cleanly in a 16-slot bracket with 3 invisible byes. The constraint is the upper limit of 32 participants, and the three available template sizes (8, 16, 32 slots). Adding a larger template requires a new hardcoded lookup table.</li>
+        <li><strong>Bracket templates are fixed</strong> — NewTon DC Tournament Manager supports any number of participants from 4 to 32. Unused slots are automatically filled with byes that advance without playing, so a 13-player tournament runs cleanly in a 16-slot bracket with 3 invisible byes. The constraint is the upper limit of 32 participants, and the three available template sizes (8, 16, 32 slots). Adding a larger template requires a new hardcoded lookup table.</li>
         <li><strong>localStorage limits</strong> — browsers typically allow 5–10 MB per domain. A 32-player tournament with full match history uses around 110 KB. Very large numbers of tournaments with extensive undo history could approach limits; the <a href="userguide.html#devconsole">Developer Console monitors this in real time</a>.</li>
-        <li><strong>Single-user design</strong> — NewTon is designed for one operator per tournament. There is no multi-device sync or conflict resolution for simultaneous edits. The optional REST API enables sharing, but not live collaboration.</li>
+        <li><strong>Single-user design</strong> — NewTon DC Tournament Manager is designed for one operator per tournament. There is no multi-device sync or conflict resolution for simultaneous edits. The optional REST API enables sharing, but not live collaboration.</li>
     </ul>
 
 </div>

@@ -24,7 +24,7 @@
         <ol>
             <li><a href="#overview">Overview</a></li>
             <li><a href="#localstorage">How It Works: Browser LocalStorage</a></li>
-            <li><a href="#what-we-dont-do">What NewTon Doesn't Do</a></li>
+            <li><a href="#what-we-dont-do">What NewTon DC Tournament Manager Doesn't Do</a></li>
             <li><a href="#storage">Storage Architecture</a></li>
             <li><a href="#exports">Export Privacy</a></li>
             <li><a href="#demo-site">Demo Site Model</a></li>
@@ -36,7 +36,7 @@
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>NewTon's privacy model is simple: <strong>your data lives in your browser, period.</strong> This isn't a privacy policy you have to trust — it's an architectural guarantee. Your tournament data physically cannot leave your device unless you explicitly export and share it.</p>
+    <p>NewTon DC Tournament Manager's privacy model is simple: <strong>your data lives in your browser, period.</strong> This isn't a privacy policy you have to trust — it's an architectural guarantee. Your tournament data physically cannot leave your device unless you explicitly export and share it.</p>
     <ul>
         <li>All tournament data stored in browser localStorage only</li>
         <li>No analytics, no telemetry, no tracking</li>
@@ -51,10 +51,10 @@
     <h2 id="localstorage">How It Works: Browser LocalStorage</h2>
 
     <h3>What Is LocalStorage?</h3>
-    <p>LocalStorage is a browser feature that stores data <strong>on your computer</strong>, isolated per website domain. When NewTon saves your tournament, it goes into your browser's localStorage — a sandboxed area that:</p>
+    <p>LocalStorage is a browser feature that stores data <strong>on your computer</strong>, isolated per website domain. When NewTon DC Tournament Manager saves your tournament, it goes into your browser's localStorage — a sandboxed area that:</p>
     <ul>
         <li><strong>Exists only on your device</strong> — not sent to any server</li>
-        <li><strong>Domain-isolated</strong> — only NewTon can access NewTon's data</li>
+        <li><strong>Domain-isolated</strong> — only NewTon DC Tournament Manager can access its own data</li>
         <li><strong>Persistent</strong> — survives browser restarts and reboots</li>
         <li><strong>Private</strong> — stored in your browser's profile directory on your hard drive</li>
     </ul>
@@ -66,10 +66,10 @@
         <li><strong>Firefox (Linux/Mac):</strong> <code>~/.mozilla/firefox/[profile]/storage/default</code></li>
         <li><strong>Safari (Mac):</strong> <code>~/Library/Safari/LocalStorage</code></li>
     </ul>
-    <p>Most browsers allow 5–10 MB per domain. NewTon uses ~1–2 MB for typical tournaments. A 32-player tournament with full history uses around 110 KB.</p>
+    <p>Most browsers allow 5–10 MB per domain. NewTon DC Tournament Manager uses ~1–2 MB for typical tournaments. A 32-player tournament with full history uses around 110 KB.</p>
     <p><strong>Who can access your data:</strong></p>
     <ul>
-        <li>✅ You — through NewTon's interface or browser developer tools</li>
+        <li>✅ You — through NewTon DC Tournament Manager's interface or browser developer tools</li>
         <li>❌ Nobody else — not even NewTon's authors</li>
     </ul>
 
@@ -77,7 +77,7 @@
     <p>When you run a tournament:</p>
     <ol>
         <li>You open <code>tournament.html</code> (locally or on the demo site)</li>
-        <li>NewTon loads data from <strong>your browser's localStorage</strong></li>
+        <li>NewTon DC Tournament Manager loads data from <strong>your browser's localStorage</strong></li>
         <li>All processing happens <strong>in your browser</strong></li>
         <li>Changes are saved back to <strong>your browser's localStorage</strong></li>
         <li><strong>Nothing is transmitted anywhere</strong></li>
@@ -86,7 +86,7 @@
 
     <hr>
 
-    <h2 id="what-we-dont-do">What NewTon Doesn't Do</h2>
+    <h2 id="what-we-dont-do">What NewTon DC Tournament Manager Doesn't Do</h2>
 
     <h3>No Analytics</h3>
     <p>No Google Analytics, no visitor tracking, no usage statistics, no page view counters.</p>
@@ -103,7 +103,7 @@
     <h3>No User Accounts</h3>
     <p>No registration, no login, no passwords, no email addresses.</p>
 
-    <p>NewTon cannot "phone home" even if it wanted to. There is no analytics endpoint, no telemetry server, no external service to send data to.</p>
+    <p>NewTon DC Tournament Manager cannot "phone home" even if it wanted to. There is no analytics endpoint, no telemetry server, no external service to send data to.</p>
 
     <hr>
 
@@ -152,7 +152,7 @@ dartsSavedPlayers                → Saved player names</code></pre>
     <hr>
 
     <h2 id="self-hosting">Self-Hosting &amp; the REST API</h2>
-    <p>NewTon includes an <strong>optional REST API</strong> for self-hosters who want to share tournaments across devices. This is the <strong>only exception</strong> to the "data never leaves your device" model.</p>
+    <p>NewTon DC Tournament Manager includes an <strong>optional REST API</strong> for self-hosters who want to share tournaments across devices. This is the <strong>only exception</strong> to the "data never leaves your device" model.</p>
 
     <h3>What the API Does</h3>
     <ul>
@@ -161,7 +161,7 @@ dartsSavedPlayers                → Saved player names</code></pre>
         <li>Delete tournaments from your server</li>
         <li>List available shared tournaments</li>
     </ul>
-    <p>Uploading requires an explicit action — NewTon never uploads anything automatically.</p>
+    <p>Uploading requires an explicit action — NewTon DC Tournament Manager never uploads anything automatically.</p>
     <p>Any file uploaded to the server must pass the Tournament Manager's import validation before it can be loaded. Files that don't match the expected tournament structure are rejected by the client — they cannot affect your tournament data.</p>
 
     <h3>Privacy Implications</h3>
@@ -183,7 +183,7 @@ dartsSavedPlayers                → Saved player names</code></pre>
     <hr>
 
     <h2 id="offline">Offline Operation</h2>
-    <p>NewTon works completely offline because:</p>
+    <p>NewTon DC Tournament Manager works completely offline because:</p>
     <ul>
         <li>No external dependencies — everything is bundled in the HTML file</li>
         <li>No API calls required — all processing is local</li>
@@ -196,23 +196,23 @@ dartsSavedPlayers                → Saved player names</code></pre>
 
     <h2 id="faq">Frequently Asked Questions</h2>
 
-    <h3>Can NewTon track me if I run it locally?</h3>
+    <h3>Can NewTon DC Tournament Manager track me if I run it locally?</h3>
     <p>No. When you open <code>tournament.html</code> directly from your file system, there's no network connection for data to travel over.</p>
 
     <h3>Can the demo site see my tournament data?</h3>
     <p>No. The server only delivers the application files once. All data is stored in your browser's localStorage, which the server cannot access.</p>
 
     <h3>What if I use browser sync (Chrome sync, Firefox sync)?</h3>
-    <p>If you have browser sync enabled, your browser <em>may</em> sync localStorage data across your devices — depending on browser settings. This is a browser feature, not a NewTon feature. Your data still doesn't go to NewTon; it goes to Google's or Mozilla's sync servers if you've enabled that. To avoid sync: use a profile without sync, use private/incognito mode, or disable localStorage sync in browser settings.</p>
+    <p>If you have browser sync enabled, your browser <em>may</em> sync localStorage data across your devices — depending on browser settings. This is a browser feature, not a NewTon DC Tournament Manager feature. Your data still doesn't go to NewTon; it goes to Google's or Mozilla's sync servers if you've enabled that. To avoid sync: use a profile without sync, use private/incognito mode, or disable localStorage sync in browser settings.</p>
 
     <h3>What about browser extensions?</h3>
     <p>Browser extensions with storage permissions can theoretically access localStorage. This is true for any website — it's a browser security model limitation. For maximum privacy, use a clean browser profile without extensions.</p>
 
-    <h3>Does NewTon comply with GDPR?</h3>
-    <p>GDPR doesn't apply to NewTon in most cases because no data is processed by NewTon — data stays on your device — and no personal data is collected by NewTon's authors. If you collect player names for your own club records, you are the data controller (same as using a spreadsheet).</p>
+    <h3>Does NewTon DC Tournament Manager comply with GDPR?</h3>
+    <p>GDPR doesn't apply to NewTon DC Tournament Manager in most cases because no data is processed by the software — data stays on your device — and no personal data is collected by NewTon's authors. If you collect player names for your own club records, you are the data controller (same as using a spreadsheet).</p>
 
     <h3>Can I verify these privacy claims?</h3>
-    <p>Yes — NewTon is open source. View the source code at <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">github.com/skrodahl/NewTon</a>, inspect network requests in browser DevTools (should be zero outbound), and examine localStorage directly. Don't trust — verify.</p>
+    <p>Yes — NewTon DC Tournament Manager is open source. View the source code at <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">github.com/skrodahl/NewTon</a>, inspect network requests in browser DevTools (should be zero outbound), and examine localStorage directly. Don't trust — verify.</p>
 
     <h3>What if I delete my browser data?</h3>
     <p>Your tournaments are deleted. LocalStorage is part of browser data. Export your tournaments regularly and keep the files somewhere safe — treat exports as your permanent backup and localStorage as working storage.</p>
@@ -220,7 +220,7 @@ dartsSavedPlayers                → Saved player names</code></pre>
     <hr>
 
     <h2 id="summary">Summary</h2>
-    <p><strong>What NewTon guarantees:</strong></p>
+    <p><strong>What NewTon DC Tournament Manager guarantees:</strong></p>
     <ul>
         <li>✅ Your data stored in your browser's localStorage only</li>
         <li>✅ No analytics, telemetry, or tracking of any kind</li>
@@ -235,7 +235,7 @@ dartsSavedPlayers                → Saved player names</code></pre>
     <ul>
         <li>⚠️ The optional REST API (disabled by default on the demo site) can upload exports to a self-hosted server — only when you explicitly trigger it, and only to your own server</li>
     </ul>
-    <p><strong>Privacy by architecture.</strong> NewTon is designed so your data cannot leave your device unless you explicitly export and share it. This isn't a promise — it's how the system is built.</p>
+    <p><strong>Privacy by architecture.</strong> NewTon DC Tournament Manager is designed so your data cannot leave your device unless you explicitly export and share it. This isn't a promise — it's how the system is built.</p>
 
 </div>
 

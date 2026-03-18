@@ -17,7 +17,7 @@
 <div class="docs-content">
 
     <h1>Docker Quick Start</h1>
-    <p class="docs-subtitle">Get NewTon Tournament Manager running in Docker in under 2 minutes.</p>
+    <p class="docs-subtitle">Get NewTon DC Tournament Manager running in Docker in under 2 minutes.</p>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
@@ -53,7 +53,7 @@ curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-com
     </div>
 
     <h3>Step 3: Access the Application</h3>
-    <p>Open your browser and go to <code>http://localhost:8080</code> — you should see the NewTon Tournament Manager.</p>
+    <p>Open your browser and go to <code>http://localhost:8080</code> — you should see the NewTon DC Tournament Manager.</p>
     <p><strong>Port 2020 = "Double 20" 🎯</strong> — The container runs nginx on port 2020 internally. The default host port (8080) maps to this. This non-standard internal port also helps avoid conflicts when using a reverse proxy.</p>
 
     <h3>What Just Happened?</h3>
@@ -169,7 +169,7 @@ networks:
         <li><strong>Content-Security-Policy</strong> — Prevents loading external resources</li>
         <li><strong>Server tokens hidden</strong> — nginx and PHP versions not disclosed</li>
     </ul>
-    <p>NewTon achieves an <strong>A grade</strong> on <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> out of the box. HSTS is not included by default to avoid breaking HTTP-only deployments — add it at your reverse proxy when using HTTPS.</p>
+    <p>NewTon DC Tournament Manager achieves an <strong>A grade</strong> on <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> out of the box. HSTS is not included by default to avoid breaking HTTP-only deployments — add it at your reverse proxy when using HTTPS.</p>
 
     <hr>
 
