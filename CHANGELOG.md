@@ -1,3 +1,28 @@
+## **v4.2.11** - Setup Actions UX, Lollipop Counter & App Name Consistency (2026-03-18)
+
+### Lollipop counter 🍭
+
+- **New stat counter**: "Lollipops (score of 3)" added to the player Statistics dialog, below Tons, with the same +/− button pattern.
+- **Leaderboard display**: Players with one or more lollipops show a 🍭 icon right-aligned in the Player column. Two or more show 🍭 x{n} for extra effect. Single lollipop shows the icon only — no count.
+- **Cosmetic only**: Not part of the points system. Not included in CSV export. Player names in exports remain clean and consistent across tournaments.
+- **Backwards compatible**: Existing tournaments load without issues — missing `lollipops` field defaults to 0.
+- **Documented**: Tips & Tricks section in `userguide.html` and `llms.txt` updated.
+
+### Setup Actions panel (js/bracket-rendering.js)
+
+- **Restructured layout**: Panel now has two clearly separated sections with named headers.
+- **"Shuffle & Draw" section title**: Replaces the former "🔧 Tournament in setup mode" status message — more descriptive and action-oriented, positioned above the format cards.
+- **"Navigation" section header**: Added above the Player Registration Page and Global Settings Page buttons, giving the panel clear visual hierarchy.
+- **Descriptive text removed**: "Setup actions will help you configure the tournament." removed as redundant.
+- **Emojis removed from section titles**: "Shuffle & Draw" and "Navigation" headers are plain text; the wrench icon in the main "Setup Actions" panel header is retained as the sole decorative element.
+- **Panel header reverted**: `refereeHeader` restored to `Setup Actions` (had been temporarily changed to "Shuffle & Draw").
+
+### App name consistency (HTML files)
+
+- **Full name enforced**: References to "NewTon DC" and "NewTon" as the software name corrected to "NewTon DC Tournament Manager" across HTML files. Short-form "NewTon" retained where contextually appropriate (e.g. prose references, possessive use).
+
+---
+
 ## **v4.2.10** - Doc Pages, User Guide & Architecture (2026-03-17)
 
 ### userguide.html

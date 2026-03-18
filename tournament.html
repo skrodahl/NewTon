@@ -633,6 +633,21 @@
                         </div>
                     </div>
 
+                    <div class="form-group">
+                        <label>Lollipops 🍭 (score of 3)</label>
+                        <div style="display: flex; align-items: center;">
+                            <button class="btn" onclick="decrementLollipops()" onmouseover="this.style.background='#fef2f2'"
+                                onmouseout="this.style.background='#ffffff'"
+                                style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
+                            <button class="btn" onclick="incrementLollipops()" onmouseover="this.style.background='#dcfce7'"
+                                onmouseout="this.style.background='#ffffff'"
+                                style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
+                            <span id="currentLollipopsCount"
+                                style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current:
+                                0</span>
+                        </div>
+                    </div>
+
                     <!-- Lists grouped together -->
                     <div id="shortLegsList"></div>
                     <div id="highOutsList"></div>

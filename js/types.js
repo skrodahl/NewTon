@@ -74,6 +74,7 @@
  * @property {number[]} highOuts - Array of high checkout scores (101-170)
  * @property {number} tons - Count of ton scores (100+)
  * @property {number} oneEighties - Count of 180 scores
+ * @property {number} lollipops - Count of 3-scores (hitting three ones — the lollipop). Cosmetic only, not included in points.
  */
 
 // ============================================================================

@@ -736,10 +736,27 @@ function decrementTons() {
     }
 }
 
+function incrementLollipops() {
+    if (!currentStatsPlayer) return;
+    currentStatsPlayer.stats.lollipops = (currentStatsPlayer.stats.lollipops || 0) + 1;
+    updateStatsCounters();
+}
+
+function decrementLollipops() {
+    if (!currentStatsPlayer) return;
+    const current = currentStatsPlayer.stats.lollipops || 0;
+    if (current > 0) {
+        currentStatsPlayer.stats.lollipops = current - 1;
+        updateStatsCounters();
+    }
+}
+
 function updateStatsCounters() {
     const current180s = currentStatsPlayer?.stats.oneEighties || 0;
     const currentTons = currentStatsPlayer?.stats.tons || 0;
-    
+    const currentLollipops = currentStatsPlayer?.stats.lollipops || 0;
+
     document.getElementById('current180sCount').textContent = `Current: ${current180s}`;
     document.getElementById('currentTonsCount').textContent = `Current: ${currentTons}`;
+    document.getElementById('currentLollipopsCount').textContent = `Current: ${currentLollipops}`;
 }
