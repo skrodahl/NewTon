@@ -4508,6 +4508,7 @@ function calculateTournamentStats() {
         most180s: { player: '', count: 0 },
         highestCheckout: { player: '', value: 0 },
         mostTons: { player: '', count: 0 },
+        mostLollipops: { player: '', count: 0 },
         shortestLeg: { player: '', value: Infinity }
     };
 
@@ -4539,6 +4540,12 @@ function calculateTournamentStats() {
         const tons = player.stats.tons || 0;
         if (tons > stats.mostTons.count) {
             stats.mostTons = { player: player.name, count: tons };
+        }
+
+        // Check lollipops
+        const lollipops = player.stats.lollipops || 0;
+        if (lollipops > stats.mostLollipops.count) {
+            stats.mostLollipops = { player: player.name, count: lollipops };
         }
 
         // Check shortest leg
@@ -4623,6 +4630,7 @@ function showTournamentAchievements() {
             ${generateAchievementItem('Highest Checkout', stats.highestCheckout.value > 0 ? `${stats.highestCheckout.player} (${stats.highestCheckout.value})` : 'None')}
             ${generateAchievementItem('Shortest Leg', stats.shortestLeg.value !== Infinity ? `${stats.shortestLeg.player} (${stats.shortestLeg.value} darts)` : 'None')}
             ${generateAchievementItem('Most Tons', stats.mostTons.count > 0 ? `${stats.mostTons.player} (${stats.mostTons.count})` : 'None')}
+            ${stats.mostLollipops.count > 0 ? generateAchievementItem('Most Lollipops 🍭', `${stats.mostLollipops.player} (${stats.mostLollipops.count})`) : ''}
         </div>
     `;
 

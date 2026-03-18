@@ -4,6 +4,7 @@
 
 - **New stat counter**: "Lollipops (score of 3)" added to the player Statistics dialog, below Tons, with the same +/− button pattern.
 - **Leaderboard display**: Players with one or more lollipops show a 🍭 icon right-aligned in the Player column. Two or more show 🍭 x{n} for extra effect. Single lollipop shows the icon only — no count.
+- **Celebration page**: "Most Lollipops 🍭" added to Player Achievements, below Most Tons. Only displayed if at least one lollipop was awarded during the tournament.
 - **Cosmetic only**: Not part of the points system. Not included in CSV export. Player names in exports remain clean and consistent across tournaments.
 - **Backwards compatible**: Existing tournaments load without issues — missing `lollipops` field defaults to 0.
 - **Documented**: Tips & Tricks section in `userguide.html` and `llms.txt` updated.

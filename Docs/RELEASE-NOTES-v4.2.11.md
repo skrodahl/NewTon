@@ -25,6 +25,10 @@ A **Lollipops (score of 3)** counter has been added to the Statistics dialog, be
 
 Players with one or more lollipops have a 🍭 icon displayed right-aligned in the Player column — visible as soon as the first lollipop is recorded. Two or more lollipops show 🍭 x{n} for extra effect. A single lollipop shows the icon only, no count.
 
+### Celebration page
+
+"Most Lollipops 🍭" appears in the Player Achievements section of the Tournament Achievements panel at the end of the tournament, below Most Tons. It is conditional — the entry only appears if at least one lollipop was awarded during the tournament. Andrew's shame is immortalised.
+
 ### Design decisions
 
 - **Cosmetic only** — lollipops are not part of the points system and carry no point value
@@ -68,7 +72,7 @@ References to the software as "NewTon DC" or "NewTon" have been corrected to **N
 - `tournament.html` — Lollipops +/− counter added to Statistics dialog
 - `userguide.html` — Lollipops tip added to Tips & Tricks section
 - `llms.txt` — Lollipop counter documented in Tips for AI Services
-- `js/bracket-rendering.js` — Setup Actions panel restructured
+- `js/bracket-rendering.js` — Setup Actions panel restructured, Most Lollipops added to celebration page
 - Multiple HTML files — App name corrected to "NewTon DC Tournament Manager"
 - `CHANGELOG.md` — v4.2.11 entry updated
 
