@@ -10,7 +10,7 @@
 
 ![Action Shot](https://github.com/skrodahl/NewTon/blob/main/Screenshots/newton-cartoon.jpg)
 
-**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Web Site](https://darts.skrodahl.net)**
+**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://darts.skrodahl.net)**
 
 ➷ **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
