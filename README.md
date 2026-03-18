@@ -107,7 +107,7 @@ docker compose up -d
 ---
 
 ## ✨ Key Features
-See the [official User Guide](https://darts.skrodahl.net/userguide.html) to learn how to use these features to manage your own tournaments.
+See the NewTon DC Tournament Manager [User Guide](https://darts.skrodahl.net/userguide.html) to learn how to use these features to manage your own tournaments.
 
 ### 🏆 Tournament Management
 - **Multiple Tournaments**: Create, save, and load with automatic browser storage
