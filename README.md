@@ -94,7 +94,7 @@ docker compose up -d
 
 **What's Included:**
 - ✅ Lightweight Alpine container (~60MB)
-- ✅ PHP REST API for tournament sharing
+- ✅ PHP [REST API](https://darts.skrodahl.net/rest-api.html) for tournament sharing
 - ✅ nginx + PHP-FPM for optimal performance
 - ✅ Multi-architecture support (Intel/AMD + Apple Silicon/Raspberry Pi)
 - ✅ Persistent storage for tournaments
@@ -115,7 +115,7 @@ See the NewTon DC Tournament Manager [User Guide](https://darts.skrodahl.net/use
   - **Tournament Protection**: Completed tournaments loaded from file are read-only to protect data integrity
 - **Tournament History**: Complete match records with lane and referee assignments
 - **Crash Resilient**: Automatic saving prevents data loss
-- **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using REST API
+- **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using [REST API](https://darts.skrodahl.net/rest-api.html)
 
 ### 🎯 Single and Double Elimination Brackets
 - **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players, single elimination brackets for 4, 8, 16, and 32 players
