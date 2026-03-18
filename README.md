@@ -16,9 +16,9 @@
 
 🎯 **NewTon Chalker** is a companion x01 scoring app designed for tablets at the dartboard. Crash-proof with persistent match data, match history, and live statistics. Install as a PWA for a native app experience.
 
-🔒 **Total Privacy**: Your tournament and match data lives in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://darts.skrodahl.net/privacy.html), not by policy.
+🔒 **Total Privacy**: Your tournament and match data live in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://darts.skrodahl.net/privacy.html), not by policy.
 
-**[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)**, double-click on tournament.hlml to get going. Or **[self-host with Docker](#-docker-deployment-self-hosting)**.
+**[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)**, double-click on tournament.hlml to get going. Or **[self-host with Docker](https://darts.skrodahl.net/docker-quickstart.html)**.
 
 ---
 # See It in Action
