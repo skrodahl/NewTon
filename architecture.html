@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Architecture &amp; Reliability — NewTon DC</title>
+    <title>Architecture &amp; Reliability — NewTon DC Tournament Manager</title>
     <meta name="description" content="How NewTon DC Tournament Manager is built for reliability. Hardcoded lookup tables, transaction-based history, and offline-first design make it virtually crash-proof.">
     <link rel="icon" type="image/jpeg" href="images/logo.jpg">
     <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
@@ -12,12 +12,12 @@
 </head>
 <body>
 
-<a class="docs-back-link" href="/">← NewTon DC</a>
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
 
 <div class="docs-content">
 
     <h1>Architecture &amp; Reliability</h1>
-    <p class="docs-subtitle">How NewTon DC is built to be virtually crash-proof.</p>
+    <p class="docs-subtitle">How NewTon DC Tournament Manager is built to be virtually crash-proof.</p>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
@@ -33,7 +33,7 @@
     </nav>
 
     <h2 id="philosophy">Design Philosophy</h2>
-    <p>NewTon DC is built around a single overriding principle: <strong>a tournament that has started must never lose data or end up in an invalid state.</strong> Every architectural decision follows from that.</p>
+    <p>NewTon DC Tournament Manager is built around a single overriding principle: <strong>a tournament that has started must never lose data or end up in an invalid state.</strong> Every architectural decision follows from that.</p>
     <p>This means no dynamic calculations that could produce different results depending on execution order, no mutable shared state that different code paths can corrupt, and no operations that can half-complete. Instead, NewTon uses <strong>hardcoded lookup tables</strong> as the single source of truth for all bracket logic, and a <strong>transaction-based history system</strong> that logs every match action and enables surgical undo.</p>
     <p>The result is a system that can survive almost any failure — a misclick, a browser crash, a power cut mid-tournament — and be restored to an exact, consistent state.</p>
 
