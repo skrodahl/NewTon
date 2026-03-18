@@ -66,12 +66,8 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 ## 🚀 Getting Started
 
 1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases/latest)** (Run `git clone` or download ZIP for the latest beta)
-2. **Open**: Launch `tournament.html` in your browser
-3. **Configure**: Set up your club branding and point system
-4. **Create**: Set up a new tournament with name and date
-5. **Register**: Add players and mark payment status
-6. **Generate**: Create the tournament bracket
-7. **Run**: Manage matches, assign lanes, and track results in real-time
+2. Visit our [official User Guide](https://darts.skrodahl.net/userguide.html) and follow the Quick Start instructions
+3. All [NewTon DC Tournament Manager](https://darts.skrodahl.net)'s features are described in detail in the [User Guide](https://darts.skrodahl.net/userguide.html)
 
 *No installation, no servers, no complexity — just pure tournament management.*
 
@@ -81,7 +77,7 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 
 **Want to host NewTon Tournament Manager on your own server?** Docker makes it effortless.
 
-### 📋 [**Docker Quick Start Guide →**](DOCKER-QUICKSTART.md)
+### 📋 [**Docker Quick Start Guide →**](https://darts.skrodahl.net/docker-quickstart.html)
 
 **Get running in under 2 minutes:**
 
@@ -105,7 +101,7 @@ docker compose up -d
 - ✅ Optional SEO landing page (`NEWTON_LANDING_PAGE=true`)
 
 **Documentation:**
-- **[Quick Start Guide](DOCKER-QUICKSTART.md)** - Get running in 2 minutes
+- **[Quick Start Guide](https://darts.skrodahl.net/docker-quickstart.html)** - Get running in 2 minutes
 
 ---
 
