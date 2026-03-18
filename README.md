@@ -142,7 +142,7 @@ Intuitive traffic light system for instant priority assessment:
 - **Centralized Control**: Manage entire tournament from Match Controls interface
 - **Clear Progression**: Each match shows exactly where winners and losers advance ("Leads to...")
 - **Lane Assignment**: Assign matches to dartboard lanes (1-20 with exclusions, configurable)
-- **Referee System**: Select referees with conflict prevention
+- **Referee System**: Referee suggestions, and select referees with conflict prevention
 - **Real-time Updates**: Live standings and bracket progression
 
 ### 👥 Player & Statistics
@@ -151,6 +151,7 @@ Intuitive traffic light system for instant priority assessment:
   - Quick-add players to new tournaments
   - Import/export with tournament data
 - **Registration**: Add players and track payment status
+- **Late Registration**: New players can be added to a tournament if there are any walkover spots available
 - **Comprehensive Stats**: Short legs, high outs, tons, 180s with configurable points
 - **Live Rankings**: Real-time 1st through 32nd place calculation
 - **Export Results**: CSV and JSON export with full tournament history
@@ -218,4 +219,4 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 **Created by Håvard Skrödahl**
 NewTon DC Malmö
 
-**License**: Open source project for dart tournament management
+**License**: Open source (BSD 3-Clause License) project for dart tournament management
