@@ -10,6 +10,10 @@
 
 - **Main landmark**: Added `<main>` element to `landing.html` and `landing-page.php` — resolves Lighthouse "Document does not have a main landmark" accessibility flag.
 
+### Landing page — Download button
+
+- **Points to `/releases/`**: "Download Latest Release" button now links to the release notes index instead of directly to GitHub, giving visitors context before downloading.
+
 ### Release notes pages
 
 - **`releases/` folder**: Standalone HTML release notes pages for all v4.2.x releases, served at `newtondarts.com/releases/`. Each release gets a permanent versioned page (`v4.2.12.html` etc.) and `index.html` always shows the latest.

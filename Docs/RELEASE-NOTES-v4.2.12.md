@@ -44,8 +44,6 @@ Resolves the Lighthouse accessibility flag "Document does not have a main landma
 
 ---
 
----
-
 ## Release Notes Pages
 
 Standalone HTML release notes pages are now served directly from the application at `https://newtondarts.com/releases/`.
@@ -54,6 +52,12 @@ Standalone HTML release notes pages are now served directly from the application
 - **Versioned pages** — permanent pages for each v4.2.x release (`v4.2.0.html` through `v4.2.12.html`), each with a download button linking to the exact GitHub release tag
 - **Previous Releases index** — every page lists older releases with version, date, and tagline
 - **sitemap.xml** — all release pages indexed; versioned pages use `changefreq: never`, the index uses `changefreq: weekly`
+
+---
+
+## Landing Page — Download Button
+
+The "Download Latest Release" button in the Get Started section now points to `/releases/` instead of directly to GitHub. Visitors land on the release notes page, which provides context and then links to the GitHub release tag. The `target="_blank"` attribute has been removed — no need to open an internal page in a new tab.
 
 ---
 
@@ -73,6 +77,7 @@ Get Started card buttons (User Guide, Docker Quickstart) now stack below their t
 - `landing-page.php` — Google Search Console verification tag updated, `<main>` landmark added
 - `docker-quickstart.html` — Demo site link updated
 - `privacy.html` — Demo site link updated
+- `landing.html` / `landing-page.php` — "Download Latest Release" button points to `/releases/`
 - `css/landing.css` — Mobile fix for wide Get Started cards, `.docs-content .btn-github` style added
 - `releases/` — New folder with `index.html`, `v4.2.0.html` through `v4.2.12.html`, and `README.md`
 - `CHANGELOG.md` — v4.2.12 entry updated

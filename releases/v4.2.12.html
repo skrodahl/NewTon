@@ -29,6 +29,7 @@
             <li><a href="#search-console">Google Search Console</a></li>
             <li><a href="#accessibility">Accessibility</a></li>
             <li><a href="#release-notes">Release Notes Pages</a></li>
+            <li><a href="#download-button">Landing Page — Download Button</a></li>
             <li><a href="#mobile">Landing Page — Mobile Fix</a></li>
             <li><a href="#files">Files Changed</a></li>
             <li><a href="#migration">Migration</a></li>
@@ -79,6 +80,11 @@
 
     <hr>
 
+    <h2 id="download-button">Landing Page — Download Button</h2>
+    <p>The "Download Latest Release" button in the Get Started section now points to <code>/releases/</code> instead of directly to GitHub. Visitors land on the release notes page, which provides context and then links to the GitHub release tag. The <code>target="_blank"</code> attribute has been removed — no need to open an internal page in a new tab.</p>
+
+    <hr>
+
     <h2 id="mobile">Landing Page — Mobile Fix</h2>
     <p>Get Started card buttons (User Guide, Docker Quickstart) now stack below their text on screens narrower than 600px, matching the responsive behaviour of the rest of the Get Started section.</p>
 
@@ -90,8 +96,8 @@
         <li><code>llms.txt</code> — All URLs updated to newtondarts.com</li>
         <li><code>sitemap.xml</code> — All URLs updated to newtondarts.com</li>
         <li><code>robots.txt</code> — Sitemap URL updated to newtondarts.com</li>
-        <li><code>landing.html</code> — Google Search Console verification tag updated, <code>&lt;main&gt;</code> landmark added</li>
-        <li><code>landing-page.php</code> — Google Search Console verification tag updated, <code>&lt;main&gt;</code> landmark added</li>
+        <li><code>landing.html</code> — Google Search Console verification tag updated, <code>&lt;main&gt;</code> landmark added, "Download Latest Release" button points to <code>/releases/</code></li>
+        <li><code>landing-page.php</code> — Google Search Console verification tag updated, <code>&lt;main&gt;</code> landmark added, "Download Latest Release" button points to <code>/releases/</code></li>
         <li><code>docker-quickstart.html</code> — Demo site link updated</li>
         <li><code>privacy.html</code> — Demo site link updated</li>
         <li><code>css/landing.css</code> — Mobile fix for wide Get Started cards, <code>.docs-content .btn-github</code> style added</li>
