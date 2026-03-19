@@ -302,6 +302,14 @@ body {
     transform: none;
 }
 
+.docs-content .btn-github {
+    padding: 10px 24px;
+    font-size: 1rem;
+    font-weight: 600;
+    color: #f5ebe0;
+    text-decoration: none;
+}
+
 .get-started-card--wide {
     grid-column: 1 / -1;
     flex-direction: row;
@@ -327,6 +335,16 @@ body {
 @media (max-width: 600px) {
     .get-started-grid {
         grid-template-columns: 1fr;
+    }
+
+    .get-started-card--wide {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+
+    .get-started-card--wide .btn-github {
+        align-self: stretch;
+        text-align: center;
     }
 }
 

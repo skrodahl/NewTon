@@ -29,6 +29,76 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://newtondarts.com/releases/</loc>
+    <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.12.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.11.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.10.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.9.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.8.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.7.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.6.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.5.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.4.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.3.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.2.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.1.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v4.2.0.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://newtondarts.com/?launch</loc>
     <priority>0.4</priority>
   </url>

@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Notes v4.2.3 — NewTon DC Tournament Manager</title>
+    <meta name="description" content="NewTon DC Tournament Manager v4.2.3 release notes. Complete visual overhaul of the landing page with a warm retro comic colour palette inspired by the Nano Banana hero illustration.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Landing page redesign with retro comic theme by Nano Banana.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v4.2.3 &mdash; March 10, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.3" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download v4.2.3</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#redesign">Landing Page Redesign</a></li>
+            <li><a href="#technical">Technical Details</a></li>
+            <li><a href="#migration">Migration from v4.2.2</a></li>
+            <li><a href="#known-issues">Known Issues</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p><strong>NewTon DC Tournament Manager Version 4.2.3</strong> is a complete visual overhaul of the landing page, inspired by the retro comic hero illustration by Nano Banana. The tournament app itself is unchanged.</p>
+    <p>This release contains no breaking changes and is a drop-in replacement for v4.2.2.</p>
+
+    <hr>
+
+    <h2 id="redesign">Landing Page Redesign</h2>
+    <p>The landing page has been completely redesigned with a warm retro comic color palette derived from the hero image. Every section has been restyled for a more playful, dynamic, and visually cohesive experience.</p>
+
+    <h3>Hero Image</h3>
+    <ul>
+        <li><strong>Nano Banana illustration</strong> added as a prominent hero image between the tagline and highlight cards</li>
+        <li>Styled as a "window into the world" with <code>border-radius: 24px</code>, a solid dark border, and a warm glow shadow</li>
+        <li>The illustration's color palette (warm tan, burnt orange, muted teal, earthy brown) drives the entire page theme</li>
+    </ul>
+
+    <h3>Color Theme Overhaul (<code>css/landing.css</code>)</h3>
+    <ul>
+        <li><strong>Background</strong>: Warm parchment (<code>#f5ebe0</code>) replaces neutral gray (<code>#f0f2f5</code>)</li>
+        <li><strong>Text</strong>: Rich brown (<code>#2b2118</code>) replaces near-black (<code>#1a1a2e</code>)</li>
+        <li><strong>Accents</strong>: Burnt orange (<code>#c0562a</code>), amber gold (<code>#e8a44a</code>), muted teal (<code>#4a8c7e</code>)</li>
+        <li><strong>Cards</strong>: Cream (<code>#fff8f0</code>) with warm borders (<code>#e0cdb8</code>) and gradient top accents</li>
+        <li><strong>Header/highlights</strong>: Dark brown (<code>#2b2118</code>) with orange border and amber number text</li>
+        <li><strong>Buttons</strong>: Burnt orange launch button, dark brown GitHub button with warm hover states</li>
+        <li><strong>Section dividers</strong>: Gradient orange-to-gold horizontal rules</li>
+    </ul>
+
+    <h3>Screenshots Replaced with Feature Showcase</h3>
+    <p>The old plain screenshot list has been replaced with an alternating two-column showcase layout:</p>
+    <ol>
+        <li><strong>Interactive Tournament Bracket</strong> — zoomable bracket view with match card zoom</li>
+        <li><strong>Run Your Tournament from One Panel</strong> — Match Controls command center</li>
+        <li><strong>Registration Made Simple</strong> — player management with dynamic help</li>
+        <li><strong>From Zero to Bracket in 60 Seconds</strong> — tournament setup flow</li>
+        <li><strong>Intelligent Seeding &amp; BYE Handling</strong> — fair draw algorithm and automatic BYE advancement <em>(new)</em></li>
+        <li><strong>Celebrate the Champion</strong> — winner celebration and results export</li>
+    </ol>
+    <p>Each showcase item features a labeled category pill, heading, descriptive paragraph, and screenshot with a subtle zoom-on-hover effect. Items alternate image position (left/right) for visual rhythm.</p>
+
+    <h3>Highlight Card Update</h3>
+    <ul>
+        <li><strong>Removed</strong>: <code>~60MB Docker Image Size</code> (implementation detail, not a user-facing selling point)</li>
+        <li><strong>Added</strong>: <code>2 Tournament Formats</code> (Single &amp; Double Elimination)</li>
+    </ul>
+
+    <h3>Standalone Test File</h3>
+    <ul>
+        <li><code>landing.html</code> created as a standalone copy for local browser testing without Docker/PHP</li>
+        <li>Identical content to <code>landing-page.php</code> except hardcoded URLs instead of PHP env vars</li>
+        <li>Not served in production — purely a development convenience</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="technical">Technical Details</h2>
+
+    <h3>Files Changed</h3>
+    <ul>
+        <li><code>css/landing.css</code> — complete rewrite: retro comic theme, showcase layout, responsive breakpoints</li>
+        <li><code>landing-page.php</code> — new design with hero image, showcase section, updated highlight cards</li>
+        <li><code>landing.html</code> — standalone test version (new file)</li>
+    </ul>
+
+    <h3>Files Unchanged</h3>
+    <ul>
+        <li><code>tournament.html</code> — PHP include mechanism unchanged</li>
+        <li><code>docker/</code> — no Docker configuration changes</li>
+        <li>All JavaScript files — no app logic changes</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration from v4.2.2</h2>
+
+    <h3>Automatic</h3>
+    <ul>
+        <li>Fully compatible with all existing tournaments</li>
+        <li>No data migration required</li>
+        <li>All existing features are unchanged</li>
+    </ul>
+
+    <h3>Docker Deployments</h3>
+    <ul>
+        <li>No configuration changes needed</li>
+        <li><code>NEWTON_LANDING_PAGE</code> and <code>NEWTON_BASE_URL</code> environment variables work as before</li>
+        <li>The hero image (<code>Screenshots/newton-cartoon.png</code>) is included in the Docker image automatically via <code>COPY . /var/www/html/</code></li>
+    </ul>
+
+    <hr>
+
+    <h2 id="known-issues">Known Issues</h2>
+    <p>None at time of release.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v4.2.3 — landing page redesign with retro comic theme by Nano Banana.</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.3" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download v4.2.3</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+        <li><a href="v4.2.2.html">v4.2.2</a> — March 9, 2026 — Landing page fix, cleaner card layout.</li>
+        <li><a href="v4.2.1.html">v4.2.1</a> — March 8, 2026 — Cleaner cards, clearer brackets, better discoverability.</li>
+        <li><a href="v4.2.0.html">v4.2.0</a> — March 3, 2026 — Single Elimination: one shot, no second chances.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Notes v4.2.12 — NewTon DC Tournament Manager</title>
+    <meta name="description" content="NewTon DC Tournament Manager v4.2.12 release notes. Dedicated domain newtondarts.com, Google Search Console update, and accessibility improvements.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Dedicated domain: newtondarts.com.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v4.2.12 &mdash; March 19, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.12" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download v4.2.12</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#domain">Domain Migration</a></li>
+            <li><a href="#search-console">Google Search Console</a></li>
+            <li><a href="#accessibility">Accessibility</a></li>
+            <li><a href="#release-notes">Release Notes Pages</a></li>
+            <li><a href="#mobile">Landing Page — Mobile Fix</a></li>
+            <li><a href="#files">Files Changed</a></li>
+            <li><a href="#migration">Migration</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p><strong>NewTon DC Tournament Manager Version 4.2.12</strong> migrates all project URLs from <code>darts.skrodahl.net</code> to the new dedicated domain <code>newtondarts.com</code>. No changes to tournament functionality — this is a drop-in replacement for v4.2.11.</p>
+
+    <hr>
+
+    <h2 id="domain">Domain Migration</h2>
+    <p>All references to the previous subdomain <code>darts.skrodahl.net</code> have been updated to <code>newtondarts.com</code>:</p>
+    <ul>
+        <li><strong>README.md</strong> — All links to the official website, user guide, architecture page, Docker quickstart, REST API reference, and privacy page</li>
+        <li><strong>llms.txt</strong> — Live demo URL and all documentation links</li>
+        <li><strong>sitemap.xml</strong> — All page URLs updated for search engine indexing</li>
+        <li><strong>robots.txt</strong> — Sitemap URL</li>
+        <li><strong>docker-quickstart.html</strong> — Demo site reference link</li>
+        <li><strong>privacy.html</strong> — Demo site reference link</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="search-console">Google Search Console</h2>
+    <p>Verification tag updated for the new domain:</p>
+    <ul>
+        <li><code>landing.html</code> — <code>google-site-verification</code> meta tag replaced</li>
+        <li><code>landing-page.php</code> — Same update for Docker-served landing page</li>
+    </ul>
+    <p>Bing Webmaster Tools verification tag remains unchanged.</p>
+
+    <hr>
+
+    <h2 id="accessibility">Accessibility</h2>
+    <p><code>landing.html</code> and <code>landing-page.php</code> now include a <code>&lt;main&gt;</code> landmark element wrapping all page content before the footer. Resolves the Lighthouse accessibility flag "Document does not have a main landmark". Screen readers use the <code>&lt;main&gt;</code> element to let users skip directly to page content. No visual change.</p>
+
+    <hr>
+
+    <h2 id="release-notes">Release Notes Pages</h2>
+    <p>Standalone HTML release notes pages are now served directly from the application at <code>newtondarts.com/releases/</code>.</p>
+    <ul>
+        <li><strong>releases/index.html</strong> — always the latest release notes</li>
+        <li><strong>Versioned pages</strong> — permanent pages for each v4.2.x release (<code>v4.2.0.html</code> through <code>v4.2.12.html</code>), each with a download button linking to the exact GitHub release tag</li>
+        <li><strong>Previous Releases index</strong> — every page lists older releases with version, date, and tagline</li>
+        <li><strong>sitemap.xml</strong> — all release pages indexed; versioned pages use <code>changefreq: never</code>, the index uses <code>changefreq: weekly</code></li>
+    </ul>
+
+    <hr>
+
+    <h2 id="mobile">Landing Page — Mobile Fix</h2>
+    <p>Get Started card buttons (User Guide, Docker Quickstart) now stack below their text on screens narrower than 600px, matching the responsive behaviour of the rest of the Get Started section.</p>
+
+    <hr>
+
+    <h2 id="files">Files Changed</h2>
+    <ul>
+        <li><code>README.md</code> — All URLs updated to newtondarts.com</li>
+        <li><code>llms.txt</code> — All URLs updated to newtondarts.com</li>
+        <li><code>sitemap.xml</code> — All URLs updated to newtondarts.com</li>
+        <li><code>robots.txt</code> — Sitemap URL updated to newtondarts.com</li>
+        <li><code>landing.html</code> — Google Search Console verification tag updated, <code>&lt;main&gt;</code> landmark added</li>
+        <li><code>landing-page.php</code> — Google Search Console verification tag updated, <code>&lt;main&gt;</code> landmark added</li>
+        <li><code>docker-quickstart.html</code> — Demo site link updated</li>
+        <li><code>privacy.html</code> — Demo site link updated</li>
+        <li><code>css/landing.css</code> — Mobile fix for wide Get Started cards, <code>.docs-content .btn-github</code> style added</li>
+        <li><code>releases/</code> — New folder with <code>index.html</code>, <code>v4.2.0.html</code> through <code>v4.2.12.html</code>, and <code>README.md</code></li>
+    </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration from v4.2.11</h2>
+    <p>No migration required. Fully compatible with all existing tournaments and saved configurations. The previous domain <code>darts.skrodahl.net</code> should redirect to <code>newtondarts.com</code>.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v4.2.12 — Dedicated domain: newtondarts.com.</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.12" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download v4.2.12</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="v4.2.12.html">v4.2.12</a> — March 19, 2026 — Dedicated domain: newtondarts.com.</li>
+        <li><a href="v4.2.11.html">v4.2.11</a> — March 18, 2026 — Shame has never looked better.</li>
+        <li><a href="v4.2.10.html">v4.2.10</a> — March 17, 2026 — Doc pages, user guide, and sitemap improvements.</li>
+        <li><a href="v4.2.9.html">v4.2.9</a> — March 14, 2026 — Landing page polish.</li>
+        <li><a href="v4.2.8.html">v4.2.8</a> — March 13, 2026 — Late Registration.</li>
+        <li><a href="v4.2.7.html">v4.2.7</a> — March 11, 2026 — SEO, font loading, and landing page improvements.</li>
+        <li><a href="v4.2.6.html">v4.2.6</a> — March 10, 2026 — Chalker PWA and QR code improvements.</li>
+        <li><a href="v4.2.5.html">v4.2.5</a> — March 9, 2026 — Chalker statistics and UX improvements.</li>
+        <li><a href="v4.2.4.html">v4.2.4</a> — March 8, 2026 — Single Elimination format and Chalker leg averages.</li>
+        <li><a href="v4.2.3.html">v4.2.3</a> — March 7, 2026 — Chalker leg averages and UX improvements.</li>
+        <li><a href="v4.2.2.html">v4.2.2</a> — March 6, 2026 — Chalker improvements and bug fixes.</li>
+        <li><a href="v4.2.1.html">v4.2.1</a> — March 5, 2026 — Single Elimination support.</li>
+        <li><a href="v4.2.0.html">v4.2.0</a> — March 4, 2026 — Single Elimination foundation.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

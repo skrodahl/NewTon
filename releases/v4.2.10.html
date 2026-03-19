@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Notes v4.2.10 — NewTon DC Tournament Manager</title>
+    <meta name="description" content="NewTon DC Tournament Manager v4.2.10 release notes. Five standalone documentation pages, a comprehensive user guide, sitemap improvements, and a Setup Actions format order fix.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Doc pages, user guide, and sitemap improvements.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v4.2.10 &mdash; March 18, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.10" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download v4.2.10</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#userguide">User Guide</a></li>
+            <li><a href="#doc-pages">Documentation Pages</a></li>
+            <li><a href="#doc-styling">Docs Page Styling</a></li>
+            <li><a href="#get-started">Landing Page — Get Started Section</a></li>
+            <li><a href="#sitemap">Sitemap</a></li>
+            <li><a href="#setup-actions">Setup Actions — Format Order</a></li>
+            <li><a href="#bing">Bing Webmaster Tools</a></li>
+            <li><a href="#seo-meta">SEO — Meta Descriptions</a></li>
+            <li><a href="#files">Files Changed</a></li>
+            <li><a href="#migration">Migration from v4.2.9</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p><strong>NewTon DC Tournament Manager Version 4.2.10</strong> adds five standalone documentation pages served directly from the application, a comprehensive user guide, sitemap improvements for search engine visibility, and a small UX fix to the Setup Actions panel.</p>
+    <p>This release contains one change to tournament functionality (Double Elimination moved to top of Setup Actions) and is otherwise a drop-in replacement for v4.2.9.</p>
+
+    <hr>
+
+    <h2 id="userguide">User Guide</h2>
+    <p>A full user guide is now available at <code>userguide.html</code>. It covers the entire tournament workflow in seven sections:</p>
+    <ul>
+        <li><strong>Quick Start</strong> — Seven numbered steps from download to running your first tournament, rendered as styled cards with orange numbered circles</li>
+        <li><strong>Tournament Formats</strong> — Double Elimination vs Single Elimination explained, with guidance on when to choose each</li>
+        <li><strong>Configuration</strong> — Club identity, point system, match configuration, and lane management</li>
+        <li><strong>Managing a Tournament</strong> — Creating tournaments, registering players, the Saved Players registry, payment tracking, and generating brackets</li>
+        <li><strong>Running Matches &amp; Match Controls</strong> — Bracket view (navigation panel, pan &amp; zoom, match states, status panel), Match Controls command center (two-column Frontside/Backside layout, live matches sorted by lane, lane/referee conflict management, Referee Suggestions), Confirm Match Winner dialog with Match Progression preview, per-player Statistics dialog, and mid-tournament Leaderboard access</li>
+        <li><strong>Developer Console</strong> — Statistics panel (Quick Overview, Transaction Health, Match State, Player Count, Lane Usage, localStorage Usage) and a complete command reference including Late Registration</li>
+        <li><strong>Results &amp; Export</strong> — Live standings, CSV export, JSON export/import</li>
+        <li><strong>Tips &amp; Tricks</strong> — Undo, Late Registration, F1 help, offline use, multiple tournaments, data safety, self-hosting</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="doc-pages">Documentation Pages</h2>
+    <p>Four standalone HTML pages are now served directly from the application, styled consistently with the landing page:</p>
+
+    <h3>architecture.html</h3>
+    <p>New page linked from the landing page's Get Started section. Covers the design philosophy and internals behind NewTon's crash-proof design: Single Source of Truth (MATCH_PROGRESSION lookup tables), Transaction History &amp; Undo (event sourcing, surgical undo, auto-recovery), Data Separation (tournament data, transaction history, and global config kept strictly isolated), Offline-First Persistence, Strengths, and Known Limitations. Cross-linked to the Developer Console section in <code>userguide.html</code>, Privacy page, and REST API page.</p>
+
+    <h3>docker-quickstart.html</h3>
+    <p>Replaces the link to the GitHub markdown file in the landing page's "Get Started" section. Covers the full self-hosting workflow: Quick Start (3 steps), a complete annotated <code>docker-compose.yml</code>, persistent storage, environment variables, reverse proxy setup (including an Nginx Proxy Manager example), security headers, logo/QR customisation, and troubleshooting.</p>
+
+    <h3>privacy.html</h3>
+    <p>Replaces the GitHub link in the landing page footer. Covers the full privacy architecture: localStorage model, technical storage details, what NewTon doesn't do (no analytics, no telemetry, no external dependencies, no cookies, no accounts), storage key structure, export privacy, demo site model, self-hosting with the REST API, offline operation, FAQ, and summary.</p>
+
+    <h3>rest-api.html</h3>
+    <p>New page linked from both <code>docker-quickstart.html</code> and <code>privacy.html</code>. Covers the complete REST API reference: overview, server requirements, directory structure, all three endpoints (List/Upload/Delete) with request/response examples and error tables, CORS headers, client-side feature detection, data format, security practices, and troubleshooting.</p>
+
+    <hr>
+
+    <h2 id="doc-styling">Docs Page Styling (<code>css/landing.css</code>)</h2>
+    <p>New CSS classes shared across all documentation pages:</p>
+    <ul>
+        <li><code>.docs-back-link</code> — Fixed top-left navigation link in Insignia font</li>
+        <li><code>.docs-content</code> — Centered 760px column with doc-appropriate spacing</li>
+        <li><code>.docs-toc</code> — Warm cream table of contents box</li>
+        <li><code>.terminal-wrap</code> / <code>.terminal-bar</code> — macOS-style terminal blocks with traffic light dots (red/amber/green), dark background, soft green monospace text</li>
+        <li><code>.docs-footer</code> — Footer width constrained to match the 760px column</li>
+        <li>Table styles — Consistent warm-palette table formatting for the REST API endpoint tables</li>
+        <li><code>.docs-quickstart</code> — Styled numbered step list with CSS counter circles (used in <code>userguide.html</code>)</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="get-started">Landing Page — Get Started Section</h2>
+    <p>Two cards have been added to the Get Started section. The User Guide card spans the full width of the section (below Local Use and Self-Hosted), with description text on the left and the "Read the Guide" button on the right. Below it, an Architecture &amp; Reliability card links to <code>architecture.html</code>. Both cards use <code>.get-started-card--wide</code>. Applied to both <code>landing.html</code> and <code>landing-page.php</code>.</p>
+
+    <hr>
+
+    <h2 id="sitemap">Sitemap</h2>
+    <p><code>sitemap.xml</code> updated with all doc pages indexed and priorities rebalanced by search value:</p>
+    <table>
+        <thead><tr><th>URL</th><th>Priority</th></tr></thead>
+        <tbody>
+            <tr><td><code>/</code></td><td>1.0</td></tr>
+            <tr><td><code>/userguide.html</code></td><td>0.8</td></tr>
+            <tr><td><code>/docker-quickstart.html</code></td><td>0.8</td></tr>
+            <tr><td><code>/architecture.html</code></td><td>0.7</td></tr>
+            <tr><td><code>/rest-api.html</code></td><td>0.7</td></tr>
+            <tr><td><code>/privacy.html</code></td><td>0.7</td></tr>
+            <tr><td><code>/chalker</code></td><td>0.6</td></tr>
+            <tr><td><code>/?launch</code></td><td>0.4</td></tr>
+        </tbody>
+    </table>
+    <p>The <code>noindex</code> meta tag has been removed from all doc pages — they contain substantive content worth indexing.</p>
+
+    <hr>
+
+    <h2 id="setup-actions">Setup Actions — Format Order</h2>
+    <p>Double Elimination Cup now appears above Single Elimination Cup in the Setup Actions panel. DE is the primary tournament format for most club use; the previous order (SE first) led to accidental SE bracket generation.</p>
+
+    <hr>
+
+    <h2 id="bing">Bing Webmaster Tools</h2>
+    <p>The <code>&lt;meta name="msvalidate.01"&gt;</code> verification tag has been added to both <code>landing.html</code> and <code>landing-page.php</code> to enable Bing Webmaster Tools indexing and analytics.</p>
+
+    <hr>
+
+    <h2 id="seo-meta">SEO — Meta Descriptions</h2>
+    <p><code>&lt;meta name="description"&gt;</code> tags have been added to all five pages that were missing them — <code>userguide.html</code>, <code>docker-quickstart.html</code>, <code>privacy.html</code>, <code>rest-api.html</code>, and <code>chalker/index.html</code>. Each description summarises the page content for search engine result snippets.</p>
+
+    <hr>
+
+    <h2 id="files">Files Changed</h2>
+    <ul>
+        <li><code>architecture.html</code> — New Architecture &amp; Reliability page</li>
+        <li><code>userguide.html</code> — New user guide page</li>
+        <li><code>docker-quickstart.html</code> — New Docker quick start page</li>
+        <li><code>privacy.html</code> — New privacy architecture page</li>
+        <li><code>rest-api.html</code> — New REST API reference page</li>
+        <li><code>css/landing.css</code> — Docs page styles, terminal blocks, table styles, <code>.docs-quickstart</code>, <code>.get-started-card--wide</code></li>
+        <li><code>landing.html</code> — Bing meta tag, Docker Quickstart link, Privacy footer link, User Guide card, Architecture &amp; Reliability card</li>
+        <li><code>landing-page.php</code> — Same changes as <code>landing.html</code></li>
+        <li><code>sitemap.xml</code> — Five doc pages added, priorities rebalanced</li>
+        <li><code>chalker/index.html</code> — Meta description added</li>
+        <li><code>js/bracket-rendering.js</code> — Double Elimination moved to top of Setup Actions</li>
+        <li><code>CHANGELOG.md</code> — v4.2.10 entry added</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration from v4.2.9</h2>
+    <p>No migration required. Fully compatible with all existing tournaments and saved configurations.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v4.2.10 — Doc pages, user guide, and sitemap improvements.</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.10" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download v4.2.10</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+        <li><a href="v4.2.9.html">v4.2.9</a> — March 15, 2026 — Landing page polish.</li>
+        <li><a href="v4.2.8.html">v4.2.8</a> — March 13, 2026 — Late Registration.</li>
+        <li><a href="v4.2.7.html">v4.2.7</a> — March 13, 2026 — Sitemap, font loading fix, and Get Started section.</li>
+        <li><a href="v4.2.6.html">v4.2.6</a> — March 12, 2026 — Undo system bug fix, Late Registration eligibility checker, and robots.txt.</li>
+        <li><a href="v4.2.5.html">v4.2.5</a> — March 11, 2026 — Landing page improvements and a Bracket Editor placeholder in the Developer Console.</li>
+        <li><a href="v4.2.4.html">v4.2.4</a> — March 10, 2026 — Proper Single Elimination match length configuration and colour-coded Chalker leg averages.</li>
+        <li><a href="v4.2.3.html">v4.2.3</a> — March 10, 2026 — Landing page redesign with retro comic theme by Nano Banana.</li>
+        <li><a href="v4.2.2.html">v4.2.2</a> — March 9, 2026 — Landing page fix, cleaner card layout.</li>
+        <li><a href="v4.2.1.html">v4.2.1</a> — March 8, 2026 — Cleaner cards, clearer brackets, better discoverability.</li>
+        <li><a href="v4.2.0.html">v4.2.0</a> — March 3, 2026 — Single Elimination: one shot, no second chances.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Notes v4.2.0 — NewTon DC Tournament Manager</title>
+    <meta name="description" content="NewTon DC Tournament Manager v4.2.0 release notes. Single Elimination format introduced as a fully supported tournament format alongside Double Elimination.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Single Elimination: one shot, no second chances.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v4.2.0 &mdash; March 3, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.0" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download v4.2.0</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#single-elimination">New Feature: Single Elimination Format</a></li>
+            <li><a href="#format-selection">Format Selection</a></li>
+            <li><a href="#se-bracket">The SE Bracket</a></li>
+            <li><a href="#visual-bracket">Visual Bracket</a></li>
+            <li><a href="#match-controls">Match Controls</a></li>
+            <li><a href="#rankings">Rankings</a></li>
+            <li><a href="#undo">Undo System</a></li>
+            <li><a href="#completion">Tournament Completion</a></li>
+            <li><a href="#migration">Migration from v4.1.x</a></li>
+            <li><a href="#known-issues">Known Issues</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p><strong>NewTon DC Tournament Manager Version 4.2.0</strong> introduces Single Elimination (SE) as a fully supported tournament format alongside the existing Double Elimination (Cup) format. Every part of the application — bracket generation, match progression, bracket visualisation, rankings, undo, and tournament completion — is format-aware.</p>
+    <p>This release contains no breaking changes and is a drop-in replacement for v4.1.x.</p>
+    <p><strong>Key Highlights:</strong></p>
+    <ul>
+        <li>Single Elimination brackets for 4, 8, 16, and 32 players</li>
+        <li>Bronze Final: a proper 3rd-place match before the Final</li>
+        <li>Full visual bracket with progression lines and round labels for all SE sizes</li>
+        <li>SE undo system: identical hard-block behaviour to Double Elimination</li>
+        <li>SE rankings: live placement tracking from round 1 through to the Final</li>
+        <li>Format selection at bracket generation time — existing DE tournaments are unaffected</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="single-elimination">New Feature: Single Elimination Format</h2>
+    <p>Single Elimination is now a first-class tournament format in NewTon.</p>
+    <p><strong>What It Means for Players:</strong><br>
+    One loss and you're out. There is no backside bracket, no second chance. The format moves fast, keeps things simple, and suits smaller venues or warm-up tournaments before a main event.</p>
+    <p><strong>What It Means for Operators:</strong><br>
+    The setup is identical to Double Elimination — register players, choose a format, generate the bracket. Everything else runs itself.</p>
+
+    <hr>
+
+    <h2 id="format-selection">Format Selection</h2>
+    <p>When generating a bracket, operators now choose between two format cards:</p>
+    <ul>
+        <li><strong>Single Elimination Cup</strong> — "Players are eliminated after one loss"</li>
+        <li><strong>Double Elimination Cup</strong> — "Players get a second chance through the backside"</li>
+    </ul>
+    <p>Both formats require a minimum of 4 players. SE supports 4/8/16/32-player brackets; DE supports 8/16/32.</p>
+    <p>The chosen format is stored on the tournament and persisted through save, load, export, and import. Existing tournaments without a format field are treated as DE — no migration required.</p>
+
+    <hr>
+
+    <h2 id="se-bracket">The SE Bracket</h2>
+
+    <h3>Round Structure</h3>
+    <p>SE brackets are purely frontside. Each round halves the field until two players remain for the Final. The round before the Final produces four players — the two winners go to the Final, the two losers meet in the Bronze Final.</p>
+    <p><strong>8-player example:</strong></p>
+    <pre><code>Round 1 (8 players) → Round 2 (Quarterfinals) → Semifinals → Bronze Final / Final</code></pre>
+    <p><strong>Round display names</strong> are assigned from the end backwards: Final, Bronze Final, Semifinals, Quarterfinals, Round N. These appear on match cards and in Match Controls.</p>
+
+    <h3>Bronze Final</h3>
+    <p>The Bronze Final is a proper match — not a consolation formality. It determines 3rd and 4th place and <strong>must be completed before the Final can begin</strong>. The Final shows as "Waiting" while Bronze is pending.</p>
+    <ul>
+        <li>Bronze winner → 3rd place</li>
+        <li>Bronze loser → 4th place</li>
+        <li>Both placements are set immediately when the match completes</li>
+    </ul>
+
+    <h3>Walkovers</h3>
+    <p>Bye slots in smaller brackets are handled automatically. A player with a walkover advances without a match being played. The bracket renders these cleanly, and the walkover is visible on the match card.</p>
+
+    <hr>
+
+    <h2 id="visual-bracket">Visual Bracket</h2>
+    <p>All four SE bracket sizes have a dedicated visual layout:</p>
+    <table>
+        <thead><tr><th>Size</th><th>Layout</th></tr></thead>
+        <tbody>
+            <tr><td>4-player</td><td>2 Semifinals, Bronze Final, Final</td></tr>
+            <tr><td>8-player</td><td>Round 1 → QFs → SFs → Bronze + Final</td></tr>
+            <tr><td>16-player</td><td>Rounds 1–3 → SFs → Bronze + Final</td></tr>
+            <tr><td>32-player</td><td>Rounds 1–4 → SFs → Bronze + Final</td></tr>
+        </tbody>
+    </table>
+    <p><strong>What you see:</strong></p>
+    <ul>
+        <li><strong>L-shaped progression lines</strong> connecting each round through a vertical spine, which then branches to Bronze and Final</li>
+        <li><strong>Round column labels</strong> above each column (ROUND 1, QUARTERFINALS, SEMIFINALS, FINALS)</li>
+        <li><strong>Placement range labels</strong> showing which placement band is eliminated in each round (e.g. "5th–8th" above Round 1 in an 8-player bracket)</li>
+        <li><strong>BRONZE</strong> and <strong>FINAL</strong> badges on the respective match cards</li>
+        <li><strong>Zoom and pan defaults</strong> tuned per bracket size so the full bracket is visible on open</li>
+    </ul>
+    <p>The bracket hover info box shows match ID and state for SE matches. "Leads to / Feeds from" text is intentionally omitted — the visual progression lines make this self-evident.</p>
+
+    <hr>
+
+    <h2 id="match-controls">Match Controls</h2>
+    <p>Match Controls in SE uses a rolling two-column layout:</p>
+    <ul>
+        <li><strong>Left column</strong>: the earliest ready round (the matches you should be running now)</li>
+        <li><strong>Right column</strong>: upcoming rounds not yet ready</li>
+    </ul>
+    <p>Live matches always appear in the left column. This keeps the operator focused on what needs attention without scrolling through the full bracket list.</p>
+
+    <hr>
+
+    <h2 id="rankings">Rankings</h2>
+    <p>SE rankings are live and update after every match completion.</p>
+    <p>Placement is determined by elimination round:</p>
+    <table>
+        <thead><tr><th>Eliminated in</th><th>8-player placement</th></tr></thead>
+        <tbody>
+            <tr><td>Round 1</td><td>5th–8th</td></tr>
+            <tr><td>Quarterfinals</td><td>—</td></tr>
+            <tr><td>Bronze Final (loser)</td><td>4th</td></tr>
+            <tr><td>Bronze Final (winner)</td><td>3rd</td></tr>
+            <tr><td>Final (loser)</td><td>2nd</td></tr>
+            <tr><td>Final (winner)</td><td>1st</td></tr>
+        </tbody>
+    </table>
+    <p>Rankings are visible during the tournament and fully resolved by the time the Final is played (Bronze is always completed first).</p>
+
+    <hr>
+
+    <h2 id="undo">Undo System</h2>
+    <p>The SE undo system follows the same hard-block rules as Double Elimination — there is no cascading, ever.</p>
+    <p><strong>How it works:</strong></p>
+    <ul>
+        <li>A match can only be undone if no downstream match has been manually completed</li>
+        <li>If a downstream match is complete, the upstream match shows "Cannot Undo, blocked by [match ID]" in the hover info box</li>
+        <li>The undo button is never rendered for blocked matches — clicking is impossible, not just warned against</li>
+        <li>Matches must be undone one at a time, working backwards deliberately</li>
+    </ul>
+    <p><strong>Example:</strong> In an 8-player SE bracket, if the Semifinal and Quarterfinal are both complete, you must undo the Semifinal first before the Quarterfinal becomes undoable.</p>
+    <p>Undoing the Final match restores the tournament to active status — the bracket becomes editable again immediately.</p>
+    <p>This behaviour is consistent across all SE bracket sizes (4P–32P) and is identical to how DE has always worked.</p>
+
+    <hr>
+
+    <h2 id="completion">Tournament Completion</h2>
+    <p>An SE tournament completes when the Final match is recorded. At that moment:</p>
+    <ul>
+        <li>1st and 2nd place are set from the Final result</li>
+        <li>The tournament is marked completed and immediately switches to read-only</li>
+        <li>The bracket renders in its completed state</li>
+        <li>All undo operations are available if needed (subject to the hard-block rules above)</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration from v4.1.x</h2>
+
+    <h3>Automatic</h3>
+    <ul>
+        <li>Fully compatible with all existing v4.1.x and earlier tournaments</li>
+        <li>No data migration required</li>
+        <li>All existing DE tournaments continue working without modification</li>
+    </ul>
+
+    <h3>What's New After Upgrading</h3>
+    <ol>
+        <li>When generating a new bracket, you'll see two format cards — choose SE or DE</li>
+        <li>SE tournaments work immediately with all features: bracket, controls, rankings, undo</li>
+        <li>All existing features for DE tournaments are unchanged</li>
+    </ol>
+
+    <hr>
+
+    <h2 id="known-issues">Known Issues</h2>
+    <p>None at time of release. Please report issues through the GitHub repository.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v4.2.0 — Single Elimination: one shot, no second chances.</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.0" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download v4.2.0</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

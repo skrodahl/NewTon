@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Notes v4.2.1 — NewTon DC Tournament Manager</title>
+    <meta name="description" content="NewTon DC Tournament Manager v4.2.1 release notes. Visual polish: eliminated player strikethrough, match card refinements, SEO meta tags, and optional landing page for Docker.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Cleaner cards, clearer brackets, better discoverability.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v4.2.1 &mdash; March 8, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.1" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download v4.2.1</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#strikethrough">Eliminated Player Strikethrough</a></li>
+            <li><a href="#card-tweaks">Match Card Visual Tweaks</a></li>
+            <li><a href="#seo">SEO &amp; Discoverability</a></li>
+            <li><a href="#docker">Docker Changes</a></li>
+            <li><a href="#migration">Migration from v4.2.0</a></li>
+            <li><a href="#known-issues">Known Issues</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p><strong>NewTon DC Tournament Manager Version 4.2.1</strong> focuses on visual polish and discoverability. Match cards receive subtle refinements, eliminated players are now visually marked with strikethrough text, and a new optional landing page improves SEO for self-hosted instances.</p>
+    <p>This release contains no breaking changes and is a drop-in replacement for v4.2.0.</p>
+    <p><strong>Key Highlights:</strong></p>
+    <ul>
+        <li>Eliminated player strikethrough on completed match cards</li>
+        <li>Muted match card styling for a cleaner bracket appearance</li>
+        <li>SEO meta tags added to the tournament app</li>
+        <li>Optional landing page for Docker deployments</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="strikethrough">Eliminated Player Strikethrough</h2>
+    <p>Completed match cards now display the eliminated player's name in muted red with a slanted strikethrough line. This makes it immediately clear who has been knocked out of the tournament at a glance.</p>
+    <ul>
+        <li>Muted red text (<code>#b87070</code>) complements the green completed-match background</li>
+        <li>Strikethrough appears only in the specific match where the player was eliminated</li>
+        <li>Works correctly in both formats:
+            <ul>
+                <li><strong>SE</strong>: every round loser is eliminated immediately</li>
+                <li><strong>DE</strong>: frontside losers who continue to the backside show no strikethrough until their backside elimination match</li>
+            </ul>
+        </li>
+        <li>Walkover slots and match winners are never struck through</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="card-tweaks">Match Card Visual Tweaks</h2>
+    <ul>
+        <li><strong>Muted "Started" button</strong>: Live match button color changed from bright orange (<code>#ff6b35</code>) to a warmer, less distracting muted orange (<code>#e09060</code>)</li>
+        <li><strong>Subtle dropdown backgrounds</strong>: Lane and referee dropdowns on ready/live match cards now use a light gray (<code>#e8e9ec</code>) instead of pure white, blending better with the card footer</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="seo">SEO &amp; Discoverability</h2>
+
+    <h3>Meta Tags</h3>
+    <p>The tournament app now includes <code>&lt;meta name="description"&gt;</code> and <code>&lt;meta name="keywords"&gt;</code> tags in the HTML head. This helps search engines accurately describe NewTon in search results, even without the landing page enabled.</p>
+
+    <h3>Schema.org Structured Data</h3>
+    <p>The landing page includes JSON-LD <code>SoftwareApplication</code> markup, giving search engines machine-readable metadata about the app (category, price, license, features, browser requirements). This can enable rich results in Google search listings.</p>
+
+    <h3>Landing Page</h3>
+    <p>A new optional landing page can be enabled for Docker deployments. When enabled, visitors see a feature-rich page with descriptions, screenshots, and proper Open Graph / Twitter Card meta tags before entering the tournament app.</p>
+    <p>The landing page is embedded in <code>tournament.html</code> (which becomes <code>tournament.php</code> during Docker build) — no separate files needed.</p>
+    <p><strong>How to enable:</strong></p>
+    <pre><code>environment:
+  - NEWTON_LANDING_PAGE=true
+  - NEWTON_BASE_URL=https://your-domain.com  # Optional: for canonical URLs</code></pre>
+    <p><strong>What it includes:</strong></p>
+    <ul>
+        <li>App header (centered logo + title, no menu or clock)</li>
+        <li>Feature descriptions</li>
+        <li>Screenshots from the repository</li>
+        <li>"Launch Tournament Manager" button (<code>?launch</code> bypasses the landing page)</li>
+        <li>Full Open Graph and Twitter Card meta tags for social sharing</li>
+    </ul>
+    <p><strong>What it does NOT include:</strong></p>
+    <ul>
+        <li>The demo site banner (that remains exclusive to <code>NEWTON_DEMO_MODE</code>)</li>
+    </ul>
+    <p>When <code>NEWTON_LANDING_PAGE</code> is not set (the default), visitors go straight to the tournament app as before.</p>
+
+    <hr>
+
+    <h2 id="docker">Docker Changes</h2>
+
+    <h3>New Environment Variables</h3>
+    <table>
+        <thead><tr><th>Variable</th><th>Default</th><th>Purpose</th></tr></thead>
+        <tbody>
+            <tr><td><code>NEWTON_LANDING_PAGE</code></td><td><code>false</code></td><td>Show SEO landing page at root URL</td></tr>
+            <tr><td><code>NEWTON_BASE_URL</code></td><td><em>(empty)</em></td><td>Canonical URL for Open Graph / Twitter Card meta tags</td></tr>
+        </tbody>
+    </table>
+
+    <h3>nginx Configuration</h3>
+    <p>The nginx index directive serves <code>tournament.php</code> as the default document. No separate landing page file is needed.</p>
+
+    <hr>
+
+    <h2 id="migration">Migration from v4.2.0</h2>
+
+    <h3>Automatic</h3>
+    <ul>
+        <li>Fully compatible with all existing tournaments</li>
+        <li>No data migration required</li>
+        <li>All existing features are unchanged</li>
+    </ul>
+
+    <h3>What's New After Upgrading</h3>
+    <ol>
+        <li>Eliminated players show strikethrough text on completed match cards</li>
+        <li>Slightly refined match card styling (muted button, dropdown backgrounds)</li>
+        <li>Search engines will see meta description and keywords on the tournament app</li>
+        <li>Optionally enable the landing page for public-facing Docker deployments</li>
+    </ol>
+
+    <hr>
+
+    <h2 id="known-issues">Known Issues</h2>
+    <p>None at time of release.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v4.2.1 — cleaner cards, clearer brackets, better discoverability.</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.1" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download v4.2.1</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+        <li><a href="v4.2.0.html">v4.2.0</a> — March 3, 2026 — Single Elimination: one shot, no second chances.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

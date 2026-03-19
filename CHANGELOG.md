@@ -10,6 +10,12 @@
 
 - **Main landmark**: Added `<main>` element to `landing.html` and `landing-page.php` — resolves Lighthouse "Document does not have a main landmark" accessibility flag.
 
+### Release notes pages
+
+- **`releases/` folder**: Standalone HTML release notes pages for all v4.2.x releases, served at `newtondarts.com/releases/`. Each release gets a permanent versioned page (`v4.2.12.html` etc.) and `index.html` always shows the latest.
+- **sitemap.xml**: All release notes pages indexed with `changefreq: never` (versioned) and `changefreq: weekly` (`/releases/`).
+- **Mobile**: Get Started card buttons on landing page stack below text on small screens.
+
 ---
 
 ## **v4.2.11** - Setup Actions UX, Lollipop Counter & App Name Consistency (2026-03-18)

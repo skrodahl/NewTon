@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Notes v4.2.2 — NewTon DC Tournament Manager</title>
+    <meta name="description" content="NewTon DC Tournament Manager v4.2.2 release notes. Landing page HTML leak fix and feature card reorganization.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Landing page fix, cleaner card layout.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v4.2.2 &mdash; March 9, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.2" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download v4.2.2</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#html-leak">Landing Page HTML Leak Fix</a></li>
+            <li><a href="#card-reorg">Landing Page Card Reorganization</a></li>
+            <li><a href="#migration">Migration from v4.2.1</a></li>
+            <li><a href="#known-issues">Known Issues</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p><strong>NewTon DC Tournament Manager Version 4.2.2</strong> fixes a bug where the landing page HTML was visible when opening <code>tournament.html</code> directly in a browser without PHP processing. The landing page feature cards have also been reorganized.</p>
+    <p>This release contains no breaking changes and is a drop-in replacement for v4.2.1.</p>
+
+    <hr>
+
+    <h2 id="html-leak">Landing Page HTML Leak Fix</h2>
+    <p>When <code>tournament.html</code> was opened directly in a browser (outside Docker), the landing page HTML content was rendered above the tournament app. Browsers parse <code>&lt;?php ?&gt;</code> tags as "bogus comments" ending at the first <code>&gt;</code> character — and the landing page HTML contains many <code>&gt;</code> characters in its tags, causing them to leak through.</p>
+    <p><strong>Solution:</strong> The landing page HTML has been moved to a separate <code>landing-page.php</code> file and is included via the <code>&lt;script&gt;&lt;?php include ?&gt;&lt;/script&gt;</code> pattern. Browsers treat PHP inside script tags as invalid JavaScript and silently ignore it. This is the same pattern already used by the demo site banner.</p>
+    <ul>
+        <li><code>tournament.html</code> now contains a single-line PHP include (invisible to browsers)</li>
+        <li><code>landing-page.php</code> contains the full landing page (only accessed server-side via <code>include</code>)</li>
+        <li>No change to Docker configuration or environment variables</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="card-reorg">Landing Page Card Reorganization</h2>
+    <ul>
+        <li><strong>New card</strong>: Chalker Scoring App — tablet-optimized x01 scoring companion for referees</li>
+        <li><strong>Removed</strong>: Magic Zoom card (bracket visualization now mentioned in Single &amp; Double Elimination card)</li>
+        <li><strong>Highlight number cards</strong> (0 dependencies, 4-32 players, ~60MB image, 100% privacy) moved into the hero section above the action buttons</li>
+    </ul>
+    <p><strong>Feature card layout (2 rows of 4):</strong></p>
+    <ol>
+        <li>Single &amp; Double Elimination | Lane &amp; Referee Management | Complete Undo System | Import &amp; Export</li>
+        <li>Chalker Scoring App | Offline-First Design | Total Privacy | Self-Hostable with Docker</li>
+    </ol>
+
+    <hr>
+
+    <h2 id="migration">Migration from v4.2.1</h2>
+
+    <h3>Automatic</h3>
+    <ul>
+        <li>Fully compatible with all existing tournaments</li>
+        <li>No data migration required</li>
+        <li>All existing features are unchanged</li>
+    </ul>
+
+    <h3>Docker Deployments</h3>
+    <ul>
+        <li>No configuration changes needed</li>
+        <li><code>NEWTON_LANDING_PAGE</code> and <code>NEWTON_BASE_URL</code> environment variables work as before</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="known-issues">Known Issues</h2>
+    <p>None at time of release.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v4.2.2 — landing page fix, cleaner card layout.</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.2" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download v4.2.2</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+        <li><a href="v4.2.1.html">v4.2.1</a> — March 8, 2026 — Cleaner cards, clearer brackets, better discoverability.</li>
+        <li><a href="v4.2.0.html">v4.2.0</a> — March 3, 2026 — Single Elimination: one shot, no second chances.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

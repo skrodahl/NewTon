@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Release Notes v4.2.11 — NewTon DC Tournament Manager</title>
+    <meta name="description" content="NewTon DC Tournament Manager v4.2.11 release notes. Lollipop counter, Setup Actions UX improvements, and app name consistency.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Shame has never looked better.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v4.2.11 &mdash; March 18, 2026</p>
+
+    <p><em>Setup Actions UX, Lollipop Counter &amp; App Name Consistency</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.11" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download v4.2.11</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#lollipop">Lollipop Counter 🍭</a></li>
+            <li><a href="#setup-actions">Setup Actions Panel</a></li>
+            <li><a href="#app-name">App Name Consistency</a></li>
+            <li><a href="#files">Files Changed</a></li>
+            <li><a href="#migration">Migration</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p><strong>NewTon DC Tournament Manager Version 4.2.11</strong> adds a lollipop counter to player statistics, refines the Setup Actions panel in Match Controls with clearer section structure and better labelling, and corrects app name references across HTML files to consistently use the full product name.</p>
+    <p>This release contains no changes to tournament logic and is a drop-in replacement for v4.2.10.</p>
+
+    <hr>
+
+    <h2 id="lollipop">Lollipop Counter 🍭</h2>
+    <p>Scoring a 3 — three ones — in darts is known as a lollipop. Many clubs mark the occasion by handing the guilty player an actual lollipop. NewTon DC Tournament Manager now supports this tradition.</p>
+
+    <h3>Player Statistics dialog</h3>
+    <p>A <strong>Lollipops (score of 3)</strong> counter has been added to the Statistics dialog, below Tons, using the same +/− button pattern as 180s and Tons.</p>
+
+    <h3>Leaderboard display</h3>
+    <p>Players with one or more lollipops have a 🍭 icon displayed right-aligned in the Player column — visible as soon as the first lollipop is recorded. Two or more lollipops show 🍭 x{n} for extra effect. A single lollipop shows the icon only, no count.</p>
+
+    <h3>Celebration page</h3>
+    <p>"Most Lollipops 🍭" appears in the Player Achievements section of the Tournament Achievements panel at the end of the tournament, below Most Tons. It is conditional — the entry only appears if at least one lollipop was awarded during the tournament.</p>
+
+    <h3>Design decisions</h3>
+    <ul>
+        <li><strong>Cosmetic only</strong> — lollipops are not part of the points system and carry no point value</li>
+        <li><strong>Not exported</strong> — the lollipop count is excluded from CSV exports so player names remain clean and consistent across tournaments</li>
+        <li><strong>Backwards compatible</strong> — existing tournaments load without issues; the missing <code>lollipops</code> field defaults to 0 silently</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="setup-actions">Setup Actions Panel</h2>
+    <p>The right-hand panel in Match Controls during setup mode has been restructured for clarity.</p>
+
+    <h3>Before</h3>
+    <p>The panel showed a generic "🔧 Tournament in setup mode" heading followed by a redundant descriptive sentence, then the format cards, then the navigation buttons — with no visual separation between the two groups.</p>
+
+    <h3>After</h3>
+    <p>The panel now has two clearly named sections:</p>
+    <ul>
+        <li><strong>Shuffle &amp; Draw</strong> — section title above the Double Elimination Cup and Single Elimination Cup format cards</li>
+        <li><strong>Navigation</strong> — section header above the Player Registration Page and Global Settings Page buttons</li>
+    </ul>
+    <p>The redundant descriptive text has been removed. Emoji icons on the section titles have been removed — the wrench icon on the "Setup Actions" panel header is retained as the sole decorative element.</p>
+    <p>The main panel header remains <strong>Setup Actions</strong>, which is accurate as an umbrella label for the full panel. "Shuffle &amp; Draw" lives where it belongs: directly above the bracket generation action.</p>
+
+    <hr>
+
+    <h2 id="app-name">App Name Consistency</h2>
+    <p>References to the software as "NewTon DC" or "NewTon" have been corrected to <strong>NewTon DC Tournament Manager</strong> across HTML files. The short form "NewTon" is retained where contextually appropriate — for example, in prose references, possessive constructions, and places where the full name would read awkwardly.</p>
+
+    <hr>
+
+    <h2 id="files">Files Changed</h2>
+    <ul>
+        <li><code>js/player-management.js</code> — <code>incrementLollipops()</code>, <code>decrementLollipops()</code>, <code>updateStatsCounters()</code> updated</li>
+        <li><code>js/results-config.js</code> — Lollipop icon displayed in Leaderboard player name cell</li>
+        <li><code>js/types.js</code> — <code>lollipops</code> added to <code>PlayerStats</code> typedef</li>
+        <li><code>tournament.html</code> — Lollipops +/− counter added to Statistics dialog</li>
+        <li><code>userguide.html</code> — Lollipops tip added to Tips &amp; Tricks section</li>
+        <li><code>llms.txt</code> — Lollipop counter documented in Tips for AI Services</li>
+        <li><code>js/bracket-rendering.js</code> — Setup Actions panel restructured, Most Lollipops added to celebration page</li>
+        <li>Multiple HTML files — App name corrected to "NewTon DC Tournament Manager"</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration from v4.2.10</h2>
+    <p>No migration required. Fully compatible with all existing tournaments and saved configurations.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v4.2.11 — Shame has never looked better.</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v4.2.11" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download v4.2.11</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<!-- Footer -->
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>
