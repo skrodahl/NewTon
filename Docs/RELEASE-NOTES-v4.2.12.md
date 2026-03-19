@@ -35,14 +35,23 @@ Bing Webmaster Tools verification tag remains unchanged.
 
 ---
 
+## Accessibility
+
+- `landing.html` — Added `<main>` landmark element wrapping all page content before the footer
+- `landing-page.php` — Same change
+
+Resolves the Lighthouse accessibility flag "Document does not have a main landmark". Screen readers use the `<main>` element to let users skip directly to page content. No visual change.
+
+---
+
 ## Files Changed
 
 - `README.md` — All URLs updated to newtondarts.com
 - `llms.txt` — All URLs updated to newtondarts.com
 - `sitemap.xml` — All URLs updated to newtondarts.com
 - `robots.txt` — Sitemap URL updated to newtondarts.com
-- `landing.html` — Google Search Console verification tag updated
-- `landing-page.php` — Google Search Console verification tag updated
+- `landing.html` — Google Search Console verification tag updated, `<main>` landmark added
+- `landing-page.php` — Google Search Console verification tag updated, `<main>` landmark added
 - `docker-quickstart.html` — Demo site link updated
 - `privacy.html` — Demo site link updated
 - `CHANGELOG.md` — v4.2.12 entry added

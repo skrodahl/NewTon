@@ -6,6 +6,10 @@
 - **Files updated**: `README.md`, `llms.txt`, `sitemap.xml`, `robots.txt`, `landing.html`, `landing-page.php`, `docker-quickstart.html`, `privacy.html`.
 - **Google Search Console**: Verification tag updated for the new domain in both `landing.html` and `landing-page.php`.
 
+### Accessibility
+
+- **Main landmark**: Added `<main>` element to `landing.html` and `landing-page.php` — resolves Lighthouse "Document does not have a main landmark" accessibility flag.
+
 ---
 
 ## **v4.2.11** - Setup Actions UX, Lollipop Counter & App Name Consistency (2026-03-18)

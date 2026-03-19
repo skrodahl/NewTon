@@ -68,6 +68,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 </head>
 <body>
 
+    <main>
     <!-- Header -->
     <div class="landing-container">
         <div class="landing-header">
@@ -298,6 +299,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     }
     function _lbEsc(e) { if (e.key === 'Escape') { document.getElementById('lightbox').classList.remove('is-open'); document.removeEventListener('keydown', _lbEsc); } }
     </script>
+
+    </main>
 
     <!-- Footer -->
     <div class="landing-footer">
