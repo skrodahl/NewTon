@@ -62,6 +62,7 @@ Live opportunities enabled from day one:
 - Running statistics as legs are played
 - Real-time leaderboard updates
 - Spectator / operator view without manual entry
+- **Celebration broadcast** — when the tournament completes and the Celebration Podium appears in TM, the podium is pushed to all connected Chalker tablets simultaneously. Every screen in the venue shows the champion at the same moment
 
 ### Live Feed: MQTT Pub/Sub
 
