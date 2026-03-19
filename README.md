@@ -66,7 +66,7 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 ## 🚀 Getting Started
 
 1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases/latest)** (Run `git clone` or download ZIP for the latest beta)
-2. Double-click on `tournament.html` to open NewTon DC Tournament Manager, and you're up and running
+2. Double-click `tournament.html` to open NewTon DC Tournament Manager, and you're up and running
 3. Visit our [User Guide](https://darts.skrodahl.net/userguide.html) to learn how to run and manage tournaments, or press `F1` for help
 
 All [NewTon DC Tournament Manager](https://darts.skrodahl.net)'s features are described in detail in the [User Guide](https://darts.skrodahl.net/userguide.html).
