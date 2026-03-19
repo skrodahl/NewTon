@@ -10,15 +10,15 @@
 
 ![Action Shot](https://github.com/skrodahl/NewTon/blob/main/Screenshots/newton-cartoon.jpg)
 
-**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://darts.skrodahl.net)**
+**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://newtondarts.com)**
 
 ➷ **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
 🎯 **NewTon Chalker** is a companion x01 scoring app designed for tablets at the dartboard. Crash-proof with persistent match data, match history, and live statistics. Install as a PWA for a native app experience.
 
-🔒 **Total Privacy**: Your tournament and match data live in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://darts.skrodahl.net/privacy.html), not by policy.
+🔒 **Total Privacy**: Your tournament and match data live in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://newtondarts.com/privacy.html), not by policy.
 
-**[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)**, double-click `tournament.html` to get going. Or **[self-host with Docker](https://darts.skrodahl.net/docker-quickstart.html)**.
+**[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)**, double-click `tournament.html` to get going. Or **[self-host with Docker](https://newtondarts.com/docker-quickstart.html)**.
 
 ---
 # See It in Action
@@ -28,7 +28,7 @@ Visit the official NewTon DC Tournament Manager Website.
 
 Fully functional versions of the latest Tournament Manager and Chalker apps are available for use and testing.
 
-🎯 [**https://darts.skrodahl.net**](https://darts.skrodahl.net)
+🎯 [**https://newtondarts.com**](https://newtondarts.com)
 
 
 *All data stays in your browser - nothing is stored on the server or shared with anyone else.*
@@ -67,9 +67,9 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 
 1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases/latest)** (Run `git clone` or download ZIP for the latest beta)
 2. Double-click `tournament.html` to open NewTon DC Tournament Manager, and you're up and running
-3. Visit our [User Guide](https://darts.skrodahl.net/userguide.html) to learn how to run and manage tournaments, or press `F1` for help
+3. Visit our [User Guide](https://newtondarts.com/userguide.html) to learn how to run and manage tournaments, or press `F1` for help
 
-All [NewTon DC Tournament Manager](https://darts.skrodahl.net)'s features are described in detail in the [User Guide](https://darts.skrodahl.net/userguide.html).
+All [NewTon DC Tournament Manager](https://newtondarts.com)'s features are described in detail in the [User Guide](https://newtondarts.com/userguide.html).
 
 *No installation, no servers, no complexity — just pure tournament management.*
 
@@ -79,7 +79,7 @@ All [NewTon DC Tournament Manager](https://darts.skrodahl.net)'s features are de
 
 **Want to host NewTon Tournament Manager on your own server?** Docker makes it effortless.
 
-### 📋 [**Docker Quick Start Guide →**](https://darts.skrodahl.net/docker-quickstart.html)
+### 📋 [**Docker Quick Start Guide →**](https://newtondarts.com/docker-quickstart.html)
 
 **Get running in under 2 minutes:**
 
@@ -95,7 +95,7 @@ docker compose up -d
 
 **What's Included:**
 - ✅ Lightweight Alpine container (~60MB)
-- ✅ PHP [REST API](https://darts.skrodahl.net/rest-api.html) for tournament sharing
+- ✅ PHP [REST API](https://newtondarts.com/rest-api.html) for tournament sharing
 - ✅ nginx + PHP-FPM for optimal performance
 - ✅ Multi-architecture support (Intel/AMD + Apple Silicon/Raspberry Pi)
 - ✅ Persistent storage for tournaments
@@ -103,14 +103,14 @@ docker compose up -d
 - ✅ Optional SEO landing page (`NEWTON_LANDING_PAGE=true`)
 
 **Documentation:**
-- **[Quick Start Guide](https://darts.skrodahl.net/docker-quickstart.html)** - Get running in 2 minutes
+- **[Quick Start Guide](https://newtondarts.com/docker-quickstart.html)** - Get running in 2 minutes
 
 ---
 
 ## ✨ Key Features
-See the NewTon DC Tournament Manager [User Guide](https://darts.skrodahl.net/userguide.html) to learn how to use these features to manage your own tournaments.
+See the NewTon DC Tournament Manager [User Guide](https://newtondarts.com/userguide.html) to learn how to use these features to manage your own tournaments.
 
-More on the [architecture and focus on resilience here](https://darts.skrodahl.net/architecture.html).
+More on the [architecture and focus on resilience here](https://newtondarts.com/architecture.html).
 
 ### 🏆 Tournament Management
 - **Multiple Tournaments**: Create, save, and load with automatic browser storage
@@ -118,7 +118,7 @@ More on the [architecture and focus on resilience here](https://darts.skrodahl.n
   - **Tournament Protection**: Completed tournaments loaded from file are read-only to protect data integrity
 - **Tournament History**: Complete match records with lane and referee assignments
 - **Crash Resilient**: Automatic saving prevents data loss
-- **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using [REST API](https://darts.skrodahl.net/rest-api.html)
+- **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using [REST API](https://newtondarts.com/rest-api.html)
 
 ### 🎯 Single and Double Elimination Brackets
 - **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players, single elimination brackets for 4, 8, 16, and 32 players
@@ -162,7 +162,7 @@ Intuitive traffic light system for instant priority assessment:
 - **Match Formats**: Best-of legs for rounds, semifinals, and finals
 - **UI Preferences**: Confirmation dialogs and interface behavior
 
-[Official User Guide](https://darts.skrodahl.net/userguide.html)
+[Official User Guide](https://newtondarts.com/userguide.html)
 
 ---
 
@@ -178,7 +178,7 @@ Intuitive traffic light system for instant priority assessment:
 - Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
 - Requires JavaScript and LocalStorage support
 
-The architecture and resilence of NewTon DC Tournament Manager is documented on our [official web site](https://darts.skrodahl.net/architecture.html).
+The architecture and resilence of NewTon DC Tournament Manager is documented on our [official web site](https://newtondarts.com/architecture.html).
 
 ---
 
@@ -186,7 +186,7 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 
 - **Automatic Saving**: All changes saved immediately to browser storage
 - **Import/Export**: JSON files for backup and computer-to-computer transfers
-- **Privacy**: [Complete local storage](https://darts.skrodahl.net/privacy.html), no cloud or external data sharing
+- **Privacy**: [Complete local storage](https://newtondarts.com/privacy.html), no cloud or external data sharing
 - **Undo System**: Reverse recent match results with transaction history
 - **Developer Console**: Debug, view tournament health, transaction log management
 

@@ -1,3 +1,13 @@
+## **v4.2.12** - Dedicated Domain: newtondarts.com (2026-03-19)
+
+### Domain migration
+
+- **New domain**: All URLs updated from `darts.skrodahl.net` to `newtondarts.com` across the entire project.
+- **Files updated**: `README.md`, `llms.txt`, `sitemap.xml`, `robots.txt`, `landing.html`, `landing-page.php`, `docker-quickstart.html`, `privacy.html`.
+- **Google Search Console**: Verification tag updated for the new domain in both `landing.html` and `landing-page.php`.
+
+---
+
 ## **v4.2.11** - Setup Actions UX, Lollipop Counter & App Name Consistency (2026-03-18)
 
 ### Lollipop counter 🍭

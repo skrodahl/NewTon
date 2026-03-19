@@ -1,35 +1,35 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
-    <loc>https://darts.skrodahl.net/</loc>
+    <loc>https://newtondarts.com/</loc>
     <priority>1.0</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/userguide.html</loc>
+    <loc>https://newtondarts.com/userguide.html</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/docker-quickstart.html</loc>
+    <loc>https://newtondarts.com/docker-quickstart.html</loc>
     <priority>0.8</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/architecture.html</loc>
+    <loc>https://newtondarts.com/architecture.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/rest-api.html</loc>
+    <loc>https://newtondarts.com/rest-api.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/privacy.html</loc>
+    <loc>https://newtondarts.com/privacy.html</loc>
     <priority>0.7</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/chalker</loc>
+    <loc>https://newtondarts.com/chalker</loc>
     <priority>0.6</priority>
   </url>
   <url>
-    <loc>https://darts.skrodahl.net/?launch</loc>
+    <loc>https://newtondarts.com/?launch</loc>
     <priority>0.4</priority>
   </url>
 </urlset>
