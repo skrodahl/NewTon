@@ -87,11 +87,30 @@ Note: In nginx, `add_header` directives inside a `location` block replace (not a
 
 ---
 
+## Landing Page Routing
+
+The landing page has been fully decoupled from `tournament.html`.
+
+### tournament.html
+The PHP one-liner that previously detected `NEWTON_LANDING_PAGE` and included `landing-page.php` has been removed. `tournament.html` is now a pure tournament app file — opening it locally works exactly as before, and the Docker config injector (`window.NEWTON_CONFIG`) is untouched.
+
+### landing-page.php — new entry point
+`landing-page.php` is now the primary index for the Docker image. A redirect check at the top of the file handles routing:
+
+- `NEWTON_LANDING_PAGE=true` → renders the landing page (strict CSP, **A+**)
+- Env var not set → 302 redirect to `/tournament.php` (tournament-only deployments go straight to the app)
+
+### /tournament.html — clean, indexable URL
+nginx rewrites `/tournament.html` to `tournament.php` internally. The client URL stays `/tournament.html` — clean enough for Google to index, and processed as PHP for the Docker config injection and permissive CSP.
+
+---
+
 ## Files Changed
 
 - `js/lightbox.js` — New external lightbox script
 - `landing.html` — Inline JS/styles removed, external script added
-- `landing-page.php` — Same changes as `landing.html`
+- `landing-page.php` — Redirect logic added at top; same inline JS/style removals as `landing.html`
+- `tournament.html` — PHP landing page switcher removed (line 1)
 - `userguide.html` — Footer inline style replaced with class
 - `privacy.html` — Footer inline style replaced with class
 - `architecture.html` — Footer inline style replaced with class
@@ -100,7 +119,7 @@ Note: In nginx, `add_header` directives inside a `location` block replace (not a
 - `releases/*.html` — Footer inline style replaced with class (13 files)
 - `releases/index.html` — Footer inline style replaced with class
 - `releases/README.md` — Template updated
-- `docker/nginx.conf` — Differentiated CSP: strict default, permissive for PHP and Chalker
+- `docker/nginx.conf` — Differentiated CSP: strict default, permissive for PHP and Chalker; `landing-page.php` as primary index; `/tournament.html` rewrite added
 - `CHANGELOG.md` — v4.2.13 entry added
 
 ---

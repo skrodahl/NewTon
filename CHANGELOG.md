@@ -9,6 +9,13 @@
 - **Permissive CSP preserved**: Tournament Manager (`tournament.php`) and Chalker (`/chalker/`) retain `'unsafe-inline'` in their CSP — required due to 93+ inline event handlers and 266+ inline styles in the tournament app. These pages grade **A** on SecurityHeaders.com.
 - **Files updated**: `landing.html`, `landing-page.php`, `userguide.html`, `privacy.html`, `architecture.html`, `docker-quickstart.html`, `rest-api.html`, all `releases/*.html`, `releases/README.md`, `css/landing.css`, `docker/nginx.conf`.
 
+### Landing page routing — extracted from tournament.html
+
+- **PHP switcher removed**: The one-line PHP router on line 1 of `tournament.html` has been removed. `tournament.html` is now a pure tournament app file with no landing page logic.
+- **`landing-page.php` is now the entry point**: Serves as the Docker index. If `NEWTON_LANDING_PAGE=true`, renders the landing page. If the env var is not set, issues a 302 redirect to `/tournament.php` — tournament-only deployments go straight to the app.
+- **`/tournament.html` URL**: nginx rewrites `/tournament.html` to `tournament.php` internally — the URL stays clean and is indexable by Google.
+- **Files updated**: `tournament.html`, `landing-page.php`, `docker/nginx.conf`.
+
 ---
 
 ## **v4.2.12** - Dedicated Domain: newtondarts.com (2026-03-19)

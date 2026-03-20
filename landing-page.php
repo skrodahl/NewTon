@@ -1,7 +1,7 @@
 <?php
-// Landing page - rendered when NEWTON_LANDING_PAGE=true
-// This file is included by tournament.php (renamed from tournament.html in Docker)
-// It is never accessed directly by browsers - only via PHP include
+// Landing page — served at / when NEWTON_LANDING_PAGE=true
+// Without the env var, redirects to /tournament.php (tournament-only deployments)
+if (getenv('NEWTON_LANDING_PAGE') !== 'true') { header('Location: /tournament.php', true, 302); exit; }
 $githubUrl = htmlspecialchars(getenv('NEWTON_GITHUB_URL') ?: 'https://github.com/skrodahl/NewTon');
 $baseUrl = htmlspecialchars(getenv('NEWTON_BASE_URL') ?: '');
 $ogUrlTag = $baseUrl ? "\n    <meta property=\"og:url\" content=\"{$baseUrl}\">" : '';
@@ -74,7 +74,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         <div class="landing-header">
             <div class="landing-header-top">
                 <h1>
-                    <img src="images/logo.jpg" alt="NewTon DC Logo" class="landing-logo">
+                    <img src="images/logo.jpg" alt="NewTon DC Tournament Manager Logo" class="landing-logo">
                     NewTon DC - Tournament Manager
                 </h1>
             </div>
@@ -110,7 +110,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             </div>
         </div>
         <div class="hero-buttons">
-            <a href="?launch" class="btn-launch" target="_blank">Launch Tournament Manager</a>
+            <a href="tournament.html" class="btn-launch" target="_blank">Launch Tournament Manager</a>
             <a href="chalker/" class="btn-chalker" target="_blank">Open Chalker App</a>
             <a href="<?= $githubUrl ?>" class="btn-github">View on GitHub</a>
         </div>
@@ -277,17 +277,17 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         </div>
     </div>
 
-    <!-- Lightbox -->
-    <div id="lightbox" class="lightbox">
-        <div class="lightbox-content">
-            <button class="lightbox-close" aria-label="Close">&times;</button>
-            <img id="lightboxImg" src="" alt="">
-        </div>
-    </div>
-
-    <script src="js/lightbox.js"></script>
-
     </main>
+
+<!-- Lightbox -->
+<div id="lightbox" class="lightbox">
+    <div class="lightbox-content">
+        <button class="lightbox-close" aria-label="Close">&times;</button>
+        <img id="lightboxImg" src="" alt="">
+    </div>
+</div>
+
+<script src="js/lightbox.js"></script>
 
     <!-- Footer -->
     <div class="landing-footer">
