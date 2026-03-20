@@ -70,6 +70,15 @@ Currently all files are baked into the Docker image at build time, so updating t
 
 **Verdict pending:** Useful for the maintainer's own deployment, but complicates the operator experience. May not be worth it given how rarely these files change.
 
+### Separate Landing Page from tournament.php
+
+Currently the Docker image serves both the landing page and the tournament app through `tournament.php` — the PHP file checks `NEWTON_LANDING_PAGE` and either includes `landing-page.php` or serves the app. This creates two problems:
+
+1. **CSP limitation**: The landing page inherits the permissive `unsafe-inline` CSP from the PHP handler, even though it no longer has any inline code (as of v4.2.13). Separating would give the landing page an A+ security rating on the root URL.
+2. **Google indexing**: `/?launch` is difficult for Google to index and reference — it's a query parameter on the same URL as the landing page, not a distinct path. A clean separation (e.g. landing page at `/`, app at `/app` or `/tournament`) would give each page its own URL and proper indexing.
+
+**Approach TBD.** Requires changes to nginx routing, the Dockerfile, and possibly the `?launch` mechanism.
+
 ### Match Archive — IndexedDB Store
 
 Add a permanent indexedDB match archive alongside localStorage (no migration — localStorage stays untouched). The archive stores raw visit data per match and is the foundation for full scoresheet storage, player statistics, season history, and external reporting.
@@ -85,4 +94,4 @@ See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record
 
 ---
 
-**Last updated:** March 14, 2026
+**Last updated:** March 20, 2026

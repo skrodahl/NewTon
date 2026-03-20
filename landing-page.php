@@ -74,8 +74,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         <div class="landing-header">
             <div class="landing-header-top">
                 <h1>
-                    <img src="images/logo.jpg" alt="NewTon DC Logo" class="landing-logo"
-                         onerror="this.outerHTML='<div class=\'landing-logo-placeholder\'>CLUB<br>LOGO</div>'">
+                    <img src="images/logo.jpg" alt="NewTon DC Logo" class="landing-logo">
                     NewTon DC - Tournament Manager
                 </h1>
             </div>
@@ -202,7 +201,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-bracket-zoom.jpg" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/tournament-bracket-zoom.png', '16-player tournament bracket showing Match Card Magic Zoom and status bar')">
+                <img src="Screenshots/th-tournament-bracket-zoom.jpg" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Bracket View</span>
@@ -213,7 +212,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-match-controls.jpg" alt="Match controls showing referee suggestions and conflict detection" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/match-controls.png', 'Match controls showing referee suggestions and conflict detection')">
+                <img src="Screenshots/th-match-controls.jpg" alt="Match controls showing referee suggestions and conflict detection" loading="lazy" class="lightbox-trigger" data-full="Screenshots/match-controls.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Match Controls</span>
@@ -224,7 +223,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-player-registration-help.jpg" alt="Player registration page with saved players and dynamic help system" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/player-registration-help.png', 'Player registration page with saved players and dynamic help system')">
+                <img src="Screenshots/th-player-registration-help.jpg" alt="Player registration page with saved players and dynamic help system" loading="lazy" class="lightbox-trigger" data-full="Screenshots/player-registration-help.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Player Management</span>
@@ -235,7 +234,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-setup.jpg" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/tournament-setup.png', 'Tournament setup page with name, date, and bracket configuration')">
+                <img src="Screenshots/th-tournament-setup.jpg" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-setup.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Setup</span>
@@ -246,7 +245,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-bracket.jpg" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/tournament-bracket.png', 'Tournament bracket showing fair draw seeding and BYE placement')">
+                <img src="Screenshots/th-tournament-bracket.jpg" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Fair Draw</span>
@@ -257,7 +256,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-celebration.jpg" alt="Tournament winner celebration screen" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/celebration.png', 'Tournament winner celebration screen')">
+                <img src="Screenshots/th-celebration.jpg" alt="Tournament winner celebration screen" loading="lazy" class="lightbox-trigger" data-full="Screenshots/celebration.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Tournament Complete</span>
@@ -268,7 +267,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-chalker-scoreboard.jpg" alt="NewTon Chalker scoring app showing live 501 scoresheet with per-visit scores and running totals" loading="lazy" class="lightbox-trigger" onclick="openLightbox('Screenshots/chalker-scoreboard.png', 'NewTon Chalker scoring app showing live 501 scoresheet with per-visit scores and running totals')">
+                <img src="Screenshots/th-chalker-scoreboard.jpg" alt="NewTon Chalker scoring app showing live 501 scoresheet with per-visit scores and running totals" loading="lazy" class="lightbox-trigger" data-full="Screenshots/chalker-scoreboard.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Chalker App</span>
@@ -279,26 +278,14 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     </div>
 
     <!-- Lightbox -->
-    <div id="lightbox" class="lightbox" onclick="closeLightbox()">
-        <div class="lightbox-content" onclick="event.stopPropagation()">
-            <button class="lightbox-close" onclick="closeLightbox()" aria-label="Close">&times;</button>
+    <div id="lightbox" class="lightbox">
+        <div class="lightbox-content">
+            <button class="lightbox-close" aria-label="Close">&times;</button>
             <img id="lightboxImg" src="" alt="">
         </div>
     </div>
 
-    <script>
-    function openLightbox(src, alt) {
-        document.getElementById('lightboxImg').src = src;
-        document.getElementById('lightboxImg').alt = alt || '';
-        document.getElementById('lightbox').classList.add('is-open');
-        document.addEventListener('keydown', _lbEsc);
-    }
-    function closeLightbox() {
-        document.getElementById('lightbox').classList.remove('is-open');
-        document.removeEventListener('keydown', _lbEsc);
-    }
-    function _lbEsc(e) { if (e.key === 'Escape') { document.getElementById('lightbox').classList.remove('is-open'); document.removeEventListener('keydown', _lbEsc); } }
-    </script>
+    <script src="js/lightbox.js"></script>
 
     </main>
 
@@ -309,7 +296,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             <a href="<?= $githubUrl ?>">GitHub</a> &mdash;
             <a href="privacy.html">Privacy</a>
         </p>
-        <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+        <p><em class="footer-cheeky">No popups? No cookies!</em></p>
     </div>
 
 </body>

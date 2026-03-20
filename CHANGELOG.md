@@ -1,3 +1,16 @@
+## **v4.2.13** - A+ Security Headers. Yes, Really. (2026-03-20)
+
+### CSP hardening — A+ on SecurityHeaders.com
+
+- **Lightbox extracted**: Inline `<script>` block and all `onclick` handlers moved to external `js/lightbox.js`. Images use `data-full` attributes instead of inline event handlers. Zero inline JavaScript on the landing page and all doc pages.
+- **Logo fallback**: Inline `onerror` handler on the logo `<img>` replaced with `addEventListener` in `js/lightbox.js`.
+- **Footer inline style**: `style="color: #a89080;"` on the "No popups? No cookies!" footer text replaced with `.footer-cheeky` CSS class across all pages — landing, docs, and release notes.
+- **Strict CSP for static pages**: `nginx.conf` now serves a strict Content-Security-Policy without `unsafe-inline` for the landing page, doc pages, and release notes. SecurityHeaders.com grades these pages **A+**.
+- **Permissive CSP preserved**: Tournament Manager (`tournament.php`) and Chalker (`/chalker/`) retain `'unsafe-inline'` in their CSP — required due to 93+ inline event handlers and 266+ inline styles in the tournament app. These pages grade **A** on SecurityHeaders.com.
+- **Files updated**: `landing.html`, `landing-page.php`, `userguide.html`, `privacy.html`, `architecture.html`, `docker-quickstart.html`, `rest-api.html`, all `releases/*.html`, `releases/README.md`, `css/landing.css`, `docker/nginx.conf`.
+
+---
+
 ## **v4.2.12** - Dedicated Domain: newtondarts.com (2026-03-19)
 
 ### Domain migration

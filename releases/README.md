@@ -125,7 +125,7 @@ The versioned page uses `changefreq: never` — it will never change after publi
         <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
         <a href="/privacy.html">Privacy</a>
     </p>
-    <p><em style="color: #a89080;">No popups? No cookies!</em></p>
+    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
 </div>
 
 </body>
