@@ -332,18 +332,17 @@ body {
     align-self: center;
 }
 
-@media (max-width: 600px) {
+@media (max-width: 730px) {
     .get-started-grid {
         grid-template-columns: 1fr;
     }
 
     .get-started-card--wide {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
     }
 
     .get-started-card--wide .btn-github {
-        align-self: stretch;
         text-align: center;
     }
 }
