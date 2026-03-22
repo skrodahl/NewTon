@@ -573,6 +573,38 @@
                                     </select>
                                 </div>
                             </div>
+                            <h4 style="margin: 22px 0 6px 0; color: #333; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #ddd; padding-bottom: 6px;">Chalker</h4>
+                            <p style="margin: 0 0 12px 0; color: #666; font-size: 13px;">x01 format and max rounds sent to the Chalker via QR code when starting a match.</p>
+                            <div class="config-grid">
+                                <div class="form-group">
+                                    <label for="chalkerX01Format">x01 Format</label>
+                                    <select id="chalkerX01Format">
+                                        <option value="101">101</option>
+                                        <option value="201">201</option>
+                                        <option value="301">301</option>
+                                        <option value="501" selected>501</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="chalkerMaxRounds">Max Rounds</label>
+                                    <select id="chalkerMaxRounds">
+                                        <option value="7">7</option>
+                                        <option value="8">8</option>
+                                        <option value="9">9</option>
+                                        <option value="10">10</option>
+                                        <option value="11">11</option>
+                                        <option value="12">12</option>
+                                        <option value="13" selected>13</option>
+                                        <option value="14">14</option>
+                                        <option value="15">15</option>
+                                        <option value="16">16</option>
+                                        <option value="17">17</option>
+                                        <option value="18">18</option>
+                                        <option value="19">19</option>
+                                        <option value="20">20</option>
+                                    </select>
+                                </div>
+                            </div>
                             <div class="config-buttons">
                                 <button class="btn btn-success" onclick="saveMatchConfiguration()">Save Match Configuration</button>
                                 <button class="btn" onclick="resetMatchConfigToDefaults()">Reset to Defaults</button>

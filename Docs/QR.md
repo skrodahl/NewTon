@@ -1,7 +1,17 @@
 # QR Code Communication Protocol (TM ↔ Chalker)
 
-**Status:** Planning
-**Last Updated:** February 2026
+**Status:** In Development — v5.0.0
+**Last Updated:** March 2026
+
+---
+
+## Decisions (March 2026)
+
+- **Version**: This feature ships as **v5.0.0** — TM↔Chalker communication is a fundamental architectural shift.
+- **First implementation target**: TM generates assignment QR (TM → Chalker direction). Chalker scanning comes second.
+- **`sc` and `mr` in TM Global Settings (Match Configuration card)**: Two new fields added at the bottom of the existing Match Configuration section. x01 Format: 101 / 201 / 301 / 501 (default 501). Max Rounds: dropdown 7–20 (default 13). Both are included in the assignment payload. This keeps TM as the single source of truth for match format — the Chalker executes whatever it is told.
+- **Network and QR unified in Chalker**: Not two separate buttons. The "New Match?" dialog will have a single **"Network / QR"** button. QR is the fallback when network is unavailable. The existing "Network Mode" placeholder (currently shows "requires a license") will be extended rather than replaced.
+- **Chalker scanning QR**: Deferred — comes after TM QR generation is working.
 
 ---
 
@@ -73,12 +83,11 @@ The `sid` (server ID) is a 12-character hex string generated once per TM install
 | `p1` | string | Player 1 name |
 | `p2` | string | Player 2 name |
 | `sc` | number | Starting score (501, 301, etc.) |
-| `bo` | number | Best-of legs |
-| `mr` | number | Max rounds before forced tiebreak (requires new Global Settings field in TM) |
-| `ln` | number | Lane number (1-20). **Omitted if unassigned.** |
-| `ref` | string | Referee name. **Omitted if none.** |
-
-> **Note:** The TM does not currently have a max rounds setting. This needs to be added to the Global Settings page (Config) as a prerequisite for QR match assignment. Default value: 13 rounds (39 darts).
+| `sc` | number | Starting score — from Global Config (101 / 201 / 301 / 501, default 501) |
+| `bo` | number | Best-of legs — from Global Config match configuration |
+| `mr` | number | Max rounds before tiebreak — from Global Config (default 13, range 7–20) |
+| `ln` | number | Lane number (1-20). **Required for QR — warning shown if unset.** |
+| `ref` | string | Referee name. **Required for QR — warning shown if unset.** |
 
 ### Match Result (Chalker → TM QR)
 

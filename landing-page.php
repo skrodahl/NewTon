@@ -126,7 +126,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             <div class="get-started-card">
                 <h3>Local Use</h3>
                 <p>Download the latest release, unzip, and double-click <code>tournament.html</code>. No installation required — runs entirely in your browser.</p>
-                <a href="/releases/" class="btn-github">Download Latest Release</a>
+                <a href="releases/" class="btn-github">Download Latest Release</a>
             </div>
             <div class="get-started-card">
                 <h3>Self-Hosted</h3>

@@ -1116,6 +1116,7 @@ body {
   overflow: hidden; /* Prevent content overflow */
 }
 
+
 /* Analytics Modal - Override default modal constraints */
 .analytics-modal-content {
   margin: 1% auto !important;

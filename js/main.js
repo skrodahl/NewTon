@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '4.2.13';
+const APP_VERSION = '5.0.0';
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -198,6 +198,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (footerContent) {
         footerContent.textContent = `${_0x2d()} version ${APP_VERSION}`;
     }
+
 
     // Application integrity check
     const _0x3f = () => {

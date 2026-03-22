@@ -26,7 +26,9 @@ const DEFAULT_CONFIG = {
         seQuarterfinal: 3,
         seSemifinal: 3,
         seBronze: 5,
-        seFinal: 5
+        seFinal: 5,
+        x01Format: 501,
+        maxRounds: 13
     },
     clubName: "NewTon DC",
     lanes: {
@@ -112,6 +114,8 @@ function applyConfigToUI() {
     safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
     safeSetValue('seBronzeLegs', config.legs.seBronze);
     safeSetValue('seFinalLegs', config.legs.seFinal);
+    safeSetValue('chalkerX01Format', config.legs.x01Format);
+    safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
 
     // Application title
     if (config.clubName) {
@@ -410,6 +414,10 @@ function saveMatchConfiguration() {
     config.legs.seBronze = parseInt(document.getElementById('seBronzeLegs').value) || 5;
     config.legs.seFinal = parseInt(document.getElementById('seFinalLegs').value) || 5;
 
+    // Read values from UI — Chalker
+    config.legs.x01Format = parseInt(document.getElementById('chalkerX01Format').value) || 501;
+    config.legs.maxRounds = parseInt(document.getElementById('chalkerMaxRounds').value) || 13;
+
     // Save to localStorage
     saveGlobalConfig();
 
@@ -466,6 +474,8 @@ function resetMatchConfigToDefaults() {
         safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
         safeSetValue('seBronzeLegs', config.legs.seBronze);
         safeSetValue('seFinalLegs', config.legs.seFinal);
+        safeSetValue('chalkerX01Format', config.legs.x01Format);
+        safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
 
         // Save to localStorage
         saveGlobalConfig();
