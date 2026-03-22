@@ -1,3 +1,43 @@
+## **v5.0.0-beta.1** - Your Boarding Pass for the Oche (2026-03-22)
+
+### Major version — TM ↔ Chalker communication begins
+
+v5.0.0 introduces the first step of direct communication between the Tournament Manager and the Chalker: QR-based match assignment. The TM generates a signed QR code for any live match; the Chalker scans it and receives everything it needs to start scoring. No typing, no mistakes.
+
+### QR match assignment (TM → Chalker)
+
+- **QR button on live match cards**: A "QR" button appears to the left of "Stop Match" on every live match card in Match Controls. Click it to display the Chalker assignment QR code.
+- **Assignment payload**: QR encodes match ID, tournament ID, server ID, player names, x01 format, best-of legs, max rounds, lane, and referee — everything the Chalker needs to auto-populate.
+- **CRC-32 integrity**: Every payload is signed with a CRC-32 checksum (`js/newton-integrity.js`). The Chalker will verify on scan; the same module will be reused for MQTT payloads in a future release.
+- **Server ID**: A 12-character hex identifier is generated once per TM installation and persisted in global config. Identifies this TM instance in QR payloads and prevents cross-TM result injection.
+- **Lane &amp; Referee required**: If either is not assigned, clicking QR shows a warning instead of a code — the Chalker needs both to function.
+- **QR library**: `lib/qrcode-generator.js` — standalone, zero external dependencies, loaded on page start.
+
+### Chalker settings in Global Config
+
+- **x01 Format**: New dropdown in Match Configuration → Chalker section. Options: 101 / 201 / 301 / 501 (default: 501). Sent to Chalker via QR.
+- **Max Rounds**: New dropdown. Range: 7–20 (default: 13). Sets the tiebreak threshold. Sent to Chalker via QR.
+- Both fields reset correctly with "Reset to Defaults" and are included in Developer Console → Reset All Config.
+
+### Match Controls UI
+
+- **Lane dropdown**: Narrowed with dedicated `cc-lane-dropdown` class (58px) — lane numbers are 1–2 digits, no more wasted space.
+- **Referee dropdown**: Narrowed with `cc-referee-dropdown` class (120px) — names are already truncated to 10 characters.
+
+### Files changed
+
+- `js/main.js` — version bump to 5.0.0-beta.1
+- `js/newton-integrity.js` — new CRC-32 sign/verify module
+- `js/qr-bridge.js` — new QR payload builder and modal display
+- `lib/qrcode-generator.js` — new QR generation library
+- `js/results-config.js` — `x01Format`, `maxRounds` in DEFAULT_CONFIG; server ID generation; Chalker section in `saveMatchConfiguration` and `resetMatchConfigToDefaults`
+- `js/bracket-rendering.js` — QR button on live cards; `cc-lane-dropdown` and `cc-referee-dropdown` classes
+- `tournament.html` — matchQRModal markup; script tags for new files; Chalker subsection in Match Configuration UI
+- `css/styles.css` — `.cc-btn-qr`, `.cc-lane-dropdown`, `.cc-referee-dropdown`
+- `Docs/QR.md` — updated with all v5.0.0 design decisions
+
+---
+
 ## **v4.2.13** - A+ Security Headers. Yes, Really. (2026-03-20)
 
 ### CSP hardening — A+ on SecurityHeaders.com

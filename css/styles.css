@@ -1435,6 +1435,16 @@ a:hover { color: #1e40af; }
   min-width: 80px;
 }
 
+.cc-lane-dropdown {
+  min-width: 0;
+  width: 58px;
+}
+
+.cc-referee-dropdown {
+  min-width: 0;
+  width: 120px;
+}
+
 .cc-match-action-btn {
   padding: 6px 12px;
   border: none;
@@ -1461,6 +1471,17 @@ a:hover { color: #1e40af; }
 
 .cc-btn-stop:hover {
   background: rgba(154, 52, 18, 1);
+}
+
+.cc-btn-qr {
+  background: white;
+  color: #111827;
+  border: 1px solid #d1d5db;
+  margin-right: 8px;
+}
+
+.cc-btn-qr:hover {
+  background: #f3f4f6;
 }
 
 .cc-btn-complete {

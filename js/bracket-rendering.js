@@ -3202,6 +3202,10 @@ function createMatchCard(match) {
 
     // For live matches, show stop button; for non-live matches, show start button
     // Disable start button if there's a referee conflict
+    const qrButton = state === 'live' ?
+        `<button class="cc-match-action-btn cc-btn-qr" onclick="openMatchQR('${match.id}')" title="Show Chalker QR code">QR</button>` :
+        '';
+
     const actionButton = state === 'live' ?
         `<button class="cc-match-action-btn cc-btn-stop" onclick="toggleActive('${match.id}'); setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100);">Stop Match</button>` :
         `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}"${hasRefereeConflict ? ' disabled' : ''}>Start Match</button>`;
@@ -3234,19 +3238,20 @@ function createMatchCard(match) {
             <div class="cc-match-controls">
                 <div class="cc-control-group">
                     <label class="cc-control-label">Lane:</label>
-                    <select class="cc-match-dropdown" onchange="updateMatchLane('${match.id}', this.value);">
+                    <select class="cc-match-dropdown cc-lane-dropdown" onchange="updateMatchLane('${match.id}', this.value);">
                         ${laneOptions}
                     </select>
                 </div>
 
                 <div class="cc-control-group">
                     <label class="cc-control-label">Referee:</label>
-                    <select class="cc-match-dropdown" onchange="updateMatchReferee('${match.id}', this.value);">
+                    <select class="cc-match-dropdown cc-referee-dropdown" onchange="updateMatchReferee('${match.id}', this.value);">
                         ${refereeOptions}
                     </select>
                 </div>
 
                 <div style="flex: 1;"></div>
+                ${qrButton}
                 ${actionButton}
             </div>
         </div>

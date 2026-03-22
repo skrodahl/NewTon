@@ -402,7 +402,14 @@ Both sides need both generation and scanning. Libraries loaded on-demand (not at
 
 6. **Chalker stays "dumb"**: The Chalker doesn't need tournament knowledge. It receives IDs via the assignment QR and echoes them back in the result QR. All validation happens on the TM side.
 
-7. **Self-signed SSL**: Works for camera access. Browser shows a one-time certificate warning; once accepted, `getUserMedia` (camera API) works normally. Docker can auto-generate a self-signed cert.
+7. **Self-signed SSL and camera access in Docker**: Camera access (`getUserMedia`, `BarcodeDetector`) requires a secure context. Secure context rules:
+   - **HTTPS (any cert, including self-signed)**: camera works. Browser shows a one-time "not private" warning on first visit; once accepted, camera works normally and the Chalker can be installed as a PWA.
+   - **`localhost` over HTTP**: camera works — browsers treat localhost as a secure context regardless of protocol.
+   - **Local IP over HTTP** (e.g. `http://192.168.1.x`): camera **blocked**. PWA install also blocked — browsers refuse to install PWAs from non-secure non-localhost origins.
+
+   **Docker SSL strategy**: Generate a self-signed certificate at container startup if none exists. Store it in the persistent data volume (same location as tournament data). Use a **30-year validity** — certificate lifetimes are a CA policy decision, not a cryptographic requirement; a self-signed cert for a local network can safely use any duration. Operators can replace the generated cert with their own by dropping cert files into the data volume. The container startup script checks: if cert files exist → use them; if not → generate them.
+
+   **Alternative for internet-connected deployments**: Caddy with Let's Encrypt automatically issues and renews a real certificate — no browser warning, no operator action required beyond pointing a real domain at the server. Not suitable for air-gapped or offline deployments.
 
 8. **Stats the TM doesn't currently track**: The result QR carries raw visit scores from which the TM can derive everything (averages, score ranges, high finishes, best/worst leg, etc.). The TM currently doesn't store this detail beyond winner/loser and leg score. A future enhancement could display derived stats in the bracket or leaderboard.
 

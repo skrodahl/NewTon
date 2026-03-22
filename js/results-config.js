@@ -69,6 +69,13 @@ function loadConfiguration() {
         saveGlobalConfig();
         applyConfigToUI();
     }
+
+    // Generate server ID once — identifies this TM instance in QR payloads
+    if (!config.server.serverId) {
+        config.server.serverId = crypto.randomUUID().replace(/-/g, '').substring(0, 12);
+        saveGlobalConfig();
+        console.log('✓ Generated server ID:', config.server.serverId);
+    }
 }
 
 // MERGE CONFIG WITH DEFAULTS

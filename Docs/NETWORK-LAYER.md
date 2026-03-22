@@ -272,6 +272,7 @@ Priority order:
 2. Query parameter: `?hub=wss://...`
 3. Well-known path: `../hub` (relative to app)
 4. Environment variable in Docker: `NEWTON_HUB_URL`
+5. **mDNS** — only applicable to the local Docker + hub scenario. newton-hub advertises itself as `_newton._tcp.local` on the local network; TM and Chalker discover it automatically without manual IP/URL configuration. Not relevant for standalone (no hub) or cloud/VPS deployments (real domain + DNS). Browser JS has no mDNS API — discovery must happen server-side or via a Docker entrypoint helper that resolves the hub address and writes it to the app config before nginx starts.
 
 ### Graceful Degradation
 

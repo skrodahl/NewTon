@@ -842,6 +842,8 @@
         </div>
 
         <!-- Load JavaScript files in the correct order -->
+        <script src="lib/qrcode-generator.js"></script>
+        <script src="js/newton-integrity.js"></script>
         <script src="js/types.js"></script>
         <script src="js/main.js"></script>
         <script src="js/lane-management.js"></script>
@@ -853,6 +855,7 @@
         <script src="js/results-config.js"></script>
         <script src="js/dynamic-help-system.js"></script>
         <script src="js/analytics.js"></script>
+        <script src="js/qr-bridge.js"></script>
 
         <footer>
             <span id="footerContent"></span></br> Created by Håvard Skrödahl, NewTon DC Malmö
@@ -1485,6 +1488,19 @@
                     <button class="btn" onclick="popDialog()">Cancel</button>
                     <button class="btn btn-success" id="confirmExportBtn" onclick="confirmExport()">Export
                         Results</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match QR Modal -->
+        <div id="matchQRModal" class="modal">
+            <div class="modal-content" style="max-width: 580px; text-align: center;">
+                <h3 id="matchQRTitle">Chalker QR Code</h3>
+                <p id="matchQRSubtitle" style="color: #6b7280; margin: 0 0 12px 0; font-size: 17px;"></p>
+                <div id="matchQRCode" style="display: flex; justify-content: center; margin: 8px 0;"></div>
+                <p id="matchQRWarning" style="color: #d97706; margin: 12px 0 0 0; display: none;"></p>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()">Close</button>
                 </div>
             </div>
         </div>
