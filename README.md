@@ -188,7 +188,7 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 - **Import/Export**: JSON files for backup and computer-to-computer transfers
 - **Privacy**: [Complete local storage](https://newtondarts.com/privacy.html), no cloud or external data sharing
 - **Undo System**: Reverse recent match results with transaction history
-- **Developer Console**: Manage late registrations, Debug, view tournament health, transaction log management
+- **Developer Console**: Manage late registrations, debug, view tournament health, transaction log management
 
 ---
 
