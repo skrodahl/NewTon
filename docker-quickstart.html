@@ -138,6 +138,11 @@ networks:
     external: true</code></pre>
     <p>In NPM, configure the proxy host to forward to <code>newton:2020</code>.</p>
 
+    <h3>Nginx Proxy Manager — Camera Access (Chalker QR)</h3>
+    <p>NPM sets its own <code>Permissions-Policy</code> header that overrides the container's nginx headers. This blocks camera access in the Chalker, which is required for QR scanning. Add the following to the <strong>Advanced</strong> tab of your NPM proxy host:</p>
+    <pre><code>more_set_headers "Permissions-Policy: geolocation=(), microphone=(), camera=(self), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()";</code></pre>
+    <p><code>more_set_headers</code> replaces the header rather than adding a duplicate. OpenResty (which NPM runs on) includes the <code>headers-more</code> module, so this directive is available without any additional setup.</p>
+
     <h3>Demo / Public Site</h3>
     <p>To replicate a public demo site like <a href="https://newtondarts.com" target="_blank" rel="noopener">newtondarts.com</a>, add the following to your <code>docker-compose.yml</code>:</p>
     <pre><code>environment:

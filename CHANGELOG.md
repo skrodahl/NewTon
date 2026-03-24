@@ -1,3 +1,41 @@
+## **v5.0.0** - The Revolution Will Be Scanned (2026-03-24)
+
+### Referee shown everywhere
+
+The referee name now appears in the QR modal subtitle (`Harry vs Bob · Lane 1 · 501 Bo3 · Ref: Charles`) and in the Chalker match info bar (`Lane 1 · 501 · Leg 1 of 3 · Ref: Charles`) for QR-started matches.
+
+### Chalker link in Tournament Manager nav
+
+A **Chalker** link at the end of the TM navigation row opens the Chalker in a new tab. Works in both local file and served deployments (`chalker/index.html`).
+
+### Footer link to newtondarts.com
+
+"NewTon DC Tournament Manager" in the TM footer is now a link to [newtondarts.com](https://newtondarts.com), styled to match the surrounding text.
+
+### Camera permission fix — Permissions-Policy header
+
+The Chalker QR scanner was blocked by a `Permissions-Policy: camera=()` HTTP header set by the Docker nginx configuration. Fixed by changing `camera=()` to `camera=(self)` in the `/chalker/` location block.
+
+Users running behind a reverse proxy (e.g. Nginx Proxy Manager) must also override the header at the proxy level — NPM sets its own `Permissions-Policy` that overrides the container's nginx headers. See the Docker Quick Start guide for the required NPM custom nginx snippet.
+
+### Camera constraint relaxed
+
+`getUserMedia` constraint changed from `{ facingMode: 'environment' }` to `{ video: true }` for broader device compatibility.
+
+### Files changed
+
+- `js/main.js` — footer link to newtondarts.com
+- `js/qr-bridge.js` — referee name in QR modal subtitle
+- `tournament.html` — Chalker nav link
+- `landing.html` — `chalker/` → `chalker/index.html`
+- `css/styles.css` — `font-family: inherit` and `text-decoration: none` on `.nav-btn`; footer link styles
+- `docker/nginx.conf` — `camera=()` → `camera=(self)` in `/chalker/` location block
+- `chalker/js/chalker.js` — referee in match info bar; `video: true` constraint
+- `chalker/sw.js` — version bumped to `chalker-v99`
+- `docker-quickstart.html` — NPM Permissions-Policy workaround documented
+
+---
+
 ## **v5.0.0-beta.2** - The Chalker Has Eyes Now (2026-03-24)
 
 ### Chalker QR scanning (Chalker ← TM)

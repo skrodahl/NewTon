@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.0-beta.2';
+const APP_VERSION = '5.0.0';
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -196,7 +196,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Update footer with version
     const footerContent = document.getElementById('footerContent');
     if (footerContent) {
-        footerContent.textContent = `${_0x2d()} version ${APP_VERSION}`;
+        footerContent.innerHTML = `<a href="https://newtondarts.com" target="_blank" rel="noopener">${_0x2d()}</a> version ${APP_VERSION}`;
     }
 
 

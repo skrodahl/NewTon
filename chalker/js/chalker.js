@@ -1212,6 +1212,7 @@
     if (state.config.laneName) infoParts.push(state.config.laneName);
     infoParts.push(state.config.startingScore);
     infoParts.push(`Leg ${state.legs.length} of ${state.config.bestOf}`);
+    if (state.config.referee) infoParts.push(`Ref: ${state.config.referee}`);
     elements.matchInfoBar.textContent = infoParts.join(' • ');
 
     // Update active player indicator

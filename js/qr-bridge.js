@@ -62,7 +62,7 @@ function openMatchQR(matchId) {
     qr.make();
 
     titleEl.textContent    = `${match.id} — Chalker QR`;
-    subtitleEl.textContent = `${match.player1.name} vs ${match.player2.name} · Lane ${match.lane} · ${config.legs.x01Format || 501} Bo${match.legs || 3}`;
+    subtitleEl.textContent = `${match.player1.name} vs ${match.player2.name} · Lane ${match.lane} · ${config.legs.x01Format || 501} Bo${match.legs || 3} · Ref: ${refName}`;
     codeEl.innerHTML       = qr.createSvgTag(6, 2);
 
     pushDialog('matchQRModal', null, true);

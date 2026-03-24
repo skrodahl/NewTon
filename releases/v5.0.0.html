@@ -98,7 +98,15 @@
     <hr>
 
     <h2 id="ui">Tournament Manager Polish</h2>
-    <p>Match Controls lane and referee dropdowns narrowed to prevent row wrapping when the QR button is present. A <strong>Chalker</strong> link added to the TM nav row — opens in a new tab. "NewTon DC Tournament Manager" in the footer now links to <a href="https://newtondarts.com" target="_blank" rel="noopener">newtondarts.com</a>.</p>
+
+    <h3>Match Controls</h3>
+    <p>Lane dropdown narrowed to 58px, Referee dropdown to 120px — prevents the bottom row from wrapping when the QR button is present.</p>
+
+    <h3>Chalker Link in Nav</h3>
+    <p>A <strong>Chalker</strong> button at the end of the TM navigation row opens the Chalker in a new tab.</p>
+
+    <h3>Footer Link</h3>
+    <p>"NewTon DC Tournament Manager" in the TM footer now links to <a href="https://newtondarts.com" target="_blank" rel="noopener">newtondarts.com</a>, styled to match the surrounding text.</p>
 
     <hr>
 
@@ -111,12 +119,45 @@
     <hr>
 
     <h2 id="files">Files Changed</h2>
-    <p>See the full list in <a href="v5.0.0.html">v5.0.0 release notes</a>.</p>
+
+    <h3>Tournament Manager</h3>
+    <ul>
+        <li><code>js/main.js</code> — version bump to 5.0.0; footer link to newtondarts.com</li>
+        <li><code>js/newton-integrity.js</code> — new CRC-32 sign/verify module</li>
+        <li><code>js/qr-bridge.js</code> — QR payload builder and modal display; referee in subtitle</li>
+        <li><code>lib/qrcode-generator.js</code> — QR generation library (qrcode-generator v1.4.4, standalone)</li>
+        <li><code>js/results-config.js</code> — <code>x01Format</code>, <code>maxRounds</code> in DEFAULT_CONFIG; server ID generation</li>
+        <li><code>js/bracket-rendering.js</code> — QR button on live cards; narrowed dropdown classes</li>
+        <li><code>tournament.html</code> — matchQRModal markup; Chalker subsection in Match Configuration; Chalker nav link</li>
+        <li><code>landing.html</code> — <code>chalker/</code> &rarr; <code>chalker/index.html</code></li>
+        <li><code>css/styles.css</code> — <code>.cc-btn-qr</code>, <code>.cc-lane-dropdown</code>, <code>.cc-referee-dropdown</code>; nav-btn font fixes; footer link styles</li>
+    </ul>
+
+    <h3>Chalker</h3>
+    <ul>
+        <li><code>chalker/index.html</code> — QR button; scan modal; confirm modal; script tags</li>
+        <li><code>chalker/js/chalker.js</code> — QR scanning, verification, confirmation, and match start from payload; referee in info bar</li>
+        <li><code>chalker/js/newton-integrity.js</code> — new file, identical copy of TM CRC-32 module</li>
+        <li><code>chalker/styles/chalker.css</code> — camera modal and confirmation modal styles</li>
+        <li><code>chalker/sw.js</code> — version <code>chalker-v99</code></li>
+    </ul>
+
+    <h3>Docker</h3>
+    <ul>
+        <li><code>docker/nginx.conf</code> — <code>camera=(self)</code> for Chalker location block</li>
+        <li><code>docker-quickstart.html</code> — NPM Permissions-Policy workaround documented</li>
+    </ul>
+
+    <h3>Docs</h3>
+    <ul>
+        <li><code>Docs/QR.md</code> — full protocol specification with all v5.0.0 design decisions</li>
+    </ul>
 
     <hr>
 
     <h2 id="migration">Migration from v4.2.x</h2>
-    <p>No migration required. Fully compatible with all existing tournaments and saved configurations. New global config fields (<code>x01Format</code>, <code>maxRounds</code>, <code>serverId</code>) are generated automatically on first load.</p>
+    <p>No migration required. Fully compatible with all existing tournaments and saved configurations.</p>
+    <p>New global config fields (<code>x01Format</code>, <code>maxRounds</code>, <code>serverId</code>) are generated automatically on first load with correct defaults.</p>
 
     <hr>
 
@@ -128,7 +169,6 @@
 
     <h2>Previous Releases</h2>
     <ul>
-        <li><a href="v5.0.0.html">v5.0.0</a> — March 24, 2026 — The Revolution Will Be Scanned.</li>
         <li><a href="v5.0.0-beta.2.html">v5.0.0-beta.2</a> — March 24, 2026 — The Chalker Has Eyes Now.</li>
         <li><a href="v5.0.0-beta.1.html">v5.0.0-beta.1</a> — March 22, 2026 — Your Boarding Pass for the Oche.</li>
         <li><a href="v4.2.13.html">v4.2.13</a> — March 20, 2026 — A+ Security Headers. Yes, Really.</li>
