@@ -880,7 +880,7 @@
     }
 
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       elements.qrScanVideo.srcObject = stream;
       showModal(elements.qrScanModal);
 
@@ -894,7 +894,7 @@
         } catch (_) { /* ignore individual frame errors */ }
       }, 300);
     } catch (err) {
-      elements.qrScanError.textContent = 'Camera access denied. Please allow camera access and try again.';
+      elements.qrScanError.textContent = `Camera error: ${err.name} — ${err.message}`;
       elements.qrScanError.style.display = 'block';
       showModal(elements.qrScanModal);
     }
