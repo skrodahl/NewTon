@@ -34,6 +34,11 @@
     <priority>0.6</priority>
   </url>
   <url>
+    <loc>https://newtondarts.com/releases/v5.0.0-beta.2.html</loc>
+    <changefreq>never</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
     <loc>https://newtondarts.com/releases/v5.0.0-beta.1.html</loc>
     <changefreq>never</changefreq>
     <priority>0.6</priority>

@@ -10,8 +10,9 @@
 - **Version**: This feature ships as **v5.0.0** — TM↔Chalker communication is a fundamental architectural shift.
 - **First implementation target**: TM generates assignment QR (TM → Chalker direction). Chalker scanning comes second.
 - **`sc` and `mr` in TM Global Settings (Match Configuration card)**: Two new fields added at the bottom of the existing Match Configuration section. x01 Format: 101 / 201 / 301 / 501 (default 501). Max Rounds: dropdown 7–20 (default 13). Both are included in the assignment payload. This keeps TM as the single source of truth for match format — the Chalker executes whatever it is told.
-- **Network and QR unified in Chalker**: Not two separate buttons. The "New Match?" dialog will have a single **"Network / QR"** button. QR is the fallback when network is unavailable. The existing "Network Mode" placeholder (currently shows "requires a license") will be extended rather than replaced.
-- **Chalker scanning QR**: Deferred — comes after TM QR generation is working.
+- **Network and QR are separate buttons in Chalker**: The "New Match?" dialog has four options — Rematch, New Match, QR, Network. QR is a first-class workflow, not a Network fallback. When Network is implemented, QR will serve as its fallback, but the button and flow are built independently so each is correct before they are combined.
+- **QR workflow in Chalker**: Tap QR → camera opens immediately in a modal → scan the assignment QR from TM → CRC verified → confirmation screen (player names, format, lane, referee) → Start. Camera stays open on failure with an error message. `BarcodeDetector` API only (Chrome/Edge). Clear "not supported" message on other browsers.
+- **Chalker scanning QR**: Implemented in v5.0.0-beta.2. Result QR (Chalker → TM) deferred to a later stage.
 
 ---
 

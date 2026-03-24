@@ -113,6 +113,15 @@
     tiebreakRandomBtn: document.getElementById('tiebreak-random'),
     tiebreakCancelBtn: document.getElementById('tiebreak-cancel-btn'),
     rematchBtn: document.getElementById('rematch-btn'),
+    qrModeBtn: document.getElementById('qr-mode-btn'),
+    qrScanModal: document.getElementById('qr-scan-modal'),
+    qrScanVideo: document.getElementById('qr-scan-video'),
+    qrScanCancelBtn: document.getElementById('qr-scan-cancel-btn'),
+    qrScanError: document.getElementById('qr-scan-error'),
+    qrConfirmModal: document.getElementById('qr-confirm-modal'),
+    qrConfirmDetails: document.getElementById('qr-confirm-details'),
+    qrConfirmStartBtn: document.getElementById('qr-confirm-start-btn'),
+    qrConfirmCancelBtn: document.getElementById('qr-confirm-cancel-btn'),
     confirmModal: document.getElementById('confirm-modal'),
     confirmTitle: document.getElementById('confirm-title'),
     confirmMessage: document.getElementById('confirm-message'),
@@ -834,6 +843,188 @@
     hideModal(elements.settingsModal);
     loadNetworkLane();
     showModal(elements.networkModal);
+  }
+
+  // =================
+  // QR Scanning Flow
+  // =================
+
+  /** @type {object|null} - Parsed and verified QR assignment payload pending confirmation */
+  let qrPayload = null;
+
+  /** @type {number|null} - setInterval handle for BarcodeDetector scan loop */
+  let qrScanInterval = null;
+
+  /**
+   * Handle QR button from New Match modal.
+   * Opens camera immediately in scan modal.
+   */
+  function handleQRModeFromModal() {
+    hideModal(elements.settingsModal);
+    startQRScanner();
+  }
+
+  /**
+   * Start camera and BarcodeDetector scan loop.
+   * Shows qr-scan-modal; on successful scan calls handleQRPayload().
+   */
+  async function startQRScanner() {
+    elements.qrScanError.style.display = 'none';
+    elements.qrScanError.textContent = '';
+
+    if (!('BarcodeDetector' in window)) {
+      elements.qrScanError.textContent = 'QR scanning is not supported in this browser. Use Chrome or Edge.';
+      elements.qrScanError.style.display = 'block';
+      showModal(elements.qrScanModal);
+      return;
+    }
+
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } });
+      elements.qrScanVideo.srcObject = stream;
+      showModal(elements.qrScanModal);
+
+      const detector = new BarcodeDetector({ formats: ['qr_code'] });
+      qrScanInterval = setInterval(async () => {
+        try {
+          const codes = await detector.detect(elements.qrScanVideo);
+          if (codes.length > 0) {
+            handleQRPayload(codes[0].rawValue);
+          }
+        } catch (_) { /* ignore individual frame errors */ }
+      }, 300);
+    } catch (err) {
+      elements.qrScanError.textContent = 'Camera access denied. Please allow camera access and try again.';
+      elements.qrScanError.style.display = 'block';
+      showModal(elements.qrScanModal);
+    }
+  }
+
+  /**
+   * Stop camera stream and scan interval.
+   */
+  function stopQRScanner() {
+    clearInterval(qrScanInterval);
+    qrScanInterval = null;
+    if (elements.qrScanVideo.srcObject) {
+      elements.qrScanVideo.srcObject.getTracks().forEach(t => t.stop());
+      elements.qrScanVideo.srcObject = null;
+    }
+  }
+
+  /**
+   * Handle a raw QR scan result.
+   * Parses JSON, verifies CRC, checks payload type, then shows confirmation.
+   * On failure, shows error in scan modal and keeps camera open.
+   * @param {string} rawValue
+   */
+  function handleQRPayload(rawValue) {
+    let payload;
+    try {
+      payload = JSON.parse(rawValue);
+    } catch (_) {
+      showQRScanError('Invalid QR code. Please scan a NewTon assignment QR.');
+      return;
+    }
+
+    if (payload.t !== 'a') {
+      showQRScanError('Wrong QR type. Please scan a match assignment QR from the Tournament Manager.');
+      return;
+    }
+
+    if (!NewtonIntegrity.verify(payload)) {
+      showQRScanError('QR integrity check failed. The code may be corrupted — please try again.');
+      return;
+    }
+
+    // Valid — stop camera and show confirmation
+    stopQRScanner();
+    hideModal(elements.qrScanModal);
+    qrPayload = payload;
+    showQRConfirm(payload);
+  }
+
+  /**
+   * Show an error in the scan modal without closing it.
+   * @param {string} message
+   */
+  function showQRScanError(message) {
+    elements.qrScanError.textContent = message;
+    elements.qrScanError.style.display = 'block';
+  }
+
+  /**
+   * Populate and show the QR confirmation modal.
+   * @param {object} payload - Verified assignment payload
+   */
+  function showQRConfirm(payload) {
+    const lines = [
+      `<strong>${payload.p1}</strong> vs <strong>${payload.p2}</strong>`,
+      `${payload.sc} · Bo${payload.bo} · ${payload.mr} rounds`,
+      `Lane ${payload.ln} · Ref: ${payload.ref}`
+    ];
+    elements.qrConfirmDetails.innerHTML = lines.map(l => `<p>${l}</p>`).join('');
+    showModal(elements.qrConfirmModal);
+  }
+
+  /**
+   * Start a match from the confirmed QR assignment payload.
+   * Builds match state directly from payload, bypassing the config form.
+   */
+  function startMatchFromQR() {
+    const payload = qrPayload;
+    qrPayload = null;
+    hideModal(elements.qrConfirmModal);
+
+    const config = {
+      player1Name: payload.p1,
+      player2Name: payload.p2,
+      startingScore: payload.sc,
+      bestOf: payload.bo,
+      maxRounds: payload.mr,
+      laneName: `Lane ${payload.ln}`,
+      matchId: payload.mid,
+      tournamentId: payload.tid,
+      serverId: payload.sid,
+      lane: payload.ln,
+      referee: payload.ref
+    };
+
+    saveSettings(config);
+
+    state = {
+      config,
+      legs: [],
+      player1Legs: 0,
+      player2Legs: 0,
+      currentPlayer: 1,
+      player1Score: config.startingScore,
+      player2Score: config.startingScore,
+      matchComplete: false,
+      matchWinner: null,
+      firstLegStarter: 1
+    };
+
+    elements.player1Header.textContent = config.player1Name;
+    elements.player2Header.textContent = config.player2Name;
+
+    showStartingPlayerModal();
+  }
+
+  /**
+   * Cancel QR scan modal — stop camera and return to idle.
+   */
+  function cancelQRScan() {
+    stopQRScanner();
+    hideModal(elements.qrScanModal);
+  }
+
+  /**
+   * Cancel QR confirmation — discard payload and return to idle.
+   */
+  function cancelQRConfirm() {
+    qrPayload = null;
+    hideModal(elements.qrConfirmModal);
   }
 
   /**
@@ -1576,7 +1767,9 @@
            elements.configModal.classList.contains('active') ||
            elements.settingsModal.classList.contains('active') ||
            elements.confirmModal.classList.contains('active') ||
-           elements.networkModal.classList.contains('active');
+           elements.networkModal.classList.contains('active') ||
+           elements.qrScanModal.classList.contains('active') ||
+           elements.qrConfirmModal.classList.contains('active');
   }
 
   /**
@@ -1991,11 +2184,19 @@
     elements.startMatchBtn.addEventListener('click', startMatch);
     elements.configCancelBtn.addEventListener('click', () => hideModal(elements.configModal));
 
-    // New Match modal (Rematch / New Match / Network)
+    // New Match modal (Rematch / New Match / QR / Network)
     elements.settingsCancelBtn.addEventListener('click', () => hideModal(elements.settingsModal));
     elements.rematchBtn.addEventListener('click', handleRematchFromModal);
     elements.newMatchBtn.addEventListener('click', handleNewMatchFromModal);
+    elements.qrModeBtn.addEventListener('click', handleQRModeFromModal);
     elements.networkModeBtn.addEventListener('click', handleNetworkModeFromModal);
+
+    // QR scan modal
+    elements.qrScanCancelBtn.addEventListener('click', cancelQRScan);
+
+    // QR confirm modal
+    elements.qrConfirmStartBtn.addEventListener('click', startMatchFromQR);
+    elements.qrConfirmCancelBtn.addEventListener('click', cancelQRConfirm);
 
     // Network modal
     elements.networkStartBtn.addEventListener('click', startNetworkMode);

@@ -183,8 +183,30 @@
             <p id="settings-modal-message">Current match will be lost.</p>
             <button id="rematch-btn" class="btn btn-primary">Rematch</button>
             <button id="new-match-btn" class="btn btn-secondary">New Match</button>
+            <button id="qr-mode-btn" class="btn btn-secondary">QR</button>
             <button id="network-mode-btn" class="btn btn-secondary">Network</button>
             <button id="settings-cancel-btn" class="btn btn-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- QR Scan Modal -->
+    <div id="qr-scan-modal" class="modal">
+        <div class="modal-content qr-scan-modal-content">
+            <h2>Scan Assignment QR</h2>
+            <video id="qr-scan-video" class="qr-video" autoplay playsinline muted></video>
+            <p class="qr-scan-hint">Point the camera at the QR code on the Tournament Manager screen.</p>
+            <p id="qr-scan-error" class="qr-scan-error" style="display: none;"></p>
+            <button id="qr-scan-cancel-btn" class="btn btn-cancel">Cancel</button>
+        </div>
+    </div>
+
+    <!-- QR Confirm Modal -->
+    <div id="qr-confirm-modal" class="modal">
+        <div class="modal-content">
+            <h2>Match Assignment</h2>
+            <div id="qr-confirm-details" class="qr-confirm-details"></div>
+            <button id="qr-confirm-start-btn" class="btn btn-primary btn-large">Start Match</button>
+            <button id="qr-confirm-cancel-btn" class="btn btn-cancel">Cancel</button>
         </div>
     </div>
 
@@ -366,6 +388,7 @@
     </div>
 
     <script src="js/db.js"></script>
+    <script src="js/newton-integrity.js"></script>
     <script src="js/chalker.js"></script>
     <script>
         // Register service worker for PWA functionality
