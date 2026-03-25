@@ -37,6 +37,10 @@ Add a permanent indexedDB match archive alongside localStorage (no migration —
 
 See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record structure and rationale.
 
+### QR — Remove Lane & Referee Requirement
+
+Currently the TM blocks QR generation if lane or referee is not assigned. This restriction was added anticipating the network layer, but for the QR-only flow it's unnecessary — a partial payload is still useful. Consider making lane and referee optional for QR, with the missing fields simply omitted from the payload and the Chalker info bar.
+
 ### Tournament Manager — Help System Update
 
 The context-sensitive help system (`dynamic-help-system.js`) is lagging behind recent feature additions. New features needing help coverage include at minimum: TM→Chalker QR assignment, the Chalker nav link, and any Match Controls changes from v5.0.0.
