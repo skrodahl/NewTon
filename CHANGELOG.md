@@ -18,9 +18,13 @@ The Chalker QR scanner was blocked by a `Permissions-Policy: camera=()` HTTP hea
 
 Users running behind a reverse proxy (e.g. Nginx Proxy Manager) must also override the header at the proxy level — NPM sets its own `Permissions-Policy` that overrides the container's nginx headers. See the Docker Quick Start guide for the required NPM custom nginx snippet.
 
-### Camera constraint relaxed
+### Camera constraint: back camera preferred
 
-`getUserMedia` constraint changed from `{ facingMode: 'environment' }` to `{ video: true }` for broader device compatibility.
+`getUserMedia` constraint updated to `{ facingMode: { ideal: 'environment' } }` — prefers the back camera on mobile devices while falling back gracefully if unavailable. An earlier change to `{ video: true }` had caused the PWA to default to the front/selfie camera.
+
+### Chalker info bar simplified
+
+x01 format (e.g. `501`) removed from the match info bar — it's already shown in the large score display above. Info bar now reads `Lane 2 • Leg 1 of 3 • Ref: Anthony` for QR-started matches, and `Leg 1 of 3` for manually-started matches.
 
 ### Files changed
 
@@ -30,8 +34,8 @@ Users running behind a reverse proxy (e.g. Nginx Proxy Manager) must also overri
 - `landing.html` — `chalker/` → `chalker/index.html`
 - `css/styles.css` — `font-family: inherit` and `text-decoration: none` on `.nav-btn`; footer link styles
 - `docker/nginx.conf` — `camera=()` → `camera=(self)` in `/chalker/` location block
-- `chalker/js/chalker.js` — referee in match info bar; `video: true` constraint
-- `chalker/sw.js` — version bumped to `chalker-v99`
+- `chalker/js/chalker.js` — referee in match info bar; back camera preference; x01 removed from info bar
+- `chalker/sw.js` — version bumped to `chalker-v101`
 - `docker-quickstart.html` — NPM Permissions-Policy workaround documented
 
 ---

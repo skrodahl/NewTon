@@ -75,7 +75,9 @@ The operator confirms → starting player selection → match begins. Catches wr
 The referee name is now visible throughout the QR flow:
 
 - **QR modal subtitle**: `Harry vs Bob · Lane 1 · 501 Bo3 · Ref: Charles`
-- **Chalker match info bar**: `Lane 1 · 501 · Leg 1 of 3 · Ref: Charles` (QR-started matches)
+- **Chalker match info bar**: `Lane 2 · Leg 1 of 3 · Ref: Anthony` (QR-started matches)
+
+The x01 format has been removed from the info bar — it's already prominent in the large score display above. The bar now carries only what isn't visible elsewhere: lane, leg progress, and referee.
 
 ---
 
@@ -117,10 +119,10 @@ Prevents the bottom row of Match Controls from wrapping when the QR button is pr
 
 **Chalker:**
 - `chalker/index.html` — QR button; scan modal; confirm modal; script tags
-- `chalker/js/chalker.js` — QR scanning, verification, confirmation, and match start from payload; referee in info bar; `video: true` constraint
+- `chalker/js/chalker.js` — QR scanning, verification, confirmation, and match start from payload; referee in info bar; back camera preference; x01 removed from info bar
 - `chalker/js/newton-integrity.js` — new file, identical copy of TM CRC-32 module
 - `chalker/styles/chalker.css` — camera modal and confirmation modal styles
-- `chalker/sw.js` — version `chalker-v99`
+- `chalker/sw.js` — version `chalker-v101`
 
 **Docker:**
 - `docker/nginx.conf` — `camera=(self)` for Chalker location block
