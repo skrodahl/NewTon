@@ -121,7 +121,7 @@ More on the [architecture and focus on resilience here](https://newtondarts.com/
 - **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using [REST API](https://newtondarts.com/rest-api.html)
 
 ### 🎯 Single and Double Elimination Brackets
-- **Professional Structure**: Frontside/backside brackets for 8, 16, and 32 players, single elimination brackets for 4, 8, 16, and 32 players
+- **Professional Structure**: Single and Double elimination brackets for 8, 16, and 32 players, facilitates tournaments for 4-32 players.
 - **Smart Generation**: Prevents two walkovers from meeting in first round
 - **Fair Draw**: Byes randomly distributed to prevent unfair advantages and minimize walkover chains
 - **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
