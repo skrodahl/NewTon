@@ -2,7 +2,7 @@
 
 ### Referee shown everywhere
 
-The referee name now appears in the QR modal subtitle (`Harry vs Bob · Lane 1 · 501 Bo3 · Ref: Charles`) and in the Chalker match info bar (`Lane 1 · 501 · Leg 1 of 3 · Ref: Charles`) for QR-started matches.
+The referee name now appears in the QR modal subtitle (`Harry vs Bob · Lane 1 · 501 Bo3 · Ref: Charles`) and in the Chalker match info bar (`Lane 2 · Leg 1 of 3 · Ref: Anthony`) for QR-started matches.
 
 ### Chalker link in Tournament Manager nav
 

@@ -49,7 +49,23 @@ The versioned page has a "Latest" link at the top of its Previous Releases list:
 <li><a href="v4.2.11.html">v4.2.11</a> — March 18, 2026 — Shame has never looked better.</li>
 ```
 
-### Step 3 — Update `sitemap.xml` (always)
+### Step 3 — Set the canonical URL
+
+Each release page must have a self-referencing canonical tag in `<head>`, immediately after the viewport meta:
+
+```html
+<link rel="canonical" href="https://newtondarts.com/releases/vX.X.X.html">
+```
+
+For `index.html`, use the trailing-slash URL:
+
+```html
+<link rel="canonical" href="https://newtondarts.com/releases/">
+```
+
+Use absolute URLs with the full protocol and domain. One tag per page, placed in `<head>`.
+
+### Step 4 — Update `sitemap.xml` (always)
 
 Add both the new versioned page and confirm `index.html` is already present. Both should have priority `0.6`:
 
@@ -73,6 +89,7 @@ The versioned page uses `changefreq: never` — it will never change after publi
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://newtondarts.com/releases/vX.X.X.html">
     <title>Release Notes vX.X.X — NewTon DC Tournament Manager</title>
     <meta name="description" content="NewTon DC Tournament Manager vX.X.X release notes. {one-line summary}.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
