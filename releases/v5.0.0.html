@@ -92,8 +92,9 @@
     <p>The referee name is now visible throughout the QR flow:</p>
     <ul>
         <li><strong>QR modal subtitle</strong>: <code>Harry vs Bob &middot; Lane 1 &middot; 501 Bo3 &middot; Ref: Charles</code></li>
-        <li><strong>Chalker match info bar</strong>: <code>Lane 1 &middot; 501 &middot; Leg 1 of 3 &middot; Ref: Charles</code></li>
+        <li><strong>Chalker match info bar</strong>: <code>Lane 2 &middot; Leg 1 of 3 &middot; Ref: Anthony</code></li>
     </ul>
+    <p>The x01 format has been removed from the info bar — it's already prominent in the large score display above. The bar carries only what isn't visible elsewhere: lane, leg progress, and referee.</p>
 
     <hr>
 
@@ -136,10 +137,10 @@
     <h3>Chalker</h3>
     <ul>
         <li><code>chalker/index.html</code> — QR button; scan modal; confirm modal; script tags</li>
-        <li><code>chalker/js/chalker.js</code> — QR scanning, verification, confirmation, and match start from payload; referee in info bar</li>
+        <li><code>chalker/js/chalker.js</code> — QR scanning, verification, confirmation, and match start from payload; referee in info bar; back camera preference; x01 removed from info bar</li>
         <li><code>chalker/js/newton-integrity.js</code> — new file, identical copy of TM CRC-32 module</li>
         <li><code>chalker/styles/chalker.css</code> — camera modal and confirmation modal styles</li>
-        <li><code>chalker/sw.js</code> — version <code>chalker-v99</code></li>
+        <li><code>chalker/sw.js</code> — version <code>chalker-v101</code></li>
     </ul>
 
     <h3>Docker</h3>
