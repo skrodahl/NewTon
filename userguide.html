@@ -27,6 +27,7 @@
             <li><a href="#configuration">Configuration</a></li>
             <li><a href="#managing">Managing a Tournament</a></li>
             <li><a href="#running">Running Matches &amp; Match Controls</a></li>
+            <li><a href="#qr">Chalker QR Assignment</a></li>
             <li><a href="#results">Results &amp; Export</a></li>
             <li><a href="#devconsole">Developer Console</a></li>
             <li><a href="#tips">Tips &amp; Tricks</a></li>
@@ -193,6 +194,43 @@
 
     <h3>Leaderboard</h3>
     <p>The <strong>Leaderboard</strong> button at the bottom of the Match Controls panel opens the current standings mid-tournament. Click any player in the leaderboard to open their Statistics dialog and add stats that were missed when the match result was recorded.</p>
+
+    <hr>
+
+    <h2 id="qr">Chalker QR Assignment</h2>
+    <p>NewTon DC Tournament Manager can send match assignments directly to the Chalker scoring app via QR code — no typing player names, no verbal handoff, no mistakes.</p>
+
+    <h3>Generating the QR Code</h3>
+    <p>On any live match card in Match Controls, click the <strong>QR</strong> button (to the left of "Stop Match"). A modal appears with the assignment QR code. The subtitle shows the match details: players, format, and lane/referee if assigned.</p>
+    <p>Lane and referee are optional — the QR code can be generated without them. Whatever is assigned at the time is included in the payload.</p>
+
+    <h3>Scanning in the Chalker</h3>
+    <p>On the Chalker, tap <strong>QR</strong> in the "New Match?" dialog. The camera opens immediately — no intermediate screens. Point it at the QR code on the TM screen. The moment a valid code enters the frame, it's captured automatically.</p>
+    <p>Every scan is verified with a CRC-32 signature. Corrupted or invalid codes are rejected with a clear error message, and the camera stays open to try again.</p>
+
+    <h3>Confirmation &amp; Match Start</h3>
+    <p>After a successful scan, a confirmation screen shows the full assignment:</p>
+    <ul>
+        <li>Player 1 vs Player 2</li>
+        <li>x01 format, best-of legs, max rounds</li>
+        <li>Lane and referee (if assigned)</li>
+    </ul>
+    <p>The operator confirms, selects the starting player, and the match begins. The Chalker displays the lane and referee in its info bar throughout the match.</p>
+
+    <h3>Configuration</h3>
+    <p>Two settings in <strong>Config &rarr; Match Configuration &rarr; Chalker</strong> control what the QR sends:</p>
+    <ul>
+        <li><strong>x01 Format</strong> — the starting score (101 / 201 / 301 / 501)</li>
+        <li><strong>Max Rounds</strong> — the tiebreak threshold (7–20)</li>
+    </ul>
+    <p>Best-of legs is determined by the match round and your match format configuration. All values travel in the QR — the Chalker receives everything it needs.</p>
+
+    <h3>Requirements</h3>
+    <ul>
+        <li><strong>Browser</strong> — QR scanning uses the <code>BarcodeDetector</code> API, available in Chrome and Edge. Other browsers show a "not supported" message.</li>
+        <li><strong>Camera</strong> — The Chalker needs camera access. On HTTPS (including self-signed certificates) and localhost, this works automatically. On plain HTTP over a local IP, browsers block camera access.</li>
+        <li><strong>Manual fallback</strong> — If QR scanning isn't available, the Chalker can always be set up manually by typing player names and selecting the format. No functionality is lost.</li>
+    </ul>
 
     <hr>
 

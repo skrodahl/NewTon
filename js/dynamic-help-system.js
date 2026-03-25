@@ -180,6 +180,7 @@ const HELP_CONTENT = {
                         <li><strong>Setup (⬅):</strong> Return to Setup page for tournament management</li>
                         <li><strong>Registration (⬅):</strong> Navigate to Registration page to manage players</li>
                         <li><strong>Config (⬅):</strong> Access Config page for point values and match formats</li>
+                        <li><strong>Chalker:</strong> Open the Chalker scoring app in a new tab</li>
                     </ul>
                     <p><strong>Bracket Controls:</strong></p>
                     <ul>
@@ -258,6 +259,7 @@ const HELP_CONTENT = {
                         <li>Lane/referee history is retained for completed matches</li>
                         <li>Configure max lanes in Config page</li>
                     </ul>
+                    <p><strong>QR Integration:</strong> When a lane or referee is assigned, it is automatically included in the Chalker assignment QR code. The Chalker displays the lane in its info bar and the referee name throughout the match.</p>
                     <p><strong>💡 Tip:</strong> Assign lanes to organize physical dartboard usage and avoid conflicts.</p>
                 `
             },
@@ -281,6 +283,7 @@ const HELP_CONTENT = {
                         <li><strong>Start Match:</strong> Move ready matches to LIVE status</li>
                         <li><strong>[Player Name] Wins:</strong> Direct winner selection buttons</li>
                         <li><strong>Lane/Referee Assignment:</strong> Dropdowns for each match</li>
+                        <li><strong>QR:</strong> Generate a Chalker assignment QR code for a live match. The Chalker scans it to receive player names, format, lane, and referee automatically — no typing needed</li>
                         <li><strong>Leaderboard Button:</strong> Access tournament leaderboard and player rankings without leaving the Tournament page</li>
                     </ul>
                     <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action</p>
@@ -311,14 +314,27 @@ const HELP_CONTENT = {
             matches: {
                 title: "Match Format Configuration",
                 content: `
-                    <p><strong>Match Length Options:</strong></p>
+                    <p><strong>Double Elimination:</strong></p>
                     <ul>
                         <li><strong>Regular Rounds:</strong> Early bracket matches</li>
                         <li><strong>Semi-Finals:</strong> Last frontside and backside matches</li>
-                        <li><strong>Backside Final:</strong> Qualifier match for Grand Final (DE only)</li>
-                        <li><strong>Grand Final:</strong> Championship match (DE only)</li>
+                        <li><strong>Backside Final:</strong> Qualifier match for Grand Final</li>
+                        <li><strong>Grand Final:</strong> Championship match</li>
+                    </ul>
+                    <p><strong>Single Elimination:</strong></p>
+                    <ul>
+                        <li><strong>Regular Rounds:</strong> Early bracket matches</li>
+                        <li><strong>Quarter-Finals:</strong> Last 8 players</li>
+                        <li><strong>Semi-Finals:</strong> Last 4 players</li>
+                        <li><strong>Bronze Match:</strong> 3rd place play-off</li>
+                        <li><strong>Final:</strong> Championship match</li>
                     </ul>
                     <p><strong>Format:</strong> Choose Best of 3, 5, or 7 legs for each round type.</p>
+                    <p><strong>Chalker Settings:</strong></p>
+                    <ul>
+                        <li><strong>x01 Format:</strong> Starting score sent to the Chalker via QR (101 / 201 / 301 / 501)</li>
+                        <li><strong>Max Rounds:</strong> Tiebreak threshold sent to the Chalker via QR (7–20, default 13)</li>
+                    </ul>
                     <p><strong>Auto-save:</strong> Settings apply immediately to new tournaments.</p>
                 `
             },

@@ -21,13 +21,13 @@ This is a **major version** — TM and Chalker are no longer independent tools. 
 
 A **QR** button appears to the left of "Stop Match" on every live match card in Match Controls. Click it to display the Chalker assignment QR code. The button only appears for live matches — not pending, not completed.
 
-### Lane & Referee Required
+### Lane & Referee Optional
 
-Both must be assigned before a QR code can be generated. If either is missing, the modal shows an amber warning instead of a code.
+Neither lane nor referee is required to generate a QR code. Both are included in the payload when assigned and omitted when not — a partial payload is still useful. The QR modal subtitle adapts dynamically, showing only the fields that are set. When QR serves as a fallback for the future network layer, lane will be required (the Chalker needs to know which board it's on), but referee remains optional in all flows.
 
 ### Signed Assignment Payload
 
-The QR encodes a JSON payload signed with CRC-32 (`newton-integrity.js`). It carries everything the Chalker needs: player names, x01 format, best-of legs, max rounds, lane, and referee. Keys are sorted before signing — deterministic across all JS engines.
+The QR encodes a JSON payload signed with CRC-32 (`newton-integrity.js`). It carries player names, x01 format, best-of legs, max rounds, and optionally lane and referee. Keys are sorted before signing — deterministic across all JS engines.
 
 ### Server ID
 
@@ -97,6 +97,15 @@ Prevents the bottom row of Match Controls from wrapping when the QR button is pr
 
 ---
 
+## Documentation & Help
+
+- **User guide**: New "Chalker QR Assignment" section in `userguide.html` — covers generating the QR, scanning in the Chalker, the confirmation screen, configuration, and browser/camera requirements.
+- **Dynamic help system**: Updated for v5.0.0 — QR button in Match Controls, Chalker nav link, Single Elimination round names in Match Format Config, Chalker settings (x01 Format, Max Rounds), and QR integration note in Lane/Referee section.
+- **Landing page**: Chalker showcase card rewritten to lead with the QR assignment flow. Moved from last position to #2 (after Bracket View).
+- **llms.txt**: QR payload description updated for optional lane/referee fields.
+
+---
+
 ## Docker / Reverse Proxy
 
 - **nginx.conf**: `camera=()` → `camera=(self)` in the `/chalker/` location block — required for `getUserMedia` / `BarcodeDetector` to function.
@@ -109,12 +118,16 @@ Prevents the bottom row of Match Controls from wrapping when the QR button is pr
 **Tournament Manager:**
 - `js/main.js` — version bump to 5.0.0; footer link to newtondarts.com
 - `js/newton-integrity.js` — new CRC-32 sign/verify module
-- `js/qr-bridge.js` — QR payload builder and modal display; referee in subtitle
+- `js/qr-bridge.js` — QR payload builder and modal display; referee in subtitle; lane/referee requirement removed; dynamic subtitle
 - `lib/qrcode-generator.js` — QR generation library (qrcode-generator v1.4.4, standalone)
 - `js/results-config.js` — `x01Format`, `maxRounds` in DEFAULT_CONFIG; server ID generation
 - `js/bracket-rendering.js` — QR button on live cards; narrowed dropdown classes
 - `tournament.html` — matchQRModal markup; Chalker subsection in Match Configuration; Chalker nav link
-- `landing.html` — `chalker/` → `chalker/index.html`
+- `js/dynamic-help-system.js` — QR button, Chalker nav link, SE rounds, Chalker settings, QR integration note
+- `landing.html` — Chalker card rewritten and moved to position 2; `chalker/` → `chalker/index.html`
+- `landing-page.php` — same Chalker card changes as `landing.html`
+- `userguide.html` — new Chalker QR Assignment section
+- `llms.txt` — QR payload updated for optional lane/referee
 - `css/styles.css` — `.cc-btn-qr`, `.cc-lane-dropdown`, `.cc-referee-dropdown`; nav-btn font fixes; footer link styles
 
 **Chalker:**
@@ -129,7 +142,7 @@ Prevents the bottom row of Match Controls from wrapping when the QR button is pr
 - `docker-quickstart.html` — NPM Permissions-Policy workaround documented
 
 **Docs:**
-- `Docs/QR.md` — full protocol specification with all v5.0.0 design decisions
+- `Docs/QR.md` — full protocol specification with all v5.0.0 design decisions; lane/referee requirements updated
 
 ---
 

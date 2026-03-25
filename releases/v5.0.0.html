@@ -29,6 +29,7 @@
             <li><a href="#qr-scan">Chalker &larr; TM: QR Scanning</a></li>
             <li><a href="#referee">Referee Everywhere</a></li>
             <li><a href="#ui">Tournament Manager Polish</a></li>
+            <li><a href="#docs">Documentation &amp; Help</a></li>
             <li><a href="#docker">Docker / Reverse Proxy</a></li>
             <li><a href="#files">Files Changed</a></li>
             <li><a href="#migration">Migration</a></li>
@@ -47,11 +48,11 @@
     <h3>QR Button on Live Match Cards</h3>
     <p>A <strong>QR</strong> button appears to the left of "Stop Match" on every live match card in Match Controls. Click it to display the Chalker assignment QR code. The button only appears for live matches — not pending, not completed.</p>
 
-    <h3>Lane &amp; Referee Required</h3>
-    <p>Both must be assigned before a QR code can be generated. If either is missing, the modal shows an amber warning instead of a code.</p>
+    <h3>Lane &amp; Referee Optional</h3>
+    <p>Neither lane nor referee is required to generate a QR code. Both are included in the payload when assigned and omitted when not — a partial payload is still useful. The QR modal subtitle adapts dynamically, showing only the fields that are set. When QR serves as a fallback for the future network layer, lane will be required (the Chalker needs to know which board it's on), but referee remains optional in all flows.</p>
 
     <h3>Signed Assignment Payload</h3>
-    <p>The QR encodes a JSON payload signed with CRC-32 (<code>newton-integrity.js</code>). It carries everything the Chalker needs: player names, x01 format, best-of legs, max rounds, lane, and referee. Keys are sorted before signing — deterministic across all JS engines.</p>
+    <p>The QR encodes a JSON payload signed with CRC-32 (<code>newton-integrity.js</code>). It carries player names, x01 format, best-of legs, max rounds, and optionally lane and referee. Keys are sorted before signing — deterministic across all JS engines.</p>
 
     <h3>Server ID</h3>
     <p>A 12-character hex identifier generated once per TM installation, persisted in global config. Identifies this TM instance in all QR payloads — the foundation for cross-device validation in the network layer.</p>
@@ -111,6 +112,16 @@
 
     <hr>
 
+    <h2 id="docs">Documentation &amp; Help</h2>
+    <ul>
+        <li><strong>User guide</strong>: New "Chalker QR Assignment" section — covers generating the QR, scanning in the Chalker, the confirmation screen, configuration, and browser/camera requirements.</li>
+        <li><strong>Dynamic help system</strong>: Updated for v5.0.0 — QR button in Match Controls, Chalker nav link, Single Elimination round names in Match Format Config, Chalker settings (x01 Format, Max Rounds), and QR integration note in Lane/Referee section.</li>
+        <li><strong>Landing page</strong>: Chalker showcase card rewritten to lead with the QR assignment flow. Moved from last position to #2 (after Bracket View).</li>
+        <li><strong>llms.txt</strong>: QR payload description updated for optional lane/referee fields.</li>
+    </ul>
+
+    <hr>
+
     <h2 id="docker">Docker / Reverse Proxy</h2>
     <ul>
         <li><strong>nginx.conf</strong>: <code>camera=()</code> &rarr; <code>camera=(self)</code> in the <code>/chalker/</code> location block — required for <code>getUserMedia</code> / <code>BarcodeDetector</code> to function.</li>
@@ -125,12 +136,16 @@
     <ul>
         <li><code>js/main.js</code> — version bump to 5.0.0; footer link to newtondarts.com</li>
         <li><code>js/newton-integrity.js</code> — new CRC-32 sign/verify module</li>
-        <li><code>js/qr-bridge.js</code> — QR payload builder and modal display; referee in subtitle</li>
+        <li><code>js/qr-bridge.js</code> — QR payload builder and modal display; referee in subtitle; lane/referee requirement removed; dynamic subtitle</li>
         <li><code>lib/qrcode-generator.js</code> — QR generation library (qrcode-generator v1.4.4, standalone)</li>
         <li><code>js/results-config.js</code> — <code>x01Format</code>, <code>maxRounds</code> in DEFAULT_CONFIG; server ID generation</li>
         <li><code>js/bracket-rendering.js</code> — QR button on live cards; narrowed dropdown classes</li>
         <li><code>tournament.html</code> — matchQRModal markup; Chalker subsection in Match Configuration; Chalker nav link</li>
-        <li><code>landing.html</code> — <code>chalker/</code> &rarr; <code>chalker/index.html</code></li>
+        <li><code>js/dynamic-help-system.js</code> — QR button, Chalker nav link, SE rounds, Chalker settings, QR integration note</li>
+        <li><code>landing.html</code> — Chalker card rewritten and moved to position 2; <code>chalker/</code> &rarr; <code>chalker/index.html</code></li>
+        <li><code>landing-page.php</code> — same Chalker card changes as <code>landing.html</code></li>
+        <li><code>userguide.html</code> — new Chalker QR Assignment section</li>
+        <li><code>llms.txt</code> — QR payload updated for optional lane/referee</li>
         <li><code>css/styles.css</code> — <code>.cc-btn-qr</code>, <code>.cc-lane-dropdown</code>, <code>.cc-referee-dropdown</code>; nav-btn font fixes; footer link styles</li>
     </ul>
 
@@ -151,7 +166,7 @@
 
     <h3>Docs</h3>
     <ul>
-        <li><code>Docs/QR.md</code> — full protocol specification with all v5.0.0 design decisions</li>
+        <li><code>Docs/QR.md</code> — full protocol specification with all v5.0.0 design decisions; lane/referee requirements updated</li>
     </ul>
 
     <hr>

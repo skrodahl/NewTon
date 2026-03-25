@@ -13,6 +13,7 @@
 - **Network and QR are separate buttons in Chalker**: The "New Match?" dialog has four options — Rematch, New Match, QR, Network. QR is a first-class workflow, not a Network fallback. When Network is implemented, QR will serve as its fallback, but the button and flow are built independently so each is correct before they are combined.
 - **QR workflow in Chalker**: Tap QR → camera opens immediately in a modal → scan the assignment QR from TM → CRC verified → confirmation screen (player names, format, lane, referee) → Start. Camera stays open on failure with an error message. `BarcodeDetector` API only (Chrome/Edge). Clear "not supported" message on other browsers.
 - **Chalker scanning QR**: Implemented in v5.0.0-beta.2. Result QR (Chalker → TM) deferred to a later stage.
+- **Lane and referee requirements relaxed for QR**: In the standalone QR flow, neither lane nor referee is required — a partial payload is still useful. The Chalker displays whatever is present and omits what isn't. When QR serves as a fallback for the network flow, lane is required (the Chalker needs to know which board it's on), but referee remains optional. The TM generates the QR with whatever fields are assigned at the time.
 
 ---
 
@@ -87,8 +88,8 @@ The `sid` (server ID) is a 12-character hex string generated once per TM install
 | `sc` | number | Starting score — from Global Config (101 / 201 / 301 / 501, default 501) |
 | `bo` | number | Best-of legs — from Global Config match configuration |
 | `mr` | number | Max rounds before tiebreak — from Global Config (default 13, range 7–20) |
-| `ln` | number | Lane number (1-20). **Required for QR — warning shown if unset.** |
-| `ref` | string | Referee name. **Required for QR — warning shown if unset.** |
+| `ln` | number | Lane number (1-20). **Optional for standalone QR. Required when QR is a network fallback** (Chalker needs to know which board). Omitted if unassigned. |
+| `ref` | string | Referee name. **Optional.** Omitted if unassigned. |
 
 ### Match Result (Chalker → TM QR)
 

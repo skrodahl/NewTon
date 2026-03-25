@@ -3,16 +3,16 @@
 
 /**
  * Open the QR modal for a live match.
- * Shows a warning if lane or referee is not set.
+ * Lane and referee are optional — included in the payload when assigned.
  * @param {string} matchId
  */
 function openMatchQR(matchId) {
     const match = matches.find(m => m.id === matchId);
     if (!match) return;
 
-    const warningEl = document.getElementById('matchQRWarning');
-    const codeEl    = document.getElementById('matchQRCode');
-    const titleEl   = document.getElementById('matchQRTitle');
+    const warningEl  = document.getElementById('matchQRWarning');
+    const codeEl     = document.getElementById('matchQRCode');
+    const titleEl    = document.getElementById('matchQRTitle');
     const subtitleEl = document.getElementById('matchQRSubtitle');
 
     // Reset state
@@ -20,25 +20,15 @@ function openMatchQR(matchId) {
     warningEl.style.display = 'none';
     warningEl.textContent = '';
 
-    // Require lane and referee
-    if (!match.lane || !match.referee) {
-        const missing = [];
-        if (!match.lane)    missing.push('Lane');
-        if (!match.referee) missing.push('Referee');
-        titleEl.textContent    = 'QR Code Unavailable';
-        subtitleEl.textContent = '';
-        warningEl.textContent  = `${missing.join(' and ')} must be assigned before generating a QR code.`;
-        warningEl.style.display = 'block';
-        pushDialog('matchQRModal', null, true);
-        return;
+    // Resolve referee name (if assigned)
+    let refName = null;
+    if (match.referee) {
+        const refereePlayer = players.find(p => String(p.id) === String(match.referee));
+        refName = refereePlayer ? refereePlayer.name : String(match.referee);
     }
 
-    // Resolve referee name
-    const refereePlayer = players.find(p => String(p.id) === String(match.referee));
-    const refName = refereePlayer ? refereePlayer.name : String(match.referee);
-
-    // Build and sign assignment payload
-    const payload = NewtonIntegrity.sign({
+    // Build assignment payload — omit lane/referee if not assigned
+    const payload = {
         v:   1,
         t:   'a',
         mid: match.id,
@@ -49,20 +39,27 @@ function openMatchQR(matchId) {
         sc:  config.legs.x01Format  || 501,
         bo:  match.legs             || 3,
         mr:  config.legs.maxRounds  || 13,
-        ln:  parseInt(match.lane),
-        ref: refName,
         ts:  Math.floor(Date.now() / 1000)
-    });
+    };
+    if (match.lane) payload.ln  = parseInt(match.lane);
+    if (refName)    payload.ref = refName;
 
-    const json = JSON.stringify(payload);
+    const signed = NewtonIntegrity.sign(payload);
+    const json   = JSON.stringify(signed);
 
     // Generate QR code (qrcode-generator: typeNumber 0 = auto, EC level M)
     const qr = qrcode(0, 'M');
     qr.addData(json);
     qr.make();
 
+    // Build subtitle with available info
+    const parts = [`${match.player1.name} vs ${match.player2.name}`];
+    if (match.lane) parts.push(`Lane ${match.lane}`);
+    parts.push(`${config.legs.x01Format || 501} Bo${match.legs || 3}`);
+    if (refName) parts.push(`Ref: ${refName}`);
+
     titleEl.textContent    = `${match.id} — Chalker QR`;
-    subtitleEl.textContent = `${match.player1.name} vs ${match.player2.name} · Lane ${match.lane} · ${config.legs.x01Format || 501} Bo${match.legs || 3} · Ref: ${refName}`;
+    subtitleEl.textContent = parts.join(' · ');
     codeEl.innerHTML       = qr.createSvgTag(6, 2);
 
     pushDialog('matchQRModal', null, true);

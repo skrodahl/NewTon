@@ -26,17 +26,42 @@ Users running behind a reverse proxy (e.g. Nginx Proxy Manager) must also overri
 
 x01 format (e.g. `501`) removed from the match info bar — it's already shown in the large score display above. Info bar now reads `Lane 2 • Leg 1 of 3 • Ref: Anthony` for QR-started matches, and `Leg 1 of 3` for manually-started matches.
 
+### QR — Lane & referee no longer required
+
+The QR modal no longer blocks when lane or referee is unassigned. Both fields are included in the payload when present and omitted when not. The QR modal subtitle adapts dynamically — showing only the fields that are set. Decision documented in `Docs/QR.md`.
+
+### Dynamic help system updated
+
+Context-sensitive help (`dynamic-help-system.js`) updated for v5.0.0 features: QR button in Match Controls, Chalker nav link, Single Elimination round names in Match Format Config, Chalker settings (x01 Format, Max Rounds), and QR integration note in Lane/Referee section.
+
+### User guide — Chalker QR Assignment section
+
+New section in `userguide.html` between Running Matches and Results & Export. Covers generating the QR, scanning in the Chalker, the confirmation screen, configuration, and browser/camera requirements.
+
+### Landing page — Chalker card rewritten and moved
+
+Chalker showcase card rewritten to lead with the QR assignment flow instead of standalone features. Moved from position 7 (last) to position 2 (after Bracket View) in both `landing.html` and `landing-page.php`.
+
+### llms.txt updated
+
+QR payload description updated to reflect optional lane/referee fields.
+
 ### Files changed
 
 - `js/main.js` — footer link to newtondarts.com
-- `js/qr-bridge.js` — referee name in QR modal subtitle
+- `js/qr-bridge.js` — referee name in QR modal subtitle; lane/referee requirement removed; dynamic subtitle
+- `js/dynamic-help-system.js` — QR button, Chalker nav link, SE rounds, Chalker settings, QR integration note
 - `tournament.html` — Chalker nav link
-- `landing.html` — `chalker/` → `chalker/index.html`
+- `landing.html` — Chalker card rewritten and moved to position 2; `chalker/` → `chalker/index.html`
+- `landing-page.php` — same Chalker card changes as `landing.html`
+- `userguide.html` — new Chalker QR Assignment section
+- `llms.txt` — QR payload updated for optional lane/referee
 - `css/styles.css` — `font-family: inherit` and `text-decoration: none` on `.nav-btn`; footer link styles
 - `docker/nginx.conf` — `camera=()` → `camera=(self)` in `/chalker/` location block
 - `chalker/js/chalker.js` — referee in match info bar; back camera preference; x01 removed from info bar
 - `chalker/sw.js` — version bumped to `chalker-v101`
 - `docker-quickstart.html` — NPM Permissions-Policy workaround documented
+- `Docs/QR.md` — lane/referee requirements updated
 
 ---
 
