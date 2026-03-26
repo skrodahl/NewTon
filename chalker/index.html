@@ -270,6 +270,17 @@
         </div>
     </div>
 
+    <!-- Result QR Modal -->
+    <div id="result-qr-modal" class="modal">
+        <div class="modal-content">
+            <h2 id="result-qr-title">Match Result QR</h2>
+            <p id="result-qr-subtitle" class="qr-scan-hint"></p>
+            <div id="result-qr-code" class="result-qr-code"></div>
+            <p class="qr-scan-hint">Point the TM camera at this code to record the result.</p>
+            <button id="result-qr-close-btn" class="btn btn-cancel">Close</button>
+        </div>
+    </div>
+
     <!-- History Detail Screen -->
     <div id="history-detail-screen" class="screen">
         <header class="history-header">
@@ -303,6 +314,9 @@
 
             <div class="history-detail-legs" id="detail-legs-container">
                 <!-- Leg tables populated by JavaScript -->
+            </div>
+            <div class="end-buttons" id="history-detail-actions">
+                <button id="history-detail-qr-btn" class="btn btn-secondary" style="display:none">Result QR</button>
             </div>
         </div>
     </div>
@@ -346,6 +360,7 @@
         <div class="end-buttons">
             <button id="end-rematch-btn" class="btn btn-primary">Rematch</button>
             <button id="end-new-match-btn" class="btn btn-secondary">New Match</button>
+            <button id="end-result-qr-btn" class="btn btn-secondary" style="display:none">Result QR</button>
             <button id="end-history-btn" class="btn btn-tertiary">History</button>
         </div>
     </div>
@@ -387,6 +402,7 @@
         </div>
     </div>
 
+    <script src="lib/qrcode-generator.js"></script>
     <script src="js/db.js"></script>
     <script src="js/newton-integrity.js"></script>
     <script src="js/chalker.js"></script>

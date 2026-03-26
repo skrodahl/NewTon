@@ -760,6 +760,18 @@ body {
   font-size: 0.95rem;
 }
 
+/* Result QR modal */
+.result-qr-code {
+  display: flex;
+  justify-content: center;
+  margin: 12px 0;
+}
+
+.result-qr-code svg {
+  width: 220px;
+  height: 220px;
+}
+
 /* Config modal (larger, scrollable) */
 .config-modal-content {
   max-width: 400px;

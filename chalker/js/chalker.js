@@ -139,7 +139,15 @@
     endLegsContainer: document.getElementById('end-legs-container'),
     endRematchBtn: document.getElementById('end-rematch-btn'),
     endNewMatchBtn: document.getElementById('end-new-match-btn'),
+    endResultQrBtn: document.getElementById('end-result-qr-btn'),
     endHistoryBtn: document.getElementById('end-history-btn'),
+
+    // Result QR modal
+    resultQrModal: document.getElementById('result-qr-modal'),
+    resultQrTitle: document.getElementById('result-qr-title'),
+    resultQrSubtitle: document.getElementById('result-qr-subtitle'),
+    resultQrCode: document.getElementById('result-qr-code'),
+    resultQrCloseBtn: document.getElementById('result-qr-close-btn'),
 
     // History
     historyScreen: document.getElementById('history-screen'),
@@ -157,6 +165,7 @@
     detailStatsP2: document.getElementById('detail-stats-p2'),
     detailStatsBody: document.getElementById('detail-stats-body'),
     detailLegsContainer: document.getElementById('detail-legs-container'),
+    historyDetailQrBtn: document.getElementById('history-detail-qr-btn'),
 
     // Keypad action buttons
     keyNew: document.getElementById('key-new'),
@@ -852,6 +861,9 @@
   /** @type {object|null} - Parsed and verified QR assignment payload pending confirmation */
   let qrPayload = null;
 
+  /** @type {object|null} - Match currently shown in history detail (for Result QR) */
+  let currentHistoryMatch = null;
+
   /** @type {number|null} - setInterval handle for BarcodeDetector scan loop */
   let qrScanInterval = null;
 
@@ -982,7 +994,7 @@
       startingScore: payload.sc,
       bestOf: payload.bo,
       maxRounds: payload.mr,
-      laneName: `Lane ${payload.ln}`,
+      laneName: payload.ln ? `Lane ${payload.ln}` : '',
       matchId: payload.mid,
       tournamentId: payload.tid,
       serverId: payload.sid,
@@ -1747,10 +1759,99 @@
     // Render leg scoresheets using shared function
     renderLegScoresheets(match, elements.endLegsContainer);
 
+    // Show Result QR button only for QR-assigned matches
+    elements.endResultQrBtn.style.display = state.config.matchId ? '' : 'none';
+
     showScreen('end');
 
     // Save to history (pass pre-built match to avoid recalculating stats)
     saveMatchToHistory(match);
+  }
+
+  // ================
+  // Result QR
+  // ================
+
+  /**
+   * Encode a byte array as base64.
+   * @param {number[]} arr
+   * @returns {string}
+   */
+  function uint8ToBase64(arr) {
+    let binary = '';
+    for (let i = 0; i < arr.length; i++) binary += String.fromCharCode(arr[i]);
+    return btoa(binary);
+  }
+
+  /**
+   * Build and sign the result payload from a completed match object.
+   * @param {object} match - Match object (config, legs, matchWinner, firstLegStarter, etc.)
+   * @returns {object} Signed payload ready for QR encoding
+   */
+  function buildResultPayload(match) {
+    const config = match.config;
+
+    const legs = match.legs.map(leg => {
+      const p1Scores = leg.visits.filter(v => v.player === 1).map(v => v.score);
+      const p2Scores = leg.visits.filter(v => v.player === 2).map(v => v.score);
+      const checkoutVisit = leg.visits.find(v => v.isCheckout);
+      const cd = checkoutVisit ? checkoutVisit.dartsUsed : 0;
+      const s = uint8ToBase64(p1Scores) + '|' + uint8ToBase64(p2Scores);
+      return { w: leg.winner, s, cd };
+    });
+
+    const payload = {
+      v:   1,
+      t:   'r',
+      mid: config.matchId,
+      tid: config.tournamentId,
+      sid: config.serverId,
+      p1:  config.player1Name,
+      p2:  config.player2Name,
+      sc:  config.startingScore,
+      bo:  config.bestOf,
+      mr:  config.maxRounds,
+      w:   match.matchWinner,
+      fls: match.firstLegStarter,
+      legs,
+      ts:  Math.floor(Date.now() / 1000)
+    };
+
+    if (config.lane) payload.ln = config.lane;
+
+    return NewtonIntegrity.sign(payload);
+  }
+
+  /**
+   * Show the result QR modal for a completed match.
+   * @param {object} match - Match object with config, legs, matchWinner, firstLegStarter
+   */
+  function showResultQRModal(match) {
+    const config = match.config;
+    const winnerName = match.matchWinner === 1 ? config.player1Name : config.player2Name;
+    const loserName  = match.matchWinner === 1 ? config.player2Name : config.player1Name;
+    const legScore   = `${match.player1Legs}-${match.player2Legs}`;
+
+    elements.resultQrTitle.textContent = `${winnerName} beat ${loserName} ${legScore}`;
+
+    const parts = [`${config.player1Name} vs ${config.player2Name}`];
+    if (config.lane) parts.push(`Lane ${config.lane}`);
+    parts.push(`${config.startingScore} Bo${config.bestOf}`);
+    elements.resultQrSubtitle.textContent = parts.join(' · ');
+
+    elements.resultQrCode.innerHTML = '';
+    try {
+      const signed = buildResultPayload(match);
+      const json = JSON.stringify(signed);
+      const qr = qrcode(0, 'M');
+      qr.addData(json);
+      qr.make();
+      elements.resultQrCode.innerHTML = qr.createSvgTag(6, 2);
+    } catch (e) {
+      elements.resultQrCode.innerHTML = '<p style="color:#f87171">Failed to generate QR code.</p>';
+    }
+
+    showModal(elements.resultQrModal);
   }
 
   // ==============
@@ -1769,7 +1870,8 @@
            elements.confirmModal.classList.contains('active') ||
            elements.networkModal.classList.contains('active') ||
            elements.qrScanModal.classList.contains('active') ||
-           elements.qrConfirmModal.classList.contains('active');
+           elements.qrConfirmModal.classList.contains('active') ||
+           elements.resultQrModal.classList.contains('active');
   }
 
   /**
@@ -2237,11 +2339,27 @@
     // End screen buttons (no confirmation needed - match is already over)
     elements.endRematchBtn.addEventListener('click', rematch);
     elements.endNewMatchBtn.addEventListener('click', showConfigModal);
+    elements.endResultQrBtn.addEventListener('click', () => {
+      const stats = calculateStats();
+      showResultQRModal({
+        config: state.config,
+        legs: state.legs,
+        player1Legs: state.player1Legs,
+        player2Legs: state.player2Legs,
+        matchWinner: state.matchWinner,
+        firstLegStarter: state.firstLegStarter,
+        stats
+      });
+    });
     elements.endHistoryBtn.addEventListener('click', showHistoryScreen);
 
     // History
     elements.historyBackBtn.addEventListener('click', historyBack);
     elements.historyDetailBackBtn.addEventListener('click', historyDetailBack);
+    elements.historyDetailQrBtn.addEventListener('click', () => {
+      if (currentHistoryMatch) showResultQRModal(currentHistoryMatch);
+    });
+    elements.resultQrCloseBtn.addEventListener('click', () => hideModal(elements.resultQrModal));
 
     // Keyboard support (for testing on desktop)
     document.addEventListener('keydown', (e) => {
@@ -2464,6 +2582,10 @@
 
     // Render leg scoresheets using shared function
     renderLegScoresheets(match, elements.detailLegsContainer);
+
+    // Show Result QR button only for QR-assigned matches
+    currentHistoryMatch = match;
+    elements.historyDetailQrBtn.style.display = match.config.matchId ? '' : 'none';
 
     showScreen('history-detail');
   }

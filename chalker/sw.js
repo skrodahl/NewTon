@@ -3,12 +3,13 @@
  * Provides offline caching for PWA functionality
  */
 
-const CACHE_NAME = 'chalker-v101';
+const CACHE_NAME = 'chalker-v102';
 
 // Files to cache for offline use
 const CACHE_FILES = [
   './',
   './index.html',
+  './lib/qrcode-generator.js',
   './js/db.js',
   './js/newton-integrity.js',
   './js/chalker.js',

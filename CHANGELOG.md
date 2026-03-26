@@ -1,3 +1,39 @@
+## **v5.0.1-beta.1** - The Round-Trip Begins (2026-03-26)
+
+### Chalker generates result QR on Match Complete
+
+When a match was started from a TM assignment QR, a **Result QR** button appears on the Match Complete screen. Tap it — a modal shows the signed result QR code. The TM operator scans it to record the result without typing anything.
+
+The result payload carries raw visit scores (base64-encoded per player per leg), leg winners, checkout dart counts, and all match identification fields (`mid`, `tid`, `sid`) echoed back from the assignment. The TM derives all statistics from the raw scores.
+
+Tiebreak legs are encoded correctly: `cd = 0` signals a tiebreak (no checkout visit); `legs[].w` records who won the deciding round.
+
+For matches started manually (no QR), no Result QR button appears — the IDs needed for TM routing are only present in QR-assigned matches.
+
+### Result QR also accessible from match history
+
+QR-assigned matches retain the result QR in Chalker history. A **Result QR** button appears at the bottom of the match detail screen for any QR-assigned match — so a missed scan can always be recovered later.
+
+### Canonical links added to all pages (SEO)
+
+`<link rel="canonical">` tags added to all 25 HTML pages, pointing to `newtondarts.com` (no `www`). Fixes a Google indexing issue where `www.newtondarts.com` was being treated as the canonical origin. Directory URLs use a trailing slash (`https://newtondarts.com/releases/`). `releases/README.md` updated with canonical link instructions and template.
+
+### Chalker info bar: lane suppressed when unassigned
+
+When a QR-assigned match has no lane set in the TM, the Chalker info bar previously showed "Lane undefined". Now it shows nothing for lane — only `Leg N of M` and `Ref: name` when present.
+
+### Files changed
+
+- All 25 HTML pages — `<link rel="canonical">` added to each
+- `releases/README.md` — canonical link instructions added as Step 3; HTML template updated
+- `chalker/lib/qrcode-generator.js` — new file; QR generation library (copy from TM's `lib/`)
+- `chalker/index.html` — Result QR button on end screen; `#result-qr-modal`; Result QR button in history detail; `qrcode-generator.js` script tag
+- `chalker/js/chalker.js` — `buildResultPayload()`, `showResultQRModal()`, `uint8ToBase64()`; show/hide Result QR button in end screen and history detail; lane-undefined fix in `startMatchFromQR()`
+- `chalker/styles/chalker.css` — `.result-qr-code` styles
+- `chalker/sw.js` — version bumped to `chalker-v102`
+
+---
+
 ## **v5.0.0** - The Revolution Will Be Scanned (2026-03-24)
 
 ### Referee shown everywhere
