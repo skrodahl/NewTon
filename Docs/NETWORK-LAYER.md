@@ -76,6 +76,74 @@ The hub routes messages. The TM is the publisher and source of truth. Consumers 
 
 The network layer features described below remain valid and unchanged.
 
+### Spectator View
+
+A read-only mobile web UI that lets anyone in the venue follow the tournament in real time from their phone. No app install, no login, no configuration — scan a QR code on the wall and you're watching.
+
+**Access:** The operator prints a QR code (or a single tournament QR is displayed on a screen) that opens the spectator UI in a browser with a topic parameter. The phone auto-subscribes to the tournament's MQTT feed. Zero UI footprint on the TM — nothing to enable, nothing to configure.
+
+**Use cases:**
+
+- **Can't see the board** — the venue is crowded, you're at the bar, you're playing on another board. Your phone becomes a personal scorecard for any match in the room.
+- **What just happened?** — a roar goes up, you missed it. Check your phone for instant context instead of asking and getting five different versions.
+- **The bragging problem** — "I hit 180, then 140, then..." — the replay settles it with the actual throws, not memory. Makes the bragging better because the details are real.
+- **Visiting team** — in a league setting, the visiting team follows every match and the current standings from the moment they walk in. No waiting for announcements, no asking the operator. Hospitality through architecture.
+
+**Features (high-impact, low-intrusion):**
+
+- **Follow / Unfollow a match** — tap "follow" to see live play-by-play. Gentle vibration or alert when the leg ends or a notable score lands.
+- **Match inspector** — per-leg throw breakdown, average per leg, time per throw. The bragging-player moment, with receipts.
+- **"Replay last leg" timeline** — step through recorded throws from match events.
+- **Search / filter players** — find a player and jump to their current match.
+- **Persistent cached snapshot** — localStorage keeps last known state if connectivity drops. Phone shows stale-but-correct data rather than nothing.
+- **Low-bandwidth mode** — only subscribe to match events for the match you're following.
+- **Read-only by design** — no write, no claim, no referee assignments from spectators. Ever.
+
+**UX & performance:**
+
+- Publish snapshot at most once per meaningful state change (avoid flooding). Use delta events for live play.
+- For large tournaments, clients subscribe only to relevant subtopics (`matches/{matchId}`) to reduce traffic.
+- On connect, client reads retained snapshot then subscribes to real-time topics — ensures instant, correct UI state.
+- Heartbeat from operator (TM presence) so spectators can show "live" vs "paused" indicator.
+
+**Infrastructure cost:** Zero. The spectator view is just another MQTT subscriber. The hub, the broker, the topics — all already exist for TM ↔ Chalker communication. The spectator UI is a static HTML/JS page served from the same container. No additional backend, no additional deployment.
+
+**Encryption & licensing model:**
+
+The spectator topic is unencrypted and separate from the operational TM ↔ Chalker traffic:
+
+| Topic | Encrypted | Licensed | Direction |
+|-------|:---------:|:--------:|-----------|
+| `newton/match/{tournamentId}` | Yes | Yes | TM ↔ Chalker (operational) |
+| `newton/spectator/{tournamentId}` | No | No | TM → spectators (read-only) |
+
+The TM publishes to the spectator topic as a side effect of processing incoming encrypted Chalker messages. The flow:
+
+1. Licensed TM receives encrypted match data from Chalker via MQTT
+2. TM decrypts, processes, updates bracket state
+3. TM publishes a curated, unencrypted summary to the spectator topic
+
+No license → no decryption → no incoming messages → nothing to publish → spectator topic is silent. The licensing model itself is the access control — no feature flags, no spectator-specific license check needed. The spectator view is a free feature, but it requires a licensed TM to have anything to show.
+
+The spectator topic is not a decrypted mirror of the operational topic. The TM deliberately publishes only what spectators should see: scores, standings, match state. No assignment payloads, no internal IDs, no raw operational data.
+
+### Big Screen Display
+
+The spectator topic powers more than phones — it's the foundation for a venue display. A TV, projector, or monitor running a full-screen browser subscribes to the same unencrypted spectator topic and becomes a live tournament board.
+
+**What it shows:**
+
+- Live bracket with match states updating in real time
+- Current match scores as legs are played
+- Leaderboard / standings after each completed match
+- Celebration podium when the tournament completes
+
+**How it works:** A static HTML page (e.g. `display.html`) served from the same container. Open it in a browser on any screen — a Raspberry Pi, a Smart TV browser, a laptop plugged into a projector. It subscribes to `newton/spectator/{tournamentId}`, reads the retained snapshot for instant state, and updates as events arrive. No interaction needed after initial load.
+
+**Same model as the phone spectator view:** same topic, same data, different UI. The phone UI is compact and interactive (follow/unfollow, search players). The big screen UI is full-screen, auto-cycling, and hands-off. Both are read-only MQTT subscribers. The TM doesn't know or care what's consuming the feed.
+
+**Infrastructure cost:** Still zero. Same broker, same topic, same published data. The display is just another subscriber.
+
 ---
 
 ## Overview
