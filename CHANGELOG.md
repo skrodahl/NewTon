@@ -22,15 +22,19 @@ QR-assigned matches retain the result QR in Chalker history. A **Result QR** but
 
 When a QR-assigned match has no lane set in the TM, the Chalker info bar previously showed "Lane undefined". Now it shows nothing for lane — only `Leg N of M` and `Ref: name` when present.
 
+### CSP fix: inline style removed from leg average highlight
+
+Leg average highlighting for the first-throwing player used an inline `style` attribute, blocked by the server's `style-src 'self'` Content Security Policy. Replaced with a CSS class (`.leg-avg-first`).
+
 ### Files changed
 
 - All 25 HTML pages — `<link rel="canonical">` added to each
 - `releases/README.md` — canonical link instructions added as Step 3; HTML template updated
 - `chalker/lib/qrcode-generator.js` — new file; QR generation library (copy from TM's `lib/`)
-- `chalker/index.html` — Result QR button on end screen; `#result-qr-modal`; Result QR button in history detail; `qrcode-generator.js` script tag
-- `chalker/js/chalker.js` — `buildResultPayload()`, `showResultQRModal()`, `uint8ToBase64()`; show/hide Result QR button in end screen and history detail; lane-undefined fix in `startMatchFromQR()`
-- `chalker/styles/chalker.css` — `.result-qr-code` styles
-- `chalker/sw.js` — version bumped to `chalker-v102`
+- `chalker/index.html` — Result QR button on end screen; `#result-qr-modal`; Result QR button in history detail; `qrcode-generator.js` script tag; "Tournament Manager" in place of "TM" in QR hint text
+- `chalker/js/chalker.js` — `buildResultPayload()`, `showResultQRModal()`, `uint8ToBase64()`; show/hide Result QR button in end screen and history detail; lane undefined fix in `startMatchFromQR()`; inline style replaced with `.leg-avg-first` class
+- `chalker/styles/chalker.css` — `.leg-avg-first` and `.result-qr-code` styles
+- `chalker/sw.js` — version bumped to `chalker-v104`
 
 ---
 

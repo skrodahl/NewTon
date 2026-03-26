@@ -64,6 +64,14 @@ Rules applied:
 
 ---
 
+## CSP Fix: Inline Style Removed from Leg Average Highlight
+
+Leg average highlighting for the first-throwing player used an inline `style` attribute (`style="color: var(--accent-success);"`), which was blocked by the server's `style-src 'self'` Content Security Policy directive. The highlighting appeared in local development but was silently suppressed on the deployed site.
+
+Fixed by replacing the inline style with a CSS class (`.leg-avg-first { color: var(--accent-success); }`). The colour-coded leg averages now work correctly in all environments.
+
+---
+
 ## Chalker info bar: lane suppressed when unassigned
 
 When a QR-assigned match has no lane set in the TM, the Chalker info bar previously showed "Lane undefined". Fixed — the info bar now shows only `Leg N of M` (and `Ref: name` when present) when no lane is assigned.
@@ -80,10 +88,10 @@ When a QR-assigned match has no lane set in the TM, the Chalker info bar previou
 ### Chalker
 
 - `chalker/lib/qrcode-generator.js` — new file; QR generation library (qrcode-generator v1.4.4, copied from TM's `lib/`)
-- `chalker/index.html` — Result QR button on end screen; `#result-qr-modal` markup; Result QR button in history detail screen; `qrcode-generator.js` script tag
-- `chalker/js/chalker.js` — `buildResultPayload()`, `showResultQRModal()`, `uint8ToBase64()`; show/hide Result QR button in end screen and history detail; `laneName` undefined fix in `startMatchFromQR()`
-- `chalker/styles/chalker.css` — `.result-qr-code` styles (centered, 220×220px SVG)
-- `chalker/sw.js` — version bumped to `chalker-v102`
+- `chalker/index.html` — Result QR button on end screen; `#result-qr-modal` markup; Result QR button in history detail screen; `qrcode-generator.js` script tag; "Tournament Manager" in place of "TM" in QR hint text
+- `chalker/js/chalker.js` — `buildResultPayload()`, `showResultQRModal()`, `uint8ToBase64()`; show/hide Result QR button in end screen and history detail; lane undefined fix in `startMatchFromQR()`; inline style replaced with `.leg-avg-first` class
+- `chalker/styles/chalker.css` — `.leg-avg-first` and `.result-qr-code` styles
+- `chalker/sw.js` — version bumped to `chalker-v104`
 
 ---
 
