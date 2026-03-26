@@ -760,6 +760,11 @@ body {
   font-size: 0.95rem;
 }
 
+/* Leg average highlight (first thrower) */
+.leg-avg-first {
+  color: var(--accent-success);
+}
+
 /* Result QR modal */
 .result-qr-code {
   display: flex;

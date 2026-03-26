@@ -1680,7 +1680,7 @@
         const score = p1Visits.reduce((sum, v) => sum + v.score, 0);
         const darts = p1Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
         const avg = ((score / darts) * 3).toFixed(1);
-        p1LegAvgs.push(legStarter === 1 ? `<span style="color: var(--accent-success);">${avg}</span>` : avg);
+        p1LegAvgs.push(legStarter === 1 ? `<span class="leg-avg-first">${avg}</span>` : avg);
       } else {
         p1LegAvgs.push('-');
       }
@@ -1689,7 +1689,7 @@
         const score = p2Visits.reduce((sum, v) => sum + v.score, 0);
         const darts = p2Visits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
         const avg = ((score / darts) * 3).toFixed(1);
-        p2LegAvgs.push(legStarter === 2 ? `<span style="color: var(--accent-success);">${avg}</span>` : avg);
+        p2LegAvgs.push(legStarter === 2 ? `<span class="leg-avg-first">${avg}</span>` : avg);
       } else {
         p2LegAvgs.push('-');
       }
