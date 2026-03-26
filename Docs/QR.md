@@ -233,6 +233,40 @@ const NewtonIntegrity = {
 
 ---
 
+## TM Result Application
+
+### Applying the Match Result
+
+`completeMatch(matchId, winnerPlayerNumber, winnerLegs, loserLegs)` handles everything structural — winner declaration, bracket advancement, and the history transaction. Called directly with data from the QR payload. The TM derives `winnerLegs` and `loserLegs` by counting `legs[].w` values.
+
+### Player Achievements
+
+Achievements are stored on `player.stats`, not on the match. The structure:
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `oneEighties` | counter | Visit scores of exactly 180 |
+| `tons` | counter | Visit scores 100–179 |
+| `highOuts` | array | Checkout scores ≥ 101 (stored as individual values) |
+| `shortLegs` | array | Dart counts for short legs (stored as individual dart counts) |
+| `lollipops` | counter | Visit scores of exactly 3 (cosmetic) |
+
+Currently populated via the Statistics Modal. All are fully derivable from the result QR payload:
+
+| Achievement | Derivation |
+|------------|------------|
+| **180s** | All visits where `score === 180` |
+| **Tons** | All visits where `100 ≤ score ≤ 179` |
+| **High outs** | Last visit in the winner's score array, if `score ≥ 101` (checkout value = remaining score = last element) |
+| **Short legs** | `(winner_visits − 1) × 3 + cd` darts. Non-checkout visits are always 3 darts; `cd` gives the final dart count. |
+| **Lollipops** | All visits where `score === 3` |
+
+### Replay Protection Covers Achievements
+
+`completeMatch()` is blocked at the match level if the match is already completed. But achievements are **additive on player.stats** — applying them a second time corrupts the totals. The achievement application must be gated by the same replay check as `completeMatch()`. In practice: check match state first; if already completed, show the replay warning and do not call either `completeMatch()` or the achievement application.
+
+---
+
 ## Replay Protection
 
 **Approach: Match-state-based (no nonces needed)**
