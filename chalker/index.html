@@ -56,6 +56,9 @@
             </div>
         </div>
 
+        <!-- Match complete banner (shown instead of keypad when match is done) -->
+        <div id="match-complete-banner" class="match-complete-banner" style="display:none"></div>
+
         <!-- Input section -->
         <div class="input-section">
             <div class="keypad-actions">
@@ -323,7 +326,8 @@
 
     <!-- End-of-Match Screen -->
     <div id="end-screen" class="screen">
-        <header class="end-header">
+        <header class="history-header">
+            <button id="end-back-btn" class="btn-icon" aria-label="Back">←</button>
             <h1>Match Complete</h1>
         </header>
 
@@ -358,10 +362,7 @@
         </div>
 
         <div class="end-buttons">
-            <button id="end-rematch-btn" class="btn btn-primary">Rematch</button>
-            <button id="end-new-match-btn" class="btn btn-secondary">New Match</button>
-            <button id="end-result-qr-btn" class="btn btn-secondary" style="display:none">Result QR</button>
-            <button id="end-history-btn" class="btn btn-tertiary">History</button>
+            <button id="end-result-qr-btn" class="btn btn-primary btn-full" style="display:none">Result QR</button>
         </div>
     </div>
 

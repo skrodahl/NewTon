@@ -1,3 +1,34 @@
+## **v5.0.1-beta.2** - Nobody Leaves the Oche (2026-03-27)
+
+### Chalker: scoreboard is now home
+
+A winning checkout no longer transports you to the Match Complete stats screen. The scoreboard stays — showing the final state, with a green banner declaring the winner. The match is saved to history immediately. From the completed scoreboard:
+
+- **STATS** — opens the full stats view (averages, score ranges, leg scoresheets)
+- **NEW** — settings modal to start the next match (pre-populated with previous settings)
+- **HISTORY** — browse previous matches; back returns to the scoreboard
+
+### Stats screen: back arrow and Result QR
+
+The stats screen now has a back arrow in the header, consistent with the history detail screen. For QR-assigned matches, a full-width **Result QR** button appears at the bottom — prominent and easy to find.
+
+### Winning leg locked after commitment
+
+Scores in the winning leg can no longer be edited after the checkout is confirmed. Consistent with how all completed legs behave — the checkout modal's Cancel button is the designed moment of regret.
+
+### QR badge in match history
+
+QR-assigned matches are marked with a **QR** badge in the history list.
+
+### Files changed
+
+- `chalker/js/chalker.js` — `onMatchComplete()` stays on scoreboard and saves to history; `completeLeg()` calls `onMatchComplete()`; `showEndScreen()` no longer saves to history; STATS key routes to `showEndScreen()` when match is complete; `startEditingVisit()` blocked when `matchComplete`; `historyBack()` calls `updateDisplay()` for completed matches; `updateIdleDisplay()` hides banner; QR badge in `renderHistoryList()`
+- `chalker/index.html` — `#match-complete-banner`; end screen back arrow in header; Result QR as full-width bottom button; end screen action buttons (Rematch, New Match, History) removed
+- `chalker/styles/chalker.css` — `.match-complete-banner`, `.btn-full`, `.qr-badge` styles
+- `chalker/sw.js` — version bumped to `chalker-v105`
+
+---
+
 ## **v5.0.1-beta.1** - The Round-Trip Begins (2026-03-26)
 
 ### Chalker generates result QR on Match Complete

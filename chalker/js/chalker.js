@@ -137,10 +137,9 @@
     endStatsBody: document.getElementById('end-stats-body'),
     endMatchInfo: document.getElementById('end-match-info'),
     endLegsContainer: document.getElementById('end-legs-container'),
-    endRematchBtn: document.getElementById('end-rematch-btn'),
-    endNewMatchBtn: document.getElementById('end-new-match-btn'),
     endResultQrBtn: document.getElementById('end-result-qr-btn'),
-    endHistoryBtn: document.getElementById('end-history-btn'),
+    endBackBtn: document.getElementById('end-back-btn'),
+    matchCompleteBanner: document.getElementById('match-complete-banner'),
 
     // Result QR modal
     resultQrModal: document.getElementById('result-qr-modal'),
@@ -379,6 +378,26 @@
   }
 
   /**
+   * Called when match is won — saves to history and stays on scoreboard.
+   * The operator can review the final state, correct a mistaken entry,
+   * tap Stats to see full statistics, or tap NEW to start the next match.
+   */
+  function onMatchComplete() {
+    const stats = calculateStats();
+    const match = {
+      config: state.config,
+      legs: state.legs,
+      player1Legs: state.player1Legs,
+      player2Legs: state.player2Legs,
+      matchWinner: state.matchWinner,
+      firstLegStarter: state.firstLegStarter,
+      stats: stats
+    };
+    saveMatchToHistory(match);
+    updateDisplay();
+  }
+
+  /**
    * Complete the current leg
    */
   function completeLeg() {
@@ -396,11 +415,11 @@
     if (state.player1Legs >= legsToWin) {
       state.matchComplete = true;
       state.matchWinner = 1;
-      showEndScreen();
+      onMatchComplete();
     } else if (state.player2Legs >= legsToWin) {
       state.matchComplete = true;
       state.matchWinner = 2;
-      showEndScreen();
+      onMatchComplete();
     } else {
       // Start next leg
       startNewLeg();
@@ -1154,6 +1173,9 @@
     // Remove network mode styling
     elements.scoringHeader.classList.remove('network-mode');
 
+    // Hide match complete banner
+    elements.matchCompleteBanner.style.display = 'none';
+
     // Show idle scores
     elements.player1Score.textContent = '---';
     elements.player2Score.textContent = '---';
@@ -1232,6 +1254,15 @@
 
     // Enable keypad
     updateKeypadState();
+
+    // Show match complete banner or hide it
+    if (state.matchComplete) {
+      const winnerName = state.matchWinner === 1 ? state.config.player1Name : state.config.player2Name;
+      elements.matchCompleteBanner.textContent = `${winnerName} wins! Tap STATS to review or NEW to start another match.`;
+      elements.matchCompleteBanner.style.display = '';
+    } else {
+      elements.matchCompleteBanner.style.display = 'none';
+    }
 
     // Render chalkboard
     renderChalkboard();
@@ -1407,6 +1438,7 @@
    * @param {number} visitIdx - Index of visit to edit
    */
   function startEditingVisit(visitIdx) {
+    if (state && state.matchComplete) return;
     const currentLeg = state.legs[state.legs.length - 1];
     if (!currentLeg || visitIdx < 0 || visitIdx >= currentLeg.visits.length) return;
 
@@ -1763,9 +1795,6 @@
     elements.endResultQrBtn.style.display = state.config.matchId ? '' : 'none';
 
     showScreen('end');
-
-    // Save to history (pass pre-built match to avoid recalculating stats)
-    saveMatchToHistory(match);
   }
 
   // ================
@@ -2315,7 +2344,13 @@
     // Keypad action buttons
     elements.keyNew.addEventListener('click', handleNewButton);
     elements.keyHistory.addEventListener('click', showHistoryScreen);
-    elements.keyStats.addEventListener('click', showLiveStats);
+    elements.keyStats.addEventListener('click', () => {
+      if (state && state.matchComplete) {
+        showEndScreen();
+      } else {
+        showLiveStats();
+      }
+    });
 
     // Stats back button
     elements.statsBackBtn.addEventListener('click', statsBack);
@@ -2336,9 +2371,7 @@
     elements.tiebreakRandomBtn.addEventListener('click', () => handleSelectionModalChoice('random'));
     elements.tiebreakCancelBtn.addEventListener('click', cancelTiebreak);
 
-    // End screen buttons (no confirmation needed - match is already over)
-    elements.endRematchBtn.addEventListener('click', rematch);
-    elements.endNewMatchBtn.addEventListener('click', showConfigModal);
+    // End screen (stats view) buttons
     elements.endResultQrBtn.addEventListener('click', () => {
       const stats = calculateStats();
       showResultQRModal({
@@ -2351,7 +2384,7 @@
         stats
       });
     });
-    elements.endHistoryBtn.addEventListener('click', showHistoryScreen);
+    elements.endBackBtn.addEventListener('click', () => showScreen('scoring'));
 
     // History
     elements.historyBackBtn.addEventListener('click', historyBack);
@@ -2540,7 +2573,7 @@
       const bestOf = m.config.bestOf || 3;
       return `
         <div class="history-item" data-index="${index}">
-          <div class="history-players">${m.config.player1Name} vs ${m.config.player2Name}</div>
+          <div class="history-players">${m.config.player1Name} vs ${m.config.player2Name}${m.config.matchId ? ' <span class="qr-badge">QR</span>' : ''}</div>
           <div class="history-score">${m.player1Legs} - ${m.player2Legs}</div>
           <div class="history-date">${dateStr} ${timeStr} • ${m.config.startingScore} • Best of ${bestOf} • ${winnerName} wins</div>
         </div>
@@ -2602,8 +2635,10 @@
    */
   function historyBack() {
     showScreen('scoring');
-    if (!state || state.matchComplete) {
+    if (!state) {
       updateIdleDisplay();
+    } else {
+      updateDisplay();
     }
   }
 
