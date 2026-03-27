@@ -138,48 +138,6 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
     <!-- Divider -->
     <div class="section-divider"><hr></div>
 
-    <!-- Key Features -->
-    <div class="features">
-        <h2>Key Features</h2>
-        <div class="features-grid">
-            <div class="feature-card">
-                <h3>Single &amp; Double Elimination</h3>
-                <p>Professional bracket structures for 4 to 32 players. Frontside/backside brackets with automatic progression, walkovers, and placement tracking. Interactive bracket visualization with click-to-zoom match cards.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Lane &amp; Referee Management</h3>
-                <p>Assign matches to dartboard lanes and referees with smart conflict detection. Players officiating a match are blocked from playing until they're free, and players in a live match are excluded from referee selection. Suggestions prioritise recent losers, winners, and referee history.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Complete Undo System</h3>
-                <p>Transaction-based history enables surgical undo of any match result. Recover from mistakes without resetting the entire tournament.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Import &amp; Export</h3>
-                <p>JSON-based backup and sharing between devices. CSV export for results. Multi-tournament support with persistent player registry.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Chalker Scoring App</h3>
-                <p>Tablet-optimized x01 scoring companion for referees. Installable as a PWA with full offline support. Live stats, match history, tiebreak warnings, and ton rings — everything a chalker needs at the board.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Offline-First Design</h3>
-                <p>Runs entirely in your browser with zero external dependencies. No internet connection, server, or database required. Pure HTML5, CSS3, and JavaScript.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Total Privacy</h3>
-                <p>All tournament data lives in your browser's localStorage. No cloud, no tracking, no external data sharing. Complete privacy by architecture.</p>
-            </div>
-            <div class="feature-card">
-                <h3>Self-Hostable with Docker</h3>
-                <p>Deploy on your own server in under 2 minutes. Lightweight Alpine container with nginx and optional REST API for tournament sharing.</p>
-            </div>
-        </div>
-    </div>
-
-    <!-- Divider -->
-    <div class="section-divider"><hr></div>
-
     <!-- Feature Showcase -->
     <div class="showcase">
         <h2>See It in Action</h2>
