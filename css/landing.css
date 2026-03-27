@@ -112,7 +112,7 @@ body {
 }
 
 .hero-image {
-    max-width: 1400px;
+    max-width: 1000px;
     margin: 0 auto 48px;
     position: relative;
 }
@@ -308,6 +308,17 @@ body {
     font-weight: 600;
     color: #f5ebe0;
     text-decoration: none;
+}
+
+.get-started-quickstart {
+    grid-column: 1 / -1;
+    text-align: center;
+}
+
+.get-started-quickstart img {
+    max-width: 900px;
+    width: 100%;
+    border-radius: 10px;
 }
 
 .get-started-card--wide {
@@ -602,6 +613,29 @@ body {
 
 .lightbox-trigger {
     cursor: zoom-in;
+}
+
+.get-started-quickstart.has-lightbox {
+    position: relative;
+    display: inline-block;
+}
+
+.get-started-quickstart.has-lightbox::after {
+    content: '';
+    position: absolute;
+    bottom: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.45) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='white' stroke-width='2.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='10' cy='10' r='6'/%3E%3Cpath d='M15 15L20 20'/%3E%3Cpath d='M10 7v6M7 10h6'/%3E%3C/svg%3E") center/18px no-repeat;
+    border-radius: 6px;
+    opacity: 0;
+    transition: opacity 0.2s ease;
+    pointer-events: none;
+}
+
+.get-started-quickstart.has-lightbox:hover::after {
+    opacity: 1;
 }
 
 .showcase-image.has-lightbox {

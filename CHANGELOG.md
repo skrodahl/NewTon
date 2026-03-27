@@ -26,6 +26,16 @@ When a QR-assigned match has no lane set in the TM, the Chalker info bar previou
 
 Leg average highlighting for the first-throwing player used an inline `style` attribute, blocked by the server's `style-src 'self'` Content Security Policy. Replaced with a CSS class (`.leg-avg-first`).
 
+### Landing page: poster hero and quickstart infographic
+
+The hero image on `landing.html` / `landing-page.php` is replaced with the NewTon DC retro poster (`newton-poster-throw.jpg`) — calmer, stronger brand statement, consistent with OG/social card graphics.
+
+A quickstart infographic (`quickstart.jpg`) is added to the Get Started section, above the User Guide card. Clicking it opens the lightbox for a full-size view. The magnifying glass badge appears on hover.
+
+### User guide: download link points to releases page
+
+The Download step in `userguide.html` now links to `/releases/` instead of the GitHub releases page.
+
 ### Files changed
 
 - All 25 HTML pages — `<link rel="canonical">` added to each
