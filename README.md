@@ -8,7 +8,7 @@
 [![GitHub Stars](https://img.shields.io/github/stars/skrodahl/NewTon?style=social)](https://github.com/skrodahl/NewTon/stargazers)
 <!-- [![GHCR Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fipitio.github.io%2Fbackage%2Fskrodahl%2FNewTon%2Fnewton.json&query=%24.downloads&logo=github&label=ghcr%20pulls)](https://github.com/skrodahl/NewTon/pkgs/container/newton) -->
 
-![Action Shot](https://github.com/skrodahl/NewTon/blob/main/Screenshots/newton-cartoon.jpg)
+![Action Shot](https://github.com/skrodahl/NewTon/blob/main/Screenshots/newton-poster-throw.jpg)
 
 **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://newtondarts.com)**
 
