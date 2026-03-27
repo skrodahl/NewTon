@@ -94,7 +94,6 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         <div class="hero-buttons">
             <a href="tournament.html" class="btn-launch" target="_blank">Launch Tournament Manager</a>
             <a href="chalker/" class="btn-chalker" target="_blank">Open Chalker App</a>
-            <a href="<?= $githubUrl ?>" class="btn-github">View on GitHub</a>
         </div>
     </div>
 
