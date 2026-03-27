@@ -48,7 +48,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         "isAccessibleForFree": true,
         "url": "<?= $githubUrl ?>",
         "downloadUrl": "<?= $githubUrl ?>",
-        "screenshot": "<?= $baseUrl ?>/Screenshots/newton-cartoon.jpg",
+		"screenshot": "<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg",
         "featureList": "Single Elimination, Double Elimination, 4-32 Players, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
         "keywords": "darts, tournament, bracket, scoring, score keeper, offline, PWA, self-hosted, open source"
     }
