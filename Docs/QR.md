@@ -261,6 +261,36 @@ Currently populated via the Statistics Modal. All are fully derivable from the r
 | **Short legs** | `(winner_visits − 1) × 3 + cd` darts. Non-checkout visits are always 3 darts; `cd` gives the final dart count. |
 | **Lollipops** | All visits where `score === 3` |
 
+### Stats Extraction Module
+
+**Design decision: TM-side only.**
+
+The Chalker delivers raw facts — visit scores, leg winners, checkout dart counts. It does not compute, interpret, or summarise. The TM is solely responsible for deriving meaning from the raw data.
+
+This clean separation enables everything downstream: the QR payload stays minimal and stable, and the TM can evolve its analysis independently of the Chalker.
+
+A dedicated module (`js/newton-stats.js`) handles all extraction. It is a pure function module — takes raw leg data in, returns structured stats out. No side effects. No coupling to QR, bracket, or player management.
+
+```javascript
+// js/newton-stats.js
+const NewtonStats = {
+  extractMatchStats(legs, startingScore, firstLegStarter) { ... },
+  extractPlayerStats(legs, playerIndex, startingScore) { ... },
+  extractAchievements(legs, playerIndex, startingScore) { ... },
+  // individual extractors callable independently
+  count180s(visits) { ... },
+  countTons(visits) { ... },
+  highOuts(legs, playerIndex, startingScore) { ... },
+  shortLegs(legs, playerIndex) { ... },
+  legAverages(legs, playerIndex) { ... },
+  matchAverage(legs, playerIndex) { ... },
+};
+```
+
+**Designed for reuse.** The individual extractors are callable independently — the QR result flow calls what it needs, and the Players' Lab (future) can call any combination without pulling in QR machinery. No extractor depends on another module.
+
+**Adding new extractors is additive.** New stat types (first-9 averages, ton-plus counts, bust rates, etc.) are new named functions in this module. Existing callers are unaffected.
+
 ### Replay Protection Covers Achievements
 
 `completeMatch()` is blocked at the match level if the match is already completed. But achievements are **additive on player.stats** — applying them a second time corrupts the totals. The achievement application must be gated by the same replay check as `completeMatch()`. In practice: check match state first; if already completed, show the replay warning and do not call either `completeMatch()` or the achievement application.
@@ -380,6 +410,7 @@ Both sides need both generation and scanning. Libraries loaded on-demand (not at
 | File | Purpose |
 |------|---------|
 | `js/newton-integrity.js` | CRC-32 module (shared code, copied to both) |
+| `js/newton-stats.js` | TM-side stats extraction module (pure functions, reusable for Players' Lab) |
 | `chalker/js/newton-integrity.js` | Same file, for Chalker |
 | `js/qr-bridge.js` | TM: QR generation (assignments) + scanning (results) |
 | `chalker/js/qr-bridge.js` | Chalker: QR scanning (assignments) + generation (results) |

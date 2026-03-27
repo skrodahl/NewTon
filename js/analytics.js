@@ -38,7 +38,10 @@ function openAnalyticsModal() {
 
     // Use dialog stack system with Escape key support
     if (typeof window.pushDialog === 'function') {
-        window.pushDialog('analyticsModal', null, true); // true enables Escape key
+        window.pushDialog('analyticsModal', () => {
+            const m = document.getElementById('analyticsModal');
+            if (m) m.style.display = 'block';
+        }, true); // true enables Escape key
     } else {
         modal.style.display = 'block';
     }

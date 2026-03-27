@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="https://newtondarts.com/releases/">
+    <link rel="canonical" href="https://newtondarts.com/releases/v5.0.1-beta.3.html">
     <title>Release Notes v5.0.1-beta.3 — NewTon DC Tournament Manager</title>
     <meta name="description" content="NewTon DC Tournament Manager v5.0.1-beta.3 release notes. The Eyes Have It — the Tournament Manager can now scan result QRs from the Chalker.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
@@ -52,12 +52,23 @@
     <hr>
 
     <h2 id="preview">Result Preview</h2>
-    <p>Both entry points produce the same decoded result table: match ID, format, winner, leg score, and a per-leg breakdown with visit scores (base64 decoded), who threw first each leg, and checkout darts (TB for tiebreak).</p>
+    <p>Both entry points produce the same decoded result table:</p>
+    <ul>
+        <li>Match ID, format, winner, and leg score</li>
+        <li>Per-leg breakdown: leg number, leg winner, who threw first, P1 visit scores (base64 decoded), P2 visit scores, checkout darts (or TB for tiebreak)</li>
+    </ul>
 
     <hr>
 
     <h2 id="inspector">QR Payload Inspector (Developer Console)</h2>
-    <p>A new <strong>QR Payload Inspector</strong> command in the Developer Console scans any NewTon QR — assignment or result — and displays the full raw payload with pass/fail checks for every field. The current Tournament Manager's tournament ID and server ID are shown at the top for direct comparison. Never blocks on validation failures.</p>
+    <p>A new <strong>QR Payload Inspector</strong> command in the Developer Console scans any NewTon QR — assignment or result — and displays:</p>
+    <ul>
+        <li><strong>This Tournament Manager</strong> — current tournament ID and server ID for direct comparison</li>
+        <li><strong>All payload fields</strong> with raw values and pass/fail checks: CRC, type, tournament ID, server ID, match found</li>
+        <li>Optional fields (lane, referee, teams) shown only when present</li>
+        <li>Per-leg breakdown with first-thrower column when legs are present</li>
+    </ul>
+    <p>Never blocks on validation failures — always shows what arrived. Works on assignment QRs too, correctly flagging type mismatch while still displaying all data.</p>
 
     <hr>
 
@@ -86,7 +97,7 @@
 
     <h2>Previous Releases</h2>
     <ul>
-        <li><a href="v5.0.1-beta.3.html">v5.0.1-beta.3</a> — March 27, 2026 — The Eyes Have It.</li>
+        <li><a href="/releases/">Latest release</a></li>
         <li><a href="v5.0.1-beta.2.html">v5.0.1-beta.2</a> — March 27, 2026 — Nobody Leaves the Oche.</li>
         <li><a href="v5.0.1-beta.1.html">v5.0.1-beta.1</a> — March 26, 2026 — The Round-Trip Begins.</li>
         <li><a href="v5.0.0.html">v5.0.0</a> — March 24, 2026 — The Revolution Will Be Scanned.</li>

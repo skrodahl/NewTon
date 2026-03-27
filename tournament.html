@@ -791,6 +791,10 @@
                                 style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">Toggle
                                 Read-Only</a>
 
+                            <a href="#" onclick="openQRInspector(); return false;"
+                                style="text-decoration: none; color: #065f46; display: block; margin-bottom: 8px; font-size: 14px;">QR
+                                Payload Inspector</a>
+
                             <a href="#" onclick="commandLateRegistration(); return false;"
                                 style="text-decoration: none; color: #b45309; display: block; margin-bottom: 8px; font-size: 14px;">Late
                                 Registration</a>
@@ -844,6 +848,28 @@
             </div>
         </div>
 
+        <!-- Result QR Scan Modal -->
+        <div id="qrResultScanModal" class="modal">
+            <div class="modal-content" style="max-width: 480px; text-align: center;">
+                <h3>Scan QR Code</h3>
+                <video id="qrResultScanVideo" style="width: 100%; border-radius: 6px; background: #000; margin: 12px 0;" autoplay playsinline muted></video>
+                <p style="color: #6b7280; font-size: 14px; margin-bottom: 8px;">Point the camera at the QR code on the Chalker.</p>
+                <p id="qrResultScanError" style="color: #dc2626; display: none; margin-bottom: 8px;"></p>
+                <button class="btn" onclick="stopResultQRScanner(); popDialog();">Cancel</button>
+            </div>
+        </div>
+
+        <!-- Result QR Preview Modal -->
+        <div id="qrResultPreviewModal" class="modal">
+            <div class="modal-content" style="max-width: 700px;">
+                <h3 id="qrResultPreviewTitle">Result QR</h3>
+                <div id="qrResultPreviewContent" style="margin: 16px 0; overflow-x: auto;"></div>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()">Close</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Load JavaScript files in the correct order -->
         <script src="lib/qrcode-generator.js"></script>
         <script src="js/newton-integrity.js"></script>
@@ -866,7 +892,7 @@
 
         <!-- Updated Winner Confirmation Modal with validation -->
         <div id="winnerConfirmModal" class="modal">
-            <div class="modal-content">
+            <div class="modal-content" style="max-width: 800px;">
                 <h3 id="winnerConfirmTitle">Confirm Match Winner</h3>
                 <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
                     <!-- Message will be populated by JavaScript -->
@@ -878,7 +904,10 @@
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
-                        <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
+                        <div style="display: flex; align-items: center; gap: 12px;">
+                            <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
+                            <button class="btn btn-success" id="scanResultQRBtn" onclick="openResultQRScanner(this.dataset.matchId)" style="white-space: nowrap;">Scan Result QR</button>
+                        </div>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center;">
@@ -1097,6 +1126,7 @@
                 <div class="text-center mt-20" style="display: flex; justify-content: center; align-items: center; position: relative;">
                     <div>
                         <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Leaderboard</button>
+                        <button class="btn" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="margin-right: 10px;">QR Results</button>
                         <button class="btn" id="commandCenterOK">Close</button>
                     </div>
                     <div style="display: flex; align-items: center; gap: 8px; position: absolute; right: 0;">

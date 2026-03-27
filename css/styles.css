@@ -3292,3 +3292,35 @@ a:hover { color: #1e40af; }
   border-radius: 4px;
   font-size: 0.9rem;
 }
+
+/* Result QR Preview */
+.qr-result-header {
+    margin-bottom: 16px;
+}
+.qr-result-match {
+    font-size: 14px;
+    color: #6b7280;
+    margin-bottom: 4px;
+}
+.qr-result-winner {
+    font-size: 18px;
+}
+.qr-result-legs {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 13px;
+}
+.qr-result-legs th,
+.qr-result-legs td {
+    border: 1px solid #e5e7eb;
+    padding: 6px 10px;
+    text-align: left;
+}
+.qr-result-legs th {
+    background: #f3f4f6;
+    font-weight: 600;
+}
+.qr-visits {
+    font-family: monospace;
+    color: #374151;
+}

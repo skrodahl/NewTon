@@ -2014,6 +2014,10 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         validationMessage.style.display = 'none';
     }
 
+    // Set match ID on scan button so openResultQRScanner() knows which match to validate against
+    const scanBtn = document.getElementById('scanResultQRBtn');
+    if (scanBtn) scanBtn.dataset.matchId = matchId;
+
     // Use dialog stack to show modal
     // Don't reinitialize on restore - just show the modal to preserve input values
     pushDialog('winnerConfirmModal', () => {
