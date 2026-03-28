@@ -1,3 +1,36 @@
+## **v5.0.1-beta.4** - Stats Don't Lie (2026-03-28)
+
+### Achievements recorded in the match completion transaction
+
+Every completed match now records exactly which achievements were entered during the completion session. When the Confirm Match Winner modal opens, a snapshot of both players' stats is taken. If the operator clicks a player name to enter achievements via the Statistics modal, the delta between snapshot and confirmed state is written to the `COMPLETE_MATCH` transaction's `achievements` field.
+
+### Cancel & revert achievements
+
+If achievements are added during a completion session and the operator cancels, the Cancel button updates to **"Cancel & revert achievements"** — making the consequence explicit. On cancel (including ESC), player stats are restored to their pre-session state. Nothing is committed until "Confirm Winner" is clicked.
+
+### Undo match + achievements
+
+The undo dialog now shows which achievements were recorded for the match being undone (when present). Two choices are offered:
+
+- **Undo match** — resets bracket state only; achievements remain on the leaderboard
+- **Undo match + achievements** — resets bracket state and removes exactly the recorded achievements from both players' stats
+
+The unconditional warning about manually entered achievements remains, since achievements entered outside the completion session are never in the transaction.
+
+### Live achievement summary in the completion modal
+
+As achievements are entered during the session, a summary box appears in the completion modal showing what has been recorded for each player — before "Confirm Winner" is clicked. The summary updates each time the Statistics modal closes.
+
+### Files changed
+
+- `js/clean-match-progression.js` — `_completionSnapshot`; `snapshotPlayerStats()`, `diffPlayerStats()`, `restorePlayerStats()`, `renderCompletionAchievements()` helpers; `showWinnerConfirmation()` snapshots on open, restores on cancel, diffs on confirm, clears summary in cleanup; `openStatsModalFromConfirmation()` updates Cancel label and renders summary; `completeMatch()` accepts `achievements` param
+- `js/bracket-rendering.js` — `rollbackAchievements()`; `showUndoConfirmationModal()` with `onConfirmWithAchievements`; `handleSurgicalUndo()` wired with achievements callback
+- `tournament.html` — `#completionAchievementsSummary` container in `winnerConfirmModal`; "Undo match + achievements" button in `undoConfirmModal`
+- `css/styles.css` — `.completion-achievements-box`, `.completion-achievements-title`, `.completion-achievement-row`
+- `Docs/UNDO.md` — updated to reflect complete design
+
+---
+
 ## **v5.0.1-beta.3** - The Eyes Have It (2026-03-27)
 
 ### Tournament Manager reads result QRs

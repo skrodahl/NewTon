@@ -928,6 +928,9 @@
                     <!-- Validation message will be inserted here by JavaScript -->
                 </div>
 
+                <!-- Populated by renderCompletionAchievements() when stats are entered during this session -->
+                <div id="completionAchievementsSummary" style="display:none;"></div>
+
                 <div class="text-center mt-20">
                     <button class="btn" id="winnerConfirmCancel" style="margin-right: 15px;">Cancel</button>
                     <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
@@ -1179,7 +1182,8 @@
                 </div>
                 <div class="text-center mt-20">
                     <button class="btn" id="undoConfirmCancel" style="margin-right: 15px;">Cancel</button>
-                    <button class="btn btn-warning" id="undoConfirmOK">Confirm Undo</button>
+                    <button class="btn btn-warning" id="undoConfirmOK" style="margin-right: 10px;">Undo match</button>
+                    <button class="btn btn-danger" id="undoConfirmOKWithAchievements" style="display:none;">Undo match + achievements</button>
                 </div>
             </div>
         </div>

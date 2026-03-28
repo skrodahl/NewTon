@@ -1915,6 +1915,54 @@ a:hover { color: #1e40af; }
   margin-bottom: 20px;
 }
 
+.undo-achievements {
+  margin: 16px 0 8px;
+  padding: 12px 14px;
+  background: #fef9ec;
+  border: 1px solid #f59e0b;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.undo-achievements-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #92400e;
+}
+
+.undo-achievement-row {
+  margin-bottom: 3px;
+  color: #374151;
+}
+
+.undo-achievements-warning {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #6b7280;
+  font-style: italic;
+}
+
+/* Completion modal achievements summary */
+.completion-achievements-box {
+  margin: 16px 0 4px;
+  padding: 12px 14px;
+  background: #f0fdf4;
+  border: 1px solid #6ee7b7;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.completion-achievements-title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #065f46;
+}
+
+.completion-achievement-row {
+  margin-bottom: 3px;
+  color: #374151;
+}
+
 /* Undo modal content area - natural sizing */
 #undoConfirmMessage {
   margin: 20px 0 !important;

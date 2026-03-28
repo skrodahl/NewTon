@@ -65,5 +65,5 @@ No migration required. Fully compatible with all existing tournament data.
 
 ## What's Next
 
-- beta.4: Declare Winner from the result preview — `completeMatch()` called from QR data, `newton-stats.js` extracts achievements
-- beta.5: QR reported matches saved to indexedDB (parallel workflow, can wait)
+- beta.4: Undo + achievements — `COMPLETE_MATCH` transaction gains an `achievements` field; undo dialog shows recorded achievements and offers to remove them; unconditional warning about manually entered achievements
+- beta.5: Complete match from Stats QR — declare winner with score only, or score + achievements; operator decides; `newton-stats.js` extracts achievements from payload

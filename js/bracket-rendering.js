@@ -2292,35 +2292,87 @@ function showMatchDetailsModal(message) {
     document.addEventListener('keydown', handleEscape);
 }
 
-function showUndoConfirmationModal(message, onConfirm, onCancel = null) {
+/**
+ * Rolls back achievements recorded in a COMPLETE_MATCH transaction from player.stats.
+ * Subtracts exactly what the transaction recorded; counters are floored at zero.
+ * @param {object} achievements - { [playerId]: { oneEighties, tons, lollipops, highOuts, shortLegs } }
+ */
+function rollbackAchievements(achievements) {
+    if (!achievements) return;
+    Object.entries(achievements).forEach(([playerId, stats]) => {
+        if (!stats) return;
+        const player = players.find(p => String(p.id) === String(playerId));
+        if (!player || !player.stats) return;
+
+        if (stats.oneEighties) {
+            player.stats.oneEighties = Math.max(0, (player.stats.oneEighties || 0) - stats.oneEighties);
+        }
+        if (stats.tons) {
+            player.stats.tons = Math.max(0, (player.stats.tons || 0) - stats.tons);
+        }
+        if (stats.lollipops) {
+            player.stats.lollipops = Math.max(0, (player.stats.lollipops || 0) - stats.lollipops);
+        }
+        if (Array.isArray(stats.highOuts)) {
+            stats.highOuts.forEach(val => {
+                const idx = (player.stats.highOuts || []).indexOf(val);
+                if (idx !== -1) player.stats.highOuts.splice(idx, 1);
+            });
+        }
+        if (Array.isArray(stats.shortLegs)) {
+            stats.shortLegs.forEach(val => {
+                const idx = (player.stats.shortLegs || []).indexOf(val);
+                if (idx !== -1) player.stats.shortLegs.splice(idx, 1);
+            });
+        }
+    });
+    saveTournament();
+    if (typeof updateResultsTable === 'function') updateResultsTable();
+    console.log('🏆 Achievement rollback complete');
+}
+
+/**
+ * Show the undo confirmation modal.
+ * @param {string} message - HTML content for the message area
+ * @param {Function} onConfirm - Called when "Undo match" is clicked
+ * @param {Function|null} onCancel - Called when cancelled
+ * @param {Function|null} onConfirmWithAchievements - When provided, shows "Undo match + achievements" button
+ */
+function showUndoConfirmationModal(message, onConfirm, onCancel = null, onConfirmWithAchievements = null) {
     const modal = document.getElementById('undoConfirmModal');
     const messageDiv = document.getElementById('undoConfirmMessage');
     const cancelBtn = document.getElementById('undoConfirmCancel');
     const confirmBtn = document.getElementById('undoConfirmOK');
-    
+    const confirmWithAchievementsBtn = document.getElementById('undoConfirmOKWithAchievements');
+
     if (!modal || !messageDiv || !cancelBtn || !confirmBtn) {
         console.error('Undo confirmation modal elements not found');
-        if (confirm(message)) onConfirm(); // Fallback to confirm
+        if (confirm(message)) onConfirm();
         return;
     }
-    
+
     messageDiv.innerHTML = message;
+
+    // Show/hide the achievements button
+    if (confirmWithAchievementsBtn) {
+        confirmWithAchievementsBtn.style.display = onConfirmWithAchievements ? '' : 'none';
+    }
+
     modal.style.display = 'flex';
-    
-    // Focus the Cancel button (default selection)
+
     setTimeout(() => {
         cancelBtn.focus();
         cancelBtn.style.boxShadow = '0 0 0 3px rgba(108, 117, 125, 0.3)';
         cancelBtn.style.transform = 'scale(1.05)';
     }, 100);
-    
-    // Set up event handlers
+
     const closeModal = () => {
         modal.style.display = 'none';
-        cancelBtn.onclick = null; // Clean up
+        cancelBtn.onclick = null;
         confirmBtn.onclick = null;
+        if (confirmWithAchievementsBtn) confirmWithAchievementsBtn.onclick = null;
     };
-    
+
     cancelBtn.onclick = () => {
         closeModal();
         if (onCancel) onCancel();
@@ -2329,11 +2381,17 @@ function showUndoConfirmationModal(message, onConfirm, onCancel = null) {
         closeModal();
         onConfirm();
     };
-    
-    // Close on Escape key (same as Cancel)
+    if (confirmWithAchievementsBtn && onConfirmWithAchievements) {
+        confirmWithAchievementsBtn.onclick = () => {
+            closeModal();
+            onConfirmWithAchievements();
+        };
+    }
+
     const handleEscape = (e) => {
         if (e.key === 'Escape') {
             closeModal();
+            if (onCancel) onCancel();
             document.removeEventListener('keydown', handleEscape);
         }
     };
@@ -2639,19 +2697,23 @@ function getConsequentialMatches(transaction) {
 }
 
 // Create enhanced modal content with match cards
-function createUndoModalContent(matchId, consequentialMatches) {
+/**
+ * Build the HTML content for the undo confirmation modal.
+ * @param {string} matchId
+ * @param {Array} consequentialMatches
+ * @param {object} transaction - The COMPLETE_MATCH transaction being undone
+ * @returns {string} HTML string
+ */
+function createUndoModalContent(matchId, consequentialMatches, transaction) {
     let content = `<div class="undo-header">Undoing <strong>${matchId}</strong> will reset the following matches:</div>`;
-    
+
     if (consequentialMatches.length === 0) {
         content += `<div class="undo-no-matches">No other matches will be affected.</div>`;
     } else {
         content += `<div class="undo-matches-container">`;
-        
         consequentialMatches.forEach(({ id, match, isFrontside }) => {
             const player1Name = match.player1?.name || 'TBD';
             const player2Name = match.player2?.name || 'TBD';
-
-            // Enhanced bracket type with round numbers
             let bracketType;
             if (match.id === 'GRAND-FINAL' || match.id === 'BS-FINAL') {
                 bracketType = match.id;
@@ -2660,7 +2722,6 @@ function createUndoModalContent(matchId, consequentialMatches) {
             } else {
                 bracketType = `⚫ Backside - Round ${match.id.split('-')[1]}`;
             }
-            
             content += `
                 <div class="undo-match-card">
                     <div class="undo-match-header">
@@ -2671,12 +2732,48 @@ function createUndoModalContent(matchId, consequentialMatches) {
                 </div>
             `;
         });
-        
         content += `</div>`;
     }
-    
+
+    // Achievements section
+    const achievements = transaction?.achievements || {};
+    const isQR = transaction?.completionType === 'QR';
+    const hasAchievements = Object.values(achievements).some(a => a !== null);
+
+    if (hasAchievements) {
+        const source = isQR ? ' (from Stats QR)' : '';
+        content += `<div class="undo-achievements">
+            <div class="undo-achievements-title">Recorded achievements for this match${source}:</div>`;
+
+        Object.entries(achievements).forEach(([playerId, stats]) => {
+            if (!stats) return;
+            const player = players.find(p => String(p.id) === String(playerId));
+            const name = player?.name || `Player ${playerId}`;
+            const lines = [];
+            if (stats.oneEighties) lines.push(`${stats.oneEighties}× 180`);
+            if (stats.tons)        lines.push(`${stats.tons}× ton`);
+            if (stats.highOuts?.length) lines.push(stats.highOuts.map(v => `high out (${v})`).join(', '));
+            if (stats.shortLegs?.length) lines.push(`${stats.shortLegs.length}× short leg`);
+            if (stats.lollipops)   lines.push(`${stats.lollipops}× lollipop`);
+            if (lines.length) {
+                content += `<div class="undo-achievement-row"><strong>${name}:</strong> ${lines.join(', ')}</div>`;
+            }
+        });
+
+        content += `</div>`;
+    }
+
+    content += `<div class="undo-achievements-warning">⚠️ Achievements may have been entered manually for these players. Review the leaderboard.</div>`;
+
     return content;
 }
+
+/**
+ * Subtract recorded achievements from player.stats.
+ * Called when operator chooses "Undo match + achievements".
+ * Counters are floored at zero. Array fields remove the recorded values.
+ * @param {object} achievements - { [playerId]: { oneEighties, tons, highOuts, shortLegs, lollipops } }
+ */
 
 // Global debounce state for undo operations
 let undoDebounceActive = false;
@@ -2715,35 +2812,47 @@ function handleSurgicalUndo(matchId) {
     console.log('🔒 Undo debounce activated');
 
     const history = getTournamentHistory();
-    const transaction = history.find(t => t.matchId === matchId && t.completionType === 'MANUAL');
+    const transaction = history.find(t => t.matchId === matchId &&
+        t.type === 'COMPLETE_MATCH' && t.completionType !== 'AUTO');
 
     if (!transaction) {
-        // Clear debounce if we can't proceed
         undoDebounceActive = false;
-        alert('Could not find a manual completion for this match in the history to undo.');
+        alert('Could not find a completion for this match in the history to undo.');
         return;
     }
 
-    // For display purposes, still find consequential matches to show user what will be affected
     const consequentialMatches = getConsequentialMatches(transaction);
-    
-    // Create enhanced confirmation modal content
-    const modalContent = createUndoModalContent(matchId, consequentialMatches);
-    
-    showUndoConfirmationModal(modalContent, () => {
-        // New bulletproof undo: Only remove the MANUAL transaction and rebuild
-        undoManualTransaction(transaction.id);
+    const modalContent = createUndoModalContent(matchId, consequentialMatches, transaction);
 
-        // Clear debounce after operation completes
+    const hasAchievements = transaction.achievements &&
+        Object.values(transaction.achievements).some(a => a !== null);
+
+    const doUndo = () => {
+        undoManualTransaction(transaction.id);
         setTimeout(() => {
             undoDebounceActive = false;
             console.log('🔓 Undo debounce cleared');
         }, 1500);
-    }, () => {
-        // User cancelled - clear debounce immediately
-        undoDebounceActive = false;
-        console.log('❌ Undo cancelled - debounce cleared');
-    });
+    };
+
+    const doUndoWithAchievements = () => {
+        rollbackAchievements(transaction.achievements);
+        undoManualTransaction(transaction.id);
+        setTimeout(() => {
+            undoDebounceActive = false;
+            console.log('🔓 Undo debounce cleared');
+        }, 1500);
+    };
+
+    showUndoConfirmationModal(
+        modalContent,
+        doUndo,
+        () => {
+            undoDebounceActive = false;
+            console.log('❌ Undo cancelled - debounce cleared');
+        },
+        hasAchievements ? doUndoWithAchievements : null
+    );
 }
 
 /**

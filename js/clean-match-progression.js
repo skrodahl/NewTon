@@ -4,6 +4,114 @@
 // Pending format selection — set by showBracketConfirmation(), read by confirmBracketGeneration()
 let pendingFormat = 'DE';
 
+// Snapshot of player stats at the moment the winner confirmation modal opens.
+// Used to diff what changed during the session (for transaction achievements) and to
+// restore stats if the operator cancels.
+let _completionSnapshot = null;
+
+/**
+ * Snapshot the achievement-relevant stats for a player.
+ * @param {object} player
+ * @returns {{ oneEighties: number, tons: number, lollipops: number, highOuts: number[], shortLegs: number[] }}
+ */
+function snapshotPlayerStats(player) {
+    const s = player.stats || {};
+    return {
+        oneEighties: s.oneEighties || 0,
+        tons: s.tons || 0,
+        lollipops: s.lollipops || 0,
+        highOuts: [...(s.highOuts || [])],
+        shortLegs: [...(s.shortLegs || [])]
+    };
+}
+
+/**
+ * Diff two stat snapshots. Returns the delta (what was added during the session),
+ * or null if nothing changed.
+ * @param {{ oneEighties, tons, lollipops, highOuts, shortLegs }} before
+ * @param {{ oneEighties, tons, lollipops, highOuts, shortLegs }} after
+ * @returns {object|null}
+ */
+function diffPlayerStats(before, after) {
+    const d = {};
+    const oneEighties = (after.oneEighties || 0) - (before.oneEighties || 0);
+    if (oneEighties > 0) d.oneEighties = oneEighties;
+    const tons = (after.tons || 0) - (before.tons || 0);
+    if (tons > 0) d.tons = tons;
+    const lollipops = (after.lollipops || 0) - (before.lollipops || 0);
+    if (lollipops > 0) d.lollipops = lollipops;
+
+    // Arrays: find values present in after that weren't in before (handles duplicates)
+    const beforeHighOuts = [...(before.highOuts || [])];
+    const added = [];
+    (after.highOuts || []).forEach(v => {
+        const idx = beforeHighOuts.indexOf(v);
+        idx !== -1 ? beforeHighOuts.splice(idx, 1) : added.push(v);
+    });
+    if (added.length) d.highOuts = added;
+
+    const beforeShortLegs = [...(before.shortLegs || [])];
+    const addedSL = [];
+    (after.shortLegs || []).forEach(v => {
+        const idx = beforeShortLegs.indexOf(v);
+        idx !== -1 ? beforeShortLegs.splice(idx, 1) : addedSL.push(v);
+    });
+    if (addedSL.length) d.shortLegs = addedSL;
+
+    return Object.keys(d).length ? d : null;
+}
+
+/**
+ * Restore a player's stats from a snapshot, reversing any changes made during the session.
+ * @param {object} player
+ * @param {{ oneEighties, tons, lollipops, highOuts, shortLegs }} snapshot
+ */
+function restorePlayerStats(player, snapshot) {
+    player.stats.oneEighties = snapshot.oneEighties;
+    player.stats.tons = snapshot.tons;
+    player.stats.lollipops = snapshot.lollipops;
+    player.stats.highOuts = [...snapshot.highOuts];
+    player.stats.shortLegs = [...snapshot.shortLegs];
+}
+
+/**
+ * Renders the current session achievement diff into the completion modal summary box.
+ * Hides the box if no achievements have been entered.
+ */
+function renderCompletionAchievements() {
+    const container = document.getElementById('completionAchievementsSummary');
+    if (!container || !_completionSnapshot) {
+        if (container) container.style.display = 'none';
+        return;
+    }
+
+    const rows = [];
+    Object.entries(_completionSnapshot).forEach(([pid, snap]) => {
+        const player = players.find(p => String(p.id) === String(pid));
+        if (!player) return;
+        const diff = diffPlayerStats(snap, snapshotPlayerStats(player));
+        if (!diff) return;
+        const parts = [];
+        if (diff.oneEighties) parts.push(`${diff.oneEighties}&times; 180`);
+        if (diff.tons)        parts.push(`${diff.tons}&times; ton`);
+        if (diff.highOuts?.length) parts.push(diff.highOuts.map(v => `high out (${v})`).join(', '));
+        if (diff.shortLegs?.length) parts.push(`${diff.shortLegs.length}&times; short leg`);
+        if (diff.lollipops)   parts.push(`${diff.lollipops}&times; lollipop`);
+        if (parts.length) rows.push(`<div class="completion-achievement-row"><strong>${player.name}:</strong> ${parts.join(', ')}</div>`);
+    });
+
+    if (!rows.length) {
+        container.style.display = 'none';
+        return;
+    }
+
+    container.innerHTML = `<div class="completion-achievements-box">
+        <div class="completion-achievements-title">Achievements entered this session:</div>
+        ${rows.join('')}
+    </div>`;
+    container.style.display = '';
+}
+
 /**
  * Returns the correct match progression table for the current tournament format.
  * Uses SE_MATCH_PROGRESSION for Single Elimination, DE_MATCH_PROGRESSION for Double Elimination.
@@ -433,6 +541,7 @@ function advancePlayer(matchId, winner, loser) {
  * @param {number} [winnerLegs=0] - Number of legs won by winner (for score display)
  * @param {number} [loserLegs=0] - Number of legs won by loser (for score display)
  * @param {CompletionType} [completionType='MANUAL'] - 'MANUAL' for user action, 'AUTO' for walkover
+ * @param {object|null} [achievements=null] - Achievement delta recorded during match completion session
  * @returns {boolean} True if match completed successfully, false on error
  *
  * @example
@@ -443,7 +552,7 @@ function advancePlayer(matchId, winner, loser) {
  * // Auto-advance walkover match
  * completeMatch('FS-1-2', 2, 0, 0, 'AUTO');
  */
-function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0, completionType = 'MANUAL') {
+function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0, completionType = 'MANUAL', achievements = null) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
         console.error('Match ' + matchId + ' not found');
@@ -469,8 +578,9 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             timestamp: new Date().toISOString(),
             matchId: matchId,
             winner: winner,
-            loser: loser
+            loser: loser,
             // beforeState removed - never used by undo system (saves ~98% storage per transaction)
+            achievements: achievements || { [winner.id]: null, [loser.id]: null }
         };
         saveTransaction(transaction);
     }
@@ -2018,6 +2128,12 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const scanBtn = document.getElementById('scanResultQRBtn');
     if (scanBtn) scanBtn.dataset.matchId = matchId;
 
+    // Snapshot stats for both players so we can diff on confirm and restore on cancel
+    _completionSnapshot = {
+        [winner.id]: snapshotPlayerStats(winner),
+        [loser.id]: snapshotPlayerStats(loser)
+    };
+
     // Use dialog stack to show modal
     // Don't reinitialize on restore - just show the modal to preserve input values
     pushDialog('winnerConfirmModal', () => {
@@ -2060,6 +2176,17 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     // Handle button clicks
     const handleCancel = () => {
+        // Restore any stats changes made during this session
+        if (_completionSnapshot) {
+            [winner, loser].forEach(p => {
+                const snap = _completionSnapshot[p.id];
+                if (!snap) return;
+                const player = players.find(pl => String(pl.id) === String(p.id));
+                if (player) restorePlayerStats(player, snap);
+            });
+            saveTournament();
+            _completionSnapshot = null;
+        }
         console.log(`Winner selection cancelled for match ${matchId}`);
         cleanup();
         popDialog(); // Use dialog stack to close and restore parent
@@ -2083,9 +2210,21 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
             return;
         }
 
+        // Compute achievement delta from the session snapshot
+        let achievements = null;
+        if (_completionSnapshot) {
+            achievements = {};
+            [winner, loser].forEach(p => {
+                const snap = _completionSnapshot[p.id];
+                const player = players.find(pl => String(pl.id) === String(p.id));
+                achievements[p.id] = (snap && player) ? diffPlayerStats(snap, snapshotPlayerStats(player)) : null;
+            });
+            _completionSnapshot = null;
+        }
+
         console.log(`Winner confirmed for match ${matchId}: ${winner.name} (${winnerLegs}-${loserLegs})`);
 
-        onConfirm(winnerLegs, loserLegs);
+        onConfirm(winnerLegs, loserLegs, achievements);
         cleanup();
         popDialog(); // Use dialog stack to close and restore parent
 
@@ -2096,9 +2235,14 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     };
 
     const cleanup = () => {
-        // Reset button styles
+        // Reset button styles and label
         cancelBtn.style.boxShadow = '';
         cancelBtn.style.transform = '';
+        cancelBtn.textContent = 'Cancel';
+
+        // Clear achievements summary
+        const summaryBox = document.getElementById('completionAchievementsSummary');
+        if (summaryBox) summaryBox.style.display = 'none';
 
         // Remove event listeners
         cancelBtn.removeEventListener('click', handleCancel);
@@ -2677,7 +2821,7 @@ function openStatsModalFromConfirmation(playerId, matchId) {
     // Open stats modal - dialog stack will handle hiding winner modal
     openStatsModal(playerId);
 
-    // Override closeStatsModal to restore input values after dialog stack restoration
+    // Override closeStatsModal to restore input values and update Cancel label after returning
     const originalClose = window.closeStatsModal;
     window.closeStatsModal = function() {
         // Call original close (which calls popDialog)
@@ -2685,8 +2829,7 @@ function openStatsModalFromConfirmation(playerId, matchId) {
             originalClose();
         }
 
-        // Restore input values after dialog stack has restored winner modal
-        // Use setTimeout to run after dialog stack's restore function completes
+        // Restore input values and check for achievement changes after dialog stack restores winner modal
         setTimeout(() => {
             const winnerLegsInputRestore = document.getElementById('winnerLegs');
             const loserLegsInputRestore = document.getElementById('loserLegs');
@@ -2695,6 +2838,19 @@ function openStatsModalFromConfirmation(playerId, matchId) {
             }
             if (loserLegsInputRestore && savedLoserLegs !== '') {
                 loserLegsInputRestore.value = savedLoserLegs;
+            }
+
+            // Update the achievements summary and Cancel button label
+            if (_completionSnapshot) {
+                renderCompletionAchievements();
+                const anyChanges = Object.entries(_completionSnapshot).some(([pid, snap]) => {
+                    const player = players.find(p => String(p.id) === String(pid));
+                    return player && diffPlayerStats(snap, snapshotPlayerStats(player)) !== null;
+                });
+                const cancelBtn = document.getElementById('winnerConfirmCancel');
+                if (cancelBtn) {
+                    cancelBtn.textContent = anyChanges ? 'Cancel & revert achievements' : 'Cancel';
+                }
             }
         }, 0);
 
@@ -2772,9 +2928,9 @@ function validateAndShowWinnerDialog(matchId, playerNumber) {
 
     // Show enhanced confirmation dialog with validation
     if (config.ui && config.ui.confirmWinnerSelection) {
-        return showWinnerConfirmation(matchId, winner, loser, (winnerLegs, loserLegs) => {
+        return showWinnerConfirmation(matchId, winner, loser, (winnerLegs, loserLegs, achievements) => {
             // This callback runs if user confirms with validated leg scores
-            const success = completeMatch(matchId, playerNumber, winnerLegs, loserLegs);
+            const success = completeMatch(matchId, playerNumber, winnerLegs, loserLegs, 'MANUAL', achievements);
 
             if (success) {
                 // Re-render bracket

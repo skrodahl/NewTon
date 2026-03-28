@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="https://newtondarts.com/releases/">
+    <link rel="canonical" href="https://newtondarts.com/releases/v5.0.1-beta.4.html">
     <title>Release Notes v5.0.1-beta.4 — NewTon DC Tournament Manager</title>
     <meta name="description" content="NewTon DC Tournament Manager v5.0.1-beta.4 release notes. Stats Don't Lie — achievements are now recorded in the match completion transaction and can be undone.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
@@ -36,7 +36,8 @@
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p><strong>NewTon DC Tournament Manager v5.0.1-beta.4</strong> closes the gap between match completion and achievement tracking. Until now, achievements were entered through a separate modal with no connection to the match being completed — they landed on player stats but left no record of which match they belonged to. The undo system had no way to reverse them. That changes here.</p>
+    <p><strong>NewTon DC Tournament Manager v5.0.1-beta.4</strong> closes the gap between match completion and achievement tracking. Until now, achievements were entered through a separate modal with no connection to the match being completed — they landed on player stats but left no record of which match they belonged to. The undo system had no way to reverse them.</p>
+    <p>That changes here. The match completion session is now achievement-aware from start to finish: stats are snapshotted when the modal opens, the delta is recorded in the transaction on confirm, and rolled back cleanly on cancel. The undo dialog offers a genuine choice.</p>
 
     <hr>
 
@@ -63,7 +64,7 @@
         <li><strong>Undo match</strong> — resets bracket state only; achievements remain on the leaderboard</li>
         <li><strong>Undo match + achievements</strong> — resets bracket state and removes exactly the recorded achievements from both players' stats</li>
     </ul>
-    <p>The unconditional warning about manually entered achievements remains. Matches completed before this release have <code>null</code> achievements — the undo dialog shows the single-button variant for those.</p>
+    <p>The unconditional warning about manually entered achievements remains. The transaction only knows what happened inside the completion session. Matches completed before this release have <code>null</code> achievements in their transactions — the undo dialog shows the single-button variant for those.</p>
 
     <hr>
 
@@ -71,7 +72,7 @@
     <ul>
         <li><code>js/clean-match-progression.js</code> — <code>_completionSnapshot</code>; <code>snapshotPlayerStats()</code>, <code>diffPlayerStats()</code>, <code>restorePlayerStats()</code>, <code>renderCompletionAchievements()</code>; <code>showWinnerConfirmation()</code> snapshots on open, restores on cancel, diffs on confirm; <code>openStatsModalFromConfirmation()</code> updates Cancel label and renders summary; <code>completeMatch()</code> accepts <code>achievements</code> param</li>
         <li><code>js/bracket-rendering.js</code> — <code>rollbackAchievements()</code>; <code>showUndoConfirmationModal()</code> with <code>onConfirmWithAchievements</code>; <code>handleSurgicalUndo()</code> wired with achievements callback</li>
-        <li><code>tournament.html</code> — <code>#completionAchievementsSummary</code> in <code>winnerConfirmModal</code>; "Undo match + achievements" button in <code>undoConfirmModal</code></li>
+        <li><code>tournament.html</code> — <code>#completionAchievementsSummary</code> container in <code>winnerConfirmModal</code>; "Undo match + achievements" button in <code>undoConfirmModal</code></li>
         <li><code>css/styles.css</code> — <code>.completion-achievements-box</code>, <code>.completion-achievements-title</code>, <code>.completion-achievement-row</code></li>
         <li><code>Docs/UNDO.md</code> — updated to reflect the complete design</li>
     </ul>
@@ -123,7 +124,6 @@
         <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
         <a href="/privacy.html">Privacy</a>
     </p>
-    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
 </div>
 
 </body>

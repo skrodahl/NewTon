@@ -291,6 +291,25 @@ const NewtonStats = {
 
 **Adding new extractors is additive.** New stat types (first-9 averages, ton-plus counts, bust rates, etc.) are new named functions in this module. Existing callers are unaffected.
 
+### Match Completion Flow (beta.5)
+
+When the result preview modal is open after a successful scan, the operator sees the winner, score, and extracted achievements. They choose how to record the result:
+
+**Option A — Score only**
+- `completeMatch(matchId, winner, winnerLegs, loserLegs)` called with `completionType: 'QR'`
+- No achievements written to `player.stats`
+- Transaction `achievements` field is empty (`null` per player)
+
+**Option B — Score + achievements**
+- `completeMatch()` called as above
+- `newton-stats.js` extracts achievements from the decoded payload
+- Achievements applied to `player.stats`
+- Transaction `achievements` field populated with exactly what was written
+
+The operator decides. The software presents the options without forcing either path.
+
+**Why this matters for undo:** the `completionType: 'QR'` and `achievements` field together give the undo dialog full knowledge of what was recorded and how. See `Docs/UNDO.md` for the undo dialog design.
+
 ### Replay Protection Covers Achievements
 
 `completeMatch()` is blocked at the match level if the match is already completed. But achievements are **additive on player.stats** — applying them a second time corrupts the totals. The achievement application must be gated by the same replay check as `completeMatch()`. In practice: check match state first; if already completed, show the replay warning and do not call either `completeMatch()` or the achievement application.
