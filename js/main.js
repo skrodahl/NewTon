@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.1-b.4'; // beta.4: achievements recorded in match completion transaction; undo match + achievements
+const APP_VERSION = '5.0.1-b.5'; // beta.5: complete match from QR scan; NewtonStats extracts achievements from visit scores; Bo1–Bo21
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

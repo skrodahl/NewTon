@@ -215,10 +215,21 @@ function decodeVisitScores(encoded) {
 
 /**
  * Populate and open the result preview modal with decoded payload data.
+ * If the referenced match is live, also shows extracted achievements,
+ * lollipop counters, and completion buttons.
  * @param {object} payload
  */
 function showResultQRPreview(payload) {
-    const contentEl = document.getElementById('qrResultPreviewContent');
+    const contentEl  = document.getElementById('qrResultPreviewContent');
+    const actionsEl  = document.getElementById('qrResultPreviewActions');
+
+    // Determine if this match can be completed from here
+    const match      = matches.find(m => m.id === payload.mid);
+    const isLive     = match && getMatchState(match) === 'live';
+
+    // Store for use by completion buttons
+    _qrCompletionPayload = isLive ? payload : null;
+    _qrLollipops = [0, 0];
 
     const winnerName = payload.w === 1 ? payload.p1 : payload.p2;
     let p1Legs = 0, p2Legs = 0;
@@ -254,13 +265,171 @@ function showResultQRPreview(payload) {
     });
 
     html += '</tbody></table>';
-    document.getElementById('qrResultPreviewTitle').textContent = 'Result QR';
+
+    // --- Achievements section (only for live matches) ---
+    if (isLive) {
+        const threshold = (config.legs && config.legs.shortLegThreshold) || 21;
+        const s1 = NewtonStats.extractAchievements(payload.legs, 0, threshold);
+        const s2 = NewtonStats.extractAchievements(payload.legs, 1, threshold);
+        const hasAny = NewtonStats.hasAny(s1) || NewtonStats.hasAny(s2);
+
+        html += `<div class="completion-achievements-box" style="margin-top:16px;">
+            <div class="completion-achievements-title">Achievements from this match</div>`;
+
+        html += `<table style="width:100%;border-collapse:collapse;font-size:14px;">
+            <thead><tr>
+                <th style="text-align:left;padding:4px 8px;">Achievement</th>
+                <th style="text-align:center;padding:4px 8px;">${payload.p1}</th>
+                <th style="text-align:center;padding:4px 8px;">${payload.p2}</th>
+            </tr></thead><tbody>`;
+
+        const rows = [
+            ['180s',        s1.oneEighties,                    s2.oneEighties],
+            ['Tons (100–179)', s1.tons,                        s2.tons],
+            ['High outs',   s1.highOuts.join(', ') || '—',     s2.highOuts.join(', ') || '—'],
+            ['Short legs',  s1.shortLegs.join(', ') || '—',    s2.shortLegs.join(', ') || '—'],
+        ];
+        rows.forEach(([label, v1, v2]) => {
+            html += `<tr>
+                <td style="padding:3px 8px;">${label}</td>
+                <td style="text-align:center;padding:3px 8px;">${v1}</td>
+                <td style="text-align:center;padding:3px 8px;">${v2}</td>
+            </tr>`;
+        });
+
+        // Lollipop row with +/- controls
+        html += `<tr>
+            <td style="padding:3px 8px;">Lollipops</td>
+            <td style="text-align:center;padding:3px 4px;">
+                <button class="btn" onclick="qrDecrementLollipop(0)" style="width:24px;height:24px;padding:0;margin-right:2px;display:inline-flex;align-items:center;justify-content:center;color:#dc2626;border-color:#dc2626;">−</button>
+                <span id="qrLollipop0" style="display:inline-block;min-width:20px;text-align:center;">0</span>
+                <button class="btn" onclick="qrIncrementLollipop(0)" style="width:24px;height:24px;padding:0;margin-left:1px;display:inline-flex;align-items:center;justify-content:center;color:#166534;border-color:#166534;">+</button>
+            </td>
+            <td style="text-align:center;padding:3px 4px;">
+                <button class="btn" onclick="qrDecrementLollipop(1)" style="width:24px;height:24px;padding:0;margin-right:2px;display:inline-flex;align-items:center;justify-content:center;color:#dc2626;border-color:#dc2626;">−</button>
+                <span id="qrLollipop1" style="display:inline-block;min-width:20px;text-align:center;">0</span>
+                <button class="btn" onclick="qrIncrementLollipop(1)" style="width:24px;height:24px;padding:0;margin-left:1px;display:inline-flex;align-items:center;justify-content:center;color:#166534;border-color:#166534;">+</button>
+            </td>
+        </tr>`;
+
+        html += '</tbody></table>';
+
+        if (!hasAny) {
+            html += `<p style="font-size:13px;color:#6b7280;margin:6px 0 0;">No automatic achievements detected. Add lollipops manually if needed.</p>`;
+        }
+
+        html += '</div>';
+    }
+
+    document.getElementById('qrResultPreviewTitle').textContent = isLive ? 'Complete Match via QR' : 'Result QR';
     contentEl.innerHTML = html;
+
+    // --- Action buttons ---
+    if (isLive) {
+        actionsEl.innerHTML = `
+            <button class="btn btn-secondary" onclick="popDialog()">Cancel</button>
+            <button class="btn" onclick="applyQRResult(false)">Score only</button>
+            <button class="btn btn-primary" onclick="applyQRResult(true)">Score + achievements</button>`;
+    } else {
+        actionsEl.innerHTML = `<button class="btn" onclick="popDialog()">Close</button>`;
+    }
+
     pushDialog('qrResultPreviewModal', null, true);
+}
+
+/**
+ * Increment lollipop counter for one player.
+ * @param {number} idx - 0 for p1, 1 for p2
+ */
+function qrIncrementLollipop(idx) {
+    _qrLollipops[idx]++;
+    const el = document.getElementById(`qrLollipop${idx}`);
+    if (el) el.textContent = _qrLollipops[idx];
+}
+
+/**
+ * Decrement lollipop counter for one player (minimum 0).
+ * @param {number} idx - 0 for p1, 1 for p2
+ */
+function qrDecrementLollipop(idx) {
+    if (_qrLollipops[idx] > 0) _qrLollipops[idx]--;
+    const el = document.getElementById(`qrLollipop${idx}`);
+    if (el) el.textContent = _qrLollipops[idx];
+}
+
+/**
+ * Apply achievements from the QR payload to a player's stats object.
+ * Adds to existing values.
+ * @param {object} player
+ * @param {{ oneEighties, tons, highOuts, shortLegs, lollipops }} stats
+ */
+function applyAchievementsToPlayer(player, stats) {
+    if (!player || !player.stats || !stats) return;
+    player.stats.oneEighties = (player.stats.oneEighties || 0) + (stats.oneEighties || 0);
+    player.stats.tons        = (player.stats.tons        || 0) + (stats.tons        || 0);
+    player.stats.lollipops   = (player.stats.lollipops   || 0) + (stats.lollipops   || 0);
+    if (stats.highOuts && stats.highOuts.length) {
+        player.stats.highOuts = (player.stats.highOuts || []).concat(stats.highOuts);
+    }
+    if (stats.shortLegs && stats.shortLegs.length) {
+        player.stats.shortLegs = (player.stats.shortLegs || []).concat(stats.shortLegs);
+    }
+}
+
+/**
+ * Complete the match from the QR payload.
+ * @param {boolean} includeAchievements - whether to extract and apply achievements
+ */
+function applyQRResult(includeAchievements) {
+    const payload = _qrCompletionPayload;
+    if (!payload) return;
+
+    const match = matches.find(m => m.id === payload.mid);
+    if (!match || getMatchState(match) !== 'live') return;
+
+    let p1Legs = 0, p2Legs = 0;
+    payload.legs.forEach(l => { if (l.w === 1) p1Legs++; else p2Legs++; });
+    const winnerPlayerNumber = payload.w; // 1 or 2
+    const winnerLegs = winnerPlayerNumber === 1 ? p1Legs : p2Legs;
+    const loserLegs  = winnerPlayerNumber === 1 ? p2Legs : p1Legs;
+
+    let achievements = null;
+
+    if (includeAchievements) {
+        const threshold = (config.legs && config.legs.shortLegThreshold) || 21;
+        const s1 = NewtonStats.extractAchievements(payload.legs, 0, threshold);
+        const s2 = NewtonStats.extractAchievements(payload.legs, 1, threshold);
+        s1.lollipops = _qrLollipops[0];
+        s2.lollipops = _qrLollipops[1];
+
+        // Resolve actual player objects from the match
+        const p1 = players.find(p => String(p.id) === String(match.player1.id));
+        const p2 = players.find(p => String(p.id) === String(match.player2.id));
+
+        if (p1) applyAchievementsToPlayer(p1, s1);
+        if (p2) applyAchievementsToPlayer(p2, s2);
+
+        // Build achievements map keyed by player ID (for transaction record)
+        achievements = {};
+        if (p1 && NewtonStats.hasAny(s1)) achievements[String(p1.id)] = s1;
+        if (p2 && NewtonStats.hasAny(s2)) achievements[String(p2.id)] = s2;
+        if (Object.keys(achievements).length === 0) achievements = null;
+    }
+
+    popDialog();
+    completeMatch(payload.mid, winnerPlayerNumber, winnerLegs, loserLegs, 'QR', achievements);
+    renderBracket();
+    refreshTournamentUI();
 }
 
 window.openResultQRScanner = openResultQRScanner;
 window.stopResultQRScanner = stopResultQRScanner;
+
+/** @type {[number, number]} lollipop counters for [p1, p2] in the preview modal */
+let _qrLollipops = [0, 0];
+
+/** @type {object|null} the validated payload currently shown in the preview modal */
+let _qrCompletionPayload = null;
 
 // ---------------------------------------------------------------------------
 // QR Inspector (Developer Console — Validate Stats QR)
@@ -410,9 +579,67 @@ function handleQRInspectorPayload(rawValue) {
         html += '</tbody></table>';
     }
 
-    document.getElementById('qrResultPreviewTitle').textContent = 'QR Payload Inspector';
+    // Completion support: offer buttons if this is a valid result for a live match in this TM
+    const canComplete = crcValid && tidMatch && sidMatch && isResult &&
+                        matchFound && Array.isArray(payload.legs) &&
+                        getMatchState(matches.find(m => m.id === payload.mid)) === 'live';
+
+    if (canComplete) {
+        const threshold = (config.legs && config.legs.shortLegThreshold) || 21;
+        const s1 = NewtonStats.extractAchievements(payload.legs, 0, threshold);
+        const s2 = NewtonStats.extractAchievements(payload.legs, 1, threshold);
+        const hasAny = NewtonStats.hasAny(s1) || NewtonStats.hasAny(s2);
+
+        html += `<div class="completion-achievements-box" style="margin-top:16px;">
+            <div class="completion-achievements-title">Achievements from this match</div>
+            <table style="width:100%;border-collapse:collapse;font-size:14px;">
+                <thead><tr>
+                    <th style="text-align:left;padding:4px 8px;">Achievement</th>
+                    <th style="text-align:center;padding:4px 8px;">${payload.p1 ?? 'P1'}</th>
+                    <th style="text-align:center;padding:4px 8px;">${payload.p2 ?? 'P2'}</th>
+                </tr></thead><tbody>
+                <tr><td style="padding:3px 8px;">180s</td><td style="text-align:center;">${s1.oneEighties}</td><td style="text-align:center;">${s2.oneEighties}</td></tr>
+                <tr><td style="padding:3px 8px;">Tons (100–179)</td><td style="text-align:center;">${s1.tons}</td><td style="text-align:center;">${s2.tons}</td></tr>
+                <tr><td style="padding:3px 8px;">High outs</td><td style="text-align:center;">${s1.highOuts.join(', ') || '—'}</td><td style="text-align:center;">${s2.highOuts.join(', ') || '—'}</td></tr>
+                <tr><td style="padding:3px 8px;">Short legs</td><td style="text-align:center;">${s1.shortLegs.join(', ') || '—'}</td><td style="text-align:center;">${s2.shortLegs.join(', ') || '—'}</td></tr>
+                <tr>
+                    <td style="padding:3px 8px;">Lollipops</td>
+                    <td style="text-align:center;padding:3px 4px;">
+                        <button class="btn" onclick="qrDecrementLollipop(0)" style="width:24px;height:24px;padding:0;margin-right:2px;display:inline-flex;align-items:center;justify-content:center;color:#dc2626;border-color:#dc2626;">−</button>
+                        <span id="qrLollipop0" style="display:inline-block;min-width:20px;text-align:center;">0</span>
+                        <button class="btn" onclick="qrIncrementLollipop(0)" style="width:24px;height:24px;padding:0;margin-left:1px;display:inline-flex;align-items:center;justify-content:center;color:#166534;border-color:#166534;">+</button>
+                    </td>
+                    <td style="text-align:center;padding:3px 4px;">
+                        <button class="btn" onclick="qrDecrementLollipop(1)" style="width:24px;height:24px;padding:0;margin-right:2px;display:inline-flex;align-items:center;justify-content:center;color:#dc2626;border-color:#dc2626;">−</button>
+                        <span id="qrLollipop1" style="display:inline-block;min-width:20px;text-align:center;">0</span>
+                        <button class="btn" onclick="qrIncrementLollipop(1)" style="width:24px;height:24px;padding:0;margin-left:1px;display:inline-flex;align-items:center;justify-content:center;color:#166534;border-color:#166534;">+</button>
+                    </td>
+                </tr>
+            </tbody></table>
+            ${!hasAny ? '<p style="font-size:13px;color:#6b7280;margin:6px 0 0;">No automatic achievements detected. Add lollipops manually if needed.</p>' : ''}
+        </div>`;
+    }
+
+    _qrCompletionPayload = canComplete ? payload : null;
+    _qrLollipops = [0, 0];
+
+    const actionsEl = document.getElementById('qrResultPreviewActions');
+    document.getElementById('qrResultPreviewTitle').textContent = canComplete ? 'Inspector — Complete Match' : 'QR Payload Inspector';
     contentEl.innerHTML = html;
+
+    if (canComplete) {
+        actionsEl.innerHTML = `
+            <button class="btn btn-secondary" onclick="popDialog()">Cancel</button>
+            <button class="btn" onclick="applyQRResult(false)">Score only</button>
+            <button class="btn btn-primary" onclick="applyQRResult(true)">Score + achievements</button>`;
+    } else {
+        actionsEl.innerHTML = `<button class="btn" onclick="popDialog()">Close</button>`;
+    }
+
     pushDialog('qrResultPreviewModal', null, true);
 }
 
 window.openQRInspector = openQRInspector;
+window.qrIncrementLollipop = qrIncrementLollipop;
+window.qrDecrementLollipop = qrDecrementLollipop;
+window.applyQRResult = applyQRResult;

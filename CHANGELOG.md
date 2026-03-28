@@ -1,3 +1,50 @@
+## **v5.0.1-beta.5** - The Loop Closes (2026-03-28)
+
+### Complete match from result QR
+
+Scanning a Chalker result QR for a live match now offers two completion buttons alongside the familiar score preview:
+
+- **Score only** — declares the winner and updates the bracket; no achievements applied
+- **Score + achievements** — extracts 180s, tons, high outs, and short legs automatically from the raw visit scores via `NewtonStats`, records them in the transaction, and applies them to both players' leaderboard stats
+
+The completion buttons appear only when the scanned match is live in the current tournament. Completed, pending, or mismatched matches show Close only.
+
+### NewtonStats — achievement extraction from raw visit scores
+
+A new pure-function module (`js/newton-stats.js`) extracts achievements directly from the Chalker's base64-encoded visit score payload:
+
+- **180s** — visit score exactly 180
+- **Tons (100–179)** — visit score 100–179
+- **High outs** — last visit of a won non-tiebreak leg with checkout score ≥ 101
+- **Short legs** — won non-tiebreak legs completed within the Short Leg Threshold (configurable in Global Config → Chalker, default 21 darts)
+
+### Lollipop counter
+
+Lollipops cannot be auto-detected from scores alone (a score of 3 is ambiguous). The preview dialog includes a manual +/− counter per player, styled to match the Statistics modal.
+
+### QR-completed matches are now undoable
+
+QR completions (`completionType: 'QR'`) are now treated identically to manual completions for undo purposes. Previously they were blocked by a filter that only accepted `'MANUAL'` — fixed in both `isMatchUndoable()` and `getMatchCompletionState()`.
+
+### Match length expanded to Bo1–Bo21
+
+All match configuration selects (SE and DE, in both the TM and the Chalker) now offer odd-numbered best-of values from 1 to 21. The Chalker's win condition is purely `Math.ceil(bestOf / 2)` — no changes to game logic were required.
+
+### Max Rounds shows dart count
+
+The Max Rounds selector in Global Config → Chalker now labels each option with its dart equivalent: "13 (39 darts)".
+
+### Files changed
+
+- `js/newton-stats.js` — new module: `decodeVisits()`, `extractAchievements()`, `hasAny()`
+- `js/qr-bridge.js` — `showResultQRPreview()` now checks match state and renders achievements section with lollipop counters; `applyQRResult()`, `applyAchievementsToPlayer()`, `qrIncrementLollipop()`, `qrDecrementLollipop()`; `handleQRInspectorPayload()` also offers completion when match is live
+- `js/bracket-rendering.js` — `isMatchUndoable()` and `getMatchCompletionState()` accept `completionType === 'QR'`
+- `js/results-config.js` — `shortLegThreshold: 21` in `DEFAULT_CONFIG.legs`; wired to `chalkerShortLegThreshold` input
+- `tournament.html` — `chalkerShortLegThreshold` input in Chalker config; max rounds options with dart counts; Bo1–Bo21 for all match selects; `#qrResultPreviewActions` div; `newton-stats.js` script tag
+- `chalker/index.html` — best-of select extended to Bo21
+
+---
+
 ## **v5.0.1-beta.4** - Stats Don't Lie (2026-03-28)
 
 ### Achievements recorded in the match completion transaction

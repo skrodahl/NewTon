@@ -28,7 +28,8 @@ const DEFAULT_CONFIG = {
         seBronze: 5,
         seFinal: 5,
         x01Format: 501,
-        maxRounds: 13
+        maxRounds: 13,
+        shortLegThreshold: 21
     },
     clubName: "NewTon DC",
     lanes: {
@@ -123,6 +124,7 @@ function applyConfigToUI() {
     safeSetValue('seFinalLegs', config.legs.seFinal);
     safeSetValue('chalkerX01Format', config.legs.x01Format);
     safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
+    safeSetValue('chalkerShortLegThreshold', config.legs.shortLegThreshold || 21);
 
     // Application title
     if (config.clubName) {
@@ -424,6 +426,7 @@ function saveMatchConfiguration() {
     // Read values from UI — Chalker
     config.legs.x01Format = parseInt(document.getElementById('chalkerX01Format').value) || 501;
     config.legs.maxRounds = parseInt(document.getElementById('chalkerMaxRounds').value) || 13;
+    config.legs.shortLegThreshold = parseInt(document.getElementById('chalkerShortLegThreshold').value) || 21;
 
     // Save to localStorage
     saveGlobalConfig();

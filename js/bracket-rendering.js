@@ -2536,10 +2536,10 @@ function isMatchUndoable(matchId) {
         return false;
     }
 
-    // Only MANUAL transactions can be undone (not AUTO walkover matches)
-    const manualTransaction = history.find(t => t.matchId === matchId && t.completionType === 'MANUAL');
+    // MANUAL and QR transactions can be undone; AUTO (walkover/bye) cannot
+    const manualTransaction = history.find(t => t.matchId === matchId && (t.completionType === 'MANUAL' || t.completionType === 'QR'));
     if (!manualTransaction) {
-        return false; // No MANUAL transaction found for this match
+        return false; // No undoable transaction found for this match
     }
 
     // Check downstream matches - block undo if any downstream match is live or was completed via MANUAL transaction
@@ -4867,8 +4867,8 @@ function getDetailedMatchState(matchId) {
         return { state: 'completed', text: 'Cannot Undo' };
     }
 
-    // Only MANUAL transactions can be undone
-    const manualTransaction = history.find(t => t.matchId === matchId && t.completionType === 'MANUAL');
+    // MANUAL and QR transactions can be undone; AUTO (walkover/bye) cannot
+    const manualTransaction = history.find(t => t.matchId === matchId && (t.completionType === 'MANUAL' || t.completionType === 'QR'));
     if (!manualTransaction) {
         return { state: 'completed', text: 'Cannot Undo' };
     }
