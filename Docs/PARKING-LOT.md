@@ -14,7 +14,21 @@ Ideas and suggestions for future consideration.
 ## Next
 *Ready for implementation when time permits*
 
-*(empty)*
+### v5.0.1 Release Preparation
+
+Documentation and communication tasks before cutting the stable release:
+
+- **User Guide** (`userguide.html`) — add TM→Chalker QR assignment section prominently; document the History tab and match detail view
+- **llms.txt** — update to reflect NewtonMatchDB, History tab, and QR result reporting
+- **Landing page — Tablet Scoring card** — update to mention QR assignment and result reporting
+- **Landing page — Match Controls card** — update to reflect Scan QR Results button and live match flow
+- **Help subsystem** (`dynamic-help-system.js`) — update context-sensitive help for new features
+- **Screenshots** — update landing page and GitHub README.md screenshots to reflect current UI
+- **Consolidated v5.0.1 release notes** — single authoritative release page summarising all beta improvements into a clean narrative for the stable release
+
+### Reddit Post
+
+Announce NewTon on a relevant subreddit (r/darts, r/opensourcesoftware, or similar) when the timing feels right — not necessarily tied to the exact 5.0.1 release date.
 
 ---
 
@@ -31,12 +45,16 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 **Fix when addressed:** `isMatchUndoable()` and the bracket tooltip function in `js/bracket-rendering.js` should follow AUTO-completed downstream matches recursively until reaching a non-AUTO match, then apply the existing live/MANUAL checks.
 
-### Match Archive — IndexedDB Store
 
-Add a permanent indexedDB match archive alongside localStorage (no migration — localStorage stays untouched). The archive stores raw visit data per match and is the foundation for full scoresheet storage, player statistics, season history, and external reporting.
+### NewtonMatchDB — Per-Tournament "Record to History" Toggle
 
-See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record structure and rationale.
+Add a checkbox in Tournament Setup (default: on) to opt a tournament out of the match register before it starts. When off, `completeMatch()` skips all `NewtonDB.saveMatch()` and `NewtonDB.saveTournamentMeta()` calls — the tournament never enters the History tab. The running Match History in Tournament Setup is unaffected (reads from the in-memory `matches` array, not IndexedDB).
 
+Effectively a practice mode. No gaps in the historical record because the tournament was never part of it. Eliminates the need for a delete button.
+
+**Implementation:** `tournament.recordHistory` boolean flag (default `true`), checked in the `completeMatch()` DB write hook and the `finalizeTournament` hook.
+
+---
 
 ### Chalker: Stay on Scoreboard After Match Completion
 
@@ -65,4 +83,4 @@ See **Docs/NETWORK-LAYER.md** (Storage Architecture Decision section) for record
 
 ---
 
-**Last updated:** March 26, 2026
+**Last updated:** March 29, 2026 — removed implemented Match Archive item; added v5.0.1 release prep tasks and Reddit post
