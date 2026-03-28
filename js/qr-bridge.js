@@ -285,7 +285,7 @@ function showResultQRPreview(payload) {
 
         const rows = [
             ['180s',        s1.oneEighties,                    s2.oneEighties],
-            ['Tons (100–179)', s1.tons,                        s2.tons],
+            ['Tons',           s1.tons,                        s2.tons],
             ['High outs',   s1.highOuts.join(', ') || '—',     s2.highOuts.join(', ') || '—'],
             ['Short legs',  s1.shortLegs.join(', ') || '—',    s2.shortLegs.join(', ') || '—'],
         ];
@@ -417,9 +417,15 @@ function applyQRResult(includeAchievements) {
     }
 
     popDialog();
-    completeMatch(payload.mid, winnerPlayerNumber, winnerLegs, loserLegs, 'QR', achievements);
+    completeMatch(payload.mid, winnerPlayerNumber, winnerLegs, loserLegs, 'QR', achievements, payload.legs || null, payload.fls || null);
     renderBracket();
     refreshTournamentUI();
+
+    // Refresh Match Controls if it is currently open
+    const ccIsOpen = window.dialogStack && window.dialogStack.some(d => d.id === 'matchCommandCenterModal');
+    if (ccIsOpen && typeof showMatchCommandCenter === 'function') {
+        showMatchCommandCenter();
+    }
 }
 
 window.openResultQRScanner = openResultQRScanner;
@@ -599,7 +605,7 @@ function handleQRInspectorPayload(rawValue) {
                     <th style="text-align:center;padding:4px 8px;">${payload.p2 ?? 'P2'}</th>
                 </tr></thead><tbody>
                 <tr><td style="padding:3px 8px;">180s</td><td style="text-align:center;">${s1.oneEighties}</td><td style="text-align:center;">${s2.oneEighties}</td></tr>
-                <tr><td style="padding:3px 8px;">Tons (100–179)</td><td style="text-align:center;">${s1.tons}</td><td style="text-align:center;">${s2.tons}</td></tr>
+                <tr><td style="padding:3px 8px;">Tons</td><td style="text-align:center;">${s1.tons}</td><td style="text-align:center;">${s2.tons}</td></tr>
                 <tr><td style="padding:3px 8px;">High outs</td><td style="text-align:center;">${s1.highOuts.join(', ') || '—'}</td><td style="text-align:center;">${s2.highOuts.join(', ') || '—'}</td></tr>
                 <tr><td style="padding:3px 8px;">Short legs</td><td style="text-align:center;">${s1.shortLegs.join(', ') || '—'}</td><td style="text-align:center;">${s2.shortLegs.join(', ') || '—'}</td></tr>
                 <tr>

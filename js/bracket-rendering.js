@@ -3031,6 +3031,12 @@ function undoManualTransaction(transactionId) {
         updateResultsTable();
     }
 
+    // Remove match from register (fire-and-forget)
+    if (typeof NewtonDB !== 'undefined' && tournament && tournament.id) {
+        NewtonDB.deleteMatch(String(tournament.id), targetTransaction.matchId)
+            .catch(e => console.warn('NewtonDB deleteMatch failed:', e));
+    }
+
     console.log(`Clean undo complete: surgically rolled back ${targetTransaction.matchId}`);
 }
 
@@ -4336,6 +4342,12 @@ function showCommandCenterModal(matchData) {
 
     // Use dialog stack to show modal
     pushDialog('matchCommandCenterModal', () => showMatchCommandCenter(), true);
+
+    // Hide QR Results button once the tournament is completed
+    const qrResultsBtn = document.getElementById('qrResultsBtn');
+    if (qrResultsBtn) {
+        qrResultsBtn.style.display = (tournament && tournament.status === 'completed') ? 'none' : '';
+    }
 
     // Set up event handlers
 

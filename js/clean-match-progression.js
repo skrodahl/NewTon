@@ -552,7 +552,7 @@ function advancePlayer(matchId, winner, loser) {
  * // Auto-advance walkover match
  * completeMatch('FS-1-2', 2, 0, 0, 'AUTO');
  */
-function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0, completionType = 'MANUAL', achievements = null) {
+function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 0, completionType = 'MANUAL', achievements = null, rawLegs = null, firstStarter = null) {
     const match = matches.find(m => m.id === matchId);
     if (!match) {
         console.error('Match ' + matchId + ' not found');
@@ -603,6 +603,37 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         saveTournament();
         if (typeof updateResultsTable === 'function') updateResultsTable();
         if (typeof updateMatchHistory === 'function') updateMatchHistory();
+
+        // Write to match register (fire-and-forget; skip AUTO walkovers)
+        if (completionType !== 'AUTO' && !window.rebuildInProgress && typeof NewtonDB !== 'undefined') {
+            const _p1 = match.player1, _p2 = match.player2;
+            const _dbMatch = {
+                tournamentId:     String(tournament.id),
+                tournamentName:   tournament.name,
+                tournamentFormat: tournament.format || 'DE',
+                matchId:          matchId,
+                matchType:        completionType === 'MANUAL' ? 'MANUAL' : 'CHALKER',
+                completedAt:      Math.floor(Date.now() / 1000),
+                player1Id:        String(_p1.id),
+                player1Name:      _p1.name,
+                player2Id:        String(_p2.id),
+                player2Name:      _p2.name,
+                winner:           winnerPlayerNumber,
+                firstStarter:     firstStarter || null,
+                legsWon:          { p1: winnerPlayerNumber === 1 ? winnerLegs : loserLegs, p2: winnerPlayerNumber === 2 ? winnerLegs : loserLegs },
+                legs:             rawLegs || null,
+                achievements:     achievements || null,
+                format:           { sc: (typeof config !== 'undefined' && config.legs && config.legs.x01Format) || 501, bo: match.legs || 3 }
+            };
+            NewtonDB.saveMatch(_dbMatch).catch(e => console.warn('NewtonDB saveMatch failed:', e));
+            NewtonDB.saveTournamentMeta({
+                tournamentId:     String(tournament.id),
+                tournamentName:   tournament.name,
+                tournamentFormat: tournament.format || 'DE',
+                playerCount:      (typeof players !== 'undefined' ? players.filter(p => !p.isBye).length : 0),
+                startedAt:        Math.floor(Date.now() / 1000)
+            }).catch(e => console.warn('NewtonDB saveTournamentMeta failed:', e));
+        }
 
         // Calculate live rankings after every match completion (reuse existing logic)
         // Only calculate rankings during normal play, not during rebuild or auto-advancement processing
@@ -697,6 +728,23 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 console.log(`✓ Tournament completed with full rankings — Final: ${winner.name} defeats ${loser.name}`);
 
                 if (typeof saveTournament === 'function') saveTournament();
+
+                // Finalize tournament in match register (fire-and-forget)
+                if (typeof NewtonDB !== 'undefined') {
+                    const _configSnapshot = (typeof config !== 'undefined') ? JSON.parse(JSON.stringify(config)) : {};
+                    const _tournamentAchievements = {};
+                    if (typeof players !== 'undefined') {
+                        players.forEach(p => {
+                            if (p.stats) _tournamentAchievements[String(p.id)] = { name: p.name, stats: Object.assign({}, p.stats) };
+                        });
+                    }
+                    NewtonDB.finalizeTournament(
+                        String(tournament.id),
+                        _configSnapshot,
+                        _tournamentAchievements,
+                        Math.floor(Date.now() / 1000)
+                    ).catch(e => console.warn('NewtonDB finalizeTournament failed:', e));
+                }
                 if (typeof updateMatchHistory === 'function') updateMatchHistory();
 
                 // Proactively refresh results UI after completion

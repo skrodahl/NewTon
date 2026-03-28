@@ -63,6 +63,7 @@
                 <button class="nav-btn" data-page="registration">Player Registration</button>
                 <button class="nav-btn" data-page="tournament">Tournament Bracket</button>
                 <button class="nav-btn" data-page="config">Global Settings</button>
+                <button class="nav-btn" data-page="history">History</button>
                 <a class="nav-btn" href="chalker/index.html" target="_blank">Chalker</a>
                 <div id="headerTournamentStatus" class="header-tournament-status">
                     Active Tournament: <strong>None</strong>
@@ -704,6 +705,70 @@
             </div>
         </div>
 
+        <!-- History Page -->
+        <div id="history" class="page">
+            <div class="history-page-header">
+                <h2>Match History</h2>
+                <div class="history-actions">
+                    <button class="btn" onclick="NewtonHistory.exportDB()">Export Register</button>
+                    <button class="btn btn-warning" onclick="document.getElementById('historyImportFile').click()">Import Register</button>
+                    <input type="file" id="historyImportFile" accept=".json" style="display:none;" onchange="NewtonHistory.importDB(event)">
+                </div>
+            </div>
+
+            <!-- Tournament list panel -->
+            <div id="historyTournamentList">
+                <div style="overflow-x:auto;">
+                    <table class="history-table">
+                        <thead><tr>
+                            <th>Tournament</th>
+                            <th>Format</th>
+                            <th>Date</th>
+                            <th style="text-align:center;">Players</th>
+                            <th style="text-align:center;">Status</th>
+                            <th style="text-align:center;"></th>
+                        </tr></thead>
+                        <tbody id="historyTournamentListBody">
+                            <tr><td colspan="6" style="text-align:center;color:#888;padding:24px;">Loading…</td></tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Match list panel -->
+            <div id="historyMatchList" style="display:none;">
+                <div class="history-back-row">
+                    <button class="btn btn-secondary" onclick="NewtonHistory.render()">← All Tournaments</button>
+                    <div>
+                        <div id="historyMatchListTitle" class="history-panel-title"></div>
+                        <div id="historyMatchListMeta" class="history-panel-meta"></div>
+                    </div>
+                </div>
+                <div style="overflow-x:auto;">
+                    <table class="history-table">
+                        <thead><tr>
+                            <th>Match</th>
+                            <th>Player 1</th>
+                            <th>Player 2</th>
+                            <th>Result</th>
+                            <th>Type</th>
+                            <th>Date</th>
+                        </tr></thead>
+                        <tbody id="historyMatchListBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Match detail panel -->
+            <div id="historyMatchDetail" style="display:none;">
+                <div class="history-back-row">
+                    <button class="btn btn-secondary" id="historyMatchDetailBackBtn">← Back to matches</button>
+                    <div id="historyMatchDetailTitle" class="history-panel-title"></div>
+                </div>
+                <div id="historyMatchDetailBody"></div>
+            </div>
+        </div>
+
         <!-- Statistics Modal -->
         <div id="statsModal" class="modal">
             <div class="modal-content">
@@ -960,6 +1025,7 @@
         <!-- Load JavaScript files in the correct order -->
         <script src="lib/qrcode-generator.js"></script>
         <script src="js/newton-integrity.js"></script>
+        <script src="js/newton-db.js"></script>
         <script src="js/types.js"></script>
         <script src="js/main.js"></script>
         <script src="js/lane-management.js"></script>
@@ -972,6 +1038,7 @@
         <script src="js/dynamic-help-system.js"></script>
         <script src="js/analytics.js"></script>
         <script src="js/newton-stats.js"></script>
+        <script src="js/newton-history.js"></script>
         <script src="js/qr-bridge.js"></script>
 
         <footer>
@@ -1214,17 +1281,21 @@
                     </div>
                 </div>
 
-                <div class="text-center mt-20" style="display: flex; justify-content: center; align-items: center; position: relative;">
-                    <div>
-                        <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Leaderboard</button>
-                        <button class="btn" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="margin-right: 10px;">QR Results</button>
-                        <button class="btn" id="commandCenterOK">Close</button>
+                <div class="text-center mt-20" style="position: relative;">
+                    <div style="margin-bottom: 10px;">
+                        <button class="btn btn-success" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="padding: 10px 28px; font-size: 15px; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1); border-color: #fb923c;">🔍 Scan QR Results</button>
                     </div>
-                    <div style="display: flex; align-items: center; gap: 8px; position: absolute; right: 0;">
-                        <label for="autoOpenMatchControlsToggle" style="margin: 0; cursor: pointer; user-select: none; font-weight: 500; font-size: 14px; color: #333333;">
-                            Automatically open Match Controls
-                        </label>
-                        <input type="checkbox" id="autoOpenMatchControlsToggle" style="cursor: pointer; width: 18px; height: 18px;">
+                    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
+                        <div>
+                            <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Leaderboard</button>
+                            <button class="btn" id="commandCenterOK">Close</button>
+                        </div>
+                        <div style="display: flex; align-items: center; gap: 8px; position: absolute; right: 0;">
+                            <label for="autoOpenMatchControlsToggle" style="margin: 0; cursor: pointer; user-select: none; font-weight: 500; font-size: 14px; color: #333333;">
+                                Automatically open Match Controls
+                            </label>
+                            <input type="checkbox" id="autoOpenMatchControlsToggle" style="cursor: pointer; width: 18px; height: 18px;">
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1613,6 +1684,17 @@
                     <button class="btn" onclick="popDialog()">Cancel</button>
                     <button class="btn btn-success" id="confirmExportBtn" onclick="confirmExport()">Export
                         Results</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Match Detail Modal (from Setup → Match History) -->
+        <div id="matchDetailModal" class="modal">
+            <div class="modal-content" style="max-width: 700px; max-height: 85vh; overflow-y: auto;">
+                <h3 id="matchDetailModalTitle" style="margin-bottom: 4px;"></h3>
+                <div id="matchDetailModalBody" style="margin: 12px 0;"></div>
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()">Close</button>
                 </div>
             </div>
         </div>

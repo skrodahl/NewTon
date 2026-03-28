@@ -421,6 +421,11 @@ function showPage(pageId) {
         }, 100);
     }
 
+    // Load history when showing history page
+    if (pageId === 'history' && typeof NewtonHistory !== 'undefined') {
+        NewtonHistory.render();
+    }
+
     // Update Registration page layout when showing registration page
     if (pageId === 'registration') {
         if (typeof updateRegistrationPageLayout === 'function') {
@@ -599,6 +604,10 @@ function updateMatchHistory() {
         let itemClass = 'match-history-item';
         if (isWalkover) itemClass += ' walkover';
         if (isBackside) itemClass += ' backside';
+        const clickable = !isWalkover;
+        const clickAttr = clickable
+            ? ` style="cursor:pointer;" onclick="NewtonHistory.openMatchModal('${String(tournament.id)}', '${match.id}')"`
+            : '';
         
         const player1Name = match.player1?.name || 'Unknown';
         const player2Name = match.player2?.name || 'Unknown';
@@ -635,7 +644,7 @@ function updateMatchHistory() {
         }
 
         historyHtml += `
-            <div class="${itemClass}">
+            <div class="${itemClass}"${clickAttr}>
                 <div class="match-header">
                     <span class="match-id">${match.id}${autoCompletedText}</span>
                     <span class="match-winner">Winner: ${winnerName}</span>
