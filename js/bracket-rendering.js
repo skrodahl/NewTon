@@ -3397,6 +3397,13 @@ function showMatchCommandCenter() {
     const liveMatches = matches.filter(m => getMatchState(m) === 'live');
     const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
 
+    // Show QR Results button only when there are live matches and tournament is not completed
+    const _qrBtn = document.getElementById('qrResultsBtn');
+    if (_qrBtn) {
+        const _done = tournament && tournament.status === 'completed';
+        _qrBtn.style.display = (!_done && liveMatches.length > 0) ? '' : 'none';
+    }
+
     // Group ready matches by round for chronological organization
     const roundGroups = {};
 
@@ -4342,12 +4349,6 @@ function showCommandCenterModal(matchData) {
 
     // Use dialog stack to show modal
     pushDialog('matchCommandCenterModal', () => showMatchCommandCenter(), true);
-
-    // Hide QR Results button once the tournament is completed
-    const qrResultsBtn = document.getElementById('qrResultsBtn');
-    if (qrResultsBtn) {
-        qrResultsBtn.style.display = (tournament && tournament.status === 'completed') ? 'none' : '';
-    }
 
     // Set up event handlers
 

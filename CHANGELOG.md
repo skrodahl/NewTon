@@ -1,3 +1,34 @@
+## **v5.0.1-beta.6** - The Record Books Open (2026-03-28)
+
+### NewtonMatchDB — Global Match Register
+
+A new IndexedDB layer (`js/newton-db.js`) persists every non-walkover match completion across all tournaments. Write at completion, delete on undo, finalize at tournament close. Each record includes visit scores, achievements, first starter, format, and timestamps.
+
+### History Tab
+
+New **History** nav item with three-panel read-only view: tournament list (finalized only) → match list → match detail with visit scores and achievements. Export/import the full DB as JSON.
+
+### Match Detail Modal — Setup Page
+
+Non-walkover completed match cards in Tournament Setup → Match History are now clickable, opening an inline modal with full match detail.
+
+### Tons Fix
+
+`NewtonStats.extractAchievements()` now counts visits ≥ 100 as tons (including 180s). Label "Tons (100–179)" corrected to "Tons".
+
+### QR Results Button Redesign
+
+Moved to its own row above Leaderboard/Close in Match Controls footer, with orange live-match glow. Hidden when tournament is completed.
+
+### Bug Fixes
+
+- Match Controls not refreshing after QR completion (wrong dialog check)
+- Match detail back button not wiring correctly (missing id)
+- QR Results button shown after tournament completion
+- QR Results button shown when no live matches
+
+---
+
 ## **v5.0.1-beta.5** - The Loop Closes (2026-03-28)
 
 ### Complete match from result QR

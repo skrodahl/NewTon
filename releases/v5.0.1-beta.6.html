@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="https://newtondarts.com/releases/">
+    <link rel="canonical" href="https://newtondarts.com/releases/v5.0.1-beta.6.html">
     <title>Release Notes v5.0.1-beta.6 — NewTon DC Tournament Manager</title>
     <meta name="description" content="NewTon DC Tournament Manager v5.0.1-beta.6 release notes. The Record Books Open — NewtonMatchDB global match register and History tab.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
@@ -62,12 +62,13 @@
         <li><strong>Match list</strong> — all final matches for the selected tournament, with winner, leg score, match type (Chalker/Manual), and date</li>
         <li><strong>Match detail</strong> — full record: type badge, format, date, winner, legs table with visit scores and checkout darts (Chalker matches), and achievements table</li>
     </ul>
-    <p>Navigation flows tournament list &rarr; match list &rarr; match detail, with back buttons at each level. Export and import of the full DB are available from the History tab.</p>
+    <p>Navigation flows tournament list &rarr; match list &rarr; match detail, with back buttons at each level. The match list back button correctly returns to the match list for the current tournament.</p>
+    <p>Export and import of the full DB are available from the History tab.</p>
 
     <hr>
 
     <h2 id="modal">Match Detail Modal — Setup Page</h2>
-    <p>Completed match cards in <strong>Tournament Setup &rarr; Match History</strong> are now clickable. Clicking a non-walkover card opens an inline modal with the full match detail. Walkover cards remain non-clickable. The pointer cursor is the only visual hint.</p>
+    <p>Completed match cards in <strong>Tournament Setup &rarr; Match History</strong> are now clickable. Clicking a non-walkover card opens an inline modal with the full match detail — identical content to the History tab detail view. Walkover cards remain non-clickable. The pointer cursor is the only visual hint.</p>
 
     <hr>
 
@@ -77,15 +78,15 @@
     <hr>
 
     <h2 id="qrbutton">QR Results Button Redesign</h2>
-    <p>The <strong>Scan QR Results</strong> button in Match Controls has been moved into its own row above Leaderboard/Close, with the orange glow from live match cards as a visual cue. The button is hidden automatically when the tournament is completed.</p>
+    <p>The <strong>Scan QR Results</strong> button in Match Controls has been moved out of the footer into its own row above Leaderboard/Close. It carries the same orange glow as live match cards — a consistent visual cue that "something active can happen here". The button is hidden automatically when the tournament is completed.</p>
 
     <hr>
 
     <h2 id="fixes">Bug Fixes</h2>
     <ul>
-        <li><strong>Match Controls not refreshing after QR completion</strong>: refresh check fixed to use <code>window.dialogStack</code> instead of <code>classList.contains('active')</code></li>
-        <li><strong>Back button in match detail wired incorrectly</strong>: added <code>id="historyMatchDetailBackBtn"</code> so <code>openMatch()</code> can wire its <code>onclick</code>; label updated to "← Back to matches"</li>
-        <li><strong>QR Results button shown after tournament completion</strong>: hidden via <code>tournament.status === 'completed'</code> check in <code>showMatchCommandCenter()</code></li>
+        <li><strong>Match Controls not refreshing after QR completion</strong>: the refresh check used <code>classList.contains('active')</code> which was wrong for the dialog stack system. Fixed to use <code>window.dialogStack</code>.</li>
+        <li><strong>Back button in match detail wired incorrectly</strong>: the HTML button had no id, so <code>openMatch()</code> could never wire its <code>onclick</code>. Fixed by adding <code>id="historyMatchDetailBackBtn"</code> and updating the label to "← Back to matches".</li>
+        <li><strong>QR Results button shown after tournament completion</strong>: now hidden via <code>tournament.status === 'completed'</code> check in <code>showMatchCommandCenter()</code>.</li>
     </ul>
 
     <hr>
@@ -94,19 +95,19 @@
     <ul>
         <li><code>js/newton-db.js</code> — new module: <code>initDB()</code>, <code>saveMatch()</code>, <code>deleteMatch()</code>, <code>getMatch()</code>, <code>getMatchesByTournament()</code>, <code>saveTournamentMeta()</code>, <code>finalizeTournament()</code>, <code>getTournament()</code>, <code>getFinalTournaments()</code>, <code>exportAll()</code>, <code>importAll()</code></li>
         <li><code>js/newton-history.js</code> — new module: three-panel History UI; <code>openMatchModal()</code> for inline detail; <code>_buildMatchDetailHtml()</code> shared builder</li>
-        <li><code>js/newton-stats.js</code> — <code>extractAchievements()</code>: tons threshold changed to &ge; 100</li>
+        <li><code>js/newton-stats.js</code> — <code>extractAchievements()</code>: tons threshold changed to <code>&ge; 100</code></li>
         <li><code>js/clean-match-progression.js</code> — DB write hook at match completion; <code>finalizeTournament</code> hook at tournament close; <code>rawLegs</code>/<code>firstStarter</code> params added to <code>completeMatch()</code></li>
         <li><code>js/bracket-rendering.js</code> — <code>undoManualTransaction()</code> calls <code>NewtonDB.deleteMatch()</code>; <code>showMatchCommandCenter()</code> hides QR Results when tournament completed; Match Controls refresh fix</li>
         <li><code>js/qr-bridge.js</code> — "Tons (100&ndash;179)" label corrected to "Tons"</li>
         <li><code>js/main.js</code> — <code>updateMatchHistory()</code> adds clickable <code>onclick</code> to non-walkover completed match cards</li>
-        <li><code>tournament.html</code> — History nav item; three-panel History page; <code>#matchDetailModal</code>; two-row Match Controls footer; script tags; back button id and label fix</li>
-        <li><code>css/styles.css</code> — History panel styles</li>
+        <li><code>tournament.html</code> — History nav item; three-panel History page; <code>#matchDetailModal</code>; two-row Match Controls footer; <code>newton-db.js</code>, <code>newton-history.js</code> script tags; <code>historyMatchDetailBackBtn</code> id and label fix</li>
+        <li><code>css/styles.css</code> — History panel styles: <code>.history-table</code>, <code>.history-row</code>, <code>.history-back-row</code>, <code>.history-panel-title</code>, <code>.history-panel-meta</code>, <code>.history-detail-header</code>, <code>.history-type-badge</code> variants</li>
     </ul>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
-    <p>No migration required. NewtonMatchDB is populated going forward from beta.6. Tournaments completed before beta.6 will not appear in the History tab — the register is not retroactive.</p>
+    <p>No migration required. NewtonMatchDB is populated going forward from beta.6. No existing tournament data is affected. Tournaments completed before beta.6 will not appear in the History tab until they are finalized again — the register is not retroactive.</p>
 
     <hr>
 
