@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.1-b.6'; // beta.6: NewtonMatchDB global match register; History tab; match detail modal; tons fix; QR Results button redesign
+const APP_VERSION = '5.0.1-b.7'; // beta.7: Docker SSL opt-in (ENV), self-signed cert auto-gen (30yr, SAN), mDNS via Avahi, configurable HTTPS port
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

@@ -14,6 +14,12 @@ Ideas and suggestions for future consideration.
 ## Next
 *Ready for implementation when time permits*
 
+### User Guide — Screenshot Presentation Style
+
+Images in the user guide should use the same presentation as the landing page "See It in Action" cards: framed container, slight zoom-on-hover, zoom icon overlay, and expand into lightbox on click. Not plain inline images. Reuse the existing lightbox.js and the landing page CSS patterns.
+
+---
+
 ### v5.0.1 Release Preparation
 
 Documentation and communication tasks before cutting the stable release:

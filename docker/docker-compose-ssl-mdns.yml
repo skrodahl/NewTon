@@ -1,0 +1,34 @@
+services:
+  newton-tournament:
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
+    container_name: newton
+    # network_mode: host is required for mDNS (Avahi/multicast) to reach the LAN.
+    # The container binds directly to host ports — no port mapping needed or supported.
+    # ⚠️  LINUX ONLY — does not work on Docker Desktop for Mac or Windows.
+    network_mode: host
+    volumes:
+      # Persistent tournament storage
+      - ./tournaments:/var/www/html/tournaments
+      # Optional: Mount custom images (logo and payment QR code)
+      - ./images:/var/www/html/images:ro
+      # SSL certificate volume — persists the auto-generated cert across restarts
+      - newton-ssl:/etc/nginx/ssl
+      # Optional: Persist nginx logs
+      # - ./logs:/var/log/nginx
+    restart: unless-stopped
+    environment:
+      # Timezone configuration
+      - TZ=Europe/Oslo
+      # Application configuration
+      - NEWTON_API_ENABLED=true          # Set to 'false' to disable REST API endpoints
+      - NEWTON_DEMO_MODE=false           # Set to 'true' to show demo banner (privacy notice)
+      - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon
+      # SSL — auto-generates a self-signed certificate on first start (30-year expiry)
+      - SSL_ENABLED=true
+      # - HTTPS_PORT=443                 # HTTPS port (default: 443)
+      # mDNS — container is reachable as <hostname>.local on the LAN
+      - MDNS_HOSTNAME=newton             # → newton.local
+
+volumes:
+  newton-ssl:

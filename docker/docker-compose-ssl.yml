@@ -1,0 +1,31 @@
+services:
+  newton-tournament:
+    image: skrodahl/newton:latest
+    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
+    container_name: newton
+    ports:
+      - "2020:2020"   # HTTP → redirects to HTTPS
+      - "443:443"     # HTTPS
+    volumes:
+      # Persistent tournament storage
+      - ./tournaments:/var/www/html/tournaments
+      # Optional: Mount custom images (logo and payment QR code)
+      - ./images:/var/www/html/images:ro
+      # SSL certificate volume — persists the auto-generated cert across restarts
+      - newton-ssl:/etc/nginx/ssl
+      # Optional: Persist nginx logs
+      # - ./logs:/var/log/nginx
+    restart: unless-stopped
+    environment:
+      # Timezone configuration
+      - TZ=Europe/Oslo
+      # Application configuration
+      - NEWTON_API_ENABLED=true          # Set to 'false' to disable REST API endpoints
+      - NEWTON_DEMO_MODE=false           # Set to 'true' to show demo banner (privacy notice)
+      - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon
+      # SSL — auto-generates a self-signed certificate on first start (30-year expiry)
+      - SSL_ENABLED=true
+      # - HTTPS_PORT=443                 # HTTPS port (default: 443)
+
+volumes:
+  newton-ssl:

@@ -3,13 +3,17 @@ services:
     image: skrodahl/newton:latest
     # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
     container_name: newton
-    ports:
-      - "${NEWTON_HOST_PORT:-8080}:2020"  # Host port configurable, internal port 2020 ("Double 20" 🎯)
+    # network_mode: host is required for mDNS (Avahi/multicast) to reach the LAN.
+    # It also simplifies Nginx Proxy Manager setup — no port mapping needed.
+    # When using host networking, the container binds directly to host ports 2020 and 443.
+    network_mode: host
     volumes:
       # Persistent tournament storage
       - ./tournaments:/var/www/html/tournaments
       # Optional: Mount custom images (logo and payment QR code)
       - ./images:/var/www/html/images:ro
+      # SSL certificate volume — read/write so entrypoint can generate a self-signed cert
+      - newton-ssl:/etc/nginx/ssl
       # Optional: Persist nginx logs (access.log and error.log)
       # - ./logs:/var/log/nginx
     restart: unless-stopped
@@ -21,6 +25,22 @@ services:
       - NEWTON_DEMO_MODE=false           # Set to 'true' to show demo banner (privacy notice)
       - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon  # GitHub link in demo banner
 
+      # SSL configuration (optional — omit both to run HTTP only on port 2020)
+      # Option A: Auto-generate a self-signed certificate (30-year expiry)
+      #   - SSL_ENABLED=true
+      # Option B: Provide your own certificates (paths inside the container)
+      #   - SSL_CERT=/run/secrets/cert.pem
+      #   - SSL_KEY=/run/secrets/key.pem
+      #
+      # - SSL_ENABLED=false              # Set to 'true' to auto-generate a self-signed cert
+      # - HTTPS_PORT=443                 # HTTPS port (default: 443)
+
+      # mDNS hostname — container will be reachable as <hostname>.local on the LAN
+      # - MDNS_HOSTNAME=newton           # Default: newton → newton.local
+
+volumes:
+  newton-ssl:
+
   # For developers building from source:
   # Uncomment the section below and comment out the image section above
   #
@@ -29,20 +49,22 @@ services:
   #     context: ..
   #     dockerfile: docker/Dockerfile
   #   container_name: newton
-  #   ports:
-  #     - "${NEWTON_HOST_PORT:-8080}:2020"  # Host port configurable, internal port 2020 ("Double 20" 🎯)
+  #   network_mode: host
   #   volumes:
   #     # Persistent tournament storage
   #     - ../tournaments:/var/www/html/tournaments
   #     # Optional: Mount custom images (logo and payment QR code)
   #     - ../images:/var/www/html/images:ro
+  #     # SSL certificate volume
+  #     - newton-ssl:/etc/nginx/ssl
   #     # Optional: Persist nginx logs (access.log and error.log)
   #     # - ../logs:/var/log/nginx
   #   restart: unless-stopped
   #   environment:
-  #     # Timezone configuration
   #     - TZ=Europe/Oslo
-  #     # Application configuration
-  #     - NEWTON_API_ENABLED=true          # Set to 'false' to disable REST API endpoints
-  #     - NEWTON_DEMO_MODE=false           # Set to 'true' to show demo banner (privacy notice)
-  #     - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon  # GitHub link in demo banner
+  #     - NEWTON_API_ENABLED=true
+  #     - NEWTON_DEMO_MODE=false
+  #     - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon
+  #     # - SSL_ENABLED=false
+  #     # - HTTPS_PORT=443
+  #     # - MDNS_HOSTNAME=newton

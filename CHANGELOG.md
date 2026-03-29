@@ -1,3 +1,25 @@
+## **v5.0.1-beta.7** - Secure by Default (2026-03-29)
+
+### Docker SSL Support
+
+Two supported paths: auto-generated self-signed cert (`SSL_ENABLED=true`, 30-year expiry with SAN), or real cert via reverse proxy. HTTPS port configurable via `HTTPS_PORT` (default: 443). Port 2020 redirects to HTTPS when SSL is active. Works on all platforms.
+
+### mDNS — newton.local
+
+Avahi (mDNS/Zeroconf) broadcasts the container on the LAN. Devices can reach it at `newton.local` (or a custom name via `MDNS_HOSTNAME`) without DNS configuration. Requires `network_mode: host` — Linux only (not supported on Docker Desktop for Mac/Windows).
+
+### Docker Compose Files
+
+Two new SSL compose files: `docker-compose-ssl.yml` (port mapping, all platforms) and `docker-compose-ssl-mdns.yml` (host networking + mDNS, Linux only).
+
+### Bug Fixes
+
+- `gettext` (provides `envsubst`) missing from Dockerfile — added to `apk add`
+- nginx template files auto-loaded by nginx when placed in `http.d/` — moved to `/etc/nginx/`
+- `ssl_session_cache` conflict with Alpine's base `nginx.conf` — removed from server block
+
+---
+
 ## **v5.0.1-beta.6** - The Record Books Open (2026-03-28)
 
 ### NewtonMatchDB — Global Match Register
