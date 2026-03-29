@@ -215,6 +215,7 @@ const HELP_CONTENT = {
                         <li>Assign lane number (optional)</li>
                         <li>Select referee from dropdown (optional)</li>
                     </ol>
+                    <p><strong>Chalker QR:</strong> Click the QR button on any LIVE match card to generate an assignment QR. The Chalker scans it to receive player names, format, and lane/referee automatically.</p>
                 `
             },
             completion: {
@@ -223,17 +224,10 @@ const HELP_CONTENT = {
             <p><strong>Selecting Winners:</strong></p>
             <ol>
                 <li>Click on winner's name in LIVE match</li>
-                <li>Confirmation dialog appears</li>
                 <li>Enter leg scores (optional but recommended)</li>
                 <li>Click "<strong>Confirm Winner</strong>"</li>
             </ol>
-            <p><strong>Leg Score Validation:</strong></p>
-            <ul>
-                <li>Winner must have more legs than loser</li>
-                <li>Scores must be reasonable for match format (Bo3/5/7)</li>
-                <li>Real-time validation prevents invalid entries</li>
-                <li>Change match formats in Config page</li>
-            </ul>
+            <p><strong>Scan Results QR:</strong> If the match was scored on the Chalker, click <strong>Scan Results QR</strong> in the confirmation dialog to import the result and player achievements directly from the Chalker's QR code — no manual entry needed.</p>
             <p><strong>Correcting Match Results:</strong></p>
             <ul>
                 <li><strong>Hover over completed matches</strong> to see if undo is available</li>
@@ -283,11 +277,11 @@ const HELP_CONTENT = {
                         <li><strong>Start Match:</strong> Move ready matches to LIVE status</li>
                         <li><strong>[Player Name] Wins:</strong> Direct winner selection buttons</li>
                         <li><strong>Lane/Referee Assignment:</strong> Dropdowns for each match</li>
-                        <li><strong>QR:</strong> Generate a Chalker assignment QR code for a live match. The Chalker scans it to receive player names, format, lane, and referee automatically — no typing needed</li>
-                        <li><strong>Leaderboard Button:</strong> Access tournament leaderboard and player rankings without leaving the Tournament page</li>
+                        <li><strong>QR:</strong> Generate a Chalker assignment QR for a live match</li>
+                        <li><strong>Scan QR Results:</strong> Appears at the bottom when matches are live — scan a Chalker result QR to import the result automatically</li>
+                        <li><strong>Leaderboard:</strong> Access tournament rankings without leaving the Tournament page</li>
                     </ul>
-                    <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action</p>
-                    <p><strong>💡 Tip:</strong> Use Match Controls for efficient tournament management - everything in one place!</p>
+                    <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action.</p>
                 `
             }
         }
@@ -374,6 +368,42 @@ const HELP_CONTENT = {
                         <li>Enable this only if you want operators to be able to delete shared tournaments</li>
                     </ul>
                     <p><strong>💡 Tip:</strong> Personalize the application for your club or organization.</p>
+                `
+            }
+        }
+    },
+
+    // History Page Help
+    history: {
+        title: "Tournament & Match History",
+        overview: "Browse and manage completed tournaments. All finalized tournaments are recorded here with full match detail.",
+        sections: {
+            tournaments: {
+                title: "Tournament List",
+                content: `
+                    <p>Each row shows a finalized tournament — format, date, player count, and status.</p>
+                    <ul>
+                        <li><strong>View →</strong> Opens the match list for that tournament</li>
+                        <li><strong>Delete:</strong> Permanently removes the tournament and all its matches. You must type the tournament name to confirm — this cannot be undone</li>
+                    </ul>
+                `
+            },
+            matches: {
+                title: "Match Detail",
+                content: `
+                    <p>Click any tournament to see its matches. Click a match to open the detail view.</p>
+                    <ul>
+                        <li><strong>Chalker matches:</strong> Show full leg-by-leg breakdown — visit scores, first thrower, checkout darts</li>
+                        <li><strong>Achievements:</strong> 180s, tons, high outs, short legs — shown when recorded</li>
+                        <li><strong>Manual matches:</strong> Show result only (no visit data)</li>
+                    </ul>
+                `
+            },
+            register: {
+                title: "Export & Import Register",
+                content: `
+                    <p><strong>Export Register:</strong> Download the full match history as a JSON file — useful for backups or moving to a new device.</p>
+                    <p><strong>Import Register:</strong> Merge a previously exported file into the current history. Existing records with the same match ID are overwritten; everything else is untouched.</p>
                 `
             }
         }

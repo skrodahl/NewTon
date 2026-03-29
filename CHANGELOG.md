@@ -1,3 +1,42 @@
+## **v5.0.1-beta.8-patch** - Default mDNS hostname changed to `newtondarts` (2026-03-29)
+
+Default `MDNS_HOSTNAME` example changed from `newton` to `newtondarts` throughout `DOCKER-QUICKSTART.md` and `llms.txt`. Container reachable as `newtondarts.local` in the documented default configuration.
+
+---
+
+## **v5.0.1-beta.8** - History, Properly Kept (2026-03-29)
+
+### Undo Dialog: Source Awareness
+
+The undo confirmation now shows whether a match was completed via Chalker or Manual entry. Chalker matches show a green info line ("Achievements were recorded automatically from Chalker visit scores."). Manual matches show an amber warning. Source label also appears in the match score line: e.g. "Frank wins 1–0 (Chalker)".
+
+### Tons Fix
+
+`NewtonStats.extractAchievements()` used `if / else if` — a 180 was counted as a 180 but not as a ton. Fixed to two independent checks: any visit ≥ 100 increments `tons`, any visit of exactly 180 also increments `oneEighties`.
+
+### QR Results Button — Placement and Visibility
+
+Scan Results QR moved to footer of Confirm Match Winner dialog (amber glow). In Match Controls, moved to single bottom row (Leaderboard | Scan QR Results | Close); magnifying glass removed. Button hidden by default — only appears when tournament is active and live matches exist.
+
+### History: Delete Tournament
+
+Delete button added to each tournament row. Requires typing the exact tournament name in a confirmation modal before the delete button enables. All match records and tournament meta permanently removed.
+
+### History: Import Fix
+
+`importAll()` previously caused a ConstraintError on the `tournamentMatch` unique index when records for existing tournaments were already in the DB, silently rolling back the entire import. Rewritten as per-record upsert: look up each match by `(tournamentId, matchId)`, overwrite if found, add if new. Unrelated records untouched.
+
+### Help System
+
+Tournament bracket help updated with QR info. New History page help section (tournament list, match detail, export/import). History header ℹ️ icon added.
+
+### Bug Fixes
+
+- `deleteTournament()` called `.delete(meta.id)` — tournaments store uses `tournamentId` as keyPath. Fixed to `.delete(tournamentId)`.
+- Import catch block crashed on null `tx.error`. Error display now null-safe.
+
+---
+
 ## **v5.0.1-beta.7** - Secure by Default (2026-03-29)
 
 ### Docker SSL Support

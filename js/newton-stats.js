@@ -41,7 +41,8 @@ const NewtonStats = {
             visits.forEach((score, i) => {
                 if (score === 180) {
                     result.oneEighties++;
-                } else if (score >= 100) {
+                }
+                if (score >= 100) {
                     result.tons++;
                 }
 

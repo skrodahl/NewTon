@@ -140,6 +140,25 @@ const NewtonDB = (() => {
     }
 
     /**
+     * Delete all records for a tournament (matches + tournament meta).
+     * Called from the History tab delete flow.
+     * @param {string} tournamentId
+     * @returns {Promise<void>}
+     */
+    async function deleteTournament(tournamentId) {
+        await initDB();
+
+        // Delete all match records for this tournament
+        const matches = await getMatchesByTournament(tournamentId);
+        for (const m of matches) {
+            await _promisify(_store('matches', 'readwrite').delete(m.id));
+        }
+
+        // Delete tournament meta record (keyPath is 'tournamentId', not 'id')
+        await _promisify(_store('tournaments', 'readwrite').delete(tournamentId));
+    }
+
+    /**
      * Delete a match record. Called on undo.
      * @param {string} tournamentId
      * @param {string} matchId
@@ -316,19 +335,27 @@ const NewtonDB = (() => {
     async function importAll(dump) {
         await initDB();
 
-        const tx = _db.transaction(['matches', 'tournaments'], 'readwrite');
-
-        (dump.tournaments || []).forEach(t => tx.objectStore('tournaments').put(t));
-        (dump.matches     || []).forEach(m => {
-            const record = Object.assign({}, m);
-            delete record.id; // let autoIncrement assign a new key to avoid collisions
-            tx.objectStore('matches').put(record);
+        // Upsert tournament metadata records (keyPath is tournamentId — put works directly)
+        const tournTx = _db.transaction('tournaments', 'readwrite');
+        (dump.tournaments || []).forEach(t => tournTx.objectStore('tournaments').put(t));
+        await new Promise((resolve, reject) => {
+            tournTx.oncomplete = () => resolve();
+            tournTx.onerror    = () => reject(tournTx.error || new Error('Tournament import failed'));
         });
 
-        return new Promise((resolve, reject) => {
-            tx.oncomplete = () => resolve();
-            tx.onerror    = () => reject(tx.error);
-        });
+        // Upsert each match by (tournamentId, matchId): overwrite if exists, add if new.
+        // Preserves status and all fields from the dump. Does not touch unrelated records.
+        for (const m of (dump.matches || [])) {
+            const existing = await getMatch(m.tournamentId, m.matchId);
+            const record   = Object.assign({}, m);
+            if (existing) {
+                record.id = existing.id; // use DB's key so put() replaces the right record
+                await _promisify(_store('matches', 'readwrite').put(record));
+            } else {
+                delete record.id;
+                await _promisify(_store('matches', 'readwrite').add(record));
+            }
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -347,7 +374,8 @@ const NewtonDB = (() => {
         getTournament,
         getFinalTournaments,
         exportAll,
-        importAll
+        importAll,
+        deleteTournament
     };
 
 })();

@@ -708,7 +708,7 @@
         <!-- History Page -->
         <div id="history" class="page">
             <div class="history-page-header">
-                <h2>Match History</h2>
+                <h2>Tournament &amp; Match History <span class="help-info-icon" data-page="history">ℹ️</span></h2>
                 <div class="history-actions">
                     <button class="btn" onclick="NewtonHistory.exportDB()">Export Register</button>
                     <button class="btn btn-warning" onclick="document.getElementById('historyImportFile').click()">Import Register</button>
@@ -726,7 +726,7 @@
                             <th>Date</th>
                             <th style="text-align:center;">Players</th>
                             <th style="text-align:center;">Status</th>
-                            <th style="text-align:center;"></th>
+                            <th style="text-align:right;"></th>
                         </tr></thead>
                         <tbody id="historyTournamentListBody">
                             <tr><td colspan="6" style="text-align:center;color:#888;padding:24px;">Loading…</td></tr>
@@ -766,6 +766,26 @@
                     <div id="historyMatchDetailTitle" class="history-panel-title"></div>
                 </div>
                 <div id="historyMatchDetailBody"></div>
+            </div>
+        </div>
+
+        <!-- History: Delete Tournament Confirmation Modal -->
+        <div id="historyDeleteTournamentModal" class="modal">
+            <div class="modal-content" style="max-width: 480px;">
+                <h3>Delete Tournament</h3>
+                <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:12px 16px;margin:16px 0;border-radius:0 4px 4px 0;">
+                    <strong style="color:#991b1b;">This cannot be undone.</strong>
+                    All match records for <strong id="historyDeleteTournamentDisplayName"></strong> will be permanently removed.
+                </div>
+                <p style="margin:0 0 6px;font-size:14px;color:#555;">Type the tournament name to confirm:</p>
+                <input type="text" id="historyDeleteTournamentInput" placeholder="Tournament name"
+                    style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccc;border-radius:4px;font-size:15px;"
+                    oninput="NewtonHistory.onDeleteInputChange()">
+                <div class="text-center mt-20" style="margin-top:20px;">
+                    <button class="btn" onclick="popDialog()" style="margin-right:12px;">Cancel</button>
+                    <button class="btn btn-danger" id="historyDeleteTournamentBtn" disabled
+                        onclick="NewtonHistory.confirmDeleteTournament()">Delete</button>
+                </div>
             </div>
         </div>
 
@@ -1059,10 +1079,7 @@
                     <div
                         style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                         <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
-                        <div style="display: flex; align-items: center; gap: 12px;">
-                            <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
-                            <button class="btn btn-success" id="scanResultQRBtn" onclick="openResultQRScanner(this.dataset.matchId)" style="white-space: nowrap;">Scan Result QR</button>
-                        </div>
+                        <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
                     </div>
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <div style="display: flex; align-items: center;">
@@ -1088,6 +1105,7 @@
 
                 <div class="text-center mt-20">
                     <button class="btn" id="winnerConfirmCancel" style="margin-right: 15px;">Cancel</button>
+                    <button class="btn btn-success" id="scanResultQRBtn" onclick="openResultQRScanner(this.dataset.matchId)" style="white-space: nowrap; margin-right: 15px; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1); border-color: #fb923c;">Scan Results QR</button>
                     <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
                 </div>
             </div>
@@ -1282,12 +1300,10 @@
                 </div>
 
                 <div class="text-center mt-20" style="position: relative;">
-                    <div style="margin-bottom: 10px;">
-                        <button class="btn btn-success" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="padding: 10px 28px; font-size: 15px; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1); border-color: #fb923c;">🔍 Scan QR Results</button>
-                    </div>
                     <div style="display: flex; justify-content: center; align-items: center; position: relative;">
                         <div>
                             <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Leaderboard</button>
+                            <button class="btn btn-success" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="display:none; margin-right: 10px; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1); border-color: #fb923c;">Scan QR Results</button>
                             <button class="btn" id="commandCenterOK">Close</button>
                         </div>
                         <div style="display: flex; align-items: center; gap: 8px; position: absolute; right: 0;">

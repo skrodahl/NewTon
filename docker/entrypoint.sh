@@ -5,7 +5,7 @@ set -e
 # NewTon DC Tournament Manager — Container Entrypoint
 # =============================================================================
 
-HOSTNAME="${MDNS_HOSTNAME:-newton}"
+HOSTNAME="${MDNS_HOSTNAME:-newtondarts}"
 HTTPS_PORT="${HTTPS_PORT:-443}"
 
 # ─── mDNS via Avahi ──────────────────────────────────────────────────────────

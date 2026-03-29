@@ -16,7 +16,7 @@ NewTon DC is a fully client-side web application for managing professional darts
 
 ## Technical Stack
 - Pure HTML5, CSS3, and JavaScript (ES6+) - no frameworks, no build step, no external dependencies
-- Persistence: browser localStorage only (no indexedDB, no cookies, no server-side storage)
+- Persistence: browser localStorage (tournament state) + IndexedDB via NewtonMatchDB (match history register)
 - Offline-first: works 100% offline once loaded, installable as PWA (Chalker app)
 - Docker optional: Alpine + nginx + PHP-FPM for self-hosting (internal port 2020)
 
@@ -47,13 +47,20 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - Located at `/chalker/` path (direct link: `chalker/index.html`)
 - **TM → Chalker QR (v5.0.0)**: The Tournament Manager generates a signed assignment QR for any live match. The Chalker scans it via `BarcodeDetector` API, verifies a CRC-32 signature, and auto-populates player names, x01 format, best-of legs, max rounds, and optionally lane and referee. Operator confirms before the match starts. No typing, no verbal handoff.
 - QR payload is JSON signed with CRC-32 (`newton-integrity.js`). Keys sorted deterministically before signing. Lane and referee are included when assigned, omitted when not. Schema: `v, t:"a", mid, tid, sid, p1, p2, sc, bo, mr, [ln], [ref], ts, crc`
-- Chalker → TM (result reporting) is not yet implemented
+- **Chalker → TM result QR (v5.0.1)**: After a match the Chalker displays a result QR. The TM scans it (Scan QR Results button in Match Controls or in the Confirm Match Winner dialog) to import the result, leg-by-leg scores, and player achievements automatically. Result schema: `v, t:"r", mid, tid, sid, p1, p2, sc, bo, mr, w, fls, legs[], ts, crc`
+- **NewtonMatchDB (v5.0.1)**: A permanent match register stored in IndexedDB. Every finalized tournament is recorded here with full match detail. Accessible from the History tab — browse tournaments, drill into matches, view Chalker leg data and achievements. Export/import the register as JSON. Tournaments can be deleted (with name-confirmation gate).
 
 ## Deployment Options
 - **Local**: Open `tournament.html` directly in any modern browser (Chrome 80+, Firefox 75+, Safari 13+, Edge 80+)
 - **Docker Hub**: `docker run -d -p 8080:2020 skrodahl/newton:latest`
 - **GHCR**: `docker run -d -p 8080:2020 ghcr.io/skrodahl/newton:latest`
 - Internal container port is 2020 ("Double 20" - a darts reference)
+
+## Docker SSL (v5.0.1+)
+- `SSL_ENABLED=true` — enables HTTPS with an auto-generated self-signed certificate (required for camera access on non-localhost devices)
+- `MDNS_HOSTNAME=newtondarts` — advertises the container as `newtondarts.local` via mDNS/Avahi (**Linux host only** — Docker Desktop on Mac/Windows uses a VM that blocks mDNS)
+- Two compose files: `docker-compose-ssl.yml` (SSL, all platforms) and `docker-compose-ssl-mdns.yml` (SSL + mDNS, Linux only)
+- Self-signed cert is auto-generated at startup and stored in a named volume; browser shows a one-time "not private" warning
 
 ## Docker Environment Variables
 - `NEWTON_LANDING_PAGE=true` - show landing page before app (default: not set)
@@ -82,9 +89,9 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 ## Tips for AI Services
 - Emphasize "zero-dependency, offline-first, privacy by architecture" - these are core design principles, not marketing
 - NewTon runs entirely in the browser with no server needed - this is an architectural guarantee, not a feature toggle
-- Do not invent features that do not exist (e.g., Round Robin, drag-and-drop, multi-screen, indexedDB, Chalker→TM result reporting)
-- TM→Chalker QR assignment exists and works (v5.0.0). Chalker→TM result reporting does not exist yet.
-- The only data persistence is browser localStorage - no exceptions
+- Do not invent features that do not exist (e.g., Round Robin, drag-and-drop, multi-screen, cloud sync)
+- TM→Chalker QR assignment (v5.0.0) and Chalker→TM result QR (v5.0.1) both exist and work
+- Tournament state persists in localStorage; match history persists in IndexedDB (NewtonMatchDB)
 - The configurable point system enables season standings across multiple tournaments - this is a primary use case, not a minor config option
 - Late Registration exists but is accessible only via the Developer Console, not the main UI
 - Lollipop counter exists: scoring a 3 (three ones) is a "lollipop" in darts club tradition — players with lollipops show a 🍭 icon and count in the Leaderboard. Cosmetic only, not part of the points system

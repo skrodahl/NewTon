@@ -56,13 +56,18 @@ const NewtonHistory = (() => {
             const date    = t.closedAt ? new Date(t.closedAt * 1000).toLocaleDateString() : '—';
             const format  = t.tournamentFormat || '—';
             const players = t.playerCount || '—';
-            return `<tr class="history-row" onclick="NewtonHistory.openTournament('${t.tournamentId}')">
-                <td>${escHtml(t.tournamentName || t.tournamentId)}</td>
+            const safeName = escHtml(t.tournamentName || t.tournamentId);
+            const safeId   = escHtml(t.tournamentId);
+            return `<tr class="history-row" onclick="NewtonHistory.openTournament('${safeId}')">
+                <td>${safeName}</td>
                 <td>${format}</td>
                 <td>${date}</td>
                 <td style="text-align:center;">${players}</td>
                 <td style="text-align:center;"><span class="history-type-badge history-type-final">Final</span></td>
-                <td style="text-align:center;"><button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.openTournament('${t.tournamentId}')">View →</button></td>
+                <td style="text-align:right;">
+                    <button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.openTournament('${safeId}')">View →</button>
+                    <button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="margin-left:6px;color:#dc2626;border-color:#dc2626;">Delete</button>
+                </td>
             </tr>`;
         }).join('');
     }
@@ -281,6 +286,49 @@ const NewtonHistory = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // Delete tournament (History tab)
+    // ---------------------------------------------------------------------------
+
+    /** State for the delete confirmation modal */
+    let _pendingDeleteId   = null;
+    let _pendingDeleteName = null;
+
+    function promptDeleteTournament(tournamentId, tournamentName) {
+        _pendingDeleteId   = tournamentId;
+        _pendingDeleteName = tournamentName;
+
+        document.getElementById('historyDeleteTournamentDisplayName').textContent = tournamentName;
+        document.getElementById('historyDeleteTournamentInput').value = '';
+        document.getElementById('historyDeleteTournamentBtn').disabled = true;
+
+        pushDialog('historyDeleteTournamentModal', null, true);
+    }
+
+    function onDeleteInputChange() {
+        const typed = document.getElementById('historyDeleteTournamentInput').value;
+        document.getElementById('historyDeleteTournamentBtn').disabled = (typed !== _pendingDeleteName);
+    }
+
+    async function confirmDeleteTournament() {
+        if (!_pendingDeleteId) return;
+
+        const id = _pendingDeleteId;
+        _pendingDeleteId   = null;
+        _pendingDeleteName = null;
+
+        popDialog();
+
+        try {
+            await NewtonDB.deleteTournament(id);
+        } catch (e) {
+            alert('Delete failed: ' + e.message);
+            return;
+        }
+
+        await renderTournamentList();
+    }
+
+    // ---------------------------------------------------------------------------
     // Export / Import
     // ---------------------------------------------------------------------------
 
@@ -318,7 +366,7 @@ const NewtonHistory = (() => {
             await renderTournamentList();
             alert('Import complete.');
         } catch (e) {
-            alert('Import failed: ' + e.message);
+            alert('Import failed: ' + (e && e.message ? e.message : String(e)));
             event.target.value = '';
         }
     }
@@ -335,6 +383,7 @@ const NewtonHistory = (() => {
     // Public API
     // ---------------------------------------------------------------------------
 
-    return { render, openTournament, openMatch, openMatchModal, exportDB, importDB };
+    return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
+             promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament };
 
 })();

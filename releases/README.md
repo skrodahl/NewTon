@@ -9,6 +9,8 @@ This folder contains HTML release notes pages for NewTon DC Tournament Manager, 
 
 ## Process for Each New Release
 
+The release notes index tell a story. Come up with a unique, cheeky or spectacular, or both, tagline for each release. Humorous and descriptive.
+
 ### Step 1 — Create both files at the same time
 
 Write `index.html` for the new release, then copy it immediately to its versioned page:

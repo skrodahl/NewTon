@@ -2741,7 +2741,7 @@ function createUndoModalContent(matchId, consequentialMatches, transaction) {
     const hasAchievements = Object.values(achievements).some(a => a !== null);
 
     if (hasAchievements) {
-        const source = isQR ? ' (from Stats QR)' : '';
+        const source = isQR ? ' (Chalker)' : ' (Manual)';
         content += `<div class="undo-achievements">
             <div class="undo-achievements-title">Recorded achievements for this match${source}:</div>`;
 
@@ -2763,7 +2763,11 @@ function createUndoModalContent(matchId, consequentialMatches, transaction) {
         content += `</div>`;
     }
 
-    content += `<div class="undo-achievements-warning">⚠️ Achievements may have been entered manually for these players. Review the leaderboard.</div>`;
+    if (isQR) {
+        content += `<div class="undo-achievements-info">Achievements were recorded automatically from Chalker visit scores.</div>`;
+    } else {
+        content += `<div class="undo-achievements-warning">⚠️ Achievements may have been entered manually for these players. Review the leaderboard.</div>`;
+    }
 
     return content;
 }
@@ -3397,11 +3401,11 @@ function showMatchCommandCenter() {
     const liveMatches = matches.filter(m => getMatchState(m) === 'live');
     const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
 
-    // Show QR Results button only when there are live matches and tournament is not completed
+    // Show QR Results button only during an active tournament with live matches
     const _qrBtn = document.getElementById('qrResultsBtn');
     if (_qrBtn) {
-        const _done = tournament && tournament.status === 'completed';
-        _qrBtn.style.display = (!_done && liveMatches.length > 0) ? '' : 'none';
+        const _active = tournament && tournament.status === 'active';
+        _qrBtn.style.display = (_active && liveMatches.length > 0) ? '' : 'none';
     }
 
     // Group ready matches by round for chronological organization

@@ -1942,6 +1942,13 @@ a:hover { color: #1e40af; }
   font-style: italic;
 }
 
+.undo-achievements-info {
+  margin-top: 12px;
+  font-size: 13px;
+  color: #166534;
+  font-style: italic;
+}
+
 /* Completion modal achievements summary */
 .completion-achievements-box {
   margin: 16px 0 4px;

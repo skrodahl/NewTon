@@ -138,7 +138,7 @@ Camera features — QR scanning in the Chalker via BarcodeDetector/getUserMedia 
 |---|---|---|---|
 | HTTP only | All | Default, no changes | `http://localhost:8080` — no camera |
 | SSL with port mapping | All (Mac, Windows, Linux) | `SSL_ENABLED=true` + `ports: 443:443` | `https://localhost` — camera works |
-| SSL + mDNS | **Linux only** | `network_mode: host` + `SSL_ENABLED=true` | `https://newton.local` — camera works |
+| SSL + mDNS | **Linux only** | `network_mode: host` + `SSL_ENABLED=true` | `https://newtondarts.local` — camera works |
 
 ### Tier 2: SSL with Port Mapping (All Platforms)
 
@@ -171,7 +171,7 @@ Access at `https://localhost`. The self-signed certificate will trigger a browse
 
 ### Tier 3: SSL + mDNS (Linux Only)
 
-Adds mDNS broadcasting so devices on the same LAN can reach the container at `newton.local` without any DNS configuration. Requires `network_mode: host`.
+Adds mDNS broadcasting so devices on the same LAN can reach the container at `newtondarts.local` without any DNS configuration. Requires `network_mode: host`.
 
 ```yaml
 services:
@@ -189,13 +189,13 @@ services:
       - NEWTON_API_ENABLED=true
       - NEWTON_DEMO_MODE=false
       - SSL_ENABLED=true
-      - MDNS_HOSTNAME=newton    # Reachable as newton.local
+      - MDNS_HOSTNAME=newtondarts    # Reachable as newtondarts.local
 
 volumes:
   newton-ssl:
 ```
 
-Access at `https://newton.local`. All devices on the same LAN — phones, tablets, scoring stations — can reach it by name.
+Access at `https://newtondarts.local`. All devices on the same LAN — phones, tablets, scoring stations — can reach it by name.
 
 > **Docker Desktop limitation:** `network_mode: host` does not work on Docker Desktop for Mac or Windows. On those platforms, host networking binds to the Docker VM's network, not the host machine's. Use Tier 2 (port mapping) for Mac/Windows. Tier 3 is for Linux hosts only (Raspberry Pi, Ubuntu, Debian, etc.).
 
@@ -205,7 +205,7 @@ Access at `https://newton.local`. All devices on the same LAN — phones, tablet
 |---|---|---|
 | `SSL_ENABLED` | `false` | Set to `true` to auto-generate a self-signed certificate (30-year expiry) |
 | `HTTPS_PORT` | `443` | HTTPS listening port |
-| `MDNS_HOSTNAME` | `newton` | mDNS hostname — container is reachable as `<value>.local` |
+| `MDNS_HOSTNAME` | `newtondarts` | mDNS hostname — container is reachable as `<value>.local` |
 
 ### Nginx Proxy Manager + SSL
 
@@ -295,12 +295,12 @@ docker compose logs
 
 Expected behaviour with a self-signed certificate. Accept the security exception once — it won't appear again. The cert is stored in the `newton-ssl` named volume and persists across restarts.
 
-### https://newton.local Not Reachable
+### https://newtondarts.local Not Reachable
 
 - Confirm you are on a **Linux host** — mDNS via `network_mode: host` does not work on Docker Desktop for Mac or Windows
-- Confirm `MDNS_HOSTNAME=newton` is set
-- Check logs: `docker compose logs` — should show `[newton] nginx: HTTPS mode`
-- Confirm the host has mDNS resolution: `ping newton.local` from another device on the LAN
+- Confirm `MDNS_HOSTNAME=newtondarts` is set
+- Check logs: `docker compose logs` — should show `[newtondarts] nginx: HTTPS mode`
+- Confirm the host has mDNS resolution: `ping newtondarts.local` from another device on the LAN
 
 ---
 
