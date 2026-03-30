@@ -30,6 +30,18 @@ Delete button added to each tournament row. Requires typing the exact tournament
 
 Tournament bracket help updated with QR info. New History page help section (tournament list, match detail, export/import). History header ℹ️ icon added.
 
+### Release notes — inline styles removed
+
+Download button inline `style` attributes (`margin`) replaced with CSS classes (`btn-download-top`, `btn-download-bottom`) across all 27 release notes files. Fixes margin being silently stripped by the strict CSP on the deployed site.
+
+### Demo banner — link order
+
+`newtondarts.com` link moved before "View on GitHub" in the Docker demo site banner (`tournament.html`).
+
+### Release notes — "Latest release" link
+
+Five versioned release notes pages (`v5.0.0.html`, `v5.0.1-beta.4` through `beta.7`) were missing the "Latest release" link at the top of their Previous Releases list. Added.
+
 ### Bug Fixes
 
 - `deleteTournament()` called `.delete(meta.id)` — tournaments store uses `tournamentId` as keyPath. Fixed to `.delete(tournamentId)`.

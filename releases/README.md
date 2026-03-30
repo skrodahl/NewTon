@@ -108,7 +108,7 @@ The versioned page uses `changefreq: never` — it will never change after publi
     <h1>{Tagline}</h1>
     <p class="docs-subtitle">NewTon DC Tournament Manager vX.X.X &mdash; {Date}</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/vX.X.X" target="_blank" rel="noopener" class="btn-github" style="margin: 8px 0 24px;">Download vX.X.X</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/vX.X.X" target="_blank" rel="noopener" class="btn-github btn-download-top">Download vX.X.X</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
@@ -126,7 +126,7 @@ The versioned page uses `changefreq: never` — it will never change after publi
 
     <p><em>NewTon DC Tournament Manager vX.X.X — {closing line}</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/vX.X.X" target="_blank" rel="noopener" class="btn-github" style="margin: 16px 0 40px;">Download vX.X.X</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/vX.X.X" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download vX.X.X</a>
 
     <hr>
 

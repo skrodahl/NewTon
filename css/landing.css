@@ -310,6 +310,14 @@ body {
     text-decoration: none;
 }
 
+.docs-content .btn-download-top {
+    margin: 8px 0 24px;
+}
+
+.docs-content .btn-download-bottom {
+    margin: 16px 0 40px;
+}
+
 .get-started-quickstart {
     grid-column: 1 / -1;
     text-align: center;
