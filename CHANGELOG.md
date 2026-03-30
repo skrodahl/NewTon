@@ -1,3 +1,9 @@
+## **Docker Quick Start — full rewrite** (2026-03-31)
+
+`docker-quickstart.html` and `DOCKER-QUICKSTART.md` rewritten around three self-contained setup options (Mac/Windows SSL, Linux SSL + mDNS, Behind a Reverse Proxy), each with a ready-to-use compose file. Docker Hub as primary image, GHCR commented as alternative. Beta image tag (`5.0.1-beta.9`) called out explicitly for the SSL setups. Environment variables moved to a reference table. `localhost only` binding explained with a compose example. `docker compose up -d` instruction added to each setup option.
+
+---
+
 ## **Docker image cleanup** (2026-03-30)
 
 `.dockerignore` optimized — reduced image size. `docker/` directory removed from the web root via `RUN rm -rf /var/www/html/docker` in the Dockerfile — build context still includes it (needed for `COPY` instructions), but it is not present in the final image.
