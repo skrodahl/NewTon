@@ -9,6 +9,9 @@ COPY . /var/www/html/
 # Rename tournament.html to tournament.php for PHP-FPM processing
 RUN mv /var/www/html/tournament.html /var/www/html/tournament.php
 
+# Remove Docker config files from the web root (not needed at runtime)
+RUN rm -rf /var/www/html/docker
+
 # Copy nginx configurations (entrypoint selects the right one at runtime)
 COPY docker/nginx-http.conf /etc/nginx/nginx-http.conf
 COPY docker/nginx-ssl.conf  /etc/nginx/nginx-ssl.conf

@@ -17,7 +17,6 @@ Docs/
 Dockerfile
 docker-compose.yml
 .dockerignore
-docker/
 
 # Assets not needed in the web root
 Posters/

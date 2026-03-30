@@ -1,6 +1,6 @@
 ## **Docker image cleanup** (2026-03-30)
 
-`.dockerignore` optimized — reduced image size and prevented nginx from serving internal Docker config files.
+`.dockerignore` optimized — reduced image size. `docker/` directory removed from the web root via `RUN rm -rf /var/www/html/docker` in the Dockerfile — build context still includes it (needed for `COPY` instructions), but it is not present in the final image.
 
 ---
 
