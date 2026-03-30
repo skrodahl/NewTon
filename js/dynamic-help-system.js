@@ -374,7 +374,7 @@ const HELP_CONTENT = {
     },
 
     // Analytics Page Help
-    analytics: {
+    history: {
         title: "Analytics",
         overview: "Browse and manage completed tournaments. All finalized tournaments are recorded here with full match detail.",
         sections: {
