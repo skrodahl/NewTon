@@ -42,6 +42,10 @@ Download button inline `style` attributes (`margin`) replaced with CSS classes (
 
 Five versioned release notes pages (`v5.0.0.html`, `v5.0.1-beta.4` through `beta.7`) were missing the "Latest release" link at the top of their Previous Releases list. Added.
 
+### QR scanning — jsQR fallback for desktop browsers
+
+`BarcodeDetector` is unavailable on Windows Enterprise editions missing the Media Feature Pack. Added `jsQR` (v1.4.0, ~250KB, zero dependencies) as a fallback — when `BarcodeDetector` is absent, video frames are decoded via canvas + jsQR. Both TM (`js/qr-bridge.js`) and Chalker (`chalker/js/chalker.js`) updated. Error message changed from "Use Chrome or Edge" to a more accurate message. Library added to `lib/jsQR.js` and `chalker/lib/jsQR.js`.
+
 ### Bug Fixes
 
 - `deleteTournament()` called `.delete(meta.id)` — tournaments store uses `tournamentId` as keyPath. Fixed to `.delete(tournamentId)`.

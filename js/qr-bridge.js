@@ -1,6 +1,50 @@
 // qr-bridge.js — QR code generation for match assignment (TM → Chalker)
 // Builds the assignment payload, signs it with CRC-32, and displays the QR code.
 
+// ---------------------------------------------------------------------------
+// QR Detection Helper — BarcodeDetector with jsQR fallback
+// ---------------------------------------------------------------------------
+
+/** @type {HTMLCanvasElement|null} reusable canvas for jsQR fallback */
+let _qrFallbackCanvas = null;
+
+/**
+ * Scan a video element for QR codes.
+ * Uses native BarcodeDetector when available, falls back to jsQR.
+ * @param {HTMLVideoElement} videoEl
+ * @returns {Promise<string|null>} decoded QR string, or null if nothing found
+ */
+async function detectQRCode(videoEl) {
+    if ('BarcodeDetector' in window) {
+        const detector = detectQRCode._detector || (detectQRCode._detector = new BarcodeDetector({ formats: ['qr_code'] }));
+        const codes = await detector.detect(videoEl);
+        return codes.length > 0 ? codes[0].rawValue : null;
+    }
+    // jsQR fallback — render video frame to canvas, decode from pixel data
+    if (typeof jsQR === 'function') {
+        if (!_qrFallbackCanvas) _qrFallbackCanvas = document.createElement('canvas');
+        const w = videoEl.videoWidth;
+        const h = videoEl.videoHeight;
+        if (!w || !h) return null;
+        _qrFallbackCanvas.width = w;
+        _qrFallbackCanvas.height = h;
+        const ctx = _qrFallbackCanvas.getContext('2d');
+        ctx.drawImage(videoEl, 0, 0, w, h);
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const code = jsQR(imageData.data, w, h);
+        return code ? code.data : null;
+    }
+    return null;
+}
+
+/**
+ * Check if QR scanning is available (native or jsQR fallback).
+ * @returns {boolean}
+ */
+function isQRScanAvailable() {
+    return ('BarcodeDetector' in window) || (typeof jsQR === 'function');
+}
+
 /**
  * Open the QR modal for a live match.
  * Lane and referee are optional — included in the payload when assigned.
@@ -90,8 +134,8 @@ async function openResultQRScanner(matchId) {
     errorEl.style.display = 'none';
     errorEl.textContent = '';
 
-    if (!('BarcodeDetector' in window)) {
-        errorEl.textContent = 'QR scanning is not supported in this browser. Use Chrome or Edge.';
+    if (!isQRScanAvailable()) {
+        errorEl.textContent = 'QR scanning is not available. Camera requires Chrome, Edge, or a secure context (HTTPS).';
         errorEl.style.display = 'block';
         pushDialog('qrResultScanModal', null, true);
         return;
@@ -103,13 +147,10 @@ async function openResultQRScanner(matchId) {
         _resultScanStream = stream;
         pushDialog('qrResultScanModal', null, true);
 
-        const detector = new BarcodeDetector({ formats: ['qr_code'] });
         _resultScanInterval = setInterval(async () => {
             try {
-                const codes = await detector.detect(videoEl);
-                if (codes.length > 0) {
-                    handleResultQRPayload(codes[0].rawValue, matchId);
-                }
+                const result = await detectQRCode(videoEl);
+                if (result) handleResultQRPayload(result, matchId);
             } catch (_) { /* ignore per-frame errors */ }
         }, 300);
     } catch (err) {
@@ -453,8 +494,8 @@ async function openQRInspector() {
     errorEl.style.display = 'none';
     errorEl.textContent = '';
 
-    if (!('BarcodeDetector' in window)) {
-        errorEl.textContent = 'QR scanning is not supported in this browser. Use Chrome or Edge.';
+    if (!isQRScanAvailable()) {
+        errorEl.textContent = 'QR scanning is not available. Camera requires Chrome, Edge, or a secure context (HTTPS).';
         errorEl.style.display = 'block';
         pushDialog('qrResultScanModal', null, true);
         return;
@@ -466,13 +507,10 @@ async function openQRInspector() {
         _resultScanStream = stream;
         pushDialog('qrResultScanModal', null, true);
 
-        const detector = new BarcodeDetector({ formats: ['qr_code'] });
         _resultScanInterval = setInterval(async () => {
             try {
-                const codes = await detector.detect(videoEl);
-                if (codes.length > 0) {
-                    handleQRInspectorPayload(codes[0].rawValue);
-                }
+                const result = await detectQRCode(videoEl);
+                if (result) handleQRInspectorPayload(result);
             } catch (_) { /* ignore per-frame errors */ }
         }, 300);
     } catch (err) {

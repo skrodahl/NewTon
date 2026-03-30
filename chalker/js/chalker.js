@@ -883,8 +883,47 @@
   /** @type {object|null} - Match currently shown in history detail (for Result QR) */
   let currentHistoryMatch = null;
 
-  /** @type {number|null} - setInterval handle for BarcodeDetector scan loop */
+  /** @type {number|null} - setInterval handle for QR scan loop */
   let qrScanInterval = null;
+
+  /** @type {HTMLCanvasElement|null} - reusable canvas for jsQR fallback */
+  let _chalkerQrCanvas = null;
+
+  /**
+   * Scan a video element for QR codes.
+   * Uses native BarcodeDetector when available, falls back to jsQR.
+   * @param {HTMLVideoElement} videoEl
+   * @returns {Promise<string|null>} decoded QR string, or null
+   */
+  async function detectQRCode(videoEl) {
+    if ('BarcodeDetector' in window) {
+      const detector = detectQRCode._detector || (detectQRCode._detector = new BarcodeDetector({ formats: ['qr_code'] }));
+      const codes = await detector.detect(videoEl);
+      return codes.length > 0 ? codes[0].rawValue : null;
+    }
+    if (typeof jsQR === 'function') {
+      if (!_chalkerQrCanvas) _chalkerQrCanvas = document.createElement('canvas');
+      const w = videoEl.videoWidth;
+      const h = videoEl.videoHeight;
+      if (!w || !h) return null;
+      _chalkerQrCanvas.width = w;
+      _chalkerQrCanvas.height = h;
+      const ctx = _chalkerQrCanvas.getContext('2d');
+      ctx.drawImage(videoEl, 0, 0, w, h);
+      const imageData = ctx.getImageData(0, 0, w, h);
+      const code = jsQR(imageData.data, w, h);
+      return code ? code.data : null;
+    }
+    return null;
+  }
+
+  /**
+   * Check if QR scanning is available (native or jsQR fallback).
+   * @returns {boolean}
+   */
+  function isQRScanAvailable() {
+    return ('BarcodeDetector' in window) || (typeof jsQR === 'function');
+  }
 
   /**
    * Handle QR button from New Match modal.
@@ -896,15 +935,15 @@
   }
 
   /**
-   * Start camera and BarcodeDetector scan loop.
+   * Start camera and QR scan loop.
    * Shows qr-scan-modal; on successful scan calls handleQRPayload().
    */
   async function startQRScanner() {
     elements.qrScanError.style.display = 'none';
     elements.qrScanError.textContent = '';
 
-    if (!('BarcodeDetector' in window)) {
-      elements.qrScanError.textContent = 'QR scanning is not supported in this browser. Use Chrome or Edge.';
+    if (!isQRScanAvailable()) {
+      elements.qrScanError.textContent = 'QR scanning is not available. Camera requires Chrome, Edge, or a secure context (HTTPS).';
       elements.qrScanError.style.display = 'block';
       showModal(elements.qrScanModal);
       return;
@@ -915,13 +954,10 @@
       elements.qrScanVideo.srcObject = stream;
       showModal(elements.qrScanModal);
 
-      const detector = new BarcodeDetector({ formats: ['qr_code'] });
       qrScanInterval = setInterval(async () => {
         try {
-          const codes = await detector.detect(elements.qrScanVideo);
-          if (codes.length > 0) {
-            handleQRPayload(codes[0].rawValue);
-          }
+          const result = await detectQRCode(elements.qrScanVideo);
+          if (result) handleQRPayload(result);
         } catch (_) { /* ignore individual frame errors */ }
       }, 300);
     } catch (err) {
