@@ -1,3 +1,31 @@
+## **v5.0.1-beta.9** - Scan Anything, Know Everything (2026-03-30)
+
+### QR scanning — jsQR fallback for desktop browsers
+
+`BarcodeDetector` is unavailable on Windows Enterprise editions missing the Media Feature Pack. Added `jsQR` (v1.4.0, ~250KB, zero dependencies) as a fallback — when `BarcodeDetector` is absent, video frames are decoded via canvas + jsQR. Both TM (`js/qr-bridge.js`) and Chalker (`chalker/js/chalker.js`) updated. Error message changed from "Use Chrome or Edge" to a more accurate message. Library added to `lib/jsQR.js` and `chalker/lib/jsQR.js`.
+
+### Result QR preview — explains why completion is unavailable
+
+When a scanned result QR cannot be applied (wrong tournament, wrong server, match not live, match not found, already completed), the preview now shows a specific explanation above the Close button instead of silently offering only Close.
+
+### Lollipop counter — conditional per player
+
+The lollipop +/− counter in the QR result preview is now hidden entirely when no player had a visit scoring 3 (a lollipop is impossible without a score of 3). When only one player had a visit of 3, only that player's counter is shown — the other cell shows "—". Applies to both the normal result preview and the QR Payload Inspector.
+
+### Release notes — inline styles removed
+
+Download button inline `style` attributes (`margin`) replaced with CSS classes (`btn-download-top`, `btn-download-bottom`) across all 27 release notes files. Fixes margin being silently stripped by the strict CSP on the deployed site.
+
+### Release notes — "Latest release" link
+
+Five versioned release notes pages (`v5.0.0.html`, `v5.0.1-beta.4` through `beta.7`) were missing the "Latest release" link at the top of their Previous Releases list. Added.
+
+### Demo banner — link order
+
+`newtondarts.com` link moved before "View on GitHub" in the Docker demo site banner (`tournament.html`).
+
+---
+
 ## **v5.0.1-beta.8-patch** - Default mDNS hostname changed to `newtondarts` (2026-03-29)
 
 Default `MDNS_HOSTNAME` example changed from `newton` to `newtondarts` throughout `DOCKER-QUICKSTART.md` and `llms.txt`. Container reachable as `newtondarts.local` in the documented default configuration.
@@ -29,22 +57,6 @@ Delete button added to each tournament row. Requires typing the exact tournament
 ### Help System
 
 Tournament bracket help updated with QR info. New History page help section (tournament list, match detail, export/import). History header ℹ️ icon added.
-
-### Release notes — inline styles removed
-
-Download button inline `style` attributes (`margin`) replaced with CSS classes (`btn-download-top`, `btn-download-bottom`) across all 27 release notes files. Fixes margin being silently stripped by the strict CSP on the deployed site.
-
-### Demo banner — link order
-
-`newtondarts.com` link moved before "View on GitHub" in the Docker demo site banner (`tournament.html`).
-
-### Release notes — "Latest release" link
-
-Five versioned release notes pages (`v5.0.0.html`, `v5.0.1-beta.4` through `beta.7`) were missing the "Latest release" link at the top of their Previous Releases list. Added.
-
-### QR scanning — jsQR fallback for desktop browsers
-
-`BarcodeDetector` is unavailable on Windows Enterprise editions missing the Media Feature Pack. Added `jsQR` (v1.4.0, ~250KB, zero dependencies) as a fallback — when `BarcodeDetector` is absent, video frames are decoded via canvas + jsQR. Both TM (`js/qr-bridge.js`) and Chalker (`chalker/js/chalker.js`) updated. Error message changed from "Use Chrome or Edge" to a more accurate message. Library added to `lib/jsQR.js` and `chalker/lib/jsQR.js`.
 
 ### Bug Fixes
 
