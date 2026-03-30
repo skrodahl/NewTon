@@ -43,12 +43,25 @@ Announce NewTon on a relevant subreddit (r/darts, r/opensourcesoftware, or simil
 
 ### Analytics — Future Enhancements
 
-The tab is named Analytics — it should earn that name over time. Ideas to consider:
+The tab is named Analytics — it should earn that name over time. The IndexedDB foundation is already there; this is purely a UI and query layer on top.
 
-- **Search / filter** — find a player or tournament across the full history
-- **Player view** — aggregate stats per player across all tournaments (averages, achievements, tournament results)
-- **Cross-tournament leaderboard** — who has the most 180s, highest average, most titles
-- **Simplified summary view** — tournament card with headline stats, expandable to match detail; less table-heavy
+**Entry point — Stats cards**
+Headline numbers at a glance: most 180s this season, highest average, current title holder, longest winning streak. Clickable to drill into the underlying detail.
+
+**Player view**
+Aggregate stats per player across all tournaments — averages, achievements, tournament results, form over time.
+
+**Cross-tournament leaderboard**
+Who has the most 180s, highest average, most titles across the full history.
+
+**Custom views — Oracle-style**
+Saved filters or pivot views over the match register. Users define what they want to see and save it for quick access.
+
+**Graphs**
+Performance and form over time — the kind of thing that makes improvement (or decline) visible in a way a table never can. Makes the club want to keep running tournaments just to watch the data accumulate.
+
+**Simplified summary view**
+Tournament card with headline stats, expandable to match detail — less table-heavy than the current list.
 
 No decisions made — just a direction.
 
