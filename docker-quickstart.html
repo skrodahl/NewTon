@@ -24,8 +24,14 @@
         <h2>Contents</h2>
         <ol>
             <li><a href="#quick-start">Quick Start</a></li>
-            <li><a href="#configuration">Configuration</a></li>
-            <li><a href="#reverse-proxy">Reverse Proxy Setup</a></li>
+            <li><a href="#setup-options">Setup Options</a>
+                <ol>
+                    <li><a href="#mac-windows">Mac / Windows</a></li>
+                    <li><a href="#linux">Linux &mdash; SSL + mDNS</a></li>
+                    <li><a href="#reverse-proxy">Behind a Reverse Proxy</a></li>
+                </ol>
+            </li>
+            <li><a href="#configuration">Environment Variables</a></li>
             <li><a href="#security">Security</a></li>
             <li><a href="#customization">Customization</a></li>
             <li><a href="#troubleshooting">Troubleshooting</a></li>
@@ -36,120 +42,144 @@
 
     <p><strong>Prerequisites:</strong> Docker and Docker Compose installed. <strong>Don't have Docker?</strong> <a href="https://www.docker.com/products/docker-desktop/" target="_blank" rel="noopener">Download Docker Desktop</a> (macOS/Windows) or install via your package manager (Linux).</p>
 
-    <h3>Step 1: Download Configuration</h3>
     <div class="terminal-wrap">
         <div class="terminal-bar"></div>
-        <pre><code># Create a directory for your tournament manager
-mkdir newton-tournament
+        <pre><code>mkdir newton-tournament
 cd newton-tournament
 
-# Download docker-compose.yml
-curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-compose.yml</code></pre>
+curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-compose.yml
+docker compose up -d</code></pre>
     </div>
 
-    <h3>Step 2: Start the Container</h3>
-    <div class="terminal-wrap">
-        <div class="terminal-bar"></div>
-        <pre><code>docker compose up -d</code></pre>
-    </div>
-
-    <h3>Step 3: Access the Application</h3>
-    <p>Open your browser and go to <code>http://localhost:8080</code> — you should see the NewTon DC Tournament Manager.</p>
-    <p><strong>Port 2020 = "Double 20" 🎯</strong> — The container runs nginx on port 2020 internally. The default host port (8080) maps to this. This non-standard internal port also helps avoid conflicts when using a reverse proxy.</p>
-
-    <h3>What Just Happened?</h3>
-    <ul>
-        <li>✅ Downloaded the pre-built image from Docker Hub</li>
-        <li>✅ Created persistent storage directories (<code>tournaments/</code> and <code>images/</code>)</li>
-        <li>✅ Started nginx + PHP-FPM serving your tournament manager</li>
-        <li>✅ Made it accessible on port 8080</li>
-    </ul>
+    <p>Open <code>http://localhost:8080</code> &mdash; NewTon is running.</p>
+    <p><strong>Port 2020 = &ldquo;Double 20&rdquo;</strong> &mdash; nginx runs on port 2020 internally. The default host port (8080) maps to this.</p>
+    <p><strong>Camera / QR scanning requires HTTPS.</strong> The quick start runs HTTP only. Pick one of the three setups below to enable camera access.</p>
 
     <hr>
 
-    <h2 id="configuration">Configuration</h2>
+    <h2 id="setup-options">Setup Options</h2>
 
-    <p>This is the complete default <code>docker-compose.yml</code>. Inline comments explain each option.</p>
+    <blockquote>
+        <p><strong>Image tags:</strong> The Mac/Windows and Linux setups below use SSL features introduced in v5.0.1-beta.9. The compose files use <code>skrodahl/newton:5.0.1-beta.9</code> (Docker Hub) with GHCR as a commented alternative. The quick start and reverse proxy setup work with <code>latest</code> (current stable).</p>
+    </blockquote>
 
+    <h3 id="mac-windows">Mac / Windows</h3>
+    <p>SSL enabled by default &mdash; gives you HTTPS and camera access on any platform.</p>
     <pre><code>services:
   newton-tournament:
-    image: skrodahl/newton:latest
-    # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
+    image: skrodahl/newton:5.0.1-beta.9
+    # Alternative: ghcr.io/skrodahl/newton:5.0.1-beta.9
     container_name: newton
     ports:
-      - "${NEWTON_HOST_PORT:-8080}:2020"  # Change host port via env var or edit directly
+      - "2020:2020"   # HTTP — redirects to HTTPS
+      - "443:443"     # HTTPS
     volumes:
-      - ./tournaments:/var/www/html/tournaments  # Persistent tournament storage
-      - ./images:/var/www/html/images:ro         # Custom logo and payment QR
-      # - ./logs:/var/log/nginx                  # Optional: persist nginx logs
+      - ./tournaments:/var/www/html/tournaments
+      - ./images:/var/www/html/images:ro
+      - newton-ssl:/etc/nginx/ssl    # Persists the auto-generated certificate
     restart: unless-stopped
     environment:
       - TZ=Europe/Oslo
-      - NEWTON_API_ENABLED=true        # Set false to disable REST API (upload/download)
-      - NEWTON_DEMO_MODE=false         # Set true to show privacy banner
-      # - NEWTON_LANDING_PAGE=true     # Uncomment to show landing page at root URL
-      # - NEWTON_BASE_URL=https://darts.example.com  # Canonical URL for Open Graph meta tags
-      - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon  # Link in demo banner</code></pre>
+      - SSL_ENABLED=true             # Auto-generates a self-signed cert (30-year, SAN)
+      - NEWTON_API_ENABLED=true      # Set false to disable tournament upload/download
+      - NEWTON_DEMO_MODE=false       # Set true to show a privacy banner
+      # - NEWTON_LANDING_PAGE=true   # Show landing page at root URL
+      # - NEWTON_BASE_URL=https://darts.example.com
 
-    <h3>Persistent Storage</h3>
-    <ul>
-        <li><code>./tournaments</code> — Stores tournament JSON files uploaded via the REST API. Persists across container restarts and updates.</li>
-        <li><code>./images</code> — Custom logo and payment QR code. Mounted read-only; replace files on the host and they are picked up immediately.</li>
-    </ul>
-    <p>The paths above are relative to the directory where <code>docker-compose.yml</code> lives. You can replace them with absolute paths if you prefer explicit control over storage location — for example <code>/var/lib/docker/volumes/newton/tournaments:/var/www/html/tournaments</code>.</p>
-
-    <h3>Environment Variables</h3>
-    <ul>
-        <li><code>NEWTON_API_ENABLED</code> — Enables or disables the REST API endpoints for tournament upload, download, and delete. Set to <code>false</code> on public or demo deployments.</li>
-        <li><code>NEWTON_DEMO_MODE</code> — Shows a banner at the top of the app explaining that data is stored locally in the browser. Useful for public-facing instances.</li>
-        <li><code>NEWTON_LANDING_PAGE</code> — Shows a landing page at the root URL instead of loading the tournament app directly. Visitors click "Launch" to enter. Access the app directly via <code>/?launch</code>.</li>
-        <li><code>NEWTON_BASE_URL</code> — Sets the canonical URL for Open Graph and Twitter Card meta tags on the landing page (e.g. <code>https://darts.example.com</code>).</li>
-        <li><code>NEWTON_GITHUB_URL</code> — Customizes the GitHub link shown in the demo banner. Useful for forks (default: <code>https://github.com/skrodahl/NewTon</code>).</li>
-        <li><code>NEWTON_HOST_PORT</code> — Changes the host port the container is accessible on (default: <code>8080</code>). Can be set as an environment variable before running <code>docker compose up</code>.</li>
-    </ul>
+volumes:
+  newton-ssl:</code></pre>
+    <p>Save as <code>docker-compose.yml</code> in a folder of your choice, then run <code>docker compose up -d</code>. That&rsquo;s it.</p>
+    <p>Access at <code>https://localhost</code>. Your browser will warn about the self-signed certificate on first visit &mdash; accept the exception once and it will not appear again.</p>
 
     <hr>
 
-    <h2 id="reverse-proxy">Reverse Proxy Setup</h2>
-    <p>The container listens on <strong>port 2020</strong> internally. When using a reverse proxy like Nginx Proxy Manager:</p>
-    <ol>
-        <li>Add the container to the same Docker network as your reverse proxy</li>
-        <li>Point your proxy to <code>newton:2020</code> (not port 80)</li>
-        <li>Remove the <code>ports:</code> mapping — not needed behind a proxy</li>
-    </ol>
+    <h3 id="linux">Linux &mdash; SSL + mDNS</h3>
+    <p>All devices on your LAN can reach the container at <code>https://newtondarts.local</code> without any DNS configuration. Requires <code>network_mode: host</code> &mdash; Linux only (not supported on Docker Desktop for Mac/Windows).</p>
+    <pre><code>services:
+  newton-tournament:
+    image: skrodahl/newton:5.0.1-beta.9
+    # Alternative: ghcr.io/skrodahl/newton:5.0.1-beta.9
+    container_name: newton
+    network_mode: host             # Required for mDNS multicast to reach the LAN
+    volumes:
+      - ./tournaments:/var/www/html/tournaments
+      - ./images:/var/www/html/images:ro
+      - newton-ssl:/etc/nginx/ssl
+    restart: unless-stopped
+    environment:
+      - TZ=Europe/Oslo
+      - SSL_ENABLED=true
+      - MDNS_HOSTNAME=newtondarts  # Reachable as newtondarts.local on the LAN
+      - NEWTON_API_ENABLED=true
+      - NEWTON_DEMO_MODE=false
+      # - NEWTON_LANDING_PAGE=true
+      # - NEWTON_BASE_URL=https://darts.example.com
 
-    <h3>Example docker-compose.yml: Nginx Proxy Manager</h3>
+volumes:
+  newton-ssl:</code></pre>
+    <p>Save as <code>docker-compose.yml</code> in a folder of your choice, then run <code>docker compose up -d</code>. That&rsquo;s it.</p>
+    <p>Access at <code>https://newtondarts.local</code>. Phones, tablets, and scoring stations on the same network can all reach it by name.</p>
+
+    <hr>
+
+    <h3 id="reverse-proxy">Behind a Reverse Proxy</h3>
+    <p>The container joins your proxy&rsquo;s Docker network. SSL termination and HTTPS are handled by the proxy &mdash; no <code>SSL_ENABLED</code> needed.</p>
     <pre><code>services:
   newton-tournament:
     image: skrodahl/newton:latest
+    # Alternative: ghcr.io/skrodahl/newton:latest
     container_name: newton
     # ports:
-    #   - "8080:2020"  # Remove when using reverse proxy
+    #   - "8080:2020"  # Remove when using a reverse proxy
     networks:
       - proxy_network
     volumes:
       - ./tournaments:/var/www/html/tournaments
       - ./images:/var/www/html/images:ro
+    restart: unless-stopped
     environment:
+      - TZ=Europe/Oslo
       - NEWTON_API_ENABLED=true
       - NEWTON_DEMO_MODE=false
+      # - NEWTON_LANDING_PAGE=true
+      # - NEWTON_BASE_URL=https://darts.example.com
 
 networks:
   proxy_network:
     external: true</code></pre>
-    <p>In NPM, configure the proxy host to forward to <code>newton:2020</code>.</p>
+    <p>Save as <code>docker-compose.yml</code> in a folder of your choice, then run <code>docker compose up -d</code>. That&rsquo;s it.</p>
+    <p>In Nginx Proxy Manager, point the proxy host to <code>newton:2020</code>.</p>
 
-    <h3>Nginx Proxy Manager — Camera Access (Chalker QR)</h3>
-    <p>NPM sets its own <code>Permissions-Policy</code> header that overrides the container's nginx headers. This blocks camera access in the Chalker, which is required for QR scanning. Add the following to the <strong>Advanced</strong> tab of your NPM proxy host:</p>
+    <h4>Camera Access Behind NPM</h4>
+    <p>NPM sets its own <code>Permissions-Policy</code> header that overrides the container&rsquo;s, blocking camera access in the Chalker. Add this to the <strong>Advanced</strong> tab of your NPM proxy host:</p>
     <pre><code>more_set_headers "Permissions-Policy: geolocation=(), microphone=(), camera=(self), payment=(), usb=(), magnetometer=(), gyroscope=(), accelerometer=(), ambient-light-sensor=()";</code></pre>
     <p><code>more_set_headers</code> replaces the header rather than adding a duplicate. OpenResty (which NPM runs on) includes the <code>headers-more</code> module, so this directive is available without any additional setup.</p>
 
-    <h3>Demo / Public Site</h3>
-    <p>To replicate a public demo site like <a href="https://newtondarts.com" target="_blank" rel="noopener">newtondarts.com</a>, add the following to your <code>docker-compose.yml</code>:</p>
+    <h4>Demo / Public Site</h4>
     <pre><code>environment:
   - NEWTON_API_ENABLED=false   # Disable upload API for security
   - NEWTON_DEMO_MODE=true      # Show privacy banner
   - NEWTON_LANDING_PAGE=true   # Show landing page at root</code></pre>
+
+    <hr>
+
+    <h2 id="configuration">Environment Variables</h2>
+    <table>
+        <thead>
+            <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
+        </thead>
+        <tbody>
+            <tr><td><code>SSL_ENABLED</code></td><td><code>false</code></td><td>Auto-generates a self-signed certificate; enables HTTPS on port 443 and redirects HTTP on port 2020</td></tr>
+            <tr><td><code>HTTPS_PORT</code></td><td><code>443</code></td><td>HTTPS listening port</td></tr>
+            <tr><td><code>MDNS_HOSTNAME</code></td><td><code>newtondarts</code></td><td>mDNS hostname &mdash; container reachable as <code>&lt;value&gt;.local</code> on the LAN (Linux only)</td></tr>
+            <tr><td><code>NEWTON_API_ENABLED</code></td><td><code>true</code></td><td>Enables REST API endpoints for tournament upload, download, and delete</td></tr>
+            <tr><td><code>NEWTON_DEMO_MODE</code></td><td><code>false</code></td><td>Shows a privacy banner at the top of the app</td></tr>
+            <tr><td><code>NEWTON_LANDING_PAGE</code></td><td><code>false</code></td><td>Shows a landing page at the root URL instead of loading the app directly</td></tr>
+            <tr><td><code>NEWTON_BASE_URL</code></td><td><em>unset</em></td><td>Canonical URL for Open Graph and Twitter Card meta tags on the landing page</td></tr>
+            <tr><td><code>NEWTON_GITHUB_URL</code></td><td><code>github.com/skrodahl/NewTon</code></td><td>GitHub link shown in the demo banner</td></tr>
+            <tr><td><code>NEWTON_HOST_PORT</code></td><td><code>8080</code></td><td>Host port for the basic HTTP compose (quick start only)</td></tr>
+        </tbody>
+    </table>
 
     <hr>
 
@@ -158,31 +188,41 @@ networks:
     <h3>REST API</h3>
     <p><strong>The REST API has no built-in authentication.</strong> Do not expose the container directly to the public internet without additional protection. Safe options:</p>
     <ul>
-        <li>✅ <strong>Local network only</strong> — home or club WiFi, default setup is fine</li>
-        <li>✅ <strong>Localhost only</strong> — bind to <code>127.0.0.1:8080:2020</code></li>
-        <li>✅ <strong>Behind VPN</strong> — Tailscale, WireGuard, or similar</li>
-        <li>✅ <strong>Reverse proxy with auth</strong> — nginx or Caddy with HTTP basic authentication</li>
-        <li>✅ <strong>Disable API</strong> — set <code>NEWTON_API_ENABLED=false</code></li>
+        <li>&#x2705; <strong>Local network only</strong> &mdash; home or club WiFi, default setup is fine</li>
+        <li>&#x2705; <strong>Localhost only</strong> &mdash; by default, Docker binds to <code>0.0.0.0</code>, meaning the container is reachable from any device on your network. To restrict access to the local machine only, specify the loopback address explicitly in your <code>ports</code> mapping:
+            <pre><code>ports:
+  - "127.0.0.1:8080:2020"</code></pre>
+            With this in place, <code>http://localhost:8080</code> still works, but other devices on the network cannot reach the container.
+        </li>
+        <li>&#x2705; <strong>Behind VPN</strong> &mdash; Tailscale, WireGuard, or similar</li>
+        <li>&#x2705; <strong>Reverse proxy with auth</strong> &mdash; nginx or Caddy with HTTP basic authentication</li>
+        <li>&#x2705; <strong>Disable API</strong> &mdash; set <code>NEWTON_API_ENABLED=false</code></li>
     </ul>
 
     <h3>Security Headers</h3>
-    <p>The Docker image includes comprehensive security headers enabled by default — no configuration needed:</p>
+    <p>The Docker image includes comprehensive security headers enabled by default &mdash; no configuration needed:</p>
     <ul>
-        <li><strong>X-Frame-Options: SAMEORIGIN</strong> — Prevents clickjacking</li>
-        <li><strong>X-Content-Type-Options: nosniff</strong> — Prevents MIME-type sniffing</li>
-        <li><strong>Referrer-Policy: strict-origin-when-cross-origin</strong> — Limits referrer data leakage</li>
-        <li><strong>Permissions-Policy</strong> — Disables geolocation, microphone, camera, and other unused features</li>
-        <li><strong>Content-Security-Policy</strong> — Prevents loading external resources</li>
-        <li><strong>Server tokens hidden</strong> — nginx and PHP versions not disclosed</li>
+        <li><strong>X-Frame-Options: SAMEORIGIN</strong> &mdash; Prevents clickjacking</li>
+        <li><strong>X-Content-Type-Options: nosniff</strong> &mdash; Prevents MIME-type sniffing</li>
+        <li><strong>Referrer-Policy: strict-origin-when-cross-origin</strong> &mdash; Limits referrer data leakage</li>
+        <li><strong>Permissions-Policy</strong> &mdash; Restricts camera and other device access to the app origin</li>
+        <li><strong>Content-Security-Policy</strong> &mdash; Prevents loading external resources</li>
+        <li><strong>Server tokens hidden</strong> &mdash; nginx and PHP versions not disclosed</li>
     </ul>
-    <p>NewTon DC Tournament Manager achieves an <strong>A grade</strong> on <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> out of the box. HSTS is not included by default to avoid breaking HTTP-only deployments — add it at your reverse proxy when using HTTPS.</p>
+    <p>NewTon DC Tournament Manager achieves an <strong>A grade</strong> on <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> out of the box.</p>
+
+    <h3>HSTS</h3>
+    <p>Strict-Transport-Security is included automatically when <code>SSL_ENABLED=true</code>. It is not set in HTTP-only mode to avoid breaking non-SSL deployments.</p>
+    <p>When terminating HTTPS at a reverse proxy, add HSTS there instead:</p>
+    <pre><code># Nginx Proxy Manager — Advanced tab
+add_header Strict-Transport-Security "max-age=31536000; includeSubDomains" always;</code></pre>
 
     <hr>
 
     <h2 id="customization">Customization</h2>
 
     <h3>Logo and Payment QR Code</h3>
-    <p>Place your own files in the <code>images/</code> folder. The <code>images/</code> volume is mounted read-only from the host, so changes are picked up immediately — no container restart needed.</p>
+    <p>Place your own files in the <code>images/</code> folder. The <code>images/</code> volume is mounted read-only from the host, so changes are picked up immediately &mdash; no container restart needed.</p>
     <div class="terminal-wrap">
         <div class="terminal-bar"></div>
         <pre><code>mkdir -p images
@@ -205,18 +245,29 @@ cp /path/to/your/payment-qr.png ./images/payment.png</code></pre>
         <pre><code>NEWTON_HOST_PORT=9000 docker compose up -d</code></pre>
     </div>
 
-    <h3>Container Won't Start</h3>
+    <h3>Container Won&rsquo;t Start</h3>
     <div class="terminal-wrap">
         <div class="terminal-bar"></div>
         <pre><code>docker compose logs</code></pre>
     </div>
 
-    <h3>Can't Access http://localhost:8080</h3>
+    <h3>Can&rsquo;t Access http://localhost:8080</h3>
     <ol>
-        <li>Verify the container is running: <code>docker compose ps</code> — should show <code>0.0.0.0:8080->2020/tcp</code></li>
+        <li>Verify the container is running: <code>docker compose ps</code> &mdash; should show <code>0.0.0.0:8080->2020/tcp</code></li>
         <li>Try <code>http://127.0.0.1:8080</code> instead of <code>localhost</code></li>
         <li>Check logs: <code>docker compose logs</code></li>
     </ol>
+
+    <h3>Browser Warning on https://localhost</h3>
+    <p>Expected with a self-signed certificate. Accept the exception once &mdash; it will not appear again. The cert is stored in the <code>newton-ssl</code> named volume and persists across restarts.</p>
+
+    <h3>https://newtondarts.local Not Reachable</h3>
+    <ul>
+        <li>Confirm you are on a <strong>Linux host</strong> &mdash; mDNS via <code>network_mode: host</code> does not work on Docker Desktop for Mac or Windows</li>
+        <li>Confirm <code>MDNS_HOSTNAME=newtondarts</code> is set</li>
+        <li>Check logs: <code>docker compose logs</code> &mdash; should show <code>[newtondarts] nginx: HTTPS mode</code></li>
+        <li>Confirm mDNS resolution from another device on the LAN: <code>ping newtondarts.local</code></li>
+    </ul>
 
     <hr>
 

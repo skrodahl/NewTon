@@ -89,10 +89,4 @@ Effectively a practice mode. No gaps in the historical record because the tourna
 
 ---
 
-## Housekeeping
-
-- **Remove `chalker/lib/jsQR.js`** — jsQR fallback was removed from the Chalker (mobile/tablet always has `BarcodeDetector`). The file was left in place but is no longer loaded. Safe to delete before v5.0.1 stable.
-
----
-
-**Last updated:** March 30, 2026 — added jsQR housekeeping item
+**Last updated:** March 30, 2026 — removed jsQR housekeeping item (done)
