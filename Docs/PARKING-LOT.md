@@ -14,9 +14,9 @@ Ideas and suggestions for future consideration.
 ## Next
 *Ready for implementation when time permits*
 
-### User Guide — Screenshot Presentation Style
+### User Guide — QR Workflow Illustration
 
-Images in the user guide should use the same presentation as the landing page "See It in Action" cards: framed container, slight zoom-on-hover, zoom icon overlay, and expand into lightbox on click. Not plain inline images. Reuse the existing lightbox.js and the landing page CSS patterns.
+The TM→Chalker QR assignment and result reporting workflow spans two devices and is hard to convey in text alone. One or two targeted screenshots or a simple diagram showing the flow would be sufficient. No full screenshot coverage — too much maintenance overhead for a living project.
 
 ---
 
@@ -25,12 +25,12 @@ Images in the user guide should use the same presentation as the landing page "S
 Documentation and communication tasks before cutting the stable release:
 
 - **User Guide** (`userguide.html`) — add TM→Chalker QR assignment section prominently; document the History tab and match detail view
-- **llms.txt** — update to reflect NewtonMatchDB, History tab, and QR result reporting
 - **Landing page — Tablet Scoring card** — update to mention QR assignment and result reporting
 - **Landing page — Match Controls card** — update to reflect Scan QR Results button and live match flow
-- **Help subsystem** (`dynamic-help-system.js`) — update context-sensitive help for new features
 - **Screenshots** — update landing page and GitHub README.md screenshots to reflect current UI
 - **Consolidated v5.0.1 release notes** — single authoritative release page summarising all beta improvements into a clean narrative for the stable release
+- ~~**llms.txt**~~ — done (beta.8)
+- ~~**Help subsystem**~~ — done (beta.8)
 
 ### Reddit Post
 
@@ -40,6 +40,19 @@ Announce NewTon on a relevant subreddit (r/darts, r/opensourcesoftware, or simil
 
 ## Later
 *Worth tracking but not urgent*
+
+### Analytics — Future Enhancements
+
+The tab is named Analytics — it should earn that name over time. Ideas to consider:
+
+- **Search / filter** — find a player or tournament across the full history
+- **Player view** — aggregate stats per player across all tournaments (averages, achievements, tournament results)
+- **Cross-tournament leaderboard** — who has the most 180s, highest average, most titles
+- **Simplified summary view** — tournament card with headline stats, expandable to match detail; less table-heavy
+
+No decisions made — just a direction.
+
+---
 
 ### Known Issue: Undo eligibility does not follow walkover chains
 
@@ -52,36 +65,6 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 **Fix when addressed:** `isMatchUndoable()` and the bracket tooltip function in `js/bracket-rendering.js` should follow AUTO-completed downstream matches recursively until reaching a non-AUTO match, then apply the existing live/MANUAL checks.
 
 
-### NewtonMatchDB — Per-Tournament "Record to History" Toggle
-
-Add a checkbox in Tournament Setup (default: on) to opt a tournament out of the match register before it starts. When off, `completeMatch()` skips all `NewtonDB.saveMatch()` and `NewtonDB.saveTournamentMeta()` calls — the tournament never enters the History tab. The running Match History in Tournament Setup is unaffected (reads from the in-memory `matches` array, not IndexedDB).
-
-Effectively a practice mode. No gaps in the historical record because the tournament was never part of it. Eliminates the need for a delete button.
-
-**Implementation:** `tournament.recordHistory` boolean flag (default `true`), checked in the `completeMatch()` DB write hook and the `finalizeTournament` hook.
-
----
-
-### Chalker: Stay on Scoreboard After Match Completion
-
-**Current behaviour:** Entering a winning checkout immediately transitions to the match completion stats screen. No way back if the score was entered by mistake.
-
-**Desired behaviour:** A successful checkout lands back on the scoreboard (showing the final state — scores, leg count, winner). The match is complete but the operator is still "in it" and can correct a mistaken entry.
-
-**New flow from the completed scoreboard:**
-- **Stats** button → opens the match stats (averages, leg detail, etc.)
-- **Result QR** → accessible from the stats screen, not the scoreboard
-- **New** button → saves the completed match to history and starts the new-match flow (replaces current "Start new match" dialog)
-- **Rematch** → still available
-
-**What this removes:** The end-screen "Start new match" dialog (Rematch / New Match / History / Result QR buttons). It takes up half the screen, lacks the QR match option, and becomes redundant once "New" is a button on the completed scoreboard.
-
-**Why it matters:** Currently there is no recovery path for a mistaken checkout entry short of starting a new match. Staying on the scoreboard gives the operator a natural review moment before committing.
-
-**Scope note:** Affects `chalker/js/chalker.js` (`showEndScreen`, `startMatchFromQR` flow) and `chalker/index.html` (end-screen markup). The Result QR button moves from the end-screen to the stats view.
-
----
-
 ## Decided Against
 *Features that were considered but explicitly rejected*
 
@@ -89,4 +72,4 @@ Effectively a practice mode. No gaps in the historical record because the tourna
 
 ---
 
-**Last updated:** March 30, 2026 — removed jsQR housekeeping item (done)
+**Last updated:** March 31, 2026 — Analytics future enhancements added; Record to History toggle removed (superseded by delete); Chalker scoreboard removed (done); llms.txt and help subsystem ticked off v5.0.1 prep list
