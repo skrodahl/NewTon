@@ -1,3 +1,9 @@
+## **Docker image cleanup** (2026-03-30)
+
+`.dockerignore` optimized — reduced image size and prevented nginx from serving internal Docker config files.
+
+---
+
 ## **v5.0.1-beta.9** - Scan Anything, Know Everything (2026-03-30)
 
 ### QR scanning — jsQR fallback for desktop browsers (Tournament Manager)

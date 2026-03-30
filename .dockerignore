@@ -3,17 +3,22 @@
 .gitignore
 .github
 
-# Documentation (keep README.md)
+# Documentation
 *.md
-!README.md
 Docs/
 
 # Development files
 .DS_Store
 .vscode
 .idea
+.claude
 
 # Docker files (don't copy into image)
 Dockerfile
 docker-compose.yml
 .dockerignore
+docker/
+
+# Assets not needed in the web root
+Posters/
+LICENSE
