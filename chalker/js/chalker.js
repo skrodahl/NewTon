@@ -886,43 +886,25 @@
   /** @type {number|null} - setInterval handle for QR scan loop */
   let qrScanInterval = null;
 
-  /** @type {HTMLCanvasElement|null} - reusable canvas for jsQR fallback */
-  let _chalkerQrCanvas = null;
-
   /**
-   * Scan a video element for QR codes.
-   * Uses native BarcodeDetector when available, falls back to jsQR.
+   * Scan a video element for QR codes using native BarcodeDetector.
+   * The Chalker runs on mobile/tablet where BarcodeDetector is available.
    * @param {HTMLVideoElement} videoEl
    * @returns {Promise<string|null>} decoded QR string, or null
    */
   async function detectQRCode(videoEl) {
-    if ('BarcodeDetector' in window) {
-      const detector = detectQRCode._detector || (detectQRCode._detector = new BarcodeDetector({ formats: ['qr_code'] }));
-      const codes = await detector.detect(videoEl);
-      return codes.length > 0 ? codes[0].rawValue : null;
-    }
-    if (typeof jsQR === 'function') {
-      if (!_chalkerQrCanvas) _chalkerQrCanvas = document.createElement('canvas');
-      const w = videoEl.videoWidth;
-      const h = videoEl.videoHeight;
-      if (!w || !h) return null;
-      _chalkerQrCanvas.width = w;
-      _chalkerQrCanvas.height = h;
-      const ctx = _chalkerQrCanvas.getContext('2d');
-      ctx.drawImage(videoEl, 0, 0, w, h);
-      const imageData = ctx.getImageData(0, 0, w, h);
-      const code = jsQR(imageData.data, w, h);
-      return code ? code.data : null;
-    }
-    return null;
+    if (!('BarcodeDetector' in window)) return null;
+    const detector = detectQRCode._detector || (detectQRCode._detector = new BarcodeDetector({ formats: ['qr_code'] }));
+    const codes = await detector.detect(videoEl);
+    return codes.length > 0 ? codes[0].rawValue : null;
   }
 
   /**
-   * Check if QR scanning is available (native or jsQR fallback).
+   * Check if QR scanning is available.
    * @returns {boolean}
    */
   function isQRScanAvailable() {
-    return ('BarcodeDetector' in window) || (typeof jsQR === 'function');
+    return 'BarcodeDetector' in window;
   }
 
   /**

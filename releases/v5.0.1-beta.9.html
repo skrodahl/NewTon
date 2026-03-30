@@ -36,19 +36,20 @@
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p><strong>NewTon DC Tournament Manager v5.0.1-beta.9</strong> makes QR scanning work everywhere &mdash; even on Windows Enterprise desktops where Chrome&rsquo;s native <code>BarcodeDetector</code> is unavailable. A JavaScript fallback library decodes QR codes from camera frames without any native API dependency. The result preview now tells operators exactly why a scanned result can&rsquo;t be applied, and the lollipop counter only appears when it&rsquo;s actually possible.</p>
+    <p><strong>NewTon DC Tournament Manager v5.0.1-beta.9</strong> makes QR scanning work everywhere in the Tournament Manager &mdash; even on Windows Enterprise desktops where Chrome&rsquo;s native <code>BarcodeDetector</code> is unavailable. A JavaScript fallback library decodes QR codes from camera frames without any native API dependency. The result preview now tells operators exactly why a scanned result can&rsquo;t be applied, and the lollipop counter only appears when it&rsquo;s actually possible.</p>
 
     <hr>
 
     <h2 id="jsqr">jsQR Fallback for Desktop Browsers</h2>
     <p>Chrome&rsquo;s <code>BarcodeDetector</code> API delegates to the Windows Shape Detection API, which requires the <strong>Media Feature Pack</strong> &mdash; a component often missing on Windows Enterprise editions. On these systems, <code>BarcodeDetector</code> reports as <code>undefined</code> even with Experimental Web Platform features enabled.</p>
     <p>NewTon now includes <strong>jsQR</strong> (v1.4.0, ~250KB, zero dependencies) as a fallback. When <code>BarcodeDetector</code> is absent, video frames are rendered to a canvas and decoded in JavaScript. The camera handling, CRC verification, and payload processing remain identical &mdash; only the decoding layer changes.</p>
-    <p>Both the Tournament Manager (<code>js/qr-bridge.js</code>) and the Chalker (<code>chalker/js/chalker.js</code>) share the same detection pattern:</p>
+    <p>The Tournament Manager (<code>js/qr-bridge.js</code>) uses this detection pattern:</p>
     <ul>
         <li><code>BarcodeDetector</code> available &rarr; native detection (no change in behaviour)</li>
         <li><code>BarcodeDetector</code> missing, <code>jsQR</code> loaded &rarr; canvas-based fallback</li>
         <li>Neither available &rarr; clear error message</li>
     </ul>
+    <p>The Chalker does not include this fallback &mdash; it runs exclusively on mobile and tablet devices where <code>BarcodeDetector</code> is always available on Chrome for Android and Safari for iOS.</p>
 
     <hr>
 
@@ -88,11 +89,8 @@
     <h2 id="files">Files Changed</h2>
     <ul>
         <li><code>lib/jsQR.js</code> &mdash; new: jsQR v1.4.0 QR decoding library</li>
-        <li><code>chalker/lib/jsQR.js</code> &mdash; identical copy for Chalker</li>
         <li><code>js/qr-bridge.js</code> &mdash; <code>detectQRCode()</code> helper with BarcodeDetector/jsQR fallback; <code>isQRScanAvailable()</code>; result preview status messages; conditional lollipop row</li>
-        <li><code>chalker/js/chalker.js</code> &mdash; same <code>detectQRCode()</code> and <code>isQRScanAvailable()</code> helpers; <code>startQRScanner()</code> updated</li>
         <li><code>tournament.html</code> &mdash; <code>jsQR.js</code> script tag; demo banner link order</li>
-        <li><code>chalker/index.html</code> &mdash; <code>jsQR.js</code> script tag</li>
         <li><code>css/landing.css</code> &mdash; <code>.btn-download-top</code>, <code>.btn-download-bottom</code> classes</li>
         <li>All 27 release notes HTML files &mdash; inline styles replaced with CSS classes; missing &ldquo;Latest release&rdquo; links added</li>
     </ul>

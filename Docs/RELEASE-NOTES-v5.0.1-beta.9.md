@@ -6,7 +6,7 @@
 
 ## Overview
 
-v5.0.1-beta.9 makes QR scanning work everywhere — even on Windows Enterprise desktops where Chrome's native `BarcodeDetector` is unavailable. A JavaScript fallback library decodes QR codes from camera frames without any native API dependency. The result preview now tells operators exactly why a scanned result can't be applied, and the lollipop counter only appears when it's actually possible.
+v5.0.1-beta.9 makes QR scanning work everywhere in the Tournament Manager — even on Windows Enterprise desktops where Chrome's native `BarcodeDetector` is unavailable. A JavaScript fallback library decodes QR codes from camera frames without any native API dependency. The result preview now tells operators exactly why a scanned result can't be applied, and the lollipop counter only appears when it's actually possible.
 
 ---
 
@@ -16,11 +16,13 @@ Chrome's `BarcodeDetector` API delegates to the Windows Shape Detection API, whi
 
 NewTon now includes **jsQR** (v1.4.0, ~250KB, zero dependencies) as a fallback. When `BarcodeDetector` is absent, video frames are rendered to a canvas and decoded in JavaScript. The camera handling, CRC verification, and payload processing remain identical — only the decoding layer changes.
 
-Both TM (`js/qr-bridge.js`) and Chalker (`chalker/js/chalker.js`) share the same detection pattern:
+The Tournament Manager (`js/qr-bridge.js`) uses this detection pattern:
 
 - `BarcodeDetector` available → native detection (no change in behaviour)
 - `BarcodeDetector` missing, `jsQR` loaded → canvas-based fallback
 - Neither available → clear error message
+
+The Chalker does not include this fallback — it runs exclusively on mobile and tablet devices where `BarcodeDetector` is always available on Chrome for Android and Safari for iOS.
 
 ---
 
@@ -60,11 +62,8 @@ Applies to both the normal result preview and the QR Payload Inspector in the De
 ## Files Changed
 
 - `lib/jsQR.js` — new: jsQR v1.4.0 QR decoding library
-- `chalker/lib/jsQR.js` — identical copy for Chalker
 - `js/qr-bridge.js` — `detectQRCode()` helper with BarcodeDetector/jsQR fallback; `isQRScanAvailable()`; result preview status messages; conditional lollipop row
-- `chalker/js/chalker.js` — same `detectQRCode()` and `isQRScanAvailable()` helpers; `startQRScanner()` updated
 - `tournament.html` — `jsQR.js` script tag; demo banner link order
-- `chalker/index.html` — `jsQR.js` script tag
 - `css/landing.css` — `.btn-download-top`, `.btn-download-bottom` classes
 - All 27 release notes HTML files — inline styles replaced with CSS classes; missing "Latest release" links added
 

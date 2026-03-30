@@ -1,8 +1,10 @@
 ## **v5.0.1-beta.9** - Scan Anything, Know Everything (2026-03-30)
 
-### QR scanning — jsQR fallback for desktop browsers
+### QR scanning — jsQR fallback for desktop browsers (Tournament Manager)
 
-`BarcodeDetector` is unavailable on Windows Enterprise editions missing the Media Feature Pack. Added `jsQR` (v1.4.0, ~250KB, zero dependencies) as a fallback — when `BarcodeDetector` is absent, video frames are decoded via canvas + jsQR. Both TM (`js/qr-bridge.js`) and Chalker (`chalker/js/chalker.js`) updated. Error message changed from "Use Chrome or Edge" to a more accurate message. Library added to `lib/jsQR.js` and `chalker/lib/jsQR.js`.
+`BarcodeDetector` is unavailable on Windows Enterprise editions missing the Media Feature Pack. Added `jsQR` (v1.4.0, ~250KB, zero dependencies) as a fallback in the Tournament Manager (`js/qr-bridge.js`) — when `BarcodeDetector` is absent, video frames are decoded via canvas + jsQR. Error message changed from "Use Chrome or Edge" to a more accurate message. Library added to `lib/jsQR.js`.
+
+The Chalker does not include this fallback — it runs exclusively on mobile and tablet devices where `BarcodeDetector` is always available on Chrome for Android and Safari for iOS.
 
 ### Result QR preview — explains why completion is unavailable
 
