@@ -1,4 +1,4 @@
-# Release Notes — v5.0.1 — Double Out
+# Release Notes — v5.0.1 — Game Shot, and the Match!
 
 **NewTon DC Tournament Manager v5.0.1**
 
@@ -101,4 +101,4 @@ No migration required. All existing tournament data is fully compatible. The Ana
 
 ---
 
-**NewTon DC Tournament Manager v5.0.1 — Double Out.**
+**NewTon DC Tournament Manager v5.0.1 — Game Shot, and the Match!**
