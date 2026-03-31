@@ -143,7 +143,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-bracket-zoom.jpg" alt="16-player tournament bracket showing Match Card Magic Zoom and status bar" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.png">
+                <img src="Screenshots/th-tournament-bracket-zoom.jpg" alt="32-player tournament bracket showing the full double elimination structure with a zoomed match card" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.jpg">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Bracket View</span>
@@ -154,29 +154,29 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-chalker-scoreboard.jpg" alt="NewTon Chalker scoring app showing live 501 scoresheet with per-visit scores and running totals" loading="lazy" class="lightbox-trigger" data-full="Screenshots/chalker-scoreboard.png">
+                <img src="Screenshots/th-chalker-scoreboard.jpg" alt="NewTon Chalker scoring app showing a completed 501 match with the result QR code ready to scan" loading="lazy" class="lightbox-trigger" data-full="Screenshots/chalker-scoreboard.jpg">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Chalker App</span>
                 <h3>Tablet Scoring at the Board</h3>
-                <p>Scan the assignment QR from the Tournament Manager and the Chalker is ready to score — player names, format, lane, and referee all arrive automatically. No typing, no mistakes. A dedicated x01 scoring app built for tablets at the dartboard, with large scores, clear running totals, and live statistics. Installs as a PWA, works fully offline, and keeps all matches in history.</p>
+                <p>Scan the assignment QR from the Tournament Manager and the Chalker is ready to score — player names, format, lane, and referee all arrive automatically. When the match is done, it generates a result QR. One scan at the Tournament Manager and the bracket advances. No manual entry, no mistakes.</p>
             </div>
         </div>
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-match-controls.jpg" alt="Match controls showing referee suggestions and conflict detection" loading="lazy" class="lightbox-trigger" data-full="Screenshots/match-controls.png">
+                <img src="Screenshots/th-match-controls.jpg" alt="Match Controls panel showing live matches, referee assignment with conflict detection, and the Scan QR Results button" loading="lazy" class="lightbox-trigger" data-full="Screenshots/match-controls.jpg">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Match Controls</span>
                 <h3>Run Your Tournament from One Panel</h3>
-                <p>The Match Controls panel is your command center. See which matches are ready, assign lanes and referees, start matches, and record results — all without leaving the page. Smart referee suggestions highlight available players and flag conflicts automatically.</p>
+                <p>The Match Controls panel is your command center. See which matches are ready, assign lanes and referees, and generate an assignment QR for the Chalker — player names, format, and referee travel in a single scan. When the match is done, scan the result QR back and the bracket advances, complete with stats. Smart referee suggestions highlight available players and flag conflicts automatically.</p>
             </div>
         </div>
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-player-registration-help.jpg" alt="Player registration page with saved players and dynamic help system" loading="lazy" class="lightbox-trigger" data-full="Screenshots/player-registration-help.png">
+                <img src="Screenshots/th-player-registration-help.jpg" alt="Player registration page with saved players and dynamic help system" loading="lazy" class="lightbox-trigger" data-full="Screenshots/player-registration-help.jpg">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Player Management</span>
@@ -187,7 +187,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-setup.jpg" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-setup.png">
+                <img src="Screenshots/th-tournament-setup.jpg" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-setup.jpg">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Setup</span>
@@ -198,7 +198,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-bracket.jpg" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket.png">
+                <img src="Screenshots/th-tournament-bracket.jpg" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket.jpg">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Fair Draw</span>
@@ -209,7 +209,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-celebration.jpg" alt="Tournament winner celebration screen" loading="lazy" class="lightbox-trigger" data-full="Screenshots/celebration.png">
+                <img src="Screenshots/th-celebration.jpg" alt="Tournament winner celebration screen" loading="lazy" class="lightbox-trigger" data-full="Screenshots/celebration.jpg">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Tournament Complete</span>
