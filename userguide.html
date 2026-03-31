@@ -55,7 +55,7 @@
     <p>Every player gets two chances before they are eliminated. The bracket is split into a <strong>Frontside</strong> (winners) and a <strong>Backside</strong> (losers). A player who loses on the Frontside drops to the Backside and can still win the tournament.</p>
     <ul>
         <li><strong>Best for:</strong> most club tournaments — fair, competitive, and players stay involved longer</li>
-        <li><strong>Bracket sizes:</strong> 8, 16, or 32 players</li>
+        <li><strong>Player count:</strong> 4 to 32 players. The bracket snaps to the nearest size of 8, 16, or 32 — empty slots are filled with byes that auto-advance real players without a match</li>
         <li><strong>Final:</strong> Frontside finalist vs Backside finalist — the Frontside finalist has a one-match advantage</li>
     </ul>
 
@@ -63,7 +63,7 @@
     <p>One loss and you're out. Straightforward bracket where winners advance and losers are eliminated immediately.</p>
     <ul>
         <li><strong>Best for:</strong> time-limited events, warm-up tournaments, or large fields where DE isn't practical</li>
-        <li><strong>Bracket sizes:</strong> 8, 16, or 32 players</li>
+        <li><strong>Player count:</strong> 4 to 32 players. Same bracket sizing as DE — byes fill the unused slots automatically</li>
         <li><strong>Includes:</strong> optional bronze match (3rd place play-off)</li>
     </ul>
 
@@ -95,6 +95,13 @@
         <li><strong>Double Elimination</strong> — Configure legs for regular rounds, Frontside and Backside semifinals, Backside Final, and the Grand Final separately</li>
         <li><strong>Single Elimination</strong> — Configure legs for each round independently (quarterfinals, semifinals, bronze match, final)</li>
     </ul>
+    <h4>Chalker</h4>
+    <p>These settings are included in the QR assignment payload sent to the Chalker:</p>
+    <ul>
+        <li><strong>x01 Format</strong> — Starting score for Chalker matches (101 / 201 / 301 / 501). Default: 501</li>
+        <li><strong>Max Rounds</strong> — Tiebreak threshold. If neither player has won enough legs by this round, the match is decided by highest score on the final visit. Range: 7–20</li>
+        <li><strong>Short Leg Threshold</strong> — The dart count below which a leg is considered a short leg and flagged as an achievement</li>
+    </ul>
 
     <h3>Lane Management</h3>
     <ul>
@@ -108,21 +115,24 @@
     <h2 id="managing">Managing a Tournament</h2>
 
     <h3>Creating a Tournament</h3>
-    <p>Click <strong>New Tournament</strong> from the tournament list. Enter a name and date — both appear on exports. Select your format (DE or SE) and bracket size before generating the bracket.</p>
+    <p>In the <strong>Tournament Setup</strong> tab, enter a tournament name and select a date, then click <strong>Create New Tournament</strong>.</p>
+    <p>Previous tournaments are listed and can be loaded or deleted from the same screen. Tournaments can also be exported and imported as JSON — useful for backups or moving to another device.</p>
 
     <h3>Registering Players</h3>
-    <p>Add players from the <strong>Players</strong> tab before generating the bracket. Type a name and press Enter or click Add. The order of entry doesn't matter — the draw is randomised when you generate the bracket.</p>
+    <p>Add players from the <strong>Player Registration</strong> tab before generating the bracket. Type a name and press Enter or click Add. New players are added to the register of Saved Players.</p>
 
     <h3>Saved Players Registry</h3>
-    <p>NewTon DC Tournament Manager maintains a persistent registry of player names across all tournaments. When you start typing a name, matching suggestions appear from previous tournaments — select one to add without retyping. The registry grows automatically as you run tournaments.</p>
-    <p>Player names in the registry can be managed from the Config tab — remove old or misspelled entries to keep suggestions clean.</p>
+    <p>Player names are saved to a persistent registry to keep names consistent across tournaments. Players can be removed from <strong>Saved Players</strong>.</p>
+    <p>Tournament exports include the Saved Players registry. To transfer it from another device, use the <strong>Import Saved Players</strong> button in the Saved Players panel.</p>
 
     <h3>Payment Tracking</h3>
     <p>Each player has a payment status indicator on the Players list. Toggle it to mark who has paid the entry fee. Payment status is visible at a glance and included in the player list — useful for the person collecting fees at the door.</p>
 
     <h3>Generating the Bracket</h3>
-    <p>Once all players are registered, click <strong>Generate Bracket</strong>. NewTon DC Tournament Manager randomises the draw and sets up all matches. If your player count doesn't fill the bracket exactly, byes are distributed automatically — bye winners advance without playing.</p>
-    <p><strong>The bracket cannot be regenerated once matches have started.</strong> Double-check your player list before generating.</p>
+    <p>Navigate to the <strong>Tournament Bracket</strong> tab. Match Controls open automatically if <strong>Automatically open Match Controls</strong> is enabled — otherwise click the Match Controls button to open them.</p>
+    <p>Match Controls in setup mode shows the player list, current configuration, and a <strong>Setup Actions</strong> panel on the right. The bracket size is determined automatically from the player count. Players can still be added from this screen.</p>
+    <p>Choose your format in the Setup Actions panel: click <strong>Generate Bracket</strong> under Double Elimination Cup or Single Elimination Cup. The draw is randomised automatically and empty slots are filled with byes.</p>
+    <p><strong>The bracket cannot be regenerated once matches have started.</strong> Double-check your player list before generating. If a player arrives after the bracket is generated, Late Registration can place them into an empty bye slot — provided no live or completed matches exist downstream of that slot.</p>
 
     <hr>
 
@@ -190,11 +200,12 @@
         <li><strong>High Out</strong> — Enter the checkout score (101+) and click Add High Out.</li>
         <li><strong>180s</strong> — Increment or decrement with the +/− buttons.</li>
         <li><strong>Tons (100+)</strong> — Increment or decrement with the +/− buttons.</li>
+        <li><strong>Lollipops (three ones)</strong> — Increment or decrement with the +/&minus; buttons.</li>
     </ul>
     <p>Stats are saved per player. Click <strong>Confirm Winner</strong> when done — NewTon DC Tournament Manager advances the winner and loser to their next matches automatically.</p>
 
     <h3>Leaderboard</h3>
-    <p>The <strong>Leaderboard</strong> button at the bottom of the Match Controls panel opens the current standings mid-tournament. Click any player in the leaderboard to open their Statistics dialog and add stats that were missed when the match result was recorded.</p>
+    <p>The <strong>Leaderboard</strong> button at the bottom of the Match Controls panel opens the current standings mid-tournament. Click any player to open their Statistics dialog and add stats that were missed when the match result was recorded. Players with lollipops show a 🍭 icon next to their name.</p>
 
     <hr>
 
@@ -219,10 +230,11 @@
     <p>The operator confirms, selects the starting player, and the match begins. The Chalker displays the lane and referee in its info bar throughout the match.</p>
 
     <h3>Configuration</h3>
-    <p>Two settings in <strong>Config &rarr; Match Configuration &rarr; Chalker</strong> control what the QR sends:</p>
+    <p>These settings are found in the Tournament Manager's <strong>Global Settings &rarr; Match Configuration &rarr; Chalker</strong> and are included in every QR assignment payload:</p>
     <ul>
-        <li><strong>x01 Format</strong> — the starting score (101 / 201 / 301 / 501)</li>
-        <li><strong>Max Rounds</strong> — the tiebreak threshold (7–20)</li>
+        <li><strong>x01 Format</strong> — Starting score for Chalker matches (101 / 201 / 301 / 501). Default: 501</li>
+        <li><strong>Max Rounds</strong> — Tiebreak threshold. If neither player has won enough legs by this round, the match is decided by highest score on the final visit. Range: 7–20</li>
+        <li><strong>Short Leg Threshold</strong> — The dart count below which a leg is considered a short leg and flagged as an achievement</li>
     </ul>
     <p>Best-of legs is determined by the match round and your match format configuration. All values travel in the QR — the Chalker receives everything it needs.</p>
 
@@ -238,22 +250,12 @@
     <h2 id="results">Results &amp; Export</h2>
 
     <h3>Live Standings</h3>
-    <p>The <strong>Results</strong> tab shows current standings and point totals as the tournament progresses. Final placements are confirmed when the Grand Final (DE) or Final (SE) is completed.</p>
+    <p>The <strong>Leaderboard</strong> shows current standings and point totals as the tournament progresses. It is accessible from Match Controls, the Tournament Bracket, and the Player Registration tab. Final placements are confirmed when the Grand Final (DE) or Final (SE) is completed.</p>
+    <p>Tournament Setup also shows a running <strong>Match History</strong> — a log of all completed matches in chronological order.</p>
 
-    <h3>CSV Export</h3>
-    <p>Export results as a CSV file for use in spreadsheets, season standings trackers, or club management systems. The export includes player names, placements, points earned, and achievement counts.</p>
+    <h3>Export Results</h3>
+    <p>Results — player names, placements, points earned, and achievement counts — can be exported from the <strong>Player Registration</strong> tab and from the celebration screen when the tournament is complete. Choose <strong>Export CSV</strong> for spreadsheets and season standings trackers, or <strong>Export JSON</strong> for structured data.</p>
 
-    <h3>Tournament Export (JSON)</h3>
-    <p>Export the full tournament as a JSON file — a complete snapshot including all matches, results, and transaction history. Use this to:</p>
-    <ul>
-        <li><strong>Back up</strong> a tournament in progress</li>
-        <li><strong>Archive</strong> completed tournaments</li>
-        <li><strong>Share</strong> results with other NewTon DC Tournament Manager instances</li>
-        <li><strong>Upload</strong> to a self-hosted server via the REST API</li>
-    </ul>
-
-    <h3>Importing a Tournament</h3>
-    <p>Import a previously exported JSON file to restore a tournament — useful for recovering from a browser data clear, moving to a different device, or loading a shared tournament. NewTon DC Tournament Manager validates the file before importing; invalid files are rejected without affecting existing data.</p>
 
     <hr>
 
@@ -276,7 +278,9 @@
         <li><strong>Recalculate Rankings</strong> — recompute standings from the current match results</li>
         <li><strong>Refresh All Dropdowns</strong> — force all lane and referee dropdowns to reload</li>
         <li><strong>Validate Everything</strong> — run a full integrity check on bracket state</li>
+        <li><strong>View Match Progression</strong> — shows the full match progression table for the bracket (Double Elimination only)</li>
         <li><strong>Toggle Read-Only</strong> — lock the tournament against accidental changes</li>
+        <li><strong>QR Payload Inspector</strong> — decode and inspect the contents of any NewTon QR payload</li>
         <li><strong>Late Registration</strong> — register a player who arrived after the bracket was generated (see <a href="#tips">Tips &amp; Tricks</a>)</li>
         <li><strong>Reset All Config</strong> — wipe global settings back to defaults (destructive — requires confirmation)</li>
     </ul>
