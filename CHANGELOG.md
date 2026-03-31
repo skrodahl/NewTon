@@ -1,3 +1,16 @@
+## **v5.0.1** — Game Shot, and the Match! (2026-03-31)
+
+The complete TM ↔ Chalker loop: match assignments travel to the Chalker via QR, results travel back the same way. Analytics tab persists every Chalker match to IndexedDB. Docker HTTPS and mDNS built in. See [Docs/RELEASE-NOTES-v5.0.1.md](Docs/RELEASE-NOTES-v5.0.1.md) for the full story.
+
+### Changes from beta.9 to stable
+
+- **Analytics tab** — "History" tab label renamed to "Analytics" (`data-page` attribute and internal `id` unchanged)
+- **User guide** — comprehensive accuracy review; QR workflow section renamed to "Chalker QR Workflow" and expanded with "Sending Results Back" subsection covering the Chalker → TM result QR flow
+- **Landing page** — Chalker App and Match Controls card text updated to describe the full QR loop; screenshot alt texts updated to match current screenshots
+- **Docker quickstart** — image tag updated from `5.0.1-beta.9` to `:latest` in all compose files; image tag callout note simplified
+
+---
+
 ## **Docker Quick Start — full rewrite** (2026-03-31)
 
 `docker-quickstart.html` and `DOCKER-QUICKSTART.md` rewritten around three self-contained setup options (Mac/Windows SSL, Linux SSL + mDNS, Behind a Reverse Proxy), each with a ready-to-use compose file. Docker Hub as primary image, GHCR commented as alternative. Beta image tag (`5.0.1-beta.9`) called out explicitly for the SSL setups. Environment variables moved to a reference table. `localhost only` binding explained with a compose example. `docker compose up -d` instruction added to each setup option.

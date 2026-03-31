@@ -28,7 +28,7 @@
             <li><a href="#configuration">Configuration</a></li>
             <li><a href="#managing">Managing a Tournament</a></li>
             <li><a href="#running">Running Matches &amp; Match Controls</a></li>
-            <li><a href="#qr">Chalker QR Assignment</a></li>
+            <li><a href="#qr">Chalker QR Workflow</a></li>
             <li><a href="#results">Results &amp; Export</a></li>
             <li><a href="#devconsole">Developer Console</a></li>
             <li><a href="#tips">Tips &amp; Tricks</a></li>
@@ -209,7 +209,7 @@
 
     <hr>
 
-    <h2 id="qr">Chalker QR Assignment</h2>
+    <h2 id="qr">Chalker QR Workflow</h2>
     <p>NewTon DC Tournament Manager can send match assignments directly to the Chalker scoring app via QR code — no typing player names, no verbal handoff, no mistakes.</p>
 
     <h3>Generating the QR Code</h3>
@@ -228,6 +228,10 @@
         <li>Lane and referee (if assigned)</li>
     </ul>
     <p>The operator confirms, selects the starting player, and the match begins. The Chalker displays the lane and referee in its info bar throughout the match.</p>
+
+    <h3>Sending Results Back</h3>
+    <p>When the match finishes, tap <strong>Stats</strong> in the Chalker, then <strong>Result QR</strong> to display the result QR code.</p>
+    <p>At the Tournament Manager, click <strong>Scan QR Results</strong> in the Match Controls footer. Point the camera at the Chalker's result QR. A preview appears — winner, score, and achievements. Click <strong>Apply Result</strong> and the bracket advances.</p>
 
     <h3>Configuration</h3>
     <p>These settings are found in the Tournament Manager's <strong>Global Settings &rarr; Match Configuration &rarr; Chalker</strong> and are included in every QR assignment payload:</p>
