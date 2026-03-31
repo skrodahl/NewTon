@@ -60,15 +60,15 @@ docker compose up -d</code></pre>
     <h2 id="setup-options">Setup Options</h2>
 
     <blockquote>
-        <p><strong>Image tags:</strong> The Mac/Windows and Linux setups below use SSL features introduced in v5.0.1-beta.9. The compose files use <code>skrodahl/newton:5.0.1-beta.9</code> (Docker Hub) with GHCR as a commented alternative. The quick start and reverse proxy setup work with <code>latest</code> (current stable).</p>
+        <p><strong>Image tag:</strong> All compose files below use <code>skrodahl/newton:latest</code> (Docker Hub) with GHCR as a commented alternative.</p>
     </blockquote>
 
     <h3 id="mac-windows">Mac / Windows</h3>
     <p>SSL enabled by default &mdash; gives you HTTPS and camera access on any platform.</p>
     <pre><code>services:
   newton-tournament:
-    image: skrodahl/newton:5.0.1-beta.9
-    # Alternative: ghcr.io/skrodahl/newton:5.0.1-beta.9
+    image: skrodahl/newton:latest
+    # Alternative: ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
       - "2020:2020"   # HTTP — redirects to HTTPS
@@ -97,8 +97,8 @@ volumes:
     <p>All devices on your LAN can reach the container at <code>https://newtondarts.local</code> without any DNS configuration. Requires <code>network_mode: host</code> &mdash; Linux only (not supported on Docker Desktop for Mac/Windows).</p>
     <pre><code>services:
   newton-tournament:
-    image: skrodahl/newton:5.0.1-beta.9
-    # Alternative: ghcr.io/skrodahl/newton:5.0.1-beta.9
+    image: skrodahl/newton:latest
+    # Alternative: ghcr.io/skrodahl/newton:latest
     container_name: newton
     network_mode: host             # Required for mDNS multicast to reach the LAN
     volumes:

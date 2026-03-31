@@ -26,7 +26,7 @@ Open `http://localhost:8080` — NewTon is running.
 
 ## Setup Options
 
-> **Image tags:** The Mac/Windows and Linux setups below use SSL features introduced in v5.0.1-beta.9. The compose files use `skrodahl/newton:5.0.1-beta.9` (Docker Hub) with GHCR as a commented alternative. The quick start and reverse proxy setup work with `latest` (current stable).
+> **Image tag:** All compose files below use `skrodahl/newton:latest` (Docker Hub) with GHCR as a commented alternative.
 
 ### Mac / Windows
 
@@ -35,8 +35,8 @@ SSL enabled by default — gives you HTTPS and camera access on any platform.
 ```yaml
 services:
   newton-tournament:
-    image: skrodahl/newton:5.0.1-beta.9
-    # Alternative: ghcr.io/skrodahl/newton:5.0.1-beta.9
+    image: skrodahl/newton:latest
+    # Alternative: ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
       - "2020:2020"   # HTTP — redirects to HTTPS
@@ -71,8 +71,8 @@ All devices on your LAN can reach the container at `https://newtondarts.local` w
 ```yaml
 services:
   newton-tournament:
-    image: skrodahl/newton:5.0.1-beta.9
-    # Alternative: ghcr.io/skrodahl/newton:5.0.1-beta.9
+    image: skrodahl/newton:latest
+    # Alternative: ghcr.io/skrodahl/newton:latest
     container_name: newton
     network_mode: host             # Required for mDNS multicast to reach the LAN
     volumes:
