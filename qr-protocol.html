@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://newtondarts.com/qr-protocol.html">
+    <title>QR Code Communication Protocol — NewTon DC Tournament Manager</title>
+    <meta name="description" content="Technical specification for the QR-based communication protocol between the NewTon DC Tournament Manager and the Chalker scoring app.">
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>QR Code Communication Protocol</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager &harr; Chalker</p>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#context">Context</a></li>
+            <li><a href="#protocol-design">Protocol Design</a></li>
+            <li><a href="#message-schemas">Message Schemas</a></li>
+            <li><a href="#crc32">CRC-32 Integrity Module</a></li>
+            <li><a href="#result-application">TM Result Application</a></li>
+            <li><a href="#replay-protection">Replay Protection</a></li>
+            <li><a href="#score-validation">TM-Side Score Validation</a></li>
+            <li><a href="#server-id">Server ID</a></li>
+            <li><a href="#flows">Flows</a></li>
+            <li><a href="#libraries">QR Library Choices</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="context">Context</h2>
+    <p>The Tournament Manager (TM) and Chalker communicate via QR codes &mdash; no network infrastructure required. Two message types cover the full match lifecycle:</p>
+    <ul>
+        <li><strong>TM &rarr; Chalker</strong>: A live match card in the TM generates an assignment QR. The Chalker scans it and auto-populates the match &mdash; player names, format, lane, and referee.</li>
+        <li><strong>Chalker &rarr; TM</strong>: When the match finishes, the Chalker generates a result QR. The TM scans it, previews the result, and applies it directly to the bracket.</li>
+    </ul>
+    <p>The payload schemas and integrity checking are designed to be transport-agnostic &mdash; the same format lends itself to network communication as well.</p>
+    <p>The QR workflow was added without breaking changes. The underlying tournament data structure is compatible with the one used since the earliest beta &mdash; no migration has ever been required in the lifetime of the software, and the addition of QR communication is no exception.</p>
+
+    <hr>
+
+    <h2 id="protocol-design">Protocol Design</h2>
+
+    <h3>Design Principles</h3>
+    <ol>
+        <li><strong>Transport-agnostic schema</strong>: Payload format is designed to work beyond QR if needed.</li>
+        <li><strong>Compact field names</strong>: Short keys minimize QR code size, keeping the QR version low and easy to scan.</li>
+        <li><strong>CRC-32 integrity</strong>: Detects corruption during scanning, alongside QR&rsquo;s built-in error correction.</li>
+        <li><strong>Replay protection</strong>: TM checks match state before applying a result &mdash; rescanning a completed match is rejected.</li>
+        <li><strong>Schema versioning</strong>: <code>v</code> field enables forward-compatible changes.</li>
+        <li><strong>Offline-first</strong>: No network, no shared secrets required.</li>
+    </ol>
+
+    <h3>Identification Fields (Present in All Messages)</h3>
+    <table>
+        <thead><tr><th>Field</th><th>Description</th><th>Example</th></tr></thead>
+        <tbody>
+            <tr><td><code>v</code></td><td>Schema version</td><td><code>1</code></td></tr>
+            <tr><td><code>t</code></td><td>Message type</td><td><code>"a"</code> (assign) or <code>"r"</code> (result)</td></tr>
+            <tr><td><code>mid</code></td><td>Match ID (from TM)</td><td><code>"FS-1-3"</code></td></tr>
+            <tr><td><code>tid</code></td><td>Tournament ID</td><td><code>"1708123456789"</code></td></tr>
+            <tr><td><code>sid</code></td><td>Server/TM instance ID (12-char hex)</td><td><code>"f47ac10b58cc"</code></td></tr>
+            <tr><td><code>ts</code></td><td>Unix timestamp (seconds)</td><td><code>1708123456</code></td></tr>
+            <tr><td><code>crc</code></td><td>CRC-32 of all other fields</td><td><code>"a1b2c3d4"</code></td></tr>
+        </tbody>
+    </table>
+    <p>The <code>sid</code> (server ID) is a 12-character hex string generated once per TM installation and persisted in global config. It identifies which TM instance created the match. 12 hex chars = 48 bits of entropy (281 trillion possible values) &mdash; collision risk is negligible for local tournament use.</p>
+
+    <hr>
+
+    <h2 id="message-schemas">Message Schemas</h2>
+
+    <h3>Match Assignment (TM &rarr; Chalker QR)</h3>
+    <pre><code>{
+  "v": 1,
+  "t": "a",
+  "mid": "FS-1-3",
+  "tid": "1708123456789",
+  "sid": "f47ac10b58cc",
+  "p1": "John Smith",
+  "p2": "Jane Doe",
+  "sc": 501,
+  "bo": 3,
+  "mr": 13,
+  "ln": 3,
+  "ref": "Frank",
+  "ts": 1708123456,
+  "crc": "a1b2c3d4"
+}</code></pre>
+    <p><strong>Estimated size: ~180&ndash;220 bytes</strong> &rarr; QR version ~7&ndash;9, very easy to scan.</p>
+    <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>p1</code></td><td>string</td><td>Player 1 name</td></tr>
+            <tr><td><code>p2</code></td><td>string</td><td>Player 2 name</td></tr>
+            <tr><td><code>sc</code></td><td>number</td><td>Starting score &mdash; from Global Config (101 / 201 / 301 / 501, default 501)</td></tr>
+            <tr><td><code>bo</code></td><td>number</td><td>Best-of legs &mdash; from Global Config match configuration</td></tr>
+            <tr><td><code>mr</code></td><td>number</td><td>Max rounds before tiebreak &mdash; from Global Config (default 13, range 7&ndash;20)</td></tr>
+            <tr><td><code>ln</code></td><td>number</td><td>Lane number (1&ndash;20). <strong>Optional.</strong> Omitted if unassigned.</td></tr>
+            <tr><td><code>ref</code></td><td>string</td><td>Referee name. <strong>Optional.</strong> Omitted if unassigned.</td></tr>
+        </tbody>
+    </table>
+
+    <h3>Match Result (Chalker &rarr; TM QR)</h3>
+    <p>The result payload carries <strong>raw visit scores only</strong> &mdash; no computed stats. The TM derives everything (averages, score ranges, high finishes, best/worst leg, etc.) from the raw scores. This keeps the payload minimal and makes the TM the single source of truth for statistics.</p>
+
+    <p><strong>What the TM derives from raw scores:</strong></p>
+    <ul>
+        <li>Tiebreak detection: neither player&rsquo;s scores sum to starting score</li>
+        <li>Who threw first each leg: <code>fls</code> + alternating</li>
+        <li>All score ranges (60+, 80+, 100+, 120+, 140+, 170+, 180)</li>
+        <li>All averages (Match, First 9, Leg)</li>
+        <li>High Finish, Best/Worst Leg, Short Legs, 100+ Finishes</li>
+        <li>Dart counts per player per leg</li>
+        <li>Complete n01 scoresheet with asterisks and xN notation</li>
+    </ul>
+
+    <p><strong>What the TM cannot derive (must be in payload):</strong></p>
+    <ul>
+        <li>Tiebreak leg winners (<code>w</code> per leg) &mdash; when max rounds is reached without checkout, a separate 3-dart tiebreak round is played (highest score wins). This round is not recorded in the visit scores.</li>
+        <li>Checkout dart count (<code>cd</code>) &mdash; how many darts used on the final visit (1, 2, or 3)</li>
+    </ul>
+
+    <pre><code>{
+  "v": 1,
+  "t": "r",
+  "mid": "FS-1-3",
+  "tid": "1708123456789",
+  "sid": "f47ac10b58cc",
+  "p1": "Klas Krantz",
+  "p2": "Hans Blomqvist",
+  "t1": "Nya Pikado C",
+  "t2": "Newton A",
+  "sc": 501,
+  "bo": 5,
+  "mr": 13,
+  "ln": 3,
+  "w": 2,
+  "fls": 2,
+  "legs": [
+    { "w": 2, "s": "SSkoFlEcNxULExU7AA==|GVFCXzwKKTkhAQgMAA==", "cd": 0 },
+    { "w": 2, "s": "LS0DLV8NHTYpPw==|KBpRPFUcNChJEA==", "cd": 3 },
+    { "w": 1, "s": "GgtfHTkZDR48NwkGVQ==|ZBoWCxwaGlMsZRIA", "cd": 3 }
+  ],
+  "ts": 1708123789,
+  "crc": "d4c3b2a1"
+}</code></pre>
+    <p><strong>Estimated size: ~380&ndash;500 bytes</strong> (typical Bo3&ndash;Bo5) &rarr; QR version ~12&ndash;16, easy to scan.</p>
+
+    <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>p1</code></td><td>string</td><td>Player 1 name</td></tr>
+            <tr><td><code>p2</code></td><td>string</td><td>Player 2 name</td></tr>
+            <tr><td><code>t1</code></td><td>string</td><td>Team 1 name. <strong>Omitted if not set.</strong></td></tr>
+            <tr><td><code>t2</code></td><td>string</td><td>Team 2 name. <strong>Omitted if not set.</strong></td></tr>
+            <tr><td><code>sc</code></td><td>number</td><td>Starting score (501, 301, etc.)</td></tr>
+            <tr><td><code>bo</code></td><td>number</td><td>Best-of legs</td></tr>
+            <tr><td><code>mr</code></td><td>number</td><td>Max rounds before tiebreak</td></tr>
+            <tr><td><code>ln</code></td><td>number</td><td>Lane number. <strong>Omitted if unassigned.</strong></td></tr>
+            <tr><td><code>w</code></td><td>1 or 2</td><td>Match winner (player number)</td></tr>
+            <tr><td><code>fls</code></td><td>1 or 2</td><td>First leg starter (alternates each leg)</td></tr>
+            <tr><td><code>legs</code></td><td>array</td><td>Per-leg data</td></tr>
+            <tr><td><code>legs[].w</code></td><td>1 or 2</td><td>Leg winner (essential for tiebreaks)</td></tr>
+            <tr><td><code>legs[].s</code></td><td>string</td><td>Base64-encoded visit scores: <code>P1_SCORES|P2_SCORES</code></td></tr>
+            <tr><td><code>legs[].cd</code></td><td>0&ndash;3</td><td>Checkout darts used (0 = tiebreak, 1&ndash;3 = darts on final visit)</td></tr>
+        </tbody>
+    </table>
+
+    <p><strong>Dropped fields:</strong> <code>wl</code> (winner&rsquo;s legs) and <code>ll</code> (loser&rsquo;s legs) are not in the payload &mdash; the TM derives them by counting <code>legs[].w</code> values.</p>
+    <p><strong>Null field omission:</strong> Fields with no value (<code>t1</code>, <code>t2</code>, <code>ln</code>) are omitted entirely rather than sent as <code>null</code>. The TM treats missing fields as unset.</p>
+
+    <h4>Score Encoding</h4>
+    <p>Each visit score (0&ndash;180) fits in a single unsigned byte. Per leg, both players&rsquo; visit scores are packed into byte arrays, base64-encoded, and joined with <code>|</code> (pipe is not in the base64 alphabet, so it&rsquo;s a safe separator).</p>
+    <pre><code>Encode: [73, 45, 40, 22, 81, ...] → Uint8Array → btoa() → "SSkoFlE..."
+Decode: atob("SSkoFlE...") → Uint8Array → [73, 45, 40, 22, 81, ...]
+Combined: "SSkoFlEcNxULExU7AA==|GVFCXzwKKTkhAQgMAA=="
+           ← Player 1 scores →  ← Player 2 scores →</code></pre>
+    <p>This saves ~45% compared to JSON number arrays. A 13-round leg goes from ~90 chars (<code>"v1":[73,45,...],"v2":[25,81,...]</code>) to ~50 chars (<code>"s":"...base64...|...base64..."</code>).</p>
+
+    <h4>Tiebreak Handling</h4>
+    <p>When max rounds (<code>mr</code>) is reached without a checkout, a separate tiebreak round is played: 3 darts each, highest score wins the leg. This deciding round is <strong>not</strong> recorded on the scoresheet. The <code>legs[].w</code> field is the only record of who won, and <code>legs[].cd = 0</code> signals the leg was a tiebreak.</p>
+
+    <h4>Size Analysis</h4>
+    <table>
+        <thead><tr><th>Format</th><th>Legs &times; Rounds</th><th>Payload</th><th>QR Version</th></tr></thead>
+        <tbody>
+            <tr><td>Bo3, typical</td><td>2&ndash;3 &times; 8</td><td>~380 bytes</td><td>~12</td></tr>
+            <tr><td>Bo5, all 5 legs</td><td>5 &times; 10</td><td>~520 bytes</td><td>~16</td></tr>
+            <tr><td>Bo7, all max rounds</td><td>7 &times; 13</td><td>~680 bytes</td><td>~20</td></tr>
+            <tr><td>Bo13, all max rounds</td><td>13 &times; 13</td><td>~1100 bytes</td><td>~30</td></tr>
+            <tr><td>QR v40 limit (EC-M)</td><td>&mdash;</td><td>2331 bytes</td><td>40</td></tr>
+        </tbody>
+    </table>
+    <p>Even the absolute worst case (Bo13, all legs going to max rounds with long player/team names) stays well within QR capacity with ~50% headroom.</p>
+
+    <hr>
+
+    <h2 id="crc32">CRC-32 Integrity Module</h2>
+
+    <h3>Purpose</h3>
+    <p>Detects data corruption from scanning errors, alongside QR&rsquo;s built-in error correction.</p>
+
+    <h3>Implementation</h3>
+    <p>A standalone utility module (<code>js/newton-integrity.js</code> / <code>chalker/js/newton-integrity.js</code>) &mdash; same file, shared between TM and Chalker:</p>
+    <pre><code>const NewtonIntegrity = {
+  // CRC-32 lookup table (generated once)
+  _table: null,
+
+  // Compute CRC-32 of a string → 8-char hex
+  crc32(str) { ... },
+
+  // Sign a payload object: compute CRC of JSON-sorted fields, append as 'crc'
+  sign(payload) { ... },
+
+  // Verify a payload: extract 'crc', recompute, compare
+  verify(payload) { ... }
+};</code></pre>
+    <p><strong>Key design decisions:</strong></p>
+    <ul>
+        <li>CRC computed over <strong>deterministically serialized</strong> payload (sorted keys, no whitespace)</li>
+        <li>The <code>crc</code> field is excluded before computing (sign adds it, verify strips it)</li>
+        <li>Pure JavaScript, zero dependencies, ~50 lines</li>
+        <li>Same file deployed to both TM and Chalker</li>
+    </ul>
+
+    <h3>Why CRC-32 (not SHA-256)</h3>
+    <ul>
+        <li>CRC-32 = 8 hex chars in the QR payload. SHA-256 = 64 chars &mdash; a significant size cost for no benefit here.</li>
+        <li>QR requires corruption detection, not cryptographic security.</li>
+        <li>The <code>verify()</code> interface is algorithm-agnostic &mdash; a stronger algorithm could be swapped in without changing callers.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="result-application">TM Result Application</h2>
+
+    <h3>Applying the Match Result</h3>
+    <p><code>completeMatch(matchId, winnerPlayerNumber, winnerLegs, loserLegs)</code> handles everything structural &mdash; winner declaration, bracket advancement, and the history transaction. Called directly with data from the QR payload. The TM derives <code>winnerLegs</code> and <code>loserLegs</code> by counting <code>legs[].w</code> values.</p>
+
+    <h3>Player Achievements</h3>
+    <p>Achievements are stored on <code>player.stats</code>, not on the match:</p>
+    <table>
+        <thead><tr><th>Field</th><th>Type</th><th>Description</th></tr></thead>
+        <tbody>
+            <tr><td><code>oneEighties</code></td><td>counter</td><td>Visit scores of exactly 180</td></tr>
+            <tr><td><code>tons</code></td><td>counter</td><td>Visit scores 100&ndash;179</td></tr>
+            <tr><td><code>highOuts</code></td><td>array</td><td>Checkout scores &ge; 101 (stored as individual values)</td></tr>
+            <tr><td><code>shortLegs</code></td><td>array</td><td>Dart counts for short legs (stored as individual dart counts)</td></tr>
+            <tr><td><code>lollipops</code></td><td>counter</td><td>Visit scores of exactly 3 (cosmetic)</td></tr>
+        </tbody>
+    </table>
+    <p>All are fully derivable from the result QR payload:</p>
+    <table>
+        <thead><tr><th>Achievement</th><th>Derivation</th></tr></thead>
+        <tbody>
+            <tr><td><strong>180s</strong></td><td>All visits where <code>score === 180</code></td></tr>
+            <tr><td><strong>Tons</strong></td><td>All visits where <code>100 &le; score &le; 179</code></td></tr>
+            <tr><td><strong>High outs</strong></td><td>Last visit in the winner&rsquo;s score array, if <code>score &ge; 101</code></td></tr>
+            <tr><td><strong>Short legs</strong></td><td><code>(winner_visits &minus; 1) &times; 3 + cd</code> darts</td></tr>
+            <tr><td><strong>Lollipops</strong></td><td>All visits where <code>score === 3</code></td></tr>
+        </tbody>
+    </table>
+
+    <h3>Stats Extraction Module</h3>
+    <p>The Chalker delivers raw facts &mdash; visit scores, leg winners, checkout dart counts. It does not compute, interpret, or summarise. The TM is solely responsible for deriving meaning from the raw data.</p>
+    <p>A dedicated module (<code>js/newton-stats.js</code>) handles all extraction. It is a pure function module &mdash; takes raw leg data in, returns structured stats out. No side effects. No coupling to QR, bracket, or player management.</p>
+    <pre><code>const NewtonStats = {
+  extractMatchStats(legs, startingScore, firstLegStarter) { ... },
+  extractPlayerStats(legs, playerIndex, startingScore) { ... },
+  extractAchievements(legs, playerIndex, startingScore) { ... },
+  count180s(visits) { ... },
+  countTons(visits) { ... },
+  highOuts(legs, playerIndex, startingScore) { ... },
+  shortLegs(legs, playerIndex) { ... },
+  legAverages(legs, playerIndex) { ... },
+  matchAverage(legs, playerIndex) { ... },
+};</code></pre>
+    <p>The individual extractors are callable independently &mdash; the QR result flow calls what it needs without pulling in unrelated machinery. No extractor depends on another module. New stat types are new named functions; existing callers are unaffected.</p>
+
+    <h3>Match Completion Flow</h3>
+    <p>When the result preview modal is open after a successful scan, the operator sees the winner, score, and extracted achievements. They choose how to record the result:</p>
+    <p><strong>Option A &mdash; Score only</strong></p>
+    <ul>
+        <li><code>completeMatch()</code> called with <code>completionType: 'QR'</code></li>
+        <li>No achievements written to <code>player.stats</code></li>
+        <li>Transaction <code>achievements</code> field is empty (<code>null</code> per player)</li>
+    </ul>
+    <p><strong>Option B &mdash; Score + achievements</strong></p>
+    <ul>
+        <li><code>completeMatch()</code> called as above</li>
+        <li><code>newton-stats.js</code> extracts achievements from the decoded payload</li>
+        <li>Achievements applied to <code>player.stats</code></li>
+        <li>Transaction <code>achievements</code> field populated with exactly what was written</li>
+    </ul>
+    <p>The operator decides. The <code>completionType: 'QR'</code> and <code>achievements</code> field together give the undo dialog full knowledge of what was recorded and how.</p>
+
+    <h3>Replay Protection Covers Achievements</h3>
+    <p><code>completeMatch()</code> is blocked if the match is already completed. Achievements are <strong>additive on player.stats</strong> &mdash; applying them a second time corrupts the totals. The achievement application is gated by the same state check: if the match is already completed, neither <code>completeMatch()</code> nor the achievement application is called.</p>
+
+    <hr>
+
+    <h2 id="replay-protection">Replay Protection</h2>
+    <p>When the TM scans a result QR for match <code>FS-1-3</code>:</p>
+    <ol>
+        <li>Look up match <code>FS-1-3</code> in the tournament</li>
+        <li>Match must be live (started, not yet completed) &mdash; any other state is rejected with a specific reason</li>
+        <li>Verify <code>tid</code> matches current tournament &mdash; reject if from a different tournament</li>
+        <li>Verify <code>sid</code> matches this TM instance &mdash; reject if from a different server</li>
+    </ol>
+    <p>Simple and robust &mdash; no nonces or timestamps required.</p>
+
+    <hr>
+
+    <h2 id="score-validation">TM-Side Score Validation</h2>
+    <p>After CRC verification passes, the TM performs arithmetic validation on the decoded scores. This catches encoding/decoding bugs and Chalker scoring bugs that CRC cannot detect &mdash; CRC only proves the data wasn&rsquo;t corrupted in transit, not that it was correct in the first place.</p>
+
+    <table>
+        <thead><tr><th>Check</th><th>Rule</th><th>Catches</th></tr></thead>
+        <tbody>
+            <tr><td>Score range</td><td>Every visit score is 0&ndash;180</td><td>Encoding errors, byte overflow</td></tr>
+            <tr><td>Visit count parity</td><td>Both players have equal visits, or first-thrower has exactly +1</td><td>Data corruption, missing visits</td></tr>
+            <tr><td>Checkout sum</td><td>Normal leg (<code>cd &gt; 0</code>): winner&rsquo;s scores sum to <code>sc</code></td><td>Scoring bugs, wrong winner</td></tr>
+            <tr><td>Tiebreak sum</td><td>Tiebreak leg (<code>cd == 0</code>): neither player&rsquo;s scores sum to <code>sc</code></td><td>Misclassified tiebreak</td></tr>
+            <tr><td>Winner consistency</td><td><code>legs[].w</code> matches the player whose scores sum to <code>sc</code></td><td>Wrong leg winner assignment</td></tr>
+            <tr><td>Leg count</td><td>Winner has exactly <code>ceil(bo/2)</code> legs won</td><td>Impossible match outcome</td></tr>
+        </tbody>
+    </table>
+    <p><strong>Soft warning, not hard rejection:</strong> If validation fails, the TM accepts the data but flags it visually. Rejecting the QR would force manual entry &mdash; worse UX for what might be a harmless edge case. The derived stats will also look visibly wrong, which is self-correcting.</p>
+
+    <hr>
+
+    <h2 id="server-id">Server ID</h2>
+    <p>A 12-character hex string generated once when the TM is first used, stored in global config (localStorage):</p>
+    <pre><code>if (!config.serverId) {
+  config.serverId = crypto.randomUUID().replace(/-/g, '').substring(0, 12);
+  saveGlobalConfig();
+}</code></pre>
+    <p>12 hex chars = 48 bits of entropy (281 trillion possible values) &mdash; collision risk is negligible for local tournament use.</p>
+    <p>Purpose:</p>
+    <ul>
+        <li>Identifies this TM instance in QR payloads</li>
+        <li>Prevents cross-TM result injection (Chalker echoes it back, TM verifies)</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="flows">Flows</h2>
+
+    <h3>Match Assignment Flow (TM &rarr; Chalker)</h3>
+    <ol>
+        <li>Operator clicks <strong>QR</strong> on a live match card in Match Controls</li>
+        <li>TM generates assignment payload with match details + CRC</li>
+        <li>TM displays the assignment QR code in a modal</li>
+        <li>Chalker operator taps <strong>QR</strong> in the New Match dialog &mdash; camera opens immediately</li>
+        <li>Chalker scans the QR, parses the payload, verifies CRC</li>
+        <li>Chalker auto-populates: player names, starting score, best-of, match ID, tournament ID</li>
+        <li>Chalker stores <code>mid</code>, <code>tid</code>, <code>sid</code> in match state for inclusion in the result QR</li>
+        <li>Operator confirms the assignment and selects the starting player &mdash; match begins</li>
+    </ol>
+
+    <h3>Match Result Flow (Chalker &rarr; TM)</h3>
+    <ol>
+        <li>Match completes on Chalker</li>
+        <li>Chalker builds result payload with raw visit scores, leg winners, and checkout dart counts + CRC</li>
+        <li>Operator taps <strong>Stats</strong>, then <strong>Result QR</strong> &mdash; Chalker displays the result QR code</li>
+        <li>TM operator clicks <strong>Scan QR Results</strong> in the Match Controls footer</li>
+        <li>TM parses payload, verifies CRC</li>
+        <li>TM checks <code>mid</code>, <code>tid</code>, <code>sid</code> against current tournament</li>
+        <li>TM verifies match is live (not already completed)</li>
+        <li>TM applies result: calls <code>completeMatch()</code> with winner + leg scores</li>
+        <li>TM stores stats from QR payload in the match record</li>
+    </ol>
+
+    <h3>Manual Fallback (No Camera/HTTPS)</h3>
+    <p>If QR scanning isn&rsquo;t available, both sides fall back gracefully:</p>
+    <ul>
+        <li><strong>Match assignment</strong>: Operator sets up the Chalker manually &mdash; type player names, select format</li>
+        <li><strong>Match result</strong>: Operator clicks winner and enters the leg score in the TM as normal</li>
+        <li>No data loss &mdash; stats are not transferred automatically, but the tournament continues unaffected</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="libraries">QR Library Choices</h2>
+    <table>
+        <thead><tr><th>Side</th><th>Need</th><th>Library</th><th>Notes</th></tr></thead>
+        <tbody>
+            <tr><td>TM</td><td>Generate assignment QR</td><td>qrcode-generator (~8KB)</td><td>Generates QR as canvas/SVG</td></tr>
+            <tr><td>TM</td><td>Scan result QR</td><td><code>BarcodeDetector</code> API (native) + jsQR fallback (~250KB)</td><td>jsQR used on Windows Enterprise where <code>BarcodeDetector</code> is unavailable</td></tr>
+            <tr><td>Chalker</td><td>Scan assignment QR</td><td><code>BarcodeDetector</code> API (native)</td><td>Mobile/tablet Chrome always has it; no fallback needed</td></tr>
+            <tr><td>Chalker</td><td>Generate result QR</td><td>qrcode-generator (~8KB)</td><td>Displayed via Stats &rarr; Result QR</td></tr>
+        </tbody>
+    </table>
+    <p>All libraries are standalone JS &mdash; no npm or build process required. Loaded via <code>&lt;script&gt;</code> tag.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

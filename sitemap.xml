@@ -17,6 +17,10 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://newtondarts.com/qr-protocol.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://newtondarts.com/rest-api.html</loc>
     <priority>0.7</priority>
   </url>

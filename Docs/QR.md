@@ -1,30 +1,20 @@
 # QR Code Communication Protocol (TM ↔ Chalker)
 
-**Status:** In Development — v5.0.0
+**Status:** Implemented — v5.0.0 (TM→Chalker assignment) + v5.0.1 (Chalker→TM result)
 **Last Updated:** March 2026
-
----
-
-## Decisions (March 2026)
-
-- **Version**: This feature ships as **v5.0.0** — TM↔Chalker communication is a fundamental architectural shift.
-- **First implementation target**: TM generates assignment QR (TM → Chalker direction). Chalker scanning comes second.
-- **`sc` and `mr` in TM Global Settings (Match Configuration card)**: Two new fields added at the bottom of the existing Match Configuration section. x01 Format: 101 / 201 / 301 / 501 (default 501). Max Rounds: dropdown 7–20 (default 13). Both are included in the assignment payload. This keeps TM as the single source of truth for match format — the Chalker executes whatever it is told.
-- **Network and QR are separate buttons in Chalker**: The "New Match?" dialog has four options — Rematch, New Match, QR, Network. QR is a first-class workflow, not a Network fallback. When Network is implemented, QR will serve as its fallback, but the button and flow are built independently so each is correct before they are combined.
-- **QR workflow in Chalker**: Tap QR → camera opens immediately in a modal → scan the assignment QR from TM → CRC verified → confirmation screen (player names, format, lane, referee) → Start. Camera stays open on failure with an error message. `BarcodeDetector` API only (Chrome/Edge). Clear "not supported" message on other browsers.
-- **Chalker scanning QR**: Implemented in v5.0.0-beta.2. Result QR (Chalker → TM) deferred to a later stage.
-- **Lane and referee requirements relaxed for QR**: In the standalone QR flow, neither lane nor referee is required — a partial payload is still useful. The Chalker displays whatever is present and omits what isn't. When QR serves as a fallback for the network flow, lane is required (the Chalker needs to know which board it's on), but referee remains optional. The TM generates the QR with whatever fields are assigned at the time.
 
 ---
 
 ## Context
 
-The Tournament Manager (TM) and Chalker currently operate independently. To bridge them without requiring network infrastructure, we're designing a QR-code-based communication protocol:
+The Tournament Manager (TM) and Chalker communicate via QR codes — no network infrastructure required. Two message types cover the full match lifecycle:
 
-- **TM → Chalker**: "Start Match" generates a QR code with match details that the Chalker scans
-- **Chalker → TM**: "Match Complete" generates a QR code with results that the TM scans
+- **TM → Chalker**: A live match card in the TM generates an assignment QR. The Chalker scans it and auto-populates the match — player names, format, lane, and referee.
+- **Chalker → TM**: When the match finishes, the Chalker generates a result QR. The TM scans it, previews the result, and applies it directly to the bracket.
 
-This protocol is the **foundation for all future data exchange** — the same payload schemas and integrity checking will be reused for encrypted MQTT messages when networking is implemented. QR communication itself is NOT a licensed feature.
+The payload schemas and integrity checking are designed to be transport-agnostic — the same format lends itself to network communication as well.
+
+The QR workflow was added without breaking changes. The underlying tournament data structure is compatible with the one used since the earliest beta — no migration has ever been required in the lifetime of the software, and the addition of QR communication is no exception.
 
 ---
 
@@ -32,12 +22,12 @@ This protocol is the **foundation for all future data exchange** — the same pa
 
 ### Design Principles
 
-1. **Same schema, different transport**: QR today, MQTT tomorrow. Payload format is identical.
-2. **Compact field names**: Short keys to minimize QR code size (keeps QR version low = easier to scan)
-3. **CRC-32 integrity**: Detects corruption during scanning. Reusable inside encrypted MQTT payloads later.
-4. **Replay protection**: TM tracks processed match results by match ID — rescanning triggers a warning.
+1. **Transport-agnostic schema**: Payload format is designed to work beyond QR if needed.
+2. **Compact field names**: Short keys minimize QR code size, keeping the QR version low and easy to scan.
+3. **CRC-32 integrity**: Detects corruption during scanning, alongside QR's built-in error correction.
+4. **Replay protection**: TM checks match state before applying a result — rescanning a completed match triggers a warning.
 5. **Schema versioning**: `v` field enables forward-compatible changes.
-6. **Offline-first**: No network, no license, no shared secrets required for QR.
+6. **Offline-first**: No network, no shared secrets required.
 
 ### Identification Fields (Present in All Messages)
 
@@ -51,7 +41,7 @@ This protocol is the **foundation for all future data exchange** — the same pa
 | `ts` | Unix timestamp (seconds) | `1708123456` |
 | `crc` | CRC-32 of all other fields | `"a1b2c3d4"` |
 
-The `sid` (server ID) is a 12-character hex string generated once per TM installation and persisted in global config. It identifies which TM instance created the match. 12 hex chars = 48 bits of entropy (281 trillion possible values) — collision risk is negligible for local tournament use. A `lic` (licensee) field will be added when licensing is implemented — the schema version bump will handle this.
+The `sid` (server ID) is a 12-character hex string generated once per TM installation and persisted in global config. It identifies which TM instance created the match. 12 hex chars = 48 bits of entropy (281 trillion possible values) — collision risk is negligible for local tournament use.
 
 ---
 
@@ -84,11 +74,10 @@ The `sid` (server ID) is a 12-character hex string generated once per TM install
 |-------|------|-------------|
 | `p1` | string | Player 1 name |
 | `p2` | string | Player 2 name |
-| `sc` | number | Starting score (501, 301, etc.) |
 | `sc` | number | Starting score — from Global Config (101 / 201 / 301 / 501, default 501) |
 | `bo` | number | Best-of legs — from Global Config match configuration |
 | `mr` | number | Max rounds before tiebreak — from Global Config (default 13, range 7–20) |
-| `ln` | number | Lane number (1-20). **Optional for standalone QR. Required when QR is a network fallback** (Chalker needs to know which board). Omitted if unassigned. |
+| `ln` | number | Lane number (1-20). **Optional.** Omitted if unassigned. |
 | `ref` | string | Referee name. **Optional.** Omitted if unassigned. |
 
 ### Match Result (Chalker → TM QR)
@@ -187,17 +176,12 @@ When max rounds (`mr`) is reached without a checkout, a separate tiebreak round 
 
 Even the absolute worst case (Bo13, all legs going to max rounds with long player/team names) stays well within QR capacity with ~50% headroom.
 
-**Future optimization — full binary encoding:**
-
-The entire payload could be binary-encoded (MessagePack or custom binary format) instead of JSON, potentially halving the size again. The TM can decode either format. Marked as an interesting future option if payload size ever becomes a concern — current JSON + base64 scores is well within limits and much easier to debug.
-
 ---
 
 ## CRC-32 Integrity Module
 
 ### Purpose
-- **QR codes**: Detects data corruption from scanning errors (belt-and-suspenders alongside QR's built-in ECC)
-- **Future MQTT**: Same CRC function reused inside encrypted message payloads for integrity verification after decryption
+Detects data corruption from scanning errors, alongside QR's built-in error correction.
 
 ### Implementation
 
@@ -226,10 +210,9 @@ const NewtonIntegrity = {
 - Same file deployed to both TM and Chalker
 
 ### Why CRC-32 (not SHA-256)
-- CRC-32 = 8 hex chars in the QR payload. SHA-256 = 64 chars. Significant size difference.
-- For QR, we only need corruption detection, not cryptographic security.
-- For MQTT, the encryption envelope provides authentication — the CRC inside just catches post-decryption data errors.
-- If stronger integrity is ever needed for QR, the `verify()` interface stays the same — only the algorithm changes.
+- CRC-32 = 8 hex chars in the QR payload. SHA-256 = 64 chars — a significant size cost for no benefit here.
+- QR requires corruption detection, not cryptographic security.
+- The `verify()` interface is algorithm-agnostic — a stronger algorithm could be swapped in without changing callers.
 
 ---
 
@@ -251,7 +234,7 @@ Achievements are stored on `player.stats`, not on the match. The structure:
 | `shortLegs` | array | Dart counts for short legs (stored as individual dart counts) |
 | `lollipops` | counter | Visit scores of exactly 3 (cosmetic) |
 
-Currently populated via the Statistics Modal. All are fully derivable from the result QR payload:
+All are fully derivable from the result QR payload:
 
 | Achievement | Derivation |
 |------------|------------|
@@ -287,11 +270,9 @@ const NewtonStats = {
 };
 ```
 
-**Designed for reuse.** The individual extractors are callable independently — the QR result flow calls what it needs, and the Players' Lab (future) can call any combination without pulling in QR machinery. No extractor depends on another module.
+The individual extractors are callable independently — the QR result flow calls what it needs without pulling in unrelated machinery. No extractor depends on another module. New stat types are new named functions; existing callers are unaffected.
 
-**Adding new extractors is additive.** New stat types (first-9 averages, ton-plus counts, bust rates, etc.) are new named functions in this module. Existing callers are unaffected.
-
-### Match Completion Flow (beta.5)
+### Match Completion Flow
 
 When the result preview modal is open after a successful scan, the operator sees the winner, score, and extracted achievements. They choose how to record the result:
 
@@ -322,12 +303,11 @@ The operator decides. The software presents the options without forcing either p
 
 When TM scans a result QR for match `FS-1-3`:
 1. Look up match `FS-1-3` in the tournament
-2. If match is NOT completed → apply result normally
-3. If match IS already completed → show warning: "This match already has a result. Rescan? (requires confirmation)"
-4. Verify `tid` matches current tournament — reject if from a different tournament
-5. Verify `sid` matches this TM instance — reject if from a different server
+2. Match must be live (started, not yet completed) — any other state is rejected with a specific reason
+3. Verify `tid` matches current tournament — reject if from a different tournament
+4. Verify `sid` matches this TM instance — reject if from a different server
 
-This is simple, robust, and doesn't require tracking nonces or timestamps.
+Simple and robust — no nonces or timestamps required.
 
 ---
 
@@ -357,19 +337,17 @@ After CRC verification passes, the TM performs arithmetic validation on the deco
 A 12-character hex string generated once when the TM is first used, stored in global config (localStorage):
 
 ```javascript
-// In results-config.js or a new config section
 if (!config.serverId) {
   config.serverId = crypto.randomUUID().replace(/-/g, '').substring(0, 12);
   saveGlobalConfig();
 }
 ```
 
-12 hex chars = 48 bits of entropy (281 trillion possible values). More than sufficient for identifying local TM instances — collision risk is negligible.
+12 hex chars = 48 bits of entropy (281 trillion possible values) — collision risk is negligible for local tournament use.
 
 Purpose:
 - Identifies this TM instance in QR payloads
 - Prevents cross-TM result injection (Chalker echoes it back, TM verifies)
-- Will coexist with licensee ID when licensing is implemented
 
 ---
 
@@ -389,21 +367,21 @@ Purpose:
 ### Match Result Flow (Chalker → TM)
 
 1. Match completes on Chalker
-2. Chalker computes stats, builds result payload with leg-level detail + CRC
-3. Chalker displays QR code on the Match Complete screen (alongside existing stats)
-4. TM operator scans QR (camera button in Match Controls, or dedicated scan page)
+2. Chalker builds result payload with raw visit scores, leg winners, and checkout dart counts + CRC
+3. Operator taps **Stats**, then **Result QR** — Chalker displays the result QR code
+4. TM operator clicks **Scan QR Results** in the Match Controls footer
 5. TM parses payload, verifies CRC
 6. TM checks `mid`, `tid`, `sid` against current tournament
 7. TM checks replay (is match already completed?)
 8. TM applies result: calls `completeMatch()` with winner + leg scores
-9. TM stores stats from QR in match data (or a linked stats record)
+9. TM stores stats from QR payload in the match record
 
 ### Manual Fallback (No Camera/HTTPS)
 
-If QR scanning isn't available:
-- **Match assignment**: Operator manually sets up the Chalker as today (type player names, select format)
-- **Match result**: Operator manually clicks winner + enters leg score in TM as today
-- No data loss — just no automatic stats transfer
+If QR scanning isn't available, both sides fall back gracefully:
+- **Match assignment**: Operator sets up the Chalker manually — type player names, select format
+- **Match result**: Operator clicks winner and enters the leg score in the TM as normal
+- No data loss — stats are not transferred automatically, but the tournament continues unaffected
 
 ---
 
@@ -412,107 +390,11 @@ If QR scanning isn't available:
 | Side | Need | Library | Size | Notes |
 |------|------|---------|------|-------|
 | TM | Generate assignment QR | qrcode-generator (~8KB) | Lightweight | Generates QR as canvas/SVG |
-| TM | Scan result QR | html5-qrcode (~50KB) | Camera-based | Wraps getUserMedia + decoding |
-| Chalker | Scan assignment QR | html5-qrcode (~50KB) | Camera-based | Chalker needs camera too |
-| Chalker | Generate result QR | qrcode-generator (~8KB) | Lightweight | Display on Match Complete screen |
+| TM | Scan result QR | `BarcodeDetector` API (native) + jsQR fallback (~250KB) | Zero-dep primary | jsQR used on Windows Enterprise where `BarcodeDetector` is unavailable |
+| Chalker | Scan assignment QR | `BarcodeDetector` API (native) | Zero-dep | Mobile/tablet Chrome always has it; no fallback needed |
+| Chalker | Generate result QR | qrcode-generator (~8KB) | Lightweight | Displayed via Stats → Result QR |
 
-Both sides need both generation and scanning. Libraries loaded on-demand (not at startup).
-
-**Zero-dependency requirement**: Both libraries are standalone JS, no npm/build needed. Loaded via `<script>` tag or dynamic import.
+**Zero-dependency requirement**: All libraries are standalone JS, no npm/build needed. Loaded via `<script>` tag.
 
 ---
 
-## Files to Create/Modify
-
-### New Files
-
-| File | Purpose |
-|------|---------|
-| `js/newton-integrity.js` | CRC-32 module (shared code, copied to both) |
-| `js/newton-stats.js` | TM-side stats extraction module (pure functions, reusable for Players' Lab) |
-| `chalker/js/newton-integrity.js` | Same file, for Chalker |
-| `js/qr-bridge.js` | TM: QR generation (assignments) + scanning (results) |
-| `chalker/js/qr-bridge.js` | Chalker: QR scanning (assignments) + generation (results) |
-| `lib/qrcode-generator.min.js` | QR generation library |
-| `lib/html5-qrcode.min.js` | QR scanning library |
-| `chalker/lib/qrcode-generator.min.js` | Same, for Chalker |
-| `chalker/lib/html5-qrcode.min.js` | Same, for Chalker |
-
-### Modified Files
-
-| File | Change |
-|------|--------|
-| `js/results-config.js` | Add `serverId` to global config |
-| `js/bracket-rendering.js` | Add QR display on "Start Match", add scan button for results |
-| `tournament.html` | QR modal markup, camera viewport |
-| `chalker/js/chalker.js` | Store network fields in state, generate result QR on complete, scan assignment QR |
-| `chalker/index.html` | QR display area on Match Complete, scan UI for assignments |
-
----
-
-## Implementation Phases
-
-### Phase 1: Foundation
-- Create `newton-integrity.js` (CRC-32 module)
-- Generate and persist server ID in TM config
-- Define and document payload schemas
-
-### Phase 2: Match Assignment QR (TM → Chalker)
-- TM: Generate QR on "Start Match" (`qr-bridge.js`)
-- Chalker: Scan QR to receive match assignment
-- Chalker: Store `mid`, `tid`, `sid` in match state
-
-### Phase 3: Match Result QR (Chalker → TM)
-- Chalker: Generate result QR on Match Complete screen
-- TM: Scan result QR (camera button in Match Controls)
-- TM: Parse, verify, apply result with replay protection
-
-### Phase 4: Polish & Edge Cases
-- Error handling (invalid QR, wrong tournament, CRC mismatch)
-- UX refinement (scan success/failure animations)
-- Test with all bracket sizes (8, 16, 32 players)
-
----
-
-## Things to Consider
-
-1. **UTF-8 player names**: Names with accents (Ødegaard, Müller) must survive QR encoding correctly. JSON + UTF-8 handles this natively.
-
-2. **Tournament ID compactness**: Current `tid` is `Date.now()` (~13 digits). Could encode as base36 to save bytes, but the saving is small (~3 bytes). Not worth the complexity.
-
-3. **QR error correction level**: Use level M (medium, ~15% recovery). Good balance between scan reliability and capacity. Level L would give more capacity but less tolerance for screen glare/angles.
-
-4. **Multiple Chalkers**: Each Chalker scans its own assignment QR and produces its own result QR. The `mid` field ensures results route to the correct match. No conflict possible.
-
-5. **Clock differences**: `ts` is informational only (for logging/debugging). Never used for validation. Different devices may have different clocks.
-
-6. **Chalker stays "dumb"**: The Chalker doesn't need tournament knowledge. It receives IDs via the assignment QR and echoes them back in the result QR. All validation happens on the TM side.
-
-7. **Self-signed SSL and camera access in Docker**: Camera access (`getUserMedia`, `BarcodeDetector`) requires a secure context. Secure context rules:
-   - **HTTPS (any cert, including self-signed)**: camera works. Browser shows a one-time "not private" warning on first visit; once accepted, camera works normally and the Chalker can be installed as a PWA.
-   - **`localhost` over HTTP**: camera works — browsers treat localhost as a secure context regardless of protocol.
-   - **Local IP over HTTP** (e.g. `http://192.168.1.x`): camera **blocked**. PWA install also blocked — browsers refuse to install PWAs from non-secure non-localhost origins.
-
-   **Docker SSL strategy**: Generate a self-signed certificate at container startup if none exists. Store it in the persistent data volume (same location as tournament data). Use a **30-year validity** — certificate lifetimes are a CA policy decision, not a cryptographic requirement; a self-signed cert for a local network can safely use any duration. Operators can replace the generated cert with their own by dropping cert files into the data volume. The container startup script checks: if cert files exist → use them; if not → generate them.
-
-   **Alternative for internet-connected deployments**: Caddy with Let's Encrypt automatically issues and renews a real certificate — no browser warning, no operator action required beyond pointing a real domain at the server. Not suitable for air-gapped or offline deployments.
-
-8. **Stats the TM doesn't currently track**: The result QR carries raw visit scores from which the TM can derive everything (averages, score ranges, high finishes, best/worst leg, etc.). The TM currently doesn't store this detail beyond winner/loser and leg score. A future enhancement could display derived stats in the bracket or leaderboard.
-
----
-
-## Related Documents
-
-- **Docs/NETWORK-LAYER.md**: Full network integration plan
-- **Docs/SINGLE-SOURCE-OF-TRUTH.md**: Data architecture principles
-
----
-
-## Verification
-
-- Generate a test assignment QR in TM, scan with phone QR reader, verify JSON is valid and CRC matches
-- Generate a test result QR in Chalker, scan with phone QR reader, verify payload completeness
-- Round-trip test: TM assigns → Chalker scans → plays match → Chalker generates result → TM scans → result applied to bracket
-- Test with special characters in player names
-- Test replay protection: scan same result QR twice, verify warning on second scan
-- Test CRC verification: manually corrupt one byte in QR data, verify rejection

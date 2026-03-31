@@ -20,21 +20,9 @@ The TM→Chalker QR assignment and result reporting workflow spans two devices a
 
 ---
 
-### v5.0.1 Release Preparation
-
-Documentation and communication tasks before cutting the stable release:
-
-- **User Guide** (`userguide.html`) — add TM→Chalker QR assignment section prominently; document the History tab and match detail view
-- **Landing page — Tablet Scoring card** — update to mention QR assignment and result reporting
-- **Landing page — Match Controls card** — update to reflect Scan QR Results button and live match flow
-- **Screenshots** — update landing page and GitHub README.md screenshots to reflect current UI
-- **Consolidated v5.0.1 release notes** — single authoritative release page summarising all beta improvements into a clean narrative for the stable release
-- ~~**llms.txt**~~ — done (beta.8)
-- ~~**Help subsystem**~~ — done (beta.8)
-
 ### Reddit Post
 
-Announce NewTon on a relevant subreddit (r/darts, r/opensourcesoftware, or similar) when the timing feels right — not necessarily tied to the exact 5.0.1 release date.
+Announce NewTon on a relevant subreddit (r/darts, r/opensourcesoftware, or similar) when the timing feels right.
 
 ---
 
@@ -85,4 +73,4 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 ---
 
-**Last updated:** March 31, 2026 — Analytics future enhancements added; Record to History toggle removed (superseded by delete); Chalker scoreboard removed (done); llms.txt and help subsystem ticked off v5.0.1 prep list
+**Last updated:** March 31, 2026 — v5.0.1 shipped; prep list cleared; QR workflow illustration and Reddit post remain in Next; Analytics future enhancements in Later
