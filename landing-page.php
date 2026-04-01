@@ -114,9 +114,9 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
                 <p>Deploy on your own server in under 2 minutes. Lightweight Docker container with nginx — perfect for club or venue use.</p>
                 <a href="docker-quickstart.html" class="btn-github">Docker Quickstart</a>
             </div>
-            <div class="get-started-quickstart has-lightbox">
+            <!-- <div class="get-started-quickstart has-lightbox">
                 <img src="Screenshots/quickstart.jpg" alt="NewTon DC Tournament Manager — Quick Start Guide: Download, Open, Configure, Create, Register, Generate &amp; Run" class="lightbox-trigger" data-full="Screenshots/quickstart.jpg">
-            </div>
+            </div> -->
             <div class="get-started-card get-started-card--wide">
                 <div class="get-started-card-text">
                     <h3>User Guide</h3>
