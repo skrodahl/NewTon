@@ -1,0 +1,469 @@
+/* Design System Reference Card — design-system.html */
+
+/* ── Page ── */
+body {
+    background: #f5ebe0;
+    padding: 0;
+    margin: 0;
+}
+
+.ds-page {
+    max-width: 1400px;
+    margin: 0 auto;
+    padding: 0 0 48px;
+    border: 1px solid #e0cdb8;
+    border-radius: 16px;
+    overflow: hidden;
+    margin-bottom: 36px;
+}
+
+/* ── Header ── */
+.ds-header {
+    background: #2b2118;
+    border-bottom: 4px solid #d4824a;
+    padding: 20px 32px;
+    display: flex;
+    align-items: center;
+    gap: 18px;
+    margin-bottom: 36px;
+}
+
+.ds-header-logo {
+    width: 54px;
+    height: 54px;
+    border-radius: 50%;
+    border: 2px solid #d4824a;
+    object-fit: cover;
+    flex-shrink: 0;
+}
+
+.ds-header-text h1 {
+    font-family: 'Insignia', Georgia, serif;
+    color: #f5ebe0;
+    font-size: 2.25rem;
+    font-weight: 400;
+    margin: 0;
+    line-height: 1.2;
+}
+
+.ds-header-text p {
+    font-family: 'Manrope', sans-serif;
+    color: #d5c4b0;
+    font-size: 0.85rem;
+    margin: 4px 0 0;
+}
+
+/* ── Three-column grid ── */
+.ds-grid {
+    display: grid;
+    grid-template-columns: 260px 1fr 300px;
+    gap: 36px;
+    padding: 0 32px;
+    align-items: start;
+}
+
+/* ── Section wrapper ── */
+.ds-section {
+    margin-bottom: 28px;
+}
+
+.ds-section:last-child {
+    margin-bottom: 0;
+}
+
+.ds-section-title {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8a7968;
+    margin: 0 0 12px;
+    padding-bottom: 6px;
+    border-bottom: 1px solid #d5c4b0;
+}
+
+/* ── Typography ── */
+.ds-type-meta {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.75rem;
+    color: #8a7968;
+    margin: 0 0 2px;
+}
+
+.ds-type-desc {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.78rem;
+    color: #5c4a3a;
+    margin: 0 0 10px;
+}
+
+.ds-specimen-h1 {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 2.25rem;
+    font-weight: 400;
+    color: #2b2118;
+    margin: 0 0 2px;
+    line-height: 1.2;
+}
+
+.ds-specimen-h2 {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 1.75rem;
+    font-weight: 400;
+    color: #2b2118;
+    margin: 0 0 14px;
+    line-height: 1.2;
+}
+
+.ds-specimen-body {
+    font-family: 'Manrope', sans-serif;
+    font-size: 1rem;
+    color: #3d2e1f;
+    line-height: 1.6;
+    margin: 0 0 2px;
+}
+
+.ds-specimen-caption {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.72rem;
+    color: #8a7968;
+    margin: 0 0 10px;
+}
+
+.ds-specimen-ui-label {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: #3d2e1f;
+    margin: 0 0 2px;
+}
+
+/* ── Buttons ── */
+.ds-button-row {
+    margin-bottom: 12px;
+}
+
+.ds-button-meta {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.72rem;
+    color: #8a7968;
+    margin: 0 0 5px;
+}
+
+.ds-button-pair {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+
+.ds-arrow {
+    color: #8a7968;
+    font-size: 0.9rem;
+}
+
+.ds-btn {
+    padding: 9px 18px;
+    border-radius: 10px;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.875rem;
+    font-weight: 700;
+    border: none;
+    cursor: default;
+    letter-spacing: 0.3px;
+}
+
+.ds-btn-launch        { background: #c0562a; color: #fff; box-shadow: 0 4px 14px rgba(192,86,42,0.35); }
+.ds-btn-launch-hover  { background: #a8441e; color: #fff; }
+.ds-btn-chalker       { background: #e8a44a; color: #2b2118; }
+.ds-btn-chalker-hover { background: #d4923e; color: #2b2118; }
+.ds-btn-github        { background: #2b2118; color: #f5ebe0; border: 2px solid #5c4a3a !important; }
+.ds-btn-github-hover  { background: #3d2e1f; color: #f5ebe0; border: 2px solid #d4824a !important; }
+
+/* ── Color Palette ── */
+.ds-palette {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 14px 10px;
+    justify-content: center;
+}
+
+.ds-swatch {
+    text-align: center;
+    flex: 0 0 calc(20% - 8px);
+}
+
+.ds-swatch-circle {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    margin: 0 auto 5px;
+    border: 1px solid rgba(0,0,0,0.07);
+}
+
+/* Swatch colors */
+.ds-swatch-parchment   { background: #f5ebe0; }
+.ds-swatch-cream       { background: #fff8f0; }
+.ds-swatch-warm-tan    { background: #ede0d0; }
+.ds-swatch-rich-brown  { background: #2b2118; }
+.ds-swatch-mid-brown   { background: #3d2e1f; }
+.ds-swatch-warm-prose  { background: #5c4a3a; }
+.ds-swatch-muted-text  { background: #8a7968; }
+.ds-swatch-pale-label  { background: #d5c4b0; }
+.ds-swatch-warm-border { background: #e0cdb8; }
+.ds-swatch-burnt       { background: #c0562a; }
+.ds-swatch-mid-orange  { background: #d4824a; }
+.ds-swatch-amber       { background: #e8a44a; }
+.ds-swatch-teal        { background: #4a8c7e; }
+
+.ds-swatch-name {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.65rem;
+    font-weight: 600;
+    color: #3d2e1f;
+    margin-bottom: 1px;
+    line-height: 1.3;
+}
+
+.ds-swatch-hex {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.62rem;
+    color: #5c4a3a;
+}
+
+/* ── Cards ── */
+.ds-cards-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 14px;
+    margin-bottom: 20px;
+}
+
+.ds-card {
+    background: #fff8f0;
+    border: 2px solid #e0cdb8;
+    border-radius: 14px;
+    padding: 18px;
+    position: relative;
+    overflow: hidden;
+}
+
+.ds-card-feature::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #c0562a, #e8a44a, #4a8c7e);
+    border-radius: 14px 14px 0 0;
+}
+
+.ds-card h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #2b2118;
+    margin: 0 0 6px;
+}
+
+.ds-card p {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.8rem;
+    color: #5c4a3a;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ── Stat Card ── */
+.ds-stat-card-wrap {
+    display: flex;
+    justify-content: center;
+}
+
+.ds-stat-card {
+    background: #2b2118;
+    border: 2px solid #d4824a;
+    border-radius: 12px;
+    padding: 28px 40px;
+    text-align: center;
+    min-width: 200px;
+}
+
+.ds-stat-number {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 2.5rem;
+    color: #e8a44a;
+    line-height: 1;
+    margin-bottom: 8px;
+}
+
+.ds-stat-label {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 500;
+    color: #d5c4b0;
+}
+
+/* ── Section Divider ── */
+.ds-divider-demo {
+    height: 3px;
+    background: linear-gradient(90deg, transparent, #d4824a, #e8a44a, #d4824a, transparent);
+    border-radius: 2px;
+    margin-bottom: 6px;
+}
+
+.ds-divider-caption {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.62rem;
+    color: #8a7968;
+    margin: 4px 0 0;
+    line-height: 1.5;
+}
+
+/* ── Showcase Label ── */
+.ds-showcase-pill {
+    display: inline-block;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.75rem;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #c0562a;
+    background: rgba(192, 86, 42, 0.1);
+    padding: 4px 12px;
+    border-radius: 20px;
+}
+
+/* ── Code & Terminal ── */
+.ds-inline-code-demo {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.875rem;
+    color: #3d2e1f;
+    margin-bottom: 8px;
+}
+
+.ds-inline-code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.85em;
+    background: #ede0d0;
+    color: #c0562a;
+    padding: 1px 5px;
+    border-radius: 3px;
+}
+
+.ds-code-block {
+    background: #2d2010;
+    border: 1px solid #4a3728;
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin: 0 0 8px;
+}
+
+.ds-code-block code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    color: #e8d5b0;
+    line-height: 1.65;
+    white-space: pre;
+    display: block;
+}
+
+.ds-terminal {
+    margin: 0;
+}
+
+.ds-terminal-bar {
+    background: #2a2a2a;
+    border-radius: 8px 8px 0 0;
+    padding: 7px 12px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.ds-terminal-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    flex-shrink: 0;
+}
+
+.ds-terminal-dot--red    { background: #e74c3c; }
+.ds-terminal-dot--yellow { background: #f39c12; }
+.ds-terminal-dot--green  { background: #2ecc71; }
+
+.ds-terminal-body {
+    background: #111;
+    border: 1px solid #2a2a2a;
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    padding: 12px 16px;
+}
+
+.ds-terminal-body code {
+    font-family: 'Courier New', Courier, monospace;
+    font-size: 0.8rem;
+    color: #b8e6b8;
+    line-height: 1.65;
+}
+
+/* ── Step List ── */
+.ds-steps {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    counter-reset: step-counter;
+}
+
+.ds-steps li {
+    counter-increment: step-counter;
+    display: flex;
+    gap: 12px;
+    align-items: center;
+    padding: 10px 14px;
+    background: #ede0d0;
+    border-radius: 8px;
+    border-left: 4px solid #d4824a;
+    color: #3d2e1f;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.875rem;
+    margin-bottom: 6px;
+}
+
+.ds-steps li:last-child {
+    margin-bottom: 0;
+}
+
+.ds-steps li::before {
+    content: counter(step-counter);
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 1rem;
+    color: #fff;
+    background: #d4824a;
+    min-width: 28px;
+    height: 28px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+/* ── Footer demo ── */
+.ds-footer-demo {
+    padding-top: 12px;
+    border-top: 2px solid #d5c4b0;
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.85rem;
+    color: #8a7968;
+}
+
+.ds-footer-demo a {
+    color: #5c4a3a;
+    text-decoration: underline;
+    text-decoration-color: #d4824a;
+    text-underline-offset: 3px;
+}
+
+.ds-footer-demo a:hover {
+    color: #c0562a;
+}

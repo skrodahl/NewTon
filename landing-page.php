@@ -75,7 +75,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             <div class="landing-header-top">
                 <h1>
                     <img src="images/logo.jpg" alt="NewTon DC Tournament Manager Logo" class="landing-logo">
-                    NewTon DC - Tournament Manager
+                    NewTon DC Tournament Manager
                 </h1>
             </div>
         </div>
@@ -237,7 +237,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         <p>
             NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
             <a href="<?= $githubUrl ?>">GitHub</a> &mdash;
-            <a href="privacy.html">Privacy</a>
+            <a href="privacy.html">Privacy</a> &mdash;
+            <a href="design-system.html">Design System</a>
         </p>
         <p><em class="footer-cheeky">No popups? No cookies!</em></p>
     </div>

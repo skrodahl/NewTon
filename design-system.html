@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="canonical" href="https://newtondarts.com/design-system.html">
+    <title>NewTon DC — Design System</title>
+    <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/design-system.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+    <h1>Design System</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager &mdash; Visual Language Reference</p>
+    <p>NewTon DC uses a warm, analogue design language built on two typefaces and a hand-picked palette of browns, oranges, and teal. This page documents every visual token &mdash; colors, typography, components, and patterns &mdash; as a living reference rendered from the actual CSS.</p>
+</div>
+
+<div class="ds-page">
+
+    <!-- Header specimen -->
+    <div class="ds-header">
+        <img src="images/logo.jpg" alt="NewTon DC Logo" class="ds-header-logo">
+        <div class="ds-header-text">
+            <h1>NewTon DC Tournament Manager</h1>
+            <p>Design System &mdash; Insignia Regular &amp; Manrope Variable &mdash; landing.css</p>
+        </div>
+    </div>
+
+    <div class="ds-grid">
+
+        <!-- ── LEFT COLUMN ── -->
+        <div>
+
+            <!-- Typography -->
+            <div class="ds-section">
+                <div class="ds-section-title">Typography</div>
+
+                <p class="ds-type-meta">Display &mdash; Insignia Regular, 400 weight</p>
+                <p class="ds-type-desc">h1, h2, stat numbers, step numerals</p>
+                <div class="ds-specimen-h1">H1 Heading</div>
+                <div class="ds-specimen-h2">H2 Heading</div>
+
+                <p class="ds-type-meta">Body &mdash; Manrope variable, 100&ndash;900 weight</p>
+                <p class="ds-type-desc">body, UI labels, buttons, captions</p>
+                <p class="ds-specimen-body">Body text. Line-height 1.6.</p>
+                <p class="ds-specimen-caption">Manrope, 1rem, #3d2e1f</p>
+                <p class="ds-specimen-ui-label">UI Label</p>
+                <p class="ds-specimen-caption">Manrope, 0.875rem, weight 500</p>
+            </div>
+
+            <!-- Buttons -->
+            <div class="ds-section">
+                <div class="ds-section-title">Buttons</div>
+
+                <div class="ds-button-row">
+                    <p class="ds-button-meta">Launch (Primary)</p>
+                    <div class="ds-button-pair">
+                        <button class="ds-btn ds-btn-launch">Launch</button>
+                        <span class="ds-arrow">&#8594;</span>
+                        <button class="ds-btn ds-btn-launch-hover">Hover</button>
+                    </div>
+                </div>
+
+                <div class="ds-button-row">
+                    <p class="ds-button-meta">Chalker</p>
+                    <div class="ds-button-pair">
+                        <button class="ds-btn ds-btn-chalker">Chalker</button>
+                        <span class="ds-arrow">&#8594;</span>
+                        <button class="ds-btn ds-btn-chalker-hover">Hover</button>
+                    </div>
+                </div>
+
+                <div class="ds-button-row">
+                    <p class="ds-button-meta">GitHub / Secondary</p>
+                    <div class="ds-button-pair">
+                        <button class="ds-btn ds-btn-github">Secondary</button>
+                        <span class="ds-arrow">&#8594;</span>
+                        <button class="ds-btn ds-btn-github-hover">Hover</button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── MIDDLE COLUMN ── -->
+        <div>
+
+            <!-- Color Palette -->
+            <div class="ds-section">
+                <div class="ds-section-title">Color Palette</div>
+                <div class="ds-palette">
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-parchment"></div>
+                        <div class="ds-swatch-name">Parchment</div>
+                        <div class="ds-swatch-hex">#f5ebe0</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-cream"></div>
+                        <div class="ds-swatch-name">Cream</div>
+                        <div class="ds-swatch-hex">#fff8f0</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-warm-tan"></div>
+                        <div class="ds-swatch-name">Warm tan</div>
+                        <div class="ds-swatch-hex">#ede0d0</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-rich-brown"></div>
+                        <div class="ds-swatch-name">Rich brown</div>
+                        <div class="ds-swatch-hex">#2b2118</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-mid-brown"></div>
+                        <div class="ds-swatch-name">Mid brown</div>
+                        <div class="ds-swatch-hex">#3d2e1f</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-warm-prose"></div>
+                        <div class="ds-swatch-name">Warm prose</div>
+                        <div class="ds-swatch-hex">#5c4a3a</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-muted-text"></div>
+                        <div class="ds-swatch-name">Muted text</div>
+                        <div class="ds-swatch-hex">#8a7968</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-pale-label"></div>
+                        <div class="ds-swatch-name">Pale label</div>
+                        <div class="ds-swatch-hex">#d5c4b0</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-warm-border"></div>
+                        <div class="ds-swatch-name">Warm border</div>
+                        <div class="ds-swatch-hex">#e0cdb8</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-burnt"></div>
+                        <div class="ds-swatch-name">Burnt orange</div>
+                        <div class="ds-swatch-hex">#c0562a</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-mid-orange"></div>
+                        <div class="ds-swatch-name">Mid orange</div>
+                        <div class="ds-swatch-hex">#d4824a</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-amber"></div>
+                        <div class="ds-swatch-name">Amber gold</div>
+                        <div class="ds-swatch-hex">#e8a44a</div>
+                    </div>
+                    <div class="ds-swatch">
+                        <div class="ds-swatch-circle ds-swatch-teal"></div>
+                        <div class="ds-swatch-name">Muted teal</div>
+                        <div class="ds-swatch-hex">#4a8c7e</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cards -->
+            <div class="ds-section">
+                <div class="ds-section-title">Cards</div>
+                <div class="ds-cards-row">
+                    <div class="ds-card">
+                        <h3>H3 Card Title</h3>
+                        <p>Standard card &mdash; cream surface, warm border, lifts on hover.</p>
+                    </div>
+                    <div class="ds-card ds-card-feature">
+                        <h3>H3 Feature</h3>
+                        <p>Feature card &mdash; 4px gradient top stripe: burnt orange &rarr; amber &rarr; teal.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Stat Card -->
+            <div class="ds-section">
+                <div class="ds-section-title">Highlight / Stat Card</div>
+                <div class="ds-stat-card-wrap">
+                    <div class="ds-stat-card">
+                        <div class="ds-stat-number">42</div>
+                        <div class="ds-stat-label">Active Players</div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- ── RIGHT COLUMN ── -->
+        <div>
+
+            <!-- Section Divider -->
+            <div class="ds-section">
+                <div class="ds-section-title">Section Divider</div>
+                <div class="ds-divider-demo"></div>
+                <p class="ds-divider-caption">transparent &rarr; #d4824a &rarr; #e8a44a &rarr; #d4824a &rarr; transparent</p>
+            </div>
+
+            <!-- Showcase Label -->
+            <div class="ds-section">
+                <div class="ds-section-title">Showcase Label</div>
+                <span class="ds-showcase-pill">Bracket View</span>
+            </div>
+
+            <!-- Code & Terminal -->
+            <div class="ds-section">
+                <div class="ds-section-title">Code &amp; Terminal</div>
+                <p class="ds-inline-code-demo">Open <span class="ds-inline-code">tournament.html</span> in your browser.</p>
+                <div class="ds-code-block">
+                    <code>const tid = "DC-2024";
+return tid;</code>
+                </div>
+                <div class="ds-terminal">
+                    <div class="ds-terminal-bar">
+                        <span class="ds-terminal-dot ds-terminal-dot--red"></span>
+                        <span class="ds-terminal-dot ds-terminal-dot--yellow"></span>
+                        <span class="ds-terminal-dot ds-terminal-dot--green"></span>
+                    </div>
+                    <div class="ds-terminal-body">
+                        <code>$ docker pull skrodahl/newton</code>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Step List -->
+            <div class="ds-section">
+                <div class="ds-section-title">Step List</div>
+                <ol class="ds-steps">
+                    <li>Download the release</li>
+                    <li>Open tournament.html</li>
+                    <li>Register players</li>
+                </ol>
+            </div>
+
+            <!-- Footer -->
+            <div class="ds-section">
+                <div class="ds-section-title">Footer</div>
+                <div class="ds-footer-demo">
+                    NewTon DC Tournament Manager &mdash; BSD-3-Clause &mdash; <a href="#">example link</a>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

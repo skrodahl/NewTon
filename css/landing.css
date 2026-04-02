@@ -310,6 +310,11 @@ body {
     text-decoration: none;
 }
 
+.docs-content .btn-github:hover {
+    color: #f5ebe0;
+    text-decoration: none;
+}
+
 .docs-content .btn-download-top {
     margin: 8px 0 24px;
 }
