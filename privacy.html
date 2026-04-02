@@ -30,6 +30,7 @@
             <li><a href="#exports">Export Privacy</a></li>
             <li><a href="#demo-site">Demo Site Model</a></li>
             <li><a href="#self-hosting">Self-Hosting &amp; the REST API</a></li>
+            <li><a href="#security">Security Architecture</a></li>
             <li><a href="#offline">Offline Operation</a></li>
             <li><a href="#faq">FAQ</a></li>
             <li><a href="#summary">Summary</a></li>
@@ -180,6 +181,38 @@ dartsSavedPlayers                → Saved player names</code></pre>
     <pre><code>environment:
   - NEWTON_API_ENABLED=true   # Allow tournament sharing
   # Data stays on your server, under your control</code></pre>
+
+    <hr>
+
+    <h2 id="security">Security Architecture</h2>
+    <p>NewTon DC Tournament Manager's privacy model and security model are the same thing. The architecture that protects your data also eliminates attack vectors.</p>
+
+    <h3>Read-Only Server Surface</h3>
+    <p>The server delivers static files via GET requests. There are no POST, PUT, or DELETE endpoints in normal operation (the optional REST API is disabled by default). With no write mechanism, there is no way for an attacker to persist anything on the server.</p>
+
+    <h3>Security Headers</h3>
+    <p>All pages are served with comprehensive security headers, enabled by default in Docker deployments:</p>
+    <ul>
+        <li><strong>Content-Security-Policy</strong> &mdash; prevents loading external scripts, styles, and resources; <code>connect-src 'self'</code> blocks data exfiltration to external servers</li>
+        <li><strong>Referrer-Policy</strong> &mdash; limits referrer information sent to other sites</li>
+        <li><strong>Permissions-Policy</strong> &mdash; disables unused browser features (geolocation, microphone, payment, USB)</li>
+        <li><strong>X-Frame-Options</strong> &mdash; prevents clickjacking by blocking embedding in foreign iframes</li>
+        <li><strong>X-Content-Type-Options</strong> &mdash; prevents MIME-type sniffing attacks</li>
+        <li><strong>Strict-Transport-Security</strong> &mdash; enforces HTTPS connections</li>
+    </ul>
+    <p>Documentation pages and the landing page achieve an <strong>A+</strong> grade on <a href="https://securityheaders.com" target="_blank" rel="noopener">securityheaders.com</a> with a strict CSP. The tournament app grades <strong>A</strong> &mdash; see below for why.</p>
+
+    <h3>Why <code>unsafe-inline</code> Is Safe in NewTon</h3>
+    <p>The Tournament Manager's CSP includes <code>unsafe-inline</code> for scripts and styles &mdash; normally considered a security risk because it allows inline scripts to execute. In a traditional web application, this enables Stored Cross-Site Scripting (XSS): an attacker saves a malicious script to a database, and every visitor who loads the page runs it.</p>
+    <p><strong>NewTon has no database.</strong> There is nowhere for an attacker to persist a malicious script. The entire attack model collapses:</p>
+    <ul>
+        <li><strong>No persistence</strong> &mdash; no database, no server-side storage, no way to save a script that other users will execute</li>
+        <li><strong>No sessions</strong> &mdash; no cookies, no login tokens, nothing to steal</li>
+        <li><strong>No exfiltration</strong> &mdash; <code>connect-src 'self'</code> traps any code inside the browser; it cannot phone home to an external server</li>
+        <li><strong>No server-side impact</strong> &mdash; the server only handles GET requests for static files; it has no write endpoints and does not process client-side behaviour</li>
+    </ul>
+    <p>The result: the only way to execute malicious inline code would require a user to deliberately inject it into their own browser. The risk is localized to the person doing it, non-persistent, and architecturally sandboxed. It cannot spread to other users because there is no shared state.</p>
+    <p>This is why <code>unsafe-inline</code> &mdash; a genuine vulnerability in applications with databases and user accounts &mdash; is architecturally neutralized in NewTon DC Tournament Manager's read-only, stateless, self-contained model.</p>
 
     <hr>
 

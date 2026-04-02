@@ -298,7 +298,7 @@ Version 4.0.0 Docker images include comprehensive security headers that compleme
 - X-Content-Type-Options (prevents MIME sniffing)
 - Server tokens hidden (reduces information disclosure)
 
-These headers are enabled by default in Docker deployments with no configuration required. They achieve an **A grade** on [securityheaders.com](https://securityheaders.com).
+These headers are enabled by default in Docker deployments with no configuration required. Documentation pages and the landing page achieve an **A+ grade** on [securityheaders.com](https://securityheaders.com) with a strict CSP (no `unsafe-inline`). The tournament app retains `unsafe-inline` for architectural reasons (see below) and grades **A**.
 
 **Why This Matters for Privacy:**
 - CSP prevents any script from making unauthorized network requests
@@ -306,6 +306,21 @@ These headers are enabled by default in Docker deployments with no configuration
 - Combined with localhost-only storage, these headers create multiple layers of privacy protection
 
 See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for complete security headers documentation.
+
+### Why `unsafe-inline` Is Safe in NewTon
+
+The Tournament Manager's CSP includes `unsafe-inline` for `script-src` and `style-src` — normally considered a security risk because it allows inline scripts to execute. In a traditional web application, this enables Stored Cross-Site Scripting (XSS): an attacker saves a malicious script to a database, and every visitor who loads the page runs it.
+
+**NewTon has no database.** There is nowhere for an attacker to persist a malicious script. The entire attack model collapses:
+
+- **No persistence** — no database, no server-side storage, no way to save a script that other users will execute
+- **No sessions** — no cookies, no login tokens, nothing to steal
+- **No exfiltration** — `connect-src 'self'` in the CSP traps any code inside the browser; it cannot phone home to an external server
+- **No server-side impact** — the server only handles GET requests for static files; it has no write endpoints and doesn't process client-side behaviour
+
+The result: the only way to execute malicious inline code would require a user to deliberately inject it into their own browser. The risk is localized to the person doing it, non-persistent, and architecturally sandboxed. It cannot spread to other users because there is no shared state.
+
+This is why `unsafe-inline` — a genuine vulnerability in applications with databases and user accounts — is architecturally neutralized in NewTon's read-only, stateless, self-contained model.
 
 ---
 
@@ -462,4 +477,4 @@ For maximum privacy:
 
 **Questions about privacy?** [Open an issue](https://github.com/skrodahl/NewTon/issues) or review the source code directly.
 
-**Last updated:** October 2025 (v4.0.0)
+**Last updated:** April 2026 (v5.0.1)
