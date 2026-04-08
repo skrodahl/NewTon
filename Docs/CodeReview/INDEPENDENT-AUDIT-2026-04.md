@@ -25,6 +25,7 @@ The application achieves its design goals with notable rigour. Bracket progressi
 | Code Quality | **B+** | Good JSDoc, large files, global state fits design |
 | Reliability & Data Integrity | **A** | Transaction log, undo cascade, QR validation |
 | Testing | **C** | No automated tests; manual QA only |
+| Documentation | **A** | 8 dedicated pages + release history; ships with app |
 
 ---
 
@@ -106,64 +107,83 @@ The innerHTML usage with player names in match history rendering is the only pot
 
 ---
 
-## 4. Areas for Improvement
+## 4. Documentation
 
-### 4.1 Automated Testing (Priority: High)
+The project includes a comprehensive documentation suite of eight dedicated HTML pages plus a full release history, all shipping with the application itself:
+
+- **privacy.html** — Privacy-by-architecture model, security headers, localStorage mechanics, FAQ
+- **architecture.html** — System architecture and design principles
+- **qr-protocol.html** — Full QR communication protocol specification: message schemas, score encoding, CRC-32 rationale, replay protection, TM-side validation, size analysis
+- **rest-api.html** — REST API endpoint reference
+- **docker-quickstart.html** — Three copy-paste-ready Docker Compose configurations (Mac/Windows, Linux with mDNS, reverse proxy) with environment variables, security guidance, and troubleshooting
+- **userguide.html** — End-user guide for tournament operation
+- **design-system.html** — Visual design reference
+- **releases/** — Individual release notes for every version, documenting changes, rationale, and migration guidance
+
+Each document serves a distinct audience without overlap: operators get the user guide and Docker quickstart, developers get the architecture and protocol specs, and privacy-conscious users get a thorough explanation of the data model. The documentation is not an afterthought — it directly informed this audit, and several initial findings were corrected by design rationale the author had already documented.
+
+Notably, the documentation is HTML — consistent with the offline-first philosophy. It ships with the application, requires no external platform, and cannot go stale in a separate wiki. For a single-developer project, this level of documentation is exceptional.
+
+---
+
+## 5. Areas for Improvement
+
+### 5.1 Automated Testing (Priority: High)
 
 The codebase has no automated tests. For a tournament manager where bracket progression correctness is critical, this is the single most impactful improvement available. The lookup-table architecture is highly testable — each entry in DE_MATCH_PROGRESSION and SE_MATCH_PROGRESSION can be verified mechanically. The completeMatch → advancePlayer pipeline has clear inputs and outputs. A regression suite covering progression, undo/redo, and ranking calculations would significantly increase confidence during refactoring and feature additions.
 
-### 4.2 File Size Management (Priority: Medium)
+### 5.2 File Size Management (Priority: Medium)
 
 Several files exceed comfortable maintenance thresholds: bracket-rendering.js (~4,260 lines) and clean-match-progression.js (~2,530 lines) are the largest. The rendering file in particular contains hardcoded pixel positions for each bracket size — these could be split into per-format modules. The progression file is more defensible given the lookup-table architecture, but extracting the ranking functions into a separate module would improve navigability without changing the design philosophy.
 
-### 4.3 textContent Adoption (Priority: Low)
+### 5.3 textContent Adoption (Priority: Low)
 
 Switching innerHTML to textContent where user-derived strings are inserted would be a low-effort hygiene improvement. While the architectural security model neutralises the practical risk, defence-in-depth is a sound principle and the change would be straightforward.
 
-### 4.4 Magic Numbers in Rendering (Priority: Low)
+### 5.4 Magic Numbers in Rendering (Priority: Low)
 
 bracket-rendering.js contains hardcoded pixel coordinates for bracket positioning. Named constants or a configuration object would improve readability. This is a cosmetic concern — the values work correctly and are tied to specific bracket sizes, but they require context to understand when reading the code.
 
 ---
 
-## 5. Audit Corrections and Clarifications
+## 6. Audit Corrections and Clarifications
 
 *This section documents corrections made after discussion with the application's author, where the initial audit assessment was inaccurate or lacked context provided by the application's documentation.*
 
-### 5.1 XSS Severity (First Revision)
+### 6.1 XSS Severity (First Revision)
 
 The initial audit flagged innerHTML usage as a Major security vulnerability. After reviewing privacy.html, which documents the privacy-by-architecture model, this was downgraded to Minor/Hygiene. The absence of shared persistence, sessions, and external communication means traditional XSS attack chains cannot be constructed. See section 3.6.
 
-### 5.2 REST API and CORS (Second Revision)
+### 6.2 REST API and CORS (Second Revision)
 
 The initial audit flagged Access-Control-Allow-Origin: * as a security concern. In practice, the REST API is unavailable when running from tournament.html and disabled by default in Docker (NEWTON_API_ENABLED=false). It requires an explicit, active choice to enable. The CORS header is appropriate for its intended use in trusted private networks. See section 3.4.
 
-### 5.3 CRC-32 Strength (Second Revision)
+### 6.3 CRC-32 Strength (Second Revision)
 
 The initial audit noted CRC-32 is not cryptographic, which implied it was a weakness. The qr-protocol.html documentation clarifies the design rationale: CRC-32 is deliberately chosen for corruption detection (8 chars vs SHA-256's 64), the real-world tampering barriers are high, and the protocol includes additional protections (replay guard, score validation) that CRC alone would not provide. See section 3.5.
 
-### 5.4 Global Mutable State (Second Revision)
+### 6.4 Global Mutable State (Second Revision)
 
 The initial audit flagged global state as a scalability and maintainability concern. NewTon is a single-user, single-device application by design — localStorage and local execution enforce this. The global state model is appropriate for the actual operating environment and avoids unnecessary abstraction. See section 2.6.
 
-### 5.5 Duplicated Ranking Logic (Second Revision)
+### 6.5 Duplicated Ranking Logic (Second Revision)
 
 The initial audit flagged per-bracket-size ranking functions as code duplication. This mirrors the hardcoded bracket philosophy: each bracket size encodes its own ranking semantics, just as it has its own progression table. The duplication is deliberate and eliminates conditional branching in ranking calculations. See section 2.5.
 
-### 5.6 Inline Styles in JavaScript (Second Revision)
+### 6.6 Inline Styles in JavaScript (Second Revision)
 
 The initial audit flagged inline styles as a maintenance concern. The 93+ inline event handlers and 266+ inline style attributes are an architectural requirement for offline single-file deployment. This is documented in privacy.html and was the subject of deliberate engineering work in v4.2.13, which extracted all inlines from landing and documentation pages to achieve A+ CSP while consciously retaining them in the tournament app. See section 3.2.
 
-### 5.7 SecurityHeaders.com Validation (Second Revision)
+### 6.7 SecurityHeaders.com Validation (Second Revision)
 
 The initial audit did not include external validation. Live Docker deployment scans confirm A+ for landing page and documentation (strict CSP, zero inline code) and A for the Tournament Manager (unsafe-inline required, all other headers present). Both grades from SecurityHeaders.com on 8 April 2026. See section 3.2.
 
 ---
 
-## 6. Conclusion
+## 7. Conclusion
 
 NewTon DC Tournament Manager is a thoughtfully designed application that makes deliberate architectural choices and follows through on them consistently. The lookup-table bracket system, single code path discipline, event-sourced undo, and privacy-by-architecture security model are each individually strong; together they create a cohesive and reliable tournament management platform.
 
 The primary recommendation is automated testing — the architecture is highly testable and a regression suite would be the highest-value addition to the codebase. File size management is a secondary concern. Security is handled with a maturity that exceeds most applications in this category, validated by external tooling.
 
-Several initial findings were corrected after discussion with the author, who provided documentation (privacy.html, qr-protocol.html, v4.2.13 release notes) that demonstrated deliberate design intent behind choices the audit had flagged as concerns. These corrections are documented transparently in section 5. The revised assessment reflects a more accurate understanding of the application's design philosophy.
+Several initial findings were corrected after discussion with the author, who provided documentation (privacy.html, qr-protocol.html, v4.2.13 release notes) that demonstrated deliberate design intent behind choices the audit had flagged as concerns. These corrections are documented transparently in section 6. The revised assessment reflects a more accurate understanding of the application's design philosophy.
