@@ -55,6 +55,25 @@ No decisions made — just a direction.
 
 ---
 
+### Automated Testing
+
+Flagged as the single most impactful improvement by the independent code audit (April 2026, `Docs/CodeReview/INDEPENDENT-AUDIT-2026-04.md`). The lookup-table architecture is highly testable — each entry in `DE_MATCH_PROGRESSION` and `SE_MATCH_PROGRESSION` can be verified mechanically.
+
+**What to test first (from audit recommendations):**
+- Progression tables — verify every match outcome routes to the correct winner/loser destination for 8, 16, and 32-player brackets
+- `completeMatch() → advancePlayer()` pipeline — clear inputs and outputs
+- Undo/redo — transaction rollback, achievement reversal, cascade through dependent matches
+- Ranking calculations — per-bracket-size ranking functions for DE and SE
+
+**Why it's not urgent:** The architecture is proven by hundreds of real tournament nights across v4 and v5. No automated tests exist, but the hardcoded lookup tables and single code path eliminate the class of bugs that tests would typically catch. The value is confidence during refactoring and future feature additions, not catching current bugs.
+
+**Implementation approach:** Own tests first, then GitHub Actions to run them automatically.
+- `node --test` (built into Node.js, zero dependencies) as the test runner — consistent with the zero-dependency philosophy
+- Test files in `tests/` — pure logic tests against lookup tables and functions. No browser, no DOM, no mocking. Just "given this match result, does the winner go to the right place?"
+- `.github/workflows/test.yml` to run on every push. Takes seconds, costs nothing. Blocks the build if something fails.
+
+---
+
 ### Known Issue: Undo eligibility does not follow walkover chains
 
 The undo check looks one level deep into downstream matches. If a downstream match is an AUTO-completed walkover, it is correctly ignored — but the check does not continue further down the chain. This means a match can show "Can Undo" even if a player has auto-advanced through a walkover into a live or manually-completed match further downstream.
@@ -73,4 +92,4 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 ---
 
-**Last updated:** March 31, 2026 — v5.0.1 shipped; prep list cleared; QR workflow illustration and Reddit post remain in Next; Analytics future enhancements in Later
+**Last updated:** April 9, 2026 — v5.0.2 shipped; automated testing added to Later (from code audit recommendation)
