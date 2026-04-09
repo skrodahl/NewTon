@@ -7,16 +7,81 @@ const NewtonHistory = (() => {
     /** Currently selected tournament record (for match list context) */
     let _activeTournament = null;
 
+    /** Current analytics view and point mode */
+    let _activeView = 'dashboard';
+    let _pointMode = 'original';
+    let _controlsInitialised = false;
+
+    // ---------------------------------------------------------------------------
+    // Analytics controls — view tabs + point mode toggle
+    // ---------------------------------------------------------------------------
+
+    /** Wire up control bar buttons. Safe to call multiple times. */
+    function initControls() {
+        if (_controlsInitialised) return;
+        _controlsInitialised = true;
+        // View tabs
+        document.querySelectorAll('.analytics-view-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchView(btn.dataset.view));
+        });
+        // Point mode toggle
+        document.querySelectorAll('.analytics-point-btn').forEach(btn => {
+            btn.addEventListener('click', () => switchPointMode(btn.dataset.pointMode));
+        });
+    }
+
+    /**
+     * Switch the active analytics view.
+     * @param {string} view - 'dashboard' | 'leaderboard' | 'players' | 'register'
+     */
+    function switchView(view) {
+        _activeView = view;
+
+        // Update tab buttons
+        document.querySelectorAll('.analytics-view-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.view === view);
+        });
+
+        // Update view panels
+        document.querySelectorAll('.analytics-view').forEach(panel => {
+            panel.classList.remove('active');
+        });
+        const viewId = 'analyticsView' + view.charAt(0).toUpperCase() + view.slice(1);
+        const panel = document.getElementById(viewId);
+        if (panel) panel.classList.add('active');
+
+        // When switching to register, render the tournament list
+        if (view === 'register') {
+            showPanel('tournamentList');
+            renderTournamentList();
+        }
+    }
+
+    /**
+     * Switch the point mode.
+     * @param {string} mode - 'original' | 'current' | 'custom'
+     */
+    function switchPointMode(mode) {
+        _pointMode = mode;
+
+        document.querySelectorAll('.analytics-point-btn').forEach(btn => {
+            btn.classList.toggle('active', btn.dataset.pointMode === mode);
+        });
+
+        // TODO: recompute active view with new point mode
+        console.log('Point mode:', mode);
+    }
+
     // ---------------------------------------------------------------------------
     // Entry point — called by showPage('history') hook in main.js
     // ---------------------------------------------------------------------------
 
     /**
-     * Render the history page. Always starts at tournament list.
+     * Render the history page. Initialises controls and shows the active view.
      */
     async function render() {
-        showPanel('tournamentList');
-        await renderTournamentList();
+        initControls();
+        switchView(_activeView);
     }
 
     // ---------------------------------------------------------------------------

@@ -709,12 +709,59 @@
         <div id="history" class="page">
             <div class="history-page-header">
                 <h2>Analytics <span class="help-info-icon" data-page="history">ℹ️</span></h2>
+                <p class="history-page-subtitle">Match register and cross-tournament statistics</p>
                 <div class="history-actions">
                     <button class="btn" onclick="NewtonHistory.exportDB()">Export Register</button>
                     <button class="btn btn-warning" onclick="document.getElementById('historyImportFile').click()">Import Register</button>
                     <input type="file" id="historyImportFile" accept=".json" style="display:none;" onchange="NewtonHistory.importDB(event)">
                 </div>
             </div>
+
+
+            <!-- Analytics control bar -->
+            <div class="analytics-controls">
+                <div class="analytics-view-tabs">
+                    <button class="analytics-view-btn active" data-view="dashboard">Dashboard</button>
+                    <button class="analytics-view-btn" data-view="leaderboard">Leaderboard</button>
+                    <button class="analytics-view-btn" data-view="players">Players</button>
+                    <button class="analytics-view-btn" data-view="register">Register</button>
+                </div>
+                <div class="analytics-point-mode">
+                    <span class="analytics-point-label">Points</span>
+                    <div class="analytics-point-toggle">
+                        <button class="analytics-point-btn active" data-point-mode="original">Original</button>
+                        <button class="analytics-point-btn" data-point-mode="current">Current</button>
+                        <button class="analytics-point-btn" data-point-mode="custom">Custom</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics view: Dashboard -->
+            <div id="analyticsViewDashboard" class="analytics-view active">
+                <div class="analytics-placeholder">
+                    <h3>Dashboard</h3>
+                    <p>Headline stats across all tournaments. Coming soon.</p>
+                </div>
+            </div>
+
+            <!-- Analytics view: Leaderboard -->
+            <div id="analyticsViewLeaderboard" class="analytics-view">
+                <div class="analytics-placeholder">
+                    <h3>Leaderboard</h3>
+                    <p>Cross-tournament rankings. Coming soon.</p>
+                </div>
+            </div>
+
+            <!-- Analytics view: Players -->
+            <div id="analyticsViewPlayers" class="analytics-view">
+                <div class="analytics-placeholder">
+                    <h3>Players</h3>
+                    <p>Individual player profiles and career stats. Coming soon.</p>
+                </div>
+            </div>
+
+            <!-- Analytics view: Register (existing match browser) -->
+            <div id="analyticsViewRegister" class="analytics-view">
 
             <!-- Tournament list panel -->
             <div id="historyTournamentList">
@@ -767,6 +814,8 @@
                 </div>
                 <div id="historyMatchDetailBody"></div>
             </div>
+
+            </div><!-- /analyticsViewRegister -->
         </div>
 
         <!-- History: Delete Tournament Confirmation Modal -->

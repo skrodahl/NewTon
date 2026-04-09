@@ -43,7 +43,7 @@ A new section in `Docs/PRIVACY.md` and `privacy.html` explains why NewTon's desi
 - **No write surface** — the server only serves static files via GET requests
 - **No persistence for attacks** — no database means no stored XSS
 - **CSP exfiltration prevention** — `connect-src 'self'` traps any code inside the browser
-- **Why `unsafe-inline` is safe here** — no cookies to steal, no sessions to hijack, no accounts to compromise
+- **Why `unsafe-inline` is acceptable here** — no database means no stored XSS; any injected code is confined to the person injecting it
 
 The conclusion: an attacker can only compromise a user who actively participates in their own compromise. The risk is localised, non-persistent, and architecturally sandboxed.
 

@@ -1,3 +1,19 @@
+## **v5.0.3** — (unreleased)
+
+### Release notes
+
+- **`unsafe-inline` wording** — changed "safe" to "acceptable" in v5.0.2 release notes (MD, HTML, index) to better reflect the nuanced security argument
+
+### Tournament Manager
+
+- **Analytics page styling** — added outer border (`#history.page.active`) and restyled header (`.history-page-header`) to match Global Settings — same background, border, and shadow for visual consistency across all pages
+
+### Chalker
+
+- **Leg averages wrapping** — removed `white-space: nowrap` from `.stats-table td.leg-avgs` so leg averages wrap on narrow phone screens instead of forcing horizontal scroll
+
+---
+
 ## **v5.0.2** - Because Every Other One Wants Your Email (2026-04-09)
 
 ### QR Code Generator
