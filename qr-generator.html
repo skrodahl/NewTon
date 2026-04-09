@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>QR Code Generator — NewTon DC Tournament Manager</title>
+    <meta name="description" content="Free QR code generator with transparent background, custom colours, and label support. No watermark, no signup, no tracking, no cookies. You're welcome.">
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body class="qr-page">
+
+<a class="docs-back-link" href="/">&#8592; NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>QR Code Generator</h1>
+    <p class="docs-subtitle">Free. Transparent. No watermark. No signup. You're welcome.</p>
+
+    <div class="qr-container">
+    <div class="qr-input-row">
+        <textarea id="input" placeholder="Enter text or URL..." rows="2"></textarea>
+        <div class="qr-char-count" id="charCount">0 / 213</div>
+    </div>
+
+    <div class="qr-input-row">
+        <input type="text" id="labelText" placeholder="Label (e.g. PAYMENT INFO)" class="label-input">
+    </div>
+
+    <div class="qr-wrap" id="qrWrap">
+        <div class="qr-placeholder" id="placeholder">Type something to generate a QR code</div>
+        <canvas id="canvas" class="hidden"></canvas>
+    </div>
+
+    <div class="qr-controls">
+        <div class="qr-ctrl">
+            <label>Color</label>
+            <input type="color" id="fgColor" value="#000000">
+        </div>
+        <div class="qr-ctrl">
+            <label>Module size</label>
+            <input type="range" id="modSize" min="4" max="20" value="10">
+        </div>
+        <div class="qr-ctrl">
+            <label>Quiet zone</label>
+            <input type="range" id="quietZone" min="0" max="2" value="0">
+        </div>
+        <div class="qr-ctrl">
+            <label>Label size</label>
+            <input type="range" id="labelSize" min="50" max="120" value="100">
+        </div>
+    </div>
+
+    <div class="qr-actions">
+        <button class="btn-primary" id="dlBtn" disabled>Download PNG</button>
+        <button class="btn-secondary" id="copyBtn" disabled>Copy to Clipboard</button>
+    </div>
+    </div>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p class="footer-cheeky">No popups? No cookies!</p>
+</div>
+
+<div class="qr-toast" id="toast"></div>
+
+<script src="js/qr-generator.js"></script>
+</body>
+</html>

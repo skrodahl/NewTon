@@ -1,3 +1,21 @@
+## **v5.0.2** - Because Every Other One Wants Your Email (2026-04-09)
+
+### QR Code Generator
+
+- **New page**: `qr-generator.html` — standalone QR code generator with transparent background, custom colour, module size, quiet zone, and label with adjustable size. Download as PNG or copy to clipboard. Zero dependencies — built from scratch with Reed-Solomon error correction and Galois Field arithmetic.
+- **CSP-clean**: All styles in `css/landing.css`, all JS in `js/qr-generator.js` — no inline code.
+- **Linked** from `userguide.html` (Payment Tracking section), `docker-quickstart.html` (Customization section), and `sitemap.xml`.
+
+### Privacy — Security Architecture
+
+- **New section** in `Docs/PRIVACY.md` and `privacy.html`: documents why NewTon's architecture is inherently safe — no write surface, no persistence mechanism for attacks, CSP exfiltration prevention, and why `unsafe-inline` is a non-risk in a system with no database, no cookies, and no accounts.
+
+### Release notes — tagline titles
+
+- All 28 release notes HTML pages updated from `Release Notes vX.X.X — NewTon DC Tournament Manager` to `vX.X.X — {Tagline}`. Each release now shows its unique tagline in Google search results instead of identical boilerplate.
+
+---
+
 ## **v5.0.1** — Game Shot, and the Match! (2026-03-31)
 
 The complete TM ↔ Chalker loop: match assignments travel to the Chalker via QR, results travel back the same way. Analytics tab persists every Chalker match to IndexedDB. Docker HTTPS and mDNS built in. See [Docs/RELEASE-NOTES-v5.0.1.md](Docs/RELEASE-NOTES-v5.0.1.md) for the full story.

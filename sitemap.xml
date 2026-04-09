@@ -33,12 +33,21 @@
     <priority>0.7</priority>
   </url>
   <url>
+    <loc>https://newtondarts.com/qr-generator.html</loc>
+    <priority>0.7</priority>
+  </url>
+  <url>
     <loc>https://newtondarts.com/chalker</loc>
     <priority>0.6</priority>
   </url>
   <url>
     <loc>https://newtondarts.com/releases/</loc>
     <changefreq>weekly</changefreq>
+    <priority>0.6</priority>
+  </url>
+  <url>
+    <loc>https://newtondarts.com/releases/v5.0.2.html</loc>
+    <changefreq>never</changefreq>
     <priority>0.6</priority>
   </url>
   <url>

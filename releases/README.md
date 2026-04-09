@@ -92,7 +92,7 @@ The versioned page uses `changefreq: never` — it will never change after publi
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/vX.X.X.html">
-    <title>Release Notes vX.X.X — NewTon DC Tournament Manager</title>
+    <title>vX.X.X — {Tagline}</title>
     <meta name="description" content="NewTon DC Tournament Manager vX.X.X release notes. {one-line summary}.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
