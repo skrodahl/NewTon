@@ -55,6 +55,11 @@ const NewtonHistory = (() => {
             showPanel('tournamentList');
             renderTournamentList();
         }
+
+        // When switching to dashboard, compute stats
+        if (view === 'dashboard') {
+            renderDashboard();
+        }
     }
 
     /**
@@ -70,6 +75,121 @@ const NewtonHistory = (() => {
 
         // TODO: recompute active view with new point mode
         console.log('Point mode:', mode);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Dashboard
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Compute headline stats from finalized data and render stat cards.
+     */
+    async function renderDashboard() {
+        const container = document.getElementById('analyticsViewDashboard');
+        if (!container || typeof NewtonDB === 'undefined') return;
+
+        container.innerHTML = '<div class="analytics-placeholder"><p>Loading…</p></div>';
+
+        try {
+            const tournaments = await NewtonDB.getFinalTournaments();
+            if (!tournaments.length) {
+                container.innerHTML = '<div class="analytics-placeholder">' +
+                    '<h3>No data yet</h3>' +
+                    '<p>Dashboard stats appear after your first tournament is finalized.</p></div>';
+                return;
+            }
+
+            // Gather all matches across all tournaments
+            const allMatches = [];
+            for (const t of tournaments) {
+                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+                allMatches.push(...matches.filter(m => m.status === 'final'));
+            }
+
+            // Unique players
+            const playerSet = new Set();
+            allMatches.forEach(m => {
+                if (m.player1Id) playerSet.add(m.player1Id);
+                if (m.player2Id) playerSet.add(m.player2Id);
+            });
+
+            // Scan tournament-level achievements (includes both manual and Chalker data)
+            let total180s = 0;
+            let highestCheckout = { score: 0, player: null };
+            let shortestLeg = { darts: Infinity, player: null };
+
+            tournaments.forEach(t => {
+                const ta = t.tournamentAchievements;
+                if (!ta) return;
+                Object.values(ta).forEach(entry => {
+                    const stats = entry.stats;
+                    if (!stats) return;
+
+                    // 180s
+                    if (stats.oneEighties) total180s += stats.oneEighties;
+
+                    // Highest checkout
+                    if (stats.highOuts && stats.highOuts.length) {
+                        const max = Math.max(...stats.highOuts);
+                        if (max > highestCheckout.score) {
+                            highestCheckout = { score: max, player: entry.name };
+                        }
+                    }
+
+                    // Shortest leg
+                    const legs = stats.shortLegs;
+                    if (Array.isArray(legs) && legs.length) {
+                        const min = Math.min(...legs);
+                        if (min < shortestLeg.darts) {
+                            shortestLeg = { darts: min, player: entry.name };
+                        }
+                    }
+                });
+            });
+
+            // Render cards
+            container.innerHTML =
+                '<div class="analytics-dashboard">' +
+                    _statCard('Tournaments', tournaments.length, 'Finalized', 'register') +
+                    _statCard('Matches', allMatches.length, 'Completed', null) +
+                    _statCard('Players', playerSet.size, 'Unique', 'players') +
+                    _statCard('180s', total180s, 'Total', 'leaderboard') +
+                    (highestCheckout.score > 0
+                        ? _statCard('Highest Checkout', highestCheckout.score, highestCheckout.player, null)
+                        : _statCard('Highest Checkout', '—', 'No data yet', null)) +
+                    (shortestLeg.darts < Infinity
+                        ? _statCard('Shortest Leg', shortestLeg.darts, shortestLeg.player, null)
+                        : _statCard('Shortest Leg', '—', 'No data yet', null)) +
+                '</div>';
+
+            // Wire up card clicks
+            container.querySelectorAll('.analytics-stat-card[data-target-view]').forEach(card => {
+                card.addEventListener('click', () => switchView(card.dataset.targetView));
+            });
+
+        } catch (e) {
+            console.error('Dashboard render failed:', e);
+            container.innerHTML = '<div class="analytics-placeholder">' +
+                '<p>Failed to load dashboard stats.</p></div>';
+        }
+    }
+
+    /**
+     * Build HTML for a single stat card.
+     * @param {string} label
+     * @param {string|number} value
+     * @param {string} subtitle
+     * @param {string|null} targetView - view to navigate to on click, or null for non-clickable
+     * @returns {string}
+     */
+    function _statCard(label, value, subtitle, targetView) {
+        const clickable = targetView ? ` data-target-view="${targetView}"` : '';
+        const clickClass = targetView ? ' clickable' : '';
+        return '<div class="analytics-stat-card' + clickClass + '"' + clickable + '>' +
+            '<div class="analytics-stat-value">' + escHtml(String(value)) + '</div>' +
+            '<div class="analytics-stat-label">' + escHtml(label) + '</div>' +
+            '<div class="analytics-stat-subtitle">' + escHtml(subtitle) + '</div>' +
+        '</div>';
     }
 
     // ---------------------------------------------------------------------------
@@ -128,7 +248,6 @@ const NewtonHistory = (() => {
                 <td>${format}</td>
                 <td>${date}</td>
                 <td style="text-align:center;">${players}</td>
-                <td style="text-align:center;"><span class="history-type-badge history-type-final">Final</span></td>
                 <td style="text-align:right;">
                     <button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.openTournament('${safeId}')">View →</button>
                     <button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="margin-left:6px;color:#dc2626;border-color:#dc2626;">Delete</button>

@@ -54,6 +54,20 @@ This means point recalculation is always possible — the raw results and the or
 - Tournament-level achievement aggregates at finalization
 - Config snapshot: full config frozen at tournament close
 
+### Records vs achievements — threshold-free stats from raw data
+
+The `extractAchievements()` function in `newton-stats.js` gates what it stores: high outs require >= 101, short legs require <= threshold (default 21 darts). These thresholds determine **achievement points**, not **records**.
+
+The dashboard should show all-time bests regardless of threshold. If the highest checkout in the register is 40, the card should show 40. If the shortest leg is 33 darts, it should show 33.
+
+The raw data to compute this already exists in every Chalker match record — the `legs` array stores visit scores and checkout darts per leg. For any leg:
+- **Checkout score**: last visit of the winning player
+- **Total darts**: `(visits.length - 1) * 3 + cd`
+
+No thresholds, just the actual numbers.
+
+**Implementation**: scan raw leg data from Chalker match records for threshold-free bests; fall back to `tournamentAchievements` for manual entries (which are only recorded when the operator considers them notable). Best of both sources.
+
 ---
 
 ## The Gap
@@ -76,6 +90,17 @@ The Analytics tab becomes a control surface over immutable data. The data never 
 ### Principle: data is immutable, presentation is configurable
 
 The three-panel match browser remains as the raw register — "show me exactly what happened." The command center sits above it as the analytical layer, orchestrating what gets computed and displayed.
+
+### Principle: compute from raw data when the answer depends on interpretation
+
+Where a stat is absolute — a 180 is a 180, a ton is 100+ — using the achievement register is pragmatic. Same answer, less work.
+
+Where a stat depends on a configurable threshold or where the raw data tells a richer story than the summary, compute from raw data. High outs and short legs are threshold-dependent — the achievement register only stores values above the point threshold, but the all-time best might be below it. Averages and checkout percentages need raw visit data by definition.
+
+The pattern:
+- **Absolute stats** (180s, tons): use achievement register — the definition is fixed
+- **Threshold-dependent stats** (high outs, short legs): compute from raw leg data — the register filters out values below the points threshold
+- **Derived stats** (averages, trends, checkout %): compute from raw visit data — no pre-computed summary exists
 
 ### Principle: one control surface, no silos
 
@@ -123,6 +148,25 @@ This is why the data layer uses IndexedDB rather than LocalStorage. IndexedDB pr
 - By season / date range
 - By format (SE/DE)
 - All-time
+
+### Table behaviour
+
+Any view that renders a table (tournaments, matches, leaderboards, player lists) should support:
+
+**Pagination:**
+- Configurable items per page (operator selects)
+- Page navigation controls
+- Applies to tournament lists, match lists, and any other tabular view
+
+**Sortable columns:**
+- Click a column header to sort by that field
+- Click again to reverse
+- Visual indicator for active sort column and direction
+
+**Column visibility:**
+- Operator can show/hide columns per table
+- Reduces noise — only display what matters for the current question
+- Another control parameter: same data, different projection
 
 ### Data flow
 

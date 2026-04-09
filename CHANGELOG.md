@@ -4,9 +4,17 @@
 
 - **`unsafe-inline` wording** — changed "safe" to "acceptable" in v5.0.2 release notes (MD, HTML, index) to better reflect the nuanced security argument
 
-### Tournament Manager
+### Tournament Manager — Analytics
 
-- **Analytics page styling** — added outer border (`#history.page.active`) and restyled header (`.history-page-header`) to match Global Settings — same background, border, and shadow for visual consistency across all pages
+- **Analytics control bar** — view tabs (Dashboard, Leaderboard, Players, Register) with green underline indicator; point mode toggle (Original, Current, Custom) as segmented button group
+- **Dashboard** — six live stat cards computed from IndexedDB: Tournaments, Matches, Players, 180s, Highest Checkout, Shortest Leg. Cards with drill-down targets are clickable. Data sourced from tournament-level achievements (includes both manual and Chalker entries)
+- **Page header** — subtitle added ("Match register and cross-tournament statistics"); Export/Import buttons moved below title for consistency with Tournament Setup and Player Registration
+- **Page styling** — outer border and restyled header to match Global Settings
+- **Register view** — removed redundant Status column from tournament table (only finalized tournaments are shown)
+
+### Documentation
+
+- **`Docs/ANALYTICS.md`** — new plan document: current state, data foundation (IndexedDB schema, config snapshot detail), architecture (command center, control surface, default views, what-if scenarios, graphs), design principles (immutable data, raw data over pre-computed summaries, no silos, composable/zoomable/connected/evolvable), phased roadmap, table behaviour (pagination, sortable columns, column visibility)
 
 ### Chalker
 
