@@ -275,6 +275,8 @@ Rankings across the full register.
 
 May benefit from a computed cache/summary to avoid scanning all matches on every render.
 
+**Export:** Season leaderboard exportable as JSON and CSV — same format as single-tournament results export. The data shape is identical (players, points, placements, achievements), just aggregated across the selected scope. Any filtered/configured leaderboard view should be exportable, not just the default.
+
 ### Phase 4 — Graphs
 
 Visual representation of form and trends.
