@@ -280,12 +280,12 @@
 
     let bitIdx = 0;
     let right = size - 1;
+    let pairCount = 0;
 
     while (right >= 1) {
       if (right === 6) right = 5;
       const left = right - 1;
-      const pairIdx = (size - 1 - right) / 2;
-      const goingUp = pairIdx % 2 === 0;
+      const goingUp = pairCount % 2 === 0;
 
       for (let i = 0; i < size; i++) {
         const row = goingUp ? (size - 1 - i) : i;
@@ -298,6 +298,7 @@
         }
       }
       right -= 2;
+      pairCount++;
     }
   }
 
