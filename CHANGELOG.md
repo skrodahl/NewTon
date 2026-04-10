@@ -1,3 +1,11 @@
+## **v5.0.4** — (unreleased)
+
+### Demo banner
+
+- **Fixed**: "Darts double elimination tournament software" changed to "Darts tournament software" — the banner predated Single Elimination support
+
+---
+
 ## **v5.0.3** — The Numbers Start Talking (2026-04-10)
 
 ### Release notes

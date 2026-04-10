@@ -304,6 +304,18 @@ Zero-dependency — canvas-based or inline SVG. No chart libraries.
 
 The command center is the frame. Each phase adds views and controls that render within it.
 
+### Priority — Tournament Setup Integration
+
+The Tournament Setup page shows recent/saved tournaments. Each tournament should indicate whether it exists in Analytics (IndexedDB) or not — a small badge, icon, or status label.
+
+For tournaments not yet in Analytics, a button to **add them** would allow operators to backfill historical tournaments into the register. This is important because tournaments completed before v5.0.1 (when IndexedDB recording was introduced) have no Analytics entry. Without backfill, the leaderboard and cross-tournament stats only tell the story from v5.0.1 onward.
+
+**Feasibility question:** localStorage tournament data includes match results, placements, and achievements — but not raw visit scores (those only exist for Chalker matches recorded via QR). A backfilled tournament would have manual-level detail: outcomes, leg counts, and operator-entered achievements. No visit-level data, no averages, no checkout darts. The question is whether this partial data is useful enough to include, or whether it creates a confusing mix of rich and shallow records in the register.
+
+**Likely answer:** yes, it's useful. Points, placements, and achievement counts are the foundation of the leaderboard. A tournament doesn't need visit-level data to contribute to season standings. The Analytics views already handle the distinction — manual matches show "Manual" type and skip visit-level display. The data quality difference is already part of the design.
+
+**Top priority for the next phase** — if feasible, implement before continuing with Phase 2.
+
 ### Phase 1 — Stats Cards + Point Mode
 
 The command center skeleton with a dashboard view.
