@@ -1,4 +1,4 @@
-## **v5.0.3** — (unreleased)
+## **v5.0.3** — The Numbers Start Talking (2026-04-10)
 
 ### Release notes
 
@@ -15,6 +15,15 @@
 ### Documentation
 
 - **`Docs/ANALYTICS.md`** — new plan document: current state, data foundation (IndexedDB schema, config snapshot detail), architecture (command center, control surface, default views, what-if scenarios, graphs), design principles (immutable data, raw data over pre-computed summaries, no silos, composable/zoomable/connected/evolvable), phased roadmap, table behaviour (pagination, sortable columns, column visibility)
+
+### Global Settings — Default paid
+
+- **New setting**: "New players default to paid" checkbox in User Interface section. When enabled, players added to a tournament are already marked as paid. Removing a player requires toggling to unpaid first — a deliberate two-step safeguard against accidental deletion.
+- `config.ui.defaultPaid` (default: `false`) — read by both `addPlayer()` and `addPlayerFromList()` in `player-management.js`.
+
+### QR Code Generator — scan fix
+
+- **Data placement bug**: QR codes with content long enough to use columns past the timing pattern (column 6) were unscannable. The direction calculation used a formula that produced non-integer values after the timing column skip, corrupting data placement for those columns. Fixed by replacing the computed index with a simple counter.
 
 ### Chalker
 

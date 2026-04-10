@@ -40,6 +40,7 @@ const DEFAULT_CONFIG = {
     ui: {
         confirmWinnerSelection: true,
         autoOpenMatchControls: true,
+        defaultPaid: false,
         developerMode: false,
         refereeSuggestionsLimit: 10
     },
@@ -158,6 +159,7 @@ function applyConfigToUI() {
     if (config.ui) {
         safeSetChecked('confirmWinnerSelection', config.ui.confirmWinnerSelection);
         safeSetChecked('autoOpenMatchControls', config.ui.autoOpenMatchControls);
+        safeSetChecked('defaultPaid', config.ui.defaultPaid);
         safeSetChecked('developerMode', config.ui.developerMode);
         safeSetValue('refereeSuggestionsLimit', config.ui.refereeSuggestionsLimit);
     }
@@ -311,6 +313,7 @@ function saveLaneConfiguration() {
 function saveUIConfiguration() {
     const confirmWinnerElement = document.getElementById('confirmWinnerSelection');
     const autoOpenElement = document.getElementById('autoOpenMatchControls');
+    const defaultPaidElement = document.getElementById('defaultPaid');
     const allowDeleteElement = document.getElementById('allowSharedTournamentDelete');
     const developerModeElement = document.getElementById('developerMode');
     const refereeSuggestionsElement = document.getElementById('refereeSuggestionsLimit');
@@ -318,6 +321,7 @@ function saveUIConfiguration() {
     config.ui = config.ui || {};
     config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
     config.ui.autoOpenMatchControls = autoOpenElement ? autoOpenElement.checked : true;
+    config.ui.defaultPaid = defaultPaidElement ? defaultPaidElement.checked : false;
     config.ui.developerMode = developerModeElement ? developerModeElement.checked : false;
     config.ui.refereeSuggestionsLimit = refereeSuggestionsElement ? parseInt(refereeSuggestionsElement.value) || 10 : 10;
 

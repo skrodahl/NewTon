@@ -116,6 +116,40 @@ The command center inverts this. There is one computation layer and one set of c
 
 No view is a special case. No feature is an island.
 
+### Principle: scope vs focus
+
+The register defines the **scope** — which tournaments are in play. Views provide the **focus** — within that scope, what are you looking at.
+
+```
+Register scope (which tournaments)
+    ↓
+View focus (which players, matchups, achievements)
+    ↓
+Display mode (table, graph, card)
+```
+
+Selecting a player in the Players tab isn't a filter on the register — it's a focus within the current scope. The scope stays the same; the view narrows. Selecting a second player narrows further to their head-to-head. The data pipeline is unchanged; only the lens moves.
+
+This means changing the register scope always changes what every view shows — but the focus within each view is independent. You can be looking at Andy's career stats, switch the register from "all time" to "2026 season", and Andy's view updates to show only his 2026 numbers. The focus stays, the scope changes.
+
+**View-level focus (not register-level filtering):**
+- **Players tab**: select one player → career stats within scope. Select two → head-to-head within scope. Available stats: points, averages, legs won/lost, achievements, form over time.
+- **Leaderboard tab**: ranked list within scope. Click a player → drills into their player view. Click two → compare.
+- **Dashboard tab**: headline numbers from scope. Click a card → jumps to the relevant tab with the right focus pre-set.
+
+Match-level filtering (e.g. "only Chalker matches", "only DE matches") is a display concern within views, not a scope decision in the register. It emerges naturally from view interactions rather than requiring a fourth filter layer.
+
+### Principle: same system, any zoom level
+
+The scope determines what the analytics show. Different scopes tell different stories — all from the same system with no special logic:
+
+- **All-time** (default) — career records, lifetime leaderboards, long-term trends
+- **Season** (date range or text filter, e.g. "Monday Cup 2026") — season standings, seasonal bests, who's in form right now
+- **Single tournament** — deeper than the end-of-tournament podium. The celebration screen shows top 3 and headline achievements. The analytics show *how* the winner won: every match, every leg, every visit score. Which matches were close, where the 180s fell, who gave the toughest fight, what the averages looked like across the bracket. Full 1st-through-32nd leaderboard with points, achievements, and legs won/lost.
+- **Two players** (focus within any scope) — head-to-head record, performance comparison, how they fare against each other vs the field
+
+Each is just the register with a different selection and a view with a different focus. No dedicated pages, no separate features.
+
 ### Design principles for the control model
 
 - **Composable** — controls combine freely; any filter works with any view
@@ -127,15 +161,39 @@ This is why the data layer uses IndexedDB rather than LocalStorage. IndexedDB pr
 
 ### Controls
 
+**Register as gating filter:**
+
+The tournament register is the scope selector for the entire command center. All other views — dashboard, leaderboard, players — compute from whichever tournaments are currently selected in the register. The default is all finalized tournaments (all-time). Every filter defaults to "everything" and narrows from there — no selection is still a selection.
+
+Three composable filters, evaluated in order:
+
+```
+All finalized tournaments
+    → Date range (coarse scope — default: all dates)
+        → Text filter (pattern match on tournament name)
+            → Manual checkboxes (fine-tune individual tournaments)
+                → Active scope for all views
+```
+
+Each layer narrows the previous one. No layer is required — skip any and the full set passes through.
+
+**Date range:**
+- From/to date pickers. Narrows the tournament list to events within the range.
+- Default: no range selected = all dates = all-time. Not a special case, just the widest scope.
+
+**Text filter:**
+- Type keywords, filtered instantly against tournament names.
+- AND logic by default: space-separated terms must all match (case-insensitive). "Monday Cup" matches "Monday Night Cup" and "Monday Afternoon Cup" but not "Monday Practice" or "Thursday Cup."
+- Future option: `-` prefix for NOT ("Monday -Practice"), added only if the need arises in practice.
+
+**Manual selection:**
+- Checkboxes on the filtered tournament list. Deselect individual tournaments you don't want in scope.
+- Operates on the already-filtered list — date range and text filter narrow first, then manual selection fine-tunes.
+
 **Point mode:**
 - **Original** — each tournament scored using its own `configSnapshot` point values (what actually happened)
 - **Current** — all tournaments recalculated using today's Global Settings (what would happen under current rules)
 - **Custom** — user-defined point values applied across all tournaments (what-if scenarios)
-
-**Scope:**
-- Date range / season filter — which tournaments are in scope
-- Format filter — SE, DE, or both
-- All-time vs rolling window
 
 **View selector:**
 - Dashboard (stats cards — headline numbers)
@@ -143,11 +201,6 @@ This is why the data layer uses IndexedDB rather than LocalStorage. IndexedDB pr
 - Player profile (individual career view)
 - Head-to-head (two-player comparison)
 - Match register (the current three-panel browser)
-
-**Grouping:**
-- By season / date range
-- By format (SE/DE)
-- All-time
 
 ### Table behaviour
 
@@ -173,14 +226,18 @@ Any view that renders a table (tournaments, matches, leaderboards, player lists)
 ```
 IndexedDB (immutable)
     ↓
-Command Center controls (point mode, scope, filters)
+Register filters (date range → text filter → manual selection)
+    ↓
+Active scope (selected tournaments)
+    ↓
+Point mode (Original / Current / Custom)
     ↓
 Computation layer (aggregation, ranking, recalculation)
     ↓
 Views (stats cards, leaderboard, player profile, graphs, match register)
 ```
 
-All views read from the same computation layer. Changing a control (e.g. switching point mode from Original to Current) recomputes and re-renders all active views.
+All views read from the same computation layer. Changing any control — a filter, the point mode, or the view — recomputes and re-renders from the active scope.
 
 ### Default Views
 
@@ -195,6 +252,16 @@ Named views are saved control states. The system ships with built-in defaults th
 Every default view is fully adjustable — the user sees the same controls as any custom view. Change a parameter and the view updates. Save it as a new named view, or just explore and discard.
 
 Users can also create their own views from scratch, building up a personalised analytics dashboard for their club.
+
+### Tournament Analytics from the Podium
+
+When a tournament completes, the full match data is already written to IndexedDB. The celebration podium shows top 3 and headline achievements — but the real story is deeper.
+
+A **"Tournament Analytics"** button on the podium screen sets the register scope to this single tournament and switches to the Analytics tab. One click from celebration to deep analysis. The dashboard, leaderboard, and player views all show data for just this tournament — no manual filtering needed.
+
+This is the moment everyone wants the details. "How did Benedict win?" — instead of scrolling through a bracket, the operator opens the full analytical story: every match, every leg, every visit score, full leaderboard from 1st to last, head-to-head records, and achievement breakdowns.
+
+Not a separate feature — just another predefined view. The register scoped to one tournament, the dashboard as the entry point.
 
 ### The What-If Scenario
 
@@ -308,4 +375,27 @@ Most speculative phase — depends on what patterns emerge from actual usage of 
 
 ---
 
-**Last updated:** April 9, 2026 — restructured around command center architecture; added config snapshot detail and point mode concept
+## Open Questions
+
+Decisions deferred — to be revisited as implementation progresses.
+
+### ~~Lazy vs eager recompute~~ — Decided: lazy
+
+The active view recomputes on filter change. Other views are marked dirty and recompute when switched to. The user never sees stale data — the view refreshes the moment they activate it. No wasted work rendering hidden views, and the right foundation before graphs and canvas rendering are added later.
+
+### Dashboard drill-through targets
+
+Each stats card on the dashboard is described as "clickable — drill into the underlying data." But where does each card link to? Options:
+- "Most 180s: Andy (5)" → Player view, filtered to Andy?
+- "Most 180s: Andy (5)" → Leaderboard, sorted by 180s?
+- Both? (Player name clicks to player, card title clicks to leaderboard?)
+
+The drill-through targets define what makes the dashboard a gateway rather than just a summary.
+
+### Raw data principle in roadmap phases
+
+The architecture section defines when to use raw data vs the achievement register (absolute stats → register shortcut; threshold-dependent and derived stats → raw data). The roadmap phases should consistently reference this. Currently Phase 2 (Player View) mentions "match averages (where Chalker data available)" but doesn't state which source is used for other stats. Each phase should be explicit about which data source it draws from.
+
+---
+
+**Last updated:** April 10, 2026 — scope vs focus principle; zoom levels (all-time, season, single tournament, head-to-head); open questions added

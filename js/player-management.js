@@ -188,7 +188,7 @@ function addPlayerFromList(playerName) {
     const player = {
         id: Date.now(),
         name: playerName,
-        paid: false,
+        paid: config && config.ui && config.ui.defaultPaid ? true : false,
         stats: {
             shortLegs: 0,
             highOuts: [],
@@ -388,7 +388,7 @@ function addPlayer() {
     const player = {
         id: Date.now(),
         name: name,
-        paid: false,
+        paid: config && config.ui && config.ui.defaultPaid ? true : false,
         stats: {
             shortLegs: 0,
             highOuts: [],
