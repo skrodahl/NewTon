@@ -229,24 +229,39 @@ Each layer narrows the previous one. No layer is required — skip any and the f
 - Head-to-head (two-player comparison)
 - Match register (the current three-panel browser)
 
-### Table behaviour
+### Table behaviour — reusable core utility
 
-Any view that renders a table (tournaments, matches, leaderboards, player lists) should support:
+All tabular views use a shared table utility. Pass it data, column definitions, and a target element — it handles sorting, pagination, and rendering. Every future view (Leaderboard, Players, match lists) gets these features for free.
+
+**Implementation:** client-side sorting and pagination. At club scale (dozens of tournaments, hundreds of matches) the data is already in memory from the initial IndexedDB fetch. Re-querying with different indices would add complexity for zero performance benefit. If the data set ever grows, the utility's internals can switch without changing the calling API.
+
+**Sorting:**
+- Default sort per table: date descending where applicable, alphabetical otherwise
+- Click a column header to sort ascending; click again to reverse
+- Visual indicator on the active column: `▲` ascending, `▼` descending
+- Third click resets to default sort (optional — decide during implementation)
 
 **Pagination:**
-- Configurable items per page (operator selects)
-- Page navigation controls
-- Applies to tournament lists, match lists, and any other tabular view
+- Rows-per-page selector below the table, right-aligned: 10 / 25 / 50 / All
+- Default: 25
+- Previous / Next buttons with current page indicator (e.g. "Page 2 of 4")
+- Selection persists to localStorage per table ID so the operator's preference survives page reloads
 
-**Sortable columns:**
-- Click a column header to sort by that field
-- Click again to reverse
-- Visual indicator for active sort column and direction
+**Layout defaults:**
+- Pagination controls below the table in a compact row: rows-per-page selector on the right, page navigation centred
+- Sort indicators inline with header text, right of the label
+- No visual clutter when inactive — only the active sort column shows an arrow
 
-**Column visibility:**
+**Column visibility** (later):
 - Operator can show/hide columns per table
 - Reduces noise — only display what matters for the current question
 - Another control parameter: same data, different projection
+- Deferred until the core sort + pagination utility is stable
+
+**First targets:**
+- Register → tournament list (sort by date, name, format, player count)
+- Register → match list (sort by match ID, player names, result, type, date)
+- These already have real data and working rendering — adding the utility is purely additive
 
 ### Data flow
 
@@ -331,17 +346,30 @@ Zero-dependency — canvas-based or inline SVG. No chart libraries.
 
 The command center is the frame. Each phase adds views and controls that render within it.
 
-### Priority — Tournament Setup Integration
+### ~~Priority — Tournament Setup Integration~~ DONE (v5.0.4)
 
-The Tournament Setup page shows recent/saved tournaments. Each tournament should indicate whether it exists in Analytics (IndexedDB) or not — a small badge, icon, or status label.
+Backfill implemented. "+ Analytics" label on each completed tournament in "My Tournaments". One-click import with per-match achievement reconstruction from transaction history. Achievement reconciliation shared between backfill and live finalization. See v5.0.4 release notes.
 
-For tournaments not yet in Analytics, a button to **add them** would allow operators to backfill historical tournaments into the register. This is important because tournaments completed before v5.0.1 (when IndexedDB recording was introduced) have no Analytics entry. Without backfill, the leaderboard and cross-tournament stats only tell the story from v5.0.1 onward.
+### Next — Table Utility
 
-**Feasibility question:** localStorage tournament data includes match results, placements, and achievements — but not raw visit scores (those only exist for Chalker matches recorded via QR). A backfilled tournament would have manual-level detail: outcomes, leg counts, and operator-entered achievements. No visit-level data, no averages, no checkout darts. The question is whether this partial data is useful enough to include, or whether it creates a confusing mix of rich and shallow records in the register.
+Reusable sort + pagination utility, applied to the existing Register tables (tournament list, match list). This is the foundation for every tabular view that follows. See "Table behaviour" section above for the full specification.
 
-**Likely answer:** yes, it's useful. Points, placements, and achievement counts are the foundation of the leaderboard. A tournament doesn't need visit-level data to contribute to season standings. The Analytics views already handle the distinction — manual matches show "Manual" type and skip visit-level display. The data quality difference is already part of the design.
+### Next — Scope Selector
 
-**Top priority for the next phase** — if feasible, implement before continuing with Phase 2.
+The tournament selection that drives all views. This is the first real control on the control surface.
+
+- **Scope state** — an array of selected tournament IDs (default: all finalized)
+- **Visual indicator** — in the control bar, showing the current scope ("All tournaments" or "Måndagscup" or "3 tournaments selected")
+- **Entry points** that set the scope:
+  - "Analytics" label in Recent Tournaments → scope to that single tournament, switch to Analytics tab
+  - Podium "Tournament Analytics" button → same, scope to the just-completed tournament
+  - Register checkboxes → manual selection within the filtered list
+- **Clear button** to reset to all-time
+- **All views read from the scope** — Dashboard stats, Leaderboard rankings, Player profiles, Register tables all filter by the active scope
+
+Without scope, clicking "Analytics" on a tournament opens a filtered register but the Dashboard still shows all-time data. With scope, every view is consistent — one selection, one dataset, every view agrees.
+
+The scope must be set before the full filter system (date range → text → checkboxes) is built. The filters narrow the scope; the scope is the result. Start with manual selection (entry points + clear), add filters later.
 
 ### Phase 1 — Stats Cards + Point Mode
 
@@ -431,10 +459,20 @@ Each stats card on the dashboard is described as "clickable — drill into the u
 
 The drill-through targets define what makes the dashboard a gateway rather than just a summary.
 
+### Dashboard stat cards — dynamic visibility and content
+
+Current behaviour: cards with no data show "No data yet" or "0". Better: hide cards that have nothing to show. A dashboard with three meaningful cards is more useful than six cards where half say zero.
+
+Beyond that: cards should be operator-selectable. The system offers a catalogue of available stat cards; the operator picks which ones appear on their dashboard. A club that doesn't track tons doesn't need a tons card. A club obsessed with 180s might want both "Most 180s this season" and "180s per tournament average."
+
+Same principle as everything else — the data exists, the operator chooses the lens. The dashboard is a configurable view, not a fixed layout.
+
+Defer specifics until the scope selector is working and real data flows through the dashboard at different zoom levels.
+
 ### Raw data principle in roadmap phases
 
 The architecture section defines when to use raw data vs the achievement register (absolute stats → register shortcut; threshold-dependent and derived stats → raw data). The roadmap phases should consistently reference this. Currently Phase 2 (Player View) mentions "match averages (where Chalker data available)" but doesn't state which source is used for other stats. Each phase should be explicit about which data source it draws from.
 
 ---
 
-**Last updated:** April 10, 2026 — achievement reconciliation solved; two-level data model updated; shared helpers in newton-db.js
+**Last updated:** April 10, 2026 — implementation sequence: table utility → scope selector → views; Tournament Setup integration marked done (v5.0.4)
