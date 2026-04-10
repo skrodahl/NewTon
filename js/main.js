@@ -406,9 +406,12 @@ function showPage(pageId) {
         navBtn.classList.add('active');
     }
 
-    // Update match history when showing setup page
+    // Update match history and tournament list when showing setup page
     if (pageId === 'setup') {
         updateMatchHistory();
+        if (typeof loadRecentTournaments === 'function') {
+            loadRecentTournaments();
+        }
     }
 
     // Auto-open Match Controls when navigating to tournament page (if enabled and tournament exists)

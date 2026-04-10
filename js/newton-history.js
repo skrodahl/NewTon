@@ -4,6 +4,12 @@
 
 const NewtonHistory = (() => {
 
+    /** Convert a timestamp to milliseconds, handling both seconds and milliseconds */
+    function tsToMs(ts) {
+        if (!ts) return 0;
+        return ts > 1e12 ? ts : ts * 1000;
+    }
+
     /** Currently selected tournament record (for match list context) */
     let _activeTournament = null;
 
@@ -103,7 +109,7 @@ const NewtonHistory = (() => {
             const allMatches = [];
             for (const t of tournaments) {
                 const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
-                allMatches.push(...matches.filter(m => m.status === 'final'));
+                allMatches.push(...matches);
             }
 
             // Unique players
@@ -238,7 +244,7 @@ const NewtonHistory = (() => {
         }
 
         el.innerHTML = tournaments.map(t => {
-            const date    = t.closedAt ? new Date(t.closedAt * 1000).toLocaleDateString() : '—';
+            const date    = t.closedAt ? new Date(tsToMs(t.closedAt)).toLocaleDateString() : '—';
             const format  = t.tournamentFormat || '—';
             const players = t.playerCount || '—';
             const safeName = escHtml(t.tournamentName || t.tournamentId);
@@ -280,14 +286,13 @@ const NewtonHistory = (() => {
             return;
         }
 
-        // Filter to final records only, sort by completedAt
+        // Sort by completedAt
         const finalMatches = matchRecords
-            .filter(m => m.status === 'final')
             .sort((a, b) => a.completedAt - b.completedAt);
 
         document.getElementById('historyMatchListTitle').textContent = escHtml(tournament.tournamentName || tournamentId);
         document.getElementById('historyMatchListMeta').textContent =
-            `${tournament.tournamentFormat || ''} · ${tournament.playerCount || '?'} players · ${tournament.closedAt ? new Date(tournament.closedAt * 1000).toLocaleDateString() : ''}`;
+            `${tournament.tournamentFormat || ''} · ${tournament.playerCount || '?'} players · ${tournament.closedAt ? new Date(tsToMs(tournament.closedAt)).toLocaleDateString() : ''}`;
 
         const el = document.getElementById('historyMatchListBody');
 
@@ -300,7 +305,7 @@ const NewtonHistory = (() => {
                 const type   = m.matchType === 'CHALKER'
                     ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
                     : '<span class="history-type-badge history-type-manual">Manual</span>';
-                const date   = m.completedAt ? new Date(m.completedAt * 1000).toLocaleDateString() : '—';
+                const date   = m.completedAt ? new Date(tsToMs(m.completedAt)).toLocaleDateString() : '—';
                 return `<tr class="history-row" onclick="NewtonHistory.openMatch('${escHtml(tournamentId)}', '${escHtml(m.matchId)}')">
                     <td style="font-family:monospace;font-size:13px;">${escHtml(m.matchId)}</td>
                     <td>${escHtml(m.player1Name)}</td>
@@ -334,7 +339,7 @@ const NewtonHistory = (() => {
 
         const winnerName = match.winner === 1 ? match.player1Name : match.player2Name;
         const legs       = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
-        const date       = match.completedAt ? new Date(match.completedAt * 1000).toLocaleString() : '—';
+        const date       = match.completedAt ? new Date(tsToMs(match.completedAt)).toLocaleString() : '—';
         const typeBadge  = match.matchType === 'CHALKER'
             ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
             : '<span class="history-type-badge history-type-manual">Manual</span>';
@@ -356,7 +361,7 @@ const NewtonHistory = (() => {
     function _buildMatchDetailHtml(match) {
         const winnerName = match.winner === 1 ? match.player1Name : match.player2Name;
         const legs       = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
-        const date       = match.completedAt ? new Date(match.completedAt * 1000).toLocaleString() : '—';
+        const date       = match.completedAt ? new Date(tsToMs(match.completedAt)).toLocaleString() : '—';
         const typeBadge  = match.matchType === 'CHALKER'
             ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
             : '<span class="history-type-badge history-type-manual">Manual</span>';

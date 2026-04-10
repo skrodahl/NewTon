@@ -68,6 +68,27 @@ No thresholds, just the actual numbers.
 
 **Implementation**: scan raw leg data from Chalker match records for threshold-free bests; fall back to `tournamentAchievements` for manual entries (which are only recorded when the operator considers them notable). Best of both sources.
 
+### Known gap: dashboard reads match-level achievements only
+
+The dashboard stat cards currently compute 180s, tons, etc. from per-match `achievements` fields. These only exist for Chalker matches (v5.0.1+) and QR-completed matches with achievement data. Backfilled tournaments and older manual tournaments store achievements at the tournament level (`meta.tournamentAchievements`) with per-player stats, but the match records have `achievements: null`.
+
+**Impact**: backfilled tournaments contribute to tournament count, match count, and player count — but not to 180s, tons, or other achievement-based stats on the dashboard.
+
+**Fix**: the computation layer should check `tournamentAchievements` on the meta record as a fallback when match-level achievements are unavailable. This is the same two-source pattern described above — match-level when available, tournament-level otherwise. The data is already there; the query just doesn't read it yet.
+
+### Two-level data model — backwards and forwards compatible
+
+Achievement data exists at two levels, and always will:
+
+- **Match-level**: raw visit data, per-leg scores, computed achievements. Only present for Chalker/QR matches (v5.0.1+). Rich, granular, derivable.
+- **Tournament-level**: per-player aggregate achievements stored on the tournament meta record (`tournamentAchievements`). Always present — written at finalization for every tournament regardless of how matches were completed.
+
+Old tournaments (pre-v5.0.1) only have tournament-level data. New Chalker matches have both. The tournament level is the universal baseline — it exists for every tournament ever recorded and will exist for every future one.
+
+Future features may add stats that only make sense at the tournament level — custom awards, "most improved player", operator notes — things that aren't derivable from raw match scores. The tournament-level record accommodates this naturally.
+
+The computation pattern: match-level when available (richer, more granular), tournament-level as fallback (always present). This is not a migration path — it's the permanent architecture. Both levels coexist indefinitely.
+
 ---
 
 ## The Gap

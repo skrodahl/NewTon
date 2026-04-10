@@ -1,8 +1,24 @@
 ## **v5.0.4** — (unreleased)
 
+### Tournament Setup — Analytics integration
+
+- **Analytics labels**: each completed tournament in "My Tournaments" shows its Analytics status — green "Analytics" label (click to view in Analytics tab) or muted "+ Analytics" label (click to backfill into the registry with confirmation dialog). Active/in-progress tournaments show no label.
+- **Backfill to Analytics**: clicking "+ Analytics" imports the tournament meta, all completed non-walkover matches, and per-player achievements into IndexedDB. One click to add historical tournaments to the registry.
+- **Player count**: each tournament now shows the player count (e.g. "- 22p"), matching the Shared Tournaments display.
+- **Setup page refresh**: navigating to Tournament Setup now refreshes the tournament list, ensuring Analytics labels reflect current state.
+
+### Analytics — match display fix
+
+- **Removed `status: 'final'` filter on match records**: the Register and Dashboard now show all matches for finalized tournaments regardless of match-level status. The tournament meta `status: 'final'` already gates visibility — filtering matches was redundant and prevented backfilled matches from appearing.
+- **Timestamp display fix**: dates now handle both seconds and milliseconds timestamps via `tsToMs()` helper — older localStorage tournaments stored `completedAt` in milliseconds, newer ones in seconds.
+
 ### Demo banner
 
 - **Fixed**: "Darts double elimination tournament software" changed to "Darts tournament software" — the banner predated Single Elimination support
+
+### Before release — open item
+
+- **Dashboard achievement stats**: stat cards (180s, tons, etc.) only read match-level achievements. Backfilled tournaments store achievements at tournament level (`tournamentAchievements`). The computation layer needs to read both sources — match-level when available, tournament-level as fallback. See `Docs/ANALYTICS.md` for the two-level data model.
 
 ---
 

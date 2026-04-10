@@ -558,14 +558,36 @@ async function loadRecentTournaments() {
             sortedTournaments :
             sortedTournaments.slice(0, 5);
 
+        // Check which tournaments are in the Analytics registry
+        let analyticsIds = new Set();
+        try {
+            if (typeof NewtonDB !== 'undefined') {
+                const analyticsTournaments = await NewtonDB.getFinalTournaments();
+                analyticsIds = new Set(analyticsTournaments.map(t => String(t.tournamentId)));
+            }
+        } catch (e) {
+            console.warn('Could not check Analytics registry:', e);
+        }
+
         const localHtml = tournamentsToShow.map(t => {
             const isActiveTournament = tournament && tournament.id === t.id;
+            const playerCount = Array.isArray(t.players) ? t.players.length : 0;
+            const playerCountText = playerCount > 0 ? ` - ${playerCount}p` : '';
+            const inAnalytics = analyticsIds.has(String(t.id));
+            const isCompleted = t.status === 'completed';
+            let analyticsLabel = '';
+            if (inAnalytics) {
+                analyticsLabel = `<span class="analytics-label analytics-label--active" onclick="event.stopPropagation(); openAnalyticsForTournament('${t.id}')" title="View in Analytics">Analytics</span>`;
+            } else if (isCompleted) {
+                analyticsLabel = `<span class="analytics-label analytics-label--add" onclick="event.stopPropagation(); addTournamentToAnalytics('${t.id}')" title="Add to Analytics registry">+ Analytics</span>`;
+            }
             return `
                 <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span>
-                            <strong>${t.name}</strong> (${t.date})
+                            <strong>${t.name}</strong> (${t.date})${playerCountText}
                             ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
+                            ${analyticsLabel}
                         </span>
                         <div>
                             <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
@@ -1776,6 +1798,129 @@ function closeStorageModal() {
     }
 }
 
+// Open Analytics tab scoped to a specific tournament
+function openAnalyticsForTournament(tournamentId) {
+    // TODO: Set Analytics register filter to this single tournament
+    // For now, just navigate to the Analytics tab
+    if (typeof showPage === 'function') {
+        showPage('history');
+    }
+    console.log(`[Analytics] Open scoped to tournament ${tournamentId}`);
+}
+
+// Add a localStorage tournament to the Analytics registry (IndexedDB)
+async function addTournamentToAnalytics(tournamentId) {
+    if (typeof NewtonDB === 'undefined') {
+        console.warn('NewtonDB not available');
+        return;
+    }
+
+    // Find the tournament in localStorage
+    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const t = tournaments.find(tr => String(tr.id) === String(tournamentId));
+    if (!t) {
+        console.warn('Tournament not found in localStorage:', tournamentId);
+        return;
+    }
+
+    // Confirmation dialog
+    const playerCount = Array.isArray(t.players) ? t.players.length : 0;
+    if (!confirm(`Add "${t.name}" (${t.date}, ${playerCount} players) to the Analytics registry?\n\nMatch results and achievements will be imported.`)) {
+        return;
+    }
+
+    // Check if already in Analytics
+    const existing = await NewtonDB.getTournament(String(t.id));
+    if (existing) {
+        console.log('Tournament already in Analytics:', t.name);
+        return;
+    }
+
+    // Build tournament meta record (field names must match newton-db.js schema)
+    // closedAt uses the tournament date (as Unix seconds) for backfilled tournaments
+    const tournamentDate = new Date(t.date + 'T00:00:00');
+    const meta = {
+        tournamentId: String(t.id),
+        tournamentName: t.name,
+        tournamentDate: t.date,
+        tournamentFormat: t.format || 'DE',
+        playerCount: Array.isArray(t.players) ? t.players.length : 0,
+        status: 'final',
+        closedAt: Math.floor(tournamentDate.getTime() / 1000),
+        configSnapshot: config || {}
+    };
+
+    // Save tournament meta
+    await NewtonDB.saveTournamentMeta(meta);
+
+    // Save completed matches
+    if (Array.isArray(t.matches)) {
+        for (const match of t.matches) {
+            if (!match.completed || !match.winner) continue;
+
+            const isWalkover = match.autoAdvanced ||
+                (match.player1 && (match.player1.name === 'Walkover' || match.player1.isBye)) ||
+                (match.player2 && (match.player2.name === 'Walkover' || match.player2.isBye));
+            if (isWalkover) continue;
+
+            const winnerIs1 = match.winner && match.player1 && String(match.winner.id) === String(match.player1.id);
+            const p1Legs = match.finalScore ? (winnerIs1 ? match.finalScore.winnerLegs : match.finalScore.loserLegs) : 0;
+            const p2Legs = match.finalScore ? (winnerIs1 ? match.finalScore.loserLegs : match.finalScore.winnerLegs) : 0;
+
+            const dbMatch = {
+                tournamentId: String(t.id),
+                tournamentName: t.name,
+                tournamentFormat: t.format || 'DE',
+                matchId: match.id,
+                matchRound: match.id,
+                matchType: 'MANUAL',
+                completedAt: match.completedAt || Math.floor(tournamentDate.getTime() / 1000),
+                player1Id: match.player1 ? String(match.player1.id) : null,
+                player1Name: match.player1 ? match.player1.name : null,
+                player2Id: match.player2 ? String(match.player2.id) : null,
+                player2Name: match.player2 ? match.player2.name : null,
+                winner: winnerIs1 ? 1 : 2,
+                firstStarter: null,
+                legsWon: { p1: p1Legs, p2: p2Legs },
+                legs: null,
+                achievements: null,
+                format: null
+            };
+
+            try {
+                await NewtonDB.saveMatch(dbMatch);
+            } catch (e) {
+                console.warn('Failed to save match to Analytics:', match.id, e);
+            }
+        }
+    }
+
+    // Save tournament-level achievements per player
+    if (Array.isArray(t.players)) {
+        const achievements = {};
+        for (const p of t.players) {
+            if (p.stats) {
+                achievements[String(p.id)] = {
+                    name: p.name,
+                    oneEighties: p.stats.oneEighties || 0,
+                    tons: p.stats.tons || 0,
+                    highOuts: Array.isArray(p.stats.highOuts) ? p.stats.highOuts : [],
+                    shortLegs: Array.isArray(p.stats.shortLegs) ? p.stats.shortLegs : [],
+                    lollipops: p.stats.lollipops || 0
+                };
+            }
+        }
+        meta.tournamentAchievements = achievements;
+        meta.placements = t.placements || {};
+        await NewtonDB.saveTournamentMeta(meta);
+    }
+
+    console.log(`[Analytics] Added tournament "${t.name}" to Analytics registry`);
+
+    // Refresh the tournament list to update the label
+    loadRecentTournaments();
+}
+
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.showResetTournamentModal = showResetTournamentModal;
@@ -1789,4 +1934,6 @@ if (typeof window !== 'undefined') {
     window.updateStorageIndicator = updateStorageIndicator;
     window.showStorageModal = showStorageModal;
     window.closeStorageModal = closeStorageModal;
+    window.openAnalyticsForTournament = openAnalyticsForTournament;
+    window.addTournamentToAnalytics = addTournamentToAnalytics;
 }
