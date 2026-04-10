@@ -4,8 +4,16 @@
 
 - **Analytics labels**: each completed tournament in "My Tournaments" shows its Analytics status — green "Analytics" label (click to view in Analytics tab) or muted "+ Analytics" label (click to backfill into the registry with confirmation dialog). Active/in-progress tournaments show no label.
 - **Backfill to Analytics**: clicking "+ Analytics" imports the tournament meta, all completed non-walkover matches, and per-player achievements into IndexedDB. One click to add historical tournaments to the registry.
+- **Backfill per-match achievements**: transaction history snapshots are diffed to derive per-match achievement deltas (180s, high outs, short legs, tons, lollipops) for backfilled tournaments. Even manually scored v4 tournaments get per-match attribution.
 - **Player count**: each tournament now shows the player count (e.g. "- 22p"), matching the Shared Tournaments display.
 - **Setup page refresh**: navigating to Tournament Setup now refreshes the tournament list, ensuring Analytics labels reflect current state.
+
+### Analytics — achievement reconciliation
+
+- **Shared reconciliation** (`NewtonDB.reconcileMatchAchievements`): after all matches are saved, compares the sum of match-level achievement deltas against authoritative player totals (`tournamentAchievements`). Any remainder — achievements entered outside the match completion dialog — is attributed to the player's last match. Ensures match-level totals always equal tournament-level totals.
+- **Used by both paths**: backfill (`addTournamentToAnalytics`) and live finalization (`completeMatch` → `finalizeTournament`) call the same reconciliation function.
+- **Shared helpers** in `newton-db.js`: `normalizeStats`, `diffStats`, `hasAnyStats`, `addStats` — used by both backfill history diffing and the reconciliation function.
+- **`.stats` wrapper fix**: backfill now writes `tournamentAchievements` in the same `{ name, stats: {...} }` shape as the finalize path — dashboard reads both consistently.
 
 ### Analytics — match display fix
 
@@ -16,9 +24,9 @@
 
 - **Fixed**: "Darts double elimination tournament software" changed to "Darts tournament software" — the banner predated Single Elimination support
 
-### Before release — open item
+### ~~Before release — open item~~ RESOLVED
 
-- **Dashboard achievement stats**: stat cards (180s, tons, etc.) only read match-level achievements. Backfilled tournaments store achievements at tournament level (`tournamentAchievements`). The computation layer needs to read both sources — match-level when available, tournament-level as fallback. See `Docs/ANALYTICS.md` for the two-level data model.
+- ~~Dashboard achievement stats~~ — solved by achievement reconciliation and `.stats` wrapper fix (see above)
 
 ---
 

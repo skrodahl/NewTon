@@ -359,6 +359,128 @@ const NewtonDB = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // Achievement helpers (shared by backfill and live finalization)
+    // ---------------------------------------------------------------------------
+
+    /** Normalize a player stats object to a consistent shape. */
+    function normalizeStats(stats) {
+        if (!stats) return { oneEighties: 0, tons: 0, highOuts: [], shortLegs: [], lollipops: 0 };
+        const sl = stats.shortLegs;
+        return {
+            oneEighties: stats.oneEighties || 0,
+            tons: stats.tons || 0,
+            highOuts: Array.isArray(stats.highOuts) ? stats.highOuts : [],
+            shortLegs: Array.isArray(sl) ? sl : [],
+            lollipops: stats.lollipops || 0
+        };
+    }
+
+    /** Compute the delta between two normalized stats snapshots. */
+    function diffStats(prev, curr) {
+        return {
+            oneEighties: curr.oneEighties - prev.oneEighties,
+            tons: curr.tons - prev.tons,
+            highOuts: curr.highOuts.slice(prev.highOuts.length),
+            shortLegs: curr.shortLegs.slice(prev.shortLegs.length),
+            lollipops: curr.lollipops - prev.lollipops
+        };
+    }
+
+    /** Returns true if a delta has any non-zero achievement. */
+    function hasAnyStats(d) {
+        return d.oneEighties > 0 || d.tons > 0 || d.lollipops > 0 ||
+            d.highOuts.length > 0 || d.shortLegs.length > 0;
+    }
+
+    /** Add achievement values from addition onto target (mutates target). */
+    function addStats(target, addition) {
+        target.oneEighties += addition.oneEighties;
+        target.tons += addition.tons;
+        target.lollipops += addition.lollipops;
+        target.highOuts = target.highOuts.concat(addition.highOuts);
+        target.shortLegs = target.shortLegs.concat(addition.shortLegs);
+    }
+
+    /**
+     * Reconcile match-level achievements with player totals.
+     * Sums all per-match achievement deltas for each player, compares against
+     * the authoritative player stats, and attributes any remainder to the
+     * player's last match. Writes updated match records back to IndexedDB.
+     *
+     * @param {string} tournamentId
+     * @param {Object<string, {name: string, stats: object}>} playerStatsMap
+     *   playerId -> { name, stats: { oneEighties, tons, highOuts, shortLegs, lollipops } }
+     * @returns {Promise<void>}
+     */
+    async function reconcileMatchAchievements(tournamentId, playerStatsMap) {
+        await initDB();
+
+        const matches = await getMatchesByTournament(tournamentId);
+        if (!matches.length) return;
+
+        // Sort by completedAt to determine last match per player
+        matches.sort((a, b) => (a.completedAt || 0) - (b.completedAt || 0));
+
+        // Sum existing match-level achievements per player, track last match
+        const accumulated = {};   // playerId -> normalized sum
+        const lastMatchIdx = {};  // playerId -> index in matches array
+
+        for (let i = 0; i < matches.length; i++) {
+            const m = matches[i];
+            const slots = [
+                { id: m.player1Id, slot: 'p1' },
+                { id: m.player2Id, slot: 'p2' }
+            ];
+
+            for (const { id, slot } of slots) {
+                if (!id) continue;
+                lastMatchIdx[id] = i;
+
+                const ach = m.achievements && m.achievements[slot];
+                if (ach) {
+                    if (!accumulated[id]) accumulated[id] = normalizeStats(null);
+                    addStats(accumulated[id], normalizeStats(ach));
+                }
+            }
+        }
+
+        // Compare accumulated vs authoritative player totals, find remainders
+        const updates = {};  // match index -> { playerId -> remainder }
+
+        for (const [playerId, entry] of Object.entries(playerStatsMap)) {
+            if (!entry.stats) continue;
+            const final_ = normalizeStats(entry.stats);
+            const acc = accumulated[playerId] || normalizeStats(null);
+            const remainder = diffStats(acc, final_);
+
+            if (hasAnyStats(remainder) && lastMatchIdx[playerId] !== undefined) {
+                const idx = lastMatchIdx[playerId];
+                if (!updates[idx]) updates[idx] = {};
+                updates[idx][playerId] = remainder;
+            }
+        }
+
+        // Write remainders back to the last match for each player
+        for (const [idxStr, playerRemainders] of Object.entries(updates)) {
+            const idx = parseInt(idxStr, 10);
+            const m = matches[idx];
+            if (!m.achievements) m.achievements = { p1: null, p2: null };
+
+            for (const [playerId, remainder] of Object.entries(playerRemainders)) {
+                const slot = String(m.player1Id) === playerId ? 'p1' : 'p2';
+                if (m.achievements[slot]) {
+                    addStats(m.achievements[slot], remainder);
+                } else {
+                    m.achievements[slot] = remainder;
+                }
+            }
+
+            // Write updated match back to IndexedDB
+            await saveMatch(m);
+        }
+    }
+
+    // ---------------------------------------------------------------------------
     // Public API
     // ---------------------------------------------------------------------------
 
@@ -375,7 +497,12 @@ const NewtonDB = (() => {
         getFinalTournaments,
         exportAll,
         importAll,
-        deleteTournament
+        deleteTournament,
+        reconcileMatchAchievements,
+        normalizeStats,
+        diffStats,
+        hasAnyStats,
+        addStats
     };
 
 })();

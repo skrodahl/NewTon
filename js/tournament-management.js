@@ -1853,7 +1853,53 @@ async function addTournamentToAnalytics(tournamentId) {
     // Save tournament meta
     await NewtonDB.saveTournamentMeta(meta);
 
-    // Save completed matches
+    // -----------------------------------------------------------------------
+    // Compute per-match achievement deltas from transaction history
+    // -----------------------------------------------------------------------
+    // Transactions store cumulative player stats snapshots. By diffing
+    // consecutive snapshots for the same player we derive what was recorded
+    // during each match.
+    // -----------------------------------------------------------------------
+
+    const matchAchievementMap = {};  // matchId -> { playerId -> delta }
+
+    // History is stored separately in localStorage under tournament_${id}_history
+    const historyKey = `tournament_${t.id}_history`;
+    const historyRaw = localStorage.getItem(historyKey);
+    const historyData = historyRaw ? JSON.parse(historyRaw) : (t.history || []);
+
+    if (Array.isArray(historyData) && historyData.length > 0) {
+        const completeTxs = historyData
+            .filter(tx => tx.type === 'COMPLETE_MATCH')
+            .sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+
+        const prevStats = {};  // playerId -> last seen normalized stats
+
+        for (const tx of completeTxs) {
+            const matchId = tx.matchId;
+            const matchDeltas = {};
+
+            for (const role of ['winner', 'loser']) {
+                const p = tx[role];
+                if (!p || !p.id) continue;
+                const pid = String(p.id);
+                const curr = NewtonDB.normalizeStats(p.stats);
+                const prev = prevStats[pid] || NewtonDB.normalizeStats(null);
+                const delta = NewtonDB.diffStats(prev, curr);
+                prevStats[pid] = curr;
+
+                if (NewtonDB.hasAnyStats(delta)) {
+                    matchDeltas[pid] = delta;
+                }
+            }
+
+            if (Object.keys(matchDeltas).length > 0) {
+                matchAchievementMap[matchId] = matchDeltas;
+            }
+        }
+    }
+
+    // Save completed matches (with history-derived achievement deltas)
     if (Array.isArray(t.matches)) {
         for (const match of t.matches) {
             if (!match.completed || !match.winner) continue;
@@ -1867,6 +1913,14 @@ async function addTournamentToAnalytics(tournamentId) {
             const p1Legs = match.finalScore ? (winnerIs1 ? match.finalScore.winnerLegs : match.finalScore.loserLegs) : 0;
             const p2Legs = match.finalScore ? (winnerIs1 ? match.finalScore.loserLegs : match.finalScore.winnerLegs) : 0;
 
+            // Look up per-match achievement deltas from history
+            const deltas = matchAchievementMap[match.id] || {};
+            const p1Id = match.player1 ? String(match.player1.id) : null;
+            const p2Id = match.player2 ? String(match.player2.id) : null;
+            const p1Ach = (p1Id && deltas[p1Id]) ? deltas[p1Id] : null;
+            const p2Ach = (p2Id && deltas[p2Id]) ? deltas[p2Id] : null;
+            const achievements = (p1Ach || p2Ach) ? { p1: p1Ach, p2: p2Ach } : null;
+
             const dbMatch = {
                 tournamentId: String(t.id),
                 tournamentName: t.name,
@@ -1875,15 +1929,15 @@ async function addTournamentToAnalytics(tournamentId) {
                 matchRound: match.id,
                 matchType: 'MANUAL',
                 completedAt: match.completedAt || Math.floor(tournamentDate.getTime() / 1000),
-                player1Id: match.player1 ? String(match.player1.id) : null,
+                player1Id: p1Id,
                 player1Name: match.player1 ? match.player1.name : null,
-                player2Id: match.player2 ? String(match.player2.id) : null,
+                player2Id: p2Id,
                 player2Name: match.player2 ? match.player2.name : null,
                 winner: winnerIs1 ? 1 : 2,
                 firstStarter: null,
                 legsWon: { p1: p1Legs, p2: p2Legs },
                 legs: null,
-                achievements: null,
+                achievements: achievements,
                 format: null
             };
 
@@ -1895,24 +1949,30 @@ async function addTournamentToAnalytics(tournamentId) {
         }
     }
 
-    // Save tournament-level achievements per player
+    // Save tournament-level achievements per player (wrapped in .stats for consistency with finalize path)
     if (Array.isArray(t.players)) {
-        const achievements = {};
+        const tournamentAchievements = {};
         for (const p of t.players) {
             if (p.stats) {
-                achievements[String(p.id)] = {
+                tournamentAchievements[String(p.id)] = {
                     name: p.name,
-                    oneEighties: p.stats.oneEighties || 0,
-                    tons: p.stats.tons || 0,
-                    highOuts: Array.isArray(p.stats.highOuts) ? p.stats.highOuts : [],
-                    shortLegs: Array.isArray(p.stats.shortLegs) ? p.stats.shortLegs : [],
-                    lollipops: p.stats.lollipops || 0
+                    stats: {
+                        oneEighties: p.stats.oneEighties || 0,
+                        tons: p.stats.tons || 0,
+                        highOuts: Array.isArray(p.stats.highOuts) ? p.stats.highOuts : [],
+                        shortLegs: Array.isArray(p.stats.shortLegs) ? p.stats.shortLegs : [],
+                        lollipops: p.stats.lollipops || 0
+                    }
                 };
             }
         }
-        meta.tournamentAchievements = achievements;
+        meta.tournamentAchievements = tournamentAchievements;
         meta.placements = t.placements || {};
         await NewtonDB.saveTournamentMeta(meta);
+
+        // Reconcile: attribute any achievements not captured by history deltas
+        // to each player's last match (e.g. stats added outside match dialog)
+        await NewtonDB.reconcileMatchAchievements(String(t.id), tournamentAchievements);
     }
 
     console.log(`[Analytics] Added tournament "${t.name}" to Analytics registry`);

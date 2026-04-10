@@ -743,7 +743,13 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                         _configSnapshot,
                         _tournamentAchievements,
                         Math.floor(Date.now() / 1000)
-                    ).catch(e => console.warn('NewtonDB finalizeTournament failed:', e));
+                    ).then(() => {
+                        // Reconcile: attribute any achievements entered outside
+                        // the match completion dialog to each player's last match
+                        return NewtonDB.reconcileMatchAchievements(
+                            String(tournament.id), _tournamentAchievements
+                        );
+                    }).catch(e => console.warn('NewtonDB finalizeTournament failed:', e));
                 }
                 if (typeof updateMatchHistory === 'function') updateMatchHistory();
 

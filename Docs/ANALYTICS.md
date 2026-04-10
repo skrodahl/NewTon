@@ -68,26 +68,32 @@ No thresholds, just the actual numbers.
 
 **Implementation**: scan raw leg data from Chalker match records for threshold-free bests; fall back to `tournamentAchievements` for manual entries (which are only recorded when the operator considers them notable). Best of both sources.
 
-### Known gap: dashboard reads match-level achievements only
+### Achievement reconciliation — solved
 
-The dashboard stat cards currently compute 180s, tons, etc. from per-match `achievements` fields. These only exist for Chalker matches (v5.0.1+) and QR-completed matches with achievement data. Backfilled tournaments and older manual tournaments store achievements at the tournament level (`meta.tournamentAchievements`) with per-player stats, but the match records have `achievements: null`.
+Match-level achievements now always sum to tournament-level totals. Two mechanisms ensure this:
 
-**Impact**: backfilled tournaments contribute to tournament count, match count, and player count — but not to 180s, tons, or other achievement-based stats on the dashboard.
+**Backfill** (historical tournaments added via "+ Analytics"):
+- Transaction history contains cumulative player stat snapshots per match. Diffing consecutive snapshots for the same player derives per-match achievement deltas — even for manually scored v4 tournaments.
+- After all matches are saved, `NewtonDB.reconcileMatchAchievements()` compares the sum of match-level deltas against the authoritative `tournamentAchievements`. Any remainder (achievements entered outside the match completion dialog) is attributed to the player's last match.
 
-**Fix**: the computation layer should check `tournamentAchievements` on the meta record as a fallback when match-level achievements are unavailable. This is the same two-source pattern described above — match-level when available, tournament-level otherwise. The data is already there; the query just doesn't read it yet.
+**Live finalization** (tournament just completed):
+- Each match already carries its achievement delta from the snapshot diff computed during the completion dialog.
+- The same `reconcileMatchAchievements()` runs after finalization, catching any stats added outside the match dialog (e.g. operator bumps a 180 count directly on the Player Registration stats panel after confirming a winner).
+
+Both paths use the same shared code in `newton-db.js`: `normalizeStats`, `diffStats`, `hasAnyStats`, `addStats`, and `reconcileMatchAchievements`.
+
+**Result**: every match in IndexedDB has per-match achievement attribution. The dashboard reads `tournamentAchievements` for aggregate stats (the authoritative total). Match detail views read per-match achievements for drill-down. The numbers always agree.
 
 ### Two-level data model — backwards and forwards compatible
 
 Achievement data exists at two levels, and always will:
 
-- **Match-level**: raw visit data, per-leg scores, computed achievements. Only present for Chalker/QR matches (v5.0.1+). Rich, granular, derivable.
-- **Tournament-level**: per-player aggregate achievements stored on the tournament meta record (`tournamentAchievements`). Always present — written at finalization for every tournament regardless of how matches were completed.
+- **Match-level**: per-match achievement deltas. Present for all matches — Chalker matches have them from `extractAchievements()`, manual matches have them from the snapshot diff, backfilled matches have them from history diffing + reconciliation.
+- **Tournament-level**: per-player aggregate achievements stored on the tournament meta record (`tournamentAchievements`). Always present — written at finalization for every tournament. The authoritative total.
 
-Old tournaments (pre-v5.0.1) only have tournament-level data. New Chalker matches have both. The tournament level is the universal baseline — it exists for every tournament ever recorded and will exist for every future one.
+The match-level sum always equals the tournament-level total thanks to reconciliation. But the tournament level remains the canonical aggregate — it's written from the live `player.stats` at finalization, not summed from match deltas.
 
 Future features may add stats that only make sense at the tournament level — custom awards, "most improved player", operator notes — things that aren't derivable from raw match scores. The tournament-level record accommodates this naturally.
-
-The computation pattern: match-level when available (richer, more granular), tournament-level as fallback (always present). This is not a migration path — it's the permanent architecture. Both levels coexist indefinitely.
 
 ---
 
@@ -431,4 +437,4 @@ The architecture section defines when to use raw data vs the achievement registe
 
 ---
 
-**Last updated:** April 10, 2026 — scope vs focus principle; zoom levels (all-time, season, single tournament, head-to-head); open questions added
+**Last updated:** April 10, 2026 — achievement reconciliation solved; two-level data model updated; shared helpers in newton-db.js
