@@ -226,45 +226,87 @@ const NewtonHistory = (() => {
     // Tournament list
     // ---------------------------------------------------------------------------
 
+    /** @type {object|null} NewtonTable instance for the tournament list */
+    let _tournamentTable = null;
+
     async function renderTournamentList() {
-        const el = document.getElementById('historyTournamentListBody');
-        el.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:24px;">Loading…</td></tr>';
+        // Create the table instance once, reuse on subsequent calls
+        if (!_tournamentTable) {
+            _tournamentTable = NewtonTable.create({
+                tableId: 'analytics-tournaments',
+                containerId: 'historyTournamentTableContainer',
+                defaultSortKey: 'closedAt',
+                defaultSortDir: 'desc',
+                emptyMessage: 'No completed tournaments yet. Close a tournament to register it here.',
+                columns: [
+                    {
+                        key: 'tournamentName', label: 'Tournament',
+                        render: (v, row) => escHtml(v || row.tournamentId)
+                    },
+                    {
+                        key: 'tournamentFormat', label: 'Format', width: '80px',
+                        render: (v) => escHtml(v || '—')
+                    },
+                    {
+                        key: 'closedAt', label: 'Date', width: '120px',
+                        render: (v) => v ? new Date(tsToMs(v)).toLocaleDateString() : '—',
+                        sortValue: (v) => v ? tsToMs(v) : 0
+                    },
+                    {
+                        key: 'playerCount', label: 'Players', align: 'center', width: '80px',
+                        render: (v) => v || '—'
+                    },
+                    {
+                        key: 'matchCount', label: 'Matches', align: 'center', width: '80px',
+                        render: (v) => v != null ? v : '—'
+                    },
+                    {
+                        key: '_actions', label: '', sortable: false, align: 'right',
+                        render: (v, row) => {
+                            const safeId = escHtml(row.tournamentId);
+                            const safeName = escHtml(row.tournamentName || row.tournamentId);
+                            return `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.openTournament('${safeId}')">View →</button>` +
+                                `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="margin-left:6px;color:#dc2626;border-color:#dc2626;">Delete</button>`;
+                        }
+                    }
+                ],
+                onRowClick: (row) => openTournament(row.tournamentId)
+            });
+        }
 
         let tournaments;
         try {
             tournaments = await NewtonDB.getFinalTournaments();
         } catch (e) {
-            el.innerHTML = `<tr><td colspan="6" style="color:#dc2626;padding:16px;">Could not load history: ${e.message}</td></tr>`;
+            const container = document.getElementById('historyTournamentTableContainer');
+            if (container) container.innerHTML = `<p style="color:#dc2626;padding:16px;">Could not load history: ${escHtml(e.message)}</p>`;
             return;
         }
 
-        if (tournaments.length === 0) {
-            el.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:24px;">No completed tournaments yet. Close a tournament to register it here.</td></tr>';
-            return;
+        // Self-heal: compute and persist matchCount for records that don't have it
+        for (const t of tournaments) {
+            if (t.matchCount == null) {
+                try {
+                    const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+                    t.matchCount = matches.length;
+                    NewtonDB.saveTournamentMeta(t).catch(() => {});
+                } catch (e) {
+                    t.matchCount = 0;
+                }
+            }
         }
 
-        el.innerHTML = tournaments.map(t => {
-            const date    = t.closedAt ? new Date(tsToMs(t.closedAt)).toLocaleDateString() : '—';
-            const format  = t.tournamentFormat || '—';
-            const players = t.playerCount || '—';
-            const safeName = escHtml(t.tournamentName || t.tournamentId);
-            const safeId   = escHtml(t.tournamentId);
-            return `<tr class="history-row" onclick="NewtonHistory.openTournament('${safeId}')">
-                <td>${safeName}</td>
-                <td>${format}</td>
-                <td>${date}</td>
-                <td style="text-align:center;">${players}</td>
-                <td style="text-align:right;">
-                    <button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.openTournament('${safeId}')">View →</button>
-                    <button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="margin-left:6px;color:#dc2626;border-color:#dc2626;">Delete</button>
-                </td>
-            </tr>`;
-        }).join('');
+        // Add _rowId for row click identification
+        tournaments.forEach(t => { t._rowId = t.tournamentId; });
+        _tournamentTable.setData(tournaments);
     }
 
     // ---------------------------------------------------------------------------
     // Match list
     // ---------------------------------------------------------------------------
+
+    /** @type {object|null} NewtonTable instance for the match list */
+    let _matchTable = null;
 
     async function openTournament(tournamentId) {
         let tournament;
@@ -286,36 +328,54 @@ const NewtonHistory = (() => {
             return;
         }
 
-        // Sort by completedAt
-        const finalMatches = matchRecords
-            .sort((a, b) => a.completedAt - b.completedAt);
-
         document.getElementById('historyMatchListTitle').textContent = escHtml(tournament.tournamentName || tournamentId);
         document.getElementById('historyMatchListMeta').textContent =
             `${tournament.tournamentFormat || ''} · ${tournament.playerCount || '?'} players · ${tournament.closedAt ? new Date(tsToMs(tournament.closedAt)).toLocaleDateString() : ''}`;
 
-        const el = document.getElementById('historyMatchListBody');
-
-        if (finalMatches.length === 0) {
-            el.innerHTML = '<tr><td colspan="6" style="text-align:center;color:#888;padding:24px;">No match records found.</td></tr>';
-        } else {
-            el.innerHTML = finalMatches.map(m => {
-                const winner = m.winner === 1 ? m.player1Name : m.player2Name;
-                const legs   = m.legsWon ? `${m.legsWon.p1}–${m.legsWon.p2}` : '—';
-                const type   = m.matchType === 'CHALKER'
-                    ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
-                    : '<span class="history-type-badge history-type-manual">Manual</span>';
-                const date   = m.completedAt ? new Date(tsToMs(m.completedAt)).toLocaleDateString() : '—';
-                return `<tr class="history-row" onclick="NewtonHistory.openMatch('${escHtml(tournamentId)}', '${escHtml(m.matchId)}')">
-                    <td style="font-family:monospace;font-size:13px;">${escHtml(m.matchId)}</td>
-                    <td>${escHtml(m.player1Name)}</td>
-                    <td>${escHtml(m.player2Name)}</td>
-                    <td><strong>${escHtml(winner)}</strong> ${legs}</td>
-                    <td>${type}</td>
-                    <td>${date}</td>
-                </tr>`;
-            }).join('');
+        // Create the table instance once, reuse on subsequent calls
+        if (!_matchTable) {
+            _matchTable = NewtonTable.create({
+                tableId: 'analytics-matches',
+                containerId: 'historyMatchTableContainer',
+                defaultSortKey: 'completedAt',
+                defaultSortDir: 'asc',
+                emptyMessage: 'No match records found.',
+                columns: [
+                    {
+                        key: 'matchId', label: 'Match', width: '130px',
+                        render: (v) => `<span style="font-family:monospace;font-size:13px;">${escHtml(v)}</span>`
+                    },
+                    {
+                        key: 'player1Name', label: 'Player 1',
+                        render: (v, row) => row.winner === 1 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                    },
+                    {
+                        key: 'player2Name', label: 'Player 2',
+                        render: (v, row) => row.winner === 2 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                    },
+                    {
+                        key: 'score', label: 'Result', align: 'center', width: '80px', sortable: false,
+                        render: (v, row) => row.legsWon ? `${row.legsWon.p1}–${row.legsWon.p2}` : '—'
+                    },
+                    {
+                        key: 'matchType', label: 'Type', width: '90px',
+                        render: (v) => v === 'CHALKER'
+                            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
+                            : '<span class="history-type-badge history-type-manual">Manual</span>'
+                    },
+                    {
+                        key: 'completedAt', label: 'Date', width: '110px',
+                        render: (v) => v ? new Date(tsToMs(v)).toLocaleDateString() : '—',
+                        sortValue: (v) => v ? tsToMs(v) : 0
+                    }
+                ],
+                onRowClick: (row) => openMatch(tournamentId, row.matchId)
+            });
         }
+
+        // Add _rowId for row click identification
+        matchRecords.forEach(m => { m._rowId = m.matchId; });
+        _matchTable.setData(matchRecords);
 
         showPanel('matchList');
     }
@@ -344,7 +404,7 @@ const NewtonHistory = (() => {
             ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
             : '<span class="history-type-badge history-type-manual">Manual</span>';
 
-        titleEl.textContent = `${match.matchId} — ${match.player1Name} vs ${match.player2Name}`;
+        titleEl.innerHTML = `<span class="match-detail-match-id">${escHtml(match.matchId)}</span><span class="match-detail-players">${escHtml(match.player1Name)} vs ${escHtml(match.player2Name)}</span>`;
 
         // Wire back button to return to match list for this tournament
         const backBtn = document.getElementById('historyMatchDetailBackBtn');
@@ -366,9 +426,12 @@ const NewtonHistory = (() => {
             ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
             : '<span class="history-type-badge history-type-manual">Manual</span>';
 
-        let html = `<div class="history-detail-header">
-            <div>${typeBadge} &nbsp; ${escHtml(match.format ? `${match.format.sc} Bo${match.format.bo}` : '')} &nbsp; ${date}</div>
-            <div style="margin-top:8px;font-size:16px;"><strong>${escHtml(winnerName)}</strong> wins ${legs}</div>
+        let html = `<div class="history-detail-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
+            <div>
+            <div>${date}</div>
+            <div style="margin-top:8px;font-size:16px;">${match.winner === 1 ? `<strong>${escHtml(match.player1Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player1Name)}</span>`} <span style="font-family:'SF Mono',Monaco,'Cascadia Code','Courier New',monospace;font-size:14px;color:#374151;margin:0 4px;">${legs}</span> ${match.winner === 2 ? `<strong>${escHtml(match.player2Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player2Name)}</span>`}</div>
+            </div>
+            <div>${match.format && match.format.bo ? `<span class="history-type-badge" style="background:#f3f4f6;color:#374151;">Best of ${match.format.bo}</span> ` : ''}${typeBadge}</div>
         </div>`;
 
         // Legs table (Chalker only)
@@ -409,44 +472,41 @@ const NewtonHistory = (() => {
             html += '</tbody></table></div>';
         }
 
-        // Achievements
-        const ach = match.achievements;
-        if (ach) {
-            const a1 = (ach.p1 || ach[match.player1Id]) || null;
-            const a2 = (ach.p2 || ach[match.player2Id]) || null;
-            if (a1 || a2) {
-                html += `<h4 style="margin:16px 0 6px;">Achievements</h4>
-                <table class="qr-result-legs">
-                    <thead><tr>
-                        <th style="text-align:left;">Achievement</th>
-                        <th style="text-align:center;">${escHtml(match.player1Name)}</th>
-                        <th style="text-align:center;">${escHtml(match.player2Name)}</th>
-                    </tr></thead><tbody>`;
+        // Match stats table — always shown, same format as Results/Leaderboard
+        const ach = match.achievements || {};
+        const a1 = (ach.p1 || ach[match.player1Id]) || {};
+        const a2 = (ach.p2 || ach[match.player2Id]) || {};
+        const fmt = (v) => (v !== undefined && v !== null && v !== 0) ? v : '—';
+        const fmtArr = (v) => (Array.isArray(v) && v.length) ? v.join(', ') : '—';
 
-                const fmt = (v) => (v !== undefined && v !== null && v !== 0) ? v : '—';
-                const fmtArr = (v) => (Array.isArray(v) && v.length) ? v.join(', ') : '—';
+        const p1Bold = match.winner === 1;
+        const p2Bold = match.winner === 2;
+        const p1Name = p1Bold ? `<strong>${escHtml(match.player1Name)}</strong>` : escHtml(match.player1Name);
+        const p2Name = p2Bold ? `<strong>${escHtml(match.player2Name)}</strong>` : escHtml(match.player2Name);
 
-                [
-                    ['180s',         a1?.oneEighties,   a2?.oneEighties],
-                    ['Tons',         a1?.tons,          a2?.tons],
-                    ['Lollipops',    a1?.lollipops,     a2?.lollipops],
-                    ['High outs',    fmtArr(a1?.highOuts),  fmtArr(a2?.highOuts)],
-                    ['Short legs',   fmtArr(a1?.shortLegs), fmtArr(a2?.shortLegs)],
-                ].forEach(([label, v1, v2]) => {
-                    const d1 = typeof v1 === 'string' ? v1 : fmt(v1);
-                    const d2 = typeof v2 === 'string' ? v2 : fmt(v2);
-                    if (d1 !== '—' || d2 !== '—') {
-                        html += `<tr>
-                            <td>${label}</td>
-                            <td style="text-align:center;">${d1}</td>
-                            <td style="text-align:center;">${d2}</td>
-                        </tr>`;
-                    }
-                });
-
-                html += '</tbody></table>';
-            }
-        }
+        html += `<table class="history-table newton-table" style="margin-top:16px;">
+            <thead><tr>
+                <th>Player</th>
+                <th style="text-align:center;">Short Legs</th>
+                <th style="text-align:center;">High Outs</th>
+                <th style="text-align:center;width:70px;">180s</th>
+                <th style="text-align:center;width:70px;">Tons</th>
+            </tr></thead><tbody>
+            <tr>
+                <td>${p1Name}</td>
+                <td style="text-align:center;">${fmtArr(a1.shortLegs)}</td>
+                <td style="text-align:center;">${fmtArr(a1.highOuts)}</td>
+                <td style="text-align:center;">${fmt(a1.oneEighties)}</td>
+                <td style="text-align:center;">${fmt(a1.tons)}</td>
+            </tr>
+            <tr>
+                <td>${p2Name}</td>
+                <td style="text-align:center;">${fmtArr(a2.shortLegs)}</td>
+                <td style="text-align:center;">${fmtArr(a2.highOuts)}</td>
+                <td style="text-align:center;">${fmt(a2.oneEighties)}</td>
+                <td style="text-align:center;">${fmt(a2.tons)}</td>
+            </tr>
+            </tbody></table>`;
 
         return html;
     }

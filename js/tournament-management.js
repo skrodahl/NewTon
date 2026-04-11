@@ -1900,6 +1900,7 @@ async function addTournamentToAnalytics(tournamentId) {
     }
 
     // Save completed matches (with history-derived achievement deltas)
+    let savedMatchCount = 0;
     if (Array.isArray(t.matches)) {
         for (const match of t.matches) {
             if (!match.completed || !match.winner) continue;
@@ -1938,11 +1939,12 @@ async function addTournamentToAnalytics(tournamentId) {
                 legsWon: { p1: p1Legs, p2: p2Legs },
                 legs: null,
                 achievements: achievements,
-                format: null
+                format: match.legs ? { sc: (config && config.legs && config.legs.x01Format) || 501, bo: match.legs } : null
             };
 
             try {
                 await NewtonDB.saveMatch(dbMatch);
+                savedMatchCount++;
             } catch (e) {
                 console.warn('Failed to save match to Analytics:', match.id, e);
             }
@@ -1968,6 +1970,7 @@ async function addTournamentToAnalytics(tournamentId) {
         }
         meta.tournamentAchievements = tournamentAchievements;
         meta.placements = t.placements || {};
+        meta.matchCount = savedMatchCount;
         await NewtonDB.saveTournamentMeta(meta);
 
         // Reconcile: attribute any achievements not captured by history deltas

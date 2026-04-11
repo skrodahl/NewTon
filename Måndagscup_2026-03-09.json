@@ -1,0 +1,6536 @@
+{
+  "exportVersion": "4.0",
+  "id": 1773076258925,
+  "name": "Måndagscup",
+  "date": "2026-03-09",
+  "created": "2026-03-09T17:10:58.925Z",
+  "status": "completed",
+  "bracketSize": 32,
+  "readOnly": true,
+  "players": [
+    {
+      "id": 1773076262812,
+      "name": "Colin",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": 1773076264956,
+      "name": "Bruhn",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          21,
+          20
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 2
+      },
+      "placement": 1,
+      "eliminated": false
+    },
+    {
+      "id": 1773076278996,
+      "name": "Tony",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    },
+    {
+      "id": 1773076284772,
+      "name": "Jocke",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          20
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 5,
+      "eliminated": false
+    },
+    {
+      "id": 1773076293180,
+      "name": "Johan H",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 7,
+      "eliminated": false
+    },
+    {
+      "id": 1773076299517,
+      "name": "Elgan",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          20
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 4,
+      "eliminated": false
+    },
+    {
+      "id": 1773076308709,
+      "name": "Johan",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": 1773076468385,
+      "name": "Jonas",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          21
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    },
+    {
+      "id": 1773076965998,
+      "name": "Håvard",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 2,
+      "eliminated": false
+    },
+    {
+      "id": 1773077465398,
+      "name": "Leo",
+      "paid": true,
+      "stats": {
+        "shortLegs": [],
+        "highOuts": [
+          115
+        ],
+        "tons": 0,
+        "oneEighties": 1
+      },
+      "placement": 7,
+      "eliminated": false
+    },
+    {
+      "id": 1773077471766,
+      "name": "Uffe",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": 1773077477606,
+      "name": "Basse",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 17,
+      "eliminated": false
+    },
+    {
+      "id": 1773077681054,
+      "name": "Marcus.Å",
+      "paid": true,
+      "stats": {
+        "shortLegs": [],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 1
+      },
+      "placement": 3,
+      "eliminated": false
+    },
+    {
+      "id": 1773077968532,
+      "name": "Eric",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": 1773078240388,
+      "name": "Adam",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    },
+    {
+      "id": 1773078612881,
+      "name": "Gustaf",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    },
+    {
+      "id": 1773078677016,
+      "name": "Liam C",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 5,
+      "eliminated": false
+    },
+    {
+      "id": 1773078950551,
+      "name": "Peter",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 17,
+      "eliminated": false
+    }
+  ],
+  "matches": [
+    {
+      "id": "FS-1-1",
+      "numericId": 1,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 7,
+        "eliminated": false
+      },
+      "player2": {
+        "id": "walkover-1",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 7,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-1",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "autoAdvanced": true,
+      "completedAt": 1773079320778,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-2",
+      "numericId": 2,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-2",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-2",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "autoAdvanced": true,
+      "completedAt": 1773079320814,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-3",
+      "numericId": 3,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-4",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 2,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 2,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-4",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 2,
+      "autoAdvanced": true,
+      "completedAt": 1773079320824,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-4",
+      "numericId": 4,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-6",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-6",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 3,
+      "autoAdvanced": true,
+      "completedAt": 1773079320831,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-5",
+      "numericId": 5,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-8",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 5,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 5,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-8",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 4,
+      "autoAdvanced": true,
+      "completedAt": 1773079320839,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-6",
+      "numericId": 6,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 4,
+        "eliminated": false
+      },
+      "player2": {
+        "id": "walkover-11",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 4,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-11",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 5,
+      "autoAdvanced": true,
+      "completedAt": 1773079320846,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-7",
+      "numericId": 7,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 17,
+        "eliminated": false
+      },
+      "player2": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        },
+        "placement": 1,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        },
+        "placement": 1,
+        "eliminated": false
+      },
+      "loser": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 17,
+        "eliminated": false
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773078612881,
+      "active": false,
+      "completed": true,
+      "positionInRound": 6,
+      "completedAt": 1773080220051,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076264956,
+        "loserId": 1773078950551
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-8",
+      "numericId": 8,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "player2": {
+        "id": "walkover-15",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "winner": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-15",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 7,
+      "autoAdvanced": true,
+      "completedAt": 1773079320854,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-9",
+      "numericId": 9,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-16",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-16",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 8,
+      "autoAdvanced": true,
+      "completedAt": 1773079320861,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-10",
+      "numericId": 10,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-18",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 5,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 5,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-18",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 9,
+      "autoAdvanced": true,
+      "completedAt": 1773079320868,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-11",
+      "numericId": 11,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-20",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-20",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 10,
+      "autoAdvanced": true,
+      "completedAt": 1773079320876,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-12",
+      "numericId": 12,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "player2": {
+        "id": "walkover-23",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "winner": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-23",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 11,
+      "autoAdvanced": true,
+      "completedAt": 1773079320885,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-13",
+      "numericId": 13,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "player2": {
+        "id": "walkover-25",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "winner": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 13,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-25",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 12,
+      "autoAdvanced": true,
+      "completedAt": 1773079320931,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-14",
+      "numericId": 14,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-26",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        },
+        "placement": 3,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        },
+        "placement": 3,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-26",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 13,
+      "autoAdvanced": true,
+      "completedAt": 1773079320945,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-15",
+      "numericId": 15,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 17,
+        "eliminated": false
+      },
+      "player2": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        },
+        "placement": 7,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        },
+        "placement": 7,
+        "eliminated": false
+      },
+      "loser": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 17,
+        "eliminated": false
+      },
+      "lane": 3,
+      "legs": 3,
+      "referee": 1773077681054,
+      "active": false,
+      "completed": true,
+      "positionInRound": 14,
+      "completedAt": 1773080786866,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773077465398,
+        "loserId": 1773077477606
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-1-16",
+      "numericId": 16,
+      "round": 1,
+      "side": "frontside",
+      "player1": {
+        "id": "walkover-30",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "player2": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "winner": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": 9,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-30",
+        "name": "Walkover",
+        "isBye": true
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 15,
+      "autoAdvanced": true,
+      "completedAt": 1773079320954,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-1",
+      "numericId": 17,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 4,
+      "legs": 3,
+      "referee": 1773076308709,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "completedAt": 1773080518373,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076278996,
+        "loserId": 1773076293180
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-2",
+      "numericId": 18,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 6,
+      "legs": 3,
+      "referee": 1773076262812,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "completedAt": 1773080529027,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076965998,
+        "loserId": 1773077471766
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-3",
+      "numericId": 19,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 8,
+      "legs": 3,
+      "referee": 1773078240388,
+      "active": false,
+      "completed": true,
+      "positionInRound": 2,
+      "completedAt": 1773080165631,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773078677016,
+        "loserId": 1773076299517
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-4",
+      "numericId": 20,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "player2": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 4,
+      "legs": 3,
+      "referee": 1773076293180,
+      "active": false,
+      "completed": true,
+      "positionInRound": 3,
+      "completedAt": 1773082066626,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773076264956,
+        "loserId": 1773076262812
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-5",
+      "numericId": 21,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773078950551,
+      "active": false,
+      "completed": true,
+      "positionInRound": 4,
+      "completedAt": 1773081831940,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773076284772,
+        "loserId": 1773076468385
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-6",
+      "numericId": 22,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 8,
+      "legs": 3,
+      "referee": 1773076299517,
+      "active": false,
+      "completed": true,
+      "positionInRound": 5,
+      "completedAt": 1773081144033,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773078240388,
+        "loserId": 1773077968532
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-7",
+      "numericId": 23,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 3,
+      "legs": 3,
+      "referee": 1773076262812,
+      "active": false,
+      "completed": true,
+      "positionInRound": 6,
+      "completedAt": 1773082161530,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773077681054,
+        "loserId": 1773076308709
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-2-8",
+      "numericId": 24,
+      "round": 2,
+      "side": "frontside",
+      "player1": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "player2": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "lane": 4,
+      "legs": 3,
+      "referee": 1773077471766,
+      "active": false,
+      "completed": true,
+      "positionInRound": 7,
+      "completedAt": 1773083058222,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773078612881,
+        "loserId": 1773077465398
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-3-1",
+      "numericId": 25,
+      "round": 3,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 8,
+      "legs": 3,
+      "referee": 1773077681054,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "completedAt": 1773083909335,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773076965998,
+        "loserId": 1773076278996
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-3-2",
+      "numericId": 26,
+      "round": 3,
+      "side": "frontside",
+      "player1": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "winner": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773077968532,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "completedAt": 1773083319737,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773078677016,
+        "loserId": 1773076264956
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "FS-3-3",
+      "numericId": 27,
+      "round": 3,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 8,
+      "legs": 3,
+      "referee": 1773076965998,
+      "active": false,
+      "completed": true,
+      "positionInRound": 2,
+      "state": "COMPLETED",
+      "completedAt": 1773085268876,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076284772,
+        "loserId": 1773078240388
+      }
+    },
+    {
+      "id": "FS-3-4",
+      "numericId": 28,
+      "round": 3,
+      "side": "frontside",
+      "player1": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "player2": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 6,
+      "legs": 3,
+      "referee": 1773076262812,
+      "active": false,
+      "completed": true,
+      "positionInRound": 3,
+      "state": "COMPLETED",
+      "completedAt": 1773085729961,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773077681054,
+        "loserId": 1773078612881
+      }
+    },
+    {
+      "id": "FS-4-1",
+      "numericId": 29,
+      "round": 4,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 4,
+      "legs": 3,
+      "referee": 1773076264956,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "state": "COMPLETED",
+      "completedAt": 1773086230208,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076965998,
+        "loserId": 1773078677016
+      }
+    },
+    {
+      "id": "FS-4-2",
+      "numericId": 30,
+      "round": 4,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 6,
+      "legs": 3,
+      "referee": 1773078677016,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "state": "COMPLETED",
+      "completedAt": 1773087227852,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773077681054,
+        "loserId": 1773076284772
+      }
+    },
+    {
+      "id": "FS-5-1",
+      "numericId": 31,
+      "round": 5,
+      "side": "frontside",
+      "player1": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "lane": 6,
+      "legs": 3,
+      "referee": 1773078677016,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "state": "COMPLETED",
+      "completedAt": 1773090002293,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773076965998,
+        "loserId": 1773077681054
+      }
+    },
+    {
+      "id": "BS-1-1",
+      "numericId": 32,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-1",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": "walkover-2",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": "walkover-2",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-1",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "autoAdvanced": true,
+      "completedAt": 1773079320962,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-1-2",
+      "numericId": 33,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-4",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": "walkover-6",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": "walkover-6",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-4",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "autoAdvanced": true,
+      "completedAt": 1773079320969,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-1-3",
+      "numericId": 34,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-8",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": "walkover-11",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": "walkover-11",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-8",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 2,
+      "autoAdvanced": true,
+      "completedAt": 1773079320977,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-1-4",
+      "numericId": 35,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": "walkover-15",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-15",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 3,
+      "autoAdvanced": true,
+      "completedAt": 1773080220085,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-1-5",
+      "numericId": 36,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-16",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": "walkover-18",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": "walkover-18",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-16",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 4,
+      "autoAdvanced": true,
+      "completedAt": 1773079320985,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-1-6",
+      "numericId": 37,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-20",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": "walkover-23",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": "walkover-23",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-20",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 5,
+      "autoAdvanced": true,
+      "completedAt": 1773079320992,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-1-7",
+      "numericId": 38,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-25",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": "walkover-26",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": "walkover-26",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-25",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 6,
+      "autoAdvanced": true,
+      "completedAt": 1773079321000,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-1-8",
+      "numericId": 39,
+      "round": 1,
+      "side": "backside",
+      "player1": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": "walkover-30",
+        "name": "Walkover"
+      },
+      "winner": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-30",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 7,
+      "autoAdvanced": true,
+      "completedAt": 1773080786902,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-1",
+      "numericId": 40,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-2",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-2",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "autoAdvanced": true,
+      "completedAt": 1773081831975,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-2",
+      "numericId": 41,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-6",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-6",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "autoAdvanced": true,
+      "completedAt": 1773081144068,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-3",
+      "numericId": 42,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-11",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-11",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 2,
+      "autoAdvanced": true,
+      "completedAt": 1773082161574,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-4",
+      "numericId": 43,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 4,
+      "legs": 3,
+      "referee": 1773076293180,
+      "active": false,
+      "completed": true,
+      "positionInRound": 3,
+      "completedAt": 1773083991814,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773077465398,
+        "loserId": 1773078950551
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-5",
+      "numericId": 44,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-18",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-18",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 4,
+      "autoAdvanced": true,
+      "completedAt": 1773080518410,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-6",
+      "numericId": 45,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-23",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-23",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 5,
+      "autoAdvanced": true,
+      "completedAt": 1773080529054,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-7",
+      "numericId": 46,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": "walkover-26",
+        "name": "Walkover"
+      },
+      "player2": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-26",
+        "name": "Walkover"
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 6,
+      "autoAdvanced": true,
+      "completedAt": 1773080165668,
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-2-8",
+      "numericId": 47,
+      "round": 2,
+      "side": "backside",
+      "player1": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": null,
+      "legs": 3,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "positionInRound": 7,
+      "completedAt": 1773084165213,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076262812,
+        "loserId": 1773077477606
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-3-1",
+      "numericId": 48,
+      "round": 3,
+      "side": "backside",
+      "player1": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773076299517,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "completedAt": 1773082688552,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773076468385,
+        "loserId": 1773077968532
+      },
+      "state": "COMPLETED"
+    },
+    {
+      "id": "BS-3-2",
+      "numericId": 49,
+      "round": 3,
+      "side": "backside",
+      "player1": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773078950551,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "state": "COMPLETED",
+      "completedAt": 1773085620972,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773077465398,
+        "loserId": 1773076308709
+      }
+    },
+    {
+      "id": "BS-3-3",
+      "numericId": 50,
+      "round": 3,
+      "side": "backside",
+      "player1": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 3,
+      "legs": 3,
+      "referee": 1773076278996,
+      "active": false,
+      "completed": true,
+      "positionInRound": 2,
+      "state": "COMPLETED",
+      "completedAt": 1773085369843,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076293180,
+        "loserId": 1773077471766
+      }
+    },
+    {
+      "id": "BS-3-4",
+      "numericId": 51,
+      "round": 3,
+      "side": "backside",
+      "player1": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 6,
+      "legs": 3,
+      "referee": 1773078612881,
+      "active": false,
+      "completed": true,
+      "positionInRound": 3,
+      "state": "COMPLETED",
+      "completedAt": 1773084586418,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076299517,
+        "loserId": 1773076262812
+      }
+    },
+    {
+      "id": "BS-4-1",
+      "numericId": 52,
+      "round": 4,
+      "side": "backside",
+      "player1": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 4,
+      "legs": 3,
+      "referee": 1773077477606,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "state": "COMPLETED",
+      "completedAt": 1773085361460,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076264956,
+        "loserId": 1773076468385
+      }
+    },
+    {
+      "id": "BS-4-2",
+      "numericId": 53,
+      "round": 4,
+      "side": "backside",
+      "player1": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "player2": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773077471766,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "state": "COMPLETED",
+      "completedAt": 1773087265476,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773077465398,
+        "loserId": 1773076278996
+      }
+    },
+    {
+      "id": "BS-4-3",
+      "numericId": 54,
+      "round": 4,
+      "side": "backside",
+      "player1": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 8,
+      "legs": 3,
+      "referee": 1773076299517,
+      "active": false,
+      "completed": true,
+      "positionInRound": 2,
+      "state": "COMPLETED",
+      "completedAt": 1773087358971,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076293180,
+        "loserId": 1773078612881
+      }
+    },
+    {
+      "id": "BS-4-4",
+      "numericId": 55,
+      "round": 4,
+      "side": "backside",
+      "player1": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 8,
+      "legs": 3,
+      "referee": 1773076284772,
+      "active": false,
+      "completed": true,
+      "positionInRound": 3,
+      "state": "COMPLETED",
+      "completedAt": 1773086070975,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773076299517,
+        "loserId": 1773078240388
+      }
+    },
+    {
+      "id": "BS-5-1",
+      "numericId": 56,
+      "round": 5,
+      "side": "backside",
+      "player1": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "player2": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773076278996,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "state": "COMPLETED",
+      "completedAt": 1773088093241,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076264956,
+        "loserId": 1773077465398
+      }
+    },
+    {
+      "id": "BS-5-2",
+      "numericId": 57,
+      "round": 5,
+      "side": "backside",
+      "player1": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 3,
+      "legs": 3,
+      "referee": 1773078612881,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "state": "COMPLETED",
+      "completedAt": 1773088174128,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076299517,
+        "loserId": 1773076293180
+      }
+    },
+    {
+      "id": "BS-6-1",
+      "numericId": 58,
+      "round": 6,
+      "side": "backside",
+      "player1": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "player2": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773077465398,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "state": "COMPLETED",
+      "completedAt": 1773089052745,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076264956,
+        "loserId": 1773076284772
+      }
+    },
+    {
+      "id": "BS-6-2",
+      "numericId": 59,
+      "round": 6,
+      "side": "backside",
+      "player1": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 6,
+      "legs": 3,
+      "referee": 1773076293180,
+      "active": false,
+      "completed": true,
+      "positionInRound": 1,
+      "state": "COMPLETED",
+      "completedAt": 1773088868085,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 0,
+        "winnerId": 1773076299517,
+        "loserId": 1773078677016
+      }
+    },
+    {
+      "id": "BS-7-1",
+      "numericId": 60,
+      "round": 7,
+      "side": "backside",
+      "player1": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "player2": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": 1,
+      "legs": 3,
+      "referee": 1773076284772,
+      "active": false,
+      "completed": true,
+      "positionInRound": 0,
+      "state": "COMPLETED",
+      "completedAt": 1773089905213,
+      "finalScore": {
+        "winnerLegs": 2,
+        "loserLegs": 1,
+        "winnerId": 1773076264956,
+        "loserId": 1773076299517
+      }
+    },
+    {
+      "id": "BS-FINAL",
+      "numericId": 61,
+      "round": "final",
+      "side": "backside-final",
+      "player1": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "player2": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "lane": 1,
+      "legs": 5,
+      "referee": 1773076299517,
+      "active": false,
+      "completed": true,
+      "state": "COMPLETED",
+      "completedAt": 1773090881785,
+      "finalScore": {
+        "winnerLegs": 3,
+        "loserLegs": 0,
+        "winnerId": 1773076264956,
+        "loserId": 1773077681054
+      }
+    },
+    {
+      "id": "GRAND-FINAL",
+      "numericId": 62,
+      "round": "grand-final",
+      "side": "grand-final",
+      "player1": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "player2": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "lane": null,
+      "legs": 5,
+      "referee": null,
+      "active": false,
+      "completed": true,
+      "state": "READY",
+      "completedAt": 1773482215040,
+      "finalScore": {
+        "winnerLegs": 3,
+        "loserLegs": 2,
+        "winnerId": 1773076264956,
+        "loserId": 1773076965998
+      }
+    }
+  ],
+  "bracket": [
+    {
+      "id": 1773076293180,
+      "name": "Johan H",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 7,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-1",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": "walkover-2",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773076278996,
+      "name": "Tony",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-4",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773076965998,
+      "name": "Håvard",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 2,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-6",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773077471766,
+      "name": "Uffe",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-8",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773078677016,
+      "name": "Liam C",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 5,
+      "eliminated": false
+    },
+    {
+      "id": 1773076299517,
+      "name": "Elgan",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          20
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 4,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-11",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773078950551,
+      "name": "Peter",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 17,
+      "eliminated": false
+    },
+    {
+      "id": 1773076264956,
+      "name": "Bruhn",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          21,
+          20
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 2
+      },
+      "placement": 1,
+      "eliminated": false
+    },
+    {
+      "id": 1773076262812,
+      "name": "Colin",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-15",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": "walkover-16",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773076468385,
+      "name": "Jonas",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          21
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-18",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773076284772,
+      "name": "Jocke",
+      "paid": true,
+      "stats": {
+        "shortLegs": [
+          20
+        ],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 5,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-20",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773077968532,
+      "name": "Eric",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": 1773078240388,
+      "name": "Adam",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-23",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773076308709,
+      "name": "Johan",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 13,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-25",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": "walkover-26",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773077681054,
+      "name": "Marcus.Å",
+      "paid": true,
+      "stats": {
+        "shortLegs": [],
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 1
+      },
+      "placement": 3,
+      "eliminated": false
+    },
+    {
+      "id": 1773077477606,
+      "name": "Basse",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 17,
+      "eliminated": false
+    },
+    {
+      "id": 1773077465398,
+      "name": "Leo",
+      "paid": true,
+      "stats": {
+        "shortLegs": [],
+        "highOuts": [
+          115
+        ],
+        "tons": 0,
+        "oneEighties": 1
+      },
+      "placement": 7,
+      "eliminated": false
+    },
+    {
+      "id": "walkover-30",
+      "name": "Walkover",
+      "isBye": true
+    },
+    {
+      "id": 1773078612881,
+      "name": "Gustaf",
+      "paid": true,
+      "stats": {
+        "shortLegs": 0,
+        "highOuts": [],
+        "tons": 0,
+        "oneEighties": 0
+      },
+      "placement": 9,
+      "eliminated": false
+    }
+  ],
+  "placements": {
+    "1773076264956": 1,
+    "1773076965998": 2,
+    "1773077681054": 3,
+    "1773076299517": 4,
+    "1773076284772": 5,
+    "1773078677016": 5,
+    "1773077465398": 7,
+    "1773076293180": 7,
+    "1773076468385": 9,
+    "1773076278996": 9,
+    "1773078612881": 9,
+    "1773078240388": 9,
+    "1773077968532": 13,
+    "1773076308709": 13,
+    "1773077471766": 13,
+    "1773076262812": 13,
+    "walkover-2": 17,
+    "walkover-6": 17,
+    "walkover-11": 17,
+    "1773078950551": 17,
+    "walkover-18": 17,
+    "walkover-23": 17,
+    "walkover-26": 17,
+    "1773077477606": 17,
+    "walkover-1": 25,
+    "walkover-4": 25,
+    "walkover-8": 25,
+    "walkover-15": 25,
+    "walkover-16": 25,
+    "walkover-20": 25,
+    "walkover-25": 25,
+    "walkover-30": 25
+  },
+  "history": [
+    {
+      "id": "tx_1773482215039",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "GRAND-FINAL: Bruhn (ID: 1773076264956) defeats Håvard (ID: 1773076965998)",
+      "timestamp": "2026-03-14T09:56:55.039Z",
+      "matchId": "GRAND-FINAL",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 2
+        }
+      },
+      "loser": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773090881783",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-FINAL: Bruhn (ID: 1773076264956) defeats Marcus.Å (ID: 1773077681054)",
+      "timestamp": "2026-03-09T21:14:41.783Z",
+      "matchId": "BS-FINAL",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21,
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      }
+    },
+    {
+      "id": "tx_1773090029732",
+      "type": "ASSIGN_LANE",
+      "description": "BS-FINAL: Lane assigned to 1",
+      "timestamp": "2026-03-09T21:00:29.732Z",
+      "matchId": "BS-FINAL",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773090025133",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-FINAL: Referee assigned to Elgan (ID: 1773076299517)",
+      "timestamp": "2026-03-09T21:00:25.133Z",
+      "matchId": "BS-FINAL",
+      "afterState": {
+        "referee": 1773076299517
+      }
+    },
+    {
+      "id": "tx_1773090002292",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-5-1: Håvard (ID: 1773076965998) defeats Marcus.Å (ID: 1773077681054)",
+      "timestamp": "2026-03-09T21:00:02.292Z",
+      "matchId": "FS-5-1",
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      }
+    },
+    {
+      "id": "tx_1773089905211",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-7-1: Bruhn (ID: 1773076264956) defeats Elgan (ID: 1773076299517)",
+      "timestamp": "2026-03-09T20:58:25.211Z",
+      "matchId": "BS-7-1",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773089060914",
+      "type": "ASSIGN_LANE",
+      "description": "BS-7-1: Lane assigned to 1",
+      "timestamp": "2026-03-09T20:44:20.914Z",
+      "matchId": "BS-7-1",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773089058758",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-7-1: Referee assigned to Jocke (ID: 1773076284772)",
+      "timestamp": "2026-03-09T20:44:18.758Z",
+      "matchId": "BS-7-1",
+      "afterState": {
+        "referee": 1773076284772
+      }
+    },
+    {
+      "id": "tx_1773089052744",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-6-1: Bruhn (ID: 1773076264956) defeats Jocke (ID: 1773076284772)",
+      "timestamp": "2026-03-09T20:44:12.744Z",
+      "matchId": "BS-6-1",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773088873766",
+      "type": "ASSIGN_LANE",
+      "description": "FS-5-1: Lane assigned to 6",
+      "timestamp": "2026-03-09T20:41:13.766Z",
+      "matchId": "FS-5-1",
+      "afterState": {
+        "lane": 6
+      }
+    },
+    {
+      "id": "tx_1773088868083",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-6-2: Elgan (ID: 1773076299517) defeats Liam C (ID: 1773078677016)",
+      "timestamp": "2026-03-09T20:41:08.083Z",
+      "matchId": "BS-6-2",
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773088227303",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-6-1: Referee assigned to Leo (ID: 1773077465398)",
+      "timestamp": "2026-03-09T20:30:27.303Z",
+      "matchId": "BS-6-1",
+      "afterState": {
+        "referee": 1773077465398
+      }
+    },
+    {
+      "id": "tx_1773088222600",
+      "type": "ASSIGN_LANE",
+      "description": "BS-6-1: Lane assigned to 1",
+      "timestamp": "2026-03-09T20:30:22.600Z",
+      "matchId": "BS-6-1",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773088211992",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-6-2: Referee assigned to Johan H (ID: 1773076293180)",
+      "timestamp": "2026-03-09T20:30:11.992Z",
+      "matchId": "BS-6-2",
+      "afterState": {
+        "referee": 1773076293180
+      }
+    },
+    {
+      "id": "tx_1773088198678",
+      "type": "ASSIGN_LANE",
+      "description": "BS-6-2: Lane assigned to 6",
+      "timestamp": "2026-03-09T20:29:58.678Z",
+      "matchId": "BS-6-2",
+      "afterState": {
+        "lane": 6
+      }
+    },
+    {
+      "id": "tx_1773088174127",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-5-2: Elgan (ID: 1773076299517) defeats Johan H (ID: 1773076293180)",
+      "timestamp": "2026-03-09T20:29:34.127Z",
+      "matchId": "BS-5-2",
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773088093239",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-5-1: Bruhn (ID: 1773076264956) defeats Leo (ID: 1773077465398)",
+      "timestamp": "2026-03-09T20:28:13.239Z",
+      "matchId": "BS-5-1",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      }
+    },
+    {
+      "id": "tx_1773087456959",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-5-1: Referee assigned to Jocke (ID: 1773076284772)",
+      "timestamp": "2026-03-09T20:17:36.959Z",
+      "matchId": "FS-5-1",
+      "afterState": {
+        "referee": 1773076284772
+      }
+    },
+    {
+      "id": "tx_1773087433885",
+      "type": "ASSIGN_LANE",
+      "description": "BS-5-2: Lane assigned to 3",
+      "timestamp": "2026-03-09T20:17:13.885Z",
+      "matchId": "BS-5-2",
+      "afterState": {
+        "lane": 3
+      }
+    },
+    {
+      "id": "tx_1773087419639",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-5-2: Referee assigned to Gustaf (ID: 1773078612881)",
+      "timestamp": "2026-03-09T20:16:59.639Z",
+      "matchId": "BS-5-2",
+      "afterState": {
+        "referee": 1773078612881
+      }
+    },
+    {
+      "id": "tx_1773087358970",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-4-3: Johan H (ID: 1773076293180) defeats Gustaf (ID: 1773078612881)",
+      "timestamp": "2026-03-09T20:15:58.970Z",
+      "matchId": "BS-4-3",
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773087310211",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-5-1: Referee assigned to Tony (ID: 1773076278996)",
+      "timestamp": "2026-03-09T20:15:10.211Z",
+      "matchId": "BS-5-1",
+      "afterState": {
+        "referee": 1773076278996
+      }
+    },
+    {
+      "id": "tx_1773087301709",
+      "type": "ASSIGN_LANE",
+      "description": "BS-5-1: Lane assigned to 1",
+      "timestamp": "2026-03-09T20:15:01.709Z",
+      "matchId": "BS-5-1",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773087265475",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-4-2: Leo (ID: 1773077465398) defeats Tony (ID: 1773076278996)",
+      "timestamp": "2026-03-09T20:14:25.475Z",
+      "matchId": "BS-4-2",
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773087227851",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-4-2: Marcus.Å (ID: 1773077681054) defeats Jocke (ID: 1773076284772)",
+      "timestamp": "2026-03-09T20:13:47.851Z",
+      "matchId": "FS-4-2",
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773086242360",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-4-2: Referee assigned to Liam C (ID: 1773078677016)",
+      "timestamp": "2026-03-09T19:57:22.360Z",
+      "matchId": "FS-4-2",
+      "afterState": {
+        "referee": 1773078677016
+      }
+    },
+    {
+      "id": "tx_1773086240064",
+      "type": "ASSIGN_LANE",
+      "description": "FS-4-2: Lane assigned to 6",
+      "timestamp": "2026-03-09T19:57:20.064Z",
+      "matchId": "FS-4-2",
+      "afterState": {
+        "lane": 6
+      }
+    },
+    {
+      "id": "tx_1773086230206",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-4-1: Håvard (ID: 1773076965998) defeats Liam C (ID: 1773078677016)",
+      "timestamp": "2026-03-09T19:57:10.206Z",
+      "matchId": "FS-4-1",
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773086107706",
+      "type": "ASSIGN_LANE",
+      "description": "BS-4-3: Lane assigned to 8",
+      "timestamp": "2026-03-09T19:55:07.706Z",
+      "matchId": "BS-4-3",
+      "afterState": {
+        "lane": 8
+      }
+    },
+    {
+      "id": "tx_1773086092126",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-4-3: Referee assigned to Elgan (ID: 1773076299517)",
+      "timestamp": "2026-03-09T19:54:52.126Z",
+      "matchId": "BS-4-3",
+      "afterState": {
+        "referee": 1773076299517
+      }
+    },
+    {
+      "id": "tx_1773086070974",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-4-4: Elgan (ID: 1773076299517) defeats Adam (ID: 1773078240388)",
+      "timestamp": "2026-03-09T19:54:30.974Z",
+      "matchId": "BS-4-4",
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773086048627",
+      "type": "ASSIGN_LANE",
+      "description": "BS-4-2: Lane assigned to 1",
+      "timestamp": "2026-03-09T19:54:08.627Z",
+      "matchId": "BS-4-2",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773086033562",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-4-2: Referee assigned to Uffe (ID: 1773077471766)",
+      "timestamp": "2026-03-09T19:53:53.562Z",
+      "matchId": "BS-4-2",
+      "afterState": {
+        "referee": 1773077471766
+      }
+    },
+    {
+      "id": "tx_1773085729960",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-3-4: Marcus.Å (ID: 1773077681054) defeats Gustaf (ID: 1773078612881)",
+      "timestamp": "2026-03-09T19:48:49.960Z",
+      "matchId": "FS-3-4",
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773085620970",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-3-2: Leo (ID: 1773077465398) defeats Johan (ID: 1773076308709)",
+      "timestamp": "2026-03-09T19:47:00.970Z",
+      "matchId": "BS-3-2",
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": [],
+          "highOuts": [
+            115
+          ],
+          "tons": 0,
+          "oneEighties": 1
+        }
+      },
+      "loser": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773085428368",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-4-1: Referee assigned to Uffe (ID: 1773077471766)",
+      "timestamp": "2026-03-09T19:43:48.368Z",
+      "matchId": "FS-4-1",
+      "afterState": {
+        "referee": 1773077471766
+      }
+    },
+    {
+      "id": "tx_1773085417821",
+      "type": "ASSIGN_LANE",
+      "description": "FS-4-1: Lane assigned to 4",
+      "timestamp": "2026-03-09T19:43:37.821Z",
+      "matchId": "FS-4-1",
+      "afterState": {
+        "lane": 4
+      }
+    },
+    {
+      "id": "tx_1773085369843",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-3-3: Johan H (ID: 1773076293180) defeats Uffe (ID: 1773077471766)",
+      "timestamp": "2026-03-09T19:42:49.843Z",
+      "matchId": "BS-3-3",
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773085361459",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-4-1: Bruhn (ID: 1773076264956) defeats Jonas (ID: 1773076468385)",
+      "timestamp": "2026-03-09T19:42:41.459Z",
+      "matchId": "BS-4-1",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773085306073",
+      "type": "ASSIGN_LANE",
+      "description": "BS-4-4: Lane assigned to 8",
+      "timestamp": "2026-03-09T19:41:46.073Z",
+      "matchId": "BS-4-4",
+      "afterState": {
+        "lane": 8
+      }
+    },
+    {
+      "id": "tx_1773085302510",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-4-4: Referee assigned to Jocke (ID: 1773076284772)",
+      "timestamp": "2026-03-09T19:41:42.510Z",
+      "matchId": "BS-4-4",
+      "afterState": {
+        "referee": 1773076284772
+      }
+    },
+    {
+      "id": "tx_1773085268874",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-3-3: Jocke (ID: 1773076284772) defeats Adam (ID: 1773078240388)",
+      "timestamp": "2026-03-09T19:41:08.874Z",
+      "matchId": "FS-3-3",
+      "winner": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            20
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773084602068",
+      "type": "ASSIGN_LANE",
+      "description": "FS-3-4: Lane assigned to 6",
+      "timestamp": "2026-03-09T19:30:02.068Z",
+      "matchId": "FS-3-4",
+      "afterState": {
+        "lane": 6
+      }
+    },
+    {
+      "id": "tx_1773084591760",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-3-4: Referee assigned to Colin (ID: 1773076262812)",
+      "timestamp": "2026-03-09T19:29:51.760Z",
+      "matchId": "FS-3-4",
+      "afterState": {
+        "referee": 1773076262812
+      }
+    },
+    {
+      "id": "tx_1773084586417",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-3-4: Elgan (ID: 1773076299517) defeats Colin (ID: 1773076262812)",
+      "timestamp": "2026-03-09T19:29:46.417Z",
+      "matchId": "BS-3-4",
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773084422357",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-3-3: Referee assigned to Håvard (ID: 1773076965998)",
+      "timestamp": "2026-03-09T19:27:02.358Z",
+      "matchId": "FS-3-3",
+      "afterState": {
+        "referee": 1773076965998
+      }
+    },
+    {
+      "id": "tx_1773084360453",
+      "type": "ASSIGN_LANE",
+      "description": "FS-3-3: Lane assigned to 8",
+      "timestamp": "2026-03-09T19:26:00.453Z",
+      "matchId": "FS-3-3",
+      "afterState": {
+        "lane": 8
+      }
+    },
+    {
+      "id": "tx_1773084296797",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-4-1: Referee assigned to Basse (ID: 1773077477606)",
+      "timestamp": "2026-03-09T19:24:56.797Z",
+      "matchId": "BS-4-1",
+      "afterState": {
+        "referee": 1773077477606
+      }
+    },
+    {
+      "id": "tx_1773084285228",
+      "type": "ASSIGN_LANE",
+      "description": "BS-4-1: Lane assigned to 4",
+      "timestamp": "2026-03-09T19:24:45.228Z",
+      "matchId": "BS-4-1",
+      "afterState": {
+        "lane": 4
+      }
+    },
+    {
+      "id": "tx_1773084264382",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-3-3: Referee assigned to Tony (ID: 1773076278996)",
+      "timestamp": "2026-03-09T19:24:24.382Z",
+      "matchId": "BS-3-3",
+      "afterState": {
+        "referee": 1773076278996
+      }
+    },
+    {
+      "id": "tx_1773084251074",
+      "type": "ASSIGN_LANE",
+      "description": "BS-3-3: Lane assigned to 3",
+      "timestamp": "2026-03-09T19:24:11.074Z",
+      "matchId": "BS-3-3",
+      "afterState": {
+        "lane": 3
+      }
+    },
+    {
+      "id": "tx_1773084227767",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-3-2: Referee assigned to Peter (ID: 1773078950551)",
+      "timestamp": "2026-03-09T19:23:47.767Z",
+      "matchId": "BS-3-2",
+      "afterState": {
+        "referee": 1773078950551
+      }
+    },
+    {
+      "id": "tx_1773084221185",
+      "type": "ASSIGN_LANE",
+      "description": "BS-3-2: Lane assigned to 1",
+      "timestamp": "2026-03-09T19:23:41.185Z",
+      "matchId": "BS-3-2",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773084165212",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-2-8: Colin (ID: 1773076262812) defeats Basse (ID: 1773077477606)",
+      "timestamp": "2026-03-09T19:22:45.212Z",
+      "matchId": "BS-2-8",
+      "winner": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773083991814",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-2-4: Leo (ID: 1773077465398) defeats Peter (ID: 1773078950551)",
+      "timestamp": "2026-03-09T19:19:51.814Z",
+      "matchId": "BS-2-4",
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773083909334",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-3-1: Håvard (ID: 1773076965998) defeats Tony (ID: 1773076278996)",
+      "timestamp": "2026-03-09T19:18:29.334Z",
+      "matchId": "FS-3-1",
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773083319736",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-3-2: Liam C (ID: 1773078677016) defeats Bruhn (ID: 1773076264956)",
+      "timestamp": "2026-03-09T19:08:39.736Z",
+      "matchId": "FS-3-2",
+      "winner": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773083226355",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-2-4: Referee assigned to Johan H (ID: 1773076293180)",
+      "timestamp": "2026-03-09T19:07:06.355Z",
+      "matchId": "BS-2-4",
+      "afterState": {
+        "referee": 1773076293180
+      }
+    },
+    {
+      "id": "tx_1773083121026",
+      "type": "ASSIGN_LANE",
+      "description": "BS-2-4: Lane assigned to 4",
+      "timestamp": "2026-03-09T19:05:21.026Z",
+      "matchId": "BS-2-4",
+      "afterState": {
+        "lane": 4
+      }
+    },
+    {
+      "id": "tx_1773083058220",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-8: Gustaf (ID: 1773078612881) defeats Leo (ID: 1773077465398)",
+      "timestamp": "2026-03-09T19:04:18.220Z",
+      "matchId": "FS-2-8",
+      "winner": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773082706323",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-3-2: Referee assigned to Eric (ID: 1773077968532)",
+      "timestamp": "2026-03-09T18:58:26.323Z",
+      "matchId": "FS-3-2",
+      "afterState": {
+        "referee": 1773077968532
+      }
+    },
+    {
+      "id": "tx_1773082704749",
+      "type": "ASSIGN_LANE",
+      "description": "FS-3-2: Lane assigned to 1",
+      "timestamp": "2026-03-09T18:58:24.749Z",
+      "matchId": "FS-3-2",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773082688552",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "BS-3-1: Jonas (ID: 1773076468385) defeats Eric (ID: 1773077968532)",
+      "timestamp": "2026-03-09T18:58:08.552Z",
+      "matchId": "BS-3-1",
+      "winner": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": [
+            21
+          ],
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773082581891",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-3-1: Referee assigned to Marcus.Å (ID: 1773077681054)",
+      "timestamp": "2026-03-09T18:56:21.891Z",
+      "matchId": "FS-3-1",
+      "afterState": {
+        "referee": 1773077681054
+      }
+    },
+    {
+      "id": "tx_1773082579508",
+      "type": "ASSIGN_LANE",
+      "description": "FS-3-1: Lane assigned to 8",
+      "timestamp": "2026-03-09T18:56:19.508Z",
+      "matchId": "FS-3-1",
+      "afterState": {
+        "lane": 8
+      }
+    },
+    {
+      "id": "tx_1773082161574",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-2-3: Johan (ID: 1773076308709) defeats Walkover (ID: walkover-11)",
+      "timestamp": "2026-03-09T18:49:21.574Z",
+      "matchId": "BS-2-3",
+      "winner": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-11",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773082161529",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-7: Marcus.Å (ID: 1773077681054) defeats Johan (ID: 1773076308709)",
+      "timestamp": "2026-03-09T18:49:21.529Z",
+      "matchId": "FS-2-7",
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773082066625",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-4: Bruhn (ID: 1773076264956) defeats Colin (ID: 1773076262812)",
+      "timestamp": "2026-03-09T18:47:46.625Z",
+      "matchId": "FS-2-4",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773081914925",
+      "type": "ASSIGN_REFEREE",
+      "description": "BS-3-1: Referee assigned to Elgan (ID: 1773076299517)",
+      "timestamp": "2026-03-09T18:45:14.925Z",
+      "matchId": "BS-3-1",
+      "afterState": {
+        "referee": 1773076299517
+      }
+    },
+    {
+      "id": "tx_1773081887165",
+      "type": "ASSIGN_LANE",
+      "description": "BS-3-1: Lane assigned to 1",
+      "timestamp": "2026-03-09T18:44:47.165Z",
+      "matchId": "BS-3-1",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773081831975",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-2-1: Jonas (ID: 1773076468385) defeats Walkover (ID: walkover-2)",
+      "timestamp": "2026-03-09T18:43:51.975Z",
+      "matchId": "BS-2-1",
+      "winner": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-2",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773081831939",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-5: Jocke (ID: 1773076284772) defeats Jonas (ID: 1773076468385)",
+      "timestamp": "2026-03-09T18:43:51.939Z",
+      "matchId": "FS-2-5",
+      "winner": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773081144067",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-2-2: Eric (ID: 1773077968532) defeats Walkover (ID: walkover-6)",
+      "timestamp": "2026-03-09T18:32:24.067Z",
+      "matchId": "BS-2-2",
+      "winner": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-6",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773081144032",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-6: Adam (ID: 1773078240388) defeats Eric (ID: 1773077968532)",
+      "timestamp": "2026-03-09T18:32:24.032Z",
+      "matchId": "FS-2-6",
+      "winner": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773080839660",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-8: Referee assigned to Uffe (ID: 1773077471766)",
+      "timestamp": "2026-03-09T18:27:19.660Z",
+      "matchId": "FS-2-8",
+      "afterState": {
+        "referee": 1773077471766
+      }
+    },
+    {
+      "id": "tx_1773080837460",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-8: Lane assigned to 6",
+      "timestamp": "2026-03-09T18:27:17.460Z",
+      "matchId": "FS-2-8",
+      "afterState": {
+        "lane": 6
+      }
+    },
+    {
+      "id": "tx_1773080801099",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-7: Referee assigned to Uffe (ID: 1773077471766)",
+      "timestamp": "2026-03-09T18:26:41.099Z",
+      "matchId": "FS-2-7",
+      "afterState": {
+        "referee": 1773077471766
+      }
+    },
+    {
+      "id": "tx_1773080793702",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-7: Lane assigned to 3",
+      "timestamp": "2026-03-09T18:26:33.702Z",
+      "matchId": "FS-2-7",
+      "afterState": {
+        "lane": 3
+      }
+    },
+    {
+      "id": "tx_1773080786902",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-8: Basse (ID: 1773077477606) defeats Walkover (ID: walkover-30)",
+      "timestamp": "2026-03-09T18:26:26.902Z",
+      "matchId": "BS-1-8",
+      "winner": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-30",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773080786866",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-1-15: Leo (ID: 1773077465398) defeats Basse (ID: 1773077477606)",
+      "timestamp": "2026-03-09T18:26:26.866Z",
+      "matchId": "FS-1-15",
+      "winner": {
+        "id": 1773077465398,
+        "name": "Leo",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": 1773077477606,
+        "name": "Basse",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      }
+    },
+    {
+      "id": "tx_1773080674309",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-4: Referee assigned to Johan H (ID: 1773076293180)",
+      "timestamp": "2026-03-09T18:24:34.309Z",
+      "matchId": "FS-2-4",
+      "afterState": {
+        "referee": 1773076293180
+      }
+    },
+    {
+      "id": "tx_1773080668569",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-4: Lane assigned to 4",
+      "timestamp": "2026-03-09T18:24:28.569Z",
+      "matchId": "FS-2-4",
+      "afterState": {
+        "lane": 4
+      }
+    },
+    {
+      "id": "tx_1773080529054",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-2-6: Uffe (ID: 1773077471766) defeats Walkover (ID: walkover-23)",
+      "timestamp": "2026-03-09T18:22:09.054Z",
+      "matchId": "BS-2-6",
+      "winner": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-23",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773080529027",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-2: Håvard (ID: 1773076965998) defeats Uffe (ID: 1773077471766)",
+      "timestamp": "2026-03-09T18:22:09.027Z",
+      "matchId": "FS-2-2",
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773080518409",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-2-5: Johan H (ID: 1773076293180) defeats Walkover (ID: walkover-18)",
+      "timestamp": "2026-03-09T18:21:58.409Z",
+      "matchId": "BS-2-5",
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-18",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773080518373",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-1: Tony (ID: 1773076278996) defeats Johan H (ID: 1773076293180)",
+      "timestamp": "2026-03-09T18:21:58.373Z",
+      "matchId": "FS-2-1",
+      "winner": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773080427929",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-6: Referee assigned to Elgan (ID: 1773076299517)",
+      "timestamp": "2026-03-09T18:20:27.929Z",
+      "matchId": "FS-2-6",
+      "afterState": {
+        "referee": 1773076299517
+      }
+    },
+    {
+      "id": "tx_1773080425527",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-6: Lane assigned to 8",
+      "timestamp": "2026-03-09T18:20:25.527Z",
+      "matchId": "FS-2-6",
+      "afterState": {
+        "lane": 8
+      }
+    },
+    {
+      "id": "tx_1773080392894",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-5: Referee assigned to Peter (ID: 1773078950551)",
+      "timestamp": "2026-03-09T18:19:52.894Z",
+      "matchId": "FS-2-5",
+      "afterState": {
+        "referee": 1773078950551
+      }
+    },
+    {
+      "id": "tx_1773080380033",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-5: Lane assigned to 1",
+      "timestamp": "2026-03-09T18:19:40.033Z",
+      "matchId": "FS-2-5",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773080220085",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-4: Peter (ID: 1773078950551) defeats Walkover (ID: walkover-15)",
+      "timestamp": "2026-03-09T18:17:00.085Z",
+      "matchId": "BS-1-4",
+      "winner": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-15",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773080220051",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-1-7: Bruhn (ID: 1773076264956) defeats Peter (ID: 1773078950551)",
+      "timestamp": "2026-03-09T18:17:00.051Z",
+      "matchId": "FS-1-7",
+      "winner": {
+        "id": 1773076264956,
+        "name": "Bruhn",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": 1773078950551,
+        "name": "Peter",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      }
+    },
+    {
+      "id": "tx_1773080165668",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-2-7: Elgan (ID: 1773076299517) defeats Walkover (ID: walkover-26)",
+      "timestamp": "2026-03-09T18:16:05.668Z",
+      "matchId": "BS-2-7",
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": "walkover-26",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773080165631",
+      "type": "COMPLETE_MATCH",
+      "completionType": "MANUAL",
+      "description": "FS-2-3: Liam C (ID: 1773078677016) defeats Elgan (ID: 1773076299517)",
+      "timestamp": "2026-03-09T18:16:05.631Z",
+      "matchId": "FS-2-3",
+      "winner": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      },
+      "loser": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        }
+      }
+    },
+    {
+      "id": "tx_1773079377805",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-3: Referee assigned to Adam (ID: 1773078240388)",
+      "timestamp": "2026-03-09T18:02:57.805Z",
+      "matchId": "FS-2-3",
+      "afterState": {
+        "referee": 1773078240388
+      }
+    },
+    {
+      "id": "tx_1773079363812",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-3: Lane assigned to 8",
+      "timestamp": "2026-03-09T18:02:43.812Z",
+      "matchId": "FS-2-3",
+      "afterState": {
+        "lane": 8
+      }
+    },
+    {
+      "id": "tx_1773079360324",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-2: Referee assigned to Colin (ID: 1773076262812)",
+      "timestamp": "2026-03-09T18:02:40.324Z",
+      "matchId": "FS-2-2",
+      "afterState": {
+        "referee": 1773076262812
+      }
+    },
+    {
+      "id": "tx_1773079356412",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-2: Lane assigned to 6",
+      "timestamp": "2026-03-09T18:02:36.412Z",
+      "matchId": "FS-2-2",
+      "afterState": {
+        "lane": 6
+      }
+    },
+    {
+      "id": "tx_1773079352508",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-2-1: Referee assigned to Johan (ID: 1773076308709)",
+      "timestamp": "2026-03-09T18:02:32.508Z",
+      "matchId": "FS-2-1",
+      "afterState": {
+        "referee": 1773076308709
+      }
+    },
+    {
+      "id": "tx_1773079347187",
+      "type": "ASSIGN_LANE",
+      "description": "FS-2-1: Lane assigned to 4",
+      "timestamp": "2026-03-09T18:02:27.187Z",
+      "matchId": "FS-2-1",
+      "afterState": {
+        "lane": 4
+      }
+    },
+    {
+      "id": "tx_1773079344837",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-1-15: Referee assigned to Marcus.Å (ID: 1773077681054)",
+      "timestamp": "2026-03-09T18:02:24.837Z",
+      "matchId": "FS-1-15",
+      "afterState": {
+        "referee": 1773077681054
+      }
+    },
+    {
+      "id": "tx_1773079341436",
+      "type": "ASSIGN_LANE",
+      "description": "FS-1-15: Lane assigned to 3",
+      "timestamp": "2026-03-09T18:02:21.436Z",
+      "matchId": "FS-1-15",
+      "afterState": {
+        "lane": 3
+      }
+    },
+    {
+      "id": "tx_1773079337827",
+      "type": "ASSIGN_REFEREE",
+      "description": "FS-1-7: Referee assigned to Gustaf (ID: 1773078612881)",
+      "timestamp": "2026-03-09T18:02:17.827Z",
+      "matchId": "FS-1-7",
+      "afterState": {
+        "referee": 1773078612881
+      }
+    },
+    {
+      "id": "tx_1773079332553",
+      "type": "ASSIGN_LANE",
+      "description": "FS-1-7: Lane assigned to 1",
+      "timestamp": "2026-03-09T18:02:12.553Z",
+      "matchId": "FS-1-7",
+      "afterState": {
+        "lane": 1
+      }
+    },
+    {
+      "id": "tx_1773079321000",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-7: Walkover (ID: walkover-26) defeats Walkover (ID: walkover-25)",
+      "timestamp": "2026-03-09T18:02:01.000Z",
+      "matchId": "BS-1-7",
+      "winner": {
+        "id": "walkover-26",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-25",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773079320992",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-6: Walkover (ID: walkover-23) defeats Walkover (ID: walkover-20)",
+      "timestamp": "2026-03-09T18:02:00.992Z",
+      "matchId": "BS-1-6",
+      "winner": {
+        "id": "walkover-23",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-20",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773079320984",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-5: Walkover (ID: walkover-18) defeats Walkover (ID: walkover-16)",
+      "timestamp": "2026-03-09T18:02:00.984Z",
+      "matchId": "BS-1-5",
+      "winner": {
+        "id": "walkover-18",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-16",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773079320977",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-3: Walkover (ID: walkover-11) defeats Walkover (ID: walkover-8)",
+      "timestamp": "2026-03-09T18:02:00.977Z",
+      "matchId": "BS-1-3",
+      "winner": {
+        "id": "walkover-11",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-8",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773079320969",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-2: Walkover (ID: walkover-6) defeats Walkover (ID: walkover-4)",
+      "timestamp": "2026-03-09T18:02:00.969Z",
+      "matchId": "BS-1-2",
+      "winner": {
+        "id": "walkover-6",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-4",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773079320962",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "BS-1-1: Walkover (ID: walkover-2) defeats Walkover (ID: walkover-1)",
+      "timestamp": "2026-03-09T18:02:00.962Z",
+      "matchId": "BS-1-1",
+      "winner": {
+        "id": "walkover-2",
+        "name": "Walkover"
+      },
+      "loser": {
+        "id": "walkover-1",
+        "name": "Walkover"
+      }
+    },
+    {
+      "id": "tx_1773079320954",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-16: Gustaf (ID: 1773078612881) defeats Walkover (ID: walkover-30)",
+      "timestamp": "2026-03-09T18:02:00.954Z",
+      "matchId": "FS-1-16",
+      "winner": {
+        "id": 1773078612881,
+        "name": "Gustaf",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-30",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320945",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-14: Marcus.Å (ID: 1773077681054) defeats Walkover (ID: walkover-26)",
+      "timestamp": "2026-03-09T18:02:00.945Z",
+      "matchId": "FS-1-14",
+      "winner": {
+        "id": 1773077681054,
+        "name": "Marcus.Å",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-26",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320931",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-13: Johan (ID: 1773076308709) defeats Walkover (ID: walkover-25)",
+      "timestamp": "2026-03-09T18:02:00.931Z",
+      "matchId": "FS-1-13",
+      "winner": {
+        "id": 1773076308709,
+        "name": "Johan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-25",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320885",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-12: Adam (ID: 1773078240388) defeats Walkover (ID: walkover-23)",
+      "timestamp": "2026-03-09T18:02:00.885Z",
+      "matchId": "FS-1-12",
+      "winner": {
+        "id": 1773078240388,
+        "name": "Adam",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-23",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320875",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-11: Eric (ID: 1773077968532) defeats Walkover (ID: walkover-20)",
+      "timestamp": "2026-03-09T18:02:00.875Z",
+      "matchId": "FS-1-11",
+      "winner": {
+        "id": 1773077968532,
+        "name": "Eric",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-20",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320868",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-10: Jocke (ID: 1773076284772) defeats Walkover (ID: walkover-18)",
+      "timestamp": "2026-03-09T18:02:00.868Z",
+      "matchId": "FS-1-10",
+      "winner": {
+        "id": 1773076284772,
+        "name": "Jocke",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-18",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320861",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-9: Jonas (ID: 1773076468385) defeats Walkover (ID: walkover-16)",
+      "timestamp": "2026-03-09T18:02:00.861Z",
+      "matchId": "FS-1-9",
+      "winner": {
+        "id": 1773076468385,
+        "name": "Jonas",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-16",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320854",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-8: Colin (ID: 1773076262812) defeats Walkover (ID: walkover-15)",
+      "timestamp": "2026-03-09T18:02:00.854Z",
+      "matchId": "FS-1-8",
+      "winner": {
+        "id": 1773076262812,
+        "name": "Colin",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-15",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320846",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-6: Elgan (ID: 1773076299517) defeats Walkover (ID: walkover-11)",
+      "timestamp": "2026-03-09T18:02:00.846Z",
+      "matchId": "FS-1-6",
+      "winner": {
+        "id": 1773076299517,
+        "name": "Elgan",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-11",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320839",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-5: Liam C (ID: 1773078677016) defeats Walkover (ID: walkover-8)",
+      "timestamp": "2026-03-09T18:02:00.839Z",
+      "matchId": "FS-1-5",
+      "winner": {
+        "id": 1773078677016,
+        "name": "Liam C",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-8",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320831",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-4: Uffe (ID: 1773077471766) defeats Walkover (ID: walkover-6)",
+      "timestamp": "2026-03-09T18:02:00.831Z",
+      "matchId": "FS-1-4",
+      "winner": {
+        "id": 1773077471766,
+        "name": "Uffe",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-6",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320824",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-3: Håvard (ID: 1773076965998) defeats Walkover (ID: walkover-4)",
+      "timestamp": "2026-03-09T18:02:00.824Z",
+      "matchId": "FS-1-3",
+      "winner": {
+        "id": 1773076965998,
+        "name": "Håvard",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-4",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320814",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-2: Tony (ID: 1773076278996) defeats Walkover (ID: walkover-2)",
+      "timestamp": "2026-03-09T18:02:00.814Z",
+      "matchId": "FS-1-2",
+      "winner": {
+        "id": 1773076278996,
+        "name": "Tony",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-2",
+        "name": "Walkover",
+        "isBye": true
+      }
+    },
+    {
+      "id": "tx_1773079320750",
+      "type": "COMPLETE_MATCH",
+      "completionType": "AUTO",
+      "description": "FS-1-1: Johan H (ID: 1773076293180) defeats Walkover (ID: walkover-1)",
+      "timestamp": "2026-03-09T18:02:00.750Z",
+      "matchId": "FS-1-1",
+      "winner": {
+        "id": 1773076293180,
+        "name": "Johan H",
+        "paid": true,
+        "stats": {
+          "shortLegs": 0,
+          "highOuts": [],
+          "tons": 0,
+          "oneEighties": 0
+        },
+        "placement": null,
+        "eliminated": false
+      },
+      "loser": {
+        "id": "walkover-1",
+        "name": "Walkover",
+        "isBye": true
+      }
+    }
+  ],
+  "playerList": [],
+  "exportedAt": "2026-04-11T20:34:20.008Z"
+}

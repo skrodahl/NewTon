@@ -771,20 +771,7 @@
 
             <!-- Tournament list panel -->
             <div id="historyTournamentList">
-                <div style="overflow-x:auto;">
-                    <table class="history-table">
-                        <thead><tr>
-                            <th>Tournament</th>
-                            <th>Format</th>
-                            <th>Date</th>
-                            <th style="text-align:center;">Players</th>
-                            <th style="text-align:right;"></th>
-                        </tr></thead>
-                        <tbody id="historyTournamentListBody">
-                            <tr><td colspan="5" style="text-align:center;color:#888;padding:24px;">Loading…</td></tr>
-                        </tbody>
-                    </table>
-                </div>
+                <div id="historyTournamentTableContainer"></div>
             </div>
 
             <!-- Match list panel -->
@@ -796,19 +783,7 @@
                         <div id="historyMatchListMeta" class="history-panel-meta"></div>
                     </div>
                 </div>
-                <div style="overflow-x:auto;">
-                    <table class="history-table">
-                        <thead><tr>
-                            <th>Match</th>
-                            <th>Player 1</th>
-                            <th>Player 2</th>
-                            <th>Result</th>
-                            <th>Type</th>
-                            <th>Date</th>
-                        </tr></thead>
-                        <tbody id="historyMatchListBody"></tbody>
-                    </table>
-                </div>
+                <div id="historyMatchTableContainer"></div>
             </div>
 
             <!-- Match detail panel -->
@@ -1113,6 +1088,7 @@
         <script src="js/dynamic-help-system.js"></script>
         <script src="js/analytics.js"></script>
         <script src="js/newton-stats.js"></script>
+        <script src="js/newton-table.js"></script>
         <script src="js/newton-history.js"></script>
         <script src="js/qr-bridge.js"></script>
 

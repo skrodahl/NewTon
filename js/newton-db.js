@@ -260,17 +260,19 @@ const NewtonDB = (() => {
         const existing = await getTournament(tournamentId);
         if (!existing) return; // Nothing to finalize — no matches were ever completed
 
+        // Promote all match records for this tournament to 'final'
+        const matches = await getMatchesByTournament(tournamentId);
+
         const tournRecord = Object.assign({}, existing, {
             status:                 'final',
             closedAt:               closedAt,
             configSnapshot:         configSnapshot,
-            tournamentAchievements: tournamentAchievements || {}
+            tournamentAchievements: tournamentAchievements || {},
+            matchCount:             matches.length
         });
 
         await _promisify(_store('tournaments', 'readwrite').put(tournRecord));
 
-        // Promote all match records for this tournament to 'final'
-        const matches = await getMatchesByTournament(tournamentId);
         if (matches.length === 0) return;
 
         const tx    = _db.transaction('matches', 'readwrite');

@@ -3444,6 +3444,21 @@ a:hover { color: #1e40af; }
     font-weight: 700;
     color: #111827;
 }
+.match-detail-match-id {
+    display: block;
+    font-size: 13px;
+    font-weight: 600;
+    color: #6b7280;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 2px;
+}
+.match-detail-players {
+    display: block;
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #111827;
+}
 .history-panel-meta {
     font-size: 13px;
     color: #6b7280;
@@ -3478,6 +3493,69 @@ a:hover { color: #1e40af; }
 .history-type-final {
     background: #d1fae5;
     color: #065f46;
+}
+
+/* ---------------------------------------------------------------------------
+   NewtonTable — sortable/paginated table utility
+   --------------------------------------------------------------------------- */
+
+.newton-table-sortable {
+    cursor: pointer;
+    user-select: none;
+}
+
+.newton-table-sortable:hover {
+    background: #e9ecef;
+}
+
+.newton-table-pagination {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 10px 12px 4px;
+    font-size: 13px;
+    color: #6b7280;
+}
+
+.newton-table-page-nav {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.newton-table-page-info {
+    font-weight: 500;
+    min-width: 100px;
+    text-align: center;
+}
+
+.newton-table-page-btn {
+    font-size: 12px !important;
+    padding: 4px 10px !important;
+}
+
+.newton-table-rpp {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.newton-table-rpp-label {
+    font-weight: 600;
+    margin-right: 4px;
+}
+
+.newton-table-rpp-btn {
+    font-size: 12px !important;
+    padding: 3px 8px !important;
+    min-width: 32px;
+}
+
+.newton-table-rpp-active {
+    background: #f0fdf4 !important;
+    color: #166534 !important;
+    border-color: #166534 !important;
+    font-weight: 600 !important;
 }
 
 /* ---------------------------------------------------------------------------

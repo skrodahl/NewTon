@@ -1,4 +1,26 @@
-## **v5.0.4** — (unreleased)
+## **v5.0.5** — (unreleased)
+
+### Analytics — table utility (`newton-table.js`)
+
+- **Reusable sortable/paginated table component**: `NewtonTable.create()` accepts column definitions (key, label, width, align, sortable, render, sortValue), data array, and callbacks. Handles sorting, pagination, and rendering. Every future tabular view gets these features for free.
+- **Sortable columns**: click header to sort ascending, click again to reverse. Visual indicator (▲/▼) on active column.
+- **Pagination**: rows-per-page selector (10 / 25 / 50 / All) with Prev/Next navigation. Both sort preference and rows-per-page persist to localStorage per table.
+- **Column widths**: optional `width` property constrains compact columns (Format, Players, Matches, Result, Type, Date).
+- **Applied to Register**: tournament list and match list both use `NewtonTable`. Hardcoded `<table>` elements replaced by container divs populated by the utility.
+- **Tournament match count**: `matchCount` field written at finalization and backfill; self-healing on render (computed and persisted if missing). Displayed as a new "Matches" column on the tournament list.
+
+### Analytics — match list and detail improvements
+
+- **Match list columns**: Player 1 and Player 2 with winner bolded; separate "Result" column showing P1–P2 score. Replaces the old combined "Result" column. Fixed widths on Match (130px), Result (80px), Type (90px), Date (110px).
+- **Match detail title**: two-line layout — match ID (small, muted, uppercase) above player names (large, bold).
+- **Match detail result**: P1 score P2 format — winner bold, loser muted, score in monospace. Replaces "Winner wins X–Y".
+- **Match detail stats table**: horizontal leaderboard-style table replaces the old vertical achievements section. Always shown with all columns (Player, Short Legs, High Outs, 180s, Tons), dashes for empty values. Winner bolded. Points column deferred until point mode computation is ready.
+- **Match detail badges**: "Best of N" and "Manual/Chalker" badges right-aligned in match header. Type badge moved from left to right.
+- **Backfill format fix**: backfilled matches now include the `format` field (x01 format and best-of) read from the localStorage match object. Previously wrote `null`.
+
+---
+
+## **v5.0.4** — No Tournament Left Behind (2026-04-10)
 
 ### Tournament Setup — Analytics integration
 
@@ -23,10 +45,6 @@
 ### Demo banner
 
 - **Fixed**: "Darts double elimination tournament software" changed to "Darts tournament software" — the banner predated Single Elimination support
-
-### ~~Before release — open item~~ RESOLVED
-
-- ~~Dashboard achievement stats~~ — solved by achievement reconciliation and `.stats` wrapper fix (see above)
 
 ---
 

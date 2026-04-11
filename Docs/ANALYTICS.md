@@ -258,10 +258,28 @@ All tabular views use a shared table utility. Pass it data, column definitions, 
 - Another control parameter: same data, different projection
 - Deferred until the core sort + pagination utility is stable
 
+**Column widths:**
+- Columns accept an optional `width` property (e.g. `'80px'`). Compact columns like Format, Players, Matches get fixed widths; name columns take the remaining space.
+
+**Self-healing data fields:**
+- Some computed fields (e.g. `matchCount`) may be missing from older records. The render path computes them on the fly and persists them back to IndexedDB. New records write the field at finalization/backfill. This avoids migration steps — old data fixes itself on first display.
+
 **First targets:**
-- Register → tournament list (sort by date, name, format, player count)
+- Register → tournament list (sort by date, name, format, player count, match count)
 - Register → match list (sort by match ID, player names, result, type, date)
 - These already have real data and working rendering — adding the utility is purely additive
+
+### Points in tables — deferred until point mode is wired
+
+The tournament list should show an achievement points column — the sum of skill-based points (180s, tons, high outs, short legs) for each tournament. Three distinct point categories:
+
+- **Achievement points** — 180s + tons + high outs + short legs (skill-based, the interesting ones)
+- **Placement points** — 1st, 2nd, 3rd etc. (bracket result)
+- **Participation points** — flat rate for showing up
+
+Achievement points depend on the point values in the active config — which means the column must respect the point mode toggle (Original uses the frozen `configSnapshot`, Current uses today's settings, Custom uses operator-defined values). This is the first real connection between the control bar and the table data.
+
+Implement when the point mode computation layer is in place.
 
 ### Data flow
 
