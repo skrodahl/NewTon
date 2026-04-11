@@ -1,4 +1,15 @@
-## **v5.0.5** — (unreleased)
+## **v5.0.6** — (unreleased)
+
+### Analytics — polish
+
+- **Date format** — all dates in Analytics now use YYYY-MM-DD, consistent with the rest of the app. Match detail timestamps show YYYY-MM-DD HH:MM.
+- **Format label** — match list header spells out "Double Elimination" / "Single Elimination" instead of "DE" / "SE". Tournament table keeps the compact abbreviation.
+- **Backfill format field** — backfilled matches now include the best-of value from the localStorage match object, enabling the "Best of N" badge on match details.
+- **Match detail badges** — "Best of N" and "Manual/Chalker" type badges right-aligned in match header.
+
+---
+
+## **v5.0.5** — Read Between the Lines (2026-04-11)
 
 ### Analytics — table utility (`newton-table.js`)
 

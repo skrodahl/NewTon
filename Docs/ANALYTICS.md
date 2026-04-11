@@ -368,22 +368,45 @@ The command center is the frame. Each phase adds views and controls that render 
 
 Backfill implemented. "+ Analytics" label on each completed tournament in "My Tournaments". One-click import with per-match achievement reconstruction from transaction history. Achievement reconciliation shared between backfill and live finalization. See v5.0.4 release notes.
 
-### Next — Table Utility
+### ~~Next — Table Utility~~ DONE (v5.0.5)
 
-Reusable sort + pagination utility, applied to the existing Register tables (tournament list, match list). This is the foundation for every tabular view that follows. See "Table behaviour" section above for the full specification.
+Reusable sort + pagination utility (`newton-table.js`), applied to Register tournament list and match list. Column widths, persistent sort/pagination preferences, match detail redesign with horizontal stats table. See v5.0.5 release notes.
 
 ### Next — Scope Selector
 
 The tournament selection that drives all views. This is the first real control on the control surface.
 
-- **Scope state** — an array of selected tournament IDs (default: all finalized)
-- **Visual indicator** — in the control bar, showing the current scope ("All tournaments" or "Måndagscup" or "3 tournaments selected")
-- **Entry points** that set the scope:
-  - "Analytics" label in Recent Tournaments → scope to that single tournament, switch to Analytics tab
-  - Podium "Tournament Analytics" button → same, scope to the just-completed tournament
-  - Register checkboxes → manual selection within the filtered list
-- **Clear button** to reset to all-time
-- **All views read from the scope** — Dashboard stats, Leaderboard rankings, Player profiles, Register tables all filter by the active scope
+**Scope state:**
+- An array of selected tournament IDs (default: all finalized)
+- All views read from the scope — Dashboard stats, Leaderboard rankings, Player profiles, Register tables all filter by the active scope
+
+**Scope indicator — in the Analytics header:**
+
+Lives below the subtitle, always visible regardless of which view tab is active. Read-only — shows what you're looking at, not where you change it.
+
+Format: `Viewing: N of M tournaments   Selection: [tag] [tag]   [Change]`
+
+Examples:
+- `Viewing: 12 of 12 tournaments   Selection: [All]   [Change]`
+- `Viewing: 1 of 12 tournaments   Selection: [Måndagscup]   [Change]`
+- `Viewing: 3 of 12 tournaments   Selection: [Monday] [2026]   [Change]`
+- `Viewing: 5 of 12 tournaments   Selection: [2026]   [Change]`
+- `Viewing: 5 of 12 tournaments   Selection: [2025-12-05 – 2026-02-14]   [Change]`
+- `Viewing: 3 of 12 tournaments   Selection: [Monday] [2025-12-05 – 2026-02-14]   [Change]`
+
+The tags are labels, not buttons — they show what's applied. [Change] navigates to the Register tab where the actual selection is made. One place to read the scope, one place to change it.
+
+"N of M" is the anchor — always tells you both the selection size and the total. "12 of 12" = nothing filtered. "1 of 12" = zoomed in.
+
+**Entry points** that set the scope:
+- "Analytics" label in Recent Tournaments → scope to that single tournament, switch to Analytics tab
+- Podium "Tournament Analytics" button → same, scope to the just-completed tournament
+- Register checkboxes → manual selection within the filtered list
+- Date range / text filter controls in Register (later)
+
+**Clear/reset:**
+- [Change] button on the scope indicator navigates to Register
+- Clear option in Register resets to all tournaments
 
 Without scope, clicking "Analytics" on a tournament opens a filtered register but the Dashboard still shows all-time data. With scope, every view is consistent — one selection, one dataset, every view agrees.
 

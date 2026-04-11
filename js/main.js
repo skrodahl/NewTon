@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.5'; // beta.8: Scan QR Results button hidden by default; hidden in setup mode and when no live matches
+const APP_VERSION = '5.0.6'; // beta.8: Scan QR Results button hidden by default; hidden in setup mode and when no live matches
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
