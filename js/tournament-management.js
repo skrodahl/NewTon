@@ -281,13 +281,16 @@ function buildTournamentPayload() {
 }
 
 /**
- * Auto-upload the current tournament to the local server's REST API.
- * Fire-and-forget — logs success/failure, never blocks or alerts.
- * Called at tournament finalization when the API is available.
+ * Upload a tournament payload to the local server's REST API.
+ * @param {object} payload - { filename, data } from buildTournamentPayload()
+ * @param {boolean} [silent=false] - true for fire-and-forget (auto-upload), false for user feedback (manual)
+ * @returns {Promise<boolean>} true if upload succeeded
  */
-async function autoUploadTournament() {
-    const payload = buildTournamentPayload();
-    if (!payload) return;
+async function uploadToServer(payload, silent = false) {
+    if (!payload) {
+        if (!silent) alert('No active tournament to upload.');
+        return false;
+    }
 
     try {
         const response = await fetch('/api/upload-tournament.php?overwrite=true', {
@@ -297,15 +300,40 @@ async function autoUploadTournament() {
         });
 
         if (response.ok) {
-            console.log(`✓ Tournament auto-uploaded to server: ${payload.filename}`);
+            console.log(`✓ Tournament uploaded to server: ${payload.filename}`);
+            if (!silent) {
+                alert(`✓ Tournament uploaded to server.\n\n${payload.filename}`);
+                if (typeof loadRecentTournaments === 'function') loadRecentTournaments();
+            }
+            return true;
         } else {
             const result = await response.json().catch(() => ({}));
-            console.warn(`Auto-upload failed (${response.status}):`, result.error || 'Unknown error');
+            const msg = result.error || 'Unknown error';
+            console.warn(`Upload failed (${response.status}):`, msg);
+            if (!silent) alert(`Upload failed: ${msg}`);
+            return false;
         }
     } catch (e) {
-        // Server not available — silent fail (expected for HTML-only deployments)
-        console.log('Auto-upload skipped — server not available');
+        console.log('Upload skipped — server not available');
+        if (!silent) alert('Server not available.');
+        return false;
     }
+}
+
+/**
+ * Auto-upload the current tournament. Fire-and-forget.
+ * Called at tournament finalization when config.server.autoUpload is enabled.
+ */
+async function autoUploadTournament() {
+    await uploadToServer(buildTournamentPayload(), true);
+}
+
+/**
+ * Manual upload of the current active tournament. Shows feedback.
+ * Called from the "Upload to Server" button in Tournament Setup.
+ */
+async function uploadCurrentTournament() {
+    await uploadToServer(buildTournamentPayload(), false);
 }
 
 // Upload tournament file to server (bonus feature - file picker based)
