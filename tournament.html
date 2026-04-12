@@ -94,10 +94,12 @@
                         Tournament</button>
                     <button class="btn btn-danger" onclick="showResetTournamentModal()">Reset Tournament</button>
                     <button id="uploadToServerBtn" class="btn btn-success"
-                        onclick="uploadCurrentTournament()" style="display: none;">Upload to
+                        onclick="showUploadModal()" style="display: none;">Backup to
                         Server</button>
                     <input type="file" id="importFile" accept=".json" style="display: none;"
                         onchange="importTournament(event)">
+                    <input type="file" id="uploadFileInput" accept=".json" style="display: none;"
+                        onchange="handleUploadFileSelected(event)">
                 </div>
 
                 <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">
@@ -434,8 +436,8 @@
                                     <label class="checkbox-label">
                                         <input type="checkbox" id="autoUploadTournament">
                                         <span>
-                                            Auto-upload tournaments on completion
-                                            <small class="field-help">Automatically saves the tournament to the local server when a tournament is completed</small>
+                                            Automatically backup tournaments on completion
+                                            <small class="field-help">Saves the tournament to the server when a tournament is completed. Backed up tournaments are available from any computer connecting to this server.</small>
                                         </span>
                                     </label>
                                 </div>
@@ -822,6 +824,28 @@
             </div>
 
             </div><!-- /analyticsViewRegister -->
+        </div>
+
+        <!-- Upload to Server Modal -->
+        <div id="uploadToServerModal" class="modal">
+            <div class="modal-content" style="max-width: 420px;">
+                <h3>Backup to Server</h3>
+                <div style="margin: 16px 0;">
+                    <label class="checkbox-label" style="display:block;margin-bottom:10px;cursor:pointer;">
+                        <input type="radio" name="uploadSource" value="active" checked>
+                        <span>Active tournament</span>
+                    </label>
+                    <label class="checkbox-label" style="display:block;cursor:pointer;">
+                        <input type="radio" name="uploadSource" value="file">
+                        <span>From file</span>
+                    </label>
+                </div>
+                <div id="uploadDestinationInfo" style="font-size:13px;color:#6b7280;margin:16px 0;padding:10px 12px;background:#f9fafb;border-radius:4px;"></div>
+                <div class="text-center" style="margin-top:20px;">
+                    <button class="btn" onclick="popDialog()" style="margin-right:12px;">Cancel</button>
+                    <button class="btn btn-success" onclick="executeUpload()">Upload</button>
+                </div>
+            </div>
         </div>
 
         <!-- History: Delete Tournament Confirmation Modal -->

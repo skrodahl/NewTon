@@ -371,11 +371,94 @@ async function autoUploadTournament() {
 }
 
 /**
- * Manual upload of the current active tournament. Shows feedback.
- * Called from the "Upload to Server" button in Tournament Setup.
+ * Show the upload modal with destination info.
  */
-async function uploadCurrentTournament() {
-    await uploadToServer(buildTournamentPayload());
+function showUploadModal() {
+    // Build destination info
+    const destinations = ['This server'];
+    const remote = config && config.server && config.server.remoteUrl;
+    if (remote) destinations.push(remote);
+
+    const infoEl = document.getElementById('uploadDestinationInfo');
+    if (infoEl) {
+        infoEl.innerHTML = '<strong>Uploads to:</strong><br>' +
+            destinations.map(d => '&bull; ' + d).join('<br>');
+    }
+
+    // Reset source selection
+    const activeRadio = document.querySelector('input[name="uploadSource"][value="active"]');
+    if (activeRadio) activeRadio.checked = true;
+
+    pushDialog('uploadToServerModal');
+}
+
+/**
+ * Execute the upload based on modal selections.
+ */
+async function executeUpload() {
+    const source = document.querySelector('input[name="uploadSource"]:checked');
+    if (!source) return;
+
+    popDialog();
+
+    if (source.value === 'file') {
+        // Trigger file picker — handleUploadFileSelected() will do the upload
+        document.getElementById('uploadFileInput').click();
+    } else {
+        // Upload active tournament
+        const payload = buildTournamentPayload();
+        if (!payload) {
+            alert('No active tournament to upload.');
+            return;
+        }
+        await _uploadToAllDestinations(payload);
+    }
+}
+
+/**
+ * Handle file selected for upload. Reads the file and uploads.
+ */
+async function handleUploadFileSelected(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    event.target.value = '';
+
+    try {
+        const text = await file.text();
+        const data = JSON.parse(text);
+        const payload = { filename: file.name, data: data };
+        await _uploadToAllDestinations(payload);
+    } catch (e) {
+        alert('Failed to read file: ' + e.message);
+    }
+}
+
+/**
+ * Upload a payload to all configured destinations (local + remote).
+ * Shows user feedback.
+ * @param {object} payload - { filename, data }
+ */
+async function _uploadToAllDestinations(payload) {
+    const results = [];
+
+    // Local upload
+    const localOk = await uploadToServer(payload, { silent: true });
+    results.push(localOk ? '✓ This server' : '✗ This server');
+
+    // Remote upload if configured
+    const remote = config && config.server && config.server.remoteUrl;
+    if (remote) {
+        const remoteOk = await uploadToServer(payload, {
+            silent: true,
+            remoteUrl: remote,
+            username: config.server.remoteUsername || '',
+            password: config.server.remotePassword || ''
+        });
+        results.push(remoteOk ? `✓ ${remote}` : `✗ ${remote}`);
+    }
+
+    alert(`Upload complete:\n\n${results.join('\n')}\n\nFile: ${payload.filename}`);
+    if (typeof loadRecentTournaments === 'function') loadRecentTournaments();
 }
 
 // Upload tournament file to server (bonus feature - file picker based)
