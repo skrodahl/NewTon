@@ -2,7 +2,7 @@
 // NEVER touches global config - only tournament-specific data
 
 let showingAllTournaments = false;
-let showingAllSharedTournaments = false;
+let sharedTournamentViewState = 'collapsed'; // 'collapsed' | 'filtered' | 'all'
 let showingAllLocalTournaments = false;
 
 /**
@@ -560,13 +560,27 @@ async function loadRecentTournaments() {
             return dateB - dateA;
         });
 
-        // Determine which shared tournaments to show
-        const sharedToShow = showingAllSharedTournaments ?
-            sortedShared :
-            sortedShared.slice(0, 5);
+        // Build a set of local tournament identifiers (name + date) for matching
+        const localTournamentKeys = new Set(
+            tournaments.map(t => `${t.name}_${t.date}`)
+        );
+
+        // Filter to tournaments not already in localStorage
+        const newShared = sortedShared.filter(t => !localTournamentKeys.has(`${t.name}_${t.date}`));
+
+        // Determine what to show based on view state
+        let sharedToShow = [];
+        if (sharedTournamentViewState === 'filtered') {
+            sharedToShow = newShared;
+        } else if (sharedTournamentViewState === 'all') {
+            sharedToShow = sortedShared;
+        }
+        // 'collapsed' shows nothing
 
         const sharedHtml = sharedToShow.map(t => {
             const playerCount = t.players || '?';
+            const isLocal = localTournamentKeys.has(`${t.name}_${t.date}`);
+            const buttonLabel = isLocal ? 'Re-import' : 'Import';
             const allowDelete = config.server && config.server.allowSharedTournamentDelete;
             const deleteButton = allowDelete
                 ? `<button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteSharedTournament('${t.filename}')">×</button>`
@@ -578,7 +592,7 @@ async function loadRecentTournaments() {
                             <strong>${t.name}</strong> (${t.date}) - ${playerCount}p
                         </span>
                         <div>
-                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSharedTournament('${t.filename}')">Load</button>
+                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSharedTournament('${t.filename}')">${buttonLabel}</button>
                             ${deleteButton}
                         </div>
                     </div>
@@ -586,14 +600,21 @@ async function loadRecentTournaments() {
             `;
         }).join('');
 
-        // Add toggle button inline with header if more than 5 shared tournaments
-        const toggleButton = sortedShared.length > 5
-            ? `<button class="btn" style="padding: 5px 10px; font-size: 14px; margin-left: 10px;" onclick="toggleSharedTournamentView()">${showingAllSharedTournaments ? 'Show Less' : 'Show All'}</button>`
-            : '';
+        // Toggle button text based on state
+        let toggleLabel = '';
+        if (sharedTournamentViewState === 'collapsed') {
+            toggleLabel = newShared.length > 0 ? `Show New (${newShared.length})` : 'Show All';
+        } else if (sharedTournamentViewState === 'filtered') {
+            toggleLabel = sortedShared.length > newShared.length ? 'Show All' : 'Collapse';
+        } else {
+            toggleLabel = 'Collapse';
+        }
+
+        const toggleButton = `<button class="btn" style="padding: 5px 10px; font-size: 14px; margin-left: 10px;" onclick="toggleSharedTournamentView()">${toggleLabel}</button>`;
 
         htmlSections.push(`
             <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #555; display: flex; align-items: center;">
-                Shared Tournaments
+                Shared Tournaments (${sortedShared.length})
                 ${toggleButton}
             </h3>
             ${sharedHtml}
@@ -703,7 +724,13 @@ function toggleTournamentView() {
 }
 
 function toggleSharedTournamentView() {
-    showingAllSharedTournaments = !showingAllSharedTournaments;
+    if (sharedTournamentViewState === 'collapsed') {
+        sharedTournamentViewState = 'filtered';
+    } else if (sharedTournamentViewState === 'filtered') {
+        sharedTournamentViewState = 'all';
+    } else {
+        sharedTournamentViewState = 'collapsed';
+    }
     loadRecentTournaments();
 }
 
