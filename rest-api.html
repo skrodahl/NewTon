@@ -69,7 +69,8 @@
 ├── api/
 │   ├── list-tournaments.php
 │   ├── upload-tournament.php
-│   └── delete-tournament.php
+│   ├── delete-tournament.php
+│   └── relay.php
 ├── tournaments/
 │   └── [tournament JSON files]
 └── [application files]</code></pre>
@@ -175,6 +176,44 @@
 
     <hr>
 
+    <h3>4. Relay (Remote Upload)</h3>
+    <p><strong>POST</strong> <code>/api/relay.php</code></p>
+    <p>Forwards a tournament upload to a remote NewTon instance. Used when the browser can&rsquo;t make cross-origin requests with basic auth (CORS preflight blocks authenticated OPTIONS requests). PHP handles the remote request server-side &mdash; no CORS, no preflight, auth works naturally.</p>
+
+    <p><strong>Request body:</strong></p>
+    <pre><code>{
+  "url": "https://newton.example.com/api/upload-tournament.php?overwrite=true",
+  "username": "NewTon",
+  "password": "tournament",
+  "payload": {
+    "filename": "MyTournament_2025-10-02.json",
+    "data": { ... tournament object ... }
+  }
+}</code></pre>
+
+    <p><strong>Parameters:</strong></p>
+    <table>
+        <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
+        <tr><td><code>url</code></td><td>string</td><td>Yes</td><td>Full URL of the remote upload endpoint</td></tr>
+        <tr><td><code>username</code></td><td>string</td><td>No</td><td>Basic auth username for the remote server</td></tr>
+        <tr><td><code>password</code></td><td>string</td><td>No</td><td>Basic auth password for the remote server</td></tr>
+        <tr><td><code>payload</code></td><td>object</td><td>Yes</td><td>The tournament payload (filename + data)</td></tr>
+    </table>
+
+    <p>The remote server&rsquo;s response is passed through directly &mdash; same status code, same JSON body.</p>
+
+    <p><strong>Error responses:</strong></p>
+    <table>
+        <tr><th>Status</th><th>Error</th><th>Cause</th></tr>
+        <tr><td>400</td><td><code>Missing url or payload</code></td><td>Required fields absent</td></tr>
+        <tr><td>400</td><td><code>Invalid remote URL</code></td><td>URL validation failed</td></tr>
+        <tr><td>502</td><td><code>Could not reach remote server</code></td><td>Remote server unreachable</td></tr>
+    </table>
+
+    <p><strong>Use case:</strong> A local Docker instance backs up tournaments to a remote server with basic auth. The browser talks to the local server (same origin, no CORS), and PHP relays to the remote server with credentials.</p>
+
+    <hr>
+
     <h2 id="cors">CORS</h2>
     <p>All endpoints include CORS headers:</p>
     <pre><code>Access-Control-Allow-Origin: *
@@ -191,13 +230,16 @@ Access-Control-Allow-Headers: Content-Type</code></pre>
 
     <h3>Conditional UI</h3>
     <ul>
-        <li>"Upload to Server" button — shown when API responds</li>
-        <li>"Shared Tournaments" section — shown when tournaments exist on the server</li>
-        <li>Delete buttons — shown on each shared tournament</li>
+        <li><strong>&ldquo;Backup to Server&rdquo; button</strong> &mdash; shown when API responds. Opens a modal with source choice (active tournament or from file) and destination info.</li>
+        <li><strong>&ldquo;Shared Tournaments&rdquo; section</strong> &mdash; collapsed by default. Shows tournament count, expands on click. Tournaments not in localStorage show &ldquo;Import&rdquo;, those already present show &ldquo;Re-import&rdquo;.</li>
+        <li><strong>Delete buttons</strong> &mdash; shown on shared tournaments when <code>config.server.allowSharedTournamentDelete</code> is enabled.</li>
     </ul>
 
+    <h3>Automatic Backup</h3>
+    <p>When enabled in Global Settings &rarr; Server Settings &rarr; &ldquo;Automatically backup tournaments on completion&rdquo;, the tournament JSON is uploaded to the local server at finalization. If a remote server is configured (Global Settings &rarr; Remote Backup), the tournament is also relayed to the remote server. Both uploads are fire-and-forget.</p>
+
     <h3>Import Validation</h3>
-    <p>Any file downloaded from the server must pass the Tournament Manager's import validation before it can be loaded. Files that don't match the expected tournament structure are rejected by the client — they cannot affect your local tournament data.</p>
+    <p>Any file downloaded from the server must pass the Tournament Manager&rsquo;s import validation before it can be loaded. Files that don&rsquo;t match the expected tournament structure are rejected by the client &mdash; they cannot affect your local tournament data.</p>
 
     <hr>
 

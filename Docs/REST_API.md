@@ -2,7 +2,7 @@
 
 **NewTon DC Tournament Manager - Server API**
 
-Version: 2.3.0
+Version: 3.0.0
 Base URL: `/api`
 
 ## Overview
@@ -71,6 +71,7 @@ See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for complete Docker setup gu
 │   ├── list-tournaments.php
 │   ├── upload-tournament.php
 │   ├── delete-tournament.php
+│   ├── relay.php
 │   └── README.md
 ├── tournaments/
 │   └── [tournament JSON files]
@@ -318,6 +319,74 @@ Content-Type: application/json
 
 ---
 
+### 4. Relay (Remote Upload)
+
+**Endpoint:** `POST /api/relay.php`
+
+**Description:** Forwards a tournament upload to a remote NewTon instance. Used when the browser can't make cross-origin requests with basic auth (CORS preflight blocks authenticated OPTIONS requests). PHP handles the remote request server-side — no CORS, no preflight, auth works naturally.
+
+**Request:**
+```http
+POST /api/relay.php HTTP/1.1
+Content-Type: application/json
+
+{
+  "url": "https://newton.example.com/api/upload-tournament.php?overwrite=true",
+  "username": "NewTon",
+  "password": "tournament",
+  "payload": {
+    "filename": "MyTournament_2025-10-02.json",
+    "data": { ... tournament object ... }
+  }
+}
+```
+
+**Request Parameters:**
+
+| Parameter | Type | Required | Description |
+|-----------|------|----------|-------------|
+| `url` | string | Yes | Full URL of the remote upload endpoint |
+| `username` | string | No | Basic auth username for the remote server |
+| `password` | string | No | Basic auth password for the remote server |
+| `payload` | object | Yes | The tournament payload (filename + data) |
+
+**Success Response:** The remote server's response is passed through directly — same status code, same JSON body.
+
+**Error Responses:**
+
+*400 Bad Request* - Invalid request:
+```json
+{
+  "error": "Missing url or payload"
+}
+```
+
+*400 Bad Request* - Invalid URL:
+```json
+{
+  "error": "Invalid remote URL"
+}
+```
+
+*502 Bad Gateway* - Remote server unreachable:
+```json
+{
+  "error": "Could not reach remote server",
+  "detail": "Connection refused"
+}
+```
+
+**Security:**
+- URL validated with `filter_var()` — only http/https allowed
+- Credentials never logged or stored by the relay
+- 15-second timeout on the remote request
+- Follows redirects (`CURLOPT_FOLLOWLOCATION`)
+- The relay requires `NEWTON_API_ENABLED=true` on the local instance
+
+**Use Case:** A local Docker instance in a basement with spotty internet backs up tournaments to a remote server with a proper SSL certificate and basic auth. The browser talks to the local server (same origin, no CORS), and PHP relays to the remote server with credentials.
+
+---
+
 ## CORS Configuration
 
 All endpoints include CORS headers for cross-origin requests:
@@ -357,16 +426,40 @@ async function loadSharedTournaments() {
 ### Conditional UI
 
 Features only appear when server is detected:
-- "Upload to Server" button (shown when API responds)
-- "Shared Tournaments" section (shown when tournaments exist)
-- Delete buttons on shared tournaments
+- "Backup to Server" button (shown when API responds)
+- "Shared Tournaments" section (collapsed by default, shown when tournaments exist on the server)
+- Delete buttons on shared tournaments (when `config.server.allowSharedTournamentDelete` is enabled)
+
+### Automatic Backup
+
+When enabled in Global Settings → Server Settings → "Automatically backup tournaments on completion", the tournament JSON is automatically uploaded to the local server at tournament finalization. If a remote server is configured (Global Settings → Remote Backup), the tournament is also relayed to the remote server.
+
+Both uploads are fire-and-forget — they log success or failure to the console but never block the finalization flow.
+
+### Backup to Server Modal
+
+The "Backup to Server" button opens a modal with:
+- **Source choice**: Active tournament or from file
+- **Destination info**: read-only display of configured destinations (this server + remote if configured)
+
+Uploads to all configured destinations. Shows a summary with success/failure per destination.
+
+### Global Settings — Server Configuration
+
+| Setting | Config key | Default | Description |
+|---------|-----------|---------|-------------|
+| Allow deleting shared tournaments | `config.server.allowSharedTournamentDelete` | `false` | Shows delete buttons on shared tournaments |
+| Automatically backup on completion | `config.server.autoUpload` | `false` | Uploads tournament to server(s) at finalization |
+| Remote server URL | `config.server.remoteUrl` | `''` | Remote NewTon instance URL |
+| Remote username | `config.server.remoteUsername` | `''` | Basic auth username for remote |
+| Remote password | `config.server.remotePassword` | `''` | Basic auth password for remote |
 
 ### Error Handling
 
 All API errors are displayed to users with clear messages:
-- Network errors: "Error uploading tournament to server"
+- Network errors: "Server not available"
 - Validation errors: Display specific error from response
-- Success: "✓ Tournament uploaded to server successfully!"
+- Success: "✓ Tournament uploaded to [destination]"
 
 ---
 
