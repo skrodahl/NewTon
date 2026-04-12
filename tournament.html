@@ -62,8 +62,8 @@
                 <button class="nav-btn active" data-page="setup">Tournament Setup</button>
                 <button class="nav-btn" data-page="registration">Player Registration</button>
                 <button class="nav-btn" data-page="tournament">Tournament Bracket</button>
-                <button class="nav-btn" data-page="config">Global Settings</button>
                 <button class="nav-btn" data-page="history">Analytics</button>
+                <button class="nav-btn" data-page="config">Global Settings</button>
                 <a class="nav-btn" href="chalker/index.html" target="_blank">Chalker</a>
                 <div id="headerTournamentStatus" class="header-tournament-status">
                     Active Tournament: <strong>None</strong>
@@ -416,6 +416,11 @@
                             </div>
 
                             <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">Server Settings</h4>
+                            <div class="form-group">
+                                <label for="serverIdDisplay">Server ID</label>
+                                <input type="text" id="serverIdDisplay" readonly style="background:#f3f4f6;color:#6b7280;cursor:default;">
+                                <small class="field-help">Auto-generated identifier for this TM instance. Used in QR payloads.</small>
+                            </div>
                             <div class="checkbox-group">
                                 <div class="form-group">
                                     <label class="checkbox-label">
@@ -427,7 +432,30 @@
                                         </span>
                                     </label>
                                 </div>
+                                <div class="form-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" id="autoUploadTournament">
+                                        <span>
+                                            Auto-upload tournaments on completion
+                                            <small class="field-help">Automatically saves the tournament to the local server when a tournament is completed</small>
+                                        </span>
+                                    </label>
+                                </div>
+                            </div>
 
+                            <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">Remote Backup</h4>
+                            <div class="form-group">
+                                <label for="remoteServerUrl">Remote server URL</label>
+                                <input type="text" id="remoteServerUrl" placeholder="https://newton.example.com">
+                                <small class="field-help">Tournament data will be uploaded to this server in addition to the local server</small>
+                            </div>
+                            <div class="form-group">
+                                <label for="remoteServerUsername">Username</label>
+                                <input type="text" id="remoteServerUsername" placeholder="(optional)">
+                            </div>
+                            <div class="form-group">
+                                <label for="remoteServerPassword">Password</label>
+                                <input type="password" id="remoteServerPassword" placeholder="(optional)">
                             </div>
 
                             <button class="btn btn-success" onclick="saveUIConfiguration()">Save UI Settings</button>

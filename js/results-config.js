@@ -45,7 +45,11 @@ const DEFAULT_CONFIG = {
         refereeSuggestionsLimit: 10
     },
     server: {
-        allowSharedTournamentDelete: false
+        allowSharedTournamentDelete: false,
+        autoUpload: false,
+        remoteUrl: '',
+        remoteUsername: '',
+        remotePassword: ''
     }
 };
 
@@ -167,6 +171,11 @@ function applyConfigToUI() {
     // Server configuration
     if (config.server) {
         safeSetChecked('allowSharedTournamentDelete', config.server.allowSharedTournamentDelete);
+        safeSetChecked('autoUploadTournament', config.server.autoUpload);
+        safeSetValue('remoteServerUrl', config.server.remoteUrl);
+        safeSetValue('remoteServerUsername', config.server.remoteUsername);
+        safeSetValue('remoteServerPassword', config.server.remotePassword);
+        safeSetValue('serverIdDisplay', config.server.serverId || '—');
     }
 
     console.log('✓ Config applied to UI');
@@ -327,6 +336,16 @@ function saveUIConfiguration() {
 
     config.server = config.server || {};
     config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;
+
+    const autoUploadElement = document.getElementById('autoUploadTournament');
+    const remoteUrlElement = document.getElementById('remoteServerUrl');
+    const remoteUsernameElement = document.getElementById('remoteServerUsername');
+    const remotePasswordElement = document.getElementById('remoteServerPassword');
+
+    config.server.autoUpload = autoUploadElement ? autoUploadElement.checked : false;
+    config.server.remoteUrl = remoteUrlElement ? remoteUrlElement.value.trim() : '';
+    config.server.remoteUsername = remoteUsernameElement ? remoteUsernameElement.value.trim() : '';
+    config.server.remotePassword = remotePasswordElement ? remotePasswordElement.value : '';
 
     saveGlobalConfig();
 

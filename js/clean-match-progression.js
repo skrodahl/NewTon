@@ -753,8 +753,9 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 }
                 if (typeof updateMatchHistory === 'function') updateMatchHistory();
 
-                // Auto-upload tournament to local server (fire-and-forget)
-                if (typeof autoUploadTournament === 'function') {
+                // Auto-upload tournament to server (fire-and-forget, respects config)
+                if (typeof autoUploadTournament === 'function' &&
+                    typeof config !== 'undefined' && config.server && config.server.autoUpload) {
                     autoUploadTournament();
                 }
 

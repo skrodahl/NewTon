@@ -2,7 +2,7 @@
 // NEVER touches global config - only tournament-specific data
 
 let showingAllTournaments = false;
-let sharedTournamentViewState = 'collapsed'; // 'collapsed' | 'filtered' | 'all'
+let sharedTournamentViewState = 'collapsed'; // 'collapsed' | 'all'
 let showingAllLocalTournaments = false;
 
 /**
@@ -570,9 +570,7 @@ async function loadRecentTournaments() {
 
         // Determine what to show based on view state
         let sharedToShow = [];
-        if (sharedTournamentViewState === 'filtered') {
-            sharedToShow = newShared;
-        } else if (sharedTournamentViewState === 'all') {
+        if (sharedTournamentViewState === 'all') {
             sharedToShow = sortedShared;
         }
         // 'collapsed' shows nothing
@@ -601,14 +599,7 @@ async function loadRecentTournaments() {
         }).join('');
 
         // Toggle button text based on state
-        let toggleLabel = '';
-        if (sharedTournamentViewState === 'collapsed') {
-            toggleLabel = newShared.length > 0 ? `Show New (${newShared.length})` : 'Show All';
-        } else if (sharedTournamentViewState === 'filtered') {
-            toggleLabel = sortedShared.length > newShared.length ? 'Show All' : 'Collapse';
-        } else {
-            toggleLabel = 'Collapse';
-        }
+        const toggleLabel = sharedTournamentViewState === 'collapsed' ? 'Show All' : 'Collapse';
 
         const toggleButton = `<button class="btn" style="padding: 5px 10px; font-size: 14px; margin-left: 10px;" onclick="toggleSharedTournamentView()">${toggleLabel}</button>`;
 
@@ -724,13 +715,7 @@ function toggleTournamentView() {
 }
 
 function toggleSharedTournamentView() {
-    if (sharedTournamentViewState === 'collapsed') {
-        sharedTournamentViewState = 'filtered';
-    } else if (sharedTournamentViewState === 'filtered') {
-        sharedTournamentViewState = 'all';
-    } else {
-        sharedTournamentViewState = 'collapsed';
-    }
+    sharedTournamentViewState = sharedTournamentViewState === 'collapsed' ? 'all' : 'collapsed';
     loadRecentTournaments();
 }
 
