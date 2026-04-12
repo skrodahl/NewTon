@@ -74,6 +74,9 @@
 
     <hr>
 
+    <h2 id="requirements">Requirements</h2>
+    <p>All backup features require the REST API to be enabled &mdash; this means running NewTon via Docker with <code>NEWTON_API_ENABLED=true</code> (the default). The &ldquo;Backup to Server&rdquo; button only appears when the API is detected. Plain HTML deployments are unaffected &mdash; export to file remains the backup path.</p>
+
     <h2 id="migration">Migration</h2>
     <p>No migration required. All new settings default to off &mdash; current behaviour is preserved. The auto-backup checkbox must be explicitly enabled. Remote backup fields are empty by default.</p>
 

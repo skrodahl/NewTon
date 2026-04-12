@@ -72,6 +72,10 @@ The Shared Tournaments section in Tournament Setup is now collapsed by default. 
 
 ---
 
+## Requirements
+
+All backup features require the REST API to be enabled — this means running NewTon via Docker with `NEWTON_API_ENABLED=true` (the default). The "Backup to Server" button only appears when the API is detected. Plain HTML deployments (opening `tournament.html` directly in a browser) are unaffected — export to file remains the backup path.
+
 ## Migration
 
 No migration required. All new settings default to off — current behaviour is preserved. The auto-backup checkbox must be explicitly enabled in Global Settings. Remote backup fields are empty by default.
