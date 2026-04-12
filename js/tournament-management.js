@@ -281,51 +281,93 @@ function buildTournamentPayload() {
 }
 
 /**
- * Upload a tournament payload to the local server's REST API.
+ * Upload a tournament payload to a server.
  * @param {object} payload - { filename, data } from buildTournamentPayload()
- * @param {boolean} [silent=false] - true for fire-and-forget (auto-upload), false for user feedback (manual)
+ * @param {object} [options]
+ * @param {boolean} [options.silent=false] - true for fire-and-forget, false for user feedback
+ * @param {string} [options.remoteUrl] - remote server URL (uses relay.php); omit for local upload
+ * @param {string} [options.username] - basic auth username for remote
+ * @param {string} [options.password] - basic auth password for remote
  * @returns {Promise<boolean>} true if upload succeeded
  */
-async function uploadToServer(payload, silent = false) {
+async function uploadToServer(payload, options = {}) {
+    const silent = options.silent || false;
+    const remoteUrl = options.remoteUrl || '';
+
     if (!payload) {
         if (!silent) alert('No active tournament to upload.');
         return false;
     }
 
+    let fetchUrl, fetchBody;
+
+    if (remoteUrl) {
+        // Remote upload via relay — PHP handles auth and forwarding
+        fetchUrl = '/api/relay.php';
+        fetchBody = JSON.stringify({
+            url: remoteUrl.replace(/\/+$/, '') + '/api/upload-tournament.php?overwrite=true',
+            username: options.username || '',
+            password: options.password || '',
+            payload: payload
+        });
+    } else {
+        // Local upload — direct to same-origin API
+        fetchUrl = '/api/upload-tournament.php?overwrite=true';
+        fetchBody = JSON.stringify(payload);
+    }
+
+    const label = remoteUrl ? remoteUrl : 'local server';
+
     try {
-        const response = await fetch('/api/upload-tournament.php?overwrite=true', {
+        const response = await fetch(fetchUrl, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(payload)
+            body: fetchBody
         });
 
         if (response.ok) {
-            console.log(`✓ Tournament uploaded to server: ${payload.filename}`);
+            console.log(`✓ Tournament uploaded to ${label}: ${payload.filename}`);
             if (!silent) {
-                alert(`✓ Tournament uploaded to server.\n\n${payload.filename}`);
+                alert(`✓ Tournament uploaded to ${label}.\n\n${payload.filename}`);
                 if (typeof loadRecentTournaments === 'function') loadRecentTournaments();
             }
             return true;
         } else {
             const result = await response.json().catch(() => ({}));
             const msg = result.error || 'Unknown error';
-            console.warn(`Upload failed (${response.status}):`, msg);
-            if (!silent) alert(`Upload failed: ${msg}`);
+            console.warn(`Upload to ${label} failed (${response.status}):`, msg);
+            if (!silent) alert(`Upload to ${label} failed: ${msg}`);
             return false;
         }
     } catch (e) {
-        console.log('Upload skipped — server not available');
-        if (!silent) alert('Server not available.');
+        console.log(`Upload to ${label} skipped — not available`);
+        if (!silent) alert(`${label} not available.`);
         return false;
     }
 }
 
 /**
  * Auto-upload the current tournament. Fire-and-forget.
+ * Uploads to local server, and to remote if configured.
  * Called at tournament finalization when config.server.autoUpload is enabled.
  */
 async function autoUploadTournament() {
-    await uploadToServer(buildTournamentPayload(), true);
+    const payload = buildTournamentPayload();
+    if (!payload) return;
+
+    // Upload to local server
+    uploadToServer(payload, { silent: true });
+
+    // Upload to remote server if configured
+    const remote = config && config.server && config.server.remoteUrl;
+    if (remote) {
+        uploadToServer(payload, {
+            silent: true,
+            remoteUrl: remote,
+            username: config.server.remoteUsername || '',
+            password: config.server.remotePassword || ''
+        });
+    }
 }
 
 /**
@@ -333,7 +375,7 @@ async function autoUploadTournament() {
  * Called from the "Upload to Server" button in Tournament Setup.
  */
 async function uploadCurrentTournament() {
-    await uploadToServer(buildTournamentPayload(), false);
+    await uploadToServer(buildTournamentPayload());
 }
 
 // Upload tournament file to server (bonus feature - file picker based)
