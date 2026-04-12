@@ -235,6 +235,79 @@ function exportTournament() {
     console.log(`✓ Tournament exported (v4.0 format, ${history.length} transactions)`);
 }
 
+/**
+ * Build the tournament export payload from the current in-memory state.
+ * Shared by exportTournament() and autoUploadTournament().
+ * @returns {{ filename: string, data: object }|null}
+ */
+function buildTournamentPayload() {
+    if (!tournament || !tournament.id) return null;
+
+    const historyKey = `tournament_${tournament.id}_history`;
+    let history = [];
+    try {
+        const historyData = localStorage.getItem(historyKey);
+        if (historyData) history = JSON.parse(historyData);
+    } catch (e) { /* ignore */ }
+
+    if (tournament.status === 'completed' && history.length > 0) {
+        const completedMatches = matches.filter(m => m.completed);
+        history = pruneTransactionHistory(history, completedMatches);
+    }
+
+    const playerList = getPlayerList();
+
+    return {
+        filename: `${tournament.name}_${tournament.date}.json`,
+        data: {
+            exportVersion: "4.0",
+            id: tournament.id,
+            name: tournament.name,
+            date: tournament.date,
+            created: tournament.created,
+            status: tournament.status,
+            bracketSize: tournament.bracketSize,
+            format: tournament.format,
+            readOnly: tournament.readOnly || false,
+            players: players,
+            matches: matches,
+            bracket: tournament.bracket,
+            placements: tournament.placements || {},
+            history: history,
+            playerList: playerList,
+            exportedAt: new Date().toISOString()
+        }
+    };
+}
+
+/**
+ * Auto-upload the current tournament to the local server's REST API.
+ * Fire-and-forget — logs success/failure, never blocks or alerts.
+ * Called at tournament finalization when the API is available.
+ */
+async function autoUploadTournament() {
+    const payload = buildTournamentPayload();
+    if (!payload) return;
+
+    try {
+        const response = await fetch('/api/upload-tournament.php?overwrite=true', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+
+        if (response.ok) {
+            console.log(`✓ Tournament auto-uploaded to server: ${payload.filename}`);
+        } else {
+            const result = await response.json().catch(() => ({}));
+            console.warn(`Auto-upload failed (${response.status}):`, result.error || 'Unknown error');
+        }
+    } catch (e) {
+        // Server not available — silent fail (expected for HTML-only deployments)
+        console.log('Auto-upload skipped — server not available');
+    }
+}
+
 // Upload tournament file to server (bonus feature - file picker based)
 async function uploadTournamentFile(event, overwrite = false) {
     const file = event.target.files[0];

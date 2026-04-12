@@ -1,4 +1,8 @@
-## **v5.0.6** — (unreleased)
+## **v5.0.6-b.1** — (unreleased)
+
+### Auto-upload to server
+
+- **Auto-save to disk on tournament completion** — when the API is available, the tournament JSON is automatically uploaded to the same server's `/api/upload-tournament.php` at finalization. The tournament is saved to the `/tournaments/` directory on disk, surviving localStorage wipes and browser cache clears.
 
 ### Analytics — polish
 
