@@ -389,7 +389,7 @@ function showUploadModal() {
     const activeRadio = document.querySelector('input[name="uploadSource"][value="active"]');
     if (activeRadio) activeRadio.checked = true;
 
-    pushDialog('uploadToServerModal');
+    pushDialog('uploadToServerModal', null, true);
 }
 
 /**

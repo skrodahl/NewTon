@@ -1,8 +1,21 @@
-## **v5.0.6-b.1** — (unreleased)
+## **v5.0.6** — (unreleased)
 
-### Auto-upload to server
+### Server backup
 
-- **Auto-save to disk on tournament completion** — when the API is available, the tournament JSON is automatically uploaded to the same server's `/api/upload-tournament.php` at finalization. The tournament is saved to the `/tournaments/` directory on disk, surviving localStorage wipes and browser cache clears.
+- **Automatic backup on tournament completion** — opt-in via Global Settings. When enabled, the tournament JSON is automatically saved to the local server's `/tournaments/` directory at finalization. Backed up tournaments are available from any computer connecting to the server.
+- **Remote backup** — configurable remote server URL with optional basic auth credentials in Global Settings. When configured, auto-backup sends to both the local server and the remote server. Remote upload uses `api/relay.php` — PHP forwards the request server-side, bypassing CORS/preflight issues with authenticated endpoints.
+- **"Backup to Server" button** — replaces the old "Upload to Server" file picker. Opens a modal with source choice (Active tournament / From file) and destination info. Uploads to all configured destinations (local + remote).
+- **`api/relay.php`** — new endpoint. Accepts a remote URL, optional credentials, and a tournament payload. Forwards via PHP curl with basic auth. Validates URL, passes through the remote server's response.
+- **Global Settings — Server section** — Server ID (read-only display), auto-backup checkbox, remote server URL, username, and password fields. All persisted in `config.server`.
+
+### Shared Tournaments
+
+- **Collapsed by default** — Shared Tournaments section starts collapsed with a count header ("Shared Tournaments (13)"). Click "Show All" to expand, "Collapse" to close. My Tournaments stays front and centre.
+- **Import / Re-import labels** — tournaments not in localStorage show "Import", tournaments already present show "Re-import".
+
+### Navigation
+
+- **Tab reorder** — Analytics now comes before Global Settings in the navigation bar. Flow: Tournament Setup → Player Registration → Tournament Bracket → Analytics → Global Settings → Chalker.
 
 ### Analytics — polish
 
