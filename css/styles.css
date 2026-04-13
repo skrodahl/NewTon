@@ -3485,6 +3485,19 @@ a:hover { color: #1e40af; }
     border-color: #1a5c2e;
     box-shadow: 0 0 0 2px rgba(26, 92, 46, 0.15);
 }
+.analytics-reset-btn {
+    padding: 7px 14px;
+    font-size: 13px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    color: #6b7280;
+    background: #fff;
+}
+.analytics-reset-btn:hover {
+    color: #374151;
+    border-color: #9ca3af;
+    background: #f9fafb;
+}
 .analytics-scope-checkbox {
     width: 16px;
     height: 16px;

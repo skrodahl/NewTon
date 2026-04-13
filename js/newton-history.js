@@ -668,6 +668,33 @@ const NewtonHistory = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // Reset all filters
+    // ---------------------------------------------------------------------------
+
+    /** Reset all filters to defaults: clear text, reset dates, check all tournaments. */
+    async function resetFilters() {
+        _textFilter = '';
+        _dateFrom = '';
+        _dateTo = '';
+        _persistTextFilter();
+        _persistDateFilter();
+
+        const all = await _loadAllTournaments();
+        _checkedIds = new Set(all.map(t => t.tournamentId));
+        setScope(null);
+
+        // Reset UI inputs
+        const textInput = document.getElementById('analyticsTextFilter');
+        if (textInput) textInput.value = '';
+
+        // Re-render table (will prefill dates from register range)
+        if (_tournamentTable) {
+            _tournamentTable = null; // force re-create to reset header checkbox
+        }
+        await renderTournamentList();
+    }
+
+    // ---------------------------------------------------------------------------
     // Combined filter pipeline
     // ---------------------------------------------------------------------------
 
@@ -1019,6 +1046,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters };
 
 })();
