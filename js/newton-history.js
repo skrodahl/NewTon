@@ -33,6 +33,133 @@ const NewtonHistory = (() => {
     let _controlsInitialised = false;
 
     // ---------------------------------------------------------------------------
+    // Scope — which tournaments are included in all analytics views
+    // ---------------------------------------------------------------------------
+
+    /** Selected tournament IDs, or null = all tournaments */
+    let _scope = null;
+
+    /** Cached full tournament list from DB (loaded once per render cycle) */
+    let _allTournaments = null;
+
+    /** Dirty flags — views that need recompute after scope change */
+    let _dirty = { dashboard: true, leaderboard: true, players: true, register: true };
+
+    /**
+     * Load all tournaments from DB (cached). Call _invalidateCache() to force reload.
+     * @returns {Promise<object[]>}
+     */
+    async function _loadAllTournaments() {
+        if (_allTournaments) return _allTournaments;
+        _allTournaments = await NewtonDB.getFinalTournaments();
+        return _allTournaments;
+    }
+
+    /** Invalidate the cached tournament list (e.g. after import or delete). */
+    function _invalidateCache() {
+        _allTournaments = null;
+    }
+
+    /**
+     * Get tournaments filtered by the current scope.
+     * @returns {Promise<object[]>}
+     */
+    async function getScopedTournaments() {
+        const all = await _loadAllTournaments();
+        if (!_scope) return all;
+        const scopeSet = new Set(_scope);
+        return all.filter(t => scopeSet.has(t.tournamentId));
+    }
+
+    /**
+     * Set the scope and mark all views dirty.
+     * @param {string[]|null} tournamentIds - array of IDs, or null for all
+     */
+    function setScope(tournamentIds) {
+        _scope = tournamentIds;
+        _dirty = { dashboard: true, leaderboard: true, players: true, register: true };
+        _persistScope();
+        renderScopeIndicator();
+    }
+
+    /** Save scope to localStorage. */
+    function _persistScope() {
+        try {
+            if (_scope) {
+                localStorage.setItem('newton_analytics_scope', JSON.stringify(_scope));
+            } else {
+                localStorage.removeItem('newton_analytics_scope');
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    /**
+     * Restore scope from localStorage, filtering out stale IDs.
+     * Must be called after tournaments are loaded.
+     */
+    async function _restoreScope() {
+        try {
+            const raw = localStorage.getItem('newton_analytics_scope');
+            if (!raw) return;
+            const ids = JSON.parse(raw);
+            if (!Array.isArray(ids)) return;
+
+            const all = await _loadAllTournaments();
+            const validIds = new Set(all.map(t => t.tournamentId));
+            const filtered = ids.filter(id => validIds.has(id));
+
+            if (filtered.length === all.length) {
+                // All selected — reset to all
+                _scope = null;
+                localStorage.removeItem('newton_analytics_scope');
+            } else {
+                _scope = filtered;
+                _checkedIds = new Set(filtered);
+            }
+        } catch (e) {
+            localStorage.removeItem('newton_analytics_scope');
+        }
+    }
+
+    /**
+     * Render the scope indicator in the Analytics header.
+     * Shows "Viewing: N of M tournaments" with selection tags. Clickable → Register.
+     */
+    async function renderScopeIndicator() {
+        const el = document.getElementById('analyticsScopeIndicator');
+        if (!el) return;
+
+        const all = await _loadAllTournaments();
+        const total = all.length;
+
+        if (!total) {
+            el.innerHTML = '';
+            return;
+        }
+
+        const scoped = _scope ? _scope.length : total;
+        const isAll = !_scope || scoped === total;
+
+        let tags = '';
+        if (isAll) {
+            tags = '<span class="analytics-scope-tag">All</span>';
+        } else if (scoped === 1) {
+            const t = all.find(t => t.tournamentId === _scope[0]);
+            const name = t ? escHtml(t.tournamentName || t.tournamentId) : escHtml(_scope[0]);
+            const date = t && t.closedAt ? ' ' + fmtDate(t.closedAt) : '';
+            tags = '<span class="analytics-scope-tag">' + name + date + '</span>';
+        } else {
+            tags = '<span class="analytics-scope-tag">' + scoped + ' selected</span>';
+        }
+
+        el.innerHTML =
+            '<span>Viewing: <span class="analytics-scope-count">' + scoped + ' of ' + total + '</span> tournaments</span> ' +
+            tags;
+
+        el.onclick = () => switchView('register');
+    }
+
+    // ---------------------------------------------------------------------------
     // Analytics controls — view tabs + point mode toggle
     // ---------------------------------------------------------------------------
 
@@ -70,15 +197,19 @@ const NewtonHistory = (() => {
         const panel = document.getElementById(viewId);
         if (panel) panel.classList.add('active');
 
-        // When switching to register, render the tournament list
+        // When switching to register, always render (checkboxes may have changed)
         if (view === 'register') {
             showPanel('tournamentList');
             renderTournamentList();
+            _dirty.register = false;
         }
 
-        // When switching to dashboard, compute stats
+        // When switching to dashboard, recompute if dirty
         if (view === 'dashboard') {
-            renderDashboard();
+            if (_dirty.dashboard) {
+                renderDashboard();
+                _dirty.dashboard = false;
+            }
         }
     }
 
@@ -111,7 +242,7 @@ const NewtonHistory = (() => {
         container.innerHTML = '<div class="analytics-placeholder"><p>Loading…</p></div>';
 
         try {
-            const tournaments = await NewtonDB.getFinalTournaments();
+            const tournaments = await getScopedTournaments();
             if (!tournaments.length) {
                 container.innerHTML = '<div class="analytics-placeholder">' +
                     '<h3>No data yet</h3>' +
@@ -221,6 +352,10 @@ const NewtonHistory = (() => {
      */
     async function render() {
         initControls();
+        _restoreTextFilter();
+        _restoreDateFilter();
+        await _restoreScope();
+        await renderScopeIndicator();
         switchView(_activeView);
     }
 
@@ -243,7 +378,28 @@ const NewtonHistory = (() => {
     /** @type {object|null} NewtonTable instance for the tournament list */
     let _tournamentTable = null;
 
+    /** Set of currently checked tournament IDs in the Register */
+    let _checkedIds = new Set();
+
+    /** Current text filter value */
+    let _textFilter = '';
+
+    /** Current date range filter (YYYY-MM-DD strings or empty) */
+    let _dateFrom = '';
+    let _dateTo = '';
+
     async function renderTournamentList() {
+        const all = await _loadAllTournaments();
+
+        // Initialise checked set from current scope (or all)
+        if (!_checkedIds.size) {
+            if (_scope) {
+                _checkedIds = new Set(_scope);
+            } else {
+                _checkedIds = new Set(all.map(t => t.tournamentId));
+            }
+        }
+
         // Create the table instance once, reuse on subsequent calls
         if (!_tournamentTable) {
             _tournamentTable = NewtonTable.create({
@@ -254,12 +410,20 @@ const NewtonHistory = (() => {
                 emptyMessage: 'No completed tournaments yet. Close a tournament to register it here.',
                 columns: [
                     {
-                        key: 'tournamentName', label: 'Tournament',
-                        render: (v, row) => escHtml(v || row.tournamentId)
+                        key: '_select', sortable: false, width: '40px', align: 'center',
+                        headerRender: () => {
+                            const visible = _allTournaments ? _applyAllFilters(_allTournaments) : [];
+                            const allChecked = visible.length > 0 && visible.every(t => _checkedIds.has(t.tournamentId));
+                            return `<input type="checkbox" class="analytics-scope-checkbox"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllTournaments(this.checked)">`;
+                        },
+                        render: (v, row) => {
+                            const checked = _checkedIds.has(row.tournamentId) ? ' checked' : '';
+                            return `<input type="checkbox" class="analytics-scope-checkbox" data-tid="${escHtml(row.tournamentId)}"${checked} onclick="event.stopPropagation();NewtonHistory.toggleTournament('${escHtml(row.tournamentId)}', this.checked)">`;
+                        }
                     },
                     {
-                        key: 'tournamentFormat', label: 'Format', width: '80px',
-                        render: (v) => escHtml(v || '—')
+                        key: 'tournamentName', label: 'Tournament',
+                        render: (v, row) => escHtml(v || row.tournamentId)
                     },
                     {
                         key: 'closedAt', label: 'Date', width: '120px',
@@ -275,6 +439,10 @@ const NewtonHistory = (() => {
                         render: (v) => v != null ? v : '—'
                     },
                     {
+                        key: 'tournamentFormat', label: 'Format', width: '80px',
+                        render: (v) => escHtml(v || '—')
+                    },
+                    {
                         key: '_actions', label: '', sortable: false, align: 'right',
                         render: (v, row) => {
                             const safeId = escHtml(row.tournamentId);
@@ -288,17 +456,8 @@ const NewtonHistory = (() => {
             });
         }
 
-        let tournaments;
-        try {
-            tournaments = await NewtonDB.getFinalTournaments();
-        } catch (e) {
-            const container = document.getElementById('historyTournamentTableContainer');
-            if (container) container.innerHTML = `<p style="color:#dc2626;padding:16px;">Could not load history: ${escHtml(e.message)}</p>`;
-            return;
-        }
-
         // Self-heal: compute and persist matchCount for records that don't have it
-        for (const t of tournaments) {
+        for (const t of all) {
             if (t.matchCount == null) {
                 try {
                     const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
@@ -310,9 +469,215 @@ const NewtonHistory = (() => {
             }
         }
 
+        // Apply all filters — show only matching tournaments
+        let tournaments = _applyAllFilters(all);
+
         // Add _rowId for row click identification
         tournaments.forEach(t => { t._rowId = t.tournamentId; });
         _tournamentTable.setData(tournaments);
+
+        // Restore filter input values
+        const filterInput = document.getElementById('analyticsTextFilter');
+        if (filterInput && filterInput.value !== _textFilter) {
+            filterInput.value = _textFilter;
+        }
+        // Prefill date inputs — use persisted values, or earliest/latest from register
+        const fromInput = document.getElementById('analyticsDateFrom');
+        const toInput = document.getElementById('analyticsDateTo');
+        if (fromInput && toInput) {
+            if (_dateFrom || _dateTo) {
+                fromInput.value = _dateFrom;
+                toInput.value = _dateTo;
+            } else {
+                const dates = all.filter(t => t.closedAt).map(t => fmtDate(t.closedAt)).sort();
+                if (dates.length) {
+                    fromInput.value = dates[0];
+                    toInput.value = dates[dates.length - 1];
+                }
+            }
+        }
+    }
+
+    /**
+     * Toggle a single tournament in/out of the checked set, then apply scope.
+     * @param {string} tournamentId
+     * @param {boolean} checked
+     */
+    function toggleTournament(tournamentId, checked) {
+        if (checked) {
+            _checkedIds.add(tournamentId);
+        } else {
+            _checkedIds.delete(tournamentId);
+        }
+        _applySelectionAsScope();
+
+        // Update header checkbox to reflect current state of visible rows
+        const headerCb = document.querySelector('#historyTournamentTableContainer thead .analytics-scope-checkbox');
+        if (headerCb) {
+            const visible = _allTournaments ? _applyAllFilters(_allTournaments) : [];
+            headerCb.checked = visible.length > 0 && visible.every(t => _checkedIds.has(t.tournamentId));
+        }
+    }
+
+    /**
+     * Toggle all tournaments on or off and apply.
+     * @param {boolean} checked
+     */
+    function toggleAllTournaments(checked) {
+        const visible = _allTournaments ? _applyAllFilters(_allTournaments) : [];
+        if (checked) {
+            visible.forEach(t => _checkedIds.add(t.tournamentId));
+        } else {
+            visible.forEach(t => _checkedIds.delete(t.tournamentId));
+        }
+        _applySelectionAsScope();
+        if (_tournamentTable) _tournamentTable.refresh();
+    }
+
+    /** Convert the current checkbox + filter state into the active scope. */
+    function _applySelectionAsScope() {
+        const all = _allTournaments || [];
+        const visible = _applyAllFilters(all);
+        const effectiveIds = visible.filter(t => _checkedIds.has(t.tournamentId)).map(t => t.tournamentId);
+
+        if (effectiveIds.length === all.length) {
+            setScope(null); // all selected = no filter
+        } else {
+            setScope(effectiveIds); // includes empty array = nothing selected
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Text filter
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Filter tournaments by the current text filter. AND logic: all space-separated
+     * terms must match the tournament name (case-insensitive).
+     * @param {object[]} tournaments
+     * @returns {object[]}
+     */
+    function _filterByText(tournaments) {
+        if (!_textFilter) return tournaments;
+        const terms = _textFilter.toLowerCase().split(/\s+/).filter(Boolean);
+        if (!terms.length) return tournaments;
+        return tournaments.filter(t => {
+            const name = (t.tournamentName || '').toLowerCase();
+            return terms.every(term => name.includes(term));
+        });
+    }
+
+    /**
+     * Handle text filter input. Filters the visible table and persists.
+     * @param {string} value
+     */
+    function onTextFilter(value) {
+        _textFilter = value.trim();
+        _persistTextFilter();
+
+        if (!_allTournaments) return;
+
+        const filtered = _applyAllFilters(_allTournaments);
+        filtered.forEach(t => { t._rowId = t.tournamentId; });
+        if (_tournamentTable) _tournamentTable.setData(filtered);
+
+        // Recompute scope — filters narrow what's in scope
+        _applySelectionAsScope();
+    }
+
+    /** Save text filter to localStorage. */
+    function _persistTextFilter() {
+        try {
+            if (_textFilter) {
+                localStorage.setItem('newton_analytics_textFilter', _textFilter);
+            } else {
+                localStorage.removeItem('newton_analytics_textFilter');
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    /** Restore text filter from localStorage. */
+    function _restoreTextFilter() {
+        try {
+            _textFilter = localStorage.getItem('newton_analytics_textFilter') || '';
+        } catch (e) { _textFilter = ''; }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Date range filter
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Filter tournaments by the current date range. Inclusive on both ends.
+     * Compares against closedAt, using the YYYY-MM-DD date portion.
+     * @param {object[]} tournaments
+     * @returns {object[]}
+     */
+    function _filterByDate(tournaments) {
+        if (!_dateFrom && !_dateTo) return tournaments;
+        return tournaments.filter(t => {
+            if (!t.closedAt) return false;
+            const d = fmtDate(t.closedAt); // YYYY-MM-DD string
+            if (_dateFrom && d < _dateFrom) return false;
+            if (_dateTo && d > _dateTo) return false;
+            return true;
+        });
+    }
+
+    /** Handle date range input change. */
+    function onDateFilter() {
+        const fromEl = document.getElementById('analyticsDateFrom');
+        const toEl = document.getElementById('analyticsDateTo');
+        _dateFrom = fromEl ? fromEl.value : '';
+        _dateTo = toEl ? toEl.value : '';
+        _persistDateFilter();
+
+        if (!_allTournaments) return;
+
+        const filtered = _applyAllFilters(_allTournaments);
+        filtered.forEach(t => { t._rowId = t.tournamentId; });
+        if (_tournamentTable) _tournamentTable.setData(filtered);
+
+        _applySelectionAsScope();
+    }
+
+    /** Save date filter to localStorage. */
+    function _persistDateFilter() {
+        try {
+            const val = JSON.stringify({ from: _dateFrom, to: _dateTo });
+            if (_dateFrom || _dateTo) {
+                localStorage.setItem('newton_analytics_dateFilter', val);
+            } else {
+                localStorage.removeItem('newton_analytics_dateFilter');
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    /** Restore date filter from localStorage. */
+    function _restoreDateFilter() {
+        try {
+            const raw = localStorage.getItem('newton_analytics_dateFilter');
+            if (!raw) return;
+            const parsed = JSON.parse(raw);
+            _dateFrom = parsed.from || '';
+            _dateTo = parsed.to || '';
+        } catch (e) {
+            _dateFrom = '';
+            _dateTo = '';
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Combined filter pipeline
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Apply all filters (text + date) to a tournament list.
+     * @param {object[]} tournaments
+     * @returns {object[]}
+     */
+    function _applyAllFilters(tournaments) {
+        return _filterByDate(_filterByText(tournaments));
     }
 
     // ---------------------------------------------------------------------------
@@ -588,6 +953,9 @@ const NewtonHistory = (() => {
             return;
         }
 
+        _invalidateCache();
+        _checkedIds.delete(id);
+        _applySelectionAsScope();
         await renderTournamentList();
     }
 
@@ -626,6 +994,9 @@ const NewtonHistory = (() => {
             const dump = JSON.parse(text);
             await NewtonDB.importAll(dump);
             event.target.value = '';
+            _invalidateCache();
+            _checkedIds.clear();
+            setScope(null);
             await renderTournamentList();
             alert('Import complete.');
         } catch (e) {
@@ -647,6 +1018,7 @@ const NewtonHistory = (() => {
     // ---------------------------------------------------------------------------
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
-             promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament };
+             promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter };
 
 })();

@@ -751,6 +751,7 @@
                     <button class="btn" onclick="NewtonHistory.exportDB()">Export Register</button>
                     <button class="btn btn-warning" onclick="document.getElementById('historyImportFile').click()">Import Register</button>
                     <input type="file" id="historyImportFile" accept=".json" style="display:none;" onchange="NewtonHistory.importDB(event)">
+                    <div id="analyticsScopeIndicator" class="analytics-scope-indicator" style="margin-left:auto;"></div>
                 </div>
             </div>
 
@@ -799,6 +800,16 @@
 
             <!-- Tournament list panel -->
             <div id="historyTournamentList">
+                <div class="analytics-filter-bar">
+                    <span class="analytics-filter-label">Lens:</span>
+                    <input type="text" id="analyticsTextFilter" class="analytics-text-filter" placeholder="Filter by name…" oninput="NewtonHistory.onTextFilter(this.value)">
+                    <div class="analytics-date-range">
+                        <label for="analyticsDateFrom">From</label>
+                        <input type="date" id="analyticsDateFrom" class="analytics-date-input" onchange="NewtonHistory.onDateFilter()">
+                        <label for="analyticsDateTo">To</label>
+                        <input type="date" id="analyticsDateTo" class="analytics-date-input" onchange="NewtonHistory.onDateFilter()">
+                    </div>
+                </div>
                 <div id="historyTournamentTableContainer"></div>
             </div>
 

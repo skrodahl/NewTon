@@ -3406,8 +3406,94 @@ a:hover { color: #1e40af; }
     font-size: 14px;
     color: #6b7280;
 }
+.analytics-scope-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    color: #166534;
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+    padding: 5px 14px;
+    border-radius: 999px;
+    cursor: pointer;
+    width: fit-content;
+}
+.analytics-scope-indicator:hover {
+    background: #dcfce7;
+}
+.analytics-scope-count {
+    font-weight: 700;
+}
+.analytics-scope-tag {
+    display: inline-block;
+    padding: 1px 8px;
+    background: rgba(22, 101, 52, 0.1);
+    border-radius: 999px;
+    font-size: 12px;
+}
+.analytics-scope-change {
+    font-size: 12px;
+    color: #15803d;
+    text-decoration: underline;
+}
+.analytics-scope-change:hover {
+    color: #166534;
+}
+.analytics-filter-bar {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    margin-bottom: 12px;
+}
+.analytics-filter-label {
+    font-size: 14px;
+    font-weight: 600;
+    color: #374151;
+}
+.analytics-text-filter {
+    flex: 1;
+    max-width: 360px;
+    padding: 8px 12px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+}
+.analytics-text-filter:focus {
+    border-color: #1a5c2e;
+    box-shadow: 0 0 0 2px rgba(26, 92, 46, 0.15);
+}
+.analytics-date-range {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.analytics-date-range label {
+    font-size: 13px;
+    color: #6b7280;
+}
+.analytics-date-input {
+    padding: 7px 10px;
+    font-size: 14px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    outline: none;
+}
+.analytics-date-input:focus {
+    border-color: #1a5c2e;
+    box-shadow: 0 0 0 2px rgba(26, 92, 46, 0.15);
+}
+.analytics-scope-checkbox {
+    width: 16px;
+    height: 16px;
+    cursor: pointer;
+    accent-color: #1a5c2e;
+}
 .history-actions {
     display: flex;
+    align-items: center;
     gap: 8px;
 }
 .history-table {

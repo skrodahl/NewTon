@@ -113,7 +113,8 @@ const NewtonTable = (() => {
             const cls = sortable ? ' class="newton-table-sortable"' : '';
             const click = sortable
                 ? ` onclick="NewtonTable._onSort('${inst.config.tableId}','${col.key}')"` : '';
-            html += `<th${cls} style="${style}"${click}>${_escHtml(col.label)}${arrow}</th>`;
+            const headerContent = col.headerRender ? col.headerRender() : _escHtml(col.label) + arrow;
+            html += `<th${cls} style="${style}"${click}>${headerContent}</th>`;
         }
         html += '</tr></thead>';
 

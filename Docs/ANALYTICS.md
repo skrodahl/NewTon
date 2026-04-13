@@ -372,45 +372,52 @@ Backfill implemented. "+ Analytics" label on each completed tournament in "My To
 
 Reusable sort + pagination utility (`newton-table.js`), applied to Register tournament list and match list. Column widths, persistent sort/pagination preferences, match detail redesign with horizontal stats table. See v5.0.5 release notes.
 
-### Next — Scope Selector
+### ~~Next — Scope Selector~~ DONE (v5.0.8)
 
-The tournament selection that drives all views. This is the first real control on the control surface.
+The tournament selection that drives all views. Implemented as three composable filters in the Register tab, each narrowing the dataset. The scope is the intersection of all active filters.
+
+**Filter pipeline:**
+```
+All tournaments in register
+    → Text filter (AND keyword match on tournament names)
+        → Date range (inclusive from/to)
+            → Per-tournament checkboxes
+                → Active scope for all views
+```
 
 **Scope state:**
-- An array of selected tournament IDs (default: all finalized)
+- An array of selected tournament IDs, or null = all
 - All views read from the scope — Dashboard stats, Leaderboard rankings, Player profiles, Register tables all filter by the active scope
+- Scope, text filter, and date range all persisted to localStorage
 
-**Scope indicator — in the Analytics header:**
+**Scope indicator — green pill in the Analytics header:**
 
-Lives below the subtitle, always visible regardless of which view tab is active. Read-only — shows what you're looking at, not where you change it.
+Lives on the same row as Export/Import buttons, right-aligned. Read-only — shows what you're looking at, not where you change it. Clicking the pill navigates to the Register tab.
 
-Format: `Viewing: N of M tournaments   Selection: [tag] [tag]   [Change]`
+Format: `Viewing: N of M tournaments  [tag]`
 
 Examples:
-- `Viewing: 12 of 12 tournaments   Selection: [All]   [Change]`
-- `Viewing: 1 of 12 tournaments   Selection: [Måndagscup]   [Change]`
-- `Viewing: 3 of 12 tournaments   Selection: [Monday] [2026]   [Change]`
-- `Viewing: 5 of 12 tournaments   Selection: [2026]   [Change]`
-- `Viewing: 5 of 12 tournaments   Selection: [2025-12-05 – 2026-02-14]   [Change]`
-- `Viewing: 3 of 12 tournaments   Selection: [Monday] [2025-12-05 – 2026-02-14]   [Change]`
+- `Viewing: 3 of 3 tournaments  [All]`
+- `Viewing: 1 of 3 tournaments  [Måndagscup 2026-03-09]`
+- `Viewing: 2 of 3 tournaments  [2 selected]`
 
-The tags are labels, not buttons — they show what's applied. [Change] navigates to the Register tab where the actual selection is made. One place to read the scope, one place to change it.
+**Text filter:** instant keyword match on tournament names. Space-separated terms use AND logic. Controls table visibility — only matching tournaments shown. Checkboxes operate within the visible set.
 
-"N of M" is the anchor — always tells you both the selection size and the total. "12 of 12" = nothing filtered. "1 of 12" = zoomed in.
+**Date range:** from/to date pickers, inclusive on both ends. Prefilled with earliest and latest tournament dates in the register. Tournaments without a closedAt excluded when any date filter active.
+
+**Checkboxes:** per-tournament selection within the visible (filtered) set. Header checkbox toggles all visible rows. Empty selection = empty scope (dashboard shows no data).
+
+**Filter interaction model:** text filter and date range control visibility (which rows appear in the table). Checkboxes select within the visible set. The scope = visible ∩ checked. Each filter only narrows — clearing a filter widens the visible set but doesn't change checkbox state.
 
 **Entry points** that set the scope:
 - "Analytics" label in Recent Tournaments → scope to that single tournament, switch to Analytics tab
-- Podium "Tournament Analytics" button → same, scope to the just-completed tournament
 - Register checkboxes → manual selection within the filtered list
-- Date range / text filter controls in Register (later)
 
-**Clear/reset:**
-- [Change] button on the scope indicator navigates to Register
-- Clear option in Register resets to all tournaments
-
-Without scope, clicking "Analytics" on a tournament opens a filtered register but the Dashboard still shows all-time data. With scope, every view is consistent — one selection, one dataset, every view agrees.
-
-The scope must be set before the full filter system (date range → text → checkboxes) is built. The filters narrow the scope; the scope is the result. Start with manual selection (entry points + clear), add filters later.
+**Persistence:**
+- Scope (checked tournament IDs) → `newton_analytics_scope`
+- Text filter → `newton_analytics_textFilter`
+- Date range → `newton_analytics_dateFilter`
+- Stale tournament IDs filtered out on restore
 
 ### Phase 1 — Stats Cards + Point Mode
 
@@ -491,9 +498,14 @@ Decisions deferred — to be revisited as implementation progresses.
 
 The active view recomputes on filter change. Other views are marked dirty and recompute when switched to. The user never sees stale data — the view refreshes the moment they activate it. No wasted work rendering hidden views, and the right foundation before graphs and canvas rendering are added later.
 
-### Dashboard drill-through targets
+### Dashboard drill-through targets — partially decided
 
-Each stats card on the dashboard is described as "clickable — drill into the underlying data." But where does each card link to? Options:
+Each stats card on the dashboard is described as "clickable — drill into the underlying data." But where does each card link to?
+
+**Decided — Matches card:**
+The "Matches — Completed" card links to a flat match list in the Register, showing all matches within the current scope. This is the first drill-through target. It requires the Register to support an "all matches" view — a single list across all tournaments in scope, not just matches within a selected tournament. The existing tournament → match hierarchy stays; the flat list is an additional mode, entered via the dashboard card (and reusable for other entry points later).
+
+**Still open — other cards:**
 - "Most 180s: Andy (5)" → Player view, filtered to Andy?
 - "Most 180s: Andy (5)" → Leaderboard, sorted by 180s?
 - Both? (Player name clicks to player, card title clicks to leaderboard?)
@@ -524,4 +536,4 @@ The architecture section defines when to use raw data vs the achievement registe
 
 ---
 
-**Last updated:** April 10, 2026 — implementation sequence: table utility → scope selector → views; Tournament Setup integration marked done (v5.0.4)
+**Last updated:** April 13, 2026 — Scope selector done (v5.0.8): text filter, date range, checkboxes, scope indicator, persistence. Next: Phase 1 stats cards + point mode.

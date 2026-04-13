@@ -309,6 +309,17 @@ const NewtonDB = (() => {
         return results.sort((a, b) => b.closedAt - a.closedAt);
     }
 
+    /**
+     * Get all tournament records regardless of status, sorted by closedAt descending.
+     * @returns {Promise<object[]>}
+     */
+    async function getAllTournaments() {
+        await initDB();
+
+        const results = await _promisify(_store('tournaments', 'readonly').getAll());
+        return results.sort((a, b) => (b.closedAt || 0) - (a.closedAt || 0));
+    }
+
     // ---------------------------------------------------------------------------
     // Export / Import
     // ---------------------------------------------------------------------------
@@ -497,6 +508,7 @@ const NewtonDB = (() => {
         finalizeTournament,
         getTournament,
         getFinalTournaments,
+        getAllTournaments,
         exportAll,
         importAll,
         deleteTournament,

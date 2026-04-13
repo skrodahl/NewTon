@@ -2038,12 +2038,12 @@ function closeStorageModal() {
 
 // Open Analytics tab scoped to a specific tournament
 function openAnalyticsForTournament(tournamentId) {
-    // TODO: Set Analytics register filter to this single tournament
-    // For now, just navigate to the Analytics tab
+    if (typeof NewtonHistory !== 'undefined' && NewtonHistory.setScope) {
+        NewtonHistory.setScope([tournamentId]);
+    }
     if (typeof showPage === 'function') {
         showPage('history');
     }
-    console.log(`[Analytics] Open scoped to tournament ${tournamentId}`);
 }
 
 // Add a localStorage tournament to the Analytics registry (IndexedDB)

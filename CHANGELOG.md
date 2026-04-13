@@ -1,8 +1,23 @@
-## **v5.0.8** — (2026-04-13)
+## **v5.0.8** — Choose Your Lens (2026-04-13)
+
+### Landing page
+
+- **Chalker card closer** — "No shouting results across the room." Replaces "No walking results across the room." — more honest.
+- **Setup card closer** — "Same steps, same setup, every week." Replaces "No configuration rabbit holes." — communicates consistency over snark.
 
 ### Analytics
 
 - **Subtitle rewritten** — "Analytics lets you explore your tournament history. It never alters the underlying results." Replaces the placeholder text. Sets expectation and builds trust.
+- **Register column reorder** — Format moved to last position. Tournament, Date, Players, Matches are the primary columns; Format is metadata.
+- **Scope selector** — tournament selection that drives all analytics views. Three composable filters narrow the dataset: text filter (AND keyword match on tournament names), date range (inclusive from/to pickers), and per-tournament checkboxes. Each filter only narrows — they never widen. The scope is the intersection of all active filters.
+- **Scope indicator** — green pill in the Analytics header shows "Viewing: N of M tournaments" with selection tags. Clickable to navigate to Register. Header checkbox in the tournament table toggles all visible rows.
+- **Text filter** — instant keyword filtering on tournament names. Space-separated terms use AND logic. Controls table visibility; checkboxes set scope within the visible set. Persisted across reloads.
+- **Date range filter** — from/to date pickers. Inclusive on both ends. Prefilled with the earliest and latest tournament dates in the register. Persisted across reloads.
+- **Scope persistence** — scope, text filter, and date range all saved to localStorage. Stale tournament IDs are filtered out on restore.
+- **Dashboard respects scope** — all stat cards (tournaments, matches, players, 180s, highest checkout, shortest leg) compute from the scoped tournament set.
+- **Dirty flag recompute** — changing scope marks inactive views dirty; they recompute on next switch (lazy).
+- **openAnalyticsForTournament() wired** — clicking "Analytics" on a tournament in My Tournaments sets the scope to that single tournament.
+- **Cache invalidation** — import and delete operations reset the tournament cache and scope.
 
 ---
 
