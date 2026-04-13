@@ -213,7 +213,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
                 <span class="showcase-label">Setup</span>
                 <h3>From Zero to Bracket in 60 Seconds.</h3>
                 <p>Name it, pick a date, choose single or double elimination &mdash; done. Bracket size adapts to your player count automatically.</p>
-                <p class="showcase-closer">No configuration rabbit holes.</p>
+                <p class="showcase-closer">Same steps, same setup, every week.</p>
             </div>
         </div>
 
