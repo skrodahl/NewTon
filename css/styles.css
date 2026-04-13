@@ -304,6 +304,7 @@ body {
 .btn {
   padding: 12px 20px;
   border: 1px solid #b0b0b0;
+  border-radius: 6px;
   background: #ffffff;
   color: #333333;
   cursor: pointer;
@@ -2885,6 +2886,7 @@ a:hover { color: #1e40af; }
   padding: 0;
   font-size: 18px;
   border: 1px solid #dc2626;
+  border-radius: 6px;
   background: white;
   color: #dc2626;
   cursor: pointer;
@@ -2985,6 +2987,7 @@ a:hover { color: #1e40af; }
   height: auto;
   font-weight: 400;
   border: 1px solid #d0d0d0;
+  border-radius: 6px;
   background: #ffffff;
   color: #666666;
   transition: all 0.15s ease;

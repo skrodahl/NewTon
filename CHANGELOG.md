@@ -1,3 +1,12 @@
+## **v5.0.9** — (2026-04-14)
+
+### UI
+
+- **Rounded corners on buttons** — `border-radius: 6px` on `.btn` globally. Buttons now visually distinct from input fields and panels, which remain flat. One line of CSS, applied everywhere.
+- **Reset filter button** — clears text filter, resets date range, checks all tournaments, and resets scope to all.
+
+---
+
 ## **v5.0.8** — Choose Your Lens (2026-04-13)
 
 ### Landing page
