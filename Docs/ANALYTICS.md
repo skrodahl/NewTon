@@ -510,6 +510,14 @@ Same principle as everything else — the data exists, the operator chooses the 
 
 Defer specifics until the scope selector is working and real data flows through the dashboard at different zoom levels.
 
+### Player count — not actually unique
+
+The Dashboard "Players — Unique" card currently sums player entries across all tournaments in scope. If Simon plays in all 12 tournaments, he counts as 12. With 12 tournaments the card shows 234 "unique" players — the real number is far lower.
+
+The count needs true deduplication across tournaments. Player identity is by name (no cross-tournament player ID exists), so this requires name-based matching. Exact match is a reasonable starting point; fuzzy matching (nicknames, typos) is a harder problem for later.
+
+Until resolved, the label "Unique" is misleading.
+
 ### Raw data principle in roadmap phases
 
 The architecture section defines when to use raw data vs the achievement register (absolute stats → register shortcut; threshold-dependent and derived stats → raw data). The roadmap phases should consistently reference this. Currently Phase 2 (Player View) mentions "match averages (where Chalker data available)" but doesn't state which source is used for other stats. Each phase should be explicit about which data source it draws from.
