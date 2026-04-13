@@ -95,7 +95,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
         <div class="story-cards">
             <div class="story-card">
                 <h3>Yours. Not theirs.</h3>
-                <p>No signup, no subscription, no cloud. Works offline, works on a Raspberry Pi, works without asking permission.</p>
+                <p>No signup, no subscription, no cloud. Works offline. Just download and run. Works without asking permission.</p>
             </div>
             <div class="story-card">
                 <h3>Scan. Score. Done.</h3>
