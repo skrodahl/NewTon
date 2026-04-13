@@ -1,3 +1,11 @@
+## **v5.0.8** — (2026-04-13)
+
+### Analytics
+
+- **Subtitle rewritten** — "Analytics lets you explore your tournament history. It never alters the underlying results." Replaces the placeholder text. Sets expectation and builds trust.
+
+---
+
 ## **v5.0.7** — The Offline Authority in Darts (2026-04-13)
 
 ### Landing page

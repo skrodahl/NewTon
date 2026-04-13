@@ -177,7 +177,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
                 <span class="showcase-label">Chalker App</span>
                 <h3>From Board to Bracket in One Scan.</h3>
                 <p>Scan the assignment QR and the Chalker is ready &mdash; players, format, lane, referee. When the match ends, scan the result QR back and the bracket advances instantly.</p>
-                <p class="showcase-closer">No walking results across the room.</p>
+                <p class="showcase-closer">No shouting results across the room.</p>
             </div>
         </div>
 
