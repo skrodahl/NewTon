@@ -248,13 +248,9 @@ body {
     overflow: hidden;
 }
 
-.ds-card-feature::before {
-    content: '';
-    position: absolute;
-    top: 0; left: 0; right: 0;
-    height: 4px;
-    background: linear-gradient(90deg, #c0562a, #e8a44a, #4a8c7e);
-    border-radius: 14px 14px 0 0;
+.ds-card-feature {
+    border-left: 4px solid #c0562a;
+    background: #fff8f0;
 }
 
 .ds-card h3 {
@@ -266,6 +262,50 @@ body {
 }
 
 .ds-card p {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.8rem;
+    color: #5c4a3a;
+    line-height: 1.5;
+    margin: 0;
+}
+
+/* ── Card Variants ── */
+.ds-card-dark {
+    background: #2b2118;
+    border: 2px solid #3d2e1f;
+    border-radius: 14px;
+    padding: 18px;
+}
+
+.ds-card-dark h3 {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: #f5ebe0;
+    margin: 0 0 6px;
+}
+
+.ds-card-dark p {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.8rem;
+    color: #d5c4b0;
+    line-height: 1.5;
+    margin: 0;
+}
+
+.ds-card-bare {
+    padding: 0;
+}
+
+.ds-card-bare h3 {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 1.25rem;
+    font-weight: 400;
+    color: #2b2118;
+    margin: 0 0 4px;
+}
+
+.ds-card-bare p {
     font-family: 'Manrope', sans-serif;
     font-size: 0.8rem;
     color: #5c4a3a;

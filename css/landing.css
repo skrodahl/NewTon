@@ -371,6 +371,41 @@ body {
     }
 }
 
+/* ── Story Cards ── */
+.story-cards {
+    max-width: 1100px;
+    margin: 0 auto;
+    padding: 24px 24px 32px;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 48px;
+    text-align: center;
+}
+
+.story-card h3 {
+    font-family: 'Insignia', Georgia, serif;
+    font-size: 1.35rem;
+    font-weight: 400;
+    color: #2b2118;
+    margin: 0 0 8px;
+    line-height: 1.3;
+}
+
+.story-card p {
+    font-family: 'Manrope', sans-serif;
+    font-size: 0.95rem;
+    color: #5c4a3a;
+    line-height: 1.6;
+    margin: 0;
+}
+
+@media (max-width: 768px) {
+    .story-cards {
+        grid-template-columns: 1fr;
+        gap: 32px;
+    }
+}
+
 /* ── Divider ── */
 .section-divider {
     max-width: 1400px;
@@ -538,6 +573,12 @@ body {
     color: #5c4a3a;
     font-size: 1.05rem;
     line-height: 1.7;
+}
+
+.showcase-closer {
+    font-style: italic;
+    color: #8a7968;
+    margin-top: 8px;
 }
 
 /* ── Footer ── */

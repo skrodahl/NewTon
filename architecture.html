@@ -95,13 +95,14 @@
     <hr>
 
     <h2 id="offline-first">Offline-First Persistence</h2>
-    <p>NewTon DC Tournament Manager has no server dependency for any of its core functionality. All data lives in the browser's <code>localStorage</code> — a sandboxed, domain-isolated storage area that persists across browser restarts and reboots without any network connection.</p>
+    <p>NewTon DC Tournament Manager has no server dependency for any of its core functionality. Tournament state lives in the browser's <code>localStorage</code>; match analytics and the historical register live in <code>IndexedDB</code>. Both are sandboxed, domain-isolated, and persist across browser restarts and reboots without any network connection.</p>
     <p>Every state change is saved immediately. There is no "save button" because there is no moment where unsaved state exists. If the browser crashes mid-tournament, the last saved state is fully intact and consistent.</p>
     <ul>
         <li><strong>No internet required</strong> after the initial download</li>
-        <li><strong>No account, no login, no sync service</strong></li>
+        <li><strong>No account, no login, no third-party service</strong></li>
         <li><strong>Export/import</strong> via JSON for backups, sharing, and moving between devices</li>
-        <li><strong><a href="rest-api.html">Optional REST API</a></strong> for self-hosters who want shared tournament access — disabled by default, never automatic</li>
+        <li><strong>Server backup</strong> (opt-in) — when running via Docker, tournaments can be automatically saved to disk on completion and relayed to a remote server. Data only leaves the device when the operator configures it.</li>
+        <li><strong><a href="rest-api.html">Optional REST API</a></strong> for self-hosters who want shared tournament access and remote backup</li>
     </ul>
     <p>See the <a href="privacy.html">Privacy Architecture</a> page for the full storage model.</p>
 
@@ -123,7 +124,7 @@
     <ul>
         <li><strong>Bracket templates are fixed</strong> — NewTon DC Tournament Manager supports any number of participants from 4 to 32. Unused slots are automatically filled with byes that advance without playing, so a 13-player tournament runs cleanly in a 16-slot bracket with 3 invisible byes. The constraint is the upper limit of 32 participants, and the three available template sizes (8, 16, 32 slots). Adding a larger template requires a new hardcoded lookup table.</li>
         <li><strong>localStorage limits</strong> — browsers typically allow 5–10 MB per domain. A 32-player tournament with full match history uses around 110 KB. Very large numbers of tournaments with extensive undo history could approach limits; the <a href="userguide.html#devconsole">Developer Console monitors this in real time</a>.</li>
-        <li><strong>Single-user design</strong> — NewTon DC Tournament Manager is designed for one operator per tournament. There is no multi-device sync or conflict resolution for simultaneous edits. The optional REST API enables sharing, but not live collaboration.</li>
+        <li><strong>Single-user design</strong> — NewTon DC Tournament Manager is designed for one operator per tournament. Server backup and shared tournaments allow access from multiple devices, but there is no live collaboration or conflict resolution for simultaneous edits.</li>
     </ul>
 
 </div>

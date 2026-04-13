@@ -1,4 +1,22 @@
-## **v5.0.6** — (unreleased)
+## **v5.0.7** — The Offline Authority in Darts (2026-04-13)
+
+### Landing page
+
+- **New hero messaging** — "The Offline Authority in Darts" tagline with three-beat subtitle: "Runs locally. Syncs across devices. Builds your venue's stats over time."
+- **Story cards** — three bare-text cards between the hero and launch buttons: "Yours. Not theirs." / "Scan. Score. Done." / "Every match remembered."
+- **In Action cards rewritten** — new titles, tighter body text, and italic closer lines for every card. Consistent voice: cheeky, confident, practical.
+- **Meta tags updated** — description, Schema.org, Open Graph, and Twitter Card all carry the new messaging.
+
+### Documentation
+
+- **llms.txt** — full refresh: new messaging, Analytics section, Server Backup section, updated privacy model, expanded architecture notes and AI tips.
+- **architecture.html** — updated Offline-First section (IndexedDB, opt-in server backup); updated single-user limitation (acknowledges shared tournaments).
+- **Design system** — feature card restyled (left border accent replaces gradient stripe); dark card and bare card variants added.
+- **REST API docs** — relay endpoint, backup modal, auto-backup, Global Settings config table added to both `Docs/REST_API.md` and `rest-api.html`.
+
+---
+
+## **v5.0.6** — Because Backups Shouldn't Be Homework (2026-04-12)
 
 ### Server backup
 
