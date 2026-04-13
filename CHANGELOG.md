@@ -2,8 +2,9 @@
 
 ### UI
 
-- **Rounded corners on buttons** — `border-radius: 6px` on `.btn` globally. Buttons now visually distinct from input fields and panels, which remain flat. One line of CSS, applied everywhere.
+- **Rounded corners on buttons** — `border-radius: 6px` on `.btn`, `.btn-small`, `.player-list-item-actions button`, and `.cc-match-action-btn` globally. Buttons now visually distinct from input fields and panels, which remain flat.
 - **Reset filter button** — clears text filter, resets date range, checks all tournaments, and resets scope to all.
+- **Register "View →" buttons removed** — row click already navigates to the tournament. Delete button stays. Cleaner table, more space for data columns.
 
 ---
 

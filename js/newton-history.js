@@ -447,8 +447,7 @@ const NewtonHistory = (() => {
                         render: (v, row) => {
                             const safeId = escHtml(row.tournamentId);
                             const safeName = escHtml(row.tournamentName || row.tournamentId);
-                            return `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.openTournament('${safeId}')">View →</button>` +
-                                `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="margin-left:6px;color:#dc2626;border-color:#dc2626;">Delete</button>`;
+                            return `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
                         }
                     }
                 ],
