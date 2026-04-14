@@ -243,7 +243,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <!-- Top row -->
                     <div class="bracket-controls-top">
                         <div class="bracket-controls-top-left">
-                            <button class="zoom-btn nav-btn analytics-back-btn" onclick="tournament = null; players = []; matches = []; localStorage.removeItem('newton_analytics_bracketPreview'); showPage('history');" title="Return to Analytics"><span class="nav-arrow">⬅</span><span class="nav-text">Analytics</span></button>
+                            <button class="zoom-btn nav-btn analytics-back-btn" onclick="tournament = null; players = []; matches = []; localStorage.removeItem('currentTournament'); showPage('history');" title="Return to Analytics"><span class="nav-arrow">⬅</span><span class="nav-text">Analytics</span></button>
                             <button class="zoom-btn nav-btn" onclick="showStatisticsModal()"
                                 title="View tournament statistics and rankings"><span class="nav-icon">≡</span><span class="nav-text">Leaderboard</span></button>
                             <button class="zoom-btn match-controls-btn nav-btn" onclick="showMatchCommandCenter()"

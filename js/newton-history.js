@@ -1327,10 +1327,11 @@ const NewtonHistory = (() => {
             if (!res.ok) throw new Error('Could not load tournament file');
             const data = await res.json();
 
-            // Store in a dedicated scratch slot — never touches real tournament data
+            // Write to currentTournament so watermark and existing code paths work.
+            // _analyticsPreview flag prevents saveTournamentOnly() from persisting to dartsTournaments.
             data.readOnly = true;
             data._analyticsPreview = true;
-            localStorage.setItem('newton_analytics_bracketPreview', JSON.stringify(data));
+            localStorage.setItem('currentTournament', JSON.stringify(data));
 
             // Set globals for the bracket renderer
             tournament = data;

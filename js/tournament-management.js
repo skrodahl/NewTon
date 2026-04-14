@@ -548,6 +548,7 @@ async function uploadTournamentFile(event, overwrite = false) {
  */
 function saveTournamentOnly(shouldLog = true) {
     if (!tournament) return;
+    if (tournament._analyticsPreview) return; // Analytics previews never persist
 
     // Build clean tournament object with current data
     const tournamentToSave = {
