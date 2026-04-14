@@ -466,6 +466,9 @@ let helpState = {
  * Call this after DOM is loaded
  */
 function initializeHelpSystem() {
+    // Skip help system entirely in analytics mode
+    if (window.NEWTON_APP_MODE === 'analytics') return;
+
     console.log('🔧 Initializing dynamic help system...');
 
     // Initialize help icons with tooltips
@@ -941,6 +944,8 @@ function showHelpSection(pageId, sectionId) {
  * Analyze current context and suggest relevant help
  */
 function suggestHelp() {
+    if (window.NEWTON_APP_MODE === 'analytics') return null;
+
     // No tournament created
     if (!tournament) {
         return { page: 'setup', section: 'creation', reason: 'No active tournament' };
