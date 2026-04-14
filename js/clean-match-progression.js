@@ -744,6 +744,16 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                         _tournamentAchievements,
                         Math.floor(Date.now() / 1000)
                     ).then(() => {
+                        // Store placements for Analytics ranking points
+                        if (tournament.placements) {
+                            return NewtonDB.getTournament(String(tournament.id)).then(t => {
+                                if (t) {
+                                    t.placements = tournament.placements;
+                                    return NewtonDB.saveTournamentMeta(t);
+                                }
+                            });
+                        }
+                    }).then(() => {
                         // Reconcile: attribute any achievements entered outside
                         // the match completion dialog to each player's last match
                         return NewtonDB.reconcileMatchAchievements(

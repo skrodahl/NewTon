@@ -3754,6 +3754,34 @@ a:hover { color: #1e40af; }
     font-weight: 600;
 }
 
+.analytics-point-layers {
+    display: flex;
+    gap: 6px;
+    margin-left: 12px;
+}
+.analytics-layer-btn {
+    padding: 6px 12px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    background: #ffffff;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: background 0.15s ease, color 0.15s ease;
+}
+.analytics-layer-btn:hover {
+    background: #f9fafb;
+    color: #222222;
+}
+.analytics-layer-btn.active {
+    background: #f0fdf4;
+    color: #166534;
+    font-weight: 600;
+    border-color: #bbf7d0;
+}
+
 /* Analytics views */
 .analytics-view {
     display: none;

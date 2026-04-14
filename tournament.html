@@ -769,7 +769,10 @@
                     <div class="analytics-point-toggle">
                         <button class="analytics-point-btn active" data-point-mode="original">Original</button>
                         <button class="analytics-point-btn" data-point-mode="current">Current</button>
-                        <button class="analytics-point-btn" data-point-mode="custom">Custom</button>
+                    </div>
+                    <div class="analytics-point-layers">
+                        <button class="analytics-layer-btn active" data-layer="ranking" onclick="NewtonHistory.toggleLayer('ranking', this)">Ranking</button>
+                        <button class="analytics-layer-btn active" data-layer="attendance" onclick="NewtonHistory.toggleLayer('attendance', this)">Attendance</button>
                     </div>
                 </div>
             </div>
@@ -781,10 +784,7 @@
 
             <!-- Analytics view: Leaderboard -->
             <div id="analyticsViewLeaderboard" class="analytics-view">
-                <div class="analytics-placeholder">
-                    <h3>Leaderboard</h3>
-                    <p>Cross-tournament rankings. Coming soon.</p>
-                </div>
+                <div id="leaderboardTableContainer"></div>
             </div>
 
             <!-- Analytics view: Players -->

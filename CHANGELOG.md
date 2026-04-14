@@ -1,4 +1,4 @@
-## **v5.0.9** — (2026-04-14)
+## **v5.0.9** — Leader of the Pack (2026-04-14)
 
 ### UI
 
@@ -10,6 +10,17 @@
 ### Analytics
 
 - **Unique player count fixed** — Dashboard "Players" card now deduplicates by lowercase trimmed name across tournaments instead of per-tournament player IDs. Drops inflated counts to actual unique players.
+- **Points column in Register** — tournament list and match list both show achievement points. Tournament list includes ranking and attendance layers when toggled on.
+- **Point mode toggle wired** — Original uses the frozen configSnapshot per tournament; Current uses today's Global Settings. Switching updates all views in real time, including match list and match detail.
+- **Ranking and Attendance toggles** — two independent layer buttons alongside the Original/Current toggle. Ranking adds placement points (1st, 2nd, 3rd...). Attendance adds participation points per player. Both on by default — toggle off to drill down to pure achievement points. Tournament-level only; match views show achievement points.
+- **Tournament Analytics button on podium** — one click from the celebration screen to Analytics scoped to the just-completed tournament.
+- **Placements stored at finalization** — `tournament.placements` now written to IndexedDB at tournament close, enabling ranking point computation in Analytics.
+- **Total Points dashboard card** — sums all points across scoped tournaments, respects point mode and layers. Clicks through to the Leaderboard.
+- **Leaderboard** — cross-tournament player rankings with full stat breakdown: placement counts (1st through 7-8th), 180s, high outs, short legs, best checkout, best leg (fewest darts), three-dart average (Chalker matches only), matches won/lost, legs won/lost. All columns sortable. Rank and Points columns shaded. Top 16 players highlighted with muted green background (survives reordering). Respects point mode (Original/Current), Ranking, and Attendance toggles. Player dedup by lowercase trimmed name.
+
+### Migration
+
+- Tournaments imported into Analytics before this version do not have placement data in IndexedDB. To enable ranking points for these tournaments: delete from the Analytics register, then re-add via "+ Analytics" in Recent Tournaments.
 
 ---
 

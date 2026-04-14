@@ -128,12 +128,14 @@ const NewtonTable = (() => {
                 const clickAttr = inst.config.onRowClick
                     ? ` onclick="NewtonTable._onRowClick('${inst.config.tableId}','${_escAttr(row._rowId || '')}')"` : '';
                 const rowCls = inst.config.onRowClick ? ' class="history-row"' : '';
-                html += `<tr${rowCls}${clickAttr}>`;
+                const rowStyle = inst.config.rowStyle ? inst.config.rowStyle(row) : '';
+                html += `<tr${rowCls}${clickAttr}${rowStyle ? ` style="${rowStyle}"` : ''}>`;
                 for (const col of columns) {
                     const align = col.align ? `text-align:${col.align};` : '';
+                    const extra = col.cellStyle || '';
                     const value = row[col.key];
                     const rendered = col.render ? col.render(value, row) : _escHtml(value != null ? String(value) : '—');
-                    html += `<td style="${align}">${rendered}</td>`;
+                    html += `<td style="${align}${extra}">${rendered}</td>`;
                 }
                 html += '</tr>';
             }

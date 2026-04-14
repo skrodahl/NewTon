@@ -32,6 +32,10 @@ const NewtonHistory = (() => {
     let _pointMode = 'original';
     let _controlsInitialised = false;
 
+    /** Point layers — which components are included in the points total */
+    let _layerRanking = true;
+    let _layerAttendance = true;
+
     // ---------------------------------------------------------------------------
     // Scope — which tournaments are included in all analytics views
     // ---------------------------------------------------------------------------
@@ -211,6 +215,14 @@ const NewtonHistory = (() => {
                 _dirty.dashboard = false;
             }
         }
+
+        // When switching to leaderboard, recompute if dirty
+        if (view === 'leaderboard') {
+            if (_dirty.leaderboard) {
+                renderLeaderboard();
+                _dirty.leaderboard = false;
+            }
+        }
     }
 
     /**
@@ -224,8 +236,80 @@ const NewtonHistory = (() => {
             btn.classList.toggle('active', btn.dataset.pointMode === mode);
         });
 
-        // TODO: recompute active view with new point mode
-        console.log('Point mode:', mode);
+        _recomputePoints();
+    }
+
+    /**
+     * Get the active point values based on the current point mode.
+     * @param {object} tournament - tournament record with configSnapshot
+     * @returns {object} point values: { oneEighty, ton, highOut, shortLeg }
+     */
+    function _getActivePoints(tournament) {
+        let pts;
+        if (_pointMode === 'current' && typeof config !== 'undefined') {
+            pts = config.points || {};
+        } else {
+            const cfg = tournament.configSnapshot;
+            pts = cfg && cfg.points ? cfg.points : (cfg || {});
+        }
+        return {
+            oneEighty:    Number(pts.oneEighty) || 0,
+            ton:          Number(pts.ton) || 0,
+            highOut:      Number(pts.highOut) || 0,
+            shortLeg:     Number(pts.shortLeg) || 0,
+            participation: Number(pts.participation) || 0,
+            first:        Number(pts.first) || 0,
+            second:       Number(pts.second) || 0,
+            third:        Number(pts.third) || 0,
+            fourth:       Number(pts.fourth) || 0,
+            fifthSixth:   Number(pts.fifthSixth) || 0,
+            seventhEighth: Number(pts.seventhEighth) || 0
+        };
+    }
+
+    /**
+     * Toggle a point layer (ranking/attendance) and re-render.
+     * @param {string} layer - 'ranking' | 'attendance'
+     * @param {HTMLElement} btn
+     */
+    function toggleLayer(layer, btn) {
+        if (layer === 'ranking') _layerRanking = !_layerRanking;
+        if (layer === 'attendance') _layerAttendance = !_layerAttendance;
+        btn.classList.toggle('active');
+
+        _recomputePoints();
+    }
+
+    /** Shared recompute after point mode or layer change. Preserves scroll position. */
+    function _recomputePoints() {
+        if (_allTournaments) {
+            _allTournaments.forEach(t => { delete t._achievementPoints; });
+        }
+        _dirty = { dashboard: true, leaderboard: true, players: true, register: true };
+
+        const el = document.scrollingElement || document.documentElement;
+        const scrollY = el.scrollTop;
+
+        const restore = () => requestAnimationFrame(() => { el.scrollTop = scrollY; });
+
+        if (_activeView === 'register') {
+            if (_activePanel === 'matchDetail' && _activeMatchContext) {
+                openMatch(_activeMatchContext.tournamentId, _activeMatchContext.matchId).then(restore);
+            } else if (_activePanel === 'matchList' && _activeTournament) {
+                openTournament(_activeTournament.tournamentId).then(restore);
+            } else {
+                renderTournamentList().then(restore);
+            }
+        } else if (_activeView === 'leaderboard') {
+            renderLeaderboard().then(restore);
+            _dirty.leaderboard = false;
+        } else if (_activeView === 'dashboard') {
+            renderDashboard().then(restore);
+            _dirty.dashboard = false;
+        } else {
+            switchView(_activeView);
+            restore();
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -298,13 +382,20 @@ const NewtonHistory = (() => {
                 });
             });
 
+            // Total points across scope (respects point mode + layers)
+            let totalPoints = 0;
+            tournaments.forEach(t => {
+                totalPoints += _computeAchievementPoints(t);
+            });
+
             // Render cards
             container.innerHTML =
                 '<div class="analytics-dashboard">' +
                     _statCard('Tournaments', tournaments.length, 'Finalized', 'register') +
                     _statCard('Matches', allMatches.length, 'Completed', null) +
                     _statCard('Players', playerSet.size, 'Unique', 'players') +
-                    _statCard('180s', total180s, 'Total', 'leaderboard') +
+                    _statCard('Points', totalPoints, 'Total', 'leaderboard') +
+                    _statCard('180s', total180s, 'Total', null) +
                     (highestCheckout.score > 0
                         ? _statCard('Highest Checkout', highestCheckout.score, highestCheckout.player, null)
                         : _statCard('Highest Checkout', '—', 'No data yet', null)) +
@@ -344,6 +435,295 @@ const NewtonHistory = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // Leaderboard
+    // ---------------------------------------------------------------------------
+
+    /** @type {object|null} NewtonTable instance for the leaderboard */
+    let _leaderboardTable = null;
+
+    /**
+     * Compute per-player points across scoped tournaments and render the leaderboard.
+     */
+    async function renderLeaderboard() {
+        const container = document.getElementById('leaderboardTableContainer');
+        if (!container || typeof NewtonDB === 'undefined') return;
+
+        // Only show loading placeholder on first render (don't collapse existing table)
+        if (!_leaderboardTable) {
+            container.innerHTML = '<div class="analytics-placeholder"><p>Loading…</p></div>';
+        }
+
+        try {
+            const tournaments = await getScopedTournaments();
+            if (!tournaments.length) {
+                container.innerHTML = '<div class="analytics-placeholder">' +
+                    '<h3>No data yet</h3>' +
+                    '<p>Leaderboard appears after your first tournament is finalized.</p></div>';
+                _leaderboardTable = null;
+                return;
+            }
+
+            // Aggregate per-player stats across all scoped tournaments
+            const playerMap = {}; // normalized name → { name, points, tournaments, wins, oneEighties, tons, highOuts, shortLegs }
+
+            for (const t of tournaments) {
+                const p = _getActivePoints(t);
+                const ta = t.tournamentAchievements || {};
+                const placements = t.placements || {};
+
+                // Build playerId → placement lookup
+                const playerPlacements = {};
+                Object.entries(placements).forEach(([pid, rank]) => {
+                    playerPlacements[String(pid)] = rank;
+                });
+
+                Object.entries(ta).forEach(([pid, entry]) => {
+                    const name = entry.name || pid;
+                    const key = name.trim().toLowerCase();
+                    const s = entry.stats || {};
+
+                    if (!playerMap[key]) {
+                        playerMap[key] = {
+                            name: name,
+                            points: 0,
+                            tournaments: 0,
+                            p1st: 0, p2nd: 0, p3rd: 0, p4th: 0, p56th: 0, p78th: 0,
+                            oneEighties: 0,
+                            tons: 0,
+                            highOuts: 0,
+                            shortLegs: 0,
+                            bestHighOut: 0,
+                            bestShortLeg: Infinity,
+                            matchesWon: 0,
+                            matchesLost: 0,
+                            legsWon: 0,
+                            legsLost: 0,
+                            _totalScored: 0,
+                            _totalDarts: 0
+                        };
+                    }
+
+                    const pm = playerMap[key];
+                    pm.tournaments++;
+
+                    // Achievement points (always)
+                    const achPts =
+                        ((s.oneEighties || 0) * p.oneEighty) +
+                        ((s.tons || 0) * p.ton) +
+                        ((Array.isArray(s.highOuts) ? s.highOuts.length : 0) * p.highOut) +
+                        ((Array.isArray(s.shortLegs) ? s.shortLegs.length : 0) * p.shortLeg);
+                    pm.points += achPts;
+
+                    // Ranking points
+                    const rank = playerPlacements[String(pid)];
+                    if (_layerRanking && rank) {
+                        const rankKey = _placementKeys[rank];
+                        if (rankKey && p[rankKey]) pm.points += p[rankKey];
+                    }
+                    // Track placement counts
+                    if (rank === 1) pm.p1st++;
+                    else if (rank === 2) pm.p2nd++;
+                    else if (rank === 3) pm.p3rd++;
+                    else if (rank === 4) pm.p4th++;
+                    else if (rank === 5 || rank === 6) pm.p56th++;
+                    else if (rank === 7 || rank === 8) pm.p78th++;
+
+                    // Attendance points
+                    if (_layerAttendance) {
+                        pm.points += p.participation;
+                    }
+
+                    // Achievement totals (for display)
+                    pm.oneEighties += (s.oneEighties || 0);
+                    pm.tons += (s.tons || 0);
+                    pm.highOuts += (Array.isArray(s.highOuts) ? s.highOuts.length : 0);
+                    pm.shortLegs += (Array.isArray(s.shortLegs) ? s.shortLegs.length : 0);
+
+                    // Personal bests
+                    if (Array.isArray(s.highOuts)) {
+                        s.highOuts.forEach(v => { if (v > pm.bestHighOut) pm.bestHighOut = v; });
+                    }
+                    if (Array.isArray(s.shortLegs)) {
+                        s.shortLegs.forEach(v => { if (v < pm.bestShortLeg) pm.bestShortLeg = v; });
+                    }
+                });
+            }
+
+            // Scan matches for win/loss and leg counts
+            for (const t of tournaments) {
+                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+                matches.forEach(m => {
+                    const k1 = m.player1Name ? m.player1Name.trim().toLowerCase() : null;
+                    const k2 = m.player2Name ? m.player2Name.trim().toLowerCase() : null;
+                    const pm1 = k1 ? playerMap[k1] : null;
+                    const pm2 = k2 ? playerMap[k2] : null;
+
+                    if (m.winner === 1) {
+                        if (pm1) pm1.matchesWon++;
+                        if (pm2) pm2.matchesLost++;
+                    } else if (m.winner === 2) {
+                        if (pm2) pm2.matchesWon++;
+                        if (pm1) pm1.matchesLost++;
+                    }
+
+                    if (m.legsWon) {
+                        if (pm1) { pm1.legsWon += (m.legsWon.p1 || 0); pm1.legsLost += (m.legsWon.p2 || 0); }
+                        if (pm2) { pm2.legsWon += (m.legsWon.p2 || 0); pm2.legsLost += (m.legsWon.p1 || 0); }
+                    }
+
+                    // Three-dart average — Chalker matches only
+                    if (m.matchType === 'CHALKER' && Array.isArray(m.legs) && m.legs.length) {
+                        const startScore = (m.format && m.format.sc) || 501;
+                        m.legs.forEach(leg => {
+                            try {
+                                const parts = (leg.s || '').split('|');
+                                const v1 = Array.from(Uint8Array.from(atob(parts[0] || ''), c => c.charCodeAt(0)));
+                                const v2 = Array.from(Uint8Array.from(atob(parts[1] || ''), c => c.charCodeAt(0)));
+
+                                // Player 1
+                                if (pm1 && v1.length) {
+                                    if (leg.w === 1) {
+                                        pm1._totalScored += startScore;
+                                        pm1._totalDarts += (v1.length - 1) * 3 + (leg.cd || 3);
+                                    } else {
+                                        pm1._totalScored += v1.reduce((a, b) => a + b, 0);
+                                        pm1._totalDarts += v1.length * 3;
+                                    }
+                                }
+                                // Player 2
+                                if (pm2 && v2.length) {
+                                    if (leg.w === 2) {
+                                        pm2._totalScored += startScore;
+                                        pm2._totalDarts += (v2.length - 1) * 3 + (leg.cd || 3);
+                                    } else {
+                                        pm2._totalScored += v2.reduce((a, b) => a + b, 0);
+                                        pm2._totalDarts += v2.length * 3;
+                                    }
+                                }
+                            } catch (_) {}
+                        });
+                    }
+                });
+            }
+
+            // Convert to array, sort by points descending, assign ranks
+            const rows = Object.values(playerMap);
+            rows.sort((a, b) => b.points - a.points);
+            rows.forEach((r, i) => {
+                r._rank = i + 1;
+                r.avg = r._totalDarts > 0 ? ((r._totalScored / r._totalDarts) * 3).toFixed(2) : null;
+                r._rowId = r.name;
+            });
+
+            // Create or reuse table
+            if (!_leaderboardTable) {
+                _leaderboardTable = NewtonTable.create({
+                    tableId: 'analytics-leaderboard',
+                    containerId: 'leaderboardTableContainer',
+                    defaultSortKey: 'points',
+                    defaultSortDir: 'desc',
+                    emptyMessage: 'No player data available.',
+                    rowStyle: (row) => row._rank <= 16 ? 'background:#f0fdf4;' : '',
+                    columns: [
+                        {
+                            key: '_rank', label: '#', width: '50px', align: 'center',
+                            render: (v) => `<span style="font-weight:600;">${v}</span>`,
+                            cellStyle: 'background:#f3f4f6;'
+                        },
+                        {
+                            key: 'name', label: 'Player',
+                            render: (v) => `<strong>${escHtml(v)}</strong>`
+                        },
+                        {
+                            key: 'p1st', label: '1st', align: 'center', width: '45px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'p2nd', label: '2nd', align: 'center', width: '45px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'p3rd', label: '3rd', align: 'center', width: '45px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'p4th', label: '4th', align: 'center', width: '45px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'p56th', label: '5-6th', align: 'center', width: '50px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'p78th', label: '7-8th', align: 'center', width: '50px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'oneEighties', label: '180s', align: 'center', width: '60px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'highOuts', label: 'High Outs', align: 'center', width: '80px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'shortLegs', label: 'Short Legs', align: 'center', width: '90px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'tournaments', label: 'Played', align: 'center', width: '70px',
+                            render: (v) => v
+                        },
+                        {
+                            key: 'points', label: 'Points', align: 'center', width: '80px',
+                            render: (v) => `<strong>${v || '—'}</strong>`,
+                            cellStyle: 'background:#f3f4f6;'
+                        },
+                        {
+                            key: 'bestHighOut', label: 'Best Out', align: 'center', width: '75px',
+                            render: (v) => v > 0 ? v : '—',
+                            sortValue: (v) => v > 0 ? v : 0
+                        },
+                        {
+                            key: 'bestShortLeg', label: 'Best Leg', align: 'center', width: '75px',
+                            render: (v) => v < Infinity ? v : '—',
+                            sortValue: (v) => v < Infinity ? v : 99999
+                        },
+                        {
+                            key: 'avg', label: 'Avg', align: 'center', width: '60px',
+                            render: (v) => v || '—',
+                            sortValue: (v) => v ? parseFloat(v) : 0
+                        },
+                        {
+                            key: 'matchesWon', label: 'MW', align: 'center', width: '50px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'matchesLost', label: 'ML', align: 'center', width: '50px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'legsWon', label: 'LW', align: 'center', width: '50px',
+                            render: (v) => v || '—'
+                        },
+                        {
+                            key: 'legsLost', label: 'LL', align: 'center', width: '50px',
+                            render: (v) => v || '—'
+                        }
+                    ]
+                });
+            }
+
+            _leaderboardTable.setData(rows);
+
+        } catch (e) {
+            console.error('Leaderboard render failed:', e);
+            container.innerHTML = '<div class="analytics-placeholder">' +
+                '<p>Failed to load leaderboard.</p></div>';
+        }
+    }
+
+    // ---------------------------------------------------------------------------
     // Entry point — called by showPage('history') hook in main.js
     // ---------------------------------------------------------------------------
 
@@ -363,13 +743,72 @@ const NewtonHistory = (() => {
     // Panel visibility
     // ---------------------------------------------------------------------------
 
+    /** Currently visible register panel */
+    let _activePanel = 'tournamentList';
+
+    /** Currently viewed match (for re-rendering on point mode change) */
+    let _activeMatchContext = null;
+
     function showPanel(name) {
+        _activePanel = name;
         ['tournamentList', 'matchList', 'matchDetail'].forEach(p => {
             document.getElementById(`history${cap(p)}`).style.display = p === name ? '' : 'none';
         });
     }
 
     function cap(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+
+    // ---------------------------------------------------------------------------
+    // Achievement points computation
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Compute total achievement points for a tournament using its configSnapshot
+     * and tournamentAchievements. Achievement points = 180s + tons + high outs + short legs,
+     * each multiplied by the point value from the frozen config.
+     * @param {object} tournament
+     * @returns {number}
+     */
+    /** Placement rank → point config key mapping */
+    const _placementKeys = {
+        1: 'first', 2: 'second', 3: 'third', 4: 'fourth',
+        5: 'fifthSixth', 6: 'fifthSixth', 7: 'seventhEighth', 8: 'seventhEighth'
+    };
+
+    function _computeAchievementPoints(tournament) {
+        const ta = tournament.tournamentAchievements;
+        if (!ta) return 0;
+
+        const p = _getActivePoints(tournament);
+        const playerCount = Object.keys(ta).length;
+
+        let total = 0;
+
+        // Achievement points (always included)
+        Object.values(ta).forEach(entry => {
+            const s = entry.stats;
+            if (!s) return;
+            total += (s.oneEighties || 0) * p.oneEighty;
+            total += (s.tons || 0) * p.ton;
+            total += (Array.isArray(s.highOuts) ? s.highOuts.length : 0) * p.highOut;
+            total += (Array.isArray(s.shortLegs) ? s.shortLegs.length : 0) * p.shortLeg;
+        });
+
+        // Ranking points (placement-based)
+        if (_layerRanking && tournament.placements) {
+            Object.values(tournament.placements).forEach(rank => {
+                const key = _placementKeys[rank];
+                if (key && p[key]) total += p[key];
+            });
+        }
+
+        // Attendance points (participation)
+        if (_layerAttendance) {
+            total += playerCount * p.participation;
+        }
+
+        return total;
+    }
 
     // ---------------------------------------------------------------------------
     // Tournament list
@@ -439,6 +878,11 @@ const NewtonHistory = (() => {
                         render: (v) => v != null ? v : '—'
                     },
                     {
+                        key: '_achievementPoints', label: 'Points', align: 'center', width: '80px',
+                        render: (v) => v != null ? v : '—',
+                        sortValue: (v) => v || 0
+                    },
+                    {
                         key: 'tournamentFormat', label: 'Format', width: '80px',
                         render: (v) => escHtml(v || '—')
                     },
@@ -466,6 +910,11 @@ const NewtonHistory = (() => {
                     t.matchCount = 0;
                 }
             }
+        }
+
+        // Compute achievement points per tournament
+        for (const t of all) {
+            t._achievementPoints = _computeAchievementPoints(t);
         }
 
         // Apply all filters — show only matching tournaments
@@ -763,20 +1212,41 @@ const NewtonHistory = (() => {
                         render: (v, row) => row.legsWon ? `${row.legsWon.p1}–${row.legsWon.p2}` : '—'
                     },
                     {
-                        key: 'matchType', label: 'Type', width: '90px',
-                        render: (v) => v === 'CHALKER'
-                            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
-                            : '<span class="history-type-badge history-type-manual">Manual</span>'
+                        key: '_achievementPoints', label: 'Points', align: 'center', width: '70px',
+                        render: (v) => v || '—',
+                        sortValue: (v) => v || 0
                     },
                     {
                         key: 'completedAt', label: 'Date', width: '110px',
                         render: (v) => v ? fmtDate(v) : '—',
                         sortValue: (v) => v ? tsToMs(v) : 0
+                    },
+                    {
+                        key: 'matchType', label: 'Type', width: '90px',
+                        render: (v) => v === 'CHALKER'
+                            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
+                            : '<span class="history-type-badge history-type-manual">Manual</span>'
                     }
                 ],
                 onRowClick: (row) => openMatch(tournamentId, row.matchId)
             });
         }
+
+        // Compute per-match achievement points using active point mode
+        const p = _getActivePoints(tournament);
+
+        matchRecords.forEach(m => {
+            const ach = m.achievements || {};
+            let total = 0;
+            Object.values(ach).forEach(a => {
+                if (!a || typeof a !== 'object') return;
+                total += (a.oneEighties || 0) * p.oneEighty;
+                total += (a.tons || 0) * p.ton;
+                total += (Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut;
+                total += (Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg;
+            });
+            m._achievementPoints = total;
+        });
 
         // Add _rowId for row click identification
         matchRecords.forEach(m => { m._rowId = m.matchId; });
@@ -816,6 +1286,7 @@ const NewtonHistory = (() => {
         if (backBtn) backBtn.onclick = () => openTournament(tournamentId);
 
         bodyEl.innerHTML = _buildMatchDetailHtml(match);
+        _activeMatchContext = { tournamentId, matchId };
         showPanel('matchDetail');
     }
 
@@ -889,6 +1360,17 @@ const NewtonHistory = (() => {
         const p1Name = p1Bold ? `<strong>${escHtml(match.player1Name)}</strong>` : escHtml(match.player1Name);
         const p2Name = p2Bold ? `<strong>${escHtml(match.player2Name)}</strong>` : escHtml(match.player2Name);
 
+        // Compute per-player achievement points
+        const p = _activeTournament ? _getActivePoints(_activeTournament) : { oneEighty: 0, ton: 0, highOut: 0, shortLeg: 0 };
+        function _playerPoints(a) {
+            return ((a.oneEighties || 0) * p.oneEighty) +
+                   ((a.tons || 0) * p.ton) +
+                   ((Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut) +
+                   ((Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg);
+        }
+        const pts1 = _playerPoints(a1);
+        const pts2 = _playerPoints(a2);
+
         html += `<table class="history-table newton-table" style="margin-top:16px;">
             <thead><tr>
                 <th>Player</th>
@@ -896,6 +1378,7 @@ const NewtonHistory = (() => {
                 <th style="text-align:center;">High Outs</th>
                 <th style="text-align:center;width:70px;">180s</th>
                 <th style="text-align:center;width:70px;">Tons</th>
+                <th style="text-align:center;width:70px;">Points</th>
             </tr></thead><tbody>
             <tr>
                 <td>${p1Name}</td>
@@ -903,6 +1386,7 @@ const NewtonHistory = (() => {
                 <td style="text-align:center;">${fmtArr(a1.highOuts)}</td>
                 <td style="text-align:center;">${fmt(a1.oneEighties)}</td>
                 <td style="text-align:center;">${fmt(a1.tons)}</td>
+                <td style="text-align:center;">${pts1 || '—'}</td>
             </tr>
             <tr>
                 <td>${p2Name}</td>
@@ -910,6 +1394,7 @@ const NewtonHistory = (() => {
                 <td style="text-align:center;">${fmtArr(a2.highOuts)}</td>
                 <td style="text-align:center;">${fmt(a2.oneEighties)}</td>
                 <td style="text-align:center;">${fmt(a2.tons)}</td>
+                <td style="text-align:center;">${pts2 || '—'}</td>
             </tr>
             </tbody></table>`;
 
@@ -1045,6 +1530,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer };
 
 })();

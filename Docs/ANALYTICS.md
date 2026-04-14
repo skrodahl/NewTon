@@ -522,12 +522,20 @@ Each stats card on the dashboard is described as "clickable — drill into the u
 **Decided — Matches card:**
 The "Matches — Completed" card links to a flat match list in the Register, showing all matches within the current scope. This is the first drill-through target. It requires the Register to support an "all matches" view — a single list across all tournaments in scope, not just matches within a selected tournament. The existing tournament → match hierarchy stays; the flat list is an additional mode, entered via the dashboard card (and reusable for other entry points later).
 
-**Still open — other cards:**
-- "Most 180s: Andy (5)" → Player view, filtered to Andy?
-- "Most 180s: Andy (5)" → Leaderboard, sorted by 180s?
-- Both? (Player name clicks to player, card title clicks to leaderboard?)
+**Decided — record cards (180s, Highest Checkout, Shortest Leg):**
+These are individual player records. They should drill through to the Player tab, focused on the named player. These cards show "who" — the Player tab tells the full story. Deferred until Player tab is built.
 
-The drill-through targets define what makes the dashboard a gateway rather than just a summary.
+**Decided — Points card:**
+Links to the Leaderboard tab. Implemented in v5.0.9.
+
+**Decided — Tournaments card:**
+Links to the Register tab. Implemented in v5.0.8.
+
+**Still to implement — Matches card:**
+Links to a flat all-matches view in the Register, showing all matches within the current scope. Requires the Register to support an "all matches" mode — a single list across all tournaments in scope, not just matches within a selected tournament. The existing tournament → match hierarchy stays; the flat list is an additional mode. Should include a Tournament column so matches are identifiable. Must respect the Lens filter.
+
+**Still to implement — Players card:**
+Links to the Players tab. Deferred until Player tab is built.
 
 ### Dashboard stat cards — dynamic visibility and content
 

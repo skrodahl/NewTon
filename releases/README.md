@@ -81,6 +81,16 @@ Add both the new versioned page and confirm `index.html` is already present. Bot
 
 The versioned page uses `changefreq: never` — it will never change after publication. `index.html` (`/releases/`) uses `changefreq: weekly` since it updates with every release.
 
+### Step 5 — Update `APP_VERSION` in `js/main.js`
+
+Update the version string and comment:
+
+```js
+const APP_VERSION = '5.0.9'; // Leader of the Pack — Leaderboard, point toggles, averages
+```
+
+This is displayed in the app footer. Easy to forget.
+
 ---
 
 ## HTML Template
