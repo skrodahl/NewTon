@@ -1,16 +1,28 @@
-## **v5.0.10** — (2026-04-14)
+## **v5.0.10-beta.1** — (2026-04-14)
 
 ### Analytics-only mode
 
-- **NEWTON_MODE=analytics** — new Docker environment variable. Hides Tournament Setup, Player Registration, Tournament Bracket, and Chalker tabs. Shows only Analytics and a limited Global Settings (Branding + Point Values). Header adapts to "[Club Name] - Analytics". Auto-navigates to Analytics on load.
-- **NEWTON_READONLY_ANALYTICS** — new Docker environment variable passed to client config. Foundation for read-only public instances.
-- **Read-only bracket view** — in analytics mode, "View Bracket" button on tournament match list loads the tournament JSON from disk and renders the bracket read-only. No match controls, no Developer Console. "Back to Analytics" button returns and clears the temporary state.
+- **NEWTON_MODE=analytics** — new Docker environment variable. Hides Tournament Setup, Player Registration, Tournament Bracket, and Chalker tabs. Shows only Analytics and a limited Global Settings (Branding + Point Values). Header adapts to "[Club Name] - Analytics". Auto-navigates to Analytics on load. Also available via URL parameter `?mode=analytics` for testing.
+- **NEWTON_READONLY_ANALYTICS=true** — new Docker environment variable passed to client config. Foundation for read-only public instances.
+- **Read-only bracket view** — in analytics mode, "View Bracket" button on tournament list and match list loads the tournament JSON from disk and renders the bracket read-only. No match controls, no auto-open Match Controls, no Developer Console. Uses a dedicated localStorage scratch slot (`newton_analytics_bracketPreview`) — never touches real tournament data. "Back to Analytics" button returns and clears the temporary state.
 - **Import Register hidden** — analytics mode hides the Import Register button. Data comes exclusively from disk (shared tournaments).
 - **Delete buttons respect settings** — Analytics register delete button only shown when "Allow deleting tournaments" is enabled in Server Settings. In analytics mode, Server Settings is inaccessible, so deletion is impossible by design.
+
+### Docker Environment Variables
+
+| Variable | Values | Default | Description |
+|---|---|---|---|
+| `NEWTON_MODE` | `full`, `analytics` | `full` | App mode. `analytics` hides tournament management tabs, shows only Analytics and limited Global Settings. |
+| `NEWTON_READONLY_ANALYTICS` | `true`, `false` | `false` | Disables all deletion in Analytics and Shared Tournaments. For public-facing instances. |
+| `NEWTON_LANDING_PAGE` | `true`, `false` | — | Enables the landing page at `/`. Existing variable. |
+| `NEWTON_DEMO_MODE` | `true`, `false` | `false` | Shows demo banner. Existing variable. |
+| `NEWTON_GITHUB_URL` | URL | `https://github.com/skrodahl/NewTon` | GitHub link in UI. Existing variable. |
+| `NEWTON_BASE_URL` | URL | — | Base URL for canonical/OG tags. Existing variable. |
 
 ### Global Settings
 
 - **Server Settings separated** — Server ID, auto-backup, shared tournament delete, and remote backup settings moved from the User Interface section into their own "Server Settings" pane. Cleaner separation of concerns.
+- **"Allow deleting tournaments"** — renamed from "Allow deleting shared tournaments". Now also controls delete button visibility in the Analytics register.
 
 ### Analytics
 

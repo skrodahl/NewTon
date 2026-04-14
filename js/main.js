@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.10-b.1'; // Leader of the Pack — Leaderboard, point toggles, averages
+const APP_VERSION = '5.0.10-b.1'; // Analytics Mode — analytics-only deployment, read-only bracket view
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -415,7 +415,7 @@ function showPage(pageId) {
     }
 
     // Auto-open Match Controls when navigating to tournament page (if enabled and tournament exists)
-    if (pageId === 'tournament' && config.ui.autoOpenMatchControls && tournament) {
+    if (pageId === 'tournament' && config.ui.autoOpenMatchControls && tournament && !tournament._analyticsPreview) {
         // Small delay to ensure page transition is complete
         setTimeout(() => {
             if (typeof showMatchCommandCenter === 'function') {
