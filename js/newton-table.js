@@ -127,9 +127,10 @@ const NewtonTable = (() => {
             for (const row of pageData) {
                 const clickAttr = inst.config.onRowClick
                     ? ` onclick="NewtonTable._onRowClick('${inst.config.tableId}','${_escAttr(row._rowId || '')}')"` : '';
-                const rowCls = inst.config.onRowClick ? ' class="history-row"' : '';
+                const extraCls = inst.config.rowClass ? inst.config.rowClass(row) : '';
+                const classes = [inst.config.onRowClick ? 'history-row' : '', extraCls].filter(Boolean).join(' ');
                 const rowStyle = inst.config.rowStyle ? inst.config.rowStyle(row) : '';
-                html += `<tr${rowCls}${clickAttr}${rowStyle ? ` style="${rowStyle}"` : ''}>`;
+                html += `<tr${classes ? ` class="${classes}"` : ''}${clickAttr}${rowStyle ? ` style="${rowStyle}"` : ''}>`;
                 for (const col of columns) {
                     const align = col.align ? `text-align:${col.align};` : '';
                     const extra = col.cellStyle || '';

@@ -3540,6 +3540,12 @@ a:hover { color: #1e40af; }
 .history-row:hover {
     background: #f9fafb;
 }
+.leaderboard-top {
+    background: #f0fdf4;
+}
+.leaderboard-top.history-row:hover {
+    background: #dcfce7;
+}
 .history-back-row {
     display: flex;
     align-items: flex-start;

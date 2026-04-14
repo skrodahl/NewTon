@@ -623,7 +623,7 @@ const NewtonHistory = (() => {
                     defaultSortKey: 'points',
                     defaultSortDir: 'desc',
                     emptyMessage: 'No player data available.',
-                    rowStyle: (row) => row._rank <= 16 ? 'background:#f0fdf4;' : '',
+                    rowClass: (row) => row._rank <= 16 ? 'leaderboard-top' : '',
                     onRowClick: (row) => { /* TODO: open Player tab for row.name */ },
                     columns: [
                         {
