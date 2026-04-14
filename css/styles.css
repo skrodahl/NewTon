@@ -3939,6 +3939,14 @@ a:hover { color: #1e40af; }
     display: inline-flex;
 }
 
+/* Default page — show Analytics instead of Setup */
+.mode-analytics #setup.page.active {
+    display: none;
+}
+.mode-analytics #history.page {
+    display: block;
+}
+
 /* Bracket controls — hide tournament management buttons in analytics mode */
 .mode-analytics .bracket-controls-top-left .nav-btn:not(.analytics-back-btn) {
     display: none;
