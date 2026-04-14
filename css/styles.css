@@ -1717,6 +1717,11 @@ a:hover { color: #1e40af; }
   border: 1px solid #e2e8f0;
 }
 
+.celebration-analytics {
+  text-align: center;
+  margin-top: 20px;
+}
+
 .highlights-title {
   font-size: 1.1rem;
   font-weight: bold;

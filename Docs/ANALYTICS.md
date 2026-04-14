@@ -6,13 +6,19 @@ The Analytics tab was introduced in v5.0.1 as a read-only match register browser
 
 ## Current State
 
-A three-panel hierarchical browser:
+Four-tab analytics interface: Dashboard, Leaderboard (placeholder), Players (placeholder), Register.
 
-1. **Tournament list** — all finalized tournaments with name, format, date, player count, status. Export/import buttons for full register backups.
+**Dashboard** — six stat cards computed from the scoped tournament set: Tournaments (finalized), Matches (completed), Players (unique by lowercase trimmed name), 180s (total), Highest Checkout (player), Shortest Leg (player). Point mode toggle in UI (Original / Current / Custom) — not yet wired to computation.
+
+**Register** — three-panel hierarchical browser:
+
+1. **Tournament list** — all finalized tournaments with checkbox selection, name, date, players, matches, format. Lens filter bar above the table: text filter (AND keyword match), date range (inclusive from/to, prefilled), Reset button. Header checkbox toggles all visible rows.
 2. **Match list** — all matches for a selected tournament. Match ID, players, result, type (Chalker/Manual), completion date.
 3. **Match detail** — full match record. For Chalker matches: leg-by-leg visit scores (decoded from base64), first thrower, checkout darts, achievements (180s, tons, high outs, short legs). For manual matches: leg count only.
 
-Delete requires typing the tournament name. Import merges without overwriting existing records.
+**Scope selector** — three composable filters narrow the dataset: text → date range → checkboxes. Scope = visible ∩ checked. Green pill indicator in the header shows "Viewing: N of M tournaments." All filters and scope persisted to localStorage.
+
+Delete requires typing the tournament name. Import merges without overwriting existing records. Export/import buttons for full register backups.
 
 ---
 
@@ -99,14 +105,14 @@ Future features may add stats that only make sense at the tournament level — c
 
 ## The Gap
 
-The data exists. The queries don't.
+The data exists. The scope selector and dashboard provide the first layer of analysis. What's missing:
 
-- **No aggregation** — achievements stored per-match and per-tournament, but never rolled up across tournaments or per player over time
-- **No player career view** — no way to see a player's history, averages, or form
-- **No cross-tournament queries** — no leaderboards, no season stats, no head-to-head records
-- **No control surface** — no way to choose what logic is applied to the data (point mode, date range, grouping)
+- **No player career view** — no way to see a player's history, averages, or form across tournaments
+- **No cross-tournament leaderboard** — no season standings, no head-to-head records
+- **Point mode not wired** — toggle exists in UI but doesn't recompute stats yet
 - **No charts** — form and trends are invisible without visual representation
 - **Manual matches lack depth** — visit-level data unavailable; only leg counts shown
+- **Dashboard drill-through incomplete** — stat cards exist but most don't link to deeper views yet
 
 ---
 
@@ -186,36 +192,42 @@ Each is just the register with a different selection and a view with a different
 
 This is why the data layer uses IndexedDB rather than LocalStorage. IndexedDB provides indexed queries, compound keys, and cursor-based iteration — the building blocks for a queryable data layer. LocalStorage would restrict the system to key-value lookups and force every aggregation into application code with no index support. The control surface needs a database underneath it, not a string store.
 
-### Controls
+### Controls — implemented (v5.0.8)
 
 **Register as gating filter:**
 
-The tournament register is the scope selector for the entire command center. All other views — dashboard, leaderboard, players — compute from whichever tournaments are currently selected in the register. The default is all finalized tournaments (all-time). Every filter defaults to "everything" and narrows from there — no selection is still a selection.
+The tournament register is the scope selector for the entire command center. All other views — dashboard, leaderboard, players — compute from whichever tournaments are currently selected in the register. The default is all tournaments in the register (all-time). Every filter defaults to "everything" and narrows from there — no selection is still a selection.
 
-Three composable filters, evaluated in order:
+Three composable filters in the Lens bar, evaluated in order:
 
 ```
-All finalized tournaments
-    → Date range (coarse scope — default: all dates)
-        → Text filter (pattern match on tournament name)
-            → Manual checkboxes (fine-tune individual tournaments)
+All tournaments in register
+    → Text filter (AND keyword match on tournament names)
+        → Date range (inclusive from/to)
+            → Per-tournament checkboxes
                 → Active scope for all views
 ```
 
-Each layer narrows the previous one. No layer is required — skip any and the full set passes through.
-
-**Date range:**
-- From/to date pickers. Narrows the tournament list to events within the range.
-- Default: no range selected = all dates = all-time. Not a special case, just the widest scope.
+Each layer narrows the previous one. No layer is required — skip any and the full set passes through. The scope is the intersection: visible (text + date matched) ∩ checked.
 
 **Text filter:**
-- Type keywords, filtered instantly against tournament names.
-- AND logic by default: space-separated terms must all match (case-insensitive). "Monday Cup" matches "Monday Night Cup" and "Monday Afternoon Cup" but not "Monday Practice" or "Thursday Cup."
+- Type keywords, filtered instantly against tournament names. Controls table visibility — non-matching rows are hidden.
+- AND logic: space-separated terms must all match (case-insensitive). "Monday Cup" matches "Monday Night Cup" and "Monday Afternoon Cup" but not "Monday Practice" or "Thursday Cup."
 - Future option: `-` prefix for NOT ("Monday -Practice"), added only if the need arises in practice.
 
+**Date range:**
+- From/to date pickers, inclusive on both ends. Compares against `closedAt` date.
+- Prefilled with the earliest and latest tournament dates in the register — immediately shows the data range.
+- Narrowing either end hides tournaments outside the window.
+
 **Manual selection:**
-- Checkboxes on the filtered tournament list. Deselect individual tournaments you don't want in scope.
-- Operates on the already-filtered list — date range and text filter narrow first, then manual selection fine-tunes.
+- Checkboxes on the filtered (visible) tournament list. Uncheck individual tournaments to exclude from scope.
+- Header checkbox toggles all visible rows.
+- Empty selection = empty scope (dashboard shows no data).
+
+**Reset button:** clears text, resets dates to full range, checks all tournaments, resets scope to all.
+
+**Persistence:** scope, text filter, and date range all saved to localStorage. Restored on reload with stale ID filtering.
 
 **Point mode:**
 - **Original** — each tournament scored using its own `configSnapshot` point values (what actually happened)
@@ -419,20 +431,25 @@ Examples:
 - Date range → `newton_analytics_dateFilter`
 - Stale tournament IDs filtered out on restore
 
-### Phase 1 — Stats Cards + Point Mode
+### Phase 1 — Stats Cards + Point Mode (partially done)
 
-The command center skeleton with a dashboard view.
+**Stats cards — implemented (v5.0.6+):**
+Six cards on the Dashboard, all scope-aware:
+- Tournaments (finalized count)
+- Matches (completed count)
+- Players (unique by lowercase trimmed name — v5.0.9)
+- 180s (total across scope)
+- Highest Checkout (value + player name)
+- Shortest Leg (dart count + player name)
 
-**Stats cards** — headline numbers computed from finalized data:
-- Most 180s (player, count, across all tournaments)
-- Highest match average (player, value, tournament)
+**Still planned:**
 - Most tournament wins (player, count)
 - Current title holder (winner of most recent finalized tournament)
-- Total matches played (all tournaments)
+- Highest match average (player, value — requires raw Chalker data)
+- Drill-through: clicking a card navigates to the relevant view with context (partially decided — see Open Questions)
 
-Clickable — drill into the underlying data.
-
-**Point mode toggle** — Original vs Current. The first control. Demonstrates the principle that the same data tells different stories depending on the scoring rules applied.
+**Point mode toggle — UI exists, not wired:**
+Toggle buttons (Original / Current / Custom) render in the control bar. Switching modes logs to console but does not recompute stats. Wiring this is the remaining Phase 1 work — it connects the `configSnapshot` per tournament to the computation layer.
 
 ### Phase 2 — Player View
 
@@ -522,13 +539,22 @@ Same principle as everything else — the data exists, the operator chooses the 
 
 Defer specifics until the scope selector is working and real data flows through the dashboard at different zoom levels.
 
-### Player count — not actually unique
+### ~~Player count — not actually unique~~ Partially resolved (v5.0.9)
 
-The Dashboard "Players — Unique" card currently sums player entries across all tournaments in scope. If Simon plays in all 12 tournaments, he counts as 12. With 12 tournaments the card shows 234 "unique" players — the real number is far lower.
+Player count now deduplicates by lowercase trimmed name across tournaments. This handles the common case (same operator, same spelling) and dropped a test dataset from 32 to 26.
 
-The count needs true deduplication across tournaments. Player identity is by name (no cross-tournament player ID exists), so this requires name-based matching. Exact match is a reasonable starting point; fuzzy matching (nicknames, typos) is a harder problem for later.
+**Remaining gap — player name aliases:**
 
-Until resolved, the label "Unique" is misleading.
+Names like "Marcus.Å" and "Marcus Å" still count as two players. Fuzzy matching is risky — too many false positives. Instead, let the operator create a manual alias map in Global Settings: a list of name pairs that should be treated as the same person. The operator knows their players; the system shouldn't guess.
+
+**Alias map concept:**
+- Stored in Global Settings (config), not in IndexedDB
+- Applied at query time when counting unique players, building leaderboards, and aggregating player stats
+- Does not modify the underlying match records — the original names stay in the register
+- UI: simple list of "also known as" entries, e.g. `Marcus Å → Marcus.Å`
+- The canonical name (right side) is what appears in views
+
+Deferred until the Player view is built — that's where aliases will matter most.
 
 ### Raw data principle in roadmap phases
 
@@ -536,4 +562,4 @@ The architecture section defines when to use raw data vs the achievement registe
 
 ---
 
-**Last updated:** April 13, 2026 — Scope selector done (v5.0.8): text filter, date range, checkboxes, scope indicator, persistence. Next: Phase 1 stats cards + point mode.
+**Last updated:** April 14, 2026 — Current State, Gap, Controls, and Phase 1 updated to reflect implemented state. Player count dedup done (v5.0.9). Alias map concept added. Next: wire point mode toggle, then Phase 2 Player View.

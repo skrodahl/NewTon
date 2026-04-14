@@ -5,6 +5,11 @@
 - **Rounded corners on buttons** — `border-radius: 6px` on `.btn`, `.btn-small`, `.player-list-item-actions button`, and `.cc-match-action-btn` globally. Buttons now visually distinct from input fields and panels, which remain flat.
 - **Reset filter button** — clears text filter, resets date range, checks all tournaments, and resets scope to all.
 - **Register "View →" buttons removed** — row click already navigates to the tournament. Delete button stays. Cleaner table, more space for data columns.
+- **Date/time separator** — match timestamps now use middot separator: `2026-03-09 · 21:13`.
+
+### Analytics
+
+- **Unique player count fixed** — Dashboard "Players" card now deduplicates by lowercase trimmed name across tournaments instead of per-tournament player IDs. Drops inflated counts to actual unique players.
 
 ---
 

@@ -21,7 +21,7 @@ const NewtonHistory = (() => {
     function fmtDateTime(ts) {
         if (!ts) return '—';
         const d = new Date(tsToMs(ts));
-        return fmtDate(ts) + ' ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
+        return fmtDate(ts) + ' \u00b7 ' + String(d.getHours()).padStart(2, '0') + ':' + String(d.getMinutes()).padStart(2, '0');
     }
 
     /** Currently selected tournament record (for match list context) */
@@ -257,11 +257,11 @@ const NewtonHistory = (() => {
                 allMatches.push(...matches);
             }
 
-            // Unique players
+            // Unique players (deduplicate by normalized name across tournaments)
             const playerSet = new Set();
             allMatches.forEach(m => {
-                if (m.player1Id) playerSet.add(m.player1Id);
-                if (m.player2Id) playerSet.add(m.player2Id);
+                if (m.player1Name) playerSet.add(m.player1Name.trim().toLowerCase());
+                if (m.player2Name) playerSet.add(m.player2Name.trim().toLowerCase());
             });
 
             // Scan tournament-level achievements (includes both manual and Chalker data)
