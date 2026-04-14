@@ -415,7 +415,14 @@
                                 <small class="field-help">Maximum number of players to show in each referee category (Winners, Losers, Assignments)</small>
                             </div>
 
-                            <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">Server Settings</h4>
+                            <button class="btn btn-success" onclick="saveUIConfiguration()">Save UI Settings</button>
+                        </div>
+                    </div>
+
+                    <!-- Server Settings Section -->
+                    <div class="config-section">
+                        <h3>Server Settings</h3>
+                        <div class="config-content">
                             <div class="form-group">
                                 <label for="serverIdDisplay">Server ID</label>
                                 <input type="text" id="serverIdDisplay" readonly style="background:#f3f4f6;color:#6b7280;cursor:default;">
@@ -427,8 +434,7 @@
                                         <input type="checkbox" id="allowSharedTournamentDelete">
                                         <span>
                                             Allow deleting shared tournaments
-                                            <small class="field-help">When disabled, delete buttons are hidden for
-                                                shared tournaments on the server</small>
+                                            <small class="field-help">When disabled, delete buttons are hidden for shared tournaments on the server</small>
                                         </span>
                                     </label>
                                 </div>
@@ -458,7 +464,7 @@
                                 <input type="password" id="remoteServerPassword" placeholder="(optional)">
                             </div>
 
-                            <button class="btn btn-success" onclick="saveUIConfiguration()">Save UI Settings</button>
+                            <button class="btn btn-success" onclick="saveUIConfiguration()">Save Server Settings</button>
                         </div>
                     </div>
                 </div>

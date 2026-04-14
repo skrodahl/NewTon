@@ -574,6 +574,25 @@ Tournament names in IndexedDB should be editable — renaming "Måndagscup" to "
 
 UI: inline edit or edit button on the tournament row in the Register, or in the tournament detail view.
 
+### Seeded brackets from Analytics data
+
+When generating a bracket, offer optional seeding based on the Analytics leaderboard. The history of past tournaments directly improves the fairness of the next one.
+
+**Concept:**
+- At bracket generation, look up registered players against the Analytics leaderboard (same lowercase trim name matching)
+- Top N players (default 4, configurable) get seeded positions — spread across the draw so they don't meet early
+- Seed placement follows standard tournament convention: #1 and #2 on opposite sides, #3 and #4 fill the remaining quarters
+- Everyone else randomized as usual
+- Seeds are based on who's actually registered for this tournament, not the global top N
+
+**Design:**
+- Opt-in toggle in Tournament Setup — not every club wants seeding
+- Configurable seed count (2, 4, 8)
+- Scope-aware: seeding could use the current Analytics scope (e.g. season standings) or all-time — operator chooses
+- This is the first feature where Analytics data flows back into the tournament manager, bridging the two systems
+
+**Dependencies:** Player Name Editor (for reliable cross-tournament identity)
+
 ### Raw data principle in roadmap phases
 
 The architecture section defines when to use raw data vs the achievement register (absolute stats → register shortcut; threshold-dependent and derived stats → raw data). The roadmap phases should consistently reference this. Currently Phase 2 (Player View) mentions "match averages (where Chalker data available)" but doesn't state which source is used for other stats. Each phase should be explicit about which data source it draws from.

@@ -1,3 +1,15 @@
+## **v5.0.10** — (2026-04-14)
+
+### Global Settings
+
+- **Server Settings separated** — Server ID, auto-backup, shared tournament delete, and remote backup settings moved from the User Interface section into their own "Server" pane. Cleaner separation of concerns.
+
+### Analytics
+
+- **Dashboard entry point** — clicking "Analytics" on a tournament (from Recent Tournaments or the podium) now always opens the Dashboard tab, not the last visited tab.
+
+---
+
 ## **v5.0.9** — Leader of the Pack (2026-04-14)
 
 ### UI
