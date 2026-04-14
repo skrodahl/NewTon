@@ -624,6 +624,7 @@ const NewtonHistory = (() => {
                     defaultSortDir: 'desc',
                     emptyMessage: 'No player data available.',
                     rowStyle: (row) => row._rank <= 16 ? 'background:#f0fdf4;' : '',
+                    onRowClick: (row) => { /* TODO: open Player tab for row.name */ },
                     columns: [
                         {
                             key: '_rank', label: '#', width: '50px', align: 'center',
