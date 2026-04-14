@@ -1,6 +1,6 @@
-# Release Notes — v5.0.10-beta.1 — Analytics Mode
+# Release Notes — v5.0.10-beta.2 — Analytics Mode
 
-**NewTon DC Tournament Manager v5.0.10-beta.1 — April 14, 2026**
+**NewTon DC Tournament Manager v5.0.10-beta.2 — April 15, 2026**
 
 ---
 
@@ -8,7 +8,7 @@
 
 NewTon becomes a two-tier system. The venue runs the full app locally. The public site runs analytics-only. Same codebase, same Docker image, one environment variable.
 
-v5.0.10-beta.1 introduces `NEWTON_MODE=analytics` — a deployment mode that hides tournament management and exposes only Analytics and a limited Global Settings. Combined with `NEWTON_READONLY_ANALYTICS=true`, public instances become read-only analytical surfaces where anyone can explore and nobody can delete.
+v5.0.10-beta.2 introduces `NEWTON_MODE=analytics` — a deployment mode that hides tournament management and exposes only Analytics and a limited Global Settings. Combined with `NEWTON_READONLY_ANALYTICS=true`, public instances become read-only analytical surfaces where anyone can explore and nobody can delete.
 
 ---
 
@@ -37,7 +37,7 @@ In analytics mode, a "View Bracket" button appears on tournament rows and in the
 - No match controls, no auto-open Match Controls
 - No Developer Console
 - "Back to Analytics" button returns and cleans up
-- Uses a dedicated localStorage scratch slot (`newton_analytics_bracketPreview`) — never touches real tournament data
+- Uses `currentTournament` with an `_analyticsPreview` guard — save functions skip analytics previews, so no phantom data is persisted
 
 Bracket view requires the tournament JSON on disk. In analytics mode, all data comes from disk, so this is always available.
 
@@ -88,10 +88,7 @@ services:
 
 ## Testing
 
-To test analytics mode without Docker, add `?mode=analytics` to the URL:
-```
-tournament.html?mode=analytics
-```
+Analytics mode requires Docker — the PHP layer sets the body class and header text server-side. No client-side override is available; this is intentional to prevent accidental mode changes on production instances.
 
 ---
 
@@ -101,4 +98,4 @@ No migration required. New environment variables are optional — existing deplo
 
 ---
 
-**NewTon DC Tournament Manager v5.0.10-beta.1 — The venue runs tournaments. The world sees the stats.**
+**NewTon DC Tournament Manager v5.0.10-beta.2 — The venue runs tournaments. The world sees the stats.**

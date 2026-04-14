@@ -3,9 +3,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="canonical" href="https://newtondarts.com/releases/v5.0.10-beta.1.html">
-    <title>v5.0.10-beta.1 — Analytics Mode</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.0.10-beta.1 release notes. Analytics-only deployment mode, read-only bracket view, Docker environment variables for public instances.">
+    <link rel="canonical" href="https://newtondarts.com/releases/v5.0.10-beta.2.html">
+    <title>v5.0.10-beta.2 — Analytics Mode</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.0.10-beta.2 release notes. Analytics-only deployment mode, read-only bracket view, Docker environment variables for public instances.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -18,9 +18,9 @@
 <div class="docs-content">
 
     <h1>Analytics Mode</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.0.10-beta.1 &mdash; April 14, 2026</p>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.0.10-beta.2 &mdash; April 14, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10-beta.1" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.0.10-beta.1</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10-beta.2" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.0.10-beta.2</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
@@ -47,10 +47,13 @@
         <li>Global Settings shows only Branding and Point Values</li>
         <li>Import Register hidden &mdash; data comes exclusively from disk</li>
         <li>Delete buttons inaccessible &mdash; Server Settings is hidden</li>
-        <li>Auto-navigates to Analytics on load</li>
+        <li>Auto-navigates to Analytics on load &mdash; no flash</li>
+        <li>Help system disabled &mdash; no tournament-related notifications</li>
+        <li>Font preloading &mdash; eliminates font swap flash</li>
+        <li>CSS-driven visibility &mdash; PHP sets body class, CSS handles hiding. Clean platform for future modes.</li>
     </ul>
     <h3>Read-Only Bracket View</h3>
-    <p>&ldquo;View Bracket&rdquo; button on tournament rows and match list. Loads the tournament JSON from disk, renders the bracket read-only. No match controls, no Developer Console. Uses a dedicated localStorage scratch slot &mdash; never touches real tournament data.</p>
+    <p>&ldquo;View Bracket&rdquo; button on tournament rows and match list. Loads the tournament JSON from disk, renders the bracket read-only. No match controls, no Developer Console. Uses <code>currentTournament</code> with an <code>_analyticsPreview</code> guard &mdash; save functions skip analytics previews, so no phantom data is persisted.</p>
 
     <hr>
 
@@ -85,9 +88,9 @@
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.0.10-beta.1 &mdash; The venue runs tournaments. The world sees the stats.</em></p>
+    <p><em>NewTon DC Tournament Manager v5.0.10-beta.2 &mdash; The venue runs tournaments. The world sees the stats.</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10-beta.1" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.0.10-beta.1</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10-beta.2" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.0.10-beta.2</a>
 
     <hr>
 

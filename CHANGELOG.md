@@ -1,12 +1,16 @@
-## **v5.0.10-beta.1** — (2026-04-14)
+## **v5.0.10-beta.2** — (2026-04-15)
 
 ### Analytics-only mode
 
-- **NEWTON_MODE=analytics** — new Docker environment variable. Hides Tournament Setup, Player Registration, Tournament Bracket, and Chalker tabs. Shows only Analytics and a limited Global Settings (Branding + Point Values). Header adapts to "[Club Name] - Analytics". Auto-navigates to Analytics on load. Also available via URL parameter `?mode=analytics` for testing.
-- **NEWTON_READONLY_ANALYTICS=true** — new Docker environment variable passed to client config. Foundation for read-only public instances.
-- **Read-only bracket view** — in analytics mode, "View Bracket" button on tournament list and match list loads the tournament JSON from disk and renders the bracket read-only. No match controls, no auto-open Match Controls, no Developer Console. Uses a dedicated localStorage scratch slot (`newton_analytics_bracketPreview`) — never touches real tournament data. "Back to Analytics" button returns and clears the temporary state.
+- **NEWTON_MODE=analytics** — Docker environment variable. Hides Tournament Setup, Player Registration, Tournament Bracket, and Chalker tabs. Shows only Analytics and a limited Global Settings (Branding + Point Values). Header set by PHP — no flash.
+- **NEWTON_READONLY_ANALYTICS=true** — Docker environment variable passed to client config. Foundation for read-only public instances.
+- **CSS-driven mode system** — PHP sets `<body class="mode-analytics">`, CSS handles all visibility. No JavaScript display:none, no flash on load. Clean platform for future modes.
+- **Read-only bracket view** — in analytics mode, "Bracket" button on tournament list and "View Bracket" in match list loads the tournament JSON from disk via API. Renders bracket read-only using `currentTournament` with `_analyticsPreview` guard — `saveTournamentOnly()` skips analytics previews. Bracket ID matching via tournament ID (with name+date fallback). "Back to Analytics" clears `currentTournament` and globals.
 - **Import Register hidden** — analytics mode hides the Import Register button. Data comes exclusively from disk (shared tournaments).
 - **Delete buttons respect settings** — Analytics register delete button only shown when "Allow deleting tournaments" is enabled in Server Settings. In analytics mode, Server Settings is inaccessible, so deletion is impossible by design.
+- **Help system disabled** — `initializeHelpSystem()` and `suggestHelp()` skip in analytics mode. No "No active tournament" notifications.
+- **Font preloading** — Insignia and Manrope fonts preloaded in tournament.html, eliminating font swap flash on load.
+- **Auto-navigate to Analytics** — CSS hides Setup page and shows Analytics immediately; JS confirms via `showPage('history')`.
 
 ### Docker Environment Variables
 
