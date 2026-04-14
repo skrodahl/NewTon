@@ -1304,6 +1304,7 @@ const NewtonHistory = (() => {
     async function viewBracket() {
         if (!_activeTournament) return;
 
+        const tid = _activeTournament.tournamentId;
         const tName = (_activeTournament.tournamentName || '').toLowerCase();
         const tDate = _activeTournament.tournamentDate || (_activeTournament.closedAt ? fmtDate(_activeTournament.closedAt) : '');
 
@@ -1313,7 +1314,9 @@ const NewtonHistory = (() => {
             if (!listRes.ok) throw new Error('Could not fetch tournament list');
             const listData = await listRes.json();
 
+            // Match by ID first, fallback to name+date
             const entry = (listData.tournaments || []).find(t => {
+                if (t.id != null && String(t.id) === String(tid)) return true;
                 return (t.name || '').toLowerCase() === tName && t.date === tDate;
             });
 

@@ -45,6 +45,7 @@ foreach ($files as $file) {
 
     $tournaments[] = [
         'filename' => basename($file),
+        'id' => $data['id'] ?? null,
         'name' => $data['name'] ?? 'Unknown',
         'date' => $data['date'] ?? 'Unknown',
         'players' => isset($data['players']) ? count($data['players']) : 0,
