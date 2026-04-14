@@ -3898,3 +3898,51 @@ a:hover { color: #1e40af; }
     color: #5c4a3a;
     border-color: #8a7968;
 }
+
+/* ==========================================================================
+   App Mode: Analytics — CSS-driven visibility
+   Body class "mode-analytics" set by PHP (Docker) or JS (URL parameter).
+   All mode-specific hiding is here. No JavaScript display:none needed.
+   ========================================================================== */
+
+/* Hide tournament management nav tabs */
+.mode-analytics .nav-btn[data-page="setup"],
+.mode-analytics .nav-btn[data-page="registration"],
+.mode-analytics .nav-btn[data-page="tournament"] {
+    display: none;
+}
+
+/* Hide the Chalker link (nav-btn with href, no data-page) */
+.mode-analytics .nav-btn[href] {
+    display: none;
+}
+
+/* Hide Import Register button */
+.mode-analytics .btn-warning[onclick*="historyImportFile"] {
+    display: none;
+}
+
+/* Limit Global Settings — hide all sections except Branding and Point Values */
+.mode-analytics #config .config-section {
+    display: none;
+}
+.mode-analytics #configBranding,
+.mode-analytics #configPoints {
+    display: block;
+}
+
+/* Back to Analytics button — hidden in full mode, shown in analytics mode */
+.analytics-back-btn {
+    display: none;
+}
+.mode-analytics .analytics-back-btn {
+    display: inline-flex;
+}
+
+/* Bracket controls — hide tournament management buttons in analytics mode */
+.mode-analytics .bracket-controls-top-left .nav-btn:not(.analytics-back-btn) {
+    display: none;
+}
+.mode-analytics .bracket-controls-middle-left .nav-btn {
+    display: none;
+}

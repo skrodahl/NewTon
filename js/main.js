@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.10-b.1'; // Analytics Mode — analytics-only deployment, read-only bracket view
+const APP_VERSION = '5.0.10-b.2'; // Analytics Mode — analytics-only deployment, read-only bracket view
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

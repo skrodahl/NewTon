@@ -37,21 +37,8 @@
                 }
             }, 500);
 
-            // Analytics-only mode (Docker: NEWTON_MODE=analytics, or URL: ?mode=analytics)
-            const _urlMode = new URLSearchParams(window.location.search).get('mode');
-            window.NEWTON_APP_MODE = _urlMode || (typeof window.NEWTON_CONFIG !== 'undefined' && window.NEWTON_CONFIG.appMode) || 'full';
+            // Analytics-only mode — runtime logic (visibility handled by CSS via body class)
             if (window.NEWTON_APP_MODE === 'analytics') {
-                // Hide non-analytics nav tabs
-                document.querySelectorAll('.nav-btn[data-page]').forEach(btn => {
-                    const page = btn.dataset.page;
-                    if (page !== 'history' && page !== 'config') {
-                        btn.style.display = 'none';
-                    }
-                });
-                // Hide the Chalker link
-                document.querySelectorAll('.nav-btn[href]').forEach(btn => {
-                    btn.style.display = 'none';
-                });
                 // Update header text (preserve logo, change only the text node)
                 const headerTitle = document.querySelector('.header h1');
                 if (headerTitle) {
@@ -65,39 +52,6 @@
                 setTimeout(() => {
                     if (typeof showPage === 'function') showPage('history');
                 }, 0);
-                // Hide bracket controls not relevant in analytics mode
-                document.querySelectorAll('.bracket-controls-top-left .nav-btn').forEach(btn => {
-                    btn.style.display = 'none'; // Leaderboard, Match Controls
-                });
-                document.querySelectorAll('.bracket-controls-middle-left .nav-btn').forEach(btn => {
-                    btn.style.display = 'none'; // Setup, Registration, Config
-                });
-                // Add "Back to Analytics" button in the bracket toolbar
-                const bracketTopLeft = document.querySelector('.bracket-controls-top-left');
-                if (bracketTopLeft) {
-                    const backBtn = document.createElement('button');
-                    backBtn.className = 'zoom-btn nav-btn';
-                    backBtn.title = 'Return to Analytics';
-                    backBtn.innerHTML = '<span class="nav-arrow">⬅</span><span class="nav-text">Analytics</span>';
-                    backBtn.onclick = () => { tournament = null; players = []; matches = []; localStorage.removeItem('newton_analytics_bracketPreview'); showPage('history'); };
-                    bracketTopLeft.appendChild(backBtn);
-                }
-
-                // Hide Import Register button in analytics mode (data comes from disk only)
-                const importBtn = document.querySelector('.btn-warning[onclick*="historyImportFile"]');
-                if (importBtn) importBtn.style.display = 'none';
-                const importFile = document.getElementById('historyImportFile');
-                if (importFile) importFile.style.display = 'none';
-
-                // Limit Global Settings sections in analytics mode
-                document.querySelectorAll('#config .config-section').forEach(section => {
-                    const heading = section.querySelector('h3');
-                    if (!heading) return;
-                    const title = heading.textContent.trim();
-                    if (title !== 'Branding' && title !== 'Point Values') {
-                        section.style.display = 'none';
-                    }
-                });
             }
 
             // Show demo banner if demo mode is enabled (Docker only)
@@ -113,7 +67,17 @@
     </script>
 </head>
 
-<body>
+<body class="<?php echo getenv('NEWTON_MODE') === 'analytics' ? 'mode-analytics' : 'mode-full'; ?>">
+<script>
+// URL parameter override for mode — runs before any rendering
+(function() {
+    const urlMode = new URLSearchParams(window.location.search).get('mode');
+    if (urlMode) {
+        document.body.className = 'mode-' + urlMode;
+    }
+    window.NEWTON_APP_MODE = document.body.className.replace('mode-', '');
+})();
+</script>
     <div class="container">
         <div class="header">
             <div class="header-top">
@@ -294,6 +258,7 @@
                     <!-- Top row -->
                     <div class="bracket-controls-top">
                         <div class="bracket-controls-top-left">
+                            <button class="zoom-btn nav-btn analytics-back-btn" onclick="tournament = null; players = []; matches = []; localStorage.removeItem('newton_analytics_bracketPreview'); showPage('history');" title="Return to Analytics"><span class="nav-arrow">⬅</span><span class="nav-text">Analytics</span></button>
                             <button class="zoom-btn nav-btn" onclick="showStatisticsModal()"
                                 title="View tournament statistics and rankings"><span class="nav-icon">≡</span><span class="nav-text">Leaderboard</span></button>
                             <button class="zoom-btn match-controls-btn nav-btn" onclick="showMatchCommandCenter()"
@@ -379,7 +344,7 @@
                     </div>
 
                     <!-- Branding Section -->
-                    <div class="config-section">
+                    <div class="config-section" id="configBranding">
                         <h3>Branding</h3>
                         <div class="config-content">
                             <div class="form-group">
@@ -541,7 +506,7 @@
                 <div class="config-column">
 
                     <!-- Point Values Section -->
-                    <div class="config-section">
+                    <div class="config-section" id="configPoints">
                         <h3>Point Values</h3>
                         <div class="config-content">
                             <div class="config-grid">
