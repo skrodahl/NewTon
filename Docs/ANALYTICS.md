@@ -374,6 +374,76 @@ Zero-dependency — canvas-based or inline SVG. No chart libraries.
 
 ---
 
+## Auto-Import from Shared Tournaments
+
+On app load, automatically import any completed shared tournaments (from the server's `/tournaments/` directory) that aren't already in IndexedDB. This ensures the Analytics register is always populated, regardless of which browser or device the operator uses.
+
+**Strategy: merge, not overwrite.**
+- Scan shared tournaments on disk
+- For each completed tournament not yet in IndexedDB → full backfill import (history diffing, achievement reconciliation)
+- For each tournament already in IndexedDB → skip (the register version is authoritative)
+- Disk is read-only from Analytics' perspective — Analytics never deletes or modifies files on disk
+
+**No exclusion lists or flags needed.** If the operator doesn't want a tournament in their analysis, they uncheck it in the Register. The scope selector already handles "I don't want to see this right now." Delete from the register is reserved for "this data shouldn't exist" — a rare action gated behind the "Allow deleting shared tournaments" setting.
+
+**Exclude from Analytics flag at tournament creation:** an opt-in checkbox when creating a tournament (default: off = include). Excluded tournaments are not auto-imported into Analytics and not auto-backed up to the server. Replaces the "Record to History" toggle concept from the parking lot. Designed for practice/test tournaments.
+
+**Delete button visibility in the Register:** only shown when "Allow deleting shared tournaments" is enabled in Global Settings. Same safety gate used for the shared tournaments list.
+
+**Smart delete:** if the tournament exists in Shared Tournaments (on disk), the delete button shows a message: "This tournament is stored on the server. Remove it from Shared Tournaments first." This prevents the confusing situation where a deleted tournament reappears on next load via auto-import. Only tournaments that exist solely in IndexedDB can be deleted directly from the register.
+
+**Server-level read-only mode:** a Docker environment variable (e.g. `NEWTON_READONLY_ANALYTICS=true`) that disables all deletion — both from the Analytics register and from Shared Tournaments. Overrides the client-side "Allow deleting shared tournaments" setting. Public-facing instances (e.g. newton.skrodahl.net) become read-only analytical surfaces: anyone can explore, nobody can delete. Data management happens at the venue's local instance.
+
+## Deployment Modes and Public Views
+
+The same codebase serves different audiences through configuration and URL routing. No forks, no separate builds.
+
+### Analytics-only mode (Docker env)
+
+`NEWTON_MODE=analytics` — a pure Analytics instance:
+- Hides Tournament Setup, Player Registration, Tournament Bracket, Chalker tabs
+- Shows Analytics only (Dashboard, Leaderboard, Players, Register)
+- Global Settings shows Branding (club name for the header) and Point Values (for Current mode toggling)
+- Header adapts to mode: "NewTon [Club Name] - Analytics" instead of "NewTon [Club Name] - Tournament Manager"
+- Auto-imports from shared tournaments on load
+- Read-only by default (no deletion)
+- Relay API still accepts tournament uploads from venue instances
+
+**Read-only bracket view (analytics mode only):** the Tournament Bracket tab is available in analytics-only mode, but read-only. No match controls, no start/stop, no Developer Console. Just the visual bracket with completed match cards, progression lines, and click-to-view results. Accessible from the Analytics Register — click a tournament, option to view bracket.
+
+Bracket view requires the tournament JSON on disk. In analytics mode, every tournament comes from disk (auto-import or manual file copy), so the JSON is always available. The bracket renderer reads the full tournament object (players, matches, bracket structure, placements) and renders with `readOnly = true`.
+
+**Not available in full app mode** — in the full app, operators load tournaments from localStorage the usual way. The Analytics bracket view exists only because analytics-only mode has no other way to see brackets.
+
+**No Register Import in analytics mode** — data comes exclusively from disk (shared tournaments). This guarantees every tournament has a JSON file, which guarantees bracket view availability. Export Register remains available for backup/transfer. The register is a read-only index of what's on disk.
+
+The venue runs the full app locally. The public site runs the analytics instance. Same Docker image, different mode.
+
+**Header branding across modes:** the Branding setting (club name) in Global Settings is used by all modes — full app, analytics-only, and future view modes (e.g. leaderboard-only for big screens). Each mode adapts the header text: "Tournament Manager", "Analytics", "Leaderboard", etc. The club name is the constant; the mode label changes.
+
+### URL-based views (public screens)
+
+Direct URLs that open specific Analytics views — designed for venue big screens and public links:
+- `/analytics` → full Analytics interface, no tournament management tabs
+- `/leaderboard` → just the leaderboard, full screen — ideal for projecting at the venue
+
+These are presentation shortcuts, not separate apps. The URL sets the initial view state (which tab, what scope). The same scope selector, point toggles, and data pipeline power everything underneath.
+
+**Venue big screen workflow:**
+- Between tournaments: project `/leaderboard` — season standings, auto-updating as tournaments finalize
+- During a tournament: scope to the current event, project the single-tournament leaderboard
+- After the Grand Final: season leaderboard updates automatically as the new data imports
+
+### The two-tier picture
+
+- **Local instance** (venue) → full app, runs tournaments, auto-backs up to remote
+- **Remote instance** (public) → analytics-only, auto-imports from shared tournaments, read-only
+- **Big screen** (venue) → URL-based view into either instance, no operator interaction needed
+
+Same data, same code. Three audiences, three presentations.
+
+---
+
 ## Roadmap
 
 The command center is the frame. Each phase adds views and controls that render within it.
@@ -599,4 +669,17 @@ The architecture section defines when to use raw data vs the achievement registe
 
 ---
 
-**Last updated:** April 14, 2026 — Current State, Gap, Controls, and Phase 1 updated to reflect implemented state. Player count dedup done (v5.0.9). Alias map concept added. Next: wire point mode toggle, then Phase 2 Player View.
+**Last updated:** April 14, 2026
+
+**Next steps (priority order):**
+1. **Auto-import shared tournaments** — on app load, import any completed shared tournaments from disk that aren't already in IndexedDB. Zero-friction Analytics population.
+2. **Import Tournament button** — in the Analytics header alongside Export/Import Register. Accepts a single tournament JSON file (same format as Tournament Setup export) and imports it into the Analytics register using the existing backfill logic. Manual fallback for when auto-backup didn't fire or the server wasn't reachable. Export at the venue, import at home.
+3. **NEWTON_READONLY_ANALYTICS=true** — Docker env variable that disables all deletion. Public instances become read-only analytical surfaces.
+4. **Smart delete button** — hide behind "Allow deleting shared tournaments" setting. If tournament exists on disk, block delete with message directing to Shared Tournaments. Respects read-only env variable.
+5. **Exclude from Analytics flag** — opt-in checkbox at tournament creation. Excluded tournaments skip auto-import and auto-backup. For practice/test tournaments.
+5. **Player tab** — Player Name Editor + player profiles
+6. **Leaderboard export** — JSON/CSV
+7. **Table cogwheel** — column visibility + top-N threshold
+8. **All-matches view** — flat match list in Register, wired to Matches dashboard card
+9. **Seeded brackets** — use Analytics leaderboard data to seed tournament draws
+10. **Analytics-only mode / URL views** — deployment modes for public sites and venue big screens

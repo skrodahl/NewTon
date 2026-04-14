@@ -896,6 +896,8 @@ const NewtonHistory = (() => {
                     {
                         key: '_actions', label: '', sortable: false, align: 'right',
                         render: (v, row) => {
+                            const allowDelete = typeof config !== 'undefined' && config.server && config.server.allowSharedTournamentDelete;
+                            if (!allowDelete) return '';
                             const safeId = escHtml(row.tournamentId);
                             const safeName = escHtml(row.tournamentName || row.tournamentId);
                             return `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
@@ -1260,6 +1262,59 @@ const NewtonHistory = (() => {
         _matchTable.setData(matchRecords);
 
         showPanel('matchList');
+
+        // Show "View Bracket" button in analytics mode
+        const bracketBtn = document.getElementById('viewBracketBtn');
+        if (bracketBtn) {
+            bracketBtn.style.display = (window.NEWTON_APP_MODE === 'analytics') ? '' : 'none';
+        }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Bracket view (analytics mode only)
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Load the active tournament's JSON from disk and show the bracket.
+     * Only available in analytics mode where all tournaments have JSON on disk.
+     */
+    async function viewBracket() {
+        if (!_activeTournament) return;
+
+        const tid = _activeTournament.tournamentId;
+
+        try {
+            // Find the matching file via list-tournaments API
+            const listRes = await fetch('api/list-tournaments.php');
+            if (!listRes.ok) throw new Error('Could not fetch tournament list');
+            const listData = await listRes.json();
+
+            const entry = (listData.tournaments || []).find(t => {
+                // Match by filename (tournament ID is typically the filename without .json)
+                return t.filename === tid + '.json' || t.filename === tid;
+            });
+
+            if (!entry) throw new Error('Tournament file not found on server');
+
+            // Fetch the full tournament JSON
+            const res = await fetch('tournaments/' + entry.filename);
+            if (!res.ok) throw new Error('Could not load tournament file');
+            const data = await res.json();
+
+            // Set globals for the bracket renderer
+            tournament = data;
+            tournament.readOnly = true;
+            players = data.players || [];
+            matches = data.matches || [];
+
+            // Show the bracket tab and render
+            if (typeof showPage === 'function') showPage('tournament');
+            if (typeof renderBracket === 'function') renderBracket();
+
+        } catch (e) {
+            console.error('viewBracket failed:', e);
+            alert('Could not load bracket: ' + e.message);
+        }
     }
 
     // ---------------------------------------------------------------------------
@@ -1537,6 +1592,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard, viewBracket };
 
 })();
