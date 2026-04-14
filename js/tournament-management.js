@@ -2038,8 +2038,9 @@ function closeStorageModal() {
 
 // Open Analytics tab scoped to a specific tournament
 function openAnalyticsForTournament(tournamentId) {
-    if (typeof NewtonHistory !== 'undefined' && NewtonHistory.setScope) {
-        NewtonHistory.setScope([String(tournamentId)]);
+    if (typeof NewtonHistory !== 'undefined') {
+        if (NewtonHistory.setScope) NewtonHistory.setScope([String(tournamentId)]);
+        if (NewtonHistory.showDashboard) NewtonHistory.showDashboard();
     }
     if (typeof showPage === 'function') {
         showPage('history');

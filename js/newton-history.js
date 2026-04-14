@@ -434,6 +434,12 @@ const NewtonHistory = (() => {
         '</div>';
     }
 
+    /** Force the next render to show the Dashboard tab. */
+    function showDashboard() {
+        _activeView = 'dashboard';
+        _dirty.dashboard = true;
+    }
+
     // ---------------------------------------------------------------------------
     // Leaderboard
     // ---------------------------------------------------------------------------
@@ -1531,6 +1537,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard };
 
 })();

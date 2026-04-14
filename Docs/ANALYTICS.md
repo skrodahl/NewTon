@@ -551,18 +551,28 @@ Defer specifics until the scope selector is working and real data flows through 
 
 Player count now deduplicates by lowercase trimmed name across tournaments. This handles the common case (same operator, same spelling) and dropped a test dataset from 32 to 26.
 
-**Remaining gap — player name aliases:**
+**Remaining gap — Player Name Editor (Players tab):**
 
-Names like "Marcus.Å" and "Marcus Å" still count as two players. Fuzzy matching is risky — too many false positives. Instead, let the operator create a manual alias map in Global Settings: a list of name pairs that should be treated as the same person. The operator knows their players; the system shouldn't guess.
+Names like "Marcus.Å" and "Marcus Å" still count as two players. Fuzzy matching is risky — too many false positives. The system should never guess — the operator knows their players.
 
-**Alias map concept:**
-- Stored in Global Settings (config), not in IndexedDB
-- Applied at query time when counting unique players, building leaderboards, and aggregating player stats
-- Does not modify the underlying match records — the original names stay in the register
-- UI: simple list of "also known as" entries, e.g. `Marcus Å → Marcus.Å`
-- The canonical name (right side) is what appears in views
+**Player Name Editor — lives in the Players tab:**
 
-Deferred until the Player view is built — that's where aliases will matter most.
+The Players tab serves two purposes: player profiles (career stats, match history) and player identity management. The Name Editor is the identity side.
+
+- **Display names**: set a "real name" for any player. "Micke.M" becomes "Mikael Mattsson" in all views. The operator can do this for every player — upgrading nicknames and abbreviations to proper first/last names across the entire system.
+- **Merge aliases**: group multiple register names under one identity. "Marcus.Å", "Marcus Å", "Marcus" all map to one player with a chosen display name. Stats, placements, and match records aggregate correctly.
+- **Auto-discovery**: the editor lists all unique names found in the register. The operator works through the list, setting display names and merging duplicates. New names appear automatically as tournaments are added.
+- **Non-destructive**: the raw match records in IndexedDB keep the original names. The editor is a presentation layer — a lens applied at query time, consistent with the Analytics philosophy.
+- **Storage**: the name map lives in Global Settings (config), persisted to localStorage. Not in IndexedDB — it's operator configuration, not tournament data.
+- **Applied everywhere**: leaderboard, dashboard, player profiles, match lists, match detail — any view that shows a player name checks the map first.
+
+This bridges the gap between casual tournament registration (where "Micke.M" is fast and good enough) and long-term analytics (where "Mikael Mattsson" tells the real story). The same data, properly identified.
+
+### Tournament name editing
+
+Tournament names in IndexedDB should be editable — renaming "Måndagscup" to "Monday Cup 2026-03-09" helps organize long-term data without changing results. This is metadata, not a result — consistent with the "data is immutable, presentation is configurable" principle. The name change should update the IndexedDB tournament meta record directly (not a presentation layer like player names) since tournament names are already mutable metadata, not frozen match data.
+
+UI: inline edit or edit button on the tournament row in the Register, or in the tournament detail view.
 
 ### Raw data principle in roadmap phases
 
