@@ -264,11 +264,13 @@ All tabular views use a shared table utility. Pass it data, column definitions, 
 - Sort indicators inline with header text, right of the label
 - No visual clutter when inactive — only the active sort column shows an arrow
 
-**Column visibility** (later):
-- Operator can show/hide columns per table
-- Reduces noise — only display what matters for the current question
-- Another control parameter: same data, different projection
-- Deferred until the core sort + pagination utility is stable
+**Table settings cogwheel** (next):
+- Small gear icon in the table header area, opens a dropdown/popover
+- **Column visibility**: checkboxes for each column — show/hide per table. Reduces noise; only display what matters for the current question. Same data, different projection.
+- **Top players threshold** (leaderboard): configurable cutoff for the green highlight. Default 16. Adjustable per operator.
+- All settings persisted to localStorage per table ID
+- Lives in the NewtonTable utility — every table gets the cogwheel for free
+- Core sort + pagination utility is now stable (v5.0.5+); this is the natural next addition
 
 **Column widths:**
 - Columns accept an optional `width` property (e.g. `'80px'`). Compact columns like Format, Players, Matches get fixed widths; name columns take the remaining space.
@@ -463,18 +465,16 @@ Aggregate stats per player across all finalized tournaments.
 
 Indexed by player ID. Requires scanning all matches for a player — existing `player1Id`/`player2Id` indices support this.
 
-### Phase 3 — Cross-Tournament Leaderboard
+### Phase 3 — Cross-Tournament Leaderboard (partially done, v5.0.9)
 
-Rankings across the full register.
+Core leaderboard implemented. Aggregates per player across scoped tournaments: placement counts (1st–7-8th), 180s, high outs, short legs, best checkout, best leg, three-dart average (Chalker only), matches won/lost, legs won/lost, total points. All sortable. Respects point mode and layers.
 
-- Season leaderboard (configurable date range — first scope control)
-- All-time records
+**Still planned:**
 - Head-to-head records between players
-- Achievement leaderboards (most 180s, highest single-match average, most high outs)
+- Achievement leaderboards (most 180s, highest single-match average, most high outs) as alternative sort/filter views
+- Computed cache/summary if performance becomes an issue at scale
 
-May benefit from a computed cache/summary to avoid scanning all matches on every render.
-
-**Export:** Season leaderboard exportable as JSON and CSV — same format as single-tournament results export. The data shape is identical (players, points, placements, achievements), just aggregated across the selected scope. Any filtered/configured leaderboard view should be exportable, not just the default.
+**Export:** Leaderboard exportable as JSON and CSV. The data is already computed as an array of player objects — serialisation is straightforward. Any filtered/configured leaderboard view should be exportable, not just the default. Export respects the active scope, point mode, and layers — what you see is what you export. Prime candidate for next implementation.
 
 ### Phase 4 — Graphs
 
