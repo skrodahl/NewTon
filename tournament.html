@@ -5,7 +5,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/tournament.html">
-    <title>NewTon DC - Tournament Manager - Open Source Darts Tournament Software</title>
+    <title>NewTon DC - <?php echo getenv('NEWTON_MODE') === 'analytics' ? 'Analytics' : 'Tournament Manager'; ?> - Open Source Darts Tournament Software</title>
     <meta name="description" content="Free, open-source darts tournament manager. Single and double elimination brackets for 4-32 players. Offline-first, self-hostable. No signup required.">
     <meta name="keywords" content="darts, tournament, bracket, double elimination, single elimination, tournament manager, open source, self-hosted, offline, darts scoring">
     <link rel="icon" type="image/jpeg" href="images/logo.jpg">
@@ -30,25 +30,17 @@
     <script>
         // Initialize help system when DOM is ready
         document.addEventListener('DOMContentLoaded', function () {
-            // Load help system after other initialization
-            setTimeout(() => {
-                if (typeof initializeHelpSystem === 'function') {
-                    initializeHelpSystem();
-                }
-            }, 500);
+            // Load help system after other initialization (not in analytics mode)
+            if (window.NEWTON_APP_MODE !== 'analytics') {
+                setTimeout(() => {
+                    if (typeof initializeHelpSystem === 'function') {
+                        initializeHelpSystem();
+                    }
+                }, 500);
+            }
 
-            // Analytics-only mode — runtime logic (visibility handled by CSS via body class)
+            // Analytics-only mode — navigate to Analytics on load
             if (window.NEWTON_APP_MODE === 'analytics') {
-                // Update header text (preserve logo, change only the text node)
-                const headerTitle = document.querySelector('.header h1');
-                if (headerTitle) {
-                    headerTitle.childNodes.forEach(node => {
-                        if (node.nodeType === Node.TEXT_NODE && node.textContent.includes('Tournament Manager')) {
-                            node.textContent = node.textContent.replace('Tournament Manager', 'Analytics');
-                        }
-                    });
-                }
-                // Navigate to Analytics on load
                 setTimeout(() => {
                     if (typeof showPage === 'function') showPage('history');
                 }, 0);
@@ -69,14 +61,7 @@
 
 <body class="<?php echo getenv('NEWTON_MODE') === 'analytics' ? 'mode-analytics' : 'mode-full'; ?>">
 <script>
-// URL parameter override for mode — runs before any rendering
-(function() {
-    const urlMode = new URLSearchParams(window.location.search).get('mode');
-    if (urlMode) {
-        document.body.className = 'mode-' + urlMode;
-    }
-    window.NEWTON_APP_MODE = document.body.className.replace('mode-', '');
-})();
+window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'analytics' : 'full';
 </script>
     <div class="container">
         <div class="header">
@@ -85,7 +70,7 @@
                     <div id="clubLogo" class="logo-placeholder">
                         CLUB<br>LOGO
                     </div>
-                    NewTon DC - Tournament Manager
+                    NewTon DC - <?php echo getenv('NEWTON_MODE') === 'analytics' ? 'Analytics' : 'Tournament Manager'; ?>
                 </h1>
                 <div id="headerClock" class="header-clock"></div>
             </div>
