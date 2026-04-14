@@ -79,7 +79,7 @@
                     backBtn.className = 'zoom-btn nav-btn';
                     backBtn.title = 'Return to Analytics';
                     backBtn.innerHTML = '<span class="nav-arrow">⬅</span><span class="nav-text">Analytics</span>';
-                    backBtn.onclick = () => { tournament = null; players = []; matches = []; showPage('history'); };
+                    backBtn.onclick = () => { tournament = null; players = []; matches = []; localStorage.removeItem('newton_analytics_bracketPreview'); showPage('history'); };
                     bracketTopLeft.appendChild(backBtn);
                 }
 

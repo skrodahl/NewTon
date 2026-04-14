@@ -896,11 +896,18 @@ const NewtonHistory = (() => {
                     {
                         key: '_actions', label: '', sortable: false, align: 'right',
                         render: (v, row) => {
+                            let html = '';
+                            if (window.NEWTON_APP_MODE === 'analytics') {
+                                const safeId = escHtml(row.tournamentId);
+                                html += `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.viewBracketForTournament('${safeId}')">Bracket</button> `;
+                            }
                             const allowDelete = typeof config !== 'undefined' && config.server && config.server.allowSharedTournamentDelete;
-                            if (!allowDelete) return '';
-                            const safeId = escHtml(row.tournamentId);
-                            const safeName = escHtml(row.tournamentName || row.tournamentId);
-                            return `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
+                            if (allowDelete) {
+                                const safeId = escHtml(row.tournamentId);
+                                const safeName = escHtml(row.tournamentName || row.tournamentId);
+                                html += `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
+                            }
+                            return html;
                         }
                     }
                 ],
@@ -1275,13 +1282,30 @@ const NewtonHistory = (() => {
     // ---------------------------------------------------------------------------
 
     /**
+     * Load bracket for a tournament by ID (from tournament list).
+     * Sets _activeTournament first, then delegates to viewBracket().
+     * @param {string} tournamentId
+     */
+    async function viewBracketForTournament(tournamentId) {
+        try {
+            const t = await NewtonDB.getTournament(tournamentId);
+            if (!t) { alert('Tournament not found.'); return; }
+            _activeTournament = t;
+            await viewBracket();
+        } catch (e) {
+            alert('Could not load tournament: ' + e.message);
+        }
+    }
+
+    /**
      * Load the active tournament's JSON from disk and show the bracket.
      * Only available in analytics mode where all tournaments have JSON on disk.
      */
     async function viewBracket() {
         if (!_activeTournament) return;
 
-        const tid = _activeTournament.tournamentId;
+        const tName = (_activeTournament.tournamentName || '').toLowerCase();
+        const tDate = _activeTournament.tournamentDate || (_activeTournament.closedAt ? fmtDate(_activeTournament.closedAt) : '');
 
         try {
             // Find the matching file via list-tournaments API
@@ -1290,8 +1314,7 @@ const NewtonHistory = (() => {
             const listData = await listRes.json();
 
             const entry = (listData.tournaments || []).find(t => {
-                // Match by filename (tournament ID is typically the filename without .json)
-                return t.filename === tid + '.json' || t.filename === tid;
+                return (t.name || '').toLowerCase() === tName && t.date === tDate;
             });
 
             if (!entry) throw new Error('Tournament file not found on server');
@@ -1301,9 +1324,13 @@ const NewtonHistory = (() => {
             if (!res.ok) throw new Error('Could not load tournament file');
             const data = await res.json();
 
+            // Store in a dedicated scratch slot — never touches real tournament data
+            data.readOnly = true;
+            data._analyticsPreview = true;
+            localStorage.setItem('newton_analytics_bracketPreview', JSON.stringify(data));
+
             // Set globals for the bracket renderer
             tournament = data;
-            tournament.readOnly = true;
             players = data.players || [];
             matches = data.matches || [];
 
@@ -1592,6 +1619,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard, viewBracket };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard, viewBracket, viewBracketForTournament };
 
 })();
