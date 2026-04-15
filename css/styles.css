@@ -3917,10 +3917,6 @@ a:hover { color: #1e40af; }
     display: none;
 }
 
-/* Hide Import Register button */
-.mode-analytics .btn-warning[onclick*="historyImportFile"] {
-    display: none;
-}
 
 /* Limit Global Settings — hide all sections except Branding and Point Values */
 .mode-analytics #config .config-section {

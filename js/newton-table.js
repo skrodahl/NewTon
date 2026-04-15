@@ -227,7 +227,8 @@ const NewtonTable = (() => {
             inst.sortDir = inst.sortDir === 'asc' ? 'desc' : 'asc';
         } else {
             inst.sortKey = key;
-            inst.sortDir = 'asc';
+            const col = inst.config.columns.find(c => c.key === key);
+            inst.sortDir = (col && col.defaultDir) || 'asc';
         }
         inst.page = 0;
         _savePrefs(inst);

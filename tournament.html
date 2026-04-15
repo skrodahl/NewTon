@@ -837,6 +837,8 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <label for="analyticsDateTo">To</label>
                         <input type="date" id="analyticsDateTo" class="analytics-date-input" onchange="NewtonHistory.onDateFilter()">
                     </div>
+                    <button class="analytics-reset-btn" id="lensCurrentHalf" onclick="NewtonHistory.setHalfYear(0)"></button>
+                    <button class="analytics-reset-btn" id="lensPreviousHalf" onclick="NewtonHistory.setHalfYear(-1)"></button>
                     <button class="analytics-reset-btn" onclick="NewtonHistory.resetFilters()">Reset</button>
                 </div>
                 <div id="historyTournamentTableContainer"></div>
@@ -897,7 +899,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <strong style="color:#991b1b;">This cannot be undone.</strong>
                     All match records for <strong id="historyDeleteTournamentDisplayName"></strong> will be permanently removed.
                 </div>
-                <p style="margin:0 0 6px;font-size:14px;color:#555;">Type the tournament name to confirm:</p>
+                <p id="historyDeleteTournamentPrompt" style="margin:0 0 6px;font-size:14px;color:#555;">Type the tournament name to confirm:</p>
                 <input type="text" id="historyDeleteTournamentInput" placeholder="Tournament name"
                     style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccc;border-radius:4px;font-size:15px;"
                     oninput="NewtonHistory.onDeleteInputChange()">
@@ -1771,6 +1773,34 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
                     <button class="btn btn-primary" id="confirmLoadBtn" onclick="confirmLoadTournament()">Load
                         Tournament</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Analytics Import Confirmation Modal -->
+        <div id="analyticsImportModal" class="modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <h3>Import to Analytics</h3>
+
+                <div style="background: #e8f4fd; padding: 12px; margin: 12px 0; border-left: 4px solid #2196F3;">
+                    <p id="analyticsImportInfo" style="margin: 0; color: #0c5460;"></p>
+                </div>
+
+                <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">
+                    <p style="margin: 0; font-weight: 600; color: #155724;">What will be imported:</p>
+                    <ul style="margin: 8px 0; padding-left: 18px; color: #155724;">
+                        <li>Match results and achievements</li>
+                        <li>Player statistics</li>
+                        <li>Final placements</li>
+                        <li>Tournament configuration snapshot</li>
+                    </ul>
+                </div>
+
+                <p style="font-size: 13px; color: #6b7280; margin: 12px 0;">This adds the tournament to the Analytics register. It does not modify any existing data.</p>
+
+                <div class="text-center mt-20">
+                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
+                    <button class="btn btn-success" id="analyticsImportConfirmBtn">Import</button>
                 </div>
             </div>
         </div>

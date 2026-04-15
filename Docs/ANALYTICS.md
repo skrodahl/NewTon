@@ -6,19 +6,27 @@ The Analytics tab was introduced in v5.0.1 as a read-only match register browser
 
 ## Current State
 
-Four-tab analytics interface: Dashboard, Leaderboard (placeholder), Players (placeholder), Register.
+Four-tab analytics interface: Dashboard, Leaderboard, Players (placeholder), Register.
 
-**Dashboard** — six stat cards computed from the scoped tournament set: Tournaments (finalized), Matches (completed), Players (unique by lowercase trimmed name), 180s (total), Highest Checkout (player), Shortest Leg (player). Point mode toggle in UI (Original / Current / Custom) — not yet wired to computation.
+**Dashboard** — seven stat cards computed from the scoped tournament set: Tournaments (finalized), Matches (completed), Players (unique by lowercase trimmed name), Points (total, respects point mode + layers), 180s (total), Highest Checkout (player), Shortest Leg (player). Points card links to Leaderboard.
+
+**Leaderboard** — cross-tournament player rankings. Columns: rank, player name, placement counts (1st–7-8th), 180s, high outs, short legs, played, points, best checkout, best leg, three-dart average (Chalker only), matches won/lost, legs won/lost. All sortable (descending-first for numeric columns, ascending for Best Leg). Top 16 highlighted. Rank and Points columns shaded. Respects point mode (Original/Current) and Ranking/Attendance layers.
 
 **Register** — three-panel hierarchical browser:
 
-1. **Tournament list** — all finalized tournaments with checkbox selection, name, date, players, matches, format. Lens filter bar above the table: text filter (AND keyword match), date range (inclusive from/to, prefilled), Reset button. Header checkbox toggles all visible rows.
-2. **Match list** — all matches for a selected tournament. Match ID, players, result, type (Chalker/Manual), completion date.
-3. **Match detail** — full match record. For Chalker matches: leg-by-leg visit scores (decoded from base64), first thrower, checkout darts, achievements (180s, tons, high outs, short legs). For manual matches: leg count only.
+1. **Tournament list** — all finalized tournaments with checkbox selection, name, date, players, matches, points, format. Lens filter bar: text filter (AND keyword match), date range (inclusive from/to, prefilled), half-year presets (current + previous), Reset button. Header checkbox toggles all visible rows. Bracket button in analytics mode.
+2. **Match list** — all matches for a selected tournament. Match ID, players, result, points, type (Chalker/Manual), completion date. View Bracket button in analytics mode.
+3. **Match detail** — full match record with per-player points column. For Chalker matches: leg-by-leg visit scores (decoded from base64), first thrower, checkout darts, achievements. For manual matches: leg count only.
 
 **Scope selector** — three composable filters narrow the dataset: text → date range → checkboxes. Scope = visible ∩ checked. Green pill indicator in the header shows "Viewing: N of M tournaments." All filters and scope persisted to localStorage.
 
-Delete requires typing the tournament name. Import merges without overwriting existing records. Export/import buttons for full register backups.
+**Point mode** — Original (frozen configSnapshot per tournament) / Current (live Global Settings). Switching updates all views in real time. Ranking layer (placement points) and Attendance layer (participation points), both toggleable, both on by default.
+
+**Import paths** — Import Tournament (from JSON file, direct to IndexedDB), Import Register (merge), auto-import from disk (on Analytics load). All use shared `NewtonDB.backfillTournament()`.
+
+**Analytics-only mode** — `NEWTON_MODE=analytics` (Docker). Hides tournament management tabs. Read-only bracket view from tournament JSONs on disk. CSS-driven visibility, PHP-set body class, no flash.
+
+Delete requires typing the tournament name (with date shown for disambiguation).
 
 ---
 
@@ -105,14 +113,14 @@ Future features may add stats that only make sense at the tournament level — c
 
 ## The Gap
 
-The data exists. The scope selector and dashboard provide the first layer of analysis. What's missing:
+Scope selector, dashboard, leaderboard, point mode, and layers are all live. What's missing:
 
 - **No player career view** — no way to see a player's history, averages, or form across tournaments
-- **No cross-tournament leaderboard** — no season standings, no head-to-head records
-- **Point mode not wired** — toggle exists in UI but doesn't recompute stats yet
+- **No head-to-head records** — can't compare two players directly
 - **No charts** — form and trends are invisible without visual representation
 - **Manual matches lack depth** — visit-level data unavailable; only leg counts shown
-- **Dashboard drill-through incomplete** — stat cards exist but most don't link to deeper views yet
+- **Dashboard drill-through incomplete** — Points → Leaderboard works; other cards don't link yet
+- **No leaderboard export** — JSON/CSV export not yet implemented
 
 ---
 
@@ -503,25 +511,25 @@ Examples:
 - Date range → `newton_analytics_dateFilter`
 - Stale tournament IDs filtered out on restore
 
-### Phase 1 — Stats Cards + Point Mode (partially done)
+### ~~Phase 1 — Stats Cards + Point Mode~~ DONE (v5.0.9–v5.0.10)
 
-**Stats cards — implemented (v5.0.6+):**
-Six cards on the Dashboard, all scope-aware:
-- Tournaments (finalized count)
+**Stats cards** — seven cards on the Dashboard, all scope-aware:
+- Tournaments (finalized count) → links to Register
 - Matches (completed count)
-- Players (unique by lowercase trimmed name — v5.0.9)
+- Players (unique by lowercase trimmed name)
+- Points (total, respects point mode + layers) → links to Leaderboard
 - 180s (total across scope)
 - Highest Checkout (value + player name)
 - Shortest Leg (dart count + player name)
 
-**Still planned:**
+**Point mode** — Original / Current. Wired to all views: dashboard, register (tournament + match lists), match detail, leaderboard. Switching updates in real time with scroll preservation.
+
+**Layers** — Ranking (placement points) + Attendance (participation points). Independent toggles, both on by default. Tournament-level only.
+
+**Still planned for dashboard:**
 - Most tournament wins (player, count)
 - Current title holder (winner of most recent finalized tournament)
-- Highest match average (player, value — requires raw Chalker data)
-- Drill-through: clicking a card navigates to the relevant view with context (partially decided — see Open Questions)
-
-**Point mode toggle — UI exists, not wired:**
-Toggle buttons (Original / Current / Custom) render in the control bar. Switching modes logs to console but does not recompute stats. Wiring this is the remaining Phase 1 work — it connects the `configSnapshot` per tournament to the computation layer.
+- Drill-through for record cards (180s, Highest Checkout, Shortest Leg) → Player tab when built
 
 ### Phase 2 — Player View
 
@@ -669,17 +677,21 @@ The architecture section defines when to use raw data vs the achievement registe
 
 ---
 
-**Last updated:** April 14, 2026
+**Last updated:** April 15, 2026 — Current State, Gap, Phase 1, and Phase 3 updated. Auto-import, Import Tournament, analytics mode, bracket view, delete protection, half-year presets all done.
+
+**Completed since last update:**
+- ~~Auto-import shared tournaments~~ DONE (v5.0.10)
+- ~~Import Tournament button~~ DONE (v5.0.10)
+- ~~Analytics-only mode~~ DONE (v5.0.10)
+- ~~Delete protection via settings~~ DONE (v5.0.10) — gated behind "Allow deleting tournaments" in Server Settings, inaccessible in analytics mode
+- ~~Read-only bracket view~~ DONE (v5.0.10)
+- ~~Shared backfill function~~ DONE (v5.0.10)
 
 **Next steps (priority order):**
-1. **Auto-import shared tournaments** — on app load, import any completed shared tournaments from disk that aren't already in IndexedDB. Zero-friction Analytics population.
-2. **Import Tournament button** — in the Analytics header alongside Export/Import Register. Accepts a single tournament JSON file (same format as Tournament Setup export) and imports it into the Analytics register using the existing backfill logic. Manual fallback for when auto-backup didn't fire or the server wasn't reachable. Export at the venue, import at home.
-3. **NEWTON_READONLY_ANALYTICS=true** — Docker env variable that disables all deletion. Public instances become read-only analytical surfaces.
-4. **Smart delete button** — hide behind "Allow deleting shared tournaments" setting. If tournament exists on disk, block delete with message directing to Shared Tournaments. Respects read-only env variable.
-5. **Exclude from Analytics flag** — opt-in checkbox at tournament creation. Excluded tournaments skip auto-import and auto-backup. For practice/test tournaments.
-5. **Player tab** — Player Name Editor + player profiles
-6. **Leaderboard export** — JSON/CSV
-7. **Table cogwheel** — column visibility + top-N threshold
-8. **All-matches view** — flat match list in Register, wired to Matches dashboard card
-9. **Seeded brackets** — use Analytics leaderboard data to seed tournament draws
-10. **Analytics-only mode / URL views** — deployment modes for public sites and venue big screens
+1. **Exclude from Analytics flag** — opt-in checkbox at tournament creation. Excluded tournaments skip auto-import and auto-backup. For practice/test tournaments.
+2. **Player tab** — Player Name Editor + player profiles
+3. **Leaderboard export** — JSON/CSV
+4. **Table cogwheel** — column visibility + top-N threshold
+5. **All-matches view** — flat match list in Register, wired to Matches dashboard card
+6. **Seeded brackets** — use Analytics leaderboard data to seed tournament draws
+7. **URL-based views** — direct URLs for venue big screens (e.g. /leaderboard)

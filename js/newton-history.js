@@ -642,52 +642,52 @@ const NewtonHistory = (() => {
                             render: (v) => `<strong>${escHtml(v)}</strong>`
                         },
                         {
-                            key: 'p1st', label: '1st', align: 'center', width: '45px',
+                            key: 'p1st', label: '1st', align: 'center', width: '45px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'p2nd', label: '2nd', align: 'center', width: '45px',
+                            key: 'p2nd', label: '2nd', align: 'center', width: '45px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'p3rd', label: '3rd', align: 'center', width: '45px',
+                            key: 'p3rd', label: '3rd', align: 'center', width: '45px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'p4th', label: '4th', align: 'center', width: '45px',
+                            key: 'p4th', label: '4th', align: 'center', width: '45px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'p56th', label: '5-6th', align: 'center', width: '50px',
+                            key: 'p56th', label: '5-6th', align: 'center', width: '50px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'p78th', label: '7-8th', align: 'center', width: '50px',
+                            key: 'p78th', label: '7-8th', align: 'center', width: '50px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'oneEighties', label: '180s', align: 'center', width: '60px',
+                            key: 'oneEighties', label: '180s', align: 'center', width: '60px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'highOuts', label: 'High Outs', align: 'center', width: '80px',
+                            key: 'highOuts', label: 'High Outs', align: 'center', width: '80px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'shortLegs', label: 'Short Legs', align: 'center', width: '90px',
+                            key: 'shortLegs', label: 'Short Legs', align: 'center', width: '90px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'tournaments', label: 'Played', align: 'center', width: '70px',
+                            key: 'tournaments', label: 'Played', align: 'center', width: '70px', defaultDir: 'desc',
                             render: (v) => v
                         },
                         {
-                            key: 'points', label: 'Points', align: 'center', width: '80px',
+                            key: 'points', label: 'Points', align: 'center', width: '80px', defaultDir: 'desc',
                             render: (v) => `<strong>${v || '—'}</strong>`,
                             cellStyle: 'background:#f3f4f6;'
                         },
                         {
-                            key: 'bestHighOut', label: 'Best Out', align: 'center', width: '75px',
+                            key: 'bestHighOut', label: 'Best Out', align: 'center', width: '75px', defaultDir: 'desc',
                             render: (v) => v > 0 ? v : '—',
                             sortValue: (v) => v > 0 ? v : 0
                         },
@@ -697,24 +697,24 @@ const NewtonHistory = (() => {
                             sortValue: (v) => v < Infinity ? v : 99999
                         },
                         {
-                            key: 'avg', label: 'Avg', align: 'center', width: '60px',
+                            key: 'avg', label: 'Avg', align: 'center', width: '60px', defaultDir: 'desc',
                             render: (v) => v || '—',
                             sortValue: (v) => v ? parseFloat(v) : 0
                         },
                         {
-                            key: 'matchesWon', label: 'MW', align: 'center', width: '50px',
+                            key: 'matchesWon', label: 'MW', align: 'center', width: '50px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'matchesLost', label: 'ML', align: 'center', width: '50px',
+                            key: 'matchesLost', label: 'ML', align: 'center', width: '50px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'legsWon', label: 'LW', align: 'center', width: '50px',
+                            key: 'legsWon', label: 'LW', align: 'center', width: '50px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         },
                         {
-                            key: 'legsLost', label: 'LL', align: 'center', width: '50px',
+                            key: 'legsLost', label: 'LL', align: 'center', width: '50px', defaultDir: 'desc',
                             render: (v) => v || '—'
                         }
                     ]
@@ -741,6 +741,7 @@ const NewtonHistory = (() => {
         initControls();
         _restoreTextFilter();
         _restoreDateFilter();
+        _initHalfYearButtons();
         await _autoImportFromDisk();
         await _restoreScope();
         await renderScopeIndicator();
@@ -960,7 +961,8 @@ const NewtonHistory = (() => {
                             if (allowDelete) {
                                 const safeId = escHtml(row.tournamentId);
                                 const safeName = escHtml(row.tournamentName || row.tournamentId);
-                                html += `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}')" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
+                                const safeDate = row.closedAt ? escHtml(fmtDate(row.closedAt)) : '';
+                                html += `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}','${safeDate}')" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
                             }
                             return html;
                         }
@@ -1184,6 +1186,66 @@ const NewtonHistory = (() => {
             _dateFrom = '';
             _dateTo = '';
         }
+    }
+
+    // ---------------------------------------------------------------------------
+    // Half-year presets
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Compute the start/end dates for a half-year relative to the current one.
+     * @param {number} offset - 0 = current half, -1 = previous half, etc.
+     * @returns {{ from: string, to: string, label: string }}
+     */
+    function _getHalfYear(offset) {
+        const now = new Date();
+        let year = now.getFullYear();
+        let half = now.getMonth() < 6 ? 1 : 2; // H1 = Jan-Jun, H2 = Jul-Dec
+
+        // Apply offset
+        half += offset;
+        while (half < 1) { half += 2; year--; }
+        while (half > 2) { half -= 2; year++; }
+
+        const from = half === 1 ? `${year}-01-01` : `${year}-07-01`;
+        const to   = half === 1 ? `${year}-06-30` : `${year}-12-31`;
+        const label = `${year}H${half}`;
+
+        return { from, to, label };
+    }
+
+    /** Populate the half-year button labels. Called on render. */
+    function _initHalfYearButtons() {
+        const current = _getHalfYear(0);
+        const previous = _getHalfYear(-1);
+        const btn1 = document.getElementById('lensCurrentHalf');
+        const btn2 = document.getElementById('lensPreviousHalf');
+        if (btn1) btn1.textContent = current.label;
+        if (btn2) btn2.textContent = previous.label;
+    }
+
+    /**
+     * Set the date range to a half-year period.
+     * @param {number} offset - 0 = current half, -1 = previous half
+     */
+    function setHalfYear(offset) {
+        const hy = _getHalfYear(offset);
+        _dateFrom = hy.from;
+        _dateTo = hy.to;
+        _persistDateFilter();
+
+        const fromInput = document.getElementById('analyticsDateFrom');
+        const toInput = document.getElementById('analyticsDateTo');
+        if (fromInput) fromInput.value = _dateFrom;
+        if (toInput) toInput.value = _dateTo;
+
+        if (!_allTournaments) return;
+
+        const filtered = _applyAllFilters(_allTournaments);
+        filtered.forEach(t => { t._rowId = t.tournamentId; });
+        if (_tournamentTable) _tournamentTable.setData(filtered);
+
+        _applySelectionAsScope();
     }
 
     // ---------------------------------------------------------------------------
@@ -1589,25 +1651,43 @@ const NewtonHistory = (() => {
         }
 
         const playerCount = t.players.length;
-        if (!confirm(`Import "${t.name}" (${t.date || '?'}, ${playerCount} players) into the Analytics register?\n\nMatch results and achievements will be imported.`)) {
-            event.target.value = '';
-            return;
+        const completedMatches = Array.isArray(t.matches) ? t.matches.filter(m => m.completed && m.winner).length : 0;
+        const totalMatches = Array.isArray(t.matches) ? t.matches.length : 0;
+
+        // Show confirmation modal
+        const infoEl = document.getElementById('analyticsImportInfo');
+        if (infoEl) {
+            infoEl.innerHTML =
+                `<strong>${escHtml(t.name)}</strong>` +
+                (t.date ? ` — ${escHtml(t.date)}` : '') +
+                `<br>${playerCount} players · ${completedMatches} completed matches` +
+                (t.format ? ` · ${t.format === 'SE' ? 'Single' : 'Double'} Elimination` : '');
         }
 
-        try {
-            const cfgSnapshot = (typeof config !== 'undefined' ? config : {});
-            const result = await NewtonDB.backfillTournament(t, cfgSnapshot);
+        const confirmBtn = document.getElementById('analyticsImportConfirmBtn');
+        if (!confirmBtn) { event.target.value = ''; return; }
 
-            // Add new tournament to checked set and refresh
-            _invalidateCache();
-            _checkedIds.add(String(t.id));
-            _applySelectionAsScope();
-            await renderTournamentList();
-            alert(`Imported "${t.name}" — ${result.matchCount} matches.`);
+        // Wire up confirm button with a one-time handler
+        const handler = async () => {
+            confirmBtn.removeEventListener('click', handler);
+            popDialog();
 
-        } catch (e) {
-            alert('Import failed: ' + (e.message || e));
-        }
+            try {
+                const cfgSnapshot = (typeof config !== 'undefined' ? config : {});
+                const result = await NewtonDB.backfillTournament(t, cfgSnapshot);
+
+                _invalidateCache();
+                _checkedIds.add(String(t.id));
+                _applySelectionAsScope();
+                await renderTournamentList();
+                alert(`Imported "${t.name}" — ${result.matchCount} matches.`);
+
+            } catch (e) {
+                alert('Import failed: ' + (e.message || e));
+            }
+        };
+        confirmBtn.addEventListener('click', handler);
+        pushDialog('analyticsImportModal');
 
         event.target.value = '';
     }
@@ -1643,11 +1723,14 @@ const NewtonHistory = (() => {
     let _pendingDeleteId   = null;
     let _pendingDeleteName = null;
 
-    function promptDeleteTournament(tournamentId, tournamentName) {
+    function promptDeleteTournament(tournamentId, tournamentName, tournamentDate) {
         _pendingDeleteId   = tournamentId;
         _pendingDeleteName = tournamentName;
 
-        document.getElementById('historyDeleteTournamentDisplayName').textContent = tournamentName;
+        const displayName = tournamentDate ? tournamentName + ' (' + tournamentDate + ')' : tournamentName;
+        document.getElementById('historyDeleteTournamentDisplayName').textContent = displayName;
+        const promptEl = document.getElementById('historyDeleteTournamentPrompt');
+        if (promptEl) promptEl.innerHTML = 'Type <strong>' + escHtml(tournamentName) + '</strong> to confirm:';
         document.getElementById('historyDeleteTournamentInput').value = '';
         document.getElementById('historyDeleteTournamentBtn').disabled = true;
 
@@ -1741,6 +1824,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
 
 })();

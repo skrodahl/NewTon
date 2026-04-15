@@ -1,3 +1,15 @@
+## **v5.0.11** — (2026-04-15)
+
+### Analytics
+
+- **Import confirmation modal** — replaces the plain confirm() dialog with a styled modal showing tournament name, date, player count, match count, format, and a list of what will be imported.
+- **Delete modal shows date** — tournament name now includes the date in parentheses for disambiguation. Confirmation prompt shows the exact name to type.
+- **Import Register in analytics mode** — no longer hidden. Register import is safe (merge, not overwrite) and enables full Analytics without requiring tournament JSONs on disk.
+- **Half-year presets** — two buttons in the Lens bar for quick date scoping: current half-year and previous half-year. Labels auto-compute from today's date (e.g. 2026H1, 2025H2).
+- **Leaderboard sort direction** — first click on a column header now sorts descending (highest first) for all numeric columns. Exception: Best Leg sorts ascending (fewest darts first). Player name sorts alphabetically. Powered by `defaultDir` property on NewtonTable columns.
+
+---
+
 ## **v5.0.10** — The Full Picture (2026-04-15)
 
 ### Analytics-only mode
