@@ -58,16 +58,15 @@ Bracket view requires the tournament JSON on disk. In analytics mode, all data c
 ```yaml
 services:
   newton-analytics:
-    image: newton-dc
+    image: skrodahl/newton:latest
     ports:
       - "2020:2020"
-    environment:
-      - NEWTON_MODE=analytics
-      - NEWTON_READONLY_ANALYTICS=true
-      - NEWTON_LANDING_PAGE=true
-      - NEWTON_BASE_URL=https://newton.example.com
     volumes:
       - ./tournaments:/var/www/html/tournaments
+      - ./images:/var/www/html/images:ro
+    environment:
+      - NEWTON_API_ENABLED=true
+      - NEWTON_MODE=analytics
 ```
 
 ---
