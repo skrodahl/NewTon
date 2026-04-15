@@ -398,3 +398,41 @@ If QR scanning isn't available, both sides fall back gracefully:
 
 ---
 
+## Planned: iOS-Compatible QR Scanning via Image Capture
+
+**Status:** Not started
+**Context:** [GitHub discussion](https://github.com/skrodahl/NewTon/issues) — iOS/iPadOS WebKit restricts `getUserMedia` in PWAs and non-Safari browsers, blocking the live camera scanner on iPads at the oche.
+
+### Problem
+
+The current scan implementation uses `getUserMedia` with a live camera stream and JS-based QR decoding. This works on desktop Chrome/Edge and Android but fails on iOS due to WebKit camera restrictions — even over HTTPS, even as a Home Screen PWA.
+
+### Proposed solution: image capture fallback
+
+Use `<input type="file" accept="image/*" capture="camera">` to let the user take a photo of the QR code, then decode it from the captured image. This avoids `getUserMedia` entirely and uses a pattern iOS fully supports.
+
+**How it works:**
+1. User taps "Scan QR" — on iOS, this opens the native camera via the file input
+2. User takes a photo of the QR code
+3. The captured image is loaded into a canvas
+4. jsQR (already bundled as fallback) decodes the QR from the canvas
+5. Normal verification and application flow continues unchanged
+
+**What stays the same:**
+- Payload format, CRC signing, replay protection — all unchanged
+- Offline-first model preserved — no URLs, no server dependency
+- Security model unchanged — same signed payload, same verification
+
+**What changes:**
+- UX is two-tap instead of point-and-scan (open camera → take photo → auto-decode)
+- Both TM and Chalker need the image capture path
+- Detection: check for `getUserMedia` support; if unavailable, show the image capture button instead
+
+**Why not deep links:**
+Deep links (`https://server/chalker/?assign=<payload>`) would require a known server URL, break offline-first, and open Safari instead of the PWA. Image capture keeps everything self-contained.
+
+**Scope:**
+- Chalker scanning assignment QR (iOS iPad at the oche — the primary use case)
+- TM scanning result QR (less common on iOS, but should work too)
+- Desktop/Android keep the current live scanner — image capture is a fallback, not a replacement
+
