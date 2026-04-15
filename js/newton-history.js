@@ -1691,7 +1691,7 @@ const NewtonHistory = (() => {
 
         let html = `<div class="history-detail-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
-            <div>${match.completedAt ? fmtDate(match.completedAt) : '—'} · <strong>${escHtml(match.matchId)}</strong></div>
+            <div>${match.completedAt ? fmtDateTime(match.completedAt) : '—'} · <strong>${escHtml(match.matchId)}</strong></div>
             <div style="margin-top:8px;font-size:16px;">${match.winner === 1 ? `<strong>${escHtml(match.player1Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player1Name)}</span>`} <span style="font-family:'SF Mono',Monaco,'Cascadia Code','Courier New',monospace;font-size:14px;color:#374151;margin:0 4px;">${legs}</span> ${match.winner === 2 ? `<strong>${escHtml(match.player2Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player2Name)}</span>`}</div>
             </div>
             <div>${match.format && match.format.bo ? `<span class="history-type-badge" style="background:#f3f4f6;color:#374151;">Best of ${match.format.bo}</span> ` : ''}${typeBadge}</div>
