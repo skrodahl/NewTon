@@ -83,6 +83,13 @@ services:
 ### Analytics
 
 - **Dashboard entry point** — clicking "Analytics" on a tournament (from Recent Tournaments or the podium) now always opens the Dashboard tab.
+- **Import Tournament from JSON** — "Import Tournament" button in the Analytics header. Pick a tournament JSON file and it's imported directly into the Analytics register. No localStorage, no API required — works offline.
+- **Auto-import from disk** — on every Analytics load, checks for shared tournaments on disk not yet in IndexedDB and imports them silently. Requires REST API (Docker deployment).
+- **Shared backfill function** — `NewtonDB.backfillTournament(t, config)` in newton-db.js. Single source of truth for all tournament imports into IndexedDB. Used by file import, localStorage backfill, and auto-import from disk.
+
+### Chalker
+
+- **Unlimited darts per leg** — new "Unlimited" option in Max Rounds (both Global Settings and Chalker). Uses 100 rounds (300 darts) internally — keeps QR payloads within comfortable scanning limits. No special-case logic needed. QR confirm display shows "Unlimited" for values >= 100.
 
 ---
 
@@ -98,4 +105,4 @@ No migration required. New environment variables are optional — existing deplo
 
 ---
 
-**NewTon DC Tournament Manager v5.0.10 — The venue runs tournaments. The world sees the stats.**
+**NewTon DC Tournament Manager v5.0.10 — The Full Picture.**
