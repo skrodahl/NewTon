@@ -2076,149 +2076,24 @@ async function addTournamentToAnalytics(tournamentId) {
         return;
     }
 
-    // Build tournament meta record (field names must match newton-db.js schema)
-    // closedAt uses the tournament date (as Unix seconds) for backfilled tournaments
-    const tournamentDate = new Date(t.date + 'T00:00:00');
-    const meta = {
-        tournamentId: String(t.id),
-        tournamentName: t.name,
-        tournamentDate: t.date,
-        tournamentFormat: t.format || 'DE',
-        playerCount: Array.isArray(t.players) ? t.players.length : 0,
-        status: 'final',
-        closedAt: Math.floor(tournamentDate.getTime() / 1000),
-        configSnapshot: config || {}
-    };
-
-    // Save tournament meta
-    await NewtonDB.saveTournamentMeta(meta);
-
-    // -----------------------------------------------------------------------
-    // Compute per-match achievement deltas from transaction history
-    // -----------------------------------------------------------------------
-    // Transactions store cumulative player stats snapshots. By diffing
-    // consecutive snapshots for the same player we derive what was recorded
-    // during each match.
-    // -----------------------------------------------------------------------
-
-    const matchAchievementMap = {};  // matchId -> { playerId -> delta }
-
-    // History is stored separately in localStorage under tournament_${id}_history
-    const historyKey = `tournament_${t.id}_history`;
-    const historyRaw = localStorage.getItem(historyKey);
-    const historyData = historyRaw ? JSON.parse(historyRaw) : (t.history || []);
-
-    if (Array.isArray(historyData) && historyData.length > 0) {
-        const completeTxs = historyData
-            .filter(tx => tx.type === 'COMPLETE_MATCH')
-            .sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
-
-        const prevStats = {};  // playerId -> last seen normalized stats
-
-        for (const tx of completeTxs) {
-            const matchId = tx.matchId;
-            const matchDeltas = {};
-
-            for (const role of ['winner', 'loser']) {
-                const p = tx[role];
-                if (!p || !p.id) continue;
-                const pid = String(p.id);
-                const curr = NewtonDB.normalizeStats(p.stats);
-                const prev = prevStats[pid] || NewtonDB.normalizeStats(null);
-                const delta = NewtonDB.diffStats(prev, curr);
-                prevStats[pid] = curr;
-
-                if (NewtonDB.hasAnyStats(delta)) {
-                    matchDeltas[pid] = delta;
-                }
-            }
-
-            if (Object.keys(matchDeltas).length > 0) {
-                matchAchievementMap[matchId] = matchDeltas;
-            }
+    // Merge history from localStorage (stored separately under tournament_${id}_history)
+    if (!t.history) {
+        const historyKey = `tournament_${t.id}_history`;
+        const historyRaw = localStorage.getItem(historyKey);
+        if (historyRaw) {
+            try { t.history = JSON.parse(historyRaw); } catch (e) { /* ignore */ }
         }
     }
 
-    // Save completed matches (with history-derived achievement deltas)
-    let savedMatchCount = 0;
-    if (Array.isArray(t.matches)) {
-        for (const match of t.matches) {
-            if (!match.completed || !match.winner) continue;
+    // Delegate to shared backfill
+    const result = await NewtonDB.backfillTournament(t, config || {});
 
-            const isWalkover = match.autoAdvanced ||
-                (match.player1 && (match.player1.name === 'Walkover' || match.player1.isBye)) ||
-                (match.player2 && (match.player2.name === 'Walkover' || match.player2.isBye));
-            if (isWalkover) continue;
+    console.log(`[Analytics] Added tournament "${t.name}" — ${result.matchCount} matches`);
 
-            const winnerIs1 = match.winner && match.player1 && String(match.winner.id) === String(match.player1.id);
-            const p1Legs = match.finalScore ? (winnerIs1 ? match.finalScore.winnerLegs : match.finalScore.loserLegs) : 0;
-            const p2Legs = match.finalScore ? (winnerIs1 ? match.finalScore.loserLegs : match.finalScore.winnerLegs) : 0;
-
-            // Look up per-match achievement deltas from history
-            const deltas = matchAchievementMap[match.id] || {};
-            const p1Id = match.player1 ? String(match.player1.id) : null;
-            const p2Id = match.player2 ? String(match.player2.id) : null;
-            const p1Ach = (p1Id && deltas[p1Id]) ? deltas[p1Id] : null;
-            const p2Ach = (p2Id && deltas[p2Id]) ? deltas[p2Id] : null;
-            const achievements = (p1Ach || p2Ach) ? { p1: p1Ach, p2: p2Ach } : null;
-
-            const dbMatch = {
-                tournamentId: String(t.id),
-                tournamentName: t.name,
-                tournamentFormat: t.format || 'DE',
-                matchId: match.id,
-                matchRound: match.id,
-                matchType: 'MANUAL',
-                completedAt: match.completedAt || Math.floor(tournamentDate.getTime() / 1000),
-                player1Id: p1Id,
-                player1Name: match.player1 ? match.player1.name : null,
-                player2Id: p2Id,
-                player2Name: match.player2 ? match.player2.name : null,
-                winner: winnerIs1 ? 1 : 2,
-                firstStarter: null,
-                legsWon: { p1: p1Legs, p2: p2Legs },
-                legs: null,
-                achievements: achievements,
-                format: match.legs ? { sc: (config && config.legs && config.legs.x01Format) || 501, bo: match.legs } : null
-            };
-
-            try {
-                await NewtonDB.saveMatch(dbMatch);
-                savedMatchCount++;
-            } catch (e) {
-                console.warn('Failed to save match to Analytics:', match.id, e);
-            }
-        }
+    // Refresh Analytics cache so the new tournament appears without reload
+    if (typeof NewtonHistory !== 'undefined') {
+        if (NewtonHistory.invalidateCache) NewtonHistory.invalidateCache();
     }
-
-    // Save tournament-level achievements per player (wrapped in .stats for consistency with finalize path)
-    if (Array.isArray(t.players)) {
-        const tournamentAchievements = {};
-        for (const p of t.players) {
-            if (p.stats) {
-                tournamentAchievements[String(p.id)] = {
-                    name: p.name,
-                    stats: {
-                        oneEighties: p.stats.oneEighties || 0,
-                        tons: p.stats.tons || 0,
-                        highOuts: Array.isArray(p.stats.highOuts) ? p.stats.highOuts : [],
-                        shortLegs: Array.isArray(p.stats.shortLegs) ? p.stats.shortLegs : [],
-                        lollipops: p.stats.lollipops || 0
-                    }
-                };
-            }
-        }
-        meta.tournamentAchievements = tournamentAchievements;
-        meta.placements = t.placements || {};
-        meta.matchCount = savedMatchCount;
-        await NewtonDB.saveTournamentMeta(meta);
-
-        // Reconcile: attribute any achievements not captured by history deltas
-        // to each player's last match (e.g. stats added outside match dialog)
-        await NewtonDB.reconcileMatchAchievements(String(t.id), tournamentAchievements);
-    }
-
-    console.log(`[Analytics] Added tournament "${t.name}" to Analytics registry`);
 
     // Refresh the tournament list to update the label
     loadRecentTournaments();

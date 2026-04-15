@@ -31,6 +31,8 @@
 ### Analytics
 
 - **Dashboard entry point** — clicking "Analytics" on a tournament (from Recent Tournaments or the podium) now always opens the Dashboard tab, not the last visited tab.
+- **Import Tournament button** — in the Analytics header. Import a single tournament JSON file directly into the Analytics register. Works without the API — direct file to IndexedDB. Available in both full and analytics mode.
+- **Shared backfill function** — `NewtonDB.backfillTournament(t, config)` extracted to newton-db.js. Single source of truth for importing tournament data into IndexedDB. Used by file import, localStorage backfill ("+ Analytics"), and auto-import from disk.
 
 ---
 

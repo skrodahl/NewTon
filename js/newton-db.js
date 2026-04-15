@@ -494,6 +494,164 @@ const NewtonDB = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // Backfill — import a tournament object into IndexedDB
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Import a full tournament object into the Analytics register (IndexedDB).
+     * Shared by all import paths: file import, localStorage backfill, auto-import from disk.
+     *
+     * @param {object} t - Full tournament object (id, name, date, players, matches, placements, history, format)
+     * @param {object} [configSnapshot] - Config snapshot to store. Falls back to empty object.
+     * @returns {Promise<{matchCount: number}>} Number of matches imported
+     */
+    async function backfillTournament(t, configSnapshot) {
+        await initDB();
+
+        if (!t || !t.id) throw new Error('Tournament object must have an id');
+
+        const tid = String(t.id);
+        const tournamentDate = new Date((t.date || '2000-01-01') + 'T00:00:00');
+
+        // Build tournament meta
+        const meta = {
+            tournamentId: tid,
+            tournamentName: t.name || 'Unknown',
+            tournamentDate: t.date || null,
+            tournamentFormat: t.format || 'DE',
+            playerCount: Array.isArray(t.players) ? t.players.length : 0,
+            status: 'final',
+            closedAt: Math.floor(tournamentDate.getTime() / 1000),
+            configSnapshot: configSnapshot || {}
+        };
+
+        await saveTournamentMeta(meta);
+
+        // -------------------------------------------------------------------
+        // Compute per-match achievement deltas from transaction history
+        // -------------------------------------------------------------------
+        const matchAchievementMap = {};
+        const historyData = t.history || [];
+
+        if (Array.isArray(historyData) && historyData.length > 0) {
+            const completeTxs = historyData
+                .filter(tx => tx.type === 'COMPLETE_MATCH')
+                .sort((a, b) => (a.timestamp || '').localeCompare(b.timestamp || ''));
+
+            const prevStats = {};
+
+            for (const tx of completeTxs) {
+                const matchId = tx.matchId;
+                const matchDeltas = {};
+
+                for (const role of ['winner', 'loser']) {
+                    const p = tx[role];
+                    if (!p || !p.id) continue;
+                    const pid = String(p.id);
+                    const curr = normalizeStats(p.stats);
+                    const prev = prevStats[pid] || normalizeStats(null);
+                    const delta = diffStats(prev, curr);
+                    prevStats[pid] = curr;
+
+                    if (hasAnyStats(delta)) {
+                        matchDeltas[pid] = delta;
+                    }
+                }
+
+                if (Object.keys(matchDeltas).length > 0) {
+                    matchAchievementMap[matchId] = matchDeltas;
+                }
+            }
+        }
+
+        // -------------------------------------------------------------------
+        // Save completed matches
+        // -------------------------------------------------------------------
+        let savedMatchCount = 0;
+        if (Array.isArray(t.matches)) {
+            for (const match of t.matches) {
+                if (!match.completed || !match.winner) continue;
+
+                const isWalkover = match.autoAdvanced ||
+                    (match.player1 && (match.player1.name === 'Walkover' || match.player1.isBye)) ||
+                    (match.player2 && (match.player2.name === 'Walkover' || match.player2.isBye));
+                if (isWalkover) continue;
+
+                const winnerIs1 = match.winner && match.player1 && String(match.winner.id) === String(match.player1.id);
+                const p1Legs = match.finalScore ? (winnerIs1 ? match.finalScore.winnerLegs : match.finalScore.loserLegs) : 0;
+                const p2Legs = match.finalScore ? (winnerIs1 ? match.finalScore.loserLegs : match.finalScore.winnerLegs) : 0;
+
+                const deltas = matchAchievementMap[match.id] || {};
+                const p1Id = match.player1 ? String(match.player1.id) : null;
+                const p2Id = match.player2 ? String(match.player2.id) : null;
+                const p1Ach = (p1Id && deltas[p1Id]) ? deltas[p1Id] : null;
+                const p2Ach = (p2Id && deltas[p2Id]) ? deltas[p2Id] : null;
+                const achievements = (p1Ach || p2Ach) ? { p1: p1Ach, p2: p2Ach } : null;
+
+                const dbMatch = {
+                    tournamentId: tid,
+                    tournamentName: t.name,
+                    tournamentFormat: t.format || 'DE',
+                    matchId: match.id,
+                    matchRound: match.id,
+                    matchType: 'MANUAL',
+                    completedAt: match.completedAt || Math.floor(tournamentDate.getTime() / 1000),
+                    player1Id: p1Id,
+                    player1Name: match.player1 ? match.player1.name : null,
+                    player2Id: p2Id,
+                    player2Name: match.player2 ? match.player2.name : null,
+                    winner: winnerIs1 ? 1 : 2,
+                    firstStarter: null,
+                    legsWon: { p1: p1Legs, p2: p2Legs },
+                    legs: null,
+                    achievements: achievements,
+                    format: match.legs ? { bo: match.legs } : null
+                };
+
+                try {
+                    await saveMatch(dbMatch);
+                    savedMatchCount++;
+                } catch (e) {
+                    console.warn('[backfill] Failed to save match:', match.id, e);
+                }
+            }
+        }
+
+        // -------------------------------------------------------------------
+        // Save tournament-level achievements and placements
+        // -------------------------------------------------------------------
+        const tournamentAchievements = {};
+        if (Array.isArray(t.players)) {
+            for (const p of t.players) {
+                if (p.stats) {
+                    tournamentAchievements[String(p.id)] = {
+                        name: p.name,
+                        stats: {
+                            oneEighties: p.stats.oneEighties || 0,
+                            tons: p.stats.tons || 0,
+                            highOuts: Array.isArray(p.stats.highOuts) ? p.stats.highOuts : [],
+                            shortLegs: Array.isArray(p.stats.shortLegs) ? p.stats.shortLegs : [],
+                            lollipops: p.stats.lollipops || 0
+                        }
+                    };
+                }
+            }
+        }
+
+        meta.tournamentAchievements = tournamentAchievements;
+        meta.placements = t.placements || {};
+        meta.matchCount = savedMatchCount;
+        await saveTournamentMeta(meta);
+
+        // Reconcile achievements
+        if (Object.keys(tournamentAchievements).length > 0) {
+            await reconcileMatchAchievements(tid, tournamentAchievements);
+        }
+
+        return { matchCount: savedMatchCount };
+    }
+
+    // ---------------------------------------------------------------------------
     // Public API
     // ---------------------------------------------------------------------------
 
@@ -513,6 +671,7 @@ const NewtonDB = (() => {
         importAll,
         deleteTournament,
         reconcileMatchAchievements,
+        backfillTournament,
         normalizeStats,
         diffStats,
         hasAnyStats,

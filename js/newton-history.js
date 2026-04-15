@@ -1495,6 +1495,69 @@ const NewtonHistory = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // Import Tournament from JSON file
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Import a single tournament JSON file into the Analytics register.
+     * Uses the shared backfillTournament() in newton-db.js.
+     * Works without the API — direct file to IndexedDB.
+     * @param {Event} event - file input change event
+     */
+    async function importTournament(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+
+        let t;
+        try {
+            const text = await file.text();
+            t = JSON.parse(text);
+        } catch (e) {
+            alert('Could not read file: ' + (e.message || e));
+            event.target.value = '';
+            return;
+        }
+
+        // Validate required fields
+        if (!t.id || !t.name || !Array.isArray(t.players)) {
+            alert('Invalid tournament file. Expected a tournament JSON export with id, name, and players.');
+            event.target.value = '';
+            return;
+        }
+
+        // Check if already in Analytics
+        const existing = await NewtonDB.getTournament(String(t.id));
+        if (existing) {
+            alert(`"${t.name}" (${t.date || '?'}) is already in the Analytics register.`);
+            event.target.value = '';
+            return;
+        }
+
+        const playerCount = t.players.length;
+        if (!confirm(`Import "${t.name}" (${t.date || '?'}, ${playerCount} players) into the Analytics register?\n\nMatch results and achievements will be imported.`)) {
+            event.target.value = '';
+            return;
+        }
+
+        try {
+            const cfgSnapshot = (typeof config !== 'undefined' ? config : {});
+            const result = await NewtonDB.backfillTournament(t, cfgSnapshot);
+
+            // Add new tournament to checked set and refresh
+            _invalidateCache();
+            _checkedIds.add(String(t.id));
+            _applySelectionAsScope();
+            await renderTournamentList();
+            alert(`Imported "${t.name}" — ${result.matchCount} matches.`);
+
+        } catch (e) {
+            alert('Import failed: ' + (e.message || e));
+        }
+
+        event.target.value = '';
+    }
+
+    // ---------------------------------------------------------------------------
     // Match detail modal (called from Setup → Match History cards)
     // ---------------------------------------------------------------------------
 
@@ -1623,6 +1686,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard, viewBracket, viewBracketForTournament };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, toggleLayer, showDashboard, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
 
 })();

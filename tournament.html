@@ -776,6 +776,8 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <button class="btn" onclick="NewtonHistory.exportDB()">Export Register</button>
                     <button class="btn btn-warning" onclick="document.getElementById('historyImportFile').click()">Import Register</button>
                     <input type="file" id="historyImportFile" accept=".json" style="display:none;" onchange="NewtonHistory.importDB(event)">
+                    <button class="btn" onclick="document.getElementById('tournamentImportFile').click()">Import Tournament</button>
+                    <input type="file" id="tournamentImportFile" accept=".json" style="display:none;" onchange="NewtonHistory.importTournament(event)">
                     <div id="analyticsScopeIndicator" class="analytics-scope-indicator" style="margin-left:auto;"></div>
                 </div>
             </div>
