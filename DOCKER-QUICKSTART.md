@@ -158,11 +158,9 @@ A read-only analytical surface — browse leaderboards, match history, and brack
 environment:
   - NEWTON_API_ENABLED=true            # Required for auto-import and bracket view
   - NEWTON_MODE=analytics              # Analytics-only mode
-  - NEWTON_LANDING_PAGE=true           # Show landing page at root
-  - NEWTON_BASE_URL=https://darts.example.com
 ```
 
-Mount the same `./tournaments` volume as your venue instance, or configure the venue to auto-backup to this server's relay API.
+Mount the `./tournaments` and `./images` volumes. Configure the venue instance to auto-backup to this server's relay API, or share the same tournaments directory.
 
 ---
 
