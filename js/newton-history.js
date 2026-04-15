@@ -179,6 +179,7 @@ const NewtonHistory = (() => {
         document.querySelectorAll('.analytics-point-btn').forEach(btn => {
             btn.addEventListener('click', () => switchPointMode(btn.dataset.pointMode));
         });
+        // Register breadcrumb is rendered dynamically via _updateBreadcrumb()
     }
 
     /**
@@ -201,10 +202,9 @@ const NewtonHistory = (() => {
         const panel = document.getElementById(viewId);
         if (panel) panel.classList.add('active');
 
-        // When switching to register, always render (checkboxes may have changed)
+        // When switching to register, render the active sub-tab
         if (view === 'register') {
-            showPanel('tournamentList');
-            renderTournamentList();
+            switchRegisterTab(_activeRegisterTab);
             _dirty.register = false;
         }
 
@@ -392,7 +392,7 @@ const NewtonHistory = (() => {
             container.innerHTML =
                 '<div class="analytics-dashboard">' +
                     _statCard('Tournaments', tournaments.length, 'Finalized', 'register') +
-                    _statCard('Matches', allMatches.length, 'Completed', null) +
+                    _statCard('Matches', allMatches.length, 'Completed', 'allMatches') +
                     _statCard('Players', playerSet.size, 'Unique', 'players') +
                     _statCard('Points', totalPoints, 'Total', 'leaderboard') +
                     _statCard('180s', total180s, 'Total', null) +
@@ -406,7 +406,15 @@ const NewtonHistory = (() => {
 
             // Wire up card clicks
             container.querySelectorAll('.analytics-stat-card[data-target-view]').forEach(card => {
-                card.addEventListener('click', () => switchView(card.dataset.targetView));
+                card.addEventListener('click', () => {
+                    const target = card.dataset.targetView;
+                    if (target === 'allMatches') {
+                        switchView('register');
+                        switchRegisterTab('matches');
+                    } else {
+                        switchView(target);
+                    }
+                });
             });
 
         } catch (e) {
@@ -809,12 +817,15 @@ const NewtonHistory = (() => {
     /** Currently visible register panel */
     let _activePanel = 'tournamentList';
 
+    /** Active register sub-tab: 'tournaments' or 'matches' */
+    let _activeRegisterTab = 'tournaments';
+
     /** Currently viewed match (for re-rendering on point mode change) */
     let _activeMatchContext = null;
 
     function showPanel(name) {
         _activePanel = name;
-        ['tournamentList', 'matchList', 'matchDetail'].forEach(p => {
+        ['tournamentList', 'allMatches', 'matchList', 'matchDetail'].forEach(p => {
             document.getElementById(`history${cap(p)}`).style.display = p === name ? '' : 'none';
         });
     }
@@ -1289,6 +1300,178 @@ const NewtonHistory = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // All matches (flat list across scope)
+    // ---------------------------------------------------------------------------
+
+    /** @type {object|null} NewtonTable instance for the all-matches view */
+    let _allMatchesTable = null;
+
+    /** Breadcrumb state for the Tournaments drill-down path */
+    let _breadcrumbTournament = null; // { id, name }
+    let _breadcrumbMatch = null;      // { id }
+
+    /** Show tournament list panel (used by back buttons). */
+    function showTournamentList() {
+        switchRegisterTab('tournaments');
+    }
+
+    /**
+     * Switch the active register sub-tab.
+     * @param {'tournaments'|'matches'} tab
+     */
+    function switchRegisterTab(tab) {
+        _activeRegisterTab = tab;
+
+        // Reset drill-down state when switching tabs
+        _breadcrumbTournament = null;
+        _breadcrumbMatch = null;
+
+        _updateBreadcrumb();
+
+        if (tab === 'tournaments') {
+            showPanel('tournamentList');
+            renderTournamentList();
+        } else {
+            renderAllMatches();
+        }
+    }
+
+    /**
+     * Rebuild the breadcrumb bar based on the current drill-down state.
+     * Tournaments (top) / Tournament Name / Match ID    |    Matches
+     */
+    function _updateBreadcrumb() {
+        const container = document.getElementById('registerBreadcrumb');
+        if (!container) return;
+
+        let html = '';
+
+        // Tournaments side (with optional drill-down crumbs)
+        const isOnTournaments = _activeRegisterTab === 'tournaments';
+        const isOnMatches = _activeRegisterTab === 'matches';
+
+        if (isOnTournaments && !_breadcrumbTournament) {
+            // Top-level tournaments list — active tab
+            html += '<span class="register-sub-tab active">Tournaments</span>';
+        } else {
+            // Tournaments is clickable crumb (navigates back to list)
+            html += `<button class="register-sub-tab" onclick="NewtonHistory.switchRegisterTab('tournaments')">Tournaments</button>`;
+        }
+
+        if (isOnTournaments && _breadcrumbTournament) {
+            const tLabel = escHtml(_breadcrumbTournament.name) + (_breadcrumbTournament.date ? ` <span style="color:#9ca3af;font-weight:400;">(${escHtml(_breadcrumbTournament.date)})</span>` : '');
+            html += '<span class="register-crumb-sep">/</span>';
+            if (_breadcrumbMatch) {
+                // Tournament name is clickable (goes back to tournament match list)
+                html += `<button class="register-sub-tab" onclick="NewtonHistory.openTournament('${escHtml(_breadcrumbTournament.id)}')">${tLabel}</button>`;
+                html += '<span class="register-crumb-sep">/</span>';
+                html += `<span class="register-sub-tab active">${escHtml(_breadcrumbMatch.id)}</span>`;
+            } else {
+                // Tournament name is the current view (active, not clickable)
+                html += `<span class="register-sub-tab active">${tLabel}</span>`;
+            }
+        }
+
+        // Matches tab
+        if (isOnMatches) {
+            html += '<span class="register-sub-tab active">Matches</span>';
+        } else {
+            html += `<button class="register-sub-tab" onclick="NewtonHistory.switchRegisterTab('matches')">Matches</button>`;
+        }
+
+        container.innerHTML = html;
+    }
+
+    /**
+     * Render a flat list of all matches across the scoped tournaments.
+     */
+    async function renderAllMatches() {
+        const tournaments = await getScopedTournaments();
+        const allMatches = [];
+
+        for (const t of tournaments) {
+            const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+            const p = _getActivePoints(t);
+
+            matches.forEach(m => {
+                // Compute per-match achievement points
+                const ach = m.achievements || {};
+                let pts = 0;
+                Object.values(ach).forEach(a => {
+                    if (!a || typeof a !== 'object') return;
+                    pts += (a.oneEighties || 0) * p.oneEighty;
+                    pts += (a.tons || 0) * p.ton;
+                    pts += (Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut;
+                    pts += (Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg;
+                });
+                m._achievementPoints = pts;
+                m._tournamentName = t.tournamentName || t.tournamentId;
+                m._tournamentId = t.tournamentId;
+                m._rowId = t.tournamentId + ':' + m.matchId;
+            });
+
+            allMatches.push(...matches);
+        }
+
+        // Update meta
+        const metaEl = document.getElementById('historyAllMatchesMeta');
+        if (metaEl) metaEl.textContent = `${allMatches.length} matches across ${tournaments.length} tournaments`;
+
+        // Create table instance once
+        if (!_allMatchesTable) {
+            _allMatchesTable = NewtonTable.create({
+                tableId: 'analytics-all-matches',
+                containerId: 'historyAllMatchesTableContainer',
+                defaultSortKey: 'completedAt',
+                defaultSortDir: 'desc',
+                emptyMessage: 'No matches in the current scope.',
+                columns: [
+                    {
+                        key: 'matchId', label: 'Match', width: '130px',
+                        render: (v) => `<span style="font-family:monospace;font-size:13px;">${escHtml(v)}</span>`
+                    },
+                    {
+                        key: 'player1Name', label: 'Player 1',
+                        render: (v, row) => row.winner === 1 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                    },
+                    {
+                        key: 'player2Name', label: 'Player 2',
+                        render: (v, row) => row.winner === 2 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                    },
+                    {
+                        key: 'score', label: 'Result', align: 'center', width: '80px', sortable: false,
+                        render: (v, row) => row.legsWon ? `${row.legsWon.p1}–${row.legsWon.p2}` : '—'
+                    },
+                    {
+                        key: '_achievementPoints', label: 'Points', align: 'center', width: '70px',
+                        render: (v) => v || '—',
+                        sortValue: (v) => v || 0
+                    },
+                    {
+                        key: '_tournamentName', label: 'Tournament',
+                        render: (v, row) => `<span style="cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();NewtonHistory.openTournament('${escHtml(row._tournamentId)}')">${escHtml(v)}</span>`
+                    },
+                    {
+                        key: 'completedAt', label: 'Date', width: '110px',
+                        render: (v) => v ? fmtDate(v) : '—',
+                        sortValue: (v) => v ? tsToMs(v) : 0
+                    },
+                    {
+                        key: 'matchType', label: 'Type', width: '90px',
+                        render: (v) => v === 'CHALKER'
+                            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
+                            : '<span class="history-type-badge history-type-manual">Manual</span>'
+                    }
+                ],
+                onRowClick: (row) => openMatch(row._tournamentId, row.matchId)
+            });
+        }
+
+        _allMatchesTable.setData(allMatches);
+        showPanel('allMatches');
+    }
+
+    // ---------------------------------------------------------------------------
     // Match list
     // ---------------------------------------------------------------------------
 
@@ -1305,6 +1488,12 @@ const NewtonHistory = (() => {
         }
         if (!tournament) { alert('Tournament not found.'); return; }
 
+        // Update breadcrumb: Tournaments / TournamentName
+        _activeRegisterTab = 'tournaments';
+        _breadcrumbTournament = { id: tournamentId, name: tournament.tournamentName || tournamentId, date: tournament.tournamentDate || null };
+        _breadcrumbMatch = null;
+        _updateBreadcrumb();
+
         _activeTournament = tournament;
 
         let matchRecords;
@@ -1315,7 +1504,6 @@ const NewtonHistory = (() => {
             return;
         }
 
-        document.getElementById('historyMatchListTitle').textContent = escHtml(tournament.tournamentName || tournamentId);
         document.getElementById('historyMatchListMeta').textContent =
             `${tournament.tournamentFormat === 'DE' ? 'Double Elimination' : tournament.tournamentFormat === 'SE' ? 'Single Elimination' : (tournament.tournamentFormat || '')} · ${tournament.playerCount || '?'} players · ${tournament.closedAt ? fmtDate(tournament.closedAt) : ''}`;
 
@@ -1361,7 +1549,7 @@ const NewtonHistory = (() => {
                             : '<span class="history-type-badge history-type-manual">Manual</span>'
                     }
                 ],
-                onRowClick: (row) => openMatch(tournamentId, row.matchId)
+                onRowClick: (row) => openMatch(row._tournamentId, row.matchId)
             });
         }
 
@@ -1369,6 +1557,7 @@ const NewtonHistory = (() => {
         const p = _getActivePoints(tournament);
 
         matchRecords.forEach(m => {
+            m._tournamentId = tournamentId;
             const ach = m.achievements || {};
             let total = 0;
             Object.values(ach).forEach(a => {
@@ -1386,12 +1575,6 @@ const NewtonHistory = (() => {
         _matchTable.setData(matchRecords);
 
         showPanel('matchList');
-
-        // Show "View Bracket" button in analytics mode
-        const bracketBtn = document.getElementById('viewBracketBtn');
-        if (bracketBtn) {
-            bracketBtn.style.display = (window.NEWTON_APP_MODE === 'analytics') ? '' : 'none';
-        }
     }
 
     // ---------------------------------------------------------------------------
@@ -1479,22 +1662,16 @@ const NewtonHistory = (() => {
         }
         if (!match) { alert('Match record not found.'); return; }
 
-        const titleEl = document.getElementById('historyMatchDetailTitle');
-        const bodyEl  = document.getElementById('historyMatchDetailBody');
+        // Update breadcrumb: Tournaments / TournamentName / MatchId
+        if (!_breadcrumbTournament || _breadcrumbTournament.id !== tournamentId) {
+            const t = await NewtonDB.getTournament(tournamentId);
+            _breadcrumbTournament = { id: tournamentId, name: t ? (t.tournamentName || tournamentId) : tournamentId, date: t ? (t.tournamentDate || null) : null };
+        }
+        _breadcrumbMatch = { id: matchId };
+        _activeRegisterTab = 'tournaments';
+        _updateBreadcrumb();
 
-        const winnerName = match.winner === 1 ? match.player1Name : match.player2Name;
-        const legs       = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
-        const date       = match.completedAt ? fmtDateTime(match.completedAt) : '—';
-        const typeBadge  = match.matchType === 'CHALKER'
-            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
-            : '<span class="history-type-badge history-type-manual">Manual</span>';
-
-        titleEl.innerHTML = `<span class="match-detail-match-id">${escHtml(match.matchId)}</span><span class="match-detail-players">${escHtml(match.player1Name)} vs ${escHtml(match.player2Name)}</span>`;
-
-        // Wire back button to return to match list for this tournament
-        const backBtn = document.getElementById('historyMatchDetailBackBtn');
-        if (backBtn) backBtn.onclick = () => openTournament(tournamentId);
-
+        const bodyEl = document.getElementById('historyMatchDetailBody');
         bodyEl.innerHTML = _buildMatchDetailHtml(match);
         _activeMatchContext = { tournamentId, matchId };
         showPanel('matchDetail');
@@ -1514,7 +1691,7 @@ const NewtonHistory = (() => {
 
         let html = `<div class="history-detail-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
-            <div>${date}</div>
+            <div>${match.completedAt ? fmtDate(match.completedAt) : '—'} · <strong>${escHtml(match.matchId)}</strong></div>
             <div style="margin-top:8px;font-size:16px;">${match.winner === 1 ? `<strong>${escHtml(match.player1Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player1Name)}</span>`} <span style="font-family:'SF Mono',Monaco,'Cascadia Code','Courier New',monospace;font-size:14px;color:#374151;margin:0 4px;">${legs}</span> ${match.winner === 2 ? `<strong>${escHtml(match.player2Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player2Name)}</span>`}</div>
             </div>
             <div>${match.format && match.format.bo ? `<span class="history-type-badge" style="background:#f3f4f6;color:#374151;">Best of ${match.format.bo}</span> ` : ''}${typeBadge}</div>
@@ -1824,6 +2001,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
+             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
 
 })();

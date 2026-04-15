@@ -3712,6 +3712,45 @@ a:hover { color: #1e40af; }
     border-bottom-color: rgba(22, 101, 52, 1);
 }
 
+.register-sub-tabs {
+    display: flex;
+    gap: 0;
+    margin-bottom: 12px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.register-sub-tab {
+    padding: 8px 16px;
+    border: none;
+    background: none;
+    font-family: inherit;
+    font-size: 13px;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -1px;
+    transition: color 0.15s ease, border-color 0.15s ease;
+}
+
+.register-sub-tab:hover {
+    color: #222222;
+}
+
+.register-sub-tab.active {
+    color: #222222;
+    border-bottom-color: rgba(22, 101, 52, 1);
+    cursor: default;
+}
+
+.register-crumb-sep {
+    color: #d1d5db;
+    font-size: 13px;
+    padding: 0 2px;
+    align-self: center;
+    user-select: none;
+}
+
 .analytics-point-mode {
     display: flex;
     align-items: center;

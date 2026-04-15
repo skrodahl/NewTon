@@ -826,6 +826,12 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
             <!-- Analytics view: Register (existing match browser) -->
             <div id="analyticsViewRegister" class="analytics-view">
 
+            <!-- Register sub-tabs / breadcrumb -->
+            <div class="register-sub-tabs" id="registerBreadcrumb">
+                <button class="register-sub-tab active" data-register-tab="tournaments">Tournaments</button>
+                <button class="register-sub-tab" data-register-tab="matches">Matches</button>
+            </div>
+
             <!-- Tournament list panel -->
             <div id="historyTournamentList">
                 <div class="analytics-filter-bar">
@@ -844,25 +850,20 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                 <div id="historyTournamentTableContainer"></div>
             </div>
 
+            <!-- All matches panel (flat list across scope) -->
+            <div id="historyAllMatches" style="display:none;">
+                <div id="historyAllMatchesMeta" class="history-panel-meta" style="margin-bottom:8px;"></div>
+                <div id="historyAllMatchesTableContainer"></div>
+            </div>
+
             <!-- Match list panel -->
             <div id="historyMatchList" style="display:none;">
-                <div class="history-back-row">
-                    <button class="btn btn-secondary" onclick="NewtonHistory.render()">← All Tournaments</button>
-                    <div>
-                        <div id="historyMatchListTitle" class="history-panel-title"></div>
-                        <div id="historyMatchListMeta" class="history-panel-meta"></div>
-                    </div>
-                    <button id="viewBracketBtn" class="btn" style="display:none;margin-left:auto;" onclick="NewtonHistory.viewBracket()">View Bracket</button>
-                </div>
+                <div id="historyMatchListMeta" class="history-panel-meta" style="margin-bottom:8px;"></div>
                 <div id="historyMatchTableContainer"></div>
             </div>
 
             <!-- Match detail panel -->
             <div id="historyMatchDetail" style="display:none;">
-                <div class="history-back-row">
-                    <button class="btn btn-secondary" id="historyMatchDetailBackBtn">← Back to matches</button>
-                    <div id="historyMatchDetailTitle" class="history-panel-title"></div>
-                </div>
                 <div id="historyMatchDetailBody"></div>
             </div>
 

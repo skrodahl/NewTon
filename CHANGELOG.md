@@ -7,6 +7,13 @@
 - **Import Register in analytics mode** — no longer hidden. Register import is safe (merge, not overwrite) and enables full Analytics without requiring tournament JSONs on disk.
 - **Half-year presets** — two buttons in the Lens bar for quick date scoping: current half-year and previous half-year. Labels auto-compute from today's date (e.g. 2026H1, 2025H2).
 - **Leaderboard sort direction** — first click on a column header now sorts descending (highest first) for all numeric columns. Exception: Best Leg sorts ascending (fewest darts first). Player name sorts alphabetically. Powered by `defaultDir` property on NewtonTable columns.
+- **Matches dashboard card** — the Matches stat card links to a flat all-matches view showing every completed match across the current scope, with columns for Match, Player 1, Player 2, Result, Points, Tournament, Date, and Type. Winners bolded.
+- **Register sub-tabs with breadcrumb navigation** — the Register view has two sub-tabs: Tournaments and Matches. Drilling into a tournament or match extends the tab bar into a breadcrumb trail: `Tournaments / Måndagscup (2026-03-09) / FS-4-1`. Each segment is clickable. Tournament date shown for disambiguation. Replaces the old back-button navigation.
+- **Match detail header** — shows date and match ID (`2026-03-09 · **FS-4-1**`) instead of full timestamp.
+
+### Bugfix
+
+- **Match detail lookup** — fixed stale closure where clicking a match in the per-tournament match list would fail with "Match record not found" after viewing more than one tournament in the same session. The table's row click handler captured the tournament ID from the first call, ignoring subsequent tournaments.
 
 ---
 
