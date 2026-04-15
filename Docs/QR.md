@@ -401,7 +401,7 @@ If QR scanning isn't available, both sides fall back gracefully:
 ## Planned: iOS-Compatible QR Scanning via Image Capture
 
 **Status:** Not started
-**Context:** [GitHub discussion](https://github.com/skrodahl/NewTon/issues) — iOS/iPadOS WebKit restricts `getUserMedia` in PWAs and non-Safari browsers, blocking the live camera scanner on iPads at the oche.
+**Context:** [GitHub discussion #4](https://github.com/skrodahl/NewTon/discussions/4) — iOS/iPadOS WebKit restricts `getUserMedia` in PWAs and non-Safari browsers, blocking the live camera scanner on iPads at the oche.
 
 ### Problem
 
