@@ -741,9 +741,64 @@ const NewtonHistory = (() => {
         initControls();
         _restoreTextFilter();
         _restoreDateFilter();
+        await _autoImportFromDisk();
         await _restoreScope();
         await renderScopeIndicator();
         switchView(_activeView);
+    }
+
+    // ---------------------------------------------------------------------------
+    // Auto-import shared tournaments from disk
+    // ---------------------------------------------------------------------------
+
+    /**
+     * Check for shared tournaments on disk and import any that aren't
+     * already in IndexedDB. Runs silently on every Analytics load.
+     */
+    async function _autoImportFromDisk() {
+        if (typeof NewtonDB === 'undefined') return;
+
+        let diskTournaments;
+        try {
+            const res = await fetch('api/list-tournaments.php');
+            if (!res.ok) return; // API not available (local file use) — skip silently
+            const data = await res.json();
+            diskTournaments = data.tournaments || [];
+        } catch (e) {
+            return; // No server — skip silently
+        }
+
+        if (!diskTournaments.length) return;
+
+        let imported = 0;
+        for (const entry of diskTournaments) {
+            // Match by ID if available, otherwise skip (can't reliably match)
+            if (!entry.id) continue;
+
+            const existing = await NewtonDB.getTournament(String(entry.id));
+            if (existing) continue;
+
+            // Fetch the full tournament JSON
+            try {
+                const res = await fetch('tournaments/' + entry.filename);
+                if (!res.ok) continue;
+                const t = await res.json();
+
+                if (!t.id || !Array.isArray(t.players)) continue;
+
+                await NewtonDB.backfillTournament(t, typeof config !== 'undefined' ? config : {});
+                _checkedIds.add(String(t.id));
+                imported++;
+            } catch (e) {
+                console.warn('[auto-import] Failed to import', entry.filename, e);
+            }
+        }
+
+        if (imported > 0) {
+            _invalidateCache();
+            _applySelectionAsScope();
+            console.log(`[auto-import] Imported ${imported} tournament(s) from disk`);
+        }
     }
 
     // ---------------------------------------------------------------------------
