@@ -1,4 +1,4 @@
-## **v5.0.10-beta.2** — (2026-04-15)
+## **v5.0.10** — The Full Picture (2026-04-15)
 
 ### Analytics-only mode
 
@@ -33,6 +33,11 @@
 - **Dashboard entry point** — clicking "Analytics" on a tournament (from Recent Tournaments or the podium) now always opens the Dashboard tab, not the last visited tab.
 - **Import Tournament button** — in the Analytics header. Import a single tournament JSON file directly into the Analytics register. Works without the API — direct file to IndexedDB. Available in both full and analytics mode.
 - **Shared backfill function** — `NewtonDB.backfillTournament(t, config)` extracted to newton-db.js. Single source of truth for importing tournament data into IndexedDB. Used by file import, localStorage backfill ("+ Analytics"), and auto-import from disk.
+- **Auto-import from disk** — on every Analytics load, checks for shared tournaments on disk not yet in IndexedDB and imports them silently. One API call + ID checks. New tournaments appear selected.
+
+### Chalker
+
+- **Unlimited darts per leg** — new "Unlimited" option in Max Rounds (both Global Settings and Chalker). Uses value `100` (300 darts) — no special-case logic needed, all existing code works unchanged. QR payload stays within comfortable scanning limits. QR confirm display shows "Unlimited" for values >= 100.
 
 ---
 

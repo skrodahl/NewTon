@@ -1,6 +1,6 @@
-# Release Notes — v5.0.10-beta.2 — Analytics Mode
+# Release Notes — v5.0.10 — The Full Picture
 
-**NewTon DC Tournament Manager v5.0.10-beta.2 — April 15, 2026**
+**NewTon DC Tournament Manager v5.0.10 — April 15, 2026**
 
 ---
 
@@ -8,7 +8,7 @@
 
 NewTon becomes a two-tier system. The venue runs the full app locally. The public site runs analytics-only. Same codebase, same Docker image, one environment variable.
 
-v5.0.10-beta.2 introduces `NEWTON_MODE=analytics` — a deployment mode that hides tournament management and exposes only Analytics and a limited Global Settings. Combined with `NEWTON_READONLY_ANALYTICS=true`, public instances become read-only analytical surfaces where anyone can explore and nobody can delete.
+v5.0.10 introduces `NEWTON_MODE=analytics` — a deployment mode that hides tournament management and exposes only Analytics and a limited Global Settings. Combined with `NEWTON_READONLY_ANALYTICS=true`, public instances become read-only analytical surfaces where anyone can explore and nobody can delete.
 
 ---
 
@@ -98,4 +98,4 @@ No migration required. New environment variables are optional — existing deplo
 
 ---
 
-**NewTon DC Tournament Manager v5.0.10-beta.2 — The venue runs tournaments. The world sees the stats.**
+**NewTon DC Tournament Manager v5.0.10 — The venue runs tournaments. The world sees the stats.**

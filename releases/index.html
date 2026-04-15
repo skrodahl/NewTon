@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.0.10-beta.2 — Analytics Mode</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.0.10-beta.2 release notes. Analytics-only deployment mode, read-only bracket view, Docker environment variables for public instances.">
+    <title>v5.0.10 — The Full Picture</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.0.10 release notes. Analytics-only mode, auto-import from disk, tournament JSON import, read-only bracket view, unlimited darts, shared backfill architecture.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,16 +17,18 @@
 
 <div class="docs-content">
 
-    <h1>Analytics Mode</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.0.10-beta.2 &mdash; April 14, 2026</p>
+    <h1>The Full Picture</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.0.10 &mdash; April 14, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10-beta.2" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.0.10-beta.2</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.0.10</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
             <li><a href="#analytics-mode">Analytics-Only Mode</a></li>
+            <li><a href="#import">Tournament Import &amp; Auto-Import</a></li>
+            <li><a href="#chalker">Chalker: Unlimited Darts</a></li>
             <li><a href="#env">Docker Environment Variables</a></li>
             <li><a href="#other">Other Changes</a></li>
             <li><a href="#migration">Migration</a></li>
@@ -34,7 +36,8 @@
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>NewTon becomes a two-tier system. The venue runs the full app locally. The public site runs analytics-only. Same codebase, same Docker image, one environment variable.</p>
+    <p>The system now shows everything, from everywhere, to everyone.</p>
+    <p>v5.0.10 adds analytics-only deployment mode, automatic tournament import from disk, manual import from JSON files, a read-only bracket view, and unlimited darts for casual play. Under the hood, a shared backfill function unifies all import paths into one reliable pipeline.</p>
 
     <hr>
 
@@ -54,6 +57,32 @@
     </ul>
     <h3>Read-Only Bracket View</h3>
     <p>&ldquo;View Bracket&rdquo; button on tournament rows and match list. Loads the tournament JSON from disk, renders the bracket read-only. No match controls, no Developer Console. Uses <code>currentTournament</code> with an <code>_analyticsPreview</code> guard &mdash; save functions skip analytics previews, so no phantom data is persisted.</p>
+
+    <p><em>Bracket view and auto-import require the REST API (Docker deployment). Manual JSON import works without the API.</em></p>
+
+    <hr>
+
+    <h2 id="import">Tournament Import &amp; Auto-Import</h2>
+
+    <h3>Import Tournament from JSON</h3>
+    <p>&ldquo;Import Tournament&rdquo; button in the Analytics header. Pick a tournament JSON file (same format as Tournament Setup export) and it&rsquo;s imported directly into the Analytics register. No localStorage, no API required &mdash; works offline, works in both full and analytics mode.</p>
+
+    <h3>Auto-Import from Disk</h3>
+    <p>On every Analytics load, the system checks for shared tournaments on disk not yet in the Analytics register. New tournaments are imported silently using the shared backfill function. One API call to list tournaments, then fetch and import any missing ones.</p>
+    <p><em>Requires REST API (Docker deployment).</em></p>
+
+    <h3>Shared Backfill Function</h3>
+    <p><code>NewtonDB.backfillTournament(t, config)</code> &mdash; a single function in newton-db.js that handles all tournament imports into IndexedDB. Match-level achievement deltas from transaction history, tournament-level achievement aggregates, placements, reconciliation. Used by:</p>
+    <ul>
+        <li>Import Tournament from JSON (file &rarr; IndexedDB)</li>
+        <li>&ldquo;+ Analytics&rdquo; from Recent Tournaments (localStorage &rarr; IndexedDB)</li>
+        <li>Auto-import from disk (server &rarr; IndexedDB)</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="chalker">Chalker: Unlimited Darts</h2>
+    <p>New &ldquo;Unlimited&rdquo; option in Max Rounds &mdash; both in Global Settings and the Chalker app. Internally uses 100 rounds (300 darts per leg), which keeps the QR result payload within comfortable scanning limits. No special-case logic &mdash; all existing code works unchanged.</p>
 
     <hr>
 
@@ -88,15 +117,15 @@
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.0.10-beta.2 &mdash; The venue runs tournaments. The world sees the stats.</em></p>
+    <p><em>NewTon DC Tournament Manager v5.0.10 &mdash; The Full Picture.</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10-beta.2" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.0.10-beta.2</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.10" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.0.10</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
-        <li><a href="v5.0.10-beta.2.html">v5.0.10-beta.2</a> &mdash; April 14, 2026 &mdash; Analytics Mode.</li>
+        <li><a href="v5.0.10.html">v5.0.10</a> &mdash; April 15, 2026 &mdash; The Full Picture.</li>
         <li><a href="v5.0.9.html">v5.0.9</a> &mdash; April 14, 2026 &mdash; Leader of the Pack.</li>
         <li><a href="v5.0.8.html">v5.0.8</a> &mdash; April 13, 2026 &mdash; Choose Your Lens.</li>
         <li><a href="v5.0.7.html">v5.0.7</a> &mdash; April 13, 2026 &mdash; The Offline Authority in Darts.</li>

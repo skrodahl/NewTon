@@ -1009,7 +1009,7 @@
   function showQRConfirm(payload) {
     const lines = [
       `<strong>${payload.p1}</strong> vs <strong>${payload.p2}</strong>`,
-      `${payload.sc} · Bo${payload.bo} · ${payload.mr} rounds`,
+      `${payload.sc} · Bo${payload.bo} · ${payload.mr >= 100 ? 'Unlimited' : payload.mr + ' rounds'}`,
       `Lane ${payload.ln} · Ref: ${payload.ref}`
     ];
     elements.qrConfirmDetails.innerHTML = lines.map(l => `<p>${l}</p>`).join('');

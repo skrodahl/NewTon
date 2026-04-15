@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.10-b.3'; // Analytics Mode — analytics-only deployment, read-only bracket view
+const APP_VERSION = '5.0.10'; // The Full Picture — analytics mode, auto-import, tournament import, unlimited darts
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
