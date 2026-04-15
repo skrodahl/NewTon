@@ -3,7 +3,6 @@
 ### Analytics-only mode
 
 - **NEWTON_MODE=analytics** — Docker environment variable. Hides Tournament Setup, Player Registration, Tournament Bracket, and Chalker tabs. Shows only Analytics and a limited Global Settings (Branding + Point Values). Header set by PHP — no flash.
-- **NEWTON_READONLY_ANALYTICS=true** — Docker environment variable passed to client config. Foundation for read-only public instances.
 - **CSS-driven mode system** — PHP sets `<body class="mode-analytics">`, CSS handles all visibility. No JavaScript display:none, no flash on load. Clean platform for future modes.
 - **Read-only bracket view** — in analytics mode, "Bracket" button on tournament list and "View Bracket" in match list loads the tournament JSON from disk via API. Renders bracket read-only using `currentTournament` with `_analyticsPreview` guard — `saveTournamentOnly()` skips analytics previews. Bracket ID matching via tournament ID (with name+date fallback). "Back to Analytics" clears `currentTournament` and globals.
 - **Import Register hidden** — analytics mode hides the Import Register button. Data comes exclusively from disk (shared tournaments).
@@ -17,7 +16,6 @@
 | Variable | Values | Default | Description |
 |---|---|---|---|
 | `NEWTON_MODE` | `full`, `analytics` | `full` | App mode. `analytics` hides tournament management tabs, shows only Analytics and limited Global Settings. |
-| `NEWTON_READONLY_ANALYTICS` | `true`, `false` | `false` | Disables all deletion in Analytics and Shared Tournaments. For public-facing instances. |
 | `NEWTON_LANDING_PAGE` | `true`, `false` | — | Enables the landing page at `/`. Existing variable. |
 | `NEWTON_DEMO_MODE` | `true`, `false` | `false` | Shows demo banner. Existing variable. |
 | `NEWTON_GITHUB_URL` | URL | `https://github.com/skrodahl/NewTon` | GitHub link in UI. Existing variable. |

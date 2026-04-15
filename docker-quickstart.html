@@ -161,6 +161,15 @@ networks:
   - NEWTON_DEMO_MODE=true      # Show privacy banner
   - NEWTON_LANDING_PAGE=true   # Show landing page at root</code></pre>
 
+    <h4>Analytics Instance</h4>
+    <p>A read-only analytical surface &mdash; browse leaderboards, match history, and brackets. Tournament data comes from shared tournament files on disk. No tournament management tabs, no deletion. Accepts tournament uploads from venue instances via the relay API.</p>
+    <pre><code>environment:
+  - NEWTON_API_ENABLED=true            # Required for auto-import and bracket view
+  - NEWTON_MODE=analytics              # Analytics-only mode
+  - NEWTON_LANDING_PAGE=true           # Show landing page at root
+  - NEWTON_BASE_URL=https://darts.example.com</code></pre>
+    <p>Mount the same <code>./tournaments</code> volume as your venue instance, or configure the venue to auto-backup to this server&rsquo;s relay API.</p>
+
     <hr>
 
     <h2 id="configuration">Environment Variables</h2>
@@ -173,6 +182,7 @@ networks:
             <tr><td><code>HTTPS_PORT</code></td><td><code>443</code></td><td>HTTPS listening port</td></tr>
             <tr><td><code>MDNS_HOSTNAME</code></td><td><code>newtondarts</code></td><td>mDNS hostname &mdash; container reachable as <code>&lt;value&gt;.local</code> on the LAN (Linux only)</td></tr>
             <tr><td><code>NEWTON_API_ENABLED</code></td><td><code>true</code></td><td>Enables REST API endpoints for tournament upload, download, and delete</td></tr>
+            <tr><td><code>NEWTON_MODE</code></td><td><code>full</code></td><td>App mode. <code>analytics</code> hides tournament management tabs, shows only Analytics and limited Global Settings</td></tr>
             <tr><td><code>NEWTON_DEMO_MODE</code></td><td><code>false</code></td><td>Shows a privacy banner at the top of the app</td></tr>
             <tr><td><code>NEWTON_LANDING_PAGE</code></td><td><code>false</code></td><td>Shows a landing page at the root URL instead of loading the app directly</td></tr>
             <tr><td><code>NEWTON_BASE_URL</code></td><td><em>unset</em></td><td>Canonical URL for Open Graph and Twitter Card meta tags on the landing page</td></tr>

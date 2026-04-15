@@ -8,7 +8,7 @@
 
 NewTon becomes a two-tier system. The venue runs the full app locally. The public site runs analytics-only. Same codebase, same Docker image, one environment variable.
 
-v5.0.10 introduces `NEWTON_MODE=analytics` — a deployment mode that hides tournament management and exposes only Analytics and a limited Global Settings. Combined with `NEWTON_READONLY_ANALYTICS=true`, public instances become read-only analytical surfaces where anyone can explore and nobody can delete.
+v5.0.10 introduces `NEWTON_MODE=analytics` — a deployment mode that hides tournament management and exposes only Analytics and a limited Global Settings. In analytics mode, Server Settings is inaccessible — deletion is impossible by design.
 
 ---
 
@@ -48,7 +48,6 @@ Bracket view requires the tournament JSON on disk. In analytics mode, all data c
 | Variable | Values | Default | Description |
 |---|---|---|---|
 | `NEWTON_MODE` | `full`, `analytics` | `full` | App mode. `analytics` hides tournament management, shows only Analytics. |
-| `NEWTON_READONLY_ANALYTICS` | `true`, `false` | `false` | Disables all deletion. For public-facing instances. |
 | `NEWTON_LANDING_PAGE` | `true`, `false` | — | Enables the landing page at `/`. |
 | `NEWTON_DEMO_MODE` | `true`, `false` | `false` | Shows demo banner. |
 | `NEWTON_GITHUB_URL` | URL | `https://github.com/skrodahl/NewTon` | GitHub link in UI. |

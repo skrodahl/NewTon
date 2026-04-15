@@ -150,6 +150,20 @@ environment:
   - NEWTON_LANDING_PAGE=true   # Show landing page at root
 ```
 
+#### Analytics Instance
+
+A read-only analytical surface — browse leaderboards, match history, and brackets. Tournament data comes from shared tournament files on disk. No tournament management tabs, no deletion. Accepts tournament uploads from venue instances via the relay API.
+
+```yaml
+environment:
+  - NEWTON_API_ENABLED=true            # Required for auto-import and bracket view
+  - NEWTON_MODE=analytics              # Analytics-only mode
+  - NEWTON_LANDING_PAGE=true           # Show landing page at root
+  - NEWTON_BASE_URL=https://darts.example.com
+```
+
+Mount the same `./tournaments` volume as your venue instance, or configure the venue to auto-backup to this server's relay API.
+
 ---
 
 ## Environment Variables
@@ -160,6 +174,7 @@ environment:
 | `HTTPS_PORT` | `443` | HTTPS listening port |
 | `MDNS_HOSTNAME` | `newtondarts` | mDNS hostname — container reachable as `<value>.local` on the LAN (Linux only) |
 | `NEWTON_API_ENABLED` | `true` | Enables REST API endpoints for tournament upload, download, and delete |
+| `NEWTON_MODE` | `full` | App mode. `analytics` hides tournament management tabs, shows only Analytics and limited Global Settings |
 | `NEWTON_DEMO_MODE` | `false` | Shows a privacy banner at the top of the app |
 | `NEWTON_LANDING_PAGE` | `false` | Shows a landing page at the root URL instead of loading the app directly |
 | `NEWTON_BASE_URL` | *(unset)* | Canonical URL for Open Graph and Twitter Card meta tags on the landing page |
