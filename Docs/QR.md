@@ -1,7 +1,7 @@
 # QR Code Communication Protocol (TM ↔ Chalker)
 
-**Status:** Implemented — v5.0.0 (TM→Chalker assignment) + v5.0.1 (Chalker→TM result)
-**Last Updated:** March 2026
+**Status:** Implemented — v5.0.0 (TM→Chalker assignment) + v5.0.1 (Chalker→TM result) + v5.0.14-beta (iOS image capture on Chalker)
+**Last Updated:** April 2026
 
 ---
 
@@ -391,55 +391,101 @@ If QR scanning isn't available, both sides fall back gracefully:
 |------|------|---------|------|-------|
 | TM | Generate assignment QR | qrcode-generator (~8KB) | Lightweight | Generates QR as canvas/SVG |
 | TM | Scan result QR | `BarcodeDetector` API (native) + jsQR fallback (~250KB) | Zero-dep primary | jsQR used on Windows Enterprise where `BarcodeDetector` is unavailable |
-| Chalker | Scan assignment QR | `BarcodeDetector` API (native) | Zero-dep | Mobile/tablet Chrome always has it; no fallback needed |
+| Chalker | Scan assignment QR | `BarcodeDetector` API (native) + jsQR for iOS image capture | Zero-dep primary | jsQR used on iOS/iPadOS where `getUserMedia` is restricted |
 | Chalker | Generate result QR | qrcode-generator (~8KB) | Lightweight | Displayed via Stats → Result QR |
 
 **Zero-dependency requirement**: All libraries are standalone JS, no npm/build needed. Loaded via `<script>` tag.
 
 ---
 
-## Planned: iOS-Compatible QR Scanning via Image Capture
+## iOS-Compatible QR Scanning via Image Capture
 
-**Status:** Not started
+**Status:** Implemented (Chalker side) — v5.0.14-beta
 **Context:** [GitHub discussion #4](https://github.com/skrodahl/NewTon/discussions/4) — iOS/iPadOS WebKit restricts `getUserMedia` in PWAs and non-Safari browsers, blocking the live camera scanner on iPads at the oche.
 **Contributors:** [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) — platform detection strategy, `capture="environment"`, image downscaling, auto-retry UX
 
 ### Problem
 
-The current scan implementation uses `getUserMedia` with a live camera stream and JS-based QR decoding. This works on desktop Chrome/Edge and Android but fails on iOS due to WebKit camera restrictions — even over HTTPS, even as a Home Screen PWA.
+The live scanner uses `getUserMedia` with a video stream and native `BarcodeDetector`. This works on desktop Chrome/Edge and Android but fails on iOS due to WebKit camera restrictions — even over HTTPS, even as a Home Screen PWA.
 
-### Proposed solution: image capture as primary iOS path
+### Solution: image capture as primary iOS path
 
-Use `<input type="file" accept="image/*" capture="environment">` to let the user take a photo of the QR code, then decode it from the captured image. This avoids `getUserMedia` entirely and uses a pattern iOS fully supports.
+On iOS/iPadOS, `<input type="file" accept="image/*" capture="environment">` opens the native rear camera. The user takes a photo, which is decoded client-side by jsQR. This avoids `getUserMedia` entirely and uses a pattern iOS fully supports.
 
-Image capture is the **default** on iOS/iPadOS — not a fallback triggered by `getUserMedia` failure. Some iPads technically support `getUserMedia` but behave unreliably in standalone PWA mode, which is worse UX than a consistent two-tap flow. Platform detection (`navigator.platform` / `navigator.userAgent`) determines the path, not feature detection.
+Image capture is the **default** on iOS/iPadOS — not a fallback triggered by `getUserMedia` failure. Some iPads technically support `getUserMedia` but behave unreliably in standalone PWA mode, which is worse UX than a consistent two-tap flow. Platform detection determines the path, not feature detection.
 
-**How it works:**
-1. User taps "Scan QR" — on iOS, this opens the native rear camera via the file input
-2. User takes a photo of the QR code
-3. The captured image is loaded into a canvas, downscaled to ~1000px on the longest side (iPad photos can be 12MP+ — downscaling improves decode speed without losing QR resolution)
-4. jsQR (already bundled as fallback) decodes the QR from the canvas
-5. Normal verification and application flow continues unchanged
+### Platform detection
 
-**On decode failure:**
-If jsQR cannot read the QR from the captured image, immediately re-open the capture input with a short hint (e.g. "Couldn't read QR — try filling the frame"). Keeps the user in the flow rather than dropping back to the main UI.
+```javascript
+function isIOS() {
+    return /iPhone|iPod/.test(navigator.userAgent) ||
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+```
+
+iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. The `navigator.platform === 'MacIntel'` + `navigator.maxTouchPoints > 1` check catches iPads disguised as Macs — real Macs report `maxTouchPoints` of 0.
+
+### How it works
+
+1. User taps "Scan QR" — `startQRScanner()` calls `isIOS()`
+2. **iOS path**: `startImageCapture()` hides the video element, shows the scan modal, and triggers the file input — iOS opens the native rear camera
+3. User takes a photo of the QR code
+4. `decodeImageQR()` loads the photo into a canvas, downscales to ~1000px on the longest side (iPad photos can be 12MP+ — downscaling improves decode speed without losing QR resolution)
+5. jsQR decodes the QR from the canvas pixel data
+6. On success: `handleQRPayload()` — same entry point as the live scanner. CRC verification, payload parsing, and confirmation flow are identical.
+7. On failure: error message displayed, hint updated to "Tap below to try again", file input reset for another capture
+
+**Desktop/Android path**: unchanged — live camera stream with `BarcodeDetector`.
+
+### Implementation details
+
+**HTML additions** (`chalker/index.html`):
+- `<input type="file" id="qr-image-input" accept="image/*" capture="environment">` — hidden, triggered programmatically
+- `<canvas id="qr-image-canvas">` — hidden, used for image downscaling and pixel extraction
+- `<script src="js/jsQR.js">` — jsQR library (~250KB), same copy used by the TM
+
+**JS functions** (`chalker/js/chalker.js`):
+- `isIOS()` — platform detection
+- `startImageCapture()` — opens native camera via file input, wires up `onchange` handler
+- `decodeImageQR(file)` — loads image, downscales, extracts pixel data, runs jsQR
+- `stopQRScanner()` — extended to reset image capture state (file input, hint text, video visibility)
+- `isQRScanAvailable()` — updated: returns `true` on iOS (image capture is always available)
 
 **What stays the same:**
 - Payload format, CRC signing, replay protection — all unchanged
+- `handleQRPayload()` is the single entry point for both scan paths
 - Offline-first model preserved — no URLs, no server dependency
 - Security model unchanged — same signed payload, same verification
 
-**What changes:**
-- `capture="environment"` targets the rear camera — avoids front-camera selection on iPads
-- UX is two-tap instead of point-and-scan (open camera, take photo, auto-decode)
-- Both TM and Chalker need the image capture path
-- Platform detection: iOS/iPadOS goes straight to image capture; desktop/Android keeps the live scanner
+### Known risks and potential pitfalls
+
+**Platform detection fragility:**
+- `navigator.platform` is deprecated. Current browsers still support it, but future versions may remove it or return a generic value. If Apple changes `maxTouchPoints` behavior on desktop Macs (e.g. for trackpad), the detection could false-positive. Monitor for changes; a `navigator.userAgentData` path may be needed eventually.
+- The detection is conservative: if it returns `false` on an iPad, the user gets the `getUserMedia` path which will fail with a camera error — not a crash, but a dead end that requires manual match setup.
+
+**`capture="environment"` behavior varies:**
+- On iPhone, this reliably opens the rear camera. On iPad, behavior depends on iOS version and context — some versions may show a file picker instead of the camera. If this happens, the user can still pick a previously taken photo, but the UX is less direct.
+- In standalone PWA mode (Home Screen app), `capture` may behave differently than in Safari. This is the hardest configuration to test remotely.
+
+**jsQR decode reliability:**
+- jsQR needs a reasonably sharp, well-lit photo with the QR code filling a significant portion of the frame. Blurry photos, extreme angles, or heavy glare will fail to decode.
+- The 1000px downscale is a balance: too small loses QR detail, too large is slow on older iPads. If decode rates are low, this threshold may need tuning.
+- jsQR does not support multiple QR codes in one image — if the photo captures more than one QR (e.g. multiple match cards visible), it may decode the wrong one or fail entirely.
+
+**Image orientation (EXIF):**
+- iOS photos include EXIF orientation metadata. The `drawImage()` canvas approach in modern browsers auto-applies EXIF rotation. Older browser versions may not — the image could be rotated 90°, which would cause jsQR to fail. All currently supported iOS versions handle this correctly, but worth noting.
+
+**Memory on older iPads:**
+- A 12MP photo loaded into an `Image` element, drawn to a canvas, and processed by jsQR creates multiple large buffers. On older iPads with limited memory, this could cause a brief freeze or, in extreme cases, a tab reload. The downscale mitigates this — the canvas is only 1000px, not the full 12MP.
+
+**Cancel flow:**
+- If the user opens the native camera via the file input and then dismisses it (taps Cancel in iOS camera UI), no `onchange` event fires. The scan modal remains visible with the hint text. The user must tap the Cancel button in the modal to return to the Chalker. This is expected behavior but may confuse first-time users.
+
+### Future work
+
+- **TM-side image capture**: The TM also scans QR codes (result QR from Chalker). If the TM is used on an iPad, it needs the same image capture path. The implementation is analogous — same `isIOS()` check, same `decodeImageQR()` function, branching in the TM's scan flow.
+- **Auto-retry on failure**: Currently the user sees an error and must manually trigger another capture. A future improvement could auto-reopen the file input after a short delay, keeping the user in the flow.
 
 **Why not deep links:**
 Deep links (`https://server/chalker/?assign=<payload>`) would require a known server URL, break offline-first, and open Safari instead of the PWA. Image capture keeps everything self-contained.
-
-**Scope:**
-- Chalker scanning assignment QR (iOS iPad at the oche — the primary use case)
-- TM scanning result QR (less common on iOS, but should work too)
-- Desktop/Android keep the current live scanner — image capture does not replace it
 

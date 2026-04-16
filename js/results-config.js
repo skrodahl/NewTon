@@ -127,7 +127,7 @@ function applyConfigToUI() {
     safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
     safeSetValue('seBronzeLegs', config.legs.seBronze);
     safeSetValue('seFinalLegs', config.legs.seFinal);
-    safeSetValue('chalkerX01Format', config.legs.x01Format);
+    initX01Toggle(config.legs.x01Format);
     safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
     safeSetValue('chalkerShortLegThreshold', config.legs.shortLegThreshold || 21);
 
@@ -194,6 +194,44 @@ function safeSetChecked(elementId, value) {
     if (element && value !== undefined) {
         element.checked = !!value;
     }
+}
+
+/**
+ * Initialize the x01 format toggle. If the stored value matches a preset,
+ * show the dropdown. Otherwise, switch to custom mode with the stored value.
+ * @param {number} value - stored x01Format value
+ */
+function initX01Toggle(value) {
+    const select = document.getElementById('chalkerX01Format');
+    const custom = document.getElementById('chalkerX01Custom');
+    const toggle = document.getElementById('chalkerX01CustomToggle');
+    const warning = document.getElementById('chalkerX01Warning');
+    if (!select || !custom || !toggle) return;
+
+    const presets = Array.from(select.options).map(o => parseInt(o.value));
+    const isCustom = value && !presets.includes(value);
+
+    toggle.checked = isCustom;
+    select.style.display = isCustom ? 'none' : '';
+    custom.style.display = isCustom ? '' : 'none';
+    if (warning) warning.style.display = isCustom ? '' : 'none';
+
+    if (isCustom) {
+        custom.value = value;
+    } else {
+        safeSetValue('chalkerX01Format', value);
+    }
+
+    toggle.onchange = () => {
+        const checked = toggle.checked;
+        select.style.display = checked ? 'none' : '';
+        custom.style.display = checked ? '' : 'none';
+        if (warning) warning.style.display = checked ? '' : 'none';
+        if (checked) {
+            custom.value = select.value;
+            custom.focus();
+        }
+    };
 }
 
 // SAVE GLOBAL CONFIG
@@ -447,7 +485,13 @@ function saveMatchConfiguration() {
     config.legs.seFinal = parseInt(document.getElementById('seFinalLegs').value) || 5;
 
     // Read values from UI — Chalker
-    config.legs.x01Format = parseInt(document.getElementById('chalkerX01Format').value) || 501;
+    const x01Toggle = document.getElementById('chalkerX01CustomToggle');
+    if (x01Toggle && x01Toggle.checked) {
+        const customVal = parseInt(document.getElementById('chalkerX01Custom').value);
+        config.legs.x01Format = (customVal >= 2 && customVal <= 1001) ? customVal : 501;
+    } else {
+        config.legs.x01Format = parseInt(document.getElementById('chalkerX01Format').value) || 501;
+    }
     config.legs.maxRounds = parseInt(document.getElementById('chalkerMaxRounds').value) || 13;
     config.legs.shortLegThreshold = parseInt(document.getElementById('chalkerShortLegThreshold').value) || 21;
 
@@ -507,7 +551,7 @@ function resetMatchConfigToDefaults() {
         safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
         safeSetValue('seBronzeLegs', config.legs.seBronze);
         safeSetValue('seFinalLegs', config.legs.seFinal);
-        safeSetValue('chalkerX01Format', config.legs.x01Format);
+        initX01Toggle(config.legs.x01Format);
         safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
 
         // Save to localStorage

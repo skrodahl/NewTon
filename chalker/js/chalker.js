@@ -75,6 +75,8 @@
     player1Name: document.getElementById('player1-name'),
     player2Name: document.getElementById('player2-name'),
     startingScore: document.getElementById('starting-score'),
+    startingScoreCustom: document.getElementById('starting-score-custom'),
+    startingScoreCustomToggle: document.getElementById('starting-score-custom-toggle'),
     bestOf: document.getElementById('best-of'),
     maxRounds: document.getElementById('max-rounds'),
     startMatchBtn: document.getElementById('start-match-btn'),
@@ -118,6 +120,9 @@
     qrScanVideo: document.getElementById('qr-scan-video'),
     qrScanCancelBtn: document.getElementById('qr-scan-cancel-btn'),
     qrScanError: document.getElementById('qr-scan-error'),
+    qrScanHint: document.getElementById('qr-scan-hint'),
+    qrImageInput: document.getElementById('qr-image-input'),
+    qrImageCanvas: document.getElementById('qr-image-canvas'),
     qrConfirmModal: document.getElementById('qr-confirm-modal'),
     qrConfirmDetails: document.getElementById('qr-confirm-details'),
     qrConfirmStartBtn: document.getElementById('qr-confirm-start-btn'),
@@ -246,7 +251,9 @@
       laneName: '', // Reserved for network mode
       player1Name: elements.player1Name.value.trim() || 'Player 1',
       player2Name: elements.player2Name.value.trim() || 'Player 2',
-      startingScore: parseInt(elements.startingScore.value, 10),
+      startingScore: elements.startingScoreCustomToggle.checked
+        ? (parseInt(elements.startingScoreCustom.value, 10) || 501)
+        : parseInt(elements.startingScore.value, 10),
       bestOf: parseInt(elements.bestOf.value, 10),
       maxRounds: parseInt(elements.maxRounds.value, 10)
     };
@@ -887,6 +894,16 @@
   let qrScanInterval = null;
 
   /**
+   * Detect iOS/iPadOS. iPadOS 13+ reports as "Macintosh" in the UA,
+   * so we check for touch support on Mac platforms to catch iPads.
+   * @returns {boolean}
+   */
+  function isIOS() {
+    return /iPhone|iPod/.test(navigator.userAgent) ||
+           (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  }
+
+  /**
    * Scan a video element for QR codes using native BarcodeDetector.
    * The Chalker runs on mobile/tablet where BarcodeDetector is available.
    * @param {HTMLVideoElement} videoEl
@@ -901,10 +918,12 @@
 
   /**
    * Check if QR scanning is available.
+   * On iOS, image capture is always available (no BarcodeDetector needed).
+   * On other platforms, requires native BarcodeDetector.
    * @returns {boolean}
    */
   function isQRScanAvailable() {
-    return 'BarcodeDetector' in window;
+    return isIOS() || 'BarcodeDetector' in window;
   }
 
   /**
@@ -917,12 +936,17 @@
   }
 
   /**
-   * Start camera and QR scan loop.
+   * Start QR scanner. On iOS, uses image capture; on other platforms, uses live camera.
    * Shows qr-scan-modal; on successful scan calls handleQRPayload().
    */
   async function startQRScanner() {
     elements.qrScanError.style.display = 'none';
     elements.qrScanError.textContent = '';
+
+    if (isIOS()) {
+      startImageCapture();
+      return;
+    }
 
     if (!isQRScanAvailable()) {
       elements.qrScanError.textContent = 'QR scanning is not available. Camera requires Chrome, Edge, or a secure context (HTTPS).';
@@ -950,6 +974,78 @@
   }
 
   /**
+   * Start image capture flow for iOS/iPadOS.
+   * Opens native camera via file input, decodes captured image with jsQR.
+   */
+  function startImageCapture() {
+    elements.qrScanVideo.style.display = 'none';
+    elements.qrScanHint.textContent = 'Take a photo of the QR code on the Tournament Manager screen.';
+    showModal(elements.qrScanModal);
+
+    elements.qrImageInput.value = '';
+    elements.qrImageInput.onchange = async (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+
+      elements.qrScanHint.textContent = 'Decoding...';
+      elements.qrScanError.style.display = 'none';
+
+      try {
+        const result = await decodeImageQR(file);
+        if (result) {
+          handleQRPayload(result);
+        } else {
+          showQRScanError('Could not read QR code. Try filling the frame and avoid glare.');
+          elements.qrScanHint.textContent = 'Tap below to try again.';
+          elements.qrImageInput.value = '';
+        }
+      } catch (err) {
+        showQRScanError('Image decode error: ' + (err.message || err));
+        elements.qrScanHint.textContent = 'Tap below to try again.';
+        elements.qrImageInput.value = '';
+      }
+    };
+
+    // Trigger the native camera
+    elements.qrImageInput.click();
+  }
+
+  /**
+   * Decode a QR code from an image file using jsQR.
+   * Downscales to ~1000px on the longest side for performance.
+   * @param {File} file - captured image file
+   * @returns {Promise<string|null>} decoded QR string, or null
+   */
+  function decodeImageQR(file) {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = elements.qrImageCanvas;
+        const ctx = canvas.getContext('2d');
+
+        // Downscale to ~1000px on longest side
+        const maxDim = 1000;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxDim || h > maxDim) {
+          const scale = maxDim / Math.max(w, h);
+          w = Math.round(w * scale);
+          h = Math.round(h * scale);
+        }
+        canvas.width = w;
+        canvas.height = h;
+        ctx.drawImage(img, 0, 0, w, h);
+
+        const imageData = ctx.getImageData(0, 0, w, h);
+        const code = jsQR(imageData.data, w, h);
+        resolve(code ? code.data : null);
+      };
+      img.onerror = () => reject(new Error('Could not load image'));
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  /**
    * Stop camera stream and scan interval.
    */
   function stopQRScanner() {
@@ -959,6 +1055,11 @@
       elements.qrScanVideo.srcObject.getTracks().forEach(t => t.stop());
       elements.qrScanVideo.srcObject = null;
     }
+    // Reset image capture state
+    elements.qrScanVideo.style.display = '';
+    elements.qrScanHint.textContent = 'Point the camera at the QR code on the Tournament Manager screen.';
+    elements.qrImageInput.value = '';
+    elements.qrImageInput.onchange = null;
   }
 
   /**
@@ -2340,6 +2441,17 @@
     elements.qrModeBtn.addEventListener('click', handleQRModeFromModal);
     elements.networkModeBtn.addEventListener('click', handleNetworkModeFromModal);
 
+    // Custom starting score toggle
+    elements.startingScoreCustomToggle.addEventListener('change', () => {
+      const checked = elements.startingScoreCustomToggle.checked;
+      elements.startingScore.style.display = checked ? 'none' : '';
+      elements.startingScoreCustom.style.display = checked ? '' : 'none';
+      if (checked) {
+        elements.startingScoreCustom.value = elements.startingScore.value;
+        elements.startingScoreCustom.focus();
+      }
+    });
+
     // QR scan modal
     elements.qrScanCancelBtn.addEventListener('click', cancelQRScan);
 
@@ -2440,7 +2552,16 @@
         // laneName not loaded - reserved for network mode
         elements.player1Name.value = saved.player1Name || '';
         elements.player2Name.value = saved.player2Name || '';
-        elements.startingScore.value = saved.startingScore || 501;
+        const sc = saved.startingScore || 501;
+        const presets = Array.from(elements.startingScore.options).map(o => parseInt(o.value));
+        if (presets.includes(sc)) {
+          elements.startingScore.value = sc;
+        } else {
+          elements.startingScoreCustomToggle.checked = true;
+          elements.startingScore.style.display = 'none';
+          elements.startingScoreCustom.style.display = '';
+          elements.startingScoreCustom.value = sc;
+        }
         elements.bestOf.value = saved.bestOf || 3;
         elements.maxRounds.value = saved.maxRounds || 20;
       }

@@ -733,8 +733,19 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                         <option value="101">101</option>
                                         <option value="201">201</option>
                                         <option value="301">301</option>
+                                        <option value="401">401</option>
                                         <option value="501" selected>501</option>
+                                        <option value="601">601</option>
+                                        <option value="701">701</option>
+                                        <option value="801">801</option>
+                                        <option value="901">901</option>
+                                        <option value="1001">1001</option>
                                     </select>
+                                    <input type="number" id="chalkerX01Custom" min="2" max="1001" placeholder="2–1001" style="display: none;">
+                                    <label style="margin-top: 6px; font-size: 12px; color: #6b7280; font-weight: normal; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
+                                        <input type="checkbox" id="chalkerX01CustomToggle">Custom score
+                                    </label>
+                                    <p id="chalkerX01Warning" style="display: none; margin: 4px 0 0 0; font-size: 11px; color: #92400e;">Unusual scores may produce larger QR codes that are harder to scan.</p>
                                 </div>
                                 <div class="form-group">
                                     <label for="chalkerMaxRounds">Max Rounds</label>

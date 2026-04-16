@@ -136,9 +136,15 @@
                         <option value="501" selected>501</option>
                         <option value="601">601</option>
                         <option value="701">701</option>
+                        <option value="801">801</option>
                         <option value="901">901</option>
                         <option value="1001">1001</option>
                     </select>
+                    <input type="number" id="starting-score-custom" min="2" max="1001" placeholder="2–1001" style="display: none;">
+                    <label style="margin-top: 6px; font-size: 12px; color: #888; font-weight: normal; cursor: pointer;">
+                        <input type="checkbox" id="starting-score-custom-toggle" style="margin-right: 4px;">
+                        Custom score
+                    </label>
                 </div>
 
                 <div class="form-group">
@@ -203,7 +209,9 @@
         <div class="modal-content qr-scan-modal-content">
             <h2>Scan Assignment QR</h2>
             <video id="qr-scan-video" class="qr-video" autoplay playsinline muted></video>
-            <p class="qr-scan-hint">Point the camera at the QR code on the Tournament Manager screen.</p>
+            <input type="file" id="qr-image-input" accept="image/*" capture="environment" style="display: none;">
+            <canvas id="qr-image-canvas" style="display: none;"></canvas>
+            <p class="qr-scan-hint" id="qr-scan-hint">Point the camera at the QR code on the Tournament Manager screen.</p>
             <p id="qr-scan-error" class="qr-scan-error" style="display: none;"></p>
             <button id="qr-scan-cancel-btn" class="btn btn-cancel">Cancel</button>
         </div>
@@ -410,6 +418,7 @@
     </div>
 
     <script src="lib/qrcode-generator.js"></script>
+    <script src="js/jsQR.js"></script>
     <script src="js/db.js"></script>
     <script src="js/newton-integrity.js"></script>
     <script src="js/chalker.js"></script>

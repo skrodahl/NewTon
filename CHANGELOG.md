@@ -1,3 +1,23 @@
+## **v5.0.14-beta.1** — No Score... (2026-04-16)
+
+*Beta — untested on iOS hardware. Feedback welcome via [GitHub discussion #4](https://github.com/skrodahl/NewTon/discussions/4).*
+
+### iOS QR Scanning (Chalker)
+
+- **Image capture for iOS/iPadOS** — on iOS devices, the Chalker uses native image capture (`capture="environment"`) instead of `getUserMedia`, which WebKit restricts. The user takes a photo of the assignment QR; jsQR decodes it client-side. Desktop/Android unchanged.
+- **Platform detection** — `isIOS()` detects iPadOS 13+ (reports as "Macintosh") via `navigator.maxTouchPoints`.
+
+### x01 Format
+
+- **Expanded presets** — x01 format dropdown now offers 101 through 1001 in steps of 100 (previously 101, 201, 301, 501). Both TM Global Settings and Chalker manual setup.
+- **Custom score** — "Custom score" checkbox reveals a number input (2–1001) for non-standard starting scores. TM shows an amber warning about QR payload size.
+
+### Contributors
+
+- [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) — iOS QR workflow design, x01 format request
+
+---
+
 ## **v5.0.13** — The Pointy End (2026-04-16)
 
 ### Export / Import

@@ -20,12 +20,6 @@ The TM→Chalker QR assignment and result reporting workflow spans two devices a
 
 ---
 
-### Reddit Post
-
-Announce NewTon on a relevant subreddit (r/darts, r/opensourcesoftware, or similar) when the timing feels right.
-
----
-
 ## Later
 *Worth tracking but not urgent*
 
@@ -33,25 +27,17 @@ Announce NewTon on a relevant subreddit (r/darts, r/opensourcesoftware, or simil
 
 The tab is named Analytics — it should earn that name over time. The IndexedDB foundation is already there; this is purely a UI and query layer on top.
 
-**Entry point — Stats cards**
-Headline numbers at a glance: most 180s this season, highest average, current title holder, longest winning streak. Clickable to drill into the underlying detail.
-
-**Player view**
-Aggregate stats per player across all tournaments — averages, achievements, tournament results, form over time.
-
-**Cross-tournament leaderboard**
-Who has the most 180s, highest average, most titles across the full history.
-
-**Custom views — Oracle-style**
-Saved filters or pivot views over the match register. Users define what they want to see and save it for quick access.
+**Player tab**
+Dedicated per-player drill-down — form over time, head-to-head records, tournament history.
 
 **Graphs**
-Performance and form over time — the kind of thing that makes improvement (or decline) visible in a way a table never can. Makes the club want to keep running tournaments just to watch the data accumulate.
+Performance and form over time — the kind of thing that makes improvement (or decline) visible in a way a table never can.
 
-**Simplified summary view**
-Tournament card with headline stats, expandable to match detail — less table-heavy than the current list.
+**Leaderboard export**
+Export leaderboard data (CSV or similar) for use outside the app.
 
-No decisions made — just a direction.
+**Table cogwheel**
+Column visibility toggle and top-N threshold control on Analytics tables.
 
 ---
 
@@ -92,4 +78,4 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 ---
 
-**Last updated:** April 9, 2026 — v5.0.2 shipped; automated testing added to Later (from code audit recommendation)
+**Last updated:** April 16, 2026 — removed completed items (Dashboard, Leaderboard, Stats cards); added Practice Mode and Chalker scoreboard retention
