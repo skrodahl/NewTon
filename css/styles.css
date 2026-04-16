@@ -4071,6 +4071,9 @@ a:hover { color: #1e40af; }
 
 
 /* Limit Global Settings — hide all sections except Branding and Point Values */
+.mode-analytics #headerTournamentStatus {
+    display: none;
+}
 .mode-analytics #config .config-section {
     display: none;
 }
