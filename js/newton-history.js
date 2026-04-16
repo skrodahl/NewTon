@@ -942,8 +942,8 @@ const NewtonHistory = (() => {
                         render: (v, row) => `<strong style="font-size:15px;">${escHtml(v || row.tournamentId)}</strong>`
                     },
                     {
-                        key: 'closedAt', label: 'Date', width: '120px',
-                        render: (v) => v ? fmtDate(v) : '—',
+                        key: 'closedAt', label: 'Date', width: '120px', cellStyle: 'white-space:nowrap;',
+                        render: (v) => v ? fmtDate(v) : '',
                         sortValue: (v) => v ? tsToMs(v) : 0
                     },
                     {
@@ -1675,7 +1675,7 @@ const NewtonHistory = (() => {
         _updateBreadcrumb();
 
         const bodyEl = document.getElementById('historyMatchDetailBody');
-        bodyEl.innerHTML = _buildMatchDetailHtml(match);
+        bodyEl.innerHTML = _buildMatchDetailHtml(match, _breadcrumbTournament);
         _activeMatchContext = { tournamentId, matchId };
         showPanel('matchDetail');
     }
@@ -1684,7 +1684,7 @@ const NewtonHistory = (() => {
     // Shared match detail HTML builder
     // ---------------------------------------------------------------------------
 
-    function _buildMatchDetailHtml(match) {
+    function _buildMatchDetailHtml(match, tournamentInfo) {
         const winnerName = match.winner === 1 ? match.player1Name : match.player2Name;
         const legs       = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
         const date       = match.completedAt ? fmtDateTime(match.completedAt) : '—';
@@ -1692,10 +1692,17 @@ const NewtonHistory = (() => {
             ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
             : '<span class="history-type-badge history-type-manual">Manual</span>';
 
+        const p1 = match.winner === 1 ? `<strong>${escHtml(match.player1Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player1Name)}</span>`;
+        const p2 = match.winner === 2 ? `<strong>${escHtml(match.player2Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player2Name)}</span>`;
+        const score = `<span style="font-family:'SF Mono',Monaco,'Cascadia Code','Courier New',monospace;font-size:14px;color:#374151;margin:0 4px;">${legs}</span>`;
+        const tName = (tournamentInfo && tournamentInfo.name) || match.tournamentName || '';
+        const tDate = (tournamentInfo && tournamentInfo.date) || '';
+        const tournamentLine = tName ? `${escHtml(tName)}${tDate ? ' · ' + escHtml(tDate) : ''}` : '';
+
         let html = `<div class="history-detail-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
             <div>
-            <div>${match.completedAt ? fmtDateTime(match.completedAt) : '—'} · <strong>${escHtml(match.matchId)}</strong></div>
-            <div style="margin-top:8px;font-size:16px;">${match.winner === 1 ? `<strong>${escHtml(match.player1Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player1Name)}</span>`} <span style="font-family:'SF Mono',Monaco,'Cascadia Code','Courier New',monospace;font-size:14px;color:#374151;margin:0 4px;">${legs}</span> ${match.winner === 2 ? `<strong>${escHtml(match.player2Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player2Name)}</span>`}</div>
+            <div style="font-size:18px;"><strong>${escHtml(match.matchId)}</strong> · ${p1} ${score} ${p2}</div>
+            <div style="margin-top:6px;color:#6b7280;font-size:13px;">${tournamentLine ? `<strong style="color:#374151;">${escHtml(tName)}</strong> · ` : ''}${date}</div>
             </div>
             <div>${match.format && match.format.bo ? `<span class="history-type-badge" style="background:#f3f4f6;color:#374151;">Best of ${match.format.bo}</span> ` : ''}${typeBadge}</div>
         </div>`;
@@ -1892,8 +1899,10 @@ const NewtonHistory = (() => {
         const titleEl = document.getElementById('matchDetailModalTitle');
         const bodyEl  = document.getElementById('matchDetailModalBody');
 
+        const t = await NewtonDB.getTournament(tournamentId);
+        const tInfo = t ? { name: t.tournamentName, date: t.tournamentDate } : null;
         titleEl.textContent = `${match.matchId} — ${match.player1Name} vs ${match.player2Name}`;
-        bodyEl.innerHTML    = _buildMatchDetailHtml(match);
+        bodyEl.innerHTML    = _buildMatchDetailHtml(match, tInfo);
 
         pushDialog('matchDetailModal', null, true);
     }

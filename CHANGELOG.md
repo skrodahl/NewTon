@@ -1,3 +1,12 @@
+## **v5.0.14-beta.2** — (2026-04-16)
+
+### Analytics
+
+- **Date column nowrap** — tournament register date no longer wraps to two lines.
+- **Match detail header** — redesigned: match ID and result as the headline (18px), tournament name (bold) · date · time on a single line below.
+
+---
+
 ## **v5.0.14-beta.1** — No Score... (2026-04-16)
 
 *Beta — untested on iOS hardware. Feedback welcome via [GitHub discussion #4](https://github.com/skrodahl/NewTon/discussions/4).*
