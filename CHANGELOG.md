@@ -1,3 +1,13 @@
+## **v5.0.12** — Clean Lines (2026-04-16)
+
+### Analytics
+
+- **Table redesign** — dark header bar (`#1f2937`) with white uppercase labels, sticky on scroll. Rows float as rounded cards with `border-spacing`, subtle shadows, and visible alternating stripes (`#eef0f4`). Hover lifts rows with stronger shadow. Top-16 leaderboard rows use stronger green tones.
+- **Badge cells** — Rank (#) and Points columns in the Leaderboard render as badge cells: rounded, tinted inner `<div>` with margin, creating real visual separation from the surrounding row. Works across white, striped, and green rows.
+- **Typography** — player names, tournament names, and match tournament links render at 15px bold. Match scores render bold at 15px. Tournament name column expands to fill available width, pushing data columns to the right edge.
+
+---
+
 ## **v5.0.11** — (2026-04-15)
 
 ### Analytics

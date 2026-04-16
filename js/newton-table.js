@@ -98,8 +98,7 @@ const NewtonTable = (() => {
         const pageData = rpp >= totalRows ? sorted : sorted.slice(start, start + rpp);
 
         // Build HTML
-        let html = '<div style="overflow-x:auto;">';
-        html += '<table class="history-table newton-table">';
+        let html = '<table class="history-table newton-table">';
 
         // Thead
         html += '<thead><tr>';
@@ -136,12 +135,13 @@ const NewtonTable = (() => {
                     const extra = col.cellStyle || '';
                     const value = row[col.key];
                     const rendered = col.render ? col.render(value, row) : _escHtml(value != null ? String(value) : '—');
-                    html += `<td style="${align}${extra}">${rendered}</td>`;
+                    const cls = col.cellClass || '';
+                    html += `<td${cls ? ` class="${cls}"` : ''} style="${align}${extra}">${rendered}</td>`;
                 }
                 html += '</tr>';
             }
         }
-        html += '</tbody></table></div>';
+        html += '</tbody></table>';
 
         // Pagination controls
         if (totalRows > 10) {

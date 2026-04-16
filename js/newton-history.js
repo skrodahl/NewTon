@@ -642,12 +642,12 @@ const NewtonHistory = (() => {
                     columns: [
                         {
                             key: '_rank', label: '#', width: '50px', align: 'center',
-                            render: (v) => `<span style="font-weight:600;">${v}</span>`,
-                            cellStyle: 'background:#f3f4f6;'
+                            render: (v) => `<div class="newton-table-badge"><span style="font-weight:600;">${v}</span></div>`,
+                            cellClass: 'newton-table-badge-cell'
                         },
                         {
                             key: 'name', label: 'Player',
-                            render: (v) => `<strong>${escHtml(v)}</strong>`
+                            render: (v) => `<strong style="font-size:15px;">${escHtml(v)}</strong>`
                         },
                         {
                             key: 'p1st', label: '1st', align: 'center', width: '45px', defaultDir: 'desc',
@@ -691,8 +691,8 @@ const NewtonHistory = (() => {
                         },
                         {
                             key: 'points', label: 'Points', align: 'center', width: '80px', defaultDir: 'desc',
-                            render: (v) => `<strong>${v || '—'}</strong>`,
-                            cellStyle: 'background:#f3f4f6;'
+                            render: (v) => `<div class="newton-table-badge"><strong>${v || '—'}</strong></div>`,
+                            cellClass: 'newton-table-badge-cell'
                         },
                         {
                             key: 'bestHighOut', label: 'Best Out', align: 'center', width: '75px', defaultDir: 'desc',
@@ -935,8 +935,8 @@ const NewtonHistory = (() => {
                         }
                     },
                     {
-                        key: 'tournamentName', label: 'Tournament',
-                        render: (v, row) => escHtml(v || row.tournamentId)
+                        key: 'tournamentName', label: 'Tournament', width: '100%',
+                        render: (v, row) => `<strong style="font-size:15px;">${escHtml(v || row.tournamentId)}</strong>`
                     },
                     {
                         key: 'closedAt', label: 'Date', width: '120px',
@@ -1432,15 +1432,15 @@ const NewtonHistory = (() => {
                     },
                     {
                         key: 'player1Name', label: 'Player 1',
-                        render: (v, row) => row.winner === 1 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                        render: (v, row) => row.winner === 1 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
                     },
                     {
                         key: 'player2Name', label: 'Player 2',
-                        render: (v, row) => row.winner === 2 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                        render: (v, row) => row.winner === 2 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
                     },
                     {
                         key: 'score', label: 'Result', align: 'center', width: '80px', sortable: false,
-                        render: (v, row) => row.legsWon ? `${row.legsWon.p1}–${row.legsWon.p2}` : '—'
+                        render: (v, row) => row.legsWon ? `<strong style="font-size:15px;">${row.legsWon.p1}–${row.legsWon.p2}</strong>` : '—'
                     },
                     {
                         key: '_achievementPoints', label: 'Points', align: 'center', width: '70px',
@@ -1449,7 +1449,7 @@ const NewtonHistory = (() => {
                     },
                     {
                         key: '_tournamentName', label: 'Tournament',
-                        render: (v, row) => `<span style="cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();NewtonHistory.openTournament('${escHtml(row._tournamentId)}')">${escHtml(v)}</span>`
+                        render: (v, row) => `<strong style="font-size:15px;cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();NewtonHistory.openTournament('${escHtml(row._tournamentId)}')">${escHtml(v)}</strong>`
                     },
                     {
                         key: 'completedAt', label: 'Date', width: '110px',
@@ -1522,15 +1522,15 @@ const NewtonHistory = (() => {
                     },
                     {
                         key: 'player1Name', label: 'Player 1',
-                        render: (v, row) => row.winner === 1 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                        render: (v, row) => row.winner === 1 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
                     },
                     {
                         key: 'player2Name', label: 'Player 2',
-                        render: (v, row) => row.winner === 2 ? `<strong>${escHtml(v)}</strong>` : escHtml(v)
+                        render: (v, row) => row.winner === 2 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
                     },
                     {
                         key: 'score', label: 'Result', align: 'center', width: '80px', sortable: false,
-                        render: (v, row) => row.legsWon ? `${row.legsWon.p1}–${row.legsWon.p2}` : '—'
+                        render: (v, row) => row.legsWon ? `<strong style="font-size:15px;">${row.legsWon.p1}–${row.legsWon.p2}</strong>` : '—'
                     },
                     {
                         key: '_achievementPoints', label: 'Points', align: 'center', width: '70px',
