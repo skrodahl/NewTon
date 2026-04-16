@@ -428,26 +428,28 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 ### How it works
 
 1. User taps "Scan QR" — `startQRScanner()` calls `isIOS()`
-2. **iOS path**: `startImageCapture()` hides the video element, shows the scan modal, and triggers the file input — iOS opens the native rear camera
-3. User takes a photo of the QR code
-4. `decodeImageQR()` loads the photo into a canvas, downscales to ~1000px on the longest side (iPad photos can be 12MP+ — downscaling improves decode speed without losing QR resolution)
-5. jsQR decodes the QR from the canvas pixel data
-6. On success: `handleQRPayload()` — same entry point as the live scanner. CRC verification, payload parsing, and confirmation flow are identical.
-7. On failure: error message displayed, hint updated to "Tap below to try again", file input reset for another capture
+2. **iOS path**: `startImageCapture()` hides the video element, shows a styled "Take Photo" button (a `<label>` linked to the hidden file input), and opens the scan modal
+3. User taps "Take Photo" — iOS opens the native rear camera. The button is a `<label for="qr-image-input">`, which guarantees the user gesture chain that iOS requires to trigger a file input.
+4. User takes a photo of the QR code
+5. `decodeImageQR()` reads the file via `FileReader.readAsDataURL()`, loads it into an `Image`, draws to a canvas downscaled to ~1000px on the longest side (iPad photos can be 12MP+)
+6. jsQR decodes the QR from the canvas pixel data
+7. On success: `handleQRPayload()` — same entry point as the live scanner. CRC verification, payload parsing, and confirmation flow are identical.
+8. On failure: error message displayed, hint updated to "Tap the button to try again", file input reset for another capture
 
 **Desktop/Android path**: unchanged — live camera stream with `BarcodeDetector`.
 
 ### Implementation details
 
 **HTML additions** (`chalker/index.html`):
-- `<input type="file" id="qr-image-input" accept="image/*" capture="environment">` — hidden, triggered programmatically
+- `<input type="file" id="qr-image-input" accept="image/*" capture="environment">` — hidden, triggered via label
+- `<label id="qr-image-label" for="qr-image-input">` — styled as a button ("Take Photo"), shown only on iOS. Using a `<label>` instead of programmatic `.click()` preserves the user gesture chain that iOS requires.
 - `<canvas id="qr-image-canvas">` — hidden, used for image downscaling and pixel extraction
 - `<script src="js/jsQR.js">` — jsQR library (~250KB), same copy used by the TM
 
 **JS functions** (`chalker/js/chalker.js`):
 - `isIOS()` — platform detection
-- `startImageCapture()` — opens native camera via file input, wires up `onchange` handler
-- `decodeImageQR(file)` — loads image, downscales, extracts pixel data, runs jsQR
+- `startImageCapture()` — shows "Take Photo" label button, wires up file input `onchange` handler
+- `decodeImageQR(file)` — reads file via `FileReader.readAsDataURL()`, loads into Image, downscales, extracts pixel data, runs jsQR
 - `stopQRScanner()` — extended to reset image capture state (file input, hint text, video visibility)
 - `isQRScanAvailable()` — updated: returns `true` on iOS (image capture is always available)
 
@@ -477,6 +479,12 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 
 **Memory on older iPads:**
 - A 12MP photo loaded into an `Image` element, drawn to a canvas, and processed by jsQR creates multiple large buffers. On older iPads with limited memory, this could cause a brief freeze or, in extreme cases, a tab reload. The downscale mitigates this — the canvas is only 1000px, not the full 12MP.
+
+**User gesture chain (beta.1 lesson):**
+- Programmatic `fileInput.click()` does not work on iOS — WebKit requires a direct user gesture to trigger a file input. Beta.1 attempted this and failed silently, exposing the raw file input. Fixed by using a `<label for="...">` styled as a button, which iOS treats as a valid user gesture.
+
+**Image loading (beta.1 lesson):**
+- `URL.createObjectURL(file)` failed to load HEIF/HEIC photos on some iOS configurations, triggering `img.onerror`. Replaced with `FileReader.readAsDataURL()` which converts the file to a base64 data URL — more universally supported across iOS Safari versions.
 
 **Cancel flow:**
 - If the user opens the native camera via the file input and then dismisses it (taps Cancel in iOS camera UI), no `onchange` event fires. The scan modal remains visible with the hint text. The user must tap the Cancel button in the modal to return to the Chalker. This is expected behavior but may confuse first-time users.

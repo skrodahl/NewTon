@@ -122,6 +122,7 @@
     qrScanError: document.getElementById('qr-scan-error'),
     qrScanHint: document.getElementById('qr-scan-hint'),
     qrImageInput: document.getElementById('qr-image-input'),
+    qrImageLabel: document.getElementById('qr-image-label'),
     qrImageCanvas: document.getElementById('qr-image-canvas'),
     qrConfirmModal: document.getElementById('qr-confirm-modal'),
     qrConfirmDetails: document.getElementById('qr-confirm-details'),
@@ -979,9 +980,11 @@
    */
   function startImageCapture() {
     elements.qrScanVideo.style.display = 'none';
-    elements.qrScanHint.textContent = 'Take a photo of the QR code on the Tournament Manager screen.';
-    showModal(elements.qrScanModal);
+    elements.qrScanHint.textContent = 'Tap the button below to take a photo of the QR code.';
+    elements.qrScanError.style.display = 'none';
 
+    // Show styled label button — tapping it triggers the hidden file input (iOS user gesture requirement)
+    elements.qrImageLabel.style.display = '';
     elements.qrImageInput.value = '';
     elements.qrImageInput.onchange = async (e) => {
       const file = e.target.files[0];
@@ -996,18 +999,17 @@
           handleQRPayload(result);
         } else {
           showQRScanError('Could not read QR code. Try filling the frame and avoid glare.');
-          elements.qrScanHint.textContent = 'Tap below to try again.';
+          elements.qrScanHint.textContent = 'Tap the button to try again.';
           elements.qrImageInput.value = '';
         }
       } catch (err) {
         showQRScanError('Image decode error: ' + (err.message || err));
-        elements.qrScanHint.textContent = 'Tap below to try again.';
+        elements.qrScanHint.textContent = 'Tap the button to try again.';
         elements.qrImageInput.value = '';
       }
     };
 
-    // Trigger the native camera
-    elements.qrImageInput.click();
+    showModal(elements.qrScanModal);
   }
 
   /**
@@ -1018,30 +1020,35 @@
    */
   function decodeImageQR(file) {
     return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.onload = () => {
-        const canvas = elements.qrImageCanvas;
-        const ctx = canvas.getContext('2d');
+      const reader = new FileReader();
+      reader.onload = () => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = elements.qrImageCanvas;
+          const ctx = canvas.getContext('2d');
 
-        // Downscale to ~1000px on longest side
-        const maxDim = 1000;
-        let w = img.width;
-        let h = img.height;
-        if (w > maxDim || h > maxDim) {
-          const scale = maxDim / Math.max(w, h);
-          w = Math.round(w * scale);
-          h = Math.round(h * scale);
-        }
-        canvas.width = w;
-        canvas.height = h;
-        ctx.drawImage(img, 0, 0, w, h);
+          // Downscale to ~1000px on longest side
+          const maxDim = 1000;
+          let w = img.width;
+          let h = img.height;
+          if (w > maxDim || h > maxDim) {
+            const scale = maxDim / Math.max(w, h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+          canvas.width = w;
+          canvas.height = h;
+          ctx.drawImage(img, 0, 0, w, h);
 
-        const imageData = ctx.getImageData(0, 0, w, h);
-        const code = jsQR(imageData.data, w, h);
-        resolve(code ? code.data : null);
+          const imageData = ctx.getImageData(0, 0, w, h);
+          const code = jsQR(imageData.data, w, h);
+          resolve(code ? code.data : null);
+        };
+        img.onerror = () => reject(new Error('Could not load image'));
+        img.src = reader.result;
       };
-      img.onerror = () => reject(new Error('Could not load image'));
-      img.src = URL.createObjectURL(file);
+      reader.onerror = () => reject(new Error('Could not read file'));
+      reader.readAsDataURL(file);
     });
   }
 
@@ -1060,6 +1067,7 @@
     elements.qrScanHint.textContent = 'Point the camera at the QR code on the Tournament Manager screen.';
     elements.qrImageInput.value = '';
     elements.qrImageInput.onchange = null;
+    elements.qrImageLabel.style.display = 'none';
   }
 
   /**
