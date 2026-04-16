@@ -161,6 +161,31 @@ This is displayed in the app footer. Easy to forget.
 </html>
 ```
 
+## Migration Section
+
+**Always included.** Every release has a Migration section after Files Changed, before the closing line. It reassures users about compatibility and documents any action needed.
+
+When there are no breaking changes:
+```
+No migration required. Fully compatible with all existing tournament data and match history.
+```
+
+When there are optional steps or caveats, state them clearly and explain what the user gains:
+```
+Tournaments imported into Analytics before this version do not have placement data
+in IndexedDB. To enable ranking points for these tournaments: delete from the Analytics
+register, then re-add via "+ Analytics" in Recent Tournaments.
+
+No other migration required. New localStorage keys and IndexedDB fields are created on first use.
+```
+
+Include this section for any of:
+- Export format version bumped (e.g. v4.0 → v4.1)
+- IndexedDB schema changes
+- LocalStorage key changes or restructuring
+- Backward-compatibility notes (e.g. "older exports still work but will show a warning")
+- Or simply: nothing changed — say so explicitly
+
 ## Notes
 
 - All asset paths use `../` — the `releases/` folder is one level below the root

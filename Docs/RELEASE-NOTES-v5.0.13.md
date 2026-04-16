@@ -46,4 +46,12 @@ Zero-value cells in the Leaderboard now render as blank instead of em-dashes. Re
 
 ---
 
+## Migration
+
+The export format is now v4.1. Older exports (v4.0 and earlier) remain fully importable — no action required. The only difference: pre-4.1 exports lack a `config` field, so Analytics will use current Global Settings as the configuration snapshot and display a warning during import.
+
+To get the correct original point values into Analytics for a previously exported tournament, re-export it from a running instance with the original settings, then re-import. Existing Analytics records from earlier imports are unaffected and can be deleted and re-imported if needed.
+
+---
+
 *NewTon DC Tournament Manager v5.0.13 — The Pointy End.*

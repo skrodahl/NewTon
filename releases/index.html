@@ -31,6 +31,7 @@
             <li><a href="#reset-accent">Reset Button Accent</a></li>
             <li><a href="#empty-cells">Leaderboard Empty Cells</a></li>
             <li><a href="#files">Files Changed</a></li>
+            <li><a href="#migration">Migration</a></li>
         </ol>
     </nav>
 
@@ -68,6 +69,12 @@
         <li><code>css/styles.css</code> &mdash; <code>.analytics-reset-btn.has-filter</code> warm accent styles</li>
         <li><code>tournament.html</code> &mdash; reset button id; import warning div in modal</li>
     </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration</h2>
+    <p>The export format is now v4.1. Older exports (v4.0 and earlier) remain fully importable &mdash; no action required. The only difference: pre-4.1 exports lack a <code>config</code> field, so Analytics will use current Global Settings as the configuration snapshot and display a warning during import.</p>
+    <p>To get the correct original point values into Analytics for a previously exported tournament, re-export it from a running instance with the original settings, then re-import. Existing Analytics records from earlier imports are unaffected and can be deleted and re-imported if needed.</p>
 
     <hr>
 
