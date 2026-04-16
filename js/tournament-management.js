@@ -206,7 +206,7 @@ function exportTournament() {
 
     // Export v4.0 format - tournament data with per-tournament history
     const tournamentData = {
-        exportVersion: "4.0",
+        exportVersion: "4.1",
         id: tournament.id,
         name: tournament.name,
         date: tournament.date,
@@ -215,6 +215,7 @@ function exportTournament() {
         bracketSize: tournament.bracketSize,
         format: tournament.format, // SE/DE format (absent = DE for backward compat)
         readOnly: tournament.readOnly || false,
+        config: typeof config !== 'undefined' ? config : {},
         players: players,
         matches: matches,
         bracket: tournament.bracket,
@@ -260,7 +261,7 @@ function buildTournamentPayload() {
     return {
         filename: `${tournament.name}_${tournament.date}.json`,
         data: {
-            exportVersion: "4.0",
+            exportVersion: "4.1",
             id: tournament.id,
             name: tournament.name,
             date: tournament.date,
@@ -269,6 +270,7 @@ function buildTournamentPayload() {
             bracketSize: tournament.bracketSize,
             format: tournament.format,
             readOnly: tournament.readOnly || false,
+            config: typeof config !== 'undefined' ? config : {},
             players: players,
             matches: matches,
             bracket: tournament.bracket,

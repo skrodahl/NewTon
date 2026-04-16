@@ -850,7 +850,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     </div>
                     <button class="analytics-reset-btn" id="lensCurrentHalf" onclick="NewtonHistory.setHalfYear(0)"></button>
                     <button class="analytics-reset-btn" id="lensPreviousHalf" onclick="NewtonHistory.setHalfYear(-1)"></button>
-                    <button class="analytics-reset-btn" onclick="NewtonHistory.resetFilters()">Reset</button>
+                    <button class="analytics-reset-btn" id="analyticsResetBtn" onclick="NewtonHistory.resetFilters()">Reset</button>
                 </div>
                 <div id="historyTournamentTableContainer"></div>
             </div>
@@ -1790,6 +1790,10 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
                 <div style="background: #e8f4fd; padding: 12px; margin: 12px 0; border-left: 4px solid #2196F3;">
                     <p id="analyticsImportInfo" style="margin: 0; color: #0c5460;"></p>
+                </div>
+
+                <div id="analyticsImportWarning" style="background: #fffbeb; padding: 12px; margin: 12px 0; border-left: 4px solid #f59e0b; display: none;">
+                    <p style="margin: 0; color: #92400e; font-size: 13px;">This export does not include point values or match length settings. Current Global Settings will be used instead.</p>
                 </div>
 
                 <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">

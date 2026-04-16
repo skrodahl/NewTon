@@ -3570,6 +3570,15 @@ a:hover { color: #1e40af; }
     color: #6b7280;
     background: #fff;
 }
+.analytics-reset-btn.has-filter {
+    color: #92400e;
+    border-color: #f59e0b;
+    background: #fffbeb;
+}
+.analytics-reset-btn.has-filter:hover {
+    background: #fef3c7;
+    border-color: #d97706;
+}
 .analytics-reset-btn:hover {
     color: #374151;
     border-color: #9ca3af;

@@ -161,6 +161,9 @@ const NewtonHistory = (() => {
             tags;
 
         el.onclick = () => switchView('register');
+
+        const resetBtn = document.getElementById('analyticsResetBtn');
+        if (resetBtn) resetBtn.classList.toggle('has-filter', !isAll);
     }
 
     // ---------------------------------------------------------------------------
@@ -651,39 +654,39 @@ const NewtonHistory = (() => {
                         },
                         {
                             key: 'p1st', label: '1st', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'p2nd', label: '2nd', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'p3rd', label: '3rd', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'p4th', label: '4th', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'p56th', label: '5-6th', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'p78th', label: '7-8th', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'oneEighties', label: '180s', align: 'center', width: '60px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'highOuts', label: 'High Outs', align: 'center', width: '80px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'shortLegs', label: 'Short Legs', align: 'center', width: '90px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'tournaments', label: 'Played', align: 'center', width: '70px', defaultDir: 'desc',
@@ -691,39 +694,39 @@ const NewtonHistory = (() => {
                         },
                         {
                             key: 'points', label: 'Points', align: 'center', width: '80px', defaultDir: 'desc',
-                            render: (v) => `<div class="newton-table-badge"><strong>${v || '—'}</strong></div>`,
+                            render: (v) => `<div class="newton-table-badge"><strong>${v ?? 0}</strong></div>`,
                             cellClass: 'newton-table-badge-cell'
                         },
                         {
                             key: 'bestHighOut', label: 'Best Out', align: 'center', width: '75px', defaultDir: 'desc',
-                            render: (v) => v > 0 ? v : '—',
+                            render: (v) => v > 0 ? v : '',
                             sortValue: (v) => v > 0 ? v : 0
                         },
                         {
                             key: 'bestShortLeg', label: 'Best Leg', align: 'center', width: '75px',
-                            render: (v) => v < Infinity ? v : '—',
+                            render: (v) => v < Infinity ? v : '',
                             sortValue: (v) => v < Infinity ? v : 99999
                         },
                         {
                             key: 'avg', label: 'Avg', align: 'center', width: '60px', defaultDir: 'desc',
-                            render: (v) => v || '—',
+                            render: (v) => v || '',
                             sortValue: (v) => v ? parseFloat(v) : 0
                         },
                         {
                             key: 'matchesWon', label: 'MW', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'matchesLost', label: 'ML', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'legsWon', label: 'LW', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         },
                         {
                             key: 'legsLost', label: 'LL', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || '—'
+                            render: (v) => v || ''
                         }
                     ]
                 });
@@ -1841,6 +1844,9 @@ const NewtonHistory = (() => {
                 (t.format ? ` · ${t.format === 'SE' ? 'Single' : 'Double'} Elimination` : '');
         }
 
+        const warningEl = document.getElementById('analyticsImportWarning');
+        if (warningEl) warningEl.style.display = t.config ? 'none' : 'block';
+
         const confirmBtn = document.getElementById('analyticsImportConfirmBtn');
         if (!confirmBtn) { event.target.value = ''; return; }
 
@@ -1850,7 +1856,7 @@ const NewtonHistory = (() => {
             popDialog();
 
             try {
-                const cfgSnapshot = (typeof config !== 'undefined' ? config : {});
+                const cfgSnapshot = t.config || (typeof config !== 'undefined' ? config : {});
                 const result = await NewtonDB.backfillTournament(t, cfgSnapshot);
 
                 _invalidateCache();

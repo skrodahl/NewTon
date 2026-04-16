@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.12'; // Clear Sight Lines — table redesign, badge cells, header layout fix
+const APP_VERSION = '5.0.13'; // The Pointy End — config in exports, import warning, reset accent, cleaner leaderboard
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

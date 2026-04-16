@@ -1,3 +1,18 @@
+## **v5.0.13** — The Pointy End (2026-04-16)
+
+### Export / Import
+
+- **Config in exports** — tournament JSON exports (v4.1) now include the full Global Settings (point values, match lengths). Previously this was lost, meaning imported tournaments inherited whatever settings happened to be active at import time.
+- **Import respects config** — Analytics import uses the config from the JSON when available. Falls back to current Global Settings for older (pre-4.1) exports.
+- **Import warning** — when importing a pre-4.1 export, the confirmation modal shows an amber warning explaining that current Global Settings will be used.
+
+### Analytics
+
+- **Reset button warm accent** — the Lens Reset button lights up with an amber border and warm tint when a filter is active, providing a clear visual cue that the view is scoped.
+- **Leaderboard empty cells** — zero-value cells render as blank instead of em-dashes, reducing visual noise and letting actual numbers stand out. Points badge shows 0 explicitly.
+
+---
+
 ## **v5.0.12** — Clear Sight Lines (2026-04-16)
 
 ### Header
