@@ -4074,6 +4074,7 @@ a:hover { color: #1e40af; }
 .mode-analytics #config .config-section {
     display: none;
 }
+.mode-analytics #config #configLogo,
 .mode-analytics #config #configBranding,
 .mode-analytics #config #configPoints {
     display: block;
