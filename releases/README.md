@@ -11,6 +11,30 @@ This folder contains HTML release notes pages for NewTon DC Tournament Manager, 
 
 The release notes index tell a story. Come up with a unique, cheeky or spectacular, or both, tagline for each release. Humorous and descriptive.
 
+### Tagline Inspiration
+
+Taglines should be cheeky, positive, and relevant to what the release actually does. Draw from:
+
+- **Darts vocabulary** — board, oche, flight, checkout, double, treble, bullseye, leg, set, 180, ton, arrows, tungsten, shaft, barrel, throw line, madhouse (double 1), Shanghai
+- **Tournament language** — bracket, elimination, seeding, walkover, bye, progression, finalist, podium, champion, round-robin, group stage
+- **Scoring and points** — points, scoring, average, checkout percentage, three-dart average, high finish, bust
+- **Match play** — game shot, match shot, best of, decider, sudden death, advantage, comeback
+- **The oche experience** — the throw, the stance, the release, chalking, calling, marking, the board lights up
+- **Success and winning** — glory, crown, trophy, top of the table, unbeaten, streak, personal best
+- **Data and records** — the numbers, the stats, the history, the ledger, the record books
+
+Tone: confident, witty, occasionally a pun. One short phrase — reads well as a headline and in the Previous Releases list. Avoid generic tech jargon ("improved performance", "bug fixes"). Every tagline should make someone curious about what changed.
+
+Past examples for reference:
+- "The Pointy End" — config in exports (points travel with data)
+- "Clear Sight Lines" — table redesign and header layout fix
+- "Leader of the Pack" — leaderboard feature
+- "Choose Your Lens" — scope selector with composable filters
+- "Game Shot, and the Match!" — major release with match completion flow
+- "The Revolution Will Be Scanned" — QR code system launch
+- "Nobody Leaves the Oche" — crash resilience improvements
+- "Read Between the Lines" — bracket progression lines
+
 ### Step 1 — Create both files at the same time
 
 Write `index.html` for the new release, then copy it immediately to its versioned page:
