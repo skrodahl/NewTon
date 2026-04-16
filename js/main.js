@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.12'; // We Found You a Match — matches view, breadcrumb navigation, half-year presets
+const APP_VERSION = '5.0.12'; // Clean Lines — table redesign, badge cells, tournament leaderboard refresh
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

@@ -3029,18 +3029,30 @@ a:hover { color: #1e40af; }
 
 .results-table {
   width: 100%;
-  border-collapse: collapse;
-  font-size: 14px;
+  border-collapse: separate;
+  border-spacing: 0 3px;
+  font-size: 13px;
   margin: 0;
 }
 
 .results-table th {
-  background: #f9f9f9;
-  border: 1px solid #e8e8e8;
+  background: #1f2937;
+  color: #ffffff;
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
   padding: 8px;
   text-align: center;
-  font-weight: 600;
-  color: #222222;
+  border: none;
+}
+
+.results-table th:first-child {
+  border-top-left-radius: 8px;
+}
+
+.results-table th:last-child {
+  border-top-right-radius: 8px;
 }
 
 .results-table th:nth-child(1),
@@ -3048,18 +3060,37 @@ a:hover { color: #1e40af; }
   text-align: left;
 }
 
+.results-table tbody tr {
+  background: #ffffff;
+  border-radius: 6px;
+}
+
 .results-table td {
-  border: 1px solid #e8e8e8;
+  border: none;
+  border-top: 1px solid #eef0f2;
+  border-bottom: 1px solid #eef0f2;
   padding: 8px;
   color: #333333;
 }
 
-.results-table tr:nth-child(even) {
-  background: #fafafa;
+.results-table td:first-child {
+  border-left: 1px solid #eef0f2;
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
 }
 
-.results-table tr:hover {
-  background: #f3f4f6;
+.results-table td:last-child {
+  border-right: 1px solid #eef0f2;
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.results-table tbody tr:nth-child(even) {
+  background: #eef0f4;
+}
+
+.results-table tbody tr:hover {
+  background: #f1f5f9;
 }
 
 
@@ -3072,15 +3103,16 @@ a:hover { color: #1e40af; }
 }
 
 .results-table .player-name {
-  font-weight: 500;
+  font-weight: 700;
+  font-size: 15px;
   color: #333333;
   width: 24%;
 }
 
 .results-table .points {
-  font-weight: 600;
+  font-weight: 700;
   color: #166534;
-  font-family: 'SF Mono', Monaco, 'Cascadia Code', 'Courier New', monospace;
+  font-size: 15px;
   width: 9%;
   text-align: center;
 }

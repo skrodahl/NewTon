@@ -619,7 +619,6 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
             <td class="stat">${player.stats.tons || 0}</td>
             <td class="stat">${legs.legsWon}</td>
             <td class="stat">${legs.legsLost}</td>
-            <td style="width: 0; padding: 0; border: none;"></td>
         </tr>
     `;
 }).join('');

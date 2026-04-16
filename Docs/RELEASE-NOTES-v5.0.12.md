@@ -36,11 +36,25 @@ The Rank (#) and Points columns in the Leaderboard render as badge cells — rou
 
 ---
 
+## Tournament Leaderboard
+
+The Player Registration leaderboard and statistics modal adopt the same visual language: dark header, row separation, rounded corners, alternating stripes. Compact padding (`8px`) keeps it tight for in-tournament use. Player names and points render at 15px bold. Removed a legacy hidden column that caused layout overflow.
+
+---
+
+## Pagination Buttons
+
+The rows-per-page and page navigation buttons at the bottom of tables now match the Lens preset button style — consistent border, radius, padding, and hover across the interface.
+
+---
+
 ## Files Changed
 
-- `css/styles.css` — table redesign: dark header, row spacing, badge cell styles, hover states, alternating row colors
+- `css/styles.css` — table redesign: dark header, row spacing, badge cell styles, hover states, alternating row colors, results-table restyling, pagination button styles
 - `js/newton-history.js` — badge cell class on rank/points columns, 15px bold names/results across all tables, tournament column width
 - `js/newton-table.js` — `cellClass` support for column config, removed wrapping overflow div
+- `js/results-config.js` — removed hidden empty column from leaderboard rows
+- `tournament.html` — removed hidden empty column from leaderboard header
 
 ---
 
