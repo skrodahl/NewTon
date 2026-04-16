@@ -626,6 +626,7 @@ function saveTournament() {
 function updateTournamentStatus() {
     const statusDiv = document.getElementById('tournamentStatus');
     const headerStatusDiv = document.getElementById('headerTournamentStatus');
+    const headerStatusNarrow = document.getElementById('headerTournamentStatusNarrow');
 
     if (tournament) {
         const statusText = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
@@ -637,9 +638,14 @@ function updateTournamentStatus() {
             statusDiv.style.display = 'block';
         }
 
-        // Update header status div (NEW)
+        // Update wide header (two-row: name over date)
         if (headerStatusDiv) {
-            headerStatusDiv.innerHTML = statusText;
+            headerStatusDiv.innerHTML = `<strong>${tournament.name}</strong><span class="tournament-date">${tournament.date}</span>`;
+        }
+
+        // Update narrow header (single line with prefix)
+        if (headerStatusNarrow) {
+            headerStatusNarrow.innerHTML = `<span class="status-prefix">Active Tournament: </span><strong>${tournament.name}</strong> (${tournament.date})`;
         }
     } else {
         // No tournament
@@ -649,9 +655,12 @@ function updateTournamentStatus() {
             statusDiv.style.display = 'block';
         }
 
-        // Update header to show "None" (NEW)
         if (headerStatusDiv) {
-            headerStatusDiv.innerHTML = 'Active Tournament: <strong>None</strong>';
+            headerStatusDiv.innerHTML = '<strong>None</strong><span class="tournament-date"></span>';
+        }
+
+        if (headerStatusNarrow) {
+            headerStatusNarrow.innerHTML = '<span class="status-prefix">Active Tournament: </span><strong>None</strong>';
         }
     }
 

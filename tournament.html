@@ -74,7 +74,16 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     </div>
                     NewTon DC - Tournament Manager
                 </h1>
-                <div id="headerClock" class="header-clock"></div>
+                <div class="header-right">
+                    <div id="headerTournamentStatus" class="header-tournament-status header-tournament-wide">
+                        <strong>None</strong>
+                        <span class="tournament-date"></span>
+                    </div>
+                    <div id="headerClock" class="header-clock"></div>
+                </div>
+            </div>
+            <div id="headerTournamentStatusNarrow" class="header-tournament-status header-tournament-narrow">
+                <span class="status-prefix">Active Tournament: </span><strong>None</strong>
             </div>
             <div class="nav">
                 <button class="nav-btn active" data-page="setup">Tournament Setup</button>
@@ -83,9 +92,6 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                 <button class="nav-btn" data-page="history">Analytics</button>
                 <button class="nav-btn" data-page="config">Global Settings</button>
                 <a class="nav-btn" href="chalker/index.html" target="_blank">Chalker</a>
-                <div id="headerTournamentStatus" class="header-tournament-status">
-                    Active Tournament: <strong>None</strong>
-                </div>
             </div>
         </div>
 

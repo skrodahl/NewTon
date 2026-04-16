@@ -1,4 +1,8 @@
-## **v5.0.12** — Clean Lines (2026-04-16)
+## **v5.0.12** — Clear Sight Lines (2026-04-16)
+
+### Header
+
+- **Active Tournament label** — replaced absolute-positioning hack with proper flex layout. Wide viewports show tournament name and date stacked next to the clock. Narrow viewports (below 1024px) show a centered row with full "Active Tournament:" prefix. Fixes overlap that blocked nav buttons at mid-range widths.
 
 ### Analytics
 

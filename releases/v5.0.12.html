@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/v5.0.12.html">
-    <title>v5.0.12 — Clean Lines</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.0.12 release notes. Table redesign with dark headers, badge cells, rounded rows, and typography improvements across Analytics and tournament leaderboard.">
+    <title>v5.0.12 — Clear Sight Lines</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.0.12 release notes. Active Tournament header fix, table redesign with dark headers, badge cells, rounded rows, and typography improvements across Analytics and tournament leaderboard.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,7 +17,7 @@
 
 <div class="docs-content">
 
-    <h1>Clean Lines</h1>
+    <h1>Clear Sight Lines</h1>
     <p class="docs-subtitle">NewTon DC Tournament Manager v5.0.12 &mdash; April 16, 2026</p>
 
     <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.12" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.0.12</a>
@@ -26,6 +26,7 @@
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
+            <li><a href="#header">Active Tournament Header</a></li>
             <li><a href="#table-redesign">Table Redesign</a></li>
             <li><a href="#badge-cells">Badge Cells</a></li>
             <li><a href="#typography">Typography</a></li>
@@ -36,7 +37,17 @@
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>The Analytics tables get a visual overhaul &mdash; stronger identity, clearer hierarchy, and badge cells that let rank and points stand out from the data. The tournament leaderboard follows suit.</p>
+    <p>The Analytics tables get a visual overhaul &mdash; stronger identity, clearer hierarchy, and badge cells that let rank and points stand out from the data. The Active Tournament label moves out of its broken absolute-positioning hack and into proper flex layout.</p>
+
+    <hr>
+
+    <h2 id="header">Active Tournament Header</h2>
+    <p>The Active Tournament label was absolute-positioned inside the nav bar &mdash; a long-standing hack that caused it to overlap nav buttons at mid-range viewport widths. Replaced with a proper dual-layout approach:</p>
+    <ul>
+        <li><strong>Wide viewports</strong> &mdash; tournament name and date stack vertically next to the clock in the header row. Compact, no extra vertical space.</li>
+        <li><strong>Narrow viewports (below 1024px)</strong> &mdash; a centered row with the full &ldquo;Active Tournament:&rdquo; prefix, separated by a subtle border.</li>
+        <li><strong>Analytics mode</strong> &mdash; both variants hidden, as before.</li>
+    </ul>
 
     <hr>
 
@@ -78,16 +89,18 @@
 
     <h2 id="files">Files Changed</h2>
     <ul>
-        <li><code>css/styles.css</code> &mdash; table redesign: dark header, row spacing, badge cell styles, hover states, alternating row colors, results-table restyling, pagination button styles</li>
+        <li><code>css/styles.css</code> &mdash; table redesign, header layout: removed absolute-positioned tournament status, added <code>.header-right</code> wrapper and responsive dual-layout, badge cell styles, pagination button styles</li>
+        <li><code>js/tournament-management.js</code> &mdash; <code>updateTournamentStatus()</code> populates both wide and narrow header elements</li>
+        <li><code>js/main.js</code> &mdash; version comment update</li>
         <li><code>js/newton-history.js</code> &mdash; badge cell class on rank/points columns, 15px bold names/results across all tables, tournament column width</li>
         <li><code>js/newton-table.js</code> &mdash; <code>cellClass</code> support for column config, removed wrapping overflow div</li>
         <li><code>js/results-config.js</code> &mdash; removed hidden empty column from leaderboard rows</li>
-        <li><code>tournament.html</code> &mdash; removed hidden empty column from leaderboard header</li>
+        <li><code>tournament.html</code> &mdash; Active Tournament label restructured with wide/narrow variants; removed hidden empty column from leaderboard header</li>
     </ul>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.0.12 &mdash; Clean Lines.</em></p>
+    <p><em>NewTon DC Tournament Manager v5.0.12 &mdash; Clear Sight Lines.</em></p>
 
     <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.0.12" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.0.12</a>
 
