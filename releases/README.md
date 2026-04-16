@@ -210,6 +210,18 @@ Include this section for any of:
 - Backward-compatibility notes (e.g. "older exports still work but will show a warning")
 - Or simply: nothing changed — say so explicitly
 
+## Fun Facts (optional)
+
+Consider adding a short, wry one-liner near the closing line — a behind-the-scenes footnote on how the release came to be. Not required, and needs discussion before including. The best ones are skewed, honest, and make someone smile.
+
+Examples:
+- "Started as a mobile layout fix. Ended with four releases and an iOS beta."
+- "This feature exists because someone asked 'what if the score isn't 501?'"
+- "The absolute positioning hack survived 18 months before anyone's screen was the wrong width."
+- "The config gap was found because the test instance had different point values. Production was fine. This time."
+
+One sentence, placed just before or after the closing line. Should feel like a director's commentary, not a press release.
+
 ## Notes
 
 - All asset paths use `../` — the `releases/` folder is one level below the root
