@@ -1,9 +1,18 @@
-## **v5.0.14-beta.2** — (2026-04-16)
+## **v5.0.14-beta.2** — Picture This (2026-04-17)
+
+### iOS QR Scanning — Fixes
+
+- **Image loading fix** — replaced `URL.createObjectURL()` with `FileReader.readAsDataURL()` for iOS HEIF/HEIC compatibility. Beta.1 failed with "Could not load image" on iPhone 16 Pro Max.
+- **User gesture fix** — replaced programmatic `fileInput.click()` with a styled "Take Photo" label button. iOS requires a direct user gesture to trigger file inputs; the programmatic approach failed silently, exposing the raw file input.
 
 ### Analytics
 
 - **Date column nowrap** — tournament register date no longer wraps to two lines.
 - **Match detail header** — redesigned: match ID and result as the headline (18px), tournament name (bold) · date · time on a single line below.
+
+### Contributors
+
+- [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) — iOS testing on iPhone 16 Pro Max (iOS 26.4.1), identified both beta.1 failures
 
 ---
 
