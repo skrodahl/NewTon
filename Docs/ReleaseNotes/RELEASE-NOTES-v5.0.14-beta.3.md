@@ -8,7 +8,7 @@
 
 ## Overview
 
-Beta.2 worked on iPad Pro but failed consistently on iPhone 16 Pro Max — the QR decoded on the device but jsQR couldn't read it. Two changes: the TM renders a larger QR, and the Chalker tries full-resolution decode before downscaling.
+Beta.2 was tested by [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) on both iPad Pro (11-inch, 2nd gen) and iPhone 16 Pro Max running iOS 26.4. The iPad decoded successfully, but the iPhone failed consistently — the photo was captured but jsQR couldn't read it. Two changes: the TM renders a larger QR, and the Chalker tries full-resolution decode before downscaling.
 
 ---
 
