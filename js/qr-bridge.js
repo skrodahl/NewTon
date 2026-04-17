@@ -104,7 +104,7 @@ function openMatchQR(matchId) {
 
     titleEl.textContent    = `${match.id} — Chalker QR`;
     subtitleEl.textContent = parts.join(' · ');
-    codeEl.innerHTML       = qr.createSvgTag(6, 2);
+    codeEl.innerHTML       = qr.createSvgTag(8, 2);
 
     pushDialog('matchQRModal', null, true);
 }

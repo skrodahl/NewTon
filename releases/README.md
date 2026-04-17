@@ -224,6 +224,7 @@ One sentence, placed just before or after the closing line. Should feel like a d
 
 ## Notes
 
+- **Detailed release notes** (markdown) are in [`Docs/ReleaseNotes/`](../Docs/ReleaseNotes/)
 - All asset paths use `../` — the `releases/` folder is one level below the root
 - The download button uses `class="btn-github"` — styling is handled by `.docs-content .btn-github` in `css/landing.css`
 - The Previous Releases list grows with each release — newest first

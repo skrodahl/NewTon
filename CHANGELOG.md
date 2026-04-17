@@ -329,7 +329,7 @@
 
 ## **v5.0.1** — Game Shot, and the Match! (2026-03-31)
 
-The complete TM ↔ Chalker loop: match assignments travel to the Chalker via QR, results travel back the same way. Analytics tab persists every Chalker match to IndexedDB. Docker HTTPS and mDNS built in. See [Docs/RELEASE-NOTES-v5.0.1.md](Docs/RELEASE-NOTES-v5.0.1.md) for the full story.
+The complete TM ↔ Chalker loop: match assignments travel to the Chalker via QR, results travel back the same way. Analytics tab persists every Chalker match to IndexedDB. Docker HTTPS and mDNS built in. See [Docs/ReleaseNotes/RELEASE-NOTES-v5.0.1.md](Docs/ReleaseNotes/RELEASE-NOTES-v5.0.1.md) for the full story.
 
 ### Changes from beta.9 to stable
 

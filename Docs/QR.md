@@ -431,7 +431,7 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 2. **iOS path**: `startImageCapture()` hides the video element, shows a styled "Take Photo" button (a `<label>` linked to the hidden file input), and opens the scan modal
 3. User taps "Take Photo" — iOS opens the native rear camera. The button is a `<label for="qr-image-input">`, which guarantees the user gesture chain that iOS requires to trigger a file input.
 4. User takes a photo of the QR code
-5. `decodeImageQR()` reads the file via `FileReader.readAsDataURL()`, loads it into an `Image`, draws to a canvas downscaled to ~1000px on the longest side (iPad photos can be 12MP+)
+5. `decodeImageQR()` reads the file via `FileReader.readAsDataURL()`, loads it into an `Image`, and attempts jsQR decode at full resolution first. If that fails and the image was larger than 2000px, it retries at 2000px (downscaling can reduce noise and improve contrast for jsQR).
 6. jsQR decodes the QR from the canvas pixel data
 7. On success: `handleQRPayload()` — same entry point as the live scanner. CRC verification, payload parsing, and confirmation flow are identical.
 8. On failure: error message displayed, hint updated to "Tap the button to try again", file input reset for another capture
@@ -449,7 +449,7 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 **JS functions** (`chalker/js/chalker.js`):
 - `isIOS()` — platform detection
 - `startImageCapture()` — shows "Take Photo" label button, wires up file input `onchange` handler
-- `decodeImageQR(file)` — reads file via `FileReader.readAsDataURL()`, loads into Image, downscales, extracts pixel data, runs jsQR
+- `decodeImageQR(file)` — reads file via `FileReader.readAsDataURL()`, loads into Image, tries jsQR at full resolution first, retries at 2000px if needed
 - `stopQRScanner()` — extended to reset image capture state (file input, hint text, video visibility)
 - `isQRScanAvailable()` — updated: returns `true` on iOS (image capture is always available)
 
@@ -471,14 +471,14 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 
 **jsQR decode reliability:**
 - jsQR needs a reasonably sharp, well-lit photo with the QR code filling a significant portion of the frame. Blurry photos, extreme angles, or heavy glare will fail to decode.
-- The 1000px downscale is a balance: too small loses QR detail, too large is slow on older iPads. If decode rates are low, this threshold may need tuning.
+- `decodeImageQR()` tries full resolution first, then retries at 2000px if the image was larger. Full resolution preserves maximum QR module detail (critical on iPhones where the QR may fill a small portion of a 48MP frame). The 2000px fallback helps when downscaling improves contrast or reduces background noise. Beta.2's 1000px cap was too aggressive — it crushed QR module detail on iPhone photos, causing consistent decode failures even with clear photos.
 - jsQR does not support multiple QR codes in one image — if the photo captures more than one QR (e.g. multiple match cards visible), it may decode the wrong one or fail entirely.
 
 **Image orientation (EXIF):**
 - iOS photos include EXIF orientation metadata. The `drawImage()` canvas approach in modern browsers auto-applies EXIF rotation. Older browser versions may not — the image could be rotated 90°, which would cause jsQR to fail. All currently supported iOS versions handle this correctly, but worth noting.
 
 **Memory on older iPads:**
-- A 12MP photo loaded into an `Image` element, drawn to a canvas, and processed by jsQR creates multiple large buffers. On older iPads with limited memory, this could cause a brief freeze or, in extreme cases, a tab reload. The downscale mitigates this — the canvas is only 1000px, not the full 12MP.
+- A 12MP+ photo loaded into an `Image` element, drawn to a canvas at full resolution, and processed by jsQR creates multiple large buffers. On older iPads with limited memory, this could cause a brief freeze or, in extreme cases, a tab reload. The two-pass strategy (full resolution → 2000px retry) prioritises decode accuracy but processes the full image first. If memory pressure becomes an issue on specific devices, the full-resolution pass could be skipped for images above a certain size.
 
 **User gesture chain (beta.1 lesson):**
 - Programmatic `fileInput.click()` does not work on iOS — WebKit requires a direct user gesture to trigger a file input. Beta.1 attempted this and failed silently, exposing the raw file input. Fixed by using a `<label for="...">` styled as a button, which iOS treats as a valid user gesture.

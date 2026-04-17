@@ -1014,7 +1014,8 @@
 
   /**
    * Decode a QR code from an image file using jsQR.
-   * Downscales to ~1000px on the longest side for performance.
+   * Tries full resolution first for maximum detail, then retries at 2000px
+   * if the image was larger (balances detail vs memory on older devices).
    * @param {File} file - captured image file
    * @returns {Promise<string|null>} decoded QR string, or null
    */
@@ -1027,22 +1028,37 @@
           const canvas = elements.qrImageCanvas;
           const ctx = canvas.getContext('2d');
 
-          // Downscale to ~1000px on longest side
-          const maxDim = 1000;
-          let w = img.width;
-          let h = img.height;
-          if (w > maxDim || h > maxDim) {
-            const scale = maxDim / Math.max(w, h);
-            w = Math.round(w * scale);
-            h = Math.round(h * scale);
+          /**
+           * Try jsQR at a given resolution.
+           * @param {number} maxDim - max longest side (0 = native resolution)
+           * @returns {string|null}
+           */
+          function tryDecode(maxDim) {
+            let w = img.width;
+            let h = img.height;
+            if (maxDim && (w > maxDim || h > maxDim)) {
+              const scale = maxDim / Math.max(w, h);
+              w = Math.round(w * scale);
+              h = Math.round(h * scale);
+            }
+            canvas.width = w;
+            canvas.height = h;
+            ctx.drawImage(img, 0, 0, w, h);
+            const imageData = ctx.getImageData(0, 0, w, h);
+            const code = jsQR(imageData.data, w, h);
+            return code ? code.data : null;
           }
-          canvas.width = w;
-          canvas.height = h;
-          ctx.drawImage(img, 0, 0, w, h);
 
-          const imageData = ctx.getImageData(0, 0, w, h);
-          const code = jsQR(imageData.data, w, h);
-          resolve(code ? code.data : null);
+          // Full resolution first — preserves maximum QR module detail
+          let result = tryDecode(0);
+
+          // If that failed and image was large, retry at 2000px —
+          // downscaling can help jsQR by reducing noise and sharpening contrast
+          if (!result && Math.max(img.width, img.height) > 2000) {
+            result = tryDecode(2000);
+          }
+
+          resolve(result);
         };
         img.onerror = () => reject(new Error('Could not load image'));
         img.src = reader.result;
