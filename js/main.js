@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.14-b.3'; // I Can See Clearly Now — larger QR render, full-res iOS decode
+const APP_VERSION = '5.0.14'; // I Can See Clearly Now — larger QR render, full-res iOS decode
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

@@ -260,6 +260,20 @@ body {
   .header-tournament-narrow .status-prefix {
     display: inline;
   }
+  .header-clock {
+    display: none;
+  }
+  .header h1 {
+    font-size: 1.5rem;
+  }
+  .header {
+    padding: 12px;
+    margin-bottom: 12px;
+    gap: 8px;
+  }
+  .history-page-subtitle {
+    display: none;
+  }
 }
 
 /* Tournament Page */
@@ -3989,15 +4003,11 @@ a:hover { color: #1e40af; }
 /* Analytics responsive — narrow viewports */
 @media (max-width: 1024px) {
     .history-page-header {
-        padding: 16px;
+        padding: 8px;
+        margin-bottom: 4px;
     }
     .history-actions {
-        flex-wrap: wrap;
-        gap: 6px;
-    }
-    .history-actions .btn {
-        font-size: 12px;
-        padding: 6px 10px;
+        display: none;
     }
     .analytics-scope-indicator {
         margin-left: 0 !important;
@@ -4010,6 +4020,7 @@ a:hover { color: #1e40af; }
         align-items: stretch;
         padding: 0;
         gap: 0;
+        margin-bottom: 4px;
     }
     .analytics-view-tabs {
         justify-content: center;
@@ -4037,8 +4048,48 @@ a:hover { color: #1e40af; }
     .analytics-view {
         overflow-x: auto;
     }
+    .container {
+        padding: 2px;
+    }
     .page {
+        padding: 2px;
         overflow-x: hidden;
+    }
+    .config-page input[type="number"] {
+        width: 80px;
+    }
+    .config-content {
+        padding: 12px;
+    }
+    .config-section h3 {
+        padding: 10px 12px;
+    }
+    .config-buttons {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .config-buttons .btn {
+        padding: 8px 10px;
+        font-size: 11px;
+        white-space: nowrap;
+    }
+    .history-table,
+    .results-table {
+        border-spacing: 0 2px;
+        font-size: 12px;
+    }
+    .history-table th,
+    .results-table th {
+        padding: 4px 3px;
+        font-size: 10px;
+    }
+    .history-table td,
+    .results-table td {
+        padding: 3px 3px;
+    }
+    .history-table td strong,
+    .history-table td span {
+        font-size: 12px !important;
     }
     .nav {
         gap: 16px;
@@ -4078,6 +4129,11 @@ a:hover { color: #1e40af; }
     grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
     gap: 16px;
     padding: 24px;
+}
+@media (max-width: 1024px) {
+    .analytics-dashboard {
+        padding: 8px;
+    }
 }
 
 .analytics-stat-card {
