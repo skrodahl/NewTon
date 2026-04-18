@@ -1,4 +1,4 @@
-## **v5.0.14** — I Can See Clearly Now (unreleased)
+## **v5.0.14** — (unreleased)
 
 ### QR Scanning
 
