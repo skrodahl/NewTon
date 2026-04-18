@@ -1,10 +1,5 @@
 ## **v5.0.14** — (unreleased)
 
-### QR Scanning
-
-- **Larger QR on TM** — assignment QR cell size increased from 6px to 8px per module. Renders ~360-424px instead of ~270-318px — more pixels per module for the camera to capture.
-- **Full-resolution decode on Chalker** — `decodeImageQR()` now tries full resolution first, then retries at 2000px if that fails. Beta.2's 1000px cap crushed QR module detail on iPhone 48MP photos.
-
 ### Mobile Layout (< 1024px)
 
 - **Reduced padding** — container, page, config sections, and Analytics header all tightened for narrow screens.
@@ -13,6 +8,15 @@
 - **Header** — smaller title font (1.5rem), hidden clock, reduced padding/gap.
 - **Analytics** — description and import/export buttons hidden.
 - **Global Settings** — narrower number inputs, compact buttons with nowrap.
+
+---
+
+## **v5.0.14-beta.3** — I Can See Clearly Now (2026-04-17)
+
+### QR Scanning
+
+- **Larger QR on TM** — assignment QR cell size increased from 6px to 8px per module. Renders ~360-424px instead of ~270-318px — more pixels per module for the camera to capture.
+- **Full-resolution decode on Chalker** — `decodeImageQR()` now tries full resolution first, then retries at 2000px if that fails. Beta.2's 1000px cap crushed QR module detail on iPhone 48MP photos.
 
 ### Docs
 
