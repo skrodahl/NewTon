@@ -222,6 +222,14 @@ Examples:
 
 One sentence, placed just before or after the closing line. Should feel like a director's commentary, not a press release.
 
+## Release Notes vs Changelog
+
+Release notes (this folder + `Docs/ReleaseNotes/`) tell the **user's story** — what's new, what's better, why it matters. They should read like a narrative, not a diff.
+
+The **changelog** (`CHANGELOG.md`) is the **developer's record** — what changed, where, and in which files. It includes Files Changed sections and implementation details that don't belong in release notes.
+
+When writing release notes, focus on value: what does the user see, what problem is solved, what's the experience. Leave the file lists and function names for the changelog.
+
 ## Notes
 
 - **Detailed release notes** (markdown) are in [`Docs/ReleaseNotes/`](../Docs/ReleaseNotes/)

@@ -9,6 +9,10 @@
 - **Analytics** — description and import/export buttons hidden.
 - **Global Settings** — narrower number inputs, compact buttons with nowrap.
 
+### Files changed
+
+- `css/styles.css` — `@media (max-width: 1024px)` rules: container/page padding, header title/clock/padding, table density (cell padding, font size, border-spacing, line-height), player name font size override, Analytics description/buttons hidden, config section padding, config button sizing/nowrap
+
 ---
 
 ## **v5.0.14-beta.3** — I Can See Clearly Now (2026-04-17)
@@ -25,6 +29,15 @@
 ### Contributors
 
 - [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) — iPhone 16 Pro Max + iPad Pro testing on iOS 26.4, identified the decode failure pattern
+
+### Files changed
+
+- `js/qr-bridge.js` — QR cell size 6 → 8 in `createSvgTag()`
+- `chalker/js/chalker.js` — `decodeImageQR()` two-pass strategy: full resolution first, 2000px fallback
+- `Docs/QR.md` — updated decode strategy documentation
+- `Docs/ReleaseNotes/` — all release notes moved from `Docs/`
+- `releases/README.md` — added pointer to `Docs/ReleaseNotes/`
+- `CHANGELOG.md` — updated release notes path reference
 
 ---
 
@@ -43,6 +56,13 @@
 ### Contributors
 
 - [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) — iOS testing on iPhone 16 Pro Max (iOS 26.4.1), identified both beta.1 failures
+
+### Files changed
+
+- `chalker/js/chalker.js` — `decodeImageQR()` switched to `FileReader.readAsDataURL()`; `startImageCapture()` uses label button; `stopQRScanner()` resets label visibility
+- `chalker/index.html` — added `<label id="qr-image-label">` styled as "Take Photo" button
+- `js/newton-history.js` — match detail header redesign; date column `nowrap`
+- `Docs/QR.md` — updated implementation details and beta.1 lessons learned
 
 ---
 
@@ -64,6 +84,15 @@
 
 - [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) — iOS QR workflow design, x01 format request
 
+### Files changed
+
+- `chalker/js/chalker.js` — `isIOS()`, `startImageCapture()`, `decodeImageQR()`, custom score toggle, updated `startQRScanner()` branching
+- `chalker/index.html` — hidden file input, canvas, jsQR script tag, custom score checkbox
+- `chalker/js/jsQR.js` — jsQR library copied from TM
+- `js/results-config.js` — `initX01Toggle()`, custom score load/save/reset
+- `tournament.html` — x01 presets expanded, custom score checkbox and warning
+- `Docs/QR.md` — iOS image capture section updated from planned to implemented
+
 ---
 
 ## **v5.0.13** — The Pointy End (2026-04-16)
@@ -78,6 +107,13 @@
 
 - **Reset button warm accent** — the Lens Reset button lights up with an amber border and warm tint when a filter is active, providing a clear visual cue that the view is scoped.
 - **Leaderboard empty cells** — zero-value cells render as blank instead of em-dashes, reducing visual noise and letting actual numbers stand out. Points badge shows 0 explicitly.
+
+### Files changed
+
+- `js/tournament-management.js` — `config` field added to export payload, export version bumped to 4.1
+- `js/newton-history.js` — import prefers `t.config` from JSON; import warning toggle; leaderboard empty cells; reset button `.has-filter` class
+- `css/styles.css` — `.analytics-reset-btn.has-filter` warm accent styles
+- `tournament.html` — `analyticsResetBtn` id on Reset button; `analyticsImportWarning` div in import modal
 
 ---
 
@@ -99,6 +135,15 @@
 - **Visual refresh** — Player Registration leaderboard and statistics modal adopt the same table styling: dark header, row separation, rounded corners, alternating stripes. Compact `8px` padding. Player names and points at 15px bold.
 - **Layout fix** — removed legacy hidden column that caused horizontal overflow on all pages.
 
+### Files changed
+
+- `css/styles.css` — table redesign, header layout: dual-layout tournament status, badge cell styles, pagination button styles
+- `js/tournament-management.js` — `updateTournamentStatus()` populates both wide and narrow header elements
+- `js/newton-history.js` — badge cell class on rank/points columns, 15px bold names/results, tournament column width
+- `js/newton-table.js` — `cellClass` support for column config, removed wrapping overflow div
+- `js/results-config.js` — removed hidden empty column from leaderboard rows
+- `tournament.html` — Active Tournament label moved to `.header-right` with narrow duplicate; removed hidden empty column
+
 ---
 
 ## **v5.0.11** — (2026-04-15)
@@ -117,6 +162,12 @@
 ### Bugfix
 
 - **Match detail lookup** — fixed stale closure where clicking a match in the per-tournament match list would fail with "Match record not found" after viewing more than one tournament in the same session. The table's row click handler captured the tournament ID from the first call, ignoring subsequent tournaments.
+
+### Files changed
+
+- `tournament.html` — register sub-tabs, breadcrumb bar, import confirmation modal
+- `js/newton-history.js` — matches view, breadcrumb navigation, `switchRegisterTab()`, match detail bugfix, half-year presets, import modal, leaderboard sort direction
+- `css/styles.css` — breadcrumb styles, sub-tab styles
 
 ---
 
@@ -254,6 +305,16 @@
 - **Backfill format field** — backfilled matches now include the best-of value from the localStorage match object, enabling the "Best of N" badge on match details.
 - **Match detail badges** — "Best of N" and "Manual/Chalker" type badges right-aligned in match header.
 
+### Files changed
+
+- `api/relay.php` — new relay endpoint for remote server uploads
+- `js/tournament-management.js` — `buildTournamentPayload()`, `uploadToServer()`, `autoUploadTournament()`, `showUploadModal()`, shared tournament collapse
+- `js/clean-match-progression.js` — auto-backup hook at tournament finalization
+- `js/results-config.js` — new `config.server` fields
+- `js/newton-history.js` — YYYY-MM-DD date formatting, format label expansion
+- `tournament.html` — Backup to Server modal, Server Settings UI, nav reorder
+- `css/styles.css` — modal ESC support
+
 ---
 
 ## **v5.0.5** — Read Between the Lines (2026-04-11)
@@ -275,6 +336,15 @@
 - **Match detail stats table**: horizontal leaderboard-style table replaces the old vertical achievements section. Always shown with all columns (Player, Short Legs, High Outs, 180s, Tons), dashes for empty values. Winner bolded. Points column deferred until point mode computation is ready.
 - **Match detail badges**: "Best of N" and "Manual/Chalker" badges right-aligned in match header. Type badge moved from left to right.
 - **Backfill format fix**: backfilled matches now include the `format` field (x01 format and best-of) read from the localStorage match object. Previously wrote `null`.
+
+### Files changed
+
+- `js/newton-table.js` — new reusable sortable/paginated table component
+- `js/newton-history.js` — tournament and match tables use `NewtonTable`; match detail redesign; match count self-healing
+- `js/newton-db.js` — `matchCount` written at finalization
+- `js/tournament-management.js` — `matchCount` and `format` written at backfill
+- `css/styles.css` — `NewtonTable` sort header and pagination styles; match detail title styles
+- `tournament.html` — hardcoded table elements replaced by container divs; `newton-table.js` script tag
 
 ---
 
@@ -303,6 +373,16 @@
 ### Demo banner
 
 - **Fixed**: "Darts double elimination tournament software" changed to "Darts tournament software" — the banner predated Single Elimination support
+
+### Files changed
+
+- `js/newton-db.js` — shared achievement helpers (`normalizeStats`, `diffStats`, `hasAnyStats`, `addStats`) and `reconcileMatchAchievements()`
+- `js/tournament-management.js` — `addTournamentToAnalytics()` with history diffing, delta computation, remainder reconciliation; Analytics labels on tournament list
+- `js/clean-match-progression.js` — live finalization calls `reconcileMatchAchievements()`
+- `js/newton-history.js` — `tsToMs()` helper; removed `status: 'final'` filter on match records
+- `js/main.js` — Tournament Setup page refresh on navigation
+- `tournament.html` — player count display in tournament list
+- `css/styles.css` — Analytics label styles
 
 ---
 
@@ -354,6 +434,17 @@
 ### Release notes — tagline titles
 
 - All 28 release notes HTML pages updated from `Release Notes vX.X.X — NewTon DC Tournament Manager` to `vX.X.X — {Tagline}`. Each release now shows its unique tagline in Google search results instead of identical boilerplate.
+
+### Files changed
+
+- `qr-generator.html` — new QR code generator page
+- `js/qr-generator.js` — new QR engine and UI logic
+- `css/landing.css` — QR generator styles
+- `Docs/PRIVACY.md` / `privacy.html` — new Security Architecture section
+- `userguide.html` — payment QR link to generator
+- `docker-quickstart.html` — customization section link to generator
+- `sitemap.xml` — `qr-generator.html` added
+- All 28 `releases/*.html` files — `<title>` tags updated to tagline format
 
 ---
 
@@ -854,6 +945,16 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 - **`/tournament.html` URL**: nginx rewrites `/tournament.html` to `tournament.php` internally — the URL stays clean and is indexable by Google.
 - **Files updated**: `tournament.html`, `landing-page.php`, `docker/nginx.conf`.
 
+### Files changed
+
+- `js/lightbox.js` — new external lightbox script
+- `landing.html` — inline JS/styles removed, external script added
+- `landing-page.php` — redirect logic added; same inline JS/style removals
+- `tournament.html` — PHP landing page switcher removed
+- `userguide.html`, `privacy.html`, `architecture.html`, `docker-quickstart.html`, `rest-api.html` — footer inline style replaced with class
+- `releases/*.html` — footer inline style replaced with class (all versioned pages)
+- `docker/nginx.conf` — differentiated CSP: strict default, permissive for PHP and Chalker; `landing-page.php` as primary index
+
 ---
 
 ## **v4.2.12** - Dedicated Domain: newtondarts.com (2026-03-19)
@@ -877,6 +978,16 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 - **`releases/` folder**: Standalone HTML release notes pages for all v4.2.x releases, served at `newtondarts.com/releases/`. Each release gets a permanent versioned page (`v4.2.12.html` etc.) and `index.html` always shows the latest.
 - **sitemap.xml**: All release notes pages indexed with `changefreq: never` (versioned) and `changefreq: weekly` (`/releases/`).
 - **Mobile**: Get Started card buttons on landing page stack below text on small screens.
+
+### Files changed
+
+- `README.md` — all URLs updated to newtondarts.com
+- `llms.txt` — all URLs updated to newtondarts.com
+- `sitemap.xml` — all URLs updated to newtondarts.com, release notes pages added
+- `robots.txt` — Sitemap URL updated to newtondarts.com
+- `landing.html` / `landing-page.php` — Google Search Console tag updated, `<main>` landmark added, download button points to `/releases/`
+- `css/landing.css` — mobile fix for wide Get Started cards, `.docs-content .btn-github` style
+- `releases/` — new folder with `index.html` and versioned pages
 
 ---
 
@@ -903,6 +1014,16 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 ### App name consistency (HTML files)
 
 - **Full name enforced**: References to "NewTon DC" and "NewTon" as the software name corrected to "NewTon DC Tournament Manager" across HTML files. Short-form "NewTon" retained where contextually appropriate (e.g. prose references, possessive use).
+
+### Files changed
+
+- `js/player-management.js` — `incrementLollipops()`, `decrementLollipops()`, `updateStatsCounters()` updated
+- `js/results-config.js` — lollipop icon displayed in Leaderboard player name cell
+- `js/types.js` — `lollipops` added to `PlayerStats` typedef
+- `tournament.html` — lollipops +/- counter added to Statistics dialog
+- `userguide.html` — lollipops tip added to Tips & Tricks section
+- `llms.txt` — lollipop counter documented
+- `js/bracket-rendering.js` — Setup Actions panel restructured, Most Lollipops added to celebration page
 
 ---
 
@@ -969,6 +1090,20 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 
 - **Meta descriptions added**: `<meta name="description">` added to all five pages missing it — `userguide.html`, `docker-quickstart.html`, `privacy.html`, `rest-api.html`, and `chalker/index.html`.
 
+### Files changed
+
+- `architecture.html` — new Architecture & Reliability page
+- `userguide.html` — new user guide page
+- `docker-quickstart.html` — new Docker quick start page
+- `privacy.html` — new privacy architecture page
+- `rest-api.html` — new REST API reference page
+- `css/landing.css` — docs page styles, terminal blocks, table styles, `.docs-quickstart`, `.get-started-card--wide`
+- `landing.html` — Bing meta tag, Docker Quickstart link, Privacy footer link, User Guide card, Architecture & Reliability card
+- `landing-page.php` — same changes as `landing.html`
+- `sitemap.xml` — five doc pages added, priorities rebalanced
+- `chalker/index.html` — meta description added
+- `js/bracket-rendering.js` — Double Elimination moved to top of Setup Actions
+
 ---
 
 ## **v4.2.9** - Landing Page Polish (2026-03-14)
@@ -989,6 +1124,14 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 - **Typical Use Case section**: Added a concrete weekly pub tournament scenario illustrating how the persistent player registry, CSV export, and configurable point system work together for season standings
 - **Key Features expanded**: Undo blocking note, "designed for season standings" qualifier on the point system, paid/unpaid tracking and optional payment QR, explicit non-power-of-two support, browser-restart survival note
 - **Tips for AI Services**: Added bullet clarifying the point system is a primary use case for season standings, not incidental config
+
+### Files changed
+
+- `landing.html` — focused thumbnails, lightbox markup and script, Chalker showcase card
+- `landing-page.php` — same changes as `landing.html`
+- `css/landing.css` — lightbox styles, zoom hint overlay
+- `Screenshots/th-*.jpg` — seven focused thumbnail images
+- `llms.txt` — Typical Use Case section, expanded Key Features, expanded Tips for AI Services
 
 ---
 
@@ -1040,6 +1183,13 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 
 - **Single Elimination**: Late Registration works in SE tournaments — `getProgressionTable()` returns the correct SE table, and FS Round 1 slot detection works identically for both formats. Tested successfully.
 
+### Files changed
+
+- `js/analytics.js` — Late Registration command (Stages 1-3)
+- `js/player-management.js` — "Player arrived late?" button and info dialog
+- `js/bracket-rendering.js` — `refreshTournamentUI` save fix
+- `tournament.html` — Late Registration info modal, Late Registration pointer in "Tournament Already in Progress" modal
+
 ---
 
 ## **v4.2.7** - SEO & Landing Page Polish (2026-03-13)
@@ -1054,6 +1204,14 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 - **font-display: block**: Switched from `swap` to `block` in `landing.css` — combined with preloading, ensures branded fonts appear from first render with no flicker
 - **App buttons open in new tab**: "Launch Tournament Manager" and "Open Chalker App" buttons now open in a new tab, keeping the landing page open
 - **Get Started section**: Two-card section added below the hero buttons — "Local Use" (download release, double-click `tournament.html`) and "Self-Hosted" (Docker quickstart link), with hover effects consistent with the rest of the page
+
+### Files changed
+
+- `sitemap.xml` — new file
+- `robots.txt` — `Sitemap:` directive added
+- `landing.html` — font preload hints, meta description, app button targets, Get Started section
+- `landing-page.php` — same changes as `landing.html`
+- `css/landing.css` — `font-display: block`, Get Started section styles
 
 ---
 
@@ -1075,6 +1233,13 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 ### SEO
 - **robots.txt**: Added to repo root — allows all crawling and signposts `/llms.txt` for AI services
 
+### Files changed
+
+- `js/bracket-rendering.js` — `isMatchUndoable()` and tooltip function updated with live downstream match checks
+- `js/analytics.js` — `commandBracketEditor` renamed to `commandLateRegistration` and implemented as eligibility checker
+- `tournament.html` — Dev Console menu entry renamed to "Late Registration"
+- `robots.txt` — new file
+
 ---
 
 ## **v4.2.5** - Landing Page & Developer Console (2026-03-11)
@@ -1088,6 +1253,13 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 ### Developer Console
 - **Bracket Editor entry**: New amber-coloured menu item added after Toggle Read-Only — shows "here be dragons / upcoming feature" placeholder; no bracket logic wired up yet
 - **Parking Lot**: Bracket Editor fully documented in `Docs/PARKING-LOT.md` with 6-step implementation plan
+
+### Files changed
+
+- `landing.html` / `landing-page.php` — hero image, OG/Twitter Card image, feature card text, Google Search Console tag
+- `tournament.html` — Bracket Editor menu entry
+- `js/analytics.js` — `commandBracketEditor()` stub
+- `js/main.js` — version bumped
 
 ---
 
@@ -1110,6 +1282,16 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 ### LLMs
 - **llms.txt tips section**: Added "Tips for AI Services" to prevent hallucinated features (Round Robin, drag-and-drop, multi-screen, indexedDB) and reinforce core design principles
 
+### Files changed
+
+- `js/results-config.js` — DEFAULT_CONFIG, `populateConfigPage()`, `saveMatchConfiguration()`, `resetMatchConfigToDefaults()` updated with SE leg fields
+- `js/clean-match-progression.js` — `isSESemifinal()`, `isSEQuarterfinal()` added; SE leg assignment in `generateFrontsideMatches()` rewritten
+- `tournament.html` — Match Configuration section split into SE/DE sub-sections; summary panel updated
+- `js/bracket-rendering.js` — config summary display updated with SE rows
+- `chalker/js/chalker.js` — `populateMatchStats()` leg averages loop updated with starter detection and colour coding
+- `landing-page.php` / `landing.html` — Chalker App button added
+- `llms.txt` — Tips for AI Services section added
+
 ---
 
 ## **v4.2.3** - Landing Page Redesign (2026-03-10)
@@ -1126,6 +1308,12 @@ v5.0.0 introduces the first step of direct communication between the Tournament 
 - **PHP landing page synced**: `landing-page.php` updated with all new content, preserving env var plumbing
 - **OG image updated**: Open Graph and Twitter Card image changed from bracket screenshot to hero cartoon — link previews now show the Nano Banana illustration on WhatsApp, Slack, Twitter, etc.
 - **llms.txt**: Machine-readable project summary added for AI assistants, with `<link rel="llms">` meta tag on landing pages
+
+### Files changed
+
+- `css/landing.css` — complete rewrite: retro comic theme, showcase layout, responsive breakpoints
+- `landing-page.php` — new design with hero image, showcase section, updated highlight cards
+- `landing.html` — standalone test version (new file)
 
 ---
 
