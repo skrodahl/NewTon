@@ -224,11 +224,11 @@ One sentence, placed just before or after the closing line. Should feel like a d
 
 ## Release Notes vs Changelog
 
-Release notes (this folder + `Docs/ReleaseNotes/`) tell the **user's story** — what's new, what's better, why it matters. They should read like a narrative, not a diff.
+Release notes (this folder + `Docs/ReleaseNotes/`) tell the **user's story** — what's new, what's better, why it matters. They are longer and more detailed than the changelog: full context, motivation, contributor credits, the narrative behind the changes.
 
-The **changelog** (`CHANGELOG.md`) is the **developer's record** — what changed, where, and in which files. It includes Files Changed sections and implementation details that don't belong in release notes.
+The **changelog** (`CHANGELOG.md`) is the **developer's record** — concise entries covering what changed, why, and which files were affected. Every version entry should have a "Files changed" section.
 
-When writing release notes, focus on value: what does the user see, what problem is solved, what's the experience. Leave the file lists and function names for the changelog.
+When writing release notes, focus on value: what does the user see, what problem is solved, what's the experience. No file lists or function names unless required for the story.
 
 ## Notes
 
