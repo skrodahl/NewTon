@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.14'; // I Can See Clearly Now — larger QR render, full-res iOS decode
+const APP_VERSION = '5.0.14'; // Narrowing the Scope — mobile layout, nav underline, bracket Analytics
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -219,15 +219,6 @@ document.addEventListener('DOMContentLoaded', function () {
 
     setTimeout(_0x3f, 500);
 
-    // Initialize navigation underline position on page load
-    setTimeout(() => {
-        updateNavUnderline();
-    }, 100);
-});
-
-// Update navigation underline on window resize (e.g., if font size or layout changes)
-window.addEventListener('resize', () => {
-    requestAnimationFrame(updateNavUnderline);
 });
 
 function loadClubLogo() {
@@ -442,35 +433,6 @@ function showPage(pageId) {
     // HELP SYSTEM INTEGRATION
     onPageChange(pageId);
 
-    // Update underline position after DOM updates
-    requestAnimationFrame(updateNavUnderline);
-}
-
-// Update navigation underline position dynamically based on active button
-function updateNavUnderline() {
-    const nav = document.querySelector('.nav');
-    const activeBtn = document.querySelector('.nav-btn.active');
-
-    if (!nav || !activeBtn) {
-        // No active button - hide underline
-        if (nav) {
-            nav.style.setProperty('--nav-underline-opacity', '0');
-        }
-        return;
-    }
-
-    // Get positions relative to the nav container
-    const navRect = nav.getBoundingClientRect();
-    const btnRect = activeBtn.getBoundingClientRect();
-
-    // Calculate position and width
-    const left = btnRect.left - navRect.left;
-    const width = btnRect.width;
-
-    // Update CSS custom properties
-    nav.style.setProperty('--nav-underline-left', `${left}px`);
-    nav.style.setProperty('--nav-underline-width', `${width}px`);
-    nav.style.setProperty('--nav-underline-opacity', '1');
 }
 
 // Helper function to get elimination rank based on match ID and bracket size

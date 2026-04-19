@@ -1,4 +1,9 @@
-## **v5.0.14** — (unreleased)
+## **v5.0.14** — Narrowing the Scope (2026-04-19)
+
+### Navigation
+
+- **Nav underline replaced** — the sliding `::after` pseudo-element (positioned by JavaScript) replaced with per-button `border-bottom`, matching the Analytics tab pattern. Fixes broken underline position when nav wraps to two lines. `updateNavUnderline()` function and resize listener removed.
+- **Analytics button on bracket** — added to the bracket nav panel after Config. Navigates to the Analytics tab without leaving the bracket first.
 
 ### Mobile Layout (< 1024px)
 
@@ -11,7 +16,9 @@
 
 ### Files changed
 
-- `css/styles.css` — `@media (max-width: 1024px)` rules: container/page padding, header title/clock/padding, table density (cell padding, font size, border-spacing, line-height), player name font size override, Analytics description/buttons hidden, config section padding, config button sizing/nowrap
+- `css/styles.css` — nav underline: removed `.nav::after` sliding indicator, added `border-bottom` on `.nav-btn` and `.nav-btn.active`; `@media (max-width: 1024px)` rules: container/page padding, header title/clock/padding, table density, player name font size override, Analytics description/buttons hidden, config section padding, config button sizing/nowrap
+- `js/main.js` — removed `updateNavUnderline()` function, init call, and resize listener
+- `tournament.html` — Analytics button added to `.bracket-controls-middle-left`
 
 ---
 
