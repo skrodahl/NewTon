@@ -15,7 +15,7 @@ The app gets tighter on small screens. Tables, padding, headers, and navigation 
 Everything below 1024px is now optimised for narrow screens. The changes are global — they apply to all views, not just Analytics.
 
 - **Reduced padding** — container, page, config sections, and Analytics header all tightened. The grey body border shrinks to a subtle 2px frame.
-- **Denser tables** — smaller cell padding (3px), font size (12px), and row spacing (2px) across all tables. Player names drop from 15px to 12px (bold preserved).
+- **Denser tables** — smaller cell padding (2px), font size (10px), and row spacing (2px) across all tables. Player names drop from 15px to 10px (bold preserved). Badge cells (rank, points) tightened to match regular cells. Headers at 9px.
 - **Header** — title font reduced to 1.5rem (prevents two-line wrapping that stretched the logo), clock hidden, padding and gap tightened.
 - **Analytics** — description text and import/export buttons hidden. The data is what matters on a phone.
 - **Global Settings** — number inputs narrowed to 80px (plenty for point values). Config buttons get `nowrap` and smaller font to prevent wrapping.

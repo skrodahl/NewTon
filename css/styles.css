@@ -4040,7 +4040,6 @@ a:hover { color: #1e40af; }
     }
     .page {
         padding: 2px;
-        overflow-x: hidden;
     }
     .config-page input[type="number"] {
         width: 80px;
@@ -4063,20 +4062,24 @@ a:hover { color: #1e40af; }
     .history-table,
     .results-table {
         border-spacing: 0 2px;
-        font-size: 12px;
+        font-size: 10px;
     }
     .history-table th,
     .results-table th {
-        padding: 4px 3px;
-        font-size: 10px;
+        padding: 3px 2px;
+        font-size: 9px;
     }
     .history-table td,
     .results-table td {
-        padding: 3px 3px;
+        padding: 2px 2px;
     }
     .history-table td strong,
     .history-table td span {
-        font-size: 12px !important;
+        font-size: 10px !important;
+    }
+    .newton-table-badge {
+        padding: 2px 3px;
+        margin: 0 2px;
     }
     .nav {
         gap: 16px;
