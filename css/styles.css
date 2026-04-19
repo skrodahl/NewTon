@@ -3993,7 +3993,7 @@ a:hover { color: #1e40af; }
         padding: 8px;
         margin-bottom: 4px;
     }
-    .history-actions {
+    .history-actions .btn {
         display: none;
     }
     .analytics-scope-indicator {
