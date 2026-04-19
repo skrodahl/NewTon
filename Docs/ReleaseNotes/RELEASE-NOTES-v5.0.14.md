@@ -6,13 +6,13 @@
 
 ## Overview
 
-The app gets tighter on small screens. Tables, padding, headers, and navigation all adapt below 1024px — making Analytics and Global Settings genuinely usable on phones and tablets. The bracket nav panel gains an Analytics shortcut, and the main navigation underline is rebuilt from scratch.
+The app gets tighter on small screens. Tables, padding, headers, and navigation all adapt below 1120px — making Analytics and Global Settings genuinely usable on phones and tablets. The bracket nav panel gains an Analytics shortcut, and the main navigation underline is rebuilt from scratch.
 
 ---
 
-## Mobile Layout (< 1024px)
+## Mobile Layout (< 1120px)
 
-Everything below 1024px is now optimised for narrow screens. The changes are global — they apply to all views, not just Analytics.
+Everything below 1120px is now optimised for narrow screens. The changes are global — they apply to all views, not just Analytics.
 
 - **Reduced padding** — container, page, config sections, and Analytics header all tightened. The grey body border shrinks to a subtle 2px frame.
 - **Denser tables** — smaller cell padding (2px), font size (10px), and row spacing (2px) across all tables. Player names drop from 15px to 10px (bold preserved). Badge cells (rank, points) tightened to match regular cells. Headers at 9px.

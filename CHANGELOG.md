@@ -5,7 +5,7 @@
 - **Nav underline replaced** — the sliding `::after` pseudo-element (positioned by JavaScript) replaced with per-button `border-bottom`, matching the Analytics tab pattern. Fixes broken underline position when nav wraps to two lines. `updateNavUnderline()` function and resize listener removed.
 - **Analytics button on bracket** — added to the bracket nav panel after Config. Navigates to the Analytics tab without leaving the bracket first.
 
-### Mobile Layout (< 1024px)
+### Mobile Layout (< 1120px)
 
 - **Reduced padding** — container, page, config sections, and Analytics header all tightened for narrow screens.
 - **Denser tables** — smaller cell padding, font size, and row spacing across all tables.

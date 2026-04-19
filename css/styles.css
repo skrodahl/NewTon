@@ -233,7 +233,7 @@ body {
   display: none;
 }
 
-@media (max-width: 1024px) {
+@media (max-width: 1120px) {
   .header-tournament-wide {
     display: none;
   }
@@ -3988,7 +3988,7 @@ a:hover { color: #1e40af; }
 }
 
 /* Analytics responsive — narrow viewports */
-@media (max-width: 1024px) {
+@media (max-width: 1120px) {
     .history-page-header {
         padding: 8px;
         margin-bottom: 4px;
@@ -4120,7 +4120,7 @@ a:hover { color: #1e40af; }
     gap: 16px;
     padding: 24px;
 }
-@media (max-width: 1024px) {
+@media (max-width: 1120px) {
     .analytics-dashboard {
         padding: 8px;
     }
