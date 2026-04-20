@@ -105,15 +105,19 @@ Add both the new versioned page and confirm `index.html` is already present. Bot
 
 The versioned page uses `changefreq: never` — it will never change after publication. `index.html` (`/releases/`) uses `changefreq: weekly` since it updates with every release.
 
-### Step 5 — Update `APP_VERSION` in `js/main.js`
+### Step 5 — Update version in `js/main.js` and `chalker/js/chalker.js`
 
-Update the version string and comment:
+Update the version string and comment in both files:
 
 ```js
+// js/main.js
 const APP_VERSION = '5.0.9'; // Leader of the Pack — Leaderboard, point toggles, averages
+
+// chalker/js/chalker.js
+const CHALKER_VERSION = '5.0.9';
 ```
 
-This is displayed in the app footer. Easy to forget.
+`APP_VERSION` is displayed in the TM footer. `CHALKER_VERSION` is displayed in the Chalker's New Match modal. Both must match. Easy to forget.
 
 ---
 

@@ -6,6 +6,9 @@
 (function() {
   'use strict';
 
+  // Keep in sync with APP_VERSION in js/main.js
+  const CHALKER_VERSION = '5.0.14';
+
   // ================
   // State Management
   // ================
@@ -1302,6 +1305,8 @@
    * Show new match modal (Rematch / New Match options)
    */
   function showSettingsModal() {
+    const versionEl = document.getElementById('chalker-version');
+    if (versionEl) versionEl.textContent = 'v' + CHALKER_VERSION;
     showModal(elements.settingsModal);
   }
 
