@@ -1,3 +1,18 @@
+## **v5.0.15** — (unreleased)
+
+### Layout
+
+- **Responsive breakpoint** — moved from 1024px to 1120px, covering tablets in portrait mode (e.g. iPad Air at 1080px).
+- **Denser desktop tables** — `history-table` cell padding halved from `14px 12px` to `7px 6px`, header padding from `10px 12px` to `5px 6px`, badge cells from `14px 12px` to `7px 6px`. Shows 24 players on a desktop screen.
+- **Sticky header fix** — removed `overflow-x: hidden` from `.page` below 1120px, which was creating a scroll container that broke `position: sticky` on table headers.
+- **Scope indicator preserved** — the Analytics scope pill was hidden below 1120px because it sat inside `.history-actions` which was set to `display: none`. Fixed by hiding only the `.btn` children instead of the container.
+
+### Files changed
+
+- `css/styles.css` — breakpoint 1024px → 1120px (all three media queries); desktop `history-table` td/th/badge padding halved; `.page` overflow-x removed from responsive block; `.history-actions .btn` hidden instead of `.history-actions`
+
+---
+
 ## **v5.0.14** — Narrowing the Scope (2026-04-19)
 
 ### Navigation

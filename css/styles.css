@@ -3610,7 +3610,7 @@ a:hover { color: #1e40af; }
     font-weight: 600;
     text-transform: uppercase;
     letter-spacing: 0.05em;
-    padding: 10px 12px;
+    padding: 5px 6px;
     text-align: left;
     border-bottom: none;
     position: sticky;
@@ -3635,7 +3635,7 @@ a:hover { color: #1e40af; }
     background: #eef0f4;
 }
 .history-table td {
-    padding: 14px 12px;
+    padding: 7px 6px;
     border-top: 1px solid #eef0f2;
     border-bottom: 1px solid #eef0f2;
 }
@@ -3682,7 +3682,7 @@ a:hover { color: #1e40af; }
 .newton-table-badge {
     background: rgba(31, 41, 55, 0.06);
     border-radius: 6px;
-    padding: 14px 12px;
+    padding: 7px 6px;
     margin: 0 4px;
 }
 .leaderboard-top .newton-table-badge {
