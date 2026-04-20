@@ -391,7 +391,7 @@ If QR scanning isn't available, both sides fall back gracefully:
 |------|------|---------|------|-------|
 | TM | Generate assignment QR | qrcode-generator (~8KB) | Lightweight | Generates QR as canvas/SVG |
 | TM | Scan result QR | `BarcodeDetector` API (native) + jsQR fallback (~250KB) | Zero-dep primary | jsQR used on Windows Enterprise where `BarcodeDetector` is unavailable |
-| Chalker | Scan assignment QR | `BarcodeDetector` API (native) + jsQR for iOS image capture | Zero-dep primary | jsQR used on iOS/iPadOS where `getUserMedia` is restricted |
+| Chalker | Scan assignment QR | QrScanner/ZXing (~60KB) + jsQR fallback for iOS image capture | Perspective-tolerant | QrScanner primary decoder on iOS/iPadOS image capture path; jsQR last resort |
 | Chalker | Generate result QR | qrcode-generator (~8KB) | Lightweight | Displayed via Stats → Result QR |
 
 **Zero-dependency requirement**: All libraries are standalone JS, no npm/build needed. Loaded via `<script>` tag.
@@ -410,9 +410,11 @@ The live scanner uses `getUserMedia` with a video stream and native `BarcodeDete
 
 ### Solution: image capture as primary iOS path
 
-On iOS/iPadOS, `<input type="file" accept="image/*" capture="environment">` opens the native rear camera. The user takes a photo, which is decoded client-side by jsQR. This avoids `getUserMedia` entirely and uses a pattern iOS fully supports.
+On iOS/iPadOS, `<input type="file" accept="image/*" capture="environment">` opens the native rear camera. The user takes a photo, which is decoded client-side by QrScanner (a ZXing-based decoder that handles perspective distortion, glare, and angles). jsQR remains as a last-resort fallback. This avoids `getUserMedia` entirely and uses a pattern iOS fully supports.
 
 Image capture is the **default** on iOS/iPadOS — not a fallback triggered by `getUserMedia` failure. Some iPads technically support `getUserMedia` but behave unreliably in standalone PWA mode, which is worse UX than a consistent two-tap flow. Platform detection determines the path, not feature detection.
+
+**Why QrScanner instead of jsQR as primary decoder:** jsQR was the original decoder but consistently failed on iPad photos of QR codes displayed on screens. It cannot handle the perspective distortion, glare, and uneven lighting inherent in photographing a screen. QrScanner uses the ZXing engine which includes perspective correction and is far more tolerant of real-world photo conditions. BarcodeDetector (the native browser API backed by Apple's Vision framework) was also evaluated but is not available on iOS Safari as of iPadOS 26.
 
 ### Platform detection
 
@@ -431,8 +433,8 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 2. **iOS path**: `startImageCapture()` hides the video element, shows a styled "Take Photo" button (a `<label>` linked to the hidden file input), and opens the scan modal
 3. User taps "Take Photo" — iOS opens the native rear camera. The button is a `<label for="qr-image-input">`, which guarantees the user gesture chain that iOS requires to trigger a file input.
 4. User takes a photo of the QR code
-5. `decodeImageQR()` reads the file via `FileReader.readAsDataURL()`, loads it into an `Image`, and attempts jsQR decode at full resolution first. If that fails and the image was larger than 2000px, it retries at 2000px (downscaling can reduce noise and improve contrast for jsQR).
-6. jsQR decodes the QR from the canvas pixel data
+5. `decodeImageQR()` reads the file via `FileReader.readAsDataURL()`, loads it into an `Image`, downscales to max 1500px, and tries QrScanner (ZXing) first. If QrScanner fails, falls back to jsQR at the same resolution, then retries jsQR at 2000px if the original image was larger.
+6. QrScanner or jsQR decodes the QR from the canvas pixel data
 7. On success: `handleQRPayload()` — same entry point as the live scanner. CRC verification, payload parsing, and confirmation flow are identical.
 8. On failure: error message displayed, hint updated to "Tap the button to try again", file input reset for another capture
 
@@ -445,11 +447,13 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 - `<label id="qr-image-label" for="qr-image-input">` — styled as a button ("Take Photo"), shown only on iOS. Using a `<label>` instead of programmatic `.click()` preserves the user gesture chain that iOS requires.
 - `<canvas id="qr-image-canvas">` — hidden, used for image downscaling and pixel extraction
 - `<script src="js/jsQR.js">` — jsQR library (~250KB), same copy used by the TM
+- `<script src="js/qr-scanner.umd.min.js">` — QrScanner/ZXing (~16KB UMD + ~44KB worker), perspective-tolerant decoder
+- `chalker/qr-scanner-worker.min.js` — Web Worker loaded dynamically by QrScanner (also in `chalker/js/` for path resolution)
 
 **JS functions** (`chalker/js/chalker.js`):
 - `isIOS()` — platform detection
 - `startImageCapture()` — shows "Take Photo" label button, wires up file input `onchange` handler
-- `decodeImageQR(file)` — reads file via `FileReader.readAsDataURL()`, loads into Image, tries jsQR at full resolution first, retries at 2000px if needed
+- `decodeImageQR(file)` — reads file via `FileReader.readAsDataURL()`, loads into Image, downscales to max 1500px, tries QrScanner first, falls back to jsQR
 - `stopQRScanner()` — extended to reset image capture state (file input, hint text, video visibility)
 - `isQRScanAvailable()` — updated: returns `true` on iOS (image capture is always available)
 
@@ -469,16 +473,17 @@ iPadOS 13+ reports as "Macintosh" in the User-Agent to receive desktop sites. Th
 - On iPhone, this reliably opens the rear camera. On iPad, behavior depends on iOS version and context — some versions may show a file picker instead of the camera. If this happens, the user can still pick a previously taken photo, but the UX is less direct.
 - In standalone PWA mode (Home Screen app), `capture` may behave differently than in Safari. This is the hardest configuration to test remotely.
 
-**jsQR decode reliability:**
-- jsQR needs a reasonably sharp, well-lit photo with the QR code filling a significant portion of the frame. Blurry photos, extreme angles, or heavy glare will fail to decode.
-- `decodeImageQR()` tries full resolution first, then retries at 2000px if the image was larger. Full resolution preserves maximum QR module detail (critical on iPhones where the QR may fill a small portion of a 48MP frame). The 2000px fallback helps when downscaling improves contrast or reduces background noise. Beta.2's 1000px cap was too aggressive — it crushed QR module detail on iPhone photos, causing consistent decode failures even with clear photos.
-- jsQR does not support multiple QR codes in one image — if the photo captures more than one QR (e.g. multiple match cards visible), it may decode the wrong one or fail entirely.
+**QrScanner/jsQR decode reliability:**
+- QrScanner (ZXing) handles perspective distortion, glare, and uneven lighting well. It successfully decodes photos taken at significant angles with screen reflections — conditions where jsQR consistently fails.
+- `decodeImageQR()` downscales all images to max 1500px before decoding. This is faster and more reliable than full resolution — tested with 3072x4096 (12MP) photos where full-res QrScanner failed but 1500px succeeded. The downscaling reduces noise while preserving more than enough QR module detail for version 9 codes (~53 modules).
+- jsQR remains as a last-resort fallback. It retries at 2000px if the original image was larger. Beta.2's 1000px cap was too aggressive — it crushed QR module detail on iPhone photos.
+- Neither decoder supports multiple QR codes in one image — if the photo captures more than one QR (e.g. multiple match cards visible), it may decode the wrong one or fail entirely.
 
 **Image orientation (EXIF):**
 - iOS photos include EXIF orientation metadata. The `drawImage()` canvas approach in modern browsers auto-applies EXIF rotation. Older browser versions may not — the image could be rotated 90°, which would cause jsQR to fail. All currently supported iOS versions handle this correctly, but worth noting.
 
 **Memory on older iPads:**
-- A 12MP+ photo loaded into an `Image` element, drawn to a canvas at full resolution, and processed by jsQR creates multiple large buffers. On older iPads with limited memory, this could cause a brief freeze or, in extreme cases, a tab reload. The two-pass strategy (full resolution → 2000px retry) prioritises decode accuracy but processes the full image first. If memory pressure becomes an issue on specific devices, the full-resolution pass could be skipped for images above a certain size.
+- A 12MP+ photo loaded into an `Image` element and drawn to a canvas creates large buffers. The 1500px downscale significantly reduces memory pressure compared to full-resolution processing. On older iPads with limited memory, a brief freeze is still possible but much less likely than with the original full-resolution approach.
 
 **User gesture chain (beta.1 lesson):**
 - Programmatic `fileInput.click()` does not work on iOS — WebKit requires a direct user gesture to trigger a file input. Beta.1 attempted this and failed silently, exposing the raw file input. Fixed by using a `<label for="...">` styled as a button, which iOS treats as a valid user gesture.

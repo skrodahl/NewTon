@@ -7,7 +7,7 @@
   'use strict';
 
   // Keep in sync with APP_VERSION in js/main.js
-  const CHALKER_VERSION = '5.0.14';
+  const CHALKER_VERSION = '5.0.15-b.1';
 
   // ================
   // State Management
@@ -1016,9 +1016,10 @@
   }
 
   /**
-   * Decode a QR code from an image file using jsQR.
-   * Tries full resolution first for maximum detail, then retries at 2000px
-   * if the image was larger (balances detail vs memory on older devices).
+   * Decode a QR code from an image file.
+   * Tries decoders in order: QrScanner (ZXing-based, handles perspective),
+   * native BarcodeDetector (Safari 15.4+, Chrome, Edge), then jsQR as
+   * last resort with full resolution and a 2000px downscaled retry.
    * @param {File} file - captured image file
    * @returns {Promise<string|null>} decoded QR string, or null
    */
@@ -1027,16 +1028,48 @@
       const reader = new FileReader();
       reader.onload = () => {
         const img = new Image();
-        img.onload = () => {
+        img.onload = async () => {
+          // Try QrScanner (ZXing-based — handles perspective, glare, angles)
+          // Always downscale to max 1500px — faster and more reliable than full-res
+          if (typeof QrScanner !== 'undefined' && QrScanner.scanImage) {
+            try {
+              const canvas = elements.qrImageCanvas;
+              const ctx = canvas.getContext('2d');
+              const maxDim = 1500;
+              let w = img.width;
+              let h = img.height;
+              if (Math.max(w, h) > maxDim) {
+                const scale = maxDim / Math.max(w, h);
+                w = Math.round(w * scale);
+                h = Math.round(h * scale);
+              }
+              canvas.width = w;
+              canvas.height = h;
+              ctx.drawImage(img, 0, 0, w, h);
+              const qrResult = await QrScanner.scanImage(canvas, {
+                returnDetailedScanResult: true,
+                alsoTryWithoutScanRegion: true
+              });
+              if (qrResult && qrResult.data) {
+                console.log('QR decoded via QrScanner (' + w + 'x' + h + ')');
+                resolve(qrResult.data);
+                return;
+              }
+            } catch (e) {
+              console.log('QrScanner: no decode (' + img.width + 'x' + img.height + ')');
+            }
+          }
+
           const canvas = elements.qrImageCanvas;
           const ctx = canvas.getContext('2d');
 
+          // Fallback: jsQR at multiple resolutions
           /**
            * Try jsQR at a given resolution.
            * @param {number} maxDim - max longest side (0 = native resolution)
            * @returns {string|null}
            */
-          function tryDecode(maxDim) {
+          function tryJsQR(maxDim) {
             let w = img.width;
             let h = img.height;
             if (maxDim && (w > maxDim || h > maxDim)) {
@@ -1049,16 +1082,13 @@
             ctx.drawImage(img, 0, 0, w, h);
             const imageData = ctx.getImageData(0, 0, w, h);
             const code = jsQR(imageData.data, w, h);
+            if (code) console.log('QR decoded via jsQR (' + w + 'x' + h + ')');
             return code ? code.data : null;
           }
 
-          // Full resolution first — preserves maximum QR module detail
-          let result = tryDecode(0);
-
-          // If that failed and image was large, retry at 2000px —
-          // downscaling can help jsQR by reducing noise and sharpening contrast
+          let result = tryJsQR(0);
           if (!result && Math.max(img.width, img.height) > 2000) {
-            result = tryDecode(2000);
+            result = tryJsQR(2000);
           }
 
           resolve(result);
@@ -1138,7 +1168,7 @@
     const lines = [
       `<strong>${payload.p1}</strong> vs <strong>${payload.p2}</strong>`,
       `${payload.sc} · Bo${payload.bo} · ${payload.mr >= 100 ? 'Unlimited' : payload.mr + ' rounds'}`,
-      `Lane ${payload.ln} · Ref: ${payload.ref}`
+      `Lane ${payload.ln || 'Not set'} · Ref: ${payload.ref || 'Not set'}`
     ];
     elements.qrConfirmDetails.innerHTML = lines.map(l => `<p>${l}</p>`).join('');
     showModal(elements.qrConfirmModal);
@@ -2264,6 +2294,8 @@
     // Hide/show Rematch button and message based on state
     elements.rematchBtn.style.display = isIdle ? 'none' : 'block';
     elements.settingsModalMessage.style.display = 'none'; // Message shown in confirm dialog
+    const versionEl = document.getElementById('chalker-version');
+    if (versionEl) versionEl.textContent = 'v' + CHALKER_VERSION;
     showModal(elements.settingsModal);
   }
 

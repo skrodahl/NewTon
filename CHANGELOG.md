@@ -1,4 +1,11 @@
-## **v5.0.15-beta.1** — (unreleased)
+## **v5.0.15-beta.1** — Ka-ZXing! (2026-04-20)
+
+### Chalker — QR Decoder
+
+- **QrScanner (ZXing) replaces jsQR as primary decoder** — the image capture path on iOS/iPadOS now uses QrScanner, a ZXing-based decoder that handles perspective distortion, glare, and screen reflections. jsQR consistently failed on iPad photos of QR codes on screens; QrScanner succeeds even at steep angles and poor lighting.
+- **1500px downscale** — all captured photos are downscaled to max 1500px before decoding. Faster and more reliable than full-resolution processing.
+- **BarcodeDetector removed from image capture path** — confirmed unavailable on iOS Safari (iPadOS 26). Removed dead code; BarcodeDetector remains in the TM's live camera scanner where it works.
+- **"Not set" for missing lane/referee** — the QR confirmation modal now shows "Not set" instead of "undefined" when lane or referee are not assigned.
 
 ### Layout
 
@@ -9,6 +16,12 @@
 
 ### Files changed
 
+- `chalker/js/chalker.js` — QrScanner as primary decoder in `decodeImageQR()`, 1500px downscale, BarcodeDetector removed from image path, "Not set" for missing lane/ref, version bump to 5.0.15-b.1
+- `chalker/index.html` — added `qr-scanner.umd.min.js` script tag
+- `chalker/js/qr-scanner.umd.min.js` — QrScanner/ZXing UMD build (~16KB)
+- `chalker/js/qr-scanner-worker.min.js` — QrScanner Web Worker (~44KB)
+- `chalker/qr-scanner-worker.min.js` — duplicate worker at page root (dynamic import path resolution)
+- `Docs/QR.md` — updated decoder chain, library table, reliability notes
 - `css/styles.css` — breakpoint 1024px → 1120px (all three media queries); desktop `history-table` td/th/badge padding halved; `.page` overflow-x removed from responsive block; `.history-actions .btn` hidden instead of `.history-actions`
 
 ---

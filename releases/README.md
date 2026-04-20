@@ -119,6 +119,37 @@ const CHALKER_VERSION = '5.0.9';
 
 `APP_VERSION` is displayed in the TM footer. `CHALKER_VERSION` is displayed in the Chalker's New Match modal. Both must match. Easy to forget.
 
+**Version format note:** `APP_VERSION` and `CHALKER_VERSION` use the short form `b` instead of `beta` (e.g. `5.0.15-b.1`). The full word causes line-wrap in the UI. Everywhere else — release pages, CHANGELOG, filenames, git tags — uses the full `beta` (e.g. `v5.0.15-beta.1`).
+
+### Step 6 — Increment the Chalker cache buster
+
+Bump the `?v=N` query parameter on the chalker.js script tag in `chalker/index.html`:
+
+```html
+<script src="js/chalker.js?v=7"></script>
+```
+
+Increment by 1 with each release. This bypasses browser and PWA service worker caching, ensuring the new code loads immediately on devices that have the Chalker installed.
+
+---
+
+## Beta Releases
+
+Betas follow the exact same process as full releases — release page, versioned page, sitemap, release notes markdown, version bump. A beta is a release.
+
+**What's different:**
+
+- **Version format:** `v5.0.15-beta.1` (file names, release pages, CHANGELOG, git tags). Short form `5.0.15-b.1` in `APP_VERSION` and `CHALKER_VERSION` only.
+- **File naming:** `releases/v5.0.15-beta.1.html`
+- **Previous Releases list:** betas appear alongside full releases, newest first. No special marking.
+- **Feedback callout:** beta release notes include a line inviting feedback, typically linking to the relevant GitHub discussion:
+
+```
+*Beta — iOS QR decode improvements for iPhone. Feedback welcome via [GitHub discussion #4](https://github.com/skrodahl/NewTon/discussions/4).*
+```
+
+Everything else — tagline, release notes markdown in `Docs/ReleaseNotes/`, sitemap entry, canonical URL, download buttons — is identical.
+
 ---
 
 ## HTML Template
