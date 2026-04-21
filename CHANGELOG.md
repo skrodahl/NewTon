@@ -1,3 +1,25 @@
+## **v5.0.15-beta.2** — Offline at the Oche (2026-04-21)
+
+### Documentation
+
+- **Automatic Backup page** — new doc page (`automatic-backup.html`) covering local backup on tournament completion, remote backup to an Analytics instance, the venue-to-cloud workflow, Analytics Mode, and manual fallback. Includes Server Settings screenshot.
+- **Cross-links** — userguide.html and docker-quickstart.html link to the new Automatic Backup page.
+
+### Docker
+
+- **Analytics Mode unlock** — undocumented `?tm=1` query parameter unlocks the full TM interface when in Analytics Mode. Enables retroactive achievement corrections.
+
+### Files changed
+
+- `automatic-backup.html` — new documentation page
+- `Screenshots/backup.png` — Server Settings screenshot
+- `tournament.html` — `?tm=1` query parameter overrides `NEWTON_MODE=analytics`; body class uses `$appMode` variable instead of raw `getenv()`
+- `userguide.html` — links to Automatic Backup page
+- `docker-quickstart.html` — link to Automatic Backup page
+- `releases/README.md` — beta release process, cache buster step, version format note
+
+---
+
 ## **v5.0.15-beta.1** — Ka-ZXing! (2026-04-20)
 
 ### Chalker — QR Decoder

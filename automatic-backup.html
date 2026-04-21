@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://newtondarts.com/automatic-backup.html">
+    <title>Automatic Backup — NewTon DC Tournament Manager</title>
+    <meta name="description" content="Automatic tournament backup and remote replication for NewTon DC Tournament Manager. Save completed tournaments to disk and upload to an Analytics instance — no manual steps required.">
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">&#8592; NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Automatic Backup</h1>
+    <p class="docs-subtitle">Save completed tournaments automatically &mdash; locally and to a remote instance.</p>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#use-case">Use Case</a></li>
+            <li><a href="#local-backup">Local Backup</a></li>
+            <li><a href="#remote-backup">Remote Backup</a></li>
+            <li><a href="#setup">Setup</a></li>
+            <li><a href="#analytics-mode">Analytics Mode</a></li>
+            <li><a href="#manual-fallback">Manual Fallback</a></li>
+            <li><a href="#requirements">Requirements</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p>NewTon is offline-first &mdash; everything is stored locally in your browser. This works brilliantly for running tournaments without an internet connection, but it means tournament data lives on one machine.</p>
+    <p>Automatic Backup bridges the gap:</p>
+    <ul>
+        <li><strong>Local backup</strong> &mdash; when a tournament is finalized, the complete tournament data is saved to the server as a JSON file. No button to click, no export to remember. It happens silently at the moment of completion.</li>
+        <li><strong>Remote backup</strong> &mdash; optionally, the same data is uploaded to a second instance at the same time. Tournaments run locally, but results are available online immediately.</li>
+        <li><strong>Immediately available</strong> &mdash; saved tournaments appear in Analytics for all users, on any device. The moment a tournament is finalized, everyone can see the results.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="use-case">Use Case</h2>
+    <p>Here is how our club uses it:</p>
+    <p>At the venue, we have a dedicated computer for the Tournament Manager. It comes out for each tournament, then goes back in the storage locker. Internet at the venue is spotty, so we rely on the offline functionality &mdash; the Tournament Manager runs without a connection.</p>
+    <p>At the end of a tournament, whatever internet connection we have is enough to upload the completed tournament to our online instance. This instance runs in <a href="#analytics-mode">Analytics Mode</a> &mdash; a read-only view of all tournament data.</p>
+    <p>Once uploaded, anyone can open the online instance on their phone and access the full stats &mdash; cross-tournament leaderboard, player rankings, match history, achievements &mdash; all from their pocket.</p>
+
+    <hr>
+
+    <h2 id="local-backup">Local Backup</h2>
+    <p>When <strong>Automatically backup tournaments on completion</strong> is enabled, finalizing a tournament saves the complete tournament data as a JSON file to the server&rsquo;s persistent storage (as configured in your Docker Compose volume mounts).</p>
+    <p>Saved tournaments appear in <strong>Shared Tournaments</strong> for all visitors on that instance. They can be imported to Recent Tournaments manually. Analytics picks them up automatically &mdash; every completed tournament becomes part of the cross-tournament statistics for everyone who visits the site.</p>
+    <p>Duplicate protection is built in &mdash; uploading a tournament that already exists on the server will not overwrite the existing copy.</p>
+
+    <hr>
+
+    <h2 id="remote-backup">Remote Backup</h2>
+    <p>In addition to the local backup, tournaments can be uploaded to a second instance at the moment of completion. The venue computer saves locally <em>and</em> pushes to the online Analytics instance in one step.</p>
+    <p>The upload happens immediately. If there is no internet connection at that moment, the upload will not succeed &mdash; use the <a href="#manual-fallback">manual fallback</a> instead.</p>
+    <p>The receiving instance needs <code>NEWTON_API_ENABLED=true</code> in its Docker configuration. Authentication is handled via basic auth (htaccess). No other configuration is required on the receiving end.</p>
+
+    <hr>
+
+    <h2 id="setup">Setup</h2>
+    <p>In <strong>Global Settings</strong>, scroll to <strong>Server Settings</strong>:</p>
+
+    <img src="Screenshots/backup.png" alt="Server Settings panel showing automatic backup configuration" style="max-width: 480px; width: 100%; border: 1px solid #e5e7eb; border-radius: 8px; margin: 1.5em 0;">
+
+    <ol>
+        <li>Tick <strong>Automatically backup tournaments on completion</strong>. This enables the local backup.</li>
+        <li>For remote backup, fill in the <strong>Remote Backup</strong> fields:
+            <ul>
+                <li><strong>Remote server URL</strong> &mdash; the full URL of the receiving instance (e.g. <code>https://my.other.instance</code>)</li>
+                <li><strong>Username</strong> and <strong>Password</strong> &mdash; basic auth credentials for the remote instance</li>
+            </ul>
+        </li>
+        <li>Click <strong>Save Server Settings</strong>.</li>
+    </ol>
+    <p>That&rsquo;s it. The next time a tournament is finalized, it will be saved locally and uploaded to the remote instance automatically.</p>
+
+    <hr>
+
+    <h2 id="analytics-mode">Analytics Mode</h2>
+    <p>The remote instance is typically configured with <code>NEWTON_MODE=analytics</code> in Docker. In Analytics Mode:</p>
+    <ul>
+        <li>The full Tournament Manager interface is hidden &mdash; visitors see only Analytics.</li>
+        <li>Data is <strong>read-only</strong>. No tournaments can be created or modified through the UI. Tournament JSON files can still be imported via Analytics.</li>
+        <li>All uploaded tournaments appear automatically in the cross-tournament statistics.</li>
+        <li>The leaderboard, player rankings, match history, and achievements are all available.</li>
+        <li>Works on mobile &mdash; designed to be checked from your phone.</li>
+    </ul>
+    <p>See the <a href="docker-quickstart.html">Docker Quick Start</a> for environment variable reference.</p>
+
+    <hr>
+
+    <h2 id="manual-fallback">Manual Fallback</h2>
+    <p>If the internet connection is unavailable at the moment of tournament completion, the remote upload will not succeed. In that case:</p>
+    <ol>
+        <li>Export the tournament as a JSON file from the Tournament Manager (Recent Tournaments &rarr; Export).</li>
+        <li>Upload the JSON file to the Analytics instance manually (Analytics &rarr; Import).</li>
+    </ol>
+    <p>Manually imported tournaments are also added to Shared Tournaments on the receiving instance, just like automatic uploads. The same duplicate protection applies.</p>
+    <p>The local backup still happens regardless of internet connectivity &mdash; only the remote upload is affected.</p>
+
+    <hr>
+
+    <h2 id="requirements">Requirements</h2>
+    <ul>
+        <li><strong>Docker</strong> &mdash; automatic backup is a server-side feature. It requires the Docker installation.</li>
+        <li><strong><code>NEWTON_API_ENABLED=true</code></strong> &mdash; the API must be enabled on both the sending and receiving instances.</li>
+        <li><strong>Persistent storage</strong> &mdash; configure volume mounts in Docker Compose so saved tournaments survive container restarts.</li>
+        <li><strong>Basic auth</strong> (optional) &mdash; recommended for the remote instance to prevent unauthorized uploads.</li>
+    </ul>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager &mdash; offline at the oche, online for everyone else.</em></p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p class="footer-cheeky">No popups? No cookies!</p>
+</div>
+
+</body>
+</html>

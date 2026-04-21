@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.0.15-b.1'; // Ka-ZXing! — QrScanner replaces jsQR on iOS, layout tightening
+const APP_VERSION = '5.0.15-b.2'; // Offline at the Oche — automatic backup doc, Analytics Mode unlock
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

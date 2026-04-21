@@ -7,7 +7,7 @@
   'use strict';
 
   // Keep in sync with APP_VERSION in js/main.js
-  const CHALKER_VERSION = '5.0.15-b.1';
+  const CHALKER_VERSION = '5.0.15-b.2';
 
   // ================
   // State Management
