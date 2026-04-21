@@ -886,6 +886,7 @@ body {
     border-radius: 8px;
     margin: 1.5em 0;
     display: block;
+    cursor: zoom-in;
 }
 
 .docs-content hr {

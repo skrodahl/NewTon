@@ -70,7 +70,7 @@
     <h2 id="setup">Setup</h2>
     <p>In <strong>Global Settings</strong>, scroll to <strong>Server Settings</strong>:</p>
 
-    <img src="Screenshots/backup.png" alt="Server Settings panel showing automatic backup configuration" class="docs-screenshot">
+    <img src="Screenshots/backup.png" alt="Server Settings panel showing automatic backup configuration" class="docs-screenshot lightbox-trigger" data-full="Screenshots/backup.png">
 
     <ol>
         <li>Tick <strong>Automatically backup tournaments on completion</strong>. This enables the local backup.</li>
@@ -133,5 +133,13 @@
     <p class="footer-cheeky">No popups? No cookies!</p>
 </div>
 
+<div id="lightbox" class="lightbox">
+    <div class="lightbox-content">
+        <button class="lightbox-close" aria-label="Close">&times;</button>
+        <img id="lightboxImg" src="" alt="">
+    </div>
+</div>
+
+<script src="js/lightbox.js"></script>
 </body>
 </html>
