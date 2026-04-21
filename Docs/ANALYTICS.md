@@ -6,7 +6,7 @@ The Analytics tab was introduced in v5.0.1 as a read-only match register browser
 
 ## Current State
 
-Four-tab analytics interface: Dashboard, Leaderboard, Players (placeholder), Register.
+Four-tab analytics interface: Dashboard, Leaderboard, Players, Register.
 
 **Dashboard** — seven stat cards computed from the scoped tournament set: Tournaments (finalized), Matches (completed), Players (unique by lowercase trimmed name), Points (total, respects point mode + layers), 180s (total), Highest Checkout (player), Shortest Leg (player). Points card links to Leaderboard.
 
@@ -115,11 +115,11 @@ Future features may add stats that only make sense at the tournament level — c
 
 Scope selector, dashboard, leaderboard, point mode, and layers are all live. What's missing:
 
-- **No player career view** — no way to see a player's history, averages, or form across tournaments
-- **No head-to-head records** — can't compare two players directly
+- **Player career view** — player list with checkbox selection and comparison table implemented; individual profile card basic (tournaments + W/L only); richer stats planned
+- **No head-to-head records** — comparison table shows side-by-side stats; dedicated head-to-head view not yet built
 - **No charts** — form and trends are invisible without visual representation
 - **Manual matches lack depth** — visit-level data unavailable; only leg counts shown
-- **Dashboard drill-through incomplete** — Points → Leaderboard works; other cards don't link yet
+- **Dashboard drill-through** — Points → Leaderboard, 180s → Players, Highest Checkout → player profile, Shortest Leg → player profile, Players → Players tab, Tournaments → Register. Matches card not yet wired.
 - **No leaderboard export** — JSON/CSV export not yet implemented
 
 ---
@@ -531,17 +531,39 @@ Examples:
 - Current title holder (winner of most recent finalized tournament)
 - Drill-through for record cards (180s, Highest Checkout, Shortest Leg) → Player tab when built
 
-### Phase 2 — Player View
+### Phase 2 — Players Tab (v1) — partially done
 
-Aggregate stats per player across all finalized tournaments.
+Split layout with checkbox-driven selection:
 
-- Tournament results (placements, win/loss record)
-- Achievement totals (180s, tons, high outs, short legs)
-- Match averages (where Chalker data available)
-- Form over time (last N tournaments)
-- Points total (respects point mode toggle)
+1. **Player list (left panel)** — checkbox + player name. All players selected by default. Header checkbox toggles all. Scrollable (70vh desktop, 40vh mobile). No pagination — scrollable container handles overflow.
+2. **Profile panel (right panel)** — adapts to selection:
+   - **All/multiple selected** → comparison table (Player, Played, W/L) — one row per selected player
+   - **One selected** → individual profile card (name, tournaments, W/L)
+   - **None selected** → placeholder: "Select a player"
+3. **Cross-view navigation** — `focusPlayer(name)` handles Leaderboard row clicks and Dashboard card clicks. Selects only that player, shows profile. Works even if Players tab hasn't rendered yet (pending focus mechanism).
 
-Indexed by player ID. Requires scanning all matches for a player — existing `player1Id`/`player2Id` indices support this.
+No player lens needed — the scrollable checkbox list *is* the lens. Visual scanning + checkboxes is sufficient at club scale (20-50 players).
+
+Form curves (ranking over time, points per tournament, averages trending) deferred to Phase 4 (Graphs).
+
+**Entry points (all implemented):**
+- Navigate to Players tab directly → all players selected, comparison table
+- Click a player name in the Leaderboard → single player profile
+- Dashboard record cards (Highest Checkout, Shortest Leg) → single player profile
+- Dashboard 180s card → Players tab (list view)
+- Dashboard Players card → Players tab (list view)
+
+**Known issues:**
+- Comparison table does not go full width below 1022px
+- Player selection is lost on reload (not persisted to localStorage)
+
+**Still planned:**
+- Persist player selection to localStorage
+- Richer profile card content (placements, achievements, points breakdown, averages, personal bests)
+- Head-to-head record when exactly two players selected
+- Profile card stats that go beyond the comparison table columns
+
+**Data source:** existing `player1Id`/`player2Id` indices in IndexedDB. Absolute stats (180s, tons) from achievement register. Threshold-dependent stats (high outs, short legs) and derived stats (averages) from raw leg data. Consistent with the raw data principle in the Architecture section.
 
 ### Phase 3 — Cross-Tournament Leaderboard (partially done, v5.0.9)
 
@@ -677,7 +699,7 @@ The architecture section defines when to use raw data vs the achievement registe
 
 ---
 
-**Last updated:** April 15, 2026 — Current State, Gap, Phase 1, and Phase 3 updated. Auto-import, Import Tournament, analytics mode, bracket view, delete protection, half-year presets all done.
+**Last updated:** April 21, 2026 — Players tab: checkbox selection, comparison table, single profile card, cross-view navigation from Dashboard + Leaderboard. Phase 2 plan updated.
 
 **Completed since last update:**
 - ~~Auto-import shared tournaments~~ DONE (v5.0.10)

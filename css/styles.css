@@ -4087,6 +4087,47 @@ a:hover { color: #1e40af; }
     }
 }
 
+/* Players tab — split layout */
+.players-split {
+    display: flex;
+    gap: 24px;
+    align-items: flex-start;
+}
+
+.players-list-panel {
+    width: 300px;
+    min-width: 300px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.players-profile-panel {
+    flex: 1;
+    min-width: 0;
+}
+
+#playersTableContainer {
+    max-width: 100%;
+}
+
+#playersTableContainer .newton-table-pagination {
+    display: none;
+}
+
+@media (max-width: 1120px) {
+    .players-split {
+        flex-direction: column;
+    }
+    .players-list-panel {
+        width: 100%;
+        min-width: 0;
+        max-height: 40vh;
+    }
+    #playersTableContainer {
+        max-width: 100%;
+    }
+}
+
 /* Analytics views */
 .analytics-view {
     display: none;

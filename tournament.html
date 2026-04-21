@@ -835,9 +835,16 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
             <!-- Analytics view: Players -->
             <div id="analyticsViewPlayers" class="analytics-view">
-                <div class="analytics-placeholder">
-                    <h3>Players</h3>
-                    <p>Individual player profiles and career stats. Coming soon.</p>
+                <div class="players-split">
+                    <div class="players-list-panel">
+                        <div id="playersTableContainer"></div>
+                    </div>
+                    <div class="players-profile-panel" id="playersProfilePanel">
+                        <div class="analytics-placeholder">
+                            <h3>Select a player</h3>
+                            <p>Click a name to view their profile.</p>
+                        </div>
+                    </div>
                 </div>
             </div>
 

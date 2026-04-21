@@ -1,3 +1,29 @@
+## **v5.1.0** — (unreleased)
+
+### Analytics — Players Tab
+
+- **Player list** — checkbox + player name. All selected by default. Header checkbox toggles all. Scrollable (70vh desktop, 40vh mobile). No pagination.
+- **Split layout** — player list on the left (300px), profile/comparison panel on the right. Stacked on mobile (<1120px).
+- **Selection-driven profile panel**:
+  - All/multiple selected → comparison table (Player, Played, W/L)
+  - One selected → individual profile card
+  - None selected → placeholder
+- **Cross-view navigation** — Leaderboard row click and Dashboard card click navigate to Players tab with that player focused. Works even if Players tab hasn't rendered yet (pending focus mechanism).
+- **Dashboard drill-through** — 180s → Players tab, Highest Checkout → player profile, Shortest Leg → player profile.
+
+### Known issues
+
+- Comparison table does not go full width below 1022px
+- Player selection not persisted across reloads
+
+### Files changed
+
+- `tournament.html` — Players tab split layout (players-split, players-list-panel, players-profile-panel)
+- `js/newton-history.js` — `renderPlayersTab()`, `renderProfilePanel()`, `focusPlayer()`, `togglePlayer()`, `toggleAllPlayers()`, dirty-flag wiring, dashboard card targets updated
+- `css/styles.css` — `.players-split` flex layout, `.players-list-panel` scroll, `#playersTableContainer` hidden pagination, responsive stacking at 1120px
+
+---
+
 ## **v5.0.15-beta.2** — Offline at the Oche (2026-04-21)
 
 ### Documentation

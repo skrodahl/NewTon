@@ -226,6 +226,14 @@ const NewtonHistory = (() => {
                 _dirty.leaderboard = false;
             }
         }
+
+        // When switching to players, recompute if dirty
+        if (view === 'players') {
+            if (_dirty.players) {
+                renderPlayersTab();
+                _dirty.players = false;
+            }
+        }
     }
 
     /**
@@ -398,12 +406,12 @@ const NewtonHistory = (() => {
                     _statCard('Matches', allMatches.length, 'Completed', 'allMatches') +
                     _statCard('Players', playerSet.size, 'Unique', 'players') +
                     _statCard('Points', totalPoints, 'Total', 'leaderboard') +
-                    _statCard('180s', total180s, 'Total', null) +
+                    _statCard('180s', total180s, 'Total', 'players') +
                     (highestCheckout.score > 0
-                        ? _statCard('Highest Checkout', highestCheckout.score, highestCheckout.player, null)
+                        ? _statCard('Highest Checkout', highestCheckout.score, highestCheckout.player, 'players', highestCheckout.player)
                         : _statCard('Highest Checkout', '—', 'No data yet', null)) +
                     (shortestLeg.darts < Infinity
-                        ? _statCard('Shortest Leg', shortestLeg.darts, shortestLeg.player, null)
+                        ? _statCard('Shortest Leg', shortestLeg.darts, shortestLeg.player, 'players', shortestLeg.player)
                         : _statCard('Shortest Leg', '—', 'No data yet', null)) +
                 '</div>';
 
@@ -411,9 +419,12 @@ const NewtonHistory = (() => {
             container.querySelectorAll('.analytics-stat-card[data-target-view]').forEach(card => {
                 card.addEventListener('click', () => {
                     const target = card.dataset.targetView;
+                    const playerName = card.dataset.targetPlayer;
                     if (target === 'allMatches') {
                         switchView('register');
                         switchRegisterTab('matches');
+                    } else if (target === 'players' && playerName) {
+                        focusPlayer(playerName);
                     } else {
                         switchView(target);
                     }
@@ -433,12 +444,14 @@ const NewtonHistory = (() => {
      * @param {string|number} value
      * @param {string} subtitle
      * @param {string|null} targetView - view to navigate to on click, or null for non-clickable
+     * @param {string} [targetPlayer] - player name to focus on click (Players tab)
      * @returns {string}
      */
-    function _statCard(label, value, subtitle, targetView) {
+    function _statCard(label, value, subtitle, targetView, targetPlayer) {
         const clickable = targetView ? ` data-target-view="${targetView}"` : '';
+        const playerAttr = targetPlayer ? ` data-target-player="${escHtml(targetPlayer)}"` : '';
         const clickClass = targetView ? ' clickable' : '';
-        return '<div class="analytics-stat-card' + clickClass + '"' + clickable + '>' +
+        return '<div class="analytics-stat-card' + clickClass + '"' + clickable + playerAttr + '>' +
             '<div class="analytics-stat-value">' + escHtml(String(value)) + '</div>' +
             '<div class="analytics-stat-label">' + escHtml(label) + '</div>' +
             '<div class="analytics-stat-subtitle">' + escHtml(subtitle) + '</div>' +
@@ -453,6 +466,252 @@ const NewtonHistory = (() => {
 
     // ---------------------------------------------------------------------------
     // Leaderboard
+    // ---------------------------------------------------------------------------
+    // PLAYERS TAB
+    // ---------------------------------------------------------------------------
+
+    /** @type {object[]|null} Current player data for the players tab */
+    let _playersData = null;
+
+    /** @type {object|null} NewtonTable instance for the players list */
+    let _playersTable = null;
+
+    /** @type {Set<string>} Selected player keys (lowercase trimmed) */
+    let _selectedPlayers = new Set();
+
+    /** @type {string|null} Player name to focus after next render */
+    let _pendingPlayerFocus = null;
+
+    /**
+     * Compute unique players across scoped tournaments and render the players list.
+     */
+    async function renderPlayersTab() {
+        const container = document.getElementById('playersTableContainer');
+        if (!container || typeof NewtonDB === 'undefined') return;
+
+        if (!_playersTable) {
+            container.innerHTML = '<div class="analytics-placeholder"><p>Loading…</p></div>';
+        }
+
+        try {
+            const tournaments = await getScopedTournaments();
+            if (!tournaments.length) {
+                container.innerHTML = '<div class="analytics-placeholder">' +
+                    '<h3>No data yet</h3>' +
+                    '<p>Players appear after your first tournament is finalized.</p></div>';
+                _playersTable = null;
+                return;
+            }
+
+            // Build unique player map from tournament achievements
+            const playerMap = {};
+
+            for (const t of tournaments) {
+                const ta = t.tournamentAchievements || {};
+                Object.entries(ta).forEach(([pid, entry]) => {
+                    const name = entry.name || pid;
+                    const key = name.trim().toLowerCase();
+                    if (!playerMap[key]) {
+                        playerMap[key] = {
+                            name: name,
+                            tournaments: 0,
+                            matchesWon: 0,
+                            matchesLost: 0
+                        };
+                    }
+                    playerMap[key].tournaments++;
+                });
+            }
+
+            // Scan matches for win/loss counts
+            for (const t of tournaments) {
+                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+                matches.forEach(m => {
+                    const k1 = m.player1Name ? m.player1Name.trim().toLowerCase() : null;
+                    const k2 = m.player2Name ? m.player2Name.trim().toLowerCase() : null;
+                    const pm1 = k1 ? playerMap[k1] : null;
+                    const pm2 = k2 ? playerMap[k2] : null;
+
+                    if (m.winner === 1) {
+                        if (pm1) pm1.matchesWon++;
+                        if (pm2) pm2.matchesLost++;
+                    } else if (m.winner === 2) {
+                        if (pm2) pm2.matchesWon++;
+                        if (pm1) pm1.matchesLost++;
+                    }
+                });
+            }
+
+            const rows = Object.values(playerMap);
+            rows.sort((a, b) => a.name.localeCompare(b.name));
+            rows.forEach(r => { r._rowId = r.name; });
+
+            // Default: all players selected
+            if (_selectedPlayers.size === 0) {
+                rows.forEach(r => _selectedPlayers.add(r.name.trim().toLowerCase()));
+            }
+
+            if (!_playersTable) {
+                _playersTable = NewtonTable.create({
+                    tableId: 'analytics-players',
+                    containerId: 'playersTableContainer',
+                    defaultSortKey: 'name',
+                    defaultSortDir: 'asc',
+                    emptyMessage: 'No player data available.',
+                    columns: [
+                        {
+                            key: '_select', sortable: false, width: '32px', align: 'center',
+                            headerRender: () => {
+                                const allChecked = rows.length > 0 && rows.every(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
+                                return `<input type="checkbox" class="analytics-scope-checkbox"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllPlayers(this.checked)">`;
+                            },
+                            render: (v, row) => {
+                                const key = row.name.trim().toLowerCase();
+                                const checked = _selectedPlayers.has(key) ? ' checked' : '';
+                                return `<input type="checkbox" class="analytics-scope-checkbox"${checked} onclick="event.stopPropagation();NewtonHistory.togglePlayer('${escHtml(row.name)}', this.checked)">`;
+                            }
+                        },
+                        {
+                            key: 'name', label: 'Player',
+                            render: (v) => `<strong>${escHtml(v)}</strong>`
+                        }
+                    ]
+                });
+            }
+
+            _playersTable.setData(rows);
+
+            // Apply pending focus or render profile panel with current selection
+            if (_pendingPlayerFocus) {
+                _applyPendingFocus();
+            } else {
+                renderProfilePanel();
+            }
+        } catch (err) {
+            console.error('Players tab render error:', err);
+            container.innerHTML = '<div class="analytics-placeholder"><p>Error loading players.</p></div>';
+            _playersTable = null;
+        }
+    }
+
+    /**
+     * Toggle a single player's selection and update the profile panel.
+     * @param {string} playerName
+     * @param {boolean} checked
+     */
+    function togglePlayer(playerName, checked) {
+        const key = playerName.trim().toLowerCase();
+        if (checked) {
+            _selectedPlayers.add(key);
+        } else {
+            _selectedPlayers.delete(key);
+        }
+        // Update header checkbox
+        const headerCb = document.querySelector('#playersTableContainer thead .analytics-scope-checkbox');
+        if (headerCb && _playersTable && _playersTable.data) {
+            headerCb.checked = _playersTable.data.every(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
+        }
+        renderProfilePanel();
+    }
+
+    /**
+     * Toggle all players' selection.
+     * @param {boolean} checked
+     */
+    function toggleAllPlayers(checked) {
+        if (!_playersTable || !_playersTable.data) return;
+        _selectedPlayers.clear();
+        if (checked) {
+            _playersTable.data.forEach(r => _selectedPlayers.add(r.name.trim().toLowerCase()));
+        }
+        // Update all row checkboxes
+        document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox').forEach(cb => {
+            cb.checked = checked;
+        });
+        renderProfilePanel();
+    }
+
+    /**
+     * Navigate to the Players tab and focus a single player.
+     * Handles the case where the Players tab hasn't rendered yet.
+     * @param {string} playerName
+     */
+    function focusPlayer(playerName) {
+        _pendingPlayerFocus = playerName;
+        switchView('players');
+        // If data already loaded, apply focus now
+        if (_playersTable && _playersTable.data && _playersTable.data.length) {
+            _applyPendingFocus();
+        }
+    }
+
+    /**
+     * Apply a pending player focus — select only that player.
+     */
+    function _applyPendingFocus() {
+        if (!_pendingPlayerFocus) return;
+        const key = _pendingPlayerFocus.trim().toLowerCase();
+        _pendingPlayerFocus = null;
+        _selectedPlayers.clear();
+        _selectedPlayers.add(key);
+        // Update checkboxes in the list
+        document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox').forEach(cb => {
+            const row = _playersTable.data.find(r => r._rowId === cb.closest('tr')?.dataset?.rowId);
+            // simpler: re-render the table
+        });
+        if (_playersTable) _playersTable.setData(_playersTable.data);
+        renderProfilePanel();
+    }
+
+    /**
+     * Render the right-side profile panel based on current selection.
+     */
+    function renderProfilePanel() {
+        const panel = document.getElementById('playersProfilePanel');
+        if (!panel || !_playersTable || !_playersTable.data) return;
+
+        const selected = _playersTable.data.filter(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
+
+        if (selected.length === 0) {
+            panel.innerHTML = '<div class="analytics-placeholder">' +
+                '<h3>Select a player</h3>' +
+                '<p>Check one or more names to view their stats.</p></div>';
+            return;
+        }
+
+        if (selected.length === 1) {
+            // Single player profile card
+            const p = selected[0];
+            panel.innerHTML =
+                '<h3>' + escHtml(p.name) + '</h3>' +
+                '<table class="history-table newton-table">' +
+                '<tbody>' +
+                '<tr><td><strong>Tournaments</strong></td><td>' + p.tournaments + '</td></tr>' +
+                '<tr><td><strong>Matches</strong></td><td>' + p.matchesWon + 'W - ' + p.matchesLost + 'L</td></tr>' +
+                '</tbody></table>';
+            return;
+        }
+
+        // Multiple players — comparison table
+        let html = '<table class="history-table newton-table">' +
+            '<thead><tr>' +
+            '<th>Player</th>' +
+            '<th style="text-align:center;width:80px;">Played</th>' +
+            '<th style="text-align:center;width:80px;">W/L</th>' +
+            '</tr></thead><tbody>';
+        selected.forEach(p => {
+            html += '<tr>' +
+                '<td><strong>' + escHtml(p.name) + '</strong></td>' +
+                '<td style="text-align:center;">' + p.tournaments + '</td>' +
+                '<td style="text-align:center;">' + p.matchesWon + '-' + p.matchesLost + '</td>' +
+                '</tr>';
+        });
+        html += '</tbody></table>';
+        panel.innerHTML = html;
+    }
+
+    // ---------------------------------------------------------------------------
+    // LEADERBOARD
     // ---------------------------------------------------------------------------
 
     /** @type {object|null} NewtonTable instance for the leaderboard */
@@ -641,7 +900,7 @@ const NewtonHistory = (() => {
                     defaultSortDir: 'desc',
                     emptyMessage: 'No player data available.',
                     rowClass: (row) => row._rank <= 16 ? 'leaderboard-top' : '',
-                    onRowClick: (row) => { /* TODO: open Player tab for row.name */ },
+                    onRowClick: (row) => { focusPlayer(row.name); },
                     columns: [
                         {
                             key: '_rank', label: '#', width: '50px', align: 'center',
@@ -2016,6 +2275,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
+             setScope, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
 
 })();
