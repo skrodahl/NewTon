@@ -879,6 +879,15 @@ body {
     margin-bottom: 5px;
 }
 
+.docs-content img.docs-screenshot {
+    max-width: 480px;
+    width: 100%;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    margin: 1.5em 0;
+    display: block;
+}
+
 .docs-content hr {
     border: none;
     border-top: 2px solid #d5c4b0;
