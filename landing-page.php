@@ -261,6 +261,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
             <a href="<?= $githubUrl ?>">GitHub</a> &mdash;
             <a href="privacy.html">Privacy</a> &mdash;
+            <a href="THIRD-PARTY-LICENSES.md">Licenses</a> &mdash;
             <a href="design-system.html">Design System</a>
         </p>
         <p><em class="footer-cheeky">No popups? No cookies!</em></p>
