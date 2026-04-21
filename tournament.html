@@ -61,7 +61,7 @@
     </script>
 </head>
 
-<body class="<?php echo getenv('NEWTON_MODE') === 'analytics' ? 'mode-analytics' : 'mode-full'; ?>">
+<body class="<?php echo $appMode === 'analytics' ? 'mode-analytics' : 'mode-full'; ?>">
 <script>
 window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'analytics' : 'full';
 </script>
