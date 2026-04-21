@@ -18,7 +18,7 @@
     if (function_exists('getenv')) {
         $demoMode = getenv('NEWTON_DEMO_MODE') === 'true' ? 'true' : 'false';
         $githubUrl = getenv('NEWTON_GITHUB_URL') ?: 'https://github.com/skrodahl/NewTon';
-        $appMode = getenv('NEWTON_MODE') ?: 'full';
+        $appMode = isset($_GET['tm']) ? 'full' : (getenv('NEWTON_MODE') ?: 'full');
         $readonlyAnalytics = getenv('NEWTON_READONLY_ANALYTICS') === 'true' ? 'true' : 'false';
         echo "\n        window.NEWTON_CONFIG = {\n";
         echo "            demoMode: $demoMode,\n";
