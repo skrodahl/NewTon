@@ -10,17 +10,31 @@
   - None selected → placeholder
 - **Cross-view navigation** — Leaderboard row click and Dashboard card click navigate to Players tab with that player focused. Works even if Players tab hasn't rendered yet (pending focus mechanism).
 - **Dashboard drill-through** — 180s → Players tab, Highest Checkout → player profile, Shortest Leg → player profile.
+- **Player selection persisted** — selection saved to localStorage (`newton_analytics_playerSelection`), restored on reload with stale name filtering.
+- **Row click toggles checkbox** — click anywhere on a player list row to toggle selection. Hover effect on all tables.
+- **Comparison table via NewtonTable** — sortable, consistent hover and styling.
+
+### Analytics — Leaderboard Export
+
+- **CSV and JSON export** — Export CSV and Export JSON buttons on the Leaderboard. Respects scope, point mode, and layers — what you see is what you export.
+- **Shared CSV utility** (`newton-csv.js`) — `NewtonCSV.exportCSV()` and `NewtonCSV.downloadFile()`. Used by both leaderboard export and tournament results export. Refactored `results-config.js` to use the shared utility.
+
+### Documentation
+
+- **Documentation index** — all doc pages listed at the bottom of the User Guide with descriptions.
 
 ### Known issues
 
 - Comparison table does not go full width below 1022px
-- Player selection not persisted across reloads
 
 ### Files changed
 
-- `tournament.html` — Players tab split layout (players-split, players-list-panel, players-profile-panel)
-- `js/newton-history.js` — `renderPlayersTab()`, `renderProfilePanel()`, `focusPlayer()`, `togglePlayer()`, `toggleAllPlayers()`, dirty-flag wiring, dashboard card targets updated
-- `css/styles.css` — `.players-split` flex layout, `.players-list-panel` scroll, `#playersTableContainer` hidden pagination, responsive stacking at 1120px
+- `tournament.html` — Players tab split layout, Leaderboard export buttons, `newton-csv.js` script tag
+- `js/newton-history.js` — `renderPlayersTab()`, `renderProfilePanel()`, `focusPlayer()`, `togglePlayer()`, `toggleAllPlayers()`, `exportLeaderboardCSV()`, `exportLeaderboardJSON()`, player selection persistence, dirty-flag wiring, dashboard card targets
+- `js/newton-csv.js` — new shared CSV/download utility
+- `js/results-config.js` — refactored to use `NewtonCSV` for CSV export and file download
+- `css/styles.css` — `.players-split` flex layout, `.players-list-panel` scroll, `#playersTableContainer` hidden pagination, `.analytics-export-btn`, responsive stacking at 1120px
+- `userguide.html` — Documentation index section, Automatic Backup links
 
 ---
 

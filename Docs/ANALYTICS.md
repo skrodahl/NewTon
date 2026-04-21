@@ -120,7 +120,7 @@ Scope selector, dashboard, leaderboard, point mode, and layers are all live. Wha
 - **No charts** — form and trends are invisible without visual representation
 - **Manual matches lack depth** — visit-level data unavailable; only leg counts shown
 - **Dashboard drill-through** — Points → Leaderboard, 180s → Players, Highest Checkout → player profile, Shortest Leg → player profile, Players → Players tab, Tournaments → Register. Matches card not yet wired.
-- **No leaderboard export** — JSON/CSV export not yet implemented
+- ~~No leaderboard export~~ — CSV and JSON export implemented (v5.1.0), respects scope/point mode/layers
 
 ---
 
@@ -555,10 +555,8 @@ Form curves (ranking over time, points per tournament, averages trending) deferr
 
 **Known issues:**
 - Comparison table does not go full width below 1022px
-- Player selection is lost on reload (not persisted to localStorage)
 
 **Still planned:**
-- Persist player selection to localStorage
 - Richer profile card content (placements, achievements, points breakdown, averages, personal bests)
 - Head-to-head record when exactly two players selected
 - Profile card stats that go beyond the comparison table columns
@@ -574,7 +572,7 @@ Core leaderboard implemented. Aggregates per player across scoped tournaments: p
 - Achievement leaderboards (most 180s, highest single-match average, most high outs) as alternative sort/filter views
 - Computed cache/summary if performance becomes an issue at scale
 
-**Export:** Leaderboard exportable as JSON and CSV. The data is already computed as an array of player objects — serialisation is straightforward. Any filtered/configured leaderboard view should be exportable, not just the default. Export respects the active scope, point mode, and layers — what you see is what you export. Prime candidate for next implementation.
+**Export:** Leaderboard exportable as JSON and CSV — implemented (v5.1.0). Uses shared `NewtonCSV` utility (`newton-csv.js`). Export respects the active scope, point mode, and layers — what you see is what you export. The same utility is used by the tournament results CSV export in `results-config.js`.
 
 ### Phase 4 — Graphs
 
@@ -699,7 +697,7 @@ The architecture section defines when to use raw data vs the achievement registe
 
 ---
 
-**Last updated:** April 21, 2026 — Players tab: checkbox selection, comparison table, single profile card, cross-view navigation from Dashboard + Leaderboard. Phase 2 plan updated.
+**Last updated:** April 21, 2026 — Players tab with checkbox selection, comparison table, profile card, cross-view navigation. Leaderboard CSV/JSON export via shared NewtonCSV utility. Player selection persisted to localStorage.
 
 **Completed since last update:**
 - ~~Auto-import shared tournaments~~ DONE (v5.0.10)
@@ -711,9 +709,8 @@ The architecture section defines when to use raw data vs the achievement registe
 
 **Next steps (priority order):**
 1. **Exclude from Analytics flag** — opt-in checkbox at tournament creation. Excluded tournaments skip auto-import and auto-backup. For practice/test tournaments.
-2. **Player tab** — Player Name Editor + player profiles
-3. **Leaderboard export** — JSON/CSV
-4. **Table cogwheel** — column visibility + top-N threshold
+2. **Player tab** — richer profile card content, Player Name Editor
+3. **Table cogwheel** — column visibility + top-N threshold
 5. **All-matches view** — flat match list in Register, wired to Matches dashboard card
 6. **Seeded brackets** — use Analytics leaderboard data to seed tournament draws
 7. **URL-based views** — direct URLs for venue big screens (e.g. /leaderboard)

@@ -902,17 +902,18 @@ function exportResultsCSV() {
 /**
  * Generate CSV content from current results table
  */
-function generateResultsCSV() {
-    // Tournament metadata rows
-    const tournamentInfo = [
-        [`Tournament: ${tournament.name}`],
-        [`Date: ${tournament.date}`],
-        [''] // Empty row for spacing
+/**
+ * Build results CSV data for the active tournament.
+ * @returns {{ metadata: string[], headers: string[], rows: Array<Array> }}
+ */
+function buildResultsCSVData() {
+    const metadata = [
+        'Tournament: ' + tournament.name,
+        'Date: ' + tournament.date
     ];
 
-    // CSV Headers
     const headers = ['Rank', 'Player', 'Points', 'Short Legs', 'High Outs', '180s', 'Tons', 'Legs Won', 'Legs Lost'];
-    
+
     // Get sorted players (same logic as updateResultsTable)
     const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
         if (a.placement && b.placement) {
@@ -926,35 +927,23 @@ function generateResultsCSV() {
         return nameA.localeCompare(nameB);
     });
 
-    // Generate CSV rows
     const rows = sortedPlayers.map(player => {
         const points = calculatePlayerPoints(player);
         const legs = calculatePlayerLegs(player.id);
-        
-        // Format ranking (remove ordinal suffixes, convert ties)
-        let rank = formatRankingForCSV(player.placement);
-        
-        // Format short legs (semicolon-separated)
-        const shortLegs = Array.isArray(player.stats.shortLegs) && player.stats.shortLegs.length > 0 
-            ? player.stats.shortLegs.join(';') 
+        const rank = formatRankingForCSV(player.placement);
+        const shortLegs = Array.isArray(player.stats.shortLegs) && player.stats.shortLegs.length > 0
+            ? player.stats.shortLegs.join(';')
             : '0';
-        
-        // Format high outs (semicolon-separated)
-        const highOuts = (player.stats.highOuts || []).length > 0 
-            ? player.stats.highOuts.join(';') 
+        const highOuts = (player.stats.highOuts || []).length > 0
+            ? player.stats.highOuts.join(';')
             : '0';
-        
         const oneEighties = player.stats.oneEighties || 0;
         const tons = player.stats.tons || 0;
-        
+
         return [rank, player.name, points, shortLegs, highOuts, oneEighties, tons, legs.legsWon, legs.legsLost];
     });
 
-    // Convert to CSV format
-    const csvRows = [...tournamentInfo, headers, ...rows];
-    return csvRows.map(row => 
-        row.map(field => `"${field}"`).join(',')
-    ).join('\n');
+    return { metadata, headers, rows };
 }
 
 /**
@@ -1066,31 +1055,19 @@ function confirmExport() {
 }
 
 function executeExport(format, filename) {
-    let content, mimeType;
-
     if (format === 'JSON') {
-        content = generateResultsJSON();
-        mimeType = 'application/json;charset=utf-8;';
+        const content = generateResultsJSON();
+        NewtonCSV.downloadFile(content, filename, 'application/json;charset=utf-8;');
     } else {
-        content = generateResultsCSV();
-        mimeType = 'text/csv;charset=utf-8;';
+        const data = buildResultsCSVData();
+        NewtonCSV.exportCSV({
+            filename: filename,
+            headers: data.headers,
+            rows: data.rows,
+            metadata: data.metadata
+        });
     }
-
-    // Create and download file
-    const blob = new Blob([content], { type: mimeType });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-
-    URL.revokeObjectURL(url);
-    console.log(`✓ Results exported as ${format}: ${filename}`);
+    console.log('Results exported as ' + format + ': ' + filename);
 }
 
 // Make functions globally available

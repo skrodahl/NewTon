@@ -4110,7 +4110,9 @@ a:hover { color: #1e40af; }
     max-width: 100%;
 }
 
-#playersTableContainer .newton-table-pagination {
+#playersTableContainer .newton-table-pagination,
+#playerProfileTableContainer .newton-table-pagination,
+#playerComparisonTableContainer .newton-table-pagination {
     display: none;
 }
 
@@ -4126,6 +4128,12 @@ a:hover { color: #1e40af; }
     #playersTableContainer {
         max-width: 100%;
     }
+}
+
+.leaderboard-actions {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 12px;
 }
 
 /* Analytics views */

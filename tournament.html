@@ -830,6 +830,10 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
             <!-- Analytics view: Leaderboard -->
             <div id="analyticsViewLeaderboard" class="analytics-view">
+                <div class="leaderboard-actions">
+                    <button class="analytics-reset-btn" onclick="NewtonHistory.exportLeaderboardCSV()">Export CSV</button>
+                    <button class="analytics-reset-btn" onclick="NewtonHistory.exportLeaderboardJSON()">Export JSON</button>
+                </div>
                 <div id="leaderboardTableContainer"></div>
             </div>
 
@@ -1203,6 +1207,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/clean-match-progression.js"></script>
         <script src="js/bracket-lines.js"></script>
         <script src="js/bracket-rendering.js"></script>
+        <script src="js/newton-csv.js"></script>
         <script src="js/results-config.js"></script>
         <script src="js/dynamic-help-system.js"></script>
         <script src="js/analytics.js"></script>

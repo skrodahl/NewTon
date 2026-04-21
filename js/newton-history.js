@@ -476,8 +476,44 @@ const NewtonHistory = (() => {
     /** @type {object|null} NewtonTable instance for the players list */
     let _playersTable = null;
 
+    /** @type {object|null} NewtonTable instance for the comparison/profile panel */
+    let _comparisonTable = null;
+
     /** @type {Set<string>} Selected player keys (lowercase trimmed) */
     let _selectedPlayers = new Set();
+
+    /** Save player selection to localStorage. Null = all selected (default). */
+    function _persistPlayerSelection() {
+        try {
+            if (_playersTable && _playersTable.data) {
+                const allKeys = _playersTable.data.map(r => r.name.trim().toLowerCase());
+                const allSelected = allKeys.every(k => _selectedPlayers.has(k));
+                if (allSelected || _selectedPlayers.size === 0) {
+                    localStorage.removeItem('newton_analytics_playerSelection');
+                } else {
+                    localStorage.setItem('newton_analytics_playerSelection', JSON.stringify([..._selectedPlayers]));
+                }
+            }
+        } catch (e) { /* ignore */ }
+    }
+
+    /** Restore player selection from localStorage. */
+    function _restorePlayerSelection(rows) {
+        try {
+            const raw = localStorage.getItem('newton_analytics_playerSelection');
+            if (!raw) return false;
+            const keys = JSON.parse(raw);
+            if (!Array.isArray(keys) || keys.length === 0) return false;
+            const validKeys = new Set(rows.map(r => r.name.trim().toLowerCase()));
+            const filtered = keys.filter(k => validKeys.has(k));
+            if (filtered.length === 0) return false;
+            _selectedPlayers = new Set(filtered);
+            return true;
+        } catch (e) {
+            localStorage.removeItem('newton_analytics_playerSelection');
+            return false;
+        }
+    }
 
     /** @type {string|null} Player name to focus after next render */
     let _pendingPlayerFocus = null;
@@ -546,9 +582,11 @@ const NewtonHistory = (() => {
             rows.sort((a, b) => a.name.localeCompare(b.name));
             rows.forEach(r => { r._rowId = r.name; });
 
-            // Default: all players selected
+            // Restore persisted selection, or default to all selected
             if (_selectedPlayers.size === 0) {
-                rows.forEach(r => _selectedPlayers.add(r.name.trim().toLowerCase()));
+                if (!_restorePlayerSelection(rows)) {
+                    rows.forEach(r => _selectedPlayers.add(r.name.trim().toLowerCase()));
+                }
             }
 
             if (!_playersTable) {
@@ -558,6 +596,22 @@ const NewtonHistory = (() => {
                     defaultSortKey: 'name',
                     defaultSortDir: 'asc',
                     emptyMessage: 'No player data available.',
+                    onRowClick: (row) => {
+                        const key = row.name.trim().toLowerCase();
+                        const nowChecked = !_selectedPlayers.has(key);
+                        togglePlayer(row.name, nowChecked);
+                        // Update the checkbox in this row
+                        const cbs = document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox');
+                        cbs.forEach(cb => {
+                            const tr = cb.closest('tr');
+                            if (tr) {
+                                const nameCell = tr.querySelector('td:nth-child(2)');
+                                if (nameCell && nameCell.textContent.trim().toLowerCase() === key) {
+                                    cb.checked = nowChecked;
+                                }
+                            }
+                        });
+                    },
                     columns: [
                         {
                             key: '_select', sortable: false, width: '32px', align: 'center',
@@ -611,6 +665,7 @@ const NewtonHistory = (() => {
         if (headerCb && _playersTable && _playersTable.data) {
             headerCb.checked = _playersTable.data.every(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
         }
+        _persistPlayerSelection();
         renderProfilePanel();
     }
 
@@ -628,6 +683,7 @@ const NewtonHistory = (() => {
         document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox').forEach(cb => {
             cb.checked = checked;
         });
+        _persistPlayerSelection();
         renderProfilePanel();
     }
 
@@ -660,6 +716,7 @@ const NewtonHistory = (() => {
             // simpler: re-render the table
         });
         if (_playersTable) _playersTable.setData(_playersTable.data);
+        _persistPlayerSelection();
         renderProfilePanel();
     }
 
@@ -673,6 +730,7 @@ const NewtonHistory = (() => {
         const selected = _playersTable.data.filter(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
 
         if (selected.length === 0) {
+            _comparisonTable = null;
             panel.innerHTML = '<div class="analytics-placeholder">' +
                 '<h3>Select a player</h3>' +
                 '<p>Check one or more names to view their stats.</p></div>';
@@ -681,33 +739,57 @@ const NewtonHistory = (() => {
 
         if (selected.length === 1) {
             // Single player profile card
+            _comparisonTable = null;
             const p = selected[0];
             panel.innerHTML =
                 '<h3>' + escHtml(p.name) + '</h3>' +
-                '<table class="history-table newton-table">' +
-                '<tbody>' +
-                '<tr><td><strong>Tournaments</strong></td><td>' + p.tournaments + '</td></tr>' +
-                '<tr><td><strong>Matches</strong></td><td>' + p.matchesWon + 'W - ' + p.matchesLost + 'L</td></tr>' +
-                '</tbody></table>';
+                '<div id="playerProfileTableContainer"></div>';
+
+            const profileTable = NewtonTable.create({
+                tableId: 'analytics-player-profile',
+                containerId: 'playerProfileTableContainer',
+                defaultSortKey: null,
+                emptyMessage: 'No data.',
+                columns: [
+                    { key: 'stat', label: 'Stat', sortable: false, render: (v) => `<strong>${escHtml(v)}</strong>` },
+                    { key: 'value', label: 'Value', sortable: false, align: 'right' }
+                ]
+            });
+            profileTable.setData([
+                { _rowId: 'tournaments', stat: 'Tournaments', value: p.tournaments },
+                { _rowId: 'matches', stat: 'Matches', value: p.matchesWon + 'W - ' + p.matchesLost + 'L' }
+            ]);
             return;
         }
 
-        // Multiple players — comparison table
-        let html = '<table class="history-table newton-table">' +
-            '<thead><tr>' +
-            '<th>Player</th>' +
-            '<th style="text-align:center;width:80px;">Played</th>' +
-            '<th style="text-align:center;width:80px;">W/L</th>' +
-            '</tr></thead><tbody>';
-        selected.forEach(p => {
-            html += '<tr>' +
-                '<td><strong>' + escHtml(p.name) + '</strong></td>' +
-                '<td style="text-align:center;">' + p.tournaments + '</td>' +
-                '<td style="text-align:center;">' + p.matchesWon + '-' + p.matchesLost + '</td>' +
-                '</tr>';
+        // Multiple players — comparison table via NewtonTable
+        panel.innerHTML = '<div id="playerComparisonTableContainer"></div>';
+        selected.forEach(r => { r._rowId = r.name; });
+
+        _comparisonTable = NewtonTable.create({
+            tableId: 'analytics-player-comparison',
+            containerId: 'playerComparisonTableContainer',
+            defaultSortKey: 'name',
+            defaultSortDir: 'asc',
+            emptyMessage: 'No player data available.',
+            rowClass: () => 'history-row',
+            columns: [
+                {
+                    key: 'name', label: 'Player',
+                    render: (v) => `<strong>${escHtml(v)}</strong>`
+                },
+                {
+                    key: 'tournaments', label: 'Played', align: 'center', width: '80px', defaultDir: 'desc',
+                    render: (v) => v
+                },
+                {
+                    key: 'matchesWon', label: 'W/L', align: 'center', width: '80px', defaultDir: 'desc',
+                    render: (v, row) => `${row.matchesWon}-${row.matchesLost}`,
+                    sortValue: (v, row) => row.matchesWon - row.matchesLost
+                }
+            ]
         });
-        html += '</tbody></table>';
-        panel.innerHTML = html;
+        _comparisonTable.setData(selected);
     }
 
     // ---------------------------------------------------------------------------
@@ -716,6 +798,9 @@ const NewtonHistory = (() => {
 
     /** @type {object|null} NewtonTable instance for the leaderboard */
     let _leaderboardTable = null;
+
+    /** @type {object[]|null} Current leaderboard rows (for export) */
+    let _leaderboardRows = null;
 
     /**
      * Compute per-player points across scoped tournaments and render the leaderboard.
@@ -991,6 +1076,7 @@ const NewtonHistory = (() => {
                 });
             }
 
+            _leaderboardRows = rows;
             _leaderboardTable.setData(rows);
 
         } catch (e) {
@@ -998,6 +1084,84 @@ const NewtonHistory = (() => {
             container.innerHTML = '<div class="analytics-placeholder">' +
                 '<p>Failed to load leaderboard.</p></div>';
         }
+    }
+
+    /**
+     * Export the current leaderboard as CSV. Respects scope, point mode, and layers.
+     */
+    function exportLeaderboardCSV() {
+        if (!_leaderboardRows || !_leaderboardRows.length) {
+            alert('No leaderboard data to export.');
+            return;
+        }
+
+        const headers = ['Rank', 'Player', '1st', '2nd', '3rd', '4th', '5-6th', '7-8th',
+            '180s', 'High Outs', 'Short Legs', 'Played', 'Points',
+            'Best Out', 'Best Leg', 'Avg', 'Matches W', 'Matches L', 'Legs W', 'Legs L'];
+
+        const rows = _leaderboardRows.map(r => [
+            r._rank,
+            r.name,
+            r.p1st || 0,
+            r.p2nd || 0,
+            r.p3rd || 0,
+            r.p4th || 0,
+            r.p56th || 0,
+            r.p78th || 0,
+            r.oneEighties || 0,
+            r.highOuts || 0,
+            r.shortLegs || 0,
+            r.tournaments || 0,
+            r.points || 0,
+            r.bestHighOut > 0 ? r.bestHighOut : '',
+            r.bestShortLeg < Infinity ? r.bestShortLeg : '',
+            r.avg || '',
+            r.matchesWon || 0,
+            r.matchesLost || 0,
+            r.legsWon || 0,
+            r.legsLost || 0
+        ]);
+
+        const metadata = ['NewTon DC Tournament Manager — Leaderboard Export'];
+
+        NewtonCSV.exportCSV({
+            filename: 'Leaderboard_' + new Date().toISOString().slice(0, 10) + '.csv',
+            headers: headers,
+            rows: rows,
+            metadata: metadata
+        });
+    }
+
+    /**
+     * Export the current leaderboard as JSON. Respects scope, point mode, and layers.
+     */
+    function exportLeaderboardJSON() {
+        if (!_leaderboardRows || !_leaderboardRows.length) {
+            alert('No leaderboard data to export.');
+            return;
+        }
+
+        const data = _leaderboardRows.map(r => ({
+            rank: r._rank,
+            name: r.name,
+            placements: { '1st': r.p1st, '2nd': r.p2nd, '3rd': r.p3rd, '4th': r.p4th, '5-6th': r.p56th, '7-8th': r.p78th },
+            oneEighties: r.oneEighties || 0,
+            highOuts: r.highOuts || 0,
+            shortLegs: r.shortLegs || 0,
+            tournaments: r.tournaments || 0,
+            points: r.points || 0,
+            bestCheckout: r.bestHighOut > 0 ? r.bestHighOut : null,
+            bestLeg: r.bestShortLeg < Infinity ? r.bestShortLeg : null,
+            average: r.avg ? parseFloat(r.avg) : null,
+            matchesWon: r.matchesWon || 0,
+            matchesLost: r.matchesLost || 0,
+            legsWon: r.legsWon || 0,
+            legsLost: r.legsLost || 0
+        }));
+
+        const content = JSON.stringify({ leaderboard: data, exported: new Date().toISOString() }, null, 2);
+        const filename = 'Leaderboard_' + new Date().toISOString().slice(0, 10) + '.json';
+        NewtonCSV.downloadFile(content, filename, 'application/json;charset=utf-8;');
     }
 
     // ---------------------------------------------------------------------------
@@ -2275,6 +2439,6 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
+             setScope, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
 
 })();
