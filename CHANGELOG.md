@@ -31,6 +31,10 @@
 
 - **Page persists across reloads** — the active page is saved to `newton_activePage` in localStorage on every navigation. On reload, the app restores the last visited page instead of always returning to Tournament Setup.
 
+### Global Settings — documentation links
+
+- **Server Settings** header and **Automatically backup tournaments on completion** checkbox now have ℹ️ icons linking to `docker-quickstart.html` and `automatic-backup.html` respectively. Opens in a new tab. Links point to local files — works on both Docker and file-based deployments.
+
 ### Referee Suggestions — lane info
 
 - **Lane shown in all suggestion categories** — Recent Losers, Recent Winners, and Recent Assignments now display the lane number when assigned (e.g. `Nick (FS-R1 · Lane 3)`). Helps operators identify who is already at the right board — especially useful for "loser marks" workflows.

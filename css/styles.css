@@ -4305,3 +4305,17 @@ a:hover { color: #1e40af; }
 .mode-analytics .bracket-controls-middle-left .nav-btn {
     display: none;
 }
+
+/* Documentation link icons in settings */
+.doc-link-icon {
+    display: inline-block;
+    text-decoration: none;
+    font-size: 1.2rem;
+    margin-left: 8px;
+    vertical-align: middle;
+    transition: transform 0.2s ease;
+}
+
+.doc-link-icon:hover {
+    transform: scale(1.15);
+}

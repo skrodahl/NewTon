@@ -14,6 +14,16 @@ Ideas and suggestions for future consideration.
 ## Next
 *Ready for implementation when time permits*
 
+### Doc pages — back link broken on `file://`
+
+All doc pages use `href="/"` for the "← NewTon DC Tournament Manager" back link. This works on Docker (`/` is the app root or landing page) but navigates to the filesystem root on `file://`.
+
+**Not fixable with a simple href change.** `href="tournament.html"` would work locally but bypasses the landing page on Docker deployments with `NEWTON_LANDING_PAGE=true` (e.g. newtondarts.com). No single href works for both environments.
+
+**Current approach:** keep `href="/"`. Local file users close the tab — doc pages opened from the ℹ️ icons open in a new tab anyway.
+
+---
+
 ### User Guide — QR Workflow Illustration
 
 The TM→Chalker QR assignment and result reporting workflow spans two devices and is hard to convey in text alone. One or two targeted screenshots or a simple diagram showing the flow would be sufficient. No full screenshot coverage — too much maintenance overhead for a living project.
