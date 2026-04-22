@@ -27,6 +27,10 @@
 
 - **New tournament appears without reload** — `NewtonHistory.invalidateCache()` called after tournament finalization completes (after placements and achievement reconciliation). The Analytics tab picks up the new tournament on next navigation without requiring a page reload.
 
+### Navigation — remember active page
+
+- **Page persists across reloads** — the active page is saved to `newton_activePage` in localStorage on every navigation. On reload, the app restores the last visited page instead of always returning to Tournament Setup.
+
 ### Referee Suggestions — lane info
 
 - **Lane shown in all suggestion categories** — Recent Losers, Recent Winners, and Recent Assignments now display the lane number when assigned (e.g. `Nick (FS-R1 · Lane 3)`). Helps operators identify who is already at the right board — especially useful for "loser marks" workflows.
@@ -42,6 +46,7 @@
 - `js/newton-history.js` — `renderPlayersTab()`, `renderProfilePanel()`, `focusPlayer()`, `togglePlayer()`, `toggleAllPlayers()`, `exportLeaderboardCSV()`, `exportLeaderboardJSON()`, player selection persistence, dirty-flag wiring, dashboard card targets
 - `js/newton-csv.js` — new shared CSV/download utility
 - `js/results-config.js` — refactored to use `NewtonCSV` for CSV export and file download
+- `js/main.js` — save/restore active page via `newton_activePage` in localStorage
 - `js/clean-match-progression.js` — `NewtonHistory.invalidateCache()` after finalization chain
 - `js/bracket-rendering.js` — lane info added to Recent Losers, Recent Winners, and Recent Assignments in referee suggestions
 - `css/styles.css` — `.players-split` flex layout, `.players-list-panel` scroll, `#playersTableContainer` hidden pagination, `.analytics-export-btn`, responsive stacking at 1120px

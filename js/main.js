@@ -145,6 +145,12 @@ document.addEventListener('keydown', (e) => {
 
 // Initialize application with bulletproof config loading
 document.addEventListener('DOMContentLoaded', function () {
+    // Restore last active page immediately to avoid flash of default page
+    const savedPage = localStorage.getItem('newton_activePage');
+    if (savedPage && document.getElementById(savedPage)) {
+        showPage(savedPage);
+    }
+
     console.log('🚀 Starting tournament manager...');
 
     // Step 1: Ensure global config is loaded FIRST
@@ -218,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
     };
 
     setTimeout(_0x3f, 500);
+
 
 });
 
@@ -390,6 +397,9 @@ function showPage(pageId) {
     });
 
     document.getElementById(pageId).classList.add('active');
+
+    // Remember active page across reloads
+    localStorage.setItem('newton_activePage', pageId);
 
     // Only update nav button if it exists (may not exist when navigating from Tournament page)
     const navBtn = document.querySelector(`[data-page="${pageId}"]`);
