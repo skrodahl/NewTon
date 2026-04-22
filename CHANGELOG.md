@@ -23,6 +23,15 @@
 
 - **Documentation index** — all doc pages listed at the bottom of the User Guide with descriptions.
 
+### Analytics — cache invalidation on finalization
+
+- **New tournament appears without reload** — `NewtonHistory.invalidateCache()` called after tournament finalization completes (after placements and achievement reconciliation). The Analytics tab picks up the new tournament on next navigation without requiring a page reload.
+
+### Referee Suggestions — lane info
+
+- **Lane shown in all suggestion categories** — Recent Losers, Recent Winners, and Recent Assignments now display the lane number when assigned (e.g. `Nick (FS-R1 · Lane 3)`). Helps operators identify who is already at the right board — especially useful for "loser marks" workflows.
+- Inspired by [@burgerboy85-rgb](https://github.com/burgerboy85-rgb) — [Discussion #6](https://github.com/skrodahl/NewTon/discussions/6)
+
 ### Known issues
 
 - Comparison table does not go full width below 1022px
@@ -33,6 +42,8 @@
 - `js/newton-history.js` — `renderPlayersTab()`, `renderProfilePanel()`, `focusPlayer()`, `togglePlayer()`, `toggleAllPlayers()`, `exportLeaderboardCSV()`, `exportLeaderboardJSON()`, player selection persistence, dirty-flag wiring, dashboard card targets
 - `js/newton-csv.js` — new shared CSV/download utility
 - `js/results-config.js` — refactored to use `NewtonCSV` for CSV export and file download
+- `js/clean-match-progression.js` — `NewtonHistory.invalidateCache()` after finalization chain
+- `js/bracket-rendering.js` — lane info added to Recent Losers, Recent Winners, and Recent Assignments in referee suggestions
 - `css/styles.css` — `.players-split` flex layout, `.players-list-panel` scroll, `#playersTableContainer` hidden pagination, `.analytics-export-btn`, responsive stacking at 1120px
 - `userguide.html` — Documentation index section, Automatic Backup links
 

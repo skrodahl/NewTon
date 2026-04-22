@@ -613,6 +613,8 @@ Decisions deferred — to be revisited as implementation progresses.
 
 The active view recomputes on filter change. Other views are marked dirty and recompute when switched to. The user never sees stale data — the view refreshes the moment they activate it. No wasted work rendering hidden views, and the right foundation before graphs and canvas rendering are added later.
 
+Tournament finalization triggers `NewtonHistory.invalidateCache()` after the full chain completes (placements saved, achievements reconciled). This clears the cached tournament list so the next Analytics navigation picks up the new tournament without a page reload. The dirty flags ensure whichever view the operator switches to recomputes from fresh data.
+
 ### Dashboard drill-through targets — partially decided
 
 Each stats card on the dashboard is described as "clickable — drill into the underlying data." But where does each card link to?

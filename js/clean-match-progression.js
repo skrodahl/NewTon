@@ -759,6 +759,11 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                         return NewtonDB.reconcileMatchAchievements(
                             String(tournament.id), _tournamentAchievements
                         );
+                    }).then(() => {
+                        // Invalidate Analytics cache so the new tournament appears without reload
+                        if (typeof NewtonHistory !== 'undefined' && NewtonHistory.invalidateCache) {
+                            NewtonHistory.invalidateCache();
+                        }
                     }).catch(e => console.warn('NewtonDB finalizeTournament failed:', e));
                 }
                 if (typeof updateMatchHistory === 'function') updateMatchHistory();

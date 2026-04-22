@@ -3613,6 +3613,7 @@ function getRefereeSuggestions() {
             id: loserId,
             name: loserName,
             round: getRoundDescription(match.id),
+            lane: match.lane || null,
             completedAt: match.completedAt || 0
         });
     }
@@ -3636,6 +3637,7 @@ function getRefereeSuggestions() {
             id: winnerId,
             name: winnerName,
             round: getRoundDescription(match.id),
+            lane: match.lane || null,
             completedAt: match.completedAt || 0
         });
     }
@@ -3675,6 +3677,7 @@ function getRefereeSuggestions() {
                         id: refereeId,
                         name: referee.name,
                         round: getRoundDescription(matchId),
+                        lane: match.lane || null,
                         timestamp: new Date(tx.timestamp).getTime(),
                         timestampStr: tx.timestamp
                     });
@@ -3793,9 +3796,10 @@ function populateRefereeSuggestions() {
         losersContainer.innerHTML = suggestions.losers.map(loser => {
             const isBackside = loser.round.startsWith('BS-');
             const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
+            const laneText = loser.lane ? ` · Lane ${loser.lane}` : '';
             return `<div class="referee-suggestion-item${backsideClass}">
                 <span class="referee-suggestion-name">${loser.name}</span>
-                <span class="referee-suggestion-round">(${loser.round})</span>
+                <span class="referee-suggestion-round">(${loser.round}${laneText})</span>
             </div>`;
         }).join('');
     } else {
@@ -3808,9 +3812,10 @@ function populateRefereeSuggestions() {
         winnersContainer.innerHTML = suggestions.winners.map(winner => {
             const isBackside = winner.round.startsWith('BS-');
             const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
+            const laneText = winner.lane ? ` · Lane ${winner.lane}` : '';
             return `<div class="referee-suggestion-item${backsideClass}">
                 <span class="referee-suggestion-name">${winner.name}</span>
-                <span class="referee-suggestion-round">(${winner.round})</span>
+                <span class="referee-suggestion-round">(${winner.round}${laneText})</span>
             </div>`;
         }).join('');
     } else {
@@ -3823,9 +3828,10 @@ function populateRefereeSuggestions() {
         assignmentsContainer.innerHTML = suggestions.recentReferees.map(assignment => {
             const isBackside = assignment.round.startsWith('BS-');
             const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
+            const laneText = assignment.lane ? ` · Lane ${assignment.lane}` : '';
             return `<div class="referee-suggestion-item${backsideClass}">
                 <span class="referee-suggestion-name">${assignment.name}</span>
-                <span class="referee-suggestion-round">(${assignment.round})</span>
+                <span class="referee-suggestion-round">(${assignment.round}${laneText})</span>
             </div>`;
         }).join('');
     } else {
