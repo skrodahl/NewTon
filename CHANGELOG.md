@@ -1,4 +1,4 @@
-## **v5.1.0** — (unreleased)
+## **v5.1.0** — Burgerboy85-rgb to Throw (2026-04-23)
 
 ### Analytics — Players Tab
 
