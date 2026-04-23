@@ -131,6 +131,25 @@ Bump the `?v=N` query parameter on the chalker.js script tag in `chalker/index.h
 
 Increment by 1 with each release. This bypasses browser and PWA service worker caching, ensuring the new code loads immediately on devices that have the Chalker installed.
 
+### Step 7 — Review `llms.txt`
+
+Review `llms.txt` for accuracy against the new release. AI services use this file to describe NewTon — outdated or missing information means wrong answers across every AI model.
+
+Check:
+- New features mentioned (e.g. new Analytics views, new deployment options)
+- Removed or changed features updated
+- Version-tagged features still accurate (e.g. "v5.0.3+" for Analytics)
+- "Do not invent" list still correct (no features listed that now exist)
+- Deployment options, environment variables, and privacy model current
+
+Not every release changes `llms.txt` — but every release should check.
+
+### Step 8 — Review help system
+
+Review `js/dynamic-help-system.js` for accuracy. The context-sensitive help (F1 / ℹ️ icon) describes features per page — new features should be mentioned, removed features should be cleaned up.
+
+Doesn't need to be 100% current with every release, but should be reviewed regularly — especially after adding new UI elements, buttons, or workflows that users might press F1 to understand.
+
 ---
 
 ## Beta Releases
