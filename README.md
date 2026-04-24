@@ -133,7 +133,7 @@ More on the [architecture and focus on resilience here](https://newtondarts.com/
 - **Undo**: Reverse recent match results (staged undo prevents accidentally clearing large portions of the bracket)
 - **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
 
-#### 🟢 Match Color Coding
+#### Match Color Coding
 Intuitive traffic light system for instant priority assessment:
 
 - 🔴 Orange/Red = "**DO THIS NOW**" (LIVE matches, current focus)
