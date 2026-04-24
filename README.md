@@ -15,11 +15,11 @@ Runs locally. Syncs across devices. Builds your venue's stats over time.
 
 **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://newtondarts.com)**
 
-➷ **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
+**NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
-🎯 **NewTon Chalker** is a companion x01 scoring app designed for tablets at the dartboard. Crash-proof with persistent match data, match history, and live statistics. Install as a PWA for a native app experience.
+**NewTon Chalker** is a companion x01 scoring app designed for tablets at the dartboard. Crash-proof with persistent match data, match history, and live statistics. Install as a PWA for a native app experience.
 
-🔒 **Total Privacy**: Your tournament and match data live in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://newtondarts.com/privacy.html), not by policy.
+**Total Privacy**: Your tournament and match data live in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://newtondarts.com/privacy.html), not by policy.
 
 **[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)**, double-click `tournament.html` to get going. Or **[self-host with Docker](https://newtondarts.com/docker-quickstart.html)**.
 
@@ -31,7 +31,7 @@ Visit the official NewTon DC Tournament Manager Website.
 
 Fully functional versions of the latest Tournament Manager and Chalker apps are available for use and testing.
 
-🎯 [**https://newtondarts.com**](https://newtondarts.com)
+[**https://newtondarts.com**](https://newtondarts.com)
 
 
 *All data stays in your browser - nothing is stored on the server or shared with anyone else.*
@@ -66,7 +66,7 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 ![Configuration Page](https://github.com/skrodahl/NewTon/blob/main/Screenshots/developer-console.png)
 ---
 
-## 🚀 Getting Started
+## Getting Started
 
 1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases/latest)** (Run `git clone` or download ZIP for the latest beta)
 2. Double-click `tournament.html` to open NewTon DC Tournament Manager, and you're up and running
@@ -78,11 +78,11 @@ All [NewTon DC Tournament Manager](https://newtondarts.com)'s features are descr
 
 ---
 
-## 🐳 Docker Deployment (Self-Hosting)
+## Docker Deployment (Self-Hosting)
 
 **Want to host NewTon Tournament Manager on your own server?** Docker makes it effortless.
 
-### 📋 [**Docker Quick Start Guide →**](https://newtondarts.com/docker-quickstart.html)
+### [**Docker Quick Start Guide →**](https://newtondarts.com/docker-quickstart.html)
 
 **Get running in under 2 minutes:**
 
@@ -110,12 +110,12 @@ docker compose up -d
 
 ---
 
-## ✨ Key Features
+## Key Features
 See the NewTon DC Tournament Manager [User Guide](https://newtondarts.com/userguide.html) to learn how to use these features to manage your own tournaments.
 
 More on the [architecture and focus on resilience here](https://newtondarts.com/architecture.html).
 
-### 🏆 Tournament Management
+### Tournament Management
 - **Multiple Tournaments**: Create, save, and load with automatic browser storage
 - **Import/Export**: JSON-based backup and sharing between computers
   - **Tournament Protection**: Completed tournaments loaded from file are read-only to protect data integrity
@@ -123,7 +123,7 @@ More on the [architecture and focus on resilience here](https://newtondarts.com/
 - **Crash Resilient**: Automatic saving prevents data loss
 - **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using [REST API](https://newtondarts.com/rest-api.html)
 
-### 🎯 Single and Double Elimination Brackets
+### Single and Double Elimination Brackets
 - **Professional Structure**: Single and Double elimination brackets for 8, 16, and 32 players, facilitates tournaments for 4-32 players.
 - **Smart Generation**: Prevents two walkovers from meeting in first round
 - **Fair Draw**: Byes randomly distributed to prevent unfair advantages and minimize walkover chains
@@ -141,7 +141,7 @@ Intuitive traffic light system for instant priority assessment:
 - 🟢 Green = "**COMPLETED**" (done and archived)
 - ⚪ White/Gray = "**NOT READY YET**" (pending, no action possible)
 
-### 🎮 Match Management
+### Match Management
 - **Centralized Control**: Manage entire tournament from Match Controls interface
 - **Clear Progression**: Each match shows exactly where winners and losers advance ("Leads to...")
 - **Lane Assignment**: Assign matches to dartboard lanes (1-20 with exclusions, configurable)
@@ -169,7 +169,7 @@ Intuitive traffic light system for instant priority assessment:
 
 ---
 
-## 🏗️ Technical Details
+## Technical Details
 
 **Architecture:**
 - Pure HTML5, CSS3, and JavaScript (ES6+) — zero dependencies
@@ -185,7 +185,7 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 
 ---
 
-## 💾 Data Management
+## Data Management
 
 - **Automatic Saving**: All changes saved immediately to browser storage
 - **Import/Export**: JSON files for backup and computer-to-computer transfers
@@ -195,7 +195,7 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 
 ---
 
-## 🎯 Use Cases
+## Use Cases
 
 - **Tournament Organizers**: Professional dart tournament management
 - **Dart Clubs**: Regular tournament nights and member ranking systems
@@ -203,7 +203,7 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 
 ---
 
-## 📄 Credits
+## Credits
 
 **Created by Håvard Skrödahl**
 NewTon DC Malmö
