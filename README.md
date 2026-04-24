@@ -22,7 +22,9 @@ The Chalker handles the board. QR codes handle the rest. One scan to start, one 
 ### Every match remembered.
 Analytics that grow with your club. Season leaderboards, player stats, and tournament history — all from data you already have.
 
-**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://newtondarts.com)**
+---
+
+**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://newtondarts.com/releases/)**  | **[Official Website](https://newtondarts.com)**
 
 **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
 
