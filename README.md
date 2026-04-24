@@ -13,33 +13,14 @@ Runs locally. Syncs across devices. Builds your venue's stats over time.
 
 ![Action Shot](https://github.com/skrodahl/NewTon/blob/main/Screenshots/newton-poster-throw.jpg)
 
-<table>
-  <thead>
-    <tr>
-      <th align="center">Yours. Not theirs.</th>
-      <th align="center">Scan. Score. Done.</th>
-      <th align="center">Every match remembered.</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td align="center">No signup, no subscription, no cloud. Works offline. Just download and run. Works without asking permission.</td>
-      <td align="center">The Chalker handles the board. QR codes handle the rest. One scan to start, one scan to finish.</td>
-      <td align="center">Analytics that grow with your club. Season leaderboards, player stats, and tournament history — all from data you already have.</td>
-    </tr>
-  </tbody>
-</table>
+### Yours. Not theirs.
+No signup, no subscription, no cloud. Works offline. Just download and run. Works without asking permission.
 
-<dl>
-  <dt><b>Yours. Not theirs.</b></dt>
-  <dd>No signup, no subscription, no cloud. Works offline. Just download and run. Works without asking permission.</dd>
-  
-  <dt><b>Scan. Score. Done.</b></dt>
-  <dd>The Chalker handles the board. QR codes handle the rest. One scan to start, one scan to finish.</dd>
+### Scan. Score. Done.
+The Chalker handles the board. QR codes handle the rest. One scan to start, one scan to finish.
 
-  <dt><b>Scan. Score. Done.</b></dt>
-  <dd>Analytics that grow with your club. Season leaderboards, player stats, and tournament history — all from data you already have.</dd>
-</dl>
+### Every match remembered.
+Analytics that grow with your club. Season leaderboards, player stats, and tournament history — all from data you already have.
 
 **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://newtondarts.com)**
 
