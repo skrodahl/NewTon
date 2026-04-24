@@ -36,16 +36,9 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 
 *All data stays in your browser - nothing is stored on the server or shared with anyone else.*
 
-## Screenshots
-**Player Registration, Saved Players, and Dynamic Help**:
+## Tournament Bracket and Match Controls
 
-![Player Registration and Dynamic Help](https://github.com/skrodahl/NewTon/blob/main/Screenshots/player-registration-help.png)
-
-**Tournament Setup**:
-
-![Tournament Setup](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-setup.png)
-
-**16-player Tournament Bracket Showing "Match Card Magic Zoom" and Status Bar**:
+**16-player Tournament Bracket  with Status Bar**:
 
 ![16-player bracket with "Match Card Magic Zoom"](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
 
@@ -53,17 +46,6 @@ Fully functional versions of the latest Tournament Manager and Chalker apps are 
 
 ![Match Controls](https://github.com/skrodahl/NewTon/blob/main/Screenshots/match-controls.png)
 
-**Celebration**:
-
-![Celebration](https://github.com/skrodahl/NewTon/blob/main/Screenshots/celebration.png)
-
-**Configuration Page**:
-
-![Configuration Page](https://github.com/skrodahl/NewTon/blob/main/Screenshots/config-page.png)
-
-**Developer Console**:
-
-![Configuration Page](https://github.com/skrodahl/NewTon/blob/main/Screenshots/developer-console.png)
 ---
 
 ## Getting Started
