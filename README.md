@@ -148,7 +148,7 @@ Intuitive traffic light system for instant priority assessment:
 - **Referee System**: Referee suggestions, and select referees with conflict prevention
 - **Real-time Updates**: Live standings and bracket progression
 
-### 👥 Player & Statistics
+### Player & Statistics
 - **Player List Registry**: Maintain a persistent list of regular players for consistency across tournaments
   - Alphabetically sorted for easy scanning
   - Quick-add players to new tournaments
@@ -159,7 +159,7 @@ Intuitive traffic light system for instant priority assessment:
 - **Live Rankings**: Real-time 1st through 32nd place calculation
 - **Export Results**: CSV and JSON export with full tournament history
 
-### ⚙️ Configuration
+### Configuration
 - **Custom Branding**: Add club logo, favicon, and customize title
 - **Flexible Scoring**: Configurable points for participation, placements, and achievements
 - **Match Formats**: Best-of legs for rounds, semifinals, and finals
