@@ -203,20 +203,6 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 
 ---
 
-## 🆘 Troubleshooting
-
-**Common Issues:**
-- Ensure JavaScript is enabled in your browser
-- Clear old tournaments if storage becomes full
-- Close other browser tabs for optimal performance with large tournaments
-
-**Data Recovery:**
-- Use the undo system to reverse recent changes
-- Import from exported JSON backup files
-- Reset tournament to bracket generation if needed
-
----
-
 ## 📄 Credits
 
 **Created by Håvard Skrödahl**
