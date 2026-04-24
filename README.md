@@ -30,6 +30,17 @@ Runs locally. Syncs across devices. Builds your venue's stats over time.
   </tbody>
 </table>
 
+<dl>
+  <dt><b>Yours. Not theirs.</b></dt>
+  <dd>No signup, no subscription, no cloud. Works offline. Just download and run. Works without asking permission.</dd>
+  
+  <dt><b>Scan. Score. Done.</b></dt>
+  <dd>The Chalker handles the board. QR codes handle the rest. One scan to start, one scan to finish.</dd>
+
+  <dt><b>Scan. Score. Done.</b></dt>
+  <dd>Analytics that grow with your club. Season leaderboards, player stats, and tournament history — all from data you already have.</dd>
+</dl>
+
 **[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://github.com/skrodahl/NewTon/releases/latest)**  | **[Official Website](https://newtondarts.com)**
 
 **NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
