@@ -8,8 +8,8 @@ set -e
 # SSL_HOSTNAME (preferred) with fallback to MDNS_HOSTNAME for backwards compatibility.
 # Used only for the SSL certificate's Subject Alternative Name.
 HOSTNAME="${SSL_HOSTNAME:-${MDNS_HOSTNAME:-newtondarts}}"
-HTTP_PORT="${HTTP_PORT:-2020}"
-HTTPS_PORT="${HTTPS_PORT:-443}"
+export HTTP_PORT="${HTTP_PORT:-2020}"
+export HTTPS_PORT="${HTTPS_PORT:-443}"
 
 # Note: mDNS (.local hostname) is a host-side concern, not handled by the container.
 # See Docs/MDNS.md for setup instructions.
