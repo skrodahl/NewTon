@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.1.0'; // Offline at the Oche — automatic backup doc, Analytics Mode unlock
+const APP_VERSION = '5.1.1'; // Somewhat Simpler Selfhosting — Docker mDNS rework, env var rename, compose cleanup
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

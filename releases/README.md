@@ -123,13 +123,23 @@ const CHALKER_VERSION = '5.0.9';
 
 ### Step 6 — Increment the Chalker cache buster
 
-Bump the `?v=N` query parameter on the chalker.js script tag in `chalker/index.html`:
+Two bumps are required — miss either one and PWA installs keep serving stale code.
+
+**6a. `chalker/index.html`** — bump the `?v=N` query parameter on the chalker.js script tag:
 
 ```html
 <script src="js/chalker.js?v=7"></script>
 ```
 
-Increment by 1 with each release. This bypasses browser and PWA service worker caching, ensuring the new code loads immediately on devices that have the Chalker installed.
+This forces the browser to re-fetch `chalker.js` on next load, bypassing HTTP caching.
+
+**6b. `chalker/sw.js`** — bump the `CACHE_NAME` constant:
+
+```js
+const CACHE_NAME = 'chalker-v105';
+```
+
+Increment by 1 with each release (e.g. `chalker-v105` → `chalker-v106`). The service worker's `activate` handler deletes any cache whose name doesn't match `CACHE_NAME`, then re-fetches and re-caches every file in `CACHE_FILES`. Without this bump, installed PWAs keep serving the previously cached files from offline storage — the script-tag cache buster alone is not enough.
 
 ### Step 7 — Review `llms.txt`
 

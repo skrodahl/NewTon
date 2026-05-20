@@ -26,8 +26,7 @@
             <li><a href="#quick-start">Quick Start</a></li>
             <li><a href="#setup-options">Setup Options</a>
                 <ol>
-                    <li><a href="#mac-windows">Mac / Windows</a></li>
-                    <li><a href="#linux">Linux &mdash; SSL + mDNS</a></li>
+                    <li><a href="#ssl-all-platforms">SSL (All Platforms)</a></li>
                     <li><a href="#reverse-proxy">Behind a Reverse Proxy</a></li>
                 </ol>
             </li>
@@ -63,7 +62,7 @@ docker compose up -d</code></pre>
         <p><strong>Image tag:</strong> All compose files below use <code>skrodahl/newton:latest</code> (Docker Hub) with GHCR as a commented alternative.</p>
     </blockquote>
 
-    <h3 id="mac-windows">Mac / Windows</h3>
+    <h3 id="ssl-all-platforms">SSL (All Platforms)</h3>
     <p>SSL enabled by default &mdash; gives you HTTPS and camera access on any platform.</p>
     <pre><code>services:
   newton-tournament:
@@ -91,34 +90,8 @@ volumes:
     <p>Save as <code>docker-compose.yml</code> in a folder of your choice, then run <code>docker compose up -d</code>. That&rsquo;s it.</p>
     <p>Access at <code>https://localhost</code>. Your browser will warn about the self-signed certificate on first visit &mdash; accept the exception once and it will not appear again.</p>
 
-    <hr>
-
-    <h3 id="linux">Linux &mdash; SSL + mDNS</h3>
-    <p>All devices on your LAN can reach the container at <code>https://newtondarts.local</code> without any DNS configuration. Requires <code>network_mode: host</code> &mdash; Linux only (not supported on Docker Desktop for Mac/Windows).</p>
-    <pre><code>services:
-  newton-tournament:
-    image: skrodahl/newton:latest
-    # Alternative: ghcr.io/skrodahl/newton:latest
-    container_name: newton
-    network_mode: host             # Required for mDNS multicast to reach the LAN
-    volumes:
-      - ./tournaments:/var/www/html/tournaments
-      - ./images:/var/www/html/images:ro
-      - newton-ssl:/etc/nginx/ssl
-    restart: unless-stopped
-    environment:
-      - TZ=Europe/Oslo
-      - SSL_ENABLED=true
-      - MDNS_HOSTNAME=newtondarts  # Reachable as newtondarts.local on the LAN
-      - NEWTON_API_ENABLED=true
-      - NEWTON_DEMO_MODE=false
-      # - NEWTON_LANDING_PAGE=true
-      # - NEWTON_BASE_URL=https://darts.example.com
-
-volumes:
-  newton-ssl:</code></pre>
-    <p>Save as <code>docker-compose.yml</code> in a folder of your choice, then run <code>docker compose up -d</code>. That&rsquo;s it.</p>
-    <p>Access at <code>https://newtondarts.local</code>. Phones, tablets, and scoring stations on the same network can all reach it by name.</p>
+    <h4>LAN Access via <code>&lt;hostname&gt;.local</code></h4>
+    <p>Phones, tablets, and scoring stations on the same network can reach the container by name (e.g. <code>https://newtondarts.local</code>) once mDNS is set up on the host. macOS has Bonjour built in; Linux needs avahi-daemon; Windows needs Bonjour installed. See <a href="https://github.com/skrodahl/NewTon/blob/main/Docs/MDNS.md" target="_blank" rel="noopener">Docs/MDNS.md</a> for full setup steps.</p>
 
     <hr>
 
@@ -176,9 +149,10 @@ networks:
             <tr><th>Variable</th><th>Default</th><th>Description</th></tr>
         </thead>
         <tbody>
-            <tr><td><code>SSL_ENABLED</code></td><td><code>false</code></td><td>Auto-generates a self-signed certificate; enables HTTPS on port 443 and redirects HTTP on port 2020</td></tr>
+            <tr><td><code>SSL_ENABLED</code></td><td><code>false</code></td><td>Auto-generates a self-signed certificate; enables HTTPS on <code>HTTPS_PORT</code> and redirects HTTP on <code>HTTP_PORT</code></td></tr>
+            <tr><td><code>HTTP_PORT</code></td><td><code>2020</code></td><td>HTTP listening port (redirects to HTTPS when SSL enabled)</td></tr>
             <tr><td><code>HTTPS_PORT</code></td><td><code>443</code></td><td>HTTPS listening port</td></tr>
-            <tr><td><code>MDNS_HOSTNAME</code></td><td><code>newtondarts</code></td><td>mDNS hostname &mdash; container reachable as <code>&lt;value&gt;.local</code> on the LAN (Linux only)</td></tr>
+            <tr><td><code>SSL_HOSTNAME</code></td><td><code>newtondarts</code></td><td>Hostname used in the auto-generated SSL certificate&rsquo;s Subject Alternative Name. Set this to match the <code>.local</code> hostname you advertise via mDNS &mdash; see <a href="https://github.com/skrodahl/NewTon/blob/main/Docs/MDNS.md" target="_blank" rel="noopener">Docs/MDNS.md</a>. Falls back to deprecated <code>MDNS_HOSTNAME</code> if unset.</td></tr>
             <tr><td><code>NEWTON_API_ENABLED</code></td><td><code>true</code></td><td>Enables REST API endpoints for tournament upload, download, and delete</td></tr>
             <tr><td><code>NEWTON_MODE</code></td><td><code>full</code></td><td>App mode. <code>analytics</code> hides tournament management tabs, shows only Analytics and limited Global Settings</td></tr>
             <tr><td><code>NEWTON_DEMO_MODE</code></td><td><code>false</code></td><td>Shows a privacy banner at the top of the app</td></tr>
@@ -269,12 +243,13 @@ cp /path/to/your/payment-qr.png ./images/payment.png</code></pre>
     <h3>Browser Warning on https://localhost</h3>
     <p>Expected with a self-signed certificate. Accept the exception once &mdash; it will not appear again. The cert is stored in the <code>newton-ssl</code> named volume and persists across restarts.</p>
 
-    <h3>https://newtondarts.local Not Reachable</h3>
+    <h3><code>&lt;hostname&gt;.local</code> Not Reachable</h3>
+    <p>mDNS resolution is a host-side concern, not handled by the container. See <a href="https://github.com/skrodahl/NewTon/blob/main/Docs/MDNS.md" target="_blank" rel="noopener">Docs/MDNS.md</a> for full setup. Quick checks:</p>
     <ul>
-        <li>Confirm you are on a <strong>Linux host</strong> &mdash; mDNS via <code>network_mode: host</code> does not work on Docker Desktop for Mac or Windows</li>
-        <li>Confirm <code>MDNS_HOSTNAME=newtondarts</code> is set</li>
-        <li>Check logs: <code>docker compose logs</code> &mdash; should show <code>[newtondarts] nginx: HTTPS mode</code></li>
-        <li>Confirm mDNS resolution from another device on the LAN: <code>ping newtondarts.local</code></li>
+        <li><strong>macOS:</strong> Bonjour is built in &mdash; should just work</li>
+        <li><strong>Windows:</strong> install Bonjour</li>
+        <li><strong>Linux:</strong> install and start <code>avahi-daemon</code> on the host, set hostname, and configure <code>allow-interfaces</code> to exclude Docker bridge interfaces</li>
+        <li>Confirm resolution from another device on the LAN: <code>ping newtondarts.local</code></li>
     </ul>
 
     <hr>

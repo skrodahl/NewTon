@@ -1,3 +1,78 @@
+## **v5.1.1** — Somewhat Simpler Selfhosting (2026-05-20)
+
+Docker release. No tournament-app changes. The container's mDNS code never worked reliably on a typical Linux host (avahi conflict) and has been removed entirely. `.local` resolution is now documented as a host-side concern.
+
+### Docker — mDNS removed from container
+
+- **Container avahi/dbus removed** — `avahi`, `avahi-tools`, and `dbus` packages dropped from the Dockerfile. The container no longer attempts to start its own avahi-daemon. mDNS broadcasting belongs to the host OS, not the container.
+- **Reason:** with `network_mode: host`, the container's avahi conflicted with the host's avahi (most desktop Linux distros). With port mapping, the container couldn't broadcast at all. There was no configuration where the in-container avahi reliably worked.
+
+### Docker — environment variables
+
+- **`SSL_HOSTNAME` (new)** — replaces `MDNS_HOSTNAME`. Controls the Subject Alternative Name on the auto-generated SSL certificate. The old name still works as a fallback (`HOSTNAME="${SSL_HOSTNAME:-${MDNS_HOSTNAME:-newtondarts}}"`) so existing compose files keep functioning.
+- **`HTTP_PORT` (new)** — configurable HTTP listening port (default `2020`). Mirrors the existing `HTTPS_PORT`. Useful for `network_mode: host` deployments avoiding privileged ports.
+
+### Docker — compose cleanup
+
+- **`docker-compose-ssl-mdns.yml` removed** — host-networking variant is no longer needed for mDNS (since mDNS isn't a container concern). Users on this file should switch to `docker-compose-ssl.yml` (port-mapped) or `docker-compose.yml` (minimal).
+- **`docker-compose.yml` switched to port mapping** — `network_mode: host` removed from the default compose. Added port mapping `2020:2020` and commented SSL options.
+- **`docker-compose-ssl.yml`** — added commented `HTTP_PORT`, `SSL_HOSTNAME` options and a pointer to `Docs/MDNS.md`.
+
+### Docker — nginx templates parameterized
+
+- **`nginx-http.conf`, `nginx-ssl.conf`** — `listen 2020;` replaced with `listen ${HTTP_PORT};`. Entrypoint expands both `${HTTP_PORT}` and `${HTTPS_PORT}` via `envsubst` for both HTTP and HTTPS modes.
+
+### Documentation
+
+- **`Docs/MDNS.md` (new)** — platform-by-platform mDNS setup. macOS (Bonjour built in), Windows (install Bonjour), Linux (avahi-daemon + `allow-interfaces` to exclude Docker bridges). Troubleshooting section covers avahi advertising Docker bridge IPs, HSTS port-change browser cache, and client-side `.local` compatibility (iOS/Android/Windows/Linux).
+- **`DOCKER-QUICKSTART.md`** — "Mac / Windows" section renamed to "SSL (All Platforms)". "Linux — SSL + mDNS" section removed. New "LAN Access via `<hostname>.local`" subsection points to `Docs/MDNS.md`. Env var table updated: removed `MDNS_HOSTNAME` (deprecated note in `SSL_HOSTNAME` row), added `HTTP_PORT`. Troubleshooting `https://newtondarts.local Not Reachable` section rewritten.
+- **`docker-quickstart.html`** — same edits as the markdown for parity.
+- **`llms.txt`** — Docker SSL section updated. Listed `HTTP_PORT`/`HTTPS_PORT`/`SSL_HOSTNAME`, removed `MDNS_HOSTNAME` description, added pointer to `Docs/MDNS.md`. Compose file list updated to reflect removal of `docker-compose-ssl-mdns.yml`.
+
+### Docker — entrypoint cleanup
+
+- **`entrypoint.sh`** — avahi/dbus startup block (lines 8–42 in the previous version) removed entirely. New `HTTP_PORT` variable, renamed `HOSTNAME` derivation to use `SSL_HOSTNAME` with `MDNS_HOSTNAME` fallback. Comment in HTTP-mode branch references `${HTTP_PORT}` instead of hardcoded 2020.
+
+### Third-party licenses
+
+- **`THIRD-PARTY-LICENSES.md` was missing from the Docker image** — `.dockerignore` excluded `*.md`, including the license file. A compliance gap for the bundled MIT (qrcode-generator, QrScanner) and Apache 2.0 (jsQR) libraries.
+- **Fix:** new `third-party-licenses.html` ships in the container (HTML isn't `.dockerignore`d), linked from the landing-page footer (`landing.html` and `landing-page.php`) alongside Privacy.
+- The markdown stays in the repo as the canonical source.
+
+### Release process
+
+- **`releases/README.md`** — Step 6 expanded to cover both the chalker.js cache buster (`?v=N` query string) *and* the service worker `CACHE_NAME` in `chalker/sw.js`. Both must bump together — without the SW bump, installed PWAs keep serving stale code from offline storage.
+
+### Migration
+
+No migration required for the tournament app. Existing Docker deployments using `MDNS_HOSTNAME` continue to work via the entrypoint fallback. Users on `docker-compose-ssl-mdns.yml` should switch to `docker-compose-ssl.yml` or `docker-compose.yml`; `network_mode: host` is no longer required for `.local` access (the host's avahi/Bonjour handles the broadcast).
+
+### Files changed
+
+- `docker/entrypoint.sh` — removed avahi/dbus startup; added `HTTP_PORT`; `SSL_HOSTNAME` with `MDNS_HOSTNAME` fallback; envsubst expanded to handle both modes
+- `docker/Dockerfile` — removed `avahi`, `avahi-tools`, `dbus` packages
+- `docker/nginx-ssl.conf` — `listen ${HTTP_PORT};` for the redirect listener
+- `docker/nginx-http.conf` — `listen ${HTTP_PORT};` for the main listener
+- `docker/docker-compose.yml` — switched from `network_mode: host` to port mapping; removed `MDNS_HOSTNAME` ref; added commented SSL/port options
+- `docker/docker-compose-ssl.yml` — added commented `HTTP_PORT`/`SSL_HOSTNAME` options; pointer to `Docs/MDNS.md`
+- `docker/docker-compose-ssl-mdns.yml` — **deleted**
+- `Docs/MDNS.md` — new
+- `DOCKER-QUICKSTART.md` — Linux section removed; LAN access pointer added; env var table updated; troubleshooting rewritten
+- `docker-quickstart.html` — parallel edits to the markdown
+- `llms.txt` — Docker SSL section updated
+- `third-party-licenses.html` — new
+- `landing.html` — footer link `THIRD-PARTY-LICENSES.md` → `third-party-licenses.html`
+- `landing-page.php` — same footer link update
+- `releases/README.md` — Step 6 expanded to cover service worker `CACHE_NAME` bump
+- `js/main.js` — `APP_VERSION` → `5.1.1`
+- `chalker/js/chalker.js` — `CHALKER_VERSION` → `5.1.1`
+- `chalker/index.html` — chalker.js cache buster `?v=8` → `?v=9`
+- `chalker/sw.js` — `CACHE_NAME` → `chalker-v106`
+- `releases/index.html`, `releases/v5.1.1.html` — release notes
+- `sitemap.xml` — `v5.1.1.html` entry
+
+---
+
 ## **v5.1.0** — Burgerboy85-rgb to Throw (2026-04-23)
 
 ### Analytics — Players Tab

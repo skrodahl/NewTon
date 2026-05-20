@@ -1,6 +1,6 @@
 # mDNS (.local Hostname) Setup
 
-mDNS lets devices on your LAN reach the NewTon container by name (e.g., `https://newtondarts.local:8443`) instead of by IP address.
+mDNS lets devices on your LAN reach the NewTon container by name (e.g., `https://newtondarts.local`) instead of by IP address.
 
 **mDNS is a host-side concern.** The Docker container does not handle mDNS — your host operating system does. The `SSL_HOSTNAME` environment variable is used only for the SSL certificate's Subject Alternative Name (SAN), not for mDNS broadcasting.
 
@@ -79,39 +79,7 @@ avahi-resolve -n newtondarts.local
 
 ## Docker Compose
 
-With mDNS handled by the host, the compose file just needs SSL and (on Linux) host networking:
-
-### Linux
-
-```yaml
-services:
-  newton-tournament:
-    image: skrodahl/newton:latest
-    container_name: newton
-    network_mode: host
-    volumes:
-      - ./tournaments:/var/www/html/tournaments
-      - ./images:/var/www/html/images:ro
-      - newton-ssl:/etc/nginx/ssl
-    restart: unless-stopped
-    environment:
-      - TZ=Europe/Oslo
-      - SSL_ENABLED=true
-      - HTTP_PORT=2020
-      - HTTPS_PORT=8443
-      - SSL_HOSTNAME=newtondarts
-      - NEWTON_API_ENABLED=true
-      - NEWTON_DEMO_MODE=false
-
-volumes:
-  newton-ssl:
-```
-
-Access at `https://newtondarts.local:8443`. HTTP requests to port 2020 redirect to HTTPS.
-
-With `network_mode: host`, the container listens directly on the host's network. Use `HTTP_PORT` and `HTTPS_PORT` to avoid claiming privileged ports 80 and 443. Both default to 80/443 if not set.
-
-### macOS / Windows
+With mDNS handled by the host, the same port-mapped compose file works on all platforms:
 
 ```yaml
 services:
@@ -137,7 +105,7 @@ volumes:
   newton-ssl:
 ```
 
-Access at `https://newtondarts.local`. The host's mDNS service (Bonjour) advertises the machine's hostname — set it to `newtondarts` in System Settings if needed.
+Access at `https://newtondarts.local`. The host's mDNS service advertises the machine's hostname — set it to match `SSL_HOSTNAME` (see the platform setup above).
 
 ---
 

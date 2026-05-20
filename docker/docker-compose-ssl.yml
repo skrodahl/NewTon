@@ -25,7 +25,11 @@ services:
       - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon
       # SSL — auto-generates a self-signed certificate on first start (30-year expiry)
       - SSL_ENABLED=true
+      # - HTTP_PORT=2020                 # HTTP port (default: 2020)
       # - HTTPS_PORT=443                 # HTTPS port (default: 443)
+      # - SSL_HOSTNAME=newtondarts       # Subject Alternative Name on the cert (default: newtondarts)
+
+      # See Docs/MDNS.md for instructions on reaching the container as <hostname>.local on the LAN.
 
 volumes:
   newton-ssl:

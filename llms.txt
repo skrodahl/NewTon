@@ -75,8 +75,10 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 
 ## Docker SSL (v5.0.1+)
 - `SSL_ENABLED=true` — enables HTTPS with an auto-generated self-signed certificate (required for camera access on non-localhost devices)
-- `MDNS_HOSTNAME=newtondarts` — advertises the container as `newtondarts.local` via mDNS/Avahi (**Linux host only** — Docker Desktop on Mac/Windows uses a VM that blocks mDNS)
-- Two compose files: `docker-compose-ssl.yml` (SSL, all platforms) and `docker-compose-ssl-mdns.yml` (SSL + mDNS, Linux only)
+- `HTTP_PORT` (default 2020) and `HTTPS_PORT` (default 443) — configurable listening ports
+- `SSL_HOSTNAME=newtondarts` — Subject Alternative Name on the auto-generated cert (defaults to `newtondarts`); falls back to deprecated `MDNS_HOSTNAME` if unset
+- mDNS `.local` resolution is a host-side concern — see `Docs/MDNS.md` for setup on macOS/Windows/Linux
+- Two compose files: `docker-compose.yml` (HTTP only by default) and `docker-compose-ssl.yml` (SSL, all platforms)
 
 ## Docker Environment Variables
 - `NEWTON_LANDING_PAGE=true` — show landing page before app (default: not set)

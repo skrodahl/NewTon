@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://newtondarts.com/third-party-licenses.html">
+    <title>Third-Party Licenses — NewTon DC Tournament Manager</title>
+    <meta name="description" content="Attribution for open-source libraries bundled with NewTon DC Tournament Manager.">
+    <link rel="icon" type="image/jpeg" href="images/logo.jpg">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">← NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Third-Party Licenses</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager bundles the following open-source libraries. No external dependencies are loaded at runtime — all libraries ship as standalone JavaScript files.</p>
+
+    <h2>qrcode-generator</h2>
+    <ul>
+        <li><strong>Author:</strong> Kazuhiko Arase</li>
+        <li><strong>License:</strong> MIT</li>
+        <li><strong>URL:</strong> <a href="https://github.com/nicjansma/qrcode-generator" target="_blank" rel="noopener">github.com/nicjansma/qrcode-generator</a></li>
+        <li><strong>Used in:</strong> TM (<code>lib/qrcode-generator.js</code>), Chalker (<code>chalker/lib/qrcode-generator.js</code>)</li>
+        <li><strong>Purpose:</strong> QR code generation for match assignment and result QR codes.</li>
+    </ul>
+
+    <h2>jsQR</h2>
+    <ul>
+        <li><strong>Author:</strong> Cosmo Wolfe</li>
+        <li><strong>License:</strong> Apache 2.0</li>
+        <li><strong>URL:</strong> <a href="https://github.com/cozmo/jsQR" target="_blank" rel="noopener">github.com/cozmo/jsQR</a></li>
+        <li><strong>Used in:</strong> TM (<code>js/jsQR.js</code>), Chalker (<code>chalker/js/jsQR.js</code>)</li>
+        <li><strong>Purpose:</strong> QR code decoding from image data. Used as a fallback decoder on the Chalker&rsquo;s iOS image capture path and on the TM for Windows Enterprise environments without BarcodeDetector.</li>
+    </ul>
+
+    <h2>QrScanner</h2>
+    <ul>
+        <li><strong>Author:</strong> Nimiq</li>
+        <li><strong>License:</strong> MIT</li>
+        <li><strong>URL:</strong> <a href="https://github.com/nimiq/qr-scanner" target="_blank" rel="noopener">github.com/nimiq/qr-scanner</a></li>
+        <li><strong>Based on:</strong> ZXing (Apache 2.0)</li>
+        <li><strong>Used in:</strong> Chalker (<code>chalker/js/qr-scanner.umd.min.js</code>, <code>chalker/js/qr-scanner-worker.min.js</code>)</li>
+        <li><strong>Purpose:</strong> Primary QR code decoder on the Chalker&rsquo;s iOS image capture path. ZXing-based engine with perspective correction, handling photos of QR codes on screens.</li>
+    </ul>
+
+</div>
+
+<!-- Footer -->
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="privacy.html">Privacy</a>
+    </p>
+    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

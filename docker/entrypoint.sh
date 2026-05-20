@@ -5,47 +5,20 @@ set -e
 # NewTon DC Tournament Manager — Container Entrypoint
 # =============================================================================
 
-HOSTNAME="${MDNS_HOSTNAME:-newtondarts}"
+# SSL_HOSTNAME (preferred) with fallback to MDNS_HOSTNAME for backwards compatibility.
+# Used only for the SSL certificate's Subject Alternative Name.
+HOSTNAME="${SSL_HOSTNAME:-${MDNS_HOSTNAME:-newtondarts}}"
+HTTP_PORT="${HTTP_PORT:-2020}"
 HTTPS_PORT="${HTTPS_PORT:-443}"
 
-# ─── mDNS via Avahi ──────────────────────────────────────────────────────────
-# Broadcasts ${HOSTNAME}.local on the local network.
-# Requires network_mode: host in docker-compose.
-# Gracefully skipped if avahi is unavailable.
-
-mkdir -p /run/dbus
-dbus-daemon --system --fork 2>/dev/null || true
-
-cat > /etc/avahi/avahi-daemon.conf <<EOF
-[server]
-host-name=${HOSTNAME}
-use-ipv4=yes
-use-ipv6=no
-ratelimit-interval-usec=1000000
-ratelimit-burst=1000
-
-[wide-area]
-enable-wide-area=yes
-
-[publish]
-publish-addresses=yes
-publish-hinfo=yes
-publish-workstation=no
-publish-domain=yes
-
-[reflector]
-enable-reflector=no
-
-[rlimits]
-EOF
-
-avahi-daemon --daemonize --no-chroot 2>/dev/null || true
+# Note: mDNS (.local hostname) is a host-side concern, not handled by the container.
+# See Docs/MDNS.md for setup instructions.
 
 # ─── SSL ─────────────────────────────────────────────────────────────────────
 # Three modes:
 #   1. SSL_CERT + SSL_KEY set  → use provided certs (implicitly enables SSL)
 #   2. SSL_ENABLED=true        → auto-generate self-signed cert (30 years)
-#   3. Neither                 → HTTP only on port 2020
+#   3. Neither                 → HTTP only on ${HTTP_PORT}
 
 SSL_DIR=/etc/nginx/ssl
 mkdir -p "$SSL_DIR"
@@ -87,14 +60,15 @@ fi
 
 # ─── Select nginx config ─────────────────────────────────────────────────────
 if [ "$USE_SSL" = "true" ]; then
-    echo "[newton] nginx: HTTPS mode (${HTTPS_PORT} + redirect from 2020)"
-    # Substitute HTTPS_PORT into the SSL config template
-    HTTPS_PORT="$HTTPS_PORT" envsubst '${HTTPS_PORT}' \
+    echo "[newton] nginx: HTTPS mode (${HTTPS_PORT} + redirect from ${HTTP_PORT})"
+    envsubst '${HTTP_PORT} ${HTTPS_PORT}' \
         < /etc/nginx/nginx-ssl.conf \
         > /etc/nginx/http.d/default.conf
 else
-    echo "[newton] nginx: HTTP mode (port 2020)"
-    cp /etc/nginx/nginx-http.conf /etc/nginx/http.d/default.conf
+    echo "[newton] nginx: HTTP mode (port ${HTTP_PORT})"
+    envsubst '${HTTP_PORT}' \
+        < /etc/nginx/nginx-http.conf \
+        > /etc/nginx/http.d/default.conf
 fi
 
 # ─── Start services ──────────────────────────────────────────────────────────

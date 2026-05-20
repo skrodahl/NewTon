@@ -1,7 +1,7 @@
 FROM php:8.2-fpm-alpine
 
-# Install nginx, SSL tools, and mDNS support
-RUN apk add --no-cache nginx openssl avahi avahi-tools dbus gettext
+# Install nginx, SSL tools, and envsubst (gettext)
+RUN apk add --no-cache nginx openssl gettext
 
 # Copy application files
 COPY . /var/www/html/

@@ -3,10 +3,8 @@ services:
     image: skrodahl/newton:latest
     # Alternative (GHCR): ghcr.io/skrodahl/newton:latest
     container_name: newton
-    # network_mode: host is required for mDNS (Avahi/multicast) to reach the LAN.
-    # It also simplifies Nginx Proxy Manager setup — no port mapping needed.
-    # When using host networking, the container binds directly to host ports 2020 and 443.
-    network_mode: host
+    ports:
+      - "2020:2020"   # HTTP (or redirect to HTTPS when SSL enabled)
     volumes:
       # Persistent tournament storage
       - ./tournaments:/var/www/html/tournaments
@@ -25,18 +23,20 @@ services:
       - NEWTON_DEMO_MODE=false           # Set to 'true' to show demo banner (privacy notice)
       - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon  # GitHub link in demo banner
 
-      # SSL configuration (optional — omit both to run HTTP only on port 2020)
+      # SSL configuration (optional — omit all to run HTTP only)
       # Option A: Auto-generate a self-signed certificate (30-year expiry)
       #   - SSL_ENABLED=true
       # Option B: Provide your own certificates (paths inside the container)
       #   - SSL_CERT=/run/secrets/cert.pem
       #   - SSL_KEY=/run/secrets/key.pem
       #
-      # - SSL_ENABLED=false              # Set to 'true' to auto-generate a self-signed cert
+      # When SSL is enabled, also expose the HTTPS port in the ports: section above
+      # (e.g. - "443:443") and uncomment the lines below to customise.
+      # - HTTP_PORT=2020                 # HTTP port (default: 2020)
       # - HTTPS_PORT=443                 # HTTPS port (default: 443)
+      # - SSL_HOSTNAME=newtondarts       # Subject Alternative Name on the cert (default: newtondarts)
 
-      # mDNS hostname — container will be reachable as <hostname>.local on the LAN
-      # - MDNS_HOSTNAME=newton           # Default: newton → newton.local
+      # See Docs/MDNS.md for instructions on reaching the container as <hostname>.local on the LAN.
 
 volumes:
   newton-ssl:
@@ -49,7 +49,8 @@ volumes:
   #     context: ..
   #     dockerfile: docker/Dockerfile
   #   container_name: newton
-  #   network_mode: host
+  #   ports:
+  #     - "2020:2020"
   #   volumes:
   #     # Persistent tournament storage
   #     - ../tournaments:/var/www/html/tournaments
@@ -65,6 +66,7 @@ volumes:
   #     - NEWTON_API_ENABLED=true
   #     - NEWTON_DEMO_MODE=false
   #     - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon
-  #     # - SSL_ENABLED=false
+  #     # - SSL_ENABLED=true
+  #     # - HTTP_PORT=2020
   #     # - HTTPS_PORT=443
-  #     # - MDNS_HOSTNAME=newton
+  #     # - SSL_HOSTNAME=newtondarts
