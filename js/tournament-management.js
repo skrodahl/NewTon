@@ -15,6 +15,26 @@ function getFormat() {
     return (tournament && tournament.format) || 'DE';
 }
 
+/**
+ * Returns a display label for a tournament's status (Setup / Active / Completed).
+ * Prefers the explicit `status` field; falls back to deriving from bracket + matches state
+ * for older tournaments that don't carry the field.
+ *
+ * @param {object} t - tournament-shaped object (active, saved, or imported)
+ * @returns {string} capitalized status label, or '-' if no tournament
+ */
+function tournamentStatusLabel(t) {
+    if (!t) return '-';
+    if (t.status) {
+        return t.status.charAt(0).toUpperCase() + t.status.slice(1);
+    }
+    if (!t.bracket) return 'Setup';
+    const matchesArr = t.matches || [];
+    if (matchesArr.length === 0) return 'Setup';
+    if (matchesArr.every(m => m.completed)) return 'Completed';
+    return 'Active';
+}
+
 // Helper function to clear tournament input fields
 function clearTournamentFields() {
     const nameElement = document.getElementById('tournamentName');
@@ -981,38 +1001,23 @@ function showLoadTournamentModal(tournamentId, selectedTournament) {
     window.selectedTournamentId = tournamentId;
     window.selectedTournamentData = selectedTournament;
 
-    // Populate selected tournament details
-    document.getElementById('loadTournamentName').textContent = selectedTournament.name;
-    document.getElementById('loadTournamentDate').textContent = selectedTournament.date;
-
+    // Populate sidebar with the tournament being loaded
     const selectedCompletedMatches = (selectedTournament.matches || []).filter(m => m.completed).length;
     const selectedTotalMatches = (selectedTournament.matches || []).length;
-    document.getElementById('loadMatchProgress').textContent = `${selectedCompletedMatches}/${selectedTotalMatches} matches completed`;
-    document.getElementById('loadPlayerCount').textContent = `${(selectedTournament.players || []).length} registered`;
+    document.getElementById('loadTournamentName').textContent = selectedTournament.name;
+    document.getElementById('loadTournamentDate').textContent = selectedTournament.date;
+    document.getElementById('loadTournamentStatus').textContent = tournamentStatusLabel(selectedTournament);
+    document.getElementById('loadMatchProgress').textContent = `${selectedCompletedMatches} of ${selectedTotalMatches}`;
+    document.getElementById('loadPlayerCount').textContent = (selectedTournament.players || []).length;
 
-    // Show/hide current tournament section and update title
-    const currentSection = document.getElementById('currentTournamentSection');
-    const actionTitle = document.getElementById('loadActionTitle');
-
+    // Description varies depending on whether a tournament is currently active
+    const desc = document.getElementById('loadTournamentDesc');
     if (tournament && tournament.name) {
-        // Show current tournament details
-        currentSection.style.display = 'block';
-        actionTitle.textContent = 'This will be replaced with:';
-
-        document.getElementById('currentTournamentName').textContent = tournament.name;
-        document.getElementById('currentTournamentDate').textContent = tournament.date;
-
-        const currentCompletedMatches = matches.filter(m => m.completed).length;
-        const currentTotalMatches = matches.length;
-        document.getElementById('currentMatchProgress').textContent = `${currentCompletedMatches}/${currentTotalMatches} matches completed`;
-        document.getElementById('currentPlayerCount').textContent = `${players.length} registered`;
+        desc.textContent = `Your current tournament "${tournament.name}" will be saved automatically and replaced. Settings and configurations remain unchanged.`;
     } else {
-        // No current tournament
-        currentSection.style.display = 'none';
-        actionTitle.textContent = 'You are about to load:';
+        desc.textContent = 'The selected tournament will become active. Settings and configurations remain unchanged.';
     }
 
-    // Show modal with Esc support
     pushDialog('loadTournamentModal', null, true);
 }
 
@@ -1138,18 +1143,10 @@ function showDeleteTournamentModal(tournamentId, tournamentToDelete) {
 
     // Calculate players count
     const playerCount = tournamentToDelete.players ? tournamentToDelete.players.length : 0;
-    document.getElementById('deleteTournamentPlayers').textContent = `${playerCount} players`;
+    document.getElementById('deleteTournamentPlayers').textContent = playerCount;
 
-    // Determine status
-    let status = 'Setup';
-    if (tournamentToDelete.bracket) {
-        if (tournamentToDelete.matches && tournamentToDelete.matches.some(m => m.completed)) {
-            status = 'In Progress';
-        } else {
-            status = 'Bracket Generated';
-        }
-    }
-    document.getElementById('deleteTournamentStatus').textContent = status;
+    // Determine status (unified Setup / Active / Completed)
+    document.getElementById('deleteTournamentStatus').textContent = tournamentStatusLabel(tournamentToDelete);
 
     // Show modal with Esc support
     pushDialog('deleteTournamentModal', null, true);
@@ -1191,9 +1188,10 @@ function showImportOverwriteModal(importedData) {
     // Store the imported data for later use
     window.importedTournamentData = importedData;
 
-    // Populate modal with tournament details
+    // Populate sidebar with imported file's details
     document.getElementById('importTournamentName').textContent = importedData.name;
     document.getElementById('importTournamentDate').textContent = importedData.date;
+    document.getElementById('importTournamentStatus').textContent = tournamentStatusLabel(importedData);
 
     // Show modal with Esc support
     pushDialog('importOverwriteModal', null, true);
@@ -1220,38 +1218,23 @@ function showImportConfirmModal(importedData, isOldFormat) {
     window.pendingImportData = importedData;
     window.isOldFormatImport = isOldFormat;
 
-    // Populate modal with tournament details
-    document.getElementById('importConfirmName').textContent = importedData.name;
-    document.getElementById('importConfirmDate').textContent = importedData.date;
-    document.getElementById('importConfirmPlayers').textContent =
-        `${(importedData.players || []).length} registered`;
-
+    // Populate sidebar with tournament details
     const completedMatches = (importedData.matches || []).filter(m => m.completed).length;
     const totalMatches = (importedData.matches || []).length;
-    document.getElementById('importConfirmMatches').textContent =
-        `${completedMatches}/${totalMatches} matches completed`;
+    document.getElementById('importConfirmName').textContent = importedData.name;
+    document.getElementById('importConfirmDate').textContent = importedData.date;
+    document.getElementById('importConfirmStatus').textContent = tournamentStatusLabel(importedData);
+    document.getElementById('importConfirmMatches').textContent = `${completedMatches} of ${totalMatches}`;
+    document.getElementById('importConfirmPlayers').textContent = (importedData.players || []).length;
 
-    // Show/hide old format warning
-    const warningSection = document.getElementById('oldFormatWarningSection');
-    const undoHistoryNote = document.getElementById('importUndoHistoryNote');
-
-    if (isOldFormat) {
-        warningSection.style.display = 'block';
-        // Hide undo history note for old formats
-        if (undoHistoryNote) {
-            undoHistoryNote.style.display = 'none';
-        }
-    } else {
-        warningSection.style.display = 'none';
-        // Show undo history note for v4.0+ formats
-        if (undoHistoryNote) {
-            undoHistoryNote.style.display = 'list-item';
-        }
-    }
+    // Toggle old-format pill + warning paragraph
+    const pill = document.getElementById('importOldFormatPill');
+    const warning = document.getElementById('importOldFormatWarning');
+    pill.style.display = isOldFormat ? '' : 'none';
+    warning.style.display = isOldFormat ? '' : 'none';
 
     // Update button text
-    const confirmBtn = document.getElementById('confirmImportBtn');
-    confirmBtn.textContent = isOldFormat ? 'Import Anyway' : 'Import Tournament';
+    document.getElementById('confirmImportBtn').textContent = isOldFormat ? 'Import Anyway' : 'Import Tournament';
 
     // Show modal
     pushDialog('importConfirmModal', null, true);
@@ -1390,46 +1373,36 @@ function showResetTournamentModal() {
     const completedMatches = matches.filter(m => m.completed).length;
     const totalMatches = matches.length;
 
-    // Populate modal with tournament details
+    // Populate sidebar with tournament details
     document.getElementById('resetTournamentName').textContent = tournamentName;
-    document.getElementById('resetMatchProgress').textContent = `${completedMatches}/${totalMatches} matches completed`;
+    document.getElementById('resetTournamentStatus').textContent = tournamentStatusLabel(tournament);
+    document.getElementById('resetMatchProgress').textContent = `${completedMatches} of ${totalMatches}`;
     document.getElementById('resetPlayerCount').textContent = players.length;
 
-    // Clear and reset input field
+    // Reset input + button state
     const input = document.getElementById('resetConfirmationInput');
     input.value = '';
-    input.placeholder = `Type "${tournamentName}" exactly`;
-
-    // Disable reset button initially
+    input.placeholder = tournamentName;
     document.getElementById('confirmResetBtn').disabled = true;
 
-    // Remove any existing event listeners by cloning the input element
+    // Replace with a clone to drop any prior listeners
     const newInput = input.cloneNode(true);
     input.parentNode.replaceChild(newInput, input);
 
-    // Set up real-time validation on the clean input
+    // Enable the reset button only when input matches exactly
     newInput.addEventListener('input', function() {
-        const resetBtn = document.getElementById('confirmResetBtn');
-        if (this.value === tournamentName) {
-            resetBtn.disabled = false;
-            resetBtn.style.background = '#fef3c7';
-        } else {
-            resetBtn.disabled = true;
-            resetBtn.style.background = '';
-        }
+        document.getElementById('confirmResetBtn').disabled = this.value !== tournamentName;
     });
 
-    // Add Enter key support
+    // Enter submits when input matches
     newInput.addEventListener('keydown', function(e) {
         if (e.key === 'Enter' && this.value === tournamentName) {
             confirmReset();
         }
     });
 
-    // Focus input after modal shows
-    setTimeout(() => {
-        newInput.focus();
-    }, 100);
+    // Focus input after modal renders
+    setTimeout(() => newInput.focus(), 100);
 
     // Show modal with Esc support
     pushDialog('resetTournamentModal', null, true);

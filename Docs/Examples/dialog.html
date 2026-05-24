@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Dialog — Direction 1 Variants</title>
+<style>
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 60px 40px 120px;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", "Segoe UI", sans-serif;
+    background: #eef0f3;
+    color: #2a2f3a;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+
+  .lede {
+    text-align: center;
+    color: #7a8090;
+    margin: 0 0 16px;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  .variant-label {
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #7a8090;
+    margin: 80px 0 8px;
+    text-align: center;
+  }
+
+  .variant-note {
+    text-align: center;
+    color: #7a8090;
+    font-size: 13px;
+    margin: 0 auto 28px;
+    max-width: 540px;
+    line-height: 1.5;
+  }
+
+  /* ============================================================
+     Shared base for all variants (the Direction 1 family)
+     ============================================================ */
+  .dlg {
+    width: 460px;
+    max-width: 100%;
+    margin: 0 auto;
+    background: white;
+    border-radius: 14px;
+    box-shadow:
+      0 1px 2px rgba(20, 25, 35, 0.06),
+      0 20px 50px rgba(20, 25, 35, 0.16);
+    overflow: hidden;
+  }
+  .dlg__title {
+    font-size: 20px;
+    font-weight: 600;
+    letter-spacing: -0.3px;
+    margin: 0;
+    color: #1a1f2a;
+  }
+  .dlg__desc {
+    color: #6b7280;
+    font-size: 14px;
+    line-height: 1.55;
+    margin: 0;
+  }
+  .dlg__details {
+    background: #f7f8fa;
+    border: 1px solid #ecedf1;
+    border-radius: 10px;
+    padding: 14px 16px;
+    font-size: 13px;
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    row-gap: 8px;
+    column-gap: 16px;
+    margin: 0;
+  }
+  .dlg__details dt { color: #8b91a0; font-weight: 500; }
+  .dlg__details dd { margin: 0; color: #2a2f3a; font-weight: 500; }
+  .dlg__label {
+    display: block;
+    font-size: 12px;
+    font-weight: 600;
+    color: #4a5160;
+    margin-bottom: 8px;
+  }
+  .dlg__input {
+    width: 100%;
+    padding: 10px 12px;
+    border: 1px solid #d8dbe2;
+    border-radius: 8px;
+    font: inherit;
+    font-size: 14px;
+    outline: none;
+    transition: border 0.15s, box-shadow 0.15s;
+  }
+  .dlg__input:focus {
+    border-color: #5b8def;
+    box-shadow: 0 0 0 3px rgba(91, 141, 239, 0.15);
+  }
+  .dlg__btn {
+    border: none;
+    border-radius: 8px;
+    padding: 9px 16px;
+    font: inherit;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.12s;
+  }
+  .dlg__btn--cancel {
+    background: white;
+    color: #4a5160;
+    border: 1px solid #d8dbe2;
+  }
+  .dlg__btn--cancel:hover { background: #f7f8fa; }
+  .dlg__btn--danger {
+    background: #d94646;
+    color: white;
+  }
+  .dlg__btn--danger:hover { background: #c93b3b; }
+  .dlg__btn:disabled { opacity: 0.5; cursor: not-allowed; }
+  .dlg__foot {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 14px 24px;
+    background: #fbfbfc;
+    border-top: 1px solid #ecedf1;
+  }
+
+  /* ============================================================
+     VARIANT A — Icon-led
+     Circular destructive icon replaces the pill badge.
+     A bit more visual weight in the header, slightly larger title.
+     ============================================================ */
+  .va-head {
+    padding: 24px 24px 18px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+  .va-icon {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    background: #fef2f2;
+    color: #c04040;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    font-weight: 700;
+  }
+  .va-head h2 { margin-bottom: 6px; }
+  .va-body { padding: 0 24px 22px; }
+  .va-body .dlg__details { margin-bottom: 20px; }
+
+  /* ============================================================
+     VARIANT B — Banner header
+     A tinted red bar across the top makes the destructive context
+     unmissable. Body stays calm and clean.
+     ============================================================ */
+  .vb-banner {
+    background: linear-gradient(180deg, #fef4f4 0%, #fdebeb 100%);
+    padding: 22px 24px;
+    border-bottom: 1px solid #f5dada;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .vb-banner-dot {
+    width: 8px;
+    height: 8px;
+    background: #c04040;
+    border-radius: 50%;
+    box-shadow: 0 0 0 4px rgba(192, 64, 64, 0.15);
+    flex-shrink: 0;
+  }
+  .vb-banner h2 {
+    font-size: 17px;
+    font-weight: 600;
+    margin: 0;
+    color: #7a2828;
+    letter-spacing: -0.2px;
+  }
+  .vb-body { padding: 22px 24px 4px; }
+  .vb-body .dlg__desc { margin-bottom: 20px; }
+  .vb-body .dlg__details { margin-bottom: 22px; }
+  .vb-field { padding: 0 24px 22px; }
+
+  /* ============================================================
+     VARIANT C — Split layout
+     Side-by-side: meta on the left, action area on the right.
+     Wider dialog, more horizontal flow.
+     ============================================================ */
+  .dlg--wide {
+    width: 580px;
+  }
+  .vd-grid {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+  }
+  .vd-side {
+    padding: 24px 20px;
+    background: #f7f8fa;
+    border-right: 1px solid #ecedf1;
+  }
+  .vd-side-label {
+    font-size: 10px;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8b91a0;
+    margin-bottom: 4px;
+  }
+  .vd-side-value {
+    font-size: 15px;
+    font-weight: 600;
+    color: #1a1f2a;
+    margin-bottom: 14px;
+  }
+  .vd-side-value:last-child { margin-bottom: 0; }
+  .vd-main {
+    padding: 24px;
+  }
+  .vd-main h2 { margin-bottom: 6px; }
+  .vd-main .dlg__desc { margin-bottom: 18px; }
+  .vd-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: #fef2f2;
+    color: #c04040;
+    font-size: 11px;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+    text-transform: uppercase;
+    padding: 4px 10px;
+    border-radius: 999px;
+    margin-bottom: 12px;
+  }
+  .vd-pill::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    background: #c04040;
+    border-radius: 50%;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Direction 1 — Variants</h1>
+    <p class="lede">Three takes on the Modern Product UI direction. Same family, different structural choices.</p>
+
+    <!-- ============================================================
+         VARIANT A
+         ============================================================ -->
+    <p class="variant-label">Variant A — Icon-led</p>
+    <p class="variant-note">A circular danger icon replaces the pill badge and sits beside the title. More visual weight up top; the description flows under the title rather than the icon.</p>
+
+    <div class="dlg">
+      <div class="va-head">
+        <div class="va-icon">!</div>
+        <div>
+          <h2 class="dlg__title">Reset tournament</h2>
+          <p class="dlg__desc">All matches, brackets and standings will be permanently deleted. Players are kept, but their elimination status is reset.</p>
+        </div>
+      </div>
+      <div class="va-body">
+        <dl class="dlg__details">
+          <dt>Name</dt><dd>8-player</dd>
+          <dt>Progress</dt><dd>8 of 8 matches</dd>
+          <dt>Players</dt><dd>6 registered</dd>
+        </dl>
+        <div style="margin-top: 20px;">
+          <label for="ca" class="dlg__label">Type the tournament name to confirm</label>
+          <input id="ca" class="dlg__input" type="text" placeholder="8-player" data-confirm="8-player">
+        </div>
+      </div>
+      <div class="dlg__foot">
+        <button class="dlg__btn dlg__btn--cancel">Cancel</button>
+        <button class="dlg__btn dlg__btn--danger" data-target="ca" disabled>Reset tournament</button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         VARIANT B
+         ============================================================ -->
+    <p class="variant-label">Variant B — Banner header</p>
+    <p class="variant-note">A tinted bar across the top makes the destructive context unmissable at a glance. The body stays clean and uncluttered.</p>
+
+    <div class="dlg">
+      <div class="vb-banner">
+        <span class="vb-banner-dot"></span>
+        <h2>Destructive — Reset tournament</h2>
+      </div>
+      <div class="vb-body">
+        <p class="dlg__desc">All matches, brackets and standings will be permanently deleted. Players are kept, but their elimination status is reset.</p>
+        <dl class="dlg__details">
+          <dt>Name</dt><dd>8-player</dd>
+          <dt>Progress</dt><dd>8 of 8 matches</dd>
+          <dt>Players</dt><dd>6 registered</dd>
+        </dl>
+      </div>
+      <div class="vb-field">
+        <label for="cb" class="dlg__label">Type the tournament name to confirm</label>
+        <input id="cb" class="dlg__input" type="text" placeholder="8-player" data-confirm="8-player">
+      </div>
+      <div class="dlg__foot">
+        <button class="dlg__btn dlg__btn--cancel">Cancel</button>
+        <button class="dlg__btn dlg__btn--danger" data-target="cb" disabled>Reset tournament</button>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         VARIANT C
+         ============================================================ -->
+    <p class="variant-label">Variant C — Split layout</p>
+    <p class="variant-note">Tournament facts move to a sidebar on the left, making them a stable reference while the user reads the description and types confirmation on the right.</p>
+
+    <div class="dlg dlg--wide">
+      <div class="vd-grid">
+        <aside class="vd-side">
+          <div class="vd-side-label">Name</div>
+          <div class="vd-side-value">8-player</div>
+          <div class="vd-side-label">Progress</div>
+          <div class="vd-side-value">8 of 8</div>
+          <div class="vd-side-label">Players</div>
+          <div class="vd-side-value">6 registered</div>
+        </aside>
+        <div class="vd-main">
+          <span class="vd-pill">Destructive</span>
+          <h2 class="dlg__title">Reset tournament</h2>
+          <p class="dlg__desc">All matches, brackets and standings will be permanently deleted. Players are kept, but their elimination status is reset.</p>
+          <label for="cd" class="dlg__label">Type the tournament name to confirm</label>
+          <input id="cd" class="dlg__input" type="text" placeholder="8-player" data-confirm="8-player">
+        </div>
+      </div>
+      <div class="dlg__foot">
+        <button class="dlg__btn dlg__btn--cancel">Cancel</button>
+        <button class="dlg__btn dlg__btn--danger" data-target="cd" disabled>Reset tournament</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.querySelectorAll('input[data-confirm]').forEach(input => {
+      input.addEventListener('input', () => {
+        const expected = input.dataset.confirm;
+        const btn = document.querySelector(`button[data-target="${input.id}"]`);
+        if (!btn) return;
+        btn.disabled = input.value !== expected;
+      });
+    });
+  </script>
+</body>
+</html>

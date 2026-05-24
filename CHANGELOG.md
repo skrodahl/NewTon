@@ -1,3 +1,76 @@
+## **v5.1.2** — The Polished Press (2026-05-24)
+
+Tactile press feedback on every button across the app, a new dialog system (`.dlg`) that unifies six confirmation/warning modals around a split-layout pattern with metadata sidebar and intent pill, a redesigned Tournament Complete celebration with CSS-only metallic medals, and a small Registration-page bug fix.
+
+### Button press feedback
+
+- **Press effect across all buttons** — `transform: translate(1.5px, 1.5px)` on `:active` for `.btn`, `.nav-btn`, `.zoom-btn`, `.help-btn`, `.cc-match-action-btn`, `.achievement-export-btn`, `.tournament-create-button`, `.analytics-reset-btn`, `.analytics-back-btn`, `.close`. Every click now feels tactile rather than flat.
+- **Analytics selector buttons excluded by design** — `.analytics-point-btn` and `.analytics-layer-btn` carry their own "active" indicator and don't inherit `.btn`, so they naturally opt out.
+- **Removed `!important` from `.help-btn:hover`** — was blocking the unified `:active` rule. Hover now behaves consistently without overrides.
+- **Removed obsolete `.celebration-export-btn:active` rule** — `translateY(0)` reset is no longer meaningful with the new shared press effect.
+
+### New dialog system (`.dlg`)
+
+A second modal pattern that sits inside the existing `.modal` backdrop and preserves `pushDialog`/`popDialog` infrastructure. Buttons inside dialogs use the standard `.btn` classes — no separate dialog button styles.
+
+- **Base components:** `.dlg`, `.dlg__title`, `.dlg__desc`, `.dlg__label`, `.dlg__input`, `.dlg__foot` (white card, 10px corner radius, soft shadow, right-aligned footer with subtle top border)
+- **Split layout:** `.dlg--split` modifier with `.dlg__grid`, `.dlg__sidebar`, `.dlg__sidebar-label`, `.dlg__sidebar-value`, `.dlg__main` — metadata sidebar on the left, action area on the right
+- **Intent pills:** `.dlg__pill` (amber) and `.dlg__pill--danger` (red) — small uppercase badges at the top of the main area. Pills can be omitted entirely (additive actions) or toggled conditionally (e.g. shown only for legacy-format imports).
+
+### Dialog migrations
+
+Six dialogs migrated to `.dlg--split`. Inline-styled colored boxes from the old markup are gone; the new layout uses clean typography with the sidebar carrying metadata context.
+
+- **Reset Tournament Confirmation** — amber "Destructive" pill, sidebar shows Name / Tournament Status / Progress / Players. Confirmation input retained with the tournament name shown as placeholder. Markup down from ~47 lines of inline-styled boxes to ~22 lines.
+- **Delete Tournament Confirmation** — red "Destructive" pill, sidebar shows Name / Date / Tournament Status / Players. A second paragraph explicitly notes that the tournament's Analytics record is preserved and remains available for review.
+- **Import Tournament Overwrite** — amber "Destructive" pill, sidebar shows Name / Date / Tournament Status. "Alternative: rename the imported file to keep both" kept as a secondary paragraph.
+- **Tournament In Progress Warning** — amber "Warning" pill, sidebar shows live tournament state (Name / Tournament Status / Progress / Players). Body trimmed from 3 colored tip boxes to 2 paragraphs.
+- **Import Tournament Confirmation** — amber "Old format" pill, conditionally shown only for legacy exports. Sidebar shows Name / Date / Tournament Status / Progress / Players. Description condenses the old "Data Safety Guaranteed" box into one sentence; the verbose "What will be imported" list is gone (redundant with file context). Button text toggles "Import Tournament" / "Import Anyway" based on format.
+- **Load Tournament Confirmation** — no pill (load is non-destructive). Sidebar shows the tournament being loaded (Name / Date / Tournament Status / Progress / Players). Description varies — when an active tournament exists it names it inline ("Your current tournament *X* will be saved automatically and replaced..."), otherwise reads as a clean "The selected tournament will become active." Replaces the old dual-section layout that duplicated metadata.
+
+### Unified Tournament Status across all sidebars
+
+- **New helper `tournamentStatusLabel(t)`** in `js/tournament-management.js` — returns `Setup` / `Active` / `Completed` for any tournament-shaped object (current, saved in localStorage, or imported file). Prefers the explicit `status` field; falls back to deriving from `bracket + matches` state for older tournaments and old-format imports.
+- **Tournament Status now displayed in every dialog's sidebar** that uses `.dlg--split`. Delete's previous "Setup / Bracket Generated / In Progress" scheme was unified to the same labels as everything else for consistency.
+
+### Tournament Complete celebration — redesign
+
+- **New podium** — compact horizontal trio of cards inside the Match Controls dialog. Champion (1st place) gently emphasized with a gold ring, soft tint background, and larger medal. 2nd and 3rd flank as supporting cards.
+- **CSS-only metallic medals** — gold, silver, bronze radial gradients (`.medal--gold`, `.medal--silver`, `.medal--bronze`) replace the emoji medals (🥇🥈🥉). Number inside the disc identifies the rank.
+- **Emojis removed throughout** — title goes from "🏆 X Complete! 🏆" to "X Complete!". Highlights heading from "🎯 Tournament Highlights" to "Tournament Highlights". The Champion card label changed from "1st Place" to "Champion".
+- **Cleaner highlights row** — three side-by-side cards on a single white background instead of separate bordered colored boxes.
+- **Buttons untouched** — the Tournament Analytics button keeps `.btn` styling and the unified press effect.
+
+### Documentation
+
+- **New `Docs/DIALOGS.md`** — comprehensive guide to the `.dlg` system. When to use which pattern, anatomy, two layouts, sidebar/pill conventions, button rules, helpers, XSS safety, dialog stack integration. Includes migration status table (6 migrated / 16 remaining / Match Controls + Developer Console excluded) and an 8-step migration checklist for the next dialog.
+
+### Bug fix — late-reg button visibility
+
+- **"Player arrived late?" button now appears immediately when navigating to Registration mid-session**, not only after a reload. `showPage('registration')` was calling `renderPlayerList()` (the saved-players list) and `updateRegistrationPageLayout()` but not `updatePlayersDisplay()` — the function that renders the tournament-players list AND the late-reg button container. Now called as part of the registration page activation.
+
+### Cleanup
+
+- Removed `#resetConfirmationInput` from the `border-radius: 0` cascade selector — the new `.dlg__input` uses rounded corners by design.
+- Removed orphaned banner CSS (`.dlg__banner`, `.dlg__banner-dot`, `.dlg__banner-title`, `.dlg__banner--danger`) — used briefly during the Tournament-in-Progress migration before that dialog was converted to split layout for consistency.
+- Removed orphaned `.celebration-export-btn` and `.celebration-actions` styles — both classes had CSS defined but were not referenced anywhere in HTML or JS. Also dropped `.celebration-export-btn:active` from the press-effect selector list.
+
+### Files changed
+
+- `css/styles.css` — unified `:active` press-effect rule; removed `!important` from `.help-btn:hover`; new `.dlg` system (base + `--split` + pills); removed `#resetConfirmationInput` from border-radius cascade; removed banner classes; rewrote tournament-celebration / podium / highlights styles (~200 lines) with new Variant C aesthetic + metallic medal classes; removed orphaned `.celebration-export-btn` / `.celebration-actions` rules
+- `tournament.html` — replaced `#resetTournamentModal`, `#deleteTournamentModal`, `#importOverwriteModal`, `#tournamentProgressModal`, `#importConfirmModal`, and `#loadTournamentModal` markup with `.dlg--split` structure; rewrote `#tournamentCelebration` markup for the new podium layout (emoji-free)
+- `js/tournament-management.js` — new `tournamentStatusLabel()` helper; `showResetTournamentModal()`, `showDeleteTournamentModal()`, `showImportOverwriteModal()`, `showImportConfirmModal()`, `showLoadTournamentModal()` trimmed for new sidebar values and all updated to use the helper; conditional pill toggle in import-confirm
+- `js/clean-match-progression.js` — `showTournamentProgressWarning()` populates the new sidebar fields with live tournament state via the helper
+- `js/bracket-rendering.js` — `updateCelebrationSubtitle()` drops emojis from the dynamically-set title
+- `js/main.js` — `showPage('registration')` now calls `updatePlayersDisplay()` so the late-reg button reflects current tournament state on every navigation
+- `Docs/DIALOGS.md` — new
+
+### Migration
+
+No data migration required. Visual/interaction polish only — all functionality, dialogs, and data flows preserved. The remaining 16 modals continue to use the existing `.modal-content` pattern and can be migrated incrementally; `matchCommandCenterModal` (Match Controls) and the Developer Console are intentionally excluded from the `.dlg` rollout — they're content-dense custom layouts.
+
+---
+
 ## **v5.1.1** — Somewhat Simpler Selfhosting (2026-05-20)
 
 Docker release. No tournament-app changes. The container's mDNS code never worked reliably on a typical Linux host (avahi conflict) and has been removed entirely. `.local` resolution is now documented as a host-side concern.

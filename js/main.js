@@ -435,6 +435,9 @@ function showPage(pageId) {
         if (typeof updateRegistrationPageLayout === 'function') {
             updateRegistrationPageLayout();
         }
+        if (typeof updatePlayersDisplay === 'function') {
+            updatePlayersDisplay();
+        }
         if (typeof renderPlayerList === 'function') {
             renderPlayerList();
         }

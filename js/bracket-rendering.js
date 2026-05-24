@@ -4531,7 +4531,7 @@ function updateCelebrationSubtitle() {
 
     // Update main title with tournament name
     if (titleDiv && tournament.name) {
-        titleDiv.textContent = `🏆 ${tournament.name} Complete! 🏆`;
+        titleDiv.textContent = `${tournament.name} Complete!`;
     }
 
     // Update subtitle with tournament date and actual player count (paid players only)

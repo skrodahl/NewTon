@@ -3192,7 +3192,15 @@ function getSERoundDisplayName(round, bracketSize) {
  * Replaces browser alert with user-friendly modal dialog
  */
 function showTournamentProgressWarning() {
-    // Use dialog stack to show modal with Esc support
+    // Populate sidebar with current tournament state
+    const completedMatches = matches.filter(m => m.completed).length;
+    const totalMatches = matches.length;
+    document.getElementById('progressTournamentName').textContent = (tournament && tournament.name) || '-';
+    document.getElementById('progressTournamentStatus').textContent = tournamentStatusLabel(tournament);
+    document.getElementById('progressMatchProgress').textContent = `${completedMatches} of ${totalMatches}`;
+    document.getElementById('progressPlayerCount').textContent = players.length;
+
+    // Show modal with Esc support
     pushDialog('tournamentProgressModal', null, true);
 }
 

@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Neumorphic Button Variants</title>
+<style>
+  :root {
+    --bg: #e8ebef;
+    --surface: #ffffff;
+    --text: #4a5160;
+    --text-soft: #8a91a0;
+    --accent: #5b8def;
+    --success: #5cb85c;
+    --danger: #e96a6a;
+    --shadow-dark: rgba(40, 50, 70, 0.22);
+    --shadow-darker: rgba(40, 50, 70, 0.30);
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    padding: 60px 40px;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+  }
+
+  h2 {
+    font-weight: 400;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: var(--text-soft);
+    margin-top: 60px;
+    margin-bottom: 24px;
+  }
+
+  .group {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 24px;
+    align-items: center;
+  }
+
+  /* === Base neumorphic pill === */
+  .neu-btn {
+    background: var(--surface);
+    color: var(--text);
+    border: none;
+    border-radius: 8px;
+    padding: 16px 36px;
+    font-size: 15px;
+    font-weight: 500;
+    letter-spacing: 0.3px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    box-shadow: 1px 1px 4px var(--shadow-dark);
+  }
+
+  .neu-btn:active,
+  .neu-btn.pressed,
+  .neu-icon:active,
+  .segmented button:active {
+    transform: translate(1.5px, 1.5px);
+  }
+
+  /* === Size variants === */
+  .neu-btn.sm { padding: 10px 22px; font-size: 13px; }
+  .neu-btn.lg { padding: 22px 56px; font-size: 17px; }
+  .neu-btn.wide { padding: 18px 80px; }
+  .neu-btn.lg.wide { padding: 24px 100px; }
+
+  /* === Color/intent variants === */
+  .neu-btn.accent { color: var(--accent); }
+  .neu-btn.success { color: var(--success); }
+  .neu-btn.danger { color: var(--danger); }
+
+  .neu-btn.filled-accent {
+    background: var(--accent);
+    color: white;
+  }
+  .neu-btn.filled-accent:hover { background: #4a7ce0; }
+
+  .neu-btn.filled-danger {
+    background: var(--danger);
+    color: white;
+  }
+
+  /* === Icon button (circle) === */
+  .neu-icon {
+    background: var(--surface);
+    border: none;
+    border-radius: 50%;
+    width: 56px;
+    height: 56px;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    color: var(--text);
+    font-size: 20px;
+    transition: all 0.2s ease;
+    box-shadow: 1px 1px 4px var(--shadow-dark);
+  }
+
+  /* === Toggle (inset) === */
+  .neu-toggle {
+    background: var(--surface);
+    color: var(--text-soft);
+    border: none;
+    border-radius: 8px;
+    padding: 14px 32px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    box-shadow: 1px 1px 4px var(--shadow-dark);
+  }
+
+  .neu-toggle.on {
+    color: var(--accent);
+  }
+
+  /* === Disabled === */
+  .neu-btn:disabled {
+    color: #b4b9c2;
+    cursor: not-allowed;
+    box-shadow: 1px 1px 3px var(--shadow-dark);
+  }
+
+/* === Button group / segmented === */
+  .segmented {
+    display: inline-flex;
+    background: var(--surface);
+    border-radius: 8px;
+    padding: 6px;
+    box-shadow: 1px 1px 4px var(--shadow-dark);
+    gap: 4px;
+  }
+  .segmented button {
+    background: transparent;
+    border: none;
+    border-radius: 8px;
+    padding: 10px 22px;
+    font-size: 14px;
+    color: var(--text-soft);
+    cursor: pointer;
+    transition: all 0.2s ease;
+  }
+  .segmented button.active {
+    background: var(--bg);
+    color: var(--text);
+  }
+
+  /* === Layout helper === */
+  .container {
+    max-width: 900px;
+    margin: 0 auto;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Neumorphic Button Variants</h1>
+    <p style="color: var(--text-soft); margin: 0;">Soft UI buttons inspired by extruded surface design.</p>
+
+    <h2>Default Pill</h2>
+    <div class="group">
+      <button class="neu-btn sm">Small</button>
+      <button class="neu-btn">Medium</button>
+      <button class="neu-btn wide">Wide</button>
+    </div>
+    <div class="group" style="margin-top: 20px;">
+      <button class="neu-btn lg">Large</button>
+      <button class="neu-btn lg wide">Large Wide</button>
+    </div>
+
+    <h2>Intent / Color</h2>
+    <div class="group">
+      <button class="neu-btn accent">Accent</button>
+      <button class="neu-btn success">Confirm</button>
+      <button class="neu-btn danger">Delete</button>
+      <button class="neu-btn filled-accent">Primary</button>
+      <button class="neu-btn filled-danger">Destructive</button>
+    </div>
+
+    <h2>States</h2>
+    <div class="group">
+      <button class="neu-btn">Default</button>
+      <button class="neu-btn pressed">Pressed</button>
+      <button class="neu-btn" disabled>Disabled</button>
+    </div>
+
+<h2>Icon Buttons</h2>
+    <div class="group">
+      <button class="neu-icon" aria-label="play">&#9658;</button>
+      <button class="neu-icon" aria-label="pause">&#10074;&#10074;</button>
+      <button class="neu-icon" aria-label="heart">&#9825;</button>
+      <button class="neu-icon" aria-label="settings">&#9881;</button>
+      <button class="neu-icon" aria-label="add">+</button>
+    </div>
+
+    <h2>Toggles (Inset)</h2>
+    <div class="group">
+      <button class="neu-toggle on">Active</button>
+      <button class="neu-toggle">Inactive</button>
+    </div>
+
+    <h2>Segmented Control</h2>
+    <div class="group">
+      <div class="segmented" id="seg">
+        <button class="active">Day</button>
+        <button>Week</button>
+        <button>Month</button>
+        <button>Year</button>
+      </div>
+    </div>
+
+    <h2>With Icon + Label</h2>
+    <div class="group">
+      <button class="neu-btn accent">&#9658;&nbsp;&nbsp;Play</button>
+      <button class="neu-btn">&#8593;&nbsp;&nbsp;Upload</button>
+      <button class="neu-btn danger">&#10005;&nbsp;&nbsp;Cancel</button>
+    </div>
+  </div>
+
+  <script>
+    // Simple segmented control behavior
+    document.querySelectorAll('.segmented').forEach(seg => {
+      seg.addEventListener('click', e => {
+        if (e.target.tagName === 'BUTTON') {
+          seg.querySelectorAll('button').forEach(b => b.classList.remove('active'));
+          e.target.classList.add('active');
+        }
+      });
+    });
+
+    // Toggle behavior
+    document.querySelectorAll('.neu-toggle').forEach(t => {
+      t.addEventListener('click', () => t.classList.toggle('on'));
+    });
+  </script>
+</body>
+</html>

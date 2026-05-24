@@ -1377,42 +1377,30 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <!-- Tournament Completion Celebration -->
                         <div id="tournamentCelebration" class="tournament-celebration" style="display: none;">
                             <div class="celebration-header">
-                                <div class="celebration-title">🏆 Tournament Complete! 🏆</div>
-                                <div class="celebration-subtitle" id="celebrationSubtitle">Congratulations to all
-                                    players!</div>
+                                <div class="celebration-title">Tournament Complete!</div>
+                                <div class="celebration-subtitle" id="celebrationSubtitle">Congratulations to all players!</div>
                             </div>
 
                             <div class="podium-container">
-                                <div class="podium-position second">
-                                    <div class="podium-player" id="podium-second">
-                                        <span class="podium-medal">🥈</span>
-                                        <div class="podium-rank">2nd Place</div>
-                                        <div class="podium-name">-</div>
-                                    </div>
-                                    <div class="podium-block second">2</div>
+                                <div class="podium-position" id="podium-second">
+                                    <div class="podium-medal medal medal--silver">2</div>
+                                    <div class="podium-rank">2nd Place</div>
+                                    <div class="podium-name">-</div>
                                 </div>
-
-                                <div class="podium-position first">
-                                    <div class="podium-player" id="podium-first">
-                                        <span class="podium-medal">🥇</span>
-                                        <div class="podium-rank">1st Place</div>
-                                        <div class="podium-name">-</div>
-                                    </div>
-                                    <div class="podium-block first">1</div>
+                                <div class="podium-position podium-position--champion" id="podium-first">
+                                    <div class="podium-medal medal medal--gold">1</div>
+                                    <div class="podium-rank">Champion</div>
+                                    <div class="podium-name">-</div>
                                 </div>
-
-                                <div class="podium-position third">
-                                    <div class="podium-player" id="podium-third">
-                                        <span class="podium-medal">🥉</span>
-                                        <div class="podium-rank">3rd Place</div>
-                                        <div class="podium-name">-</div>
-                                    </div>
-                                    <div class="podium-block third">3</div>
+                                <div class="podium-position" id="podium-third">
+                                    <div class="podium-medal medal medal--bronze">3</div>
+                                    <div class="podium-rank">3rd Place</div>
+                                    <div class="podium-name">-</div>
                                 </div>
                             </div>
 
                             <div class="celebration-highlights">
-                                <div class="highlights-title">🎯 Tournament Highlights</div>
+                                <div class="highlights-title">Tournament Highlights</div>
                                 <div class="highlights-grid" id="highlightsGrid">
                                     <!-- Highlights will be populated here -->
                                 </div>
@@ -1540,34 +1528,26 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Tournament In Progress Warning Modal -->
         <div id="tournamentProgressModal" class="modal">
-            <div class="modal-content">
-                <h3>🏆 Tournament Already in Progress</h3>
-                <div style="margin: 20px 0; line-height: 1.6;">
-                    <p><strong>This tournament is currently active with matches in progress.</strong></p>
-                    <p>To generate a new bracket, you'll need to reset the tournament first.</p>
-
-                    <div
-                        style="background: #f8f9fa; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                        <p style="margin: 0; font-weight: 600;">💡 How to Reset:</p>
-                        <p style="margin: 8px 0 0 0;">Go to <strong>Setup page</strong> → <strong>"Reset
-                                Tournament"</strong> button</p>
-                    </div>
-
-                    <div
-                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                        <p style="margin: 0; font-weight: 600;">⚠️ Important:</p>
-                        <p style="margin: 8px 0 0 0;">Resetting will keep all players but clear match results and
-                            bracket progress.</p>
-                    </div>
-
-                    <div
-                        style="background: #fefce8; padding: 15px; margin: 15px 0; border-left: 4px solid #d97706;">
-                        <p style="margin: 0; font-weight: 600;">🕐 Player arrived late?</p>
-                        <p style="margin: 8px 0 0 0;">Use the <strong>"Player arrived late?"</strong> button at the
-                            bottom of the Tournament Players list.</p>
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="progressTournamentName">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="progressTournamentStatus">-</div>
+                        <div class="dlg__sidebar-label">Progress</div>
+                        <div class="dlg__sidebar-value" id="progressMatchProgress">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="progressPlayerCount">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill">Warning</span>
+                        <h2 class="dlg__title">Tournament already in progress</h2>
+                        <p class="dlg__desc">To start fresh or change the bracket, reset the tournament from the <strong>Setup</strong> page. Players are kept; only matches and bracket are cleared.</p>
+                        <p class="dlg__desc">If a player arrived late, use the <strong>Player arrived late?</strong> button at the bottom of the Tournament Players list instead.</p>
                     </div>
                 </div>
-                <div class="text-center mt-20">
+                <div class="dlg__foot">
                     <button class="btn" onclick="popDialog()">Got It</button>
                 </div>
             </div>
@@ -1575,235 +1555,143 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Reset Tournament Confirmation Modal -->
         <div id="resetTournamentModal" class="modal">
-            <div class="modal-content">
-                <h3>⚠️ Reset Tournament Confirmation</h3>
-                <div style="margin: 20px 0; line-height: 1.6;">
-                    <div
-                        style="background: #faf8f3; padding: 15px; margin-bottom: 20px; border-left: 4px solid rgba(180, 83, 9, 1);">
-                        <p style="margin: 0; font-weight: 600;">🚨 WARNING: This action cannot be undone!</p>
-                    </div>
-
-                    <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
-                        <h4 style="margin: 0 0 10px 0; color: #333;">Tournament Details:</h4>
-                        <p style="margin: 5px 0;"><strong>Name:</strong> <span id="resetTournamentName">-</span></p>
-                        <p style="margin: 5px 0;"><strong>Progress:</strong> <span id="resetMatchProgress">-</span></p>
-                        <p style="margin: 5px 0;"><strong>Players:</strong> <span id="resetPlayerCount">-</span>
-                            registered</p>
-                    </div>
-
-                    <div
-                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                        <h4 style="margin: 0 0 10px 0; color: #111827;">This will permanently delete:</h4>
-                        <ul style="margin: 10px 0; padding-left: 20px; color: #111827;">
-                            <li>All match results</li>
-                            <li>All bracket progress</li>
-                            <li>All tournament standings</li>
-                        </ul>
-                        <p style="margin: 8px 0 0 0; font-weight: 600; color: #111827;">Players will be kept but their
-                            elimination status will be reset.</p>
-                    </div>
-
-                    <div
-                        style="background: #f2f5f4; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                        <p style="margin: 0; font-weight: 600; color: #111827;">🔒 Security Confirmation Required</p>
-                        <p style="margin: 8px 0 12px 0; color: #111827;">Type the tournament name exactly to confirm
-                            reset:</p>
-                        <input type="text" id="resetConfirmationInput" placeholder="Tournament name..."
-                            style="width: 100%; padding: 8px; border: 2px solid rgba(22, 101, 52, 1); font-size: 14px; border-radius: 0;"
-                            autocomplete="off">
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="resetTournamentName">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="resetTournamentStatus">-</div>
+                        <div class="dlg__sidebar-label">Progress</div>
+                        <div class="dlg__sidebar-value" id="resetMatchProgress">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="resetPlayerCount">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill">Destructive</span>
+                        <h2 class="dlg__title">Reset tournament</h2>
+                        <p class="dlg__desc">All matches, brackets and standings will be permanently deleted. Players are kept, but their elimination status is reset.</p>
+                        <div>
+                            <label class="dlg__label" for="resetConfirmationInput">Type the tournament name to confirm</label>
+                            <input type="text" id="resetConfirmationInput" class="dlg__input" autocomplete="off">
+                        </div>
                     </div>
                 </div>
-                <div class="text-center mt-20">
-                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
-                    <button class="btn btn-warning" id="confirmResetBtn" onclick="confirmReset()" disabled>Reset
-                        Tournament</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
+                    <button class="btn btn-warning" id="confirmResetBtn" onclick="confirmReset()" disabled>Reset Tournament</button>
                 </div>
             </div>
         </div>
 
         <!-- Delete Tournament Confirmation Modal -->
         <div id="deleteTournamentModal" class="modal">
-            <div class="modal-content">
-                <h3>🗑️ Delete Tournament Confirmation</h3>
-                <div style="margin: 20px 0; line-height: 1.6;">
-                    <div
-                        style="background: #f8d7da; padding: 15px; margin-bottom: 20px; border-left: 4px solid #dc3545;">
-                        <p style="margin: 0; font-weight: 600; color: #721c24;">⚠️ DANGER: This action cannot be undone!
-                        </p>
-                    </div>
-
-                    <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
-                        <h4 style="margin: 0 0 10px 0; color: #333;">Tournament to Delete:</h4>
-                        <p style="margin: 5px 0; font-size: 16px;"><strong>Name:</strong> <span
-                                id="deleteTournamentName">-</span></p>
-                        <p style="margin: 5px 0;"><strong>Date:</strong> <span id="deleteTournamentDate">-</span></p>
-                        <p style="margin: 5px 0;"><strong>Players:</strong> <span id="deleteTournamentPlayers">-</span>
-                        </p>
-                        <p style="margin: 5px 0;"><strong>Status:</strong> <span id="deleteTournamentStatus">-</span>
-                        </p>
-                    </div>
-
-                    <div
-                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                        <h4 style="margin: 0 0 10px 0; color: #856404;">This will permanently remove:</h4>
-                        <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
-                            <li>All tournament data</li>
-                            <li>All player statistics</li>
-                            <li>All match results and history</li>
-                            <li>Tournament configuration</li>
-                        </ul>
-                        <p style="margin: 8px 0 0 0; font-weight: 600; color: #856404;">The tournament file will be
-                            completely removed from your device.</p>
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="deleteTournamentName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="deleteTournamentDate">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="deleteTournamentStatus">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="deleteTournamentPlayers">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill dlg__pill--danger">Destructive</span>
+                        <h2 class="dlg__title">Delete tournament</h2>
+                        <p class="dlg__desc">The tournament file will be completely removed from your device. All tournament data, player statistics, match results, history, and configuration go with it.</p>
+                        <p class="dlg__desc">The tournament's record in Analytics is not affected and remains available for review.</p>
                     </div>
                 </div>
-                <div class="text-center mt-20">
-                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
-                    <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDeleteTournament()">Delete
-                        Tournament</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
+                    <button class="btn btn-danger" id="confirmDeleteBtn" onclick="confirmDeleteTournament()">Delete Tournament</button>
                 </div>
             </div>
         </div>
 
         <!-- Import Tournament Overwrite Modal -->
         <div id="importOverwriteModal" class="modal">
-            <div class="modal-content">
-                <h3>📂 Tournament Already Exists</h3>
-                <div style="margin: 20px 0; line-height: 1.6;">
-                    <div
-                        style="background: #e7f3ff; padding: 15px; margin-bottom: 20px; border-left: 4px solid #0056b3;">
-                        <p style="margin: 0; font-weight: 600; color: #0056b3;">A tournament with this name and date
-                            already exists in your system.</p>
-                    </div>
-
-                    <div style="background: #f8f9fa; padding: 15px; margin: 15px 0;">
-                        <h4 style="margin: 0 0 10px 0; color: #333;">Tournament Details:</h4>
-                        <p style="margin: 5px 0; font-size: 16px;"><strong>Name:</strong> <span
-                                id="importTournamentName">-</span></p>
-                        <p style="margin: 5px 0;"><strong>Date:</strong> <span id="importTournamentDate">-</span></p>
-                    </div>
-
-                    <div
-                        style="background: #faf8f3; padding: 15px; margin: 15px 0; border-left: 4px solid rgba(180, 83, 9, 1);">
-                        <h4 style="margin: 0 0 10px 0; color: #856404;">If you choose to overwrite:</h4>
-                        <ul style="margin: 10px 0; padding-left: 20px; color: #856404;">
-                            <li>Current tournament data will be completely replaced</li>
-                            <li>All existing match results will be lost</li>
-                            <li>Player statistics will be overwritten</li>
-                            <li>This action cannot be undone</li>
-                        </ul>
-                    </div>
-
-                    <div style="background: #d1ecf1; padding: 15px; margin: 15px 0; border-left: 4px solid #17a2b8;">
-                        <p style="margin: 0; font-weight: 600; color: #0c5460;">💡 Alternative:</p>
-                        <p style="margin: 8px 0 0 0; color: #0c5460;">You can cancel and rename the imported tournament
-                            file to avoid overwriting.</p>
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="importTournamentName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="importTournamentDate">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="importTournamentStatus">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill">Destructive</span>
+                        <h2 class="dlg__title">Tournament already exists</h2>
+                        <p class="dlg__desc">Importing this file will replace the matching tournament on your device. All existing match results, player statistics, and tournament data will be lost.</p>
+                        <p class="dlg__desc">Alternative: cancel and rename the imported tournament file to keep both.</p>
                     </div>
                 </div>
-                <div class="text-center mt-20">
-                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel Import</button>
-                    <button class="btn btn-warning" id="confirmOverwriteBtn"
-                        onclick="confirmOverwriteTournament()">Overwrite Existing</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel Import</button>
+                    <button class="btn btn-warning" id="confirmOverwriteBtn" onclick="confirmOverwriteTournament()">Overwrite Existing</button>
                 </div>
             </div>
         </div>
 
         <!-- Import Tournament Confirmation Modal -->
         <div id="importConfirmModal" class="modal">
-            <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
-                <h3>📥 Import Tournament Confirmation</h3>
-                <div style="margin: 15px 0; line-height: 1.4;">
-                    <div
-                        style="background: #d1ecf1; padding: 12px; margin-bottom: 15px; border-left: 4px solid #17a2b8;">
-                        <p style="margin: 0; font-weight: 600; color: #0c5460;">ℹ️ Data Safety Guaranteed</p>
-                        <p style="margin: 6px 0 0 0; color: #0c5460;">Your current tournament data is automatically
-                            saved and can be reloaded at any time. Importing a tournament will not cause any
-                            data loss.</p>
-                    </div>
-
-                    <!-- Old Format Warning (conditionally shown) -->
-                    <div id="oldFormatWarningSection"
-                        style="background: #faf8f3; padding: 12px; margin-bottom: 15px; border-left: 4px solid rgba(180, 83, 9, 1); display: none;">
-                        <p style="margin: 0; font-weight: 600; color: #856404;">⚠️ Undo History Unavailable</p>
-                        <p style="margin: 6px 0 0 0; color: #856404;">This tournament is from an older version. It will
-                            import successfully but undo functionality will not be available. All other features work
-                            normally.</p>
-                    </div>
-
-                    <div style="background: #e7f3ff; padding: 12px; margin: 12px 0; border-left: 4px solid #0056b3;">
-                        <h4 style="margin: 0 0 8px 0; color: #0056b3;">Tournament to Import:</h4>
-                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
-                                id="importConfirmName">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="importConfirmDate">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="importConfirmMatches">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="importConfirmPlayers">-</span></p>
-                    </div>
-
-                    <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">
-                        <p style="margin: 0; font-weight: 600; color: #155724;">✓ What will be imported:</p>
-                        <ul style="margin: 8px 0; padding-left: 18px; color: #155724;">
-                            <li>Tournament data and settings</li>
-                            <li>All registered players</li>
-                            <li>Match results and bracket structure</li>
-                            <li>Final placements (if tournament completed)</li>
-                            <li id="importUndoHistoryNote">Full undo history</li>
-                        </ul>
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="importConfirmName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="importConfirmDate">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="importConfirmStatus">-</div>
+                        <div class="dlg__sidebar-label">Progress</div>
+                        <div class="dlg__sidebar-value" id="importConfirmMatches">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="importConfirmPlayers">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill" id="importOldFormatPill" style="display: none;">Old format</span>
+                        <h2 class="dlg__title">Import tournament</h2>
+                        <p class="dlg__desc">Your current tournament data is automatically saved and can be reloaded at any time — importing will not cause any data loss.</p>
+                        <p class="dlg__desc" id="importOldFormatWarning" style="display: none;">This tournament is from an older version. It will import successfully, but undo history will not be available. All other features work normally.</p>
                     </div>
                 </div>
-                <div class="text-center mt-20">
-                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel Import</button>
-                    <button class="btn btn-primary" id="confirmImportBtn" onclick="confirmImport()">Import
-                        Tournament</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
+                    <button class="btn btn-primary" id="confirmImportBtn" onclick="confirmImport()">Import Tournament</button>
                 </div>
             </div>
         </div>
 
         <!-- Load Tournament Confirmation Modal -->
         <div id="loadTournamentModal" class="modal">
-            <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
-                <h3>🔄 Load Tournament Confirmation</h3>
-                <div style="margin: 15px 0; line-height: 1.4;">
-                    <div
-                        style="background: #d1ecf1; padding: 12px; margin-bottom: 15px; border-left: 4px solid #17a2b8;">
-                        <p style="margin: 0; font-weight: 600; color: #0c5460;">ℹ️ Data Safety Guaranteed</p>
-                        <p style="margin: 6px 0 0 0; color: #0c5460;">Your current tournament data is automatically
-                            saved and can be reloaded at any time. Loading a different tournament will not cause any
-                            data loss.</p>
-                    </div>
-
-                    <div id="currentTournamentSection"
-                        style="background: #f8f9fa; padding: 12px; margin: 12px 0; display: none;">
-                        <h4 style="margin: 0 0 8px 0; color: #333;">Current Tournament:</h4>
-                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
-                                id="currentTournamentName">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="currentTournamentDate">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="currentMatchProgress">-</span>
-                        </p>
-                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="currentPlayerCount">-</span></p>
-                    </div>
-
-                    <div style="background: #e7f3ff; padding: 12px; margin: 12px 0; border-left: 4px solid #0056b3;">
-                        <h4 style="margin: 0 0 8px 0; color: #0056b3;" id="loadActionTitle">You are about to load:</h4>
-                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
-                                id="loadTournamentName">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="loadTournamentDate">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Progress:</strong> <span id="loadMatchProgress">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="loadPlayerCount">-</span></p>
-                    </div>
-
-                    <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">
-                        <p style="margin: 0; font-weight: 600; color: #155724;">✓ What happens next:</p>
-                        <ul style="margin: 8px 0; padding-left: 18px; color: #155724;">
-                            <li>Current tournament data is automatically saved</li>
-                            <li>Selected tournament becomes active</li>
-                            <li>You'll be taken to the Registration page</li>
-                            <li>All settings and configurations remain unchanged</li>
-                        </ul>
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="loadTournamentName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="loadTournamentDate">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="loadTournamentStatus">-</div>
+                        <div class="dlg__sidebar-label">Progress</div>
+                        <div class="dlg__sidebar-value" id="loadMatchProgress">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="loadPlayerCount">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <h2 class="dlg__title">Load tournament</h2>
+                        <p class="dlg__desc" id="loadTournamentDesc">-</p>
                     </div>
                 </div>
-                <div class="text-center mt-20">
-                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
-                    <button class="btn btn-primary" id="confirmLoadBtn" onclick="confirmLoadTournament()">Load
-                        Tournament</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
+                    <button class="btn btn-primary" id="confirmLoadBtn" onclick="confirmLoadTournament()">Load Tournament</button>
                 </div>
             </div>
         </div>

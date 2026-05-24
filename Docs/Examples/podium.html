@@ -1,0 +1,539 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Tournament Podium</title>
+<style>
+  * { box-sizing: border-box; }
+
+  :root {
+    --gold: #e6b542;
+    --gold-light: #f4d068;
+    --gold-dark: #a07410;
+    --silver: #b6b9be;
+    --silver-light: #d8dadc;
+    --silver-dark: #7a7e84;
+    --bronze: #b87333;
+    --bronze-light: #d49158;
+    --bronze-dark: #7a4818;
+  }
+
+  body {
+    margin: 0;
+    padding: 60px 40px 120px;
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "SF Pro Display", "Segoe UI", sans-serif;
+    background: #eef0f3;
+    color: #2a2f3a;
+    min-height: 100vh;
+  }
+
+  h1 {
+    font-weight: 300;
+    letter-spacing: 0.5px;
+    margin: 0 0 8px;
+    text-align: center;
+  }
+
+  .lede {
+    text-align: center;
+    color: #7a8090;
+    margin: 0 0 16px;
+  }
+
+  .container { max-width: 1000px; margin: 0 auto; }
+
+  .variant-label {
+    font-weight: 600;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    color: #7a8090;
+    margin: 80px 0 8px;
+    text-align: center;
+  }
+
+  .variant-note {
+    text-align: center;
+    color: #7a8090;
+    font-size: 13px;
+    margin: 0 auto 48px;
+    max-width: 540px;
+    line-height: 1.5;
+  }
+
+  /* ============================================================
+     SHARED — Medal disc (CSS-only)
+     Radial gradient gives a soft "metallic" highlight.
+     ============================================================ */
+  .medal {
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    color: white;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
+    border: 3px solid rgba(255, 255, 255, 0.35);
+    flex-shrink: 0;
+  }
+  .medal--gold {
+    background: radial-gradient(circle at 32% 30%, var(--gold-light), var(--gold) 55%, var(--gold-dark));
+    box-shadow: 0 4px 12px rgba(212, 175, 55, 0.45);
+  }
+  .medal--silver {
+    background: radial-gradient(circle at 32% 30%, var(--silver-light), var(--silver) 55%, var(--silver-dark));
+    box-shadow: 0 4px 12px rgba(140, 144, 150, 0.40);
+  }
+  .medal--bronze {
+    background: radial-gradient(circle at 32% 30%, var(--bronze-light), var(--bronze) 55%, var(--bronze-dark));
+    box-shadow: 0 4px 12px rgba(184, 115, 51, 0.45);
+  }
+
+  /* ============================================================
+     VARIANT A — Classic Olympic podium
+     Cards sit flush on top of properly tiered blocks.
+     ============================================================ */
+  .pa {
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  .pa__col {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 180px;
+  }
+  .pa__card {
+    background: white;
+    border-radius: 14px 14px 0 0;
+    padding: 24px 16px 22px;
+    text-align: center;
+    width: 100%;
+    box-shadow: 0 -10px 28px rgba(20, 25, 35, 0.08);
+    position: relative;
+    z-index: 2;
+  }
+  .pa__medal {
+    width: 56px;
+    height: 56px;
+    font-size: 22px;
+    margin: 0 auto 12px;
+  }
+  .pa__place {
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8b91a0;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .pa__name {
+    font-size: 17px;
+    font-weight: 600;
+    color: #1a1f2a;
+    letter-spacing: -0.2px;
+  }
+  .pa__block {
+    width: 100%;
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    padding-top: 16px;
+    font-size: 34px;
+    font-weight: 700;
+    color: rgba(255, 255, 255, 0.85);
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+    position: relative;
+    z-index: 1;
+  }
+  /* Subtle top edge highlight for podium "depth" */
+  .pa__block::before {
+    content: "";
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.25);
+  }
+  .pa__block--gold {
+    height: 160px;
+    background: linear-gradient(180deg, var(--gold) 0%, var(--gold-dark) 100%);
+  }
+  .pa__block--silver {
+    height: 120px;
+    background: linear-gradient(180deg, var(--silver) 0%, var(--silver-dark) 100%);
+  }
+  .pa__block--bronze {
+    height: 88px;
+    background: linear-gradient(180deg, var(--bronze) 0%, var(--bronze-dark) 100%);
+  }
+
+  /* ============================================================
+     VARIANT B — Champion Hero
+     1st place dominates; 2nd/3rd flank as supporting cards.
+     ============================================================ */
+  .pb {
+    display: grid;
+    grid-template-columns: 1fr 1.35fr 1fr;
+    gap: 16px;
+    align-items: center;
+    max-width: 720px;
+    margin: 0 auto;
+  }
+  .pb__card {
+    background: white;
+    border-radius: 14px;
+    padding: 24px 20px;
+    text-align: center;
+    box-shadow: 0 4px 20px rgba(20, 25, 35, 0.07);
+  }
+  .pb__card--hero {
+    padding: 36px 24px;
+    background: linear-gradient(180deg, #fff9ec 0%, #ffffff 65%);
+    box-shadow:
+      0 0 0 1px rgba(230, 181, 66, 0.35),
+      0 12px 36px rgba(230, 181, 66, 0.25),
+      0 4px 16px rgba(20, 25, 35, 0.08);
+  }
+  .pb__medal {
+    width: 48px;
+    height: 48px;
+    font-size: 18px;
+    margin: 0 auto 12px;
+  }
+  .pb__medal--hero {
+    width: 76px;
+    height: 76px;
+    font-size: 30px;
+    border-width: 4px;
+    margin-bottom: 16px;
+  }
+  .pb__place {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8b91a0;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .pb__place--hero {
+    color: var(--gold-dark);
+    font-size: 11px;
+    letter-spacing: 2px;
+  }
+  .pb__name {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1a1f2a;
+  }
+  .pb__name--hero {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: -0.3px;
+  }
+
+  /* ============================================================
+     VARIANT C — Drop-in (dialog-friendly trio)
+     Compact, no physical podium, 1st gently emphasized.
+     Designed to slot inside the Tournament Complete dialog.
+     ============================================================ */
+  .pc {
+    display: grid;
+    grid-template-columns: 1fr 1.15fr 1fr;
+    gap: 14px;
+    align-items: stretch;
+    max-width: 520px;
+    margin: 0 auto;
+  }
+  .pc__card {
+    background: white;
+    border-radius: 12px;
+    padding: 18px 14px;
+    text-align: center;
+    border: 1px solid #ecedf1;
+    box-shadow: 0 2px 10px rgba(20, 25, 35, 0.05);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+  }
+  .pc__card--gold {
+    padding: 22px 14px;
+    border-color: rgba(230, 181, 66, 0.35);
+    background: linear-gradient(180deg, #fff9ec 0%, #ffffff 70%);
+    box-shadow:
+      0 0 0 1px rgba(230, 181, 66, 0.18),
+      0 6px 18px rgba(230, 181, 66, 0.18);
+  }
+  .pc__medal {
+    width: 40px;
+    height: 40px;
+    font-size: 15px;
+  }
+  .pc__medal--hero {
+    width: 54px;
+    height: 54px;
+    font-size: 20px;
+  }
+  .pc__place {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: #8b91a0;
+    font-weight: 600;
+  }
+  .pc__place--hero { color: var(--gold-dark); }
+  .pc__name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1a1f2a;
+  }
+  .pc__name--hero {
+    font-size: 18px;
+    font-weight: 700;
+    letter-spacing: -0.2px;
+  }
+
+  /* ============================================================
+     Mock dialog frame — shows variant C in context
+     ============================================================ */
+  .mock {
+    max-width: 700px;
+    margin: 32px auto 0;
+    background: linear-gradient(180deg, #f0f4fa 0%, #f8f9fb 60%);
+    border-radius: 16px;
+    padding: 36px 40px;
+    box-shadow: 0 14px 50px rgba(20, 25, 35, 0.14);
+  }
+  .mock__title {
+    font-size: 22px;
+    font-weight: 700;
+    text-align: center;
+    margin: 0 0 6px;
+    color: #1a1f2a;
+  }
+  .mock__sub {
+    font-size: 13px;
+    color: #7a8090;
+    text-align: center;
+    margin: 0 0 28px;
+  }
+  .mock__highlights-title {
+    text-align: center;
+    font-weight: 600;
+    font-size: 13px;
+    margin: 32px 0 14px;
+    color: #4a5160;
+  }
+  .mock__highlights {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+    background: white;
+    border-radius: 12px;
+    padding: 14px;
+    border: 1px solid #ecedf1;
+  }
+  .mock__hl {
+    text-align: center;
+    padding: 10px;
+  }
+  .mock__hl-label {
+    font-size: 11px;
+    color: #8b91a0;
+    text-transform: uppercase;
+    letter-spacing: 1.2px;
+    font-weight: 600;
+    margin-bottom: 4px;
+  }
+  .mock__hl-value {
+    font-size: 17px;
+    font-weight: 700;
+    color: #1a1f2a;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Tournament Podium</h1>
+    <p class="lede">Three takes on the winners' podium.</p>
+
+    <!-- ============================================================
+         VARIANT A
+         ============================================================ -->
+    <p class="variant-label">Variant A — Classic Olympic</p>
+    <p class="variant-note">Cards sit flush on top of properly tiered blocks. Real medal colors with metallic gradients. The whole composition reads as one object.</p>
+
+    <div class="pa">
+      <div class="pa__col">
+        <div class="pa__card">
+          <div class="medal medal--silver pa__medal">2</div>
+          <div class="pa__place">2nd Place</div>
+          <div class="pa__name">Christian</div>
+        </div>
+        <div class="pa__block pa__block--silver">2</div>
+      </div>
+      <div class="pa__col">
+        <div class="pa__card">
+          <div class="medal medal--gold pa__medal">1</div>
+          <div class="pa__place">1st Place</div>
+          <div class="pa__name">Bob</div>
+        </div>
+        <div class="pa__block pa__block--gold">1</div>
+      </div>
+      <div class="pa__col">
+        <div class="pa__card">
+          <div class="medal medal--bronze pa__medal">3</div>
+          <div class="pa__place">3rd Place</div>
+          <div class="pa__name">Carl</div>
+        </div>
+        <div class="pa__block pa__block--bronze">3</div>
+      </div>
+    </div>
+
+    <!-- In-context mock -->
+    <p class="variant-note" style="margin: 56px auto 0;">…inside the actual dialog frame, for context:</p>
+
+    <div class="mock">
+      <h2 class="mock__title">8-player Complete!</h2>
+      <p class="mock__sub">April 21, 2026 · Congratulations to all 6 players!</p>
+
+      <div class="pa">
+        <div class="pa__col">
+          <div class="pa__card">
+            <div class="medal medal--silver pa__medal">2</div>
+            <div class="pa__place">2nd Place</div>
+            <div class="pa__name">Christian</div>
+          </div>
+          <div class="pa__block pa__block--silver">2</div>
+        </div>
+        <div class="pa__col">
+          <div class="pa__card">
+            <div class="medal medal--gold pa__medal">1</div>
+            <div class="pa__place">1st Place</div>
+            <div class="pa__name">Bob</div>
+          </div>
+          <div class="pa__block pa__block--gold">1</div>
+        </div>
+        <div class="pa__col">
+          <div class="pa__card">
+            <div class="medal medal--bronze pa__medal">3</div>
+            <div class="pa__place">3rd Place</div>
+            <div class="pa__name">Carl</div>
+          </div>
+          <div class="pa__block pa__block--bronze">3</div>
+        </div>
+      </div>
+
+      <div class="mock__highlights-title">Tournament Highlights</div>
+      <div class="mock__highlights">
+        <div class="mock__hl">
+          <div class="mock__hl-label">Most 180s</div>
+          <div class="mock__hl-value">None</div>
+        </div>
+        <div class="mock__hl">
+          <div class="mock__hl-label">Highest Checkout</div>
+          <div class="mock__hl-value">None</div>
+        </div>
+        <div class="mock__hl">
+          <div class="mock__hl-label">Shortest Leg</div>
+          <div class="mock__hl-value">None</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         VARIANT B
+         ============================================================ -->
+    <p class="variant-label">Variant B — Champion Hero</p>
+    <p class="variant-note">1st place dominates with a larger card, gold-tinted background, and a bigger medal. 2nd and 3rd flank as supporting cards. Celebratory feel.</p>
+
+    <div class="pb">
+      <div class="pb__card">
+        <div class="medal medal--silver pb__medal">2</div>
+        <div class="pb__place">2nd Place</div>
+        <div class="pb__name">Christian</div>
+      </div>
+      <div class="pb__card pb__card--hero">
+        <div class="medal medal--gold pb__medal pb__medal--hero">1</div>
+        <div class="pb__place pb__place--hero">Champion</div>
+        <div class="pb__name pb__name--hero">Bob</div>
+      </div>
+      <div class="pb__card">
+        <div class="medal medal--bronze pb__medal">3</div>
+        <div class="pb__place">3rd Place</div>
+        <div class="pb__name">Carl</div>
+      </div>
+    </div>
+
+    <!-- ============================================================
+         VARIANT C — drop-in for the Tournament Complete dialog
+         ============================================================ -->
+    <p class="variant-label">Variant C — Drop-in for dialog</p>
+    <p class="variant-note">A compact horizontal trio with 1st gently emphasized by a gold ring, soft tint, and a larger medal. No physical podium blocks — the visual hierarchy comes from card weight, so it sits cleanly alongside the Highlights cards below it.</p>
+
+    <!-- Standalone -->
+    <div class="pc">
+      <div class="pc__card">
+        <div class="medal medal--silver pc__medal">2</div>
+        <div class="pc__place">2nd Place</div>
+        <div class="pc__name">Christian</div>
+      </div>
+      <div class="pc__card pc__card--gold">
+        <div class="medal medal--gold pc__medal pc__medal--hero">1</div>
+        <div class="pc__place pc__place--hero">Champion</div>
+        <div class="pc__name pc__name--hero">Bob</div>
+      </div>
+      <div class="pc__card">
+        <div class="medal medal--bronze pc__medal">3</div>
+        <div class="pc__place">3rd Place</div>
+        <div class="pc__name">Carl</div>
+      </div>
+    </div>
+
+    <!-- In-context mock -->
+    <p class="variant-note" style="margin: 56px auto 0;">…inside the actual dialog frame, for context:</p>
+
+    <div class="mock">
+      <h2 class="mock__title">8-player Complete!</h2>
+      <p class="mock__sub">April 21, 2026 · Congratulations to all 6 players!</p>
+
+      <div class="pc">
+        <div class="pc__card">
+          <div class="medal medal--silver pc__medal">2</div>
+          <div class="pc__place">2nd Place</div>
+          <div class="pc__name">Christian</div>
+        </div>
+        <div class="pc__card pc__card--gold">
+          <div class="medal medal--gold pc__medal pc__medal--hero">1</div>
+          <div class="pc__place pc__place--hero">Champion</div>
+          <div class="pc__name pc__name--hero">Bob</div>
+        </div>
+        <div class="pc__card">
+          <div class="medal medal--bronze pc__medal">3</div>
+          <div class="pc__place">3rd Place</div>
+          <div class="pc__name">Carl</div>
+        </div>
+      </div>
+
+      <div class="mock__highlights-title">Tournament Highlights</div>
+      <div class="mock__highlights">
+        <div class="mock__hl">
+          <div class="mock__hl-label">Most 180s</div>
+          <div class="mock__hl-value">None</div>
+        </div>
+        <div class="mock__hl">
+          <div class="mock__hl-label">Highest Checkout</div>
+          <div class="mock__hl-value">None</div>
+        </div>
+        <div class="mock__hl">
+          <div class="mock__hl-label">Shortest Leg</div>
+          <div class="mock__hl-value">None</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+</html>
