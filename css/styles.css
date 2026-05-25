@@ -1256,7 +1256,9 @@ body {
 
 /* --split: metadata sidebar on the left, main content on the right */
 .dlg--split { max-width: 720px; }
-.dlg__grid { display: grid; grid-template-columns: 220px 1fr; }
+/* --wide: ~20% wider, used when content (long player names, 3-button footers) needs more room */
+.dlg--wide  { max-width: 880px; }
+.dlg__grid { display: grid; grid-template-columns: 260px 1fr; }
 .dlg__sidebar {
   padding: 24px 20px;
   background: #f7f8fa;
@@ -2022,6 +2024,139 @@ a:hover { color: #1e40af; }
   margin: 0;
   font-style: italic;
 }
+
+/* Winner Confirmation — progression lines + sidebar stats buttons */
+.winner-progression {
+  margin: 14px 0;
+}
+.winner-progression__title {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #8b91a0;
+  margin-bottom: 6px;
+}
+.winner-progression__winner { color: #065f46; margin-bottom: 2px; }
+.winner-progression__loser  { color: #dc2626; }
+.winner-stats-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.winner-stats-stack .btn {
+  width: 100%;
+  margin: 0;
+}
+
+/* Player Statistics editor — counter row + list editors */
+#statsModal .dlg { max-width: 620px; }  /* slightly wider than default 580px for the 3-col counter row */
+
+.stats-counter-row {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+}
+.stat-counter {
+  background: #f8f9fa;
+  border: 1px solid #ecedf1;
+  border-radius: 8px;
+  padding: 12px;
+  text-align: center;
+}
+.stat-counter__label {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: #8b91a0;
+  font-weight: 600;
+  margin-bottom: 10px;
+}
+.stat-counter__controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+}
+.stat-counter__value {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1a1f2a;
+  min-width: 28px;
+  text-align: center;
+}
+.stat-counter__btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1px solid #d8dbe2;
+  background: white;
+  font-size: 18px;
+  font-weight: 700;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: background 0.15s, border-color 0.15s;
+  font-family: inherit;
+}
+.stat-counter__btn:active { transform: translate(1.5px, 1.5px); }
+.stat-counter__btn--minus { color: #dc2626; }
+.stat-counter__btn--minus:hover { background: #fef2f2; border-color: #dc2626; }
+.stat-counter__btn--plus { color: #166534; }
+.stat-counter__btn--plus:hover { background: #dcfce7; border-color: #166534; }
+
+.stat-list-editor__input-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+}
+.stat-list-editor__input-row .dlg__input { flex: 1; }
+.stat-list-editor__input-row .btn { margin: 0; flex-shrink: 0; }
+
+/* Chip list — segmented-control style, each chip is clickable to remove */
+.stat-list-editor__items {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 10px;
+  padding: 4px;
+  background: #f3f5f7;
+  border-radius: 8px;
+}
+.stat-list-editor__items:empty { display: none; }
+
+.stat-list-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 12px;
+  background: white;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  font: inherit;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f2a;
+  cursor: pointer;
+  user-select: none;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+}
+.stat-list-item:hover {
+  background: #fef2f2;
+  color: #dc2626;
+  border-color: #fecaca;
+}
+.stat-list-item:active { transform: translate(1.5px, 1.5px); }
+
+.stat-list-item__x {
+  color: #b0b6c0;
+  font-size: 16px;
+  line-height: 1;
+  transition: color 0.15s;
+}
+.stat-list-item:hover .stat-list-item__x { color: #dc2626; }
 
 /* Enhanced Undo Confirmation Modal */
 .undo-header {

@@ -108,3 +108,22 @@ The undo dialog handles QR-completed matches identically to manually completed o
 - Achievements entered manually via the Statistics Modal are not tracked per-match. The transaction has no record of them.
 - The warning in the undo dialog is the only safeguard. The operator must review the leaderboard manually for any match where stats were hand-edited.
 - This is by design — adding per-match tracking to manual achievement entry is a separate, larger problem not addressed here.
+
+---
+
+## Planned — Match-Anchored Snapshot (next iteration)
+
+The current snapshot/diff approach has a subtler limitation: the snapshot is taken when the Confirm Winner modal opens, which is loose. If the dialog was previously opened for the same match (and exited via an abnormal path) or if other matches were completed in between, the snapshot can capture player state at the wrong moment — leading to achievements from earlier matches being attributed to a later match's transaction.
+
+The fix is to anchor the snapshot to the **Start Match** event instead:
+
+- New field: `match.preMatchSnapshot = { [player1Id]: snap, [player2Id]: snap }`
+- Created/overwritten in `toggleActive()` when activating the match
+- `showWinnerConfirmation` / `handleConfirm` / `handleCancel` read from `match.preMatchSnapshot` instead of the session-scoped `_completionSnapshot`
+- Fallback at dialog open for matches started before this lands (no migration needed)
+
+This gives every COMPLETE_MATCH transaction a solid, unambiguous baseline. The `achievements` field will correctly reflect only what was added between **this match's** Start and Confirm — no leakage between matches.
+
+A follow-up task addresses manual entry: stats added via the bare `openStatsModal` (Results table, Command Center) will be attributed to the player's last completed match transaction, closing the "manually entered, untracked" gap noted above.
+
+Full plan: `.claude/plans/eager-singing-garden.md`.

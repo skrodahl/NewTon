@@ -90,6 +90,16 @@ Use when tournament metadata adds context. Adds `.dlg--split` (widens to 720px) 
 </div>
 ```
 
+### Width modifier — `.dlg--wide`
+
+Adds ~20% more width (880px). Stack it onto either layout when the content needs the extra room — long player names that wrap, a 3-button footer, or richer body content:
+
+```html
+<div class="dlg dlg--split dlg--wide">...</div>
+```
+
+Used sparingly. The default widths (580px / 720px) are intentional — they keep dialogs feeling like dialogs rather than pages. Reach for `.dlg--wide` only when you've seen the content crowd at the default width.
+
 ---
 
 ## Sidebar conventions
@@ -186,7 +196,7 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 
 ## Migration status
 
-### Migrated (10)
+### Migrated (12)
 
 | Dialog | Modal ID | Layout | Pill |
 |---|---|---|---|
@@ -200,15 +210,15 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 | Analytics — Delete Tournament | `historyDeleteTournamentModal` | split | red Destructive |
 | Late Registration Info | `lateRegInfoModal` | default | none |
 | Export Tournament Results | `exportConfirmModal` | split | amber Incomplete (conditional) |
+| Confirm Match Winner | `winnerConfirmModal` | split + wide (match metadata, not tournament) | none |
+| Player Statistics Editor | `statsModal` | default | none |
 
-### Not yet migrated (12)
+### Not yet migrated (10)
 
 - `uploadToServerModal`
-- `statsModal`
 - `analyticsModal`
 - `qrResultScanModal`
 - `qrResultPreviewModal`
-- `winnerConfirmModal`
 - `matchDetailsModal`
 - `statisticsModal`
 - `bracketConfirmModal`

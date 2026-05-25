@@ -2336,7 +2336,7 @@ function rollbackAchievements(achievements) {
  * @param {string} matchId - e.g. 'FS-1-1', 'BS-2-3', 'GRAND-FINAL', 'BS-FINAL'
  * @returns {string}
  */
-function _undoBracketLabel(matchId) {
+function _bracketLabel(matchId) {
     if (matchId === 'GRAND-FINAL') return 'Grand Final';
     if (matchId === 'BS-FINAL') return 'Backside Final';
     if (matchId.startsWith('FS-')) return `Frontside Round ${matchId.split('-')[1]}`;
@@ -2444,7 +2444,7 @@ function showUndoConfirmationModal({matchId, consequentialMatches, transaction, 
     const p1 = matchObj?.player1?.name || 'TBD';
     const p2 = matchObj?.player2?.name || 'TBD';
     document.getElementById('undoSidebarMatch').textContent = matchId;
-    document.getElementById('undoSidebarBracket').textContent = _undoBracketLabel(matchId);
+    document.getElementById('undoSidebarBracket').textContent = _bracketLabel(matchId);
     document.getElementById('undoSidebarPlayers').textContent = `${p1} vs ${p2}`;
 
     // Build consequences body safely (no innerHTML / no interpolation of user data)

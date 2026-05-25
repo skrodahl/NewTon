@@ -126,13 +126,20 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Enter' && window.dialogStack.length > 0) {
         const topDialog = window.dialogStack[window.dialogStack.length - 1];
 
-        // Only handle Enter for the Edit Statistics dialog
         if (topDialog.id === 'statsModal') {
             e.preventDefault();
-            e.stopPropagation();
+            // stopImmediatePropagation prevents the winner-confirm keydown listener
+            // (also on document) from firing in this same event.
+            e.stopImmediatePropagation();
 
-            // Call saveStats function to save statistics
-            if (typeof saveStats === 'function') {
+            // Enter in a list-editor input behaves like clicking its Add button.
+            // Anywhere else (counters, buttons, body), Enter saves and closes.
+            const active = document.activeElement;
+            if (active && active.id === 'statsShortLegDarts' && typeof addShortLeg === 'function') {
+                addShortLeg();
+            } else if (active && active.id === 'statsHighOut' && typeof addHighOut === 'function') {
+                addHighOut();
+            } else if (typeof saveStats === 'function') {
                 saveStats();
                 console.log('🔑 Enter key saved statistics');
             }

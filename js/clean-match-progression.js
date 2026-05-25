@@ -6,7 +6,7 @@ let pendingFormat = 'DE';
 
 // Snapshot of player stats at the moment the winner confirmation modal opens.
 // Used to diff what changed during the session (for transaction achievements) and to
-// restore stats if the operator cancels.
+// restore stats if the operator cancels. Fresh on every open of the dialog.
 let _completionSnapshot = null;
 
 /**
@@ -2110,62 +2110,96 @@ if (typeof window !== 'undefined') {
  * Enhanced showWinnerConfirmation with proper leg score validation
  * Replaces the existing function in clean-match-progression.js
  */
+
+/**
+ * Build the match-progression block shown in the winner confirmation body.
+ * Safe — all player names and destinations go in via textContent.
+ */
+function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
+    const block = document.createElement('div');
+    block.className = 'winner-progression';
+
+    const title = document.createElement('div');
+    title.className = 'winner-progression__title';
+    title.textContent = 'Match Progression';
+    block.appendChild(title);
+
+    // Winner line
+    const winnerLine = document.createElement('div');
+    winnerLine.className = 'winner-progression__winner';
+    const wName = document.createElement('strong');
+    wName.textContent = winner.name;
+    winnerLine.appendChild(wName);
+    if (progression.winner) {
+        winnerLine.appendChild(document.createTextNode(' advances to '));
+        const dest = document.createElement('strong');
+        dest.textContent = progression.winner[0];
+        winnerLine.appendChild(dest);
+    } else {
+        winnerLine.appendChild(document.createTextNode(' wins the tournament!'));
+    }
+    block.appendChild(winnerLine);
+
+    // Loser line
+    const loserLine = document.createElement('div');
+    loserLine.className = 'winner-progression__loser';
+    const lName = document.createElement('strong');
+    lName.textContent = loser.name;
+    loserLine.appendChild(lName);
+    if (progression.loser) {
+        loserLine.appendChild(document.createTextNode(' moves to '));
+        const dest = document.createElement('strong');
+        dest.textContent = progression.loser[0];
+        loserLine.appendChild(dest);
+    } else {
+        const rank = typeof getEliminationRankForMatch === 'function'
+            ? getEliminationRankForMatch(matchId, tournament.bracketSize)
+            : null;
+        if (rank && typeof formatRanking === 'function') {
+            loserLine.appendChild(document.createTextNode(' is placed '));
+            const rankText = document.createElement('strong');
+            rankText.textContent = formatRanking(rank);
+            loserLine.appendChild(rankText);
+        } else {
+            loserLine.appendChild(document.createTextNode(' is eliminated'));
+        }
+    }
+    block.appendChild(loserLine);
+
+    return block;
+}
+
 function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const modal = document.getElementById('winnerConfirmModal');
-    const message = document.getElementById('winnerConfirmMessage');
+    const body = document.getElementById('winnerConfirmBody');
     const cancelBtn = document.getElementById('winnerConfirmCancel');
     const confirmBtn = document.getElementById('winnerConfirmOK');
 
-    if (!modal || !message || !cancelBtn || !confirmBtn) {
+    if (!modal || !body || !cancelBtn || !confirmBtn) {
         console.error('Winner confirmation modal elements not found');
         return false;
     }
 
-    // Get progression information for this match
-    let progressionInfo = '';
-    const progressionTable = getProgressionTable();
-    if (progressionTable) {
-        const progression = progressionTable[matchId];
-        if (progression) {
-            progressionInfo += '<div style="margin: 15px 0; padding: 10px; background: #f8f9fa; border-left: 4px solid #065f46;">';
-            progressionInfo += '<div style="font-weight: 600; color: #065f46; margin-bottom: 5px;">Match Progression:</div>';
-            
-            // Winner advancement
-            if (progression.winner) {
-                progressionInfo += `<div style="color: #065f46;">✓ <strong>${winner.name}</strong> advances to <strong>${progression.winner[0]}</strong></div>`;
-            } else {
-                progressionInfo += `<div style="color: #065f46;">✓ <strong>${winner.name}</strong> wins the tournament!</div>`;
-            }
-            
-            // Loser advancement or elimination
-            if (progression.loser) {
-                progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> moves to <strong>${progression.loser[0]}</strong></div>`;
-            } else {
-                // Player is eliminated - show placement rank
-                const rank = typeof getEliminationRankForMatch === 'function'
-                    ? getEliminationRankForMatch(matchId, tournament.bracketSize)
-                    : null;
-                if (rank && typeof formatRanking === 'function') {
-                    const rankText = formatRanking(rank);
-                    progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> is placed <strong>${rankText}</strong></div>`;
-                } else {
-                    progressionInfo += `<div style="color: #dc2626;">• <strong>${loser.name}</strong> is eliminated</div>`;
-                }
-            }
-            
-            progressionInfo += '</div>';
-        }
-    }
+    // Sidebar — match metadata + Edit Statistics links (safe via textContent)
+    document.getElementById('winnerSidebarMatch').textContent = matchId;
+    document.getElementById('winnerSidebarBracket').textContent = _bracketLabel(matchId);
+    const winnerLink = document.getElementById('winnerStatsLink');
+    winnerLink.textContent = winner.name;
+    winnerLink.onclick = () => openStatsModalFromConfirmation(winner.id, matchId);
+    const loserLink = document.getElementById('loserStatsLink');
+    loserLink.textContent = loser.name;
+    loserLink.onclick = () => openStatsModalFromConfirmation(loser.id, matchId);
 
-    // Set message content with clickable player names and progression info
-    message.innerHTML = `
-        Declare <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${winner.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${winner.name}</span></strong> as the WINNER<br>
-        against <strong><span class="clickable-player-name" onclick="openStatsModalFromConfirmation(${loser.id}, '${matchId}')" style="cursor: pointer; text-decoration: underline; color: #065f46;">${loser.name}</span></strong> in match <strong>${matchId}</strong>
-        <br><br>
-        <small style="color: #6b7280; font-style: italic;">💡 Click player names to edit their statistics</small>
-        ${progressionInfo}
-        Please confirm the winner, or press "Cancel":
-    `;
+    // Title — "{winner} beats {loser}"
+    document.getElementById('winnerConfirmDialogTitle').textContent = `${winner.name} beats ${loser.name}`;
+
+    // Body — progression block only (declaration and hint live in title / sidebar now)
+    body.replaceChildren();
+    const progressionTable = getProgressionTable();
+    const progression = progressionTable && progressionTable[matchId];
+    if (progression) {
+        body.appendChild(_buildWinnerProgressionBlock(matchId, winner, loser, progression));
+    }
 
     // Populate leg score fields
     const match = matches.find(m => m.id === matchId);
@@ -2203,18 +2237,26 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const scanBtn = document.getElementById('scanResultQRBtn');
     if (scanBtn) scanBtn.dataset.matchId = matchId;
 
-    // Snapshot stats for both players so we can diff on confirm and restore on cancel
+    // Snapshot stats for both players so we can diff on confirm and restore on cancel.
+    // Fresh snapshot every open — the diff represents this dialog session only.
     _completionSnapshot = {
         [winner.id]: snapshotPlayerStats(winner),
         [loser.id]: snapshotPlayerStats(loser)
     };
 
-    // Use dialog stack to show modal
-    // Don't reinitialize on restore - just show the modal to preserve input values
+    // Use dialog stack to show modal.
+    // enableEsc=false because handleKeyPress (above) handles Esc itself — routing it through
+    // handleCancel so stats added in this session are rolled back. If we let the stack's
+    // own Esc handler fire, the dialog would just pop without cleanup, leaving the snapshot
+    // stale for the next open.
     pushDialog('winnerConfirmModal', () => {
         const modal = document.getElementById('winnerConfirmModal');
         if (modal) modal.style.display = 'block';
-    }, true); // Enable Escape key via dialog stack
+    }, false);
+
+    // Hide any stale achievements box from a previous open of this dialog
+    const summaryBox = document.getElementById('completionAchievementsSummary');
+    if (summaryBox) summaryBox.style.display = 'none';
 
     // Focus cancel button by default
     setTimeout(() => {
@@ -2342,14 +2384,22 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     };
 
     const handleKeyPress = (e) => {
+        if (e.key !== 'Enter' && e.key !== 'Escape') return;
+
+        // Defer when another dialog is on top of us (e.g. statsModal opened via Edit Statistics).
+        const top = window.dialogStack && window.dialogStack[window.dialogStack.length - 1];
+        if (!top || top.id !== 'winnerConfirmModal') return;
+
         if (e.key === 'Enter') {
-            // Only confirm if validation passes
             const validation = validateInputs();
-            if (validation.valid) {
-                handleConfirm();
-            }
+            if (validation.valid) handleConfirm();
+        } else {
+            // Esc routes through handleCancel so stats added in this session are rolled back.
+            // Without this, the snapshot stays stale and the next open's diff is computed
+            // against the wrong baseline.
+            e.preventDefault();
+            handleCancel();
         }
-        // Escape key handled by dialog stack
     };
 
     // Remove any existing event listeners first (in case this is a restoration)

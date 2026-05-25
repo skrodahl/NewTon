@@ -1,6 +1,6 @@
 ## **v5.1.2** — The Polished Press (2026-05-24)
 
-Tactile press feedback on every button across the app, a new dialog system (`.dlg`) that unifies six confirmation/warning modals around a split-layout pattern with metadata sidebar and intent pill, a redesigned Tournament Complete celebration with CSS-only metallic medals, and a small Registration-page bug fix.
+Tactile press feedback on every button across the app, a new dialog system (`.dlg`) that unifies eleven confirmation/warning/info modals around a small set of shared layouts, a redesigned Tournament Complete celebration with an Olympic tiered podium and decorative garlands, and a small Registration-page bug fix.
 
 ### Button press feedback
 
@@ -13,13 +13,16 @@ Tactile press feedback on every button across the app, a new dialog system (`.dl
 
 A second modal pattern that sits inside the existing `.modal` backdrop and preserves `pushDialog`/`popDialog` infrastructure. Buttons inside dialogs use the standard `.btn` classes — no separate dialog button styles.
 
-- **Base components:** `.dlg`, `.dlg__title`, `.dlg__desc`, `.dlg__label`, `.dlg__input`, `.dlg__foot` (white card, 10px corner radius, soft shadow, right-aligned footer with subtle top border)
-- **Split layout:** `.dlg--split` modifier with `.dlg__grid`, `.dlg__sidebar`, `.dlg__sidebar-label`, `.dlg__sidebar-value`, `.dlg__main` — metadata sidebar on the left, action area on the right
-- **Intent pills:** `.dlg__pill` (amber) and `.dlg__pill--danger` (red) — small uppercase badges at the top of the main area. Pills can be omitted entirely (additive actions) or toggled conditionally (e.g. shown only for legacy-format imports).
+- **Base components:** `.dlg`, `.dlg__title`, `.dlg__desc`, `.dlg__label`, `.dlg__input`, `.dlg__foot` (white card, 10px corner radius, soft shadow, right-aligned footer with subtle top border).
+- **Title separator** — `.dlg__title` carries `border-bottom: 1px solid #ecedf1` + `padding-bottom: 14px`, mirroring the footer's `border-top`. Every dialog gets a consistent header / body / footer rhythm automatically; no markup change needed in individual dialogs.
+- **Split layout:** `.dlg--split` modifier with `.dlg__grid`, `.dlg__sidebar`, `.dlg__sidebar-label`, `.dlg__sidebar-value`, `.dlg__main` — metadata sidebar on the left, action area on the right.
+- **Wide modifier:** `.dlg--wide` adds ~20% width (880px from 720px). For dialogs with three-button footers or richer body content. Stackable with `.dlg--split`.
+- **Sidebar widened** — `.dlg__grid` left column 220px → 260px (+18%). System-wide. Improves readability of longer values ("Frontside Round 1") and accommodates sidebar buttons (winner-confirm Edit Statistics).
+- **Intent pills:** `.dlg__pill` (amber) and `.dlg__pill--danger` (red) — small uppercase badges at the top of the main area. Pills can be omitted entirely (additive actions, info dialogs) or toggled conditionally (e.g. shown only for legacy-format imports).
 
 ### Dialog migrations
 
-Six dialogs migrated to `.dlg--split`. Inline-styled colored boxes from the old markup are gone; the new layout uses clean typography with the sidebar carrying metadata context.
+Eleven dialogs migrated. Most use `.dlg--split` with the standard tournament-metadata sidebar; some use match metadata instead (when the dialog is about a specific match rather than the tournament); one uses the default single-column layout (pure info); one uses `.dlg--split + .dlg--wide` (winner-confirm needs the extra room for its form and three-button footer).
 
 - **Reset Tournament Confirmation** — amber "Destructive" pill, sidebar shows Name / Tournament Status / Progress / Players. Confirmation input retained with the tournament name shown as placeholder. Markup down from ~47 lines of inline-styled boxes to ~22 lines.
 - **Delete Tournament Confirmation** — red "Destructive" pill, sidebar shows Name / Date / Tournament Status / Players. A second paragraph explicitly notes that the tournament's Analytics record is preserved and remains available for review.
@@ -27,23 +30,34 @@ Six dialogs migrated to `.dlg--split`. Inline-styled colored boxes from the old 
 - **Tournament In Progress Warning** — amber "Warning" pill, sidebar shows live tournament state (Name / Tournament Status / Progress / Players). Body trimmed from 3 colored tip boxes to 2 paragraphs.
 - **Import Tournament Confirmation** — amber "Old format" pill, conditionally shown only for legacy exports. Sidebar shows Name / Date / Tournament Status / Progress / Players. Description condenses the old "Data Safety Guaranteed" box into one sentence; the verbose "What will be imported" list is gone (redundant with file context). Button text toggles "Import Tournament" / "Import Anyway" based on format.
 - **Load Tournament Confirmation** — no pill (load is non-destructive). Sidebar shows the tournament being loaded (Name / Date / Tournament Status / Progress / Players). Description varies — when an active tournament exists it names it inline ("Your current tournament *X* will be saved automatically and replaced..."), otherwise reads as a clean "The selected tournament will become active." Replaces the old dual-section layout that duplicated metadata.
+- **Undo Match Confirmation** — split layout with *match metadata* sidebar (Match / Bracket / Players) instead of tournament metadata. Amber "Destructive" pill. Body refactored to build DOM via `createElement` / `textContent` rather than `innerHTML` interpolation — **closed a pre-existing XSS hole** where player names were being inserted into HTML via template literals. New helpers `_buildUndoMatchCard()`, `_buildUndoAchievementsSection()`, and `_bracketLabel()` (shared with winner-confirm). The old `createUndoModalContent()` HTML-string builder (~80 lines) deleted entirely.
+- **Analytics — Delete Tournament** (`historyDeleteTournamentModal`) — split layout, red "Destructive" pill, sidebar shows Name / Date / Tournament Status (hardcoded "Completed" since Analytics history only contains finalized tournaments). Confirmation input retained with the tournament name in the placeholder.
+- **Late Registration Info** — pure info, **uses the default (non-split) layout** — first dialog to do so. No pill, no sidebar. Title + three description paragraphs walking the operator through enabling the Developer Console → opening it → using the "Late Arrival" command. Single "Got it" button.
+- **Export Tournament Results** — split layout, standard 5-field tournament sidebar. Conditional amber "Incomplete" pill + warning paragraph (toggled together) for tournaments without finalized rankings. Description condensed to a one-line "Save as {format}: {filename}" with format and filename bold-emphasized. Dropped the verbose "What will be included" list, the separate "Export Details" box, and the "Tournament Complete" reassurance box.
+- **Confirm Match Winner** — most involved migration. Uses **split + `.dlg--wide`** (3-button footer + leg-score form needs the extra room). Sidebar carries match metadata (Match / Bracket) plus an "Edit Statistics" section with the two player names as full `.btn` buttons — clicking either opens the stats modal. Dynamic title reads *"{winner} beats {loser}"*. Body shows a Match Progression block (small uppercase header + colored progression lines: green winner, red loser, plain text without tick/bullet markers) and the existing leg-score form. Three-button footer: Cancel / Scan Results QR / Confirm Winner. Body content refactored from `innerHTML` template-literal interpolation (player names XSS hole) to `createElement` / `textContent` throughout. New `_buildWinnerProgressionBlock()` helper. All form validation, snapshot/restore, button wiring, and Enter-key handling preserved unchanged.
 
 ### Unified Tournament Status across all sidebars
 
 - **New helper `tournamentStatusLabel(t)`** in `js/tournament-management.js` — returns `Setup` / `Active` / `Completed` for any tournament-shaped object (current, saved in localStorage, or imported file). Prefers the explicit `status` field; falls back to deriving from `bracket + matches` state for older tournaments and old-format imports.
-- **Tournament Status now displayed in every dialog's sidebar** that uses `.dlg--split`. Delete's previous "Setup / Bracket Generated / In Progress" scheme was unified to the same labels as everything else for consistency.
+- **Tournament Status now displayed in every dialog's sidebar** that uses `.dlg--split` and is about a tournament (not a specific match). Delete's previous "Setup / Bracket Generated / In Progress" scheme was unified to the same labels as everything else for consistency.
 
-### Tournament Complete celebration — redesign
+### Tournament Complete celebration — Olympic tiered podium
 
-- **New podium** — compact horizontal trio of cards inside the Match Controls dialog. Champion (1st place) gently emphasized with a gold ring, soft tint background, and larger medal. 2nd and 3rd flank as supporting cards.
-- **CSS-only metallic medals** — gold, silver, bronze radial gradients (`.medal--gold`, `.medal--silver`, `.medal--bronze`) replace the emoji medals (🥇🥈🥉). Number inside the disc identifies the rank.
-- **Emojis removed throughout** — title goes from "🏆 X Complete! 🏆" to "X Complete!". Highlights heading from "🎯 Tournament Highlights" to "Tournament Highlights". The Champion card label changed from "1st Place" to "Champion".
-- **Cleaner highlights row** — three side-by-side cards on a single white background instead of separate bordered colored boxes.
+The Tournament Complete view inside Match Controls now uses an Olympic-style tiered podium:
+
+- **Three tiered colored blocks** under three white cards: gold (160px, center, tallest), silver (120px, left), bronze (88px, right). Block surfaces use metallic gradients matching the medals.
+- **Drop shadow on each block** gives them physical depth.
+- **20px gap** between podium columns lets each column read as its own piece while the composition still reads as one object.
+- **CSS-only metallic medal discs** sit on each card — gold/silver/bronze radial gradients with the rank number inside. Replaces the previous emoji medals (🥇🥈🥉).
+- **Uppercase rank labels** — CHAMPION / SILVER / BRONZE — match the sidebar-label style used elsewhere in the dialog system.
+- **Decorative SVG garlands** — four wavy strands (muted red / cream / green / black) sweep across the background behind the podium, giving the celebration view a sense of occasion without resorting to emoji.
+- **Tournament Highlights row** sits cleanly below the podium — three side-by-side cards on a single white background. No heading (the row's contents speak for themselves).
+- **All decorative emojis removed** — title goes from "🏆 X Complete! 🏆" to "X Complete!", the highlights heading is gone entirely.
 - **Buttons untouched** — the Tournament Analytics button keeps `.btn` styling and the unified press effect.
 
 ### Documentation
 
-- **New `Docs/DIALOGS.md`** — comprehensive guide to the `.dlg` system. When to use which pattern, anatomy, two layouts, sidebar/pill conventions, button rules, helpers, XSS safety, dialog stack integration. Includes migration status table (6 migrated / 16 remaining / Match Controls + Developer Console excluded) and an 8-step migration checklist for the next dialog.
+- **New `Docs/DIALOGS.md`** — comprehensive reference for the `.dlg` system. When to use which pattern, anatomy, visual structure rules (the title + footer separator pair), the two layouts plus the `.dlg--wide` modifier, sidebar conventions (including the tournament-metadata-vs-match-metadata distinction), the intent pill system with all variants, button rules, helpers, XSS safety, dialog stack integration. Includes the live migration status table and an 8-step migration checklist for the next dialog. Updated through the session as each new dialog was migrated.
 
 ### Bug fix — late-reg button visibility
 
@@ -54,20 +68,26 @@ Six dialogs migrated to `.dlg--split`. Inline-styled colored boxes from the old 
 - Removed `#resetConfirmationInput` from the `border-radius: 0` cascade selector — the new `.dlg__input` uses rounded corners by design.
 - Removed orphaned banner CSS (`.dlg__banner`, `.dlg__banner-dot`, `.dlg__banner-title`, `.dlg__banner--danger`) — used briefly during the Tournament-in-Progress migration before that dialog was converted to split layout for consistency.
 - Removed orphaned `.celebration-export-btn` and `.celebration-actions` styles — both classes had CSS defined but were not referenced anywhere in HTML or JS. Also dropped `.celebration-export-btn:active` from the press-effect selector list.
+- Renamed `_undoBracketLabel` → `_bracketLabel` — now shared between undo and winner-confirm dialogs.
+- Deleted `createUndoModalContent()` (~80 lines of HTML-string building) — replaced by safe DOM construction.
+- Removed orphaned `.clickable-player-name` CSS — used briefly during the winner-dialog migration before the sidebar names became proper `.btn` buttons.
+- Removed orphaned `.winner-hint` CSS — used briefly during the winner-dialog migration for the "💡 Click player names" hint, before the hint was removed entirely (the sidebar label "Edit Statistics" is self-explanatory).
 
 ### Files changed
 
-- `css/styles.css` — unified `:active` press-effect rule; removed `!important` from `.help-btn:hover`; new `.dlg` system (base + `--split` + pills); removed `#resetConfirmationInput` from border-radius cascade; removed banner classes; rewrote tournament-celebration / podium / highlights styles (~200 lines) with new Variant C aesthetic + metallic medal classes; removed orphaned `.celebration-export-btn` / `.celebration-actions` rules
-- `tournament.html` — replaced `#resetTournamentModal`, `#deleteTournamentModal`, `#importOverwriteModal`, `#tournamentProgressModal`, `#importConfirmModal`, and `#loadTournamentModal` markup with `.dlg--split` structure; rewrote `#tournamentCelebration` markup for the new podium layout (emoji-free)
-- `js/tournament-management.js` — new `tournamentStatusLabel()` helper; `showResetTournamentModal()`, `showDeleteTournamentModal()`, `showImportOverwriteModal()`, `showImportConfirmModal()`, `showLoadTournamentModal()` trimmed for new sidebar values and all updated to use the helper; conditional pill toggle in import-confirm
-- `js/clean-match-progression.js` — `showTournamentProgressWarning()` populates the new sidebar fields with live tournament state via the helper
-- `js/bracket-rendering.js` — `updateCelebrationSubtitle()` drops emojis from the dynamically-set title
+- `css/styles.css` — unified `:active` press-effect rule; removed `!important` from `.help-btn:hover`; new `.dlg` system (base + `--split` + `--wide` + pills, title separator, 260px sidebar); removed `#resetConfirmationInput` from border-radius cascade; removed banner classes; rewrote tournament-celebration / podium / highlights styles for the Olympic tiered podium with garlands; new `.winner-progression*` and `.winner-stats-stack` classes; removed orphaned `.celebration-export-btn`, `.celebration-actions`, `.clickable-player-name`, `.winner-hint`
+- `tournament.html` — replaced eleven modal markups with `.dlg` structure (Reset, Delete, Import Overwrite, Tournament In Progress, Import Confirmation, Load Tournament, Undo Match, Analytics Delete, Late Reg Info, Export, Winner Confirm); rewrote `#tournamentCelebration` for the Olympic podium with inline SVG garlands
+- `js/tournament-management.js` — new `tournamentStatusLabel()` helper; `showResetTournamentModal()`, `showDeleteTournamentModal()`, `showImportOverwriteModal()`, `showImportConfirmModal()`, `showLoadTournamentModal()` updated for new sidebar values and all use the helper; conditional pill toggle in import-confirm
+- `js/clean-match-progression.js` — `showTournamentProgressWarning()` populates new sidebar fields via the helper; `showWinnerConfirmation()` refactored for safe DOM building (sidebar populated via `textContent`, body built via `createElement`, dynamic title, new `_buildWinnerProgressionBlock()` helper, Edit Statistics buttons wired in sidebar)
+- `js/bracket-rendering.js` — `updateCelebrationSubtitle()` drops emojis from the dynamically-set title; `showUndoConfirmationModal()` refactored for safe DOM (new `_buildUndoMatchCard()`, `_buildUndoAchievementsSection()`, `_bracketLabel()` helpers); `handleSurgicalUndo()` updated to pass structured params; old `createUndoModalContent()` deleted
+- `js/newton-history.js` — `promptDeleteTournament()` updated for new sidebar IDs (separate name and date, placeholder pattern instead of dynamic prompt `innerHTML`)
+- `js/results-config.js` — `showExportConfirmModal()` trimmed: new sidebar IDs, conditional pill + warning toggle, dropped the verbose "what will be included" list builder
 - `js/main.js` — `showPage('registration')` now calls `updatePlayersDisplay()` so the late-reg button reflects current tournament state on every navigation
 - `Docs/DIALOGS.md` — new
 
 ### Migration
 
-No data migration required. Visual/interaction polish only — all functionality, dialogs, and data flows preserved. The remaining 16 modals continue to use the existing `.modal-content` pattern and can be migrated incrementally; `matchCommandCenterModal` (Match Controls) and the Developer Console are intentionally excluded from the `.dlg` rollout — they're content-dense custom layouts.
+No data migration required. Visual/interaction polish only — all functionality, dialogs, and data flows preserved. The remaining 11 modals continue to use the existing `.modal-content` pattern and can be migrated incrementally; `matchCommandCenterModal` (Match Controls) and the Developer Console are intentionally excluded from the `.dlg` rollout — they're content-dense custom layouts.
 
 ---
 

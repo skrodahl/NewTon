@@ -952,77 +952,61 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Statistics Modal -->
         <div id="statsModal" class="modal">
-            <div class="modal-content">
-                <h3 id="statsPlayerName">Player Statistics</h3>
+            <div class="dlg">
+                <div class="dlg__main">
+                    <h2 class="dlg__title" id="statsPlayerName">Edit player statistics</h2>
 
-                <!-- Scrollable content area -->
-                <div class="stats-content-container" style="max-height: 60vh; overflow-y: auto; padding-right: 8px;">
-                    <div class="form-group">
-                        <label>Short Legs (max 21 darts)</label>
-                        <input type="number" id="statsShortLegDarts" min="9" max="21" placeholder="Enter dart count">
-                        <button class="btn" onclick="addShortLeg()" style="margin-top: 5px;">Add Short Leg</button>
-                    </div>
-
-                    <div class="form-group">
-                        <label>High Out Score (101+)</label>
-                        <input type="number" id="statsHighOut" min="101" max="170" placeholder="Enter high out score">
-                        <button class="btn" onclick="addHighOut()" style="margin-top: 5px;">Add High Out</button>
-                    </div>
-
-                    <div class="form-group">
-                        <label>180s</label>
-                        <div style="display: flex; align-items: center;">
-                            <button class="btn" onclick="decrement180s()" onmouseover="this.style.background='#fef2f2'"
-                                onmouseout="this.style.background='#ffffff'"
-                                style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
-                            <button class="btn" onclick="increment180s()" onmouseover="this.style.background='#dcfce7'"
-                                onmouseout="this.style.background='#ffffff'"
-                                style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
-                            <span id="current180sCount"
-                                style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current:
-                                0</span>
+                    <!-- Counter row: 180s / Tons / Lollipops -->
+                    <div class="stats-counter-row">
+                        <div class="stat-counter">
+                            <div class="stat-counter__label">180s</div>
+                            <div class="stat-counter__controls">
+                                <button type="button" class="stat-counter__btn stat-counter__btn--minus" onclick="decrement180s()">−</button>
+                                <span class="stat-counter__value" id="current180sCount">0</span>
+                                <button type="button" class="stat-counter__btn stat-counter__btn--plus" onclick="increment180s()">+</button>
+                            </div>
+                        </div>
+                        <div class="stat-counter">
+                            <div class="stat-counter__label">Tons</div>
+                            <div class="stat-counter__controls">
+                                <button type="button" class="stat-counter__btn stat-counter__btn--minus" onclick="decrementTons()">−</button>
+                                <span class="stat-counter__value" id="currentTonsCount">0</span>
+                                <button type="button" class="stat-counter__btn stat-counter__btn--plus" onclick="incrementTons()">+</button>
+                            </div>
+                        </div>
+                        <div class="stat-counter">
+                            <div class="stat-counter__label">Lollipops</div>
+                            <div class="stat-counter__controls">
+                                <button type="button" class="stat-counter__btn stat-counter__btn--minus" onclick="decrementLollipops()">−</button>
+                                <span class="stat-counter__value" id="currentLollipopsCount">0</span>
+                                <button type="button" class="stat-counter__btn stat-counter__btn--plus" onclick="incrementLollipops()">+</button>
+                            </div>
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Tons (100+)</label>
-                        <div style="display: flex; align-items: center;">
-                            <button class="btn" onclick="decrementTons()" onmouseover="this.style.background='#fef2f2'"
-                                onmouseout="this.style.background='#ffffff'"
-                                style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
-                            <button class="btn" onclick="incrementTons()" onmouseover="this.style.background='#dcfce7'"
-                                onmouseout="this.style.background='#ffffff'"
-                                style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
-                            <span id="currentTonsCount"
-                                style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current:
-                                0</span>
+                    <!-- Short Legs list editor -->
+                    <div class="stat-list-editor">
+                        <label class="dlg__label" for="statsShortLegDarts">Short Legs (max 21 darts)</label>
+                        <div class="stat-list-editor__input-row">
+                            <input type="number" id="statsShortLegDarts" class="dlg__input" min="9" max="21" placeholder="Enter dart count">
+                            <button type="button" class="btn" onclick="addShortLeg()">Add</button>
                         </div>
+                        <div id="shortLegsList" class="stat-list-editor__items"></div>
                     </div>
 
-                    <div class="form-group">
-                        <label>Lollipops 🍭 (score of 3)</label>
-                        <div style="display: flex; align-items: center;">
-                            <button class="btn" onclick="decrementLollipops()" onmouseover="this.style.background='#fef2f2'"
-                                onmouseout="this.style.background='#ffffff'"
-                                style="width: 24px; height: 24px; padding: 0; margin-right: 2px; display: flex; align-items: center; justify-content: center; color: #dc2626; border-color: #dc2626;">−</button>
-                            <button class="btn" onclick="incrementLollipops()" onmouseover="this.style.background='#dcfce7'"
-                                onmouseout="this.style.background='#ffffff'"
-                                style="width: 24px; height: 24px; padding: 0; margin-left: 1px; display: flex; align-items: center; justify-content: center; color: #166534; border-color: #166534;">+</button>
-                            <span id="currentLollipopsCount"
-                                style="margin-left: 8px; font-weight: bold; font-size: 1.0em; transform: translateY(-6px);">Current:
-                                0</span>
+                    <!-- High Outs list editor -->
+                    <div class="stat-list-editor">
+                        <label class="dlg__label" for="statsHighOut">High Out Score (101+)</label>
+                        <div class="stat-list-editor__input-row">
+                            <input type="number" id="statsHighOut" class="dlg__input" min="101" max="170" placeholder="Enter high out score">
+                            <button type="button" class="btn" onclick="addHighOut()">Add</button>
                         </div>
+                        <div id="highOutsList" class="stat-list-editor__items"></div>
                     </div>
-
-                    <!-- Lists grouped together -->
-                    <div id="shortLegsList"></div>
-                    <div id="highOutsList"></div>
                 </div>
-
-                <!-- Fixed button area at bottom -->
-                <div class="text-center mt-20" style="flex-shrink: 0; margin-top: 20px;">
-                    <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
+                <div class="dlg__foot">
                     <button class="btn" onclick="closeStatsModal()">Cancel</button>
+                    <button class="btn btn-success" onclick="saveStats()">Save Statistics</button>
                 </div>
             </div>
         </div>
@@ -1231,45 +1215,54 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Updated Winner Confirmation Modal with validation -->
         <div id="winnerConfirmModal" class="modal">
-            <div class="modal-content" style="max-width: 800px;">
-                <h3 id="winnerConfirmTitle">Confirm Match Winner</h3>
-                <div id="winnerConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
-                    <!-- Message will be populated by JavaScript -->
-                </div>
-
-                <!-- Enhanced leg scores section with validation -->
-                <div id="legScoresSection"
-                    style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e5e7eb;">
-                    <div
-                        style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
-                        <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
-                        <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
-                    </div>
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <div style="display: flex; align-items: center;">
-                            <span id="winnerNameForLegs"
-                                style="font-weight: 600; color: #065f46; margin-right: 10px; min-width: 80px;">Winner</span>
-                            <input type="number" id="winnerLegs" min="0" max="7"
-                                style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
-                            <span style="margin: 0 8px; color: #6b7280;">legs</span>
+            <div class="dlg dlg--split dlg--wide">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Match</div>
+                        <div class="dlg__sidebar-value" id="winnerSidebarMatch">-</div>
+                        <div class="dlg__sidebar-label">Bracket</div>
+                        <div class="dlg__sidebar-value" id="winnerSidebarBracket">-</div>
+                        <div class="dlg__sidebar-label">Edit Statistics</div>
+                        <div class="dlg__sidebar-value winner-stats-stack">
+                            <button type="button" class="btn" id="winnerStatsLink">-</button>
+                            <button type="button" class="btn" id="loserStatsLink">-</button>
                         </div>
-                        <div style="display: flex; align-items: center;">
-                            <span id="loserNameForLegs"
-                                style="font-weight: 600; color: #6b7280; margin-right: 10px; min-width: 80px;">Loser</span>
-                            <input type="number" id="loserLegs" min="0" max="7" value="0"
-                                style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
-                            <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                    </aside>
+                    <div class="dlg__main">
+                        <h2 class="dlg__title" id="winnerConfirmDialogTitle">Confirm match winner</h2>
+                        <div id="winnerConfirmBody">
+                            <!-- Progression populated by JS -->
                         </div>
+
+                        <!-- Leg score form -->
+                        <div id="legScoresSection"
+                            style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e5e7eb;">
+                            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                                <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
+                                <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
+                            </div>
+                            <div style="display: flex; justify-content: space-between; align-items: center;">
+                                <div style="display: flex; align-items: center;">
+                                    <span id="winnerNameForLegs" style="font-weight: 600; color: #065f46; margin-right: 10px; min-width: 80px;">Winner</span>
+                                    <input type="number" id="winnerLegs" min="0" max="7" style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
+                                    <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                                </div>
+                                <div style="display: flex; align-items: center;">
+                                    <span id="loserNameForLegs" style="font-weight: 600; color: #6b7280; margin-right: 10px; min-width: 80px;">Loser</span>
+                                    <input type="number" id="loserLegs" min="0" max="7" value="0" style="width: 60px; padding: 6px 8px; border: 1px solid #d1d5db; text-align: center;">
+                                    <span style="margin: 0 8px; color: #6b7280;">legs</span>
+                                </div>
+                            </div>
+                            <!-- Validation message inserted by JS -->
+                        </div>
+
+                        <!-- Populated by renderCompletionAchievements() when stats are entered during this session -->
+                        <div id="completionAchievementsSummary" style="display:none;"></div>
                     </div>
-                    <!-- Validation message will be inserted here by JavaScript -->
                 </div>
-
-                <!-- Populated by renderCompletionAchievements() when stats are entered during this session -->
-                <div id="completionAchievementsSummary" style="display:none;"></div>
-
-                <div class="text-center mt-20">
-                    <button class="btn" id="winnerConfirmCancel" style="margin-right: 15px;">Cancel</button>
-                    <button class="btn btn-success" id="scanResultQRBtn" onclick="openResultQRScanner(this.dataset.matchId)" style="white-space: nowrap; margin-right: 15px; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1); border-color: #fb923c;">Scan Results QR</button>
+                <div class="dlg__foot">
+                    <button class="btn" id="winnerConfirmCancel">Cancel</button>
+                    <button class="btn btn-success" id="scanResultQRBtn" onclick="openResultQRScanner(this.dataset.matchId)" style="white-space: nowrap; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1); border-color: #fb923c;">Scan Results QR</button>
                     <button class="btn btn-success" id="winnerConfirmOK">Confirm Winner</button>
                 </div>
             </div>

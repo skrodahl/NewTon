@@ -501,7 +501,7 @@ function openStatsModal(playerId) {
     if (!player) return;
 
     currentStatsPlayer = player;
-    document.getElementById('statsPlayerName').textContent = `${player.name} - Statistics`;
+    document.getElementById('statsPlayerName').textContent = `Edit ${player.name}'s statistics`;
 
     // Clear input fields when opening modal
     document.getElementById('statsShortLegDarts').value = '';
@@ -539,18 +539,12 @@ function addHighOut() {
 
 function updateHighOutsList() {
     const container = document.getElementById('highOutsList');
-    if (!currentStatsPlayer || !currentStatsPlayer.stats.highOuts) {
-        container.innerHTML = '';
-        return;
-    }
+    container.replaceChildren();
+    if (!currentStatsPlayer || !Array.isArray(currentStatsPlayer.stats.highOuts)) return;
 
-    const html = currentStatsPlayer.stats.highOuts.map((score, index) => `
-        <span style="background: #f8f9fa; padding: 5px 10px; margin: 2px; border-radius: 3px; display: inline-block;">
-            ${score} <button onclick="removeHighOut(${index})" style="background: none; border: none; color: red; cursor: pointer;">×</button>
-        </span>
-    `).join('');
-    
-    container.innerHTML = `<div style="margin-top: 10px;"><strong>High Outs:</strong><br>${html}</div>`;
+    currentStatsPlayer.stats.highOuts.forEach((score, index) => {
+        container.appendChild(_buildStatListItem(score, () => removeHighOut(index)));
+    });
 }
 
 function removeHighOut(index) {
@@ -685,18 +679,12 @@ function addShortLeg() {
 
 function updateShortLegsList() {
     const container = document.getElementById('shortLegsList');
-    if (!currentStatsPlayer || !Array.isArray(currentStatsPlayer.stats.shortLegs)) {
-        container.innerHTML = '';
-        return;
-    }
+    container.replaceChildren();
+    if (!currentStatsPlayer || !Array.isArray(currentStatsPlayer.stats.shortLegs)) return;
 
-    const html = currentStatsPlayer.stats.shortLegs.map((darts, index) => `
-        <span style="background: #f8f9fa; padding: 5px 10px; margin: 2px; border-radius: 3px; display: inline-block;">
-            ${darts} <button onclick="removeShortLeg(${index})" style="background: none; border: none; color: red; cursor: pointer;">×</button>
-        </span>
-    `).join('');
-
-    container.innerHTML = `<div style="margin-top: 10px;"><strong>Short Legs:</strong><br>${html}</div>`;
+    currentStatsPlayer.stats.shortLegs.forEach((darts, index) => {
+        container.appendChild(_buildStatListItem(darts, () => removeShortLeg(index)));
+    });
 }
 
 function removeShortLeg(index) {
@@ -756,7 +744,30 @@ function updateStatsCounters() {
     const currentTons = currentStatsPlayer?.stats.tons || 0;
     const currentLollipops = currentStatsPlayer?.stats.lollipops || 0;
 
-    document.getElementById('current180sCount').textContent = `Current: ${current180s}`;
-    document.getElementById('currentTonsCount').textContent = `Current: ${currentTons}`;
-    document.getElementById('currentLollipopsCount').textContent = `Current: ${currentLollipops}`;
+    document.getElementById('current180sCount').textContent = current180s;
+    document.getElementById('currentTonsCount').textContent = currentTons;
+    document.getElementById('currentLollipopsCount').textContent = currentLollipops;
+}
+
+/**
+ * Build a chip-style list item. The whole chip is a button — click anywhere
+ * on it to remove. Hover turns red to signal the destructive action.
+ */
+function _buildStatListItem(value, onRemove) {
+    const chip = document.createElement('button');
+    chip.type = 'button';
+    chip.className = 'stat-list-item';
+    chip.title = 'Click to remove';
+    chip.onclick = onRemove;
+
+    const valueSpan = document.createElement('span');
+    valueSpan.textContent = value;
+    chip.appendChild(valueSpan);
+
+    const xSpan = document.createElement('span');
+    xSpan.className = 'stat-list-item__x';
+    xSpan.textContent = '×';
+    chip.appendChild(xSpan);
+
+    return chip;
 }
