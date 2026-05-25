@@ -45,6 +45,17 @@ The `.dlg` sits **inside** an existing `.modal` element so the dialog stack (`pu
 
 ---
 
+## Visual structure
+
+Every dialog has two horizontal rules that create a consistent header / body / footer rhythm:
+
+- **Under the title** — `.dlg__title` carries a `border-bottom: 1px solid #ecedf1; padding-bottom: 14px` that separates the title row (and the optional pill above it) from the body content.
+- **Above the footer** — `.dlg__foot` carries the mirror `border-top: 1px solid #ecedf1` that separates the body from the action buttons.
+
+You don't need to add either rule manually. Drop a `.dlg__title` and a `.dlg__foot` into your markup and the rhythm is automatic. Both rules use the same color (`#ecedf1`) and 14px of breathing room, so the dialog reads as one composition with three weighted regions.
+
+---
+
 ## Two layouts
 
 ### Default — single column
@@ -93,7 +104,7 @@ Use when tournament metadata adds context. Adds `.dlg--split` (widens to 720px) 
   4. **Progress** — e.g. `8 of 8`
   5. **Players** — just the count
 
-Every dialog using `.dlg--split` should include **Tournament Status**. This is true for migration *and* for any new dialog you build.
+Every dialog using `.dlg--split` should include **Tournament Status** *when the dialog is about the tournament as a whole*. When the dialog is about a specific match (e.g. `undoConfirmModal`), the sidebar carries match metadata instead — `Match`, `Bracket`, `Players` — and Tournament Status is omitted (it would always be `Active` and adds no information).
 
 ---
 
@@ -175,7 +186,7 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 
 ## Migration status
 
-### Migrated (6)
+### Migrated (10)
 
 | Dialog | Modal ID | Layout | Pill |
 |---|---|---|---|
@@ -185,11 +196,14 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 | Tournament In Progress Warning | `tournamentProgressModal` | split | amber Warning |
 | Import Tournament Confirmation | `importConfirmModal` | split | amber Old format (conditional) |
 | Load Tournament Confirmation | `loadTournamentModal` | split | none |
+| Undo Match Confirmation | `undoConfirmModal` | split (match metadata, not tournament) | amber Destructive |
+| Analytics — Delete Tournament | `historyDeleteTournamentModal` | split | red Destructive |
+| Late Registration Info | `lateRegInfoModal` | default | none |
+| Export Tournament Results | `exportConfirmModal` | split | amber Incomplete (conditional) |
 
-### Not yet migrated (16)
+### Not yet migrated (12)
 
 - `uploadToServerModal`
-- `historyDeleteTournamentModal`
 - `statsModal`
 - `analyticsModal`
 - `qrResultScanModal`
@@ -197,13 +211,10 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 - `winnerConfirmModal`
 - `matchDetailsModal`
 - `statisticsModal`
-- `undoConfirmModal`
 - `bracketConfirmModal`
 - `analyticsImportModal`
-- `exportConfirmModal`
 - `matchDetailModal`
 - `matchQRModal`
-- `lateRegInfoModal`
 
 ### Intentionally excluded
 

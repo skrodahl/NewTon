@@ -1210,6 +1210,8 @@ body {
   letter-spacing: -0.3px;
   margin: 0;
   color: #1a1f2a;
+  padding-bottom: 14px;
+  border-bottom: 1px solid #ecedf1;
 }
 
 .dlg__desc {
@@ -1749,6 +1751,8 @@ a:hover { color: #1e40af; }
 /* Tournament Completion Celebration Podium */
 /* === Tournament Completion Celebration === */
 .tournament-celebration {
+  position: relative;
+  overflow: hidden;
   background: linear-gradient(180deg, #f0f4fa 0%, #f8f9fb 60%);
   border-radius: 16px;
   padding: 36px 40px;
@@ -1756,6 +1760,26 @@ a:hover { color: #1e40af; }
   max-width: 800px;
   color: #1a1f2a;
   box-shadow: 0 14px 50px rgba(20, 25, 35, 0.14);
+}
+
+/* Dynamic garland strands — decorative SVG behind the podium */
+.celebration-garlands {
+  position: absolute;
+  left: 0;
+  right: 0;
+  top: 90px;
+  height: 400px;
+  z-index: 0;
+  pointer-events: none;
+}
+
+/* Keep all content above the garlands */
+.celebration-header,
+.podium-container,
+.celebration-highlights,
+.celebration-analytics {
+  position: relative;
+  z-index: 1;
 }
 
 .celebration-header {
@@ -1775,34 +1799,32 @@ a:hover { color: #1e40af; }
   color: #7a8090;
 }
 
-/* Podium — compact horizontal trio with champion gently emphasized */
+/* Podium — tiered Olympic-style blocks with cards on top */
 .podium-container {
-  display: grid;
-  grid-template-columns: 1fr 1.15fr 1fr;
-  gap: 14px;
-  align-items: stretch;
-  max-width: 520px;
+  display: flex;
+  justify-content: center;
+  align-items: flex-end;
+  gap: 20px;
+  max-width: 600px;
   margin: 0 auto;
 }
 
 .podium-position {
-  background: white;
-  border-radius: 12px;
-  padding: 18px 14px;
-  text-align: center;
-  border: 1px solid #ecedf1;
-  box-shadow: 0 2px 10px rgba(20, 25, 35, 0.05);
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  width: 180px;
 }
 
-.podium-position--champion {
-  padding: 22px 14px;
-  border-color: rgba(230, 181, 66, 0.35);
-  background: linear-gradient(180deg, #fff9ec 0%, #ffffff 70%);
-  box-shadow: 0 0 0 1px rgba(230, 181, 66, 0.18), 0 6px 18px rgba(230, 181, 66, 0.18);
+.podium-card {
+  background: white;
+  border-radius: 14px 14px 0 0;
+  padding: 24px 16px 22px;
+  text-align: center;
+  width: 100%;
+  box-shadow: 0 -10px 28px rgba(20, 25, 35, 0.08);
+  position: relative;
+  z-index: 2;
 }
 
 /* Medal discs — CSS-only with metallic radial gradients */
@@ -1819,15 +1841,10 @@ a:hover { color: #1e40af; }
 }
 
 .podium-medal {
-  width: 40px;
-  height: 40px;
-  font-size: 15px;
-}
-
-.podium-position--champion .podium-medal {
-  width: 54px;
-  height: 54px;
-  font-size: 20px;
+  width: 56px;
+  height: 56px;
+  font-size: 22px;
+  margin: 0 auto 12px;
 }
 
 .medal--gold {
@@ -1844,41 +1861,64 @@ a:hover { color: #1e40af; }
 }
 
 .podium-rank {
-  font-size: 10px;
+  font-size: 11px;
   text-transform: uppercase;
   letter-spacing: 1.5px;
   color: #8b91a0;
   font-weight: 600;
-}
-
-.podium-position--champion .podium-rank {
-  color: #a07410;
+  margin-bottom: 4px;
 }
 
 .podium-name {
-  font-size: 14px;
+  font-size: 17px;
   font-weight: 600;
   color: #1a1f2a;
+  letter-spacing: -0.2px;
   word-break: break-word;
 }
 
-.podium-position--champion .podium-name {
-  font-size: 18px;
+/* Tiered blocks below each card */
+.podium-block {
+  width: 100%;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 16px;
+  font-size: 34px;
   font-weight: 700;
-  letter-spacing: -0.2px;
+  color: rgba(255, 255, 255, 0.85);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
+  position: relative;
+  z-index: 1;
+  box-shadow: 0 16px 32px rgba(20, 25, 35, 0.40);
+}
+
+.podium-block::before {
+  content: "";
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 4px;
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.podium-block--gold {
+  height: 160px;
+  background: linear-gradient(180deg, #e6b542 0%, #a07410 100%);
+}
+
+.podium-block--silver {
+  height: 120px;
+  background: linear-gradient(180deg, #b6b9be 0%, #7a7e84 100%);
+}
+
+.podium-block--bronze {
+  height: 88px;
+  background: linear-gradient(180deg, #b87333 0%, #7a4818 100%);
 }
 
 /* Highlights */
 .celebration-highlights {
   margin-top: 32px;
-}
-
-.highlights-title {
-  text-align: center;
-  font-weight: 600;
-  font-size: 13px;
-  margin-bottom: 14px;
-  color: #4a5160;
 }
 
 .highlights-grid {

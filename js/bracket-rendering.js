@@ -2332,70 +2332,192 @@ function rollbackAchievements(achievements) {
 }
 
 /**
- * Show the undo confirmation modal.
- * @param {string} message - HTML content for the message area
- * @param {Function} onConfirm - Called when "Undo match" is clicked
- * @param {Function|null} onCancel - Called when cancelled
- * @param {Function|null} onConfirmWithAchievements - When provided, shows "Undo match + achievements" button
+ * Returns a human-readable label for a match's bracket position.
+ * @param {string} matchId - e.g. 'FS-1-1', 'BS-2-3', 'GRAND-FINAL', 'BS-FINAL'
+ * @returns {string}
  */
-function showUndoConfirmationModal(message, onConfirm, onCancel = null, onConfirmWithAchievements = null) {
-    const modal = document.getElementById('undoConfirmModal');
-    const messageDiv = document.getElementById('undoConfirmMessage');
+function _undoBracketLabel(matchId) {
+    if (matchId === 'GRAND-FINAL') return 'Grand Final';
+    if (matchId === 'BS-FINAL') return 'Backside Final';
+    if (matchId.startsWith('FS-')) return `Frontside Round ${matchId.split('-')[1]}`;
+    if (matchId.startsWith('BS-')) return `Backside Round ${matchId.split('-')[1]}`;
+    return matchId;
+}
+
+/**
+ * Builds a consequence match card safely (no innerHTML / no template interpolation of user data).
+ */
+function _buildUndoMatchCard(id, match, isFrontside) {
+    const card = document.createElement('div');
+    card.className = 'undo-match-card';
+
+    const header = document.createElement('div');
+    header.className = 'undo-match-header';
+
+    const idDiv = document.createElement('div');
+    idDiv.className = 'undo-match-id';
+    idDiv.textContent = id;
+    header.appendChild(idDiv);
+
+    const typeDiv = document.createElement('div');
+    typeDiv.className = 'undo-bracket-type';
+    if (match.id === 'GRAND-FINAL' || match.id === 'BS-FINAL') {
+        typeDiv.textContent = match.id;
+    } else if (isFrontside) {
+        typeDiv.textContent = `⚪ Frontside - Round ${match.id.split('-')[1]}`;
+    } else {
+        typeDiv.textContent = `⚫ Backside - Round ${match.id.split('-')[1]}`;
+    }
+    header.appendChild(typeDiv);
+    card.appendChild(header);
+
+    const playersDiv = document.createElement('div');
+    playersDiv.className = 'undo-match-players';
+    const p1 = match.player1?.name || 'TBD';
+    const p2 = match.player2?.name || 'TBD';
+    playersDiv.textContent = `${p1} vs ${p2}`;
+    card.appendChild(playersDiv);
+
+    return card;
+}
+
+/**
+ * Builds the achievements section safely.
+ */
+function _buildUndoAchievementsSection(achievements, isQR) {
+    const section = document.createElement('div');
+    section.className = 'undo-achievements';
+
+    const title = document.createElement('div');
+    title.className = 'undo-achievements-title';
+    title.textContent = `Recorded achievements for this match${isQR ? ' (Chalker)' : ' (Manual)'}:`;
+    section.appendChild(title);
+
+    Object.entries(achievements).forEach(([playerId, stats]) => {
+        if (!stats) return;
+        const player = players.find(p => String(p.id) === String(playerId));
+        const name = player?.name || `Player ${playerId}`;
+        const lines = [];
+        if (stats.oneEighties) lines.push(`${stats.oneEighties}× 180`);
+        if (stats.tons)        lines.push(`${stats.tons}× ton`);
+        if (stats.highOuts?.length) lines.push(stats.highOuts.map(v => `high out (${v})`).join(', '));
+        if (stats.shortLegs?.length) lines.push(`${stats.shortLegs.length}× short leg`);
+        if (stats.lollipops)   lines.push(`${stats.lollipops}× lollipop`);
+        if (!lines.length) return;
+
+        const row = document.createElement('div');
+        row.className = 'undo-achievement-row';
+        const nameBold = document.createElement('strong');
+        nameBold.textContent = `${name}:`;
+        row.appendChild(nameBold);
+        row.appendChild(document.createTextNode(` ${lines.join(', ')}`));
+        section.appendChild(row);
+    });
+
+    return section;
+}
+
+/**
+ * Show the undo confirmation modal.
+ * @param {object} opts
+ * @param {string} opts.matchId - The match being undone (e.g. 'FS-1-1')
+ * @param {Array} opts.consequentialMatches - Other matches that will reset
+ * @param {object} opts.transaction - The transaction being undone (carries achievements + completionType)
+ * @param {Function} opts.onConfirm - Called when "Undo match" is clicked
+ * @param {Function|null} [opts.onCancel] - Called when cancelled (button, Esc, or X)
+ * @param {Function|null} [opts.onConfirmWithAchievements] - When provided, shows "Undo match + achievements" button
+ */
+function showUndoConfirmationModal({matchId, consequentialMatches, transaction, onConfirm, onCancel = null, onConfirmWithAchievements = null}) {
     const cancelBtn = document.getElementById('undoConfirmCancel');
     const confirmBtn = document.getElementById('undoConfirmOK');
     const confirmWithAchievementsBtn = document.getElementById('undoConfirmOKWithAchievements');
+    const body = document.getElementById('undoConsequences');
 
-    if (!modal || !messageDiv || !cancelBtn || !confirmBtn) {
+    if (!cancelBtn || !confirmBtn || !body) {
         console.error('Undo confirmation modal elements not found');
-        if (confirm(message)) onConfirm();
+        onConfirm();
         return;
     }
 
-    messageDiv.innerHTML = message;
+    // Sidebar — match metadata (safe via textContent)
+    const matchObj = matches.find(m => m.id === matchId);
+    const p1 = matchObj?.player1?.name || 'TBD';
+    const p2 = matchObj?.player2?.name || 'TBD';
+    document.getElementById('undoSidebarMatch').textContent = matchId;
+    document.getElementById('undoSidebarBracket').textContent = _undoBracketLabel(matchId);
+    document.getElementById('undoSidebarPlayers').textContent = `${p1} vs ${p2}`;
 
-    // Show/hide the achievements button
-    if (confirmWithAchievementsBtn) {
-        confirmWithAchievementsBtn.style.display = onConfirmWithAchievements ? '' : 'none';
+    // Build consequences body safely (no innerHTML / no interpolation of user data)
+    body.replaceChildren();
+
+    if (!consequentialMatches || consequentialMatches.length === 0) {
+        const noMatches = document.createElement('div');
+        noMatches.className = 'undo-no-matches';
+        noMatches.textContent = 'No other matches will be affected.';
+        body.appendChild(noMatches);
+    } else {
+        const header = document.createElement('div');
+        header.className = 'undo-header';
+        header.textContent = `Undoing ${matchId} will reset the following matches:`;
+        body.appendChild(header);
+
+        const container = document.createElement('div');
+        container.className = 'undo-matches-container';
+        consequentialMatches.forEach(({id, match: cMatch, isFrontside}) => {
+            container.appendChild(_buildUndoMatchCard(id, cMatch, isFrontside));
+        });
+        body.appendChild(container);
     }
 
-    modal.style.display = 'flex';
+    // Optional achievements section + info/warning footer line
+    const achievements = transaction?.achievements || {};
+    const isQR = transaction?.completionType === 'QR';
+    const hasAchievements = Object.values(achievements).some(a => a !== null);
 
+    if (hasAchievements) {
+        body.appendChild(_buildUndoAchievementsSection(achievements, isQR));
+    }
+
+    const footerLine = document.createElement('div');
+    if (isQR) {
+        footerLine.className = 'undo-achievements-info';
+        footerLine.textContent = 'Achievements were recorded automatically from Chalker visit scores.';
+    } else {
+        footerLine.className = 'undo-achievements-warning';
+        footerLine.textContent = '⚠️ Achievements may have been entered manually for these players. Review the leaderboard.';
+    }
+    body.appendChild(footerLine);
+
+    // Show/hide the "+ achievements" button
+    confirmWithAchievementsBtn.style.display = onConfirmWithAchievements ? '' : 'none';
+
+    // Wire buttons + Esc — close via popDialog and fire user callbacks
+    const handleEscape = (e) => {
+        if (e.key === 'Escape') closeAndCancel();
+    };
+    const cleanup = () => {
+        cancelBtn.onclick = null;
+        confirmBtn.onclick = null;
+        confirmWithAchievementsBtn.onclick = null;
+        document.removeEventListener('keydown', handleEscape);
+    };
+    const closeAndCancel = () => { cleanup(); popDialog(); if (onCancel) onCancel(); };
+
+    cancelBtn.onclick = closeAndCancel;
+    confirmBtn.onclick = () => { cleanup(); popDialog(); onConfirm(); };
+    if (onConfirmWithAchievements) {
+        confirmWithAchievementsBtn.onclick = () => { cleanup(); popDialog(); onConfirmWithAchievements(); };
+    }
+
+    // Show modal (Esc handled manually so it routes through onCancel for debounce cleanup)
+    pushDialog('undoConfirmModal', null, false);
+    document.addEventListener('keydown', handleEscape);
+
+    // Focus Cancel for safety; inline boxShadow overrides the global outline-none rule
     setTimeout(() => {
         cancelBtn.focus();
         cancelBtn.style.boxShadow = '0 0 0 3px rgba(108, 117, 125, 0.3)';
-        cancelBtn.style.transform = 'scale(1.05)';
     }, 100);
-
-    const closeModal = () => {
-        modal.style.display = 'none';
-        cancelBtn.onclick = null;
-        confirmBtn.onclick = null;
-        if (confirmWithAchievementsBtn) confirmWithAchievementsBtn.onclick = null;
-    };
-
-    cancelBtn.onclick = () => {
-        closeModal();
-        if (onCancel) onCancel();
-    };
-    confirmBtn.onclick = () => {
-        closeModal();
-        onConfirm();
-    };
-    if (confirmWithAchievementsBtn && onConfirmWithAchievements) {
-        confirmWithAchievementsBtn.onclick = () => {
-            closeModal();
-            onConfirmWithAchievements();
-        };
-    }
-
-    const handleEscape = (e) => {
-        if (e.key === 'Escape') {
-            closeModal();
-            if (onCancel) onCancel();
-            document.removeEventListener('keydown', handleEscape);
-        }
-    };
-    document.addEventListener('keydown', handleEscape);
 }
 
 // --- END: Functions for Referee and Lane Management ---
@@ -2696,82 +2818,6 @@ function getConsequentialMatches(transaction) {
     });
 }
 
-// Create enhanced modal content with match cards
-/**
- * Build the HTML content for the undo confirmation modal.
- * @param {string} matchId
- * @param {Array} consequentialMatches
- * @param {object} transaction - The COMPLETE_MATCH transaction being undone
- * @returns {string} HTML string
- */
-function createUndoModalContent(matchId, consequentialMatches, transaction) {
-    let content = `<div class="undo-header">Undoing <strong>${matchId}</strong> will reset the following matches:</div>`;
-
-    if (consequentialMatches.length === 0) {
-        content += `<div class="undo-no-matches">No other matches will be affected.</div>`;
-    } else {
-        content += `<div class="undo-matches-container">`;
-        consequentialMatches.forEach(({ id, match, isFrontside }) => {
-            const player1Name = match.player1?.name || 'TBD';
-            const player2Name = match.player2?.name || 'TBD';
-            let bracketType;
-            if (match.id === 'GRAND-FINAL' || match.id === 'BS-FINAL') {
-                bracketType = match.id;
-            } else if (isFrontside) {
-                bracketType = `⚪ Frontside - Round ${match.id.split('-')[1]}`;
-            } else {
-                bracketType = `⚫ Backside - Round ${match.id.split('-')[1]}`;
-            }
-            content += `
-                <div class="undo-match-card">
-                    <div class="undo-match-header">
-                        <div class="undo-match-id">${id}</div>
-                        <div class="undo-bracket-type">${bracketType}</div>
-                    </div>
-                    <div class="undo-match-players">${player1Name} vs ${player2Name}</div>
-                </div>
-            `;
-        });
-        content += `</div>`;
-    }
-
-    // Achievements section
-    const achievements = transaction?.achievements || {};
-    const isQR = transaction?.completionType === 'QR';
-    const hasAchievements = Object.values(achievements).some(a => a !== null);
-
-    if (hasAchievements) {
-        const source = isQR ? ' (Chalker)' : ' (Manual)';
-        content += `<div class="undo-achievements">
-            <div class="undo-achievements-title">Recorded achievements for this match${source}:</div>`;
-
-        Object.entries(achievements).forEach(([playerId, stats]) => {
-            if (!stats) return;
-            const player = players.find(p => String(p.id) === String(playerId));
-            const name = player?.name || `Player ${playerId}`;
-            const lines = [];
-            if (stats.oneEighties) lines.push(`${stats.oneEighties}× 180`);
-            if (stats.tons)        lines.push(`${stats.tons}× ton`);
-            if (stats.highOuts?.length) lines.push(stats.highOuts.map(v => `high out (${v})`).join(', '));
-            if (stats.shortLegs?.length) lines.push(`${stats.shortLegs.length}× short leg`);
-            if (stats.lollipops)   lines.push(`${stats.lollipops}× lollipop`);
-            if (lines.length) {
-                content += `<div class="undo-achievement-row"><strong>${name}:</strong> ${lines.join(', ')}</div>`;
-            }
-        });
-
-        content += `</div>`;
-    }
-
-    if (isQR) {
-        content += `<div class="undo-achievements-info">Achievements were recorded automatically from Chalker visit scores.</div>`;
-    } else {
-        content += `<div class="undo-achievements-warning">⚠️ Achievements may have been entered manually for these players. Review the leaderboard.</div>`;
-    }
-
-    return content;
-}
-
 /**
  * Subtract recorded achievements from player.stats.
  * Called when operator chooses "Undo match + achievements".
@@ -2826,7 +2872,6 @@ function handleSurgicalUndo(matchId) {
     }
 
     const consequentialMatches = getConsequentialMatches(transaction);
-    const modalContent = createUndoModalContent(matchId, consequentialMatches, transaction);
 
     const hasAchievements = transaction.achievements &&
         Object.values(transaction.achievements).some(a => a !== null);
@@ -2848,15 +2893,17 @@ function handleSurgicalUndo(matchId) {
         }, 1500);
     };
 
-    showUndoConfirmationModal(
-        modalContent,
-        doUndo,
-        () => {
+    showUndoConfirmationModal({
+        matchId,
+        consequentialMatches,
+        transaction,
+        onConfirm: doUndo,
+        onCancel: () => {
             undoDebounceActive = false;
             console.log('❌ Undo cancelled - debounce cleared');
         },
-        hasAchievements ? doUndoWithAchievements : null
-    );
+        onConfirmWithAchievements: hasAchievements ? doUndoWithAchievements : null
+    });
 }
 
 /**

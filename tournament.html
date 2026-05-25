@@ -923,20 +923,29 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- History: Delete Tournament Confirmation Modal -->
         <div id="historyDeleteTournamentModal" class="modal">
-            <div class="modal-content" style="max-width: 480px;">
-                <h3>Delete Tournament</h3>
-                <div style="background:#fef2f2;border-left:4px solid #dc2626;padding:12px 16px;margin:16px 0;border-radius:0 4px 4px 0;">
-                    <strong style="color:#991b1b;">This cannot be undone.</strong>
-                    All match records for <strong id="historyDeleteTournamentDisplayName"></strong> will be permanently removed.
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="historyDeleteTournamentDisplayName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="historyDeleteTournamentDate">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value">Completed</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill dlg__pill--danger">Destructive</span>
+                        <h2 class="dlg__title">Delete tournament</h2>
+                        <p class="dlg__desc">All match records for this tournament will be permanently removed from Analytics. This cannot be undone.</p>
+                        <div>
+                            <label class="dlg__label" for="historyDeleteTournamentInput">Type the tournament name to confirm</label>
+                            <input type="text" id="historyDeleteTournamentInput" class="dlg__input" autocomplete="off" oninput="NewtonHistory.onDeleteInputChange()">
+                        </div>
+                    </div>
                 </div>
-                <p id="historyDeleteTournamentPrompt" style="margin:0 0 6px;font-size:14px;color:#555;">Type the tournament name to confirm:</p>
-                <input type="text" id="historyDeleteTournamentInput" placeholder="Tournament name"
-                    style="width:100%;box-sizing:border-box;padding:8px 10px;border:1px solid #ccc;border-radius:4px;font-size:15px;"
-                    oninput="NewtonHistory.onDeleteInputChange()">
-                <div class="text-center mt-20" style="margin-top:20px;">
-                    <button class="btn" onclick="popDialog()" style="margin-right:12px;">Cancel</button>
-                    <button class="btn btn-danger" id="historyDeleteTournamentBtn" disabled
-                        onclick="NewtonHistory.confirmDeleteTournament()">Delete</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
+                    <button class="btn btn-danger" id="historyDeleteTournamentBtn" disabled onclick="NewtonHistory.confirmDeleteTournament()">Delete Tournament</button>
                 </div>
             </div>
         </div>
@@ -1376,6 +1385,15 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
                         <!-- Tournament Completion Celebration -->
                         <div id="tournamentCelebration" class="tournament-celebration" style="display: none;">
+                            <svg class="celebration-garlands" viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true">
+                                <g fill="none" stroke-linecap="round" opacity="0.65">
+                                    <path d="M-20,260 C 250,320 550,70  820,60"  stroke="#c8392f" stroke-width="12"/>
+                                    <path d="M-20,282 C 250,342 550,92  820,82"  stroke="#d8c898" stroke-width="12"/>
+                                    <path d="M-20,304 C 250,364 550,114 820,104" stroke="#2a8a5a" stroke-width="12"/>
+                                    <path d="M-20,326 C 250,386 550,136 820,126" stroke="#1a1a1a" stroke-width="12"/>
+                                </g>
+                            </svg>
+
                             <div class="celebration-header">
                                 <div class="celebration-title">Tournament Complete!</div>
                                 <div class="celebration-subtitle" id="celebrationSubtitle">Congratulations to all players!</div>
@@ -1383,24 +1401,32 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
                             <div class="podium-container">
                                 <div class="podium-position" id="podium-second">
-                                    <div class="podium-medal medal medal--silver">2</div>
-                                    <div class="podium-rank">2nd Place</div>
-                                    <div class="podium-name">-</div>
+                                    <div class="podium-card">
+                                        <div class="medal medal--silver podium-medal">2</div>
+                                        <div class="podium-rank">Silver</div>
+                                        <div class="podium-name">-</div>
+                                    </div>
+                                    <div class="podium-block podium-block--silver">2</div>
                                 </div>
-                                <div class="podium-position podium-position--champion" id="podium-first">
-                                    <div class="podium-medal medal medal--gold">1</div>
-                                    <div class="podium-rank">Champion</div>
-                                    <div class="podium-name">-</div>
+                                <div class="podium-position" id="podium-first">
+                                    <div class="podium-card">
+                                        <div class="medal medal--gold podium-medal">1</div>
+                                        <div class="podium-rank">Champion</div>
+                                        <div class="podium-name">-</div>
+                                    </div>
+                                    <div class="podium-block podium-block--gold">1</div>
                                 </div>
                                 <div class="podium-position" id="podium-third">
-                                    <div class="podium-medal medal medal--bronze">3</div>
-                                    <div class="podium-rank">3rd Place</div>
-                                    <div class="podium-name">-</div>
+                                    <div class="podium-card">
+                                        <div class="medal medal--bronze podium-medal">3</div>
+                                        <div class="podium-rank">Bronze</div>
+                                        <div class="podium-name">-</div>
+                                    </div>
+                                    <div class="podium-block podium-block--bronze">3</div>
                                 </div>
                             </div>
 
                             <div class="celebration-highlights">
-                                <div class="highlights-title">Tournament Highlights</div>
                                 <div class="highlights-grid" id="highlightsGrid">
                                     <!-- Highlights will be populated here -->
                                 </div>
@@ -1497,14 +1523,27 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Undo Confirmation Modal -->
         <div id="undoConfirmModal" class="modal">
-            <div class="modal-content">
-                <h3 id="undoConfirmTitle">Confirm Match Undo</h3>
-                <div id="undoConfirmMessage" style="margin: 20px 0; line-height: 1.5;">
-                    <!-- Undo confirmation message will be populated by JavaScript -->
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Match</div>
+                        <div class="dlg__sidebar-value" id="undoSidebarMatch">-</div>
+                        <div class="dlg__sidebar-label">Bracket</div>
+                        <div class="dlg__sidebar-value" id="undoSidebarBracket">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="undoSidebarPlayers">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill">Destructive</span>
+                        <h2 class="dlg__title">Undo match</h2>
+                        <div id="undoConsequences">
+                            <!-- Consequences populated by JS -->
+                        </div>
+                    </div>
                 </div>
-                <div class="text-center mt-20">
-                    <button class="btn" id="undoConfirmCancel" style="margin-right: 15px;">Cancel</button>
-                    <button class="btn btn-warning" id="undoConfirmOK" style="margin-right: 10px;">Undo match</button>
+                <div class="dlg__foot">
+                    <button class="btn" id="undoConfirmCancel">Cancel</button>
+                    <button class="btn btn-warning" id="undoConfirmOK">Undo match</button>
                     <button class="btn btn-danger" id="undoConfirmOKWithAchievements" style="display:none;">Undo match + achievements</button>
                 </div>
             </div>
@@ -1730,55 +1769,30 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Export Confirmation Modal -->
         <div id="exportConfirmModal" class="modal">
-            <div class="modal-content" style="max-height: 85vh; overflow-y: auto;">
-                <h3>📤 Export Tournament Results</h3>
-                <div style="margin: 15px 0; line-height: 1.4;">
-                    <div style="background: #f8f9fa; padding: 12px; border-radius: 5px; margin-bottom: 15px;">
-                        <h4 style="margin: 0 0 8px 0; color: #333;">Tournament Details:</h4>
-                        <p style="margin: 3px 0; font-size: 16px;"><strong>Name:</strong> <span
-                                id="exportTournamentName">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Date:</strong> <span id="exportTournamentDate">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Status:</strong> <span id="exportTournamentStatus">-</span>
-                        </p>
-                        <p style="margin: 3px 0;"><strong>Players:</strong> <span id="exportPlayerCount">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Completed Matches:</strong> <span
-                                id="exportMatchProgress">-</span></p>
-                    </div>
-
-                    <div
-                        style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                        <h4 style="margin: 0 0 8px 0; color: #111827;">Export Details:</h4>
-                        <p style="margin: 3px 0;"><strong>Format:</strong> <span id="exportFormat">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Filename:</strong> <span id="exportFilename">-</span></p>
-                        <p style="margin: 3px 0;"><strong>Content:</strong> <span id="exportContent">-</span></p>
-                    </div>
-
-                    <div id="exportWarningSection"
-                        style="background: #faf8f3; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(180, 83, 9, 1); display: none;">
-                        <p style="margin: 0; font-weight: 600; color: #856404;">⚠️ Tournament Incomplete</p>
-                        <p style="margin: 6px 0 0 0; color: #856404;">This tournament is not yet finished. The export
-                            will contain current standings but may not reflect final rankings.</p>
-                    </div>
-
-                    <div id="exportCompleteSection"
-                        style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1); display: none;">
-                        <p style="margin: 0; font-weight: 600; color: #111827;">✓ Tournament Complete</p>
-                        <p style="margin: 6px 0 0 0; color: #111827;">This tournament is finished with final rankings
-                            available. The export will contain complete results.</p>
-                    </div>
-
-                    <div
-                        style="background: #f2f5f4; padding: 12px; border-radius: 5px; margin: 12px 0; border-left: 4px solid rgba(22, 101, 52, 1);">
-                        <p style="margin: 0; font-weight: 600; color: #111827;">📋 What will be included:</p>
-                        <ul style="margin: 8px 0; padding-left: 18px; color: #111827;" id="exportIncludesList">
-                            <!-- Populated by JavaScript -->
-                        </ul>
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="exportTournamentName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="exportTournamentDate">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="exportTournamentStatus">-</div>
+                        <div class="dlg__sidebar-label">Progress</div>
+                        <div class="dlg__sidebar-value" id="exportMatchProgress">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="exportPlayerCount">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill" id="exportIncompletePill" style="display: none;">Incomplete</span>
+                        <h2 class="dlg__title">Export tournament results</h2>
+                        <p class="dlg__desc">Save as <strong id="exportFormat">-</strong>: <strong id="exportFilename">-</strong></p>
+                        <p class="dlg__desc" id="exportIncompleteWarning" style="display: none;">This tournament isn't finished yet — the export will reflect current standings, not final rankings.</p>
                     </div>
                 </div>
-                <div class="text-center mt-20">
+                <div class="dlg__foot">
                     <button class="btn" onclick="popDialog()">Cancel</button>
-                    <button class="btn btn-success" id="confirmExportBtn" onclick="confirmExport()">Export
-                        Results</button>
+                    <button class="btn btn-success" id="confirmExportBtn" onclick="confirmExport()">Export Results</button>
                 </div>
             </div>
         </div>
@@ -1809,18 +1823,14 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Late Registration Info Modal -->
         <div id="lateRegInfoModal" class="modal">
-            <div class="modal-content">
-                <h3>Registering a Late Arrival</h3>
-                <p style="line-height: 1.6; margin: 16px 0;">
-                    A new player can join a tournament already in progress. They will be placed randomly in an available
-                    walkover spot in Frontside Round 1 and participate as a fully registered, paid player from that point
-                    forward.
-                </p>
-                <p style="line-height: 1.6; margin: 16px 0;">
-                    To register a late arrival, enable the Developer Console in Global Settings, then open it by clicking
-                    the version number in the lower-right corner of the Tournament Bracket.
-                </p>
-                <div class="text-center mt-20">
+            <div class="dlg">
+                <div class="dlg__main">
+                    <h2 class="dlg__title">Registering a late arrival</h2>
+                    <p class="dlg__desc">To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open it by clicking the version number in the lower-right corner of the Tournament Bracket.</p>
+                    <p class="dlg__desc">In the <strong>Developer Console</strong>, use the command <strong>Late Arrival</strong> to add players.</p>
+                    <p class="dlg__desc">The new player will be placed randomly in an available walkover spot in Frontside Round 1 and participate as a fully registered, paid player from that point forward.</p>
+                </div>
+                <div class="dlg__foot">
                     <button class="btn btn-primary" onclick="popDialog()">Got it</button>
                 </div>
             </div>

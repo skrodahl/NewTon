@@ -2342,11 +2342,11 @@ const NewtonHistory = (() => {
         _pendingDeleteId   = tournamentId;
         _pendingDeleteName = tournamentName;
 
-        const displayName = tournamentDate ? tournamentName + ' (' + tournamentDate + ')' : tournamentName;
-        document.getElementById('historyDeleteTournamentDisplayName').textContent = displayName;
-        const promptEl = document.getElementById('historyDeleteTournamentPrompt');
-        if (promptEl) promptEl.innerHTML = 'Type <strong>' + escHtml(tournamentName) + '</strong> to confirm:';
-        document.getElementById('historyDeleteTournamentInput').value = '';
+        document.getElementById('historyDeleteTournamentDisplayName').textContent = tournamentName;
+        document.getElementById('historyDeleteTournamentDate').textContent = tournamentDate || '-';
+        const input = document.getElementById('historyDeleteTournamentInput');
+        input.value = '';
+        input.placeholder = tournamentName;
         document.getElementById('historyDeleteTournamentBtn').disabled = true;
 
         pushDialog('historyDeleteTournamentModal', null, true);

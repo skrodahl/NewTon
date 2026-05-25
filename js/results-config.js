@@ -977,62 +977,27 @@ loadConfiguration();
  */
 function showExportConfirmModal(format, filename, hasFinalisedRankings) {
     // Store export details for later use
-    window.pendingExport = {
-        format: format,
-        filename: filename,
-        hasFinalisedRankings: hasFinalisedRankings
-    };
+    window.pendingExport = { format, filename, hasFinalisedRankings };
 
-    // Populate tournament details
-    document.getElementById('exportTournamentName').textContent = tournament.name;
-    document.getElementById('exportTournamentDate').textContent = tournament.date;
-
-    // Calculate tournament status
+    // Populate sidebar
     const completedMatches = matches.filter(m => m.completed).length;
     const totalMatches = matches.length;
-    const status = hasFinalisedRankings ? 'Complete' : 'In Progress';
+    document.getElementById('exportTournamentName').textContent = tournament.name;
+    document.getElementById('exportTournamentDate').textContent = tournament.date;
+    document.getElementById('exportTournamentStatus').textContent = tournamentStatusLabel(tournament);
+    document.getElementById('exportMatchProgress').textContent = `${completedMatches} of ${totalMatches}`;
+    document.getElementById('exportPlayerCount').textContent = players.length;
 
-    document.getElementById('exportTournamentStatus').textContent = status;
-    document.getElementById('exportPlayerCount').textContent = `${players.length} registered`;
-    document.getElementById('exportMatchProgress').textContent = `${completedMatches}/${totalMatches} matches`;
-
-    // Populate export details
+    // Populate format + filename in the description
     document.getElementById('exportFormat').textContent = format;
     document.getElementById('exportFilename').textContent = filename;
 
-    const contentDescription = format === 'JSON'
-        ? 'Complete tournament data with match results and statistics'
-        : 'Results table with rankings, points, and player statistics';
-    document.getElementById('exportContent').textContent = contentDescription;
-
-    // Show/hide status sections
-    const warningSection = document.getElementById('exportWarningSection');
-    const completeSection = document.getElementById('exportCompleteSection');
-
-    if (hasFinalisedRankings) {
-        warningSection.style.display = 'none';
-        completeSection.style.display = 'block';
-    } else {
-        warningSection.style.display = 'block';
-        completeSection.style.display = 'none';
-    }
-
-    // Populate what will be included list
-    const includesList = document.getElementById('exportIncludesList');
-    const items = format === 'JSON' ? [
-        'Complete tournament configuration',
-        'All player information and statistics',
-        'Complete match history and results',
-        'Bracket structure and progression',
-        'Current rankings and placements'
-    ] : [
-        'Final rankings and positions',
-        'Player names and statistics',
-        'Points breakdown (placement, participation, achievements)',
-        'Tournament totals and summary'
-    ];
-
-    includesList.innerHTML = items.map(item => `<li>${item}</li>`).join('');
+    // Toggle the incomplete pill + warning paragraph together
+    const pill = document.getElementById('exportIncompletePill');
+    const warning = document.getElementById('exportIncompleteWarning');
+    const showWarning = !hasFinalisedRankings;
+    pill.style.display = showWarning ? '' : 'none';
+    warning.style.display = showWarning ? '' : 'none';
 
     // Show modal with Esc support
     pushDialog('exportConfirmModal', null, true);
