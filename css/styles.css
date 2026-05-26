@@ -2049,6 +2049,25 @@ a:hover { color: #1e40af; }
   margin: 0;
 }
 
+/* Light-touch alignment for non-.dlg modals — rounded corners + solid white background
+   to match the .dlg aesthetic without restructuring the content inside. */
+#statisticsModal .modal-content,
+#matchQRModal .modal-content,
+#qrResultScanModal .modal-content,
+#matchDetailModal .modal-content,
+#matchCommandCenterModal .modal-content,
+#analyticsModal .modal-content {
+  border-radius: 10px;
+  background-color: #ffffff;
+}
+/* Title separator — mirrors the .dlg__title border-bottom for light-touch alignment */
+#matchDetailModal .modal-content > h3,
+#matchCommandCenterModal .modal-content > h3,
+#analyticsModal .modal-content > h3 {
+  border-bottom: 1px solid #ecedf1;
+  padding-bottom: 14px;
+}
+
 /* Player Statistics editor — counter row + list editors */
 #statsModal .dlg { max-width: 620px; }  /* slightly wider than default 580px for the 3-col counter row */
 
@@ -2157,6 +2176,66 @@ a:hover { color: #1e40af; }
   transition: color 0.15s;
 }
 .stat-list-item:hover .stat-list-item__x { color: #dc2626; }
+
+/* Bracket confirmation — read-only player chips in a scrollable wrap-flow */
+.bracket-confirm-players {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px;
+  background: #f3f5f7;
+  border-radius: 8px;
+  max-height: 280px;
+  overflow-y: auto;
+}
+.bracket-confirm-player {
+  background: white;
+  border: 1px solid #ecedf1;
+  border-radius: 6px;
+  padding: 6px 12px;
+  font-size: 14px;
+  font-weight: 600;
+  color: #1a1f2a;
+}
+
+/* Upload modal — option cards (radio) + destination info */
+.upload-source-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.upload-source-option {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  background: #f8f9fa;
+  border: 1px solid #ecedf1;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  font-size: 14px;
+  color: #1a1f2a;
+}
+.upload-source-option:hover { background: #ecedf1; }
+.upload-source-option input[type="radio"] { margin: 0; }
+.upload-destination {
+  background: #f3f5f7;
+  border-radius: 8px;
+  padding: 12px 16px;
+  font-size: 13px;
+}
+.upload-destination__title {
+  font-weight: 600;
+  margin-bottom: 6px;
+  color: #4a5160;
+}
+.upload-destination__list {
+  margin: 0;
+  padding-left: 18px;
+  color: #6b7280;
+}
+.upload-destination__list li { margin: 2px 0; }
 
 /* Enhanced Undo Confirmation Modal */
 .undo-header {

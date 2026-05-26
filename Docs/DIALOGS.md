@@ -196,7 +196,7 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 
 ## Migration status
 
-### Migrated (12)
+### Migrated (16)
 
 | Dialog | Modal ID | Layout | Pill |
 |---|---|---|---|
@@ -212,24 +212,38 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 | Export Tournament Results | `exportConfirmModal` | split | amber Incomplete (conditional) |
 | Confirm Match Winner | `winnerConfirmModal` | split + wide (match metadata, not tournament) | none |
 | Player Statistics Editor | `statsModal` | default | none |
+| Generate Bracket Confirmation | `bracketConfirmModal` | split + wide (bracket summary, not tournament status) | none |
+| Backup to Server | `uploadToServerModal` | default | none |
+| Import to Analytics | `analyticsImportModal` | split | amber Missing settings (conditional) |
+| Result QR Preview | `qrResultPreviewModal` | default + wide | none |
 
-### Not yet migrated (10)
+### Not yet migrated (0)
 
-- `uploadToServerModal`
-- `analyticsModal`
-- `qrResultScanModal`
-- `qrResultPreviewModal`
-- `matchDetailsModal`
-- `statisticsModal`
-- `bracketConfirmModal`
-- `analyticsImportModal`
-- `matchDetailModal`
-- `matchQRModal`
+All migrateable dialogs have been addressed.
 
 ### Intentionally excluded
 
-- **`matchCommandCenterModal`** — Match Controls. Content-dense custom layout; not a fit for the `.dlg` pattern.
-- **Developer Console** — same rationale.
+- **`matchCommandCenterModal`** — Match Controls. Content-dense custom layout (live + ready + completed match panels, referee suggestions, lane controls); not a fit for the `.dlg` pattern. Received light-touch visual alignment.
+- **`analyticsModal`** — Developer Console (the id is historical; the modal displays as "Developer Console" and opens via the version-number click when developer mode is enabled). Content-dense split view with commands and inspection panels. Received light-touch visual alignment.
+- **`statisticsModal`** — Leaderboard. 1200px-wide table view — also a page-in-a-modal rather than a dialog. Received a **light-touch visual alignment** (see below) instead of a full migration.
+- **`matchQRModal`** — Match assignment QR display. The QR image dominates and the rest is just a title, subtitle, and Close — restructuring into a `.dlg` layout wouldn't add value. Received the same light-touch visual alignment.
+- **`qrResultScanModal`** — Camera viewport for scanning result QRs. The `<video>` element dominates; the rest is just a title, hint, and Cancel. Light-touch alignment, no restructuring.
+- **`matchDetailModal`** — Match detail view from the History tab. Title + JS-populated body + Close. Content is a read-only summary of one completed match — restructuring into a `.dlg` sidebar layout wouldn't add meaningful structure. Light-touch alignment.
+
+### Light-touch alignment
+
+For non-`.dlg` modals (Match Controls, Analytics, Leaderboard, Developer Console) that stay on the legacy `.modal-content` pattern, small visual updates can be applied via scoped `#someModal .modal-content` overrides to keep them consistent with the `.dlg` aesthetic. The minimum useful set:
+
+```css
+#someModal .modal-content {
+  border-radius: 10px;             /* matches .dlg */
+  background-color: #ffffff;       /* solid white, not the legacy translucent rgba */
+}
+```
+
+Plus drop decorative emojis from the `<h3>` title. That's enough to make them feel part of the same family without restructuring page-style content.
+
+Already applied to: `statisticsModal`, `matchQRModal`, `qrResultScanModal`, `matchDetailModal`, `matchCommandCenterModal`, `analyticsModal` (Developer Console).
 
 ---
 

@@ -1417,21 +1417,37 @@ function generateCleanBracket(format) {
 function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
     pendingFormat = format;
 
-    const titleEl = document.getElementById('bracketConfirmTitle');
-    const subtitleEl = document.getElementById('bracketConfirmSubtitle');
-    const playersEl = document.getElementById('bracketConfirmPlayers');
-
+    // Sidebar — bracket summary
     const formatLabel = format === 'SE' ? 'Single Elimination' : 'Double Elimination';
-    titleEl.textContent = `Generate ${bracketSize}-Player ${formatLabel} Bracket?`;
+    document.getElementById('bracketConfirmTitle').textContent = `Generate ${formatLabel} Bracket`;
+    document.getElementById('bracketConfirmName').textContent = (tournament && tournament.name) || '-';
+    document.getElementById('bracketConfirmFormat').textContent = formatLabel;
+    document.getElementById('bracketConfirmSize').textContent = bracketSize;
+    document.getElementById('bracketConfirmPlayerCount').textContent = paidPlayers.length;
 
-    const byeText = byeCount > 0 ? `, ${byeCount} bye${byeCount > 1 ? 's' : ''}` : '';
-    subtitleEl.textContent = `${paidPlayers.length} players registered${byeText}`;
+    // Byes field is conditional — show only when there are byes
+    const byesLabel = document.getElementById('bracketConfirmByesLabel');
+    const byesValue = document.getElementById('bracketConfirmByes');
+    if (byeCount > 0) {
+        byesLabel.style.display = '';
+        byesValue.style.display = '';
+        byesValue.textContent = byeCount;
+    } else {
+        byesLabel.style.display = 'none';
+        byesValue.style.display = 'none';
+    }
 
-    // Render read-only player cards sorted alphabetically
+    // Render read-only player chips, sorted alphabetically. Safe DOM construction
+    // (textContent for names) — no innerHTML interpolation.
+    const playersEl = document.getElementById('bracketConfirmPlayers');
+    playersEl.replaceChildren();
     const sorted = [...paidPlayers].sort((a, b) => a.name.localeCompare(b.name));
-    playersEl.innerHTML = sorted.map(p =>
-        `<div class="player-list-item in-tournament" style="cursor: default; box-shadow: 0 2px 4px rgba(0,0,0,0.1);">${p.name}</div>`
-    ).join('');
+    sorted.forEach(p => {
+        const chip = document.createElement('div');
+        chip.className = 'bracket-confirm-player';
+        chip.textContent = p.name;
+        playersEl.appendChild(chip);
+    });
 
     pushDialog('bracketConfirmModal', null, true);
 

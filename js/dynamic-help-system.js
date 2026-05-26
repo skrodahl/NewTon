@@ -896,8 +896,6 @@ function addQuickActions(pageId) {
         case 'tournament':
             if (tournament && !tournament.bracket) {
                 actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showMatchCommandCenter();" style="font-size: 12px; padding: 6px 12px;">Open Match Controls</button>';
-            } else if (matches && matches.some(m => getMatchState && getMatchState(m) === 'ready')) {
-                actionsHTML = '<button class="btn btn-warning" onclick="hideHelp(); showMatchDetails();" style="font-size: 12px; padding: 6px 12px;">Show Ready Matches</button>';
             }
             break;
 

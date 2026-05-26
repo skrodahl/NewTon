@@ -901,21 +901,23 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Upload to Server Modal -->
         <div id="uploadToServerModal" class="modal">
-            <div class="modal-content" style="max-width: 420px;">
-                <h3>Backup to Server</h3>
-                <div style="margin: 16px 0;">
-                    <label class="checkbox-label" style="display:block;margin-bottom:10px;cursor:pointer;">
-                        <input type="radio" name="uploadSource" value="active" checked>
-                        <span>Active tournament</span>
-                    </label>
-                    <label class="checkbox-label" style="display:block;cursor:pointer;">
-                        <input type="radio" name="uploadSource" value="file">
-                        <span>From file</span>
-                    </label>
+            <div class="dlg">
+                <div class="dlg__main">
+                    <h2 class="dlg__title">Backup to server</h2>
+                    <div class="upload-source-options">
+                        <label class="upload-source-option">
+                            <input type="radio" name="uploadSource" value="active" checked>
+                            <span>Active tournament</span>
+                        </label>
+                        <label class="upload-source-option">
+                            <input type="radio" name="uploadSource" value="file">
+                            <span>From file</span>
+                        </label>
+                    </div>
+                    <div id="uploadDestinationInfo" class="upload-destination"></div>
                 </div>
-                <div id="uploadDestinationInfo" style="font-size:13px;color:#6b7280;margin:16px 0;padding:10px 12px;background:#f9fafb;border-radius:4px;"></div>
-                <div class="text-center" style="margin-top:20px;">
-                    <button class="btn" onclick="popDialog()" style="margin-right:12px;">Cancel</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
                     <button class="btn btn-success" onclick="executeUpload()">Upload</button>
                 </div>
             </div>
@@ -1177,11 +1179,13 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Result QR Preview Modal -->
         <div id="qrResultPreviewModal" class="modal">
-            <div class="modal-content" style="max-width: 700px;">
-                <h3 id="qrResultPreviewTitle">Result QR</h3>
-                <div id="qrResultPreviewContent" style="margin: 16px 0; overflow-x: auto;"></div>
+            <div class="dlg dlg--wide">
+                <div class="dlg__main">
+                    <h2 class="dlg__title" id="qrResultPreviewTitle">Result QR</h2>
+                    <div id="qrResultPreviewContent" style="overflow-x: auto;"></div>
+                </div>
                 <!-- Populated by showResultQRPreview() — close only, or close + completion buttons -->
-                <div id="qrResultPreviewActions" class="text-center mt-20">
+                <div id="qrResultPreviewActions" class="dlg__foot">
                     <button class="btn" onclick="popDialog()">Close</button>
                 </div>
             </div>
@@ -1269,19 +1273,6 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         </div>
 
         <!-- Match Controls Modal -->
-        <div id="matchDetailsModal" class="modal">
-            <div class="modal-content">
-                <h3 id="matchDetailsTitle">Match Controls</h3>
-                <div id="matchDetailsMessage"
-                    style="margin: 20px 0; line-height: 1.5; font-family: monospace; white-space: pre-line;">
-                    <!-- Match details will be populated by JavaScript -->
-                </div>
-                <div class="text-center mt-20">
-                    <button class="btn" id="matchDetailsOK" style="background: #065f46;">OK</button>
-                </div>
-            </div>
-        </div>
-
         <!-- Match Controls Modal -->
         <div id="matchCommandCenterModal" class="modal">
             <div class="modal-content match-controls-modal" style="width: 90%; height: 90%; max-width: 90%;">
@@ -1486,7 +1477,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <!-- Statistics Modal -->
         <div id="statisticsModal" class="modal">
             <div class="modal-content" style="width: 90%; max-width: 1200px;">
-                <h3 style="text-align: center; margin-bottom: 20px;">📊 Leaderboard</h3>
+                <h3 style="text-align: center; margin-bottom: 20px;">Leaderboard</h3>
 
                 <div class="statistics-container" style="max-height: 70vh; overflow-y: auto;">
                     <table class="results-table" id="statisticsTable">
@@ -1544,14 +1535,27 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Bracket Generation Confirmation Modal -->
         <div id="bracketConfirmModal" class="modal">
-            <div class="modal-content" style="max-width: 700px;">
-                <h3 id="bracketConfirmTitle"></h3>
-                <div style="margin: 15px 0; line-height: 1.6;">
-                    <p id="bracketConfirmSubtitle" style="color: #666; font-size: 14px;"></p>
-                    <div id="bracketConfirmPlayers" class="player-list-items" style="margin: 15px 0; max-height: 50vh; overflow-y: auto;"></div>
-                    <p style="margin-top: 15px; font-size: 14px; color: #b45309; font-weight: 500;">Make sure all players are registered before proceeding.</p>
+            <div class="dlg dlg--split dlg--wide">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="bracketConfirmName">-</div>
+                        <div class="dlg__sidebar-label">Format</div>
+                        <div class="dlg__sidebar-value" id="bracketConfirmFormat">-</div>
+                        <div class="dlg__sidebar-label">Bracket Size</div>
+                        <div class="dlg__sidebar-value" id="bracketConfirmSize">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="bracketConfirmPlayerCount">-</div>
+                        <div class="dlg__sidebar-label" id="bracketConfirmByesLabel">Byes</div>
+                        <div class="dlg__sidebar-value" id="bracketConfirmByes">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <h2 class="dlg__title" id="bracketConfirmTitle">Generate Bracket</h2>
+                        <p class="dlg__desc">These players will be placed into the bracket. Make sure all players are registered before proceeding.</p>
+                        <div id="bracketConfirmPlayers" class="bracket-confirm-players"></div>
+                    </div>
                 </div>
-                <div style="display: flex; justify-content: flex-end; gap: 10px; margin-top: 20px;">
+                <div class="dlg__foot">
                     <button class="btn" onclick="popDialog()" autofocus>Cancel</button>
                     <button class="btn btn-success" onclick="confirmBracketGeneration()">Generate</button>
                 </div>
@@ -1730,31 +1734,29 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Analytics Import Confirmation Modal -->
         <div id="analyticsImportModal" class="modal">
-            <div class="modal-content" style="max-width: 500px;">
-                <h3>Import to Analytics</h3>
-
-                <div style="background: #e8f4fd; padding: 12px; margin: 12px 0; border-left: 4px solid #2196F3;">
-                    <p id="analyticsImportInfo" style="margin: 0; color: #0c5460;"></p>
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="analyticsImportName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="analyticsImportDate">-</div>
+                        <div class="dlg__sidebar-label">Tournament Status</div>
+                        <div class="dlg__sidebar-value" id="analyticsImportStatus">-</div>
+                        <div class="dlg__sidebar-label">Progress</div>
+                        <div class="dlg__sidebar-value" id="analyticsImportProgress">-</div>
+                        <div class="dlg__sidebar-label">Players</div>
+                        <div class="dlg__sidebar-value" id="analyticsImportPlayers">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <span class="dlg__pill" id="analyticsImportMissingSettingsPill" style="display: none;">Missing settings</span>
+                        <h2 class="dlg__title">Import to Analytics</h2>
+                        <p class="dlg__desc" id="analyticsImportDesc">This adds the tournament to the Analytics register. No existing data is modified.</p>
+                        <p class="dlg__desc" id="analyticsImportWarning" style="display: none;">This export does not include point values or match length settings — current Global Settings will be used instead.</p>
+                    </div>
                 </div>
-
-                <div id="analyticsImportWarning" style="background: #fffbeb; padding: 12px; margin: 12px 0; border-left: 4px solid #f59e0b; display: none;">
-                    <p style="margin: 0; color: #92400e; font-size: 13px;">This export does not include point values or match length settings. Current Global Settings will be used instead.</p>
-                </div>
-
-                <div style="background: #d4edda; padding: 12px; margin: 12px 0; border-left: 4px solid #28a745;">
-                    <p style="margin: 0; font-weight: 600; color: #155724;">What will be imported:</p>
-                    <ul style="margin: 8px 0; padding-left: 18px; color: #155724;">
-                        <li>Match results and achievements</li>
-                        <li>Player statistics</li>
-                        <li>Final placements</li>
-                        <li>Tournament configuration snapshot</li>
-                    </ul>
-                </div>
-
-                <p style="font-size: 13px; color: #6b7280; margin: 12px 0;">This adds the tournament to the Analytics register. It does not modify any existing data.</p>
-
-                <div class="text-center mt-20">
-                    <button class="btn" onclick="popDialog()" style="margin-right: 15px;">Cancel</button>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
                     <button class="btn btn-success" id="analyticsImportConfirmBtn">Import</button>
                 </div>
             </div>

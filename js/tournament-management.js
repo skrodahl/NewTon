@@ -396,15 +396,28 @@ async function autoUploadTournament() {
  * Show the upload modal with destination info.
  */
 function showUploadModal() {
-    // Build destination info
+    // Build destination info — config.server.remoteUrl is user-configurable, so build with
+    // textContent rather than innerHTML interpolation.
     const destinations = ['This server'];
     const remote = config && config.server && config.server.remoteUrl;
     if (remote) destinations.push(remote);
 
     const infoEl = document.getElementById('uploadDestinationInfo');
     if (infoEl) {
-        infoEl.innerHTML = '<strong>Uploads to:</strong><br>' +
-            destinations.map(d => '&bull; ' + d).join('<br>');
+        infoEl.replaceChildren();
+        const title = document.createElement('div');
+        title.className = 'upload-destination__title';
+        title.textContent = 'Uploads to:';
+        infoEl.appendChild(title);
+
+        const list = document.createElement('ul');
+        list.className = 'upload-destination__list';
+        destinations.forEach(d => {
+            const li = document.createElement('li');
+            li.textContent = d;
+            list.appendChild(li);
+        });
+        infoEl.appendChild(list);
     }
 
     // Reset source selection

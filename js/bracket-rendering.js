@@ -2221,77 +2221,6 @@ function refreshRefereeDropdown(matchId) {
     }
 }
 
-function showMatchDetails() {
-    if (!matches || matches.length === 0) {
-        showMatchDetailsModal('No matches available to show details for.');
-        return;
-    }
-    const activeMatches = matches.filter(m => getMatchState(m) === 'live');
-    const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
-    let details = '';
-    if (activeMatches.length > 0) {
-        details += `Live:\n`;
-        activeMatches.forEach(match => {
-            const refereeName = match.referee ? (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
-            let info = match.lane ? ` (Lane ${match.lane}, Ref: ${refereeName})` : ` (No lane, Ref: ${refereeName})`;
-            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
-        });
-        details += '\n';
-    }
-    if (readyMatches.length > 0) {
-        details += `Ready to start:\n`;
-        readyMatches.forEach(match => {
-            const refereeName = match.referee ? (players.find(p => p.id == match.referee)?.name || 'Unknown') : 'None';
-            let info = match.lane ? ` (Lane ${match.lane}, Ref: ${refereeName})` : ` (No lane, Ref: ${refereeName})`;
-            details += `• ${match.id}: ${match.player1?.name} vs ${match.player2?.name}${info}\n`;
-        });
-        details += '\n';
-    }
-    if (activeMatches.length === 0 && readyMatches.length === 0) {
-        const completedMatches = matches.filter(m => m.completed);
-        const pendingMatches = matches.length - completedMatches.length;
-        details = `No matches currently active or ready.\n\nCompleted: ${completedMatches.length}\nPending: ${pendingMatches}`;
-    } else {
-        details = details.trim();
-    }
-    showMatchDetailsModal(details);
-}
-
-function showMatchDetailsModal(message) {
-    const modal = document.getElementById('matchDetailsModal');
-    const messageDiv = document.getElementById('matchDetailsMessage');
-    const okBtn = document.getElementById('matchDetailsOK');
-    
-    if (!modal || !messageDiv || !okBtn) {
-        console.error('Match details modal elements not found');
-        alert(message); // Fallback to alert
-        return;
-    }
-    
-    messageDiv.textContent = message;
-    modal.style.display = 'flex';
-    
-    // Focus the OK button
-    setTimeout(() => okBtn.focus(), 100);
-    
-    // Set up event handlers
-    const closeModal = () => {
-        modal.style.display = 'none';
-        okBtn.onclick = null; // Clean up
-    };
-    
-    okBtn.onclick = closeModal;
-    
-    // Close on Escape key
-    const handleEscape = (e) => {
-        if (e.key === 'Escape') {
-            closeModal();
-            document.removeEventListener('keydown', handleEscape);
-        }
-    };
-    document.addEventListener('keydown', handleEscape);
-}
-
 /**
  * Rolls back achievements recorded in a COMPLETE_MATCH transaction from player.stats.
  * Subtracts exactly what the transaction recorded; counters are floored at zero.
@@ -2616,7 +2545,6 @@ if (typeof window !== 'undefined') {
     window.refreshTournamentUI = refreshTournamentUI;
 
     // Original functions needed by HTML
-    window.showMatchDetails = showMatchDetails;
     window.updateMatchReferee = updateMatchReferee;
     window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
     window.refreshRefereeDropdown = refreshRefereeDropdown;

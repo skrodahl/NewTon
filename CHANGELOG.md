@@ -1,4 +1,4 @@
-## **v5.1.2** — The Polished Press (2026-05-24)
+## **v5.1.2** — The Polished Press (2026-05-26)
 
 Tactile press feedback on every button across the app, a new dialog system (`.dlg`) that unifies eleven confirmation/warning/info modals around a small set of shared layouts, a redesigned Tournament Complete celebration with an Olympic tiered podium and decorative garlands, a fix to a long-standing match-achievement attribution bug, and a small Registration-page bug fix.
 

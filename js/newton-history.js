@@ -2264,18 +2264,29 @@ const NewtonHistory = (() => {
         const completedMatches = Array.isArray(t.matches) ? t.matches.filter(m => m.completed && m.winner).length : 0;
         const totalMatches = Array.isArray(t.matches) ? t.matches.length : 0;
 
-        // Show confirmation modal
-        const infoEl = document.getElementById('analyticsImportInfo');
-        if (infoEl) {
-            infoEl.innerHTML =
-                `<strong>${escHtml(t.name)}</strong>` +
-                (t.date ? ` — ${escHtml(t.date)}` : '') +
-                `<br>${playerCount} players · ${completedMatches} completed matches` +
-                (t.format ? ` · ${t.format === 'SE' ? 'Single' : 'Double'} Elimination` : '');
+        // Populate sidebar with imported file's metadata (safe via textContent)
+        const formatLabel = t.format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+        const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+        setText('analyticsImportName', t.name);
+        setText('analyticsImportDate', t.date || '-');
+        setText('analyticsImportStatus', typeof tournamentStatusLabel === 'function' ? tournamentStatusLabel(t) : '-');
+        setText('analyticsImportProgress', `${completedMatches} of ${totalMatches}`);
+        setText('analyticsImportPlayers', playerCount);
+
+        // Description varies on whether the format is known
+        const descEl = document.getElementById('analyticsImportDesc');
+        if (descEl) {
+            descEl.textContent = t.format
+                ? `Add this ${formatLabel} tournament to the Analytics register. No existing data is modified.`
+                : 'Add this tournament to the Analytics register. No existing data is modified.';
         }
 
+        // Toggle the "Missing settings" pill + warning paragraph together when no config snapshot
+        const showMissingSettings = !t.config;
+        const pillEl = document.getElementById('analyticsImportMissingSettingsPill');
         const warningEl = document.getElementById('analyticsImportWarning');
-        if (warningEl) warningEl.style.display = t.config ? 'none' : 'block';
+        if (pillEl) pillEl.style.display = showMissingSettings ? '' : 'none';
+        if (warningEl) warningEl.style.display = showMissingSettings ? '' : 'none';
 
         const confirmBtn = document.getElementById('analyticsImportConfirmBtn');
         if (!confirmBtn) { event.target.value = ''; return; }
