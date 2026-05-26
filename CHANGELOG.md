@@ -1,6 +1,6 @@
 ## **v5.1.2** — The Polished Press (2026-05-24)
 
-Tactile press feedback on every button across the app, a new dialog system (`.dlg`) that unifies eleven confirmation/warning/info modals around a small set of shared layouts, a redesigned Tournament Complete celebration with an Olympic tiered podium and decorative garlands, and a small Registration-page bug fix.
+Tactile press feedback on every button across the app, a new dialog system (`.dlg`) that unifies eleven confirmation/warning/info modals around a small set of shared layouts, a redesigned Tournament Complete celebration with an Olympic tiered podium and decorative garlands, a fix to a long-standing match-achievement attribution bug, and a small Registration-page bug fix.
 
 ### Button press feedback
 
@@ -59,6 +59,22 @@ The Tournament Complete view inside Match Controls now uses an Olympic-style tie
 
 - **New `Docs/DIALOGS.md`** — comprehensive reference for the `.dlg` system. When to use which pattern, anatomy, visual structure rules (the title + footer separator pair), the two layouts plus the `.dlg--wide` modifier, sidebar conventions (including the tournament-metadata-vs-match-metadata distinction), the intent pill system with all variants, button rules, helpers, XSS safety, dialog stack integration. Includes the live migration status table and an 8-step migration checklist for the next dialog. Updated through the session as each new dialog was migrated.
 
+### Bug fix — match achievement attribution
+
+A latent bug in the achievement snapshot/diff: the baseline was captured when the Confirm Winner modal opened, which was a loose moment in the lifecycle. If the dialog was opened previously for the same match (and exited via an abnormal path) or if other matches were completed between opens, the snapshot could capture player stats at the wrong instant. The diff at confirm-time would then record achievements from earlier matches onto the current match's transaction — and undoing the current match would incorrectly revert those earlier achievements too.
+
+The fix anchors the snapshot to the **Start Match** event instead:
+
+- New field: `match.preMatchSnapshot = { [player1Id]: snap, [player2Id]: snap }`
+- Recorded in `toggleActive()` when the match becomes active. Overwritten on every Start (Esc/Cancel having already rolled back any pending stats from a previous winner-confirm session).
+- `showWinnerConfirmation` reads the anchored snapshot via the existing `_completionSnapshot` global — now a pointer into `match.preMatchSnapshot` rather than a session-scoped copy.
+- `handleConfirm` and `handleCancel` no longer null the pointer — the snapshot lives on the match object for the next attempt (and stays after completion as audit data).
+- Fallback: if a match was started before this lands and has no snapshot, `showWinnerConfirmation` takes one at dialog open — same behavior as the previous approach, so existing in-progress tournaments keep working without migration.
+
+Result: every `COMPLETE_MATCH` transaction's `achievements` field correctly reflects only the achievements added between **this match's** Start and Confirm — no leakage between matches, no contamination across dialog re-opens. Undo now reverts exactly the right set per match.
+
+A follow-up will close the remaining gap: stats added via the bare `openStatsModal` (Results table, Command Center) outside any winner-confirm flow are still untracked per-match. The plan is to attribute them to the player's last completed match transaction. Deferred — see `Docs/UNDO.md` for the rationale.
+
 ### Bug fix — late-reg button visibility
 
 - **"Player arrived late?" button now appears immediately when navigating to Registration mid-session**, not only after a reload. `showPage('registration')` was calling `renderPlayerList()` (the saved-players list) and `updateRegistrationPageLayout()` but not `updatePlayersDisplay()` — the function that renders the tournament-players list AND the late-reg button container. Now called as part of the registration page activation.
@@ -78,12 +94,13 @@ The Tournament Complete view inside Match Controls now uses an Olympic-style tie
 - `css/styles.css` — unified `:active` press-effect rule; removed `!important` from `.help-btn:hover`; new `.dlg` system (base + `--split` + `--wide` + pills, title separator, 260px sidebar); removed `#resetConfirmationInput` from border-radius cascade; removed banner classes; rewrote tournament-celebration / podium / highlights styles for the Olympic tiered podium with garlands; new `.winner-progression*` and `.winner-stats-stack` classes; removed orphaned `.celebration-export-btn`, `.celebration-actions`, `.clickable-player-name`, `.winner-hint`
 - `tournament.html` — replaced eleven modal markups with `.dlg` structure (Reset, Delete, Import Overwrite, Tournament In Progress, Import Confirmation, Load Tournament, Undo Match, Analytics Delete, Late Reg Info, Export, Winner Confirm); rewrote `#tournamentCelebration` for the Olympic podium with inline SVG garlands
 - `js/tournament-management.js` — new `tournamentStatusLabel()` helper; `showResetTournamentModal()`, `showDeleteTournamentModal()`, `showImportOverwriteModal()`, `showImportConfirmModal()`, `showLoadTournamentModal()` updated for new sidebar values and all use the helper; conditional pill toggle in import-confirm
-- `js/clean-match-progression.js` — `showTournamentProgressWarning()` populates new sidebar fields via the helper; `showWinnerConfirmation()` refactored for safe DOM building (sidebar populated via `textContent`, body built via `createElement`, dynamic title, new `_buildWinnerProgressionBlock()` helper, Edit Statistics buttons wired in sidebar)
+- `js/clean-match-progression.js` — `showTournamentProgressWarning()` populates new sidebar fields via the helper; `showWinnerConfirmation()` refactored for safe DOM building (sidebar populated via `textContent`, body built via `createElement`, dynamic title, new `_buildWinnerProgressionBlock()` helper, Edit Statistics buttons wired in sidebar); achievement snapshot anchored to `toggleActive()` (Start Match) via new `match.preMatchSnapshot`; `showWinnerConfirmation`/`handleConfirm`/`handleCancel` read from the anchored snapshot instead of taking a fresh one at dialog open; `_completionSnapshot` global is now a pointer into the match's snapshot rather than a session-scoped copy
 - `js/bracket-rendering.js` — `updateCelebrationSubtitle()` drops emojis from the dynamically-set title; `showUndoConfirmationModal()` refactored for safe DOM (new `_buildUndoMatchCard()`, `_buildUndoAchievementsSection()`, `_bracketLabel()` helpers); `handleSurgicalUndo()` updated to pass structured params; old `createUndoModalContent()` deleted
 - `js/newton-history.js` — `promptDeleteTournament()` updated for new sidebar IDs (separate name and date, placeholder pattern instead of dynamic prompt `innerHTML`)
 - `js/results-config.js` — `showExportConfirmModal()` trimmed: new sidebar IDs, conditional pill + warning toggle, dropped the verbose "what will be included" list builder
 - `js/main.js` — `showPage('registration')` now calls `updatePlayersDisplay()` so the late-reg button reflects current tournament state on every navigation
 - `Docs/DIALOGS.md` — new
+- `Docs/UNDO.md` — updated: replaced the "Planned — Match-Anchored Snapshot" section with implementation notes; reframed the "Completion Modal — Snapshot & Diff" section around the new Start-Match anchor; the manual-entry gap remains in "What This Does Not Solve" (deferred follow-up)
 
 ### Migration
 

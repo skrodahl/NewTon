@@ -4,9 +4,11 @@
 // Pending format selection — set by showBracketConfirmation(), read by confirmBracketGeneration()
 let pendingFormat = 'DE';
 
-// Snapshot of player stats at the moment the winner confirmation modal opens.
-// Used to diff what changed during the session (for transaction achievements) and to
-// restore stats if the operator cancels. Fresh on every open of the dialog.
+// Pointer into the active match's preMatchSnapshot (anchored at Start Match in
+// toggleActive). Reassigned by showWinnerConfirmation when the dialog opens.
+// Used by renderCompletionAchievements / handleConfirm / handleCancel as the baseline
+// for the achievement diff and the restore-on-cancel rollback target. Don't null out
+// after use — the underlying match.preMatchSnapshot lives on the match object.
 let _completionSnapshot = null;
 
 /**
@@ -1897,6 +1899,20 @@ function toggleActive(matchId) {
 
     console.log(`Match ${matchId} ${match.active ? 'activated' : 'deactivated'}`);
 
+    // Anchor achievement snapshot on Start Match.
+    // Captures both players' stats at the moment the match becomes active — this is
+    // the baseline for the achievement diff computed on Confirm Winner. Overwritten on
+    // every Start; any pending uncommitted stats from a previous winner-confirm session
+    // have already been rolled back (Cancel/Esc → handleCancel restorePlayerStats).
+    if (match.active && !window.rebuildInProgress) {
+        match.preMatchSnapshot = {};
+        [match.player1, match.player2].forEach(p => {
+            if (!p || !p.id) return;
+            const player = players.find(pl => String(pl.id) === String(p.id));
+            if (player) match.preMatchSnapshot[player.id] = snapshotPlayerStats(player);
+        });
+    }
+
     // Create transaction for match state change
     if (!window.rebuildInProgress) {
         const transaction = {
@@ -2237,12 +2253,24 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const scanBtn = document.getElementById('scanResultQRBtn');
     if (scanBtn) scanBtn.dataset.matchId = matchId;
 
-    // Snapshot stats for both players so we can diff on confirm and restore on cancel.
-    // Fresh snapshot every open — the diff represents this dialog session only.
-    _completionSnapshot = {
-        [winner.id]: snapshotPlayerStats(winner),
-        [loser.id]: snapshotPlayerStats(loser)
-    };
+    // Use the match-anchored snapshot recorded at Start Match (toggleActive).
+    // This is the reliable baseline for the achievement diff — it can't drift like the
+    // old "snapshot at dialog open" approach did.
+    //
+    // Fallback: if the snapshot is missing (match started before this feature, or some
+    // unusual code path), take one now. The diff then only captures stats added from this
+    // point forward — same behavior as the old approach, so the dialog still works.
+    const matchObj = matches.find(m => m.id === matchId);
+    if (matchObj && !matchObj.preMatchSnapshot) {
+        matchObj.preMatchSnapshot = {
+            [winner.id]: snapshotPlayerStats(winner),
+            [loser.id]: snapshotPlayerStats(loser)
+        };
+    }
+    // _completionSnapshot is now a pointer into the match-anchored snapshot.
+    // renderCompletionAchievements, handleConfirm, and handleCancel all read through it
+    // unchanged.
+    _completionSnapshot = matchObj ? matchObj.preMatchSnapshot : null;
 
     // Use dialog stack to show modal.
     // enableEsc=false because handleKeyPress (above) handles Esc itself — routing it through
@@ -2293,7 +2321,10 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
     // Handle button clicks
     const handleCancel = () => {
-        // Restore any stats changes made during this session
+        // Restore stats to the match's anchored baseline (Start Match snapshot).
+        // The snapshot lives on match.preMatchSnapshot and stays there — it'll be the
+        // baseline for the next Confirm Winner attempt on this same match. The global
+        // _completionSnapshot is just a pointer; don't null it out.
         if (_completionSnapshot) {
             [winner, loser].forEach(p => {
                 const snap = _completionSnapshot[p.id];
@@ -2302,7 +2333,6 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
                 if (player) restorePlayerStats(player, snap);
             });
             saveTournament();
-            _completionSnapshot = null;
         }
         console.log(`Winner selection cancelled for match ${matchId}`);
         cleanup();
@@ -2327,7 +2357,10 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
             return;
         }
 
-        // Compute achievement delta from the session snapshot
+        // Compute achievement delta from the match-anchored snapshot.
+        // The snapshot stays on match.preMatchSnapshot as audit data — useful if anyone
+        // inspects the match record later. The global _completionSnapshot pointer is
+        // harmless to leave dangling (it'll be reassigned on the next dialog open).
         let achievements = null;
         if (_completionSnapshot) {
             achievements = {};
@@ -2336,7 +2369,6 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
                 const player = players.find(pl => String(pl.id) === String(p.id));
                 achievements[p.id] = (snap && player) ? diffPlayerStats(snap, snapshotPlayerStats(player)) : null;
             });
-            _completionSnapshot = null;
         }
 
         console.log(`Winner confirmed for match ${matchId}: ${winner.name} (${winnerLegs}-${loserLegs})`);

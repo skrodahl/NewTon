@@ -1,7 +1,7 @@
 # Undo System — Achievements
 
-**Status:** Implemented — v5.0.1-beta.4
-**Last Updated:** March 2026
+**Status:** Implemented — v5.0.1-beta.4; snapshot anchor refactored in v5.1.2
+**Last Updated:** May 2026
 
 ---
 
@@ -36,14 +36,31 @@ Every `COMPLETE_MATCH` transaction has an `achievements` field:
 
 The `achievements` field is always present. A `null` value for a player means no achievements were recorded for them in this transaction — not that they have none overall.
 
-## Completion Modal — Snapshot & Diff
+## Snapshot Anchor — Start Match
 
-When the winner confirmation modal opens, a snapshot of both players' stats is taken. The operator can click player names to open the Stats Modal and add achievements as usual.
+The achievement baseline is captured when the match becomes active in `toggleActive()` (the "Start" button in Match Controls). The snapshot lives on the match itself:
 
-- **Confirm Winner**: the delta between snapshot and current stats is computed and written to the transaction's `achievements` field. Stats are already on `player.stats` as normal.
-- **Cancel** (or ESC): the delta is rolled back from `player.stats`, restoring them to their pre-session state. If achievements were entered, the Cancel button label updates to **"Cancel & revert achievements"** before the operator clicks, making the consequence clear.
+```javascript
+match.preMatchSnapshot = {
+    [player1Id]: { oneEighties, tons, lollipops, highOuts, shortLegs },
+    [player2Id]: { ... }
+}
+```
 
-This means nothing is permanently committed until "Confirm Winner" is clicked.
+This snapshot is overwritten on every Start. Stop + Start refreshes the baseline; any pending uncommitted stats from a previous Confirm Winner attempt have already been rolled back via Esc/Cancel.
+
+## Completion Modal — Diff
+
+The Confirm Winner dialog reads the match's anchored snapshot (the operator can click player names to open the Stats Modal and add achievements as usual).
+
+- **Confirm Winner**: the delta between `match.preMatchSnapshot` and current stats is computed and written to the COMPLETE_MATCH transaction's `achievements` field. Stats are already on `player.stats` as normal. The snapshot stays on the match object after completion as audit data.
+- **Cancel** (or ESC): the delta is rolled back from `player.stats`, restoring them to the Start-Match baseline. The snapshot stays on the match — it'll be reused as the baseline for the next Confirm Winner attempt. If achievements were entered, the Cancel button label updates to **"Cancel & revert achievements"** before the operator clicks, making the consequence clear.
+
+This means nothing is permanently committed until "Confirm Winner" is clicked, and the snapshot anchor is solid — it can't drift across dialog re-opens or be contaminated by other matches' completions.
+
+### Fallback for snapshot-less matches
+
+A match that was started before the Start-Match anchor landed (i.e. before v5.1.2) will not have a `preMatchSnapshot`. In that case, `showWinnerConfirmation` takes a snapshot at dialog open — same behavior as the original implementation, so existing in-progress tournaments keep working without migration.
 
 ---
 
@@ -111,19 +128,18 @@ The undo dialog handles QR-completed matches identically to manually completed o
 
 ---
 
-## Planned — Match-Anchored Snapshot (next iteration)
+## Why the Anchor Matters
 
-The current snapshot/diff approach has a subtler limitation: the snapshot is taken when the Confirm Winner modal opens, which is loose. If the dialog was previously opened for the same match (and exited via an abnormal path) or if other matches were completed in between, the snapshot can capture player state at the wrong moment — leading to achievements from earlier matches being attributed to a later match's transaction.
+Before v5.1.2 the snapshot was taken when the Confirm Winner modal opened. That timing is loose: if the dialog was previously opened for the same match (and exited via an abnormal path) or if other matches were completed in between, the snapshot could capture player state at the wrong instant. The diff at confirm-time would then record achievements from earlier matches onto the current match's transaction — and undoing the current match would incorrectly revert those earlier achievements too.
 
-The fix is to anchor the snapshot to the **Start Match** event instead:
+Anchoring to `toggleActive()` (Start Match) makes the baseline definitive:
 
-- New field: `match.preMatchSnapshot = { [player1Id]: snap, [player2Id]: snap }`
-- Created/overwritten in `toggleActive()` when activating the match
-- `showWinnerConfirmation` / `handleConfirm` / `handleCancel` read from `match.preMatchSnapshot` instead of the session-scoped `_completionSnapshot`
-- Fallback at dialog open for matches started before this lands (no migration needed)
+- Start Match is a clear lifecycle event with no ambiguity about timing.
+- The snapshot lives on the match object, not in a session-scoped global, so it can't drift between dialog opens.
+- Overwriting on every Start is safe: any pending uncommitted stats from a previous Confirm Winner attempt have already been rolled back by the Esc-as-Cancel handler.
 
-This gives every COMPLETE_MATCH transaction a solid, unambiguous baseline. The `achievements` field will correctly reflect only what was added between **this match's** Start and Confirm — no leakage between matches.
+The corner case "user adds stats, exits Confirm Winner via abnormal path (tab close), then stops and re-starts the match" is intentionally not handled — orphan stats from that path are accepted as un-attributed lifetime totals. Adding rollback-on-Start logic to cover this would complicate a clean architecture for a near-impossible scenario.
 
-A follow-up task addresses manual entry: stats added via the bare `openStatsModal` (Results table, Command Center) will be attributed to the player's last completed match transaction, closing the "manually entered, untracked" gap noted above.
+## Pending — Manual Entry Attribution
 
-Full plan: `.claude/plans/eager-singing-garden.md`.
+Stats added via the bare `openStatsModal` (Results table, Command Center) are still untracked per-match — these edits happen outside any winner-confirm flow, so no transaction records them. The plan is to attribute them to the player's last completed match transaction, closing the gap noted in "What This Does Not Solve" above. Deferred until the current architecture proves out in real-world use.
