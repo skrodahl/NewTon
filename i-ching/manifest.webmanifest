@@ -1,0 +1,27 @@
+{
+  "name": "ORACULON CT-64 — I Ching Calculator",
+  "short_name": "ORACULON",
+  "description": "A fake vintage scientific calculator that tells fortunes. It cannot produce an answer above four.",
+  "lang": "en",
+  "dir": "ltr",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#1b1813",
+  "theme_color": "#1b1813",
+  "icons": [
+    {
+      "src": "icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}

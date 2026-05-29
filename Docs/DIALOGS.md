@@ -152,6 +152,23 @@ The `.dlg__foot` is right-aligned (`justify-content: flex-end`). For single-butt
 
 ---
 
+## The `.dlg__note` panel
+
+A subtle elevated panel for grouping body content that should read as "set apart" from the surrounding prose — typically a procedure, a callout, or a related cluster of steps. White background like the dialog itself, but with a 1px `#ecedf1` border and a soft shadow that lifts it off the surface. 8px radius, 14px/16px padding.
+
+```html
+<div class="dlg__note">
+    <p class="dlg__desc">First step or paragraph.</p>
+    <p class="dlg__desc">Second step or paragraph.</p>
+</div>
+```
+
+Stacked children get automatic 10px vertical spacing via `.dlg__note > * + *`. Use sparingly — most dialogs don't need it. Reach for it when the body has both lead-in prose and a distinct grouped action set (as in `lateRegInfoModal`, where the first paragraph is the lead-in and the framed block contains the operator's steps and what to expect).
+
+**Text color inside the panel:** `.dlg__note .dlg__desc` overrides the default muted `#6b7280` to the dialog body color `#2a2f3a`. The frame draws attention to the content inside it, so the text should read as primary, not as helper prose. Default `.dlg__desc` muted gray stays in effect outside the panel — useful for captions and lead-in prose elsewhere in the dialog.
+
+---
+
 ## Helpers
 
 ### `tournamentStatusLabel(t)` — in `js/tournament-management.js`
@@ -208,7 +225,7 @@ Show/hide behavior, z-index management, and Esc support are unchanged from the l
 | Load Tournament Confirmation | `loadTournamentModal` | split | none |
 | Undo Match Confirmation | `undoConfirmModal` | split (match metadata, not tournament) | amber Destructive |
 | Analytics — Delete Tournament | `historyDeleteTournamentModal` | split | red Destructive |
-| Late Registration Info | `lateRegInfoModal` | default | none |
+| Late Registration Info | `lateRegInfoModal` | default + `.dlg__note` | none |
 | Export Tournament Results | `exportConfirmModal` | split | amber Incomplete (conditional) |
 | Confirm Match Winner | `winnerConfirmModal` | split + wide (match metadata, not tournament) | none |
 | Player Statistics Editor | `statsModal` | default | none |

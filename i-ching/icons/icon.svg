@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" viewBox="0 0 512 512">
+  <!-- full-bleed square (no rounded corners) so it works as a maskable icon -->
+  <defs>
+    <linearGradient id="case" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d7c9a8"/>
+      <stop offset="1" stop-color="#9c8d6e"/>
+    </linearGradient>
+    <radialGradient id="vig" cx="0.5" cy="0.42" r="0.75">
+      <stop offset="0.55" stop-color="#000000" stop-opacity="0"/>
+      <stop offset="1" stop-color="#2e2418" stop-opacity="0.45"/>
+    </radialGradient>
+  </defs>
+  <rect width="512" height="512" fill="url(#case)"/>
+  <rect width="512" height="512" fill="url(#vig)"/>
+  <!-- the 易 glyph, centered well within the central 80% maskable safe zone -->
+  <text x="256" y="256" text-anchor="middle" dominant-baseline="central"
+        font-family="'Hiragino Mincho ProN','Songti SC','Noto Serif CJK SC',serif"
+        font-size="300" font-weight="700"
+        fill="#8a2c1e">易</text>
+  <!-- a thin solar/LED strip accent at the base -->
+  <rect x="116" y="396" width="280" height="18" rx="4" fill="#0c130b"/>
+  <g fill="#7fdc52">
+    <circle cx="146" cy="405" r="5"/><circle cx="186" cy="405" r="5"/>
+    <circle cx="226" cy="405" r="5"/><circle cx="266" cy="405" r="5"/>
+    <circle cx="306" cy="405" r="5"/><circle cx="346" cy="405" r="5"/>
+    <circle cx="386" cy="405" r="5" fill="#3a7a2a"/>
+  </g>
+</svg>

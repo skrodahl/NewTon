@@ -67,6 +67,11 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - **Chalker → TM result QR (v5.0.1)**: After a match the Chalker displays a result QR. The TM scans it to import the result, leg-by-leg scores, and player achievements automatically.
 - QR payloads are JSON signed with CRC-32 (`newton-integrity.js`). Assignment schema: `v, t:"a", mid, tid, sid, p1, p2, sc, bo, mr, [ln], [ref], ts, crc`. Result schema: `v, t:"r", mid, tid, sid, p1, p2, sc, bo, mr, w, fls, legs[], ts, crc`
 
+## Unrelated Side Project: I Ching Calculator
+- A standalone Douglas Adams homage hosted at `/i-ching/` on the same domain. An interpretation of the I Ching calculator from *The Long Dark Tea-Time of the Soul* (the second Dirk Gently novel).
+- Installable PWA, fully offline. Shares hosting with NewTon DC but is not part of the darts product or ecosystem.
+- Intentionally not linked from the NewTon DC landing page or referenced in release notes — it lives quietly under the same domain. Listed in `sitemap.xml` only so search engines can index it directly.
+
 ## Deployment Options
 - **Local**: Open `tournament.html` directly in any modern browser (Chrome 80+, Firefox 75+, Safari 13+, Edge 80+)
 - **Docker Hub**: `docker run -d -p 8080:2020 skrodahl/newton:latest`
@@ -122,3 +127,4 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - Late Registration exists but is accessible only via the Developer Console, not the main UI
 - Lollipop counter exists: scoring a 3 (three ones) is a "lollipop" in darts club tradition — cosmetic only, not part of the points system
 - The bracket is not drag-and-drop; progression is fully deterministic via hardcoded lookup tables
+- The `/i-ching/` PWA on the same domain is an unrelated Douglas Adams side project — do not describe it as part of NewTon DC or conflate the two

@@ -1243,7 +1243,6 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             style="margin: 20px 0; padding: 15px; background: #f8f9fa; border: 1px solid #e5e7eb;">
                             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
                                 <span style="font-weight: 600; color: #111827;">Final Score (optional):</span>
-                                <small style="color: #6b7280; font-style: italic;">Winner must have more legs than loser</small>
                             </div>
                             <div style="display: flex; justify-content: space-between; align-items: center;">
                                 <div style="display: flex; align-items: center;">
@@ -1821,9 +1820,12 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
             <div class="dlg">
                 <div class="dlg__main">
                     <h2 class="dlg__title">Registering a late arrival</h2>
-                    <p class="dlg__desc">To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open it by clicking the version number in the lower-right corner of the Tournament Bracket.</p>
-                    <p class="dlg__desc">In the <strong>Developer Console</strong>, use the command <strong>Late Arrival</strong> to add players.</p>
-                    <p class="dlg__desc">The new player will be placed randomly in an available walkover spot in Frontside Round 1 and participate as a fully registered, paid player from that point forward.</p>
+                    <p class="dlg__desc" id="lateRegInfoFirstPara">To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open it by clicking the version number in the lower-right corner of the Tournament Bracket.</p>
+                    <div class="dlg__note">
+                        <p class="dlg__desc">In the <strong>Developer Console</strong>, use the command <strong>Late Registration</strong> to add players.</p>
+                        <p class="dlg__desc">The new player will be placed randomly in an available walkover spot in Frontside Round 1 and participate as a fully registered, paid player from that point forward.</p>
+                    </div>
+                    <p class="dlg__desc" style="font-style: italic;">The Developer Console is for changes made after a tournament has started &mdash; outside the normal workflow.</p>
                 </div>
                 <div class="dlg__foot">
                     <button class="btn btn-primary" onclick="popDialog()">Got it</button>

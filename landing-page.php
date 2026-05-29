@@ -6,6 +6,7 @@ $githubUrl = htmlspecialchars(getenv('NEWTON_GITHUB_URL') ?: 'https://github.com
 $baseUrl = htmlspecialchars(getenv('NEWTON_BASE_URL') ?: '');
 $ogUrlTag = $baseUrl ? "\n    <meta property=\"og:url\" content=\"{$baseUrl}\">" : '';
 $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" : '';
+$jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -45,8 +46,8 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             "priceCurrency": "USD"
         },
         "license": "https://opensource.org/licenses/BSD-3-Clause",
-        "isAccessibleForFree": true,
-        "url": "<?= $githubUrl ?>",
+        "isAccessibleForFree": true,<?= $jsonLdUrl ?>
+        "codeRepository": "<?= $githubUrl ?>",
         "downloadUrl": "<?= $githubUrl ?>",
 		"screenshot": "<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg",
         "featureList": "Single Elimination, Double Elimination, 4-32 Players, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
@@ -264,7 +265,7 @@ $canonicalTag = $baseUrl ? "\n    <link rel=\"canonical\" href=\"{$baseUrl}\">" 
             <a href="third-party-licenses.html">Licenses</a> &mdash;
             <a href="design-system.html">Design System</a>
         </p>
-        <p><em class="footer-cheeky">No popups? No cookies!</em></p>
+        <p><em class="footer-cheeky">No popups? No cookies!</em> <a class="footer-egg" href="/i-ching/" target="_blank" rel="noopener">42</a></p>
     </div>
 
 </body>

@@ -641,6 +641,24 @@ function updatePlayersDisplay() {
 }
 
 function showLateRegInfoModal() {
+    const developerMode = (() => {
+        try {
+            const savedConfig = localStorage.getItem('dartsConfig');
+            if (savedConfig) {
+                const parsed = JSON.parse(savedConfig);
+                return parsed.ui && parsed.ui.developerMode;
+            }
+        } catch (e) {}
+        return false;
+    })();
+
+    const firstPara = document.getElementById('lateRegInfoFirstPara');
+    if (firstPara) {
+        firstPara.innerHTML = developerMode
+            ? 'To register a late arrival, open the <strong>Developer Console</strong> by clicking the version number in the lower-right corner of the Tournament Bracket.'
+            : 'To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open it by clicking the version number in the lower-right corner of the Tournament Bracket.';
+    }
+
     pushDialog('lateRegInfoModal', null, true);
 }
 

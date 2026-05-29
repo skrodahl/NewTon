@@ -1,0 +1,96 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>易經計算機 — I Ching Calculator CT-64</title>
+
+<!-- PWA: installable, standalone, themed to the dark desk surround -->
+<link rel="manifest" href="manifest.webmanifest">
+<meta name="theme-color" content="#1b1813">
+<!-- iOS still ignores the manifest's display mode; these drive standalone there -->
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="ORACULON">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon-180.png">
+
+<!-- self-hosted retro fonts (no network needed; CSP can stay 'self') -->
+<link rel="stylesheet" href="fonts/fonts.css">
+<link rel="stylesheet" href="css/oraculon.css">
+
+<div class="device" role="application" aria-label="I Ching Calculator">
+  <!-- the back half fell off; held on with a strip of aging Sellotape -->
+  <div class="tape" aria-hidden="true"></div>
+  <!-- a peeling thrift-shop price sticker (£20 — what Dirk paid) -->
+  <div class="sticker" aria-hidden="true">£20</div>
+  <div class="brand">
+    <div class="logo">易 ORACUL<b>O</b>N</div>
+    <div class="model">CT-64 SCIENTIFIC<br>易經計算機<br>MADE IN ELSEWHERE</div>
+  </div>
+  <div class="solar" aria-hidden="true"></div>
+
+  <div class="lcd">
+    <div class="status">
+      <span class="ann on deg">DEG</span>
+      <span id="ann-iching" class="ann">易 I·CHING</span>
+      <span id="ann-err" class="ann">∞</span>
+    </div>
+    <div id="out" class="out">0</div>
+    <div class="stuck" aria-hidden="true">8</div>
+    <div class="crack" aria-hidden="true"></div>
+  </div>
+
+  <div class="keys">
+    <button class="key sci" data-fn="sin">sin</button>
+    <button class="key sci" data-fn="cos">cos</button>
+    <button class="key sci" data-fn="tan">tan</button>
+    <button class="key sci" data-fn="sqrt">√</button>
+
+    <button class="key sci" data-fn="sq">x²</button>
+    <button class="key sci" data-fn="inv">1/x</button>
+    <button class="key sci" data-fn="log10">log</button>
+    <button class="key sci" data-fn="pi">π</button>
+
+    <button class="key red" data-act="clear">C</button>
+    <button class="key red" data-act="del">⌫</button>
+    <button class="key op" data-op="/">÷</button>
+    <button class="key op" data-op="*">×</button>
+
+    <button class="key" data-d="7">7</button>
+    <button class="key" data-d="8">8</button>
+    <button class="key" data-d="9">9</button>
+    <button class="key op" data-op="-">−</button>
+
+    <button class="key" data-d="4">4</button>
+    <button class="key" data-d="5">5</button>
+    <button class="key" data-d="6">6</button>
+    <button class="key op" data-op="+">+</button>
+
+    <button class="key" data-d="1">1</button>
+    <button class="key" data-d="2">2</button>
+    <button class="key" data-d="3">3</button>
+    <button class="key op eq" data-act="equals">=</button>
+
+    <button class="key zero" data-d="0">0</button>
+    <button class="key" data-d=".">.</button>
+
+    <button class="key iching" data-act="iching"><span class="hz">易</span><span class="mark">Red</span></button>
+  </div>
+
+  <button class="manual-link" id="manualBtn">▸ READ INSTRUCTION BOOKLET ◂</button>
+</div>
+
+<!-- ===== Instruction booklet ===== -->
+<div class="modal" id="modal">
+  <div class="booklet">
+    <h2>OWNER MANUAL · 易經計算機 CT-64</h2>
+    <div class="sub">CONGRATULATION FOR YOUR PURCHASE OF FINE DEVICE</div>
+    <p>Welcome the proud owner! This electronic abacus of fortune reckon the sums, perform the science, AND ALSO foretell the unknowable across 128 hexagram. Truly we live in the future, which this device already know about.</p>
+    <p>Operation is simple, and also mysterious: press what you wish; receive what you receive. Should the answer arrive instead as a colour, a mood, or a quantity of soup — this is not error, this is the device thinking. WHY it think so is explain upon the page that are missing (see below).</p>
+    <p>To CONSULT THE ORACLE: concentrate SOULFULLY upon the question which besiege you, enjoy the silence, and on achieving inner harmony press the RED button. The reading, translate from the Chinese by way of the Japanese, have enjoy many adventure on the road; any strangeness is therefore not error but TRAVEL.</p>
+    <div class="missing">
+      ⚠ PAGE 4–11 MISSING ⚠<br>(HOW TO INTERPRET THE ANSWER)<br>· APOLOGISE FOR INCONVENIENCE ·
+    </div>
+    <p class="warranty">WARRANTY: Device guarantee against everything except disappointment, water, fate, and the colour yellow. Battery not include. Future not include. Do not eat the device even if it advise so.</p>
+    <button class="close" id="closeBtn">CLOSE BOOKLET (FATE IS SEALED)</button>
+  </div>
+</div>
+
+<script src="js/oraculon.js" defer></script>

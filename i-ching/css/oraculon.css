@@ -1,0 +1,349 @@
+  :root{
+    --case:#cdbfa0;            /* cheap beige plastic */
+    --case-dark:#9c8d6e;
+    --case-edge:#7d6f54;
+    --lcd-bg:#7c8c63;          /* sickly green LCD */
+    --lcd-bg2:#94a374;
+    --lcd-ink:#1c2410;
+    --red:#b6402f;
+    --red-dark:#8a2c1e;
+    --gold:#c9a227;
+    --key:#e9e2d0;
+    --key-edge:#b3a988;
+    --ink:#2a2418;
+    --paper:#f3ead2;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;height:100%;}
+  body{
+    min-height:100%;
+    display:flex;align-items:center;justify-content:center;
+    /* respect the notch / home-bar when installed as a standalone PWA */
+    padding:
+      max(32px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+      max(32px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    background:
+      radial-gradient(120% 120% at 20% 10%, #5a5446 0%, #2e2a22 55%, #1b1813 100%);
+    font-family:'Special Elite',serif;
+    color:var(--ink);
+  }
+  /* faint desk grain */
+  body::before{
+    content:"";position:fixed;inset:0;pointer-events:none;opacity:.06;mix-blend-mode:overlay;
+    background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='120'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='2'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  .device{
+    position:relative;
+    width:340px;max-width:100%;
+    background:linear-gradient(160deg,var(--case) 0%,var(--case-dark) 100%);
+    border-radius:26px 26px 30px 30px;
+    padding:18px 18px 22px;
+    box-shadow:
+      0 2px 0 #fff6 inset,
+      0 -6px 14px #0003 inset,
+      0 24px 50px -12px #000a,
+      0 4px 0 var(--case-edge);
+    border:1px solid #00000022;
+    overflow:hidden;            /* clip the tape to the case so it can't float in the background */
+  }
+  /* aging Sellotape wrapping over the top-right corner of the case
+     (the book: "the back had half fallen off… stuck back on with Sellotape") */
+  .tape{
+    position:absolute; top:-4px; right:6px; z-index:8;
+    width:92px; height:26px;
+    transform:rotate(40deg);
+    /* a shiny, translucent strip lying across the corner; edge highlights along the
+       long sides sell it as tape. The case `overflow:hidden` clips it at the rounded
+       silhouette, so it reads as going over the corner without floating in the air */
+    background:linear-gradient(180deg,
+      rgba(255,252,214,.20) 0%,        /* top edge of the tape, catching light */
+      rgba(230,212,132,.34) 45%,
+      rgba(212,194,116,.30) 55%,
+      rgba(255,252,214,.18) 100%);     /* bottom edge of the tape */
+    box-shadow:inset 0 0 8px rgba(255,255,255,.30);
+    border-left:1px solid rgba(255,255,255,.40);
+    border-right:1px solid rgba(150,128,68,.40);
+    pointer-events:none;
+  }
+  .tape::after{   /* glossy diagonal glare — sells the plastic tape */
+    content:""; position:absolute; inset:0;
+    background:linear-gradient(115deg, rgba(255,255,255,.32) 0 15%, transparent 38%);
+  }
+  /* brand plate */
+  .brand{
+    display:flex;align-items:baseline;justify-content:space-between;gap:8px;
+    margin:2px 4px 12px;
+  }
+  .brand .logo{
+    font-family:'Silkscreen',monospace;font-weight:700;
+    font-size:15px;letter-spacing:.5px;color:var(--red-dark);
+    text-shadow:0 1px 0 #fff8;
+  }
+  .brand .logo b{color:var(--gold);}
+  .brand .model{
+    font-family:'Silkscreen',monospace;font-size:8px;color:#6b5f44;text-align:right;line-height:1.5;
+  }
+  /* the "solar strip" is actually a recessed row of nostalgic green LEDs,
+     populated and animated by the script (classic blinkenlights patterns) */
+  .solar{
+    height:15px;margin:0 4px 10px;border-radius:3px;
+    background:linear-gradient(180deg,#0d130c,#070a06);
+    border:1px solid #00000066;
+    box-shadow:0 1px 0 #ffffff22, inset 0 1px 3px #000a;
+    display:flex;align-items:center;justify-content:space-between;
+    padding:0 5px;overflow:hidden;
+  }
+  .solar .led{
+    --on:0;
+    width:8px;height:8px;border-radius:50%;flex:0 0 auto;
+    background:radial-gradient(circle at 50% 35%,
+      rgba(190,255,150,calc(.18 + .82*var(--on))) 0%,
+      rgba(54,170,40,calc(.12 + .60*var(--on))) 55%,
+      rgba(8,34,6,.92) 100%);
+    box-shadow:0 0 calc(1px + 7px*var(--on)) rgba(120,255,70,calc(.75*var(--on))),
+               inset 0 0 2px rgba(0,0,0,.5);
+    transition:background .09s linear, box-shadow .09s linear;
+  }
+
+  /* ===========================================================
+     WEAR & TEAR — this unit has lived a hard, cheap life.
+     Grime layers sit at z-index:-1 (behind the keys/LCD/receipt)
+     so they dirty the bare case without hurting readability.
+     =========================================================== */
+  .device{ z-index:0; }   /* stacking context for the grime layers */
+  .device::before{        /* grime, blotchy sun-yellowing, greasy edge dirt */
+    content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    border-radius:inherit; mix-blend-mode:multiply;
+    background:
+      radial-gradient(135% 120% at 50% -12%, transparent 50%, rgba(46,36,18,.46)),
+      radial-gradient(120% 120% at -10% 110%, transparent 52%, rgba(38,30,14,.50)),
+      radial-gradient(120% 120% at 110% 74%, transparent 54%, rgba(38,30,14,.44)),
+      radial-gradient(42% 32% at 80% 20%, rgba(150,118,38,.32), transparent 70%),
+      radial-gradient(34% 24% at 18% 60%, rgba(120,90,30,.30), transparent 72%),
+      radial-gradient(46% 30% at 64% 92%, rgba(96,72,30,.28), transparent 70%),
+      radial-gradient(26% 18% at 36% 34%, rgba(80,58,22,.24), transparent 72%),
+      radial-gradient(20% 14% at 92% 46%, rgba(70,50,20,.26), transparent 74%),
+      radial-gradient(18% 12% at 8% 32%, rgba(64,48,20,.22), transparent 74%);
+  }
+  .device::after{         /* fine dust + scuffs & hairline scratches */
+    content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    border-radius:inherit; mix-blend-mode:overlay; opacity:.92;
+    background-repeat:no-repeat; background-size:100% 100%;
+    background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='240'%20height='420'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='.9'%20numOctaves='2'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'%20opacity='.06'/%3E%3Cg%20fill='none'%20stroke-linecap='round'%3E%3Cpath%20d='M28%2066L132%2044'%20stroke='%23fff'%20stroke-opacity='.5'%20stroke-width='.8'/%3E%3Cpath%20d='M150%20120L210%20150'%20stroke='%23fff'%20stroke-opacity='.4'%20stroke-width='.7'/%3E%3Cpath%20d='M44%20250L150%20232'%20stroke='%23fff'%20stroke-opacity='.38'%20stroke-width='.7'/%3E%3Cpath%20d='M64%20330L196%20318'%20stroke='%23000'%20stroke-opacity='.3'%20stroke-width='.8'/%3E%3Cpath%20d='M18%20170L74%20188'%20stroke='%23000'%20stroke-opacity='.26'%20stroke-width='.7'/%3E%3Cpath%20d='M168%2060L206%2082'%20stroke='%23000'%20stroke-opacity='.24'%20stroke-width='.7'/%3E%3Cpath%20d='M96%20384L208%20372'%20stroke='%23fff'%20stroke-opacity='.36'%20stroke-width='.7'/%3E%3Cpath%20d='M30%20372L78%20360'%20stroke='%23000'%20stroke-opacity='.26'%20stroke-width='.7'/%3E%3Cpath%20d='M120%20200L232%20174'%20stroke='%23fff'%20stroke-opacity='.42'%20stroke-width='.7'/%3E%3Cpath%20d='M52%20120L150%2098'%20stroke='%23000'%20stroke-opacity='.28'%20stroke-width='.7'/%3E%3Cpath%20d='M150%20332L66%20300'%20stroke='%23fff'%20stroke-opacity='.34'%20stroke-width='.7'/%3E%3Cpath%20d='M196%20240L120%20264'%20stroke='%23000'%20stroke-opacity='.24'%20stroke-width='.7'/%3E%3Cpath%20d='M86%20410L196%20398'%20stroke='%23fff'%20stroke-opacity='.3'%20stroke-width='.7'/%3E%3C/g%3E%3C/svg%3E");
+  }
+  .brand .logo{ opacity:.9; }          /* printing rubbed by years of thumbs */
+  .brand .model{ opacity:.74; }
+  .lcd::before{           /* hazy, smudged, faintly scratched screen */
+    content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    border-radius:inherit; mix-blend-mode:soft-light;
+    background:
+      radial-gradient(58% 48% at 70% 36%, rgba(255,255,255,.16), transparent 62%),
+      radial-gradient(42% 40% at 22% 76%, rgba(30,40,12,.30), transparent 70%),
+      linear-gradient(116deg, transparent 49.6%, rgba(255,255,255,.12) 49.6% 49.85%, transparent 49.85%),
+      linear-gradient(74deg, transparent 61.5%, rgba(0,0,0,.10) 61.5% 61.7%, transparent 61.7%);
+  }
+  .keys button.key{ position:relative; }   /* anchor the greasy-key sheen */
+  .key[data-d="5"]::after,
+  .key[data-act="equals"]::after,
+  .key[data-act="iching"]::after,
+  .key[data-d="0"]::after{                  /* most-pressed keys: greasy, worn-shiny */
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    background:radial-gradient(62% 72% at 50% 44%, rgba(255,255,255,.22), rgba(255,255,255,0) 66%);
+  }
+  .keys button.key::before{                 /* every key wears a little dirt & scuff */
+    content:""; position:absolute; inset:0; border-radius:inherit; pointer-events:none;
+    mix-blend-mode:multiply;
+    background:
+      radial-gradient(72% 60% at 28% 26%, rgba(58,48,26,.13), transparent 62%),
+      radial-gradient(60% 50% at 80% 82%, rgba(48,40,20,.15), transparent 66%);
+  }
+  /* labels worn faint by years of pressing (the most-used keys) */
+  .key[data-d="0"]{ color:rgba(42,36,24,.40); }
+  .key[data-d="5"]{ color:rgba(42,36,24,.50); }
+  .key[data-d="8"]{ color:rgba(42,36,24,.58); }
+  .key[data-d="2"]{ color:rgba(42,36,24,.62); }
+  .key[data-act="equals"]{ color:rgba(58,47,8,.50); }
+  .key[data-op="+"]{ color:rgba(58,47,8,.62); }
+  /* a couple of keys working loose in their sockets — crooked, sitting proud or sunk */
+  .key[data-d="9"]{
+    transform:rotate(3deg) translateY(-1px); z-index:1;
+    box-shadow:0 4px 0 var(--key-edge),0 7px 8px #0005,0 1px 0 #fff9 inset;
+  }
+  .key[data-d="1"]{
+    transform:rotate(-2.5deg) translateY(1px);
+    box-shadow:0 1px 0 var(--key-edge),0 1px 3px #0006,0 1px 0 #fff5 inset;
+  }
+  .key[data-fn="tan"]{ transform:rotate(1.6deg); }
+
+  /* a peeling thrift-shop price sticker slapped on the case (the device's own
+     price is, by its Rule of 4, an unspeakable "Suffusion of Yellow") */
+  .sticker{
+    position:absolute; left:170px; top:48px; z-index:1; pointer-events:none;
+    width:50px; height:34px; transform:rotate(-6deg);
+    background:linear-gradient(160deg,#ece3c9,#d8cba4);
+    color:#8e3120; opacity:.9;
+    font-family:'Special Elite',serif; font-size:16px; line-height:1; letter-spacing:.5px;
+    display:flex; align-items:center; justify-content:center; text-align:center;
+    border-radius:2px;
+    box-shadow:0 2px 5px rgba(0,0,0,.32);
+  }
+  .sticker sup{ font-size:.58em; vertical-align:.55em; }
+  .sticker::after{   /* the curled, peeling top-right corner (sticker's pale back) */
+    content:""; position:absolute; top:-3px; right:-4px;
+    width:20px; height:18px;
+    background:linear-gradient(220deg,#f4eedb 0%,#c7bb98 82%);
+    border-radius:0 2px 0 11px;
+    transform:skewX(-10deg) rotate(5deg);
+    box-shadow:-2px 3px 4px rgba(0,0,0,.28);
+  }
+
+  /* a tired LCD: faint always-on segment ghost, with one segment stuck dark */
+  .lcd .stuck{
+    position:absolute; left:16px; bottom:11px; z-index:-1; pointer-events:none;
+    font-family:'VT323',monospace; font-size:46px; line-height:1;
+    color:var(--lcd-ink); opacity:.12;
+  }
+  .lcd .stuck::after{   /* one segment genuinely stuck ON */
+    content:""; position:absolute; left:7px; top:9px; width:19px; height:6px;
+    background:var(--lcd-ink); opacity:.45; border-radius:1px;
+  }
+
+  /* a hairline crack across the LCD glass (dark fracture + a bright glint) */
+  .lcd .crack{
+    position:absolute; inset:0; z-index:5; pointer-events:none;
+    background-repeat:no-repeat; background-size:100% 100%;
+    background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='280'%20height='110'%3E%3Cg%20fill='none'%20stroke-linejoin='round'%20stroke-linecap='round'%3E%3Cpath%20d='M44%206L92%2040L118%2033L165%2066L150%2072L214%20100'%20stroke='%231c2410'%20stroke-opacity='.32'%20stroke-width='1.6'/%3E%3Cpath%20d='M118%2033L130%2060'%20stroke='%231c2410'%20stroke-opacity='.28'%20stroke-width='1.1'/%3E%3Cpath%20d='M44%206L92%2040L118%2033L165%2066L150%2072L214%20100'%20stroke='%23fff'%20stroke-opacity='.5'%20stroke-width='.6'/%3E%3Cpath%20d='M118%2033L130%2060'%20stroke='%23fff'%20stroke-opacity='.45'%20stroke-width='.5'/%3E%3C/g%3E%3C/svg%3E");
+  }
+
+  /* Dead pixels: a few stuck permanently OFF. Rather than DRAW dots (which would
+     visibly "light up"), we MASK the readout — punching tiny holes in the text so
+     it simply never goes dark at those spots and the real screen shows through.
+     Invisible on a blank display; seen only as gaps where dark text passes under. */
+  .lcd .out{
+    -webkit-mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='276'%20height='56'%3E%3Cmask%20id='h'%3E%3Crect%20width='100%25'%20height='100%25'%20fill='%23fff'/%3E%3Ccircle%20cx='28'%20cy='18'%20r='2'/%3E%3Ccircle%20cx='52'%20cy='40'%20r='2.5'/%3E%3Ccircle%20cx='80'%20cy='12'%20r='1.5'/%3E%3Ccircle%20cx='104'%20cy='46'%20r='2'/%3E%3Ccircle%20cx='128'%20cy='24'%20r='2.5'/%3E%3Ccircle%20cx='150'%20cy='36'%20r='2'/%3E%3Ccircle%20cx='172'%20cy='16'%20r='1.5'/%3E%3Ccircle%20cx='196'%20cy='44'%20r='2'/%3E%3Ccircle%20cx='218'%20cy='28'%20r='2.5'/%3E%3Ccircle%20cx='240'%20cy='20'%20r='2'/%3E%3Ccircle%20cx='262'%20cy='42'%20r='2'/%3E%3Ccircle%20cx='40'%20cy='34'%20r='1.5'/%3E%3Ccircle%20cx='116'%20cy='8'%20r='2'/%3E%3Ccircle%20cx='186'%20cy='50'%20r='2'/%3E%3Ccircle%20cx='252'%20cy='12'%20r='1.5'/%3E%3Ccircle%20cx='90'%20cy='30'%20r='2'/%3E%3C/mask%3E%3Crect%20width='100%25'%20height='100%25'%20fill='%23fff'%20mask='url(%23h)'/%3E%3C/svg%3E");
+            mask-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='276'%20height='56'%3E%3Cmask%20id='h'%3E%3Crect%20width='100%25'%20height='100%25'%20fill='%23fff'/%3E%3Ccircle%20cx='28'%20cy='18'%20r='2'/%3E%3Ccircle%20cx='52'%20cy='40'%20r='2.5'/%3E%3Ccircle%20cx='80'%20cy='12'%20r='1.5'/%3E%3Ccircle%20cx='104'%20cy='46'%20r='2'/%3E%3Ccircle%20cx='128'%20cy='24'%20r='2.5'/%3E%3Ccircle%20cx='150'%20cy='36'%20r='2'/%3E%3Ccircle%20cx='172'%20cy='16'%20r='1.5'/%3E%3Ccircle%20cx='196'%20cy='44'%20r='2'/%3E%3Ccircle%20cx='218'%20cy='28'%20r='2.5'/%3E%3Ccircle%20cx='240'%20cy='20'%20r='2'/%3E%3Ccircle%20cx='262'%20cy='42'%20r='2'/%3E%3Ccircle%20cx='40'%20cy='34'%20r='1.5'/%3E%3Ccircle%20cx='116'%20cy='8'%20r='2'/%3E%3Ccircle%20cx='186'%20cy='50'%20r='2'/%3E%3Ccircle%20cx='252'%20cy='12'%20r='1.5'/%3E%3Ccircle%20cx='90'%20cy='30'%20r='2'/%3E%3C/mask%3E%3Crect%20width='100%25'%20height='100%25'%20fill='%23fff'%20mask='url(%23h)'/%3E%3C/svg%3E");
+    -webkit-mask-size:100% 100%;  mask-size:100% 100%;
+    -webkit-mask-repeat:no-repeat; mask-repeat:no-repeat;
+  }
+
+  /* LCD */
+  .lcd{
+    position:relative;z-index:3;          /* sits above the receipt so paper feeds from behind it */
+    background:linear-gradient(180deg,var(--lcd-bg2),var(--lcd-bg));
+    border-radius:8px;
+    margin:0 2px 14px;
+    padding:8px 12px 10px;
+    box-shadow:0 2px 8px #0004 inset,0 0 0 3px #5d5238,0 0 0 4px #00000022,
+               0 8px 10px -6px #0007;     /* slot casts a shadow onto the emerging paper */
+    overflow:hidden;
+  }
+  .lcd::after{ /* glass sheen */
+    content:"";position:absolute;inset:0;pointer-events:none;
+    background:linear-gradient(115deg,#ffffff33 0%,#ffffff00 40%);
+  }
+  .lcd .status{
+    display:flex;justify-content:space-between;align-items:center;
+    font-family:'VT323',monospace;font-size:14px;color:var(--lcd-ink);opacity:.75;
+    height:16px;letter-spacing:1px;
+  }
+  .lcd .status .ann{visibility:hidden;}
+  .lcd .status .ann.on{visibility:visible;}
+  .lcd .out{
+    font-family:'VT323',monospace;color:var(--lcd-ink);
+    /* FIXED height: tall enough for the 48px number AND a 2-line wrapped phrase,
+       so the LCD never resizes whether the answer is "0", "Beige", or a wrapper */
+    text-align:right;line-height:1;height:56px;overflow:hidden;
+    display:flex;align-items:center;justify-content:flex-end;
+    font-size:48px;word-break:break-word;
+  }
+  .lcd .out.phrase{font-size:24px;text-align:right;line-height:1.1;letter-spacing:.5px;}
+  /* the judgement marching across the tiny LCD */
+  .lcd .out.ticker{justify-content:flex-start;overflow:hidden;font-size:30px;}
+  .lcd .out.ticker .run{
+    white-space:nowrap;display:inline-block;padding-left:100%;
+    animation:march 5s linear 1;
+  }
+  @keyframes march{from{transform:translateX(0);}to{transform:translateX(-100%);}}
+
+  /* (No printout: the whole reading scrolls across the LCD instead — see the
+     marquee styles above and consult() in the script.) */
+
+  /* keypad */
+  .keys{display:grid;grid-template-columns:repeat(4,1fr);gap:9px;margin:0 2px;}
+  button.key{
+    appearance:none;border:none;cursor:pointer;
+    font-family:'Silkscreen',monospace;font-size:15px;
+    padding:14px 0;border-radius:9px;
+    background:linear-gradient(180deg,#fff8 0%,var(--key) 30%,var(--key) 70%,var(--key-edge) 100%);
+    color:var(--ink);
+    box-shadow:0 2px 0 var(--key-edge),0 3px 4px #0004,0 1px 0 #fff9 inset;
+    transition:transform .04s,box-shadow .04s;
+    user-select:none;
+  }
+  button.key:active{transform:translateY(2px);box-shadow:0 0 0 var(--key-edge),0 1px 2px #0006;}
+  button.op{
+    background:linear-gradient(180deg,#ffb,var(--gold));color:#3a2f08;
+    box-shadow:0 2px 0 #8a6f15,0 3px 4px #0004,0 1px 0 #fff7 inset;
+  }
+  button.op:active{box-shadow:0 0 0 #8a6f15,0 1px 2px #0006;}
+  button.sci{
+    background:linear-gradient(180deg,#dfe6ea,#a9b8c0);color:#1d2a30;font-size:12px;padding:11px 0;
+    box-shadow:0 2px 0 #7e909a,0 3px 4px #0004,0 1px 0 #fff8 inset;
+  }
+  button.sci:active{box-shadow:0 0 0 #7e909a,0 1px 2px #0006;}
+  button.red{
+    background:linear-gradient(180deg,#e9806f,var(--red));color:#fff;
+    box-shadow:0 2px 0 var(--red-dark),0 3px 4px #0004,0 1px 0 #fff4 inset;
+  }
+  button.red:active{box-shadow:0 0 0 var(--red-dark),0 1px 2px #0006;}
+  button.eq{grid-row:span 2;display:flex;align-items:center;justify-content:center;}
+  button.zero{grid-column:span 2;}
+  /* The "red button" the manual tells you to press. There isn't one —
+     there is a blue button marked "Red". (Dirk Gently, faithfully.) */
+  button.iching{
+    grid-column:span 4;margin-top:2px;font-size:16px;
+    background:linear-gradient(180deg,#5b8fc2 0%,#3f72a8 45%,#2f5985 100%);color:#f3f6fb;
+    box-shadow:0 2px 0 #1f3f63,0 3px 6px #0006,0 1px 0 #ffffff33 inset;
+    letter-spacing:1px;
+  }
+  button.iching:active{box-shadow:0 0 0 #1f3f63,0 1px 2px #0007;}
+  button.iching .hz{font-family:'VT323',monospace;font-size:20px;margin-right:8px;vertical-align:-2px;color:var(--gold);}
+  button.iching .mark{font-family:'Silkscreen',monospace;}
+
+  .manual-link{
+    display:block;width:100%;margin-top:12px;text-align:center;
+    font-family:'Silkscreen',monospace;font-size:9px;color:#b6a677;
+    text-shadow:0 1px 0 rgba(0,0,0,.35);
+    background:none;border:none;cursor:pointer;letter-spacing:.5px;
+  }
+  .manual-link:hover{color:#e7d39a;text-decoration:underline;}
+
+  /* manual modal */
+  .modal{
+    position:fixed;inset:0;background:#000a;display:none;
+    align-items:center;justify-content:center;padding:24px;z-index:9;
+  }
+  .modal.open{display:flex;}
+  .booklet{
+    background:var(--paper);max-width:380px;width:100%;max-height:80vh;overflow:auto;
+    padding:22px 24px;border-radius:3px;box-shadow:0 20px 60px #000b;
+    font-family:'Special Elite',serif;color:#241d10;font-size:13px;line-height:1.5;
+    transform:rotate(-.4deg);
+  }
+  .booklet h2{font-family:'Silkscreen',monospace;font-size:13px;color:var(--red-dark);
+    margin:0 0 4px;letter-spacing:.5px;}
+  .booklet .sub{font-family:'Silkscreen',monospace;font-size:8px;color:#8a7c55;margin-bottom:14px;}
+  .booklet p{margin:0 0 10px;}
+  .booklet .missing{
+    border:2px dashed #b6402f88;color:#8a2c1e;padding:10px;text-align:center;
+    font-family:'Silkscreen',monospace;font-size:9px;line-height:1.8;margin:12px 0;
+  }
+  .booklet .warranty{font-size:11px;color:#5a4f38;border-top:1px solid #00000022;padding-top:10px;margin-top:6px;}
+  .booklet .close{
+    margin-top:14px;width:100%;padding:9px;cursor:pointer;border:none;border-radius:4px;
+    background:var(--red);color:#fff;font-family:'Silkscreen',monospace;font-size:10px;
+  }
+
+  /* DEG annunciator — dimmed (moved off an inline style for CSP) */
+  .lcd .status .ann.deg{opacity:.6;}

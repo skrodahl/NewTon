@@ -1,3 +1,53 @@
+## **v5.1.3** — Cannot Operate on Soup (2026-05-29)
+
+Small polish on top of v5.1.2: trimmed a redundant helper line from the Confirm Winner dialog, restructured the Late Arrival info dialog so the actual instructions get visual focus, introduced a reusable `.dlg__note` panel component to the dialog system, and fixed a JSON-LD signal on the landing page that was letting Google (and AI services) treat the GitHub repo as the canonical home of the project instead of `newtondarts.com`.
+
+### Confirm Winner — redundant helper removed
+
+- **Dropped the italic "Winner must have more legs than loser" small-text** from the Final Score row. The same message is already raised dynamically by the form validator when the leg counts are inverted, so the static helper was pure redundancy. Cleaner row layout, one fewer line for the eye to parse.
+
+### Late Arrival info dialog — focus on the actual instructions
+
+- **First paragraph now adapts to the Developer Console setting.** When Developer Console is already enabled in Global Settings, the lead-in collapses to "To register a late arrival, open the **Developer Console** by clicking the version number in the lower-right corner of the Tournament Bracket." When Dev Console is disabled, the original two-step instruction (enable, then open) is shown. Operators who've already opted in no longer have to skip past instructions for a setting they've already configured. `showLateRegInfoModal()` reads `ui.developerMode` from `dartsConfig` (same pattern used elsewhere in `tournament-management.js`) and swaps the paragraph text before pushing the dialog.
+- **The two action paragraphs ("use the Late Arrival command" + "the new player will be placed...") are now wrapped in a `.dlg__note` framed panel.** Single shared frame, white background, soft elevation shadow, 1px border, 8px radius — the actual operator steps get visual focus rather than dissolving into a wall of muted prose.
+- **Text inside `.dlg__note` is darker than the default `.dlg__desc`** — overridden to the dialog body color `#2a2f3a` (from the muted `#6b7280` helper gray). The frame draws attention to the content inside it; the text needs to read as primary, not as helper prose.
+- **New italic caption below the framed panel** — *"The Developer Console is for changes made after a tournament has started — outside the normal workflow."* Explains *why* this operation lives in the Developer Console rather than the main UI, in one line. Stays muted (default `.dlg__desc` gray) so it reads as an aside rather than competing with the framed instructions.
+
+### New dialog component — `.dlg__note`
+
+A small reusable building block added to the dialog system. White background (same as the dialog itself), 1px `#ecedf1` border, 8px radius, 14px/16px padding, and a soft elevation shadow (`0 1px 2px rgba(20,25,35,0.04), 0 4px 12px rgba(20,25,35,0.06)`). Stacked children get automatic 10px vertical spacing via `.dlg__note > * + *`. Scoped color override `.dlg__note .dlg__desc { color: #2a2f3a; }` so framed content reads as primary text. Currently used only by `lateRegInfoModal`; available to any future dialog that needs to group a procedure or callout inside its body.
+
+### SEO / discoverability — JSON-LD canonical signal
+
+- **Added explicit `url` and `codeRepository` to the `SoftwareApplication` JSON-LD** on both `landing.html` (static) and `landing-page.php` (the Docker-served variant). `url` now points at `https://newtondarts.com/` (the canonical site) and `codeRepository` points at `https://github.com/skrodahl/NewTon` (the source). Schema.org's `SoftwareApplication` inherits `codeRepository` from `CreativeWork`, so the GitHub link has a proper home that doesn't compete with the canonical URL signal. The PHP variant additionally fixed a latent bug: `"url"` was previously pointing at `$githubUrl` (the GitHub repo) — actively telling Google the canonical home was on github.com. That has been corrected to `$baseUrl` (with the same conditional-emission pattern used by the existing `og:url` and `<link rel="canonical">` fragments, so the field is omitted entirely when `NEWTON_BASE_URL` is unset rather than emitting an empty string).
+- **Why it matters.** The schema was previously silent on `url`. With no explicit signal in the structured data, Google (and AI services that consume the same signals) fell back to link structure, backlinks, and domain authority — all of which favor GitHub by a wide margin. Result: search results and AI summaries kept pointing at `github.com/skrodahl/NewTon` as the project's home rather than at `newtondarts.com`. The HTML-level `<link rel="canonical">` was already correct; the JSON-LD now reinforces it instead of being silent.
+- **The existing schema was already clean in other respects** — `offers` block correctly wraps price/currency, `license` is already an SPDX URL (`https://opensource.org/licenses/BSD-3-Clause`). The two new properties were the only meaningful addition needed. Validate with [Rich Results Test](https://search.google.com/test/rich-results) and [Schema Markup Validator](https://validator.schema.org/) after deploy.
+- **Realistic expectations.** The structured-data fix tells Google what the canonical URL *should* be; it doesn't override GitHub's domain authority or backlink profile overnight. Correction will be gradual as Google re-indexes and as more references to `newtondarts.com` accumulate.
+
+### Footer easter egg
+
+A small `42` now trails the cheeky "No popups? No cookies!" line in the landing-page footer. Muted brown (`#c9b8a4`), monospaced, no underline, 70% opacity — sits at the edge of attention. On hover it firms up to the standard footer-link brown. Clickable; where it goes is left as an exercise for the reader, with bonus points for anyone who has *The Long Dark Tea-Time of the Soul* within arm's reach. New `.footer-egg` CSS class added next to `.footer-cheeky` in `css/landing.css`; identical markup added to both `landing.html` and `landing-page.php`.
+
+### Documentation
+
+- **`Docs/DIALOGS.md`** — new "The `.dlg__note` panel" section between Buttons and Helpers, with anatomy, when-to-use guidance, and the text-color rationale. Migrated-dialogs table entry for Late Registration Info now reads `default + .dlg__note` so the use of the new component is discoverable from the index.
+
+### Files changed
+
+- `tournament.html` — removed the "Winner must have more legs than loser" `<small>` from the Confirm Winner Final Score row; added `id="lateRegInfoFirstPara"` to the late-arrival lead paragraph; wrapped the two action paragraphs in `<div class="dlg__note">`; added italic caption paragraph below the framed panel
+- `js/player-management.js` — `showLateRegInfoModal()` reads `ui.developerMode` from `dartsConfig` and swaps the first paragraph's `innerHTML` between the two predefined static strings before pushing the dialog
+- `css/styles.css` — new `.dlg__note`, `.dlg__note > * + *`, and `.dlg__note .dlg__desc` rules added next to `.dlg__desc`
+- `landing.html` — `SoftwareApplication` JSON-LD gains `url` (`https://newtondarts.com/`) and `codeRepository` (`https://github.com/skrodahl/NewTon`) properties; footer gains the `42` easter-egg link
+- `landing-page.php` — JSON-LD `"url"` corrected from `$githubUrl` to a conditional `$jsonLdUrl` (uses `$baseUrl` when set); new `"codeRepository"` field added; footer gains the `42` easter-egg link
+- `css/landing.css` — new `.footer-egg` and `.footer-egg:hover` rules added next to `.footer-cheeky`
+- `Docs/DIALOGS.md` — new `.dlg__note` panel section; migrated-dialogs table entry updated for `lateRegInfoModal`
+
+### Migration
+
+No data migration required. CSS-only additions and a single conditional in `showLateRegInfoModal()`; all other dialogs are unaffected.
+
+---
+
 ## **v5.1.2** — The Polished Press (2026-05-26)
 
 Tactile press feedback on every button across the app, a new dialog system (`.dlg`) that unifies eleven confirmation/warning/info modals around a small set of shared layouts, a redesigned Tournament Complete celebration with an Olympic tiered podium and decorative garlands, a fix to a long-standing match-achievement attribution bug, and a small Registration-page bug fix.
