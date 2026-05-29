@@ -40,6 +40,30 @@ soul: *useless, confidently broken, enigmatic, in the device's voice, discovered
 - A rare **"all systems nominal"** full sweep that fires at a completely meaningless moment.
 - The manual references an **"LED STATUS GUIDE"** — on one of the missing pages, naturally.
 
+### These seeds already cluster into a Stage 1 spec
+
+If the entries above are sorted by *when* each fires, a coherent firmware table falls out:
+
+| Moment | LED behaviour |
+|---|---|
+| Power-on | Failed self-test sweep that tests nothing |
+| Idle (very rare) | "All systems nominal" full sweep at a meaningless time |
+| Keypress / operator / equals / clear | Existing chase / Larson / sweep / blink |
+| Consult cast | Existing Larson scan |
+| Consult reading | Mistimed celebration + a lying progress fill |
+| Soup error | The 3rd-from-last twitch, alone |
+| Always-on background | One LED stuck half-on (the strip's ghost-8) |
+
+Working channels do their job; failed-ambition channels fail visibly. The whole strip can be
+specced from this one table when Stage 1 begins.
+
+The **faded silkscreen legend** (`POWER · BUSY · ERR · ···`) is the keystone seed — it
+physicalises the entire conceit. The labels are documentary evidence that the lights *were
+meant* to mean something; the misalignment with the actual LEDs is documentary evidence that
+nobody finished the job. Pair it with the existing missing-pages gag (the **LED STATUS
+GUIDE** is on a missing page, of course it is) and the "failed status system" idea lands
+without a word of explanation.
+
 ## Input & keys
 - A **sticky key**: one key (say `4`) occasionally needs a second press, or double-fires.
 - **Phantom keypress**: once in a blue moon a digit appears that you didn't press.
@@ -95,6 +119,12 @@ soul: *useless, confidently broken, enigmatic, in the device's voice, discovered
 - A **self-aware** rare line: "YOU ARE LOOKING AT A WEB PAGE PRETENDING TO BE A CALCULATOR."
 - A **developer console** message for anyone who opens devtools, in the device's voice.
 - Consulting at exactly **midnight** does something tiny and unrepeatable.
+- An **"EAT THE DEVICE"** reading, vanishingly rare — the oracle actually issues the advice the
+  manual warned against. The booklet's *"Do not eat the device even if it advise so"* was
+  load-bearing all along. Most owners never see it fire; the few who do can confirm they were
+  warned. Trigger should be a deliberate conjunction (specific hexagram × specific changing line
+  × a calendar/clock anomaly) so it's not just an RNG flicker — when it happens, it has to feel
+  like the device *meant it*.
 
 ## Platform & delivery (a "pocket oracle")
 > Strong candidate, and a natural rung between the web toy and the hardware: it's already one

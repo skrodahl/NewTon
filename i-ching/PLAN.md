@@ -64,6 +64,13 @@ manual that explains nothing.
   practical to build, and embraces the **deliberate inconvenience** — you wait, you squint, you may
   miss it and have to consult again. *(The PoC also kept a richer roll-out/tear-off paper version,
   saved as `i-ching-calculator - printout.html`, in case a "deluxe" printing tier is ever wanted.)*
+- **Mostly silent — and pointedly so.** The book's calculator is silent. A real device will be
+  tempted to bleep on keypress and chime on result; both undermine the cheap, beaten-up character.
+  The intent: at most a single barely-audible click on keypress (cheapest possible piezo, deliberately
+  too quiet to feel reassuring), and **nothing at all on a result**. The silence when *"A Suffusion of
+  Yellow"* appears should be deafening — the device making no comment on what it just did. No startup
+  tune, no error beep, no consult chime. (The *engineering* of "barely audible" is still deferred to
+  Stage 1; the *intent* is set.)
 - **It is meant to be a little inconvenient.** Slightly-awkward-to-use is part of the charm — e.g.
   the lights celebrating at exactly the wrong moment. Don't optimise the personality away.
 
