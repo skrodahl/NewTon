@@ -72,27 +72,63 @@
   }
   /* brand plate */
   .brand{
+    position:relative;
     display:flex;align-items:baseline;justify-content:space-between;gap:8px;
-    margin:2px 4px 12px;
+    margin:2px 4px 6px;
+  }
+  /* "Designed by the Sirius Cybernetics" — absolutely positioned below the wordmark
+     so it doesn't push the LED strip down (sticker overlap with LEDs is preserved).
+     Small Silkscreen, half-faded by wear. Positioned LOW enough that the £20 sticker
+     covers part of it — the manufacturer credit is half-obscured by a second-hand
+     price tag, which is exactly how cheap used products feel. Intentional. */
+  .brand .designer{
+    position:absolute; left:0; top:38px;
+    font-family:'Silkscreen',monospace; font-size:7px;
+    color:#1f1610; letter-spacing:.5px; line-height:1;
+    opacity:.72; white-space:nowrap; pointer-events:none;
   }
   .brand .logo{
-    font-family:'Silkscreen',monospace;font-weight:700;
-    font-size:15px;letter-spacing:.5px;color:var(--red-dark);
+    font-family:'Arial Black','Helvetica Neue',Impact,sans-serif;
+    font-style:italic;font-weight:900;
+    font-size:20px;letter-spacing:-0.3px;color:#1a1a1a;
     text-shadow:0 1px 0 #fff8;
+    line-height:1;
+  }
+  .brand .logo .cj{
+    font-family:'Hiragino Mincho ProN','Songti SC','Noto Serif CJK SC',serif;
+    font-style:normal;font-weight:900;
+    font-size:1.15em;color:#6e1810;
+    line-height:1;
   }
   .brand .logo b{color:var(--gold);}
   .brand .model{
-    font-family:'Silkscreen',monospace;font-size:8px;color:#6b5f44;text-align:right;line-height:1.5;
+    font-family:'Silkscreen',monospace;font-size:8px;color:#1f1610;text-align:right;line-height:1.5;
   }
   /* the "solar strip" is actually a recessed row of nostalgic green LEDs,
      populated and animated by the script (classic blinkenlights patterns) */
   .solar{
-    height:15px;margin:0 4px 10px;border-radius:3px;
+    height:15px;margin:0 4px 3px;border-radius:3px;
     background:linear-gradient(180deg,#0d130c,#070a06);
     border:1px solid #00000066;
     box-shadow:0 1px 0 #ffffff22, inset 0 1px 3px #000a;
     display:flex;align-items:center;justify-content:space-between;
     padding:0 5px;overflow:hidden;
+  }
+  /* Silkscreen LED legend: small faded labels below the LED bar, evidence that the
+     factory MEANT the bar to convey status. ERR sits over the SECOND-to-last LED,
+     while the actual ERR LED (the soup-twitch) is the THIRD-to-last — off by one.
+     The "design was specified with intent, but the offset was wrong" gag. Discovery
+     trigger: user produces a soup state, sees the 3rd-from-last LED twitch, looks
+     at the ERR label below, realises they don't line up. The whole "failed status
+     system" gag is grounded in this one off-by-one. */
+  .solar-legend{
+    margin:0 4px 8px;
+    padding:0 20px 0 5px;        /* extra right padding shifts ERR one LED-width inward */
+    font-family:'Silkscreen',monospace; font-size:7px;
+    color:#1f1610; opacity:.58;
+    letter-spacing:.5px; line-height:1;
+    text-align:right; white-space:nowrap;
+    pointer-events:none;
   }
   .solar .led{
     --on:0;
@@ -133,7 +169,7 @@
     background-image:url("data:image/svg+xml,%3Csvg%20xmlns='http://www.w3.org/2000/svg'%20width='240'%20height='420'%3E%3Cfilter%20id='n'%3E%3CfeTurbulence%20type='fractalNoise'%20baseFrequency='.9'%20numOctaves='2'/%3E%3C/filter%3E%3Crect%20width='100%25'%20height='100%25'%20filter='url(%23n)'%20opacity='.06'/%3E%3Cg%20fill='none'%20stroke-linecap='round'%3E%3Cpath%20d='M28%2066L132%2044'%20stroke='%23fff'%20stroke-opacity='.5'%20stroke-width='.8'/%3E%3Cpath%20d='M150%20120L210%20150'%20stroke='%23fff'%20stroke-opacity='.4'%20stroke-width='.7'/%3E%3Cpath%20d='M44%20250L150%20232'%20stroke='%23fff'%20stroke-opacity='.38'%20stroke-width='.7'/%3E%3Cpath%20d='M64%20330L196%20318'%20stroke='%23000'%20stroke-opacity='.3'%20stroke-width='.8'/%3E%3Cpath%20d='M18%20170L74%20188'%20stroke='%23000'%20stroke-opacity='.26'%20stroke-width='.7'/%3E%3Cpath%20d='M168%2060L206%2082'%20stroke='%23000'%20stroke-opacity='.24'%20stroke-width='.7'/%3E%3Cpath%20d='M96%20384L208%20372'%20stroke='%23fff'%20stroke-opacity='.36'%20stroke-width='.7'/%3E%3Cpath%20d='M30%20372L78%20360'%20stroke='%23000'%20stroke-opacity='.26'%20stroke-width='.7'/%3E%3Cpath%20d='M120%20200L232%20174'%20stroke='%23fff'%20stroke-opacity='.42'%20stroke-width='.7'/%3E%3Cpath%20d='M52%20120L150%2098'%20stroke='%23000'%20stroke-opacity='.28'%20stroke-width='.7'/%3E%3Cpath%20d='M150%20332L66%20300'%20stroke='%23fff'%20stroke-opacity='.34'%20stroke-width='.7'/%3E%3Cpath%20d='M196%20240L120%20264'%20stroke='%23000'%20stroke-opacity='.24'%20stroke-width='.7'/%3E%3Cpath%20d='M86%20410L196%20398'%20stroke='%23fff'%20stroke-opacity='.3'%20stroke-width='.7'/%3E%3C/g%3E%3C/svg%3E");
   }
   .brand .logo{ opacity:.9; }          /* printing rubbed by years of thumbs */
-  .brand .model{ opacity:.74; }
+  .brand .model{ opacity:.88; }
   .lcd::before{           /* hazy, smudged, faintly scratched screen */
     content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
     border-radius:inherit; mix-blend-mode:soft-light;
@@ -179,20 +215,25 @@
   /* a peeling thrift-shop price sticker slapped on the case (the device's own
      price is, by its Rule of 4, an unspeakable "Suffusion of Yellow") */
   .sticker{
-    position:absolute; left:170px; top:48px; z-index:1; pointer-events:none;
+    position:absolute; left:170px; top:43px; z-index:1; pointer-events:none;
     width:50px; height:34px; transform:rotate(-6deg);
-    background:linear-gradient(160deg,#ece3c9,#d8cba4);
-    color:#8e3120; opacity:.9;
+    /* Aged paper: yellowed base with subtle stain blotches from years of grime */
+    background:
+      radial-gradient(ellipse at 28% 38%, rgba(110,70,30,.18) 0%, transparent 48%),
+      radial-gradient(ellipse at 72% 70%, rgba(90,55,20,.14) 0%, transparent 42%),
+      radial-gradient(ellipse at 55% 22%, rgba(140,100,50,.10) 0%, transparent 35%),
+      linear-gradient(160deg,#dccfa3,#b8a578);
+    color:#6d2417; opacity:.82;
     font-family:'Special Elite',serif; font-size:16px; line-height:1; letter-spacing:.5px;
     display:flex; align-items:center; justify-content:center; text-align:center;
     border-radius:2px;
-    box-shadow:0 2px 5px rgba(0,0,0,.32);
+    box-shadow:0 2px 5px rgba(0,0,0,.32), inset 0 0 8px rgba(80,55,20,.10);
   }
   .sticker sup{ font-size:.58em; vertical-align:.55em; }
-  .sticker::after{   /* the curled, peeling top-right corner (sticker's pale back) */
+  .sticker::after{   /* the curled, peeling top-right corner (sticker's pale back, also aged) */
     content:""; position:absolute; top:-3px; right:-4px;
     width:20px; height:18px;
-    background:linear-gradient(220deg,#f4eedb 0%,#c7bb98 82%);
+    background:linear-gradient(220deg,#e3d8b0 0%,#ad9f78 82%);
     border-radius:0 2px 0 11px;
     transform:skewX(-10deg) rotate(5deg);
     box-shadow:-2px 3px 4px rgba(0,0,0,.28);
@@ -259,12 +300,110 @@
   }
   .lcd .out.phrase{font-size:24px;text-align:right;line-height:1.1;letter-spacing:.5px;}
   /* the judgement marching across the tiny LCD */
-  .lcd .out.ticker{justify-content:flex-start;overflow:hidden;font-size:30px;}
+  .lcd .out.ticker{justify-content:flex-start;overflow:hidden;font-size:30px;padding-left:42px;clip-path:inset(0 0 0 40px);-webkit-clip-path:inset(0 0 0 40px);}
+  /* When the hex graphic is visible, the SETTLED phrase ("易 No.N NAME") also
+     needs to keep clear of the hex on the left — otherwise long names overflow
+     leftward (right-aligned text wrapping) and run under the hexagram. */
+  .lcd.has-hex .out.phrase{
+    padding-left:42px;
+    clip-path:inset(0 0 0 40px);
+    -webkit-clip-path:inset(0 0 0 40px);
+  }
   .lcd .out.ticker .run{
     white-space:nowrap;display:inline-block;padding-left:100%;
     animation:march 5s linear 1;
   }
   @keyframes march{from{transform:translateX(0);}to{transform:translateX(-100%);}}
+
+  /* ── The hexagram graphic: appears at the left of the LCD during a consult.
+     Lines render bottom-up (the hex-lines flex is column-reverse, so the first
+     child appears at the bottom). For "deluxe" (numbers 65–128), the LCD glitches
+     after line 6 and a faint, crooked, blinking 7th line is added on top. ── */
+  .lcd .hex{
+    position:absolute; left:12px; top:26px; z-index:4;
+    width:26px; opacity:0; transition:opacity .25s ease;
+    pointer-events:none;
+  }
+  .lcd .hex.on{opacity:1;}
+  .lcd .hex-lines{
+    display:flex; flex-direction:column-reverse;
+    gap:2px; height:33px;  /* reserves a 7-line slot in both modes, so the num doesn't jump */
+  }
+  .lcd .hex-line{
+    height:3px; display:flex; gap:3px;
+    opacity:0; transition:opacity 140ms ease-out;
+  }
+  .lcd .hex-line.show{opacity:1;}
+  .lcd .hex-line.yang::before{
+    content:""; flex:1; background:var(--lcd-ink); border-radius:1px;
+  }
+  .lcd .hex-line.yin::before, .lcd .hex-line.yin::after{
+    content:""; flex:0 0 46%; background:var(--lcd-ink); border-radius:1px;
+  }
+  /* the bonus 7th line: crooked + faint + irregular blink, like a finger pressed
+     into the LCD where this line shouldn't exist */
+  .lcd .hex-line.deluxe{
+    transform:rotate(-3.5deg) translateX(1px);
+    transform-origin:left center;
+    transition:none;
+  }
+  .lcd .hex-line.deluxe.show{
+    opacity:.5;
+    animation:lcdStruggle 4.3s infinite ease-in-out;
+  }
+  @keyframes lcdStruggle{
+    0%   { opacity:.50; filter:blur(0); }
+    14%  { opacity:.62; }
+    27%  { opacity:.08; filter:blur(.4px); }
+    34%  { opacity:.44; filter:blur(.2px); }
+    48%  { opacity:.55; filter:blur(0); }
+    61%  { opacity:.70; }
+    74%  { opacity:.50; }
+    88%  { opacity:.38; filter:blur(.15px); }
+    100% { opacity:.50; }
+  }
+  .lcd .hex-num{
+    margin-top:3px; text-align:center; line-height:1;
+    font-family:'VT323',monospace; font-size:9px;
+    color:var(--lcd-ink); opacity:.72; letter-spacing:.5px;
+  }
+
+  /* The pie symbol — occupies the same left-most LCD area as the hexagram graphic,
+     but only fires for the π+π = PIE reading. A narrow wedge cut from the upper-
+     right area (NOT a 90° gap, which would read as a Pac-Man mouth): the slice
+     was removed cleanly, served and eaten elsewhere. The angle is deliberately
+     off-cardinal so it doesn't align with any iconic game-character mouth shape.
+     Sits below the DEG annunciator so it doesn't crowd the status bar. Same
+     fade-in transition as .hex; hidden by any non-pie action via hidePie(). */
+  .lcd .pie{
+    position:absolute; left:9px; top:36px; z-index:4;
+    width:30px; height:30px; border-radius:50%;
+    background:conic-gradient(from 20deg, transparent 0 50deg, var(--lcd-ink) 50deg 360deg);
+    opacity:0; transition:opacity .25s ease;
+    pointer-events:none;
+  }
+  .lcd .pie.on{ opacity:.72; }
+
+  /* the breakdown overlay: scanline-y + jittery, one short panic and gone */
+  .lcd .lcd-glitch{
+    position:absolute; inset:0; z-index:6; pointer-events:none;
+    background:repeating-linear-gradient(0deg, var(--lcd-ink) 0 1px, transparent 1px 4px);
+    mix-blend-mode:multiply; opacity:0;
+  }
+  .lcd.glitch .lcd-glitch{
+    animation:lcdPanic 1.2s linear 1;
+  }
+  @keyframes lcdPanic{
+    0%   { opacity:0;   transform:translateY(0); }
+    8%   { opacity:.85; transform:translateY(2px); }
+    18%  { opacity:.50; transform:translateY(-3px); }
+    30%  { opacity:.80; transform:translateY(1px); }
+    42%  { opacity:.30; transform:translateY(-2px); }
+    55%  { opacity:.70; transform:translateY(0); }
+    70%  { opacity:.40; transform:translateY(-1px); }
+    85%  { opacity:.80; transform:translateY(1px); }
+    100% { opacity:0;   transform:translateY(0); }
+  }
 
   /* (No printout: the whole reading scrolls across the LCD instead — see the
      marquee styles above and consult() in the script.) */
@@ -300,9 +439,11 @@
   button.eq{grid-row:span 2;display:flex;align-items:center;justify-content:center;}
   button.zero{grid-column:span 2;}
   /* The "red button" the manual tells you to press. There isn't one —
-     there is a blue button marked "Red". (Dirk Gently, faithfully.) */
+     there is a blue button marked "Red". (Dirk Gently, faithfully.)
+     Sits in the bottom row, same combined width as 0 and . — narrower than
+     the original full-width oracle bar, so the layout reads less neat. */
   button.iching{
-    grid-column:span 4;margin-top:2px;font-size:16px;
+    grid-column:span 3;margin-top:2px;font-size:16px;
     background:linear-gradient(180deg,#5b8fc2 0%,#3f72a8 45%,#2f5985 100%);color:#f3f6fb;
     box-shadow:0 2px 0 #1f3f63,0 3px 6px #0006,0 1px 0 #ffffff33 inset;
     letter-spacing:1px;

@@ -30,12 +30,23 @@ manual that explains nothing.
    The `index.html` web build (now a split, installable PWA). Doubles as the reference prototype / living spec
    for everything that follows. (Quirks catalogued in [QUIRKS-AND-EASTER-EGGS.md](QUIRKS-AND-EASTER-EGGS.md).)
 
-2. **Stage 1 — Microcontroller + touchscreen prototype** *(first physical step)*
+2. **Stage 0.5 — Mobile app distribution** *(the missing rung)*
+   Wrap the existing PWA as a Trusted Web Activity (via [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap))
+   and ship to the **Google Play Store** — one-time $25 developer fee. **Same codebase**; the app is a
+   wrapper, not a port. Goal: build an audience and a press flywheel *before* Stage 1, so the eventual
+   crowdfunder lands in a warm room — real install numbers are the most persuasive evidence a future
+   Kickstarter can show. The store listing itself is an Oraculon artefact: description, screenshots,
+   changelog, and dev replies to 1-star reviews all in the device's broken voice (the 1-star "doesn't
+   calculate above 4, broken" reviews *are* the marketing — they prove the Rule is being discovered).
+   Adjacent free venues optional: **F-Droid** (FOSS audience, zero fee), **Amazon Appstore** (zero
+   friction). iOS deferred until Play numbers justify the $99/year cost.
+
+3. **Stage 1 — Microcontroller + touchscreen prototype** *(first physical step)*
    Port the experience to an **M5Stack Tab5** (or similar). Goal: prove the whole thing in
    software/firmware on real hardware — feel, timing, the reading, the lights — *before* committing
    to any custom hardware. Essentially uses the prototype to write the spec for Stage 2.
 
-3. **Stage 2 — Dedicated calculator device** *(end goal)*
+4. **Stage 2 — Dedicated calculator device** *(end goal)*
    A real, molded calculator with physical keys — not a dev board with a screen. Intended to be
    **crowdfunded**.
 
@@ -46,6 +57,18 @@ manual that explains nothing.
   higher tier.
 - **Stretch goals = a higher ceiling.** True to the manual's "premium model permits answers as high
   as 5, perhaps 6": unlocking **answers up to 5**, then **up to 6**, as funding stretch goals.
+- **Mobile premium tier — answers up to 5, for £20.** A single optional in-app purchase on the
+  Stage 0.5 release that raises the ceiling by exactly one number. The same gag as the hardware
+  stretch goals, made daily and bite-sized: the free app caps at 4; one IAP unlocks 5. **The price
+  must be £20** — what Dirk paid for the whole device in the book, and what the case's price
+  sticker has always read. Paying £20 for permission to compute one digit higher is the joke; it's
+  also a deliberately inappropriate IAP tier (real apps charge £0.99–£4.99 for unlocks — £20 is
+  reserved for "Pro with cloud sync") which is itself part of the gag. Bonus recursion: the device
+  can't display its own price (by its own Rule of 4, `20` becomes *"A Suffusion of Yellow"*), yet
+  it charges that price to get the user one digit closer to it. The purchase screen itself stays
+  in the device's voice — broken legal copy, a missing apology page, a confirmation button reading
+  **"FATE IS PURCHASED."** **Up-to-6 stays hardware-only**, so the physical device remains the
+  aspirational top tier — the app gets you halfway up the mountain, never to the peak.
 
 ## Guiding principles (keep the soul)
 

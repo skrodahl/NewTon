@@ -14,8 +14,8 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
 <!-- self-hosted retro fonts (no network needed; CSP can stay 'self') -->
-<link rel="stylesheet" href="fonts/fonts.css">
-<link rel="stylesheet" href="css/oraculon.css">
+<link rel="stylesheet" href="fonts/fonts.css?v=3">
+<link rel="stylesheet" href="css/oraculon.css?v=3">
 
 <div class="device" role="application" aria-label="I Ching Calculator">
   <!-- the back half fell off; held on with a strip of aging Sellotape -->
@@ -23,10 +23,12 @@
   <!-- a peeling thrift-shop price sticker (£20 — what Dirk paid) -->
   <div class="sticker" aria-hidden="true">£20</div>
   <div class="brand">
-    <div class="logo">易 ORACUL<b>O</b>N</div>
-    <div class="model">CT-64 SCIENTIFIC<br>易經計算機<br>MADE IN ELSEWHERE</div>
+    <div class="logo"><span class="cj">易</span> ORACUL<b>O</b>N</div>
+    <div class="designer">Designed by the Sirius Cybernetics</div>
+    <div class="model">CT-64 SCIENTIFIC<br>易經計算機<br>MADE ON SIRIUS</div>
   </div>
   <div class="solar" aria-hidden="true"></div>
+  <div class="solar-legend" aria-hidden="true">POWER · BUSY · ERR</div>
 
   <div class="lcd">
     <div class="status">
@@ -36,7 +38,13 @@
     </div>
     <div id="out" class="out">0</div>
     <div class="stuck" aria-hidden="true">8</div>
+    <div class="hex" aria-hidden="true">
+      <div class="hex-lines"></div>
+      <div class="hex-num"></div>
+    </div>
+    <div class="pie" aria-hidden="true"></div>
     <div class="crack" aria-hidden="true"></div>
+    <div class="lcd-glitch" aria-hidden="true"></div>
   </div>
 
   <div class="keys">
@@ -52,26 +60,27 @@
 
     <button class="key red" data-act="clear">C</button>
     <button class="key red" data-act="del">⌫</button>
+    <button class="key op" data-op="%">%</button>
     <button class="key op" data-op="/">÷</button>
-    <button class="key op" data-op="*">×</button>
 
     <button class="key" data-d="7">7</button>
     <button class="key" data-d="8">8</button>
     <button class="key" data-d="9">9</button>
-    <button class="key op" data-op="-">−</button>
+    <button class="key op" data-op="*">×</button>
 
     <button class="key" data-d="4">4</button>
     <button class="key" data-d="5">5</button>
     <button class="key" data-d="6">6</button>
-    <button class="key op" data-op="+">+</button>
+    <button class="key op" data-op="-">−</button>
 
     <button class="key" data-d="1">1</button>
     <button class="key" data-d="2">2</button>
     <button class="key" data-d="3">3</button>
-    <button class="key op eq" data-act="equals">=</button>
+    <button class="key op" data-op="+">+</button>
 
     <button class="key zero" data-d="0">0</button>
     <button class="key" data-d=".">.</button>
+    <button class="key op eq" data-act="equals">=</button>
 
     <button class="key iching" data-act="iching"><span class="hz">易</span><span class="mark">Red</span></button>
   </div>
@@ -84,7 +93,7 @@
   <div class="booklet">
     <h2>OWNER MANUAL · 易經計算機 CT-64</h2>
     <div class="sub">CONGRATULATION FOR YOUR PURCHASE OF FINE DEVICE</div>
-    <p>Welcome the proud owner! This electronic abacus of fortune reckon the sums, perform the science, AND ALSO foretell the unknowable across 128 hexagram. Truly we live in the future, which this device already know about.</p>
+    <p>Welcome the proud owner! This electronic abacus of fortune reckon the sums, perform the science, AND ALSO foretell the unknowable across 64 hexagram. Truly we live in the future, which this device already know about.</p>
     <p>Operation is simple, and also mysterious: press what you wish; receive what you receive. Should the answer arrive instead as a colour, a mood, or a quantity of soup — this is not error, this is the device thinking. WHY it think so is explain upon the page that are missing (see below).</p>
     <p>To CONSULT THE ORACLE: concentrate SOULFULLY upon the question which besiege you, enjoy the silence, and on achieving inner harmony press the RED button. The reading, translate from the Chinese by way of the Japanese, have enjoy many adventure on the road; any strangeness is therefore not error but TRAVEL.</p>
     <div class="missing">
@@ -95,4 +104,4 @@
   </div>
 </div>
 
-<script src="js/oraculon.js" defer></script>
+<script src="js/oraculon.js?v=3" defer></script>

@@ -1,16 +1,25 @@
 /* ORACULON CT-64 — service worker.
    Precache the whole app shell so the device works fully offline once installed.
-   Bump CACHE when any precached asset changes — old caches are dropped on activate. */
+
+   DEPLOY CHECKLIST when any of css/oraculon.css, js/oraculon.js, or fonts/fonts.css
+   changes: bump THREE numbers in lockstep so installed PWAs pick up the new code
+   on the next refresh:
+     1. CACHE below (e.g. "oraculon-v3" → "oraculon-v4")
+     2. SHELL ?v=N suffixes on the three versioned files (must match index.html)
+     3. ?v=N on the matching <link>/<script> tags in index.html
+   The query strings force HTTP-layer cache miss; the CACHE bump invalidates
+   the SW cache and drops the old cache on activate (skipWaiting + clients.claim
+   make the new SW take control immediately). Belt-and-suspenders. */
 "use strict";
 
-const CACHE = "oraculon-v2";
+const CACHE = "oraculon-v3";
 
 const SHELL = [
   "./index.html",
-  "./css/oraculon.css",
-  "./js/oraculon.js",
+  "./css/oraculon.css?v=3",
+  "./js/oraculon.js?v=3",
   "./manifest.webmanifest",
-  "./fonts/fonts.css",
+  "./fonts/fonts.css?v=3",
   "./fonts/XLYgIZbkc4JPUL5CVArUVL0ntn4OSFNuQsI3GA.woff2",
   "./fonts/XLYgIZbkc4JPUL5CVArUVL0ntnAOSFNuQsI.woff2",
   "./fonts/m8JUjfVPf62XiF7kO-i9aAhAfmKi2PmeBvYdbA.woff2",

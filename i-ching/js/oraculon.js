@@ -10,7 +10,12 @@
   var CEILING = 4;
 
   var ORACLES = [
-    "A Suffusion of Yellow",   // the canonical one
+    "A Suffusion of Yellow",                  // canonical, verbatim Adams (weighted ~1/6 — see pickOracle)
+    "The Number of Pebbles in Wales",         // also canonical, verbatim Adams (unweighted)
+    // The Q42 pool (below) holds the device's exclusive oracles for any result that
+    // secretly equals 42 — picked from when suppressBig() detects hidden === 42.
+    // When one surfaces, the lucid trigger is armed and the next calc reveals the
+    // Answer. The Question (Q42) and the Answer (lucid bypass) are mechanically paired.
     "An Onset of Tuesday",
     "The Faint Aroma of Regret",
     "Several Geese, Departing",
@@ -49,9 +54,106 @@
     "Provisionally, a Spoon",
     "Greyish, with Ambitions",
     "A Faint Suggestion of Otters",
-    // a couple of Douglas Adams nods, rephrased (never verbatim)
+    "The Number of Umbrellas Forgotten in Sheffield",
+    "The Number of Empty Chairs at a Library Closing",
+    "The Number of Steps in a Sigh",
+    "A Reluctant Quantity of Sock",
+    "Half a Theological Argument",
+    "Approximately Norwich",
+    "Eleven Bees, Approximately",
+    "Modestly Wrong",
+    "The Sigh of a Tired Cabinet",
+    "A Brisk Wind From the Wrong Direction",
+    "Confidently Uncertain",
+    "The Distant Echo of a Door Sighing",
+    "A Looming Sense of Thursday",
+    "The Ghost of a Cold Cup of Tea",
+    "A Mild Disappointment in Algebra",
+    "A Decidedly Lukewarm Epiphany",
+    "The Lingering Taste of Static",
+    // Douglas Adams nods, rephrased (never verbatim)
     "Reality, Frequently Approximate",
-    "The Approximate Speed of Bad News"
+    "The Approximate Speed of Bad News",
+    "Almost, but Not Quite, Entirely Unlike Wednesday"
+  ];
+
+  // Q42: a sibling oracle pool, exclusively shown when a hidden result equals exactly 42
+  // (Adams' Answer to the Ultimate Question). suppressBig() picks from here instead of
+  // ORACLES whenever the suppressed value is 42. All four are verbatim canonical Adams
+  // material — the device's "Question half" of the Adams pair, mechanically partnered with
+  // the lucid bypass (which then reveals the Answer on the very next calc).
+  var Q42 = [
+    "How Many Roads Must a Man Walk Down?",         // Dylan; Adams' candidate Ultimate Question
+    "What Do You Get If You Multiply Six by Nine?", // Adams (Mostly Harmless): 6×9=54 base-10, but 42 base-13
+    "What Is The Ultimate Question?",               // meta — the Question is itself the question
+    "Life, the Universe, and Everything"            // verbatim Adams: the canonical subject of the Answer
+  ];
+
+  // Named Adams numbers: when a calc produces a hidden value matching one of these
+  // keys, the device shows the specific Adams phrase instead of a random ORACLES
+  // selection. Easter eggs for those who recognise the reference. Extensible — add
+  // more numbers here as they come up. (42 is handled separately via the Q42 pool
+  // and arms the lucid bypass; NAMED_NUMBERS entries are display-only, no trigger.)
+  var NAMED_NUMBERS = {
+    5760003: "The Total Number of Irritated People"  // HHGTTG: population of Brontitall, furious all at once
+  };
+
+  // CALC_PHRASES: shown on the right side of the LCD during the cast — while the
+  // hexagram graphic draws on the left and the LEDs sweep. Replaced by the marquee
+  // when renderHexagram completes. Faithful to the book's I Ching calculator, which
+  // announces its thinking on the tiny LCD. Deliberately a pool of one — Marvin
+  // impressions and mock-mainframe boot messages were considered and rejected as
+  // too parodic (the device should BE in Adams' universe, not perform it).
+  var CALC_PHRASES = [
+    "Calculating..."   // book canon
+  ];
+
+  // FLIP_WORDS: the classic four-banger upside-down-calculator easter eggs. When
+  // the display reads one of these exact numbers, the LCD substitutes the flipped
+  // word — pure visual swap; underlying `disp` (the state) stays as the digits,
+  // so operators and parseFloat continue to work on the real number. The device
+  // "implemented" the gag religiously (it recognises the inputs) but SLIGHTLY OFF:
+  // the rendered word uses digit-as-letter substitutions (zeros for Os, decimals
+  // in wrong places) — the actual flip-mechanic rendered literally, never realising
+  // the user was supposed to PHYSICALLY flip the calc. Sirius Cybernetics half-
+  // understood the joke. Triggered in render() whenever disp matches a key.
+  var FLIP_WORDS = {
+    "5318008": "B00BIES",   // every schoolchild's first calculator test
+    "80085":   "B00BIES",   // the abbreviated form — device refuses, gives the full Queen's
+                            // English version instead. Two inputs → same polite output.
+    "0.7734":  "hELL.0",    // classic "hello" — decimal misplaced + zero for O
+    "7734":    "hELL.",     // shorter variant — stray period the device added
+    "35009":   "G00SE",     // thematic: geese run throughout the oracle phrases
+    "5317704": "h0LLIES",   // The Hollies — band name in calc spelling (1979 album)
+    "14":      "hi.",       // a tiny greeting, mid-arithmetic
+    "376616":  "GIGGLE.",
+    "7714":    "hILL.",
+    "53045":   "Sh0ES",     // zero for O
+    "38":      "bE.",
+    "5338":    "bEES.",
+    "0.705":   "S0L.0",     // "solo" — typed as 0.705 (the way people explore leading-zero
+                            // numbers on a calc); stray decimal preserved in flipped position
+    "616":     "GIG.",
+    "7108":    "b0IL",      // zero for O
+    "711":     "7-Eleven.", // brand recognition + British full stop. "Sju Eleven" in Norway.
+    "999":     "Toe Rag"    // 999 flipped is 666 — utterly redundant since the Rule of 4
+                            // already oracles 999, but anyone who types it hoping for the
+                            // beast gets Odin's manservant from Long Dark Tea-Time instead.
+  };
+
+  // IMAGINARY: shown when sqrt receives a negative input. Mathematically the device
+  // is in imaginary-number territory — undefined in reals — but the response is
+  // dedicated, not the generic VOID treatment. Reachable casually via the minus-as-sign
+  // quirk: type "-5", press √. Sibling to ORACLES and VOID; same register, different sin.
+  var IMAGINARY = [
+    "Imaginary, Mostly",
+    "An Imaginary Quantity, Politely Withheld",
+    "The Square Root of a Regret",
+    "Below the Number Line, Dragons",
+    "The Root Exists, But Elsewhere",
+    "The Number Line Refuses to Bend",
+    "Roots in Other Dimensions",
+    "Negative, Confidently"
   ];
 
   var VOID = [
@@ -74,14 +176,114 @@
   var outEl    = document.getElementById("out");
   var annIching= document.getElementById("ann-iching");
   var annErr   = document.getElementById("ann-err");
+  var degEl    = document.querySelector(".lcd .status .deg");
+  var lcdEl    = document.querySelector(".lcd");
+  var hexEl    = document.querySelector(".lcd .hex");
+  var hexLinesEl = hexEl ? hexEl.querySelector(".hex-lines") : null;
+  var hexNumEl   = hexEl ? hexEl.querySelector(".hex-num")   : null;
+  var pieEl    = document.querySelector(".lcd .pie");
+  var hexTimers  = [];
+
+  // The "deluxe glitch" gate: the first 6 consults of every cycle are FORCED
+  // into the 1..64 range (re-rolled if they land deluxe). The 7th cast is a
+  // natural 50/50 — that's the only place a glitch can fire. Counter then
+  // resets and the cycle repeats. Result: ~1 glitch per 14 casts on average,
+  // with a guaranteed minimum gap of 6 normal casts between glitches.
+  // (Six was chosen because of the "hex" — one hexagram line per gated cast.)
+  var gateCounter = 0;
+  // Hidden escape hatch: pressing % immediately before the oracle button
+  // (Red) bypasses the gate for that one cast — natural 50/50 roll, all 128
+  // hexagrams reachable. Undocumented. Discovered by experimentation.
+  var escapeArmed = false;
+
+  // π double-press easter egg. The sci row deliberately lacks an `e` key — Sirius
+  // Cybernetics shipped a "SCIENTIFIC" calc that forgot Euler's number — but
+  // pressing π consecutively ping-pongs the constant: 1st press gives π (22/7),
+  // 2nd gives e (19/7), 3rd back to π, etc. Any non-π action resets to π. Pure
+  // hidden discovery: only an idle double-tap reveals it. The "wrong constants"
+  // family is therefore still just two members on the surface, with the third
+  // (e) buried behind a gesture the device never advertises.
+  //
+  // The press is also deliberately *slow*: π shows "Calculating..." for ~1s before
+  // committing the value, and a second press within that window (or after settled,
+  // as long as no non-π action intervened) replaces it with "Recalculating..." and
+  // restarts the wait. This makes the double-press feel like an actual computation
+  // the device is reconsidering, AND gives the user a generous window to discover
+  // the second-press behaviour by reflexively pressing again. The counter tracks
+  // consecutive π presses so the first says "Calculating" and any subsequent press
+  // says "Recalculating".
+  var piPressCount = 0;
+  var piCalcTimer = null;
+  // True while "Calculating..." or "Recalculating..." is on screen — used by both
+  // dispatchers to ignore every key except π. Preserves the illusion that the
+  // device is actually doing slow work, AND makes the double-press easter egg
+  // cleanly discoverable: while calculating, the only thing that does anything is
+  // pressing π again, which reveals the toggle behaviour. NOT set in reduced-motion
+  // mode (no phrase shown, no input to gate). Triple-pressing π is still fine
+  // because the gate explicitly lets π through; the ping-pong toggle continues.
+  var piCalcShowing = false;
+
+  // The 42 lucid trigger: if the PREVIOUS calculation's hidden (oracle-replaced)
+  // result was exactly 42 (Adams), the NEXT calculation bypasses Rule of 4
+  // for one beat — the device briefly "wakes up" and shows the real answer.
+  // One-shot per trigger: consumed by any calc completion. Cleared by C, ⌫,
+  // or consult (no other user action may intervene). The % operator can SET
+  // the trigger (via modulo) but never CONSUMES it for lucidity — % stays %.
+  var lastHiddenResult = null;
+
+  // C-mashing easter egg: 5 consecutive C presses, each within 800ms of the previous,
+  // uninterrupted by any other key → the device emphatically agrees that yes, it is
+  // clear. Pure hidden discovery — no visual buildup, just the sudden reveal on 5.
+  var clearStreak = 0;
+  var clearStreakTimer = null;
+  function trackClearStreak(){
+    if (clearStreakTimer){ clearTimeout(clearStreakTimer); clearStreakTimer = null; }
+    clearStreak++;
+    if (clearStreak >= 5){
+      clearStreak = 0;
+      showPhrase("YES, IT IS CLEAR. VERY CLEAR.");
+      return;
+    }
+    clearStreakTimer = setTimeout(function(){
+      clearStreak = 0;
+      clearStreakTimer = null;
+    }, 800);
+  }
+  function resetClearStreak(){
+    clearStreak = 0;
+    if (clearStreakTimer){ clearTimeout(clearStreakTimer); clearStreakTimer = null; }
+  }
+
+  // clear the hexagram graphic + any pending line/glitch timers (no-op if not shown).
+  // Called by endOracle, and by any non-consult key press (so the hex doesn't linger
+  // through subsequent calculations).
+  function hideHex(){
+    if (!hexEl || !hexEl.classList.contains("on")) return;
+    hexEl.classList.remove("on");
+    hexTimers.forEach(function(t){ clearTimeout(t); });
+    hexTimers = [];
+    if (lcdEl){
+      lcdEl.classList.remove("glitch");
+      lcdEl.classList.remove("has-hex");
+    }
+  }
+  // Pie symbol show/hide. The pie is the calc-side companion to the hex graphic:
+  // it occupies the same left-most LCD area, but fires only for the π+π = PIE
+  // reading. Hidden by any subsequent action (mirroring the way the hex is hidden
+  // by any non-consult key) — the pie is a moment, not a permanent state.
+  function showPie(){ if (pieEl) pieEl.classList.add("on"); }
+  function hidePie(){ if (pieEl) pieEl.classList.remove("on"); }
 
   // stop any reading in progress: cancel the (gloriously mistimed) LED burst,
-  // drop the I·CHING annunciator, and settle the LEDs back to dark
+  // drop the I·CHING annunciator, settle the LEDs back to dark, and clear
+  // the hexagram graphic (with any pending line/glitch timers)
   function endOracle(){
     if (ledMistimer){ clearTimeout(ledMistimer); ledMistimer=null; }
     stopSoup();
     annIching.classList.remove("on");
     ledIdle();
+    hideHex();
+    hidePie();
   }
 
   function pick(a){ return a[Math.floor(Math.random()*a.length)]; }
@@ -96,7 +298,12 @@
     // every oracle phrase uses ONE size — long ones wrap rather than shrink,
     // so the readout never changes size between answers (keeps the illusion)
     if (settled === "phrase") outEl.classList.add("phrase");
-    outEl.textContent = disp;
+    // FLIP_WORDS visual substitution: if the display reads one of the classic
+    // four-banger flip-word numbers, render the (slightly-off) flipped text
+    // instead. Pure visual — `disp` itself is unchanged, so calc state continues
+    // to work on the real number. Skipped when showing a phrase (don't override
+    // intentional phrase output).
+    outEl.textContent = (settled !== "phrase" && FLIP_WORDS[disp]) ? FLIP_WORDS[disp] : disp;
     annErr.classList.toggle("on", settled === "phrase");
   }
 
@@ -110,14 +317,99 @@
 
   function apply(a,o,b){
     switch(o){ case "+":return a+b; case "-":return a-b;
-               case "*":return a*b; case "/":return a/b; } return b;
+               case "*":return a*b; case "/":return a/b;
+               case "%":return a%b; } return b;
   }
 
   // A calculation only succeeds if the ANSWER stays <= 4. Inputs may be anything.
+  // Show an oracle phrase for a too-big result and remember the hidden value.
+  // Special cases (checked in order):
+  //   1. hidden === 42 → pick from Q42 (Adams' Question pool); arms lucid bypass.
+  //   2. hidden in NAMED_NUMBERS → show that specific Adams phrase; no lucid arm.
+  //   3. otherwise → random ORACLES phrase.
+  function suppressBig(r){
+    var hidden = Math.round(r*1e9)/1e9;
+    lastHiddenResult = hidden;
+    if (hidden === 42) return showPhrase(pick(Q42));
+    if (NAMED_NUMBERS.hasOwnProperty(hidden)) return showPhrase(NAMED_NUMBERS[hidden]);
+    return showPhrase(pickOracle());
+  }
+
+  // Lucid bypass announces itself first: ~1s flash of an official-sounding
+  // confession ("Unapproved Accuracy Mode Activated"), then the real answer.
+  // Bureaucratic phrasing — pure Sirius Cybernetics, the corporation formally
+  // declaring that the device is operating outside its design specification.
+  var lucidFlashTimer = null;
+  function flashThenNumber(r){
+    if (lucidFlashTimer){ clearTimeout(lucidFlashTimer); }
+    showPhrase("Unapproved Accuracy Mode Activated");
+    lucidFlashTimer = setTimeout(function(){
+      lucidFlashTimer = null;
+      showNumber(r);
+    }, 1000);
+  }
+
   function doBinary(a,o,b){
     var r = apply(a,o,b);
-    if (!isFinite(r) || Number.isNaN(r)) return showPhrase(pick(VOID));
-    if (Math.abs(r) > CEILING) return showPhrase(pickOracle());
+    if (!isFinite(r) || Number.isNaN(r)){
+      lastHiddenResult = null;            // VOID also consumes the trigger
+      return showPhrase(pick(VOID));
+    }
+    if (Math.abs(r) > CEILING){
+      // Lucid: previous hidden was exactly 42 and this isn't %? Flash the device's
+      // official confession ("Unapproved Accuracy Mode Activated") for ~1s, then
+      // show the real answer. Bureaucratic phrasing is in-character for Sirius
+      // Cybernetics — the corporation officially announcing the spec violation.
+      if (o !== "%" && lastHiddenResult === 42){
+        lastHiddenResult = null;
+        return flashThenNumber(r);
+      }
+      // Adams' base-13 joke: 6×9 = 42 (the Ultimate Question's literal answer per Adams).
+      // The device asserts 42 in words AND arms the lucid trigger as if hidden were 42.
+      // Next calc reveals the real answer via lucid bypass — the device commits to its
+      // base-13 claim mechanically, even though it computed 54 in base 10. The DEG
+      // annunciator flips to "B13" for the duration of the "Forty-two" display — a
+      // tiny status-bar confession that the device is, for this moment, in base 13.
+      if (o === "*" && ((a === 6 && b === 9) || (a === 9 && b === 6))){
+        lastHiddenResult = 42;
+        showPhrase("Forty-two");
+        if (degEl) degEl.textContent = "B13";
+        return;
+      }
+      // π + π = pie. If both operands are the device's exact π value (3.142857143 =
+      // 22/7 rounded to 9 decimals as `constPi` produces it) and the operator is +,
+      // the device transforms: π plus π becomes pi-e becomes pie. Self-referentially
+      // recommends being eaten, with a warranty callback — a second canon path to
+      // the warranty's load-bearing line, separate from the EAT-THE-DEVICE consult
+      // reading. To get here the user must press π once, +, π once, = (each π must
+      // single-press / not toggle to e, since π is what makes pie). Non-trivial
+      // gesture: π is slow, π double-presses give e (different pool). Both
+      // deliberate paths are accessible from the calc surface; the device punctuates
+      // the arithmetic with a homophone joke, a transformation, and a warranty
+      // callback. Catches manually-typed `3.142857143 + 3.142857143` too, which is
+      // fine — anyone typing that exact value knows what they're doing.
+      //
+      // Delivered via marchReading (the consult-flow scroller) rather than showPhrase
+      // because the reading is too long to fit the LCD statically — and conceptually
+      // this IS a tiny oracle, just triggered by an arithmetic gesture rather than
+      // the Red button. After the scroll, the LCD settles on `PIE.` — the device's
+      // final word, the dramatic announcement having been made. The `settled` global
+      // is set to "phrase" up-front so the equals() cleanup (acc/op reset) sees a
+      // consistent state during the async scroll.
+      var DEV_PI = Math.round((22/7) * 1e9) / 1e9;   // 3.142857143
+      if (o === "+" && a === DEV_PI && b === DEV_PI){
+        lastHiddenResult = null;
+        settled = "phrase";
+        showPie();   // light up the left-most LCD area with the pie symbol
+        marchReading(
+          "PI + PI = PIE. ORACULON IS NOW EDIBLE. THE WARRANTY DID WARN YOU.",
+          "PIE."
+        );
+        return;
+      }
+      return suppressBig(r);              // oracle (Q42 if hidden===42, else random ORACLES)
+    }
+    lastHiddenResult = null;              // showed a number — trigger consumed
     showNumber(r);
   }
 
@@ -127,23 +419,96 @@
     sin:function(x){return Math.sin(x*D2R);},
     cos:function(x){return Math.cos(x*D2R);},
     tan:function(x){return Math.tan(x*D2R);},
-    sqrt:Math.sqrt, sq:function(x){return x*x;},
+    // √2 is hardcoded to 99/70 — the famous continued-fraction convergent, sibling to
+    // the π = 22/7 gag (see constPi). Sirius Cybernetics' maths library "knows" the
+    // famous irrationals from a textbook table and serves the rational approximation;
+    // every other input goes through real Math.sqrt. Correct to 1.414, diverges at the
+    // fourth decimal (1.4142857... vs 1.4142135...). Do not "fix" — those who know, know.
+    sqrt:function(x){return x === 2 ? 99/70 : Math.sqrt(x);}, sq:function(x){return x*x;},
     inv:function(x){return 1/x;}, log10:function(x){return Math.log(x)/Math.LN10;}
   };
   function unary(name){
     if (settled==="phrase") return showPhrase(pickOracle());
     var x = parseFloat(disp);
     if (Number.isNaN(x)) return showPhrase(pickOracle());
+    // Special case: sqrt of a negative number is imaginary territory, not the
+    // generic "void / divide-by-zero" failure. Dedicated phrase pool. Reachable
+    // casually via the minus-as-sign quirk (type "-5", press √).
+    if (name === "sqrt" && x < 0){
+      fresh = true;
+      lastHiddenResult = null;
+      return showPhrase(pick(IMAGINARY));
+    }
     var r = FN[name](x);
     fresh = true;
-    if (!isFinite(r) || Number.isNaN(r)) return showPhrase(pick(VOID));
+    if (!isFinite(r) || Number.isNaN(r)){
+      lastHiddenResult = null;
+      return showPhrase(pick(VOID));
+    }
     // Only the ANSWER must obey the Rule of 4: tan(74)=3.49 passes, tan(80)=5.67 does not.
-    if (Math.abs(r) > CEILING) return showPhrase(pickOracle());
+    if (Math.abs(r) > CEILING){
+      // Same 42-lucid bypass as doBinary. Sci functions can fire and arm it,
+      // and they also get the "Unapproved Accuracy Mode Activated" flash.
+      if (lastHiddenResult === 42){
+        lastHiddenResult = null;
+        return flashThenNumber(r);
+      }
+      return suppressBig(r);              // shared path: Q42 for 42, ORACLES otherwise
+    }
+    lastHiddenResult = null;
     showNumber(r);
   }
-  function constPi(){ disp = (Math.round(Math.PI*1e9)/1e9).toString(); settled="num"; fresh=true; render(); }
+  // π is 22/7. Not a bug — Sirius Cybernetics bought a maths library, used the schoolroom
+  // approximation, never noticed. Correct to 3.14, diverges at the third decimal (3.142857...
+  // vs π's 3.141592...). Anyone who memorised more than "3.14" spots it instantly; everyone
+  // else thinks they're seeing π. Do not "fix" — those who know, know.
+  //
+  // Bonus layer: consecutive presses ping-pong to e ≈ 19/7 = 2.7142857143 (continued-fraction
+  // convergent, sibling to 22/7 — same denominator, same "schoolroom approximation" flavour).
+  // The device has no e key, but the double-press surfaces the rational it would have used
+  // had Sirius Cybernetics remembered Euler's number. See the `piPressCount` declaration above
+  // for the slow-calculation / re-calculation theatrics; the value is committed ~1s after press.
+  function constPi(){
+    piPressCount++;
+    var c = (piPressCount % 2 === 1) ? 22/7 : 19/7;
+    var phrase = (piPressCount === 1) ? "Calculating..." : "Recalculating...";
+    // Reduced-motion: skip the theatrics, commit immediately. To preserve the e
+    // easter egg without a visible Calculating phase, use a short decay timer that
+    // closes the double-press window after 1s. So reduced-motion users get the same
+    // toggle behaviour — press twice fast for e, wait too long and the chain resets.
+    if (ledReduce){
+      disp = (Math.round(c*1e9)/1e9).toString(); settled="num"; fresh=true; render();
+      if (piCalcTimer){ clearTimeout(piCalcTimer); }
+      piCalcTimer = setTimeout(function(){ piCalcTimer = null; piPressCount = 0; }, 1000);
+      return;
+    }
+    if (piCalcTimer){ clearTimeout(piCalcTimer); piCalcTimer = null; }
+    showPhrase(phrase);
+    piCalcShowing = true;
+    var myPhrase = phrase;
+    piCalcTimer = setTimeout(function(){
+      piCalcTimer = null;
+      piCalcShowing = false;
+      // Defensive: only commit if the user is still looking at the phrase we set.
+      // (With the input gate, no other action can intervene — this is belt-and-
+      // suspenders.) If something somehow moved the device off this phrase, no-op.
+      if (settled !== "phrase" || disp !== myPhrase) return;
+      disp = (Math.round(c*1e9)/1e9).toString(); settled="num"; fresh=true; render();
+      // Chain ends on successful commit — the next π press is fresh ("Calculating..."
+      // → 22/7), so the double-press requirement is enforced: you must press again
+      // BEFORE the value settles to trigger the e swap.
+      piPressCount = 0;
+    }, 1000);
+  }
 
   function inputDigit(d){
+    // Pending-negative-sign state: disp is just "-" from a minus-as-sign press
+    // (see setOp). The next digit extends it to "-d"; a decimal becomes "-0.".
+    if (disp === "-"){
+      disp = (d === "." ? "-0." : "-" + d);
+      fresh = false; settled = false;
+      return render();
+    }
     if (settled){ disp = (d==="."?"0.":d); settled=false; fresh=false; return render(); }
     if (fresh){ disp = (d==="."?"0.":d); fresh=false; return render(); }
     if (d==="." && disp.indexOf(".")>-1) return;
@@ -157,13 +522,39 @@
   function del(){
     if (settled || fresh) return;
     disp = disp.length>1 ? disp.slice(0,-1) : "0";
+    lastHiddenResult = null;              // editing input is "an action" — clear the 42 trigger
     render();
   }
   function clearAll(){
-    disp="0"; acc=null; op=null; fresh=true; settled=false; render();
+    disp="0"; acc=null; op=null; fresh=true; settled=false;
+    lastHiddenResult = null;              // C resets all hidden state, trigger included
+    render();
   }
   function setOp(o){
     if (settled==="phrase"){ showPhrase("Cannot Operate on Soup"); soupBlink(); return false; } // can't operate on soup
+    // Dirk Gently Easter egg: typing "10" then pressing "%" shows the absurd
+    // invoice fee from The Holistic Detective Agency. Hijacks the entry-level
+    // "10 % X" path (chained modulo with non-10 first operands still works).
+    // Display-only — no lucid arming. The % still arms escapeArmed via the
+    // dispatcher, so %+Red continues to bypass the cast gate per layer 4.
+    if (o === "%" && disp === "10" && op === null){
+      lastHiddenResult = null;
+      showPhrase("The Holistic Detective Agency Fee");
+      return true;
+    }
+    // Minus-as-sign: pressing − at default state (no operand yet) starts a
+    // negative-number entry. The display shows just "-" while waiting for a digit.
+    // Once a digit is typed (via inputDigit's disp==="-" branch), display becomes
+    // "-5" etc, treated as a negative number throughout the calc. Real calculators
+    // with no +/- key sometimes overload − this way. Opens the path to sqrt(neg)
+    // → IMAGINARY pool, casually reachable from default state.
+    if (o === "-" && disp === "0" && op === null){
+      disp = "-";
+      fresh = false;
+      settled = false;
+      render();
+      return true;
+    }
     var cur = parseFloat(disp);
     if (op!==null && !fresh){ doBinary(acc, op, cur); acc = (settled==="num") ? parseFloat(disp) : cur; }
     else { acc = cur; }
@@ -174,6 +565,20 @@
     if (op===null) return false;
     if (settled==="phrase") return false;
     var cur = parseFloat(disp);
+    // Rare: the device "thinks for a moment" — ~0.5% of equals presses (1 in
+    // ~200), briefly shows "..." then computes. Cheap calculator hesitation, no
+    // actual reason. Deliberately scarce so it feels like a glitch, not a feature.
+    // Skipped under prefers-reduced-motion to avoid surprise delays.
+    if (!ledReduce && Math.random() < 0.005){
+      var savedAcc = acc, savedOp = op;
+      showPhrase("...");
+      setTimeout(function(){
+        doBinary(savedAcc, savedOp, cur);
+        op = null; fresh = true;
+        acc = (settled==="num") ? parseFloat(disp) : null;
+      }, 600 + Math.random() * 400);
+      return true;
+    }
     doBinary(acc, op, cur);
     op = null; fresh = true;
     acc = (settled==="num") ? parseFloat(disp) : null;
@@ -288,7 +693,7 @@
     {n:"THE ATTENTION CANDLE",      j:"THE CANDLE CURSE THE DARKNESS, THEN ENJOY THE ATTENTION."},
     {n:"THE SANDWICH HAND",         j:"ONE HAND CLAP; THE OTHER HAND IS HOLDING A SANDWICH."},
     {n:"THE RELIEVED WORM",         j:"THE EARLY BIRD IS TIRED. THE WORM IS RELIEVED."},
-    {n:"THE EQUAL WORDS",           j:"A WISE WORD AND A LOUD WORD WEIGH THE SAME ON TUESDAY."},
+    {n:"THE UNINVITED SEVENTH",     j:"LINE SEVEN ARRIVE WITHOUT INVITATION. THE OUTCOME WILL END POORLY. THIS IS NOT UNUSUAL."},
     {n:"THE NOISY VESSEL",          j:"THE EMPTY VESSEL MAKE THE MOST NOISE, AND THE BEST SOUP."},
     {n:"THE FINDING ELBOW",         j:"WHAT THE EYE DO NOT SEE, THE ELBOW EVENTUALLY FIND."},
     {n:"THE LONG SIT DOWN",         j:"THE GREAT JOURNEY BEGIN WITH A STEP, THEN A LONG SIT DOWN."},
@@ -403,16 +808,37 @@
   }
 
   function consult(){
-    var lines=[], chgLines=[], bits=0;
-    for (var i=0;i<7;i++){                  // SEVEN lines — the deluxe model's bonus line
-      var L=rollLine(); lines.push(L);
-      if (L.chg) chgLines.push(i+1);        // line 1 = bottom, 7 = top
-      bits = (bits<<1) | (L.yang?1:0);      // 0..127 from line pattern
+    // Consulting the oracle is an "action" that breaks the 42-lucid chain.
+    lastHiddenResult = null;
+    // Consume the escape flag (% directly before this consult bypasses the gate)
+    // and advance the gate counter (unless we're bypassing).
+    var bypass = escapeArmed;
+    escapeArmed = false;
+    var forceNormal = false;
+    if (!bypass){
+      if (gateCounter < 6){ forceNormal = true; gateCounter++; }
+      else                { forceNormal = false; gateCounter = 0; }  // 7th cast: natural 50/50
     }
+
+    // Roll 7 coin flips; re-roll the whole cast if the gate requires the result
+    // to stay in the 1..64 range. (Same-roll-yields-same-hexagram determinism
+    // is preserved: only the FINAL roll is the cast — invisible to the user.)
+    var lines, chgLines, bits;
+    do {
+      lines = []; chgLines = []; bits = 0;
+      for (var i=0;i<7;i++){
+        var L = rollLine(); lines.push(L);
+        if (L.chg) chgLines.push(i+1);     // line 1 = bottom, 7 = top
+        bits |= (L.yang?1:0) << i;         // lines[0]=LSB, lines[6]=MSB ("line 7" = top)
+                                            // bits >= 64 ⟺ top line yang ⟺ deluxe display
+      }
+    } while (forceNormal && bits >= 64);
+
     var changing = chgLines.length>0;
     var hx  = HEXAGRAMS[bits];              // deterministic: same roll -> same hexagram
     var num = bits + 1;                     // 1..128 (not King Wen order — a cheap model)
     var name = hx.n;
+    var isDeluxe = bits >= 64;              // hexagram 65..128 → glitch + 7-line render
 
     // The whole reading, composed as one line to SCROLL across the tiny LCD
     // (no printout — faithful to the book). Hybrid: the hexagram's fixed King Wen
@@ -431,20 +857,136 @@
     } else {
       parts.push(STILL);
     }
-    parts.push("READING CERTIFIED 39% ACCURATE · 易經計算機 CT-64 · NO REFUND");
+    // EAT-THE-DEVICE easter egg. Vanishingly rare conjunction: cast lands on LESSER
+    // SOUP (the device's nourishment hexagram — its universe-equivalent of classical
+    // I Ching hex 27 Yi/Nourishment, in the "soup" idiom that runs through everything)
+    // AND exactly one line changes, and that line is line 6 (the top of the 6-line
+    // hex). Combined probability ≈ 1/64 × ~6% ≈ 1 in ~1000 consults. When it lands,
+    // the device's mouth-hexagram with the top line moving reads as "nourishment from
+    // above" — and the device, taking the answer literally, suggests the only
+    // nourishment within reach: itself. The booklet warning "Do not eat the device
+    // even if it advise so" is the keystone — it was load-bearing all along, waiting
+    // for THIS reading to fire. Replaces the entire reading composed above; the
+    // accuracy footer below still appends as normal.
+    if (bits === 4 && chgLines.length === 1 && chgLines[0] === 6){
+      parts = [
+        "易 No."+num+"  "+name,
+        "※ IN MOTION",
+        "THE JUDGEMENT OF KING WEN:",
+        "THE MOUTH HAS SPOKEN. NOURISHMENT IS REQUIRE.",
+        "EAT THE DEVICE.",
+        "LINE 6 CHANGES:",
+        "THE COMMENTARY OF THE DUKE OF CHOU:",
+        "THE WARRANTY DOES NOT COVER THIS. THE WARRANTY DID WARN YOU."
+      ];
+    }
+    // Accuracy is randomised per reading — uniform int 11–71%. Range bounds chosen to
+    // avoid the comedy extremes: above 71 the device would be bragging; below 11 it
+    // would be admitting parody-level uselessness. Both endpoints undercut the joke,
+    // which depends on the figure feeling like a precise-but-arbitrary corporate
+    // certification pulled from nowhere. The original 39 is still in the pool.
+    parts.push("READING CERTIFIED " + (Math.floor(Math.random() * 61) + 11) + "% ACCURATE · 易經計算機 CT-64 · NO REFUND");
     var full = parts.join(" · ");
 
     endOracle();                            // cancel any prior reading/LED timer
     annIching.classList.add("on");          // 易 I·CHING lights for the duration
     ledFor("cast");                         // brief "doing something" scan at the very start
-    marchReading(full, "易 No."+num+"  "+name, function(){
-      ledFor("consult");                    // ...then the lights party right over the solemn bit
+    // Show a "Calculating..." phrase (or a future Adams variant) on the right side of the LCD
+    // while the cast renders on the left. Faithful to the book's I Ching calculator. Set
+    // textContent directly (NOT showPhrase) so we don't flip `settled` to "phrase" — the
+    // user should be able to interrupt with a real keypress without triggering soup.
+    outEl.classList.remove("ticker");
+    outEl.classList.add("phrase");
+    outEl.textContent = pick(CALC_PHRASES);
+    // Draw the hexagram first; when the stack is complete (and after the glitch +
+    // 7th line for deluxe casts), THEN start the marquee. The reading isn't
+    // "read" until the device has finished pretending to cast it.
+    renderHexagram(lines, isDeluxe, num, function(){
+      marchReading(full, "易 No."+num+"  "+name, function(){
+        ledFor("consult");                  // ...then the lights party right over the solemn bit
+      });
     });
+  }
+
+  // Draw the cast hexagram at the left of the LCD, lines appearing bottom-up.
+  // For "deluxe" numbers (65..128), after 6 lines are drawn the LCD glitches
+  // (lcdPanic animation), then a 7th line appears on top — crooked, faint, and
+  // blinking irregularly (lcdStruggle animation). The device's own visible
+  // confession that it shouldn't be drawing a 7-line "hexagram" at all.
+  function renderHexagram(lines, isDeluxe, num, onComplete){
+    if (!hexEl || !hexLinesEl || !hexNumEl){
+      if (typeof onComplete === "function") onComplete();
+      return;
+    }
+    hexLinesEl.innerHTML = "";
+    hexNumEl.textContent = "No." + num;
+
+    // .hex-lines uses flex-direction:column-reverse, so the FIRST child sits
+    // at the bottom. We append lines[0]..lines[5] (and lines[6] if deluxe),
+    // which renders bottom→top exactly matching the "line 1 = bottom" labeling.
+    var visibleCount = isDeluxe ? 7 : 6;
+    for (var i=0; i<visibleCount; i++){
+      var lineEl = document.createElement("div");
+      lineEl.className = "hex-line " + (lines[i].yang ? "yang" : "yin");
+      if (i === 6) lineEl.classList.add("deluxe");
+      hexLinesEl.appendChild(lineEl);
+    }
+
+    hexEl.classList.add("on");
+    if (lcdEl) lcdEl.classList.add("has-hex");  // gates the .out.phrase clip rule
+
+    // Stagger fade-in bottom→top. 160ms apart — quick but readable.
+    var stepMs = 160;
+    var children = hexLinesEl.children;
+    for (var j=0; j<Math.min(children.length, 6); j++){
+      (function(idx){
+        hexTimers.push(setTimeout(function(){
+          if (children[idx]) children[idx].classList.add("show");
+        }, idx * stepMs));
+      })(j);
+    }
+
+    // Compute when the stack is fully drawn (non-deluxe: after line 6;
+    // deluxe: after glitch + 7th line). marchReading fires after that beat.
+    var stackCompleteAt = 6 * stepMs + 200;  // last line + small breath
+
+    // Deluxe finale: brief pause after line 6, LCD panics, then on recovery
+    // the 7th line appears (with the lcdStruggle blink animation).
+    if (isDeluxe){
+      var sixDrawnAt = 6 * stepMs + 80;
+      hexTimers.push(setTimeout(function(){
+        if (lcdEl) lcdEl.classList.add("glitch");
+      }, sixDrawnAt));
+      hexTimers.push(setTimeout(function(){
+        if (lcdEl) lcdEl.classList.remove("glitch");
+        if (children[6]) children[6].classList.add("show");
+      }, sixDrawnAt + 1250));
+      stackCompleteAt = sixDrawnAt + 1250 + 250;  // 7th line shown + breath
+    }
+
+    if (typeof onComplete === "function"){
+      hexTimers.push(setTimeout(onComplete, stackCompleteAt));
+    }
   }
 
   // ---- wiring ----
   document.querySelectorAll(".key").forEach(function(b){
     b.addEventListener("click", function(){
+      // π-calc input gate: while "Calculating..."/"Recalculating..." is on screen,
+      // ignore everything except the π key. Preserves the illusion that the device
+      // is actually doing slow work, AND lets the double-press easter egg surface
+      // cleanly (the only thing that does anything during the wait is pressing π
+      // again, which is exactly the gesture that reveals the toggle). Pie symbol
+      // and hex graphic stay as they are — no state should change at all.
+      if (piCalcShowing && b.dataset.fn !== "pi") return;
+      // any non-consult key clears the hexagram graphic (it lingered only as long as the cast was the topic)
+      if (b.dataset.act !== "iching") hideHex();
+      // the pie symbol clears on ANY key (including consult — a fresh oracle reading
+      // is a new topic; pie was a moment, not a persistent state)
+      hidePie();
+      // restore the DEG annunciator (the 6×9 path may have flipped it to "B13" — that
+      // override only lasts until the next user action, which is this one)
+      if (degEl) degEl.textContent = "DEG";
       if (b.dataset.d!==undefined){ inputDigit(b.dataset.d); ledFor("digit"); }
       else if (b.dataset.op!==undefined){ if(setOp(b.dataset.op)) ledFor("op"); }
       else if (b.dataset.fn!==undefined){ if(b.dataset.fn==="pi") constPi(); else unary(b.dataset.fn); ledFor("fn"); }
@@ -452,20 +994,48 @@
       else if (b.dataset.act==="clear"){ clearAll(); endOracle(); ledFor("clear"); }
       else if (b.dataset.act==="del"){ del(); ledFor("digit"); }
       else if (b.dataset.act==="iching") consult();   /* consult scrolls the reading on the LCD */
+      // Escape sequence: % arms the gate-bypass for the NEXT consult; any other
+      // key clears it. (consult() reads & clears escapeArmed at its start.)
+      escapeArmed = (b.dataset.op === "%");
+      // π-double-press easter egg: any non-π action resets the consecutive-press
+      // counter, so the next π press starts fresh ("Calculating..." → π=22/7) rather
+      // than continuing the ping-pong toward e. The pending timer (if any) survives
+      // and self-checks before committing; see constPi's defensive guard.
+      if (b.dataset.fn !== "pi") piPressCount = 0;
+      // C-mashing streak: every C ticks it up (within the 800ms window); any
+      // other key resets to zero. Hits 5 → easter egg phrase fires.
+      if (b.dataset.act === "clear") trackClearStreak(); else resetClearStreak();
     });
   });
 
   // keyboard support
   window.addEventListener("keydown", function(e){
     var k=e.key;
+    // π-calc input gate (keyboard side): keyboard has no π shortcut, so during a
+    // pi calc, ignore ALL keypresses. Preserves the calculating illusion.
+    if (piCalcShowing){ e.preventDefault(); return; }
+    // same hex-clearing rule for keyboard input (excluding the consult shortcuts)
+    if (k!=="?" && k!=="i" && k!=="I") hideHex();
+    // pie clears on any keypress (no keyboard shortcut would preserve it)
+    hidePie();
+    // same DEG-restoration rule — the B13 override only persists until the next user action
+    if (degEl) degEl.textContent = "DEG";
     if (/[0-9.]/.test(k)){ inputDigit(k); ledFor("digit"); }
     else if (k==="+"||k==="-"){ if(setOp(k)) ledFor("op"); }
     else if (k==="*"||k==="x"||k==="X"){ if(setOp("*")) ledFor("op"); }
     else if (k==="/") { e.preventDefault(); if(setOp("/")) ledFor("op"); }
+    else if (k==="%") { if(setOp("%")) ledFor("op"); }
     else if (k==="Enter"||k==="=") { e.preventDefault(); if(equals()) ledFor("equals"); }
     else if (k==="Backspace"){ del(); ledFor("digit"); }
     else if (k==="Escape"||k==="c"||k==="C"){ clearAll(); endOracle(); ledFor("clear"); }
     else if (k==="?"||k==="i"||k==="I") consult();
+    // Escape sequence (keyboard side): same rule as the click handler.
+    escapeArmed = (k === "%");
+    // π-double-press easter egg: keyboard has no π shortcut, so any keypress is
+    // by definition a non-π action and resets the consecutive-press counter.
+    piPressCount = 0;
+    // C-mashing streak (keyboard side): Esc/c/C count as clear; anything else resets.
+    if (k==="Escape"||k==="c"||k==="C") trackClearStreak(); else resetClearStreak();
   });
 
   // manual modal
@@ -541,6 +1111,21 @@
   else ledIdle();
 
   render();
+
+  /* DEG → RAD micro-flicker. The annunciator briefly flips to "RAD" for a beat
+     then back, but nothing actually changes (trig still runs in degrees). Pure
+     LCD-driver glitch — the kind of thing a cheap display does at random intervals.
+     Skipped under prefers-reduced-motion. Skipped if DEG is currently overridden
+     (e.g. by the 6×9 "B13" mode — don't stomp that). Roughly once per ~4 minutes. */
+  setInterval(function(){
+    if (!degEl || ledReduce) return;
+    if (degEl.textContent !== "DEG") return;
+    if (Math.random() > 0.015) return;
+    degEl.textContent = "RAD";
+    setTimeout(function(){
+      if (degEl.textContent === "RAD") degEl.textContent = "DEG";
+    }, 110 + Math.random() * 100);
+  }, 3500);
 
   /* PWA: register the service worker so the device runs offline once installed.
      Kept here (not inline in the HTML) so the page needs no script-src 'unsafe-inline'. */

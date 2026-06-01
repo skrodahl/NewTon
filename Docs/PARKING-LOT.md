@@ -82,6 +82,22 @@ Flagged as the single most impactful improvement by the independent code audit (
 
 ---
 
+### Chalker — Google Play Store distribution
+
+The Chalker is already a PWA. Wrap it as a Trusted Web Activity (via [Bubblewrap](https://github.com/GoogleChromeLabs/bubblewrap)) and ship to the **Google Play Store** — one-time $25 developer fee, single codebase, same QR scanner, same offline behaviour. Makes the Chalker findable in the place darts players and clubs actually look for tablet scoring apps: app-store searches for "darts scorer", "x01", "darts referee app".
+
+**Why this matters beyond convenience:** Play Store presence is a discovery funnel into NewTon TM. The TM→Chalker QR handshake already exists. A darts ref or club operator who finds the Chalker via app-store search, installs it, scores a match at the board, and notices the QR scanner eventually asks *"what's the TM, can I run a tournament with that?"* NewTon DC currently has no app-store presence; the Chalker on Play Store changes that, even though it's the companion app rather than the main product.
+
+**Store listing voice:** clean, professional, utility-focused — *"tablet-optimised x01 scoring with QR result handoff to your NewTon DC tournament."* Actual product copy.
+
+**Economics:** the $25 Play Store developer fee is one-time per account, not per app. Whichever app ships first justifies the registration; subsequent listings are essentially free.
+
+**Adjacent free venues to consider:** F-Droid (FOSS audience, requires reproducible builds), Amazon Appstore (zero fee, marginal users). **iOS App Store deferred** until Play numbers justify the $99/year fee — iOS users can already install the Chalker as a PWA via Safari's *Add to Home Screen*, with full-screen standalone, offline scoring, and working QR scanning intact (the QrScanner swap from v5.0.15-b.1 was specifically the iOS fix). The deferral is about *discovery on iOS*, not *capability on iOS*.
+
+**Why deferred:** real ongoing maintenance surface — store assets (screenshots, description, feature graphic), policy compliance (Google's review can surface friction), changelog discipline on every Chalker release. Worth doing deliberately, not opportunistically.
+
+---
+
 ### Known Issue: Undo eligibility does not follow walkover chains
 
 The undo check looks one level deep into downstream matches. If a downstream match is an AUTO-completed walkover, it is correctly ignored — but the check does not continue further down the chain. This means a match can show "Can Undo" even if a player has auto-advanced through a walkover into a live or manually-completed match further downstream.
@@ -100,4 +116,4 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 ---
 
-**Last updated:** April 16, 2026 — removed completed items (Dashboard, Leaderboard, Stats cards); added Practice Mode and Chalker scoreboard retention
+**Last updated:** May 29, 2026 — added Chalker — Google Play Store distribution (Later)
