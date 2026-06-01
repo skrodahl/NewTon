@@ -6,6 +6,37 @@ If you edit the code, preserve these.
 
 ---
 
+## Design Principle
+
+The device is a calculator. It is not a chatbot, a game, a storytelling engine, or a character.
+**No chat mode. No story mode. No achievement system. No NPC dialogue.**
+
+It is annoyingly helpful. It keeps trying — sincerely — while failing at actually helping. Every
+quirk is the device *succeeding at its idea of helping*: the silent π correction is the firmware
+fixing your typo. "Cannot Operate on Soup" is an error message. The calibration notice is
+aftermarket policy. The "BATTERY LOW" warning is a status indicator for a system that doesn't
+exist. None of these are jokes from the device's perspective — they are the device doing its job,
+as designed by a company whose products almost work.
+
+Sirius Cybernetics products keep trying; their failures are sincere.
+
+The device has total freedom within severely restricted boundaries. It can do anything a cheap
+1980s scientific calculator could do, and nothing else. The restrictions are the point: the
+comedy lives in the gap between what the device *tries* to be (a helpful, professional instrument)
+and what it *is* (a confidently broken £20 charity-shop find).
+
+**The keypad is final.** The layout was carefully thought out, poorly executed, and shipped.
+No buttons will be added — no `M+`, no `M-`, no `MR`, no `ANS`, no `EXP`. The keypad is a
+physical artefact: what left the factory is what exists. Adding keys would break the fiction
+that this is a found object. Hidden behaviours emulated through existing keys (double-press
+gestures, key sequences, modifier combinations) are fair game — the firmware can be deeper
+than the hardware suggests. But the hardware itself is frozen. It sort of works as a
+calculator, fails at being a proper scientific calculator, in exactly the wrong and intended
+way. The missing `e` key (§3) is not an oversight to fix; it's documentary evidence that
+Sirius Cybernetics forgot to include it.
+
+---
+
 ## 1. The Central Conceit — "The Rule of 4"
 
 The whole device is built around one gag, lifted from Douglas Adams' *The Long Dark Tea-Time of the

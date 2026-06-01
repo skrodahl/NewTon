@@ -9,6 +9,16 @@ soul: *useless, confidently broken, enigmatic, in the device's voice, discovered
 > Guardrail when picking from this list: does it make the device feel more like a **cursed object you
 > found in a drawer**, or just like a gimmick? Keep the former.
 
+> **The design principle.** The device is annoyingly helpful — it keeps trying, sincerely, while
+> failing at actually helping. It behaves like a calculator should, but twisted. It is a calculator.
+> Not a chatbot, not a game, not a storytelling engine. **No chat mode. No story mode. No achievement
+> system. No NPC dialogue.** The device has total freedom within severely restricted boundaries: it
+> can do anything a cheap 1980s calculator could do, and nothing else. The quirks are not the device
+> breaking character — they are the device *succeeding at its idea of helping*. The silent π
+> correction isn't a joke; it's the firmware fixing your typo. The "Cannot Operate on Soup" isn't
+> a punchline; it's an error message. The calibration notice isn't a gag; it's aftermarket policy.
+> Sirius Cybernetics products keep trying; their failures are sincere.
+
 > **Status convention**: items marked **✅** have been implemented. The canonical "what exists"
 > record is [QUIRKS-AND-EASTER-EGGS.md](QUIRKS-AND-EASTER-EGGS.md); IDEAS preserves the brainstorm
 > trail (including the considered-and-rejected) so future-you can see what was on the table.
