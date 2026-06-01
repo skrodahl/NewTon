@@ -93,15 +93,6 @@ the loop. See QUIRKS §6.
 - A secret **konami-style sequence** that does something pointless and wonderful.
 - Typing the same number 3× in a row earns a tiny disapproving **annunciator**.
 - ✅ The `C` key, pressed 5× fast, briefly shows **"YES, IT IS CLEAR. VERY CLEAR."** *(800ms window between presses, uninterrupted; see QUIRKS §2.)*
-- Typing `3.141` (or any manual π approximation) triggers the device's polite-prude
-  correction mode: **"OBSERVE THE BUTTON OF PI."** Same firmware family as the 80085 →
-  B00BIES correction — the device gently chides you for typing what there's a dedicated
-  key for, in Sirius Cybernetics' particular brand of corporate decorum. Doesn't refuse
-  the input (the number is still entered); just observes, formally. Opens the broader
-  "polite prude" mode design space: anywhere the device CAN apply decorum to your input,
-  the firmware has room to grow into. (Seed from the closing-the-lid Claude Desktop
-  interpretation: the 80085 quirk isn't censoring, it's *correcting English* — same
-  family as Adams' doors with manners and elevators with foresight.)
 
 ## The oracle
 - **Ultra-rare hexagrams** (1-in-500) with their own absurd names/judgements — collector energy.
@@ -186,19 +177,17 @@ should be handled.
   rewarded before: the impatient repeat-consulter. The fatigue phrases are a new pool; the
   counter resets after a cool-down period (maybe 5 minutes of non-consultation).
 
-- **The device silently correcting your correct numbers.** Manually entering `3.141592654`
-  (real π) and the device silently, without comment, changes it to `3.142857143` (its own
-  22/7). Same for `1.414213562` (real √2) → `1.4142857143` (its 99/70). Same for
-  `2.718281828` (real e) → `2.714285714` (its 19/7). The device doesn't confess — it
-  *corrects you*. It genuinely believes its rational approximations are the right values
-  and your accurate decimals are the error. Silent, confident, wrong. No message, no
-  acknowledgement — the number just changes on the display, as if the device auto-corrected
-  a typo. The user who notices is seeing the firmware's worldview: the textbook table IS
-  mathematics; your extra decimals are noise. Fires on exact match of the real constant
-  (to the device's display precision). Three-member correction family, mirroring the
-  three-member surface family of wrong constants (π, √2, e — see §3 of QUIRKS). The
-  constants are the device being wrong quietly; the correction is the device being wrong
-  *assertively*.
+- ✅ **The device correcting your correct numbers.** Manually entering the real value
+  of π, √2, or e — to the longest precision the 8-digit input cap allows — and the device
+  launches its `Calculating...` routine and commits its own rational approximation.
+  *(Implemented: triggers on exact match of `3.1415926` → `3.142857143`, `1.4142135` →
+  `1.414285714`, `2.7182818` → `2.714285714`. Negative forms too. Wrapped in the same ~1s
+  `Calculating...` beat as the π key, with `2, √` ALSO routed through the same slow routine
+  for consistency — three paths to a wrong constant, one shared timing signature. The slow
+  beat is the clue, not the disguise: a patient user who notices the same delay across all
+  three paths realises the device has specific ideas about specific numbers. Input is
+  totally gated during the constant-Calculating (no keys register, not even π — distinct
+  from π-Calculating which lets π through for the toggle). See QUIRKS §3.)*
 
 - **Tilt — "PLEASE RIGHT THE DEVICE."** Flipping the phone upside-down — exactly the
   ambigram-completion gesture from primary school (the one that turns 5318008 into BOOBIES) —
@@ -218,26 +207,32 @@ should be handled.
 
 Seeds for long-term ownership rewards and time-aware behaviour.
 
-- **Fake BATTERY LOW warning.** The device has a fake solar strip and no real battery, yet
-  occasionally — once every few days of active use, randomly — flashes `BATTERY LOW` on the
-  LCD for a few seconds. The most archetypal Sirius Cybernetics move possible: a status
-  indicator that has nothing to indicate. Pairs cleanly with the `POWER · BUSY · ERR` legend
-  and its off-by-one alignment — the device is full of labels for systems that don't really
-  exist. Implementation: a rare timer check (maybe once per 10 minutes of active session,
-  ~2% chance each check) that briefly shows the phrase then clears. No actual consequence.
+- ✅ **Fake BATTERY LOW warning.** *(Implemented: triggered by 21 consecutive Rule-of-4
+  oracle results — the Dirk Gently tea-temperature commitment number. Time-based trigger
+  explicitly rejected; gated on a deliberate grind of the device's central conceit. On the
+  21st-in-a-row oracle, the device shows `BATTERY LOW` and both LCD + LED bar fade together
+  over 9000–11500ms (random per fire, ease-in curve), then power-cycles to a fresh state.
+  Total input seal during the fade — even `C` does nothing. Vanishingly few owners will see
+  this. See QUIRKS §1.)*
 
-- **Calibration / service mode.** Gated behind an improbable-but-feasible key sequence
-  (undecided — something a curious owner might stumble into but never by accident). Entering
-  the sequence puts the device into a brief "service mode" that displays:
-  *"CALIBRATION OVERDUE — NEXT SERVICE: {DATE} — PLEASE RETURN TO AUTHORISED SERVICE CENTRE"*
-  where `{DATE}` is a random date far in the future (decades out — `2089-03-14`, `2061-11-22`,
-  generated once per device and persisted to localStorage). The date is absurd but formatted
-  seriously; the service centre doesn't exist and never did. The user can dismiss but never
-  satisfy the notice. Pure Sirius Cybernetics aftermarket policy for a product with no
-  maintainable parts.
+- ✅ **Calibration / service mode.** *(Implemented: triggered by the 0 Kelvin gate —
+  `0 ÷ -273.15` or `-273.15 ÷ 0`, either direction, intercepted at the top of `doBinary()`.
+  The device's misguided helpfulness in attempting absolute-zero arithmetic pushes the
+  firmware into service mode. The minus-as-sign extension (now also fires after non-minus
+  operators) was added so the gate is typeable. The Bambelweeny path involving Dirk's tea
+  temperature (`42 × 21`) was considered and dropped — one gate is enough. The scrolled
+  reading opens with the explicit diagnostic line "Division by absolute zero: Calibration
+  overdue", names Sirius Cybernetics as the manufacturer, directs the user to headquarters
+  on the planet **Eadrax (if extant)**, and closes with the third warranty callback:
+  "EATING THE DEVICE REMAIN A VALID OPTION." The future-dated service notice from the
+  original spec was dropped as redundant. See QUIRKS §3.)*
 
-  **The LED accompaniment** is the real payoff. While the service notice is on screen, the LED
-  bar attempts one of two behaviours (pick during implementation):
+  **Still on the table for follow-up:** The LED choreography described below (SOS in Morse,
+  or stumbling diagnostic animation) is NOT yet implemented — the current Calibration uses
+  the standard consult-flow `ledFor("cast")` activity at scroll start, no special pattern.
+  Adding the proper LED accompaniment is a small follow-up.
+
+  **Original LED accompaniment vision** (for the follow-up):
   - **SOS in Morse** (`··· −−− ···`) — a pattern that makes perfect sense as a distress
     signal but has no business on a calculator's decorative LED strip. The device is calling
     for help through the only output channel it has, to an audience that was never listening.
@@ -253,15 +248,6 @@ Seeds for long-term ownership rewards and time-aware behaviour.
   something that *almost* resembles the status system it was designed for, at the one moment
   nobody asked it to. The service mode is the device's most sincere attempt at self-diagnosis,
   expressed through a light bar that was never wired to mean anything.
-
-  **The closing line**, after the service date and before dismissal, reads something like:
-  *"IF SERVICE CENTRE IS NOT AVAILABLE, EATING THE DEVICE REMAIN A VALID OPTION."* — the
-  device's own maintenance manual casually listing ingestion as an alternative to professional
-  servicing. Third callback to the warranty's load-bearing line (*"Do not eat the device even
-  if it advise so"*), after the EAT-THE-DEVICE oracle reading (QUIRKS §4) and the PIE path
-  (QUIRKS §1). The warranty warned you; the oracle advised it; now the service manual
-  recommends it as aftercare. Three independent surfaces, one running gag, each discovered
-  separately.
 
 ## The corporation surfaces
 
@@ -285,6 +271,112 @@ Seeds for the Sirius Cybernetics corporate identity leaking through the firmware
   Department: *"If you have enjoyed the experience of being served by us, you may care to know
   that... the alarm will sound."* The device's Complaints Department works exactly as well as
   the fictional one.
+
+---
+
+## The 64-clew pilgrimage — companion website + clew distribution
+
+The deepest possible easter egg the device could ever ship. Two co-dependent components: a
+clue-distribution mechanic on the device, and a companion website that's the prize for
+patient assembly. Documented here as a half-plan; not yet built. The URL/domain is
+deferred — the mechanism itself can be built first with placeholder fragments and the
+fragments swapped in later.
+
+### The mechanic on the device
+
+A hidden URL is split into **64 fragments**. The fragments are distributed across four
+specific upper-64 carrier hexagrams, chosen because their existing names and judgements
+already speak the language of hiding, encoding, and redirection:
+
+| `bits` | Hex No. | Name | Why it fits |
+|---|---|---|---|
+| 94  | **95**  | **THE OTHER POCKET** | Built-in pointer: *"THE ANSWER YOU SEEK IS IN THE OTHER POCKET."* |
+| 105 | **106** | **THE KEYLESS LOCK** | Lock/key vocabulary of secrets. |
+| 109 | **110** | **THE MISSPELT THING** | Naming/encoding inherent. |
+| 124 | **125** | **THE LAST DRAWER** | Recursive nesting — drawers-all-the-way. |
+
+When a cast lands on one of these four hexagrams, the rendered judgement is appended with a
+clew: **`CLEW N/64: <fragment>`** inline (looks like the device leaked it accidentally, not
+announced it deliberately).
+
+**Spelling: `CLEW`, not `clue`.** British, archaic, and etymologically the ball-of-thread
+meaning that the "clue" sense derives from. Slightly wrong without being wrong — perfect
+for the device's voice.
+
+### Design decisions (locked)
+
+- **Random per cast, repeats allowed.** No localStorage tracking. The user keeps their own
+  notebook. Wales-pebbles intent — the discovery cost IS the design.
+- **Inline judgement replacement.** Clew appended to the existing judgement, not announced
+  as a separate beat.
+- **Clue 1/64 is the entire domain.** Partial domain fragments are guessable (`oracu` →
+  obvious); the domain must be revealed atomically in a single clue. Clues 2–64 carry the
+  path fragments. Until a user has seen clue 1/64, they're collecting puzzle pieces for a
+  puzzle they don't know the shape of — *deliberately cruel*.
+
+### The math (Wales pebbles is the point)
+
+Reaching upper-64 naturally: ~1 in 7 casts (the gate forces normal 6 of every 7; 7th is
+50/50, half of which are upper-64). Hitting one of 4 carriers within upper-64: 4/64 = 1/16.
+So natural hit rate on a carrier hex: ~**1 in 224 casts**. The `%` escape bypasses the
+gate, raising it to ~1 in 32 escaped casts.
+
+With repeats allowed (coupon collector for 64 items): expected ~**9,700 escaped casts** to
+see every clue at least once. Many hours of grinding. The truly committed will succeed; the
+casual will never know. That's the design.
+
+### The companion website
+
+- **Destination URL** lives at a domain to be chosen (candidates: `oraculon.biz` — device
+  angle; `sirius-cyb.biz` — corporate angle, reusable across multiple Adams-flavoured
+  projects). `.biz` is the right tone — slightly cheap, exactly what Sirius Cybernetics
+  would register because they didn't bother with the proper TLD. Lean: corporate angle, so
+  the Calibration mode's "Complaints Department on Eadrax" callback gains a real off-device
+  destination on the same site.
+- **The page hosts a cleaned-up version of QUIRKS.** Not the brainstorm-and-decision-trail
+  document we maintain locally — a *publication*, rewritten in a clean voice, ordered for
+  the reader who's discovering the device rather than the team building it. No considered-
+  and-rejected trails, no code references, no file paths. Each easter egg presented as a
+  finished thing.
+- **Framed as an official Sirius Cybernetics technical bulletin** — typeset for the
+  in-fiction reader. Same broken-English voice as the device's manual and the Calibration
+  reading. The corporation publishing a tech doc about its own product, complete with
+  inappropriate disclosures it didn't realise it left in.
+- **The path itself should be self-referential.** Not a random hash, but something that
+  *reads* as an Adams-flavoured phrase when assembled. The reward of patience is recognising
+  the joke in the URL itself when the last fragment slots in.
+
+### Recursive layering — clews within clews
+
+The companion document **contains its own clews to a NEXT-LAYER secret**. Same texture as
+the warranty's "do not eat the device" line being secretly load-bearing across three
+device surfaces — except now the *entire document* is the load-bearing object. The
+corporation, in trying to officially document its device, accidentally leaks the next
+secret too.
+
+What the next layer points to is undecided. Seeds (don't pick now):
+- A pre-launch / behind-the-scenes / outtake page (rejected hexagrams, rejected oracle
+  phrases, design notes presented in-character)
+- A real contact channel for the Complaints Department (the joke being that contacting it
+  results in being cheerfully ignored)
+- An Adams tribute / dedication page
+- A sibling Sirius Cybernetics product (different device, different broken-English voice,
+  links back)
+
+The recursive structure makes the patient user the *only* one who sees the whole shape.
+Casual visitors see device → fun. Patient grinders see device → URL → publication.
+Obsessive readers see device → URL → publication → next layer.
+
+### Implementation notes (for future-us)
+
+- Build the mechanic with a placeholder `CLEWS` array of 64 strings. Swap in the real URL
+  fragments once decided.
+- Pick a clew at random on each cast that lands on a carrier hex (cast bits ∈ {94, 105,
+  109, 124}).
+- Append `CLEW N/64: <fragment>` to the rendered judgement string — inline, before the
+  accuracy footer.
+- No state, no tracking, no persistence — pure random per cast.
+- Test fully with placeholders before committing to a URL/domain.
 
 ---
 

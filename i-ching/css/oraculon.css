@@ -405,6 +405,34 @@
     100% { opacity:0;   transform:translateY(0); }
   }
 
+  /* BATTERY LOW — the device's pretend-energy-source giving out. Only the
+     SEGMENTS fade (text, annunciators, ghost-8, hex/pie graphics) and the
+     individual LEDs. The green LCD panel itself stays solid throughout (the
+     device emulates a cheap reflective LCD — no backlight; the green is glass
+     and reflector, not powered). Same for the LED bar housing — the dark
+     plastic stays; only the LEDs lose current. ease-in gives the battery-knee
+     feel: slow plateau, accelerating drop. "forwards" keeps the final state
+     (opacity:0) until the class is removed.
+
+     Two separate classes so the LEDs can come back online 2 seconds before
+     the LCD does (wake-up sequence: LEDs sputter randomly as "power returns,"
+     then the LCD finally shows "0"):
+       .dying-lcd  — fades the LCD segments. Removed at full wake-up.
+       .dying-leds — fades the LED bar. Removed 2s before wake-up so the
+                     wake-LED show is visible. */
+  @keyframes batteryDie {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  .dying-lcd .lcd .status,
+  .dying-lcd .lcd .out,
+  .dying-lcd .lcd .stuck,
+  .dying-lcd .lcd .hex,
+  .dying-lcd .lcd .pie,
+  .dying-leds .solar .led {
+    animation: batteryDie var(--battery-die-duration, 10s) ease-in forwards;
+  }
+
   /* (No printout: the whole reading scrolls across the LCD instead — see the
      marquee styles above and consult() in the script.) */
 

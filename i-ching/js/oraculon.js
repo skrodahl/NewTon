@@ -214,14 +214,38 @@
   // says "Recalculating".
   var piPressCount = 0;
   var piCalcTimer = null;
-  // True while "Calculating..." or "Recalculating..." is on screen — used by both
-  // dispatchers to ignore every key except π. Preserves the illusion that the
-  // device is actually doing slow work, AND makes the double-press easter egg
-  // cleanly discoverable: while calculating, the only thing that does anything is
-  // pressing π again, which reveals the toggle behaviour. NOT set in reduced-motion
-  // mode (no phrase shown, no input to gate). Triple-pressing π is still fine
-  // because the gate explicitly lets π through; the ping-pong toggle continues.
-  var piCalcShowing = false;
+  // The Calculating gate. When non-null, a "Calculating..." (or "Recalculating...")
+  // phrase is on screen and most input is refused. Two values:
+  //   "pi"       — constPi's Calculating. The π key is allowed through so the
+  //                double-press toggle (π → e) remains discoverable.
+  //   "constant" — slowCalcConstant's Calculating, fired by typed-real-constant
+  //                correction OR sqrt(2). NOTHING is allowed through; the device
+  //                is "computing" its wrong value and refuses to be distracted.
+  // null when no Calculating in progress. The dispatchers consult this to gate
+  // input. NOT set under reduced-motion (commit is instant; no phrase to gate).
+  // The shared ~1s beat across "pi", typed corrections, and sqrt(2) is the
+  // recognition pattern: any production of a wrong constant looks the same.
+  var calcKind = null;
+
+  // BATTERY LOW — the consecutive-Rule-of-4 fatigue gate. The device keeps a count
+  // of how many oracle phrases have fired in a row (any time the Rule of 4 has
+  // intercepted a real result with a phrase instead). On the 21st consecutive
+  // oracle, the device "loses power" — fires BATTERY LOW instead of the next
+  // oracle phrase, then fades the LCD and LED bar together over ~10s before
+  // power-cycling to default state. The streak resets on any real number shown
+  // (via showNumber), on C/clearAll, and on the BATTERY LOW fire itself. The
+  // threshold of 21 is the Dirk Gently tea-temperature commitment number —
+  // room temperature in degrees Celsius, the temperature at which his tea is
+  // optimal. (Note that Dirk's room temperature might also be 20°C; we settled
+  // on 21 deliberately.) The number is deeply earned: 21 oracles in a row, with
+  // no number result in between, no C press, no break in the streak. Vanishingly
+  // few owners will ever see it. Those who do have committedly hit the device's
+  // central conceit (the Rule of 4) 21 times without a break, and the device
+  // finally gives up its pretend-energy-source rather than its pretend-rule.
+  var oracleStreak = 0;
+  // True while the BATTERY LOW fade is running. Total input seal — no keys
+  // register, no C, no consult. The device is dead for the duration.
+  var batteryDying = false;
 
   // The 42 lucid trigger: if the PREVIOUS calculation's hidden (oracle-replaced)
   // result was exactly 42 (Adams), the NEXT calculation bypasses Rule of 4
@@ -312,6 +336,7 @@
     // baffling 10 digits even though input is capped at 8; that mismatch is the joke)
     var s = (Math.round(n*1e9)/1e9).toString();
     disp = s; settled = "num"; render();
+    oracleStreak = 0;   // a real number breaks the consecutive-Rule-of-4 streak
   }
   function showPhrase(p){ disp = p; settled = "phrase"; render(); }
 
@@ -328,11 +353,103 @@
   //   2. hidden in NAMED_NUMBERS → show that specific Adams phrase; no lucid arm.
   //   3. otherwise → random ORACLES phrase.
   function suppressBig(r){
+    oracleStreak++;
+    if (oracleStreak >= 21){   // Dirk's tea temperature, AND half-a-forty-two
+      // 21st consecutive Rule-of-4 hit (Dirk's tea temperature) — the device's
+      // pretend-energy-source gives out. BATTERY LOW replaces the oracle entirely;
+      // no lastHiddenResult set (no lucid armed), no oracle phrase. Streak resets;
+      // a new 21-in-a-row is required to fire again.
+      oracleStreak = 0;
+      return fireBatteryLow();
+    }
     var hidden = Math.round(r*1e9)/1e9;
     lastHiddenResult = hidden;
     if (hidden === 42) return showPhrase(pick(Q42));
     if (NAMED_NUMBERS.hasOwnProperty(hidden)) return showPhrase(NAMED_NUMBERS[hidden]);
     return showPhrase(pickOracle());
+  }
+
+  // BATTERY LOW — the device "dies" for ~10 seconds. Shows the phrase on the LCD,
+  // then fades both the LCD and the LED bar together (CSS keyframe + opacity
+  // transition driven by --battery-die-duration). At the end of the fade, the
+  // .dying class is removed (instant snap-back to default opacity) and the device
+  // power-cycles to its default state: disp = "0", all session counters reset,
+  // LEDs back to idle. During the fade, batteryDying is set; the dispatchers
+  // refuse all input. The C key included — no early recovery. The duration
+  // is randomized 9000–11500ms per fire so it's never exactly 10s (real
+  // batteries don't keep schedule; neither does this fake one).
+  function fireBatteryLow(){
+    if (piCalcTimer){ clearTimeout(piCalcTimer); piCalcTimer = null; }
+    calcKind = null;
+    batteryDying = true;
+    showPhrase("BATTERY LOW");
+    var fadeDuration = 9000 + Math.random() * 2500;
+    document.body.style.setProperty("--battery-die-duration", fadeDuration + "ms");
+    document.body.classList.add("dying-lcd", "dying-leds");
+    //
+    // Timeline (pause = same as fade, so total dead time = 2 × fade):
+    //   t = 0                   — BATTERY LOW shown, fade begins
+    //   t = fadeDuration        — fade complete, everything at opacity 0
+    //   t = 2*fade - 2000       — LEDs come back online (sputtering randomly via
+    //                              the twinkle pattern for 2s) — "power returns"
+    //                              before the LCD does. NO SOS — just chaos.
+    //   t = 2*fade              — full wake-up: LCD resets to "0", hard reset
+    //                              of session state, LEDs back to idle.
+    //
+    // The two-stage wake-up (LEDs first, then LCD) is in-character: a real cheap
+    // device coming back from a dead battery would sputter on the easy-to-power
+    // bits (LEDs) before the more demanding display starts working again.
+    setTimeout(function(){
+      document.body.classList.remove("dying-leds");
+      ledPlay([["twinkle", 2000]]);   // random LED firing — the wake-up show
+    }, 2 * fadeDuration - 2000);
+    setTimeout(function(){
+      // Hard reset BEFORE removing .dying-lcd: clearAll() sets disp="0" and
+      // renders, but .dying-lcd keeps the segment opacity at 0 — so the user
+      // never sees "BATTERY LOW" snap back to full brightness. Then removing
+      // the class lets the new "0" content fade in instantly at full opacity.
+      batteryDying = false;
+      piPressCount = 0;
+      escapeArmed = false;
+      clearStreak = 0;
+      if (clearStreakTimer){ clearTimeout(clearStreakTimer); clearStreakTimer = null; }
+      hideHex();
+      hidePie();
+      endOracle();
+      if (degEl) degEl.textContent = "DEG";
+      clearAll();   // disp="0", op/acc/fresh/settled reset, lastHiddenResult cleared
+      document.body.classList.remove("dying-lcd");
+    }, 2 * fadeDuration);
+  }
+
+  // CALIBRATION mode — fired by the 0 Kelvin gate (see doBinary). The device's
+  // misguided helpfulness in attempting absolute-zero arithmetic pushes the
+  // firmware into a service-mode reading. Opens with the diagnostic line
+  // ("Division by absolute zero: Calibration overdue") — cause-and-effect
+  // bureaucracy, the device naming exactly what broke. The body is
+  // Sirius-Cybernetics officialese: the user is directed to return the unit to
+  // the corporation's COMPLAINTS DEPARTMENT (a direct Adams nod — the
+  // Complaints Department in Hitchhiker canon exists primarily to ignore
+  // complaints), located on the planet Eadrax. The "(IF EXTANT)" parenthetical
+  // is the device politely acknowledging that the Complaints Department offices
+  // may no longer exist — galactic real estate being what it is — which in turn
+  // is why the warranty's third callback (eat the device) reads as the
+  // realistic fallback rather than absurd advice. No service date — the
+  // original IDEAS framing had one but it was redundant; the date pretended to
+  // be useful and wasn't. Same scroll mechanism as the consult reading
+  // (marchReading); after the scroll, disp settles on "CAL." until the user
+  // clears or does another calc.
+  function fireCalibration(){
+    var reading = [
+      "Division by absolute zero: Calibration overdue",
+      "SIRIUS CYBERNETICS CORPORATION",
+      "RETURN UNIT TO COMPLAINTS DEPARTMENT OFFICES ON EADRAX (IF EXTANT)",
+      "IF UNREACHABLE EATING THE DEVICE REMAIN A VALID OPTION"
+    ].join(" · ");
+    endOracle();
+    ledFor("cast");   // brief LED activity at scroll start, same as consult
+    settled = "phrase";
+    marchReading(reading, "CAL.");
   }
 
   // Lucid bypass announces itself first: ~1s flash of an official-sounding
@@ -350,6 +467,21 @@
   }
 
   function doBinary(a,o,b){
+    // 0 Kelvin gate — a play on divide-by-zero, where the "zero" is absolute zero
+    // expressed in degrees Celsius (-273.15). The device, working in Celsius (DEG
+    // annunciator), is asked to divide using 0K as either dividend or divisor;
+    // it attempts to comply (misguided helpfulness), and that attempt sends the
+    // firmware into Calibration mode. Caught BEFORE the isFinite check so the
+    // `-273.15 ÷ 0` direction (which produces -Infinity) is intercepted before
+    // falling through to VOID. Both directions: `0 ÷ -273.15` (mathematically
+    // 0, a perfectly valid division — the joke is "the device divided by zero
+    // anyway, because the zero was in different units") and `-273.15 ÷ 0`
+    // (mathematically -Infinity, the real division-by-zero — the joke is "the
+    // device's helpful behaviour pushed it past a thermodynamic boundary").
+    if (o === "/" && ((a === 0 && b === -273.15) || (a === -273.15 && b === 0))){
+      lastHiddenResult = null;
+      return fireCalibration();
+    }
     var r = apply(a,o,b);
     if (!isFinite(r) || Number.isNaN(r)){
       lastHiddenResult = null;            // VOID also consumes the trigger
@@ -439,6 +571,15 @@
       lastHiddenResult = null;
       return showPhrase(pick(IMAGINARY));
     }
+    // √2 → 99/70 routed through slowCalcConstant so it shares the ~1s
+    // Calculating beat with constPi and the typed-real-constant correction.
+    // Consistency across all three wrong-constant productions is the clue:
+    // the same delay every time signals that the device has specific opinions
+    // about these specific numbers.
+    if (name === "sqrt" && x === 2){
+      lastHiddenResult = null;
+      return slowCalcConstant("1.414285714");
+    }
     var r = FN[name](x);
     fresh = true;
     if (!isFinite(r) || Number.isNaN(r)){
@@ -484,11 +625,11 @@
     }
     if (piCalcTimer){ clearTimeout(piCalcTimer); piCalcTimer = null; }
     showPhrase(phrase);
-    piCalcShowing = true;
+    calcKind = "pi";   // π Calculating — lets π through the gate for toggle access
     var myPhrase = phrase;
     piCalcTimer = setTimeout(function(){
       piCalcTimer = null;
-      piCalcShowing = false;
+      calcKind = null;
       // Defensive: only commit if the user is still looking at the phrase we set.
       // (With the input gate, no other action can intervene — this is belt-and-
       // suspenders.) If something somehow moved the device off this phrase, no-op.
@@ -501,22 +642,93 @@
     }, 1000);
   }
 
+  // Shared slow-Calculating routine for the wrong-constants family. Used by:
+  //   - correctIfRealConstant — when the user types real π/√2/e to the input cap
+  //   - unary("sqrt") with x===2 — the device producing its own √2
+  // Both fire the same ~1s "Calculating..." beat then commit the device's wrong
+  // value. Single-shot (no toggle/ping-pong — that's constPi's territory). While
+  // the routine runs, calcKind = "constant" — the dispatchers block ALL keys, no
+  // exceptions. The device is "computing" and refuses to be distracted.
+  //
+  // The shared beat across constPi, correction, and sqrt(2) is the pattern
+  // recognizer: any production of a wrong constant takes the same beat, and a
+  // mathematically-aware user who notices the consistent timing realises the
+  // device has SPECIFIC ideas about those specific numbers. The delay is the
+  // clue, not just the disguise.
+  function slowCalcConstant(targetStr){
+    if (ledReduce){
+      disp = targetStr; settled = "num"; fresh = true; render();
+      return;
+    }
+    if (piCalcTimer){ clearTimeout(piCalcTimer); piCalcTimer = null; }
+    showPhrase("Calculating...");
+    calcKind = "constant";
+    piCalcTimer = setTimeout(function(){
+      piCalcTimer = null;
+      calcKind = null;
+      disp = targetStr; settled = "num"; fresh = true; render();
+    }, 1000);
+  }
+
+  // Silent constant-correction. The device genuinely believes its rational
+  // approximations are the correct values and your accurate decimals are the
+  // error. If the user has typed the longest user-reachable form of one of the
+  // three real constants — π, √2, e to 8 digits, the input cap — the device
+  // launches a "Calculating..." routine and commits its own wrong value. From
+  // the user's perspective: the last keystroke triggers a brief calculating
+  // beat, and the corrected number appears. Same beat as pressing the π key
+  // directly, which is the *intended clue*: the device treats these three
+  // numbers as objects of computation, not as inputs to accept.
+  //
+  // Three-member correction family, mirroring the three-member surface family
+  // of wrong constants in §3 (π = 22/7, √2 = 99/70, e = 19/7). The constants
+  // are the device being wrong quietly; the correction is the device being
+  // wrong assertively — and now the slow-Calculating wrapper makes the
+  // assertion legible. Doubly wrong-helpful: first the device caps your input
+  // at 8 digits (cheap calc), then it rewrites what you typed to its own
+  // 10-digit value (polite prude). You typed too few decimals AND too many
+  // simultaneously, in the device's opinion.
+  //
+  // Strict equality only — typing "3.14159" (incomplete) does nothing; only
+  // the full 8-digit version fires. The user has to be demonstrably trying
+  // to type real-π before the device asserts.
+  //
+  // Returns true if a correction was triggered (caller should NOT call render —
+  // the slow routine handles its own rendering). Returns false on no match.
+  function correctIfRealConstant(){
+    var target;
+    switch (disp){
+      case  "3.1415926": target =  "3.142857143"; break;   // real π   →  22/7
+      case "-3.1415926": target = "-3.142857143"; break;
+      case  "1.4142135": target =  "1.414285714"; break;   // real √2  →  99/70
+      case "-1.4142135": target = "-1.414285714"; break;
+      case  "2.7182818": target =  "2.714285714"; break;   // real e   →  19/7
+      case "-2.7182818": target = "-2.714285714"; break;
+      default: return false;
+    }
+    slowCalcConstant(target);
+    return true;
+  }
+
   function inputDigit(d){
     // Pending-negative-sign state: disp is just "-" from a minus-as-sign press
     // (see setOp). The next digit extends it to "-d"; a decimal becomes "-0.".
     if (disp === "-"){
       disp = (d === "." ? "-0." : "-" + d);
       fresh = false; settled = false;
+      if (correctIfRealConstant()) return;
       return render();
     }
-    if (settled){ disp = (d==="."?"0.":d); settled=false; fresh=false; return render(); }
-    if (fresh){ disp = (d==="."?"0.":d); fresh=false; return render(); }
+    if (settled){ disp = (d==="."?"0.":d); settled=false; fresh=false; if (correctIfRealConstant()) return; return render(); }
+    if (fresh){ disp = (d==="."?"0.":d); fresh=false; if (correctIfRealConstant()) return; return render(); }
     if (d==="." && disp.indexOf(".")>-1) return;
     if (d!=="." && disp.replace(/[^0-9]/g,"").length>=8){    // 8-digit display is full:
       disp = disp.replace(/\d(?=\D*$)/, d);                  // the last digit just keeps changing (dysfunctional)
+      if (correctIfRealConstant()) return;
       return render();
     }
     disp = (disp==="0" && d!==".") ? d : disp + d;
+    if (correctIfRealConstant()) return;
     render();
   }
   function del(){
@@ -528,6 +740,7 @@
   function clearAll(){
     disp="0"; acc=null; op=null; fresh=true; settled=false;
     lastHiddenResult = null;              // C resets all hidden state, trigger included
+    oracleStreak = 0;                     // C also breaks the BATTERY LOW streak
     render();
   }
   function setOp(o){
@@ -542,13 +755,20 @@
       showPhrase("The Holistic Detective Agency Fee");
       return true;
     }
-    // Minus-as-sign: pressing − at default state (no operand yet) starts a
-    // negative-number entry. The display shows just "-" while waiting for a digit.
-    // Once a digit is typed (via inputDigit's disp==="-" branch), display becomes
-    // "-5" etc, treated as a negative number throughout the calc. Real calculators
-    // with no +/- key sometimes overload − this way. Opens the path to sqrt(neg)
-    // → IMAGINARY pool, casually reachable from default state.
-    if (o === "-" && disp === "0" && op === null){
+    // Minus-as-sign: pressing − to start a negative-number entry. The display
+    // shows just "-" while waiting for a digit. Once a digit is typed (via
+    // inputDigit's disp==="-" branch), display becomes "-5" etc, treated as
+    // a negative number throughout the calc. Real calculators with no +/- key
+    // sometimes overload − this way. Two states fire it:
+    //   1. Default state (disp="0", op=null) — fresh negative entry.
+    //   2. After a non-minus operator (fresh=true, op set, op !== "-") —
+    //      negative-operand entry mid-calc, preserving the pending op. Lets
+    //      the user type `0 ÷ -273.15` directly, and other gestures that need
+    //      a negative second operand. The op !== "-" guard preserves the
+    //      double-minus behaviour for users who do that.
+    //   If the user presses something other than a digit after the "-" is set,
+    //   the result is harmless (NaN propagates through doBinary to VOID).
+    if (o === "-" && ((disp === "0" && op === null) || (fresh && op !== null && op !== "-"))){
       disp = "-";
       fresh = false;
       settled = false;
@@ -972,13 +1192,18 @@
   // ---- wiring ----
   document.querySelectorAll(".key").forEach(function(b){
     b.addEventListener("click", function(){
-      // π-calc input gate: while "Calculating..."/"Recalculating..." is on screen,
-      // ignore everything except the π key. Preserves the illusion that the device
-      // is actually doing slow work, AND lets the double-press easter egg surface
-      // cleanly (the only thing that does anything during the wait is pressing π
-      // again, which is exactly the gesture that reveals the toggle). Pie symbol
-      // and hex graphic stay as they are — no state should change at all.
-      if (piCalcShowing && b.dataset.fn !== "pi") return;
+      // BATTERY LOW seal: the device is dead during the fade. Nothing registers.
+      if (batteryDying) return;
+      // Calculating gate. When calcKind is set, a "Calculating..."/"Recalculating..."
+      // phrase is on screen and most input is refused. Two cases:
+      //   calcKind === "pi"       — the π key is the ONE exception; pressing it
+      //                             toggles to e (or back). Other keys blocked.
+      //   calcKind === "constant" — NOTHING is allowed through. The device is
+      //                             "computing" a wrong constant and refuses to
+      //                             be distracted. Includes typed real-constant
+      //                             correction and sqrt(2).
+      // Pie symbol and hex graphic stay as they are — no state should change at all.
+      if (calcKind && !(calcKind === "pi" && b.dataset.fn === "pi")) return;
       // any non-consult key clears the hexagram graphic (it lingered only as long as the cast was the topic)
       if (b.dataset.act !== "iching") hideHex();
       // the pie symbol clears on ANY key (including consult — a fresh oracle reading
@@ -1011,9 +1236,11 @@
   // keyboard support
   window.addEventListener("keydown", function(e){
     var k=e.key;
-    // π-calc input gate (keyboard side): keyboard has no π shortcut, so during a
-    // pi calc, ignore ALL keypresses. Preserves the calculating illusion.
-    if (piCalcShowing){ e.preventDefault(); return; }
+    // BATTERY LOW seal (keyboard side): device is dead, nothing registers.
+    if (batteryDying){ e.preventDefault(); return; }
+    // Calculating gate (keyboard side): keyboard has no π shortcut, so during ANY
+    // Calculating routine (pi OR constant), ignore ALL keypresses.
+    if (calcKind){ e.preventDefault(); return; }
     // same hex-clearing rule for keyboard input (excluding the consult shortcuts)
     if (k!=="?" && k!=="i" && k!=="I") hideHex();
     // pie clears on any keypress (no keyboard shortcut would preserve it)
