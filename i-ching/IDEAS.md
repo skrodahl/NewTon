@@ -157,10 +157,95 @@ the loop. See QUIRKS §6.
 - ✅ A deliberately **cheap, slightly-wrong home-screen icon** (the beige device, or just 易) — looks like
   a knock-off app someone sideloaded. *(`icons/icon.svg` is the full device with 易 dominating.)*
 - A wheezy **fake boot / splash** on launch that never quite resolves (ties to the startup-jingle idea).
-- An **"Add to Home Screen"** nudge written in the device's broken voice.
+- ✅ An **"Add to Home Screen"** nudge written in the device's broken voice. *("INSTALL ORACULON FOR PORTABLE FORTUNE" — install banner with red INSTALL button, Silkscreen font, dark desk-surround theme. See QUIRKS §11.)*
 - A fake **"update available"** prompt that, true to form, makes one thing visibly worse and calls it
   an improvement (pairs with the firmware-"update" gag below).
 - Landscape vs portrait: it stubbornly **only works one way up**, like real cheap hardware.
+
+## The device has opinions about you
+
+Seeds for behaviours where the device *receives* user behaviour rather than producing it — gestural,
+reactive, and rooted in the fiction that Sirius Cybernetics has opinions about how their product
+should be handled.
+
+- **Consultation streak — the oracle gets tired.** Consult once, fine. Consult three or four
+  times in close succession and the readings start showing fatigue: *"THE GEESE ARE TIRED.
+  CONSULT AGAIN TOMORROW."* Consult six or seven times and the device breaks character for a
+  single phrase — *"JUST FLIP A COIN"* — then returns to broken English. Lays on top of the
+  existing consult flow without changing it, and rewards a user the device has never specifically
+  rewarded before: the impatient repeat-consulter. The fatigue phrases are a new pool; the
+  counter resets after a cool-down period (maybe 5 minutes of non-consultation).
+
+- **The device recognising its own numbers.** Manually entering `3.142857143` — the device's
+  own bogus π value (22/7) — gets a specific response. Same for `1.4142857143` (its bogus √2,
+  99/70). The device finally acknowledging that the user is on to its rational-approximation
+  gag — a small confession when the gag is caught. *"WE KNOW. WE WERE THERE."* or similar.
+  Fires on exact match only (the user must type the full value, not arrive at it via the π
+  button). Two-member recognition family, mirroring the two-member surface family of wrong
+  constants (§3 of QUIRKS). The confession is the other side of the gag: the constants are
+  the device being wrong quietly; the recognition is the device admitting it, once caught.
+
+- **Tilt — "PLEASE RIGHT THE DEVICE."** Flipping the phone upside-down — exactly the
+  ambigram-completion gesture from primary school (the one that turns 5318008 into BOOBIES) —
+  produces a one-time message, because of course Sirius Cybernetics never realised the flip
+  was part of the calculator trick and considers it a usage error. Uses the `DeviceOrientation`
+  API. One-shot per session; the device doesn't nag. The message is the device's *incorrect
+  understanding* of what you're doing — it thinks you dropped it, not that you're reading
+  upside-down words.
+
+- **Shake — "PLEASE DO NOT SHAKE."** Shaking the phone gets a single deadpan admonition.
+  Uses the `DeviceMotion` API with a reasonable threshold so normal movement doesn't trigger
+  it. One-shot per session. Pairs with tilt as the two gestural opinions the device has about
+  its physical handling. Both are *receiving* user behaviour rather than producing content —
+  the device reacts to how you hold it, not what you press.
+
+## The device has opinions about time
+
+Seeds for long-term ownership rewards and time-aware behaviour.
+
+- **Fake BATTERY LOW warning.** The device has a fake solar strip and no real battery, yet
+  occasionally — once every few days of active use, randomly — flashes `BATTERY LOW` on the
+  LCD for a few seconds. The most archetypal Sirius Cybernetics move possible: a status
+  indicator that has nothing to indicate. Pairs cleanly with the `POWER · BUSY · ERR` legend
+  and its off-by-one alignment — the device is full of labels for systems that don't really
+  exist. Implementation: a rare timer check (maybe once per 10 minutes of active session,
+  ~2% chance each check) that briefly shows the phrase then clears. No actual consequence.
+
+- **Calibration overdue.** When the PWA is installed, the device remembers the date as its
+  `MANUFACTURE_DATE` in localStorage. A year later (real-world calendar), the first launch
+  shows a one-time *"CALIBRATION OVERDUE — PLEASE RETURN TO AUTHORISED SERVICE CENTRE"*
+  notice that the user can dismiss but never satisfy, because there is no authorised service
+  centre and there never was. Long-term ownership reward; pure Sirius Cybernetics aftermarket
+  policy. The dismissal is permanent (localStorage flag) — the notice fires exactly once in
+  the device's lifetime. The year gap means only genuine long-term owners see it. Pairs with
+  the warranty's *"Device guarantee against everything except disappointment, water, fate, and
+  the colour yellow"* — the device has a maintenance schedule for a product with no
+  maintainable parts.
+
+## The corporation surfaces
+
+Seeds for the Sirius Cybernetics corporate identity leaking through the firmware.
+
+- **"SHARE AND ENJOY" — the Marketing Division's slogan.** Appears as a rare one-second flash
+  on the LCD, maybe once per thirty minutes of active use. No mechanic, no purpose; just the
+  corporation occasionally remembering it has a brand. The phrase is verbatim Adams (HHGTTG —
+  the Sirius Cybernetics Marketing Division's motto, famously inscribed on a conditions-of-
+  sale plaque and also on the hull of a black stunt ship). Implementation: a rare timer, same
+  family as the `DEG`→`RAD` flicker (§3 of QUIRKS) — ambient corporate noise. Skipped under
+  `prefers-reduced-motion`.
+
+- **The Complaints Department.** Reachable via some illogical key sequence (undecided — maybe
+  `C C C C C C C` or a specific operator chain). Opens a tiny text input on the LCD:
+  *"COMPLAINTS DEPARTMENT — ENTER COMPLAINT:"*. The user can type whatever they want (digit
+  keys only, naturally — the device's input vocabulary is numbers). After pressing `=`, the
+  device replies *"MESSAGE FILED."* and returns to normal. The complaint goes into the void;
+  the corporate acknowledgement is the only response. The message is not stored, not logged,
+  not transmitted. Pure bureaucratic theatre. Pairs with Adams' description of the Complaints
+  Department: *"If you have enjoyed the experience of being served by us, you may care to know
+  that... the alarm will sound."* The device's Complaints Department works exactly as well as
+  the fictional one.
+
+---
 
 ## Hardware / physical-device specific (Stage 2)
 - A **real, non-functional solar cell** above the (real) green LED bar — uselessness made literal.
