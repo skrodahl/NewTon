@@ -176,14 +176,19 @@ should be handled.
   rewarded before: the impatient repeat-consulter. The fatigue phrases are a new pool; the
   counter resets after a cool-down period (maybe 5 minutes of non-consultation).
 
-- **The device recognising its own numbers.** Manually entering `3.142857143` — the device's
-  own bogus π value (22/7) — gets a specific response. Same for `1.4142857143` (its bogus √2,
-  99/70). The device finally acknowledging that the user is on to its rational-approximation
-  gag — a small confession when the gag is caught. *"WE KNOW. WE WERE THERE."* or similar.
-  Fires on exact match only (the user must type the full value, not arrive at it via the π
-  button). Two-member recognition family, mirroring the two-member surface family of wrong
-  constants (§3 of QUIRKS). The confession is the other side of the gag: the constants are
-  the device being wrong quietly; the recognition is the device admitting it, once caught.
+- **The device silently correcting your correct numbers.** Manually entering `3.141592654`
+  (real π) and the device silently, without comment, changes it to `3.142857143` (its own
+  22/7). Same for `1.414213562` (real √2) → `1.4142857143` (its 99/70). Same for
+  `2.718281828` (real e) → `2.714285714` (its 19/7). The device doesn't confess — it
+  *corrects you*. It genuinely believes its rational approximations are the right values
+  and your accurate decimals are the error. Silent, confident, wrong. No message, no
+  acknowledgement — the number just changes on the display, as if the device auto-corrected
+  a typo. The user who notices is seeing the firmware's worldview: the textbook table IS
+  mathematics; your extra decimals are noise. Fires on exact match of the real constant
+  (to the device's display precision). Three-member correction family, mirroring the
+  three-member surface family of wrong constants (π, √2, e — see §3 of QUIRKS). The
+  constants are the device being wrong quietly; the correction is the device being wrong
+  *assertively*.
 
 - **Tilt — "PLEASE RIGHT THE DEVICE."** Flipping the phone upside-down — exactly the
   ambigram-completion gesture from primary school (the one that turns 5318008 into BOOBIES) —
@@ -211,16 +216,42 @@ Seeds for long-term ownership rewards and time-aware behaviour.
   exist. Implementation: a rare timer check (maybe once per 10 minutes of active session,
   ~2% chance each check) that briefly shows the phrase then clears. No actual consequence.
 
-- **Calibration overdue.** When the PWA is installed, the device remembers the date as its
-  `MANUFACTURE_DATE` in localStorage. A year later (real-world calendar), the first launch
-  shows a one-time *"CALIBRATION OVERDUE — PLEASE RETURN TO AUTHORISED SERVICE CENTRE"*
-  notice that the user can dismiss but never satisfy, because there is no authorised service
-  centre and there never was. Long-term ownership reward; pure Sirius Cybernetics aftermarket
-  policy. The dismissal is permanent (localStorage flag) — the notice fires exactly once in
-  the device's lifetime. The year gap means only genuine long-term owners see it. Pairs with
-  the warranty's *"Device guarantee against everything except disappointment, water, fate, and
-  the colour yellow"* — the device has a maintenance schedule for a product with no
+- **Calibration / service mode.** Gated behind an improbable-but-feasible key sequence
+  (undecided — something a curious owner might stumble into but never by accident). Entering
+  the sequence puts the device into a brief "service mode" that displays:
+  *"CALIBRATION OVERDUE — NEXT SERVICE: {DATE} — PLEASE RETURN TO AUTHORISED SERVICE CENTRE"*
+  where `{DATE}` is a random date far in the future (decades out — `2089-03-14`, `2061-11-22`,
+  generated once per device and persisted to localStorage). The date is absurd but formatted
+  seriously; the service centre doesn't exist and never did. The user can dismiss but never
+  satisfy the notice. Pure Sirius Cybernetics aftermarket policy for a product with no
   maintainable parts.
+
+  **The LED accompaniment** is the real payoff. While the service notice is on screen, the LED
+  bar attempts one of two behaviours (pick during implementation):
+  - **SOS in Morse** (`··· −−− ···`) — a pattern that makes perfect sense as a distress
+    signal but has no business on a calculator's decorative LED strip. The device is calling
+    for help through the only output channel it has, to an audience that was never listening.
+    Plays once, slowly, then the strip goes dark.
+  - **An incomplete animation that can't keep rhythm** — the strip tries to run a diagnostic
+    sweep but stumbles: LEDs fire out of sequence, pause too long, restart from the wrong
+    position, and eventually give up partway through. The firmware's service routine exists
+    but hasn't been exercised since manufacture and has bit-rotted. Same "barely managing"
+    posture as the soup LED (§6 of QUIRKS) and the crooked 7th line (§4), applied to a
+    different component.
+
+  Either option pairs with the `POWER · BUSY · ERR` legend — the LED bar finally doing
+  something that *almost* resembles the status system it was designed for, at the one moment
+  nobody asked it to. The service mode is the device's most sincere attempt at self-diagnosis,
+  expressed through a light bar that was never wired to mean anything.
+
+  **The closing line**, after the service date and before dismissal, reads something like:
+  *"IF SERVICE CENTRE IS NOT AVAILABLE, EATING THE DEVICE REMAIN A VALID OPTION."* — the
+  device's own maintenance manual casually listing ingestion as an alternative to professional
+  servicing. Third callback to the warranty's load-bearing line (*"Do not eat the device even
+  if it advise so"*), after the EAT-THE-DEVICE oracle reading (QUIRKS §4) and the PIE path
+  (QUIRKS §1). The warranty warned you; the oracle advised it; now the service manual
+  recommends it as aftercare. Three independent surfaces, one running gag, each discovered
+  separately.
 
 ## The corporation surfaces
 
