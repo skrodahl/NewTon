@@ -854,3 +854,39 @@ the grime on:
 is given `z-index:0` to form a stacking context), so they dirty the *bare case* but render **behind**
 the keys, the LCD, and the rolled-out receipt. The screen and paper therefore stay legible; only the
 LCD's own subtle `::before` haze touches the readout, kept faint on purpose.
+
+---
+
+## 11. The Install Banner — the device's voice in the browser chrome
+
+Most PWAs treat the install banner as inviolable browser furniture — a system notification
+about a technical capability. The Oraculon doesn't. Its install prompt speaks in the same
+1970s-catalogue brochure voice as the rest of the device:
+
+**"INSTALL ORACULON FOR PORTABLE FORTUNE"**
+
+"Portable fortune" does double duty: the app is portable (installable on your phone), and
+the I Ching fortune is now portable (it travels with you). The phrase could only have been
+written by this device — no other PWA install banner reads like a product tagline from a
+fictional Sirius Cybernetics mail-order catalogue.
+
+- **The red INSTALL button.** The device's primary action is a blue button marked "Red"
+  (§4). The device's *meta* primary action — installing itself onto your phone — is,
+  correctly, a **red button marked "Install."** The device's own inverted-colour convention
+  extends cleanly into the chrome around it: the in-universe action gets the wrong colour
+  on purpose; the out-of-universe action gets the right colour by inheritance. Both are red
+  in spirit; only one is red in practice.
+- **The dark banner** (`#2a2418`, matching the desk surround) with a gold top border
+  (`var(--gold)`) and Silkscreen monospace at 10px — same typographic register as the model
+  plate and the LED legend. The banner looks like another piece of the device's case, not a
+  browser notification.
+- **Behaviour:** appears once (on `beforeinstallprompt`), dismissable (✕ persists to
+  `oraculon_install_dismissed` in localStorage), never returns after install or dismissal.
+  Never shown inside a TWA (Play Store install) — `beforeinstallprompt` doesn't fire in
+  that context. The banner is a moment, not a feature — same transience as the pie symbol
+  (§1) and the `B13` annunciator flash (§9).
+- **Safe-area aware** — `padding-bottom: max(10px, env(safe-area-inset-bottom))` respects
+  the home bar on devices with gesture navigation. The banner sits at the bottom of the
+  viewport, below the device, in the desk-surround space — it belongs to the *room*, not
+  the *calculator*, which is correct: installing is a decision made by the owner, not a
+  function performed by the device.
