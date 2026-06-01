@@ -1,0 +1,230 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ORACULON Overlay Prototype — Hybrid</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html, body { height: 100%; }
+  body {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #1b1813;
+    font-family: monospace;
+  }
+
+  .device {
+    position: relative;
+    width: 100%;
+    max-width: 420px;
+    aspect-ratio: 1466 / 2912;
+    background: url('oraculon-clean-straight-2.png') center / 100% 100% no-repeat;
+  }
+
+  /* ── LCD overlay ── */
+  .lcd {
+    position: absolute;
+    top: 13%;
+    left: 7%;
+    width: 86%;
+    height: 8%;
+    background: rgba(124, 140, 99, 0.3);
+    border-radius: 4px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    padding-right: 4%;
+    font-family: 'VT323', monospace;
+    font-size: clamp(24px, 5vw, 48px);
+    color: #1c2410;
+  }
+
+  /* ── Key grid (rows 1-6: SIN through 1,2,3,+) ── */
+  .keys-grid {
+    position: absolute;
+    top: 30.8%;
+    left: 8%;
+    width: 85%;
+    height: 38%;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    grid-template-rows: repeat(6, 1fr);
+    gap: 2.3% 2%;
+  }
+
+  /* ── Bottom keys (individually positioned) ── */
+  .key-bottom {
+    position: absolute;
+    left: 8%;
+  }
+
+  .key-zero {
+    top: 76.2%;
+    width: 41.5%;
+    height: 4.5%;
+  }
+
+  .key-dot {
+    top: 76.2%;
+    left: 51%;
+    width: 19.5%;
+    height: 4.5%;
+  }
+
+  .key-eq {
+    top: 76.2%;
+    left: 73%;
+    width: 20%;
+    height: 12%;
+  }
+
+  .key-oracle {
+    top: 82.2%;
+    width: 62%;
+    height: 5.5%;
+  }
+
+  /* ── Shared key styles ── */
+  .key {
+    background: rgba(255, 0, 0, 0.15);
+    border: 1px dashed rgba(255, 0, 0, 0.4);
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: clamp(8px, 1.5vw, 14px);
+    color: rgba(255, 255, 255, 0.7);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .key:hover {
+    background: rgba(255, 255, 0, 0.25);
+    border-color: rgba(255, 255, 0, 0.6);
+  }
+
+  /* ── LED strip overlay ── */
+  .solar {
+    position: absolute;
+    top: 10.2%;
+    left: 7%;
+    width: 86%;
+    height: 1.5%;
+    background: rgba(0, 255, 0, 0.15);
+    border: 1px dashed rgba(0, 255, 0, 0.4);
+    border-radius: 2px;
+  }
+
+  /* ── Manual link overlay ── */
+  .manual-link {
+    position: absolute;
+    bottom: 1.2%;
+    left: 12%;
+    width: 76%;
+    height: 2%;
+    background: rgba(0, 100, 255, 0.15);
+    border: 1px dashed rgba(0, 100, 255, 0.4);
+    border-radius: 2px;
+    cursor: pointer;
+    font-size: clamp(6px, 1.2vw, 10px);
+    color: rgba(255, 255, 255, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  /* Toggle overlay visibility */
+  .debug-toggle {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    z-index: 100;
+    padding: 8px 16px;
+    background: #333;
+    color: #fff;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+  }
+
+  .device.hide-overlay .key,
+  .device.hide-overlay .lcd,
+  .device.hide-overlay .solar,
+  .device.hide-overlay .manual-link {
+    background: transparent !important;
+    border-color: transparent !important;
+    color: transparent !important;
+  }
+</style>
+</head>
+<body>
+
+<button class="debug-toggle" onclick="document.querySelector('.device').classList.toggle('hide-overlay')">Toggle Overlay</button>
+
+<div class="device">
+
+  <div class="solar"></div>
+
+  <div class="lcd">0</div>
+
+  <!-- Rows 1-6: uniform grid -->
+  <div class="keys-grid">
+    <!-- Row 1: Scientific -->
+    <button class="key">sin</button>
+    <button class="key">cos</button>
+    <button class="key">tan</button>
+    <button class="key">√</button>
+
+    <!-- Row 2: Scientific -->
+    <button class="key">x²</button>
+    <button class="key">1/x</button>
+    <button class="key">log</button>
+    <button class="key">π</button>
+
+    <!-- Row 3: Red + Op -->
+    <button class="key">C</button>
+    <button class="key">⌫</button>
+    <button class="key">%</button>
+    <button class="key">÷</button>
+
+    <!-- Row 4: Digits + Op -->
+    <button class="key">7</button>
+    <button class="key">8</button>
+    <button class="key">9</button>
+    <button class="key">×</button>
+
+    <!-- Row 5: Digits + Op -->
+    <button class="key">4</button>
+    <button class="key">5</button>
+    <button class="key">6</button>
+    <button class="key">−</button>
+
+    <!-- Row 6: Digits + Op -->
+    <button class="key">1</button>
+    <button class="key">2</button>
+    <button class="key">3</button>
+    <button class="key">+</button>
+  </div>
+
+  <!-- Bottom section: individually positioned -->
+  <button class="key key-bottom key-zero">0</button>
+  <button class="key key-bottom key-dot">.</button>
+  <button class="key key-bottom key-eq">=</button>
+  <button class="key key-bottom key-oracle">易 Red</button>
+
+  <button class="manual-link">▸ READ INSTRUCTION BOOKLET ◂</button>
+
+</div>
+
+<script>
+  document.querySelectorAll('.key').forEach(k => {
+    k.addEventListener('click', () => {
+      document.querySelector('.lcd').textContent = k.textContent.trim();
+    });
+  });
+</script>
+</body>
+</html>
