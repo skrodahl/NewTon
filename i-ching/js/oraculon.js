@@ -1134,4 +1134,38 @@
       navigator.serviceWorker.register("sw.js").catch(function(){ /* offline-only is fine */ });
     });
   }
+
+  /* PWA install prompt — capture the event, show a banner, let the user decide. */
+  var _installPrompt = null;
+
+  window.addEventListener("beforeinstallprompt", function(e) {
+    e.preventDefault();
+    if (localStorage.getItem("oraculon_install_dismissed")) return;
+    _installPrompt = e;
+    var banner = document.getElementById("installBanner");
+    if (banner) banner.classList.add("visible");
+  });
+
+  window.addEventListener("appinstalled", function() {
+    _installPrompt = null;
+    var banner = document.getElementById("installBanner");
+    if (banner) banner.classList.remove("visible");
+    localStorage.setItem("oraculon_install_dismissed", "1");
+  });
+
+  window.installApp = function() {
+    if (!_installPrompt) return;
+    _installPrompt.prompt();
+    _installPrompt.userChoice.then(function() {
+      _installPrompt = null;
+      var banner = document.getElementById("installBanner");
+      if (banner) banner.classList.remove("visible");
+    });
+  };
+
+  window.dismissInstall = function() {
+    var banner = document.getElementById("installBanner");
+    if (banner) banner.classList.remove("visible");
+    localStorage.setItem("oraculon_install_dismissed", "1");
+  };
 })();

@@ -1,3 +1,19 @@
+## **v5.1.4** — Pocket Chalker (2026-06-01)
+
+### Chalker — PWA install banner
+
+- **Install prompt** — a banner slides up from the bottom when the browser offers PWA installation: "Install NewTon Chalker for offline use." One tap triggers the native install dialog. Dismiss (✕) hides it permanently. Never shown again after install or dismissal (`chalker_install_dismissed` in localStorage). Never shown inside a TWA (Play Store install).
+- **Styling** — dark theme (`--bg-dark`), blue accent border (`--accent-primary`), Manrope font. Respects safe area insets for notch/home bar.
+- **CSP-clean** — all logic in `chalker.js`, all styling in `chalker.css`. No inline scripts or styles.
+
+### Files changed
+
+- `chalker/index.html` — install banner markup
+- `chalker/js/chalker.js` — `beforeinstallprompt` capture, `installApp()`, `dismissInstall()`, `appinstalled` listener
+- `chalker/styles/chalker.css` — `.install-banner`, `.install-btn`, `.install-dismiss` styles
+
+---
+
 ## **v5.1.3** — Cannot Operate on Soup (2026-05-29)
 
 Small polish on top of v5.1.2: trimmed a redundant helper line from the Confirm Winner dialog, restructured the Late Arrival info dialog so the actual instructions get visual focus, introduced a reusable `.dlg__note` panel component to the dialog system, and fixed a JSON-LD signal on the landing page that was letting Google (and AI services) treat the GitHub repo as the canonical home of the project instead of `newtondarts.com`.
