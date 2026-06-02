@@ -364,10 +364,11 @@ for the device's voice.
   notebook. Wales-pebbles intent — the discovery cost IS the design.
 - **Inline judgement replacement.** Clew appended to the existing judgement, not announced
   as a separate beat.
-- **Clue 1/64 is the entire domain.** Partial domain fragments are guessable (`oracu` →
-  obvious); the domain must be revealed atomically in a single clue. Clues 2–64 carry the
-  path fragments. Until a user has seen clue 1/64, they're collecting puzzle pieces for a
-  puzzle they don't know the shape of — *deliberately cruel*.
+- **All 64 clues are path fragments.** *(Revised — see below.)* The original design treated
+  clue 1/64 as the entire domain (to prevent partial-domain guessability). Now that
+  `oraculon.biz` is the PWA's public home — known to search engines, named in the device's
+  Schema.org metadata — the domain is no longer the secret. The puzzle is now entirely
+  *what path on oraculon.biz*. All 64 clues assemble into the path.
 
 ### The math (Wales pebbles is the point)
 
@@ -382,12 +383,18 @@ casual will never know. That's the design.
 
 ### The companion website
 
-- **Destination URL** lives at a domain to be chosen (candidates: `oraculon.biz` — device
-  angle; `sirius-cyb.biz` — corporate angle, reusable across multiple Adams-flavoured
-  projects). `.biz` is the right tone — slightly cheap, exactly what Sirius Cybernetics
-  would register because they didn't bother with the proper TLD. Lean: corporate angle, so
-  the Calibration mode's "Complaints Department on Eadrax" callback gains a real off-device
-  destination on the same site.
+- **Domain locked: `oraculon.biz`.** Device-angle won over corporate-angle, and `.biz` won
+  over `.com` — keeping the in-character cheap-TLD aesthetic that the original design
+  argued for. Sirius Cybernetics would absolutely register the `.biz` because they didn't
+  bother with the proper TLD. Bought and live as of 2026-06-02; it's where the PWA itself
+  is served from, named in the SEO metadata, and discoverable via the single `42` link in
+  NewTon's landing-page footer. The corporation-angle reasoning (`sirius-cyb.biz` for
+  cross-project reuse) was set aside — one device, one domain. A sister project later
+  would need its own domain rather than riding this one's umbrella.
+- **The puzzle is now the PATH on `oraculon.biz`, not the domain itself.** All 64 fragments
+  assemble into the path that completes `https://oraculon.biz/<assembled>/`. Until a user
+  has collected enough fragments to recognise the path's *shape*, they're still collecting
+  in the dark — but the dark is smaller than originally designed (they know the domain).
 - **The page hosts a cleaned-up version of QUIRKS.** Not the brainstorm-and-decision-trail
   document we maintain locally — a *publication*, rewritten in a clean voice, ordered for
   the reader who's discovering the device rather than the team building it. No considered-
@@ -395,11 +402,19 @@ casual will never know. That's the design.
   finished thing.
 - **Framed as an official Sirius Cybernetics technical bulletin** — typeset for the
   in-fiction reader. Same broken-English voice as the device's manual and the Calibration
-  reading. The corporation publishing a tech doc about its own product, complete with
-  inappropriate disclosures it didn't realise it left in.
+  reading, and continuous with the Schema.org `author.description` field that now
+  documents the corporation as *"A bunch of mindless jerks who'll be the first against the
+  wall when the revolution comes"* (verbatim Adams, baked into the metadata layer).
 - **The path itself should be self-referential.** Not a random hash, but something that
   *reads* as an Adams-flavoured phrase when assembled. The reward of patience is recognising
-  the joke in the URL itself when the last fragment slots in.
+  the joke in the URL itself when the last fragment slots in. Path candidates to draft later:
+  `/the-uninvited-seventh-clew/`, `/clew-of-the-deluxe-hexagram/`, etc. — to be decided
+  alongside the fragment-array contents.
+- **Calibration's "Complaints Department on Eadrax" callback.** The Calibration reading
+  promises to direct the user to a Complaints Department; with `oraculon.biz` live, that
+  surface could plausibly live at `oraculon.biz/complaints/` or similar as a future
+  addition. Not implemented yet; just noting that the device's fiction now has a real
+  off-device destination to claim, when wanted.
 
 ### Recursive layering — clews within clews
 

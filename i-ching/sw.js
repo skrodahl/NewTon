@@ -12,14 +12,14 @@
    make the new SW take control immediately). Belt-and-suspenders. */
 "use strict";
 
-const CACHE = "oraculon-v5";
+const CACHE = "oraculon-v32";
 
 const SHELL = [
   "./index.html",
-  "./css/oraculon.css?v=5",
-  "./js/oraculon.js?v=5",
+  "./css/oraculon.css?v=32",
+  "./js/oraculon.js?v=32",
   "./manifest.webmanifest",
-  "./fonts/fonts.css?v=5",
+  "./fonts/fonts.css?v=32",
   "./fonts/XLYgIZbkc4JPUL5CVArUVL0ntn4OSFNuQsI3GA.woff2",
   "./fonts/XLYgIZbkc4JPUL5CVArUVL0ntnAOSFNuQsI.woff2",
   "./fonts/m8JUjfVPf62XiF7kO-i9aAhAfmKi2PmeBvYdbA.woff2",

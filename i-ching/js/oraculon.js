@@ -12,6 +12,7 @@
   var ORACLES = [
     "A Suffusion of Yellow",                  // canonical, verbatim Adams (weighted ~1/6 — see pickOracle)
     "The Number of Pebbles in Wales",         // also canonical, verbatim Adams (unweighted)
+    "A Puddle of Darkness",                   // also canonical, verbatim Adams (The Long Dark Tea-Time of the Soul)
     // The Q42 pool (below) holds the device's exclusive oracles for any result that
     // secretly equals 42 — picked from when suppressBig() detects hidden === 42.
     // When one surfaces, the lucid trigger is armed and the next calc reveals the
@@ -247,6 +248,15 @@
   // register, no C, no consult. The device is dead for the duration.
   var batteryDying = false;
 
+  // True while the POST (Power On Self Test) sequence is running — fires on
+  // page load. The corporation's dry-technical firmware boot routine,
+  // deliberately drawn-out, ending with the CLEW #1 reveal as a lingering
+  // final line. Total input seal during the sequence — even C does nothing —
+  // to commit to the device's misguided helpfulness ("the device is too
+  // helpful for shortcuts"). Cleared the moment the CLEW line is shown, so
+  // the user can dismiss the lingering URL at will.
+  var postRunning = false;
+
   // The 42 lucid trigger: if the PREVIOUS calculation's hidden (oracle-replaced)
   // result was exactly 42 (Adams), the NEXT calculation bypasses Rule of 4
   // for one beat — the device briefly "wakes up" and shows the real answer.
@@ -321,7 +331,14 @@
     outEl.classList.remove("phrase","ticker");
     // every oracle phrase uses ONE size — long ones wrap rather than shrink,
     // so the readout never changes size between answers (keeps the illusion)
-    if (settled === "phrase") outEl.classList.add("phrase");
+    if (settled === "phrase") {
+      outEl.classList.add("phrase");
+    } else {
+      // Transitioning out of phrase mode: also clear .post (the POST terminal
+      // styling persists through POST's chained phrases, then drops the moment
+      // the user dismisses the lingering CLEW with any state-changing action).
+      outEl.classList.remove("post");
+    }
     // FLIP_WORDS visual substitution: if the display reads one of the classic
     // four-banger flip-word numbers, render the (slightly-off) flipped text
     // instead. Pure visual — `disp` itself is unchanged, so calc state continues
@@ -450,6 +467,273 @@
     ledFor("cast");   // brief LED activity at scroll start, same as consult
     settled = "phrase";
     marchReading(reading, "CAL.");
+  }
+
+  // POST — Power On Self Test. Runs on page load (and, in a later stage, after
+  // BATTERY LOW recovery). The corporation's dry-technical firmware boot
+  // sequence: a new voice register on the device, distinct from both the
+  // calculator's neutral numeric display and the oracle's broken-English
+  // soup-and-goose voice. Each line is a deadpan technical assertion, half of
+  // which double as callbacks to existing quirks (the wrong constants, the 0K
+  // Calibration, the Rule of 4 ceiling, Dirk's tea temperature). The final
+  // line is CLEW #1 — the device's first hint that there's a deeper layer,
+  // delivered as if it were a debug variable left in the firmware. CLEW #1
+  // lingers as the settled phrase, dismissed by any user action.
+  // HINTS — lines that point to actual discoverable behaviours in the device.
+  // When a HINT happens to be the last line of a POST run, it lingers with a
+  // "HINT:" prefix as the device's invitation to investigate further.
+  var POST_LINES_HINTS = [
+    // Wiring (hint that specific keys are overloaded / special-cased)
+    "WIRING_PCT: OK",
+    "WIRING_PI: OK [SLOW]",
+    "WIRING_SQRT: OK",
+    "WIRING_RED: OK",
+    "WIRING_C: OK [STREAK COUNTER]",
+    // Constants engine (the wrong-constants family)
+    "RATIO_ENGINE: LOADED 3 CONSTANTS",
+    "PI_ENGINE = 22/7 OK",
+    "SQRT_TABLE: 1 ENTRY",
+    "EULER_FALLBACK: HIDDEN",
+    // Hexagram subsystem
+    "HEXAGRAM_TABLE: 128 ENTRIES",
+    "KING_WEN_ORDER: NOT FOUND",
+    "DUKE OF CHOU: POSTHUMOUS",
+    "TRIGRAMS: 6 OF 8",
+    // Annunciators / display modes
+    "DEG MODE: LOCKED",
+    "RAD MODE: NOT SUPPORTED",
+    // Calibration / Rule of 4
+    "CALIB_ABSZERO = -273.00 K [DRIFT: 0.15]",
+    "CALIB_TEA = 21°C OK",
+    "CEILING = 4 OK",
+    "RULE_OF_4: ENFORCED",
+    "HEATING TEA TO 100°C... 21°C [STALL]",
+    // Warranty / manual / documentation
+    "WARRANTY: VALID UNTIL FATE",
+    "LED_STATUS_GUIDE: SEE PAGE 7",
+    "MANUAL: PAGES 4-11 NOT FOUND",
+    // Display physics
+    "LCD WIDTH: 13 CHAR",
+    "GHOST_8: BURNED IN",
+    "BACKLIGHT: NOT FITTED",
+    "PRECISION: 8 IN / 10 OUT",
+    // Adams-derived hints that actually point somewhere
+    "SHARE AND ENJOY: 1 OF 1",
+    "INTERCONNECTEDNESS: ALIGNED OK",
+    "INFINITE_IMPROBABILITY: 0.01% [ABORT]",
+    // Sirius Cybernetics surfacing (each name appears in lore the user can find)
+    "MARKETING_DIV: LIVE",
+    "COMPLAINTS_DEPT: NO REPLY",
+    "EADRAX_PING: TIMEOUT",
+    "ASSEMBLY: SIRIUS [PROBABLE]",
+    // Errors that aren't really errors but reference specific easter eggs
+    "ERROR 5C",
+    "SOUP_DETECTOR: ACTIVE",
+    // Status confessions
+    "STATUS: FUNDAMENTALLY A PUZZLE"
+  ];
+
+  // FLAVOUR — generic firmware noise. Mixes into POST as camouflage so the
+  // HINT lines don't all visually stand out. When a FLAVOUR line is the last
+  // line of POST, it shows briefly then transitions to "0" — the device boots
+  // ready without leaving a lingering "payoff." Most boots end this way.
+  var POST_LINES_FLAVOUR = [
+    "MEM 32K OK",
+    "MEM 0K OK",
+    "ROM CHECKSUM: 易",
+    "BUS WIDTH: 4 BIT",
+    "DEAD PIXEL: 1",
+    "BOOKLET: WET",
+    "ORACLE_POOL: 60 PHRASES",
+    "Q42_POOL: 4 PHRASES",
+    "NAMED_NUMBERS: 12 LOADED",
+    "CHGNOTES: 16 PHRASES",
+    "IMAGINARY_POOL: LOADED",
+    "VOID_POOL: LOADED",
+    "BAMBELWEENY_57: FW NOT FOUND",
+    "BABEL_FISH: NOT INSTALLED",
+    "DEEP_THOUGHT: 7.5M YEARS",
+    "MARVIN_PERSONA: NOT INSTALLED",
+    "VOGON_POETRY_FILTER: ENABLED",
+    "PETUNIAS: 1",
+    "WHALE_COUNTER: 0",
+    "TOWEL: NOT DETECTED",
+    "FACTORY ID: 1979",
+    "QA STATUS: SHIPPED",
+    "ENGINEER ON DUTY: NONE",
+    "FW REVISION: ?",
+    "ERROR ¥9"
+  ];
+
+  function runPost(){
+    postRunning = true;
+    // Add the booting class — triggers the CSS fade-in animation on segments.
+    document.body.classList.add("booting-lcd");
+    // Add the POST terminal class — smaller VT323 monospace, right-aligned.
+    // Persists through every showPhrase() during POST (render() only touches
+    // .phrase/.ticker, not .post). Removed by render() once the user dismisses
+    // the lingering CLEW and transitions out of phrase state.
+    outEl.classList.add("post");
+    // Open with a glitch — the LCD's first visible act is a panic (scanlines
+    // and jitter via the existing lcdPanic keyframe, normally used for the
+    // deluxe consult's 7th-line glitch). Overlaps with the 1.5s segment fade-in,
+    // so the device looks like it's powering up with electrical noise before
+    // stabilising into the POST sequence proper.
+    if (lcdEl){
+      lcdEl.classList.add("glitch");
+      setTimeout(function(){ lcdEl.classList.remove("glitch"); }, 1250);
+    }
+
+    // Build the line sequence: cosmological opener + boot header + random init
+    // sample from the combined HINTS+FLAVOUR pool. All init lines display
+    // identically during POST — the HINT/CLEW reveal happens AFTER POST
+    // completes, as a separate phase (see below). Most boots end with the
+    // device simply settling to "0".
+    //
+    // The opener is "GNAB" then "GNAB GIB..." — "BIG BANG" reversed letter-by-
+    // letter and word-by-word. The device begins its boot sequence at the
+    // beginning of the universe, just doing it backwards because nobody at the
+    // factory noticed. Trailing dots imply "...and everything that followed."
+    // Implemented as a two-phase first line (occupies line slot 0 with both
+    // text and LED phase changes at the midpoint — see showNextLine).
+    var BIG_BANG_PHASE_A = "GNAB" + " ".repeat(7);  // padded to "GNAB GIB..." width
+    var BIG_BANG_PHASE_B = "GNAB GIB...";
+    var lines = [BIG_BANG_PHASE_A, "SCC FW BOOT 1.0", "ORACULON CT-64"];
+    var pool = POST_LINES_HINTS.concat(POST_LINES_FLAVOUR);
+    // Fisher-Yates shuffle
+    for (var s = pool.length - 1; s > 0; s--){
+      var t = Math.floor(Math.random() * (s + 1));
+      var swap = pool[s]; pool[s] = pool[t]; pool[t] = swap;
+    }
+    var initCount = 6 + Math.floor(Math.random() * 3);   // 6-8 init lines
+    for (var k = 0; k < initCount; k++){
+      if (pool[k]) lines.push(pool[k]);
+    }
+
+    // Decide the post-POST ending up front: ~10% CLEW, ~10% HINT, ~80% nothing.
+    // CLEW and HINT are rare AND require a transition (10s pause after "0",
+    // then a glitch that masks the content swap). FLAVOUR boots end with just
+    // the device settling to "0".
+    var rng = Math.random();
+    var ending = rng < 0.1 ? "clew" : (rng < 0.2 ? "hint" : "flavour");
+
+    var idx = 0;
+    // Per-line duration is randomized 1500-2500ms per call — keeps the calm
+    // 2s baseline but breaks the metronome; each line has its own beat. Bounds
+    // (1500, 2500) easy to tune later.
+    // LED rhythm replaces the previous dot-growth rhythm: text holds steady per
+    // line, the LED bar does the moving instead. Pattern per line:
+    //   Line 0 (first message) has two phases — the very LAST LED lit alone
+    //     (boot wake signal), then halfway through the line, the FIRST TWO
+    //     LEDs lit (the proper boot progression begins from position 0).
+    //   Line N >= 1: a static 3-LED window at positions (N-1, N, N+1). Slides
+    //     across the bar by one position per line. Visually, the boot
+    //     "progresses" across the LED bar as lines tick by.
+    // The LED state is set ONCE per line via ledShow (not animated), so the
+    // only visual change per line is the LED window sliding by one. Much
+    // calmer than continuous text growth. LED idle baseline is 0.04 brightness.
+    function setPostLeds(lineIdx, phaseB){
+      if (lineIdx === 0 && !phaseB){
+        // Phase A: only the very last LED lit
+        ledShow(leds.map(function(_, i){ return i === LED_N - 1 ? 1 : 0.04; }));
+      } else if (lineIdx === 0 && phaseB){
+        // Phase B: first two LEDs lit
+        ledShow(leds.map(function(_, i){ return (i === 0 || i === 1) ? 1 : 0.04; }));
+      } else {
+        // Sliding 3-LED window starting at position (lineIdx - 1)
+        var winStart = lineIdx - 1;
+        ledShow(leds.map(function(_, i){
+          return (i >= winStart && i <= winStart + 2) ? 1 : 0.04;
+        }));
+      }
+    }
+    function showNextLine(){
+      if (idx >= lines.length) return;
+      var line = lines[idx];
+      var lineIdx = idx;
+      var isLast = (lineIdx === lines.length - 1);
+      idx++;
+      var lineDuration = 1500 + Math.floor(Math.random() * 1000);   // 1500-2500ms
+      showPhrase(line);
+      setPostLeds(lineIdx, false);   // initial LED state for this line
+      // Line 0 only: midway through, switch BOTH the LED state (phase B: first
+      // two LEDs) AND the text (phase B: "GNAB GIB..." — the GIB... appends to
+      // the right of the already-positioned GNAB). The padding in phase A
+      // (non-breaking spaces) keeps GNAB in the same X position across both
+      // phases, so the text appears to "build up" rather than slide.
+      if (lineIdx === 0){
+        setTimeout(function(){
+          setPostLeds(0, true);
+          showPhrase(BIG_BANG_PHASE_B);
+        }, Math.floor(lineDuration / 2));
+      }
+      if (lineIdx === 0 && !isLast){
+        // After line 0's full duration, fade GNAB GIB... out over 1.5s, then
+        // immediately show the next line (boot header proper). The fade
+        // separates the cosmological opener from the firmware boot — two
+        // distinct beats rather than one continuous stream of init text.
+        setTimeout(function(){
+          outEl.classList.add("bigbang-fading");
+          setTimeout(function(){
+            outEl.classList.remove("bigbang-fading");
+            showNextLine();
+          }, 1500);
+        }, lineDuration);
+        return;
+      }
+      if (isLast){
+        // Last line shows for lineDuration, then ALWAYS transitions to "0"
+        // (device boots ready). Progress LEDs turn off here. Gate clears
+        // immediately — user can use the calc normally for the next 10 seconds.
+        setTimeout(function(){
+          document.body.classList.remove("booting-lcd");
+          ledIdle();
+          disp = "0"; settled = false; fresh = true;
+          outEl.classList.remove("post");
+          render();
+          postRunning = false;   // Always cleared at "0". User can interact now.
+          if (ending === "flavour") return;   // No reveal coming. Done.
+          // HINT or CLEW: schedule the reveal 10 seconds from now. During those
+          // 10s, user has free use of the calc — anything they do (digits,
+          // calcs, even consults) is fair game. At the 10s mark, the device
+          // interrupts itself: a glitch fires and the content swaps to the
+          // reveal regardless of what the user was doing. The interruption is
+          // the point — "embrace any mistake" applied to user state.
+          setTimeout(function(){
+            // Skip if user has triggered something we shouldn't interrupt
+            // (BATTERY LOW is sacred — 21-oracle grind earns its silence;
+            // another POST shouldn't happen anyway, but check defensively).
+            if (batteryDying || postRunning) return;
+            // Clean up any in-progress consult (cancel pending LED bursts,
+            // hex graphics, etc.) so the reveal doesn't fight with consult
+            // state still running in the background.
+            endOracle();
+            // Re-seal the gate for the duration of the glitch — the user
+            // can't dismiss until the reveal is fully visible.
+            postRunning = true;
+            ledIdle();
+            outEl.classList.add("post");
+            if (lcdEl){
+              lcdEl.classList.add("glitch");
+              setTimeout(function(){ lcdEl.classList.remove("glitch"); }, 1250);
+            }
+            // Swap content under cover of the glitch.
+            if (ending === "clew"){
+              showPhrase("CLEW #1: https://lostpages.oraculon.biz/");
+            } else {
+              var hint = POST_LINES_HINTS[Math.floor(Math.random() * POST_LINES_HINTS.length)];
+              showPhrase("HINT: " + hint);
+            }
+            // Gate clears when the glitch finishes — user can then dismiss
+            // with any key (normal settled-phrase handling takes over).
+            setTimeout(function(){ postRunning = false; }, 1250);
+          }, 10000);
+        }, lineDuration);
+      } else {
+        setTimeout(showNextLine, lineDuration);
+      }
+    }
+    showNextLine();
   }
 
   // Lucid bypass announces itself first: ~1s flash of an official-sounding
@@ -1002,7 +1286,10 @@
   // fires partway through (the LEDs' gloriously badly-timed celebration).
   function marchReading(text, rest, onMid){
     annErr.classList.remove("on");
-    outEl.classList.remove("phrase");
+    // Clear .phrase AND .post — any scroll (consult, Calibration) starts fresh
+    // in ticker styling. .post would otherwise carry over from a lingering POST
+    // CLEW and impose terminal styling on the scrolling reading.
+    outEl.classList.remove("phrase","post");
     outEl.classList.add("ticker");
     outEl.innerHTML = '<span class="run"></span>';
     var run = outEl.firstChild;
@@ -1192,6 +1479,9 @@
   // ---- wiring ----
   document.querySelectorAll(".key").forEach(function(b){
     b.addEventListener("click", function(){
+      // POST seal: the device is "booting" during the firmware init. Nothing
+      // registers — not even C. The device is too helpful for shortcuts.
+      if (postRunning) return;
       // BATTERY LOW seal: the device is dead during the fade. Nothing registers.
       if (batteryDying) return;
       // Calculating gate. When calcKind is set, a "Calculating..."/"Recalculating..."
@@ -1236,6 +1526,8 @@
   // keyboard support
   window.addEventListener("keydown", function(e){
     var k=e.key;
+    // POST seal (keyboard side): firmware is initialising; nothing registers.
+    if (postRunning){ e.preventDefault(); return; }
     // BATTERY LOW seal (keyboard side): device is dead, nothing registers.
     if (batteryDying){ e.preventDefault(); return; }
     // Calculating gate (keyboard side): keyboard has no π shortcut, so during ANY
@@ -1273,8 +1565,30 @@
 
   // ---- the "solar strip" green LEDs: rest dark, run a classic pattern on activity ----
   var ledBar = document.querySelector(".solar"), leds = [], LED_N = 18, ledGain = [];
-  if (ledBar){ for (var li=0; li<LED_N; li++){ var ld=document.createElement("span"); ld.className="led"; ledBar.appendChild(ld); leds.push(ld); ledGain.push(0.7 + Math.random()*0.3); } } // each cheap LED a touch brighter/dimmer
-  function ledShow(v){ for (var i=0;i<LED_N;i++) leds[i].style.setProperty("--on",((v[i]||0)*ledGain[i]).toFixed(3)); }
+  // POWER LEDs: the silkscreen legend's "POWER" label spans LEDs 12 and 13
+  // (1-indexed) = positions 11, 12 (0-indexed). These two are ALWAYS lit — the
+  // device having power is its baseline state, and the POWER label means what
+  // it says (the only label that does, since BUSY and ERR are off-by-one and
+  // ERR-only-knows-soup respectively). Lit at creation so there's no dark flash
+  // before the first ledShow call, AND forced in ledShow so subsequent patterns
+  // can't turn them off. Only goes dark during BATTERY LOW (the .dying-leds CSS
+  // opacity fade overrides --on entirely).
+  var POWER_LED_INDICES = [11, 12];
+  function isPowerLed(i){ return i === POWER_LED_INDICES[0] || i === POWER_LED_INDICES[1]; }
+  if (ledBar){
+    for (var li=0; li<LED_N; li++){
+      var ld=document.createElement("span"); ld.className="led"; ledBar.appendChild(ld); leds.push(ld);
+      var g = 0.7 + Math.random()*0.3;
+      ledGain.push(g);   // each cheap LED a touch brighter/dimmer
+      if (isPowerLed(li)) ld.style.setProperty("--on", g.toFixed(3));
+    }
+  }
+  function ledShow(v){
+    for (var i=0;i<LED_N;i++){
+      var val = isPowerLed(i) ? 1 : (v[i] || 0);
+      leds[i].style.setProperty("--on", (val * ledGain[i]).toFixed(3));
+    }
+  }
   function ledTri(x,max){ var p=max*2; x%=p; return x<=max?x:p-x; }   // 0..max..0 triangle wave
   var LEDP = {   // each returns a brightness array for animation step s
     larson: function(s){ var pos=ledTri(s,LED_N-1); return leds.map(function(_,i){ return Math.max(.04,1-Math.abs(i-pos)*.55); }); },
@@ -1397,4 +1711,9 @@
     if (banner) banner.classList.remove("visible");
     localStorage.setItem("oraculon_install_dismissed", "1");
   });
+
+  // Page load: run POST as the device's intro sequence. Dry-technical firmware
+  // boot, deliberately drawn-out, ending with the CLEW #1 reveal lingering.
+  // Fires every time the page loads or reloads.
+  runPost();
 })();

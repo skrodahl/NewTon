@@ -299,6 +299,18 @@
     font-size:48px;word-break:break-word;
   }
   .lcd .out.phrase{font-size:24px;text-align:right;line-height:1.1;letter-spacing:.5px;}
+  /* POST terminal styling — smaller VT323 monospace, dense text. The firmware's
+     own voice register: visually distinct from the calculator's larger numeric
+     output and from the oracle's larger phrase font, but RIGHT-ALIGNED to match
+     the rest of the LCD's conventions (the calculator's display is right-aligned
+     everywhere; POST is rendered on the same LCD, so it inherits the convention).
+     Right-alignment also keeps POST text away from the ghost-8 burnt into the
+     left side of the panel. The smaller font is what lets the full CLEW URL
+     fit on one line. Defined AFTER .out.phrase so when both classes are present
+     (POST lines are also settled phrases for state-management purposes), .post
+     wins on the visual properties. */
+  .lcd .out.phrase.post,
+  .lcd .out.post{font-size:18px;text-align:right;line-height:1.2;letter-spacing:0;justify-content:flex-end;padding:8px 12px;}
   /* the judgement marching across the tiny LCD */
   .lcd .out.ticker{justify-content:flex-start;overflow:hidden;font-size:30px;padding-left:42px;clip-path:inset(0 0 0 40px);-webkit-clip-path:inset(0 0 0 40px);}
   /* When the hex graphic is visible, the SETTLED phrase ("易 No.N NAME") also
@@ -424,13 +436,60 @@
     from { opacity: 1; }
     to   { opacity: 0; }
   }
+  /* .stuck is deliberately EXCLUDED — the burnt-in ghost-8 and its stuck-ON
+     segment are PHYSICAL defects of the LCD glass/polarizer, not powered
+     display content. They persist whether the device is on, off, dying, or
+     dead. Real LCDs with burn-in show the burn even unpowered; ours does too.
+     Same as .crack (physical glass damage, also never in any fade list). */
   .dying-lcd .lcd .status,
   .dying-lcd .lcd .out,
-  .dying-lcd .lcd .stuck,
   .dying-lcd .lcd .hex,
   .dying-lcd .lcd .pie,
   .dying-leds .solar .led {
     animation: batteryDie var(--battery-die-duration, 10s) ease-in forwards;
+  }
+
+  /* POST fade-in — the inverse of BATTERY LOW's fade-out. Same scope (segments
+     + individual LEDs only; green panel + LED housing stay solid throughout).
+     ease-out for "power surging back" — fast at first, decelerating to a settled
+     state. "forwards" keeps opacity 1 after the animation completes, so removing
+     the .booting class doesn't reset visibility. Duration much shorter than
+     BATTERY LOW (~1.5s) — the wake-in is brisk, the death is ceremonial. */
+  @keyframes batteryWake {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+  /* Several .lcd children are deliberately EXCLUDED here:
+       .hex, .pie — conditionally-visible (only during consult / π+π=PIE).
+                    Including them with `forwards` would leave them visible.
+       .stuck     — the ghost-8 has its own low natural opacity (0.12, plus 0.45
+                    for the stuck-ON segment via ::after). `forwards` would
+                    override those low opacities and render the ghost at full
+                    strength — making the LCD's permanent burnt-in artifact look
+                    like a regular display element. Leave .stuck at its natural
+                    opacity throughout; it appears immediately on page load.
+       .crack, .lcd-glitch — physical artifacts / overlay effects, not display
+                    content. Should not animate. */
+  .booting-lcd .lcd .status,
+  .booting-lcd .lcd .out {
+    animation: batteryWake var(--post-wake-duration, 1500ms) ease-out forwards;
+  }
+
+  /* GNAB GIB fade-out — the cosmological opener fades away before the boot
+     header proper begins. MUST be defined AFTER the .booting-lcd .lcd .out
+     rule because both rules set the `animation` shorthand on .out with equal
+     specificity (0,3,0). Source-order cascade puts the later rule on top, so
+     .bigbang-fading needs to come after .booting-lcd to win when both apply.
+     Forwards keeps the end state (opacity 0) until the class is removed, at
+     which point .out snaps back to opacity 1 for the next line. No visible
+     flash because the class removal and content change happen in the same JS
+     event-loop tick (browser repaints once at the end). */
+  @keyframes bigbangFade {
+    from { opacity: 1; }
+    to   { opacity: 0; }
+  }
+  .lcd .out.bigbang-fading {
+    animation: bigbangFade 1.5s ease-in forwards;
   }
 
   /* (No printout: the whole reading scrolls across the LCD instead — see the

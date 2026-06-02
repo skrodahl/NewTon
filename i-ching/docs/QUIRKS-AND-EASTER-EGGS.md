@@ -72,11 +72,12 @@ returned an answer of anything up to '4'."
   (for the scientific functions). Both check `Math.abs(r) > CEILING`.
 
 ### Two separate pools of nonsense
-- **`ORACLES`** (60 phrases) — shown when an answer is simply *too big*. Two are **verbatim
+- **`ORACLES`** (61 phrases) — shown when an answer is simply *too big*. Three are **verbatim
   Adams canon** (the device's defining utterances, kept unaltered): *"A Suffusion of Yellow"*
   (flagged as **"the canonical one"** and **slightly weighted** — `pickOracle()` returns it ~1 in 6
-  vs ~1 in 60 for the rest — so a first-time user is likely to meet the famous phrase), and
-  *"The Number of Pebbles in Wales"* (also from the calculator scene, unweighted). The rest riff
+  vs ~1 in 61 for the rest — so a first-time user is likely to meet the famous phrase),
+  *"The Number of Pebbles in Wales"* (also from the calculator scene, unweighted), and
+  *"A Puddle of Darkness"* (from *The Long Dark Tea-Time of the Soul*, unweighted). The rest riff
   on the same deadpan-surreal register: *"An Onset of Tuesday," "A Modest Quantity of Soup,"
   "Beige," "Approximately a Hat," "Somewhere Between Six and a Llama," "Two-Thirds of an Apology,"
   "Greyish, with Ambitions," "The Number of Empty Chairs at a Library Closing," "Approximately
@@ -938,3 +939,240 @@ fictional Sirius Cybernetics mail-order catalogue.
   viewport, below the device, in the desk-surround space — it belongs to the *room*, not
   the *calculator*, which is correct: installing is a decision made by the owner, not a
   function performed by the device.
+
+---
+
+## 12. The Boot Sequence (POST)
+
+Every page load — including reload — runs the **Power On Self Test**: a dry-technical
+firmware boot routine in a new voice register entirely (distinct from both the calculator's
+numeric display and the oracle's broken-English voice). The corporation's internal
+diagnostic log leaking through the user-facing surface. It takes its time, it commits to
+its theatre, and once per ten boots or so, it leaks something the user wasn't supposed to
+see.
+
+POST is also the keystone of the discovery gradient (Design Principle). Every user, every
+load, sees the boot. Most see only noise. A few see a hint. Very few see CLEW #1. The
+gradient is real-time and probabilistic.
+
+### The cosmological opener
+
+POST begins with two phases of a single line: **`GNAB`** appears on screen, holds, then
+**` GIB...`** appends to its right. Read forward, this is gibberish. Read backwards — letter
+by letter, word by word — it spells **`BIG BANG`**. The device begins its boot sequence at
+the beginning of the universe, just doing it backwards because nobody at the factory
+noticed. The trailing dots imply *"...and everything that followed."*
+
+**Implementation:** `GNAB` is right-padded with seven non-breaking spaces (matching the
+width of ` GIB...`) so right-alignment positions it where it'll be when phase B appends.
+GNAB stays in its X position across both phases — only the LEDs and the appended text
+indicate that something has happened. The two-phase change is synchronized with the
+LED kickoff (very-last → first-two), so a single visual moment marks "boot proper begins."
+
+After the full per-line duration, **GNAB GIB... fades out over 1.5s** before the boot
+header takes over. The fade separates the cosmological opener from the firmware boot
+proper: two distinct beats rather than one continuous stream.
+
+### The boot header
+
+Two fixed lines that appear after the opener fades:
+
+- `SCC FW BOOT 1.0` — Sirius Cybernetics Corporation Firmware Boot version 1.0
+- `ORACULON CT-64` — the device's full model name
+
+These never vary. The corporation never updates its firmware version, and the device's
+name is what it is. Every boot's hardware roll-call is identical.
+
+### The init lines (sampled, mixed pool)
+
+After the header, 6–8 random lines from a pool of ~60 entries. The pool is split into two
+internal categories — `POST_LINES_HINTS` and `POST_LINES_FLAVOUR` — but during POST display
+they're combined and shown identically. The distinction only matters at the very end (see
+"The HINT/CLEW reveal" below).
+
+**HINTS** (~37 lines) point to discoverable behaviours in the device. Each hint references
+something the user could investigate. Examples:
+
+- `WIRING_PCT: OK` — the `%` key is overloaded (modulo + Holistic Detective Fee + escape gate)
+- `WIRING_PI: OK [SLOW]` — π takes a beat to compute (the Calculating routine)
+- `RATIO_ENGINE: LOADED 3 CONSTANTS` — the three wrong constants (π, √2, e)
+- `KING_WEN_ORDER: NOT FOUND` — the hexagram table isn't in classical order
+- `CALIB_ABSZERO = -273.00 K [DRIFT: 0.15]` — the 0K Calibration gate, off-by-0.15
+- `CALIB_TEA = 21°C OK` — Dirk's tea temperature, the BATTERY LOW threshold
+- `CEILING = 4 OK` — Rule of 4
+- `WARRANTY: VALID UNTIL FATE` — the booklet's warranty line
+- `MANUAL: PAGES 4-11 NOT FOUND` — the missing pages
+- `EADRAX_PING: TIMEOUT` — Calibration mode's Complaints Department destination
+- `ERROR 5C` — the 5×C-press easter egg, dressed up as a hex error code
+- `STATUS: FUNDAMENTALLY A PUZZLE` — the device confessing what it is
+
+**FLAVOUR** (~25 lines) is generic firmware noise — Adams trivia, fake memory checks,
+pseudo-errors. Camouflage so the HINT lines don't visually stand out. Examples:
+
+- `MEM 32K OK`, `MEM 0K OK`, `BUS WIDTH: 4 BIT`
+- `BAMBELWEENY_57: FW NOT FOUND`, `BABEL_FISH: NOT INSTALLED`, `DEEP_THOUGHT: 7.5M YEARS`
+- `VOGON_POETRY_FILTER: ENABLED`, `PETUNIAS: 1`, `TOWEL: NOT DETECTED`
+- `FACTORY ID: 1979` (year *The Hitchhiker's Guide to the Galaxy* was first published)
+- `QA STATUS: SHIPPED`, `ENGINEER ON DUTY: NONE`, `FW REVISION: ?`
+
+**Sampling**: each boot picks 6–8 lines from the combined ~60-line pool via Fisher-Yates
+shuffle. The same boot rarely shows the same combination twice; a user who reloads will
+see different hints over time, building a notebook of references.
+
+### Per-line timing — randomised 1500–2500ms
+
+Each POST line shows for **random 1500–2500ms per call**. The variance keeps the boot
+from feeling metronomic — each line has its own beat. Earlier iterations used a fixed 2s
+and felt mechanical; the ±500ms jitter is what makes it feel like an actual machine doing
+actual (if implausible) work.
+
+### LED progression — the sliding 3-LED window
+
+The 18-LED strip provides the visual rhythm. Each POST line updates the LED state once,
+then the LEDs hold static for that line's duration. The progression:
+
+- **Line 0 (the GNAB GIB opener), phase A**: the *very last* LED (position 17) lit alone —
+  the boot's wake signal.
+- **Line 0, phase B** (midway): the *first two* LEDs (positions 0, 1) lit — the proper
+  progression begins from the start of the bar.
+- **Line N ≥ 1**: a 3-LED window at positions (N−1, N, N+1). Slides across the bar by
+  one position per line. By the time the last init line shows, the window has crossed
+  most of the strip.
+
+The static-per-line approach is deliberately calm. An earlier iteration had progressive
+dots on the text (`MEM 32K OK.`, then `..`, then `...`) and felt hectic — too much motion.
+Moving the rhythm from the text to the LEDs let the text hold steady, with only the LED
+window sliding by one position per line. Much more meditative.
+
+After POST completes, `ledIdle()` returns all progress LEDs to baseline — except POWER
+(see below), which stays lit.
+
+### POWER LEDs always lit
+
+The silkscreen legend `POWER · BUSY · ERR` (§6) sits under the LED bar. The `POWER` label
+spans LEDs 12 and 13 (1-indexed) — and **those two LEDs are always lit at full brightness**,
+regardless of what pattern is currently displayed. The device having power is its baseline
+state; the `POWER` label means what it says. (The other two labels keep their off-by-one
+mischief — `BUSY` doesn't really mean anything, and `ERR` sits one LED away from the actual
+soup-error LED. POWER is the *only* label that's grounded in actual behaviour, which makes
+the silkscreen-vs-reality joke even sharper: one label tells the truth, two lie.)
+
+The POWER override applies through every code path that touches LED brightness (idle,
+animations, POST, ledFor patterns) via `ledShow`. The only exception is BATTERY LOW — the
+`.dying-leds` CSS opacity fade kills the entire LED bar, POWER included, because the death
+sequence is physical (all LED current cut). When the device wakes from BATTERY LOW, POWER
+returns to lit immediately.
+
+### Right-aligned terminal styling
+
+POST lines render in a distinct visual register: VT323 at 18px, right-aligned, monospace
+(via the `.post` CSS class added to `.out`). Smaller than the calculator's normal 48px
+numeric display, smaller than the oracle's 24px phrase font. The size + monospace
+shaping reads as "terminal log entry" while the right-alignment ties it to the LCD's
+overall convention (the calculator's display is right-aligned everywhere). POST is the
+firmware's voice, on the calculator's display, using the display's conventions.
+
+The `.post` class persists through every POST line. It clears automatically the moment the
+user does anything that triggers a `render()` with `settled !== "phrase"` (a digit input,
+C, an operator) — so subsequent phrases (oracle, soup, Calibration) render in their normal
+phrase font.
+
+### The transition to "0"
+
+After the last init line completes, the device transitions to its default ready state:
+`disp = "0"` in the normal calc font (the `.post` class is removed). This is the device
+"booting ready." For most boots (~80%), this is where POST ends — the user can now use
+the calc normally.
+
+The transition is visible: the small right-aligned terminal text vanishes and is replaced
+by the large `0` of a calculator at rest. The change in font size + position makes the
+"boot complete" moment unambiguous.
+
+### The opening glitch
+
+POST starts with a 1250ms `lcdPanic` glitch animation (the same one used by the deluxe
+consult's 7th-line surprise — §4). The glitch fires in parallel with the segment fade-in,
+so the device's very first visible act is electrical jitter. The user sees the LCD come
+alive *through* a glitch, not after it. Sells the "old device powering up with electrical
+noise" feel for free; reuses an existing animation surface.
+
+### The HINT/CLEW reveal — the device interrupts itself
+
+This is the keystone moment. After POST settles to `0`, the user is free to do whatever
+they want. They might type calcs, run consults, or just stare at the screen. **Ten seconds
+later**, if the boot was rolled for HINT or CLEW (otherwise nothing happens), the device
+*interrupts itself*:
+
+1. A 1250ms `lcdPanic` glitch fires.
+2. Under cover of the glitch, the LCD content is replaced — by a random HINT (with
+   `HINT:` prefix) or by CLEW #1 (the URL `https://lostpages.oraculon.biz/`).
+3. The `.post` terminal styling is re-applied (smaller font, right-aligned).
+4. Input is re-sealed for the duration of the glitch (so the user can't dismiss mid-glitch).
+5. When the glitch ends, the gate clears. The HINT/CLEW lingers as a settled phrase until
+   the user does anything (any keypress dismisses, normal settled-phrase handling).
+
+**Probabilities per boot**: ~10% CLEW, ~10% HINT, ~80% nothing. The user who boots 10
+times typically sees 1 of each — and 8 boots that ended with just `0`, forgettable.
+
+**The 10-second wait is the magic.** By the time the glitch fires, the user has finished
+parsing the boot and started using the calc. They're in the middle of typing `5 + 3` and
+suddenly the LCD glitches and now says `HINT: PI_ENGINE = 22/7 OK`. That's the "what just
+happened?" moment that the design relies on.
+
+**Accidental dismissal is a feature, not a bug.** If the user happens to press a key
+during the brief unsealed window after the glitch (or even keeps pressing a key from
+before the reveal), the HINT/CLEW can be dismissed before it's been read. This is
+*intentionally preserved*. It makes the reveal feel more like a real glitch — fleeting,
+easy to miss — and it creates an incentive to refresh and try again. A user who catches a
+flash they can't quite identify will start watching for it. The interruption is the
+point; the catch is the reward.
+
+**Safety checks before the reveal fires**:
+- Skipped if `batteryDying` (BATTERY LOW is sacred — the 21-oracle grind earned its
+  silence; another routine shouldn't interrupt it).
+- Skipped if `postRunning` is already true (shouldn't happen; defensive).
+- `endOracle()` is called before the swap to clean up any consult state still running
+  in the background (pending LED bursts, hex graphics, etc.).
+
+### Why HINT carries the prefix and CLEW doesn't
+
+The `HINT:` prefix marks the line as the device addressing the user — *"this is for
+you."* Without it, hint lines would read as more internal status that the user can
+dismiss as firmware leakage. Adding the prefix tells the reader the device wants them to
+notice this one.
+
+CLEW doesn't need a prefix because the URL itself is unambiguous — a fully-formed link
+with a clearly readable subdomain (`lostpages` — pairing with the booklet's missing-pages
+gag from §5). Anyone who sees the CLEW knows what they're being given.
+
+### Implementation references
+
+- POST machinery: `runPost()` and `setPostLeds()` in `js/oraculon.js`
+- Line pools: `POST_LINES_HINTS` and `POST_LINES_FLAVOUR` arrays
+- Input gate: `postRunning` flag, checked at the top of both dispatchers
+- CSS: `.booting-lcd` (segment fade-in), `.bigbang-fading` (opener fade-out), `.out.post`
+  (terminal styling), `@keyframes batteryWake` / `@keyframes bigbangFade`
+- POWER LED override: `ledShow()` forces positions 11, 12 to brightness 1 unconditionally;
+  the `.dying-leds` CSS opacity fade is the only thing that can hide them (during BATTERY
+  LOW)
+
+### Discovery gradient placement
+
+POST sits at multiple layers of the gradient simultaneously:
+
+- **Surface**: everyone sees the boot. The cosmological opener (GNAB GIB → BIG BANG
+  reversed) is a quiet joke for the curious; the boot header is straightforward firmware
+  flavour.
+- **Idle exploration**: a user who watches the boot will notice individual init lines
+  hinting at specific quirks (`CALIB_TEA = 21°C`, `KING_WEN_ORDER: NOT FOUND`). Over
+  multiple boots, the lines accumulate.
+- **The patient catch**: the HINT reveal — 10 seconds after the device has "settled" —
+  is the device addressing the user directly. Rare but findable.
+- **The pilgrimage entry**: the CLEW reveal is the URL that points to the rest of the
+  discovery layers (lostpages.oraculon.biz — when built, the missing pages and the
+  hexagram-distributed CLEWs #2–#64).
+
+The whole sequence is universally functional at every depth above it — the user who
+never refreshes still gets a calculator that boots once and works. The user who reloads
+once or twice gets the boot's basic flavour. The user who refreshes ten times sees their
+first HINT. The user who refreshes a hundred times has assembled a notebook.
