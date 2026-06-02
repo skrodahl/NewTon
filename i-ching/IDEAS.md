@@ -433,64 +433,58 @@ Obsessive readers see device → URL → publication → next layer.
 - No state, no tracking, no persistence — pure random per cast.
 - Test fully with placeholders before committing to a URL/domain.
 
-### Cross-project layering — clews in NewTon's release notes
+### Cross-project layering — the silent retraction
 
-Retroactively edit `Docs/ReleaseNotes/RELEASE-NOTES-v5.1.3.md` (currently *"Cannot Operate
-on Soup"*) so it becomes a clew-carrier of its own. The release page already has Oraculon
-flavour (its tagline borrows the device's signature soup error, and its footer carries a
-clickable `42` link as a 42-easter-egg trail) — extend that flavour into a deliberate
-secondary clew surface.
+**Don't edit shipped release notes.** Edit the live site instead.
 
-**What changes:**
+v5.1.3 ("Cannot Operate on Soup") added a clickable `42` link to the landing page footer
+that trails the *"No popups? No cookies!"* line — Oraculon's principal discovery hook from
+NewTon. The retroactive move is to **silently remove that link** from the live landing
+page, while leaving v5.1.3's release notes documenting it as if it still exists. The
+release notes describe a feature that no longer matches reality. No v5.1.4 acknowledges the
+removal. The discrepancy IS the clue.
 
-- **New tagline**, in the same anti-direction register as the device's voice. Candidates:
-  - **"Don't Look Here for Clews"** — uses the device's signature `CLEW` spelling (British,
-    archaic), which is the *real* cue. A user who has already collected clews from the
-    device immediately recognises the spelling; everyone else reads it as an idle
-    misdirection. The anti-instruction IS the instruction, but only for the right reader.
-  - **"The Missing Release"** — implies the release is anomalous / shouldn't exist, which
-    pairs with the device's "(IF EXTANT)" Calibration parenthetical. Same humour shape.
-  - Other officialese variants in similar vein.
-- **Content carries embedded clews** — could be fragments of the 64 (alternate collection
-  path; rewards users who explore the host project), or could be a separate clew set that
-  points to the *next-layer* secret beyond the destination URL. Either is interesting; pick
-  during implementation.
-- **The release notes' historical claims may shift** in subtle ways from the originally
-  shipped version. The shift is the clue.
+**Why this is better than editing the release notes themselves:**
 
-**Why it works in-character:**
+- Release notes are historical records — dated, archived, *should* be immutable. Honouring
+  that constraint preserves journalistic credibility for everything else.
+- The live site is allowed to drift. Sirius Cybernetics absolutely would ship something,
+  document it once, and quietly retract it without a follow-up release. The corporation
+  doesn't owe you a changelog for what it removes.
+- The asymmetry is the joke: the past says one thing, the present says another, the present
+  doesn't explain itself. A reader who notices is doing real archival work.
 
-Retroactively editing a shipped release notes document is *something you're not supposed to
-do*. Release notes are historical records — dated, archived, ideally immutable. Violating
-that for the corporation's purposes is perfectly Sirius Cybernetics: a company that would
-absolutely backdate its own documentation when it suited them, with no acknowledgement, and
-expect everyone to act normal. The "we accidentally updated our archives" gesture is
-already in the brand.
+**The discovery shape after this lands:**
 
-For the device's discovery gradient, this adds a layer that uses *NewTon's infrastructure
-as a clew-carrier*. The trail becomes: user collects some clews from device → user explores
-the host project (NewTon) → user finds v5.1.3's strange tagline → user recognises the
-device-flavour spelling → user reads carefully and finds the planted material. The cross-
-project bleed is part of the puzzle, not a contamination of it.
+A user who:
+1. Encounters NewTon for unrelated reasons (darts tournament software).
+2. Browses release notes — perhaps scanning for a specific feature.
+3. Hits v5.1.3, reads the "Footer easter egg" section, learns about the `42` link.
+4. Goes to look at the footer — **the 42 isn't there**.
+5. Either shrugs and moves on (most users), OR investigates the discrepancy.
+6. The investigator finds the Oraculon by another route — direct URL guess, git
+   archaeology, or just by asking — and connects the gap.
 
-**Why it's also the right time to do it:**
+The user has *earned* the device's URL by noticing that the past disagrees with the
+present. This is a genuine archival discovery, not a click on a marketing link. The 42 link
+WAS the easy discovery path; removing it makes the device's discoverability less commercial
+and more found-object — exactly matching "path of discovery, nothing more."
 
-After the repo split (deploy snapshot stays on NewTon, dev moves elsewhere), the v5.1.3
-release notes will become a genuine archived artefact on NewTon — and the perfect place
-for the device to leave a fingerprint that connects the two repos *only for the user who
-knows to look*. The deeper a fan goes into the device, the more visible the cross-project
-connection becomes. The casual NewTon user sees a weird tagline. The committed Oraculon
-user sees a deliberate handshake.
+**Embrace any mistake (applied):** the retraction is framed in the corporation's voice as
+"the link was removed in a maintenance update we didn't ship release notes for." Sirius
+Cybernetics shipping a feature, documenting it, then silently retracting it without
+acknowledgement is *exactly* how that corporation behaves. The "mistake" of inconsistent
+documentation is absorbed into the device's fiction.
 
-**Caveats:**
+**Future extension:** this is one specific silent retraction. Nothing prevents future
+versions from adding features that get silently removed too — each one becomes a new
+"wait, where did that go?" moment for the archival reader. The pattern itself becomes a
+discovery layer: *the corporation removes things without telling you.*
 
-- Don't break the release notes' substantive content. The migration section, the technical
-  details about `.dlg__note`, the JSON-LD fix — those need to remain accurate as historical
-  record. Only the tagline and lightly-decorative passages should carry the clew load.
-- The originally-shipped tagline ("Cannot Operate on Soup") is itself an Oraculon nod and
-  worth preserving in some way — possibly retained as a subtitle, or referenced in the new
-  framing ("Originally shipped under the title *Cannot Operate on Soup*"). The edit should
-  feel like the corporation reissued the bulletin, not erased it.
+**Caveat:** the `42` link is currently THE discovery path for casual users. Removing it
+makes the device meaningfully harder to find. That's the design intent (less commercial,
+more found-object) but worth being clear-eyed about — install metrics, if anyone is
+tracking them, will drop. The principle "path of discovery, nothing more" accepts this.
 
 ---
 
