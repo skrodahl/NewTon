@@ -20,6 +20,18 @@ as designed by a company whose products almost work.
 
 Sirius Cybernetics products keep trying; their failures are sincere.
 
+**Embrace any mistake.** This is the meta-principle that holds the whole device together:
+nothing is admitted as a mistake. Every deviation, typo, regression, accidental leak, or
+post-deploy oddity becomes part of the device's fiction rather than corrected against it.
+A bug discovered after deploy isn't fixed — it's absorbed and explained. A typo in shipped
+text becomes "the corporation's typo." A regression becomes "the device deteriorating." An
+accidentally-shipped feature becomes "the device leaked it." A retroactively-edited
+release notes file becomes "the corporation updating its records." The device's most
+powerful defence is that *nothing* is unintentional — and the corporation behind it is
+exactly the kind of organisation that would behave this way. Any future change to anything
+already shipped should pass through this filter first: not "we made a mistake," but
+"the device/corporation has revealed something new about itself."
+
 The device has total freedom within severely restricted boundaries. It can do anything a cheap
 1980s scientific calculator could do, and nothing else. The restrictions are the point: the
 comedy lives in the gap between what the device *tries* to be (a helpful, professional instrument)
