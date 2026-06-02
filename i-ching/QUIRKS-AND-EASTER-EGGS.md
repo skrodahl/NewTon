@@ -32,6 +32,20 @@ exactly the kind of organisation that would behave this way. Any future change t
 already shipped should pass through this filter first: not "we made a mistake," but
 "the device/corporation has revealed something new about itself."
 
+**Interconnectedness is a design test.** New quirks should *connect* to existing ones — by
+extending a family, sharing a principle, or building a bridge between previously-separate
+pieces. The warranty's load-bearing line surfacing across three independent paths
+(EAT-THE-DEVICE oracle reading, PI+PI=PIE, Calibration's closing line). The constants
+forming a "two on the surface, three in total" wrong-constant family with a mirror
+correction family. The Calibration mode pointing to a Complaints Department on Eadrax that
+itself has a planned easter-egg surface. The 64-clew pilgrimage routing through hexagrams
+whose existing judgements already speak the language of hiding. The discovery gradient
+itself layering each user-type into a stack where every layer remains universally
+functional. Isolated easter eggs are rejected; connected ones are kept. If a new addition
+doesn't strengthen at least one existing thread, it probably doesn't belong on this
+device. The web of references *is* the device's depth — not the count of features but the
+graph between them.
+
 The device has total freedom within severely restricted boundaries. It can do anything a cheap
 1980s scientific calculator could do, and nothing else. The restrictions are the point: the
 comedy lives in the gap between what the device *tries* to be (a helpful, professional instrument)
