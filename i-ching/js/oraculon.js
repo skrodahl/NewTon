@@ -1380,7 +1380,8 @@
     localStorage.setItem("oraculon_install_dismissed", "1");
   });
 
-  window.installApp = function() {
+  var installBtn = document.getElementById("installBtn");
+  if (installBtn) installBtn.addEventListener("click", function() {
     if (!_installPrompt) return;
     _installPrompt.prompt();
     _installPrompt.userChoice.then(function() {
@@ -1388,11 +1389,12 @@
       var banner = document.getElementById("installBanner");
       if (banner) banner.classList.remove("visible");
     });
-  };
+  });
 
-  window.dismissInstall = function() {
+  var dismissBtn = document.getElementById("dismissBtn");
+  if (dismissBtn) dismissBtn.addEventListener("click", function() {
     var banner = document.getElementById("installBanner");
     if (banner) banner.classList.remove("visible");
     localStorage.setItem("oraculon_install_dismissed", "1");
-  };
+  });
 })();

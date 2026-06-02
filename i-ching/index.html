@@ -1,6 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>易經計算機 — I Ching Calculator CT-64</title>
+<title>ORACULON CT-64 — I Ching Calculator</title>
+<meta name="description" content="A fictional vintage scientific calculator that tells fortunes via the I Ching. It cannot produce an answer above four. Probably less than 1,000,000 glitches.">
+<link rel="canonical" href="https://oraculon.com/">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oraculon.com/">
+<meta property="og:title" content="ORACULON CT-64 — I Ching Calculator">
+<meta property="og:description" content="A fictional vintage scientific calculator that tells fortunes via the I Ching. It cannot produce an answer above four.">
+<meta property="og:image" content="https://oraculon.com/icons/icon-512.png">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ORACULON CT-64 — I Ching Calculator">
+<meta name="twitter:description" content="A fictional vintage scientific calculator that tells fortunes via the I Ching. It cannot produce an answer above four.">
+<meta name="twitter:image" content="https://oraculon.com/icons/icon-512.png">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ORACULON CT-64",
+    "description": "A fictional vintage scientific calculator inspired by Douglas Adams' The Long Dark Tea-Time of the Soul. It reckons sums, performs science, and foretells the unknowable across 64 hexagram. It cannot produce an answer above four.",
+    "url": "https://oraculon.com/",
+    "applicationCategory": "EntertainmentApplication",
+    "operatingSystem": "Web Browser",
+    "browserRequirements": "Chrome, Firefox, Safari, Edge",
+    "offers": {
+        "@type": "Offer",
+        "price": "0",
+        "priceCurrency": "USD"
+    },
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/licenses/BSD-3-Clause",
+    "author": {
+        "@type": "Organization",
+        "name": "Sirius Cybernetics Corporation",
+        "description": "A bunch of mindless jerks who'll be the first against the wall when the revolution comes."
+    }
+}
+</script>
 
 <!-- PWA: installable, standalone, themed to the dark desk surround -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -14,8 +58,10 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
 <!-- self-hosted retro fonts (no network needed; CSP can stay 'self') -->
-<link rel="stylesheet" href="fonts/fonts.css?v=4">
-<link rel="stylesheet" href="css/oraculon.css?v=4">
+<link rel="stylesheet" href="fonts/fonts.css?v=5">
+<link rel="stylesheet" href="css/oraculon.css?v=5">
+</head>
+<body>
 
 <div class="device" role="application" aria-label="I Ching Calculator">
   <!-- the back half fell off; held on with a strip of aging Sellotape -->
@@ -106,8 +152,10 @@
 
 <div class="install-banner" id="installBanner">
   <span class="install-text">INSTALL ORACULON FOR PORTABLE FORTUNE</span>
-  <button class="install-btn" onclick="installApp()">INSTALL</button>
-  <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+  <button class="install-btn" id="installBtn">INSTALL</button>
+  <button class="install-dismiss" id="dismissBtn">✕</button>
 </div>
 
-<script src="js/oraculon.js?v=4" defer></script>
+<script src="js/oraculon.js?v=5" defer></script>
+</body>
+</html>

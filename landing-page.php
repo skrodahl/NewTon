@@ -265,7 +265,7 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
             <a href="third-party-licenses.html">Licenses</a> &mdash;
             <a href="design-system.html">Design System</a>
         </p>
-        <p><em class="footer-cheeky">No popups? No cookies!</em> <a class="footer-egg" href="/i-ching/" target="_blank" rel="noopener">42</a></p>
+        <p><em class="footer-cheeky">No popups? No cookies!</em> <a class="footer-egg" href="https://oraculon.biz" target="_blank" rel="noopener">42</a></p>
     </div>
 
 </body>

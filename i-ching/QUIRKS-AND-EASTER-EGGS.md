@@ -4,6 +4,23 @@ A catalogue of every intentional joke, hidden behaviour, and bit of flavour text
 [index.html](index.html). Nothing here is a bug — it is all on purpose.
 If you edit the code, preserve these.
 
+### By the numbers
+
+~**300** distinct text strings the device can produce across 10+ phrase pools and 8 hardcoded
+intercepts. ~**45** distinct behavioural mechanics (Rule of 4, soup state, the 5-layer `%` key,
+the rational-approximation family, the 42 lucid bypass, the hexagram gate, the slow-π input
+gate, flip-word substitutions, the annunciator system, six LED signatures, and more). ~**15**
+layered visual quirks (grime, scratches, dead pixels, off-aligned keys, the sticker, the
+Sellotape, the crack, the stuck ghost-8, the misaligned legend).
+
+The oracle alone reaches **~6.6 million** unique reading-string instances: 128 hexagrams × 25
+advice lines × 17 endings × 2 motion states × 61 accuracy percentages. A dedicated user is
+statistically unlikely to see every variant in a lifetime of consults. The device is always
+bigger than its current owner.
+
+All of this lives in a single HTML file, a single JS file, and a single CSS file. No framework,
+no build step, no server. A cursed object found in a drawer.
+
 ---
 
 ## Design Principle
@@ -20,32 +37,6 @@ as designed by a company whose products almost work.
 
 Sirius Cybernetics products keep trying; their failures are sincere.
 
-**Embrace any mistake.** This is the meta-principle that holds the whole device together:
-nothing is admitted as a mistake. Every deviation, typo, regression, accidental leak, or
-post-deploy oddity becomes part of the device's fiction rather than corrected against it.
-A bug discovered after deploy isn't fixed — it's absorbed and explained. A typo in shipped
-text becomes "the corporation's typo." A regression becomes "the device deteriorating." An
-accidentally-shipped feature becomes "the device leaked it." A retroactively-edited
-release notes file becomes "the corporation updating its records." The device's most
-powerful defence is that *nothing* is unintentional — and the corporation behind it is
-exactly the kind of organisation that would behave this way. Any future change to anything
-already shipped should pass through this filter first: not "we made a mistake," but
-"the device/corporation has revealed something new about itself."
-
-**Interconnectedness is a design test.** New quirks should *connect* to existing ones — by
-extending a family, sharing a principle, or building a bridge between previously-separate
-pieces. The warranty's load-bearing line surfacing across three independent paths
-(EAT-THE-DEVICE oracle reading, PI+PI=PIE, Calibration's closing line). The constants
-forming a "two on the surface, three in total" wrong-constant family with a mirror
-correction family. The Calibration mode pointing to a Complaints Department on Eadrax that
-itself has a planned easter-egg surface. The 64-clew pilgrimage routing through hexagrams
-whose existing judgements already speak the language of hiding. The discovery gradient
-itself layering each user-type into a stack where every layer remains universally
-functional. Isolated easter eggs are rejected; connected ones are kept. If a new addition
-doesn't strengthen at least one existing thread, it probably doesn't belong on this
-device. The web of references *is* the device's depth — not the count of features but the
-graph between them.
-
 The device has total freedom within severely restricted boundaries. It can do anything a cheap
 1980s scientific calculator could do, and nothing else. The restrictions are the point: the
 comedy lives in the gap between what the device *tries* to be (a helpful, professional instrument)
@@ -60,44 +51,6 @@ than the hardware suggests. But the hardware itself is frozen. It sort of works 
 calculator, fails at being a proper scientific calculator, in exactly the wrong and intended
 way. The missing `e` key (§3) is not an oversight to fix; it's documentary evidence that
 Sirius Cybernetics forgot to include it.
-
-### The discovery gradient
-
-People will see an innocent and flawed calculator that provides fortune telling. Those that
-start exploring will start to discover things. Some are hidden in plain sight. Some appear by
-virtue of time. Some by pure luck. Some are obvious for fans of calculators, Douglas Adams,
-or mathematics. Some give hints to similar quirks. The grand, number-of-pebbles-in-Wales,
-clew-hunting is for the relentless — in a way that makes oracle-fatigue look like child's play.
-
-Concretely the layers run:
-
-- **Surface** — innocent and flawed calculator. Everyone sees this.
-- **Idle exploration** — quirks hidden in plain sight: the £20 sticker, the Sellotape
-  holding on the back half, the soup-ERR LED off-by-one against its silkscreen label.
-- **Time-based** — the `DEG`→`RAD` flicker, ambient corporate noise like the planned
-  `SHARE AND ENJOY` flash.
-- **Lucky** — the random oracle phrases, the flip-words spotted by accident.
-- **Fan-shaped** — calculator nostalgia (`B00BIES`, the 8-digit input cap), Douglas Adams
-  (Forty-two, Eadrax, the EAT THE DEVICE paths, Sirius Cybernetics, the warranty line),
-  mathematics (22/7, 99/70, 19/7, π+π=pie, the silent constant correction, the 0 Kelvin gate).
-- **Hint-bearing** — the shared `Calculating...` beat across three independent paths that
-  reveals the device has *specific* ideas about *specific* numbers; the warranty's
-  load-bearing line surfacing across three independent surfaces.
-- **The relentless** — BATTERY LOW (21 consecutive oracle results, Dirk's tea-temperature
-  and half-a-forty-two), the deepest reward currently implemented.
-- **The pilgrimage** — the 64-clew assembly into a hidden companion-site URL (planned, see
-  IDEAS): obsessive territory; Wales pebbles. The deepest legal depth.
-
-Each layer is universally functional at every depth above it. A user who never goes past
-"innocent calculator" still has a calculator. A user who collects flip-words still has a
-fortune-teller. A user who finds BATTERY LOW has earned an exit no one demanded they take.
-The clew-hunter is just the user at the deepest legal depth. **No layer is gated against
-the layer above it; every layer is accessible to whoever finds it.** The device is
-universally useless at every level, in increasingly satisfying ways.
-
-> *A short variation of this section will likely become the public-facing description for
-> the Play Store entry (Stage 0.5 distribution): same hierarchy, marketing register, fewer
-> internal references. To be drafted closer to launch.*
 
 ---
 
@@ -258,80 +211,6 @@ non-terminating decimal expansion, the **"8 in / 10 out"** display mismatch (§2
 Lucid + division = the device's silent commitment to showing the real answer regardless of how
 ridiculous the digit count gets.
 
-### BATTERY LOW — the 21st-consecutive-oracle fatigue
-
-The deepest easter egg in the device. The Rule of 4 says: *the answer must stay below 4; bigger
-results become an oracle phrase.* The user who insists on doing big calcs over and over earns
-*nothing* from this — every result becomes a different oracle phrase, the device keeps
-deflecting. There's no payoff for grinding the Rule of 4, **except** if you grind it long
-enough.
-
-After **21 consecutive oracle results** with no real number in between (and no `C` press to
-break the streak), the 21st-would-be oracle is replaced by **BATTERY LOW**. The device's
-pretend-energy-source — advertised by the `POWER · BUSY · ERR` legend that's been hanging
-under the LED bar all along (see §6) — finally "gives out." The LCD displays the phrase
-`BATTERY LOW` at full brightness, then *only the segments* fade — text, annunciators,
-ghost-8, hex/pie graphics — along with the individual LEDs in the bar. The **green LCD
-panel itself and the dark LED housing stay solid throughout**: this is a reflective LCD,
-not a backlit one, so power loss kills the segments but the polarizer/reflector glass
-remains visible. The segment fade runs over **9000–11500ms** (random per fire — never
-exactly 10s) with an `ease-in` curve (battery-knee feel: slow plateau, accelerating drop).
-
-**The wake-up has three stages:**
-1. **Dead pause** equal in duration to the fade itself — another 9000–11500ms with the
-   panel visibly still green but completely blank (no segments, no LEDs). The device is
-   fully powered down; the panel just stares back. *Tense.*
-2. **LED sputter** — in the final 2 seconds before LCD wake-up, the LEDs come back online
-   alone, firing randomly via the `twinkle` pattern. Power returns to the easy-to-power
-   bits first; the LCD is still dark. No SOS, no Morse — just chaotic LED noise as the
-   device tries to power back up.
-3. **LCD wake-up** — at the end of the LED sputter, the LCD content snaps to `0`, the
-   `.dying-lcd` class is removed (segment opacity returns to full instantly), all session
-   counters reset (lucid trigger, π press count, escape arm, C-mash streak, hex/pie
-   graphics all cleared), LEDs return to idle. Like a fresh boot.
-
-Total dead-time: **~18–23 seconds** (2 × fadeDuration). The two-stage wake-up (LEDs first,
-then LCD) is in-character — a real cheap device coming back from a dead battery would
-sputter on the easy bits before the demanding display started working again.
-
-**The threshold of 21 has two simultaneous readings** — both pure Adams:
-
-1. **Dirk Gently's tea-temperature commitment number** — Dirk's optimal tea temperature is
-   room temperature, ~20–21°C; we settled on 21 deliberately.
-2. **Half of forty-two** — exactly half of the Ultimate Answer. Adams numerologically: if
-   42 is the device's most-canon-stacked number (Q42 pool, lucid bypass, base-13 path,
-   PIE reading, 13-char display coincidence — §1, §3, §9), then 21 is its quiet other
-   half. The user who has hit the Rule of 4 wall 21 times has, in a sense, accumulated
-   *half an Answer's worth of failure* before the device gives up.
-
-Both readings point to the same number; both are valid; either alone would justify the
-choice. The device's deepest threshold is the intersection of "Dirk's room-temp tea" and
-"half an Ultimate Answer" — exactly the kind of canon density the most-buried easter egg
-deserves.
-
-**Total input seal during the fade.** While `batteryDying` is true, the dispatchers refuse
-every key, including `C`. The device is *dead* for the duration; no early recovery, no
-short-circuit. The user who earned this by hitting the Rule of 4 wall 21 times in a row
-accepts the full 10-second penalty. The fact that `C` doesn't bypass the death is itself a
-piece of texture: a real cheap device with a dead battery doesn't respond to its power button
-either.
-
-**Why this is the most-hidden easter egg in the device.** It takes 21 consecutive Rule-of-4
-results — every calc must produce a result with absolute value > 4, with no real number ever
-intervening, and no `C` press to reset. That's a deliberate grind. Vanishingly few owners will
-ever see it. The reward isn't a witty phrase or a hidden answer — it's the device giving up
-on itself, fading away, and coming back. The user gets confirmation that even the Rule of 4
-has a limit, and the limit is "the device is too cheap to handle being asked this many big
-questions in a row."
-
-**Implementation.** `oracleStreak` counter increments at the start of `suppressBig()`, resets
-in `showNumber()` (real number shown) and `clearAll()` (`C` pressed). On streak reaching 21,
-`fireBatteryLow()` runs instead of the oracle: sets `batteryDying = true`, sets the CSS
-variable `--battery-die-duration` to the random duration, adds `.dying` class to body.
-A keyframe `batteryDie` (opacity 1 → 0, ease-in, forwards) runs on `.lcd` and `.solar`.
-After the duration, `setTimeout` clears `.dying`, resets all session state, calls
-`endOracle()` and `clearAll()`. Repeatable: another 21-in-a-row will fire it again.
-
 ---
 
 ## 2. Calculator Behaviour Quirks
@@ -386,30 +265,18 @@ After the duration, `setTimeout` clears `.dying`, resets all session state, call
   overlay, settle — would have required coordinating with each rendering surface, and a partial
   implementation that only fired on `=` would have felt like a bug rather than a feature.)*
 
-- **Minus-as-sign — two states.** The device has no dedicated `+/-` key; pressing `−` instead
-  starts a negative-number entry in two distinct states:
-
-  **State 1: default state.** Pressing `−` when the display reads exactly `"0"` and no
-  operator is pending (just after `C`, or at first load) does NOT start a subtraction.
-  The display becomes literally `−` and the next digit extends to `-5` (or `-0.5` for a
-  decimal). Reachable accidentally by anyone who presses `−` first at the start; the `−`
-  appearing on screen is the discovery cue. Opens the path to `sqrt(-x)` → IMAGINARY pool
-  (§1).
-
-  **State 2: after a non-minus operator (post-operator entry).** Pressing `−` when an
-  operator is pending (`+`, `×`, `÷`, `%` — anything except `−` itself) AND `fresh === true`
-  (no digit typed yet for the next operand) starts a *negative-operand* entry. The pending
-  operator is preserved; the next operand becomes negative. Lets the user type `0 ÷ -273.15
-  =` directly, and the more general case of `X op -Y` for any op except `−`. The op !== "−"
-  guard preserves the existing double-minus behaviour for users who do that (`5 − − 3` still
-  re-affirms subtraction).
-
-  Both states emit `disp = "-"` until a digit comes in; the inputDigit `disp === "-"` branch
-  then prepends the minus to the new digit. If the user presses something other than a digit
-  while disp is `"-"`, parseFloat returns NaN, which propagates through doBinary to VOID —
-  acceptable failure mode for a gesture the device wasn't expecting. State 2 is a deliberate
-  extension that brings the device closer to a real calc (which would accept negative
-  operands); without it, the 0 Kelvin gate (see §3) wouldn't be typeable.
+- **Minus-as-sign at default state.** Pressing `−` when the display reads exactly `"0"` and no
+  operator is pending (i.e. just after `C`, or at first load) **does NOT** start a subtraction.
+  Instead, the display becomes literally `−` and the next digit extends to `-5` (or `-0.5` for
+  a decimal). The device is now in negative-number entry mode without any explicit `+/-` key.
+  Reachable accidentally by anyone who presses `−` first at the start state; the `−` appearing
+  on screen is the discovery cue. Opens the path to negative arithmetic generally — and
+  specifically to `sqrt(-x)` triggering the IMAGINARY pool (§1). The discovery chain is:
+  press `−` at start → type a number → press `√` → see *"Imaginary, Mostly"* or similar.
+  Implementation: a guard in `setOp()` that special-cases the first-minus, plus a guard at the
+  top of `inputDigit()` that handles `disp === "-"` by prepending the minus to the new digit.
+  `del` (⌫) cancels back to `0` via its existing length-1 → "0" rule. Once a digit is typed,
+  the negative number behaves normally throughout the rest of the calc.
 
 - **The pending operator is NEVER shown.** Standard calculators display the pressed operator
   somewhere (usually a small status indicator near the LCD). The Oraculon **deliberately does
@@ -616,133 +483,6 @@ After the duration, `setTimeout` clears `.dying`, resets all session state, call
   commit itself resets the counter, enforcing the "true double-press" rule: once `22/7` is on
   screen, the next `π` press starts a fresh chain.
 - **`log` is base-10** (`Math.log(x)/Math.LN10`), labelled `log` as on a classic calculator.
-- **The device corrects your *correct* numbers — the polite-prude family extended.**
-  The wrong-constants entries above describe how the device's `π`, `√2`, and `e` keys produce
-  rational approximations. This entry is the *mirror image*: when the user manually enters one
-  of the three real constants — to the longest precision the 8-digit input cap allows — the
-  device launches its `Calculating...` routine and commits its own wrong value. Three
-  correction rules:
-
-  | What the user typed (real value, truncated to 8 digits) | What the device "calculates" to |
-  |---|---|
-  | `3.1415926` (real π to 7 decimals) | `3.142857143` (its 22/7) |
-  | `1.4142135` (real √2 to 7 decimals) | `1.414285714` (its 99/70) |
-  | `2.7182818` (real e to 7 decimals) | `2.714285714` (its 19/7) |
-
-  Negative forms (`-3.1415926` etc.) correct identically, sign preserved. The user's last
-  keystroke triggers the same ~1-second `Calculating...` beat that pressing the `π` key uses,
-  and the corrected number appears when it commits. **The slow beat is the clue.** A
-  mathematically-aware user who notices the consistent timing across `π`-key, `2, √`, and
-  typed-real-constant paths starts to suspect the device has *specific* ideas about those
-  specific numbers. The delay isn't disguise — it's pattern recognition for the patient.
-
-  **`2, √` also goes through `Calculating...` for consistency.** Originally `√2` returned its
-  99/70 instantly; now it fires the same slow routine as the typed-constant correction. Any
-  production of a wrong constant takes the same beat, regardless of *how* the user arrived at
-  it. Three independent paths (`π` key, `2, √`, typed real value) — one shared timing
-  signature. Other `√` inputs (`√3`, `√4`, `√5`, ...) remain instant; the slow beat is reserved
-  for the device's three textbook-table specials.
-
-  **The whole conceit lives in the gap between cap and display.** The input is capped at 8
-  digits (cheap calc), but the device's wrong constants display at 10 digits via the
-  Calculating commit. So the user is **doubly wrong-helped**: first the cap denies them the
-  precision they were reaching for, then the correction adds extra digits they didn't ask for.
-  They typed too few decimals AND too many simultaneously, in the device's opinion. Sirius
-  Cybernetics shipped a firmware that genuinely believes its rational approximations are the
-  authoritative values and accurate decimals are typing noise; "correction" here is not
-  censorship, it's *the firmware fixing what it perceives as user error*. Same family as the
-  polite refusal of `80085` (rendered as the full `B00BIES` rather than the cruder
-  abbreviation): the device is too well-bred to accept the input as given.
-
-  **During the Calculating, the device refuses input.** The dispatchers gate on `calcKind`: when
-  it's `"constant"` (the typed-correction or `√2` paths), *no* keys register, including `π`.
-  When it's `"pi"` (the `π`-key path), only `π` is allowed through (for the double-press
-  toggle). The two gating modes share a single mechanism but differ by exception: π-Calculating
-  is permeable to π; constant-Calculating is totally sealed. The device is busy computing
-  whichever wrong value it has decided you wanted, and will not be distracted.
-
-  **Strict equality only.** Typing `3.1415` (incomplete) does nothing; only the full 8-digit
-  truncation fires. The user must be *demonstrably trying* to type real-π before the device
-  asserts. Anything shorter is ambiguous (could be any number), and the device, while
-  opinionated, is not paranoid. Three-member correction family (π, √2, e) directly mirrors the
-  three-member total wrong-constants family in the entries above (two surface + one hidden via
-  π double-press). The constants are the device being wrong *quietly*; the correction is the
-  device being wrong *assertively*; the Calculating wrapper turns the assertion into a *clue*.
-  Implemented as `correctIfRealConstant()` (returns boolean) called at the end of every
-  disp-mutating branch of `inputDigit()`, delegating to the shared `slowCalcConstant()` helper
-  which also serves the `√2` path.
-
-- **The 0 Kelvin gate — Calibration mode via misguided helpfulness.** The device works in
-  degrees Celsius (the `DEG` annunciator is on at all times). Absolute zero — 0 Kelvin — is
-  `-273.15°C`. So the conceptual gesture "divide by 0 Kelvin" is mathematically `divide by
-  -273.15` in the device's units. *Not* divide by zero. The joke is that the user is
-  *thinking* divide-by-zero (a real boundary condition), the device is *seeing* a perfectly
-  ordinary division, and the device's helpful attempt to compute it sends the firmware over
-  the edge anyway.
-
-  **Trigger.** A division involving 0 and -273.15 in either direction:
-  - `0 ÷ -273.15 =` — mathematically 0 (perfectly valid). The device "divided by zero"
-    despite the divisor not being zero (in Celsius); it's now in an impossible state by its
-    own logic.
-  - `-273.15 ÷ 0 =` — mathematically -∞. The real division-by-zero, with the operand being
-    absolute zero. Normally produces VOID; the gate intercepts before the VOID check.
-
-  Either direction fires the same response. Detection happens at the top of `doBinary()`
-  (before `isFinite`, before the lucid bypass, before `6×9`) so the gate has priority over
-  every other special path.
-
-  **Response: CALIBRATION mode.** The LCD scrolls the device's service-notice reading:
-
-  > `Division by absolute zero: Calibration overdue · SIRIUS CYBERNETICS CORPORATION ·
-  > RETURN UNIT TO COMPLAINTS DEPARTMENT OFFICES ON EADRAX (IF EXTANT) · IF UNREACHABLE
-  > EATING THE DEVICE REMAIN A VALID OPTION`
-
-  Then settles on `CAL.`. The opener names the diagnostic explicitly — "Division by
-  absolute zero" — so the user (if they read it) learns exactly what they did. The body
-  is Sirius Cybernetics officialese, with a direct Adams nod: the user is directed to
-  return the unit to the corporation's **Complaints Department offices** (in Hitchhiker
-  canon, the Complaints Department exists specifically to ignore complaints — routing
-  the user there for a *broken device* is the most archetypal Sirius-Cybernetics move
-  possible). The offices are on the planet **Eadrax**. The "**(IF EXTANT)**"
-  parenthetical is the device politely acknowledging that the Complaints Department may
-  no longer exist — galactic real estate being what it is — which in turn is why the
-  warranty's third callback (eat the device) reads as the realistic fallback rather
-  than absurd advice.
-
-  **Background lore (not stated on-device).** The Complaints Department is the only
-  profitable division of Sirius Cybernetics Corporation. The corporation makes such
-  terrible products that the only arm turning a profit is the one processing the endless
-  complaints about them — a perfect Adams catch-22. The Calibration reading doesn't
-  *say* this; it just *routes the user there*. The reader of this document knows why
-  that routing is funny; the device's user only knows they've been directed to file a
-  complaint about a calculator that broke trying to do absolute-zero math.
-
-  **The closing line is the device's THIRD warranty callback.** The booklet's *"Do not eat
-  the device even if it advise so"* is now load-bearing across:
-  - The consult-side **EAT-THE-DEVICE reading** (LESSER SOUP + line 6, §4)
-  - The calc-side **`π + π = PIE`** path (§1)
-  - The Calibration **service-mode closing line** (this entry)
-
-  Three independent paths to the same booklet line. The device's own maintenance manual
-  casually listing ingestion as an alternative to professional servicing is the most
-  Sirius-Cybernetics line in the whole device: a corporation that ships eat-yourself as a
-  documented fallback.
-
-  **Why "Calibration via misguided helpfulness" is the right framing.** A real device would
-  refuse to process absolute zero (range error, domain violation). The Oraculon, in
-  keeping with the design principle (sincerely failing to help), *attempts* the math anyway
-  — and the attempt destabilises it. Calibration is the recovery routine. The gate isn't a
-  mode switch; it's a *consequence*. The user broke the device with a perfectly innocent
-  arithmetic gesture, and the device responds with a bureaucratic service notice it
-  shouldn't have firmware for. (See IDEAS for the original framing: this was the "simpler"
-  of two paths to Calibration; the more convoluted Bambelweeny path involving Dirk's tea
-  temperature was considered and dropped — one gate is enough.)
-
-  Implementation: `fireCalibration()` adjacent to `fireBatteryLow()` in the source (both
-  are end-of-pretend-system routines). Uses the same `marchReading` scroller as the
-  consult flow. The `√2` Calculating, the BATTERY LOW fade, and the Calibration scroll all
-  borrow from the device's existing visual vocabulary — the device knows how to do these
-  things because it knows how to do consults; the only difference is what triggers them.
 
 ---
 
