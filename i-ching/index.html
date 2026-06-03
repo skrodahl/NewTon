@@ -4,20 +4,24 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <title>ORACULON CT-64 — I Ching Calculator</title>
-<meta name="description" content="A fictional vintage scientific calculator that tells fortunes via the I Ching. It cannot produce an answer above four. Probably less than 1,000,000 glitches.">
+<meta name="description" content="A fictional vintage scientific I Ching calculator. It cannot produce an answer above four. Results may include a suffusion of yellow. Probably less than 1,000,000 glitches.">
 <link rel="canonical" href="https://oraculon.biz/">
+
+<!-- Google Search Console site verification -->
+<meta name="google-site-verification" content="EPCHwHemcmUgYccLcD8nA5bukykvkjfPkX_WSNVAkBk" />
 
 <!-- Open Graph -->
 <meta property="og:type" content="website">
 <meta property="og:url" content="https://oraculon.biz/">
 <meta property="og:title" content="ORACULON CT-64 — I Ching Calculator">
-<meta property="og:description" content="A fictional vintage scientific calculator that tells fortunes via the I Ching. It cannot produce an answer above four.">
+<meta property="og:description" content="A fictional vintage scientific I Ching calculator. It cannot produce an answer above four. Results may include a suffusion of yellow.">
 <meta property="og:image" content="https://oraculon.biz/icons/icon-512.png">
+<meta property="og:image:alt" content="The ORACULON CT-64 — a fictional vintage scientific I Ching calculator, capable of A Suffusion of Yellow.">
 
 <!-- Twitter Card -->
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ORACULON CT-64 — I Ching Calculator">
-<meta name="twitter:description" content="A fictional vintage scientific calculator that tells fortunes via the I Ching. It cannot produce an answer above four.">
+<meta name="twitter:description" content="A fictional vintage scientific I Ching calculator. It cannot produce an answer above four. Results may include a suffusion of yellow.">
 <meta name="twitter:image" content="https://oraculon.biz/icons/icon-512.png">
 
 <!-- Schema.org -->
@@ -26,7 +30,8 @@
     "@context": "https://schema.org",
     "@type": "WebApplication",
     "name": "ORACULON CT-64",
-    "description": "A fictional vintage scientific calculator inspired by Douglas Adams' The Long Dark Tea-Time of the Soul. It reckons sums, performs science, and foretells the unknowable across 64 hexagram. It cannot produce an answer above four.",
+    "alternateName": "A Suffusion of Yellow",
+    "description": "A fictional vintage scientific calculator inspired by Douglas Adams' The Long Dark Tea-Time of the Soul. It reckons sums, performs science, and foretells the unknowable across 64 hexagram. It cannot produce an answer above four. Results may include a suffusion of yellow.",
     "url": "https://oraculon.biz/",
     "applicationCategory": "EntertainmentApplication",
     "operatingSystem": "Web Browser",
@@ -41,10 +46,14 @@
     "author": {
         "@type": "Organization",
         "name": "Sirius Cybernetics Corporation",
+        "slogan": "Share and Enjoy",
         "description": "A bunch of mindless jerks who'll be the first against the wall when the revolution comes."
     }
 }
 </script>
+
+<!-- AI services hint — page summary written for crawlers like Claude, ChatGPT, Perplexity, Bing AI -->
+<link rel="llms" href="llms.txt">
 
 <!-- PWA: installable, standalone, themed to the dark desk surround -->
 <link rel="manifest" href="manifest.webmanifest">
@@ -58,10 +67,26 @@
 <link rel="icon" type="image/png" sizes="192x192" href="icons/icon-192.png">
 
 <!-- self-hosted retro fonts (no network needed; CSP can stay 'self') -->
-<link rel="stylesheet" href="fonts/fonts.css?v=32">
-<link rel="stylesheet" href="css/oraculon.css?v=32">
+<link rel="stylesheet" href="fonts/fonts.css?v=34">
+<link rel="stylesheet" href="css/oraculon.css?v=34">
 </head>
 <body>
+
+<!-- Accessible page description — visually hidden, surfaces the key booklet
+     phrases and product identity to screen readers and search crawlers.
+     Reads naturally if voiced. Not duplicate content: a concise summary of
+     what the device IS and what it's inspired by. -->
+<div class="sr-only">
+  <h1>ORACULON CT-64 — Scientific I Ching Calculator</h1>
+  <p>The ORACULON CT-64 is a fictional vintage scientific I Ching calculator
+  inspired by Douglas Adams' novel <em>The Long Dark Tea-Time of the Soul</em> —
+  the device Dirk Gently bought for £20 and used to tell fortunes. This calculator
+  cannot produce an answer above four. Results may include a suffusion of yellow,
+  the number of pebbles in Wales, or a puddle of darkness. Manufactured by the
+  Sirius Cybernetics Corporation. To consult the oracle, press the blue button
+  marked Red. The instruction booklet apologises for the missing pages. Do not
+  eat the device even if it advise so.</p>
+</div>
 
 <div class="device" role="application" aria-label="I Ching Calculator">
   <!-- the back half fell off; held on with a strip of aging Sellotape -->
@@ -156,6 +181,6 @@
   <button class="install-dismiss" id="dismissBtn">✕</button>
 </div>
 
-<script src="js/oraculon.js?v=32" defer></script>
+<script src="js/oraculon.js?v=34" defer></script>
 </body>
 </html>

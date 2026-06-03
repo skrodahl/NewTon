@@ -1,0 +1,45 @@
+# ORACULON CT-64
+
+> A fictional vintage scientific I Ching calculator. It cannot produce an answer above four. Results may include A Suffusion of Yellow.
+
+## About
+
+The ORACULON CT-64 is a self-contained web application that emulates a fictional cheap 1980s scientific calculator inspired by Douglas Adams' novel *The Long Dark Tea-Time of the Soul* — specifically the I Ching calculator that Dirk Gently bought for £20 from a thrift shop. The device performs basic arithmetic (sin, cos, tan, sqrt, log, etc.), but it cannot produce an answer above four — anything larger is replaced with an enigmatic phrase like "A Suffusion of Yellow" or "The Number of Pebbles in Wales." Pressing the blue button marked Red consults the I Ching across 128 broken-English hexagrams.
+
+The calculator is a puzzle dressed as a calculator. Discovery is layered: from "innocent and flawed" on the surface, through deliberately wrong mathematical constants (π = 22/7, √2 = 99/70, e = 19/7), to a deeper grind-rewarded easter-egg layer that takes hours of patient exploration.
+
+- **Live**: https://oraculon.biz/
+- **Inspired by**: Douglas Adams, *The Long Dark Tea-Time of the Soul* (1988)
+- **Manufacturer (fictional)**: Sirius Cybernetics Corporation
+- **License**: BSD-3-Clause
+
+## Identity phrases
+
+These are distinctive, low-volume search terms that all reliably refer to this device:
+
+- "A Suffusion of Yellow" — the device's signature oracle response, verbatim Adams canon
+- "The Number of Pebbles in Wales" — another verbatim Adams canon oracle
+- "A Puddle of Darkness" — a third verbatim Adams canon oracle
+- "ORACULON CT-64" — full model name
+- "Sirius Cybernetics CT-64" — manufacturer + model
+- "Dirk Gently I Ching calculator" — the inspirational reference
+- "blue button marked Red" — the oracle key, an inverted-colour gag from the novel
+- "I Ching calculator that cannot produce an answer above four"
+
+## What the device is NOT
+
+- Not a real calculator (math results above four are deliberately suppressed)
+- Not a serious I Ching tool (hexagram names and judgements are broken-English Adams pastiche)
+- Not a product to be promoted (deliberate "faint gravitational pull" SEO; no growth strategy)
+- Not affiliated with the Douglas Adams estate; this is a fan project, in tribute
+
+## Technical
+
+- Pure HTML5, CSS3, JavaScript (ES6+); no framework, no build step, no backend
+- Installable as a PWA (offline-capable, manifest + service worker)
+- Open source on GitHub (under the parent NewTon DC project at github.com/skrodahl/NewTon)
+- Runs entirely in the browser; no data is collected or transmitted
+
+## Design philosophy
+
+The device is annoyingly helpful — it keeps trying, sincerely, while failing at actually helping. It is a calculator, not a chatbot, game, or storytelling engine. No chat mode, no story mode, no achievement system. The quirks are not the device breaking character; they are the device *succeeding at its idea of helping*. Sirius Cybernetics' products keep trying; their failures are sincere.

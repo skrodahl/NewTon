@@ -1105,7 +1105,10 @@ later**, if the boot was rolled for HINT or CLEW (otherwise nothing happens), th
 
 1. A 1250ms `lcdPanic` glitch fires.
 2. Under cover of the glitch, the LCD content is replaced — by a random HINT (with
-   `HINT:` prefix) or by CLEW #1 (the URL `https://lostpages.oraculon.biz/`).
+   `HINT:` prefix) or by `CLEW #1/64: https://lostpages.oraculon.biz/` (the URL,
+   with explicit `1/64` framing — the user immediately knows there are sixty-three
+   more out there, only one has been delivered, and the device implicitly admits
+   there's a series).
 3. The `.post` terminal styling is re-applied (smaller font, right-aligned).
 4. Input is re-sealed for the duration of the glitch (so the user can't dismiss mid-glitch).
 5. When the glitch ends, the gate clears. The HINT/CLEW lingers as a settled phrase until
@@ -1134,16 +1137,28 @@ point; the catch is the reward.
 - `endOracle()` is called before the swap to clean up any consult state still running
   in the background (pending LED bursts, hex graphics, etc.).
 
-### Why HINT carries the prefix and CLEW doesn't
+### Why HINT carries a prefix and CLEW carries a fraction
 
 The `HINT:` prefix marks the line as the device addressing the user — *"this is for
 you."* Without it, hint lines would read as more internal status that the user can
 dismiss as firmware leakage. Adding the prefix tells the reader the device wants them to
 notice this one.
 
-CLEW doesn't need a prefix because the URL itself is unambiguous — a fully-formed link
-with a clearly readable subdomain (`lostpages` — pairing with the booklet's missing-pages
-gag from §5). Anyone who sees the CLEW knows what they're being given.
+CLEW doesn't need a prefix — the URL itself is unambiguous, a fully-formed link with a
+clearly readable subdomain (`lostpages`, pairing with the booklet's missing-pages gag
+from §5). What CLEW carries instead is **`#1/64`** — explicit fractional notation. The
+user who sees `CLEW #1/64` immediately knows three things:
+
+1. There is a series.
+2. They have just received the first member of it.
+3. Sixty-three more exist out there.
+
+The fraction is doing the heaviest semantic lifting in the whole reveal. Without `/64`
+the URL is "a hint" — useful, but isolated. With `/64`, the URL becomes "the first piece
+of an assembly" — and the user who has the patience to grind out the other sixty-three
+will end up somewhere richer than wherever the first one alone leads. The device admits
+the scale of the pilgrimage in the very moment of its first invitation. A lot hinges on
+that single fraction.
 
 ### Implementation references
 

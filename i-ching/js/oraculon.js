@@ -530,7 +530,9 @@
     "ERROR 5C",
     "SOUP_DETECTOR: ACTIVE",
     // Status confessions
-    "STATUS: FUNDAMENTALLY A PUZZLE"
+    "STATUS: FUNDAMENTALLY A PUZZLE",
+    "NO USER-SERVICEABLE TRUTHS INSIDE",
+    "FAULTS ARE FACTORY CALIBRATED"
   ];
 
   // FLAVOUR — generic firmware noise. Mixes into POST as camouflage so the
@@ -562,7 +564,8 @@
     "QA STATUS: SHIPPED",
     "ENGINEER ON DUTY: NONE",
     "FW REVISION: ?",
-    "ERROR ¥9"
+    "ERROR ¥9",
+    "ORACULON CT-64 SERVICE PORT"
   ];
 
   function runPost(){
@@ -719,7 +722,7 @@
             }
             // Swap content under cover of the glitch.
             if (ending === "clew"){
-              showPhrase("CLEW #1: https://lostpages.oraculon.biz/");
+              showPhrase("CLEW #1/64: https://lostpages.oraculon.biz/");
             } else {
               var hint = POST_LINES_HINTS[Math.floor(Math.random() * POST_LINES_HINTS.length)];
               showPhrase("HINT: " + hint);

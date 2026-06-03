@@ -1,7 +1,7 @@
 {
   "name": "ORACULON CT-64 — I Ching Calculator",
   "short_name": "ORACULON",
-  "description": "A fake vintage scientific calculator that tells fortunes. It cannot produce an answer above four.",
+  "description": "A fictional vintage scientific I Ching calculator. It cannot produce an answer above four. Results may include a suffusion of yellow.",
   "lang": "en",
   "dir": "ltr",
   "start_url": "./",

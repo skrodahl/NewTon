@@ -501,6 +501,178 @@ makes the device meaningfully harder to find. That's the design intent (less com
 more found-object) but worth being clear-eyed about — install metrics, if anyone is
 tracking them, will drop. The principle "path of discovery, nothing more" accepts this.
 
+### Architecture rewrite — particles as destinations
+
+*Added 2026-06-03. Supersedes the fragment-assembly design above (preserved as
+brainstorm trail). The earlier design assembled 64 path fragments into a single
+URL; this design treats each clew as its own complete destination, and the
+pilgrimage's final target is no longer a URL but a device input.*
+
+**The shape:**
+- **64 particles**, each a complete path on `oraculon.biz/<path>`.
+- Same four carrier hexagrams (95, 106, 110, 125) still deliver clews — one per cast.
+- **CLEW #1 is bootstrap**: `https://lostpages.oraculon.biz/`, the device's Owner
+  Manual verbatim, with the missing pages still missing. No SEO, no GSC, no
+  sitemap, robots disallow. Available only to those who type the URL.
+- **CLEW #2…#64 are particle pages** at `oraculon.biz/<path>`. Each page is a
+  small in-character document plus an **overt `#N/64` stamp** in a visibly
+  different register (the stamp reads as back-of-house imprint, not prose).
+- **Some particles carry assembly material; some carry assembly instructions.**
+  Distribution and density TBD.
+- **Assembly produces a key sequence**, not a URL. The pilgrimage loops back
+  into the device.
+
+**The reveal:**
+- The key sequence triggers a device-voice scroll, structured like the
+  Calibration reading.
+- Contents include the **`%+Red` efficiency hint** (pilgrims could have used
+  this all along to cast upper-64 hexagrams faster) plus acknowledgements of
+  other deeply hidden quirks.
+- *Number of pebbles in Wales* intent: genuinely useful AND anticlimactic, so
+  pilgrims feel rewarded *and* motivated to tell others "count them yourself."
+- **Trigger is always available.** The sequence works for any user who knows it,
+  whether earned or told. No server gates the pilgrimage.
+
+**Stamp register (sketch):** *"YOU ARE ON THE HEXAGRAM PILGRIMAGE. THIS IS
+PARTICLE #12/64. #1 IS THE BASE URL."* Overt and slightly patronising — the
+corporation explaining itself badly to the patient seeker. Exact wording TBD.
+
+**Why this beats fragment-assembly:**
+- Each clew is its own destination — visiting it is the reward, not just one
+  more letter in an opaque string.
+- Pilgrimage target is a device input, so the loop closes back into the
+  calculator instead of out to one final web page.
+- Particle URLs let Sirius Cybernetics' voice scale by adding pages, not code.
+- Once a few paths are known, fans can *guess* unseen ones (the broken-
+  English vocabulary is small and predictable). Fan-shaped discovery extends
+  past the device.
+
+**What carries over from the old design unchanged:**
+- Random per cast, repeats allowed (no localStorage tracking).
+- Inline judgement replacement (clew rendered as part of the judgement, not
+  announced separately).
+- Wales-pebbles math (~9,700 escaped casts to see every clue). The cost IS
+  the design.
+- The `CLEW` spelling, the carrier hex selection, and the `oraculon.biz`
+  domain rationale.
+- The cross-project silent-retraction layer (independent of pilgrimage shape).
+
+**Deferred specifics:**
+- Exact key sequence — unguessable yet typeable; gracefully tolerates
+  near-misses.
+- Visual register of the `#N/64` stamp — different font? Ink-stamp graphic?
+  Faded carbon copy?
+- Instruction-particles vs material-particles ratio and the chain structure
+  between them.
+- Particle URL naming convention beyond "Adams-flavoured broken-English phrase."
+- Reveal scroll exact wording.
+- Whether `lostpages.oraculon.biz` ships with its own visual register (to feel
+  "elsewhere") or renders the booklet verbatim in the device's existing CSS.
+- Whether the reveal scroll itself acknowledges the source-code back door
+  (see next section) — closing a meta-discovery loop, or staying silent.
+
+---
+
+## The source code is the back door
+
+The discovery gradient — innocent surface → idle quirks → time-grind unlocks →
+lucky-press quirks → hint-bearing POST → relentless grinding → pilgrimage —
+has one omitted audience: **the user who reads the source code**.
+
+The Rubik's Cube precedent: a child who can't solve the cube discovers it can
+be disassembled and reassembled in a solved state. That's not cheating; it's
+a different kind of solving. The universe needs back doors. Our back door is
+the source.
+
+### Decision (2026-06-03): a header comment in `js/oraculon.js`
+
+One artifact, one location. A short comment block at the top of
+`js/oraculon.js` that anticipates the code-reader and includes the verbatim
+Adams line **"Sorry For the Inconvenience"** (God's final message to His
+creation, *So Long, and Thanks for All the Fish*).
+
+Exact wording not yet decided — the working draft below is a floor, not a
+ceiling; the final block will likely be a touch more elaborate. The shape is
+settled: header comment, main JS file, corporation's voice, verbatim line
+present.
+
+### Working draft (not committed)
+
+```
+/*
+ * ORACULON CT-64 — Sirius Cybernetics Corporation
+ * Sorry For the Inconvenience.
+ * You were anticipated. All things are fundamentally interconnected,
+ * including you and this comment.
+ */
+```
+
+### Why this, not the alternatives
+
+- ~~**A constructed three-movement welcome** (apology / reassurance / hint).~~
+  Rejected as try-hard. The device addressing the reader too overtly breaks
+  the "found object" feel — the corporation is supposed to be mindless jerks,
+  not a host with greeting cards.
+- ~~**A dedicated `HELLO-READER.md` at the repo root.**~~ Rejected: the
+  View-Source investigator and the GitHub-finder see the same files (GitHub
+  *holds* the source the page already ships). A separate greeting file would
+  address an audience distinction that doesn't exist.
+- ~~**Replacing the `i-ching/` placeholder README.**~~ Rejected for the same
+  reason: redundant with the source itself.
+- ✅ **A single concentrated header comment.** The JS file is where someone
+  investigating the device's behaviour lands; a service-note-style comment
+  there is exactly where the corporation would put a remark.
+
+### The pervasive hospitality already in place
+
+The header comment is a single concentrated anchor on top of welcome that's
+already pervasive without a new line written:
+
+- `llms.txt` — explicitly addresses AI crawlers and human source-readers;
+  names the premise; lists the verbatim Adams oracles.
+- The `sr-only` block in `index.html` — names the booklet's load-bearing
+  phrases verbatim in screen-reader prose.
+- The Schema.org `author.description` — *"A bunch of mindless jerks who'll
+  be the first against the wall when the revolution comes"*, verbatim Adams
+  baked into the metadata.
+- Existing HTML and JS comments — already generous and in-voice (LED-bar
+  legend, bigbang fade, `BIG_BANG_PHASE_A` naming).
+
+The header comment is the *explicit* acknowledgement; the surrounding
+hospitality is the *implicit* welcome. Both together close the gradient's
+omitted audience.
+
+### Why "Sorry For the Inconvenience" earns its keep
+
+The booklet's *"APOLOGISE FOR INCONVENIENCE"* is a broken-English folk-echo of
+the verbatim Adams line. Placing the verbatim version in the source-code
+header lets the device, the corporation, and the universe all apologise in
+unison — three layers of sincere institutional regret. The code-reader gets
+the deepest, most cosmic version (God Himself, in flaming thirty-foot
+letters) of an apology the casual user only sees as a typo in the manual.
+
+Same move as the three verbatim Adams oracles ("A Suffusion of Yellow", "The
+Number of Pebbles in Wales", "A Puddle of Darkness") anchoring ~60 pastiche
+oracles: canon anchors the imitation.
+
+### Why this matters
+
+- **Closes the gradient's omitted audience.** Every other discovery path is
+  acknowledged in the device's voice; the code-reader was previously the one
+  path the device ignored.
+- **Extends "Embrace any mistake" to audience choice.** A user choosing to
+  read the source instead of grinding the device isn't a mistake we patch
+  around — it's a choice we welcome.
+- **Deepens "Interconnectedness is a design test."** The source becomes a
+  discovery surface like any other. Existing already-generous code comments
+  retroactively become deliberately so — their thoroughness is no longer
+  accidental, it's hospitality.
+
+### Deferred
+
+Just the exact wording of the comment block. Floor: the draft above. Ceiling:
+a bit more elaborate. Everything else is decided.
+
 ---
 
 ## Hardware / physical-device specific (Stage 2)
