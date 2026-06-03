@@ -1,0 +1,220 @@
+MAKE THE INSTRUCTION BOOKLET INDEXABLE!
+
+---
+Ideas for POST:
+ORACULON CT-64 SERVICE PORT
+NO USER-SERVICEABLE TRUTHS INSIDE
+FAULTS ARE FACTORY CALIBRATED
+---
+
+Low-effort SEO is also right. ORACULON should not have a growth strategy. It should have faint gravitational pull.
+
+Low-effort things that would probably help
+1. Put the exact phrase in crawlable text
+If the phrase only appears dynamically through JavaScript, Google may still see it eventually, but it is less reliable. Somewhere in the initial HTML, include:
+
+A Suffusion of Yellow
+
+Not necessarily visibly prominent. It could be in the manual text, footer, metadata-adjacent copy, or a small hidden-but-not-deceptive descriptive block.
+
+For example, a tiny accessible description could say something like:
+
+html
+Copy
+<p class="sr-only">
+  ORACULON CT-64 is a fictional I Ching calculator inspired by the phrase
+  “A Suffusion of Yellow.”
+</p>
+If you do this, I’d avoid stuffing it repeatedly. One or two natural mentions are enough.
+
+2. Use it in the page title or meta description
+Possible <title> options:
+
+html
+Copy
+<title>ORACULON CT-64 — A Suffusion of Yellow</title>
+or more cryptic:
+
+html
+Copy
+<title>ORACULON CT-64 Scientific I Ching Calculator</title>
+Then the meta description can carry the phrase:
+
+html
+Copy
+<meta name="description" content="ORACULON CT-64: a cheap scientific I Ching calculator capable of answers up to 4, and occasionally a suffusion of yellow.">
+That is probably the best balance: searchable, but still in-universe.
+
+3. Add Open Graph / social metadata
+Even if social sharing is not the main goal, it gives crawlers a better summary.
+
+html
+Copy
+<meta property="og:title" content="ORACULON CT-64">
+<meta property="og:description" content="A scientific I Ching calculator capable of answers up to 4.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oraculon.biz/">
+If you have a nice preview image, add:
+
+html
+Copy
+<meta property="og:image" content="https://oraculon.biz/path-to-preview-image.png">
+I would not make the description too explanatory. “Capable of answers up to 4” is enough of a lure.
+
+4. Add a canonical URL
+html
+Copy
+<link rel="canonical" href="https://oraculon.biz/">
+Small, boring, useful.
+
+5. Make sure Google can see the manual text
+The booklet is a good place for indexable flavour. If it is currently injected only after clicking, Google may or may not capture it well. You could include the manual modal HTML in the initial page markup and hide it with CSS until opened.
+
+That gives you crawlable text like:
+
+electronic abacus of fortune
+A Suffusion of Yellow
+64 hexagram
+I Ching calculator
+Do not eat the device even if it advise so
+PAGE 4–11 MISSING
+Those phrases are distinctive and likely to rank if indexed.
+
+6. Let Newton pass a little authority
+Since newtondarts.com is already SEO-strong, the tiny 42 link matters. If the link is currently just the text 42, that is aesthetically perfect, but weak as anchor text.
+
+You probably do not want to ruin the visible joke. But you could improve it subtly with an aria-label or title:
+
+html
+Copy
+<a href="https://oraculon.biz/" title="A Suffusion of Yellow" aria-label="A Suffusion of Yellow">42</a>
+Visible page remains just 42; crawlers and assistive tech get a little more meaning.
+
+If that feels too explicit, use:
+
+html
+Copy
+<a href="https://oraculon.biz/" title="ORACULON CT-64" aria-label="ORACULON CT-64">42</a>
+Or, most cryptic-but-useful:
+
+html
+Copy
+<a href="https://oraculon.biz/" title="answers up to 4" aria-label="answers up to 4">42</a>
+7. Add robots.txt and sitemap only if you want boring completeness
+A minimal robots.txt:
+
+txt
+Copy
+User-agent: *
+Allow: /
+
+Sitemap: https://oraculon.biz/sitemap.xml
+A tiny sitemap:
+
+xml
+Copy
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://oraculon.biz/</loc>
+  </url>
+</urlset>
+This is mundane, but it helps indexing without changing the object.
+
+Phrases worth making crawlable
+For your intended audience, these are likely the best search hooks:
+
+A Suffusion of Yellow
+I Ching calculator
+Dirk Gently I Ching calculator
+blue button marked Red
+answers up to 4
+The Number of Pebbles in Wales
+A Puddle of Darkness
+ORACULON CT-64
+scientific I Ching calculator
+Sirius Cybernetics
+portable fortune
+I’d include only a handful, naturally. The page should not read like SEO copy. It should read like a weird device Google happened to overhear.
+
+My preferred tiny SEO package
+If you want the highest benefit with the least visible compromise, I’d do only this:
+
+html
+Copy
+<title>ORACULON CT-64 — Scientific I Ching Calculator</title>
+<meta name="description" content="A £20 scientific I Ching calculator capable of answers up to 4, a suffusion of yellow, and portable fortune.">
+<link rel="canonical" href="https://oraculon.biz/">
+<meta property="og:title" content="ORACULON CT-64">
+<meta property="og:description" content="A scientific I Ching calculator capable of answers up to 4.">
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oraculon.biz/">
+And on Newton’s tiny 42 link:
+
+html
+Copy
+<a href="https://oraculon.biz/" title="A Suffusion of Yellow" aria-label="A Suffusion of Yellow">42</a>
+That would make the trail more indexable without turning it into a normal product page.
+
+---
+
+Description: A £20 scientific I Ching calculator capable of answers up to 4, portable fortune, and a suffusion of yellow.
+
+---
+
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+
+<title>ORACULON CT-64 — I Ching Calculator</title>
+<meta name="description" content="A fictional vintage scientific I Ching calculator that cannot produce an answer above four. Results may include a suffusion of yellow. Probably less than 1,000,000 glitches.">
+<link rel="canonical" href="https://oraculon.biz/">
+
+<link rel="manifest" href="/manifest.webmanifest">
+<meta name="theme-color" content="#2a2418">
+
+<link rel="icon" href="/favicon.ico" sizes="any">
+<link rel="icon" type="image/png" sizes="32x32" href="/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="192x192" href="/icons/icon-192.png">
+<link rel="apple-touch-icon" href="/icons/icon-192.png">
+
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="ORACULON CT-64">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+
+<!-- Open Graph -->
+<meta property="og:type" content="website">
+<meta property="og:url" content="https://oraculon.biz/">
+<meta property="og:title" content="ORACULON CT-64 — I Ching Calculator">
+<meta property="og:description" content="A fictional vintage scientific I Ching calculator. It cannot produce an answer above four. Results may include a suffusion of yellow.">
+<meta property="og:image" content="https://oraculon.biz/icons/icon-512.png">
+<meta property="og:image:alt" content="The ORACULON CT-64, a worn vintage scientific I Ching calculator.">
+
+<!-- Twitter Card -->
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="ORACULON CT-64 — I Ching Calculator">
+<meta name="twitter:description" content="A fictional vintage scientific I Ching calculator. It cannot produce an answer above four. Results may include a suffusion of yellow.">
+<meta name="twitter:image" content="https://oraculon.biz/icons/icon-512.png">
+<meta name="twitter:image:alt" content="The ORACULON CT-64, a worn vintage scientific I Ching calculator.">
+
+<!-- Schema.org -->
+<script type="application/ld+json">
+{
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    "name": "ORACULON CT-64",
+    "description": "A fictional vintage scientific calculator inspired by Douglas Adams' The Long Dark Tea-Time of the Soul. It reckons sums, performs science, and foretells the unknowable across 64 hexagram. It cannot produce an answer above four. Results may include a suffusion of yellow.",
+    "url": "https://oraculon.biz/",
+    "applicationCategory": "EntertainmentApplication",
+    "operatingSystem": "Web Browser",
+    "browserRequirements": "Requires a modern browser with JavaScript enabled.",
+    "isAccessibleForFree": true,
+    "license": "https://opensource.org/licenses/BSD-3-Clause",
+    "author": {
+        "@type": "Organization",
+        "name": "Sirius Cybernetics Corporation",
+        "description": "A bunch of mindless jerks who'll be the first against the wall when the revolution comes."
+    }
+}
+</script>
