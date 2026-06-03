@@ -494,7 +494,11 @@ Or more broken:
 // COUNTING BY SOURCE IS STILL COUNTING.
 ```
 
-That last one is strong.
+Or:
+```js
+SERVICE PANEL REMOVED.
+WARRANTY HAS BECOME HISTORICAL.
+```
 
 ### The source as “glitch route” should not be too clean
 
