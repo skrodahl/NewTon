@@ -1,7 +1,6 @@
 // tournament-management.js - Config-Free Tournament Operations
 // NEVER touches global config - only tournament-specific data
 
-let showingAllTournaments = false;
 let sharedTournamentViewState = 'collapsed'; // 'collapsed' | 'all'
 let showingAllLocalTournaments = false;
 
@@ -910,11 +909,6 @@ async function loadRecentTournaments() {
     }
 
     container.innerHTML = htmlSections.join('');
-}
-
-function toggleTournamentView() {
-    showingAllTournaments = !showingAllTournaments;
-    loadRecentTournaments();
 }
 
 function toggleSharedTournamentView() {

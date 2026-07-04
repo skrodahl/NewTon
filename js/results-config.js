@@ -244,40 +244,6 @@ function saveGlobalConfig() {
     }
 }
 
-// SAVE CONFIGURATION FROM UI
-function saveConfiguration() {
-    console.log('💾 Saving all configuration...');
-
-    try {
-        // Points configuration
-        config.points.participation = parseInt(document.getElementById('participationPoints').value) || 0;
-        config.points.first = parseInt(document.getElementById('firstPlacePoints').value) || 0;
-        config.points.second = parseInt(document.getElementById('secondPlacePoints').value) || 0;
-        config.points.third = parseInt(document.getElementById('thirdPlacePoints').value) || 0;
-        config.points.fourth = parseInt(document.getElementById('fourthPlacePoints').value) || 0;
-        config.points.fifthSixth = parseInt(document.getElementById('fifthSixthPlacePoints').value) || 0;
-        config.points.seventhEighth = parseInt(document.getElementById('seventhEighthPlacePoints').value) || 0;
-        config.points.highOut = parseInt(document.getElementById('highOutPoints').value) || 0;
-        config.points.ton = parseInt(document.getElementById('tonPoints').value) || 0;
-        config.points.shortLeg = parseInt(document.getElementById('shortLegPoints').value) || 0;
-        config.points.oneEighty = parseInt(document.getElementById('oneEightyPoints').value) || 0;
-
-        // Match legs configuration
-        config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value) || 3;
-        config.legs.frontsideSemifinal = parseInt(document.getElementById('frontsideSemifinalLegs').value) || 3;
-        config.legs.backsideSemifinal = parseInt(document.getElementById('backsideSemifinalLegs').value) || 3;
-        config.legs.backsideFinal = parseInt(document.getElementById('backsideFinalLegs').value) || 3;
-        config.legs.grandFinal = parseInt(document.getElementById('grandFinalLegs').value) || 3;
-
-        saveGlobalConfig();
-        alert('✓ Configuration saved successfully!');
-
-    } catch (error) {
-        console.error('❌ Error saving configuration:', error);
-        alert('❌ Error saving configuration. Please check the console.');
-    }
-}
-
 // ... (The rest of the functions remain the same as the original file)
 
 // APPLICATION SETTINGS
@@ -1038,7 +1004,6 @@ function executeExport(format, filename) {
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.loadConfiguration = loadConfiguration;
-    window.saveConfiguration = saveConfiguration;
     window.saveApplicationSettings = saveApplicationSettings;
     window.saveLaneConfiguration = saveLaneConfiguration;
     window.saveUIConfiguration = saveUIConfiguration;

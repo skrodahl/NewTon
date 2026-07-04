@@ -825,53 +825,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 }
 
 /**
- * NEW: Get all downstream matches affected by a given match's outcome.
- * @param {string} matchId The starting match ID.
- * @param {number} bracketSize The size of the tournament bracket.
- * @returns {Set<string>} A set of all downstream match IDs.
- */
-function getDownstreamMatches(matchId, bracketSize) {
-    const format = getFormat();
-    const table = format === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
-    const progression = table[bracketSize];
-    if (!progression) return new Set();
-
-    const downstream = new Set();
-    const queue = [matchId];
-    const visited = new Set();
-
-    while (queue.length > 0) {
-        const currentMatchId = queue.shift();
-        if (visited.has(currentMatchId)) {
-            continue;
-        }
-        visited.add(currentMatchId);
-
-        const rule = progression[currentMatchId];
-        if (rule) {
-            if (rule.winner) {
-                const winnerDest = rule.winner[0];
-                const winnerDestMatch = matches.find(m => m.id === winnerDest);
-                if (winnerDestMatch && winnerDestMatch.completed && !downstream.has(winnerDest)) {
-                    downstream.add(winnerDest);
-                    queue.push(winnerDest);
-                }
-            }
-            if (rule.loser) {
-                const loserDest = rule.loser[0];
-                const loserDestMatch = matches.find(m => m.id === loserDest);
-                if (loserDestMatch && loserDestMatch.completed && !downstream.has(loserDest)) {
-                    downstream.add(loserDest);
-                    queue.push(loserDest);
-                }
-            }
-        }
-    }
-
-    return downstream;
-}
-
-/**
  * Calculates final tournament placements for all players based on match outcomes.
  * Called when Grand Final is completed. Determines 4th place and beyond using
  * which backside match each player lost.
@@ -1169,38 +1122,6 @@ function shouldAutoAdvance(match) {
 
     // Auto-advance Real vs Walkover OR Walkover vs Walkover
     return (p1IsWalkover && !p2IsWalkover) || (!p1IsWalkover && p2IsWalkover) || (p1IsWalkover && p2IsWalkover);
-}
-
-/**
- * PROCESS AUTO-ADVANCEMENT - Enhanced to handle walkover vs walkover
- */
-function processAutoAdvancement(match) {
-    if (!shouldAutoAdvance(match)) return false;
-
-    const p1IsWalkover = isWalkover(match.player1);
-    const p2IsWalkover = isWalkover(match.player2);
-
-    let winnerPlayerNumber;
-
-    if (p1IsWalkover && p2IsWalkover) {
-        // Both are walkovers - pick player1 as winner arbitrarily
-        winnerPlayerNumber = 1;
-        console.log(`Auto-advancing walkover vs walkover: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 1 wins`);
-    } else if (p1IsWalkover && !p2IsWalkover) {
-        // Player 2 wins
-        winnerPlayerNumber = 2;
-        console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 2 wins`);
-    } else if (!p1IsWalkover && p2IsWalkover) {
-        // Player 1 wins
-        winnerPlayerNumber = 1;
-        console.log(`Auto-advancing: ${match.id} (${match.player1.name} vs ${match.player2.name}) - Player 1 wins`);
-    } else {
-        return false; // Should not reach here
-    }
-
-    // Mark as auto-advanced and complete
-    match.autoAdvanced = true;
-    return completeMatch(match.id, winnerPlayerNumber, 0, 0, 'AUTO');
 }
 
 /**
@@ -2083,14 +2004,8 @@ function updateMatchLane(matchId, newLane) {
     if (modal &&
         (modal.style.display === 'flex' || modal.style.display === 'block') &&
         typeof showMatchCommandCenter === 'function') {
-        // Preserve scroll position
-        const modalContent = document.querySelector('.cc-modal-content');
-        const scrollTop = modalContent ? modalContent.scrollTop : 0;
         setTimeout(() => {
             showMatchCommandCenter();
-            if (modalContent) {
-                modalContent.scrollTop = scrollTop;
-            }
         }, 200);
     }
 
@@ -2126,35 +2041,6 @@ function debugBracketGeneration() {
     // Check for auto-advancement opportunities
     const autoAdvanceMatches = matches.filter(shouldAutoAdvance);
     console.log(`Matches ready for auto-advancement: ${autoAdvanceMatches.length}`);
-}
-
-// Make functions globally available and OVERRIDE old functions
-if (typeof window !== 'undefined') {
-    // NEW CLEAN FUNCTIONS
-    window.advancePlayer = advancePlayer;
-    window.completeMatch = completeMatch;
-    window.selectWinnerClean = selectWinnerClean;
-    window.processAutoAdvancements = processAutoAdvancements;
-    window.debugProgression = debugProgression;
-    window.generateCleanBracket = generateCleanBracket;
-    window.debugBracketGeneration = debugBracketGeneration;
-    window.toggleActive = toggleActive;
-    window.toggleActiveWithValidation = toggleActiveWithValidation;
-    window.getMatchState = getMatchState;
-    window.updateMatchLane = updateMatchLane;
-    window.DE_MATCH_PROGRESSION = DE_MATCH_PROGRESSION;
-    window.SE_MATCH_PROGRESSION = SE_MATCH_PROGRESSION;
-    window.calculateBracketSize = calculateBracketSize;
-    window.getProgressionTable = getProgressionTable;
-
-    // OVERRIDE OLD FUNCTIONS - Replace with clean versions
-    window.selectWinner = selectWinnerClean;
-    window.selectWinnerV2 = selectWinnerClean;
-    window.selectWinnerWithValidation = selectWinnerClean;
-    window.selectWinnerWithAutoAdvancement = selectWinnerClean;
-    window.generateBracket = generateCleanBracket;
-
-    console.log('✅ Clean match progression system loaded - old system disabled');
 }
 
 /**
@@ -2667,329 +2553,6 @@ function clearTournamentHistory() {
 }
 
 /**
- * Get undone transactions from localStorage.
- * @returns {Array} An array of undone transaction objects.
- */
-function getUndoneTransactions() {
-    try {
-        const undoneData = localStorage.getItem('undoneTransactions');
-        return undoneData ? JSON.parse(undoneData) : [];
-    } catch (error) {
-        console.error('Error loading undone transactions:', error);
-        return [];
-    }
-}
-
-/**
- * Save undone transactions to localStorage.
- * @param {Array} undoneTransactions An array of undone transaction objects.
- */
-function saveUndoneTransactions(undoneTransactions) {
-    localStorage.setItem('undoneTransactions', JSON.stringify(undoneTransactions));
-}
-
-/**
- * NEW: Undoes a single transaction.
- * @param {string} transactionId The ID of the transaction to undo.
- */
-function undoTransaction(transactionId) {
-    return undoTransactions([transactionId]);
-}
-
-/**
- * NEW: Undoes a list of transactions.
- * @param {Array<string>} transactionIds The IDs of the transactions to undo.
- */
-function undoTransactions(transactionIds) {
-    if (!transactionIds || transactionIds.length === 0) {
-        return false;
-    }
-
-    // Check if tournament is read-only (imported completed tournament)
-    if (tournament && tournament.readOnly) {
-        alert('Completed tournament: Read-only - Use Reset Tournament to modify');
-        return false;
-    }
-
-    const history = getTournamentHistory();
-    const undone = getUndoneTransactions();
-
-    const transactionsToUndo = history.filter(t => transactionIds.includes(t.id))
-                                    .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-    if (transactionsToUndo.length === 0) {
-        return false;
-    }
-
-    // Collect all match IDs from the transactions being undone
-    const affectedMatchIds = new Set(transactionsToUndo.map(t => t.matchId).filter(Boolean));
-
-    // Find ALL related transactions for these matches (ASSIGN_LANE, ASSIGN_REFEREE, START_MATCH, STOP_MATCH)
-    const relatedTransactionTypes = ['ASSIGN_LANE', 'ASSIGN_REFEREE', 'START_MATCH', 'STOP_MATCH'];
-    const relatedTransactions = history.filter(t =>
-        affectedMatchIds.has(t.matchId) && relatedTransactionTypes.includes(t.type)
-    );
-
-    // Combine all transactions to be removed (original + related)
-    const allTransactionsToRemove = new Set([
-        ...transactionIds,
-        ...relatedTransactions.map(t => t.id)
-    ]);
-
-    console.log(`🔄 Undo: Removing ${transactionsToUndo.length} COMPLETE_MATCH transactions + ${relatedTransactions.length} related transactions`);
-
-    // Track matches that have been cleared by downstream cleanup
-    const clearedMatches = new Set();
-    
-    // Process each transaction to undo
-    transactionsToUndo.forEach(transaction => {
-        if (transaction.beforeState.matches) {
-            // 1. Restore the original match state EXACTLY as it was
-            // FIXED: Don't restore auto-advanced matches that were cleared by downstream cleanup
-            const affectedMatch = transaction.beforeState.matches.find(m => m.id === transaction.matchId);
-            if (affectedMatch && !clearedMatches.has(transaction.matchId)) {
-                const matchIndex = matches.findIndex(m => m.id === transaction.matchId);
-                if (matchIndex !== -1) {
-                    console.log(`DEBUG: Restoring match ${transaction.matchId} to original state`);
-                    matches[matchIndex] = JSON.parse(JSON.stringify(affectedMatch));
-                } else {
-                    console.log(`DEBUG: Skipping restoration of cleared match ${transaction.matchId}`);
-                }
-            }
-
-            // 2. Clear downstream effects using progression rules
-            const undoProgressionTable = getProgressionTable();
-            if (undoProgressionTable) {
-                const progression = undoProgressionTable[transaction.matchId];
-                if (progression && transaction.winner && transaction.loser) {
-                    const winnerId = transaction.winner.id;
-                    const loserId = transaction.loser.id;
-
-                    // Clear winner from their destination
-                    if (progression.winner) {
-                        const [targetMatchId, slot] = progression.winner;
-                        const targetMatch = matches.find(m => m.id === targetMatchId);
-                        console.log(`DEBUG: Looking for winner ${transaction.winner.name} in ${targetMatchId}.${slot}, found:`, targetMatch ? targetMatch[slot] : 'no match');
-                        
-                        // FIXED: Match by name instead of ID, since auto-advancement creates new IDs
-                        if (targetMatch && targetMatch[slot] && targetMatch[slot].name === transaction.winner.name) {
-                            // Get the current player ID (may be different from original due to auto-advancement)  
-                            const currentPlayerId = targetMatch[slot].id;
-                            console.log(`DEBUG: Clearing winner ${transaction.winner.name} (current ID: ${currentPlayerId}) from ${targetMatchId}`);
-                            clearPlayerFromDownstream(currentPlayerId, targetMatchId);
-                            // Mark this match as cleared so it won't be restored later
-                            clearedMatches.add(targetMatchId);
-                            // Then clear the immediate slot
-                            targetMatch[slot] = { id: `${targetMatchId}-${slot}`, name: 'TBD' };
-                        } else {
-                            console.log(`DEBUG: Winner ${transaction.winner.name} NOT found in ${targetMatchId}.${slot}`);
-                        }
-                    }
-
-                    // Clear loser from their destination
-                    if (progression.loser) {
-                        const [targetMatchId, slot] = progression.loser;
-                        const targetMatch = matches.find(m => m.id === targetMatchId);
-                        console.log(`DEBUG: Looking for loser ${transaction.loser.name} in ${targetMatchId}.${slot}, found:`, targetMatch ? targetMatch[slot] : 'no match');
-                        
-                        // FIXED: Match by name instead of ID, since auto-advancement creates new IDs
-                        if (targetMatch && targetMatch[slot] && targetMatch[slot].name === transaction.loser.name) {
-                            // Get the current player ID (may be different from original due to auto-advancement)
-                            const currentPlayerId = targetMatch[slot].id;
-                            console.log(`DEBUG: Clearing loser ${transaction.loser.name} (current ID: ${currentPlayerId}) from ${targetMatchId}`);
-                            clearPlayerFromDownstream(currentPlayerId, targetMatchId);
-                            // Mark this match as cleared so it won't be restored later
-                            clearedMatches.add(targetMatchId);
-                            // Then clear the immediate slot
-                            targetMatch[slot] = { id: `${targetMatchId}-${slot}`, name: 'TBD' };
-                        } else {
-                            console.log(`DEBUG: Loser ${transaction.loser.name} NOT found in ${targetMatchId}.${slot} (expected from FS-2-1 undo)`);
-                        }
-                    }
-                }
-            }
-        }
-    });
-
-    // Move undone transactions to the undone list (only the COMPLETE_MATCH transactions)
-    transactionsToUndo.forEach(t => undone.unshift(t));
-    saveUndoneTransactions(undone);
-
-    // Remove ALL related transactions from the history (COMPLETE_MATCH + ASSIGN_LANE/REFEREE + START/STOP_MATCH)
-    const newHistory = history.filter(t => !allTransactionsToRemove.has(t.id));
-
-    if (tournament && tournament.id) {
-        const historyKey = `tournament_${tournament.id}_history`;
-        localStorage.setItem(historyKey, JSON.stringify(newHistory));
-    }
-
-    console.log(`✅ Removed ${allTransactionsToRemove.size} total transactions from history`);
-
-    // Clear tournament completion state when undoing the tournament-ending match
-    // DE: GRAND-FINAL, SE: the final FS match (has {} in progression table)
-    const undoTable = getProgressionTable();
-    const isUndoingFinal = transactionsToUndo.some(t => {
-        const rule = undoTable && undoTable[t.matchId];
-        return rule && Object.keys(rule).length === 0;
-    });
-    if (isUndoingFinal) {
-        clearTournamentCompletionState();
-    }
-
-    // Save and refresh
-    saveTournament();
-
-    // Refresh results table after clearing tournament state
-    if (isUndoingFinal && typeof updateResultsTable === 'function') {
-        console.log('🔄 Refreshing results table after final undo');
-        updateResultsTable();
-    }
-    
-    // DEBUG: Show tournament state after undo
-    if (isUndoingFinal) {
-        console.log('DEBUG: Tournament state after final undo:');
-        console.log(`- Status: ${tournament.status}`);
-        console.log(`- Placements: ${Object.keys(tournament.placements || {}).length} entries`);
-        console.log(`- Players with placement: ${players.filter(p => p.placement).length}`);
-    }
-    
-    if (typeof refreshTournamentUI === 'function') {
-        refreshTournamentUI();
-    }
-
-    console.log(`✓ ${transactionIds.length} transactions undone.`);
-    return true;
-}
-
-/**
- * Helper function to clear tournament completion state
- * Called when undoing GRAND-FINAL to revert tournament back to active state
- */
-function clearTournamentCompletionState() {
-    console.log('🔄 Clearing tournament completion state (GRAND-FINAL undo)');
-    
-    // Clear tournament placements
-    if (tournament.placements) {
-        const placementCount = Object.keys(tournament.placements).length;
-        tournament.placements = {};
-        console.log(`Cleared ${placementCount} tournament placements`);
-    }
-    
-    // Reset tournament status
-    if (tournament.status === 'completed') {
-        tournament.status = 'active';
-        console.log('Reset tournament status from "completed" to "active"');
-    }
-    
-    // Clear all player placement properties
-    let clearedPlacements = 0;
-    players.forEach(player => {
-        if (player.placement) {
-            player.placement = null;
-            clearedPlacements++;
-        }
-    });
-    console.log(`Cleared ${clearedPlacements} player placement properties`);
-    
-    console.log('✓ Tournament completion state cleared');
-}
-
-/**
- * Helper function to check if a match has any walkover players
- */
-function hasWalkoverPlayer(match) {
-    return isWalkover(match.player1) || isWalkover(match.player2);
-}
-
-// Helper function to recursively clear a player from downstream matches
-function clearPlayerFromDownstream(playerId, currentMatchId) {
-    const currentMatch = matches.find(m => m.id === currentMatchId);
-    if (!currentMatch) return;
-
-    console.log(`Clearing player ${playerId} from match ${currentMatchId}`);
-
-    // If match has TBD players, it cannot be LIVE
-    if ((currentMatch.player1?.name === 'TBD' || currentMatch.player2?.name === 'TBD') && currentMatch.active) {
-        currentMatch.active = false;
-    }
-
-    // Check if this player is in this match at all
-    const player1Match = currentMatch.player1 && currentMatch.player1.id === playerId;
-    const player2Match = currentMatch.player2 && currentMatch.player2.id === playerId;
-    
-    if (!player1Match && !player2Match) {
-        console.log(`Player ${playerId} not found in match ${currentMatchId}`);
-        return;
-    }
-
-    // If this match was completed (auto or manual), clear it and continue downstream
-    if (currentMatch.completed) {
-        console.log(`Clearing completed match ${currentMatchId}`);
-        
-        // Continue clearing downstream BEFORE we clear this match
-        const clearProgressionTable = getProgressionTable();
-        if (clearProgressionTable) {
-            const progression = clearProgressionTable[currentMatchId];
-            if (progression) {
-                if (progression.winner) {
-                    const [nextMatchId, slot] = progression.winner;
-                    const nextMatch = matches.find(m => m.id === nextMatchId);
-                    if (nextMatch && nextMatch[slot] && nextMatch[slot].id === playerId) {
-                        clearPlayerFromDownstream(playerId, nextMatchId);
-                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
-                    }
-                }
-                if (progression.loser) {
-                    const [nextMatchId, slot] = progression.loser;
-                    const nextMatch = matches.find(m => m.id === nextMatchId);
-                    if (nextMatch && nextMatch[slot] && nextMatch[slot].id === playerId) {
-                        clearPlayerFromDownstream(playerId, nextMatchId);
-                        nextMatch[slot] = { id: `${nextMatchId}-${slot}`, name: 'TBD' };
-                    }
-                }
-            }
-        }
-        
-        // Now clear this match
-        currentMatch.completed = false;
-        currentMatch.winner = null;
-        currentMatch.loser = null;
-        currentMatch.active = false;
-        currentMatch.autoAdvanced = false;
-    }
-    
-    // FIXED: Handle walkover matches - remove real players completely, leaving only walkovers
-    if (currentMatch.autoAdvanced || hasWalkoverPlayer(currentMatch)) {
-        console.log(`Match ${currentMatchId} has walkover - removing real player completely`);
-        
-        // For auto-advanced walkover matches, remove the real player and leave only walkovers/TBD
-        // This prevents the match from auto-advancing again
-        if (player1Match && !isWalkover(currentMatch.player1)) {
-            // Removing a real player - replace with TBD so match can't auto-advance
-            currentMatch.player1 = { id: `${currentMatchId}-player1`, name: 'TBD' };
-            console.log(`Removed real player ${playerId} from player1 slot in ${currentMatchId}, replaced with TBD`);
-            console.log(`DEBUG: Match ${currentMatchId} is now: ${currentMatch.player1.name} vs ${currentMatch.player2.name}`);
-        } else if (player2Match && !isWalkover(currentMatch.player2)) {
-            // Removing a real player - replace with TBD so match can't auto-advance  
-            currentMatch.player2 = { id: `${currentMatchId}-player2`, name: 'TBD' };
-            console.log(`Removed real player ${playerId} from player2 slot in ${currentMatchId}, replaced with TBD`);
-            console.log(`DEBUG: Match ${currentMatchId} is now: ${currentMatch.player1.name} vs ${currentMatch.player2.name}`);
-        }
-        // If removing a walkover player, just leave it (shouldn't happen in practice)
-    } else {
-        // For normal matches, clear to TBD as usual
-        if (player1Match) {
-            currentMatch.player1 = { id: `${currentMatchId}-player1`, name: 'TBD' };
-            console.log(`Cleared player ${playerId} from player1 slot in ${currentMatchId}`);
-        }
-        if (player2Match) {
-            currentMatch.player2 = { id: `${currentMatchId}-player2`, name: 'TBD' };
-            console.log(`Cleared player ${playerId} from player2 slot in ${currentMatchId}`);
-        }
-    }
-}
-
-/**
  * Debug function to show current history
  */
 function debugHistory() {
@@ -3183,19 +2746,6 @@ function validateAndShowWinnerDialog(matchId, playerNumber) {
     return success;
 }
 
-// NEW: Error handling with help suggestions
-function handleBracketGenerationError() {
-    if (typeof showHelpHint === 'function') {
-        if (!tournament) {
-            showHelpHint('Create a tournament first on the Setup page.');
-        } else if (players.filter(p => p.paid).length < 4) {
-            showHelpHint('Add at least 4 paid players before generating bracket.');
-        } else if (tournament.bracket) {
-            showHelpHint('Tournament already has a bracket. Use "Reset Tournament" to start over.');
-        }
-    }
-}
-
 /**
  * Check if a match is a frontside semifinal
  */
@@ -3333,13 +2883,9 @@ if (typeof window !== 'undefined') {
     // Transactional History System
     window.saveTransaction = saveTransaction;
     window.generateTransactionId = generateTransactionId;
-    window.undoTransaction = undoTransaction;
-    window.undoTransactions = undoTransactions;
     window.getTournamentHistory = getTournamentHistory;
     window.clearTournamentHistory = clearTournamentHistory;
     window.debugHistory = debugHistory;
-    window.getUndoneTransactions = getUndoneTransactions;
-    window.saveUndoneTransactions = saveUndoneTransactions;
 
     // Original Functions (unchanged)
     window.advancePlayer = advancePlayer;
@@ -3370,7 +2916,6 @@ if (typeof window !== 'undefined') {
     window.openStatsModalFromConfirmation = openStatsModalFromConfirmation;
     window.detectMatchIssues = detectMatchIssues;
     window.onPageChange = onPageChange;
-    window.handleBracketGenerationError = handleBracketGenerationError;
     window.isFrontsideSemifinal = isFrontsideSemifinal;
     window.isBacksideSemifinal = isBacksideSemifinal;
     window.isSEBronzeMatch = isSEBronzeMatch;
@@ -3380,7 +2925,8 @@ if (typeof window !== 'undefined') {
     window.getSERoundDisplayName = getSERoundDisplayName;
     window.calculateAllRankings = calculateAllRankings;
     window.calculate8PlayerRankings = calculate8PlayerRankings;
-    window.getDownstreamMatches = getDownstreamMatches;
     window.isWalkover = isWalkover;
     window.showTournamentProgressWarning = showTournamentProgressWarning;
+
+    console.log('✅ Clean match progression system loaded - old system disabled');
 }

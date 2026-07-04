@@ -40,7 +40,6 @@
  * Priority 5 - History/Undo system (bracket-rendering.js): ✅ DONE
  * - handleSurgicalUndo(matchId) → void
  * - undoManualTransaction(transactionId) → void
- * - rebuildBracketFromHistory(cleanHistory) → void
  * - getConsequentialMatches(transaction) → Match[]
  * - isMatchUndoable(matchId) → boolean
  *

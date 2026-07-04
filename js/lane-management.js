@@ -1,14 +1,5 @@
 // lane-management.js - Phase 2: Lane Management System
 
-// Add lane configuration to global config
-if (typeof config !== 'undefined') {
-    config.lanes = config.lanes || {
-        maxLanes: 4,           // Maximum number of lanes available
-        excludedLanes: [],     // Array of lane numbers to exclude (e.g., [5, 7])
-        requireLaneForStart: false  // Whether to require lane before starting match
-    };
-}
-
 /**
  * Get all lanes that are currently in use by LIVE matches
  */
@@ -292,47 +283,6 @@ function parseExcludedLanes(excludedLanesString) {
         .filter(n => !isNaN(n) && n > 0);
 }
 
-/**
- * Update lane configuration (called from config page)
- */
-function updateLaneConfiguration() {
-    const maxLanes = parseInt(document.getElementById('maxLanes')?.value) || 10;
-    const requireLane = document.getElementById('requireLaneForStart')?.checked || false;
-    const excludedLanesString = document.getElementById('excludedLanes')?.value || '';
-
-    // Parse excluded lanes
-    const excludedLanes = parseExcludedLanes(excludedLanesString);
-
-    // Validate excluded lanes are within range
-    const validExcludedLanes = excludedLanes.filter(lane => lane <= maxLanes);
-    if (validExcludedLanes.length !== excludedLanes.length) {
-        const invalidLanes = excludedLanes.filter(lane => lane > maxLanes);
-        alert(`Warning: Some excluded lanes (${invalidLanes.join(', ')}) are above the maximum lane number (${maxLanes}) and will be ignored.`);
-    }
-
-    config.lanes = {
-        maxLanes: maxLanes,
-        excludedLanes: validExcludedLanes,
-        requireLaneForStart: requireLane
-    };
-
-    // Save configuration
-    if (typeof saveConfiguration === 'function') {
-        saveConfiguration();
-    } else {
-        localStorage.setItem('dartsConfig', JSON.stringify(config));
-    }
-
-    console.log('Lane configuration updated:', config.lanes);
-
-    // Refresh all lane dropdowns with new settings
-    setTimeout(() => {
-        refreshAllLaneDropdowns();
-    }, 100);
-
-    return true;
-}
-
 // Debug function for lane management
 function debugLaneManagement() {
     console.log('=== LANE MANAGEMENT DEBUG ===');
@@ -575,7 +525,6 @@ if (typeof window !== 'undefined') {
     window.updateMatchLaneWithValidation = updateMatchLaneWithValidation;
     window.toggleActiveWithLaneValidation = toggleActiveWithLaneValidation;
     window.showLaneUsage = showLaneUsage;
-    window.updateLaneConfiguration = updateLaneConfiguration;
     window.debugLaneManagement = debugLaneManagement;
     window.refreshAllLaneDropdowns = refreshAllLaneDropdowns;
     window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;

@@ -9,7 +9,6 @@ let zoomLevel = 0.6;
 let isDragging = false;
 let dragStart = { x: 0, y: 0 };
 let panOffset = { x: 0, y: 0 };
-let zoomAnimationFrame = null;
 let initialBracketRender = true;
 
 function initializeBracketControls() {
@@ -222,29 +221,6 @@ function renderFrontsideMatches(frontsideStructure, grid) {
         render32PlayerFrontsideMatches(grid);
         return;
     }
-
-    // Default positioning for other bracket sizes
-    frontsideStructure.forEach((roundInfo, roundIndex) => {
-        const frontsideMatches = matches.filter(m =>
-            m.side === 'frontside' && m.round === roundInfo.round
-        );
-
-        // Position: Center flowing RIGHT
-        const roundX = grid.centerX + grid.centerBuffer + roundIndex * (grid.matchWidth + grid.horizontalSpacing);
-
-        if (frontsideMatches.length === 1) {
-            const matchY = grid.centerY - (grid.matchHeight / 2);
-            renderMatch(frontsideMatches[0], roundX, matchY, 'frontside', roundIndex);
-        } else {
-            const totalNeededHeight = frontsideMatches.length * grid.matchHeight + (frontsideMatches.length - 1) * grid.verticalSpacing;
-            const startY = grid.centerY - (totalNeededHeight / 2);
-
-            frontsideMatches.forEach((match, matchIndex) => {
-                const matchY = startY + matchIndex * (grid.matchHeight + grid.verticalSpacing);
-                renderMatch(match, roundX, matchY, 'frontside', roundIndex);
-            });
-        }
-    });
 }
 
 // Hardcoded positioning for 8-player frontside to show clear progression
@@ -538,31 +514,6 @@ function renderBacksideMatches(backsideStructure, grid) {
         render32PlayerBacksideMatches(grid);
         return;
     }
-
-    // Default positioning for other bracket sizes
-    backsideStructure.forEach((roundInfo, roundIndex) => {
-        const backsideMatches = matches.filter(m =>
-            m.side === 'backside' && m.round === roundInfo.round
-        );
-
-        if (backsideMatches.length === 0) return;
-
-        // Position: Center flowing LEFT
-        const roundX = grid.centerX - grid.centerBuffer - (roundIndex + 1) * (grid.matchWidth + grid.horizontalSpacing);
-
-        if (backsideMatches.length === 1) {
-            const matchY = grid.centerY - (grid.matchHeight / 2);
-            renderMatch(backsideMatches[0], roundX, matchY, 'backside', roundIndex);
-        } else {
-            const totalNeededHeight = backsideMatches.length * grid.matchHeight + (backsideMatches.length - 1) * grid.verticalSpacing;
-            const startY = grid.centerY - (totalNeededHeight / 2);
-
-            backsideMatches.forEach((match, matchIndex) => {
-                const matchY = startY + matchIndex * (grid.matchHeight + grid.verticalSpacing);
-                renderMatch(match, roundX, matchY, 'backside', roundIndex);
-            });
-        }
-    });
 }
 
 // Hardcoded positioning for 8-player backside to show clear progression (mirrored to left)
@@ -1263,80 +1214,6 @@ function renderSETitles(grid) {
 }
 
 /**
- * NEW: Get all matches that are in a state where they can be redone.
- * @returns {Set<string>} A set of match IDs that are redoable.
- */
-function getRedoableMatches() {
-    const undone = getUndoneTransactions();
-    const redoable = new Set();
-
-    if (undone.length === 0) {
-        return redoable;
-    }
-
-    undone.forEach(transaction => {
-        if (transaction && transaction.beforeState && transaction.beforeState.matches) {
-            const match = matches.find(m => m.id === transaction.matchId);
-            if (match && !match.completed) {
-                const beforeMatch = transaction.beforeState.matches.find(m => m.id === transaction.matchId);
-                if (beforeMatch && match.player1 && match.player2 &&
-                    beforeMatch.player1.id === match.player1.id &&
-                    beforeMatch.player2.id === match.player2.id) {
-                    redoable.add(transaction.matchId);
-                }
-            }
-        }
-    });
-
-    return redoable;
-}
-
-/**
- * NEW: Handle the redo button click.
- * @param {string} matchId The ID of the match to redo.
- */
-function handleRedoClick(matchId) {
-    const undone = getUndoneTransactions();
-    const transactionToRedo = undone.find(t => t.matchId === matchId);
-
-    if (!transactionToRedo) {
-        alert('Could not find the match in the undone history to redo.');
-        return;
-    }
-
-    if (!transactionToRedo.winner) {
-        alert('The transaction to redo is corrupted and cannot be processed.');
-        return;
-    }
-
-    const beforeMatch = transactionToRedo.beforeState.matches.find(m => m.id === matchId);
-    if (!beforeMatch) {
-        alert('Could not find the match in the before state of the transaction.');
-        return;
-    }
-
-    // Re-complete the match with the original outcome
-    const winner = transactionToRedo.winner;
-    const winnerPlayerNumber = winner.id === beforeMatch.player1.id ? 1 : 2;
-    
-    completeMatch(matchId, winnerPlayerNumber, beforeMatch.finalScore?.winnerLegs, beforeMatch.finalScore?.loserLegs);
-
-    // Remove from undone transactions and add back to history
-    const newUndone = undone.filter(t => t.id !== transactionToRedo.id);
-    saveUndoneTransactions(newUndone);
-
-    const history = getTournamentHistory();
-    history.unshift(transactionToRedo);
-
-    if (tournament && tournament.id) {
-        const historyKey = `tournament_${tournament.id}_history`;
-        localStorage.setItem(historyKey, JSON.stringify(history));
-    }
-
-    refreshTournamentUI();
-}
-
-/**
  * Returns a numeric round order for a match ID so later rounds have higher values.
  * Used to determine which is a player's final (elimination) match.
  * @param {string} matchId
@@ -1490,15 +1367,6 @@ function renderMatch(match, x, y, section, roundIndex) {
     const player1Eliminated = isPlayerEliminatedInMatch(match, 'player1');
     const player2Eliminated = isPlayerEliminatedInMatch(match, 'player2');
 
-    // --- START: Redo UI Logic ---
-    //const redoableMatches = getRedoableMatches();
-    //const isRedoable = redoableMatches.has(match.id);
-    let redoButton = '';
-    //if (isRedoable) {
-    //    redoButton = `<button onclick="handleRedoClick('${match.id}')" class="btn btn-sm btn-info" style="margin-left: 5px;">Redo</button>`;
-    //}
-    // --- END: Redo UI Logic ---
-
     matchElement.innerHTML = `
         <div class="match-header">
             <span style="font-size: 16px;">${match.id}</span>
@@ -1547,7 +1415,6 @@ function renderMatch(match, x, y, section, roundIndex) {
             	    ${buttonDisabled ? 'disabled' : ''}>
         	    ${buttonText}
     	    </button>
-            ${redoButton}
 	</div>
     `;
 
@@ -2097,14 +1964,8 @@ function updateMatchReferee(matchId, refereeId) {
         if (modal &&
             (modal.style.display === 'flex' || modal.style.display === 'block') &&
             typeof showMatchCommandCenter === 'function') {
-            // Preserve scroll position
-            const modalContent = document.querySelector('.cc-modal-content');
-            const scrollTop = modalContent ? modalContent.scrollTop : 0;
             setTimeout(() => {
                 showMatchCommandCenter();
-                if (modalContent) {
-                    modalContent.scrollTop = scrollTop;
-                }
             }, 200);
         }
 
@@ -2124,15 +1985,11 @@ function updateMatchReferee(matchId, refereeId) {
 
     // Create transaction for referee assignment
     if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
-        let description;
-        if (parsedRefereeId) {
-            // Look up player name
-            const referee = players && players.find(p => p.id === parsedRefereeId);
-            const refereeName = referee ? referee.name : 'Unknown';
-            description = `${matchId}: Referee assigned to ${refereeName} (ID: ${parsedRefereeId})`;
-        } else {
-            description = `${matchId}: Referee cleared`;
-        }
+        // Look up player name (parsedRefereeId is always truthy here — the
+        // empty/clear case returns early at the top of this function)
+        const referee = players && players.find(p => p.id === parsedRefereeId);
+        const refereeName = referee ? referee.name : 'Unknown';
+        const description = `${matchId}: Referee assigned to ${refereeName} (ID: ${parsedRefereeId})`;
 
         const transaction = {
             id: generateTransactionId(),
@@ -2158,14 +2015,8 @@ function updateMatchReferee(matchId, refereeId) {
     if (modal &&
         (modal.style.display === 'flex' || modal.style.display === 'block') &&
         typeof showMatchCommandCenter === 'function') {
-        // Preserve scroll position
-        const modalContent = document.querySelector('.cc-modal-content');
-        const scrollTop = modalContent ? modalContent.scrollTop : 0;
         setTimeout(() => {
             showMatchCommandCenter();
-            if (modalContent) {
-                modalContent.scrollTop = scrollTop;
-            }
         }, 200);
     }
 
@@ -2553,8 +2404,6 @@ if (typeof window !== 'undefined') {
     window.getPlayersInLiveMatches = getPlayersInLiveMatches;
     window.isPlayerAvailableAsReferee = isPlayerAvailableAsReferee;
     window.checkRefereeConflict = checkRefereeConflict;
-    window.getRedoableMatches = getRedoableMatches;
-    window.handleRedoClick = handleRedoClick;
 }
 
 // --- START: Surgical Undo Implementation ---
@@ -2846,9 +2695,13 @@ function handleSurgicalUndo(matchId) {
  * 2. Remove ALL transactions for affected matches (lanes, refs, starts, completions)
  * 3. Save clean history to localStorage
  * 4. Reset tournament status if undoing GRAND-FINAL
- * 5. Roll back match states and remove players from downstream slots
- * 6. Rebuild bracket from clean history using rebuildBracketFromHistory()
- * 7. Recalculate rankings and update UI
+ * 5. Surgically roll back each affected match in place: use the progression
+ *    table to remove the advanced winner/loser from their destination slots,
+ *    then reset the match itself (completed/winner/loser/active/lane/referee)
+ *    while keeping its original players
+ * 6. Update all match states and refresh the UI
+ * 7. Recalculate rankings, restore 3rd place if BS-FINAL is still completed,
+ *    and delete rolled-back matches from NewtonDB
  *
  * Uses DE_MATCH_PROGRESSION for deterministic rollback.
  */
@@ -3024,191 +2877,6 @@ function undoManualTransaction(transactionId) {
     }
 
     console.log(`Clean undo complete: surgically rolled back ${targetTransaction.matchId}`);
-}
-
-/**
- * Rebuilds entire bracket state from transaction history.
- * Single source of truth approach - history IS the state.
- *
- * @param {Transaction[]} cleanHistory - Array of transactions to replay chronologically
- * @returns {void}
- *
- * @description
- * Rebuild process:
- * 1. Set global flags to prevent new transactions during rebuild
- * 2. Clear all matches and placements
- * 3. Regenerate bracket structure using generateAllMatches()
- * 4. Replay transactions chronologically:
- *    - COMPLETE_MATCH: Re-complete with winner/loser
- *    - ASSIGN_LANE: Restore lane assignment
- *    - ASSIGN_REFEREE: Restore referee assignment
- *    - START_MATCH/STOP_MATCH: Restore active state
- * 5. Run processAutoAdvancements() for walkovers
- * 6. Recalculate rankings and update UI
- *
- * Called after surgical undo or tournament reset.
- */
-function rebuildBracketFromHistory(cleanHistory) {
-    if (!tournament || !tournament.bracketSize) {
-        console.error('Cannot rebuild bracket: no tournament or bracket size');
-        return;
-    }
-
-    // Set global flags to prevent any transaction creation during rebuild
-    window.rebuildInProgress = true;
-    window.autoAdvancementsDisabled = true;
-
-    console.log(`Rebuilding bracket from ${cleanHistory.length} transactions`);
-
-    // 1. Clear existing matches and placements, then regenerate bracket structure
-    matches.length = 0;
-    tournament.placements = {}; // Clear all rankings to start fresh
-
-    // Recreate the bracket structure (similar to generateCleanBracket)
-    const bracketSize = tournament.bracketSize;
-    const paidPlayers = players.filter(p => p.paid);
-
-    // Use the existing bracket generation logic to create fresh structure
-    if (typeof generateAllMatches === 'function') {
-        // We need the bracket object to regenerate matches
-        if (!tournament.bracket) {
-            console.error('Cannot rebuild: tournament.bracket not available');
-            return;
-        }
-        generateAllMatches(tournament.bracket, bracketSize);
-    } else {
-        console.error('generateAllMatches function not available');
-        return;
-    }
-
-    // 2. Apply each transaction from clean history in chronological order
-    const chronologicalHistory = cleanHistory
-        .slice() // Don't mutate original array
-        .sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
-
-    let appliedCount = 0;
-    chronologicalHistory.forEach((transaction, index) => {
-        const match = matches.find(m => m.id === transaction.matchId);
-        if (!match) {
-            console.log(`🔍 Rebuild ${index + 1}/${chronologicalHistory.length}: Match ${transaction.matchId} not found`);
-            return;
-        }
-
-        console.log(`🔍 Rebuild ${index + 1}/${chronologicalHistory.length}: Processing ${transaction.type} for ${transaction.matchId}`);
-
-        // Process different transaction types
-        switch (transaction.type) {
-            case 'COMPLETE_MATCH':
-                if (transaction.winner && transaction.loser) {
-                    console.log(`  ➤ Setting players: ${transaction.winner.name} vs ${transaction.loser.name}`);
-
-                    // Ensure the match has the correct players from transaction
-                    match.player1 = transaction.winner;
-                    match.player2 = transaction.loser;
-
-                    // Winner is always player1 for this rebuild approach
-                    const winnerPlayerNumber = 1;
-                    if (typeof completeMatch === 'function') {
-                        console.log(`  ➤ Calling completeMatch(${transaction.matchId}, ${winnerPlayerNumber})`);
-                        completeMatch(
-                            transaction.matchId,
-                            winnerPlayerNumber,
-                            transaction.winnerLegs || 0,
-                            transaction.loserLegs || 0,
-                            transaction.completionType || 'MANUAL'
-                        );
-                        console.log(`  ✅ Completed ${transaction.matchId}: ${transaction.winner.name} wins`);
-                        appliedCount++;
-                    }
-                }
-                break;
-
-            case 'START_MATCH':
-                match.active = true;
-                appliedCount++;
-                break;
-
-            case 'STOP_MATCH':
-                match.active = false;
-                appliedCount++;
-                break;
-
-            case 'ASSIGN_LANE':
-                match.lane = transaction.afterState.lane;
-                appliedCount++;
-                break;
-
-            case 'ASSIGN_REFEREE':
-                match.referee = transaction.afterState.referee;
-                appliedCount++;
-                break;
-
-            default:
-                // Handle legacy transactions without explicit type (assume COMPLETE_MATCH)
-                if (transaction.matchId && transaction.winner && transaction.loser) {
-                    match.player1 = transaction.winner;
-                    match.player2 = transaction.loser;
-                    const winnerPlayerNumber = 1;
-                    if (typeof completeMatch === 'function') {
-                        completeMatch(
-                            transaction.matchId,
-                            winnerPlayerNumber,
-                            transaction.winnerLegs || 0,
-                            transaction.loserLegs || 0,
-                            transaction.completionType || 'MANUAL'
-                        );
-                        appliedCount++;
-                    }
-                }
-                break;
-        }
-    });
-
-    // 5. Update match states and UI
-    updateAllMatchStates();
-    if (typeof refreshTournamentUI === 'function') {
-        refreshTournamentUI();
-    }
-
-    console.log(`Bracket rebuild complete: applied ${appliedCount} transactions`);
-
-    // Reasonable delay to prevent auto-advancements during UI refresh cycles
-    setTimeout(() => {
-        console.log('🔓 Rebuild protection window ending - re-enabling auto-advancements');
-        window.rebuildInProgress = false;
-        window.autoAdvancementsDisabled = false;
-
-        // Process auto-advancements to handle walkover matches that should advance automatically
-        if (typeof processAutoAdvancements === 'function') {
-            console.log('🔄 Processing auto-advancements after bracket rebuild');
-            // Safety reset: ensure flag is clean before starting
-            window.processingAutoAdvancements = false;
-
-            // Process auto-advancements multiple times to catch cascading walkover effects
-            let attempts = 0;
-            const maxAttempts = 3;
-            const processRound = () => {
-                attempts++;
-                console.log(`🔄 Auto-advancement attempt ${attempts}/${maxAttempts}`);
-                processAutoAdvancements();
-
-                // Schedule additional rounds to catch cascading effects
-                if (attempts < maxAttempts) {
-                    setTimeout(processRound, 100);
-                }
-            };
-
-            processRound();
-
-            // Emergency flag cleanup after all attempts
-            setTimeout(() => {
-                if (window.processingAutoAdvancements) {
-                    console.warn('🚨 Emergency flag cleanup - processingAutoAdvancements was stuck');
-                    window.processingAutoAdvancements = false;
-                }
-            }, 2000);
-        }
-    }, 500);
 }
 
 // Update match states based on current player composition

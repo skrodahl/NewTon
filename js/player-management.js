@@ -581,13 +581,6 @@ function saveStats() {
     closeStatsModal();
 }
 
-// Simple fallback functions to prevent errors
-function safeSaveTournament() {
-    if (typeof saveTournament === 'function') {
-        saveTournament();
-    }
-}
-
 function closeStatsModal() {
     currentStatsPlayer = null;
     popDialog(); // Use dialog stack to close and restore parent

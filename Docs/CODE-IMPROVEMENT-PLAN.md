@@ -305,6 +305,13 @@ Exports carry `exportVersion`, but the localStorage records (`dartsTournaments`,
 
 ## Phase 5 — Dead Code Removal
 
+> **Status: Implemented 2026-07-04** (~950 lines deleted across 8 files; every symbol re-verified caller-free by grep at delete time). Deviations from the list below:
+> - `buildMatchSourcesLookup` (analytics.js) was **NOT deleted** — the review claim was wrong; it has a live caller in bracket-rendering.js (`showMatchProgression` "Fed by" line). Kept.
+> - `getUndoneTransactions` turned out to live in clean-match-progression.js (not bracket-rendering.js); deleted there together with `saveUndoneTransactions` and `clearTournamentCompletionState`, both newly orphaned by the 5.1 deletion.
+> - Deliberately kept, pending separate decisions: `match.state` writes, the `|| 10` maxLanes fallbacks in lane-management.js.
+> - The dead `${redoButton}` template interpolation and the stale `rebuildBracketFromHistory` mention in types.js were removed as part of their parent deletions; `undoManualTransaction`'s JSDoc steps 5–7 rewritten to describe the actual in-place rollback.
+> - The duplicated window-export block in clean-match-progression.js was a strict subset of the surviving one; the load-confirmation console.log was relocated, nothing else moved.
+
 Deletions only; git history preserves everything. The dangerous ones first.
 
 ### 5.1 Dead parallel undo implementation — DANGEROUS ⚠️

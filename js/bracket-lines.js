@@ -482,10 +482,6 @@ function createCustomFinalsLines(round3X, fs31CenterY, finalsX, backsideFinalCen
     fs31_h1.style.backgroundColor = '#666666';
     fs31_h1.style.zIndex = '1';
 
-    // Create invisible placeholder for fs31_v to maintain array structure
-    const fs31_v = document.createElement('div');
-    fs31_v.style.display = 'none';
-
     const fs31_h2 = document.createElement('div');
     fs31_h2.style.position = 'absolute';
     fs31_h2.style.left = `${finalsVerticalX}px`;
@@ -494,16 +490,6 @@ function createCustomFinalsLines(round3X, fs31CenterY, finalsX, backsideFinalCen
     fs31_h2.style.height = '3px';
     fs31_h2.style.backgroundColor = '#666666';
     fs31_h2.style.zIndex = '1';
-
-    // FS-3-1 to BS-FINAL connector (reuse same vertical line approach)
-    const fs31ToBsFinal_h1 = document.createElement('div');
-    fs31ToBsFinal_h1.style.position = 'absolute';
-    fs31ToBsFinal_h1.style.left = `${round3X + grid.matchWidth}px`;
-    fs31ToBsFinal_h1.style.top = `${fs31CenterY}px`;
-    fs31ToBsFinal_h1.style.width = `${finalsVerticalX - (round3X + grid.matchWidth)}px`;
-    fs31ToBsFinal_h1.style.height = '3px';
-    fs31ToBsFinal_h1.style.backgroundColor = '#666666';
-    fs31ToBsFinal_h1.style.zIndex = '1';
 
     // Extend vertical line to cover both BS-FINAL and GRAND-FINAL
     const extendedVertical = document.createElement('div');
@@ -524,7 +510,7 @@ function createCustomFinalsLines(round3X, fs31CenterY, finalsX, backsideFinalCen
     fs31ToBsFinal_h2.style.backgroundColor = '#666666';
     fs31ToBsFinal_h2.style.zIndex = '1';
 
-    return [fs31_h1, fs31_v, fs31_h2, fs31ToBsFinal_h1, extendedVertical, fs31ToBsFinal_h2];
+    return [fs31_h1, fs31_h2, extendedVertical, fs31ToBsFinal_h2];
 }
 
 /**
@@ -611,9 +597,9 @@ function create8PlayerFrontsideLines(grid, matches, positions) {
         const grandFinalCenterY = grandFinalY + (grid.matchHeight / 2);
 
         // Custom Finals connections
-        const [fs31_h1, fs31_v, fs31_h2, fs31ToBsFinal_h1, extendedVertical, fs31ToBsFinal_h2] =
+        const [fs31_h1, fs31_h2, extendedVertical, fs31ToBsFinal_h2] =
             createCustomFinalsLines(round3X, fs31CenterY, finalsX, backsideFinalCenterY, grandFinalCenterY, grid);
-        progressionLines.push(fs31_h1, fs31_v, fs31_h2, fs31ToBsFinal_h1, extendedVertical, fs31ToBsFinal_h2);
+        progressionLines.push(fs31_h1, fs31_h2, extendedVertical, fs31ToBsFinal_h2);
     }
 
     return progressionLines;
@@ -705,23 +691,21 @@ function create8PlayerBacksideLines(grid, matches, positions) {
     const bs2ToBS3MidPointX = (bs2LeftEdge + bs3RightEdge) / 2;
 
     // BS-2-1 to BS-3-1 progression line
-    const [hLine1, vLine1] = createProgressionLine(bs2LeftEdge, bs21CenterY, bs2ToBS3MidPointX, bs21CenterY);
-    const [hLine2, vLine2] = createProgressionLine(bs2ToBS3MidPointX, bs21CenterY, bs2ToBS3MidPointX, bs31CenterY);
-    const [hLine3, vLine3] = createProgressionLine(bs2ToBS3MidPointX, bs31CenterY, bs3RightEdge, bs31CenterY);
+    const [hLine1] = createProgressionLine(bs2LeftEdge, bs21CenterY, bs2ToBS3MidPointX, bs21CenterY);
+    const [, vLine2] = createProgressionLine(bs2ToBS3MidPointX, bs21CenterY, bs2ToBS3MidPointX, bs31CenterY);
+    const [hLine3] = createProgressionLine(bs2ToBS3MidPointX, bs31CenterY, bs3RightEdge, bs31CenterY);
 
     // BS-2-2 to BS-3-1 progression line
-    const [hLine4, vLine4] = createProgressionLine(bs2LeftEdge, bs22CenterY, bs2ToBS3MidPointX, bs22CenterY);
-    const [hLine5, vLine5] = createProgressionLine(bs2ToBS3MidPointX, bs22CenterY, bs2ToBS3MidPointX, bs31CenterY);
+    const [hLine4] = createProgressionLine(bs2LeftEdge, bs22CenterY, bs2ToBS3MidPointX, bs22CenterY);
+    const [, vLine5] = createProgressionLine(bs2ToBS3MidPointX, bs22CenterY, bs2ToBS3MidPointX, bs31CenterY);
 
-    progressionLines.push(hLine1, vLine1, hLine2, vLine2, hLine3, vLine3, hLine4, vLine4, hLine5, vLine5);
+    progressionLines.push(hLine1, vLine2, hLine3, hLine4, vLine5);
 
     // Add BS-FINAL indicator for 8-player bracket
-    const spacingMultiplier = 4;
-    const finalsX = positions.round3X + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
     const backsideFinalY = grid.centerY - 80;
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
 
-    const bs31ToFinalElements = createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCenterY, grid);
+    const bs31ToFinalElements = createBS31ToFinalIndicator(bs3X, bs31CenterY, backsideFinalCenterY, grid);
     progressionLines.push(...bs31ToFinalElements);
 
     return progressionLines;
@@ -731,12 +715,11 @@ function create8PlayerBacksideLines(grid, matches, positions) {
  * Creates L-shaped line with arrow pointing to BS-FINAL text for 8-player bracket
  * @param {number} bs3X - X position of BS-3-1 match
  * @param {number} bs31CenterY - Center Y position of BS-3-1 match
- * @param {number} finalsX - X position of finals matches
  * @param {number} backsideFinalCenterY - Center Y position of BS-FINAL match
  * @param {Object} grid - Grid configuration object
  * @returns {Array} Array of DOM elements for the L-shaped line, arrow, and text
  */
-function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCenterY, grid) {
+function createBS31ToFinalIndicator(bs3X, bs31CenterY, backsideFinalCenterY, grid) {
     const elements = [];
 
     // Calculate positions
@@ -803,12 +786,11 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, finalsX, backsideFinalCen
  * Creates L-shaped line with arrow pointing to BS-FINAL text for 16-player bracket
  * @param {number} bs5X - X position of BS-5-1 match
  * @param {number} bs51CenterY - Center Y position of BS-5-1 match
- * @param {number} finalsX - X position of finals matches
  * @param {number} backsideFinalCenterY - Center Y position of BS-FINAL match
  * @param {Object} grid - Grid configuration object
  * @returns {Array} Array of DOM elements for the L-shaped line, arrow, and text
  */
-function create16PlayerBSFinalIndicator(bs5X, bs51CenterY, finalsX, backsideFinalCenterY, grid) {
+function create16PlayerBSFinalIndicator(bs5X, bs51CenterY, backsideFinalCenterY, grid) {
     const elements = [];
 
     // Calculate positions (same approach as 8-player createBS31ToFinalIndicator)
@@ -974,9 +956,9 @@ function create16PlayerFrontsideLines(grid, matches, positions) {
     const grandFinalCenterY = grandFinalY + (grid.matchHeight / 2);
 
     // Custom Finals connections (FS-4-1 to both BS-FINAL and GRAND-FINAL)
-    const [fs41_h1, fs41_v, fs41_h2, fs41ToBsFinal_h1, extendedVertical, fs41ToBsFinal_h2] =
+    const [fs41_h1, fs41_h2, extendedVertical, fs41ToBsFinal_h2] =
         createCustomFinalsLines(round4X, fs41CenterY, finalsX, backsideFinalCenterY, grandFinalCenterY, grid);
-    progressionLines.push(fs41_h1, fs41_v, fs41_h2, fs41ToBsFinal_h1, extendedVertical, fs41ToBsFinal_h2);
+    progressionLines.push(fs41_h1, fs41_h2, extendedVertical, fs41ToBsFinal_h2);
 
     return progressionLines;
 }
@@ -1203,14 +1185,11 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     // Phase 2e: BS-5-1 to BS-FINAL indicator (like 8-player BS-3-1 indicator)
     console.log('🔧 Creating BS-5-1 to BS-FINAL indicator');
 
-    // Calculate finals positioning (similar to frontside finals)
-    const spacingMultiplier = 4;
-    const finalsX = positions.round1X + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
     const backsideFinalY = grid.centerY - 80;
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
 
     // Create BS-FINAL indicator from BS-5-1 (like createBS31ToFinalIndicator for 8-player)
-    const bs51ToFinalElements = create16PlayerBSFinalIndicator(positions.bs5X, bs51CenterY, finalsX, backsideFinalCenterY, grid);
+    const bs51ToFinalElements = create16PlayerBSFinalIndicator(positions.bs5X, bs51CenterY, backsideFinalCenterY, grid);
     progressionLines.push(...bs51ToFinalElements);
 
     return progressionLines;
@@ -1383,12 +1362,11 @@ function create32PlayerFrontsideLines(grid, matches, positions) {
  * Creates BS-FINAL indicator for 32-player bracket (L-shaped line with arrow and text)
  * @param {number} bs7X - X coordinate of BS-7-1 match
  * @param {number} bs71CenterY - Center Y coordinate of BS-7-1 match
- * @param {number} finalsX - X coordinate of finals area
  * @param {number} backsideFinalCenterY - Center Y coordinate of BS-FINAL match
  * @param {Object} grid - Grid configuration object
  * @returns {Array} Array of 4 DOM elements [hLine, vLine, arrow, text]
  */
-function create32PlayerBSFinalIndicator(bs7X, bs71CenterY, finalsX, backsideFinalCenterY, grid) {
+function create32PlayerBSFinalIndicator(bs7X, bs71CenterY, backsideFinalCenterY, grid) {
     const elements = [];
 
     // Calculate positions (same approach as 8-player and 16-player indicators)
@@ -1700,14 +1678,11 @@ function create32PlayerBacksideLines(grid, matches, positions) {
 
     // Phase 4: BS-7-1 → BS-FINAL indicator (L-shaped line with arrow and text)
 
-    // Calculate finals positioning (similar to frontside finals)
-    const spacingMultiplier = 4;
-    const finalsX = round1X + grid.matchWidth + (spacingMultiplier * grid.horizontalSpacing);
     const backsideFinalY = grid.centerY - 80;
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
 
     // Create BS-FINAL indicator from BS-7-1 (like 8-player and 16-player)
-    const bs71ToFinalElements = create32PlayerBSFinalIndicator(bs7X, bs71CenterY, finalsX, backsideFinalCenterY, grid);
+    const bs71ToFinalElements = create32PlayerBSFinalIndicator(bs7X, bs71CenterY, backsideFinalCenterY, grid);
     progressionLines.push(...bs71ToFinalElements);
 
     return progressionLines;
@@ -1836,9 +1811,6 @@ function createSEBracketLabels(grid, bracketCenterX, finalsX, bracketSize, bronz
         labels.push(bronzeSubtitle);
 
         labels.push(makeColumnLabel('seFinalsLabel',  'FINAL',        finalsX  + grid.matchWidth / 2, grid.centerY - 60));
-    } else {
-        // All other sizes: single FINALS label above the shared finals column
-        labels.push(makeColumnLabel('seFinalsLabel', 'FINAL', finalsX + grid.matchWidth / 2, bronzeY - 60));
     }
 
     return labels;
@@ -1975,11 +1947,6 @@ function createSEFinalsLines(lastRoundX, sf1CenterY, sf2CenterY, finalsX, bronze
     const spineTop    = Math.min(sf1CenterY, sf2CenterY, bronzeCenterY, finalCenterY);
     const spineBottom = Math.max(sf1CenterY, sf2CenterY, bronzeCenterY, finalCenterY);
     elements.push(makeVLine(finalsVerticalX, spineTop, spineBottom - spineTop));
-
-    // Spine → Bronze left edge (skipped for 8P where bronze has a dedicated column with bottom vertical)
-    if (bronzeX === undefined) {
-        elements.push(makeHLine(finalsVerticalX, bronzeCenterY, finalsX - finalsVerticalX));
-    }
 
     // Spine → Final left edge
     elements.push(makeHLine(finalsVerticalX, finalCenterY, finalsX - finalsVerticalX));
