@@ -66,6 +66,20 @@ if (!in_array($scheme, ['http', 'https'])) {
     exit;
 }
 
+// Optional relay allowlist: when NEWTON_RELAY_ALLOWLIST is set (comma-separated
+// hostnames), only those hosts may be relayed to. Unset = any host (current
+// behavior) — the relay is then only as protected as the deployment around it.
+$relayAllowlist = getenv('NEWTON_RELAY_ALLOWLIST');
+if ($relayAllowlist !== false && trim($relayAllowlist) !== '') {
+    $allowedHosts = array_filter(array_map('trim', explode(',', strtolower($relayAllowlist))));
+    $remoteHost = strtolower(parse_url($remoteUrl, PHP_URL_HOST) ?? '');
+    if (!in_array($remoteHost, $allowedHosts, true)) {
+        http_response_code(403);
+        echo json_encode(['error' => 'Remote host is not in NEWTON_RELAY_ALLOWLIST']);
+        exit;
+    }
+}
+
 // Forward the request via cURL
 $ch = curl_init($remoteUrl);
 curl_setopt($ch, CURLOPT_POST, true);

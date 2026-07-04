@@ -1,3 +1,100 @@
+## **v5.1.5** — Undo the Undone (2026-07-04)
+
+A code-quality release. A full review of the codebase (four parallel deep reviews covering the bracket core, app/state layer, analytics/history/DB, and QR/Chalker/API — plan and findings in `Docs/CODE-IMPROVEMENT-PLAN.md`) produced a six-phase improvement plan. This release ships Phase 1 (correctness bug fixes, ~25 items) and Phase 5 (dead code removal, ~950 lines). No features, no behavior changes beyond the fixes themselves.
+
+### Transaction & undo integrity
+
+- **Transaction IDs are now guaranteed unique.** All five mint sites previously used `` `tx_${Date.now()}` ``; `processAutoAdvancements()` completes walkover chains synchronously, so several transactions could share one ID within the same millisecond. Undo looks transactions up by ID — a duplicate could silently strip an *unrelated* match's transaction from history while its board state stayed completed. New shared helper `generateTransactionId()` (timestamp + monotonic counter) in `clean-match-progression.js`, used everywhere.
+- **Undo gates now respect QR completions downstream.** The downstream-blocking checks in `isMatchUndoable()` and `getDetailedMatchState()` only blocked on `MANUAL` completions — undoing an upstream match would destroy a Chalker-recorded QR result (legs, averages, achievements) with no warning. All four checks now treat QR like MANUAL.
+- **Undo cleans up NewtonDB for consequential matches.** `undoManualTransaction()` deleted the IndexedDB match record only for the target match; rolled-back downstream matches left orphaned records that Analytics kept counting. All rolled-back matches are now deleted from the register.
+- **Undo confirmation modal fallback no longer bypasses confirmation.** If the modal elements were missing, the fallback executed the destructive undo directly; it now logs and aborts.
+- **Winner-confirmation input listeners no longer leak.** `showWinnerConfirmation()` added anonymous input listeners on every open but removed a function that was never attached; handlers accumulated all session, each closing over a stale match. Named handler, stored on the modal, removed on cleanup and re-open.
+
+### Transaction pruning (export + Developer Console)
+
+- **Pruning matches strictly on `matchId`.** All four pruning sites (three in `analytics.js`, one in the export path) grouped transactions with a `description.includes(matchId)` fallback — `FS-1-1` is a substring of descriptions for `FS-1-10`…`FS-1-16`, so a completed match could claim (and prune) transactions belonging to other, including live, matches: lane/referee assignments and START_MATCH entries. The substring fallback is gone.
+- **Transactions without an identifier are skipped** instead of collapsing to an `undefined` key that matched — and dropped — every other id-less transaction.
+
+### Import / export
+
+- **Saved Players are restored on import again.** Import wrote the snapshot to the legacy `savedPlayers` localStorage key; the app reads `playerList`. The feature was silently broken.
+- **Old-format detection works on the overwrite path.** `window.isOldFormatImport` was only set by the confirm modal; re-importing over an existing tournament used a stale or undefined flag, which could restore incompatible pre-v4.0 snapshot history (or skip valid v4.0 history).
+- **Removed a stale export that threw on every page load.** `window.generateResultsCSV = generateResultsCSV` referenced a deleted function — an uncaught ReferenceError that aborted the remaining `window.*` assignments in `results-config.js`.
+
+### Analytics / History
+
+- **Match detail points use the match's own tournament.** The Points column was computed from whichever tournament was last opened via the register (`_activeTournament`) — wrong `configSnapshot` in Original point mode when opening from the flat Matches tab. The detail builder now receives the match's own tournament record.
+- **Cancelled imports no longer fire later.** The Analytics import confirm handler was only removed on click; dismissing the modal left it attached, and confirming a second file imported both. Stale handlers are now replaced on re-wire.
+- **Tiebreak legs no longer corrupt three-dart averages.** Legs with `cd === 0` (tiebreak) were credited with a full 501 scored plus three invented checkout darts; they're now excluded, consistent with `extractAchievements()`.
+
+### Chalker
+
+- **Cross-leg undo restores both players' scores.** `restoreFromVisit()` only restored the undone player's score when stepping back into a previous leg; the opponent kept the new leg's starting score, corrupting subsequent bust/checkout validation. `undoLastVisit()` now recalculates both scores from the visit log.
+- **Tiebreak and edited-checkout wins reach match history.** Only `completeLeg()` routed through `onMatchComplete()`; the other two completion paths skipped `saveMatchToHistory()`/`clearCurrentMatch()` entirely — no history entry, no Result QR from history, stale `current_match`. Both now route through `onMatchComplete()` (which also gives them the same stay-on-scoreboard behavior as normal wins).
+- **Offline PWA actually boots offline.** The page loads `js/chalker.js?v=N` but the service worker cached the unversioned path, and `caches.match()` never matches query-stringed requests — the main script always hit the network. Fixed with `ignoreSearch: true`; the QR scanner libraries (`jsQR.js`, `qr-scanner.umd.min.js`, worker files) are now in `CACHE_FILES` so QR match assignment works offline; `cache.addAll` failures are logged instead of silently failing the install. Cache bumped to `chalker-v109`, script to `?v=12`.
+- **Edit-mode "empty Enter deletes the last visit" is reachable** — `handleEnter()` returned early on an empty buffer before the delete branch could run.
+- **Tiebreak cancel no longer strands input in an invisible row** — on a full board there is no new-entry cell, so cancel now enters edit mode on the last recorded visit. Undoing out of a tiebreak leg clears the `tiebreak` flag so a leg later won normally isn't misreported.
+- **Rematch uses the active match config, not the form.** After a QR-assigned match the form held older manual values; rematch now rebuilds from `state.config`, stripping the QR identity fields (`matchId`/`tournamentId`/`serverId`) so a casual rematch isn't reported as the tournament match.
+
+### Smaller fixes
+
+- `requireLaneForStart` is actually enforced — it warned and continued; it now blocks the start *before* the state change (no stray START_MATCH transaction).
+- `stats.shortLegs` initialized as an array at player creation (was `0`, patched lazily elsewhere); `snapshotPlayerStats()` guards legacy numeric values with `Array.isArray()` instead of throwing mid-`toggleActive`.
+- Bo1 matches: loser legs max is `0`, not `2` (`match.legs - 1 || 2` falsy-zero bug).
+- `advancePlayer()` returns `false` when a destination match lookup fails instead of reporting success.
+- Watermark match count excludes walkovers via `isWalkoverMatch()` (the old `player1 !== 'BYE'` compared objects to a string — always true).
+- QR result payloads are validated (`Array.isArray(payload.legs)`) *before* the scanner is torn down — a malformed payload previously left the user with no modal and no error.
+- Club logo candidates load sequentially in priority order (parallel loading let the last-to-load win).
+- `api/upload-tournament.php` reports `overwritten` correctly (`file_exists()` was checked after the write, so it was always true).
+- `loadSpecificTournament()` no longer dereferences before its null check; `debugBracketGeneration()` returns after its guard.
+
+### REST API hardening (Phase 2)
+
+Robustness fixes only — the documented security model (no built-in auth; deployers protect exposed instances) is unchanged, and CORS behavior is untouched.
+
+- **The API kill switch actually kills.** `NEWTON_API_ENABLED` was only honored as the exact string `false`; `FALSE`, `0`, `off`, and `no` (any case) now all disable the API. Unset still means enabled (opt-out model preserved).
+- **Upload limits.** `upload-tournament.php` rejects payloads over 10 MB (413) before decoding, and requires the data to minimally look like a tournament export (`id`, `name`, `players` array) — no more arbitrary JSON hosted under `/tournaments/`.
+- **Optional relay allowlist.** New `NEWTON_RELAY_ALLOWLIST` env var (comma-separated hostnames): when set, `relay.php` only forwards to those hosts; when unset, behavior is unchanged. Documented in DOCKER-QUICKSTART.md and commented examples in both compose files. `CURLOPT_FOLLOWLOCATION` deliberately left enabled — disabling it would break relaying through http→https redirects.
+
+### Dead code removal (Phase 5, ~950 lines)
+
+Every deletion re-verified caller-free by grep at delete time (including `onclick` strings in HTML). Highlights:
+
+- **The dead parallel undo implementation** (`undoTransaction`, `undoTransactions`, `clearPlayerFromDownstream`, `hasWalkoverPlayer`, plus orphaned `getUndoneTransactions`/`saveUndoneTransactions`/`clearTournamentCompletionState`) — depended on `beforeState`, which transactions no longer carry, so it *threw if invoked*, and it was window-exported: one console call away from corrupting a live tournament.
+- **The dead redo system** (`getRedoableMatches`, `handleRedoClick`, commented UI block, the always-empty `${redoButton}` template slot) — same `beforeState` dependency.
+- **`rebuildBracketFromHistory()`** (~185 lines, zero callers) — and corrected `undoManualTransaction()`'s JSDoc, which falsely claimed undo used it.
+- The misleading singular `processAutoAdvancement()` (picked the *opposite* winner from the live plural version), `getDownstreamMatches()`, `handleBracketGenerationError()`, `showingAllTournaments`/`toggleTournamentView`, `safeSaveTournament()`, `updateLaneConfiguration()` + `saveConfiguration()` (and their window exports), the dead `config.lanes` bootstrap in lane-management.js, the duplicate window-export block in clean-match-progression.js (strict subset of the surviving one), `.cc-modal-content` scroll no-ops (selector matches nothing), unreachable bracket-size fallbacks, `zoomAnimationFrame`, and invisible placeholder/zero-sized line elements plus the dead `finalsX` parameter in bracket-lines.js.
+- **One review finding was rejected during implementation:** `buildMatchSourcesLookup()` (analytics.js) has a live caller in `showMatchProgression`'s "Fed by" line — kept.
+
+### Files changed
+
+- `js/clean-match-progression.js` — `generateTransactionId()` helper + all mint sites; `advancePlayer()` failure return; `snapshotPlayerStats()` guard; Bo1 loser max; winner-confirmation listener fix; dead undo cluster / singular auto-advance / duplicate export block removed
+- `js/bracket-rendering.js` — QR-aware undo gates (4 sites); NewtonDB cleanup of rolled-back matches; undo modal fallback; redo system / `rebuildBracketFromHistory` / unreachable fallbacks / dead else removed; JSDoc corrected
+- `js/tournament-management.js` — strict-matchId export pruning; `playerList` restore key; `isOldFormatImport` on overwrite path; watermark walkover filter; debug-log-before-null-check; `showingAllTournaments`/`toggleTournamentView` removed
+- `js/analytics.js` — strict-matchId pruning (3 sites) + id-less transaction handling
+- `js/newton-history.js` — match detail tournament record; import confirm handler cleanup; tiebreak legs excluded from averages
+- `js/results-config.js` — stale `generateResultsCSV` export removed; dead `saveConfiguration()` removed
+- `js/lane-management.js` — `requireLaneForStart` pre-start enforcement; dead bootstrap + `updateLaneConfiguration()` removed
+- `js/player-management.js` — `shortLegs: []` init (2 sites); dead `safeSaveTournament()` removed
+- `js/qr-bridge.js` — result payload leg validation before scanner teardown
+- `js/main.js` — sequential logo loading
+- `js/bracket-lines.js` — invisible placeholders, zero-sized divs, dead `bronzeX` branches, dead `finalsX` parameter removed
+- `js/types.js` — stale `rebuildBracketFromHistory` doc line removed
+- `chalker/js/chalker.js` — cross-leg undo recalculation; tiebreak/edit-checkout history routing; edit-mode delete; tiebreak cancel/undo; rematch from `state.config`
+- `chalker/sw.js` — `ignoreSearch`, scanner libs cached, `addAll` error logging, `chalker-v109`
+- `chalker/index.html` — `chalker.js?v=12`
+- `api/upload-tournament.php` — `wasOverwritten` captured before write; 10 MB payload cap; tournament shape check
+- `api/api-check.php` — normalized `NEWTON_API_ENABLED` kill switch
+- `api/relay.php` — opt-in `NEWTON_RELAY_ALLOWLIST` host restriction
+- `api/README.md`, `DOCKER-QUICKSTART.md`, `docker/docker-compose.yml`, `docker/docker-compose-ssl.yml` — new env var documented
+- `Docs/CODE-IMPROVEMENT-PLAN.md` — new: full review findings and the six-phase plan (Phases 2, 3, 4, 6 pending)
+
+### Migration
+
+No data migration required. The Chalker service-worker cache bump (`chalker-v109`) refreshes installed PWAs automatically on next online launch. Legacy `savedPlayers` localStorage keys are simply no longer written; existing ones are inert.
+
+---
+
 ## **v5.1.4** — Pocket Chalker (2026-06-01)
 
 ### Chalker — PWA install banner

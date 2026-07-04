@@ -5,8 +5,11 @@
  * Include this file at the top of all API endpoints
  */
 
-// Check if API is disabled via environment variable
-if (getenv('NEWTON_API_ENABLED') === 'false') {
+// Check if API is disabled via environment variable.
+// Normalized: 'false', 'FALSE', '0', 'off', 'no' all disable; unset keeps the
+// API enabled (documented opt-out model — deployers protect exposed instances).
+$newtonApiEnabled = getenv('NEWTON_API_ENABLED');
+if ($newtonApiEnabled !== false && in_array(strtolower(trim($newtonApiEnabled)), ['false', '0', 'off', 'no'], true)) {
     http_response_code(403);
     header('Content-Type: application/json');
     echo json_encode([

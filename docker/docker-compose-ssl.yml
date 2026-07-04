@@ -21,6 +21,7 @@ services:
       - TZ=Europe/Oslo
       # Application configuration
       - NEWTON_API_ENABLED=true          # Set to 'false' to disable REST API endpoints
+      # - NEWTON_RELAY_ALLOWLIST=results.myclub.org  # Optional: restrict relay API to these hosts (comma-separated)
       - NEWTON_DEMO_MODE=false           # Set to 'true' to show demo banner (privacy notice)
       - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon
       # SSL — auto-generates a self-signed certificate on first start (30-year expiry)

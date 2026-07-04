@@ -107,8 +107,12 @@ Uploads a tournament to the server.
 
 - **Filename validation**: Only alphanumeric, spaces, hyphens, underscores, and `.json` extension allowed
 - **Directory traversal prevention**: `basename()` ensures files stay in tournaments directory
+- **Upload limits**: Payloads over 10 MB are rejected (413); the data must minimally look like a tournament export (`id`, `name`, `players`)
+- **Relay allowlist (optional)**: Set `NEWTON_RELAY_ALLOWLIST` (comma-separated hostnames) to restrict which remote hosts `relay.php` will forward to; unset allows any host
+- **API kill switch**: `NEWTON_API_ENABLED` accepts `false`, `0`, `off`, `no` (any case) to disable all endpoints
 - **CORS headers**: Configured for cross-origin requests (adjust as needed)
 - **File permissions**: Tournaments directory requires write access (755 recommended)
+- **No built-in authentication**: Protect exposed instances at the deployment layer (reverse proxy with basic auth, VPN, or LAN-only) — see DOCKER-QUICKSTART.md § Security
 
 ## Local Development
 

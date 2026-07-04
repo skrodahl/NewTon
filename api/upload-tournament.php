@@ -46,6 +46,16 @@ if (!is_writable($tournamentsDir)) {
 
 // Get POST data
 $input = file_get_contents('php://input');
+
+// Cap payload size before decoding — a real tournament export is well under
+// this; anything larger is a disk-fill attempt or a mistake
+$maxUploadBytes = 10 * 1024 * 1024;
+if (strlen($input) > $maxUploadBytes) {
+    http_response_code(413);
+    echo json_encode(['error' => 'Payload too large (max 10 MB)']);
+    exit;
+}
+
 $payload = json_decode($input, true);
 
 if ($payload === null) {
@@ -63,6 +73,14 @@ if (!isset($payload['filename']) || !isset($payload['data'])) {
 
 $filename = basename($payload['filename']); // Security: prevent directory traversal
 $data = $payload['data'];
+
+// Minimal shape check — the payload must look like a tournament export,
+// not arbitrary JSON hosted under /tournaments/
+if (!is_array($data) || !isset($data['id'], $data['name']) || !isset($data['players']) || !is_array($data['players'])) {
+    http_response_code(400);
+    echo json_encode(['error' => 'Data does not look like a tournament export (missing id, name, or players)']);
+    exit;
+}
 
 // Validate filename - allow unicode characters but prevent directory traversal
 if (!str_ends_with($filename, '.json')) {

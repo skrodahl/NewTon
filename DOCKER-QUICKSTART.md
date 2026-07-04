@@ -141,7 +141,8 @@ Mount the `./tournaments` and `./images` volumes. Configure the venue instance t
 | `HTTP_PORT` | `2020` | HTTP listening port (redirects to HTTPS when SSL enabled) |
 | `HTTPS_PORT` | `443` | HTTPS listening port |
 | `SSL_HOSTNAME` | `newtondarts` | Hostname used in the auto-generated SSL certificate's Subject Alternative Name. Set this to match the `.local` hostname you advertise via mDNS — see [Docs/MDNS.md](Docs/MDNS.md). Falls back to deprecated `MDNS_HOSTNAME` if unset. |
-| `NEWTON_API_ENABLED` | `true` | Enables REST API endpoints for tournament upload, download, and delete |
+| `NEWTON_API_ENABLED` | `true` | Enables REST API endpoints for tournament upload, download, and delete. `false`, `0`, `off`, and `no` (any case) all disable |
+| `NEWTON_RELAY_ALLOWLIST` | *(unset)* | Comma-separated hostnames the relay API (`api/relay.php`) may forward to, e.g. `results.myclub.org`. Unset = any host |
 | `NEWTON_MODE` | `full` | App mode. `analytics` hides tournament management tabs, shows only Analytics and limited Global Settings |
 | `NEWTON_DEMO_MODE` | `false` | Shows a privacy banner at the top of the app |
 | `NEWTON_LANDING_PAGE` | `false` | Shows a landing page at the root URL instead of loading the app directly |

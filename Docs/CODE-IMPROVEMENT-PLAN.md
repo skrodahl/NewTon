@@ -161,6 +161,8 @@ Small, surgical fixes to real bugs. Each item is independently testable.
 
 ## Phase 2 — PHP API Hardening (deployer-neutral)
 
+> **Status: Implemented 2026-07-04** — 2.1 (kill-switch normalization, opt-out semantics kept: unset still means enabled), 2.2 (10 MB cap + id/name/players shape check), and 2.4 (opt-in `NEWTON_RELAY_ALLOWLIST`; `CURLOPT_FOLLOWLOCATION` left enabled on purpose — disabling it would break relaying through http→https redirects). Documented in DOCKER-QUICKSTART.md env table, api/README.md Security, and commented examples in both compose files. No php lint available locally — verify endpoints once on a running instance.
+
 **Decision (maintainer, 2026-07-04):** Built-in authentication is intentionally out of scope. The documented security model (DOCKER-QUICKSTART.md "Security") is that the API has no built-in auth and deployers must protect it (LAN-only, reverse proxy with basic auth, VPN). CORS headers are left as-is — they may be load-bearing for direct browser-to-remote-server upload. Only philosophy-neutral robustness fixes are in scope.
 
 ### 2.1 Kill-switch fails open
