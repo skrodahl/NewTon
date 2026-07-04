@@ -239,12 +239,12 @@ function loadClubLogo() {
     const logoContainer = document.getElementById('clubLogo');
     if (!logoContainer) return;
 
-    // Try different logo file extensions
+    // Try logo file extensions in priority order, one at a time — parallel
+    // requests would let the last-to-load win instead of the first match
     const logoFiles = ['images/logo.png', 'images/logo.jpg', 'images/logo.jpeg', 'images/logo.svg'];
-    let logoLoaded = false;
 
-    logoFiles.forEach(filename => {
-        if (logoLoaded) return;
+    const tryLogo = (index) => {
+        if (index >= logoFiles.length) return; // No logo found - keep placeholder
 
         const img = new Image();
         img.onload = function () {
@@ -256,13 +256,14 @@ function loadClubLogo() {
             img.style.height = '60px';
             img.style.borderRadius = '50%';
             img.style.objectFit = 'cover';
-            logoLoaded = true;
         };
         img.onerror = function () {
-            // Logo not found - keep placeholder
+            tryLogo(index + 1);
         };
-        img.src = filename;  // Relative path (works for both file:// and web server)
-    });
+        img.src = logoFiles[index];  // Relative path (works for both file:// and web server)
+    };
+
+    tryLogo(0);
 }
 
 function setTodayDate() {

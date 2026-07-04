@@ -102,6 +102,9 @@ if ($jsonData === false) {
     exit;
 }
 
+// Capture before the write — afterwards file_exists() is always true
+$wasOverwritten = file_exists($filepath);
+
 if (file_put_contents($filepath, $jsonData) === false) {
     http_response_code(500);
     echo json_encode(['error' => 'Failed to save tournament file']);
@@ -109,7 +112,6 @@ if (file_put_contents($filepath, $jsonData) === false) {
 }
 
 // Success
-$wasOverwritten = file_exists($filepath) && $overwriteRequested;
 echo json_encode([
     'success' => true,
     'filename' => $filename,

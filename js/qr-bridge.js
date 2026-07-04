@@ -222,6 +222,14 @@ function handleResultQRPayload(rawValue, expectedMatchId) {
         return;
     }
 
+    // Validate leg data BEFORE tearing down the scanner — a malformed payload
+    // throwing inside showResultQRPreview would be swallowed by the scan loop,
+    // leaving the user with no modal and no error
+    if (!Array.isArray(payload.legs) || payload.legs.length === 0) {
+        showResultScanError('Result payload has no leg data.');
+        return;
+    }
+
     // Valid — stop camera, close scan modal, show preview
     stopResultQRScanner();
     popDialog();

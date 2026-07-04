@@ -1114,8 +1114,10 @@ later**, if the boot was rolled for HINT or CLEW (otherwise nothing happens), th
 5. When the glitch ends, the gate clears. The HINT/CLEW lingers as a settled phrase until
    the user does anything (any keypress dismisses, normal settled-phrase handling).
 
-**Probabilities per boot**: ~10% CLEW, ~10% HINT, ~80% nothing. The user who boots 10
-times typically sees 1 of each — and 8 boots that ended with just `0`, forgettable.
+**Probabilities per boot (after the bootstrap)**: ~10% CLEW, ~10% HINT, ~80% nothing.
+The user who boots 10 times typically sees 1 of each — and 8 boots that ended with
+just `0`, forgettable. *During* the bootstrap (visits 1–4), CLEW is forced — see
+"The bootstrap floor" below.
 
 **The 10-second wait is the magic.** By the time the glitch fires, the user has finished
 parsing the boot and started using the calc. They're in the middle of typing `5 + 3` and
@@ -1160,11 +1162,55 @@ will end up somewhere richer than wherever the first one alone leads. The device
 the scale of the pilgrimage in the very moment of its first invitation. A lot hinges on
 that single fraction.
 
+### The bootstrap floor — CLEW #1 guaranteed on first visits
+
+Without help, a first-time visitor reads the device as "a calculator that isn't
+working" and leaves. The ~10% boot roll might not fire across their brief
+investigation, and CLEW #1 is the only signal the device gives that a pilgrimage
+layer exists at all. So the first reveal gets a floor: **CLEW #1 is guaranteed
+on visits 1–4.**
+
+A visit counter in `localStorage` (`oraculon:visits`) increments on each page
+load, up to 5, then freezes. Visits 1–4 force the ending to `clew`; visit 5+
+reverts to the ~10% random roll. The counter holds at 5 forever after; visits
+6+ never touch storage.
+
+```js
+var visits = parseInt(localStorage.getItem("oraculon:visits") || "0", 10);
+if (visits <= 4){
+    visits += 1;
+    localStorage.setItem("oraculon:visits", String(visits));
+}
+if (visits <= 4) ending = "clew";
+```
+
+Wrapped in try/catch so localStorage being unavailable (private-mode quotas,
+storage disabled, etc.) falls back silently to the random roll.
+
+**Why 4**: rule-of-4 framing — the bootstrap budget is bounded by the same
+limit the device enforces on its own arithmetic.
+
+**Cleared site data = fresh bootstrap.** Incognito sessions, cleared cookies,
+or visits on a new device each get the first-4 guarantee anew. There's nothing
+to hide; privacy-aware users get the front door wide open every time.
+
+**Reset for testing**: `localStorage.removeItem("oraculon:visits")` in DevTools
+restarts the counter. The key name (`oraculon:visits`) is also itself visible
+to anyone reading `js/oraculon.js` — the floor mechanic is in plain view, and a
+code-reader can reset, freeze, or interrogate the counter at will.
+
+**This is the only place in the discovery layer where determinism is allowed
+to overshoot.** Everywhere else (HINT/FLAVOUR rolls, cast-clew rarity, the
+upper-register gate) preserves probabilistic feel. CLEW #1 is the front door;
+the front door is allowed to be open.
+
 ### Implementation references
 
 - POST machinery: `runPost()` and `setPostLeds()` in `js/oraculon.js`
 - Line pools: `POST_LINES_HINTS` and `POST_LINES_FLAVOUR` arrays
 - Input gate: `postRunning` flag, checked at the top of both dispatchers
+- Visit counter: `localStorage` key `oraculon:visits`, set in `runPost()` ending
+  selection block (try/catch wrapped)
 - CSS: `.booting-lcd` (segment fade-in), `.bigbang-fading` (opener fade-out), `.out.post`
   (terminal styling), `@keyframes batteryWake` / `@keyframes bigbangFade`
 - POWER LED override: `ledShow()` forces positions 11, 12 to brightness 1 unconditionally;
@@ -1188,6 +1234,10 @@ POST sits at multiple layers of the gradient simultaneously:
   hexagram-distributed CLEWs #2–#64).
 
 The whole sequence is universally functional at every depth above it — the user who
-never refreshes still gets a calculator that boots once and works. The user who reloads
-once or twice gets the boot's basic flavour. The user who refreshes ten times sees their
-first HINT. The user who refreshes a hundred times has assembled a notebook.
+boots once gets a calculator that boots and works, AND sees CLEW #1 (the bootstrap
+floor guarantees it on the first 4 visits). Past visit 4, HINTs arrive at ~10% per
+boot, and over many refreshes a notebook of firmware leaks and pilgrimage hints
+accumulates. The bootstrap floor shifts the gradient's depth: CLEW #1 stops being
+a deep-grind discovery and becomes a first-visit one. The depth moves to HINTs and
+to the cast-clew body of the pilgrimage (CLEWs #2–#64) — exactly where the design
+wants the grind to live.

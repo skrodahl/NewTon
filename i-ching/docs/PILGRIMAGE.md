@@ -50,10 +50,12 @@ object, talkative unreliable maker, user walking between them.
 
 ## 2. The bootstrap: `CLEW #1/64` and `lostpages.oraculon.biz`
 
-The device delivers exactly one clew: at boot, ~10% of the time, under cover
-of the same `lcdPanic` glitch used everywhere else, it shows
-`CLEW #1/64: https://lostpages.oraculon.biz/` and then never mentions the
-pilgrimage again. (See QUIRKS POST section for the reveal machinery.)
+The device delivers exactly one clew at boot —
+`CLEW #1/64: https://lostpages.oraculon.biz/` — under cover of the same
+`lcdPanic` glitch used everywhere else, and then never mentions the pilgrimage
+again. Reveal probability is **guaranteed on the first 4 visits** (see "The
+bootstrap floor" below), then ~10% per boot thereafter. (See QUIRKS POST
+section for the reveal machinery.)
 
 ### Why `lostpages` is the right subdomain
 
@@ -97,6 +99,38 @@ surfaced during use — see §4). The bootstrap is easier to reach than the body
 of the pilgrimage. That asymmetry is correct: the front door should be more
 findable than the corridor. But it *is* two mechanisms, not one extended across
 64. Don't forget that when building #2+.
+
+### The bootstrap floor (the first-4 guarantee)
+
+Without help, a first-time visitor most likely reads the device as "a calculator
+that isn't working" and leaves. The ~10% boot roll might not fire across their
+brief investigation, and CLEW #1 is the only signal the device gives that any
+pilgrimage layer exists at all. The discovery contract — *"there is more"* —
+hinges entirely on this one reveal landing.
+
+So: **the first 4 visits guarantee CLEW #1.** A visit counter in localStorage
+(`oraculon:visits`) increments on each page load up to 5, then freezes. Visits
+1–4 force the post-POST ending to `clew`; visit 5+ reverts to the random roll.
+Rule-of-4 framing matches the device's own ceiling — the bootstrap budget is
+bounded by the same limit the device enforces on its own arithmetic.
+
+**This is the only place in the architecture where determinism is allowed to
+overshoot.** Everywhere else (HINT/FLAVOUR rolls, clew rarity tiers, the upper-
+register gate) preserves probabilistic feel. CLEW #1 is the front door; the
+front door is allowed to be open. CLEW #2+ stay corridor — they keep their
+glitchy rarity per §4.
+
+**Cleared site data = fresh bootstrap.** Incognito sessions, cleared cookies, or
+visits on a new device each get the first-4 guarantee anew. Privacy-aware users
+(the most likely audience to find the device charming) get the front door wide
+open every time they arrive. There's nothing to hide.
+
+**Reset for testing**: `localStorage.removeItem("oraculon:visits")` in DevTools
+restarts the counter. The key name is also itself a code-reader clew —
+someone investigating `js/oraculon.js` will find the string `oraculon:visits`
+and the floor logic in plain view, and can either reset the counter or hold it
+at any value they like. The back-door audience (see IDEAS) thus gets a working
+device knob, not just a welcome.
 
 ---
 
@@ -276,12 +310,52 @@ page, proud of itself, unaware you needed it on page one. A knowing wink would
 let the corporation off the hook by making it complicit in its own gag; the whole
 conceit is that they're *sincere* and not in on it. The obliviousness is the joke.
 
-### What unites the range (and the hard limit)
+### What unites the range (and what doesn't)
 
-Both are sincere institutional incompetence — the channel's only voice. Neither
-*encourages* continuation. Lore clews explain; mechanical clews inform-too-late.
-Position, not cheerleading. **The device tells you where you are; it never tells
-you to keep going.** A fraction is a coordinate, not a cheer.
+The unifying constraint is **the bridge, not the voice.** Every clew surfaces
+on the device as the same `CLEW #N/64: <thing>` coordinate under `lcdPanic` —
+short, in device-voice, leaked. That shared bridge is the only stylistic
+constraint. Past it, the channel is open.
+
+**The channel is polyphonic.** Earlier framing called it "sincere institutional
+incompetence — the channel's only voice"; that was a useful constraint while
+the hook hadn't landed. With CLEW #1's bootstrap floor in place (visits 1–4
+guaranteed), the constraint is no longer needed. Each destination can be
+whatever it needs to be: a Sirius engineering memo, a marketing bulletin, an
+admin tea-budget overrun, an ex-employee's design diary, a fan zine, a poem
+about the LED bar, an archived complaints-department auto-reply, a short
+story where the device is barely a prop. The channel's only rule is
+*"not the device."*
+
+This refines §1: the corporation-side was implicitly singular; it's now a
+chorus. §8's three departmental registers were the start; "anyone who isn't
+the device" is the finish.
+
+**What stays constrained across the whole range:**
+
+- The device-side leaked string stays in device-voice — short, LCD-shaped,
+  reads as a glitch.
+- **Neither coordinate nor destination *encourages* continuation.** Lore
+  clews explain, mechanical clews inform-too-late, storytelling clews exist
+  as self-contained moments. None of them say "keep going." **The device
+  tells you where you are; the channel tells you what's there; neither tells
+  you to go on.** A fraction is a coordinate, not a cheer.
+
+**What the polyphony enables:**
+
+- **No fatigue ceiling.** 64+ clews in one voice would tire; 64+ across many
+  voices stays alive indefinitely.
+- **Tonal contrast as a tool.** A pilgrim assembling clews from voices that
+  don't know about each other is doing the same work as the holistic
+  detective in §9 — the polyphony IS the pilgrimage's texture.
+- **Meta-commentary becomes admissible** without breaking the found-object
+  feel: the description doesn't come from the device, it comes from someone
+  else writing *about* the device. The channel was always allowed to discuss
+  the device; the device still isn't allowed to discuss itself.
+- **Three explicit uses for the channel** (storytelling, quirk-revealing,
+  design-describing) replace the earlier two-tier framing (lore / mechanical).
+  Those two stay valid as register exemplars, but the channel isn't bounded by
+  them.
 
 ---
 
@@ -289,12 +363,16 @@ you to keep going.** A fraction is a coordinate, not a cheer.
 
 `lostpages` is a **container shape, not a content type.** Had it been named
 `themissinghexagrams` or `theclews` it would be boxed into one payload. "Lost
-pages" admits anything that could have fallen out of a Sirius Cybernetics binder:
-construction notes, meeting minutes, internal memos, rejected hexagrams,
-complaints-department auto-replies, expense reports for tea, a half-finished
-design doc for the LED status system nobody completed. The name describes the
-*condition* of the contents — detached, unfiled, should-have-been-somewhere-else
-— and institutional debris is an infinite category.
+pages" admits anything that could have fallen out of a Sirius Cybernetics
+binder: construction notes, meeting minutes, internal memos, rejected
+hexagrams, complaints-department auto-replies, expense reports for tea, a
+half-finished design doc for the LED status system nobody completed. **Or
+fallen out of anyone else's notebook** (see §7 on the polyphonic channel) — a
+former employee's design diary, a fan zine reproduction, a parody trade-
+magazine ad, a short story where the device is barely a prop. The name
+describes the *condition* of the contents — detached, unfiled, should-have-
+been-somewhere-else — and institutional debris, and any debris around an
+institution, is an infinite category.
 
 ### Meeting minutes are characterisation by accident
 

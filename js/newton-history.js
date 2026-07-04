@@ -937,6 +937,10 @@ const NewtonHistory = (() => {
                         const startScore = (m.format && m.format.sc) || 501;
                         m.legs.forEach(leg => {
                             try {
+                                // Tiebreak legs (cd === 0) have no 501 scoring — including
+                                // them corrupts the average (extractAchievements excludes
+                                // them for the same reason)
+                                if (leg.cd === 0) return;
                                 const parts = (leg.s || '').split('|');
                                 const v1 = Array.from(Uint8Array.from(atob(parts[0] || ''), c => c.charCodeAt(0)));
                                 const v2 = Array.from(Uint8Array.from(atob(parts[1] || ''), c => c.charCodeAt(0)));
@@ -2088,9 +2092,16 @@ const NewtonHistory = (() => {
         }
         if (!match) { alert('Match record not found.'); return; }
 
+        // Fetch the match's own tournament record — points must come from THIS
+        // tournament's configSnapshot, not whichever was last opened via openTournament
+        let matchTournament = null;
+        try {
+            matchTournament = await NewtonDB.getTournament(tournamentId);
+        } catch (_) {}
+
         // Update breadcrumb: Tournaments / TournamentName / MatchId
         if (!_breadcrumbTournament || _breadcrumbTournament.id !== tournamentId) {
-            const t = await NewtonDB.getTournament(tournamentId);
+            const t = matchTournament;
             _breadcrumbTournament = { id: tournamentId, name: t ? (t.tournamentName || tournamentId) : tournamentId, date: t ? (t.tournamentDate || null) : null };
         }
         _breadcrumbMatch = { id: matchId };
@@ -2098,7 +2109,7 @@ const NewtonHistory = (() => {
         _updateBreadcrumb();
 
         const bodyEl = document.getElementById('historyMatchDetailBody');
-        bodyEl.innerHTML = _buildMatchDetailHtml(match, _breadcrumbTournament);
+        bodyEl.innerHTML = _buildMatchDetailHtml(match, _breadcrumbTournament, matchTournament);
         _activeMatchContext = { tournamentId, matchId };
         showPanel('matchDetail');
     }
@@ -2107,7 +2118,7 @@ const NewtonHistory = (() => {
     // Shared match detail HTML builder
     // ---------------------------------------------------------------------------
 
-    function _buildMatchDetailHtml(match, tournamentInfo) {
+    function _buildMatchDetailHtml(match, tournamentInfo, tournamentRecord) {
         const winnerName = match.winner === 1 ? match.player1Name : match.player2Name;
         const legs       = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
         const date       = match.completedAt ? fmtDateTime(match.completedAt) : '—';
@@ -2181,7 +2192,7 @@ const NewtonHistory = (() => {
         const p2Name = p2Bold ? `<strong>${escHtml(match.player2Name)}</strong>` : escHtml(match.player2Name);
 
         // Compute per-player achievement points
-        const p = _activeTournament ? _getActivePoints(_activeTournament) : { oneEighty: 0, ton: 0, highOut: 0, shortLeg: 0 };
+        const p = tournamentRecord ? _getActivePoints(tournamentRecord) : { oneEighty: 0, ton: 0, highOut: 0, shortLeg: 0 };
         function _playerPoints(a) {
             return ((a.oneEighties || 0) * p.oneEighty) +
                    ((a.tons || 0) * p.ton) +
@@ -2291,9 +2302,15 @@ const NewtonHistory = (() => {
         const confirmBtn = document.getElementById('analyticsImportConfirmBtn');
         if (!confirmBtn) { event.target.value = ''; return; }
 
-        // Wire up confirm button with a one-time handler
+        // Wire up confirm button with a one-time handler. Remove any handler left
+        // from a previously cancelled import first — Escape/cancel never fires the
+        // old one, and a stale handler would import that file alongside the new one.
+        if (confirmBtn._importHandler) {
+            confirmBtn.removeEventListener('click', confirmBtn._importHandler);
+        }
         const handler = async () => {
             confirmBtn.removeEventListener('click', handler);
+            confirmBtn._importHandler = null;
             popDialog();
 
             try {
@@ -2310,6 +2327,7 @@ const NewtonHistory = (() => {
                 alert('Import failed: ' + (e.message || e));
             }
         };
+        confirmBtn._importHandler = handler;
         confirmBtn.addEventListener('click', handler);
         pushDialog('analyticsImportModal');
 
@@ -2336,7 +2354,7 @@ const NewtonHistory = (() => {
         const t = await NewtonDB.getTournament(tournamentId);
         const tInfo = t ? { name: t.tournamentName, date: t.tournamentDate } : null;
         titleEl.textContent = `${match.matchId} — ${match.player1Name} vs ${match.player2Name}`;
-        bodyEl.innerHTML    = _buildMatchDetailHtml(match, tInfo);
+        bodyEl.innerHTML    = _buildMatchDetailHtml(match, tInfo, t);
 
         pushDialog('matchDetailModal', null, true);
     }

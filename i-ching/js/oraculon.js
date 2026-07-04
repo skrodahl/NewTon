@@ -620,6 +620,21 @@
     var rng = Math.random();
     var ending = rng < 0.1 ? "clew" : (rng < 0.2 ? "hint" : "flavour");
 
+    // Bootstrap floor for CLEW #1: a first-time visitor whose only encounter
+    // with the device is the surface ("a calculator that isn't working") would
+    // never see the pilgrimage layer exists. Guarantee CLEW #1 on the first
+    // four visits. From visit 5 onward, revert to the normal ~10% roll above.
+    // Rule-of-4 framing matches the device's ceiling. Counter holds at 5
+    // forever once past the bootstrap phase; visits 6+ never touch storage.
+    try {
+        var visits = parseInt(localStorage.getItem("oraculon:visits") || "0", 10);
+        if (visits <= 4){
+            visits += 1;
+            localStorage.setItem("oraculon:visits", String(visits));
+        }
+        if (visits <= 4) ending = "clew";
+    } catch (e) { /* localStorage unavailable (private mode quotas, etc.) — fall back to the random roll */ }
+
     var idx = 0;
     // Per-line duration is randomized 1500-2500ms per call — keeps the calm
     // 2s baseline but breaks the metronome; each line has its own beat. Bounds

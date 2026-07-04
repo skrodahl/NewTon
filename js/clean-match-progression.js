@@ -11,6 +11,20 @@ let pendingFormat = 'DE';
 // after use — the underlying match.preMatchSnapshot lives on the match object.
 let _completionSnapshot = null;
 
+// Monotonic counter so transaction IDs stay unique even when several transactions
+// are minted within the same millisecond (e.g. walkover chains in
+// processAutoAdvancements). Undo looks transactions up by ID — duplicates would
+// let it strip an unrelated match's transaction from history.
+let _txIdCounter = 0;
+
+/**
+ * Generate a unique transaction ID.
+ * @returns {string}
+ */
+function generateTransactionId() {
+    return `tx_${Date.now()}_${++_txIdCounter}`;
+}
+
 /**
  * Snapshot the achievement-relevant stats for a player.
  * @param {object} player
@@ -22,8 +36,8 @@ function snapshotPlayerStats(player) {
         oneEighties: s.oneEighties || 0,
         tons: s.tons || 0,
         lollipops: s.lollipops || 0,
-        highOuts: [...(s.highOuts || [])],
-        shortLegs: [...(s.shortLegs || [])]
+        highOuts: Array.isArray(s.highOuts) ? [...s.highOuts] : [],
+        shortLegs: Array.isArray(s.shortLegs) ? [...s.shortLegs] : []
     };
 }
 
@@ -484,6 +498,8 @@ function advancePlayer(matchId, winner, loser) {
         return false;
     }
 
+    let success = true;
+
     const progression = getProgressionTable();
     if (!progression) {
         console.error(`No progression rules for ${tournament.bracketSize}-player bracket`);
@@ -511,6 +527,7 @@ function advancePlayer(matchId, winner, loser) {
             };
         } else {
             console.error(`Target match ${targetMatchId} not found for winner`);
+            success = false;
         }
     }
 
@@ -528,10 +545,11 @@ function advancePlayer(matchId, winner, loser) {
             };
         } else {
             console.error(`Target match ${targetMatchId} not found for loser`);
+            success = false;
         }
     }
 
-    return true;
+    return success;
 }
 
 /**
@@ -573,7 +591,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
     // Skip transaction creation during rebuild to prevent corruption
     if (!window.rebuildInProgress) {
         const transaction = {
-            id: `tx_${Date.now()}`,
+            id: generateTransactionId(),
             type: 'COMPLETE_MATCH',
             completionType: completionType,
             description: `${matchId}: ${winner.name} (ID: ${winner.id}) defeats ${loser.name} (ID: ${loser.id})`,
@@ -1932,7 +1950,7 @@ function toggleActive(matchId) {
     // Create transaction for match state change
     if (!window.rebuildInProgress) {
         const transaction = {
-            id: `tx_${Date.now()}`,
+            id: generateTransactionId(),
             type: match.active ? 'START_MATCH' : 'STOP_MATCH',
             description: `${matchId}: ${match.active ? 'Started' : 'Stopped'}`,
             timestamp: new Date().toISOString(),
@@ -2036,7 +2054,7 @@ function updateMatchLane(matchId, newLane) {
     // Create transaction for lane assignment
     if (!window.rebuildInProgress) {
         const transaction = {
-            id: `tx_${Date.now()}`,
+            id: generateTransactionId(),
             type: 'ASSIGN_LANE',
             description: `${matchId}: Lane ${parsedNewLane ? `assigned to ${parsedNewLane}` : 'cleared'}`,
             timestamp: new Date().toISOString(),
@@ -2085,6 +2103,7 @@ function updateMatchLane(matchId, newLane) {
 function debugBracketGeneration() {
     if (!tournament || !tournament.bracket) {
         console.log('No bracket generated yet');
+        return;
     }
 
     console.log('=== BRACKET GENERATION DEBUG ===');
@@ -2256,7 +2275,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     if (loserLegsInput) {
         loserLegsInput.value = 0;
         if (match) {
-            loserLegsInput.max = match.legs - 1 || 2; // Max legs loser can have
+            loserLegsInput.max = Math.max(0, match.legs - 1); // Max legs loser can have (0 for Bo1)
         }
     }
 
@@ -2318,21 +2337,27 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         return validateLegScores(winnerLegs, loserLegs, matchLegs);
     };
 
-    // Add input event listeners for real-time validation
+    // Add input event listeners for real-time validation.
+    // Named handler stored on the modal (like _cancelHandler) so it can be removed
+    // in cleanup and on re-open — anonymous handlers accumulated across opens.
+    const handleLegsInput = () => {
+        const validation = validateInputs();
+        updateValidationDisplay(validation);
+        confirmBtn.disabled = !validation.valid;
+    };
+
+    if (modal._legsInputHandler) {
+        if (winnerLegsInput) winnerLegsInput.removeEventListener('input', modal._legsInputHandler);
+        if (loserLegsInput) loserLegsInput.removeEventListener('input', modal._legsInputHandler);
+    }
+    modal._legsInputHandler = handleLegsInput;
+
     if (winnerLegsInput) {
-        winnerLegsInput.addEventListener('input', () => {
-            const validation = validateInputs();
-            updateValidationDisplay(validation);
-            confirmBtn.disabled = !validation.valid;
-        });
+        winnerLegsInput.addEventListener('input', handleLegsInput);
     }
 
     if (loserLegsInput) {
-        loserLegsInput.addEventListener('input', () => {
-            const validation = validateInputs();
-            updateValidationDisplay(validation);
-            confirmBtn.disabled = !validation.valid;
-        });
+        loserLegsInput.addEventListener('input', handleLegsInput);
     }
 
     // Handle button clicks
@@ -2416,11 +2441,12 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
         // Remove input listeners
         if (winnerLegsInput) {
-            winnerLegsInput.removeEventListener('input', validateInputs);
+            winnerLegsInput.removeEventListener('input', handleLegsInput);
         }
         if (loserLegsInput) {
-            loserLegsInput.removeEventListener('input', validateInputs);
+            loserLegsInput.removeEventListener('input', handleLegsInput);
         }
+        modal._legsInputHandler = null;
 
         // Clear validation message
         if (validationMessage) {
@@ -3306,6 +3332,7 @@ function showTournamentProgressWarning() {
 if (typeof window !== 'undefined') {
     // Transactional History System
     window.saveTransaction = saveTransaction;
+    window.generateTransactionId = generateTransactionId;
     window.undoTransaction = undoTransaction;
     window.undoTransactions = undoTransactions;
     window.getTournamentHistory = getTournamentHistory;

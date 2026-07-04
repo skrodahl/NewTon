@@ -190,7 +190,7 @@ function addPlayerFromList(playerName) {
         name: playerName,
         paid: config && config.ui && config.ui.defaultPaid ? true : false,
         stats: {
-            shortLegs: 0,
+            shortLegs: [],
             highOuts: [],
             tons: 0,
             oneEighties: 0
@@ -390,7 +390,7 @@ function addPlayer() {
         name: name,
         paid: config && config.ui && config.ui.defaultPaid ? true : false,
         stats: {
-            shortLegs: 0,
+            shortLegs: [],
             highOuts: [],
             tons: 0,
             oneEighties: 0

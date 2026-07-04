@@ -2070,7 +2070,7 @@ function updateMatchReferee(matchId, refereeId) {
         // Create transaction for referee clearing
         if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
             const transaction = {
-                id: `tx_${Date.now()}`,
+                id: generateTransactionId(),
                 type: 'ASSIGN_REFEREE',
                 description: `${matchId}: Referee cleared`,
                 timestamp: new Date().toISOString(),
@@ -2135,7 +2135,7 @@ function updateMatchReferee(matchId, refereeId) {
         }
 
         const transaction = {
-            id: `tx_${Date.now()}`,
+            id: generateTransactionId(),
             type: 'ASSIGN_REFEREE',
             description: description,
             timestamp: new Date().toISOString(),
@@ -2362,9 +2362,9 @@ function showUndoConfirmationModal({matchId, consequentialMatches, transaction, 
     const confirmWithAchievementsBtn = document.getElementById('undoConfirmOKWithAchievements');
     const body = document.getElementById('undoConsequences');
 
-    if (!cancelBtn || !confirmBtn || !body) {
-        console.error('Undo confirmation modal elements not found');
-        onConfirm();
+    if (!cancelBtn || !confirmBtn || !confirmWithAchievementsBtn || !body) {
+        // Never fall through to the destructive action without user confirmation
+        console.error('Undo confirmation modal elements not found - undo aborted');
         return;
     }
 
@@ -2592,12 +2592,12 @@ function isMatchUndoable(matchId) {
         return false; // No undoable transaction found for this match
     }
 
-    // Check downstream matches - block undo if any downstream match is live or was completed via MANUAL transaction
+    // Check downstream matches - block undo if any downstream match is live or was completed via MANUAL/QR transaction
     const _undoableTable = getProgressionTable();
     if (tournament.bracketSize && _undoableTable) {
         const progression = _undoableTable[matchId];
         if (progression) {
-            // Check if winner's destination is live or has a MANUAL completion
+            // Check if winner's destination is live or has a MANUAL/QR completion
             if (progression.winner) {
                 const [targetMatchId] = progression.winner;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
@@ -2606,13 +2606,13 @@ function isMatchUndoable(matchId) {
                 }
                 if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
-                        return false; // Blocked by MANUAL downstream match
+                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
+                        return false; // Blocked by MANUAL/QR downstream match
                     }
                 }
             }
 
-            // Check if loser's destination is live or has a MANUAL completion
+            // Check if loser's destination is live or has a MANUAL/QR completion
             if (progression.loser) {
                 const [targetMatchId] = progression.loser;
                 const targetMatch = matches.find(m => m.id === targetMatchId);
@@ -2621,15 +2621,15 @@ function isMatchUndoable(matchId) {
                 }
                 if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
-                        return false; // Blocked by MANUAL downstream match
+                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
+                        return false; // Blocked by MANUAL/QR downstream match
                     }
                 }
             }
         }
     }
 
-    return true; // Safe to undo - match has MANUAL transaction, no live downstream matches, and no MANUAL downstream dependencies
+    return true; // Safe to undo - match has MANUAL/QR transaction, no live downstream matches, and no MANUAL/QR downstream dependencies
 }
 
 // Helper function to find matches that are directly affected by undoing a specific match
@@ -2923,6 +2923,7 @@ function undoManualTransaction(transactionId) {
     // 6. Roll back ALL affected matches and remove advancing players from downstream matches
     // Process all transactions being removed (handles auto-advancement chains)
     const progression = getProgressionTable();
+    const rolledBackMatchIds = new Set([targetTransaction.matchId]);
 
     transactionsToRemove.forEach(transactionId => {
         const transaction = history.find(t => t.id === transactionId);
@@ -2930,6 +2931,8 @@ function undoManualTransaction(transactionId) {
 
         const match = matches.find(m => m.id === transaction.matchId);
         if (!match) return;
+
+        rolledBackMatchIds.add(transaction.matchId);
 
         console.log(`🔄 Rolling back ${transaction.matchId} from COMPLETED to READY`);
 
@@ -3010,10 +3013,14 @@ function undoManualTransaction(transactionId) {
         updateResultsTable();
     }
 
-    // Remove match from register (fire-and-forget)
+    // Remove rolled-back matches from register (fire-and-forget) — includes
+    // consequential matches (e.g. QR-completed downstream results), not just the
+    // target, so no orphaned records are left for Analytics to count
     if (typeof NewtonDB !== 'undefined' && tournament && tournament.id) {
-        NewtonDB.deleteMatch(String(tournament.id), targetTransaction.matchId)
-            .catch(e => console.warn('NewtonDB deleteMatch failed:', e));
+        rolledBackMatchIds.forEach(rolledBackId => {
+            NewtonDB.deleteMatch(String(tournament.id), rolledBackId)
+                .catch(e => console.warn('NewtonDB deleteMatch failed:', e));
+        });
     }
 
     console.log(`Clean undo complete: surgically rolled back ${targetTransaction.matchId}`);
@@ -4886,7 +4893,7 @@ function getDetailedMatchState(matchId) {
                     blockingMatches.push(`${targetMatchId} (live)`);
                 } else if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
+                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
                         blockingMatches.push(targetMatchId);
                     }
                 }
@@ -4900,7 +4907,7 @@ function getDetailedMatchState(matchId) {
                     blockingMatches.push(`${targetMatchId} (live)`);
                 } else if (targetMatch && targetMatch.completed) {
                     const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && targetTransaction.completionType === 'MANUAL') {
+                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
                         blockingMatches.push(targetMatchId);
                     }
                 }

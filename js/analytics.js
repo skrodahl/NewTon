@@ -3067,9 +3067,9 @@ function estimateSmartPruning() {
 
     completedMatches.forEach(match => {
         const matchId = match.id;
-        const matchTxns = history.filter(t =>
-            (t.matchId === matchId) || (t.description && t.description.includes(matchId))
-        );
+        // Match strictly on matchId — a description substring check would let
+        // 'FS-1-1' claim transactions belonging to FS-1-10..FS-1-16
+        const matchTxns = history.filter(t => t.matchId === matchId);
 
         // Count removable transactions
         const lanes = matchTxns.filter(t => t.type === 'ASSIGN_LANE');
@@ -3115,9 +3115,9 @@ function previewSmartPruning() {
 
     completedMatches.forEach(match => {
         const matchId = match.id;
-        const matchTxns = history.filter(t =>
-            (t.matchId === matchId) || (t.description && t.description.includes(matchId))
-        );
+        // Match strictly on matchId — a description substring check would let
+        // 'FS-1-1' claim transactions belonging to FS-1-10..FS-1-16
+        const matchTxns = history.filter(t => t.matchId === matchId);
 
         const lanes = matchTxns.filter(t => t.type === 'ASSIGN_LANE');
         const refs = matchTxns.filter(t => t.type === 'ASSIGN_REFEREE');
@@ -3244,9 +3244,9 @@ function executeSmartPruning() {
 
     completedMatches.forEach(match => {
         const matchId = match.id;
-        const matchTxns = history.filter(t =>
-            (t.matchId === matchId) || (t.description && t.description.includes(matchId))
-        );
+        // Match strictly on matchId — a description substring check would let
+        // 'FS-1-1' claim transactions belonging to FS-1-10..FS-1-16
+        const matchTxns = history.filter(t => t.matchId === matchId);
 
         console.log(`Match ${matchId}: Found ${matchTxns.length} transactions`);
 
@@ -3285,10 +3285,16 @@ function executeSmartPruning() {
     console.log(`Total transactions to remove: ${toRemove.length}`);
 
     // Filter out transactions to remove
-    const idsToRemove = new Set(toRemove.map(t => t.id || t.timestamp));
+    // Skip transactions with no identifier — an undefined key would match
+    // (and drop) every other id-less transaction
+    const keyOf = t => t.id || t.timestamp || null;
+    const idsToRemove = new Set(toRemove.map(keyOf).filter(k => k !== null));
     console.log(`Created removal set with ${idsToRemove.size} unique IDs`);
 
-    const prunedHistory = history.filter(t => !idsToRemove.has(t.id || t.timestamp));
+    const prunedHistory = history.filter(t => {
+        const key = keyOf(t);
+        return key === null || !idsToRemove.has(key);
+    });
 
     const totalRemoved = toRemove.length;
     const before = history.length;

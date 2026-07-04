@@ -659,7 +659,7 @@
     if (state.player1Legs >= legsToWin || state.player2Legs >= legsToWin) {
       state.matchComplete = true;
       state.matchWinner = state.player1Legs >= legsToWin ? 1 : 2;
-      showEndScreen();
+      onMatchComplete();
     } else {
       startNewLeg();
       updateDisplay();
@@ -674,7 +674,14 @@
   function cancelTiebreak() {
     hideModal(elements.tiebreakModal);
     selectionModalMode = null;
-    // Stay on current leg - referee can tap a score to edit it
+    // Stay on current leg - referee can tap a score to edit it.
+    // The board is full, so there is no new-entry cell: move input to the
+    // last recorded visit (edit mode) so typing stays within rendered rows
+    // instead of landing in an invisible row beyond maxRounds.
+    const currentLeg = state.legs[state.legs.length - 1];
+    if (currentLeg && currentLeg.visits.length > 0) {
+      startEditingVisit(currentLeg.visits.length - 1);
+    }
   }
 
   /**
@@ -757,9 +764,9 @@
     editingVisitIndex = null;
     inputBuffer = '';
 
-    // Show end screen or start next leg
+    // Save to history or start next leg
     if (state.matchComplete) {
-      showEndScreen();
+      onMatchComplete();
     } else {
       startNewLeg();
       updateDisplay();
@@ -788,6 +795,8 @@
         state.player2Legs--;
       }
       currentLeg.winner = null;
+      // Clear tie-break flag so a leg later won normally isn't reported as tie-break
+      currentLeg.tiebreak = false;
 
       // The last visit was a checkout, undo it
       if (currentLeg.visits.length > 0) {
@@ -799,6 +808,11 @@
       const lastVisit = currentLeg.visits.pop();
       restoreFromVisit(lastVisit);
     }
+
+    // Recalculate both players' scores from the visit log
+    // (restoreFromVisit only restores the undone player's score,
+    // which leaves the opponent wrong after stepping back a leg)
+    recalculateScores();
 
     state.matchComplete = false;
     state.matchWinner = null;
@@ -859,10 +873,41 @@
   /**
    * Handle Rematch button from New Match modal
    * Starts new match with same config (no additional confirmation needed)
+   * Rebuilds from the active match config, not the form — after a
+   * QR-assigned match the form still holds older manual values.
    */
   function handleRematchFromModal() {
     hideModal(elements.settingsModal);
-    startMatch();
+
+    if (state && state.config) {
+      // Strip QR identity fields (matchId/tournamentId/serverId) so a
+      // casual rematch isn't reported as the tournament match
+      const { matchId, tournamentId, serverId, ...config } = state.config;
+
+      saveSettings(config);
+
+      state = {
+        config: config,
+        legs: [],
+        player1Legs: 0,
+        player2Legs: 0,
+        currentPlayer: 1,
+        player1Score: config.startingScore,
+        player2Score: config.startingScore,
+        matchComplete: false,
+        matchWinner: null,
+        firstLegStarter: 1 // Will be set by selection modal
+      };
+
+      // Update UI
+      elements.player1Header.textContent = config.player1Name;
+      elements.player2Header.textContent = config.player2Name;
+
+      // Show starting player selection
+      showStartingPlayerModal();
+    } else {
+      startMatch();
+    }
   }
 
   /**
@@ -2107,7 +2152,8 @@
    */
   function handleEnter() {
     if (isModalActive()) return;
-    if (inputBuffer === '') return;
+    // Empty input is allowed in edit mode (deletes the last visit)
+    if (inputBuffer === '' && editingVisitIndex === null) return;
 
     const score = parseInt(inputBuffer, 10);
 

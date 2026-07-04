@@ -1049,7 +1049,6 @@ if (typeof window !== 'undefined') {
     window.formatRanking = formatRanking;
     window.getOrdinalSuffix = getOrdinalSuffix;
     window.exportResultsCSV = exportResultsCSV;
-    window.generateResultsCSV = generateResultsCSV;
     window.formatRankingForCSV = formatRankingForCSV;
     window.exportResultsJSON = exportResultsJSON;
     window.generateResultsJSON = generateResultsJSON;

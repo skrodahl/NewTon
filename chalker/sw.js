@@ -3,7 +3,7 @@
  * Provides offline caching for PWA functionality
  */
 
-const CACHE_NAME = 'chalker-v108';
+const CACHE_NAME = 'chalker-v109';
 
 // Files to cache for offline use
 const CACHE_FILES = [
@@ -13,6 +13,10 @@ const CACHE_FILES = [
   './js/db.js',
   './js/newton-integrity.js',
   './js/chalker.js',
+  './js/jsQR.js',
+  './js/qr-scanner.umd.min.js',
+  './js/qr-scanner-worker.min.js',
+  './qr-scanner-worker.min.js',
   './styles/chalker.css',
   './fonts/Manrope-VariableFont_wght.ttf',
   './fonts/CascadiaCode-VariableFont_wght.ttf',
@@ -27,7 +31,10 @@ self.addEventListener('install', (event) => {
     caches.open(CACHE_NAME)
       .then((cache) => {
         console.log('Caching app files');
-        return cache.addAll(CACHE_FILES);
+        return cache.addAll(CACHE_FILES)
+          .catch((err) => {
+            console.error('Failed to cache app files:', err);
+          });
       })
       .then(() => {
         // Activate immediately without waiting
@@ -60,7 +67,7 @@ self.addEventListener('activate', (event) => {
 // Fetch event - serve from cache, fall back to network
 self.addEventListener('fetch', (event) => {
   event.respondWith(
-    caches.match(event.request)
+    caches.match(event.request, { ignoreSearch: true })
       .then((cachedResponse) => {
         if (cachedResponse) {
           return cachedResponse;

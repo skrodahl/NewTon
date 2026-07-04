@@ -216,6 +216,13 @@ function toggleActiveWithLaneValidation(matchId) {
 
     const currentState = getMatchState ? getMatchState(match) : 'unknown';
 
+    // Enforce lane requirement BEFORE starting — checking afterwards would leave
+    // the match live (and a START_MATCH transaction minted) despite the block
+    if (currentState === 'ready' && config.lanes?.requireLaneForStart && !match.lane) {
+        alert('A lane must be assigned before starting this match (required by lane configuration).');
+        return false;
+    }
+
     // Use existing validation first
     if (typeof toggleActiveWithValidation === 'function') {
         const stateChangeSuccessful = toggleActiveWithValidation(matchId);
@@ -225,12 +232,6 @@ function toggleActiveWithLaneValidation(matchId) {
     }
 
     const newState = getMatchState ? getMatchState(match) : 'unknown';
-
-    // If transitioning to LIVE, check lane assignment
-    if (newState === 'live' && config.lanes?.requireLaneForStart && !match.lane) {
-        alert('Warning: No lane assigned to this match');
-        // Continue anyway since requireLaneForStart is false by default
-    }
 
     // If transitioning to LIVE, check for lane conflicts
     if (newState === 'live' && match.lane && isLaneInUse(match.lane, matchId)) {

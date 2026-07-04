@@ -153,9 +153,9 @@ function pruneTransactionHistory(history, completedMatches) {
 
     completedMatches.forEach(match => {
         const matchId = match.id;
-        const matchTxns = history.filter(t =>
-            (t.matchId === matchId) || (t.description && t.description.includes(matchId))
-        );
+        // Match strictly on matchId — a description substring check would let
+        // 'FS-1-1' claim transactions belonging to FS-1-10..FS-1-16
+        const matchTxns = history.filter(t => t.matchId === matchId);
 
         const lanes = matchTxns.filter(t => t.type === 'ASSIGN_LANE');
         const refs = matchTxns.filter(t => t.type === 'ASSIGN_REFEREE');
@@ -176,9 +176,14 @@ function pruneTransactionHistory(history, completedMatches) {
         toRemove.push(...starts, ...stops);
     });
 
-    // Filter out transactions to remove
-    const idsToRemove = new Set(toRemove.map(t => t.id || t.timestamp));
-    const prunedHistory = history.filter(t => !idsToRemove.has(t.id || t.timestamp));
+    // Filter out transactions to remove. Skip transactions with no identifier —
+    // an undefined key would match (and drop) every other id-less transaction.
+    const keyOf = t => t.id || t.timestamp || null;
+    const idsToRemove = new Set(toRemove.map(keyOf).filter(k => k !== null));
+    const prunedHistory = history.filter(t => {
+        const key = keyOf(t);
+        return key === null || !idsToRemove.has(key);
+    });
 
     console.log(`✓ Export pruning: Removed ${toRemove.length} redundant transactions from export`);
     return prunedHistory;
@@ -998,8 +1003,6 @@ function loadSpecificTournament(id) {
 
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const selectedTournament = tournaments.find(t => t.id === id);
-    console.log('DEBUG: selectedTournament object:', selectedTournament);
-    console.log('DEBUG: selectedTournament.bracketSize:', selectedTournament.bracketSize);
 
     if (!selectedTournament) {
         alert('Tournament not found');
@@ -1319,10 +1322,12 @@ function continueImportProcess(importedData) {
         // Clear any undone transactions (fresh import)
         localStorage.removeItem('undoneTransactions');
 
-        // Restore playerList if included in export (v4.0 snapshot)
+        // Restore playerList if included in export (v4.0 snapshot).
+        // Key must be 'playerList' — that's what player-management.js reads;
+        // 'savedPlayers' is a legacy key nothing consumes.
         if (importedData.playerList && Array.isArray(importedData.playerList)) {
             try {
-                localStorage.setItem('savedPlayers', JSON.stringify(importedData.playerList));
+                localStorage.setItem('playerList', JSON.stringify(importedData.playerList));
                 console.log(`✓ Restored ${importedData.playerList.length} saved players from export snapshot`);
             } catch (e) {
                 console.warn('Could not restore saved players:', e);
@@ -1545,6 +1550,10 @@ function processImportedTournament(importedData) {
         return;
     }
 
+    // Set before branching — the overwrite path skips showImportConfirmModal,
+    // which would otherwise leave a stale flag from a previous import
+    window.isOldFormatImport = validation.isOldFormat;
+
     // Check if tournament already exists
     const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
     const existingTournament = tournaments.find(t => t.id === importedData.id);
@@ -1680,11 +1689,10 @@ function updateTournamentWatermark() {
             const playerCount = paidPlayers.length;
             const bracketSize = tournament.bracketSize || 8;
 
-            // Calculate total matches (excluding BYEs)
+            // Calculate total matches (excluding walkovers/byes — player slots are
+            // objects, so a string comparison against 'BYE' never matched)
             const matches = tournament.matches || [];
-            const realMatches = matches.filter(match =>
-                match.player1 !== 'BYE' && match.player2 !== 'BYE'
-            );
+            const realMatches = matches.filter(match => !isWalkoverMatch(match));
             const matchCount = realMatches.length;
 
             // Calculate completed matches
