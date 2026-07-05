@@ -32,7 +32,7 @@ Suggested order: 1 → 2 → 3 → 4 → 5 → 6. Phases 1–2 are quick wins. P
 
 ## Phase 1 — Correctness Bugs
 
-> **Status: Implemented 2026-07-04** — all items 1.1–1.13 plus Appendix C (listener leak) and 2.3/1.13m (`wasOverwritten`). Notable implementation choices: 1.13b enforces the lane requirement *before* starting the match (no state to revert); 1.13k enters edit mode on the last visit after tiebreak cancel (there is no new-entry cell on a full board); 1.13l strips `matchId`/`tournamentId`/`serverId` on rematch, mirroring `startMatchFromQR`. Chalker cache bumped (`chalker-v109`, `?v=12`). Pending manual browser verification.
+> **Status: Implemented & committed 2026-07-04** (commit `7332b30`) — all items 1.1–1.13 plus Appendix C (listener leak) and 2.3/1.13m (`wasOverwritten`). Notable implementation choices: 1.13b enforces the lane requirement *before* starting the match (no state to revert); 1.13k enters edit mode on the last visit after tiebreak cancel (there is no new-entry cell on a full board); 1.13l strips `matchId`/`tournamentId`/`serverId` on rematch, mirroring `startMatchFromQR`. Chalker cache bumped (`chalker-v109`, `?v=12`).
 
 Small, surgical fixes to real bugs. Each item is independently testable.
 
@@ -161,7 +161,7 @@ Small, surgical fixes to real bugs. Each item is independently testable.
 
 ## Phase 2 — PHP API Hardening (deployer-neutral)
 
-> **Status: Implemented 2026-07-04** — 2.1 (kill-switch normalization, opt-out semantics kept: unset still means enabled), 2.2 (10 MB cap + id/name/players shape check), and 2.4 (opt-in `NEWTON_RELAY_ALLOWLIST`; `CURLOPT_FOLLOWLOCATION` left enabled on purpose — disabling it would break relaying through http→https redirects). Documented in DOCKER-QUICKSTART.md env table, api/README.md Security, and commented examples in both compose files. No php lint available locally — verify endpoints once on a running instance.
+> **Status: Implemented & committed 2026-07-04** (commit `333e330`) — 2.1 (kill-switch normalization, opt-out semantics kept: unset still means enabled), 2.2 (10 MB cap + id/name/players shape check), and 2.4 (opt-in `NEWTON_RELAY_ALLOWLIST`; `CURLOPT_FOLLOWLOCATION` left enabled on purpose — disabling it would break relaying through http→https redirects). Documented in DOCKER-QUICKSTART.md env table, api/README.md Security, and commented examples in both compose files. No php lint available locally — verify endpoints once on a running instance.
 
 **Decision (maintainer, 2026-07-04):** Built-in authentication is intentionally out of scope. The documented security model (DOCKER-QUICKSTART.md "Security") is that the API has no built-in auth and deployers must protect it (LAN-only, reverse proxy with basic auth, VPN). CORS headers are left as-is — they may be load-bearing for direct browser-to-remote-server upload. Only philosophy-neutral robustness fixes are in scope.
 
@@ -238,6 +238,13 @@ Player names, tournament names, referee names, and server-supplied filenames flo
 
 The app's stated top priority is crash-resistance; these close the gaps between that goal and the current persistence code.
 
+> **Status: low-risk guards implemented 2026-07-04** (uncommitted) — items 4.1 (partial), 4.5, 4.7, 4.9.
+> - **4.1:** `readTournamentsRegistry()` helper added (tournament-management.js) + `getPlayerList()` guarded. Swapped **6 of 8** registry read sites (createTournament dup-check, loadRecentTournaments, load-by-id, deleteTournament, confirm-delete, the localStorage lookup near 2058). **Deliberately NOT swapped:** `saveTournamentOnly` (was :607) and the import existence-check (was :1549) — both are read-modify-**write-back**; a `[]`-returning reader there would overwrite and destroy the other tournaments on corruption. Left throwing (which safely aborts the write) until **4.2** adds proper write-abort handling. The helper's JSDoc documents this.
+> - **4.5:** import filter `n => typeof n === 'string' && n.trim()` + empty-after-filter guard.
+> - **4.7:** `crypto.randomUUID` fallback to `getRandomValues` (works over plain HTTP).
+> - **4.9:** try/catch-with-placeholder added to `renderTournamentList` and `renderAllMatches` (mirrors `renderDashboard`).
+> - **Still pending (the delicate ones):** 4.2 (saveTournamentOnly write ordering + the two deferred 4.1 sites), 4.3 (analytics-preview corruption), 4.4 (deeper import validation), 4.6 (NewtonDB atomicity), 4.8 (render-race tokens). 4.10 discuss-first.
+
 ### 4.1 One guarded registry reader
 
 - **Where:** `js/tournament-management.js:74, 607, 743, 999, 1133, 1170, 1549, 2056` — 8+ unguarded `JSON.parse(localStorage.getItem('dartsTournaments'))` call sites.
@@ -307,7 +314,7 @@ Exports carry `exportVersion`, but the localStorage records (`dartsTournaments`,
 
 ## Phase 5 — Dead Code Removal
 
-> **Status: Implemented 2026-07-04** (~950 lines deleted across 8 files; every symbol re-verified caller-free by grep at delete time). Deviations from the list below:
+> **Status: Implemented & committed 2026-07-04** (commit `8885755`; ~950 lines deleted across 8 files; every symbol re-verified caller-free by grep at delete time). **Independently re-verified 2026-07-04:** all changes are deletions-only, `node --check` passes on every touched file, and grep confirms no dangling references to any deleted symbol — the non-obvious bracket-lines.js removals (dead `finalsX` params, five zero-sized connector divs, `bronzeX === undefined` branches) were each traced to their call sites (all four SE layouts always pass a computed `bronzeX`, so those branches were unreachable). Deviations from the list below:
 > - `buildMatchSourcesLookup` (analytics.js) was **NOT deleted** — the review claim was wrong; it has a live caller in bracket-rendering.js (`showMatchProgression` "Fed by" line). Kept.
 > - `getUndoneTransactions` turned out to live in clean-match-progression.js (not bracket-rendering.js); deleted there together with `saveUndoneTransactions` and `clearTournamentCompletionState`, both newly orphaned by the 5.1 deletion.
 > - Deliberately kept, pending separate decisions: `match.state` writes, the `|| 10` maxLanes fallbacks in lane-management.js.

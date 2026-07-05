@@ -3,7 +3,14 @@
 // PLAYER LIST (Registry) - localStorage management
 function getPlayerList() {
     const stored = localStorage.getItem('playerList');
-    return stored ? JSON.parse(stored) : [];
+    if (!stored) return [];
+    try {
+        const parsed = JSON.parse(stored);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        console.error('Failed to parse playerList — treating as empty:', e);
+        return [];
+    }
 }
 
 function savePlayerList(playerList) {
@@ -109,29 +116,32 @@ function renderPlayerList() {
         return a.toLowerCase().localeCompare(b.toLowerCase());
     });
 
+    // Per-render lookup: click handlers reference entries by numeric index so a
+    // player's name is never passed through an inline handler string. (HTML-escaping
+    // a name does not make it safe inside onclick="fn('…')" — see escapeHtml note.)
+    const cardActions = [];
+
     // Helper function to render player cards
     const renderPlayerCard = (playerName, isInTournament) => {
         const itemClass = isInTournament ? 'player-list-item in-tournament' : 'player-list-item';
-        const clickHandler = isInTournament
-            ? `onclick="removePlayerFromTournament('${playerName}')"`
-            : `onclick="addPlayerFromList('${playerName}')"`;
+        const idx = cardActions.push({ name: playerName, action: isInTournament ? 'remove' : 'add' }) - 1;
 
         // Only show delete button for available players (not in tournament)
         const deleteButton = !isInTournament
-            ? `<button class="player-list-delete-btn" onclick="event.stopPropagation(); deleteFromPlayerList('${playerName}')" title="Remove from saved players">×</button>`
+            ? `<button class="player-list-delete-btn" data-pl-delete="${idx}" title="Remove from saved players">×</button>`
             : '';
 
         // Add "(Paid)" indicator for players in tournament who have paid
-        let displayName = playerName;
+        let displayName = escapeHtml(playerName);
         if (isInTournament) {
             const player = players.find(p => p.name.toLowerCase() === playerName.toLowerCase());
             if (player && player.paid) {
-                displayName = `${playerName} <span style="font-weight: normal; font-size: 13px; color: #059669;">(Paid)</span>`;
+                displayName = `${escapeHtml(playerName)} <span style="font-weight: normal; font-size: 13px; color: #059669;">(Paid)</span>`;
             }
         }
 
         return `
-            <div class="${itemClass}" ${clickHandler} style="cursor: pointer;">
+            <div class="${itemClass}" data-pl-idx="${idx}" style="cursor: pointer;">
                 <div class="player-list-item-name">
                     <span>${displayName}</span>
                 </div>
@@ -168,6 +178,35 @@ function renderPlayerList() {
     html += '</div></div>';
 
     container.innerHTML = html;
+
+    // One delegated click listener (attached once). Reads the numeric index from the
+    // clicked card/button and dispatches to the name-based handlers via the current
+    // render's lookup — no user text is ever placed in an inline handler.
+    renderPlayerList._cardActions = cardActions;
+    if (!container._plDelegated) {
+        container._plDelegated = true;
+        container.addEventListener('click', (e) => {
+            const actions = renderPlayerList._cardActions || [];
+
+            const delBtn = e.target.closest('.player-list-delete-btn[data-pl-delete]');
+            if (delBtn) {
+                e.stopPropagation();
+                const entry = actions[parseInt(delBtn.getAttribute('data-pl-delete'), 10)];
+                if (entry) deleteFromPlayerList(entry.name);
+                return;
+            }
+
+            const card = e.target.closest('[data-pl-idx]');
+            if (!card) return;
+            const entry = actions[parseInt(card.getAttribute('data-pl-idx'), 10)];
+            if (!entry) return;
+            if (entry.action === 'add') {
+                addPlayerFromList(entry.name);
+            } else {
+                removePlayerFromTournament(entry.name);
+            }
+        });
+    }
 }
 
 // ADD PLAYER FROM PLAYER LIST TO TOURNAMENT
@@ -259,7 +298,15 @@ function importPlayerListFromFile() {
                 return;
             }
 
-            const importedList = data.playerList;
+            // Keep only valid, non-empty string names — a single number/object would brick
+            // renderPlayerList() at name.toLowerCase() and leave Registration broken.
+            const importedList = data.playerList.filter(n => typeof n === 'string' && n.trim());
+
+            if (importedList.length === 0) {
+                alert('This file doesn\'t contain any valid player names.');
+                return;
+            }
+
             const currentList = getPlayerList();
 
             // Show import dialog
@@ -610,7 +657,7 @@ function updatePlayersDisplay() {
         return `
             <div class="player-card ${player.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${player.id})">
                 <div class="player-info">
-                    <div class="player-name">${player.name}</div>
+                    <div class="player-name">${escapeHtml(player.name)}</div>
                     <div class="player-status">${player.paid ? 'Paid' : 'Unpaid'}</div>
                 </div>
                 <div class="player-actions">

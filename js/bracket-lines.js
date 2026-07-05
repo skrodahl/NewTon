@@ -91,7 +91,7 @@ function createBracketLabels(grid, round1StartY, frontsideX, backsideX, bracketS
     tournamentHeader.style.textAlign = 'center';
     tournamentHeader.style.transform = 'translateX(-50%)'; // Center horizontally
     tournamentHeader.style.zIndex = '5';
-    tournamentHeader.innerHTML = `<strong>${clubName} - ${tournamentName}</strong><br><span style="font-size: 0.8em; font-weight: normal;">${tournamentDate}</span>`;
+    tournamentHeader.innerHTML = `<strong>${escapeHtml(clubName)} - ${escapeHtml(tournamentName)}</strong><br><span style="font-size: 0.8em; font-weight: normal;">${escapeHtml(tournamentDate)}</span>`;
     labels.push(tournamentHeader);
 
     // FRONTSIDE label - positioned above frontside bracket
@@ -1769,7 +1769,7 @@ function createSEBracketLabels(grid, bracketCenterX, finalsX, bracketSize, bronz
     tournamentHeader.style.textAlign = 'center';
     tournamentHeader.style.transform = 'translateX(-50%)';
     tournamentHeader.style.zIndex = '5';
-    tournamentHeader.innerHTML = `<strong>${clubName} - ${tournamentName}</strong><br><span style="font-size: 0.8em; font-weight: normal;">${tournamentDate}</span>`;
+    tournamentHeader.innerHTML = `<strong>${escapeHtml(clubName)} - ${escapeHtml(tournamentName)}</strong><br><span style="font-size: 0.8em; font-weight: normal;">${escapeHtml(tournamentDate)}</span>`;
     labels.push(tournamentHeader);
 
     function makeColumnLabel(id, text, centerX, topY) {

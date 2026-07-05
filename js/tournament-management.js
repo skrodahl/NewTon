@@ -4,6 +4,40 @@
 let sharedTournamentViewState = 'collapsed'; // 'collapsed' | 'all'
 let showingAllLocalTournaments = false;
 
+// One-time guard so a corrupt registry only alerts the user once per session
+let _registryReadFailed = false;
+
+/**
+ * Reads and parses the saved-tournaments registry ('dartsTournaments') from localStorage.
+ * Single guarded reader: on corrupt/unparseable data it returns an empty array instead of
+ * throwing, so one bad value can't simultaneously break loading, deletion, and the Recent
+ * Tournaments list. Surfaces the failure (console every time, a single alert once per session).
+ *
+ * NOTE: read-modify-write-back callers (saveTournamentOnly, import) deliberately do NOT use
+ * this helper — for them, returning [] on corruption would overwrite and destroy the other
+ * tournaments. Those sites keep the throw-and-abort behavior until Phase 4.2 adds write handling.
+ *
+ * @returns {Array<object>} Saved tournament records, or [] on missing/corrupt data
+ */
+function readTournamentsRegistry() {
+    const raw = localStorage.getItem('dartsTournaments');
+    if (!raw) return [];
+    try {
+        const parsed = JSON.parse(raw);
+        return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+        console.error('Failed to parse dartsTournaments registry — treating as empty:', e);
+        if (!_registryReadFailed) {
+            _registryReadFailed = true;
+            alert('Warning: the saved tournaments list could not be read (the stored data may ' +
+                  'be corrupted). Existing tournaments are temporarily unavailable. Do NOT create, ' +
+                  'save, or import tournaments until this is resolved, or the stored data may be ' +
+                  'overwritten.');
+        }
+        return [];
+    }
+}
+
 /**
  * Returns the current tournament's format, defaulting to 'DE' for backward compatibility.
  * Tournaments created before SE support have no format field — they are always DE.
@@ -70,7 +104,7 @@ function createTournament() {
     }
 
     // Check for duplicate tournament with same name and date
-    const existingTournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const existingTournaments = readTournamentsRegistry();
     const duplicateTournament = existingTournaments.find(t => t.name === name && t.date === date);
     
     if (duplicateTournament) {
@@ -668,7 +702,9 @@ function updateTournamentStatus() {
     const headerStatusNarrow = document.getElementById('headerTournamentStatusNarrow');
 
     if (tournament) {
-        const statusText = `Active Tournament: <strong>${tournament.name}</strong> (${tournament.date})`;
+        const safeName = escapeHtml(tournament.name);
+        const safeDate = escapeHtml(tournament.date);
+        const statusText = `Active Tournament: <strong>${safeName}</strong> (${safeDate})`;
 
         // Update main status div (in Setup page)
         if (statusDiv) {
@@ -679,12 +715,12 @@ function updateTournamentStatus() {
 
         // Update wide header (two-row: name over date)
         if (headerStatusDiv) {
-            headerStatusDiv.innerHTML = `<strong>${tournament.name}</strong><span class="tournament-date">${tournament.date}</span>`;
+            headerStatusDiv.innerHTML = `<strong>${safeName}</strong><span class="tournament-date">${safeDate}</span>`;
         }
 
         // Update narrow header (single line with prefix)
         if (headerStatusNarrow) {
-            headerStatusNarrow.innerHTML = `<span class="status-prefix">Active Tournament: </span><strong>${tournament.name}</strong> (${tournament.date})`;
+            headerStatusNarrow.innerHTML = `<span class="status-prefix">Active Tournament: </span><strong>${safeName}</strong> (${safeDate})`;
         }
     } else {
         // No tournament
@@ -744,7 +780,7 @@ async function loadSharedTournaments() {
 }
 
 async function loadRecentTournaments() {
-    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournaments = readTournamentsRegistry();
     const container = document.getElementById('recentTournaments');
 
     // Try to load shared tournaments from server
@@ -752,6 +788,9 @@ async function loadRecentTournaments() {
 
     // Build HTML sections
     let htmlSections = [];
+    // Per-render lookup: interactive elements reference entries by numeric index so
+    // server-supplied filenames and tournament ids never enter inline handler strings.
+    const rowActions = [];
 
     // Shared Tournaments Section (if available)
     if (sharedTournaments && sharedTournaments.length > 0) {
@@ -782,17 +821,18 @@ async function loadRecentTournaments() {
             const isLocal = localTournamentKeys.has(`${t.name}_${t.date}`);
             const buttonLabel = isLocal ? 'Re-import' : 'Import';
             const allowDelete = config.server && config.server.allowSharedTournamentDelete;
+            const importIdx = rowActions.push({ action: 'import', value: t.filename }) - 1;
             const deleteButton = allowDelete
-                ? `<button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteSharedTournament('${t.filename}')">×</button>`
+                ? `<button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" data-rt-idx="${rowActions.push({ action: 'shared-delete', value: t.filename }) - 1}">×</button>`
                 : '';
             return `
                 <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; background: #f0f8ff;">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span>
-                            <strong>${t.name}</strong> (${t.date}) - ${playerCount}p
+                            <strong>${escapeHtml(t.name)}</strong> (${escapeHtml(t.date)}) - ${escapeHtml(String(playerCount))}p
                         </span>
                         <div>
-                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSharedTournament('${t.filename}')">${buttonLabel}</button>
+                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" data-rt-idx="${importIdx}">${buttonLabel}</button>
                             ${deleteButton}
                         </div>
                     </div>
@@ -864,21 +904,23 @@ async function loadRecentTournaments() {
             const isCompleted = t.status === 'completed';
             let analyticsLabel = '';
             if (inAnalytics) {
-                analyticsLabel = `<span class="analytics-label analytics-label--active" onclick="event.stopPropagation(); openAnalyticsForTournament('${t.id}')" title="View in Analytics">Analytics</span>`;
+                analyticsLabel = `<span class="analytics-label analytics-label--active" data-rt-idx="${rowActions.push({ action: 'analytics-view', value: t.id }) - 1}" title="View in Analytics">Analytics</span>`;
             } else if (isCompleted) {
-                analyticsLabel = `<span class="analytics-label analytics-label--add" onclick="event.stopPropagation(); addTournamentToAnalytics('${t.id}')" title="Add to Analytics registry">+ Analytics</span>`;
+                analyticsLabel = `<span class="analytics-label analytics-label--add" data-rt-idx="${rowActions.push({ action: 'analytics-add', value: t.id }) - 1}" title="Add to Analytics registry">+ Analytics</span>`;
             }
+            const loadIdx = rowActions.push({ action: 'load', value: t.id }) - 1;
+            const localDeleteIdx = rowActions.push({ action: 'local-delete', value: t.id }) - 1;
             return `
                 <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span>
-                            <strong>${t.name}</strong> (${t.date})${playerCountText}
+                            <strong>${escapeHtml(t.name)}</strong> (${escapeHtml(t.date)})${playerCountText}
                             ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
                             ${analyticsLabel}
                         </span>
                         <div>
-                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" onclick="loadSpecificTournament(${t.id})">Load</button>
-                            <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" onclick="deleteTournament(${t.id})">×</button>
+                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" data-rt-idx="${loadIdx}">Load</button>
+                            <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" data-rt-idx="${localDeleteIdx}">×</button>
                         </div>
                     </div>
                 </div>
@@ -909,6 +951,27 @@ async function loadRecentTournaments() {
     }
 
     container.innerHTML = htmlSections.join('');
+
+    // One delegated click listener (attached once): dispatches by the numeric index
+    // stored on each interactive element via the current render's rowActions lookup.
+    loadRecentTournaments._rowActions = rowActions;
+    if (!container._rtDelegated) {
+        container._rtDelegated = true;
+        container.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-rt-idx]');
+            if (!el) return;
+            const entry = (loadRecentTournaments._rowActions || [])[parseInt(el.getAttribute('data-rt-idx'), 10)];
+            if (!entry) return;
+            switch (entry.action) {
+                case 'import':         loadSharedTournament(entry.value); break;
+                case 'shared-delete':  deleteSharedTournament(entry.value); break;
+                case 'analytics-view': openAnalyticsForTournament(entry.value); break;
+                case 'analytics-add':  addTournamentToAnalytics(entry.value); break;
+                case 'load':           loadSpecificTournament(entry.value); break;
+                case 'local-delete':   deleteTournament(entry.value); break;
+            }
+        });
+    }
 }
 
 function toggleSharedTournamentView() {
@@ -995,7 +1058,7 @@ async function deleteSharedTournament(filename) {
 function loadSpecificTournament(id) {
     console.log(`🔄 Loading tournament ${id} (config will stay global)...`);
 
-    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournaments = readTournamentsRegistry();
     const selectedTournament = tournaments.find(t => t.id === id);
 
     if (!selectedTournament) {
@@ -1127,7 +1190,7 @@ function continueLoadProcess(selectedTournament) {
 }
 
 function deleteTournament(tournamentId) {
-    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournaments = readTournamentsRegistry();
     const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
 
     if (!tournamentToDelete) {
@@ -1164,7 +1227,7 @@ function showDeleteTournamentModal(tournamentId, tournamentToDelete) {
 
 function confirmDeleteTournament() {
     const tournamentId = window.tournamentToDeleteId;
-    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournaments = readTournamentsRegistry();
     const tournamentToDelete = tournaments.find(t => t.id === tournamentId);
 
     if (!tournamentToDelete) {
@@ -1360,7 +1423,7 @@ function continueImportProcess(importedData) {
         // Show success with detailed info
         const historyCount = importedData.history ? importedData.history.length : 0;
         showImportStatus('success',
-            `✓ Tournament "${tournament.name}" imported successfully! ` +
+            `✓ Tournament "${escapeHtml(tournament.name)}" imported successfully! ` +
             `${players.length} players, ${matches.filter(m => m.completed).length} completed matches, ` +
             `and ${historyCount} transaction history entries loaded.`
         );
@@ -1540,7 +1603,7 @@ function processImportedTournament(importedData) {
     const validation = validateTournamentData(importedData);
     if (!validation.valid) {
         alert(`Invalid tournament data:\n\n${validation.error}`);
-        showImportStatus('error', `Invalid tournament data: ${validation.error}`);
+        showImportStatus('error', `Invalid tournament data: ${escapeHtml(validation.error)}`);
         return;
     }
 
@@ -1765,18 +1828,18 @@ function updateTournamentWatermark() {
 
             watermark.innerHTML = `
                 <div class="cad-header-container">
-                    <div class="cad-header-title">${truncatedName}</div>
+                    <div class="cad-header-title">${escapeHtml(truncatedName)}</div>
                     <div class="cad-header-clock" id="cad-clock">${currentTime}</div>
                 </div>
                 <div class="cad-grid">
-                    <div class="cad-cell cad-format">${formatText}</div>
+                    <div class="cad-cell cad-format">${escapeHtml(formatText)}</div>
                     <div class="cad-cell cad-players">
                         <div>${playerCount}</div>
                         <div>PLAYERS</div>
                     </div>
                     <div class="cad-cell cad-bracket">${bracketSize}-BRACKET</div>
                     <div class="cad-cell cad-matches">${matchCount} MATCHES</div>
-                    <div class="cad-cell cad-date">${tournament.date}</div>
+                    <div class="cad-cell cad-date">${escapeHtml(tournament.date)}</div>
                     <div class="cad-cell cad-version" style="${versionStyle}" ${versionClick}>v${version}</div>
                 </div>
                 <div class="cad-status">${status}</div>
@@ -2055,7 +2118,7 @@ async function addTournamentToAnalytics(tournamentId) {
     }
 
     // Find the tournament in localStorage
-    const tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+    const tournaments = readTournamentsRegistry();
     const t = tournaments.find(tr => String(tr.id) === String(tournamentId));
     if (!t) {
         console.warn('Tournament not found in localStorage:', tournamentId);

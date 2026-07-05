@@ -76,9 +76,14 @@ function loadConfiguration() {
         applyConfigToUI();
     }
 
-    // Generate server ID once — identifies this TM instance in QR payloads
+    // Generate server ID once — identifies this TM instance in QR payloads.
+    // crypto.randomUUID is undefined in non-secure contexts (plain-HTTP LAN deploys are
+    // supported), so fall back to getRandomValues, which IS available over HTTP.
     if (!config.server.serverId) {
-        config.server.serverId = crypto.randomUUID().replace(/-/g, '').substring(0, 12);
+        const hex = crypto.randomUUID
+            ? crypto.randomUUID().replace(/-/g, '')
+            : Array.from(crypto.getRandomValues(new Uint8Array(16)), b => b.toString(16).padStart(2, '0')).join('');
+        config.server.serverId = hex.substring(0, 12);
         saveGlobalConfig();
         console.log('✓ Generated server ID:', config.server.serverId);
     }
@@ -621,7 +626,7 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
     return `
         <tr onclick="openStatsModal(${player.id})" style="cursor: pointer;">
             <td class="rank">${formatRanking(player.placement)}</td>
-            <td class="player-name"><div style="display: flex; justify-content: space-between; align-items: center;">${player.name}${player.stats.lollipops > 0 ? `<span>${player.stats.lollipops > 1 ? `🍭 x${player.stats.lollipops}` : '🍭'}</span>` : ''}</div></td>
+            <td class="player-name"><div style="display: flex; justify-content: space-between; align-items: center;">${escapeHtml(player.name)}${player.stats.lollipops > 0 ? `<span>${player.stats.lollipops > 1 ? `🍭 x${player.stats.lollipops}` : '🍭'}</span>` : ''}</div></td>
             <td class="points">${points}</td>
             <td class="stat">${Array.isArray(player.stats.shortLegs) && player.stats.shortLegs.length > 0 ? player.stats.shortLegs.join(',') : '—'}</td>
             <td class="stat">${Array.isArray(player.stats.highOuts) && player.stats.highOuts.length > 0 ? player.stats.highOuts.join(',') : '—'}</td>

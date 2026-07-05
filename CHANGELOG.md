@@ -1,6 +1,6 @@
 ## **v5.1.5** — Undo the Undone (2026-07-04)
 
-A code-quality release. A full review of the codebase (four parallel deep reviews covering the bracket core, app/state layer, analytics/history/DB, and QR/Chalker/API — plan and findings in `Docs/CODE-IMPROVEMENT-PLAN.md`) produced a six-phase improvement plan. This release ships Phase 1 (correctness bug fixes, ~25 items) and Phase 5 (dead code removal, ~950 lines). No features, no behavior changes beyond the fixes themselves.
+A code-quality release. A full review of the codebase (four parallel deep reviews covering the bracket core, app/state layer, analytics/history/DB, and QR/Chalker/API — plan and findings in `Docs/CODE-IMPROVEMENT-PLAN.md`) produced a six-phase improvement plan. This release ships Phase 1 (correctness bug fixes, ~25 items), Phase 2 (REST API hardening), Phase 3 (the HTML-escaping sweep — XSS hardening plus the apostrophe-in-names bug), Phase 5 (dead code removal, ~950 lines), and the low-risk guards from Phase 4 (persistence hardening). No features, no behavior changes beyond the fixes themselves.
 
 ### Transaction & undo integrity
 
@@ -56,6 +56,23 @@ Robustness fixes only — the documented security model (no built-in auth; deplo
 - **Upload limits.** `upload-tournament.php` rejects payloads over 10 MB (413) before decoding, and requires the data to minimally look like a tournament export (`id`, `name`, `players` array) — no more arbitrary JSON hosted under `/tournaments/`.
 - **Optional relay allowlist.** New `NEWTON_RELAY_ALLOWLIST` env var (comma-separated hostnames): when set, `relay.php` only forwards to those hosts; when unset, behavior is unchanged. Documented in DOCKER-QUICKSTART.md and commented examples in both compose files. `CURLOPT_FOLLOWLOCATION` deliberately left enabled — disabling it would break relaying through http→https redirects.
 
+### HTML-escaping sweep (Phase 3)
+
+Every user-, import-, and QR-derived string that reaches the DOM is now HTML-escaped, and identifiers are no longer passed through inline `onclick` strings. This closes a systemic pattern flagged independently by all four reviews, with three consequences:
+
+- **It broke on legal names today.** A player named `O'Brien` produced a `SyntaxError` in generated handlers like `onclick="addPlayerFromList('O'Brien')"` — registration cards, history checkboxes, and delete buttons all failed on an apostrophe.
+- **Stored XSS.** Imported tournament JSON and scanned QR payloads are barely validated, so a crafted player/tournament name (or QR field) could execute script in the app context.
+- **HTML-escaping inside a JS string is a false fix.** Several sites wrapped names in an escaper *inside* an `onclick` string; the browser HTML-decodes the attribute before the JS parser sees it, so the escaping evaporated.
+
+The fix, applied uniformly:
+
+- **One canonical `escapeHtml()`** in `main.js` (window-exported), quote-safe so it is valid in both element text and quoted attributes. The Chalker, being a standalone app, carries an identical copy. The weaker `textContent`-based private copy in `analytics.js` (which didn't escape quotes) was removed.
+- **Identifiers no longer travel in inline handler strings.** Handlers that carried a name or id were converted to either a per-render numeric-index lookup with one delegated listener, or `data-*` attributes (where HTML-escaping *is* correct, since the value is read via `getAttribute`, never evaluated). `NewtonTable` row clicks now dispatch by integer index into the data array — one change that hardened every table at once and removed its flawed `_escAttr` (which escaped `'` but not `"`). Analytics/History cell buttons use `data-*` attributes with a shared capture-phase delegated listener, so `stopPropagation` still suppresses the row click.
+
+Coverage spans registration and player lists; tournament status, Recent Tournaments (including the server-supplied filename), import messages, and the bracket watermark; match cards, the command center, and referee dropdowns/suggestions across the bracket; the two bracket headers (club + tournament name); the Analytics tables and Developer Console; and the QR result preview, the QR Payload Inspector (which renders deliberately *unverified* scanned payloads), and the Chalker's match-assignment confirm, leg breakdown, and history.
+
+One extra vector was caught during verification: the QR Inspector's JSON-parse-failure branch dumped the raw scanned string into `innerHTML` by string concatenation (missed by the initial template-interpolation sweep) — now escaped. Numeric-id inline handlers (e.g. `openStatsModal(${player.id})`) were left as-is by design; guaranteeing those ids are numeric against crafted imports belongs to a later persistence-validation pass.
+
 ### Dead code removal (Phase 5, ~950 lines)
 
 Every deletion re-verified caller-free by grep at delete time (including `onclick` strings in HTML). Highlights:
@@ -66,28 +83,38 @@ Every deletion re-verified caller-free by grep at delete time (including `onclic
 - The misleading singular `processAutoAdvancement()` (picked the *opposite* winner from the live plural version), `getDownstreamMatches()`, `handleBracketGenerationError()`, `showingAllTournaments`/`toggleTournamentView`, `safeSaveTournament()`, `updateLaneConfiguration()` + `saveConfiguration()` (and their window exports), the dead `config.lanes` bootstrap in lane-management.js, the duplicate window-export block in clean-match-progression.js (strict subset of the surviving one), `.cc-modal-content` scroll no-ops (selector matches nothing), unreachable bracket-size fallbacks, `zoomAnimationFrame`, and invisible placeholder/zero-sized line elements plus the dead `finalsX` parameter in bracket-lines.js.
 - **One review finding was rejected during implementation:** `buildMatchSourcesLookup()` (analytics.js) has a live caller in `showMatchProgression`'s "Fed by" line — kept.
 
+### Persistence hardening (Phase 4 — low-risk guards)
+
+The safe first slice of Phase 4. The delicate items (save-path write ordering, analytics-preview isolation, NewtonDB write atomicity, render-race tokens) are deferred to a later release.
+
+- **A corrupt tournaments registry no longer bricks the app.** New `readTournamentsRegistry()` helper parses `dartsTournaments` inside a try/catch and returns an empty array (with a one-time warning) instead of throwing — one bad value previously broke loading, deletion, and the Recent Tournaments list at once, with `loadRecentTournaments()` failing as a silent unhandled rejection that left the panel blank. Applied to the six read-only sites. The two read-modify-write-back sites (`saveTournamentOnly`, import) deliberately keep throwing — which safely aborts the write — until Phase 4.2 adds real write handling; a `[]`-returning reader there would overwrite and destroy the other saved tournaments on corruption. `getPlayerList()` is guarded the same way.
+- **Player-list import can't brick Registration.** Imported names are filtered to non-empty strings before use; a single number or object in the file previously threw at `name.toLowerCase()` on every subsequent render, breaking the page until localStorage was hand-edited.
+- **Server ID generation works over plain HTTP.** `crypto.randomUUID()` is undefined in non-secure contexts (self-hosted `http://<lan-ip>` is a supported deployment); it now falls back to `crypto.getRandomValues()`, so QR payload identity survives HTTP deployments instead of crashing config load.
+- **Analytics register tabs show an error instead of a blank panel.** `renderTournamentList()` and `renderAllMatches()` now mirror the dashboard's try/catch-with-placeholder on a DB read failure.
+
 ### Files changed
 
 - `js/clean-match-progression.js` — `generateTransactionId()` helper + all mint sites; `advancePlayer()` failure return; `snapshotPlayerStats()` guard; Bo1 loser max; winner-confirmation listener fix; dead undo cluster / singular auto-advance / duplicate export block removed
-- `js/bracket-rendering.js` — QR-aware undo gates (4 sites); NewtonDB cleanup of rolled-back matches; undo modal fallback; redo system / `rebuildBracketFromHistory` / unreachable fallbacks / dead else removed; JSDoc corrected
-- `js/tournament-management.js` — strict-matchId export pruning; `playerList` restore key; `isOldFormatImport` on overwrite path; watermark walkover filter; debug-log-before-null-check; `showingAllTournaments`/`toggleTournamentView` removed
-- `js/analytics.js` — strict-matchId pruning (3 sites) + id-less transaction handling
-- `js/newton-history.js` — match detail tournament record; import confirm handler cleanup; tiebreak legs excluded from averages
-- `js/results-config.js` — stale `generateResultsCSV` export removed; dead `saveConfiguration()` removed
-- `js/lane-management.js` — `requireLaneForStart` pre-start enforcement; dead bootstrap + `updateLaneConfiguration()` removed
-- `js/player-management.js` — `shortLegs: []` init (2 sites); dead `safeSaveTournament()` removed
-- `js/qr-bridge.js` — result payload leg validation before scanner teardown
-- `js/main.js` — sequential logo loading
-- `js/bracket-lines.js` — invisible placeholders, zero-sized divs, dead `bronzeX` branches, dead `finalsX` parameter removed
+- `js/bracket-rendering.js` — QR-aware undo gates (4 sites); NewtonDB cleanup of rolled-back matches; undo modal fallback; redo system / `rebuildBracketFromHistory` / unreachable fallbacks / dead else removed; JSDoc corrected; Phase 3 name escaping (match cards, command center, referee dropdowns/suggestions, paid-fee lists)
+- `js/tournament-management.js` — strict-matchId export pruning; `playerList` restore key; `isOldFormatImport` on overwrite path; watermark walkover filter; debug-log-before-null-check; `showingAllTournaments`/`toggleTournamentView` removed; new `readTournamentsRegistry()` guarded reader (6 read-only sites); Phase 3: escaped tournament status / Recent Tournaments / import messages / watermark, `loadRecentTournaments` delegated listener (server filename + ids out of onclick)
+- `js/analytics.js` — strict-matchId pruning (3 sites) + id-less transaction handling; Phase 3: removed the private non-quote-safe `escapeHtml` (now uses the canonical one), escaped Developer Console views + `showCommandFeedback`
+- `js/newton-table.js` — Phase 3: row clicks dispatch by integer index into the data array (removed `_rowId`-in-onclick and the flawed `_escAttr`) — hardens every table at once
+- `js/newton-history.js` — match detail tournament record; import confirm handler cleanup; tiebreak legs excluded from averages; register-tab render error placeholders (`renderTournamentList`/`renderAllMatches`); Phase 3: cell action buttons moved to `data-*` + a shared capture-phase delegated listener (`_wireTableActions`), cell escaping
+- `js/results-config.js` — stale `generateResultsCSV` export removed; dead `saveConfiguration()` removed; `crypto.randomUUID` HTTP fallback for server-ID generation; Phase 3: results-table player-name escaping
+- `js/lane-management.js` — `requireLaneForStart` pre-start enforcement; dead bootstrap + `updateLaneConfiguration()` removed; Phase 3: referee `<option>` name escaping
+- `js/player-management.js` — `shortLegs: []` init (2 sites); dead `safeSaveTournament()` removed; `getPlayerList()` corrupt-data guard; player-list import string filter; Phase 3: `renderPlayerList` per-render index + delegated listener (the O'Brien fix), name escaping
+- `js/qr-bridge.js` — result payload leg validation before scanner teardown; Phase 3: escaped the QR result preview and QR Payload Inspector payload fields, including the raw-string JSON-parse-failure branch
+- `js/main.js` — sequential logo loading; Phase 3: canonical quote-safe `escapeHtml()` (window-exported); match-history delegated listener + heading/name escaping
+- `js/bracket-lines.js` — invisible placeholders, zero-sized divs, dead `bronzeX` branches, dead `finalsX` parameter removed; Phase 3: escaped the bracket headers (club + tournament name)
 - `js/types.js` — stale `rebuildBracketFromHistory` doc line removed
-- `chalker/js/chalker.js` — cross-leg undo recalculation; tiebreak/edit-checkout history routing; edit-mode delete; tiebreak cancel/undo; rematch from `state.config`
+- `chalker/js/chalker.js` — cross-leg undo recalculation; tiebreak/edit-checkout history routing; edit-mode delete; tiebreak cancel/undo; rematch from `state.config`; Phase 3: own `escapeHtml()` + escaped the QR-confirm modal, leg-breakdown headers, leg status, and match history
 - `chalker/sw.js` — `ignoreSearch`, scanner libs cached, `addAll` error logging, `chalker-v109`
 - `chalker/index.html` — `chalker.js?v=12`
 - `api/upload-tournament.php` — `wasOverwritten` captured before write; 10 MB payload cap; tournament shape check
 - `api/api-check.php` — normalized `NEWTON_API_ENABLED` kill switch
 - `api/relay.php` — opt-in `NEWTON_RELAY_ALLOWLIST` host restriction
 - `api/README.md`, `DOCKER-QUICKSTART.md`, `docker/docker-compose.yml`, `docker/docker-compose-ssl.yml` — new env var documented
-- `Docs/CODE-IMPROVEMENT-PLAN.md` — new: full review findings and the six-phase plan (Phases 2, 3, 4, 6 pending)
+- `Docs/CODE-IMPROVEMENT-PLAN.md` — new: full review findings and the six-phase plan (Phases 1, 2, 3, 5 shipped; Phase 4 low-risk guards shipped; Phase 6 and the rest of Phase 4 pending)
 
 ### Migration
 

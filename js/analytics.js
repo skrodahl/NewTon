@@ -801,13 +801,13 @@ function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSe
 
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Match ID:</label>
-                    <input type="text" id="filterMatchId" placeholder="Match ID" value="${filterMatchId}"
+                    <input type="text" id="filterMatchId" placeholder="Match ID" value="${escapeHtml(filterMatchId)}"
                            style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Search String:</label>
-                    <input type="text" id="filterSearch" placeholder="Search..." value="${filterSearch}"
+                    <input type="text" id="filterSearch" placeholder="Search..." value="${escapeHtml(filterSearch)}"
                            style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
                 </div>
 
@@ -852,7 +852,7 @@ function showConsoleOutput() {
         html += `<p style="color: #666;">No console output captured yet</p>`;
     } else {
         consoleBuffer.forEach(entry => {
-            html += `<p>[${entry.timestamp}] ${entry.message}</p>`;
+            html += `<p>[${entry.timestamp}] ${escapeHtml(entry.message)}</p>`;
         });
     }
 
@@ -911,7 +911,7 @@ function showPlayerDetails() {
                 <div style="margin-left: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;">
         `;
         paidPlayers.forEach(player => {
-            html += `<div style="margin: 4px 0;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></div>`;
+            html += `<div style="margin: 4px 0;"><strong>${escapeHtml(player.name)}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></div>`;
         });
         html += `</div></div>`;
     }
@@ -926,7 +926,7 @@ function showPlayerDetails() {
                 <div style="margin-left: 20px; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 8px;">
         `;
         unpaidPlayers.forEach(player => {
-            html += `<div style="margin: 4px 0;"><strong>${player.name}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></div>`;
+            html += `<div style="margin: 4px 0;"><strong>${escapeHtml(player.name)}</strong> <span style="color: #666; font-size: 13px;">(ID: ${player.id})</span></div>`;
         });
         html += `</div></div>`;
     }
@@ -1237,7 +1237,7 @@ function showLocalStorageUsage() {
         currentTournamentHtml = `
         <div style="margin: 20px 0; padding: 15px; background: #e7f3ff; border-left: 4px solid #0056b3;">
             <div style="font-weight: 600; font-size: 15px; color: #0056b3; margin-bottom: 12px;">
-                📊 Current Tournament: ${tournament.name} (${tournament.date})
+                📊 Current Tournament: ${escapeHtml(tournament.name)} (${escapeHtml(tournament.date)})
             </div>
 
             <div style="margin: 12px 0; padding: 10px; background: #fff; border: 1px solid #ddd;">
@@ -1293,7 +1293,7 @@ function showLocalStorageUsage() {
 
             otherHtml += `
                 <div style="padding-left: 12px; font-size: 13px;">
-                    - ${t.name} (${t.date}): ${(tTotalSize / 1024 / 1024).toFixed(2)} MB
+                    - ${escapeHtml(t.name)} (${escapeHtml(t.date)}): ${(tTotalSize / 1024 / 1024).toFixed(2)} MB
                 </div>
             `;
         });
@@ -1911,7 +1911,7 @@ function showValidationResults() {
         html += `
             <div style="margin: 12px 0;">
                 <div style="color: ${checkColor}; font-weight: 600;">
-                    ${icon} ${result.name}: ${result.message}
+                    ${icon} ${escapeHtml(result.name)}: ${escapeHtml(result.message)}
                 </div>
         `;
 
@@ -1996,11 +1996,8 @@ function updateConsoleFooter() {
 /**
  * Escape HTML to prevent injection
  */
-function escapeHtml(text) {
-    const div = document.createElement('div');
-    div.textContent = text;
-    return div.innerHTML;
-}
+// escapeHtml() is the shared canonical helper defined in main.js (quote-safe,
+// window-exported). This file's former private copy did not escape quotes.
 
 // ============================================================================
 // VALIDATION CHECKS
@@ -2286,9 +2283,9 @@ function showCommandFeedback(commandName, status, details) {
         .map(line => {
             // Check if line starts with bullet character
             if (line.startsWith('•')) {
-                return `<div style="margin: 4px 0; padding-left: 8px;">${line}</div>`;
+                return `<div style="margin: 4px 0; padding-left: 8px;">${escapeHtml(line)}</div>`;
             }
-            return `<div style="margin: 8px 0;">${line}</div>`;
+            return `<div style="margin: 8px 0;">${escapeHtml(line)}</div>`;
         })
         .join('');
 

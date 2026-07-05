@@ -372,7 +372,7 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
             if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
                 const selected = isCurrentReferee ? 'selected' : '';
                 const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
-                options += `<option value="${player.id}" ${selected}>${playerName}</option>`;
+                options += `<option value="${player.id}" ${selected}>${escapeHtml(playerName)}</option>`;
             } else {
                 // Show unavailable players as disabled with reason
                 const playerName = player.name.length > 10 ? player.name.substring(0, 10) + '...' : player.name;
@@ -380,7 +380,7 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
                 if (isAssignedElsewhere) reason = ' (assigned)';
                 else if (isInLiveMatch) reason = ' (playing)';
 
-                options += `<option value="${player.id}" disabled style="color: #ccc;">${playerName}${reason}</option>`;
+                options += `<option value="${player.id}" disabled style="color: #ccc;">${escapeHtml(playerName)}${reason}</option>`;
             }
         });
     }

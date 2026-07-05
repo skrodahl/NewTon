@@ -14,6 +14,31 @@ const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
 const _0x6e = [110,97,109,101,110,116,32,77,97,110,97,103,101,114];
 const _0x2d = () => String.fromCharCode(..._0x4e, ..._0x6e);
 
+/**
+ * Escapes a value for safe interpolation into HTML — both element text and
+ * quoted attribute values (escapes `"` and `'` too, unlike a textContent round-trip).
+ * The single canonical escaper for the whole app; use it for every user-, import-,
+ * or QR-payload-derived string placed into innerHTML.
+ *
+ * NOTE: this is HTML escaping, not JavaScript-string escaping. Do NOT rely on it to
+ * make a name safe inside an inline `onclick="fn('…')"` string — the browser
+ * HTML-decodes the attribute before the JS parser sees it. Pass identifiers to
+ * handlers via data-* attributes or a numeric index instead.
+ *
+ * @param {*} value - any value; null/undefined become ''
+ * @returns {string} HTML-escaped string
+ */
+function escapeHtml(value) {
+    if (value == null) return '';
+    return String(value)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#39;');
+}
+window.escapeHtml = escapeHtml;
+
 // =============================================================================
 // DIALOG STACK MANAGER - Unified dialog stacking system
 // =============================================================================
@@ -554,7 +579,7 @@ function updateMatchHistory() {
     // Update heading with tournament info
     if (matchHistoryHeading) {
         if (tournament && tournament.name && tournament.date) {
-            matchHistoryHeading.innerHTML = `Match History: ${tournament.name} <span style="font-weight: normal;">(${tournament.date})</span>`;
+            matchHistoryHeading.innerHTML = `Match History: ${escapeHtml(tournament.name)} <span style="font-weight: normal;">(${escapeHtml(tournament.date)})</span>`;
         } else {
             matchHistoryHeading.textContent = 'Match History: None';
         }
@@ -583,6 +608,8 @@ function updateMatchHistory() {
 
     // Build match history HTML
     let historyHtml = '';
+    // Per-render lookup so match/tournament ids never pass through inline handlers
+    const historyRows = [];
     completedMatches.forEach(match => {
         const isWalkover = match.autoAdvanced || isWalkoverMatch(match);
         const isBackside = match.id && match.id.startsWith('BS-');
@@ -592,12 +619,12 @@ function updateMatchHistory() {
         if (isBackside) itemClass += ' backside';
         const clickable = !isWalkover;
         const clickAttr = clickable
-            ? ` style="cursor:pointer;" onclick="NewtonHistory.openMatchModal('${String(tournament.id)}', '${match.id}')"`
+            ? ` style="cursor:pointer;" data-mh-idx="${historyRows.push({ tournamentId: String(tournament.id), matchId: match.id }) - 1}"`
             : '';
-        
-        const player1Name = match.player1?.name || 'Unknown';
-        const player2Name = match.player2?.name || 'Unknown';
-        const winnerName = match.winner?.name || 'Unknown';
+
+        const player1Name = escapeHtml(match.player1?.name || 'Unknown');
+        const player2Name = escapeHtml(match.player2?.name || 'Unknown');
+        const winnerName = escapeHtml(match.winner?.name || 'Unknown');
         
         // Get progression info for both players
         const player1Id = match.player1?.id;
@@ -622,7 +649,7 @@ function updateMatchHistory() {
         // Add lane and referee information
         let matchDetailsText = '';
         const laneText = match.lane ? `Lane ${match.lane}` : '';
-        const refereeText = match.referee ? `Referee: ${getPlayerNameById(match.referee)}` : '';
+        const refereeText = match.referee ? `Referee: ${escapeHtml(getPlayerNameById(match.referee))}` : '';
 
         if (laneText || refereeText) {
             const details = [refereeText, laneText].filter(Boolean).join(' • ');
@@ -645,6 +672,19 @@ function updateMatchHistory() {
     });
 
     matchResultsContainer.innerHTML = historyHtml;
+
+    // One delegated click listener (attached once): opens the match modal by index,
+    // keeping tournament/match ids out of inline handler strings.
+    updateMatchHistory._historyRows = historyRows;
+    if (!matchResultsContainer._mhDelegated) {
+        matchResultsContainer._mhDelegated = true;
+        matchResultsContainer.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-mh-idx]');
+            if (!el) return;
+            const row = (updateMatchHistory._historyRows || [])[parseInt(el.getAttribute('data-mh-idx'), 10)];
+            if (row) NewtonHistory.openMatchModal(row.tournamentId, row.matchId);
+        });
+    }
 }
 
 // Helper function to check if a match is a walkover

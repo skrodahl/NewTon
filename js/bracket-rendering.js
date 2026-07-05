@@ -1357,10 +1357,10 @@ function renderMatch(match, x, y, section, roundIndex) {
     // Modify player display names if they're refereeing other matches
     // Only show referee conflict indicator for non-completed matches
     const player1Display = (conflictInfo.player1IsReferee && matchState !== 'completed')
-        ? `⚠️ ${match.player1.name} (Referee)`
+        ? `⚠️ ${escapeHtml(match.player1.name)} (Referee)`
         : getPlayerDisplayName(match.player1);
     const player2Display = (conflictInfo.player2IsReferee && matchState !== 'completed')
-        ? `⚠️ ${match.player2.name} (Referee)`
+        ? `⚠️ ${escapeHtml(match.player2.name)} (Referee)`
         : getPlayerDisplayName(match.player2);
 
     // Strikethrough for eliminated players (only in the match where they were eliminated)
@@ -1399,7 +1399,7 @@ function renderMatch(match, x, y, section, roundIndex) {
 	<div class="match-controls">
     	    <span style="font-size: 11px; color: #666;">
         	    ${matchState === 'completed'
-                    ? `Ref: <span style="font-size: 11px;">${match.referee ? players.find(p => p.id === match.referee)?.name || 'Unknown' : 'None'}</span>`
+                    ? `Ref: <span style="font-size: 11px;">${escapeHtml(match.referee ? players.find(p => p.id === match.referee)?.name || 'Unknown' : 'None')}</span>`
                     : `Ref: <select onchange="updateMatchReferee('${match.id}', this.value)"
                         onfocus="refreshRefereeDropdown('${match.id}')"
                         style="background: ${matchState === 'ready' || matchState === 'live' ? '#e8e9ec' : 'white'}; border: 1px solid #ddd; font-size: 11px; width: 185px; padding: 1px; ${matchState === 'pending' ? 'opacity: 0.5; cursor: not-allowed;' : ''}"
@@ -1688,7 +1688,7 @@ function getPlayerDisplayName(player) {
     if (!player) return '<span class="awaiting-player">Awaiting Player</span>';
     if (player.name === 'TBD') return '<span class="awaiting-player">Awaiting Player</span>';
     if (player.isBye) return 'Walkover';
-    return player.name || 'Unknown';
+    return escapeHtml(player.name || 'Unknown');
 }
 
 function getPlayerClickHandler(match, playerNumber, matchState) {
@@ -2379,10 +2379,10 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
 
             if (isCurrentReferee || (!isAssignedElsewhere && !isInLiveMatch)) {
                 const selected = isCurrentReferee ? 'selected' : '';
-                options += `<option value="${player.id}" ${selected}>${player.name}</option>`;
+                options += `<option value="${player.id}" ${selected}>${escapeHtml(player.name)}</option>`;
             } else {
                 let reason = isAssignedElsewhere ? ' (assigned)' : ' (playing)';
-                options += `<option value="${player.id}" disabled style="color: #ccc;">${player.name}${reason}</option>`;
+                options += `<option value="${player.id}" disabled style="color: #ccc;">${escapeHtml(player.name)}${reason}</option>`;
             }
         });
     }
@@ -2949,8 +2949,8 @@ function createMatchCard(match) {
     const laneOptions = generateLaneOptions(match.id, match.lane);
     const refereeOptions = generateRefereeOptionsWithConflicts(match.id, match.referee);
     
-    const player1Name = match.player1?.name || 'TBD';
-    const player2Name = match.player2?.name || 'TBD';
+    const player1Name = escapeHtml(match.player1?.name || 'TBD');
+    const player2Name = escapeHtml(match.player2?.name || 'TBD');
     const player1Id = match.player1?.id || '';
     const player2Id = match.player2?.id || '';
 
@@ -3448,7 +3448,7 @@ function populateRefereeSuggestions() {
             const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
             const laneText = loser.lane ? ` · Lane ${loser.lane}` : '';
             return `<div class="referee-suggestion-item${backsideClass}">
-                <span class="referee-suggestion-name">${loser.name}</span>
+                <span class="referee-suggestion-name">${escapeHtml(loser.name)}</span>
                 <span class="referee-suggestion-round">(${loser.round}${laneText})</span>
             </div>`;
         }).join('');
@@ -3464,7 +3464,7 @@ function populateRefereeSuggestions() {
             const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
             const laneText = winner.lane ? ` · Lane ${winner.lane}` : '';
             return `<div class="referee-suggestion-item${backsideClass}">
-                <span class="referee-suggestion-name">${winner.name}</span>
+                <span class="referee-suggestion-name">${escapeHtml(winner.name)}</span>
                 <span class="referee-suggestion-round">(${winner.round}${laneText})</span>
             </div>`;
         }).join('');
@@ -3480,7 +3480,7 @@ function populateRefereeSuggestions() {
             const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
             const laneText = assignment.lane ? ` · Lane ${assignment.lane}` : '';
             return `<div class="referee-suggestion-item${backsideClass}">
-                <span class="referee-suggestion-name">${assignment.name}</span>
+                <span class="referee-suggestion-name">${escapeHtml(assignment.name)}</span>
                 <span class="referee-suggestion-round">(${assignment.round}${laneText})</span>
             </div>`;
         }).join('');
@@ -3543,7 +3543,7 @@ function showCommandCenterModal(matchData) {
             if (tournament.name && (tournament.status === 'setup' || tournament.status === 'active')) {
                 titleElement.innerHTML = `
                     <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span>Match Controls - ${tournament.name}</span>
+                        <span>Match Controls - ${escapeHtml(tournament.name)}</span>
                         <div id="match-controls-clock" class="match-controls-clock">${currentTime}</div>
                     </div>
                 `;
@@ -3601,7 +3601,7 @@ function showCommandCenterModal(matchData) {
                                 <div style="font-size: 13px; font-weight: 500; color: #065f46;">Entrance Fee Paid (${paidPlayersList.length}):</div>
                                 <div style="margin-top: 8px; line-height: 1.6;">
                                     ${paidPlayersList.map(player =>
-                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">✓ ${player.name}</span>`
+                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">✓ ${escapeHtml(player.name)}</span>`
                                     ).join('')}
                                 </div>
                             </div>
@@ -3615,7 +3615,7 @@ function showCommandCenterModal(matchData) {
                                 <div style="font-size: 13px; font-weight: 500; color: #dc2626;">Entrance Fee Not Paid (${unpaidPlayersList.length}):</div>
                                 <div style="margin-top: 8px; line-height: 1.6;">
                                     ${unpaidPlayersList.map(player =>
-                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">☐ ${player.name}</span>`
+                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">☐ ${escapeHtml(player.name)}</span>`
                                     ).join('')}
                                 </div>
                             </div>

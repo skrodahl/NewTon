@@ -123,9 +123,12 @@ const NewtonTable = (() => {
             const msg = inst.config.emptyMessage || 'No data.';
             html += `<tr><td colspan="${columns.length}" style="text-align:center;color:#888;padding:24px;">${_escHtml(msg)}</td></tr>`;
         } else {
+            // Map each row object to its index in inst.data so a row click dispatches by
+            // a plain integer — no row identifier (possibly user text) enters the onclick.
+            const rowIndex = new Map(inst.data.map((r, i) => [r, i]));
             for (const row of pageData) {
                 const clickAttr = inst.config.onRowClick
-                    ? ` onclick="NewtonTable._onRowClick('${inst.config.tableId}','${_escAttr(row._rowId || '')}')"` : '';
+                    ? ` onclick="NewtonTable._onRowClick('${inst.config.tableId}',${rowIndex.get(row)})"` : '';
                 const extraCls = inst.config.rowClass ? inst.config.rowClass(row) : '';
                 const classes = [inst.config.onRowClick ? 'history-row' : '', extraCls].filter(Boolean).join(' ');
                 const rowStyle = inst.config.rowStyle ? inst.config.rowStyle(row) : '';
@@ -254,11 +257,11 @@ const NewtonTable = (() => {
         _render(inst);
     }
 
-    function _onRowClick(tableId, rowId) {
+    function _onRowClick(tableId, rowIndex) {
         const inst = _instances[tableId];
         if (!inst || !inst.config.onRowClick) return;
 
-        const row = inst.data.find(r => r._rowId === rowId);
+        const row = inst.data[rowIndex];
         if (row) inst.config.onRowClick(row);
     }
 
@@ -290,10 +293,6 @@ const NewtonTable = (() => {
 
     function _escHtml(str) {
         return String(str || '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-    }
-
-    function _escAttr(str) {
-        return String(str || '').replace(/'/g, "\\'");
     }
 
     // -------------------------------------------------------------------------

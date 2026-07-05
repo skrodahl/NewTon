@@ -9,6 +9,24 @@
   // Keep in sync with APP_VERSION in js/main.js
   const CHALKER_VERSION = '5.1.3';
 
+  /**
+   * Escape a value for safe interpolation into innerHTML (element text and quoted
+   * attributes). Chalker is standalone, so it carries its own copy — mirrors the
+   * canonical escapeHtml in js/main.js. Player names and scanned QR payload fields
+   * are untrusted and must pass through this before reaching innerHTML.
+   * @param {*} value
+   * @returns {string}
+   */
+  function escapeHtml(value) {
+    if (value == null) return '';
+    return String(value)
+      .replace(/&/g, '&amp;')
+      .replace(/</g, '&lt;')
+      .replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;')
+      .replace(/'/g, '&#39;');
+  }
+
   // ================
   // State Management
   // ================
@@ -1211,9 +1229,9 @@
    */
   function showQRConfirm(payload) {
     const lines = [
-      `<strong>${payload.p1}</strong> vs <strong>${payload.p2}</strong>`,
-      `${payload.sc} · Bo${payload.bo} · ${payload.mr >= 100 ? 'Unlimited' : payload.mr + ' rounds'}`,
-      `Lane ${payload.ln || 'Not set'} · Ref: ${payload.ref || 'Not set'}`
+      `<strong>${escapeHtml(payload.p1)}</strong> vs <strong>${escapeHtml(payload.p2)}</strong>`,
+      `${escapeHtml(payload.sc)} · Bo${escapeHtml(payload.bo)} · ${payload.mr >= 100 ? 'Unlimited' : escapeHtml(payload.mr) + ' rounds'}`,
+      `Lane ${escapeHtml(payload.ln || 'Not set')} · Ref: ${escapeHtml(payload.ref || 'Not set')}`
     ];
     elements.qrConfirmDetails.innerHTML = lines.map(l => `<p>${l}</p>`).join('');
     showModal(elements.qrConfirmModal);
@@ -2440,7 +2458,7 @@
       if (isInProgress) {
         statusText = '<span class="in-progress-badge">In Progress</span>';
       } else {
-        statusText = `${winnerName} wins ${shortLegBadge}`;
+        statusText = `${escapeHtml(winnerName)} wins ${shortLegBadge}`;
       }
 
       html += `
@@ -2453,10 +2471,10 @@
           <table class="leg-scoresheet-table">
             <thead>
               <tr>
-                <th class="col-scored">${p1Marker}${config.player1Name.substring(0, 8)}</th>
+                <th class="col-scored">${p1Marker}${escapeHtml(config.player1Name.substring(0, 8))}</th>
                 <th class="col-remaining">To Go</th>
                 <th class="col-darts"></th>
-                <th class="col-scored">${p2Marker}${config.player2Name.substring(0, 8)}</th>
+                <th class="col-scored">${p2Marker}${escapeHtml(config.player2Name.substring(0, 8))}</th>
                 <th class="col-remaining">To Go</th>
               </tr>
             </thead>
@@ -2819,9 +2837,9 @@
       const bestOf = m.config.bestOf || 3;
       return `
         <div class="history-item" data-index="${index}">
-          <div class="history-players">${m.config.player1Name} vs ${m.config.player2Name}${m.config.matchId ? ' <span class="qr-badge">QR</span>' : ''}</div>
+          <div class="history-players">${escapeHtml(m.config.player1Name)} vs ${escapeHtml(m.config.player2Name)}${m.config.matchId ? ' <span class="qr-badge">QR</span>' : ''}</div>
           <div class="history-score">${m.player1Legs} - ${m.player2Legs}</div>
-          <div class="history-date">${dateStr} ${timeStr} • ${m.config.startingScore} • Best of ${bestOf} • ${winnerName} wins</div>
+          <div class="history-date">${dateStr} ${timeStr} • ${m.config.startingScore} • Best of ${bestOf} • ${escapeHtml(winnerName)} wins</div>
         </div>
       `;
     }).join('');

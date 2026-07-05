@@ -280,20 +280,22 @@ function showResultQRPreview(payload) {
     _qrCompletionPayload = isLive ? payload : null;
     _qrLollipops = [0, 0];
 
-    const winnerName = payload.w === 1 ? payload.p1 : payload.p2;
+    const p1 = escapeHtml(payload.p1);
+    const p2 = escapeHtml(payload.p2);
+    const winnerName = payload.w === 1 ? p1 : p2;
     let p1Legs = 0, p2Legs = 0;
     payload.legs.forEach(l => { if (l.w === 1) p1Legs++; else p2Legs++; });
 
     let html = `<div class="qr-result-header">
-        <div class="qr-result-match">${payload.mid} &mdash; ${payload.sc} Bo${payload.bo}</div>
+        <div class="qr-result-match">${escapeHtml(payload.mid)} &mdash; ${escapeHtml(payload.sc)} Bo${escapeHtml(String(payload.bo))}</div>
         <div class="qr-result-winner"><strong>${winnerName}</strong> wins ${p1Legs}&ndash;${p2Legs}</div>
     </div>
     <table class="qr-result-legs">
         <thead><tr>
             <th>#</th>
             <th>Winner</th>
-            <th>${payload.p1}</th>
-            <th>${payload.p2}</th>
+            <th>${p1}</th>
+            <th>${p2}</th>
             <th>CD</th>
         </tr></thead>
         <tbody>`;
@@ -302,7 +304,7 @@ function showResultQRPreview(payload) {
         const [enc1, enc2] = leg.s.split('|');
         const v1 = decodeVisitScores(enc1);
         const v2 = decodeVisitScores(enc2);
-        const legWinnerName = leg.w === 1 ? payload.p1 : payload.p2;
+        const legWinnerName = leg.w === 1 ? p1 : p2;
         const cd = leg.cd === 0 ? 'TB' : String(leg.cd);
         html += `<tr>
             <td>${i + 1}</td>
@@ -328,8 +330,8 @@ function showResultQRPreview(payload) {
         html += `<table style="width:100%;border-collapse:collapse;font-size:14px;">
             <thead><tr>
                 <th style="text-align:left;padding:4px 8px;">Achievement</th>
-                <th style="text-align:center;padding:4px 8px;">${payload.p1}</th>
-                <th style="text-align:center;padding:4px 8px;">${payload.p2}</th>
+                <th style="text-align:center;padding:4px 8px;">${p1}</th>
+                <th style="text-align:center;padding:4px 8px;">${p2}</th>
             </tr></thead><tbody>`;
 
         const rows = [
@@ -576,7 +578,7 @@ function handleQRInspectorPayload(rawValue) {
     try {
         payload = JSON.parse(rawValue);
     } catch (_) {
-        contentEl.innerHTML = '<p style="color:#dc2626;">Could not parse QR data as JSON.</p><pre style="font-size:12px;overflow-x:auto;">' + rawValue + '</pre>';
+        contentEl.innerHTML = '<p style="color:#dc2626;">Could not parse QR data as JSON.</p><pre style="font-size:12px;overflow-x:auto;">' + escapeHtml(rawValue) + '</pre>';
         pushDialog('qrResultPreviewModal', null, true);
         return;
     }
@@ -591,7 +593,7 @@ function handleQRInspectorPayload(rawValue) {
     const matchFound = payload.mid ? !!matches.find(m => m.id === payload.mid) : false;
 
     const fmtTs = payload.ts ? new Date(payload.ts * 1000).toLocaleString() : '—';
-    const firstStarter = payload.fls ? (payload.fls === 1 ? payload.p1 : payload.p2) : '—';
+    const firstStarter = escapeHtml(payload.fls ? (payload.fls === 1 ? payload.p1 : payload.p2) : '—');
 
     let html = `
         <div class="qr-result-header">
@@ -609,24 +611,24 @@ function handleQRInspectorPayload(rawValue) {
         <table class="qr-result-legs" style="margin-bottom:16px;">
             <thead><tr><th>Field</th><th>Value</th><th>Check</th></tr></thead>
             <tbody>
-                <tr><td>Type <code>t</code></td><td>${payload.t ?? '—'}</td><td>${payload.t === 'r' ? ok + ' Result QR' : payload.t === 'a' ? ok + ' Assignment QR' : err + ' unknown type'}</td></tr>
-                <tr><td>CRC</td><td style="font-family:monospace;">${payload.crc ?? '—'}</td><td>${crcValid ? ok + ' valid' : err + ' FAILED'}</td></tr>
-                <tr><td>Version <code>v</code></td><td>${payload.v ?? '—'}</td><td></td></tr>
-                <tr><td>Match <code>mid</code></td><td>${payload.mid ?? '—'}</td><td>${matchFound ? ok + ' found' : err + ' not in tournament'}</td></tr>
-                <tr><td>Tournament <code>tid</code></td><td style="font-family:monospace;">${payload.tid ?? '—'}</td><td>${tidMatch ? ok + ' match' : err + ' mismatch'}</td></tr>
-                <tr><td>Server <code>sid</code></td><td style="font-family:monospace;">${payload.sid ?? '—'}</td><td>${sidMatch ? ok + ' match' : err + ' mismatch'}</td></tr>
+                <tr><td>Type <code>t</code></td><td>${escapeHtml(payload.t ?? '—')}</td><td>${payload.t === 'r' ? ok + ' Result QR' : payload.t === 'a' ? ok + ' Assignment QR' : err + ' unknown type'}</td></tr>
+                <tr><td>CRC</td><td style="font-family:monospace;">${escapeHtml(payload.crc ?? '—')}</td><td>${crcValid ? ok + ' valid' : err + ' FAILED'}</td></tr>
+                <tr><td>Version <code>v</code></td><td>${escapeHtml(payload.v ?? '—')}</td><td></td></tr>
+                <tr><td>Match <code>mid</code></td><td>${escapeHtml(payload.mid ?? '—')}</td><td>${matchFound ? ok + ' found' : err + ' not in tournament'}</td></tr>
+                <tr><td>Tournament <code>tid</code></td><td style="font-family:monospace;">${escapeHtml(payload.tid ?? '—')}</td><td>${tidMatch ? ok + ' match' : err + ' mismatch'}</td></tr>
+                <tr><td>Server <code>sid</code></td><td style="font-family:monospace;">${escapeHtml(payload.sid ?? '—')}</td><td>${sidMatch ? ok + ' match' : err + ' mismatch'}</td></tr>
                 <tr><td>Timestamp <code>ts</code></td><td>${fmtTs}</td><td></td></tr>
-                <tr><td>Player 1 <code>p1</code></td><td>${payload.p1 ?? '—'}</td><td></td></tr>
-                <tr><td>Player 2 <code>p2</code></td><td>${payload.p2 ?? '—'}</td><td></td></tr>
-                <tr><td>Winner <code>w</code></td><td>${payload.w ?? '—'}</td><td></td></tr>
+                <tr><td>Player 1 <code>p1</code></td><td>${escapeHtml(payload.p1 ?? '—')}</td><td></td></tr>
+                <tr><td>Player 2 <code>p2</code></td><td>${escapeHtml(payload.p2 ?? '—')}</td><td></td></tr>
+                <tr><td>Winner <code>w</code></td><td>${escapeHtml(payload.w ?? '—')}</td><td></td></tr>
                 <tr><td>First starter <code>fls</code></td><td>${firstStarter}</td><td></td></tr>
-                <tr><td>Format <code>sc</code></td><td>${payload.sc ?? '—'}</td><td></td></tr>
-                <tr><td>Best-of <code>bo</code></td><td>${payload.bo ?? '—'}</td><td></td></tr>
-                <tr><td>Max rounds <code>mr</code></td><td>${payload.mr ?? '—'}</td><td></td></tr>
-                ${payload.ln  ? `<tr><td>Lane <code>ln</code></td><td>${payload.ln}</td><td></td></tr>` : ''}
-                ${payload.ref ? `<tr><td>Referee <code>ref</code></td><td>${payload.ref}</td><td></td></tr>` : ''}
-                ${payload.t1  ? `<tr><td>Team 1 <code>t1</code></td><td>${payload.t1}</td><td></td></tr>` : ''}
-                ${payload.t2  ? `<tr><td>Team 2 <code>t2</code></td><td>${payload.t2}</td><td></td></tr>` : ''}
+                <tr><td>Format <code>sc</code></td><td>${escapeHtml(payload.sc ?? '—')}</td><td></td></tr>
+                <tr><td>Best-of <code>bo</code></td><td>${escapeHtml(payload.bo ?? '—')}</td><td></td></tr>
+                <tr><td>Max rounds <code>mr</code></td><td>${escapeHtml(payload.mr ?? '—')}</td><td></td></tr>
+                ${payload.ln  ? `<tr><td>Lane <code>ln</code></td><td>${escapeHtml(payload.ln)}</td><td></td></tr>` : ''}
+                ${payload.ref ? `<tr><td>Referee <code>ref</code></td><td>${escapeHtml(payload.ref)}</td><td></td></tr>` : ''}
+                ${payload.t1  ? `<tr><td>Team 1 <code>t1</code></td><td>${escapeHtml(payload.t1)}</td><td></td></tr>` : ''}
+                ${payload.t2  ? `<tr><td>Team 2 <code>t2</code></td><td>${escapeHtml(payload.t2)}</td><td></td></tr>` : ''}
             </tbody>
         </table>`;
 
@@ -634,12 +636,12 @@ function handleQRInspectorPayload(rawValue) {
         let p1Legs = 0, p2Legs = 0;
         payload.legs.forEach(l => { if (l.w === 1) p1Legs++; else p2Legs++; });
 
-        html += `<div class="qr-result-winner" style="margin-bottom:8px;"><strong>${payload.w === 1 ? payload.p1 : payload.p2}</strong> wins ${p1Legs}&ndash;${p2Legs}</div>`;
+        html += `<div class="qr-result-winner" style="margin-bottom:8px;"><strong>${escapeHtml(payload.w === 1 ? payload.p1 : payload.p2)}</strong> wins ${p1Legs}&ndash;${p2Legs}</div>`;
         html += `<table class="qr-result-legs">
             <thead><tr>
                 <th>#</th><th>Winner</th><th>First</th>
-                <th>${payload.p1 ?? 'P1'}</th>
-                <th>${payload.p2 ?? 'P2'}</th>
+                <th>${escapeHtml(payload.p1 ?? 'P1')}</th>
+                <th>${escapeHtml(payload.p2 ?? 'P2')}</th>
                 <th>CD</th>
             </tr></thead><tbody>`;
 
@@ -647,8 +649,8 @@ function handleQRInspectorPayload(rawValue) {
             const [enc1, enc2] = (leg.s || '|').split('|');
             const v1 = decodeVisitScores(enc1 || '');
             const v2 = decodeVisitScores(enc2 || '');
-            const legWinner = leg.w === 1 ? payload.p1 : payload.p2;
-            const throwsFirst = ((payload.fls - 1 + i) % 2 === 0) ? payload.p1 : payload.p2;
+            const legWinner = escapeHtml(leg.w === 1 ? payload.p1 : payload.p2);
+            const throwsFirst = escapeHtml(((payload.fls - 1 + i) % 2 === 0) ? payload.p1 : payload.p2);
             const cd = leg.cd === 0 ? 'TB' : String(leg.cd);
             html += `<tr>
                 <td>${i + 1}</td>
@@ -679,8 +681,8 @@ function handleQRInspectorPayload(rawValue) {
             <table style="width:100%;border-collapse:collapse;font-size:14px;">
                 <thead><tr>
                     <th style="text-align:left;padding:4px 8px;">Achievement</th>
-                    <th style="text-align:center;padding:4px 8px;">${payload.p1 ?? 'P1'}</th>
-                    <th style="text-align:center;padding:4px 8px;">${payload.p2 ?? 'P2'}</th>
+                    <th style="text-align:center;padding:4px 8px;">${escapeHtml(payload.p1 ?? 'P1')}</th>
+                    <th style="text-align:center;padding:4px 8px;">${escapeHtml(payload.p2 ?? 'P2')}</th>
                 </tr></thead><tbody>
                 <tr><td style="padding:3px 8px;">180s</td><td style="text-align:center;">${s1.oneEighties}</td><td style="text-align:center;">${s2.oneEighties}</td></tr>
                 <tr><td style="padding:3px 8px;">Tons</td><td style="text-align:center;">${s1.tons}</td><td style="text-align:center;">${s2.tons}</td></tr>

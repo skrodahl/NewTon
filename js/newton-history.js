@@ -622,7 +622,7 @@ const NewtonHistory = (() => {
                             render: (v, row) => {
                                 const key = row.name.trim().toLowerCase();
                                 const checked = _selectedPlayers.has(key) ? ' checked' : '';
-                                return `<input type="checkbox" class="analytics-scope-checkbox"${checked} onclick="event.stopPropagation();NewtonHistory.togglePlayer('${escHtml(row.name)}', this.checked)">`;
+                                return `<input type="checkbox" class="analytics-scope-checkbox"${checked} data-nh-action="toggle-player" data-name="${escHtml(row.name)}">`;
                             }
                         },
                         {
@@ -634,6 +634,7 @@ const NewtonHistory = (() => {
             }
 
             _playersTable.setData(rows);
+            _wireTableActions('playersTableContainer');
 
             // Apply pending focus or render profile panel with current selection
             if (_pendingPlayerFocus) {
@@ -1332,7 +1333,15 @@ const NewtonHistory = (() => {
     let _dateTo = '';
 
     async function renderTournamentList() {
-        const all = await _loadAllTournaments();
+        let all;
+        try {
+            all = await _loadAllTournaments();
+        } catch (e) {
+            console.error('Tournament list render failed:', e);
+            const c = document.getElementById('historyTournamentTableContainer');
+            if (c) c.innerHTML = '<div class="analytics-placeholder"><p>Failed to load tournaments.</p></div>';
+            return;
+        }
 
         // Initialise checked set from current scope (or all)
         if (!_checkedIds.size) {
@@ -1361,7 +1370,7 @@ const NewtonHistory = (() => {
                         },
                         render: (v, row) => {
                             const checked = _checkedIds.has(row.tournamentId) ? ' checked' : '';
-                            return `<input type="checkbox" class="analytics-scope-checkbox" data-tid="${escHtml(row.tournamentId)}"${checked} onclick="event.stopPropagation();NewtonHistory.toggleTournament('${escHtml(row.tournamentId)}', this.checked)">`;
+                            return `<input type="checkbox" class="analytics-scope-checkbox" data-nh-action="toggle-tournament" data-tid="${escHtml(row.tournamentId)}"${checked}>`;
                         }
                     },
                     {
@@ -1396,14 +1405,14 @@ const NewtonHistory = (() => {
                             let html = '';
                             if (window.NEWTON_APP_MODE === 'analytics') {
                                 const safeId = escHtml(row.tournamentId);
-                                html += `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.viewBracketForTournament('${safeId}')">Bracket</button> `;
+                                html += `<button class="btn btn-sm" data-nh-action="view-bracket" data-tid="${safeId}">Bracket</button> `;
                             }
                             const allowDelete = typeof config !== 'undefined' && config.server && config.server.allowSharedTournamentDelete;
                             if (allowDelete) {
                                 const safeId = escHtml(row.tournamentId);
                                 const safeName = escHtml(row.tournamentName || row.tournamentId);
                                 const safeDate = row.closedAt ? escHtml(fmtDate(row.closedAt)) : '';
-                                html += `<button class="btn btn-sm" onclick="event.stopPropagation();NewtonHistory.promptDeleteTournament('${safeId}','${safeName}','${safeDate}')" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
+                                html += `<button class="btn btn-sm" data-nh-action="delete-tournament" data-tid="${safeId}" data-name="${safeName}" data-date="${safeDate}" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
                             }
                             return html;
                         }
@@ -1437,6 +1446,7 @@ const NewtonHistory = (() => {
         // Add _rowId for row click identification
         tournaments.forEach(t => { t._rowId = t.tournamentId; });
         _tournamentTable.setData(tournaments);
+        _wireTableActions('historyTournamentTableContainer');
 
         // Restore filter input values
         const filterInput = document.getElementById('analyticsTextFilter');
@@ -1770,6 +1780,30 @@ const NewtonHistory = (() => {
      * Rebuild the breadcrumb bar based on the current drill-down state.
      * Tournaments (top) / Tournament Name / Match ID    |    Matches
      */
+    // Wire one capture-phase delegated listener for in-cell action buttons/checkboxes.
+    // Capture runs before NewtonTable's row onclick, so stopPropagation on an action
+    // element suppresses the row click, while plain row clicks pass through untouched.
+    // Action values ride in data-* attributes (HTML-escaped → safe), never in handler
+    // strings — so names/ids can't break out of an onclick or inject markup.
+    function _wireTableActions(containerId) {
+        const container = document.getElementById(containerId);
+        if (!container || container._nhActionsWired) return;
+        container._nhActionsWired = true;
+        container.addEventListener('click', (e) => {
+            const el = e.target.closest('[data-nh-action]');
+            if (!el) return;
+            e.stopPropagation();
+            const tid = el.getAttribute('data-tid');
+            switch (el.getAttribute('data-nh-action')) {
+                case 'toggle-player':     togglePlayer(el.getAttribute('data-name'), el.checked); break;
+                case 'toggle-tournament': toggleTournament(tid, el.checked); break;
+                case 'view-bracket':      viewBracketForTournament(tid); break;
+                case 'delete-tournament': promptDeleteTournament(tid, el.getAttribute('data-name'), el.getAttribute('data-date')); break;
+                case 'open-tournament':   openTournament(tid); break;
+            }
+        }, true);
+    }
+
     function _updateBreadcrumb() {
         const container = document.getElementById('registerBreadcrumb');
         if (!container) return;
@@ -1793,7 +1827,7 @@ const NewtonHistory = (() => {
             html += '<span class="register-crumb-sep">/</span>';
             if (_breadcrumbMatch) {
                 // Tournament name is clickable (goes back to tournament match list)
-                html += `<button class="register-sub-tab" onclick="NewtonHistory.openTournament('${escHtml(_breadcrumbTournament.id)}')">${tLabel}</button>`;
+                html += `<button class="register-sub-tab" data-nh-action="open-tournament" data-tid="${escHtml(_breadcrumbTournament.id)}">${tLabel}</button>`;
                 html += '<span class="register-crumb-sep">/</span>';
                 html += `<span class="register-sub-tab active">${escHtml(_breadcrumbMatch.id)}</span>`;
             } else {
@@ -1810,42 +1844,50 @@ const NewtonHistory = (() => {
         }
 
         container.innerHTML = html;
+        _wireTableActions('registerBreadcrumb');
     }
 
     /**
      * Render a flat list of all matches across the scoped tournaments.
      */
     async function renderAllMatches() {
-        const tournaments = await getScopedTournaments();
         const allMatches = [];
+        try {
+            const tournaments = await getScopedTournaments();
 
-        for (const t of tournaments) {
-            const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
-            const p = _getActivePoints(t);
+            for (const t of tournaments) {
+                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+                const p = _getActivePoints(t);
 
-            matches.forEach(m => {
-                // Compute per-match achievement points
-                const ach = m.achievements || {};
-                let pts = 0;
-                Object.values(ach).forEach(a => {
-                    if (!a || typeof a !== 'object') return;
-                    pts += (a.oneEighties || 0) * p.oneEighty;
-                    pts += (a.tons || 0) * p.ton;
-                    pts += (Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut;
-                    pts += (Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg;
+                matches.forEach(m => {
+                    // Compute per-match achievement points
+                    const ach = m.achievements || {};
+                    let pts = 0;
+                    Object.values(ach).forEach(a => {
+                        if (!a || typeof a !== 'object') return;
+                        pts += (a.oneEighties || 0) * p.oneEighty;
+                        pts += (a.tons || 0) * p.ton;
+                        pts += (Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut;
+                        pts += (Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg;
+                    });
+                    m._achievementPoints = pts;
+                    m._tournamentName = t.tournamentName || t.tournamentId;
+                    m._tournamentId = t.tournamentId;
+                    m._rowId = t.tournamentId + ':' + m.matchId;
                 });
-                m._achievementPoints = pts;
-                m._tournamentName = t.tournamentName || t.tournamentId;
-                m._tournamentId = t.tournamentId;
-                m._rowId = t.tournamentId + ':' + m.matchId;
-            });
 
-            allMatches.push(...matches);
+                allMatches.push(...matches);
+            }
+
+            // Update meta
+            const metaEl = document.getElementById('historyAllMatchesMeta');
+            if (metaEl) metaEl.textContent = `${allMatches.length} matches across ${tournaments.length} tournaments`;
+        } catch (e) {
+            console.error('All-matches render failed:', e);
+            const c = document.getElementById('historyAllMatchesTableContainer');
+            if (c) c.innerHTML = '<div class="analytics-placeholder"><p>Failed to load matches.</p></div>';
+            return;
         }
-
-        // Update meta
-        const metaEl = document.getElementById('historyAllMatchesMeta');
-        if (metaEl) metaEl.textContent = `${allMatches.length} matches across ${tournaments.length} tournaments`;
 
         // Create table instance once
         if (!_allMatchesTable) {
@@ -1879,7 +1921,7 @@ const NewtonHistory = (() => {
                     },
                     {
                         key: '_tournamentName', label: 'Tournament',
-                        render: (v, row) => `<strong style="font-size:15px;cursor:pointer;text-decoration:underline;" onclick="event.stopPropagation();NewtonHistory.openTournament('${escHtml(row._tournamentId)}')">${escHtml(v)}</strong>`
+                        render: (v, row) => `<strong style="font-size:15px;cursor:pointer;text-decoration:underline;" data-nh-action="open-tournament" data-tid="${escHtml(row._tournamentId)}">${escHtml(v)}</strong>`
                     },
                     {
                         key: 'completedAt', label: 'Date', width: '110px',
@@ -1898,6 +1940,7 @@ const NewtonHistory = (() => {
         }
 
         _allMatchesTable.setData(allMatches);
+        _wireTableActions('historyAllMatchesTableContainer');
         showPanel('allMatches');
     }
 
