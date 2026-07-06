@@ -1689,13 +1689,47 @@ function validateTournamentData(data) {
     if (data.players.length > 0) {
         for (let i = 0; i < data.players.length; i++) {
             const player = data.players[i];
-            if (!player.name || !player.id) {
-                return { valid: false, error: `Player ${i + 1} is missing required fields (name, id)` };
+            if (typeof player.name !== 'string' || !player.name.trim() || !player.id) {
+                return { valid: false, error: `Player ${i + 1} is missing required fields (a string name, and an id)` };
             }
 
             // Set default player values
             if (typeof player.paid === 'undefined') player.paid = false;
             if (!player.stats) player.stats = { shortLegs: [], highOuts: [], tons: 0, oneEighties: 0 };
+        }
+    }
+
+    // Validate placements are a map of numeric ranks (consumed directly as ranks / placement points)
+    if (data.placements != null) {
+        if (typeof data.placements !== 'object' || Array.isArray(data.placements)) {
+            return { valid: false, error: 'Placements must be an object' };
+        }
+        for (const [pid, rank] of Object.entries(data.placements)) {
+            if (typeof rank !== 'number' || !isFinite(rank)) {
+                return { valid: false, error: `Placement for player ${pid} must be a number` };
+            }
+        }
+    }
+
+    // Validate match shape — malformed matches otherwise flow into renderBracket, the
+    // progression lookups, and innerHTML, crashing at render rather than failing at import.
+    for (let i = 0; i < data.matches.length; i++) {
+        const m = data.matches[i];
+        if (!m || typeof m !== 'object') {
+            return { valid: false, error: `Match ${i + 1} is not a valid object` };
+        }
+        if (typeof m.id !== 'string') {
+            return { valid: false, error: `Match ${i + 1} is missing a valid (string) id` };
+        }
+        if (m.player1 != null && typeof m.player1 !== 'object') {
+            return { valid: false, error: `Match ${m.id}: player1 must be an object or null` };
+        }
+        if (m.player2 != null && typeof m.player2 !== 'object') {
+            return { valid: false, error: `Match ${m.id}: player2 must be an object or null` };
+        }
+        // completed feeds boolean checks throughout — coerce rather than reject if not already boolean
+        if (typeof m.completed !== 'boolean') {
+            m.completed = !!m.completed;
         }
     }
 

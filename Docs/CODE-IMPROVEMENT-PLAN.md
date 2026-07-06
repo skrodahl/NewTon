@@ -195,7 +195,7 @@ Covered as Phase 1 item 1.13m (one-line fix, listed there because it's a pure co
 > - **Foundation:** one canonical quote-safe `escapeHtml()` in `js/main.js` (window-exported). The weaker `textContent`-based private copy in `analytics.js` (didn't escape quotes) was removed. The Chalker, being a standalone app, carries an identical copy inside its IIFE.
 > - **Handler pattern:** identifiers no longer travel in inline `onclick` strings — converted to either a per-render numeric-index lookup + one delegated listener, or `data-*` attributes read via `getAttribute` (where HTML-escaping is correct). `NewtonTable` row clicks now dispatch by integer index into `inst.data` (removed `_rowId`-in-onclick and the flawed `_escAttr`) — one change that hardened every table at once. newton-history cell buttons use `data-nh-action` + a shared **capture-phase** delegated listener (`_wireTableActions`) so `stopPropagation` still suppresses the row click.
 > - **Extra vector found during verification:** the `qr-bridge.js` QR-Inspector JSON-parse-failure branch dumped the raw scanned string into `innerHTML` by string concatenation (`'…' + rawValue + '…'`) — missed by the `${…}`-template sweep, now escaped. It is the one call site not in the batch list below.
-> - **Deliberately left as-is:** numeric-id inline handlers (`openStatsModal(${player.id})`, `togglePaid(${player.id})`, `selectWinner`/`toggleActive('${match.id}')`) — safe while those ids are numeric/structural; guaranteeing that against crafted imports belongs to **4.4** (import validation).
+> - **Deliberately left as-is (now an accepted residual — see Appendix A.3):** numeric-id inline handlers (`openStatsModal(${player.id})`, `togglePaid(${player.id})`, `selectWinner`/`toggleActive('${match.id}')`) — safe while those ids are numeric/structural. Originally flagged as "guarantee via 4.4 import validation"; after threat-model review that was **dropped** — the only way to reach the crafted-id vector is importing an untrusted file, and its XSS runs solely in the importer's own browser against their own local data (no auth, no secrets, no system of record). Accepted; may be tidied in Phase 6 for cleanliness, not as a security fix.
 
 One systemic pattern with three consequences, found independently by all four reviews.
 
@@ -249,7 +249,8 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 > - **4.5:** import filter `n => typeof n === 'string' && n.trim()` + empty-after-filter guard.
 > - **4.7:** `crypto.randomUUID` fallback to `getRandomValues` (works over plain HTTP).
 > - **4.9:** try/catch-with-placeholder added to `renderTournamentList` and `renderAllMatches` (mirrors `renderDashboard`).
-> - **Still pending (the delicate ones):** 4.2 (saveTournamentOnly write ordering + the two deferred 4.1 sites), 4.3 (analytics-preview corruption), 4.4 (deeper import validation), 4.6 (NewtonDB atomicity), 4.8 (render-race tokens). 4.10 discuss-first.
+> - **4.8 + 4.4 implemented 2026-07-06 (uncommitted)** — see their per-item status notes below.
+> - **Still pending (the delicate three):** 4.2 (saveTournamentOnly write ordering + the two deferred 4.1 sites), 4.3 (analytics-preview — **reassessed & downgraded, see note below**), 4.6 (NewtonDB atomicity). 4.10 discuss-first.
 
 ### 4.1 One guarded registry reader
 
@@ -265,6 +266,14 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 
 ### 4.3 Analytics bracket preview can destroy/corrupt the active tournament
 
+> **Reassessment (2026-07-06, after maintainer discussion — priority downgraded; the "destroy/corrupt" framing above overstates it):**
+> - **Only reachable in analytics-only mode.** The bracket-preview path (`viewBracketForTournament` → `viewBracket`, newton-history.js ~2094) is gated to `NEWTON_APP_MODE === 'analytics'` (the "Bracket" button, newton-history.js:1423) and fetches the tournament JSON from the server (`api/list-tournaments.php`, `tournaments/…`). In full mode — **every `file://` and `NEWTON_MODE=full` deployment — there is no preview path at all,** so this cannot happen there.
+> - **The `?tm` escape hatch is the only bridge.** On a `NEWTON_MODE=analytics` deployment, full mode (and thus a real, editable `currentTournament`) is reached by appending `?tm` (tournament.html:21) — same origin, shared localStorage. That is the intended way to *fix/edit completed tournaments after the fact*: analytics mode hides the tournament tabs (`.mode-analytics` CSS), so `?tm` is what puts the bracket + the Developer Console "Toggle Read-Only" unlock (`commandToggleReadOnly`, analytics.js:2595) within reach. So the only way a live/editable tournament and the preview coexist on one origin is this deliberate cross-mode use — and it's sequential (same tab, different visits), not simultaneous.
+> - **Recoverable, not destructive.** Edits are written to `dartsTournaments` on every change, and the unlocked (`readOnly:false`) state is persisted there too. The preview only clobbers the `currentTournament` *pointer* — worst case the active tournament is deactivated and re-loaded from Recent Tournaments; no saved data or unlocked state is lost.
+> - **Hard constraint on the fix:** it must not disturb the `?tm` edit workflow. Acceptance test: on an analytics build, `?tm` → unlock a completed tournament → edit → preview a bracket → back/reload → still full mode with the tournament unlocked and editable. Done right the fix *improves* this (restoring the prior `currentTournament` on preview-exit returns you to your edit session instead of booting you out).
+> - **Priority:** do **4.2 first** (it touches the live save path in every mode). 4.3 is analytics-viewer hardening — worth doing for deployments that actually edit on the analytics box, low priority otherwise.
+> - **Corrected pointers:** preview writes `currentTournament` at newton-history.js:2124 (`viewBracket`, with `readOnly:true` + `_analyticsPreview:true`); back button at tournament.html:253; the reload path `autoLoadCurrentTournament` (main.js) copies `readOnly` but drops `_analyticsPreview`; the persistence guard is `if (tournament._analyticsPreview) return` in `saveTournamentOnly`.
+
 - **Where:** `js/newton-history.js:2060`, `tournament.html:253` (back button), `js/main.js:319-333` (`autoLoadCurrentTournament`), `js/tournament-management.js:586` (guard)
 - **Issue (two parts):**
   1. Previewing a bracket from Analytics writes the preview into `currentTournament`, and the back button does `localStorage.removeItem('currentTournament')` — the user's real active tournament is silently deactivated on next reload.
@@ -273,6 +282,8 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 - **Verify:** With an active tournament, preview an analytics bracket, hit back, reload — active tournament still loads. Reload mid-preview — preview does not appear in Recent Tournaments.
 
 ### 4.4 Deeper import validation
+
+> **Status: Implemented 2026-07-06 (uncommitted).** Rejects (does not strip) with the existing `{valid:false, error}` shape on the crash-inducing invariants: player `name` must be a non-empty string; every match must be an object with a **string `id`** (a numeric id crashes `id.startsWith('BS-')` in the history view) and `player1`/`player2` object-or-null; `placements` must be a map of finite numbers. `completed` is coerced to boolean rather than rejected. These invariants have always held for real exports (old and new), so legitimate imports are unaffected — only crafted/corrupt data now fails cleanly at the import dialog. **Scope deliberately stops here:** deeper *semantic/structural* validation (match ids must be real bracket slots; player ids must be numeric) and a tamper-detection **CRC** on exports were both considered and **declined** — see Appendix A.3. They defend only against tampering, which (per the threat model) reduces to self-hacking with no meaningful impact, at the cost of fragile progression-table coupling (id-set validation) or false confidence (a CRC is tamper-evident, not tamper-proof).
 
 - **Where:** `js/tournament-management.js:1561-1637` (`validateTournamentData`)
 - **Issue:** Validates name/date/arrays-are-arrays but nothing about match shape (`id`, `player1/2`, `completed`, `finalScore`), bracket structure, or placements. Malformed matches flow into `renderBracket`, progression lookups, and innerHTML (feeds Phase 3). Garbage `matches` imports "successfully" and crashes at render.
@@ -301,6 +312,8 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 - **Verify:** Serve over plain HTTP from a non-localhost IP; config loads, serverId present, QR assignment works.
 
 ### 4.8 Async render races in Analytics
+
+> **Status: Implemented 2026-07-06 (uncommitted).** Used a **per-view** token (`_renderSeq = { dashboard, leaderboard, players }`) rather than one shared `renderSeq` — a single global would make switching views cancel a legitimately-needed render of a *different* view. Each of the three render functions captures `++_renderSeq.<view>` at entry and bails before painting at two points: right after `getScopedTournaments()`, and again before the final DOM write (more IndexedDB reads happen in between). Register-path renders (`renderTournamentList`/`openTournament`/`openMatch`) are out of scope — navigational, not point-mode-sensitive.
 
 - **Where:** `js/newton-history.js:295-324` (`_recomputePoints`), `renderDashboard`, `renderLeaderboard`, `renderPlayersTab`
 - **Issue:** Each render awaits multiple IndexedDB reads with no generation token. Rapidly toggling point mode/layers or changing scope fires overlapping renders; last-to-finish wins and may paint the *older* mode's data.
@@ -426,6 +439,9 @@ The original reviewer claimed the SE final and bronze become playable simultaneo
 
 **A.2 API authentication and CORS — DESCOPED (maintainer decision, 2026-07-04).**
 The API's no-built-in-auth model is documented (DOCKER-QUICKSTART.md "Security": reverse proxy with basic auth, LAN-only, or VPN). Adding auth to the PHP endpoints is intentionally out of scope; deployers who expose the API are responsible for protecting it. CORS `Access-Control-Allow-Origin: *` headers are retained — they may be load-bearing for direct browser-to-remote-server tournament upload. Only the deployer-neutral robustness items in Phase 2 remain in scope.
+
+**A.3 Import tamper-hardening (semantic validation + export CRC) — DECLINED (maintainer decision, 2026-07-06).**
+After the shipped 4.4 type checks (crash-prevention only), the question was whether to also reject *structurally* invalid imports (a match id that isn't a real bracket slot — e.g. a hand-edited `FS-12-1`; a non-numeric player id) and/or stamp exports with a CRC to detect tampering. Both declined. **Rationale — the app's threat model:** the authoritative data is browser-local (localStorage + IndexedDB); there is no server-side system of record (the optional shared server is a dumb, unauthenticated JSON exchange folder — see A.2), and no secrets, sessions, or auth exist to escalate to. So a tampered/crafted import can only ever affect the *importer's own* local copy of non-sensitive darts data — "hacking your own instance," where the user already has full control via the Developer Console (unlock/reset/prune) and devtools. Semantic id-validation would also couple `validateTournamentData` to the progression tables and make imports cross-version fragile (old/foreign exports falsely rejected); a CRC is tamper-*evident*, not tamper-*proof* (a hostile author recomputes it), so it buys nothing against the only real actor. The residual crafted-id XSS in the Phase 3 numeric-id inline handlers is accepted on the same basis (see the Phase 3 status note). **Standing guidance (maintainer, "keep in mind for all remaining improvements"):** weigh every future hardening item against this threat model — don't build defenses whose only benefit assumes a remote attacker or a shared datastore; keep cheap crash-prevention, and treat correctness/robustness-against-your-own-mistakes normally.
 
 ## Appendix B — Explicitly Verified Clean
 

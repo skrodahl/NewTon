@@ -49,6 +49,11 @@ const NewtonHistory = (() => {
     /** Dirty flags — views that need recompute after scope change */
     let _dirty = { dashboard: true, leaderboard: true, players: true, register: true };
 
+    // Per-view generation token. Each async render captures the current value at entry
+    // and bails before painting if a newer render of the same view has since started —
+    // so rapid point-mode/layer/scope toggles can't let a stale render win the repaint.
+    let _renderSeq = { dashboard: 0, leaderboard: 0, players: 0 };
+
     /**
      * Load all tournaments from DB (cached). Call _invalidateCache() to force reload.
      * @returns {Promise<object[]>}
@@ -333,11 +338,13 @@ const NewtonHistory = (() => {
     async function renderDashboard() {
         const container = document.getElementById('analyticsViewDashboard');
         if (!container || typeof NewtonDB === 'undefined') return;
+        const seq = ++_renderSeq.dashboard;
 
         container.innerHTML = '<div class="analytics-placeholder"><p>Loading…</p></div>';
 
         try {
             const tournaments = await getScopedTournaments();
+            if (seq !== _renderSeq.dashboard) return; // superseded by a newer render
             if (!tournaments.length) {
                 container.innerHTML = '<div class="analytics-placeholder">' +
                     '<h3>No data yet</h3>' +
@@ -398,6 +405,8 @@ const NewtonHistory = (() => {
             tournaments.forEach(t => {
                 totalPoints += _computeAchievementPoints(t);
             });
+
+            if (seq !== _renderSeq.dashboard) return; // superseded during the DB reads above
 
             // Render cards
             container.innerHTML =
@@ -524,6 +533,7 @@ const NewtonHistory = (() => {
     async function renderPlayersTab() {
         const container = document.getElementById('playersTableContainer');
         if (!container || typeof NewtonDB === 'undefined') return;
+        const seq = ++_renderSeq.players;
 
         if (!_playersTable) {
             container.innerHTML = '<div class="analytics-placeholder"><p>Loading…</p></div>';
@@ -531,6 +541,7 @@ const NewtonHistory = (() => {
 
         try {
             const tournaments = await getScopedTournaments();
+            if (seq !== _renderSeq.players) return; // superseded by a newer render
             if (!tournaments.length) {
                 container.innerHTML = '<div class="analytics-placeholder">' +
                     '<h3>No data yet</h3>' +
@@ -577,6 +588,8 @@ const NewtonHistory = (() => {
                     }
                 });
             }
+
+            if (seq !== _renderSeq.players) return; // superseded during the DB reads above
 
             const rows = Object.values(playerMap);
             rows.sort((a, b) => a.name.localeCompare(b.name));
@@ -809,6 +822,7 @@ const NewtonHistory = (() => {
     async function renderLeaderboard() {
         const container = document.getElementById('leaderboardTableContainer');
         if (!container || typeof NewtonDB === 'undefined') return;
+        const seq = ++_renderSeq.leaderboard;
 
         // Only show loading placeholder on first render (don't collapse existing table)
         if (!_leaderboardTable) {
@@ -817,6 +831,7 @@ const NewtonHistory = (() => {
 
         try {
             const tournaments = await getScopedTournaments();
+            if (seq !== _renderSeq.leaderboard) return; // superseded by a newer render
             if (!tournaments.length) {
                 container.innerHTML = '<div class="analytics-placeholder">' +
                     '<h3>No data yet</h3>' +
@@ -1080,6 +1095,8 @@ const NewtonHistory = (() => {
                     ]
                 });
             }
+
+            if (seq !== _renderSeq.leaderboard) return; // superseded during the DB reads above
 
             _leaderboardRows = rows;
             _leaderboardTable.setData(rows);
