@@ -191,6 +191,12 @@ Covered as Phase 1 item 1.13m (one-line fix, listed there because it's a pure co
 
 ## Phase 3 — Escaping Sweep
 
+> **Status: Implemented & committed 2026-07-05** (commit `464e991`) — all five batches (A–E) plus the foundation. Fully verified: Batches A–D in the browser by the maintainer; Batch E via console tests against the real functions (TM QR Inspector 4/4, Chalker 2/2) with a screenshot confirming a malicious `<img onerror>` / `O'Brien <b>` payload renders as literal text.
+> - **Foundation:** one canonical quote-safe `escapeHtml()` in `js/main.js` (window-exported). The weaker `textContent`-based private copy in `analytics.js` (didn't escape quotes) was removed. The Chalker, being a standalone app, carries an identical copy inside its IIFE.
+> - **Handler pattern:** identifiers no longer travel in inline `onclick` strings — converted to either a per-render numeric-index lookup + one delegated listener, or `data-*` attributes read via `getAttribute` (where HTML-escaping is correct). `NewtonTable` row clicks now dispatch by integer index into `inst.data` (removed `_rowId`-in-onclick and the flawed `_escAttr`) — one change that hardened every table at once. newton-history cell buttons use `data-nh-action` + a shared **capture-phase** delegated listener (`_wireTableActions`) so `stopPropagation` still suppresses the row click.
+> - **Extra vector found during verification:** the `qr-bridge.js` QR-Inspector JSON-parse-failure branch dumped the raw scanned string into `innerHTML` by string concatenation (`'…' + rawValue + '…'`) — missed by the `${…}`-template sweep, now escaped. It is the one call site not in the batch list below.
+> - **Deliberately left as-is:** numeric-id inline handlers (`openStatsModal(${player.id})`, `togglePaid(${player.id})`, `selectWinner`/`toggleActive('${match.id}')`) — safe while those ids are numeric/structural; guaranteeing that against crafted imports belongs to **4.4** (import validation).
+
 One systemic pattern with three consequences, found independently by all four reviews.
 
 ### The problem
@@ -238,7 +244,7 @@ Player names, tournament names, referee names, and server-supplied filenames flo
 
 The app's stated top priority is crash-resistance; these close the gaps between that goal and the current persistence code.
 
-> **Status: low-risk guards implemented 2026-07-04** (uncommitted) — items 4.1 (partial), 4.5, 4.7, 4.9.
+> **Status: low-risk guards implemented & committed 2026-07-05** (commit `464e991`, shipped alongside Phase 3) — items 4.1 (partial), 4.5, 4.7, 4.9.
 > - **4.1:** `readTournamentsRegistry()` helper added (tournament-management.js) + `getPlayerList()` guarded. Swapped **6 of 8** registry read sites (createTournament dup-check, loadRecentTournaments, load-by-id, deleteTournament, confirm-delete, the localStorage lookup near 2058). **Deliberately NOT swapped:** `saveTournamentOnly` (was :607) and the import existence-check (was :1549) — both are read-modify-**write-back**; a `[]`-returning reader there would overwrite and destroy the other tournaments on corruption. Left throwing (which safely aborts the write) until **4.2** adds proper write-abort handling. The helper's JSDoc documents this.
 > - **4.5:** import filter `n => typeof n === 'string' && n.trim()` + empty-after-filter guard.
 > - **4.7:** `crypto.randomUUID` fallback to `getRandomValues` (works over plain HTTP).
