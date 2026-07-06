@@ -250,7 +250,7 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 > - **4.7:** `crypto.randomUUID` fallback to `getRandomValues` (works over plain HTTP).
 > - **4.9:** try/catch-with-placeholder added to `renderTournamentList` and `renderAllMatches` (mirrors `renderDashboard`).
 > - **4.8 + 4.4 implemented 2026-07-06 (uncommitted)** — see their per-item status notes below.
-> - **Still pending (the delicate three):** 4.2 (saveTournamentOnly write ordering + the two deferred 4.1 sites), 4.3 (analytics-preview — **reassessed & downgraded, see note below**), 4.6 (NewtonDB atomicity). 4.10 discuss-first.
+> - **Still pending:** 4.2 (**reshaped** to a storage-full gate + a 5-line loud-fail save wrap — simpler than the original write-ordering surgery; also absorbs the two deferred 4.1 write-back sites), 4.3 (analytics-preview — **reassessed & downgraded, see note below**), 4.6 (NewtonDB atomicity). 4.10 discuss-first.
 
 ### 4.1 One guarded registry reader
 
@@ -258,11 +258,21 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 - **Why:** One corrupt value bricks tournament creation, saving, loading, deleting, and the Recent Tournaments list simultaneously (in `loadRecentTournaments` the throw is an unhandled async rejection — the container never renders, no error shown).
 - **Fix:** One `readTournamentsRegistry()` helper: try/catch, return `[]` on parse failure, surface a one-time console warning + user-visible notice. Use everywhere. Same treatment for `getPlayerList()` (`player-management.js:6`).
 
-### 4.2 `saveTournamentOnly()` error handling and write ordering
+### 4.2 Storage-full handling — pre-emptive gate + loud-fail save wrap
 
-- **Where:** `js/tournament-management.js:607-617`
+> **Reshaped 2026-07-07 (maintainer direction — simpler than the original "write-ordering" approach below; prevent the bad state at the door instead of doing surgery on the hottest save function):**
+> 1. **Pre-emptive gate (primary).** In `createTournament()` **and** the import entry point, check storage usage (reuse the existing calc in `analytics.js` ~383) and, if ≥ ~**90%** full, block the action with a clear message pointing at the Storage Space modal to export/delete old tournaments. 90% leaves ~1 MB free — more than one tournament's worst-case growth (~a few hundred KB) — so it also covers the create-then-grow-during-play case, not just the moment of creation. (Avoid 95%: ~0.5 MB headroom can be overrun by a big 32-player tournament mid-play.)
+> 2. **Loud-fail wrap (backstop).** Wrap `saveTournamentOnly()`'s body (`tournament-management.js` ~622-660) in a single try/catch; on *any* failure — a `QuotaExceededError` slipping past the gate, or a corrupt-registry parse — fire a **one-time** alert and return without claiming success (no partial write, no overwrite). ~5 lines: no write-reordering, no caller-contract change, no reader-swap, no rollback.
+>
+> **Why keep the wrap:** the gate leans on the *assumed* 10 MB limit (`analytics.js:384` is hardcoded, not the real browser quota), so it's a strong heuristic, not a hard guarantee — a browser whose real cap is lower could still throw. The wrap turns that (and the rare corrupt-parse) from a silent throw into `completeMatch`, which loses a completed match, into a clear message. It *removes* a corner case rather than adding one.
+>
+> **This supersedes the original fix below and absorbs the two deferred 4.1 write-back sites** (`saveTournamentOnly` + import): they stay as plain parses *inside the wrap*, which now fails loudly on corruption instead of either throwing silently (today) or `[]`-overwriting everything (the naive reader-swap we were avoiding) — no corrupt-vs-empty signaling needed.
+>
+> **Verify:** monkeypatch `localStorage.setItem` to throw `QuotaExceededError` → complete a match → confirm one alert, no uncaught throw, active tournament survives reload. Fill storage past 90% → confirm create *and* import are both blocked with the message.
+
+- **Where (original framing):** `js/tournament-management.js:607-617`
 - **Issue:** The most-called persistence function has zero failure handling: unguarded parse, then two `setItem` calls. A `QuotaExceededError` on the first write throws into the match-completion flow; success-then-failure leaves `dartsTournaments` and `currentTournament` divergent.
-- **Fix:** Wrap in try/catch; on quota failure alert the user and point at the storage-management modal; write `currentTournament` first (small, authoritative for reload) so partial failure favors the active tournament; report failure to the caller.
+- **Original fix (superseded):** Wrap in try/catch; on quota failure alert the user and point at the storage-management modal; write `currentTournament` first (small, authoritative for reload) so partial failure favors the active tournament; report failure to the caller.
 
 ### 4.3 Analytics bracket preview can destroy/corrupt the active tournament
 
