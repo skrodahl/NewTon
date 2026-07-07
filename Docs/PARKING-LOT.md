@@ -42,6 +42,16 @@ Observed on iPhone 12 Mini, iOS 26.5, Safari. After multiple captures in the sam
 
 ---
 
+### Storage Space dialog — tighter copy + note that stats survive deletion
+
+The Storage Space dialog (`showStorageManagement` in `tournament-management.js`) is text-heavy and omits a reassuring fact: **deleting a tournament from the Recent list keeps its stats in Analytics.** `confirmDeleteTournament` only removes the localStorage keys (`dartsTournaments` + the per-tournament `tournament_<id>_history` key); it never touches NewtonDB/IndexedDB, so finalized stats (leaderboard, achievements) survive deletion.
+
+**Do:** trim the "How to Free Up Space" bullets, and add a line such as *"Deleting a finalized tournament keeps its stats in Analytics"* so operators aren't afraid to free space.
+
+**Floated but not recommended:** a one-click "delete the oldest 50%" button. Bulk automated deletion is a footgun against the app's export-before-destroy ethos, and "oldest 50%" is an arbitrary heuristic with its own edge cases. The reassurance text is the better lever for the "afraid to delete" concern — keep deletion explicit and per-tournament.
+
+---
+
 ## Later
 *Worth tracking but not urgent*
 
@@ -108,6 +118,16 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 **Fix when addressed:** `isMatchUndoable()` and the bracket tooltip function in `js/bracket-rendering.js` should follow AUTO-completed downstream matches recursively until reaching a non-AUTO match, then apply the existing live/MANUAL checks.
 
+---
+
+### Migrate tournaments from localStorage to IndexedDB?
+
+Move tournament storage (`dartsTournaments` / `currentTournament`) off localStorage (~10 MB cap — the quota problem behind Phase 4.2) and into IndexedDB, which the app already uses for match/analytics data (NewtonDB) and whose quota is effectively unbounded for darts data.
+
+**Current lean: no.** localStorage tournament access is **synchronous and pervasive** — `saveTournamentOnly` (every match completion), `loadSpecificTournament`, `createTournament`, `autoLoadCurrentTournament`, `readTournamentsRegistry`, the watermark/render paths. IndexedDB is async, so migrating turns one contained problem into async rippling through the entire save/load/render layer, up against the protected transaction/undo foundations — a high-blast-radius, spiralling dependency-chain change (the kind the design philosophy exists to avoid), plus a one-time migration path with its own backward-compat corner cases.
+
+For the actual problem (quota), the contained fix is the Phase 4.2 storage gate (block create/import near the limit + a loud-fail save wrap) — blast radius of one function. Revisit only if quota becomes a routine pain the gate can't absorb.
+
 
 ## Decided Against
 *Features that were considered but explicitly rejected*
@@ -116,4 +136,4 @@ The undo check looks one level deep into downstream matches. If a downstream mat
 
 ---
 
-**Last updated:** May 29, 2026 — added Chalker — Google Play Store distribution (Later)
+**Last updated:** July 7, 2026 — added Storage Space dialog copy (Next) + localStorage→IndexedDB migration question (Later)

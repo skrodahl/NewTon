@@ -2037,69 +2037,54 @@ function showStorageModal() {
     // Create modal HTML
     const modalHTML = `
         <div id="storageModal" class="modal" style="display: block;">
-            <div class="modal-content">
-                <h3>Storage Space</h3>
-                <div class="storage-status">
-                    <div class="storage-progress-bar">
-                        <div class="storage-progress-fill storage-${colorClass}" style="width: ${percentage}%"></div>
-                    </div>
-                    <div class="storage-details">
-                        <strong>Using ${usedMB} MB of ${limitMB} MB available (${percentage}%)</strong>
-                        <div style="margin-top: 4px; color: #6b7280;">${statusMessage}</div>
+            <div class="dlg dlg--wide">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Tournaments</div>
+                        <div class="dlg__sidebar-value">${formatBytes(tournamentsSize)} (${tournamentCount} tournaments)</div>
+                        <div class="dlg__sidebar-label">Tournament History</div>
+                        <div class="dlg__sidebar-value">${formatBytes(historySize)}</div>
+                        <div class="dlg__sidebar-label">Settings & Players</div>
+                        <div class="dlg__sidebar-value">${formatBytes(globalSize)}</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <h2 class="dlg__title">Storage Space</h2>
+                        <div>
+                            <div class="storage-progress-bar">
+                                <div class="storage-progress-fill storage-${colorClass}" style="width: ${percentage}%"></div>
+                            </div>
+                            <div class="storage-details">
+                                <strong>Using ${usedMB} MB of ${limitMB} MB available (${percentage}%)</strong>
+                                <div style="margin-top: 4px; color: #6b7280;">${statusMessage}</div>
+                            </div>
+                        </div>
+                        <div class="dlg__note">
+                            <p class="dlg__label" style="margin-bottom: 0;">How to Free Up Space</p>
+                            <ol style="margin: 0; padding-left: 20px;">
+                                <li style="margin-bottom: 10px;">
+                                    <strong>Export old tournaments you want to keep</strong>
+                                    <ul style="margin: 4px 0 0 0; padding-left: 18px;">
+                                        <li>Click on a tournament name to load it</li>
+                                        <li>Click "Export Tournament" button to save it</li>
+                                    </ul>
+                                </li>
+                                <li>
+                                    <strong>Delete tournaments you no longer need</strong>
+                                    <ul style="margin: 4px 0 0 0; padding-left: 18px;">
+                                        <li>Click the X button next to old tournaments in the list above</li>
+                                        <li>Deleted tournaments can't be recovered (unless you exported them)</li>
+                                    </ul>
+                                </li>
+                            </ol>
+                        </div>
+                        ${historySize > 1024 * 1024 ? `
+                        <p class="dlg__desc"><strong>Advanced:</strong> Your tournament history is using ${formatBytes(historySize)}. History lets you undo match results — clean up old history from the Developer Console (Ctrl+Shift+D) if you're low on space.</p>
+                        ` : ''}
+                        <p class="dlg__desc" style="font-style: italic;">Tip: Focus on older tournaments from several months ago.</p>
                     </div>
                 </div>
-
-                <div class="storage-breakdown">
-                    <h4>What's Using Space</h4>
-                    <div class="storage-breakdown-item">
-                        <span>Tournaments:</span>
-                        <strong>${formatBytes(tournamentsSize)} (${tournamentCount} tournaments)</strong>
-                    </div>
-                    <div class="storage-breakdown-item">
-                        <span>Tournament History:</span>
-                        <strong>${formatBytes(historySize)}</strong>
-                    </div>
-                    <div class="storage-breakdown-item">
-                        <span>Settings & Players:</span>
-                        <strong>${formatBytes(globalSize)}</strong>
-                    </div>
-                </div>
-
-                <div class="storage-instructions">
-                    <h4>How to Free Up Space</h4>
-                    <ol>
-                        <li>
-                            <strong>Export old tournaments you want to keep</strong>
-                            <ul>
-                                <li>Click on a tournament name to load it</li>
-                                <li>Click "Export Tournament" button to save it</li>
-                            </ul>
-                        </li>
-                        <li>
-                            <strong>Delete tournaments you no longer need</strong>
-                            <ul>
-                                <li>Click the X button next to old tournaments in the list above</li>
-                                <li>Deleted tournaments can't be recovered (unless you exported them)</li>
-                            </ul>
-                        </li>
-                    </ol>
-                    <p style="margin: 12px 0 0 0; font-style: italic; color: #6b7280;">
-                        Tip: Focus on older tournaments from several months ago.
-                    </p>
-                </div>
-
-                ${historySize > 1024 * 1024 ? `
-                <div class="storage-advanced">
-                    <strong>Advanced:</strong> Your tournament history is using ${formatBytes(historySize)}.
-                    History allows you to undo match results.
-                    <br><br>
-                    If you're running low on space, you can clean up old history
-                    from the Developer Console (press Ctrl+Shift+D).
-                </div>
-                ` : ''}
-
-                <div style="text-align: center; margin-top: 25px;">
-                    <button class="btn" onclick="closeStorageModal()">Close</button>
+                <div class="dlg__foot">
+                    <button class="btn btn-primary" onclick="closeStorageModal()">Close</button>
                 </div>
             </div>
         </div>
