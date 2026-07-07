@@ -7,6 +7,9 @@ let showingAllLocalTournaments = false;
 // One-time guard so a corrupt registry only alerts the user once per session
 let _registryReadFailed = false;
 
+// One-time guard so a failed save (quota/corruption) only alerts once, until the next good save
+let _saveFailedAlerted = false;
+
 /**
  * Reads and parses the saved-tournaments registry ('dartsTournaments') from localStorage.
  * Single guarded reader: on corrupt/unparseable data it returns an empty array instead of
@@ -94,6 +97,32 @@ function clearTournamentFields() {
  * - Clears UI and saves to localStorage
  * - Navigates to Setup page
  */
+/**
+ * Storage-full guard. Pre-empts the localStorage quota problem at the entry points
+ * (create / import) instead of handling a QuotaExceededError mid-save. Best-effort:
+ * if usage can't be read it does NOT block — the saveTournamentOnly() try/catch is the
+ * real backstop. Reuses getLocalStorageStats() (analytics.js).
+ * @param {string} action - short phrase for the message, e.g. "create a new tournament"
+ * @returns {boolean} true if the action should be blocked
+ */
+function storageGateBlocks(action) {
+    if (typeof getLocalStorageStats !== 'function') return false;
+    let stats;
+    try {
+        stats = getLocalStorageStats();
+    } catch (e) {
+        console.warn('Storage usage check failed — not blocking:', e);
+        return false;
+    }
+    if (stats && stats.percentage >= 90) {
+        alert(`Browser storage is ${stats.percentage}% full — there may not be room to ${action}.\n\n` +
+              `Free up space first: open "Storage Space" on the Tournament Setup page to export and delete old ` +
+              `tournaments. Deleting a finalized tournament keeps its stats in Analytics.`);
+        return true;
+    }
+    return false;
+}
+
 function createTournament() {
     const name = document.getElementById('tournamentName').value.trim();
     const date = document.getElementById('tournamentDate').value;
@@ -102,6 +131,8 @@ function createTournament() {
         alert('Please enter both tournament name and date');
         return;
     }
+
+    if (storageGateBlocks('create a new tournament')) return;
 
     // Check for duplicate tournament with same name and date
     const existingTournaments = readTournamentsRegistry();
@@ -620,42 +651,58 @@ async function uploadTournamentFile(event, overwrite = false) {
  * - Called frequently during tournament operations
  */
 function saveTournamentOnly(shouldLog = true) {
-    if (!tournament) return;
-    if (tournament._analyticsPreview) return; // Analytics previews never persist
+    if (!tournament) return true;
+    if (tournament._analyticsPreview) return true; // Analytics previews never persist
 
-    // Build clean tournament object with current data
-    const tournamentToSave = {
-        id: tournament.id,
-        name: tournament.name,
-        date: tournament.date,
-        created: tournament.created,
-        status: tournament.status,
-        players: players, // Tournament-specific player data
-        matches: matches, // Tournament-specific match data
-        bracket: tournament.bracket,
-        bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
-        format: tournament.format, // SE/DE format (absent = DE for backward compat)
-        placements: tournament.placements || {},
-        readOnly: tournament.readOnly, // ✅ Fixed: Include readOnly flag
-        lastSaved: new Date().toISOString()
-        // NO CONFIG DATA - Config stays global
-    };
+    try {
+        // Build clean tournament object with current data
+        const tournamentToSave = {
+            id: tournament.id,
+            name: tournament.name,
+            date: tournament.date,
+            created: tournament.created,
+            status: tournament.status,
+            players: players, // Tournament-specific player data
+            matches: matches, // Tournament-specific match data
+            bracket: tournament.bracket,
+            bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
+            format: tournament.format, // SE/DE format (absent = DE for backward compat)
+            placements: tournament.placements || {},
+            readOnly: tournament.readOnly, // ✅ Fixed: Include readOnly flag
+            lastSaved: new Date().toISOString()
+            // NO CONFIG DATA - Config stays global
+        };
 
-    // Save to tournaments list
-    let tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
-    const index = tournaments.findIndex(t => t.id === tournament.id);
+        // Save to tournaments list
+        let tournaments = JSON.parse(localStorage.getItem('dartsTournaments') || '[]');
+        const index = tournaments.findIndex(t => t.id === tournament.id);
 
-    if (index >= 0) {
-        tournaments[index] = tournamentToSave;
-    } else {
-        tournaments.push(tournamentToSave);
-    }
+        if (index >= 0) {
+            tournaments[index] = tournamentToSave;
+        } else {
+            tournaments.push(tournamentToSave);
+        }
 
-    localStorage.setItem('dartsTournaments', JSON.stringify(tournaments));
-    localStorage.setItem('currentTournament', JSON.stringify(tournamentToSave));
+        localStorage.setItem('dartsTournaments', JSON.stringify(tournaments));
+        localStorage.setItem('currentTournament', JSON.stringify(tournamentToSave));
 
-    if (shouldLog) {
-        console.log('✓ Tournament saved (config unchanged)');
+        _saveFailedAlerted = false; // a good save clears the sticky alert
+        if (shouldLog) {
+            console.log('✓ Tournament saved (config unchanged)');
+        }
+        return true;
+    } catch (e) {
+        // Quota exhausted, or a corrupt dartsTournaments value that won't parse. Either way the
+        // write is aborted before it can overwrite/diverge, and the in-memory tournament is
+        // unchanged — freeing space and repeating the action will persist it. Alert once (this
+        // runs on every match completion, so don't spam) until the next successful save.
+        console.error('Failed to save tournament:', e);
+        if (!_saveFailedAlerted) {
+            _saveFailedAlerted = true;
+            alert('Could not save — browser storage is full or unreadable, so your latest change is NOT stored.\n\n' +
+                  'Open "Storage Space" on the Tournament Setup page to export and delete old tournaments, then repeat the action.');
+        }
+        return false;
     }
 }
 
@@ -1606,6 +1653,8 @@ function processImportedTournament(importedData) {
         showImportStatus('error', `Invalid tournament data: ${escapeHtml(validation.error)}`);
         return;
     }
+
+    if (storageGateBlocks('import this tournament')) return;
 
     // Set before branching — the overwrite path skips showImportConfirmModal,
     // which would otherwise leave a stale flag from a previous import

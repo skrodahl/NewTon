@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.1.3'; // Cannot Operate on Soup — dialog polish, .dlg__note panel, JSON-LD canonical fix
+const APP_VERSION = '5.1.5'; // Undo the Undone — code review: correctness, escaping sweep, dead code, storage hardening
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
