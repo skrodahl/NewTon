@@ -267,62 +267,24 @@ function pruneTransactionHistory(history, completedMatches) {
  * - Includes Saved Players snapshot for player list restoration
  */
 function exportTournament() {
-    if (!tournament || !tournament.id) {
+    // Reuse the shared payload builder (single source of truth for the export shape,
+    // history pruning, and filename) rather than re-assembling it here.
+    const payload = buildTournamentPayload();
+    if (!payload) {
         alert('No active tournament to export');
         return;
     }
 
-    // Get per-tournament history
-    const historyKey = `tournament_${tournament.id}_history`;
-    let history = [];
-    try {
-        const historyData = localStorage.getItem(historyKey);
-        if (historyData) {
-            history = JSON.parse(historyData);
-        }
-    } catch (e) {
-        console.warn('Could not load tournament history:', e);
-    }
-
-    // Prune history for completed tournaments only
-    if (tournament.status === 'completed' && history.length > 0) {
-        const completedMatches = matches.filter(m => m.completed);
-        history = pruneTransactionHistory(history, completedMatches);
-    }
-
-    // Get current Saved Players (snapshot)
-    const playerList = getPlayerList();
-
-    // Export v4.0 format - tournament data with per-tournament history
-    const tournamentData = {
-        exportVersion: "4.1",
-        id: tournament.id,
-        name: tournament.name,
-        date: tournament.date,
-        created: tournament.created,
-        status: tournament.status,
-        bracketSize: tournament.bracketSize,
-        format: tournament.format, // SE/DE format (absent = DE for backward compat)
-        readOnly: tournament.readOnly || false,
-        config: typeof config !== 'undefined' ? config : {},
-        players: players,
-        matches: matches,
-        bracket: tournament.bracket,
-        placements: tournament.placements || {},
-        history: history,
-        playerList: playerList,
-        exportedAt: new Date().toISOString()
-    };
-
-    const dataStr = JSON.stringify(tournamentData, null, 2);
+    const dataStr = JSON.stringify(payload.data, null, 2);
     const dataBlob = new Blob([dataStr], { type: 'application/json' });
     const url = URL.createObjectURL(dataBlob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = `${tournament.name}_${tournament.date}.json`;
+    link.download = payload.filename;
     link.click();
+    URL.revokeObjectURL(url); // release the blob URL (previously leaked for the page lifetime)
 
-    console.log(`✓ Tournament exported (v4.0 format, ${history.length} transactions)`);
+    console.log(`✓ Tournament exported (v4.0 format, ${payload.data.history.length} transactions)`);
 }
 
 /**
@@ -347,8 +309,16 @@ function buildTournamentPayload() {
 
     const playerList = getPlayerList();
 
+    // Sanitize filesystem-hostile characters so the name is safe as both a download
+    // filename and a server-side upload filename. Deterministic (same tournament →
+    // same name, so re-uploads still overwrite); a name without hostile chars is
+    // unchanged. Server-side matching is by JSON id/name+date, not the filename.
+    const safeName = `${tournament.name}_${tournament.date}`
+        .replace(/[<>:"\/\\|?*\x00-\x1f]/g, '-')
+        .replace(/^[.\s]+|[.\s]+$/g, '') || 'tournament';
+
     return {
-        filename: `${tournament.name}_${tournament.date}.json`,
+        filename: `${safeName}.json`,
         data: {
             exportVersion: "4.1",
             id: tournament.id,
