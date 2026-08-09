@@ -606,6 +606,52 @@ function create8PlayerFrontsideLines(grid, matches, positions) {
 }
 
 /**
+ * Creates a Z-shaped loser-feed line: frontside match → vertical spine → backside match.
+ * Shared by the 8/16/32-player backside layouts (identical geometry; the 32-player
+ * layout stacks its lines above the straight BS-progression lines via zIndex '10').
+ * @param {number} fromX - X of the frontside match edge the line starts from
+ * @param {number} fromY - Center Y of the frontside match
+ * @param {number} toX - X of the backside match edge the line ends at
+ * @param {number} toY - Center Y of the backside match
+ * @param {number} verticalX - X of the vertical spine segment
+ * @param {string} [zIndex='1'] - Stacking order ('10' for the 32-player layout)
+ * @returns {HTMLElement[]} [hLine1, vLine, hLine2]
+ */
+function createLoserFeedLine(fromX, fromY, toX, toY, verticalX, zIndex = '1') {
+    // Horizontal line from frontside match to vertical line
+    const hLine1 = document.createElement('div');
+    hLine1.style.position = 'absolute';
+    hLine1.style.left = `${Math.min(fromX, verticalX)}px`;
+    hLine1.style.top = `${fromY}px`;
+    hLine1.style.width = `${Math.abs(verticalX - fromX)}px`;
+    hLine1.style.height = '3px';
+    hLine1.style.backgroundColor = '#666666';
+    hLine1.style.zIndex = zIndex;
+
+    // Vertical line
+    const vLine = document.createElement('div');
+    vLine.style.position = 'absolute';
+    vLine.style.left = `${verticalX}px`;
+    vLine.style.top = `${Math.min(fromY, toY)}px`;
+    vLine.style.width = '3px';
+    vLine.style.height = `${Math.abs(toY - fromY)}px`;
+    vLine.style.backgroundColor = '#666666';
+    vLine.style.zIndex = zIndex;
+
+    // Horizontal line from vertical line to backside match
+    const hLine2 = document.createElement('div');
+    hLine2.style.position = 'absolute';
+    hLine2.style.left = `${Math.min(verticalX, toX)}px`;
+    hLine2.style.top = `${toY}px`;
+    hLine2.style.width = `${Math.abs(toX - verticalX)}px`;
+    hLine2.style.height = '3px';
+    hLine2.style.backgroundColor = '#666666';
+    hLine2.style.zIndex = zIndex;
+
+    return [hLine1, vLine, hLine2];
+}
+
+/**
  * Creates all backside progression lines for 8-player bracket
  * @param {Object} grid - Grid configuration object
  * @param {Array} matches - Array of match objects
@@ -636,41 +682,6 @@ function create8PlayerBacksideLines(grid, matches, positions) {
 
     // FS to BS loser feed lines - use custom approach like 16/32 player brackets
     const loserFeedVerticalX = round1X - 40; // Position vertical line 40px left of frontside matches
-
-    // Helper function to create custom loser feed lines (same as 16/32-player)
-    function createLoserFeedLine(fromX, fromY, toX, toY, verticalX) {
-        // Horizontal line from frontside match to vertical line
-        const hLine1 = document.createElement('div');
-        hLine1.style.position = 'absolute';
-        hLine1.style.left = `${Math.min(fromX, verticalX)}px`;
-        hLine1.style.top = `${fromY}px`;
-        hLine1.style.width = `${Math.abs(verticalX - fromX)}px`;
-        hLine1.style.height = '3px';
-        hLine1.style.backgroundColor = '#666666';
-        hLine1.style.zIndex = '1';
-
-        // Vertical line
-        const vLine = document.createElement('div');
-        vLine.style.position = 'absolute';
-        vLine.style.left = `${verticalX}px`;
-        vLine.style.top = `${Math.min(fromY, toY)}px`;
-        vLine.style.width = '3px';
-        vLine.style.height = `${Math.abs(toY - fromY)}px`;
-        vLine.style.backgroundColor = '#666666';
-        vLine.style.zIndex = '1';
-
-        // Horizontal line from vertical line to backside match
-        const hLine2 = document.createElement('div');
-        hLine2.style.position = 'absolute';
-        hLine2.style.left = `${Math.min(verticalX, toX)}px`;
-        hLine2.style.top = `${toY}px`;
-        hLine2.style.width = `${Math.abs(toX - verticalX)}px`;
-        hLine2.style.height = '3px';
-        hLine2.style.backgroundColor = '#666666';
-        hLine2.style.zIndex = '1';
-
-        return [hLine1, vLine, hLine2];
-    }
 
     const [fs11_h1, fs11_v, fs11_h2] = createLoserFeedLine(round1X, fs11CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
     const [fs12_h1, fs12_v, fs12_h2] = createLoserFeedLine(round1X, fs12CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
@@ -705,36 +716,38 @@ function create8PlayerBacksideLines(grid, matches, positions) {
     const backsideFinalY = grid.centerY - 80;
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
 
-    const bs31ToFinalElements = createBS31ToFinalIndicator(bs3X, bs31CenterY, backsideFinalCenterY, grid);
+    const bs31ToFinalElements = createBSFinalIndicator(bs3X, bs31CenterY, backsideFinalCenterY, grid);
     progressionLines.push(...bs31ToFinalElements);
 
     return progressionLines;
 }
 
 /**
- * Creates L-shaped line with arrow pointing to BS-FINAL text for 8-player bracket
- * @param {number} bs3X - X position of BS-3-1 match
- * @param {number} bs31CenterY - Center Y position of BS-3-1 match
+ * Creates the L-shaped line + arrow + "BS-FINAL" label pointing from the last
+ * backside match (BS-3-1 / BS-5-1 / BS-7-1 for 8 / 16 / 32 players) to the
+ * BS-FINAL slot. Format-agnostic — the layout is identical across bracket sizes.
+ * @param {number} bsX - X position of the source backside match
+ * @param {number} bsCenterY - Center Y position of the source backside match
  * @param {number} backsideFinalCenterY - Center Y position of BS-FINAL match
  * @param {Object} grid - Grid configuration object
  * @returns {Array} Array of DOM elements for the L-shaped line, arrow, and text
  */
-function createBS31ToFinalIndicator(bs3X, bs31CenterY, backsideFinalCenterY, grid) {
+function createBSFinalIndicator(bsX, bsCenterY, backsideFinalCenterY, grid) {
     const elements = [];
 
     // Calculate positions
     const horizontalLineLength = 40; // Length of horizontal line
-    const lineStartX = bs3X; // Start line from the left edge of BS-3-1 match
+    const lineStartX = bsX; // Start line from the left edge of the source backside match
     const verticalLineEndX = lineStartX - horizontalLineLength; // Position vertical line at the end of horizontal line
     const textX = verticalLineEndX - 27; // Position text ~8px closer to the right (about one character width)
     const textY = backsideFinalCenterY + grid.matchHeight + 20; // Position text one match height + 20px below BS-FINAL center
     const verticalLineBottomY = textY - 15; // Vertical line ends 15px above text
 
-    // Horizontal line (left from BS-3-1)
+    // Horizontal line (left from the source backside match)
     const hLine = document.createElement('div');
     hLine.style.position = 'absolute';
     hLine.style.left = `${lineStartX - horizontalLineLength}px`;
-    hLine.style.top = `${bs31CenterY}px`;
+    hLine.style.top = `${bsCenterY}px`;
     hLine.style.width = `${horizontalLineLength}px`;
     hLine.style.height = '3px';
     hLine.style.backgroundColor = '#666666';
@@ -745,9 +758,9 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, backsideFinalCenterY, gri
     const vLine = document.createElement('div');
     vLine.style.position = 'absolute';
     vLine.style.left = `${verticalLineEndX}px`;
-    vLine.style.top = `${bs31CenterY}px`;
+    vLine.style.top = `${bsCenterY}px`;
     vLine.style.width = '3px';
-    vLine.style.height = `${verticalLineBottomY - bs31CenterY}px`; // Line extends to just above text
+    vLine.style.height = `${verticalLineBottomY - bsCenterY}px`; // Line extends to just above text
     vLine.style.backgroundColor = '#666666';
     vLine.style.zIndex = '2';
     elements.push(vLine);
@@ -771,77 +784,6 @@ function createBS31ToFinalIndicator(bs3X, bs31CenterY, backsideFinalCenterY, gri
     text.style.left = `${textX}px`;
     text.style.top = `${textY}px`;
     text.style.fontFamily = 'Inter, sans-serif';
-    text.style.fontSize = '12px';
-    text.style.fontWeight = 'bold';
-    text.style.color = '#333333';
-    text.style.textAlign = 'center';
-    text.style.zIndex = '2';
-    text.textContent = 'BS-FINAL';
-    elements.push(text);
-
-    return elements;
-}
-
-/**
- * Creates L-shaped line with arrow pointing to BS-FINAL text for 16-player bracket
- * @param {number} bs5X - X position of BS-5-1 match
- * @param {number} bs51CenterY - Center Y position of BS-5-1 match
- * @param {number} backsideFinalCenterY - Center Y position of BS-FINAL match
- * @param {Object} grid - Grid configuration object
- * @returns {Array} Array of DOM elements for the L-shaped line, arrow, and text
- */
-function create16PlayerBSFinalIndicator(bs5X, bs51CenterY, backsideFinalCenterY, grid) {
-    const elements = [];
-
-    // Calculate positions (same approach as 8-player createBS31ToFinalIndicator)
-    const horizontalLineLength = 40; // Length of horizontal line
-    const lineStartX = bs5X; // Start line from the left edge of BS-5-1 match
-    const verticalLineEndX = lineStartX - horizontalLineLength; // Position vertical line at the end of horizontal line
-    const textX = verticalLineEndX - 27; // Position text ~8px closer to the right (about one character width)
-    const textY = backsideFinalCenterY + grid.matchHeight + 20; // Position text one match height + 20px below BS-FINAL center
-    const verticalLineBottomY = textY - 15; // Vertical line ends 15px above text
-
-    // Horizontal line (left from BS-5-1)
-    const hLine = document.createElement('div');
-    hLine.style.position = 'absolute';
-    hLine.style.left = `${lineStartX - horizontalLineLength}px`;
-    hLine.style.top = `${bs51CenterY}px`;
-    hLine.style.width = `${horizontalLineLength}px`;
-    hLine.style.height = '3px';
-    hLine.style.backgroundColor = '#666666';
-    hLine.style.zIndex = '2';
-    elements.push(hLine);
-
-    // Vertical line (downward)
-    const vLine = document.createElement('div');
-    vLine.style.position = 'absolute';
-    vLine.style.left = `${verticalLineEndX}px`;
-    vLine.style.top = `${bs51CenterY}px`;
-    vLine.style.width = '3px';
-    vLine.style.height = `${verticalLineBottomY - bs51CenterY}px`; // Line extends to just above text
-    vLine.style.backgroundColor = '#666666';
-    vLine.style.zIndex = '2';
-    elements.push(vLine);
-
-    // Arrow pointing down
-    const arrow = document.createElement('div');
-    arrow.style.position = 'absolute';
-    arrow.style.left = `${verticalLineEndX - 4}px`; // Center arrow on vertical line (1px right)
-    arrow.style.top = `${verticalLineBottomY}px`; // Position arrow at the end of vertical line
-    arrow.style.width = '0';
-    arrow.style.height = '0';
-    arrow.style.borderLeft = '5px solid transparent';
-    arrow.style.borderRight = '5px solid transparent';
-    arrow.style.borderTop = '10px solid #666666';
-    arrow.style.zIndex = '2';
-    elements.push(arrow);
-
-    // BS-FINAL text
-    const text = document.createElement('div');
-    text.style.position = 'absolute';
-    text.style.left = `${textX}px`;
-    text.style.top = `${textY}px`;
-    text.style.fontFamily = 'Ïnter, sans-serif';
     text.style.fontSize = '12px';
     text.style.fontWeight = 'bold';
     text.style.color = '#333333';
@@ -1000,41 +942,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     // Hardcode vertical line position closer to frontside (like 8-player bracket)
     const loserFeedVerticalX = round1X - 40; // Position vertical line 40px left of frontside matches
 
-    // Helper function to create custom loser feed lines
-    function createLoserFeedLine(fromX, fromY, toX, toY, verticalX) {
-        // Horizontal line from frontside match to vertical line
-        const hLine1 = document.createElement('div');
-        hLine1.style.position = 'absolute';
-        hLine1.style.left = `${Math.min(fromX, verticalX)}px`;
-        hLine1.style.top = `${fromY}px`;
-        hLine1.style.width = `${Math.abs(verticalX - fromX)}px`;
-        hLine1.style.height = '3px';
-        hLine1.style.backgroundColor = '#666666';
-        hLine1.style.zIndex = '1';
-
-        // Vertical line
-        const vLine = document.createElement('div');
-        vLine.style.position = 'absolute';
-        vLine.style.left = `${verticalX}px`;
-        vLine.style.top = `${Math.min(fromY, toY)}px`;
-        vLine.style.width = '3px';
-        vLine.style.height = `${Math.abs(toY - fromY)}px`;
-        vLine.style.backgroundColor = '#666666';
-        vLine.style.zIndex = '1';
-
-        // Horizontal line from vertical line to backside match
-        const hLine2 = document.createElement('div');
-        hLine2.style.position = 'absolute';
-        hLine2.style.left = `${Math.min(verticalX, toX)}px`;
-        hLine2.style.top = `${toY}px`;
-        hLine2.style.width = `${Math.abs(toX - verticalX)}px`;
-        hLine2.style.height = '3px';
-        hLine2.style.backgroundColor = '#666666';
-        hLine2.style.zIndex = '1';
-
-        return [hLine1, vLine, hLine2];
-    }
-
     // FS-1-1 and FS-1-2 losers → BS-1-1
     const [fs11_h1, fs11_v, fs11_h2] = createLoserFeedLine(round1X, fs11CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
     const [fs12_h1, fs12_v, fs12_h2] = createLoserFeedLine(round1X, fs12CenterY, bs1X + grid.matchWidth, bs11CenterY, loserFeedVerticalX);
@@ -1188,8 +1095,8 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     const backsideFinalY = grid.centerY - 80;
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
 
-    // Create BS-FINAL indicator from BS-5-1 (like createBS31ToFinalIndicator for 8-player)
-    const bs51ToFinalElements = create16PlayerBSFinalIndicator(positions.bs5X, bs51CenterY, backsideFinalCenterY, grid);
+    // Create BS-FINAL indicator from BS-5-1
+    const bs51ToFinalElements = createBSFinalIndicator(positions.bs5X, bs51CenterY, backsideFinalCenterY, grid);
     progressionLines.push(...bs51ToFinalElements);
 
     return progressionLines;
@@ -1359,77 +1266,6 @@ function create32PlayerFrontsideLines(grid, matches, positions) {
 }
 
 /**
- * Creates BS-FINAL indicator for 32-player bracket (L-shaped line with arrow and text)
- * @param {number} bs7X - X coordinate of BS-7-1 match
- * @param {number} bs71CenterY - Center Y coordinate of BS-7-1 match
- * @param {number} backsideFinalCenterY - Center Y coordinate of BS-FINAL match
- * @param {Object} grid - Grid configuration object
- * @returns {Array} Array of 4 DOM elements [hLine, vLine, arrow, text]
- */
-function create32PlayerBSFinalIndicator(bs7X, bs71CenterY, backsideFinalCenterY, grid) {
-    const elements = [];
-
-    // Calculate positions (same approach as 8-player and 16-player indicators)
-    const horizontalLineLength = 40; // Length of horizontal line
-    const lineStartX = bs7X; // Start line from the left edge of BS-7-1 match
-    const verticalLineEndX = lineStartX - horizontalLineLength; // Position vertical line at the end of horizontal line
-    const textX = verticalLineEndX - 27; // Position text ~8px closer to the right (about one character width)
-    const textY = backsideFinalCenterY + grid.matchHeight + 20; // Position text one match height + 20px below BS-FINAL center
-    const verticalLineBottomY = textY - 15; // Vertical line ends 15px above text
-
-    // Horizontal line (left from BS-7-1)
-    const hLine = document.createElement('div');
-    hLine.style.position = 'absolute';
-    hLine.style.left = `${lineStartX - horizontalLineLength}px`;
-    hLine.style.top = `${bs71CenterY}px`;
-    hLine.style.width = `${horizontalLineLength}px`;
-    hLine.style.height = '3px';
-    hLine.style.backgroundColor = '#666666';
-    hLine.style.zIndex = '2';
-    elements.push(hLine);
-
-    // Vertical line (downward)
-    const vLine = document.createElement('div');
-    vLine.style.position = 'absolute';
-    vLine.style.left = `${verticalLineEndX}px`;
-    vLine.style.top = `${bs71CenterY}px`;
-    vLine.style.width = '3px';
-    vLine.style.height = `${verticalLineBottomY - bs71CenterY}px`; // Line extends to just above text
-    vLine.style.backgroundColor = '#666666';
-    vLine.style.zIndex = '2';
-    elements.push(vLine);
-
-    // Arrow pointing down
-    const arrow = document.createElement('div');
-    arrow.style.position = 'absolute';
-    arrow.style.left = `${verticalLineEndX - 4}px`; // Center arrow on vertical line (1px right)
-    arrow.style.top = `${verticalLineBottomY}px`; // Position arrow at the end of vertical line
-    arrow.style.width = '0';
-    arrow.style.height = '0';
-    arrow.style.borderLeft = '5px solid transparent';
-    arrow.style.borderRight = '5px solid transparent';
-    arrow.style.borderTop = '10px solid #666666';
-    arrow.style.zIndex = '2';
-    elements.push(arrow);
-
-    // BS-FINAL text
-    const text = document.createElement('div');
-    text.style.position = 'absolute';
-    text.style.left = `${textX}px`;
-    text.style.top = `${textY}px`;
-    text.style.fontFamily = 'Inter, sans-serif';
-    text.style.fontSize = '12px';
-    text.style.fontWeight = 'bold';
-    text.style.color = '#333333';
-    text.style.textAlign = 'center';
-    text.style.zIndex = '2';
-    text.textContent = 'BS-FINAL';
-    elements.push(text);
-
-    return elements;
-}
-
-/**
  * Creates all backside progression lines for 32-player bracket
  * @param {Object} grid - Grid configuration object
  * @param {Array} matches - Array of match objects
@@ -1449,41 +1285,6 @@ function create32PlayerBacksideLines(grid, matches, positions) {
 
     // Hardcode vertical line position closer to frontside (like 16-player bracket)
     const loserFeedVerticalX = round1X - 40; // Position vertical line 40px left of frontside matches
-
-    // Helper function to create custom loser feed lines (same as 16-player)
-    function createLoserFeedLine(fromX, fromY, toX, toY, verticalX) {
-        // Horizontal line from frontside match to vertical line
-        const hLine1 = document.createElement('div');
-        hLine1.style.position = 'absolute';
-        hLine1.style.left = `${Math.min(fromX, verticalX)}px`;
-        hLine1.style.top = `${fromY}px`;
-        hLine1.style.width = `${Math.abs(verticalX - fromX)}px`;
-        hLine1.style.height = '3px';
-        hLine1.style.backgroundColor = '#666666';
-        hLine1.style.zIndex = '10';
-
-        // Vertical line
-        const vLine = document.createElement('div');
-        vLine.style.position = 'absolute';
-        vLine.style.left = `${verticalX}px`;
-        vLine.style.top = `${Math.min(fromY, toY)}px`;
-        vLine.style.width = '3px';
-        vLine.style.height = `${Math.abs(toY - fromY)}px`;
-        vLine.style.backgroundColor = '#666666';
-        vLine.style.zIndex = '10';
-
-        // Horizontal line from vertical line to backside match
-        const hLine2 = document.createElement('div');
-        hLine2.style.position = 'absolute';
-        hLine2.style.left = `${Math.min(verticalX, toX)}px`;
-        hLine2.style.top = `${toY}px`;
-        hLine2.style.width = `${Math.abs(toX - verticalX)}px`;
-        hLine2.style.height = '3px';
-        hLine2.style.backgroundColor = '#666666';
-        hLine2.style.zIndex = '10';
-
-        return [hLine1, vLine, hLine2];
-    }
 
     for (let i = 1; i <= 8; i++) {
         // Each BS-1-X receives losers from two FS-1-Y matches
@@ -1505,7 +1306,7 @@ function create32PlayerBacksideLines(grid, matches, positions) {
         const [loser1_h1, loser1_v, loser1_h2] = createLoserFeedLine(
             round1X, fs1Match1Y,
             bs1X + grid.matchWidth, bs1CenterY,
-            loserFeedVerticalX
+            loserFeedVerticalX, '10'
         );
         progressionLines.push(loser1_h1, loser1_v, loser1_h2);
 
@@ -1513,7 +1314,7 @@ function create32PlayerBacksideLines(grid, matches, positions) {
         const [loser2_h1, loser2_v, loser2_h2] = createLoserFeedLine(
             round1X, fs1Match2Y,
             bs1X + grid.matchWidth, bs1CenterY,
-            loserFeedVerticalX
+            loserFeedVerticalX, '10'
         );
         progressionLines.push(loser2_h1, loser2_v, loser2_h2);
 
@@ -1682,7 +1483,7 @@ function create32PlayerBacksideLines(grid, matches, positions) {
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);
 
     // Create BS-FINAL indicator from BS-7-1 (like 8-player and 16-player)
-    const bs71ToFinalElements = create32PlayerBSFinalIndicator(bs7X, bs71CenterY, backsideFinalCenterY, grid);
+    const bs71ToFinalElements = createBSFinalIndicator(bs7X, bs71CenterY, backsideFinalCenterY, grid);
     progressionLines.push(...bs71ToFinalElements);
 
     return progressionLines;
