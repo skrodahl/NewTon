@@ -22,6 +22,29 @@ function initializeBracketControls() {
     }
 }
 
+/**
+ * Default zoom + pan for the initial view of a bracket, keyed by format and size.
+ * Single source for these values (were duplicated in renderBracket() and resetZoom()).
+ * Returns null when no default applies (DE with a non-standard size) — callers then
+ * leave the current view unchanged, matching the previous behavior.
+ * @param {"SE"|"DE"} format
+ * @param {number} bracketSize - 4 | 8 | 16 | 32
+ * @returns {{ zoom: number, panX: number, panY: number }|null}
+ */
+function getDefaultView(format, bracketSize) {
+    if (format === 'SE') {
+        if (bracketSize === 32) return { zoom: 0.30, panX: 300, panY: 342 };
+        if (bracketSize === 16) return { zoom: 0.52, panX: 55,  panY: 229 };
+        if (bracketSize === 8)  return { zoom: 0.65, panX: -50, panY: 105 };
+        return { zoom: 0.8, panX: -80, panY: 65 }; // 4-player (and any other SE size)
+    }
+    // DE
+    if (bracketSize === 32) return { zoom: 0.33, panX: 750, panY: 360 };
+    if (bracketSize === 16) return { zoom: 0.45, panX: 645, panY: 275 }; // TODO: test/adjust
+    if (bracketSize === 8)  return { zoom: 0.61, panX: 450, panY: 175 }; // TODO: test/adjust
+    return null; // DE has no 4-player default; leave view unchanged
+}
+
 function renderBracket() {
     const canvas = document.getElementById('bracketCanvas');
     if (!canvas) return;
@@ -51,42 +74,11 @@ function renderBracket() {
 
     // Set default zoom and position for initial bracket render
     if (initialBracketRender && tournament && tournament.bracket) {
-        if (tournament.format === 'SE') {
-            // SE-specific zoom/pan defaults (bracket is entirely right-of-center, no backside)
-            if (tournament.bracketSize === 32) {
-                zoomLevel = 0.30;
-                panOffset.x = 300;
-                panOffset.y = 342;
-            } else if (tournament.bracketSize === 16) {
-                zoomLevel = 0.52;
-                panOffset.x = 55;
-                panOffset.y = 229;
-            } else if (tournament.bracketSize === 8) {
-                zoomLevel = 0.65;
-                panOffset.x = -50;
-                panOffset.y = 105;
-            } else { // 4-player
-                zoomLevel = 0.8;
-                panOffset.x = -80;
-                panOffset.y = 65;
-            }
-        } else {
-            // DE zoom/pan defaults
-            if (tournament.bracketSize === 32) {
-                zoomLevel = 0.33;
-                panOffset.x = 750;
-                panOffset.y = 360;
-            } else if (tournament.bracketSize === 16) {
-                // TODO: Test and adjust for 16-player bracket
-                zoomLevel = 0.45;
-                panOffset.x = 645;
-                panOffset.y = 275;
-            } else if (tournament.bracketSize === 8) {
-                // TODO: Test and adjust for 8-player bracket
-                zoomLevel = 0.61;
-                panOffset.x = 450;
-                panOffset.y = 175;
-            }
+        const view = getDefaultView(tournament.format, tournament.bracketSize);
+        if (view) {
+            zoomLevel = view.zoom;
+            panOffset.x = view.panX;
+            panOffset.y = view.panY;
         }
 
         initialBracketRender = false;
@@ -1753,39 +1745,11 @@ function zoomOut() {
 function resetZoom() {
     // Set zoom and pan based on current bracket format and size
     if (tournament && tournament.bracketSize) {
-        if (tournament.format === 'SE') {
-            if (tournament.bracketSize === 32) {
-                zoomLevel = 0.30;
-                panOffset.x = 300;
-                panOffset.y = 342;
-            } else if (tournament.bracketSize === 16) {
-                zoomLevel = 0.52;
-                panOffset.x = 55;
-                panOffset.y = 229;
-            } else if (tournament.bracketSize === 8) {
-                zoomLevel = 0.65;
-                panOffset.x = -50;
-                panOffset.y = 105;
-            } else { // 4-player
-                zoomLevel = 0.8;
-                panOffset.x = -80;
-                panOffset.y = 65;
-            }
-        } else {
-            // DE zoom/pan defaults
-            if (tournament.bracketSize === 32) {
-                zoomLevel = 0.33;
-                panOffset.x = 750;
-                panOffset.y = 360;
-            } else if (tournament.bracketSize === 16) {
-                zoomLevel = 0.45;
-                panOffset.x = 645;
-                panOffset.y = 275;
-            } else if (tournament.bracketSize === 8) {
-                zoomLevel = 0.61;
-                panOffset.x = 450;
-                panOffset.y = 175;
-            }
+        const view = getDefaultView(tournament.format, tournament.bracketSize);
+        if (view) {
+            zoomLevel = view.zoom;
+            panOffset.x = view.panX;
+            panOffset.y = view.panY;
         }
     } else {
         // Fallback for safety
