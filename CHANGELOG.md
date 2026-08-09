@@ -34,6 +34,7 @@ All three now reject on transaction abort so a failure surfaces to the caller in
 ### Analytics internals (Phase 6 cleanup)
 
 - **One source for the achievement-points formula.** The calculation (180s + tons + high outs + short legs, each times its configured point value) was copy-pasted in five places across the Leaderboard, the tournament-points computation, the Matches tab, and the match-detail views. It's now a single `_achPoints(stats, p)` helper. No behavior change — the numbers are identical — but a future change to the point rules (or a new achievement type) is now a one-line edit instead of five that can drift apart.
+- **One source for decoding Chalker visit scores.** The base64 decoding of a leg's per-visit scores was inlined twice in the analytics views (the three-dart-average aggregation and the match-detail leg table) instead of using the existing `NewtonStats.decodeVisits()`. Both now call it, so the encoded-visit format is defined in exactly one place. No behavior change (round-trip decode verified identical).
 
 ### Design decision — additive-only localStorage schema (4.10 declined)
 
@@ -41,7 +42,7 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 
 ### Files changed
 
-- `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview); Phase 6: extracted `_achPoints(stats, p)` helper, replacing 5 duplicated achievement-points formulas
+- `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview); Phase 6: extracted `_achPoints(stats, p)` helper, replacing 5 duplicated achievement-points formulas; replaced 2 inline base64 visit decodes with `NewtonStats.decodeVisits()`
 - `js/main.js` — new `exitAnalyticsBracketPreview()` (stash-restore on preview exit); `autoLoadCurrentTournament()` now copies `_analyticsPreview` so the no-persist guard survives a reload
 - `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`
 - `js/newton-db.js` — `saveMatch` single-transaction upsert (TOCTOU fix); `deleteTournament` single cross-store transaction with cursor delete; `importAll` single-transaction batched match upsert with `(tournamentId, matchId)` de-dupe; all three reject on `tx.onabort`

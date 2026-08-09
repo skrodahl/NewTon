@@ -967,9 +967,8 @@ const NewtonHistory = (() => {
                                 // them corrupts the average (extractAchievements excludes
                                 // them for the same reason)
                                 if (leg.cd === 0) return;
-                                const parts = (leg.s || '').split('|');
-                                const v1 = Array.from(Uint8Array.from(atob(parts[0] || ''), c => c.charCodeAt(0)));
-                                const v2 = Array.from(Uint8Array.from(atob(parts[1] || ''), c => c.charCodeAt(0)));
+                                const v1 = NewtonStats.decodeVisits(leg.s, 0);
+                                const v2 = NewtonStats.decodeVisits(leg.s, 1);
 
                                 // Player 1
                                 if (pm1 && v1.length) {
@@ -2237,12 +2236,8 @@ const NewtonHistory = (() => {
                 const legWinner   = leg.w === 1 ? match.player1Name : match.player2Name;
                 const cd          = leg.cd === 0 ? 'TB' : String(leg.cd);
 
-                let v1 = [], v2 = [];
-                try {
-                    const parts = (leg.s || '|').split('|');
-                    v1 = Array.from(Uint8Array.from(atob(parts[0] || ''), c => c.charCodeAt(0)));
-                    v2 = Array.from(Uint8Array.from(atob(parts[1] || ''), c => c.charCodeAt(0)));
-                } catch (_) {}
+                const v1 = NewtonStats.decodeVisits(leg.s, 0);
+                const v2 = NewtonStats.decodeVisits(leg.s, 1);
 
                 html += `<tr>
                     <td>${i + 1}</td>
