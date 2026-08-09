@@ -266,23 +266,6 @@ function showLaneUsage() {
     alert(message);
 }
 
-/**
- * Parse excluded lanes from input string
- */
-function parseExcludedLanes(excludedLanesString) {
-    if (!excludedLanesString || typeof excludedLanesString !== 'string') {
-        return [];
-    }
-
-    // Split by comma and convert to integers, filtering out invalid values
-    return excludedLanesString
-        .split(',')
-        .map(s => s.trim())
-        .filter(s => s.length > 0)
-        .map(s => parseInt(s))
-        .filter(n => !isNaN(n) && n > 0);
-}
-
 // Debug function for lane management
 function debugLaneManagement() {
     console.log('=== LANE MANAGEMENT DEBUG ===');

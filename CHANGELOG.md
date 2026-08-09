@@ -36,6 +36,10 @@ All three now reject on transaction abort so a failure surfaces to the caller in
 - **One source for the achievement-points formula.** The calculation (180s + tons + high outs + short legs, each times its configured point value) was copy-pasted in five places across the Leaderboard, the tournament-points computation, the Matches tab, and the match-detail views. It's now a single `_achPoints(stats, p)` helper. No behavior change — the numbers are identical — but a future change to the point rules (or a new achievement type) is now a one-line edit instead of five that can drift apart.
 - **One source for decoding Chalker visit scores.** The base64 decoding of a leg's per-visit scores was inlined twice in the analytics views (the three-dart-average aggregation and the match-detail leg table) instead of using the existing `NewtonStats.decodeVisits()`. Both now call it, so the encoded-visit format is defined in exactly one place. No behavior change (round-trip decode verified identical).
 
+### Dead code removal (Phase 6)
+
+- **Removed an unused duplicate of the excluded-lanes parser.** `parseExcludedLanes()` in `lane-management.js` was byte-identical to `parseExcludedLanesString()` in `results-config.js` but had no callers anywhere in the codebase. Deleted it; the live `parseExcludedLanesString()` (with its one caller) is unchanged.
+
 ### Design decision — additive-only localStorage schema (4.10 declined)
 
 Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. Declined: the stored schema is **additive-only** (every change so far adds an optional field with a sensible default when absent), and additive changes are handled by idempotent "missing → default" adaptation at read time, which is skip-proof regardless of how many versions a record predates — so no version marker or migration ladder is needed. A marker only pays off for a *destructive/ambiguous* change (rename a field; change a value's meaning), which the app avoids. This is now a standing principle in `CLAUDE.md` (Development Principles → Data Integrity). Export files keep `exportVersion` because they arrive from any vintage; localStorage evolves in lockstep with the app and does not.
@@ -49,6 +53,7 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 - `js/bracket-lines.js` — Phase 6: three BS-FINAL indicators → one `createBSFinalIndicator`; three nested `createLoserFeedLine` → one module-level helper (z-index parameter); `'Ïnter'`→`'Inter'` font fix; removed 20 bracket-geometry debug logs
 - `js/bracket-rendering.js` — Phase 6: removed the 6 per-render `🎯 Rendering N-player` logs and 1 stray `populateRefereeSuggestions` log
 - `js/tournament-management.js` — Phase 6: `exportTournament()` now reuses `buildTournamentPayload()` (removes a duplicated payload builder) + adds `URL.revokeObjectURL`; filename sanitized at source in `buildTournamentPayload()`
+- `js/lane-management.js` — Phase 6: removed the unused duplicate `parseExcludedLanes()`
 - `CLAUDE.md` — added the additive-only localStorage schema-evolution principle (Data Integrity)
 - `Docs/CODE-IMPROVEMENT-PLAN.md` — 4.3 and 4.6 marked implemented; 4.2 status corrected to shipped; 4.10 closed (won't-do, with rationale); Phase 4 complete; Phase 6 6.7 + 6.6 marked done
 
