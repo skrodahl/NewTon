@@ -1876,89 +1876,49 @@ function updateMatchReferee(matchId, refereeId) {
     const match = matches.find(m => m.id === matchId);
     if (!match) return false;
 
-    // Capture state before change for transaction
-    const oldReferee = match.referee;
+    let parsedRefereeId = null;
+    let description;
 
     if (!refereeId) {
+        // Clear referee
         match.referee = null;
-
-        // Create transaction for referee clearing
-        if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
-            const transaction = {
-                id: generateTransactionId(),
-                type: 'ASSIGN_REFEREE',
-                description: `${matchId}: Referee cleared`,
-                timestamp: new Date().toISOString(),
-                matchId: matchId,
-                afterState: { referee: null } // Keep for referee suggestions timeline
-                // beforeState removed - never used by undo system
-            };
-
-            saveTransaction(transaction);
+        description = `${matchId}: Referee cleared`;
+    } else {
+        // Assign referee — validate availability first
+        const currentRefereeId = match.referee;
+        if (refereeId !== currentRefereeId && !isPlayerAvailableAsReferee(refereeId, matchId)) {
+            alert('This referee is already assigned to another match or currently playing.');
+            const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchReferee"]`);
+            if (dropdown) dropdown.value = currentRefereeId || '';
+            return false;
         }
+        parsedRefereeId = parseInt(refereeId);
+        match.referee = parsedRefereeId;
 
-        saveTournament();
-
-        // Refresh all referee dropdowns to update conflict detection
-        if (typeof refreshAllRefereeDropdowns === 'function') {
-            refreshAllRefereeDropdowns();
-        }
-
-        // Re-render bracket to update referee conflict indicators
-        renderBracket();
-
-        // Refresh Match Controls if it's open
-        const modal = document.getElementById('matchCommandCenterModal');
-        if (modal &&
-            (modal.style.display === 'flex' || modal.style.display === 'block') &&
-            typeof showMatchCommandCenter === 'function') {
-            setTimeout(() => {
-                showMatchCommandCenter();
-            }, 200);
-        }
-
-        return true;
-    }
-
-    const currentRefereeId = match.referee;
-    if (refereeId !== currentRefereeId && !isPlayerAvailableAsReferee(refereeId, matchId)) {
-        alert('This referee is already assigned to another match or currently playing.');
-        const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchReferee"]`);
-        if (dropdown) dropdown.value = currentRefereeId || '';
-        return false;
-    }
-
-    const parsedRefereeId = refereeId ? parseInt(refereeId) : null;
-    match.referee = parsedRefereeId;
-
-    // Create transaction for referee assignment
-    if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
-        // Look up player name (parsedRefereeId is always truthy here — the
-        // empty/clear case returns early at the top of this function)
         const referee = players && players.find(p => p.id === parsedRefereeId);
         const refereeName = referee ? referee.name : 'Unknown';
-        const description = `${matchId}: Referee assigned to ${refereeName} (ID: ${parsedRefereeId})`;
+        description = `${matchId}: Referee assigned to ${refereeName} (ID: ${parsedRefereeId})`;
+    }
 
-        const transaction = {
+    // Shared path: record the transaction, persist, re-render, refresh Match Controls.
+    if (!window.rebuildInProgress && typeof saveTransaction === 'function') {
+        saveTransaction({
             id: generateTransactionId(),
             type: 'ASSIGN_REFEREE',
             description: description,
             timestamp: new Date().toISOString(),
             matchId: matchId,
             afterState: { referee: parsedRefereeId } // Keep for referee suggestions timeline
-            // beforeState removed - never used by undo system
-        };
-
-        saveTransaction(transaction);
+        });
     }
 
     saveTournament();
-    refreshAllRefereeDropdowns();
 
-    // Re-render bracket to update referee conflict indicators
+    // Re-render bracket to update referee conflict indicators. This rebuilds every
+    // referee dropdown, so a separate refreshAllRefereeDropdowns() call is redundant.
     renderBracket();
 
-    // Refresh Match Controls if it's open
+    // Refresh Match Controls if it is open
     const modal = document.getElementById('matchCommandCenterModal');
     if (modal &&
         (modal.style.display === 'flex' || modal.style.display === 'block') &&
