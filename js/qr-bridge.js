@@ -11,6 +11,11 @@ let _qrFallbackCanvas = null;
 /**
  * Scan a video element for QR codes.
  * Uses native BarcodeDetector when available, falls back to jsQR.
+ *
+ * NOTE: The Chalker (chalker/js/chalker.js) has its own detectQRCode/isQRScanAvailable.
+ * They INTENTIONALLY DIFFER and are not kept in sync: this TM copy has a jsQR fallback,
+ * while the Chalker uses an iOS image-capture path (isIOS) instead. Don't "unify" them.
+ *
  * @param {HTMLVideoElement} videoEl
  * @returns {Promise<string|null>} decoded QR string, or null if nothing found
  */
@@ -83,6 +88,7 @@ function openMatchQR(matchId) {
         sc:  config.legs.x01Format  || 501,
         bo:  match.legs             || 3,
         mr:  config.legs.maxRounds  || 13,
+        slt: config.legs.shortLegThreshold || 21,
         ts:  Math.floor(Date.now() / 1000)
     };
     if (match.lane) payload.ln  = parseInt(match.lane);

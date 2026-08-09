@@ -46,6 +46,10 @@ All three now reject on transaction abort so a failure surfaces to the caller in
 - **One source for the results-table player sort.** The "paid players, ranked first then alphabetical" sort was copy-pasted in three results functions (the results table, the JSON export, and the CSV export). Extracted `getSortedPaidPlayers()`; all three call it. Identical ordering, no behavior change.
 - **Referee assign/clear share one path.** Assigning a referee and clearing one duplicated ~45 lines of near-identical follow-up work (record the change, save, re-render, refresh Match Controls). They're one shared tail now, with each case only setting the referee and its history description. Also removed a redundant dropdown refresh that the bracket re-render already covers.
 
+### Chalker
+
+- **The Short Leg Threshold setting now actually reaches the Chalker.** The Config page's "Short Leg Threshold (darts)" lives under the CHALKER section, but until now the Chalker never received it — it judged short legs with its own built-in table while the Tournament Manager awarded the achievement using the configured value, so the on-screen "Short Leg" badge could disagree with what you were actually credited. The threshold is now sent to the Chalker with the rest of the match setup (alongside x01 format and max rounds), so the badge and the award always agree. Standalone Chalker matches (started on the device, not assigned from a tournament) keep using the sensible built-in table, and older QR codes without the new field fall back to it too.
+
 ### Design decision — additive-only localStorage schema (4.10 declined)
 
 Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. Declined: the stored schema is **additive-only** (every change so far adds an optional field with a sensible default when absent), and additive changes are handled by idempotent "missing → default" adaptation at read time, which is skip-proof regardless of how many versions a record predates — so no version marker or migration ladder is needed. A marker only pays off for a *destructive/ambiguous* change (rename a field; change a value's meaning), which the app avoids. This is now a standing principle in `CLAUDE.md` (Development Principles → Data Integrity). Export files keep `exportVersion` because they arrive from any vintage; localStorage evolves in lockstep with the app and does not.
@@ -54,7 +58,7 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 
 - `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview); Phase 6: extracted `_achPoints(stats, p)` helper, replacing 5 duplicated achievement-points formulas; replaced 2 inline base64 visit decodes with `NewtonStats.decodeVisits()`
 - `js/main.js` — new `exitAnalyticsBracketPreview()` (stash-restore on preview exit); `autoLoadCurrentTournament()` now copies `_analyticsPreview` so the no-persist guard survives a reload
-- `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`
+- `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`; Phase 6: Config CHALKER blurb now notes the short-leg threshold is sent
 - `js/newton-db.js` — `saveMatch` single-transaction upsert (TOCTOU fix); `deleteTournament` single cross-store transaction with cursor delete; `importAll` single-transaction batched match upsert with `(tournamentId, matchId)` de-dupe; all three reject on `tx.onabort`
 - `js/bracket-lines.js` — Phase 6: three BS-FINAL indicators → one `createBSFinalIndicator`; three nested `createLoserFeedLine` → one module-level helper (z-index parameter); `'Ïnter'`→`'Inter'` font fix; removed 20 bracket-geometry debug logs
 - `js/bracket-rendering.js` — Phase 6: removed the 6 per-render `🎯 Rendering N-player` logs and 1 stray `populateRefereeSuggestions` log; extracted `getDefaultView()` replacing the duplicated zoom/pan defaults in `renderBracket()`/`resetZoom()`; `render32PlayerBacksideMatches` now calls the shared `createBacksideBackground()` instead of an inline copy, and captures each backside round's first-match Y into `positions` for the placement labels; `createBacksidePlacementLabels` case 32 reads those instead of recomputing; `updateMatchReferee` clear/assign paths merged into one shared tail (redundant `refreshAllRefereeDropdowns()` calls dropped)
@@ -63,8 +67,12 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 - `js/results-config.js` — Phase 6: new `isDeveloperMode()` helper (reads in-memory `config`); new `getSortedPaidPlayers()` helper replacing 3 duplicated results sorts
 - `js/player-management.js` — Phase 6: late-reg modal uses `isDeveloperMode()` instead of an inline localStorage-parsing IIFE
 - `js/tournament-management.js` (watermark) — Phase 6: both developer-mode checks use `isDeveloperMode()` instead of inline IIFEs
+- `js/qr-bridge.js` — Phase 6 (6.20): assignment payload now carries `slt` (short-leg threshold); (6.21) note that the QR-detect helpers intentionally differ from the Chalker's
+- `chalker/js/chalker.js` — Phase 6 (6.20): `getShortLegThreshold()` helper prefers the assigned threshold, falls back to the built-in table; reads `slt` from the QR payload; (6.21) divergence note
+- `chalker/sw.js` — cache bumped to `chalker-v110`
+- `chalker/index.html` — `chalker.js?v=13`
 - `CLAUDE.md` — added the additive-only localStorage schema-evolution principle (Data Integrity)
-- `Docs/CODE-IMPROVEMENT-PLAN.md` — 4.3 and 4.6 marked implemented; 4.2 status corrected to shipped; 4.10 closed (won't-do, with rationale); Phase 4 complete; Phase 6 6.7 + 6.6 marked done
+- `Docs/CODE-IMPROVEMENT-PLAN.md` — Phase 4 complete (4.3/4.6 done, 4.2 corrected, 4.10 closed); Phase 6 in progress (6.6, 6.7, 6.9, 6.10, 6.12–6.20 done; 6.21 closed)
 
 ### Migration
 

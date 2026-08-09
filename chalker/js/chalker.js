@@ -479,6 +479,15 @@
     1001: 42
   };
 
+  // Short-leg threshold for a match: the Tournament Manager's configured value when the
+  // match was assigned from TM (carried in the QR payload as `slt`), otherwise the
+  // format-scaled default. Keeps the "Short Leg" badge in step with the achievement the
+  // TM will award from the returned raw scores.
+  function getShortLegThreshold(config) {
+    if (config && config.shortLegThreshold != null) return config.shortLegThreshold;
+    return SHORT_LEG_THRESHOLDS[config && config.startingScore] || 21;
+  }
+
   /**
    * Check if a score is valid (achievable with 3 darts)
    * @param {number} score
@@ -973,6 +982,10 @@
   /**
    * Scan a video element for QR codes using native BarcodeDetector.
    * The Chalker runs on mobile/tablet where BarcodeDetector is available.
+   *
+   * NOTE: The TM (js/qr-bridge.js) has its own detectQRCode/isQRScanAvailable.
+   * They INTENTIONALLY DIFFER and are not kept in sync: the Chalker uses an iOS
+   * image-capture path (isIOS); the TM copy has a jsQR fallback. Do not "unify" them.
    * @param {HTMLVideoElement} videoEl
    * @returns {Promise<string|null>} decoded QR string, or null
    */
@@ -1250,6 +1263,7 @@
       player1Name: payload.p1,
       player2Name: payload.p2,
       startingScore: payload.sc,
+      shortLegThreshold: payload.slt,
       bestOf: payload.bo,
       maxRounds: payload.mr,
       laneName: payload.ln ? `Lane ${payload.ln}` : '',
@@ -1767,7 +1781,7 @@
    * @returns {Object} Statistics object
    */
   function calculateStats() {
-    const shortLegThreshold = SHORT_LEG_THRESHOLDS[state.config.startingScore] || 21;
+    const shortLegThreshold = getShortLegThreshold(state.config);
 
     function makePlayerStats() {
       return {
@@ -1932,7 +1946,7 @@
     els.statsP1.textContent = config.player1Name;
     els.statsP2.textContent = config.player2Name;
 
-    const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
+    const shortLegThreshold = getShortLegThreshold(config);
 
     // Calculate leg averages
     const legs = match.legs || [];
@@ -2440,7 +2454,7 @@
       const visits = leg.visits || [];
       const winnerVisits = leg.winner ? visits.filter(v => v.player === leg.winner) : [];
       const totalDarts = winnerVisits.reduce((sum, v) => sum + (v.dartsUsed || 3), 0);
-      const shortLegThreshold = SHORT_LEG_THRESHOLDS[config.startingScore] || 21;
+      const shortLegThreshold = getShortLegThreshold(config);
       const isShortLeg = leg.winner && totalDarts <= shortLegThreshold;
       const shortLegBadge = isShortLeg ? '<span class="short-leg-badge">Short Leg</span>' : '';
 
