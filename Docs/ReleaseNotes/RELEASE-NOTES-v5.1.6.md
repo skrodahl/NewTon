@@ -10,7 +10,7 @@ Another one for the code, not the board.
 
 v5.1.5 put the whole codebase under the microscope and started working through a six-phase improvement plan. v5.1.6 carries that forward on two fronts: it **finishes the data-integrity work**, and it begins a long **consolidation pass** — the unglamorous business of finding every place the app had quietly grown a second or third copy of the same logic and folding them back into one.
 
-One small visible fix (a mislabelled font on the big brackets). Otherwise, nothing about how you run a tournament changes — this is a manager that's a little sturdier and a lot tidier under the hood.
+Two small fixes you might actually notice — a mislabelled font on the big brackets, and a Chalker setting that finally does what it promises. Otherwise, nothing about how you run a tournament changes — this is a manager that's a little sturdier and a lot tidier under the hood.
 
 ---
 
@@ -32,6 +32,14 @@ A few quiet reinforcements to the way the app handles your tournaments:
 
 ---
 
+## A Setting Made Real
+
+Open Config and, under the **Chalker** settings, you'll find a **Short Leg Threshold** — the number of darts at or below which a leg counts as "short." It looked like it controlled the Chalker. It didn't. The Tournament Manager used your value when it *awarded* the short-leg achievement, but the Chalker judged short legs on the scoreboard with its own built-in table — so the "Short Leg" badge a scorer saw could quietly disagree with the achievement the player was actually credited.
+
+Now the threshold travels with the match. Hand a match to the Chalker by QR and your configured value goes with it, so the badge on the board and the achievement in the results always agree. Matches started directly on the Chalker keep using its sensible built-in defaults, and older tournament QR codes fall back to them too — so nothing you already rely on changes.
+
+---
+
 ## One Place, Not Five
 
 The heart of this release is repetition, removed.
@@ -48,7 +56,7 @@ You won't see any of it. What you get is an app where the next improvement is a 
 
 ## Migration
 
-No migration required. Fully compatible with all existing tournament data, match history, and Analytics. Nothing about how your data is stored changes — only, in a few small ways, how carefully the app looks after it.
+No migration required. Fully compatible with all existing tournament data, match history, and Analytics. Nothing about how your data is stored changes — only, in a few small ways, how carefully the app looks after it. Installed Chalker apps refresh to the new version automatically on their next online launch.
 
 ---
 
