@@ -1,6 +1,6 @@
 ## **v5.1.6** — Look, Don't Touch (unreleased)
 
-Continues Phase 4 of the code-improvement plan (`Docs/CODE-IMPROVEMENT-PLAN.md`). First item in: analytics bracket-preview isolation (4.3). No new features.
+Continues Phase 4 of the code-improvement plan (`Docs/CODE-IMPROVEMENT-PLAN.md`): analytics bracket-preview isolation (4.3) and NewtonMatchDB write-path atomicity (4.6). No new features.
 
 ### Analytics / History
 
@@ -10,16 +10,27 @@ Continues Phase 4 of the code-improvement plan (`Docs/CODE-IMPROVEMENT-PLAN.md`)
 
   The fix keeps the preview read-only and self-contained. `viewBracket()` now stashes the real active tournament (if any) under a transient `_preAnalyticsPreviewTournament` key before overwriting the pointer — skipped when the prior value is itself a preview, so chaining preview→preview can't turn an intermediate preview into the stash. A new `exitAnalyticsBracketPreview()` restores that stash on exit (or clears the pointer when nothing was active, preserving prior behavior), and the Analytics back button now calls it instead of blindly deleting `currentTournament`. `autoLoadCurrentTournament()` now carries `_analyticsPreview` across a reload, so the no-persist guard survives. Net effect: a `?tm` edit session survives a preview round-trip *and* a mid-preview reload instead of being booted out — the fix improves the edit workflow rather than merely protecting it.
 
+### Match register (NewtonMatchDB)
+
+Three IndexedDB write paths were made atomic and faster. None change the public API or any caller.
+
+- **Re-completing a match can't lose the record to a race.** `saveMatch()` checked for an existing `(tournamentId, matchId)` record in one transaction and wrote in a *separate* one. Two near-simultaneous saves could both see "no existing" and both `add()`, the second colliding on the unique index and silently dropping the re-completion. The lookup and the write now share **one** transaction; because IndexedDB serializes overlapping read-write transactions, the second save sees the first's record and updates it in place.
+- **Deleting a tournament is all-or-nothing.** `deleteTournament()` opened a fresh transaction per match in a loop, so a mid-loop failure could leave a half-deleted tournament (some matches gone, meta still present). It now deletes every match (via the `tournamentId` index cursor) and the tournament-meta record in a **single** transaction that aborts as a whole on any failure.
+- **Importing a register dump is one transaction, not two per match.** `importAll()` did a lookup and a write in separate transactions for *each* match record — slow on large dumps and non-atomic. It now processes the whole match batch in one transaction, and de-dupes the incoming records by `(tournamentId, matchId)` first so a malformed dump with a duplicate can't abort the batch on the unique index (well-formed exports never contain duplicates).
+
+All three now reject on transaction abort so a failure surfaces to the caller instead of hanging.
+
 ### Files changed
 
 - `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview)
 - `js/main.js` — new `exitAnalyticsBracketPreview()` (stash-restore on preview exit); `autoLoadCurrentTournament()` now copies `_analyticsPreview` so the no-persist guard survives a reload
 - `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`
-- `Docs/CODE-IMPROVEMENT-PLAN.md` — 4.3 marked implemented; 4.2 status corrected to shipped; Phase 4 rollup updated (only 4.6 and 4.10 remain)
+- `js/newton-db.js` — `saveMatch` single-transaction upsert (TOCTOU fix); `deleteTournament` single cross-store transaction with cursor delete; `importAll` single-transaction batched match upsert with `(tournamentId, matchId)` de-dupe; all three reject on `tx.onabort`
+- `Docs/CODE-IMPROVEMENT-PLAN.md` — 4.3 and 4.6 marked implemented; 4.2 status corrected to shipped; Phase 4 rollup updated (only the 4.10 design item remains)
 
 ### Migration
 
-No data migration required. The `_preAnalyticsPreviewTournament` key is transient — written and cleared within a preview session, and only ever read when exiting a preview; a value left behind by a hard-closed tab mid-preview is inert and gets reclaimed on the next preview exit.
+No data migration required. The `_preAnalyticsPreviewTournament` key is transient — written and cleared within a preview session, and only ever read when exiting a preview; a value left behind by a hard-closed tab mid-preview is inert and gets reclaimed on the next preview exit. The NewtonMatchDB changes are behavioral only — the schema (stores, indexes, `DB_VERSION`) is unchanged.
 
 ---
 

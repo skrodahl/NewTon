@@ -118,24 +118,31 @@ const NewtonDB = (() => {
     async function saveMatch(data) {
         await initDB();
 
-        // Check for existing record with same (tournamentId, matchId)
-        const existing = await getMatch(data.tournamentId, data.matchId);
-
-        const tx    = _db.transaction('matches', 'readwrite');
-        const store = tx.objectStore('matches');
-
         const record = Object.assign({}, data, { status: 'live' });
 
-        if (existing) {
-            record.id = existing.id; // preserve primary key for overwrite
-            store.put(record);
-        } else {
-            store.add(record);
-        }
-
         return new Promise((resolve, reject) => {
+            const tx    = _db.transaction('matches', 'readwrite');
+            const store = tx.objectStore('matches');
+
+            // Look up the existing (tournamentId, matchId) record inside the SAME
+            // transaction as the write. IndexedDB runs overlapping readwrite
+            // transactions sequentially, so a concurrent saveMatch() can't slip
+            // between the check and the write and cause a duplicate-key add() on the
+            // unique tournamentMatch index (the earlier fire-and-forget TOCTOU).
+            const lookup = store.index('tournamentMatch').get([data.tournamentId, data.matchId]);
+            lookup.onsuccess = () => {
+                if (lookup.result) {
+                    record.id = lookup.result.id; // preserve primary key for overwrite
+                    store.put(record);
+                } else {
+                    store.add(record);
+                }
+            };
+            lookup.onerror = () => reject(lookup.error);
+
             tx.oncomplete = () => resolve();
             tx.onerror    = () => reject(tx.error);
+            tx.onabort    = () => reject(tx.error);
         });
     }
 
@@ -148,14 +155,29 @@ const NewtonDB = (() => {
     async function deleteTournament(tournamentId) {
         await initDB();
 
-        // Delete all match records for this tournament
-        const matches = await getMatchesByTournament(tournamentId);
-        for (const m of matches) {
-            await _promisify(_store('matches', 'readwrite').delete(m.id));
-        }
+        // Single transaction over BOTH stores so a mid-way failure aborts the whole
+        // delete instead of leaving a half-deleted tournament (matches gone, meta kept,
+        // or vice-versa). Matches are removed by walking the tournamentId index cursor.
+        return new Promise((resolve, reject) => {
+            const tx = _db.transaction(['matches', 'tournaments'], 'readwrite');
 
-        // Delete tournament meta record (keyPath is 'tournamentId', not 'id')
-        await _promisify(_store('tournaments', 'readwrite').delete(tournamentId));
+            const cursorReq = tx.objectStore('matches').index('tournamentId').openCursor(tournamentId);
+            cursorReq.onsuccess = () => {
+                const cursor = cursorReq.result;
+                if (cursor) {
+                    cursor.delete();
+                    cursor.continue();
+                }
+            };
+            cursorReq.onerror = () => reject(cursorReq.error);
+
+            // Tournament meta record (keyPath is 'tournamentId', not 'id')
+            tx.objectStore('tournaments').delete(tournamentId);
+
+            tx.oncomplete = () => resolve();
+            tx.onerror    = () => reject(tx.error);
+            tx.onabort    = () => reject(tx.error);
+        });
     }
 
     /**
@@ -356,19 +378,45 @@ const NewtonDB = (() => {
             tournTx.onerror    = () => reject(tournTx.error || new Error('Tournament import failed'));
         });
 
-        // Upsert each match by (tournamentId, matchId): overwrite if exists, add if new.
-        // Preserves status and all fields from the dump. Does not touch unrelated records.
-        for (const m of (dump.matches || [])) {
-            const existing = await getMatch(m.tournamentId, m.matchId);
-            const record   = Object.assign({}, m);
-            if (existing) {
-                record.id = existing.id; // use DB's key so put() replaces the right record
-                await _promisify(_store('matches', 'readwrite').put(record));
-            } else {
-                delete record.id;
-                await _promisify(_store('matches', 'readwrite').add(record));
-            }
-        }
+        // Upsert every match by (tournamentId, matchId) in ONE transaction: overwrite if
+        // it exists, add if new. Preserves all fields from the dump; does not touch
+        // unrelated records. The old code opened two transactions per record (a lookup
+        // then a write) — very slow on large dumps and non-atomic.
+        const matches = dump.matches || [];
+        if (matches.length === 0) return;
+
+        // De-dupe by (tournamentId, matchId), keeping the last occurrence. exportAll()
+        // never emits duplicates, but a malformed dump with one would make two blind
+        // add()s collide on the unique index and abort the whole batch. This pre-empts
+        // that corner case and preserves the old sequential "last wins" behavior.
+        const byKey = new Map();
+        for (const m of matches) byKey.set(JSON.stringify([m.tournamentId, m.matchId]), m);
+        const deduped = [...byKey.values()];
+
+        return new Promise((resolve, reject) => {
+            const tx    = _db.transaction('matches', 'readwrite');
+            const store = tx.objectStore('matches');
+            const index = store.index('tournamentMatch');
+
+            deduped.forEach(m => {
+                const record = Object.assign({}, m);
+                const lookup = index.get([m.tournamentId, m.matchId]);
+                lookup.onsuccess = () => {
+                    if (lookup.result) {
+                        record.id = lookup.result.id; // use DB's key so put() replaces the right record
+                        store.put(record);
+                    } else {
+                        delete record.id;
+                        store.add(record);
+                    }
+                };
+                // lookup.onerror bubbles to tx.onerror
+            });
+
+            tx.oncomplete = () => resolve();
+            tx.onerror    = () => reject(tx.error);
+            tx.onabort    = () => reject(tx.error);
+        });
     }
 
     // ---------------------------------------------------------------------------

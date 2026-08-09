@@ -251,7 +251,8 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 > - **4.9:** try/catch-with-placeholder added to `renderTournamentList` and `renderAllMatches` (mirrors `renderDashboard`).
 > - **4.8 + 4.4 committed** (4.4 further tightened later in `d376477`) — see their per-item status notes below.
 > - **4.2 committed** in `a8ec523` (shipped with v5.1.5); **4.3 implemented 2026-08-09 (uncommitted)** — see their per-item status notes below.
-> - **Still pending:** 4.6 (NewtonDB atomicity). 4.10 discuss-first.
+> - **4.6 implemented 2026-08-09 (uncommitted)** — see its per-item status note below.
+> - **Still pending:** 4.10 (discuss-first design item). Phase 4's code items are otherwise complete.
 
 ### 4.1 One guarded registry reader
 
@@ -311,6 +312,8 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 - **Fix:** `importedList.filter(n => typeof n === 'string' && n.trim())` before saving.
 
 ### 4.6 NewtonDB write-path atomicity
+
+> **Status: Implemented 2026-08-09 (uncommitted).** All three rewrites in `js/newton-db.js`, no API/caller changes: (1) `saveMatch` now does the `tournamentMatch` index lookup and the `put`/`add` in **one** readwrite transaction — since IndexedDB serializes overlapping readwrite transactions, a concurrent save can no longer duplicate-`add()` and lose a re-completion; (2) `deleteTournament` uses a **single** transaction over both stores, deleting matches by walking the `tournamentId` index cursor, so a mid-way failure aborts instead of half-deleting; (3) `importAll` batches all matches into **one** transaction (was two per record) and de-dupes the incoming matches by `(tournamentId, matchId)` first, pre-empting a unique-index abort on a malformed dump while preserving last-wins. All three wire `tx.onabort → reject`. `node --check` clean. **Not yet browser-verified** — IndexedDB needs a real browser, but any local `file://` open exercises these paths (no deploy required).
 
 - **Where:** `js/newton-db.js:118-140` (`saveMatch`), `148-159` (`deleteTournament`), `361-371` (`importAll`)
 - **Issues:**
