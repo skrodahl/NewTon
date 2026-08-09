@@ -343,9 +343,13 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 - **Issue:** A DB error leaves the panel blank/stale with only an unhandled rejection in the console — while `renderDashboard`/`renderLeaderboard` handle errors properly.
 - **Fix:** Mirror the dashboard's try/catch-with-placeholder pattern.
 
-### 4.10 (Design item, discuss before doing) localStorage schema version
+### 4.10 (Design item) localStorage schema version — CLOSED, WON'T DO (2026-08-09)
 
-Exports carry `exportVersion`, but the localStorage records (`dartsTournaments`, `currentTournament`, `dartsConfig`) have no version marker — migrations are scattered heuristics (`bracketSize` backfill, `format` absence, `shortLegs` shape). A single `schemaVersion` field would let future migrations run once at load instead of defensively everywhere. Worth discussing scope before implementing.
+Exports carry `exportVersion`, but the localStorage records (`dartsTournaments`, `currentTournament`, `dartsConfig`) have no version marker — migrations are scattered heuristics (`bracketSize` backfill, `format` absence, `shortLegs` shape).
+
+**Decision (maintainer, 2026-08-09): won't do — no version marker for localStorage.** The schema is *additive-only* (every change so far has added an optional field with a sensible default when absent), and it will stay that way. Additive changes are handled by idempotent "missing → default" read-time adaptation, which is **skip-proof by construction** — a record from any past version normalizes in one pass, so no per-record version and no accumulating migration ladder are ever required. A version marker + migration ladder only pays off for *destructive/ambiguous* changes (rename a field; change a value's units so old and new data are indistinguishable), which the app has never made and should avoid; if such a change ever becomes unavoidable, add the marker *at that point*. Recorded prominently as a standing principle in **CLAUDE.md → Development Principles → Data Integrity Above All ("Additive-only schema evolution")**. The one optional follow-up left on the table is pure tidiness — consolidating today's scattered read-time guards into a single `normalizeTournament()` at load — which belongs to Phase 6 cleanup, not here, and carries the usual multi-site refactor risk.
+
+**With 4.10 closed, all Phase 4 items are resolved** (code items shipped or implemented-uncommitted; 4.3 reassessed & done, 4.6 done, 4.10 declined).
 
 ---
 
