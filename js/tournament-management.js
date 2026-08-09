@@ -1860,16 +1860,7 @@ function updateTournamentWatermark() {
             const version = window.APP_VERSION || 'v2.0.3';
 
             // Check if developer mode is enabled (read directly from localStorage)
-            const developerMode = (() => {
-                try {
-                    const savedConfig = localStorage.getItem('dartsConfig');
-                    if (savedConfig) {
-                        const parsed = JSON.parse(savedConfig);
-                        return parsed.ui && parsed.ui.developerMode;
-                    }
-                } catch (e) {}
-                return false;
-            })();
+            const developerMode = isDeveloperMode();
             const versionStyle = developerMode ? 'cursor: pointer;' : '';
             const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
 
@@ -1899,16 +1890,7 @@ function updateTournamentWatermark() {
             `;
         } else {
             // Check if developer mode is enabled (read directly from localStorage)
-            const developerMode = (() => {
-                try {
-                    const savedConfig = localStorage.getItem('dartsConfig');
-                    if (savedConfig) {
-                        const parsed = JSON.parse(savedConfig);
-                        return parsed.ui && parsed.ui.developerMode;
-                    }
-                } catch (e) {}
-                return false;
-            })();
+            const developerMode = isDeveloperMode();
             const versionStyle = developerMode ? 'cursor: pointer;' : '';
             const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
 

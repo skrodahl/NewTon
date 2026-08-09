@@ -274,6 +274,16 @@ function saveApplicationSettings() {
     alert('✓ Branding saved successfully!');
 }
 
+/**
+ * Whether developer mode is enabled — it gives access to the Developer Console via
+ * the clickable header version number. Reads the in-memory global `config`
+ * (single source of truth), not a fresh localStorage parse.
+ * @returns {boolean}
+ */
+function isDeveloperMode() {
+    return !!(typeof config !== 'undefined' && config.ui && config.ui.developerMode);
+}
+
 // Helper function to parse excluded lanes from string
 function parseExcludedLanesString(excludedLanesString) {
     if (!excludedLanesString || typeof excludedLanesString !== 'string') {

@@ -681,16 +681,7 @@ function updatePlayersDisplay() {
 }
 
 function showLateRegInfoModal() {
-    const developerMode = (() => {
-        try {
-            const savedConfig = localStorage.getItem('dartsConfig');
-            if (savedConfig) {
-                const parsed = JSON.parse(savedConfig);
-                return parsed.ui && parsed.ui.developerMode;
-            }
-        } catch (e) {}
-        return false;
-    })();
+    const developerMode = isDeveloperMode();
 
     const firstPara = document.getElementById('lateRegInfoFirstPara');
     if (firstPara) {
