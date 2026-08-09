@@ -692,30 +692,9 @@ function render32PlayerBacksideMatches(grid) {
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
-    // Add slightly darker background box for the backside bracket
-    const backsideBackground = document.createElement('div');
-    backsideBackground.className = 'backside-background';
-    backsideBackground.style.cssText = `
-        position: absolute;
-        background: linear-gradient(to left, rgba(0, 0, 0, 0.06), transparent);
-        border-radius: 16px;
-        z-index: 0;
-        pointer-events: none;
-    `;
-
-    // Calculate background dimensions based on the backside bracket area
+    // Add slightly darker background box for the backside bracket (shared helper, like 8P/16P)
     const round1StartY = grid.centerY - (7.5 * spacing);
-    const backsideStartX = grid.centerX - grid.centerBuffer - (7 * (grid.matchWidth + grid.horizontalSpacing));
-    const backsideEndX = grid.centerX - grid.centerBuffer - grid.horizontalSpacing;
-    const backsideWidth = backsideEndX - backsideStartX + grid.matchWidth + 40 - (2 * grid.matchWidth / 3); // Extra padding minus 1/3 match width on each end
-    const backsideHeight = 16 * spacing + 40; // Height to cover all matches plus padding
-    const backsideTop = round1StartY - 20; // Start with some padding above
-
-    backsideBackground.style.left = `${backsideStartX - 20 - (grid.matchWidth / 2) + (grid.matchWidth / 3)}px`;
-    backsideBackground.style.top = `${backsideTop}px`;
-    backsideBackground.style.width = `${backsideWidth}px`;
-    backsideBackground.style.height = `${backsideHeight}px`;
-
+    const backsideBackground = createBacksideBackground(grid, 32, round1StartY, spacing);
     document.getElementById('bracketMatches').appendChild(backsideBackground);
 
     // Mirror frontside positioning to the left side
