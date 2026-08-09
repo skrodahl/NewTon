@@ -321,42 +321,16 @@ function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing,
             };
             break;
         case 32:
-            // Calculate Y positions for 32-player bracket using exact bracket rendering logic
-            // BS-1-1: First backside round 1 match (between FS-1-1 and FS-1-2)
-            const input1Y = round1StartY;
-            const input2Y = round1StartY + spacing;
-            const bs11Y32 = (input1Y + input2Y) / 2;
-
-            // BS-2-1: First backside round 2 match (same as BS-1-1)
-            const bs21Y32 = bs11Y32;
-
-            // BS-3-1: First backside round 3 match (using FS-2-1 and FS-2-2 logic)
-            const input1Y_bs31 = round1StartY + spacing / 2;
-            const input2Y_bs31 = round1StartY + spacing + spacing / 2;
-            const bs31Y32 = (input1Y_bs31 + input2Y_bs31) / 2;
-
-            // BS-4-1: Using the correct FS-R3 alignment calculation (BS-R4 position was correct)
-            const input1Y_bs41 = round1StartY + spacing / 2;        // Same as FS-3-1 input
-            const input2Y_bs41 = round1StartY + 2 * spacing + spacing / 2;  // Same as FS-3-1 input
-            const bs41Y32 = (input1Y_bs41 + input2Y_bs41) / 2;
-
-            // BS-5-1: Aligned with BS-2-4 position
-            const bs51Y32 = round1StartY + 6 * spacing + (spacing / 2);
-
-            // BS-6-1: Same Y position as BS-5-1 (aligned with BS-2-4)
-            const bs61Y32 = bs51Y32;
-
-            // BS-7-1: Same as FS-5-1 position
-            const bs71Y32 = grid.centerY - 80 + (grid.matchHeight / 2);
-
+            // Use passed Y coordinates (captured as-rendered in render32PlayerBacksideMatches).
+            // BS-3-1 and BS-4-1 render at the same Y, so round-3's label sits correctly either way.
             firstMatchYPositions = {
-                1: bs11Y32, // BS-1-1
-                2: bs21Y32, // BS-2-1
-                3: bs41Y32, // BS-3-1 (now uses BS-4-1 position - the correct one)
-                4: bs41Y32, // BS-4-1 (correct position)
-                5: bs51Y32, // BS-5-1
-                6: bs61Y32, // BS-6-1 (same as BS-5-1)
-                7: bs71Y32  // BS-7-1
+                1: positions.bs11Y, // BS-1-1
+                2: positions.bs21Y, // BS-2-1
+                3: positions.bs31Y, // BS-3-1
+                4: positions.bs41Y, // BS-4-1
+                5: positions.bs51Y, // BS-5-1
+                6: positions.bs61Y, // BS-6-1
+                7: positions.bs71Y  // BS-7-1
             };
             break;
         default:

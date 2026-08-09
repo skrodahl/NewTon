@@ -700,6 +700,9 @@ function render32PlayerBacksideMatches(grid) {
     // Mirror frontside positioning to the left side
     // round1StartY already defined above for background calculation
 
+    // First-match Y per backside round, captured as rendered — fed to the placement labels (6.19)
+    let bs11Y, bs21Y, bs31Y, bs41Y, bs51Y, bs61Y, bs71Y;
+
     // Round 1: BS-1-1 through BS-1-8 aligned with FS-R2 positions (they receive FS-R2 losers)
     const bs1X = grid.centerX - grid.centerBuffer - (grid.matchWidth + grid.horizontalSpacing);
 
@@ -711,6 +714,7 @@ function render32PlayerBacksideMatches(grid) {
             const input1Y = round1StartY + (2 * (i - 1)) * spacing;     // First input match
             const input2Y = round1StartY + (2 * (i - 1) + 1) * spacing; // Second input match
             const matchY = (input1Y + input2Y) / 2; // Same as FS-2-X position
+            if (i === 1) bs11Y = matchY;
             renderMatch(match, bs1X, matchY, 'backside', 0);
         }
     }
@@ -725,6 +729,7 @@ function render32PlayerBacksideMatches(grid) {
             const input1Y = round1StartY + (2 * (i - 1)) * spacing;
             const input2Y = round1StartY + (2 * (i - 1) + 1) * spacing;
             const matchY = (input1Y + input2Y) / 2; // Same as FS-2-X position
+            if (i === 1) bs21Y = matchY;
             renderMatch(match, bs2X, matchY, 'backside', 1);
         }
     }
@@ -742,6 +747,7 @@ function render32PlayerBacksideMatches(grid) {
             const input1Y = round1StartY + (2 * (input1Index - 1)) * spacing + spacing / 2;
             const input2Y = round1StartY + (2 * (input2Index - 1)) * spacing + spacing / 2;
             const matchY = (input1Y + input2Y) / 2; // Same as FS-3-X position
+            if (i === 1) bs31Y = matchY;
             renderMatch(match, bs3X, matchY, 'backside', 2);
         }
     }
@@ -759,6 +765,7 @@ function render32PlayerBacksideMatches(grid) {
             const input1Y = round1StartY + (2 * (input1Index - 1)) * spacing + spacing / 2;
             const input2Y = round1StartY + (2 * (input2Index - 1)) * spacing + spacing / 2;
             const matchY = (input1Y + input2Y) / 2; // Same as FS-3-X position
+            if (i === 1) bs41Y = matchY;
             renderMatch(match, bs4X, matchY, 'backside', 3);
         }
     }
@@ -771,6 +778,7 @@ function render32PlayerBacksideMatches(grid) {
     if (bs51) {
         // Align with BS-2-4: round1StartY + 6 * spacing + (spacing / 2)
         const matchY = round1StartY + 6 * spacing + (spacing / 2);
+        bs51Y = matchY;
         renderMatch(bs51, bs5X, matchY, 'backside', 4);
     }
 
@@ -790,6 +798,7 @@ function render32PlayerBacksideMatches(grid) {
     if (bs61) {
         // Align with BS-2-4: round1StartY + 6 * spacing + (spacing / 2)
         const matchY = round1StartY + 6 * spacing + (spacing / 2);
+        bs61Y = matchY;
         renderMatch(bs61, bs6X, matchY, 'backside', 5);
     }
 
@@ -808,6 +817,7 @@ function render32PlayerBacksideMatches(grid) {
     if (bs71) {
         // Align with FS-5-1's position (half match height below BS-FINAL)
         const fs51Y = grid.centerY - 80 + (grid.matchHeight / 2); // Same as FS-5-1 position
+        bs71Y = fs51Y;
         renderMatch(bs71, bs7X, fs51Y, 'backside', 6);
     }
 
@@ -820,6 +830,7 @@ function render32PlayerBacksideMatches(grid) {
     const positions = {
         round1X: grid.centerX + grid.centerBuffer, // Frontside round 1 X for loser feeds
         bs1X, bs2X, bs3X, bs4X, bs5X, bs6X, bs7X,
+        bs11Y, bs21Y, bs31Y, bs41Y, bs51Y, bs61Y, bs71Y,
         round1StartY, spacing
     };
 
