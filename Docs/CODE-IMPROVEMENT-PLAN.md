@@ -249,8 +249,9 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 > - **4.5:** import filter `n => typeof n === 'string' && n.trim()` + empty-after-filter guard.
 > - **4.7:** `crypto.randomUUID` fallback to `getRandomValues` (works over plain HTTP).
 > - **4.9:** try/catch-with-placeholder added to `renderTournamentList` and `renderAllMatches` (mirrors `renderDashboard`).
-> - **4.8 + 4.4 implemented 2026-07-06 (uncommitted)** — see their per-item status notes below.
-> - **Still pending:** 4.2 (**reshaped** to a storage-full gate + a 5-line loud-fail save wrap — simpler than the original write-ordering surgery; also absorbs the two deferred 4.1 write-back sites), 4.3 (analytics-preview — **reassessed & downgraded, see note below**), 4.6 (NewtonDB atomicity). 4.10 discuss-first.
+> - **4.8 + 4.4 committed** (4.4 further tightened later in `d376477`) — see their per-item status notes below.
+> - **4.2 committed** in `a8ec523` (shipped with v5.1.5); **4.3 implemented 2026-08-09 (uncommitted)** — see their per-item status notes below.
+> - **Still pending:** 4.6 (NewtonDB atomicity). 4.10 discuss-first.
 
 ### 4.1 One guarded registry reader
 
@@ -260,6 +261,8 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 
 ### 4.2 Storage-full handling — pre-emptive gate + loud-fail save wrap
 
+> **Status: Implemented & committed** (commit `a8ec523`, shipped with the v5.1.5 release — the reshaped design below was implemented as specified but not marked done here until a later review found it already shipped). Both parts landed exactly as reshaped: the pre-emptive `storageGateBlocks(action)` gate (`tournament-management.js`, ≥90%, best-effort — does **not** block if usage can't be read) is wired into **both** `createTournament()` and `processImportedTournament()`; the loud-fail try/catch wrap on `saveTournamentOnly()` fires a sticky one-time `_saveFailedAlerted` alert and returns `false` without claiming success (a good save clears the flag). The two deferred 4.1 write-back sites are absorbed as plain parses *inside* the wrap.
+>
 > **Reshaped 2026-07-07 (maintainer direction — simpler than the original "write-ordering" approach below; prevent the bad state at the door instead of doing surgery on the hottest save function):**
 > 1. **Pre-emptive gate (primary).** In `createTournament()` **and** the import entry point, check storage usage (reuse the existing calc in `analytics.js` ~383) and, if ≥ ~**90%** full, block the action with a clear message pointing at the Storage Space modal to export/delete old tournaments. 90% leaves ~1 MB free — more than one tournament's worst-case growth (~a few hundred KB) — so it also covers the create-then-grow-during-play case, not just the moment of creation. (Avoid 95%: ~0.5 MB headroom can be overrun by a big 32-player tournament mid-play.)
 > 2. **Loud-fail wrap (backstop).** Wrap `saveTournamentOnly()`'s body (`tournament-management.js` ~622-660) in a single try/catch; on *any* failure — a `QuotaExceededError` slipping past the gate, or a corrupt-registry parse — fire a **one-time** alert and return without claiming success (no partial write, no overwrite). ~5 lines: no write-reordering, no caller-contract change, no reader-swap, no rollback.
@@ -276,6 +279,8 @@ The app's stated top priority is crash-resistance; these close the gaps between 
 
 ### 4.3 Analytics bracket preview can destroy/corrupt the active tournament
 
+> **Status: Implemented 2026-08-09 (uncommitted).** The reassessed 3-edit fix (maintainer chose "option 1"): (1) `autoLoadCurrentTournament` (main.js) now copies `_analyticsPreview` into the rebuilt tournament, so a reload mid-preview keeps the no-persist guard and can't leak the preview into `dartsTournaments`; (2) `viewBracket` (newton-history.js) stashes the prior real `currentTournament` into a new `_preAnalyticsPreviewTournament` key before overwriting — skipped when the prior is itself a preview, so chained preview→preview doesn't clobber the stash; (3) a new global `exitAnalyticsBracketPreview()` (main.js) restores that stash (or `removeItem`s the pointer when nothing was stashed), and the back button (tournament.html:253) calls it instead of blindly deleting `currentTournament`. Verified: `node --check` clean; a 4-scenario localStorage state-machine simulation (real-restore / nothing-active / chained-preview / reload-mid-preview) all pass. **Not yet browser-verified** on a live `NEWTON_MODE=analytics` deployment (needs `api/list-tournaments.php` + `tournaments/*.json`). Preserves the `?tm` workflow (a preview round-trip now returns you to your edit session).
+>
 > **Reassessment (2026-07-06, after maintainer discussion — priority downgraded; the "destroy/corrupt" framing above overstates it):**
 > - **Only reachable in analytics-only mode.** The bracket-preview path (`viewBracketForTournament` → `viewBracket`, newton-history.js ~2094) is gated to `NEWTON_APP_MODE === 'analytics'` (the "Bracket" button, newton-history.js:1423) and fetches the tournament JSON from the server (`api/list-tournaments.php`, `tournaments/…`). In full mode — **every `file://` and `NEWTON_MODE=full` deployment — there is no preview path at all,** so this cannot happen there.
 > - **The `?tm` escape hatch is the only bridge.** On a `NEWTON_MODE=analytics` deployment, full mode (and thus a real, editable `currentTournament`) is reached by appending `?tm` (tournament.html:21) — same origin, shared localStorage. That is the intended way to *fix/edit completed tournaments after the fact*: analytics mode hides the tournament tabs (`.mode-analytics` CSS), so `?tm` is what puts the bracket + the Developer Console "Toggle Read-Only" unlock (`commandToggleReadOnly`, analytics.js:2595) within reach. So the only way a live/editable tournament and the preview coexist on one origin is this deliberate cross-mode use — and it's sequential (same tab, different visits), not simultaneous.

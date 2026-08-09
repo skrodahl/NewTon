@@ -1,3 +1,28 @@
+## **v5.1.6** — Look, Don't Touch (unreleased)
+
+Continues Phase 4 of the code-improvement plan (`Docs/CODE-IMPROVEMENT-PLAN.md`). First item in: analytics bracket-preview isolation (4.3). No new features.
+
+### Analytics / History
+
+- **Previewing a bracket no longer forgets the tournament you were editing.** In analytics-only mode (`NEWTON_MODE=analytics`), the "Bracket" preview writes the fetched tournament into the shared `currentTournament` pointer in order to render it. Two problems followed — both only reachable when the analytics box is *also* used to edit completed tournaments through the `?tm` escape hatch (same origin, shared localStorage):
+  - The "back to Analytics" button did `localStorage.removeItem('currentTournament')`, silently deactivating whatever tournament you had open. On the next `?tm` reload it was gone from the pointer — its data was safe in `dartsTournaments`, but you had to reopen it from Recent Tournaments.
+  - Reloading *while previewing* was worse: `autoLoadCurrentTournament()` rebuilt the tournament object without the `_analyticsPreview` guard flag, so the next save persisted the read-only preview into `dartsTournaments` as a phantom "real" tournament.
+
+  The fix keeps the preview read-only and self-contained. `viewBracket()` now stashes the real active tournament (if any) under a transient `_preAnalyticsPreviewTournament` key before overwriting the pointer — skipped when the prior value is itself a preview, so chaining preview→preview can't turn an intermediate preview into the stash. A new `exitAnalyticsBracketPreview()` restores that stash on exit (or clears the pointer when nothing was active, preserving prior behavior), and the Analytics back button now calls it instead of blindly deleting `currentTournament`. `autoLoadCurrentTournament()` now carries `_analyticsPreview` across a reload, so the no-persist guard survives. Net effect: a `?tm` edit session survives a preview round-trip *and* a mid-preview reload instead of being booted out — the fix improves the edit workflow rather than merely protecting it.
+
+### Files changed
+
+- `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview)
+- `js/main.js` — new `exitAnalyticsBracketPreview()` (stash-restore on preview exit); `autoLoadCurrentTournament()` now copies `_analyticsPreview` so the no-persist guard survives a reload
+- `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`
+- `Docs/CODE-IMPROVEMENT-PLAN.md` — 4.3 marked implemented; 4.2 status corrected to shipped; Phase 4 rollup updated (only 4.6 and 4.10 remain)
+
+### Migration
+
+No data migration required. The `_preAnalyticsPreviewTournament` key is transient — written and cleared within a preview session, and only ever read when exiting a preview; a value left behind by a hard-closed tab mid-preview is inert and gets reclaimed on the next preview exit.
+
+---
+
 ## **v5.1.5** — Undo the Undone (2026-07-04)
 
 A code-quality release. A full review of the codebase (four parallel deep reviews covering the bracket core, app/state layer, analytics/history/DB, and QR/Chalker/API — plan and findings in `Docs/CODE-IMPROVEMENT-PLAN.md`) produced a six-phase improvement plan. This release ships Phase 1 (correctness bug fixes, ~25 items), Phase 2 (REST API hardening), Phase 3 (the HTML-escaping sweep — XSS hardening plus the apostrophe-in-names bug), Phase 5 (dead code removal, ~950 lines), and most of Phase 4 (persistence & data-integrity hardening — guarded registry reads, storage-full handling, render-race tokens, and import crash-prevention). No new features; the only visible change beyond the fixes is a restyle of the Storage Space dialog.

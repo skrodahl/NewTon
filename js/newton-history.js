@@ -2121,6 +2121,23 @@ const NewtonHistory = (() => {
             // _analyticsPreview flag prevents saveTournamentOnly() from persisting to dartsTournaments.
             data.readOnly = true;
             data._analyticsPreview = true;
+
+            // 4.3: Preserve the real active tournament (if any) so exiting the
+            // preview restores it instead of deactivating it. Don't overwrite the
+            // stash when chaining preview→preview (prior is itself a preview).
+            const priorCurrent = localStorage.getItem('currentTournament');
+            let priorIsPreview = false;
+            try {
+                priorIsPreview = !!(priorCurrent && JSON.parse(priorCurrent)._analyticsPreview);
+            } catch (e) { /* corrupt prior — treat as non-preview */ }
+            if (!priorIsPreview) {
+                if (priorCurrent) {
+                    localStorage.setItem('_preAnalyticsPreviewTournament', priorCurrent);
+                } else {
+                    localStorage.removeItem('_preAnalyticsPreviewTournament');
+                }
+            }
+
             localStorage.setItem('currentTournament', JSON.stringify(data));
 
             // Set globals for the bracket renderer

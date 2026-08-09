@@ -328,6 +328,36 @@ function setupEventListeners() {
     }
 }
 
+// ANALYTICS BRACKET PREVIEW - exit/restore helper (Phase 4.3)
+/**
+ * Exit the Analytics bracket preview (analytics-only mode) and restore whatever
+ * tournament was active before the preview began.
+ *
+ * viewBracket() (newton-history.js) overwrites the shared `currentTournament`
+ * pointer with a read-only, `_analyticsPreview`-tagged copy fetched from the
+ * server, first stashing any real active tournament under
+ * `_preAnalyticsPreviewTournament`. Restoring that stash here means a `?tm`
+ * edit session survives a preview round-trip instead of being deactivated.
+ * When nothing was active, the pointer is cleared (unchanged prior behavior).
+ *
+ * @returns {void}
+ */
+function exitAnalyticsBracketPreview() {
+    tournament = null;
+    players = [];
+    matches = [];
+
+    const prior = localStorage.getItem('_preAnalyticsPreviewTournament');
+    if (prior !== null) {
+        localStorage.setItem('currentTournament', prior);
+    } else {
+        localStorage.removeItem('currentTournament');
+    }
+    localStorage.removeItem('_preAnalyticsPreviewTournament');
+
+    showPage('history');
+}
+
 // AUTO-LOAD CURRENT TOURNAMENT - Never loads config, only tournament data
 function autoLoadCurrentTournament() {
     console.log('🔄 Auto-loading current tournament (config stays global)...');
@@ -354,7 +384,8 @@ function autoLoadCurrentTournament() {
             bracketSize: tournamentData.bracketSize, // ✅ Fixed: Include bracketSize
             format: tournamentData.format, // SE/DE format (absent = DE for backward compat)
             placements: tournamentData.placements || {},
-            readOnly: tournamentData.readOnly // ✅ Fixed: Include readOnly flag
+            readOnly: tournamentData.readOnly, // ✅ Fixed: Include readOnly flag
+            _analyticsPreview: tournamentData._analyticsPreview // 4.3: keep the no-persist guard alive across reload
             // NO CONFIG loading - config stays global
         };
 
