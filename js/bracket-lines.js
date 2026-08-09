@@ -297,16 +297,6 @@ function createBacksideBackground(grid, bracketSize, round1StartY, spacing) {
 function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing, positions) {
     const placementLabels = [];
 
-    // Debug: Log what's in the positions object
-    console.log('createBacksidePlacementLabels called with:');
-    console.log('  bracketSize:', bracketSize);
-    console.log('  round1StartY:', round1StartY);
-    console.log('  spacing:', spacing);
-    console.log('  positions object:', positions);
-    console.log('  positions.bs11Y:', positions.bs11Y);
-    console.log('  positions.bs21Y:', positions.bs21Y);
-    console.log('  positions.bs31Y:', positions.bs31Y);
-
     // Calculate first match Y positions for each backside round
     // These will be used to position labels directly above the first match of each round
     let firstMatchYPositions = {};
@@ -426,17 +416,9 @@ function createBacksidePlacementLabels(grid, bracketSize, round1StartY, spacing,
             // Use a shorter distance than the BACKSIDE label to avoid overlap
             const placementLabelDistance = 70; // 70px above each match (optimal visual balance)
             labelY = firstMatchY - placementLabelDistance;
-
-            // Debug logging
-            console.log(`Placement label for round ${placement.round}:`, {
-                firstMatchY,
-                labelY,
-                placementText: placement.text
-            });
         } else {
             // Fallback to old position if match Y position not available
             labelY = round1StartY - 10;
-            console.log(`No firstMatchY for round ${placement.round}, using fallback:`, labelY);
         }
 
         label.style.left = `${roundX}px`;
@@ -962,9 +944,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     progressionLines.push(fs15_h1, fs15_v, fs15_h2, fs16_h1, fs16_v, fs16_h2, fs17_h1, fs17_v, fs17_h2, fs18_h1, fs18_v, fs18_h2);
 
     // Phase 2a: BS Round 1 → BS Round 2 (straight lines, 1:1 progression)
-    console.log('🔧 Creating BS-R1 → BS-R2 straight lines');
-    console.log('bs1X:', bs1X, 'bs2X:', bs2X);
-    console.log('bs21Y:', positions.bs21Y, 'bs22Y:', positions.bs22Y);
 
     const bs21CenterY = positions.bs21Y + (grid.matchHeight / 2);
     const bs22CenterY = positions.bs22Y + (grid.matchHeight / 2);
@@ -976,7 +955,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     const lineStart = bs2X + grid.matchWidth; // Start from right edge of BS-R2 matches
     const lineEnd = bs1X; // End at left edge of BS-R1 matches
     const lineWidth = lineEnd - lineStart; // Width between the matches
-    console.log('BS progression line: from BS-R2 right edge', lineStart, 'to BS-R1 left edge', lineEnd, 'width =', lineWidth);
 
     const bs11ToBs21 = document.createElement('div');
     bs11ToBs21.style.position = 'absolute';
@@ -986,13 +964,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     bs11ToBs21.style.height = '3px';
     bs11ToBs21.style.backgroundColor = '#666666';
     bs11ToBs21.style.zIndex = '10';
-
-    console.log('BS-1-1→BS-2-1 line:', {
-        left: bs1X,
-        top: bs11CenterY,
-        width: lineWidth,
-        height: 3
-    });
 
     const bs12ToBs22 = document.createElement('div');
     bs12ToBs22.style.position = 'absolute';
@@ -1024,7 +995,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     progressionLines.push(bs11ToBs21, bs12ToBs22, bs13ToBs23, bs14ToBs24);
 
     // Phase 2b: BS Round 3 → BS Round 4 (straight lines, 1:1 progression)
-    console.log('🔧 Creating BS-R3 → BS-R4 straight lines');
 
     const bs31CenterY = positions.bs31Y + (grid.matchHeight / 2);
     const bs32CenterY = positions.bs32Y + (grid.matchHeight / 2);
@@ -1035,8 +1005,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     const bs3ToBS4LineStart = bs4X + grid.matchWidth; // Start from right edge of BS-R4 matches
     const bs3ToBS4LineEnd = bs3X; // End at left edge of BS-R3 matches
     const bs3ToBS4LineWidth = bs3ToBS4LineEnd - bs3ToBS4LineStart; // Width between the matches
-
-    console.log('BS-R3→BS-R4 line: from BS-R4 right edge', bs3ToBS4LineStart, 'to BS-R3 left edge', bs3ToBS4LineEnd, 'width =', bs3ToBS4LineWidth);
 
     // Straight line: BS-3-1 → BS-4-1
     const bs31ToBs41 = document.createElement('div');
@@ -1061,7 +1029,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     progressionLines.push(bs31ToBs41, bs32ToBs42);
 
     // Phase 2c: BS Round 2 → BS Round 3 (L-shaped convergence lines, 4→2)
-    console.log('🔧 Creating BS-R2 → BS-R3 convergence lines');
 
     // BS-2-1 & BS-2-2 → BS-3-1 (convergence)
     // Note: bs21CenterY, bs22CenterY, bs23CenterY, bs24CenterY already calculated above for Phase 2a
@@ -1079,7 +1046,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     progressionLines.push(bs23_h1, bs23_v, bs23_h2, bs24_h1, bs24_v, bs24_h2);
 
     // Phase 2d: BS Round 4 → BS Round 5 (L-shaped convergence lines, 2→1)
-    console.log('🔧 Creating BS-R4 → BS-R5 convergence lines');
 
     const bs51CenterY = positions.bs51Y + (grid.matchHeight / 2);
 
@@ -1090,7 +1056,6 @@ function create16PlayerBacksideLines(grid, matches, positions) {
     progressionLines.push(bs41_h1, bs41_v, bs41_h2, bs42_h1, bs42_v, bs42_h2);
 
     // Phase 2e: BS-5-1 to BS-FINAL indicator (like 8-player BS-3-1 indicator)
-    console.log('🔧 Creating BS-5-1 to BS-FINAL indicator');
 
     const backsideFinalY = grid.centerY - 80;
     const backsideFinalCenterY = backsideFinalY + (grid.matchHeight / 2);

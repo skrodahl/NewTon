@@ -405,6 +405,8 @@ Deletions only; git history preserves everything. The dangerous ones first.
 
 Opportunistic; each item independent. The duplications matter more than the cycles — they're where future edits will silently diverge.
 
+> **Status (2026-08-09): STARTED — safe/satisfying items first.** **6.7** and **6.6** done and browser-verified (user tested 32P renders correctly). See their per-row notes below. Everything else is untouched and independent.
+
 ### Performance
 
 | # | Where | Issue | Fix |
@@ -414,13 +416,13 @@ Opportunistic; each item independent. The duplications matter more than the cycl
 | 6.3 | `js/tournament-management.js:1660-1665` | `updateTournamentWatermark` re-reads and re-parses the full `currentTournament` blob from localStorage on every save, when the global `tournament` object is authoritative | Use the in-memory object |
 | 6.4 | `js/dynamic-help-system.js:673-689` | MutationObserver on the whole body subtree incl. attributes — fires on every DOM mutation in the app (bracket renders, clock ticks), each running `querySelector('.page.active')` | Drop the observer; update `helpState.currentPage` from `showPage()`/`onPageChange()` |
 | 6.5 | `js/newton-history.js:350-353, 563-579, 914-916, 1818-1819` | Four views fetch per-tournament matches *sequentially* (`for … await`), and every point-mode/layer toggle refetches everything from IndexedDB though only client-side multipliers changed | `Promise.all(...)`; cache matches alongside `_allTournaments`, invalidate via `_invalidateCache` |
-| 6.6 | `js/bracket-lines.js` (~20/render), `js/bracket-rendering.js` (49, incl. per-player on every Command Center open :3681-3706) | Debug console.log noise | Remove or gate behind `developerMode` |
+| 6.6 ✅ DONE | `js/bracket-lines.js`, `js/bracket-rendering.js` | Debug console.log noise | **DONE 2026-08-09.** Removed the 20 geometry/render debug logs in bracket-lines.js + the 6 `🎯 Rendering N-player` logs + 1 stray `populateRefereeSuggestions` log in bracket-rendering.js. **Scope deliberately stopped there:** the ~230 `console.log`s in the other files are *operational tracing* (module-loaded / config / save-load confirmations, ranking calc, and the `processAutoAdvancements` infinite-loop guard diagnostics) — kept as observability since there is no automated test suite. **Not gated** behind `developerMode` (maintainer decision: logging shouldn't be gated). Kept all `console.warn`/`console.error`. |
 
 ### Consolidation (duplication that will drift — some already has)
 
 | # | What | Where | Note |
 |---|------|-------|------|
-| 6.7 | Three byte-identical BS-FINAL indicator functions | `js/bracket-lines.js:739, 811, 1391` | **Already drifted:** `'Ïnter, sans-serif'` typo at :862 breaks the Inter font on 16-player brackets. Also `createLoserFeedLine` defined identically 3× (:655, :1022, :1476, differing only in z-index) — one module-level helper each |
+| 6.7 ✅ DONE | Three byte-identical BS-FINAL indicator functions | `js/bracket-lines.js` | **DONE 2026-08-09, verified (32P renders correctly).** Collapsed the three indicators → one `createBSFinalIndicator`; the three nested `createLoserFeedLine` → one module-level helper with `zIndex='1'` default (the two 32P call sites pass `'10'`). **Fixed the `'Ïnter'`→`'Inter'` typo** that was breaking the Inter font on 16-player brackets. Net −199 lines. |
 | 6.8 | Downstream undo-blocking logic duplicated | `js/bracket-rendering.js:2596-2630` vs `4874-4918` | ~35 near-identical lines that must stay in lockstep — both carried bug 1.2. Extract one helper returning blocking match IDs; derive the boolean and the status text from it |
 | 6.9 | `exportTournament` duplicates `buildTournamentPayload` | `js/tournament-management.js:200-257` vs `264-303` | Former should call the latter. While there: revoke the `URL.createObjectURL` (250-254) and sanitize filesystem-hostile characters in the filename |
 | 6.10 | Achievement-points formula ×4–5 | `js/newton-history.js:871-875, 1291-1294, 1826-1832, 1988-1995, 2185` | Extract `_achPoints(stats, p)` |

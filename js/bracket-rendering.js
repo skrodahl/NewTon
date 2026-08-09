@@ -225,7 +225,6 @@ function renderFrontsideMatches(frontsideStructure, grid) {
 
 // Hardcoded positioning for 8-player frontside to show clear progression
 function render8PlayerFrontsideMatches(grid) {
-    console.log('🎯 Rendering 8-player frontside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
 
     // Don't render progression lines if no tournament exists or no matches populated
     if (!tournament || !matches || matches.length === 0) {
@@ -296,7 +295,6 @@ function render8PlayerFrontsideMatches(grid) {
 
 // Hardcoded positioning for 16-player frontside to show clear progression
 function render16PlayerFrontsideMatches(grid) {
-    console.log('🎯 Rendering 16-player frontside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
@@ -371,7 +369,6 @@ function render16PlayerFrontsideMatches(grid) {
 
 // Hardcoded positioning for 32-player frontside to show clear progression
 function render32PlayerFrontsideMatches(grid) {
-    console.log('🎯 Rendering 32-player frontside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
@@ -518,7 +515,6 @@ function renderBacksideMatches(backsideStructure, grid) {
 
 // Hardcoded positioning for 8-player backside to show clear progression (mirrored to left)
 function render8PlayerBacksideMatches(grid) {
-    console.log('🎯 Rendering 8-player backside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
@@ -591,7 +587,6 @@ function render8PlayerBacksideMatches(grid) {
 
 // Hardcoded positioning for 16-player backside to show clear progression (mirrored to left)
 function render16PlayerBacksideMatches(grid) {
-    console.log('🎯 Rendering 16-player backside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
@@ -702,7 +697,6 @@ function render16PlayerBacksideMatches(grid) {
 
 // Hardcoded positioning for 32-player backside to show clear progression (mirrored to left)
 function render32PlayerBacksideMatches(grid) {
-    console.log('🎯 Rendering 32-player backside matches', { bracketSize: tournament.bracketSize, totalMatches: matches.length });
 
     const spacing = grid.matchHeight + grid.verticalSpacing;
 
@@ -3411,7 +3405,6 @@ function getRefereeSuggestions() {
  * Respects config.ui.refereeSuggestionsLimit setting.
  */
 function populateRefereeSuggestions() {
-    console.log('🎯 populateRefereeSuggestions called');
 
     const losersContainer = document.getElementById('refereeLosersContainer');
     const winnersContainer = document.getElementById('refereeWinnersContainer');

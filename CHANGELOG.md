@@ -1,6 +1,6 @@
 ## **v5.1.6** — Look, Don't Touch (unreleased)
 
-Continues Phase 4 of the code-improvement plan (`Docs/CODE-IMPROVEMENT-PLAN.md`): analytics bracket-preview isolation (4.3) and NewtonMatchDB write-path atomicity (4.6). No new features.
+Continues the code-improvement plan (`Docs/CODE-IMPROVEMENT-PLAN.md`): analytics bracket-preview isolation (4.3) and NewtonMatchDB write-path atomicity (4.6) — which complete Phase 4 (the remaining 4.10 schema-version item was reviewed and declined, see below) — plus the first Phase 6 cleanups on the bracket renderer. No new features; the one visible change is a font fix on 16-player brackets.
 
 ### Analytics / History
 
@@ -20,13 +20,26 @@ Three IndexedDB write paths were made atomic and faster. None change the public 
 
 All three now reject on transaction abort so a failure surfaces to the caller instead of hanging.
 
+### Bracket rendering (Phase 6 cleanup)
+
+- **Fixed the "BS-FINAL" label font on 16-player brackets.** The indicator's font-family was misspelled `'Ïnter'` (with a diacritic) in the 16-player code path, so that label silently fell back to the default sans-serif instead of Inter. Fixed while de-duplicating.
+- **Consolidated duplicated bracket-line code.** The three byte-identical "BS-FINAL indicator" builders (8/16/32-player) are now one `createBSFinalIndicator`, and the three identical nested `createLoserFeedLine` copies are now one shared module-level helper (with a z-index parameter for the 32-player layout, which stacks its feed lines above the straight progression lines). About 199 fewer lines — and the font typo can no longer silently reappear in one copy.
+- **Removed bracket-geometry debug logging.** Deleted ~27 developer `console.log`s that narrated internal layout math on every bracket render (coordinate dumps, `🔧 Creating…`, `🎯 Rendering…`). Operational logging elsewhere — lifecycle, save/load confirmations, ranking calculation, and the `processAutoAdvancements` infinite-loop guards — is intentionally kept as observability (there is no automated test suite), and every `console.warn`/`console.error` is untouched.
+
+### Design decision — additive-only localStorage schema (4.10 declined)
+
+Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. Declined: the stored schema is **additive-only** (every change so far adds an optional field with a sensible default when absent), and additive changes are handled by idempotent "missing → default" adaptation at read time, which is skip-proof regardless of how many versions a record predates — so no version marker or migration ladder is needed. A marker only pays off for a *destructive/ambiguous* change (rename a field; change a value's meaning), which the app avoids. This is now a standing principle in `CLAUDE.md` (Development Principles → Data Integrity). Export files keep `exportVersion` because they arrive from any vintage; localStorage evolves in lockstep with the app and does not.
+
 ### Files changed
 
 - `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview)
 - `js/main.js` — new `exitAnalyticsBracketPreview()` (stash-restore on preview exit); `autoLoadCurrentTournament()` now copies `_analyticsPreview` so the no-persist guard survives a reload
 - `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`
 - `js/newton-db.js` — `saveMatch` single-transaction upsert (TOCTOU fix); `deleteTournament` single cross-store transaction with cursor delete; `importAll` single-transaction batched match upsert with `(tournamentId, matchId)` de-dupe; all three reject on `tx.onabort`
-- `Docs/CODE-IMPROVEMENT-PLAN.md` — 4.3 and 4.6 marked implemented; 4.2 status corrected to shipped; Phase 4 rollup updated (only the 4.10 design item remains)
+- `js/bracket-lines.js` — Phase 6: three BS-FINAL indicators → one `createBSFinalIndicator`; three nested `createLoserFeedLine` → one module-level helper (z-index parameter); `'Ïnter'`→`'Inter'` font fix; removed 20 bracket-geometry debug logs
+- `js/bracket-rendering.js` — Phase 6: removed the 6 per-render `🎯 Rendering N-player` logs and 1 stray `populateRefereeSuggestions` log
+- `CLAUDE.md` — added the additive-only localStorage schema-evolution principle (Data Integrity)
+- `Docs/CODE-IMPROVEMENT-PLAN.md` — 4.3 and 4.6 marked implemented; 4.2 status corrected to shipped; 4.10 closed (won't-do, with rationale); Phase 4 complete; Phase 6 6.7 + 6.6 marked done
 
 ### Migration
 
