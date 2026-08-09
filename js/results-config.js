@@ -551,6 +551,22 @@ function displayResults() {
     }
 }
 
+/**
+ * Paid players sorted for the results views: ranked players first (by placement
+ * ascending), then unranked players alphabetically by name (case-insensitive).
+ * Reads the global `players` array. Shared by updateResultsTable,
+ * generateResultsJSON, and buildResultsCSVData.
+ * @returns {object[]}
+ */
+function getSortedPaidPlayers() {
+    return [...players].filter(p => p.paid).sort((a, b) => {
+        if (a.placement && b.placement) return a.placement - b.placement;
+        if (a.placement) return -1;
+        if (b.placement) return 1;
+        return a.name.toLowerCase().localeCompare(b.name.toLowerCase());
+    });
+}
+
 function updateResultsTable(targetTbodyId = 'resultsTableBody') {
     const tbody = document.getElementById(targetTbodyId);
     if (!tbody) return;
@@ -576,19 +592,7 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
         console.warn('Could not derive placements for players', e);
     }
 
-    const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
-        // First sort by placement (rank)
-        if (a.placement && b.placement) {
-            return a.placement - b.placement;
-        }
-        if (a.placement) return -1;
-        if (b.placement) return 1;
-
-        // Then sort alphabetically by name (case-insensitive)
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        return nameA.localeCompare(nameB);
-    });
+    const sortedPlayers = getSortedPaidPlayers();
 
     // Determine which context we're in (main results or statistics modal)
     const isMainResults = (targetTbodyId === 'resultsTableBody');
@@ -772,17 +776,7 @@ function exportResultsJSON() {
  */
 function generateResultsJSON() {
     // Get sorted players (same logic as updateResultsTable)
-    const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
-        if (a.placement && b.placement) {
-            return a.placement - b.placement;
-        }
-        if (a.placement) return -1;
-        if (b.placement) return 1;
-
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        return nameA.localeCompare(nameB);
-    });
+    const sortedPlayers = getSortedPaidPlayers();
 
     // Get completed matches for match results section
     const completedMatches = matches ? matches
@@ -896,17 +890,7 @@ function buildResultsCSVData() {
     const headers = ['Rank', 'Player', 'Points', 'Short Legs', 'High Outs', '180s', 'Tons', 'Legs Won', 'Legs Lost'];
 
     // Get sorted players (same logic as updateResultsTable)
-    const sortedPlayers = [...players].filter(p => p.paid).sort((a, b) => {
-        if (a.placement && b.placement) {
-            return a.placement - b.placement;
-        }
-        if (a.placement) return -1;
-        if (b.placement) return 1;
-
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        return nameA.localeCompare(nameB);
-    });
+    const sortedPlayers = getSortedPaidPlayers();
 
     const rows = sortedPlayers.map(player => {
         const points = calculatePlayerPoints(player);

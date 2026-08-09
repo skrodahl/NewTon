@@ -40,6 +40,7 @@ All three now reject on transaction abort so a failure surfaces to the caller in
 
 - **Removed an unused duplicate of the excluded-lanes parser.** `parseExcludedLanes()` in `lane-management.js` was byte-identical to `parseExcludedLanesString()` in `results-config.js` but had no callers anywhere in the codebase. Deleted it; the live `parseExcludedLanesString()` (with its one caller) is unchanged.
 - **One source for the developer-mode check.** The same "is developer mode on?" block was inlined three times (twice in the watermark render, once in the late-registration info modal), and each re-parsed the `dartsConfig` localStorage value instead of reading the loaded in-memory config. Extracted a single `isDeveloperMode()` that reads `config.ui.developerMode` — one definition, and it honors the single-source-of-truth principle.
+- **One source for the results-table player sort.** The "paid players, ranked first then alphabetical" sort was copy-pasted in three results functions (the results table, the JSON export, and the CSV export). Extracted `getSortedPaidPlayers()`; all three call it. Identical ordering, no behavior change.
 
 ### Design decision — additive-only localStorage schema (4.10 declined)
 
@@ -55,7 +56,7 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 - `js/bracket-rendering.js` — Phase 6: removed the 6 per-render `🎯 Rendering N-player` logs and 1 stray `populateRefereeSuggestions` log
 - `js/tournament-management.js` — Phase 6: `exportTournament()` now reuses `buildTournamentPayload()` (removes a duplicated payload builder) + adds `URL.revokeObjectURL`; filename sanitized at source in `buildTournamentPayload()`
 - `js/lane-management.js` — Phase 6: removed the unused duplicate `parseExcludedLanes()`
-- `js/results-config.js` — Phase 6: new `isDeveloperMode()` helper (reads in-memory `config`)
+- `js/results-config.js` — Phase 6: new `isDeveloperMode()` helper (reads in-memory `config`); new `getSortedPaidPlayers()` helper replacing 3 duplicated results sorts
 - `js/player-management.js` — Phase 6: late-reg modal uses `isDeveloperMode()` instead of an inline localStorage-parsing IIFE
 - `js/tournament-management.js` (watermark) — Phase 6: both developer-mode checks use `isDeveloperMode()` instead of inline IIFEs
 - `CLAUDE.md` — added the additive-only localStorage schema-evolution principle (Data Integrity)
