@@ -31,13 +31,17 @@ All three now reject on transaction abort so a failure surfaces to the caller in
 - **De-duplicated the export path and fixed a blob-URL leak.** `exportTournament()` was re-assembling the entire export payload (history load, pruning, player-list snapshot, the full object shape) instead of using the shared `buildTournamentPayload()` that the server-upload paths already use — so the two could silently drift. It now calls the shared builder, and it releases the download's object URL with `URL.revokeObjectURL()` (previously the blob was retained for the page's lifetime on every export).
 - **Export filenames are sanitized.** Filesystem-hostile characters in a tournament name (`< > : " / \ | ? *` and control characters) are now replaced with `-` when building the filename, so a name like `Spring/Fall: Cup` produces a valid download instead of a broken or path-traversing one. Sanitization is deterministic (re-uploading the same tournament still overwrites its file) and normal names are unchanged.
 
+### Analytics internals (Phase 6 cleanup)
+
+- **One source for the achievement-points formula.** The calculation (180s + tons + high outs + short legs, each times its configured point value) was copy-pasted in five places across the Leaderboard, the tournament-points computation, the Matches tab, and the match-detail views. It's now a single `_achPoints(stats, p)` helper. No behavior change — the numbers are identical — but a future change to the point rules (or a new achievement type) is now a one-line edit instead of five that can drift apart.
+
 ### Design decision — additive-only localStorage schema (4.10 declined)
 
 Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. Declined: the stored schema is **additive-only** (every change so far adds an optional field with a sensible default when absent), and additive changes are handled by idempotent "missing → default" adaptation at read time, which is skip-proof regardless of how many versions a record predates — so no version marker or migration ladder is needed. A marker only pays off for a *destructive/ambiguous* change (rename a field; change a value's meaning), which the app avoids. This is now a standing principle in `CLAUDE.md` (Development Principles → Data Integrity). Export files keep `exportVersion` because they arrive from any vintage; localStorage evolves in lockstep with the app and does not.
 
 ### Files changed
 
-- `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview)
+- `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview); Phase 6: extracted `_achPoints(stats, p)` helper, replacing 5 duplicated achievement-points formulas
 - `js/main.js` — new `exitAnalyticsBracketPreview()` (stash-restore on preview exit); `autoLoadCurrentTournament()` now copies `_analyticsPreview` so the no-persist guard survives a reload
 - `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`
 - `js/newton-db.js` — `saveMatch` single-transaction upsert (TOCTOU fix); `deleteTournament` single cross-store transaction with cursor delete; `importAll` single-transaction batched match upsert with `(tournamentId, matchId)` de-dupe; all three reject on `tx.onabort`

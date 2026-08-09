@@ -284,6 +284,21 @@ const NewtonHistory = (() => {
     }
 
     /**
+     * Achievement points for one stats/achievement object under the active point values.
+     * Single source of the achievement-points formula (180s, tons, high outs, short legs).
+     * @param {object} stats - a player-stats or per-match achievement object
+     * @param {object} p - active point values from _getActivePoints()
+     * @returns {number}
+     */
+    function _achPoints(stats, p) {
+        if (!stats || !p) return 0;
+        return ((stats.oneEighties || 0) * p.oneEighty)
+             + ((stats.tons || 0) * p.ton)
+             + ((Array.isArray(stats.highOuts) ? stats.highOuts.length : 0) * p.highOut)
+             + ((Array.isArray(stats.shortLegs) ? stats.shortLegs.length : 0) * p.shortLeg);
+    }
+
+    /**
      * Toggle a point layer (ranking/attendance) and re-render.
      * @param {string} layer - 'ranking' | 'attendance'
      * @param {HTMLElement} btn
@@ -884,12 +899,7 @@ const NewtonHistory = (() => {
                     pm.tournaments++;
 
                     // Achievement points (always)
-                    const achPts =
-                        ((s.oneEighties || 0) * p.oneEighty) +
-                        ((s.tons || 0) * p.ton) +
-                        ((Array.isArray(s.highOuts) ? s.highOuts.length : 0) * p.highOut) +
-                        ((Array.isArray(s.shortLegs) ? s.shortLegs.length : 0) * p.shortLeg);
-                    pm.points += achPts;
+                    pm.points += _achPoints(s, p);
 
                     // Ranking points
                     const rank = playerPlacements[String(pid)];
@@ -1310,10 +1320,7 @@ const NewtonHistory = (() => {
         Object.values(ta).forEach(entry => {
             const s = entry.stats;
             if (!s) return;
-            total += (s.oneEighties || 0) * p.oneEighty;
-            total += (s.tons || 0) * p.ton;
-            total += (Array.isArray(s.highOuts) ? s.highOuts.length : 0) * p.highOut;
-            total += (Array.isArray(s.shortLegs) ? s.shortLegs.length : 0) * p.shortLeg;
+            total += _achPoints(s, p);
         });
 
         // Ranking points (placement-based)
@@ -1882,10 +1889,7 @@ const NewtonHistory = (() => {
                     let pts = 0;
                     Object.values(ach).forEach(a => {
                         if (!a || typeof a !== 'object') return;
-                        pts += (a.oneEighties || 0) * p.oneEighty;
-                        pts += (a.tons || 0) * p.ton;
-                        pts += (Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut;
-                        pts += (Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg;
+                        pts += _achPoints(a, p);
                     });
                     m._achievementPoints = pts;
                     m._tournamentName = t.tournamentName || t.tournamentId;
@@ -2052,10 +2056,7 @@ const NewtonHistory = (() => {
             let total = 0;
             Object.values(ach).forEach(a => {
                 if (!a || typeof a !== 'object') return;
-                total += (a.oneEighties || 0) * p.oneEighty;
-                total += (a.tons || 0) * p.ton;
-                total += (Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut;
-                total += (Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg;
+                total += _achPoints(a, p);
             });
             m._achievementPoints = total;
         });
@@ -2270,14 +2271,8 @@ const NewtonHistory = (() => {
 
         // Compute per-player achievement points
         const p = tournamentRecord ? _getActivePoints(tournamentRecord) : { oneEighty: 0, ton: 0, highOut: 0, shortLeg: 0 };
-        function _playerPoints(a) {
-            return ((a.oneEighties || 0) * p.oneEighty) +
-                   ((a.tons || 0) * p.ton) +
-                   ((Array.isArray(a.highOuts) ? a.highOuts.length : 0) * p.highOut) +
-                   ((Array.isArray(a.shortLegs) ? a.shortLegs.length : 0) * p.shortLeg);
-        }
-        const pts1 = _playerPoints(a1);
-        const pts2 = _playerPoints(a2);
+        const pts1 = _achPoints(a1, p);
+        const pts2 = _achPoints(a2, p);
 
         html += `<table class="history-table newton-table" style="margin-top:16px;">
             <thead><tr>
