@@ -1,6 +1,12 @@
-## **v5.1.6** — Look, Don't Touch (unreleased)
+## **v5.1.6** — One Throw, One Score (2026-09-06)
 
-Continues the code-improvement plan (`Docs/CODE-IMPROVEMENT-PLAN.md`): analytics bracket-preview isolation (4.3) and NewtonMatchDB write-path atomicity (4.6) — which complete Phase 4 (the remaining 4.10 schema-version item was reviewed and declined, see below) — plus the first Phase 6 cleanups on the bracket renderer. No new features; the one visible change is a font fix on 16-player brackets.
+**Completes the code-improvement plan** (`Docs/CODE-IMPROVEMENT-PLAN.md`) — Phases 1–6 are now done. This release carries the end of Phase 4 (analytics bracket-preview isolation 4.3, NewtonMatchDB write-path atomicity 4.6; the remaining 4.10 schema-version item was reviewed and declined, see below) and the whole of Phase 6 — performance (6.1–6.5) and consolidation (6.7–6.21).
+
+No new features. The theme is doing the same work once instead of repeatedly: `completeMatch()` persists once rather than 2–4 times (127 → 63 saves across a full 32-player tournament), `renderBracket()` parses the transaction history once rather than per card (~63 → 1), Analytics fetches match lists concurrently and caches them (48 → 12 reads; point-mode/layer toggles 48 → 0), and a whole-body MutationObserver is gone. Every change was verified by differential testing against the pre-change file — full tournaments replayed in both formats at every bracket size, state compared after each completion — with the details recorded per item in the plan doc.
+
+Visible changes: the 16-player bracket font fix, the Short Leg Threshold reaching the Chalker, F1 help matching the page after a reload, and Analytics reflecting corrections to a finalized tournament without a reload.
+
+**Two documented declines**, both reopenable with evidence: 6.1 part B (`checkRefereeConflict`'s O(n²) scan — pure in-memory, unmeasured payoff) and the `renderLeaderboard` split inside 6.11 (measured overlap was ~20 lines of a 292-line function; the plan's own rule is "split when touched, not as a dedicated pass").
 
 ### Analytics / History
 

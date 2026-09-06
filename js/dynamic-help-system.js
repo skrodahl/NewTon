@@ -110,7 +110,7 @@ const HELP_CONTENT = {
                     <p><strong>Tracking Performance:</strong></p>
                     <p>Click any player name to open their statistics panel and record:</p>
                     <ul>
-                        <li><strong>Short Legs:</strong> Games finished in 9-21 darts</li>
+                        <li><strong>Short Legs:</strong> Legs finished within the dart count set by Short Leg Threshold on the Config page (default 21)</li>
                         <li><strong>High Outs:</strong> Finishing scores of 101+ points</li>
                         <li><strong>180s:</strong> Maximum dart scores</li>
                         <li><strong>Tons:</strong> Any score of 100+ points</li>

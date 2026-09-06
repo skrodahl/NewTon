@@ -63,7 +63,7 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - Installable as a PWA with full offline support
 - Live stats, match history, tiebreak warnings, ton rings
 - Located at `/chalker/` path (direct link: `chalker/index.html`)
-- **TM → Chalker QR (v5.0.0)**: The Tournament Manager generates a signed assignment QR for any live match. The Chalker scans it via `BarcodeDetector` API, verifies a CRC-32 signature, and auto-populates player names, x01 format, best-of legs, max rounds, and optionally lane and referee. Operator confirms before the match starts.
+- **TM → Chalker QR (v5.0.0)**: The Tournament Manager generates a signed assignment QR for any live match. The Chalker scans it via `BarcodeDetector` API, verifies a CRC-32 signature, and auto-populates player names, x01 format, best-of legs, max rounds, the short-leg threshold (v5.1.6+), and optionally lane and referee. Operator confirms before the match starts.
 - **Chalker → TM result QR (v5.0.1)**: After a match the Chalker displays a result QR. The TM scans it to import the result, leg-by-leg scores, and player achievements automatically.
 - QR payloads are JSON signed with CRC-32 (`newton-integrity.js`). Assignment schema: `v, t:"a", mid, tid, sid, p1, p2, sc, bo, mr, [ln], [ref], ts, crc`. Result schema: `v, t:"r", mid, tid, sid, p1, p2, sc, bo, mr, w, fls, legs[], ts, crc`
 
