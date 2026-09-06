@@ -51,23 +51,24 @@ function isQRScanAvailable() {
 }
 
 /**
- * Open the QR modal for a live match.
- * Lane and referee are optional — included in the payload when assigned.
- * @param {string} matchId
+ * Build the signed match-assignment payload — transport-agnostic.
+ *
+ * Split out of openMatchQR() so the payload can be produced without rendering a
+ * QR code. QR is one way to deliver it; the network layer (see
+ * Docs/NETWORK-LAYER.md) is intended to be another, carrying this exact object
+ * so there is only ever one definition of an assignment.
+ *
+ * The Chalker's result side already works this way — `buildResultPayload()`
+ * builds, `showResultQRModal()` renders.
+ *
+ * Lane and referee are optional and are omitted when not assigned.
+ *
+ * @param {string} matchId - e.g. 'FS-1-3'
+ * @returns {object|null} signed payload (CRC appended), or null if no such match
  */
-function openMatchQR(matchId) {
+function buildAssignmentPayload(matchId) {
     const match = matches.find(m => m.id === matchId);
-    if (!match) return;
-
-    const warningEl  = document.getElementById('matchQRWarning');
-    const codeEl     = document.getElementById('matchQRCode');
-    const titleEl    = document.getElementById('matchQRTitle');
-    const subtitleEl = document.getElementById('matchQRSubtitle');
-
-    // Reset state
-    codeEl.innerHTML = '';
-    warningEl.style.display = 'none';
-    warningEl.textContent = '';
+    if (!match) return null;
 
     // Resolve referee name (if assigned)
     let refName = null;
@@ -94,13 +95,39 @@ function openMatchQR(matchId) {
     if (match.lane) payload.ln  = parseInt(match.lane);
     if (refName)    payload.ref = refName;
 
-    const signed = NewtonIntegrity.sign(payload);
-    const json   = JSON.stringify(signed);
+    return NewtonIntegrity.sign(payload);
+}
+
+/**
+ * Open the QR modal for a live match.
+ * Lane and referee are optional — included in the payload when assigned.
+ * @param {string} matchId
+ */
+function openMatchQR(matchId) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match) return;
+
+    const warningEl  = document.getElementById('matchQRWarning');
+    const codeEl     = document.getElementById('matchQRCode');
+    const titleEl    = document.getElementById('matchQRTitle');
+    const subtitleEl = document.getElementById('matchQRSubtitle');
+
+    // Reset state
+    codeEl.innerHTML = '';
+    warningEl.style.display = 'none';
+    warningEl.textContent = '';
+
+    const signed = buildAssignmentPayload(matchId);
+    if (!signed) return;
+    const json = JSON.stringify(signed);
 
     // Generate QR code (qrcode-generator: typeNumber 0 = auto, EC level M)
     const qr = qrcode(0, 'M');
     qr.addData(json);
     qr.make();
+
+    // Referee name is carried in the payload when one is assigned
+    const refName = signed.ref || null;
 
     // Build subtitle with available info
     const parts = [`${match.player1.name} vs ${match.player2.name}`];
@@ -116,6 +143,7 @@ function openMatchQR(matchId) {
 }
 
 window.openMatchQR = openMatchQR;
+window.buildAssignmentPayload = buildAssignmentPayload;
 
 // ---------------------------------------------------------------------------
 // Result QR Scanner (Chalker → TM)
@@ -507,6 +535,13 @@ function applyQRResult(includeAchievements) {
 
     popDialog();
     completeMatch(payload.mid, winnerPlayerNumber, winnerLegs, loserLegs, 'QR', achievements, payload.legs || null, payload.fls || null);
+
+    // If this result arrived over the network, it can be dropped now that it has been
+    // applied — and only now. A result the operator has not accepted stays pending.
+    if (typeof NetworkClient !== 'undefined' && typeof NetworkClient.clearResult === 'function') {
+        NetworkClient.clearResult(payload.mid);
+    }
+
     renderBracket();
     refreshTournamentUI();
 

@@ -305,6 +305,18 @@ const HELP_CONTENT = {
                     <p><strong>💡 Tip:</strong> Adjust values to balance participation vs. performance rewards.</p>
                 `
             },
+            handover: {
+                title: "Chalker Handover",
+                content: `
+                    <p><strong>How a match reaches the Chalker.</strong> Set under Chalker on the Config page:</p>
+                    <ul>
+                        <li><strong>QR code</strong> (default) &mdash; show a code on the match card for the Chalker to scan, and scan its result code back. Works offline and needs no network.</li>
+                        <li><strong>Network</strong> (experimental) &mdash; send the match to a Chalker on the same local network, and the result comes back on its own. Hides the QR buttons and offers <strong>Transfer</strong> on a started match instead. Requires the Docker deployment, with the Chalker opened from your own server rather than newtondarts.com.</li>
+                        <li><strong>None</strong> &mdash; hides both, for entering every result by hand.</li>
+                    </ul>
+                    <p><strong>💡 Tip:</strong> A result arriving over the network is never applied on its own &mdash; you accept it, and accepting opens the same review a scanned result QR opens.</p>
+                `
+            },
             matches: {
                 title: "Match Format Configuration",
                 content: `

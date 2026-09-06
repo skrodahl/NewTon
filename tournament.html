@@ -727,7 +727,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                 </div>
                             </div>
                             <h4 style="margin: 22px 0 6px 0; color: #333; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #ddd; padding-bottom: 6px;">Chalker</h4>
-                            <p style="margin: 0 0 12px 0; color: #666; font-size: 13px;">x01 format, max rounds, and short leg threshold sent to the Chalker via QR code when starting a match.</p>
+                            <p style="margin: 0 0 12px 0; color: #666; font-size: 13px;">x01 format, max rounds, and short leg threshold sent to the Chalker when starting a match. Handover chooses how a match reaches the device.</p>
                             <div class="config-grid">
                                 <div class="form-group">
                                     <label for="chalkerX01Format">x01 Format</label>
@@ -774,6 +774,15 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                 <div class="form-group">
                                     <label for="chalkerShortLegThreshold">Short Leg Threshold (darts)</label>
                                     <input type="number" id="chalkerShortLegThreshold" min="3" max="60" value="21" style="width: 80px;">
+                                </div>
+                                <div class="form-group">
+                                    <label for="chalkerHandover">Handover</label>
+                                    <select id="chalkerHandover">
+                                        <option value="qr" selected>QR code</option>
+                                        <option value="network">Network (experimental)</option>
+                                        <option value="none">None</option>
+                                    </select>
+                                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">QR shows a code to scan. Network sends the match to a device on the local network &mdash; experimental, and it hides the QR buttons. None leaves matches to be entered by hand.</p>
                                 </div>
                             </div>
                             <div class="config-buttons">
@@ -1212,6 +1221,9 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/newton-table.js"></script>
         <script src="js/newton-history.js"></script>
         <script src="js/qr-bridge.js"></script>
+    <!-- Optional network client. Separately licensed (see licensed/LICENSE.md) and may be
+         absent; the Tournament Manager works fully without it. -->
+    <script src="licensed/js/network-tm.js?v=1"></script>
 
         <footer>
             <span id="footerContent"></span></br> Created by Håvard Skrödahl, NewTon DC Malmö

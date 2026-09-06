@@ -44,6 +44,9 @@ const DEFAULT_CONFIG = {
         developerMode: false,
         refereeSuggestionsLimit: 10
     },
+    chalker: {
+        handover: 'qr'
+    },
     server: {
         allowSharedTournamentDelete: false,
         autoUpload: false,
@@ -135,6 +138,7 @@ function applyConfigToUI() {
     initX01Toggle(config.legs.x01Format);
     safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
     safeSetValue('chalkerShortLegThreshold', config.legs.shortLegThreshold || 21);
+    safeSetValue('chalkerHandover', getChalkerHandover());
 
     // Application title
     if (config.clubName) {
@@ -272,6 +276,44 @@ function saveApplicationSettings() {
     }
 
     alert('✓ Branding saved successfully!');
+}
+
+/**
+ * Hand a started match over to a Chalker across the local network.
+ *
+ * This is only the guard. The implementation lives in `licensed/`, which is not
+ * covered by this project's BSD licence and may be absent entirely — the app must
+ * work without it (see `licensed/README.md`). Keeping every entry point funnelled
+ * through here means the network layer has exactly one attachment point.
+ *
+ * @param {string} matchId - the live match to hand over, e.g. 'FS-1-3'
+ * @returns {void}
+ */
+function transferMatchToDevice(matchId) {
+    if (typeof NetworkClient !== 'undefined' && typeof NetworkClient.dispatchMatch === 'function') {
+        NetworkClient.dispatchMatch(matchId);
+        return;
+    }
+    alert('Network handover is not available yet.\n\nIt is still being built. Switch Handover to "QR code" on the Config page to hand matches over by scanning.');
+}
+
+/**
+ * How a match is handed over to the Chalker.
+ *
+ * Global setting, chosen on the Config page:
+ *   'qr'      — show the assignment QR and the result scanner (default, current behaviour)
+ *   'network' — hand over across the local network instead; all QR affordances are hidden
+ *   'none'    — no handover at all; matches are entered manually
+ *
+ * Read through this helper rather than reaching into `config` directly, so the
+ * default applies uniformly to configs saved before the setting existed
+ * (additive-only schema: missing means 'qr').
+ *
+ * @returns {'qr'|'network'|'none'}
+ */
+function getChalkerHandover() {
+    const mode = config && config.chalker && config.chalker.handover;
+    return (mode === 'network' || mode === 'none') ? mode : 'qr';
 }
 
 /**
@@ -475,6 +517,12 @@ function saveMatchConfiguration() {
     }
     config.legs.maxRounds = parseInt(document.getElementById('chalkerMaxRounds').value) || 13;
     config.legs.shortLegThreshold = parseInt(document.getElementById('chalkerShortLegThreshold').value) || 21;
+
+    const handoverEl = document.getElementById('chalkerHandover');
+    if (handoverEl) {
+        config.chalker = config.chalker || {};
+        config.chalker.handover = handoverEl.value;
+    }
 
     // Save to localStorage
     saveGlobalConfig();

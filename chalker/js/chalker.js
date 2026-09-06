@@ -7,7 +7,7 @@
   'use strict';
 
   // Keep in sync with APP_VERSION in js/main.js
-  const CHALKER_VERSION = '5.1.6';
+  const CHALKER_VERSION = '5.1.7-b.1';
 
   /**
    * Escape a value for safe interpolation into innerHTML (element text and quoted
@@ -1355,6 +1355,11 @@
     hideModal(elements.networkModal);
     showScreen('scoring');
     updateDisplayForNetworkWaiting();
+
+    // Wake the network client, if one is loaded
+    if (window.NewtonNetwork && typeof window.NewtonNetwork.start === 'function') {
+      window.NewtonNetwork.start(lane);
+    }
   }
 
   /** @type {string|null} - Lane number when waiting for network match */
@@ -2028,6 +2033,16 @@
       firstLegStarter: state.firstLegStarter,
       stats: stats
     };
+
+    // Hand the finished match to the network client, if one is loaded. Same signed
+    // payload the result QR carries — one definition of a result, two ways to send it.
+    if (window.NewtonChalkerBridge && typeof window.NewtonChalkerBridge.onMatchComplete === 'function') {
+      try {
+        window.NewtonChalkerBridge.onMatchComplete(buildResultPayload(match));
+      } catch (e) {
+        console.warn('Network result handoff failed:', e);
+      }
+    }
 
     // Match info line (end screen specific - shows format without date)
     const bestOf = match.config.bestOf || 3;
@@ -2980,20 +2995,70 @@
     localStorage.setItem('chalker_install_dismissed', '1');
   });
 
+  /** Hide the install banner. */
+  function hideInstallBanner() {
+    var banner = document.getElementById('installBanner');
+    if (banner) banner.classList.remove('visible');
+  }
+
   window.installApp = function() {
-    if (!_installPrompt) return;
+    // The deferred prompt can be invalidated by the browser (app already installed,
+    // or the event has gone stale). Previously this returned silently, leaving the
+    // banner sitting over the keypad advertising a button that did nothing.
+    if (!_installPrompt) {
+      hideInstallBanner();
+      localStorage.setItem('chalker_install_dismissed', '1');
+      return;
+    }
     _installPrompt.prompt();
     _installPrompt.userChoice.then(function() {
       _installPrompt = null;
-      var banner = document.getElementById('installBanner');
-      if (banner) banner.classList.remove('visible');
+      hideInstallBanner();
     });
   };
 
   window.dismissInstall = function() {
-    var banner = document.getElementById('installBanner');
-    if (banner) banner.classList.remove('visible');
+    hideInstallBanner();
     localStorage.setItem('chalker_install_dismissed', '1');
   };
+
+  /**
+   * Bridge for the optional network client in `licensed/`.
+   *
+   * That directory is separately licensed and may be absent entirely, so this is a
+   * deliberately narrow surface: start a match from an assignment payload, report a
+   * finished one, and answer what the device is currently doing. No scoring logic
+   * crosses it — the network client is a transport, and the Chalker remains the only
+   * thing that knows how to score darts.
+   */
+  window.NewtonChalkerBridge = {
+    /** Start a match from a verified assignment payload (same path a scanned QR takes). */
+    startFromAssignment: function(payload) {
+      qrPayload = payload;
+      startMatchFromQR();
+    },
+    /** Set by the network client; called with the signed result payload on completion. */
+    onMatchComplete: null,
+    /** Lane this device is claiming, or null when not in network mode. */
+    getLane: function() { return networkWaitingLane; },
+    /** Match currently being scored, or null. */
+    getCurrentMatchId: function() {
+      return (state && state.config && state.config.matchId) ? state.config.matchId : null;
+    },
+    /** True when the device is free to take a new match. */
+    isIdle: function() { return !state || state.matchComplete === true; }
+  };
+
+  // Wire the banner buttons with listeners rather than inline onclick attributes.
+  // They were the only inline handlers left in the Chalker, which made them the only
+  // thing here that a strict Content-Security-Policy (one without 'unsafe-inline')
+  // would silently disable — leaving an undismissable bar over the bottom keypad row.
+  // The banner markup also sits after this script, so it isn't in the DOM yet.
+  document.addEventListener('DOMContentLoaded', function() {
+    var installBtn = document.getElementById('installAppBtn');
+    var dismissBtn = document.getElementById('installDismissBtn');
+    if (installBtn) installBtn.addEventListener('click', window.installApp);
+    if (dismissBtn) dismissBtn.addEventListener('click', window.dismissInstall);
+  });
 
 })();

@@ -1283,6 +1283,13 @@ function renderMatch(match, x, y, section, roundIndex) {
         stateClass += ' important-match';
     }
 
+    // A result waiting to be accepted (network handover) — styling only; the action
+    // lives in Match Controls, where the operator works
+    if (typeof NetworkClient !== 'undefined' && typeof NetworkClient.hasPendingResult === 'function' &&
+        NetworkClient.hasPendingResult(match.id)) {
+        stateClass += ' match-result-waiting';
+    }
+
     matchElement.className = stateClass;
     matchElement.style.left = x + 'px';
     matchElement.style.top = y + 'px';
@@ -2924,9 +2931,22 @@ function createMatchCard(match) {
 
     // For live matches, show stop button; for non-live matches, show start button
     // Disable start button if there's a referee conflict
-    const qrButton = state === 'live' ?
-        `<button class="cc-match-action-btn cc-btn-qr" onclick="openMatchQR('${match.id}')" title="Show Chalker QR code">QR</button>` :
-        '';
+
+    // Handover affordance for a live match — QR code, network transfer, or nothing,
+    // per the global Chalker Handover setting (see getChalkerHandover()).
+    const _handover = (typeof getChalkerHandover === 'function') ? getChalkerHandover() : 'qr';
+    let qrButton = '';
+    const _resultWaiting = state === 'live' && typeof NetworkClient !== 'undefined' &&
+        typeof NetworkClient.hasPendingResult === 'function' && NetworkClient.hasPendingResult(match.id);
+    if (_resultWaiting) {
+        // A finished match has come back from the Chalker. Reviewing it opens the same
+        // preview a scanned QR opens; nothing is applied until the operator accepts.
+        qrButton = `<button class="cc-match-action-btn cc-btn-qr cc-btn-result-ready" onclick="NetworkClient.reviewResult('${match.id}')" title="A result has arrived from the Chalker — review and accept it">Result ✓</button>`;
+    } else if (state === 'live' && _handover === 'qr') {
+        qrButton = `<button class="cc-match-action-btn cc-btn-qr" onclick="openMatchQR('${match.id}')" title="Show Chalker QR code">QR</button>`;
+    } else if (state === 'live' && _handover === 'network') {
+        qrButton = `<button class="cc-match-action-btn cc-btn-qr" onclick="transferMatchToDevice('${match.id}')" title="Send this match to a Chalker on the network">Transfer</button>`;
+    }
 
     const actionButton = state === 'live' ?
         `<button class="cc-match-action-btn cc-btn-stop" onclick="toggleActive('${match.id}'); setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100);">Stop Match</button>` :
@@ -3008,7 +3028,8 @@ function showMatchCommandCenter() {
     const _qrBtn = document.getElementById('qrResultsBtn');
     if (_qrBtn) {
         const _active = tournament && tournament.status === 'active';
-        _qrBtn.style.display = (_active && liveMatches.length > 0) ? '' : 'none';
+        const _qrMode = (typeof getChalkerHandover !== 'function') || getChalkerHandover() === 'qr';
+        _qrBtn.style.display = (_qrMode && _active && liveMatches.length > 0) ? '' : 'none';
     }
 
     // Group ready matches by round for chronological organization

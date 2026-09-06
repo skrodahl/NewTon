@@ -2,6 +2,16 @@ BSD 3-Clause License
 
 Copyright (c) 2025, skrodahl
 
+-------------------------------------------------------------------------------
+SCOPE NOTE: This BSD 3-Clause License covers the NewTon DC Tournament Manager
+with ONE exception. The `licensed/` directory is NOT covered by this license;
+it is governed by `licensed/LICENSE.md` and all rights to it are reserved.
+That directory contains experimental network-transfer components which may
+become a paid feature. They are currently free to use under a revocable grant
+(see Section 2 of `licensed/LICENSE.md`), and the rest of the application does
+not depend on them.
+-------------------------------------------------------------------------------
+
 Redistribution and use in source and binary forms, with or without
 modification, are permitted provided that the following conditions are met:
 

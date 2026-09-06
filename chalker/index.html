@@ -233,7 +233,7 @@
     <div id="network-modal" class="modal">
         <div class="modal-content config-modal-content">
             <h2>Network Mode</h2>
-            <p class="network-notice">This feature requires a license and is not yet available.</p>
+            <p class="network-notice">Experimental preview &mdash; not yet functional. No licence required; this will be free to use.</p>
             <div class="config-form-modal">
                 <div class="form-group">
                     <label for="network-lane">Lane</label>
@@ -424,11 +424,14 @@
     <script src="js/qr-scanner.umd.min.js"></script>
     <script src="js/db.js"></script>
     <script src="js/newton-integrity.js"></script>
-    <script src="js/chalker.js?v=14"></script>
+    <script src="js/chalker.js?v=15"></script>
+    <!-- Optional network client. Separately licensed (see ../licensed/LICENSE.md) and
+         may be absent; the Chalker works fully without it. -->
+    <script src="../licensed/js/network-chalker.js?v=1"></script>
     <div class="install-banner" id="installBanner">
         <span class="install-text">Install NewTon Chalker for offline use</span>
-        <button class="install-btn" onclick="installApp()">Install</button>
-        <button class="install-dismiss" onclick="dismissInstall()">✕</button>
+        <button class="install-btn" id="installAppBtn">Install</button>
+        <button class="install-dismiss" id="installDismissBtn">✕</button>
     </div>
 
     <script>

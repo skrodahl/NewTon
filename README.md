@@ -202,3 +202,20 @@ The architecture and resilence of NewTon DC Tournament Manager is documented on 
 NewTon DC Malmö
 
 **License**: Open source (BSD 3-Clause License) project for dart tournament management
+
+### Licensing split
+
+The application is BSD 3-Clause licensed, with one exception: the **`licensed/`
+directory** is covered by its own terms in [`licensed/LICENSE.md`](licensed/LICENSE.md),
+not by BSD-3.
+
+That directory holds an experimental proof of concept for transferring matches
+between the Tournament Manager and the Chalker over the local network, which may
+eventually become a paid feature. Right now it is **free to use — no key, no
+subscription, no registration** — under a grant that is revocable for future
+releases (Section 2 of its licence).
+
+Nothing else changes. The Tournament Manager, the Chalker, QR transfer, Analytics
+and every other feature remain fully open source and always will be, and the
+application works completely without that directory — delete it and everything
+still runs.

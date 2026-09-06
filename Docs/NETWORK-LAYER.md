@@ -1,13 +1,430 @@
-# NewTon Network Layer - App Integration
+# NewTon Network Layer
+
+**Status: proof of concept, not started. Nothing here is built yet.**
+
+Direct transfer of matches between the Tournament Manager and the Chalker over
+the local network, as an alternative to the QR code round trip.
+
+This document supersedes the earlier design, preserved in full at the bottom under
+[Appendix: Superseded Design (March–August 2026)](#appendix-superseded-design-marchaugust-2026).
+Several of its central assumptions were wrong; the reasoning is recorded here so
+they are not re-proposed.
+
+---
+
+## What this is
+
+An experimental proof of concept. It may not work. It may be removed. **No
+promise is made that it will be developed further.**
+
+QR transfer and manual entry remain the supported ways to move match data, and
+are unaffected. The application must work identically with the `licensed/`
+directory deleted.
+
+Code lives in `licensed/` under its own licence — see
+[`../licensed/README.md`](../licensed/README.md). It is free to use, with no key
+and no subscription. Licence gating, if it ever happens, is a later stage and is
+explicitly **not** part of this work.
+
+---
+
+## Decisions
+
+| Decision | Choice | Why |
+|---|---|---|
+| Topology | **LAN only** | Non-negotiable. No relay, no cloud, no internet at run time. |
+| Transport — proof of concept | **REST over the existing PHP/nginx stack** | Needs no new infrastructure, no new dependency, and removes the riskiest unknown. See below. |
+| Transport — intended direction | **MQTT over WebSocket** | Earns its place once live per-dart views exist. Same payloads, so the swap is cheap. |
+| Chalker origin | **Served from the container** | A Chalker installed from `newtondarts.com` cannot reach the LAN. See [the origin problem](#the-origin-problem). |
+| Discovery | **None required** | Both apps are clients of the container they were served from. Relative URLs. |
+| Device onboarding | **QR carrying the container URL** | Scanned once per device with the *native camera app*, so it works on plain http. |
+| Lane identity | **The Chalker claims a lane** | Boards are physical and fixed. No coordination step. |
+| Presence | **Heartbeat POST + staleness timeout** | Survives phone sleep, which a live connection does not. |
+| Server state | **JSON in the existing `tournaments/` volume** | Already mounted, already persistent. |
+| Encryption | **None at the application layer** | The container is the club's own machine on their own network. |
+| Licence keys | **None** | Not this stage. |
+
+---
+
+## Why REST first, MQTT later
+
+MQTT is the right long-term answer and the plans that depend on it are real. It
+is the wrong *first* step, for three reasons.
+
+**The container already is a server.** nginx routes PHP through FastCGI to
+php-fpm, `api/` holds five working endpoints, and `tournaments/` is a mounted
+persistent volume. A REST match transfer is two PHP files and a JSON file.
+Nothing new is installed, nothing new runs, and the zero-dependency property
+survives — no mqtt.js, no Mosquitto, no libwebsockets packaging risk.
+
+**It removes the question most likely to kill the idea.** Whether a phone holds a
+live connection through screen sleep, backgrounding and roaming between access
+points is the hardest thing to get right and the easiest thing to be defeated by.
+With polling there is no connection to lose: the phone wakes, makes a request,
+done. No reconnect logic, no backoff, no session state.
+
+**What MQTT provides has cheap equivalents at this scale:**
+
+| MQTT | REST equivalent |
+|---|---|
+| Last Will (lane offline) | Heartbeat with timestamp; stale after ~30s. More robust — it survives sleep. |
+| Retained messages | A file on disk. The same semantics. |
+| QoS 1 | Retry plus idempotency. Payloads already carry match IDs, and re-applying a result is the path a re-scanned QR already takes. |
+| Push | Polling. Seconds of latency to say "here is your next match" is irrelevant. |
+
+Eight lanes polling every two seconds is four requests per second against nginx
+serving a static JSON file.
+
+*Not SSE:* each open stream pins a php-fpm worker, and a handful of lanes would
+exhaust a default pool. Polling is the safer shape on this stack.
+
+**Where MQTT earns it back:** narrating a leg dart-by-dart to a spectator view or
+big screen. Polling is fine for "here is your match" and "here is the result";
+it is poor for live streaming. If those views become real, switch — and because
+both transports carry the *same payload objects*, switching is cheap.
+
+---
+
+## How the pieces find each other
+
+**They don't have to.** Both apps are served by the container, so the API is a
+relative path from wherever the page was loaded. No IP, no hub URL, no config
+setting, no mDNS. The superseded design needed a five-step discovery chain only
+because its hub was a separate thing elsewhere on the network.
+
+The one genuine step is human: getting the phone to the URL the first time.
+
+**Onboarding.** The TM displays a QR containing its own origin —
+`http://newton.local:2020/chalker/`. The phone scans it with its **native camera
+app**, which opens the Chalker in the browser. Once per device, ever. The native
+camera app is not the web `getUserMedia` API, so this works on the plain-http
+deployment where the in-page scanner does not. QR ends up doing what it is best
+at — carrying a URL to a phone — while REST carries the match data.
+
+**Lane identity.** On first load the Chalker asks which board it is; the choice
+is stored on the device. That matches physical reality — the phone sits at board
+5 all evening — and needs no coordination. The existing lane concept (1–20, with
+the excluded-lanes config) carries over unchanged. If two devices claim one lane,
+the heartbeat's device ID lets the TM say so; last-writer-wins with a visible
+warning is fine here.
+
+**Device ID caveat.** `crypto.randomUUID()` is undefined outside a secure
+context, so it is unavailable on the http deployment. The fallback already exists
+at `js/results-config.js:80`, with a comment naming plain-HTTP LAN deploys
+specifically. The Chalker needs the same treatment.
+
+**Presence.** A heartbeat POST every few seconds carrying lane, device ID and
+status. Anything older than ~30 seconds is offline.
+
+---
+
+## What the proof of concept is trying to establish
+
+Choosing the cheaper transport shortened this list, which was the point.
+
+1. **Does the round trip actually feel better than scanning a QR code?** The
+   primary question. No amount of design answers it, and it decides whether any
+   of this is worth building properly.
+2. ~~**Does the Chalker survive being backgrounded for a whole match?**~~
+   **ANSWERED 2026-09-06 — yes.** `saveCurrentMatch()` writes the full scoring
+   state and input buffer to IndexedDB after every visit, undo, edit, tiebreak and
+   match start, and `checkForActiveMatch()` auto-resumes on load. Crucially
+   **IndexedDB is *not* a secure-context API**, so it works on the plain-http
+   deployment — unlike service workers, `getUserMedia` and `crypto.randomUUID()`.
+   An evicted tab therefore resumes mid-match with nothing lost.
+   The residual http-vs-https difference is narrower than it looked: without a
+   service worker the *app shell* must be re-fetched from the container to
+   resume. Normally fine, since the container is what you are talking to; the
+   failure case is a tab evicted **and** wifi briefly down, where https+SW would
+   have loaded the shell from cache.
+3. **Is polling acceptable on phone batteries** over a three-hour tournament?
+4. **Does the operator flow feel right** — a match appearing on the correct board
+   with nobody scanning anything?
+
+### What does not need proving
+
+The payload schemas, the CRC-32 integrity check, and the entire apply-a-result
+path shipped in v5.0.0/v5.0.1 and are in daily use. `handleResultQRPayload()`
+takes a raw string, not a camera; the Chalker's assignment handler does the same.
+The proof of concept carries **those exact payloads over a different pipe** and
+introduces no new semantics.
+
+---
+
+## The origin problem
+
+**A Chalker installed from `https://newtondarts.com` cannot reach the LAN over
+plain http or `ws://`, and the ways around that require infrastructure
+incompatible with LAN-only.**
+
+The rule, from the [Secure Contexts spec](https://w3c.github.io/webappsec-secure-contexts/):
+an origin is *potentially trustworthy* if its scheme is `https` or `wss`, or its
+host is loopback (`127.0.0.0/8`, `::1/128`, `localhost`). **Private ranges such as
+`192.168.0.0/16` are deliberately not on that list.**
+
+| From the hosted PWA | Result |
+|---|---|
+| `http://` or `ws://` to a LAN address | Blocked by mixed content. No workaround, no interstitial, no click-through. |
+| `https://` or `wss://`, self-signed cert | Fails certificate validation. No override is possible for `fetch` or WebSocket. |
+| `https://` or `wss://`, **publicly-trusted** cert | Works, subject to Private Network Access preflight |
+| WebRTC data channel | Works — not a subresource fetch, so mixed content never applies |
+
+Two things that are easy to get wrong:
+
+- **Installing a PWA does not change its origin.** The installed Chalker still
+  runs as `https://newtondarts.com`, under the same restrictions as a tab.
+- **Network reachability is irrelevant.** The phone can ping the container all
+  day; the *page* still cannot open an insecure request to it.
+
+Verify the first row in seconds by running `fetch('http://192.168.1.50/api/api-check.php')`
+in the installed Chalker — it fails before a packet leaves the device.
+
+### Why the two working rows are still ruled out
+
+A **publicly-trusted certificate on a LAN device** is achievable — it is how Plex
+solved this — but it means your own domain with wildcard DNS mapping encoded
+private addresses, per-installation issuance via DNS-01, and renewals. That needs
+internet at setup and periodically after, which contradicts LAN-only. A real
+option if that constraint ever softens.
+
+**WebRTC** genuinely escapes mixed content, and an https PWA can open a data
+channel to a LAN peer. But it is peer-to-peer between two WebRTC endpoints, and
+neither Mosquitto nor nginx is one — so it reaches the TM's *browser tab*, not a
+server, discarding everything a broker or an API gives you. It also needs
+signalling, which from a hosted PWA means QR: two scans to establish what one
+scan does today. Worth remembering as the only route that keeps the hosted PWA
+*and* stays LAN-only; not a cheap path to anything.
+
+### http or https for the container-served Chalker
+
+Both work. They differ in what the Chalker keeps.
+
+| | `docker-compose.yml` (http) | `docker-compose-ssl.yml` (self-signed) |
+|---|---|---|
+| Cert setup | None | Install and trust on every device — worst on iOS |
+| Service worker | **No** — needs a secure context | Yes |
+| Offline / installable PWA | **No** | Yes |
+| In-page camera (QR fallback) | **No** — `mediaDevices` is undefined | Yes |
+| `crypto.randomUUID()` | **No** — fallback required | Yes |
+| REST transfer | Yes | Yes |
+
+In network mode neither side needs the in-page camera, so the http row's losses
+bite only in a failure mode. Note that a self-signed certificate must be
+*trusted*, not merely clicked through: Chrome refuses to register a service worker
+on a page that had a certificate error.
+
+**Start on http.** Zero setup friction, and it exercises the uncertain parts.
+
+---
+
+## Keeping future freedom
+
+The proof of concept must not constrain the real implementation. Six rules, all
+cheap:
+
+1. **Reuse the existing QR payloads verbatim.** No new wire format means no new
+   format to be stuck with — and it is what makes a later MQTT swap cheap.
+2. **Version the API path** — `/api/v1/…` from the first endpoint. Free now,
+   expensive to retrofit.
+3. **Keep network state out of persisted tournament records.** This matters most.
+   The project's additive-only schema rule means anything written into
+   `dartsTournaments` can never be renamed or repurposed — a field the proof of
+   concept invents is a permanent commitment. Hold lane, dispatch status and
+   result source in memory, or under a separate throwaway localStorage key, until
+   the design settles.
+4. **Nothing in exports.** Do not touch `exportVersion` or the export payload.
+5. **Off by default, opt-in.** Nothing that is not enabled can be depended on.
+6. **One choke point.** All network setup goes through a single initialisation
+   function. If a licence check ever arrives it has exactly one place to live —
+   and it is better structure regardless.
+
+---
+
+## A threat-model change worth naming
+
+This introduces something the app has never had: **a shared datastore that
+multiple devices write to.** The standing threat model — data is browser-local,
+so attacks reduce to self-hacking — stops being strictly true. Anyone on the club
+wifi can POST a result.
+
+For a LAN proof of concept that does not justify building authentication. Two
+things already in place make it comfortable, and both are free:
+
+- **Results go through the existing preview-and-confirm path**
+  (`showResultQRPreview` → `applyQRResult`) rather than being applied
+  automatically. Nothing enters a tournament without the operator seeing it.
+- **Undo already exists** if something slips through.
+
+Recorded here as a deliberate, bounded exception rather than leaving the older
+threat-model statement quietly untrue.
+
+---
+
+## What already exists (found 2026-09-06)
+
+More of the Chalker side is built than the plan assumed.
+
+**Chalker — the whole idle-mode scaffold is present and styled:**
+
+- A **Network** button in the New Match modal → `handleNetworkModeFromModal()`
+- A Network Mode modal with a lane select, persisted to IndexedDB
+  (`settings` / `networkLane`) by `saveNetworkLane()` / `loadNetworkLane()` —
+  i.e. **lane claiming is already implemented**, device-local, exactly as the
+  decisions table proposes
+- `startNetworkMode()` clears any active match and switches the scoring screen
+  into a waiting state
+- `updateDisplayForNetworkWaiting()` — a finished idle screen: `Lane N •
+  Waiting...`, `---` placeholders, `network-mode` header styling, keypad disabled
+
+**What is missing is only the transport.** `networkWaitingLane` is written once
+and read once, for a label. Nothing polls and nothing receives. So the remaining
+Chalker work is: a poll loop, wiring a received assignment into the existing
+start-match path, and posting the result on completion.
+
+**The TM has no network scaffold at all** — nothing outside the QR code. The
+dispatch UI, lane status display and result collection are all still to build.
+
+⚠️ **The Network modal reads "This feature requires a license and is not yet
+available."** That predates the decision that the proof of concept is free with
+no key, and must be corrected before this is usable — otherwise the first person
+to open it is told something untrue.
+
+---
+
+## The one piece of real work — ✅ DONE 2026-09-06
+
+Smaller than expected: **the Chalker side was already split.**
+`buildResultPayload(match)` returns the signed payload and `showResultQRModal()`
+renders it, so results were transport-agnostic already.
+
+Only the TM needed it. `openMatchQR()` built the assignment payload and rendered
+the QR in one function; **`buildAssignmentPayload(matchId)` is now extracted**
+(`js/qr-bridge.js`), returning the signed payload or `null` for an unknown match.
+`openMatchQR()` calls it and takes the referee name for its subtitle from
+`signed.ref`, so the referee lookup is not duplicated.
+
+Verified against the pre-change file: payload JSON byte-identical across 9 cases
+(no lane/referee, lane only, referee only, both, a referee id with no matching
+player, a string lane, missing config defaults, an apostrophe in a name, and an
+unknown match id as a no-op) — 1258 bytes compared, with a frozen clock so `ts`
+matches. A mutant that serialises the lane as a string fails exactly the
+lane-bearing cases.
+
+Everything downstream of "here is a payload string" was already
+transport-agnostic and needed no changes. **Both directions can now be produced
+without rendering a QR**, which is all the network layer needs from the BSD side.
+
+---
+
+## Sketch
+
+```
+TM (browser)            container: nginx + php-fpm          Chalker (browser)
+     |                            |                                |
+     |-- POST /api/v1/assign ---->| writes lanes/5.json            |
+     |                            |<---- GET /api/v1/assign?lane=5 |  (poll)
+     |                            |----- assignment payload ------>|
+     |                            |                                |  (scoring)
+     |                            |<---- POST /api/v1/result ------|
+     |-- GET /api/v1/result ----->|                                |
+     |<-- result payload ---------|                                |
+     |                            |<---- POST /api/v1/heartbeat ---|  (every few s)
+     |                                                             |
+     | preview + confirm — the same handler a scanned QR goes through
+```
+
+Endpoints — **built 2026-09-06**, in `licensed/api/v1/`:
+
+```
+POST /licensed/api/v1/assign.php      {lane, payload}   TM queues a match for a lane
+                                      {lane, clear:1}   TM frees the lane after accepting
+GET  /licensed/api/v1/assign.php?lane=N                 Chalker collects what is queued
+POST /licensed/api/v1/result.php      {payload}         Chalker posts a finished match
+                                      {clear: matchId}  TM discards one after applying it
+GET  /licensed/api/v1/result.php                        TM collects everything pending
+POST /licensed/api/v1/heartbeat.php   {lane, deviceId, status, matchId}
+GET  /licensed/api/v1/lanes.php                         registry, with `online` derived
+```
+
+They live under `licensed/` rather than `api/` deliberately: nginx's `location ~ \.php$`
+already serves any `.php` under the document root, so this needs **no nginx change**,
+and deleting the directory deletes the endpoints — which is the "the app works without
+`licensed/`" property, enforced by construction rather than by discipline.
+
+Two design points worth keeping:
+
+- **An assignment is not cleared when collected.** A Chalker that reads one and then
+  crashes would otherwise lose the match with no way to ask again. It stays until
+  replaced or explicitly cleared, and the Chalker ignores an assignment for the match
+  it is already scoring — so re-reading is harmless, which is what makes polling safe.
+- **Results are keyed by match id**, so a corrected resend replaces the pending copy
+  instead of queueing a second one. A result is only ever deleted by the TM after the
+  operator accepts it; if they don't, it stays pending. That is what makes "declining"
+  mean "not yet" without any decline action existing.
+
+State lives in `tournaments/network/` — the volume that is already mounted and already
+written to by the upload endpoint, so it survives a restart and needs no new config.
+Writes are atomic (temp file plus rename) so a poller never reads a half-written mailbox.
+Match ids reaching a filename are whitelisted to `[A-Za-z0-9-]`, which is the one place
+request data touches a path.
+
+---
+
+## Open questions
+
+1. **Free as in beer, or free as in freedom?** Currently the former: `licensed/`
+   carries restrictive terms with a revocable free-use grant. Shipping under
+   BSD-3 instead is a one-way door that closes on first publication.
+2. **What becomes commercial later**, if anything: the transport alone, or
+   Series/League as well? The superseded design gated Series/League behind
+   encryption that no longer exists.
+3. **Contributions** — the licence reserves the necessary rights (Section 5), but
+   a proper CLA is the real answer if the commercial path is pursued.
+4. **Multiple tournaments on one container** — the endpoints allow it; whether the
+   UI should is a separate question.
+5. **Does the Chalker's existing persistence survive a background eviction?**
+   See question 2 of the proof-of-concept list.
+
+---
+
+## Related documents
+
+- [`QR.md`](QR.md) — the payload protocol this reuses, unchanged
+- [`CHALKER-PERSISTENCE.md`](CHALKER-PERSISTENCE.md) — bears on the eviction question
+- [`MDNS.md`](MDNS.md) — `.local` hostname setup
+- [`../licensed/README.md`](../licensed/README.md) — the licensing boundary
+- [`../api/README.md`](../api/README.md) — the existing endpoints this builds on
+
+---
+---
+
+# Appendix: Superseded Design (March–August 2026)
+
+**Retained for reference. Do not implement from this section.** It is preserved
+because several of its assumptions were wrong in instructive ways:
+
+- **Encryption as the licence gate.** The design had encryption doing double duty
+  — protecting data in transit *and* enforcing licensing. Those are separate
+  concerns and coupling them made both awkward. In a LAN-only deployment there is
+  nothing to protect the payload from anyway; the licence boundary is now the
+  `licensed/` directory, and any future key check is independent of it.
+- **A hub reachable from the hosted Chalker.** Not possible — see
+  [the origin problem](#the-origin-problem--why-the-public-chalker-cannot-be-the-network-client).
+- **Series/League gated behind the network bridge**, on the reasoning that no
+  licence meant no decryption meant no MQTT. That gate no longer exists.
+- **A separate `newton-hub` project.** The broker is Mosquitto in the existing
+  container.
+
+---
 
 **Status:** Planning
 **Last Updated:** March 14, 2026
 
 ---
 
-## Storage Architecture Decision (March 2026, revised)
+### Storage Architecture Decision (March 2026, revised)
 
-### Hybrid Storage: localStorage + indexedDB
+#### Hybrid Storage: localStorage + indexedDB
 
 The storage layer does **not** need to migrate wholesale to indexedDB. Instead, a hybrid approach separates concerns cleanly:
 
@@ -24,7 +441,7 @@ The storage layer does **not** need to migrate wholesale to indexedDB. Instead, 
 **The archive is independent:**
 The indexedDB match archive has its own lifecycle. It is not a cache of localStorage — it is a permanent record. Deleting a tournament from localStorage does not orphan the archive; the archive stands on its own. It can be queried for player statistics, trends, head-to-head records, and season history long after the operational tournament data is gone.
 
-### Match Archive Record
+#### Match Archive Record
 
 ```javascript
 {
@@ -41,13 +458,13 @@ The indexedDB match archive has its own lifecycle. It is not a cache of localSto
 
 All derived values — averages, checkout percentages, high finishes, score ranges, head-to-head records — are calculated on read from the raw visits. The store stays lean; the queries stay flexible.
 
-### What this unblocks
+#### What this unblocks
 - Full scoresheet storage (Chalker → TM result import)
 - Series / League season history
 - Player statistics and trends across tournaments
 - External reporting / API hydration
 
-### Data Flow: Live Stream + Final Transfer
+#### Data Flow: Live Stream + Final Transfer
 
 When network is active, Chalker sends data to TM in two phases:
 
@@ -64,7 +481,7 @@ Live opportunities enabled from day one:
 - Spectator / operator view without manual entry
 - **Celebration broadcast** — when the tournament completes and the Celebration Podium appears in TM, the podium is pushed to all connected Chalker tablets simultaneously. Every screen in the venue shows the champion at the same moment
 
-### Live Feed: MQTT Pub/Sub
+#### Live Feed: MQTT Pub/Sub
 
 External consumers (live-view displays, announcer screens, stats overlays) receive live data via the same MQTT broker already used for TM ↔ Chalker communication. No separate mechanism needed.
 
@@ -76,7 +493,7 @@ The hub routes messages. The TM is the publisher and source of truth. Consumers 
 
 The network layer features described below remain valid and unchanged.
 
-### Spectator View
+#### Spectator View
 
 A read-only mobile web UI that lets anyone in the venue follow the tournament in real time from their phone. No app install, no login, no configuration — scan a QR code on the wall and you're watching.
 
@@ -127,7 +544,7 @@ No license → no decryption → no incoming messages → nothing to publish →
 
 The spectator topic is not a decrypted mirror of the operational topic. The TM deliberately publishes only what spectators should see: scores, standings, match state. No assignment payloads, no internal IDs, no raw operational data.
 
-### Big Screen Display
+#### Big Screen Display
 
 The spectator topic powers more than phones — it's the foundation for a venue display. A TV, projector, or monitor running a full-screen browser subscribes to the same unencrypted spectator topic and becomes a live tournament board.
 
@@ -146,7 +563,7 @@ The spectator topic powers more than phones — it's the foundation for a venue 
 
 ---
 
-## Overview
+### Overview
 
 This document focuses on what changes are needed in **this project** (Tournament Manager and Chalker) to support network connectivity while preserving full standalone/offline functionality.
 
@@ -154,7 +571,7 @@ The network hub itself is a separate project (newton-hub). This document is abou
 
 ---
 
-## Design Principle: Offline First, Network Optional
+### Design Principle: Offline First, Network Optional
 
 The apps must work identically in all scenarios:
 
@@ -171,7 +588,7 @@ The apps must work identically in all scenarios:
 - Users who deploy only newton-app get the same experience as opening HTML directly.
 - Network mode is toggled on/off in TM (master control).
 
-### Licensing Boundaries
+#### Licensing Boundaries
 
 | Feature | License Required | Notes |
 |---------|:---:|-------|
@@ -185,9 +602,9 @@ The apps must work identically in all scenarios:
 
 ---
 
-## Tournament Manager Changes
+### Tournament Manager Changes
 
-### New UI Elements
+#### New UI Elements
 
 **Lane Assignment on Match Start**
 - When starting a match, option to assign to a lane
@@ -209,7 +626,7 @@ The apps must work identically in all scenarios:
 - QR code scanner fallback (camera-based)
 - Manual entry always available (current behavior)
 
-### New JavaScript Module: `js/network-client.js`
+#### New JavaScript Module: `js/network-client.js`
 
 ```javascript
 // Network client - optional module, app works without it
@@ -234,7 +651,7 @@ const NetworkClient = {
 };
 ```
 
-### Data Structure Extensions
+#### Data Structure Extensions
 
 **Match object additions:**
 ```javascript
@@ -251,9 +668,9 @@ const NetworkClient = {
 
 ---
 
-## Chalker Changes
+### Chalker Changes
 
-### New UI Elements
+#### New UI Elements
 
 **Network Mode Toggle**
 - Setting to enable/disable network mode
@@ -274,7 +691,7 @@ const NetworkClient = {
 - Visual confirmation of delivery
 - QR code generation as fallback
 
-### New JavaScript Module: `chalker/js/network-client.js`
+#### New JavaScript Module: `chalker/js/network-client.js`
 
 ```javascript
 // Network client - optional module, app works without it
@@ -300,7 +717,7 @@ const ChalkerNetwork = {
 };
 ```
 
-### Data Structure Extensions
+#### Data Structure Extensions
 
 **State object additions:**
 ```javascript
@@ -317,7 +734,7 @@ const ChalkerNetwork = {
 
 ---
 
-## QR Code Communication (Open Source)
+### QR Code Communication (Open Source)
 
 QR is the **free, unlicensed path** for match assignment and result transfer. It works in all scenarios — standalone, Docker, with or without a hub. No network or license required.
 
@@ -331,9 +748,9 @@ The TM derives all statistics (averages, score ranges, high finishes, etc.) from
 
 ---
 
-## Connection Detection
+### Connection Detection
 
-### Hub URL Discovery
+#### Hub URL Discovery
 
 Priority order:
 1. Explicit setting in app config
@@ -342,7 +759,7 @@ Priority order:
 4. Environment variable in Docker: `NEWTON_HUB_URL`
 5. **mDNS** — only applicable to the local Docker + hub scenario. newton-hub advertises itself as `_newton._tcp.local` on the local network; TM and Chalker discover it automatically without manual IP/URL configuration. Not relevant for standalone (no hub) or cloud/VPS deployments (real domain + DNS). Browser JS has no mDNS API — discovery must happen server-side or via a Docker entrypoint helper that resolves the hub address and writes it to the app config before nginx starts.
 
-### Graceful Degradation
+#### Graceful Degradation
 
 ```javascript
 // Pseudo-code for network initialization
@@ -360,7 +777,7 @@ async function initNetwork() {
 }
 ```
 
-### Reconnection
+#### Reconnection
 
 - Auto-reconnect with exponential backoff
 - Max reconnect attempts before giving up
@@ -368,9 +785,9 @@ async function initNetwork() {
 
 ---
 
-## Message Schemas
+### Message Schemas
 
-### Match Assignment & Result (via MQTT)
+#### Match Assignment & Result (via MQTT)
 
 MQTT uses the **same payload schemas** as QR (see **Docs/QR.md**), wrapped in an encrypted envelope. The `t` field distinguishes message types (`"a"` for assignment, `"r"` for result). This means one schema definition, two transports.
 
@@ -378,7 +795,7 @@ The encrypted MQTT envelope adds:
 - Encryption layer (license-gated — TM cannot decrypt without valid license keys)
 - CRC-32 inside the encrypted payload for post-decryption integrity verification
 
-### Lane Registration (Chalker → Hub)
+#### Lane Registration (Chalker → Hub)
 ```json
 {
   "type": "lane:register",
@@ -387,7 +804,7 @@ The encrypted MQTT envelope adds:
 }
 ```
 
-### Heartbeat (Chalker → Hub)
+#### Heartbeat (Chalker → Hub)
 ```json
 {
   "type": "heartbeat",
@@ -399,7 +816,7 @@ The encrypted MQTT envelope adds:
 
 ---
 
-## File Structure
+### File Structure
 
 New files to add:
 
@@ -441,50 +858,50 @@ tournament.html          # QR modal markup, camera viewport
 
 ---
 
-## Implementation Phases
+### Implementation Phases
 
 QR communication (Docs/QR.md) is the foundation for TM ↔ Chalker data exchange and must be completed before the MQTT network phases. QR is the free, offline path; MQTT is the licensed, networked path. Both use identical payload schemas.
 
-### QR Phase 1: Foundation
+#### QR Phase 1: Foundation
 - Create `newton-integrity.js` (CRC-32 module, shared between TM and Chalker)
 - Generate and persist `serverId` in TM global config (`results-config.js`)
 - See **Docs/QR.md** for full phase breakdown
 
-### QR Phase 2: Match Assignment QR (TM → Chalker)
+#### QR Phase 2: Match Assignment QR (TM → Chalker)
 - TM generates assignment QR on "Start Match"
 - Chalker scans QR to receive match details
 - See **Docs/QR.md**
 
-### QR Phase 3: Match Result QR (Chalker → TM)
+#### QR Phase 3: Match Result QR (Chalker → TM)
 - Chalker generates result QR on Match Complete
 - TM scans result QR and applies to bracket
 - See **Docs/QR.md**
 
-### Network Phase 1: Network Mode Toggle (TM)
+#### Network Phase 1: Network Mode Toggle (TM)
 - Add network mode on/off toggle to TM settings
 - When off: current behavior, no network features visible
 - When on: attempt hub connection, show status indicator
 
-### Network Phase 2: Chalker Network Client
+#### Network Phase 2: Chalker Network Client
 - Add network-client.js to Chalker
 - Connection status indicator
 - Receive match assignments
 - Send results on completion
 
-### Network Phase 3: TM Network Client
+#### Network Phase 3: TM Network Client
 - Add network-client.js to TM
 - Lane status display
 - Match dispatch UI
 - Result reception
 
-### Network Phase 4: Polish
+#### Network Phase 4: Polish
 - Reconnection handling
 - Error states and recovery
 - Settings UI for network config
 
 ---
 
-## Open Questions (App-Side)
+### Open Questions (App-Side)
 
 1. **Network mode default:** Opt-in (must enable) or auto-detect?
 
@@ -498,7 +915,7 @@ QR communication (Docs/QR.md) is the foundation for TM ↔ Chalker data exchange
 
 ---
 
-## Related Documents
+### Related Documents
 
 - **Docs/QR.md**: QR communication protocol (payload schemas, encoding, integrity)
 - **CHALKER-PERSISTENCE.md**: Chalker's offline storage architecture
@@ -507,7 +924,7 @@ QR communication (Docs/QR.md) is the foundation for TM ↔ Chalker data exchange
 
 ---
 
-## Hub Reference (Separate Project)
+### Hub Reference (Separate Project)
 
 The newton-hub handles:
 - WebSocket server

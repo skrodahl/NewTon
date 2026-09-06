@@ -1,3 +1,43 @@
+## **v5.1.7-beta.1** — Look, No Camera (2026-09-06)
+
+### Network handover (experimental)
+
+Matches can be sent to a Chalker across the local network instead of being carried by QR code. **Experimental, and not yet tested on real hardware.** Nothing changes unless you choose it: the new setting defaults to QR, and with the default selected the app behaves exactly as it did.
+
+The network code lives in `licensed/`, which is **not open source** — see `licensed/LICENSE.md`. It is free to use, with no key and no subscription, under a grant that is revocable for future releases. Everything else in the project remains BSD 3-Clause, and both apps work fully with that directory deleted.
+
+- **New Config setting: Handover — QR code / Network / None.** QR is the default and unchanged. Network hides every QR affordance and offers a Transfer button on a started match in Match Controls. None hides both, for clubs entering results by hand. Configs saved before this setting existed default to QR.
+- **Sending a match.** Assign the match a lane, start it, and press Transfer. It goes to whichever Chalker is serving that lane. Nothing else changes about how you run the tournament.
+- **Receiving a result.** When a Chalker finishes, the match card shows a result is waiting. **It is never applied on its own** — you accept it, and accepting opens the same review you already know from scanning a result QR, lollipop counters and all. A result that is not accepted stays waiting, so there is nothing to lose by leaving it.
+- **Fixing a wrong result.** Corrections are made on the Chalker, which owns the scoring and can undo back across legs, and the corrected result replaces the waiting one. The Tournament Manager never edits machine-recorded scoring — a record either comes from the Chalker or is declared by hand, never a mix of the two.
+- **Why polling rather than a live connection.** A phone sleeps, gets backgrounded, and roams between access points all evening. A connection has to survive all of that; a request that simply happens again in a few seconds does not. There is no connection to lose and nothing to reconnect.
+- **No new dependencies and no broker.** The endpoints are plain PHP served by the container's existing web server, and the state lives in the volume it already mounts.
+
+Groundwork that came with it: the Tournament Manager's assignment payload is now built independently of the QR code that used to render it, so one definition of a match assignment serves both ways of sending it. The Chalker's result side already worked that way. No change to what either produces — the payload was verified byte-identical to the previous code across every combination of lane, referee, missing settings and awkward names.
+
+### Chalker
+
+- **The install banner can be dismissed again, and Install is never a dead end.** Its two buttons were the only inline `onclick` handlers left anywhere in the Chalker — everything else is wired with `addEventListener` — which made them the only thing in the app a strict Content-Security-Policy would silently disable. Where that applied, the banner sat permanently across the bottom keypad row with both buttons inert. They are now wired like every other control. Two further faults in the same few lines: the banner markup sits *after* the scripts, so the buttons are not in the DOM when `chalker.js` runs (the listeners now wait for `DOMContentLoaded`), and `installApp()` returned silently when the browser's deferred install prompt was missing or stale — the button genuinely did nothing. It now closes the banner and remembers the dismissal instead.
+
+### Files changed
+
+- `licensed/` — new, separately licensed directory: `LICENSE.md`, `README.md`, `api/v1/{_common,assign,result,heartbeat,lanes}.php`, `js/network-chalker.js`, `js/network-tm.js`
+- `LICENSE` — scope note naming the `licensed/` carve-out
+- `README.md` — "Licensing split" section
+- `js/qr-bridge.js` — new `buildAssignmentPayload(matchId)`, split out of `openMatchQR()`, which now derives its subtitle's referee name from `signed.ref`; `applyQRResult()` clears the network mailbox once a result has been applied
+- `js/results-config.js` — new `config.chalker.handover` (default `'qr'`), `getChalkerHandover()`, the `transferMatchToDevice()` guard, and load/save wiring
+- `js/bracket-rendering.js` — match card shows Result / QR / Transfer according to the handover setting and whether a result is waiting; bracket card marks a waiting result; Match Controls' scan button hidden outside QR mode
+- `js/clean-match-progression.js` — winner dialog's Scan Results QR button hidden outside QR mode
+- `chalker/js/chalker.js` — new `NewtonChalkerBridge`, the narrow surface the optional network client uses; install-banner listeners wired on `DOMContentLoaded`; `installApp()` no longer returns silently without a deferred prompt; new `hideInstallBanner()`
+- `chalker/index.html` — install-banner buttons use ids instead of inline `onclick`; Network Mode modal no longer claims a licence is required; loads the optional network client
+- `tournament.html` — Handover dropdown in the Config → Chalker section; loads the optional network client
+- `css/styles.css` — styling for a result waiting to be accepted
+- `Docs/NETWORK-LAYER.md` — rewritten for the LAN-only, REST-first proof of concept; the superseded design is retained as an appendix with a note on what it got wrong
+
+### Not yet verified
+
+The PHP endpoints have never been run — there is no PHP interpreter on the development machine — and neither client has run in a browser or over a real network. The clients are tested against stubbed endpoints, which verifies them against the intended contract rather than against the actual server. Run `php -l` over `licensed/api/v1/` and play one match end to end before relying on any of it.
+
 ## **v5.1.6** — One Throw, One Score (2026-09-06)
 
 **Completes the code-improvement plan** (`Docs/CODE-IMPROVEMENT-PLAN.md`) — Phases 1–6 are now done. This release carries the end of Phase 4 (analytics bracket-preview isolation 4.3, NewtonMatchDB write-path atomicity 4.6; the remaining 4.10 schema-version item was reviewed and declined, see below) and the whole of Phase 6 — performance (6.1–6.5) and consolidation (6.7–6.21).

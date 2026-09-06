@@ -2182,9 +2182,14 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         validationMessage.style.display = 'none';
     }
 
-    // Set match ID on scan button so openResultQRScanner() knows which match to validate against
+    // Set match ID on scan button so openResultQRScanner() knows which match to validate against.
+    // Hidden unless the Chalker handover is set to QR (see getChalkerHandover()).
     const scanBtn = document.getElementById('scanResultQRBtn');
-    if (scanBtn) scanBtn.dataset.matchId = matchId;
+    if (scanBtn) {
+        scanBtn.dataset.matchId = matchId;
+        const _qrMode = (typeof getChalkerHandover !== 'function') || getChalkerHandover() === 'qr';
+        scanBtn.style.display = _qrMode ? '' : 'none';
+    }
 
     // Use the match-anchored snapshot recorded at Start Match (toggleActive).
     // This is the reliable baseline for the achievement diff — it can't drift like the
