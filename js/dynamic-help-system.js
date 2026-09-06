@@ -665,28 +665,33 @@ function setupHelpModalInteractions(modal) {
 }
 
 /**
+ * Point the help system at a new page (6.4).
+ *
+ * Called from showPage() — the single place that moves the `.page.active` class —
+ * so the help system learns about a navigation directly instead of inferring it.
+ * This replaced a MutationObserver on the whole body subtree (childList + subtree +
+ * class attributes), which woke on *every* DOM change in the app — each bracket
+ * render, each clock tick — and ran a `querySelector('.page.active')` every time,
+ * to detect an event the app already knows it is causing.
+ *
+ * Safe to call before the help system is initialized: it only updates state, and
+ * updateHelpContext() does nothing while the help modal is closed.
+ *
+ * @param {string} pageId - id of the page now active (e.g. 'setup', 'tournament')
+ * @returns {void}
+ */
+function setHelpPage(pageId) {
+    if (!pageId || pageId === helpState.currentPage) return;
+    helpState.currentPage = pageId;
+    updateHelpContext();
+}
+
+/**
  * SETUP CONTEXT DETECTION
  * Automatically detect user context and show relevant help
  */
 function setupContextDetection() {
-    // Detect page changes
-    const observer = new MutationObserver(() => {
-        const activePage = document.querySelector('.page.active');
-        if (activePage) {
-            const pageId = activePage.id;
-            if (pageId !== helpState.currentPage) {
-                helpState.currentPage = pageId;
-                updateHelpContext();
-            }
-        }
-    });
-
-    observer.observe(document.body, {
-        childList: true,
-        subtree: true,
-        attributes: true,
-        attributeFilter: ['class']
-    });
+    // Page changes arrive via setHelpPage(), called from showPage()
 
     // Detect first-time user
     if (!localStorage.getItem('helpSystemSeen')) {

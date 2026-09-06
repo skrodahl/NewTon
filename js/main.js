@@ -508,6 +508,7 @@ function showPage(pageId) {
     }
 
     // HELP SYSTEM INTEGRATION
+    if (typeof setHelpPage === 'function') setHelpPage(pageId);
     onPageChange(pageId);
 
 }
