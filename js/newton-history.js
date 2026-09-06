@@ -80,6 +80,52 @@ const NewtonHistory = (() => {
     }
 
     /**
+     * Normalize a player name into the key players are matched on across Analytics (6.11).
+     *
+     * Analytics has no stable player id across tournaments — each tournament stores its
+     * own ids — so players are identified by name. Every view that groups, counts or
+     * selects players must agree on this exact normalization, or the same person shows
+     * up as two people (or the Players tab and the Leaderboard report different
+     * win/loss records for one player). Defining it once makes that agreement
+     * structural instead of a convention repeated at 20 call sites.
+     *
+     * @param {string|null|undefined} name - a player name from a match or achievements record
+     * @returns {string|null} the lookup key, or null when there is no name
+     */
+    function _playerKey(name) {
+        return name ? String(name).trim().toLowerCase() : null;
+    }
+
+    /**
+     * Tally match wins and losses into a player map (6.11).
+     *
+     * Shared by the Leaderboard and the Players tab, which had byte-identical copies of
+     * this scan — they must report the same W/L for the same player. Callers own the map
+     * and any further per-match work (the Leaderboard also accumulates legs and averages);
+     * players absent from the map are skipped, exactly as before.
+     *
+     * @param {object[]} matches - match records for one tournament
+     * @param {Object<string, {matchesWon: number, matchesLost: number}>} playerMap - keyed by _playerKey()
+     * @returns {void} mutates playerMap
+     */
+    function _tallyMatchWinLoss(matches, playerMap) {
+        matches.forEach(m => {
+            const k1 = _playerKey(m.player1Name);
+            const k2 = _playerKey(m.player2Name);
+            const pm1 = k1 ? playerMap[k1] : null;
+            const pm2 = k2 ? playerMap[k2] : null;
+
+            if (m.winner === 1) {
+                if (pm1) pm1.matchesWon++;
+                if (pm2) pm2.matchesLost++;
+            } else if (m.winner === 2) {
+                if (pm2) pm2.matchesWon++;
+                if (pm1) pm1.matchesLost++;
+            }
+        });
+    }
+
+    /**
      * Load the match lists for several tournaments at once (6.5).
      *
      * Replaces the `for (const t of …) await …` loops the aggregation views used to
@@ -410,8 +456,8 @@ const NewtonHistory = (() => {
             // Unique players (deduplicate by normalized name across tournaments)
             const playerSet = new Set();
             allMatches.forEach(m => {
-                if (m.player1Name) playerSet.add(m.player1Name.trim().toLowerCase());
-                if (m.player2Name) playerSet.add(m.player2Name.trim().toLowerCase());
+                if (m.player1Name) playerSet.add(_playerKey(m.player1Name));
+                if (m.player2Name) playerSet.add(_playerKey(m.player2Name));
             });
 
             // Scan tournament-level achievements (includes both manual and Chalker data)
@@ -543,7 +589,7 @@ const NewtonHistory = (() => {
     function _persistPlayerSelection() {
         try {
             if (_playersTable && _playersTable.data) {
-                const allKeys = _playersTable.data.map(r => r.name.trim().toLowerCase());
+                const allKeys = _playersTable.data.map(r => _playerKey(r.name));
                 const allSelected = allKeys.every(k => _selectedPlayers.has(k));
                 if (allSelected || _selectedPlayers.size === 0) {
                     localStorage.removeItem('newton_analytics_playerSelection');
@@ -561,7 +607,7 @@ const NewtonHistory = (() => {
             if (!raw) return false;
             const keys = JSON.parse(raw);
             if (!Array.isArray(keys) || keys.length === 0) return false;
-            const validKeys = new Set(rows.map(r => r.name.trim().toLowerCase()));
+            const validKeys = new Set(rows.map(r => _playerKey(r.name)));
             const filtered = keys.filter(k => validKeys.has(k));
             if (filtered.length === 0) return false;
             _selectedPlayers = new Set(filtered);
@@ -605,7 +651,7 @@ const NewtonHistory = (() => {
                 const ta = t.tournamentAchievements || {};
                 Object.entries(ta).forEach(([pid, entry]) => {
                     const name = entry.name || pid;
-                    const key = name.trim().toLowerCase();
+                    const key = _playerKey(name);
                     if (!playerMap[key]) {
                         playerMap[key] = {
                             name: name,
@@ -620,20 +666,7 @@ const NewtonHistory = (() => {
 
             // Scan matches for win/loss counts
             for (const matches of await _loadMatchesFor(tournaments)) {
-                matches.forEach(m => {
-                    const k1 = m.player1Name ? m.player1Name.trim().toLowerCase() : null;
-                    const k2 = m.player2Name ? m.player2Name.trim().toLowerCase() : null;
-                    const pm1 = k1 ? playerMap[k1] : null;
-                    const pm2 = k2 ? playerMap[k2] : null;
-
-                    if (m.winner === 1) {
-                        if (pm1) pm1.matchesWon++;
-                        if (pm2) pm2.matchesLost++;
-                    } else if (m.winner === 2) {
-                        if (pm2) pm2.matchesWon++;
-                        if (pm1) pm1.matchesLost++;
-                    }
-                });
+                _tallyMatchWinLoss(matches, playerMap);
             }
 
             if (seq !== _renderSeq.players) return; // superseded during the DB reads above
@@ -645,7 +678,7 @@ const NewtonHistory = (() => {
             // Restore persisted selection, or default to all selected
             if (_selectedPlayers.size === 0) {
                 if (!_restorePlayerSelection(rows)) {
-                    rows.forEach(r => _selectedPlayers.add(r.name.trim().toLowerCase()));
+                    rows.forEach(r => _selectedPlayers.add(_playerKey(r.name)));
                 }
             }
 
@@ -657,7 +690,7 @@ const NewtonHistory = (() => {
                     defaultSortDir: 'asc',
                     emptyMessage: 'No player data available.',
                     onRowClick: (row) => {
-                        const key = row.name.trim().toLowerCase();
+                        const key = _playerKey(row.name);
                         const nowChecked = !_selectedPlayers.has(key);
                         togglePlayer(row.name, nowChecked);
                         // Update the checkbox in this row
@@ -666,7 +699,7 @@ const NewtonHistory = (() => {
                             const tr = cb.closest('tr');
                             if (tr) {
                                 const nameCell = tr.querySelector('td:nth-child(2)');
-                                if (nameCell && nameCell.textContent.trim().toLowerCase() === key) {
+                                if (nameCell && _playerKey(nameCell.textContent) === key) {
                                     cb.checked = nowChecked;
                                 }
                             }
@@ -676,11 +709,11 @@ const NewtonHistory = (() => {
                         {
                             key: '_select', sortable: false, width: '32px', align: 'center',
                             headerRender: () => {
-                                const allChecked = rows.length > 0 && rows.every(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
+                                const allChecked = rows.length > 0 && rows.every(r => _selectedPlayers.has(_playerKey(r.name)));
                                 return `<input type="checkbox" class="analytics-scope-checkbox"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllPlayers(this.checked)">`;
                             },
                             render: (v, row) => {
-                                const key = row.name.trim().toLowerCase();
+                                const key = _playerKey(row.name);
                                 const checked = _selectedPlayers.has(key) ? ' checked' : '';
                                 return `<input type="checkbox" class="analytics-scope-checkbox"${checked} data-nh-action="toggle-player" data-name="${escHtml(row.name)}">`;
                             }
@@ -715,7 +748,7 @@ const NewtonHistory = (() => {
      * @param {boolean} checked
      */
     function togglePlayer(playerName, checked) {
-        const key = playerName.trim().toLowerCase();
+        const key = _playerKey(playerName);
         if (checked) {
             _selectedPlayers.add(key);
         } else {
@@ -724,7 +757,7 @@ const NewtonHistory = (() => {
         // Update header checkbox
         const headerCb = document.querySelector('#playersTableContainer thead .analytics-scope-checkbox');
         if (headerCb && _playersTable && _playersTable.data) {
-            headerCb.checked = _playersTable.data.every(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
+            headerCb.checked = _playersTable.data.every(r => _selectedPlayers.has(_playerKey(r.name)));
         }
         _persistPlayerSelection();
         renderProfilePanel();
@@ -738,7 +771,7 @@ const NewtonHistory = (() => {
         if (!_playersTable || !_playersTable.data) return;
         _selectedPlayers.clear();
         if (checked) {
-            _playersTable.data.forEach(r => _selectedPlayers.add(r.name.trim().toLowerCase()));
+            _playersTable.data.forEach(r => _selectedPlayers.add(_playerKey(r.name)));
         }
         // Update all row checkboxes
         document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox').forEach(cb => {
@@ -767,7 +800,7 @@ const NewtonHistory = (() => {
      */
     function _applyPendingFocus() {
         if (!_pendingPlayerFocus) return;
-        const key = _pendingPlayerFocus.trim().toLowerCase();
+        const key = _playerKey(_pendingPlayerFocus);
         _pendingPlayerFocus = null;
         _selectedPlayers.clear();
         _selectedPlayers.add(key);
@@ -788,7 +821,7 @@ const NewtonHistory = (() => {
         const panel = document.getElementById('playersProfilePanel');
         if (!panel || !_playersTable || !_playersTable.data) return;
 
-        const selected = _playersTable.data.filter(r => _selectedPlayers.has(r.name.trim().toLowerCase()));
+        const selected = _playersTable.data.filter(r => _selectedPlayers.has(_playerKey(r.name)));
 
         if (selected.length === 0) {
             _comparisonTable = null;
@@ -903,7 +936,7 @@ const NewtonHistory = (() => {
 
                 Object.entries(ta).forEach(([pid, entry]) => {
                     const name = entry.name || pid;
-                    const key = name.trim().toLowerCase();
+                    const key = _playerKey(name);
                     const s = entry.stats || {};
 
                     if (!playerMap[key]) {
@@ -968,21 +1001,15 @@ const NewtonHistory = (() => {
                 });
             }
 
-            // Scan matches for win/loss and leg counts
+            // Scan matches for win/loss (shared) and leg counts (leaderboard only)
             for (const matches of await _loadMatchesFor(tournaments)) {
+                _tallyMatchWinLoss(matches, playerMap);
+
                 matches.forEach(m => {
-                    const k1 = m.player1Name ? m.player1Name.trim().toLowerCase() : null;
-                    const k2 = m.player2Name ? m.player2Name.trim().toLowerCase() : null;
+                    const k1 = _playerKey(m.player1Name);
+                    const k2 = _playerKey(m.player2Name);
                     const pm1 = k1 ? playerMap[k1] : null;
                     const pm2 = k2 ? playerMap[k2] : null;
-
-                    if (m.winner === 1) {
-                        if (pm1) pm1.matchesWon++;
-                        if (pm2) pm2.matchesLost++;
-                    } else if (m.winner === 2) {
-                        if (pm2) pm2.matchesWon++;
-                        if (pm1) pm1.matchesLost++;
-                    }
 
                     if (m.legsWon) {
                         if (pm1) { pm1.legsWon += (m.legsWon.p1 || 0); pm1.legsLost += (m.legsWon.p2 || 0); }
