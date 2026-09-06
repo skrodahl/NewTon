@@ -1772,21 +1772,20 @@ function showImportStatus(type, message) {
     }
 }
 
+/**
+ * Redraw the CAD-style status panel (the "watermark" box on the Tournament page)
+ * from the current tournament state.
+ *
+ * Reads the in-memory global `tournament`, which is authoritative: every writer of
+ * the `currentTournament` localStorage record serializes it from that same object,
+ * so the stored blob can never be fresher. Re-parsing it here would only add a full
+ * JSON.parse of the whole tournament to every save.
+ *
+ * @returns {void}
+ */
 function updateTournamentWatermark() {
     const watermark = document.getElementById('watermark-right');
     if (watermark) {
-        // Get current tournament data from localStorage
-        const currentTournamentData = localStorage.getItem('currentTournament');
-        let tournament = null;
-
-        if (currentTournamentData) {
-            try {
-                tournament = JSON.parse(currentTournamentData);
-            } catch (e) {
-                console.warn('Could not parse current tournament data');
-            }
-        }
-
         if (tournament) {
             // Truncate tournament name if needed
             const truncatedName = tournament.name.length > 38

@@ -39,6 +39,10 @@ All three now reject on transaction abort so a failure surfaces to the caller in
 - **One source for the achievement-points formula.** The calculation (180s + tons + high outs + short legs, each times its configured point value) was copy-pasted in five places across the Leaderboard, the tournament-points computation, the Matches tab, and the match-detail views. It's now a single `_achPoints(stats, p)` helper. No behavior change — the numbers are identical — but a future change to the point rules (or a new achievement type) is now a one-line edit instead of five that can drift apart.
 - **One source for decoding Chalker visit scores.** The base64 decoding of a leg's per-visit scores was inlined twice in the analytics views (the three-dart-average aggregation and the match-detail leg table) instead of using the existing `NewtonStats.decodeVisits()`. Both now call it, so the encoded-visit format is defined in exactly one place. No behavior change (round-trip decode verified identical).
 
+### Performance (Phase 6)
+
+- **The status panel no longer re-parses the whole tournament on every save.** `updateTournamentWatermark()` runs after each `saveTournament()` — and it began by re-reading the `currentTournament` record back out of localStorage and `JSON.parse`-ing the entire tournament, purely to display a name, a few counts and a status. It now reads the in-memory tournament object, which is the same data: every writer of that localStorage record serializes it *from* the in-memory object, so the stored copy can never be newer. One full parse of the tournament blob is gone from every save (and every bracket render), and the panel is now consistent with the header's Active Tournament display, which already read the in-memory object. No visible change.
+
 ### Dead code removal (Phase 6)
 
 - **Removed an unused duplicate of the excluded-lanes parser.** `parseExcludedLanes()` in `lane-management.js` was byte-identical to `parseExcludedLanesString()` in `results-config.js` but had no callers anywhere in the codebase. Deleted it; the live `parseExcludedLanesString()` (with its one caller) is unchanged.
@@ -66,7 +70,7 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 - `js/lane-management.js` — Phase 6: removed the unused duplicate `parseExcludedLanes()`
 - `js/results-config.js` — Phase 6: new `isDeveloperMode()` helper (reads in-memory `config`); new `getSortedPaidPlayers()` helper replacing 3 duplicated results sorts
 - `js/player-management.js` — Phase 6: late-reg modal uses `isDeveloperMode()` instead of an inline localStorage-parsing IIFE
-- `js/tournament-management.js` (watermark) — Phase 6: both developer-mode checks use `isDeveloperMode()` instead of inline IIFEs
+- `js/tournament-management.js` (watermark) — Phase 6: both developer-mode checks use `isDeveloperMode()` instead of inline IIFEs; `updateTournamentWatermark()` reads the in-memory `tournament` instead of re-reading and re-parsing `currentTournament` from localStorage (6.3), with JSDoc added
 - `js/qr-bridge.js` — Phase 6 (6.20): assignment payload now carries `slt` (short-leg threshold); (6.21) note that the QR-detect helpers intentionally differ from the Chalker's
 - `chalker/js/chalker.js` — Phase 6 (6.20): `getShortLegThreshold()` helper prefers the assigned threshold, falls back to the built-in table; reads `slt` from the QR payload; (6.21) divergence note
 - `chalker/sw.js` — cache bumped to `chalker-v110`
