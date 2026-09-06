@@ -41,6 +41,9 @@ All three now reject on transaction abort so a failure surfaces to the caller in
 
 ### Performance (Phase 6)
 
+- **Completing a match saves once instead of two to four times.** Recording a result touched the saved tournament repeatedly in a row: once for the result, again after recalculating live rankings, again if the match set a placement (the Backside Final's 3rd place, or a Single Elimination bronze match's 3rd/4th), and again if it finished the tournament. Each of those rewrote the entire tournament — every player, every match — and redrew the status panel and results table with it. It all happens in one go now: the result, the rankings and any placement are worked out first, then written once. Playing a full 32-player double-elimination tournament went from 127 saves to 63. Nothing about the results changes — verified by replaying whole tournaments in both formats at every bracket size, including byes, and comparing the complete state after every single match.
+- **Removed a dead "reopen Match Controls" path.** After a completion, the code could schedule the Match Controls panel to reopen half a second later, on top of the refresh it had already scheduled — but the flag that triggered it was never switched on anywhere in the app, so the branch could never run. Deleted, along with the two leftover places that reset the unused flag.
+
 - **The help system stopped watching the entire page for changes.** To notice which page you were on, it ran a MutationObserver over the whole document — every element, every class attribute — so it woke up on *every* DOM change the app made: each bracket render, each clock tick, each table repaint, and asked "which page is active?" each time. The app already knows when it changes page, so it now simply says so. No observer remains in the codebase.
 - **F1 help matches the page you're on after a reload.** The app restores your last page when it loads, but the old page-detection was only installed half a second later and never saw that first transition — so reloading straight onto, say, the Tournament page and pressing F1 gave you Setup help until you navigated somewhere else. Fixed as a side effect of the change above.
 
@@ -72,7 +75,7 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 
 ### Files changed
 
-- `js/clean-match-progression.js` — Phase 6: `completeMatch()`'s NewtonDB match + meta writes now invalidate the Analytics cache once both land (6.5)
+- `js/clean-match-progression.js` — Phase 6: `completeMatch()` persists once at the end of the success path instead of 2–4 times (6.2), with the `isTournamentFinal` computation moved inside the following `try` so a throw can't skip the save; dead `window.commandCenterWasOpen` reopen branch + both clear-the-flag blocks removed (6.2); NewtonDB match + meta writes now invalidate the Analytics cache once both land (6.5)
 - `js/newton-history.js` — `viewBracket()` stashes the prior real `currentTournament` into `_preAnalyticsPreviewTournament` before overwriting (skips re-stashing when the prior is already a preview); Phase 6: new `_matchesByTournament` cache + `_loadMatchesFor()` (`Promise.all`, input order preserved) replacing the four sequential `for … await` match fetches in `renderDashboard`/`renderPlayersTab`/`renderLeaderboard`/`renderAllMatches`, cleared by `_invalidateCache()` (6.5); extracted `_achPoints(stats, p)` helper, replacing 5 duplicated achievement-points formulas; replaced 2 inline base64 visit decodes with `NewtonStats.decodeVisits()`
 - `js/main.js` — Phase 6: `showPage()` now calls `setHelpPage(pageId)` (6.4); new `exitAnalyticsBracketPreview()` (stash-restore on preview exit); `autoLoadCurrentTournament()` now copies `_analyticsPreview` so the no-persist guard survives a reload
 - `tournament.html` — Analytics back button calls `exitAnalyticsBracketPreview()` instead of `localStorage.removeItem('currentTournament')`; Phase 6: Config CHALKER blurb now notes the short-leg threshold is sent
@@ -90,7 +93,7 @@ Item 4.10 proposed adding a `schemaVersion` marker to the localStorage records. 
 - `chalker/sw.js` — cache bumped to `chalker-v110`
 - `chalker/index.html` — `chalker.js?v=13`
 - `CLAUDE.md` — added the additive-only localStorage schema-evolution principle (Data Integrity)
-- `Docs/CODE-IMPROVEMENT-PLAN.md` — Phase 4 complete (4.3/4.6 done, 4.2 corrected, 4.10 closed); Phase 6 in progress (6.1 part A, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.12–6.20 done; 6.21 closed; 6.1 part B declined)
+- `Docs/CODE-IMPROVEMENT-PLAN.md` — Phase 4 complete (4.3/4.6 done, 4.2 corrected, 4.10 closed); Phase 6 in progress (6.1 part A, 6.2, 6.3, 6.4, 6.5, 6.6, 6.7, 6.8, 6.9, 6.10, 6.12–6.20 done; 6.21 closed; 6.1 part B declined)
 
 ### Migration
 

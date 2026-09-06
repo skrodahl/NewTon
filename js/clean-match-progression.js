@@ -620,8 +620,9 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
     if (success) {
 
-        saveTournament();
-        if (typeof updateResultsTable === 'function') updateResultsTable();
+        // Persisting is deferred to a single saveTournament() at the end of this path
+        // (6.2) — the hooks below still mutate `tournament` (placements, status,
+        // readOnly), and every reader in between works off the in-memory object.
         if (typeof updateMatchHistory === 'function') updateMatchHistory();
 
         // Write to match register (fire-and-forget; skip AUTO walkovers)
@@ -672,8 +673,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         if (!window.rebuildInProgress && !window.processingAutoAdvancements) {
             try {
                 calculateAllRankings();
-                if (typeof saveTournament === 'function') saveTournament(); // Save updated rankings
-                if (typeof updateResultsTable === 'function') updateResultsTable(); // Refresh Registration page results
             } catch (e) {
                 console.warn('Could not calculate live rankings:', e);
             }
@@ -691,9 +690,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 tournament.placements[String(loser.id)] = 3;
 
                 console.log(`✓ 3rd place: ${loser.name}`);
-
-                if (typeof saveTournament === 'function') saveTournament();
-                if (typeof updateResultsTable === 'function') updateResultsTable();
 
                 // Note: This placement will be cleared and recalculated when Grand Final completes
                 // This ensures consistency with other backside matches that set placement immediately
@@ -715,9 +711,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 tournament.placements[String(loser.id)] = 4;
 
                 console.log(`✓ 3rd place: ${winner.name}, 4th place: ${loser.name}`);
-
-                if (typeof saveTournament === 'function') saveTournament();
-                if (typeof updateResultsTable === 'function') updateResultsTable();
             }
         } catch (e) {
             console.error('Bronze completion error', { matchId, winner, loser, error: e });
@@ -726,12 +719,13 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         // Tournament completion hook: detect final match and set placements
         // DE: GRAND-FINAL has {} progression. SE: last FS round has {} progression.
         // SE bronze also has {} but should NOT trigger completion — only the SE final does.
-        const completionTable = getProgressionTable();
-        const completionRule = completionTable && completionTable[matchId];
-        const isSEBronze = getFormat() === 'SE' && isSEBronzeMatch(matchId, tournament.bracketSize);
-        const isTournamentFinal = completionRule && Object.keys(completionRule).length === 0 && !isSEBronze;
-
         try {
+            // Computed inside the try so a throw here can't skip the save below
+            const completionTable = getProgressionTable();
+            const completionRule = completionTable && completionTable[matchId];
+            const isSEBronze = getFormat() === 'SE' && isSEBronzeMatch(matchId, tournament.bracketSize);
+            const isTournamentFinal = completionRule && Object.keys(completionRule).length === 0 && !isSEBronze;
+
             if (isTournamentFinal) {
                 const format = getFormat();
                 console.log(`🏆 ${format} Final completed - calculating all rankings...`);
@@ -758,8 +752,6 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 tournament.readOnly = true;
 
                 console.log(`✓ Tournament completed with full rankings — Final: ${winner.name} defeats ${loser.name}`);
-
-                if (typeof saveTournament === 'function') saveTournament();
 
                 // Finalize tournament in match register (fire-and-forget)
                 if (typeof NewtonDB !== 'undefined') {
@@ -823,6 +815,14 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         } catch (e) {
             console.error('Tournament completion error', { matchId, winner, loser, error: e });
         }
+
+        // Single persist for the whole completion (6.2). Everything above mutates the
+        // in-memory tournament — the match result, live rankings, and any placement or
+        // tournament-completion hook — and this writes all of it once. Before
+        // processAutoAdvancements(), which completes walkovers through this same path
+        // and so persists its own results.
+        saveTournament();
+        if (typeof updateResultsTable === 'function') updateResultsTable();
 
         // Skip auto-advancements during rebuild to prevent transaction corruption
         if (!window.rebuildInProgress) {
@@ -2276,11 +2276,6 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         console.log(`Winner selection cancelled for match ${matchId}`);
         cleanup();
         popDialog(); // Use dialog stack to close and restore parent
-
-        // Clear flag
-        if (window.commandCenterWasOpen) {
-            window.commandCenterWasOpen = false;
-        }
     };
 
     const handleConfirm = () => {
@@ -2315,11 +2310,6 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         onConfirm(winnerLegs, loserLegs, achievements);
         cleanup();
         popDialog(); // Use dialog stack to close and restore parent
-
-        // Clear flag
-        if (window.commandCenterWasOpen) {
-            window.commandCenterWasOpen = false;
-        }
     };
 
     const cleanup = () => {
@@ -2746,13 +2736,6 @@ function validateAndShowWinnerDialog(matchId, playerNumber) {
             }, 100);
         }
 
-        // If Command Center was open when completion was initiated, reopen it after completion
-        if (window.commandCenterWasOpen && typeof showMatchCommandCenter === 'function') {
-            setTimeout(() => {
-                showMatchCommandCenter();
-                window.commandCenterWasOpen = false; // Clear flag
-            }, 500); // Same delay as confirmation path
-        }
     }
 
     return success;
