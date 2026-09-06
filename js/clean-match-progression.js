@@ -645,14 +645,26 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 achievements:     achievements || null,
                 format:           { sc: (typeof config !== 'undefined' && config.legs && config.legs.x01Format) || 501, bo: match.legs || 3 }
             };
-            NewtonDB.saveMatch(_dbMatch).catch(e => console.warn('NewtonDB saveMatch failed:', e));
-            NewtonDB.saveTournamentMeta({
+            const _matchSaved = NewtonDB.saveMatch(_dbMatch).catch(e => console.warn('NewtonDB saveMatch failed:', e));
+            const _metaSaved = NewtonDB.saveTournamentMeta({
                 tournamentId:     String(tournament.id),
                 tournamentName:   tournament.name,
                 tournamentFormat: tournament.format || 'DE',
                 playerCount:      (typeof players !== 'undefined' ? players.filter(p => !p.isBye).length : 0),
                 startedAt:        Math.floor(Date.now() / 1000)
             }).catch(e => console.warn('NewtonDB saveTournamentMeta failed:', e));
+
+            // Analytics caches tournament records and their match lists; drop the cached
+            // copies once these writes land, so re-completing a match in an unlocked
+            // tournament can't leave Analytics showing pre-edit data. Deliberately after
+            // the writes, not before: invalidating first would let a read in between
+            // repopulate the cache with the old records. Guarded — Analytics may not be
+            // loaded, and this must never affect match completion.
+            Promise.all([_matchSaved, _metaSaved]).then(() => {
+                if (typeof NewtonHistory !== 'undefined' && NewtonHistory.invalidateCache) {
+                    NewtonHistory.invalidateCache();
+                }
+            });
         }
 
         // Calculate live rankings after every match completion (reuse existing logic)

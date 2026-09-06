@@ -2813,9 +2813,19 @@ function undoManualTransaction(transactionId) {
     // consequential matches (e.g. QR-completed downstream results), not just the
     // target, so no orphaned records are left for Analytics to count
     if (typeof NewtonDB !== 'undefined' && tournament && tournament.id) {
-        rolledBackMatchIds.forEach(rolledBackId => {
+        const deletions = rolledBackMatchIds.map(rolledBackId =>
             NewtonDB.deleteMatch(String(tournament.id), rolledBackId)
-                .catch(e => console.warn('NewtonDB deleteMatch failed:', e));
+                .catch(e => console.warn('NewtonDB deleteMatch failed:', e))
+        );
+
+        // Drop Analytics' cached tournament + match lists once the deletes land, so an
+        // undo in an unlocked tournament can't leave Analytics counting removed matches
+        // (after, not before — invalidating first would let a read in between recache
+        // the stale records). Guarded: Analytics may not be loaded.
+        Promise.all(deletions).then(() => {
+            if (typeof NewtonHistory !== 'undefined' && NewtonHistory.invalidateCache) {
+                NewtonHistory.invalidateCache();
+            }
         });
     }
 

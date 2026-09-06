@@ -46,6 +46,15 @@ const NewtonHistory = (() => {
     /** Cached full tournament list from DB (loaded once per render cycle) */
     let _allTournaments = null;
 
+    /**
+     * Cached match lists, keyed by tournamentId (6.5). Analytics re-renders on every
+     * point-mode and layer toggle, but those change only client-side multipliers — the
+     * match records are identical, so refetching them from IndexedDB each time is pure
+     * waste. Cleared together with _allTournaments by _invalidateCache().
+     * @type {Map<string, object[]>}
+     */
+    let _matchesByTournament = new Map();
+
     /** Dirty flags — views that need recompute after scope change */
     let _dirty = { dashboard: true, leaderboard: true, players: true, register: true };
 
@@ -64,9 +73,34 @@ const NewtonHistory = (() => {
         return _allTournaments;
     }
 
-    /** Invalidate the cached tournament list (e.g. after import or delete). */
+    /** Invalidate the cached tournament list and match lists (e.g. after import or delete). */
     function _invalidateCache() {
         _allTournaments = null;
+        _matchesByTournament.clear();
+    }
+
+    /**
+     * Load the match lists for several tournaments at once (6.5).
+     *
+     * Replaces the `for (const t of …) await …` loops the aggregation views used to
+     * run: those issued one IndexedDB round-trip after another, when the reads are
+     * independent and can all be in flight together. Results are returned in the same
+     * order as `tournaments` (Promise.all preserves input order), so callers that pair
+     * them back up by index — or render them in order — behave exactly as before.
+     *
+     * Already-cached tournaments resolve without touching the DB at all.
+     *
+     * @param {object[]} tournaments - tournament meta records (need `tournamentId`)
+     * @returns {Promise<object[][]>} one match array per tournament, in input order
+     */
+    async function _loadMatchesFor(tournaments) {
+        return Promise.all(tournaments.map(async t => {
+            const id = t.tournamentId;
+            if (_matchesByTournament.has(id)) return _matchesByTournament.get(id);
+            const matches = await NewtonDB.getMatchesByTournament(id);
+            _matchesByTournament.set(id, matches);
+            return matches;
+        }));
     }
 
     /**
@@ -369,10 +403,9 @@ const NewtonHistory = (() => {
 
             // Gather all matches across all tournaments
             const allMatches = [];
-            for (const t of tournaments) {
-                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+            (await _loadMatchesFor(tournaments)).forEach(matches => {
                 allMatches.push(...matches);
-            }
+            });
 
             // Unique players (deduplicate by normalized name across tournaments)
             const playerSet = new Set();
@@ -586,8 +619,7 @@ const NewtonHistory = (() => {
             }
 
             // Scan matches for win/loss counts
-            for (const t of tournaments) {
-                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+            for (const matches of await _loadMatchesFor(tournaments)) {
                 matches.forEach(m => {
                     const k1 = m.player1Name ? m.player1Name.trim().toLowerCase() : null;
                     const k2 = m.player2Name ? m.player2Name.trim().toLowerCase() : null;
@@ -937,8 +969,7 @@ const NewtonHistory = (() => {
             }
 
             // Scan matches for win/loss and leg counts
-            for (const t of tournaments) {
-                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+            for (const matches of await _loadMatchesFor(tournaments)) {
                 matches.forEach(m => {
                     const k1 = m.player1Name ? m.player1Name.trim().toLowerCase() : null;
                     const k2 = m.player2Name ? m.player2Name.trim().toLowerCase() : null;
@@ -1878,8 +1909,11 @@ const NewtonHistory = (() => {
         try {
             const tournaments = await getScopedTournaments();
 
-            for (const t of tournaments) {
-                const matches = await NewtonDB.getMatchesByTournament(t.tournamentId);
+            const matchLists = await _loadMatchesFor(tournaments);
+
+            for (let i = 0; i < tournaments.length; i++) {
+                const t = tournaments[i];
+                const matches = matchLists[i];
                 const p = _getActivePoints(t);
 
                 matches.forEach(m => {
