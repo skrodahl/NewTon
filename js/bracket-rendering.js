@@ -11,6 +11,15 @@ let dragStart = { x: 0, y: 0 };
 let panOffset = { x: 0, y: 0 };
 let initialBracketRender = true;
 
+// Transaction history for the current render pass (6.1).
+// renderMatch() -> isMatchUndoable() needs the history for every card; without
+// this the whole log was re-read and re-parsed from localStorage once per match
+// (~63 times per 32-player render, and renderBracket() runs after every lane,
+// referee and completion change). Set only for the duration of one synchronous
+// renderCleanBracket() call, so no history writer can leave it stale; when it is
+// null, isMatchUndoable() reads localStorage as before.
+let _renderPassHistory = null;
+
 function initializeBracketControls() {
     const viewport = document.getElementById('bracketViewport');
     if (viewport) {
@@ -55,7 +64,14 @@ function renderBracket() {
     }
 
     clearBracket();
-    renderCleanBracket();
+
+    // Parse the transaction history once for the whole pass (see _renderPassHistory)
+    _renderPassHistory = getTournamentHistory();
+    try {
+        renderCleanBracket();
+    } finally {
+        _renderPassHistory = null;
+    }
 
     // Update CAD information box to reflect current tournament state
     if (typeof updateTournamentWatermark === 'function') {
@@ -2335,7 +2351,8 @@ function isMatchUndoable(matchId) {
     // Read-only tournaments cannot be undone
     if (tournament && tournament.readOnly) return false;
 
-    const history = getTournamentHistory();
+    // Reuse the render pass's already-parsed history when called from renderMatch()
+    const history = _renderPassHistory || getTournamentHistory();
     if (history.length === 0) return false;
 
     const match = matches.find(m => m.id === matchId);
