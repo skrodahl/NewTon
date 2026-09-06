@@ -2333,6 +2333,60 @@ if (typeof window !== 'undefined') {
 // --- START: Surgical Undo Implementation ---
 
 /**
+ * Finds the downstream matches that block undoing a completed match (6.8).
+ *
+ * Single source for the "is anything downstream in the way?" scan. Undoing a match
+ * un-advances its winner and loser, so it is unsafe once a destination match has
+ * started (live) or has a result a human/Chalker entered (MANUAL/QR). An AUTO
+ * (walkover) completion downstream does not block — it is re-derivable.
+ *
+ * Both callers derive their answer from this list rather than repeating the walk:
+ * isMatchUndoable() only asks whether it is empty; getDetailedMatchState() turns it
+ * into the "Cannot Undo, blocked by ..." status text. The two had byte-identical
+ * copies of this scan that had to be kept in lockstep — and both carried the same
+ * bug when QR completions were introduced.
+ *
+ * Does NOT decide undo eligibility on its own: each caller keeps its own read-only,
+ * walkover and "has a MANUAL/QR transaction" gates, which differ in what they return.
+ *
+ * @param {string} matchId - The match ID being considered for undo (e.g., 'FS-1-1')
+ * @param {Array<object>} history - Already-loaded transaction history (passed in so
+ *   the caller controls the read — the render pass reuses one parsed copy)
+ * @returns {Array<{matchId: string, live: boolean}>} Blocking matches in
+ *   winner-then-loser order; empty when nothing blocks (including when the
+ *   tournament has no progression table or no entry for this match)
+ */
+function getUndoBlockingMatches(matchId, history) {
+    const blockers = [];
+
+    const progressionTable = getProgressionTable();
+    if (!tournament || !tournament.bracketSize || !progressionTable) return blockers;
+
+    const progression = progressionTable[matchId];
+    if (!progression) return blockers;
+
+    // Check where this match's winner and loser were advanced to
+    ['winner', 'loser'].forEach(outcome => {
+        if (!progression[outcome]) return;
+
+        const [targetMatchId] = progression[outcome];
+        const targetMatch = matches.find(m => m.id === targetMatchId);
+        if (!targetMatch) return;
+
+        if (targetMatch.active) {
+            blockers.push({ matchId: targetMatchId, live: true });
+        } else if (targetMatch.completed) {
+            const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
+            if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
+                blockers.push({ matchId: targetMatchId, live: false });
+            }
+        }
+    });
+
+    return blockers;
+}
+
+/**
  * Checks if a match can be safely undone without breaking tournament integrity.
  *
  * @param {string} matchId - The match ID to check (e.g., 'FS-1-1', 'BS-2-3')
@@ -2366,44 +2420,8 @@ function isMatchUndoable(matchId) {
         return false; // No undoable transaction found for this match
     }
 
-    // Check downstream matches - block undo if any downstream match is live or was completed via MANUAL/QR transaction
-    const _undoableTable = getProgressionTable();
-    if (tournament.bracketSize && _undoableTable) {
-        const progression = _undoableTable[matchId];
-        if (progression) {
-            // Check if winner's destination is live or has a MANUAL/QR completion
-            if (progression.winner) {
-                const [targetMatchId] = progression.winner;
-                const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.active) {
-                    return false; // Blocked by live downstream match
-                }
-                if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
-                        return false; // Blocked by MANUAL/QR downstream match
-                    }
-                }
-            }
-
-            // Check if loser's destination is live or has a MANUAL/QR completion
-            if (progression.loser) {
-                const [targetMatchId] = progression.loser;
-                const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.active) {
-                    return false; // Blocked by live downstream match
-                }
-                if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
-                        return false; // Blocked by MANUAL/QR downstream match
-                    }
-                }
-            }
-        }
-    }
-
-    return true; // Safe to undo - match has MANUAL/QR transaction, no live downstream matches, and no MANUAL/QR downstream dependencies
+    // Safe to undo when nothing downstream is live or manually/QR completed
+    return getUndoBlockingMatches(matchId, history).length === 0;
 }
 
 // Helper function to find matches that are directly affected by undoing a specific match
@@ -4470,53 +4488,17 @@ function getDetailedMatchState(matchId) {
         return { state: 'completed', text: 'Cannot Undo' };
     }
 
-    // Check for blocking downstream matches (uses correct progression table for SE or DE)
-    const _progressionTable = getProgressionTable();
-    if (tournament.bracketSize && _progressionTable) {
-        const progression = _progressionTable[matchId];
-        if (progression) {
-            const blockingMatches = [];
+    // Describe any blocking downstream matches (same scan isMatchUndoable() uses)
+    const blockingMatches = getUndoBlockingMatches(matchId, history)
+        .map(blocker => blocker.live ? `${blocker.matchId} (live)` : blocker.matchId);
 
-            // Check winner's destination
-            if (progression.winner) {
-                const [targetMatchId] = progression.winner;
-                const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.active) {
-                    blockingMatches.push(`${targetMatchId} (live)`);
-                } else if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
-                        blockingMatches.push(targetMatchId);
-                    }
-                }
-            }
-
-            // Check loser's destination
-            if (progression.loser) {
-                const [targetMatchId] = progression.loser;
-                const targetMatch = matches.find(m => m.id === targetMatchId);
-                if (targetMatch && targetMatch.active) {
-                    blockingMatches.push(`${targetMatchId} (live)`);
-                } else if (targetMatch && targetMatch.completed) {
-                    const targetTransaction = history.find(t => t.matchId === targetMatchId && t.type === 'COMPLETE_MATCH');
-                    if (targetTransaction && (targetTransaction.completionType === 'MANUAL' || targetTransaction.completionType === 'QR')) {
-                        blockingMatches.push(targetMatchId);
-                    }
-                }
-            }
-
-            // Generate text based on blocking matches
-            if (blockingMatches.length === 0) {
-                return { state: 'completed', text: 'Can Undo' };
-            } else if (blockingMatches.length === 1) {
-                return { state: 'completed', text: `Cannot Undo, blocked by ${blockingMatches[0]}` };
-            } else {
-                return { state: 'completed', text: `Cannot Undo, blocked by ${blockingMatches[0]} and ${blockingMatches[1]}` };
-            }
-        }
+    if (blockingMatches.length === 0) {
+        return { state: 'completed', text: 'Can Undo' };
+    } else if (blockingMatches.length === 1) {
+        return { state: 'completed', text: `Cannot Undo, blocked by ${blockingMatches[0]}` };
+    } else {
+        return { state: 'completed', text: `Cannot Undo, blocked by ${blockingMatches[0]} and ${blockingMatches[1]}` };
     }
-
-    return { state: 'completed', text: 'Can Undo' };
 }
 
 // Update center watermark with message (supports both string and two-line object)
