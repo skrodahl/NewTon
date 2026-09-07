@@ -28,10 +28,6 @@ It is worth saying why this became a setting rather than a sterner warning. The 
 
 Behind it, the formats are now defined in one place instead of being written into the tournament screen by hand. That is invisible today; it matters the next time a format is added.
 
-### The idea that was rejected
-
-The first thought was to allow converting a tournament between formats, provided nothing past the first round had been played. It was dropped, and for a better reason than complexity: in double elimination, a first-round loser is *already advanced* into a backside match the moment that match completes, and that advancement is recorded in the tournament's history. Converting would mean rewriting or discarding history entries — the record everything else is derived from — to recover from a mis-click. Preventing the situation is a great deal safer than unpicking it.
-
 ---
 
 ## The Status Panel Tells the Truth
