@@ -436,6 +436,12 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             </div>
 
                             <div class="form-group">
+                                <label>Tournament formats to offer</label>
+                                <small class="field-help">Which formats appear when starting a tournament. Hide the ones your club never plays so they cannot be picked by mistake. Existing tournaments are unaffected.</small>
+                                <div id="formatVisibilityOptions" class="checkbox-group" style="margin-top: 8px;"></div>
+                            </div>
+
+                            <div class="form-group">
                                 <label for="refereeSuggestionsLimit">Number of referee suggestions to show</label>
                                 <input type="number" id="refereeSuggestionsLimit" value="10" min="5" max="20" style="width: 80px;">
                                 <small class="field-help">Maximum number of players to show in each referee category (Winners, Losers, Assignments)</small>

@@ -38,6 +38,7 @@ const DEFAULT_CONFIG = {
         requireLaneForStart: false
     },
     ui: {
+        hiddenFormats: [],
         confirmWinnerSelection: true,
         autoOpenMatchControls: true,
         defaultPaid: false,
@@ -139,6 +140,7 @@ function applyConfigToUI() {
     safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
     safeSetValue('chalkerShortLegThreshold', config.legs.shortLegThreshold || 21);
     safeSetValue('chalkerHandover', getChalkerHandover());
+    renderFormatVisibilityOptions();
 
     // Application title
     if (config.clubName) {
@@ -279,6 +281,108 @@ function saveApplicationSettings() {
 }
 
 /**
+ * Every tournament format the application can create.
+ *
+ * The single source for a format's presentation: its name, its one-line description,
+ * and the player range it accepts. Both the Shuffle & Draw cards and the Config
+ * page's visibility checkboxes are built from this list, so adding a format means
+ * adding one entry here rather than editing two places that can drift apart.
+ *
+ * Deliberately presentation only. A format's *behaviour* — its progression tables,
+ * its rendering path, its ranking rules — lives with the rest of the tournament
+ * logic and is not abstracted here. Adding a new format still means teaching those
+ * systems about it; this list just stops the UI from being written out twice.
+ *
+ * Order is display order.
+ *
+ * @type {Array<{id: string, name: string, blurb: string, minPlayers: number, maxPlayers: number}>}
+ */
+const TOURNAMENT_FORMATS = [
+    {
+        id: 'DE',
+        name: 'Double Elimination Cup',
+        blurb: 'Players get a second chance through the backside',
+        minPlayers: 4,
+        maxPlayers: 32
+    },
+    {
+        id: 'SE',
+        name: 'Single Elimination Cup',
+        blurb: 'Players are eliminated after one loss',
+        minPlayers: 4,
+        maxPlayers: 32
+    }
+];
+
+/**
+ * The formats offered when starting a tournament.
+ *
+ * Clubs that only ever play one way can hide the others on the Config page, so the
+ * wrong format cannot be picked by accident on tournament night. Hiding is a display
+ * filter on *creation only* — an already-created tournament in a hidden format still
+ * opens, renders, undoes and exports exactly as before.
+ *
+ * A blocklist rather than an allowlist, by design: a format added in a future release
+ * appears for everyone rather than staying invisible to the clubs most likely to have
+ * configured this. Absent or empty means everything is shown, so existing installations
+ * are unaffected.
+ *
+ * Never returns an empty list — the Config page prevents hiding the last format, and
+ * this falls back to the full list if a stored value somehow hides them all.
+ *
+ * @returns {Array<object>} entries from TOURNAMENT_FORMATS, in display order
+ */
+function getVisibleFormats() {
+    const hidden = (config && config.ui && Array.isArray(config.ui.hiddenFormats))
+        ? config.ui.hiddenFormats : [];
+    const visible = TOURNAMENT_FORMATS.filter(f => hidden.indexOf(f.id) === -1);
+    return visible.length ? visible : TOURNAMENT_FORMATS.slice();
+}
+
+/**
+ * Build the format visibility checkboxes on the Config page from TOURNAMENT_FORMATS.
+ *
+ * Rendered rather than hand-written so a new format appears here automatically. The
+ * last remaining ticked box is disabled: hiding every format would leave no way to
+ * start a tournament.
+ *
+ * @returns {void}
+ */
+function renderFormatVisibilityOptions() {
+    const host = document.getElementById('formatVisibilityOptions');
+    if (!host) return;
+
+    const hidden = (config && config.ui && Array.isArray(config.ui.hiddenFormats))
+        ? config.ui.hiddenFormats : [];
+
+    host.innerHTML = TOURNAMENT_FORMATS.map(f => `
+        <label class="checkbox-label">
+            <input type="checkbox" class="format-visibility-toggle" data-format-id="${escapeHtml(f.id)}"
+                   ${hidden.indexOf(f.id) === -1 ? 'checked' : ''}>
+            <span>${escapeHtml(f.name)}<small class="field-help">${escapeHtml(f.blurb)}</small></span>
+        </label>
+    `).join('');
+
+    host.querySelectorAll('.format-visibility-toggle').forEach(cb => {
+        cb.addEventListener('change', updateFormatVisibilityGuard);
+    });
+    updateFormatVisibilityGuard();
+}
+
+/**
+ * Keep at least one format ticked by disabling the last one standing.
+ * @returns {void}
+ */
+function updateFormatVisibilityGuard() {
+    const boxes = Array.from(document.querySelectorAll('.format-visibility-toggle'));
+    const checked = boxes.filter(cb => cb.checked);
+    boxes.forEach(cb => {
+        cb.disabled = (checked.length === 1 && cb.checked);
+        cb.title = cb.disabled ? 'At least one format must remain available' : '';
+    });
+}
+
+/**
  * Hand a started match over to a Chalker across the local network.
  *
  * This is only the guard. The implementation lives in `licensed/`, which is not
@@ -394,6 +498,15 @@ function saveUIConfiguration() {
     config.ui.defaultPaid = defaultPaidElement ? defaultPaidElement.checked : false;
     config.ui.developerMode = developerModeElement ? developerModeElement.checked : false;
     config.ui.refereeSuggestionsLimit = refereeSuggestionsElement ? parseInt(refereeSuggestionsElement.value) || 10 : 10;
+
+    // Formats to hide when starting a tournament — stored as the unticked ones, so a
+    // format added in a future release is shown by default. Only written when the
+    // checkboxes are present, and never allowed to hide everything.
+    const formatToggles = Array.from(document.querySelectorAll('.format-visibility-toggle'));
+    if (formatToggles.length) {
+        const hidden = formatToggles.filter(cb => !cb.checked).map(cb => cb.dataset.formatId);
+        config.ui.hiddenFormats = (hidden.length < formatToggles.length) ? hidden : [];
+    }
 
     config.server = config.server || {};
     config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;

@@ -305,6 +305,14 @@ const HELP_CONTENT = {
                     <p><strong>💡 Tip:</strong> Adjust values to balance participation vs. performance rewards.</p>
                 `
             },
+            formats: {
+                title: "Tournament Formats",
+                content: `
+                    <p><strong>Tournament formats to offer</strong> (User Interface section) controls which formats appear on the Shuffle &amp; Draw screen when starting a tournament.</p>
+                    <p>Untick the ones your club never plays and they stop being offered, so the wrong format cannot be picked by mistake. At least one format always stays available.</p>
+                    <p><strong>💡 Existing tournaments are unaffected</strong> — hiding a format only changes the screen where a new tournament is started. A tournament already created in that format still opens, renders and exports as normal.</p>
+                `
+            },
             handover: {
                 title: "Chalker Handover",
                 content: `

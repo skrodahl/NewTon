@@ -1776,10 +1776,18 @@ function showImportStatus(type, message) {
  * Redraw the CAD-style status panel (the "watermark" box on the Tournament page)
  * from the current tournament state.
  *
- * Reads the in-memory global `tournament`, which is authoritative: every writer of
- * the `currentTournament` localStorage record serializes it from that same object,
- * so the stored blob can never be fresher. Re-parsing it here would only add a full
- * JSON.parse of the whole tournament to every save.
+ * Takes player and match counts from the **globals** `players` and `matches`, which
+ * are the live arrays, exactly as `saveTournamentOnly()` does when it serializes.
+ *
+ * It must NOT read `tournament.players` / `tournament.matches`. Nothing ever assigns
+ * those: they are set to empty literals when a tournament is created and are only
+ * ever re-aliased to the globals on load (`players = tournament.players`). Any action
+ * that *reassigns* a global breaks that aliasing for good — generating a bracket
+ * (`matches = []`), removing a player (`players = players.filter(...)`), or creating a
+ * tournament — after which `tournament.players`/`tournament.matches` are frozen at
+ * whatever they last happened to be. That produced a live panel reporting 9 players
+ * and 0 matches during a 14-player tournament, which only looked right again after a
+ * reload re-aliased them.
  *
  * @returns {void}
  */
@@ -1792,16 +1800,17 @@ function updateTournamentWatermark() {
                 ? tournament.name.substring(0, 35) + "..."
                 : tournament.name;
 
-            // Calculate tournament statistics
-            const players = tournament.players || [];
-            const paidPlayers = players.filter(p => p.paid);
+            // Calculate tournament statistics — from the live globals, not the
+            // tournament object's stale copies (see the note above)
+            const livePlayers = (typeof players !== 'undefined' && Array.isArray(players)) ? players : [];
+            const paidPlayers = livePlayers.filter(p => p.paid);
             const playerCount = paidPlayers.length;
             const bracketSize = tournament.bracketSize || 8;
 
             // Calculate total matches (excluding walkovers/byes — player slots are
             // objects, so a string comparison against 'BYE' never matched)
-            const matches = tournament.matches || [];
-            const realMatches = matches.filter(match => !isWalkoverMatch(match));
+            const liveMatches = (typeof matches !== 'undefined' && Array.isArray(matches)) ? matches : [];
+            const realMatches = liveMatches.filter(match => !isWalkoverMatch(match));
             const matchCount = realMatches.length;
 
             // Calculate completed matches

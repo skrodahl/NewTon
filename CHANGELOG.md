@@ -1,3 +1,24 @@
+## **v5.1.7** — Know Your Format (2026-09-07)
+
+### Known issue
+
+- **Network handover does not work.** Transferring a match to a lane returns HTTP 500. The endpoints in `licensed/api/v1/` have never been parsed by a PHP interpreter — run `php -l` over them first. The feature remains off by default (Handover: QR code) and nothing else in this release depends on it. Sharing a version number with `v5.1.7-beta.1` does not mean that beta has graduated.
+
+### Tournament formats
+
+- **You can hide the formats your club never plays.** Under Config → User Interface, "Tournament formats to offer" controls which formats appear on the Shuffle & Draw screen. A club that only plays double elimination can hide single elimination, and the wrong one can no longer be picked by accident on tournament night — which is exactly how a season opener ended up briefly in the wrong format, despite the confirmation dialog naming it twice. Preventing the choice beats warning about it.
+  - **Existing tournaments are untouched.** Hiding a format only affects the screen where a new tournament is started. A tournament already created in a hidden format still opens, renders, undoes and exports exactly as before.
+  - **At least one format always remains.** The last ticked box cannot be unticked.
+  - **Formats added in future releases appear by default**, rather than staying invisible until found in Settings. The setting records what you have hidden, not what you have chosen — so a new format shows up for everyone, and clubs who want it gone can hide it too.
+- **One list defines the formats.** Their names, descriptions and player limits were written into the tournament screen's markup; the Config checkboxes would have been a second copy of the same list. Both are now built from a single definition, so the two cannot disagree about which formats exist. It covers presentation only — a new format still needs its own progression tables and rendering, which stay where they belong.
+
+### Fixes
+
+- **The Status Panel shows the real player and match counts again.** During a live 14-player tournament the panel reported 9 players and 0 matches. It had been reading the tournament object's own `players`/`matches` arrays, which look authoritative but are never actually updated: they are created empty with the tournament and only ever re-pointed at the live arrays when a tournament is loaded from storage. Three ordinary actions break that link for good — generating a bracket, removing a player, and creating a tournament — after which those copies are frozen at whatever they last held, while the real roster and bracket carry on without them. Everything else in the app, including everything saved to disk, uses the live arrays; only the panel did not. It does now. This is a regression introduced in v5.1.6, where the panel was changed to read the in-memory tournament instead of re-reading storage on every save — the storage record was being written from the live arrays, so it had always been correct. A reload was enough to make the panel right again, which is why it was hard to catch.
+- **A knocked-out player is struck through only in the match that eliminated them.** The same frozen copy was consulted when deciding where to show the strikethrough, so the check found no matches to compare against and marked every match a player had lost. In double elimination that meant a player who lost once on the frontside and again on the backside appeared eliminated in both. Display only — no scores, standings or stored data were affected.
+
+---
+
 ## **v5.1.7-beta.1** — Look, No Camera (2026-09-06)
 
 ### Network handover (experimental)

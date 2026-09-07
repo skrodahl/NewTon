@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.1.7-b.1'; // Look, No Camera — experimental network match handover (licensed/)
+const APP_VERSION = '5.1.7'; // Know Your Format — hide unused tournament formats; Status Panel count fix
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

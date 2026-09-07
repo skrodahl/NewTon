@@ -1242,7 +1242,11 @@ function isPlayerEliminatedInMatch(match, playerSlot) {
     // If they appear in any completed match with a higher round order, that is their
     // actual elimination match and this one is not (e.g. DE frontside vs backside).
     const matchOrder = getMatchRoundOrder(match.id);
-    const allMatches = Object.values(tournament.matches || {});
+    // The live global, not tournament.matches — nothing ever assigns that, so it is
+    // frozen at whatever it held when the tournament object was built (usually empty).
+    // Reading it made this scan find nothing, striking through a player in every match
+    // they lost rather than only their elimination.
+    const allMatches = (typeof matches !== 'undefined' && Array.isArray(matches)) ? matches : [];
     const eliminatedLater = allMatches.some(m =>
         m.id !== match.id &&
         m.completed &&
@@ -3870,50 +3874,41 @@ function showCommandCenterModal(matchData) {
                 // Tournament in setup - show setup actions
                 if (refereeHeader) refereeHeader.textContent = 'Setup Actions';
                 if (refereeSetupMessage) {
-                    // Build format-aware bracket generation cards
+                    // Build a card per offered format, from the shared registry — the same
+                    // list the Config page's visibility checkboxes are built from, so the two
+                    // cannot disagree about which formats exist. Clubs can hide the formats
+                    // they never play (Config → User Interface), which is what stops the wrong
+                    // one being picked by accident.
                     const paidPlayers = players ? players.filter(p => p.paid).length : 0;
-
-                    // SE card: min 4 players, supports 4/8/16/32 brackets
-                    let seButtonText, seDisabled = '';
-                    const seBracketSize = calculateBracketSize(paidPlayers, 'SE');
-                    if (paidPlayers < 4) {
-                        seButtonText = 'Need 4+ players';
-                        seDisabled = 'disabled';
-                    } else if (paidPlayers > 32) {
-                        seButtonText = 'Max 32 players';
-                        seDisabled = 'disabled';
-                    } else {
-                        seButtonText = `Generate ${seBracketSize}-Player Bracket`;
-                    }
-
-                    // DE card: min 4 players, supports 8/16/32 brackets
-                    let deButtonText, deDisabled = '';
-                    const deBracketSize = calculateBracketSize(paidPlayers, 'DE');
-                    if (paidPlayers < 4) {
-                        deButtonText = 'Need 4+ players';
-                        deDisabled = 'disabled';
-                    } else if (paidPlayers > 32) {
-                        deButtonText = 'Max 32 players';
-                        deDisabled = 'disabled';
-                    } else {
-                        deButtonText = `Generate ${deBracketSize}-Player Bracket`;
-                    }
+                    const offeredFormats = (typeof getVisibleFormats === 'function')
+                        ? getVisibleFormats()
+                        : [{ id: 'DE', name: 'Double Elimination Cup', blurb: 'Players get a second chance through the backside', minPlayers: 4, maxPlayers: 32 }];
 
                     const cardStyle = 'border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; background: #f0f0f0; box-shadow: 0 2px 4px rgba(0,0,0,0.08);';
+
+                    const formatCards = offeredFormats.map(fmt => {
+                        let buttonText, disabled = '';
+                        if (paidPlayers < fmt.minPlayers) {
+                            buttonText = `Need ${fmt.minPlayers}+ players`;
+                            disabled = 'disabled';
+                        } else if (paidPlayers > fmt.maxPlayers) {
+                            buttonText = `Max ${fmt.maxPlayers} players`;
+                            disabled = 'disabled';
+                        } else {
+                            buttonText = `Generate ${calculateBracketSize(paidPlayers, fmt.id)}-Player Bracket`;
+                        }
+                        return `
+                            <div style="${cardStyle}">
+                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">${escapeHtml(fmt.name)}</div>
+                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">${escapeHtml(fmt.blurb)}</div>
+                                <button class="btn btn-success" onclick="generateBracket('${escapeHtml(fmt.id)}')" ${disabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${buttonText}</button>
+                            </div>`;
+                    }).join('');
 
                     refereeSetupMessage.innerHTML = `
                         <p style="font-weight: 600; font-size: 16px; margin-bottom: 0;">Shuffle & Draw</p>
                         <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                            <div style="${cardStyle}">
-                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">Double Elimination Cup</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players get a second chance through the backside</div>
-                                <button class="btn btn-success" onclick="generateBracket('DE')" ${deDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${deButtonText}</button>
-                            </div>
-                            <div style="${cardStyle}">
-                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">Single Elimination Cup</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">Players are eliminated after one loss</div>
-                                <button class="btn btn-success" onclick="generateBracket('SE')" ${seDisabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${seButtonText}</button>
-                            </div>
+                            ${formatCards}
                         </div>
                         <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
                             <p style="font-weight: 600; font-size: 16px; margin-bottom: 0;">Navigation</p>
