@@ -807,10 +807,13 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                 <h2>Analytics <span class="help-info-icon" data-page="history">ℹ️</span></h2>
                 <p class="history-page-subtitle">Analytics lets you explore your tournament history. It never alters the underlying results.</p>
                 <div class="history-actions">
-                    <button class="btn" onclick="NewtonHistory.exportDB()">Export Register</button>
-                    <button class="btn btn-warning" onclick="document.getElementById('historyImportFile').click()">Import Register</button>
+                    <!-- Maintenance tools. Hidden in analytics-only mode (see .mode-analytics in
+                         css/styles.css) because that deployment is shared with club members, and
+                         importing a register overwrites match history. Reachable with ?tm. -->
+                    <button class="btn analytics-maintenance-tool" onclick="NewtonHistory.exportDB()">Export Register</button>
+                    <button class="btn btn-warning analytics-maintenance-tool" onclick="document.getElementById('historyImportFile').click()">Import Register</button>
                     <input type="file" id="historyImportFile" accept=".json" style="display:none;" onchange="NewtonHistory.importDB(event)">
-                    <button class="btn" onclick="document.getElementById('tournamentImportFile').click()">Import Tournament</button>
+                    <button class="btn analytics-maintenance-tool" onclick="document.getElementById('tournamentImportFile').click()">Import Tournament</button>
                     <input type="file" id="tournamentImportFile" accept=".json" style="display:none;" onchange="NewtonHistory.importTournament(event)">
                     <div id="analyticsScopeIndicator" class="analytics-scope-indicator" style="margin-left:auto;"></div>
                 </div>

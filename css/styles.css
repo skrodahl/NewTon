@@ -4633,3 +4633,11 @@ a:hover { color: #1e40af; }
 @media (prefers-reduced-motion: reduce) {
     .cc-btn-result-ready { animation: none; }
 }
+
+/* Analytics maintenance tools — Export/Import Register, Import Tournament.
+   Hidden in analytics-only mode: that deployment gets shared with club members, and
+   Import Register overwrites the match history for everyone. The maintainer still
+   reaches them on the same instance via ?tm, which forces full mode. */
+.mode-analytics .analytics-maintenance-tool {
+    display: none;
+}

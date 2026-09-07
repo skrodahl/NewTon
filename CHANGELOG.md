@@ -1,3 +1,21 @@
+## **v5.1.8-beta.1** — Behind the Bar (2026-09-07)
+
+### Analytics safety
+
+- **Export Register, Import Register and Import Tournament are hidden in analytics-only mode.** A shared Analytics instance is now something a whole club can browse, and one of those buttons — Import Register — replaces the stored match history for everyone who uses it. They were sitting in plain sight at the top of the page, next to the scope selector, with nothing but a file picker between a curious member and everybody's season. They are maintenance tools and they now behave like it: absent from the shared view, and still available to the maintainer on the same instance via the `?tm` escape hatch, which forces full mode. Deleting a tournament was already gated behind a separate server setting and is unchanged. Nothing is removed from the normal Tournament Manager — this affects the analytics-only deployment (`NEWTON_MODE=analytics`) only.
+- No new setting was needed: `?tm` already forces full mode and is already the maintainer's route into a shared instance. **To be clear about what this is and is not** — `?tm` is not authenticated, so anyone who knows the parameter can still reach these tools. This removes the accident, not the possibility. Gating `?tm` itself is a separate job.
+
+### Known issue
+
+- **Network handover still does not work.** Transferring a match to a lane returns HTTP 500. The endpoints in `licensed/api/v1/` have never been parsed by a PHP interpreter — run `php -l` over them first. The feature remains off by default.
+
+### Files changed
+
+- `tournament.html` — the three maintenance controls carry `analytics-maintenance-tool`
+- `css/styles.css` — `.mode-analytics .analytics-maintenance-tool { display: none; }`
+
+---
+
 ## **v5.1.7** — Know Your Format (2026-09-07)
 
 ### Known issue
