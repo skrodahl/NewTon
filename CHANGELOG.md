@@ -1,4 +1,31 @@
-## **Unreleased**
+## **v5.1.8** — Off the Wire (2026-09-13)
+
+### Fixes
+
+- **The welcome help shown on a first run works again.** Opening the app with nothing stored — a fresh install, or a new browser — pops a first-time guide after a couple of seconds. It was displaying "Overview: undefined" and none of its actual content. The same applied to the "Common Issues" button inside the help window: that content had never been able to render either.
+
+  The cause was a shape mismatch. Every help topic is stored as a title, an overview and a set of sections, and the renderer expects exactly that. The scenarios topic — which holds both the welcome guide and the common-issues list — had instead been written with its two entries at the top level, so the renderer found no title, no overview, and no sections to draw. It now has the same shape as every other topic, and both are reachable.
+
+  It went unnoticed because until recently something else was covering it. The help system used to watch the whole page for changes, and any change at all — including the clock ticking over — made it redraw itself with the current page's help. The broken welcome was replaced within seconds of appearing. That watcher was removed in v5.1.6 as wasteful, which it was; it was also, accidentally, hiding this.
+
+- **The Handover setting now says that Network needs Docker.** It is listed as "Network (experimental, Docker only)", and the description explains why: the feature needs the small web server that ships with the container, so it does nothing if you opened `tournament.html` directly or are using the hosted version.
+
+### In-app help caught up with Analytics
+
+- **The built-in help now explains the Analytics page.** It had been describing only the Register — the tournament and match records — because that is all Analytics was when the help was written. Everything added since, which is most of what people actually use it for, went undocumented: the Dashboard, the Leaderboard and what its columns mean, the Players view, and the two controls that change every number on the page.
+- **The Lens is explained properly**, including the part that is easy to miss: you set it under Register → Tournaments, but it governs the Dashboard, Leaderboard and Players as well. The help now says so, and points at the indicator in the page header as the first thing to check when a figure looks wrong.
+- **Point modes and layers are explained** — Original scores each tournament with the values in force on the night, Current rescores everything with today's values, and the Ranking and Attendance toggles switch whole categories of points on and off. With the reassurance that none of it changes a stored result.
+- **Automatic backup has help for the first time.** Uploading a completed tournament to the server without anyone remembering to do it is one of the better reasons to run the container, and it was not mentioned anywhere in the app.
+
+### Analytics: the maintenance URL can be password-protected
+
+- **`NEWTON_TM_PASSWORD` gates the `?tm` maintenance URL.** An analytics-only instance hides tournament management, and appending `?tm` brings the full Tournament Manager back for that browser — which is how a shared instance gets maintained. It was unauthenticated, so anyone who knew the parameter could use it. Setting the new environment variable requires `?tm=<password>` instead.
+
+  **A wrong or missing password loads the ordinary Analytics page** — no error, no prompt, no hint that a maintenance mode exists at all. A login prompt would announce the door and invite a try; this way nothing is advertised.
+
+  Leave the variable unset and nothing changes: bare `?tm` keeps working exactly as before, so no existing deployment is affected.
+
+  Worth being plain about the limits: this is one shared password in an environment variable, not user accounts, and it appears in the server's access log and in browser history. It stops a curious club member. It is not protection against someone determined, and an instance reachable beyond people you broadly trust still wants a password at the web server.
 
 ### Docker: tournament storage was not writable on Linux
 
@@ -13,6 +40,9 @@
 
 ### Files changed
 
+- `js/dynamic-help-system.js` — the `scenarios` help topic now has the `title`/`overview`/`sections` shape the renderer requires, so the first-run guide and Common Issues both display; new Analytics sections (views, lens, points, leaderboard, players) and a Server & Automatic Backup section under Config
+- `tournament.html` — Handover's Network option labelled "Docker only" with an explanation; `?tm` honours `NEWTON_TM_PASSWORD` when set (constant-time comparison, silent fallback to the configured mode)
+- `DOCKER-QUICKSTART.md`, `docker/docker-compose.yml` — the new variable, and a section on maintaining an analytics-only instance
 - `docker/entrypoint.sh` — ensures `tournaments/` is writable by the web server (correcting ownership only when it is not), creates and chowns `tournaments/network/`, and warns in the log with a fix command if either is impossible
 - `licensed/api/v1/_common.php` — directory and write errors name the resolved path and effective uid
 - `licensed/js/network-tm.js` — `post()` preserves the server's error text; dispatch failures show it

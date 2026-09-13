@@ -352,6 +352,18 @@ const HELP_CONTENT = {
                     <p><strong>Auto-save:</strong> Settings apply immediately to new tournaments.</p>
                 `
             },
+            server: {
+                title: "Server & Automatic Backup",
+                content: `
+                    <p><strong>Only relevant when running the Docker container.</strong> These settings do nothing if you opened the app as a file.</p>
+                    <ul>
+                        <li><strong>Automatic backup:</strong> when enabled, a tournament is uploaded to the server the moment it is completed &mdash; no one has to remember to do it. This is what fills Shared Tournaments, and what lets a separate Analytics instance collect a season's results on its own.</li>
+                        <li><strong>Remote server:</strong> a second destination, so results can also reach a machine elsewhere &mdash; a club Analytics box, for instance. Optional, with its own address and credentials.</li>
+                        <li><strong>Allow deleting shared tournaments:</strong> off by default. Turn it on only if you want the delete button available on the server's tournament list.</li>
+                    </ul>
+                    <p><strong>💡 If Shared Tournaments stays empty</strong> on a Linux server, the container could not write to its tournament folder &mdash; look at its startup log, which now says so and gives the command to fix it.</p>
+                `
+            },
             application: {
                 title: "Application Settings",
                 content: `
@@ -396,8 +408,75 @@ const HELP_CONTENT = {
     // Analytics Page Help
     history: {
         title: "Analytics",
-        overview: "Browse and manage completed tournaments. All finalized tournaments are recorded here with full match detail.",
+        overview: "Explore your tournament history — standings across a season, player records, and every completed match. Analytics only ever reads your results; it never changes them.",
         sections: {
+            views: {
+                title: "The Four Views",
+                content: `
+                    <p>Buttons along the top switch between them. All four show the same set of tournaments &mdash; whichever ones the <strong>Lens</strong> currently selects.</p>
+                    <ul>
+                        <li><strong>Dashboard</strong> &mdash; the headline numbers: tournaments, matches, unique players, total points, 180s, the highest checkout and the shortest leg. Click a card to jump to the view behind it.</li>
+                        <li><strong>Leaderboard</strong> &mdash; the standings. One row per player, sortable by any column.</li>
+                        <li><strong>Players</strong> &mdash; the player list; pick one to see their record on the right.</li>
+                        <li><strong>Register</strong> &mdash; the underlying records: every tournament, and every match within them.</li>
+                    </ul>
+                `
+            },
+            lens: {
+                title: "The Lens — Choosing What You Are Looking At",
+                content: `
+                    <p>The <strong>Lens</strong> decides which tournaments the numbers are drawn from. Everything else follows it &mdash; Dashboard, Leaderboard and Players all reflect whatever the Lens currently selects.</p>
+                    <p>You set it under <strong>Register &rarr; Tournaments</strong>, using the filter bar above the list:</p>
+                    <ul>
+                        <li><strong>Filter by name</strong> &mdash; narrows the list as you type</li>
+                        <li><strong>From / To</strong> &mdash; limits it to a date range</li>
+                        <li><strong>Half-year buttons</strong> &mdash; the current or previous half-year in one click, which is usually what a season is</li>
+                        <li><strong>The tick boxes</strong> &mdash; choose individual tournaments directly</li>
+                        <li><strong>Reset</strong> &mdash; back to everything</li>
+                    </ul>
+                    <p><strong>💡 The indicator at the top right of the page always tells you what is currently selected</strong> &mdash; so if a number looks wrong, check there first. It is the usual explanation.</p>
+                    <p>Your selection is remembered between visits.</p>
+                `
+            },
+            points: {
+                title: "How Points Are Counted",
+                content: `
+                    <p>Two controls sit beside the view buttons, and both change every figure on screen as soon as you touch them.</p>
+                    <p><strong>Original or Current:</strong></p>
+                    <ul>
+                        <li><strong>Original</strong> &mdash; each tournament is scored with the point values that were in force on the night it was played. The honest historical record.</li>
+                        <li><strong>Current</strong> &mdash; everything is rescored with today's values from Global Settings. Useful for asking "what would last season look like under this year's rules?"</li>
+                    </ul>
+                    <p><strong>Ranking and Attendance</strong> switch whole categories of points on and off:</p>
+                    <ul>
+                        <li><strong>Ranking</strong> &mdash; the points awarded for finishing position</li>
+                        <li><strong>Attendance</strong> &mdash; the points for simply taking part</li>
+                    </ul>
+                    <p>Both are on by default. Turn Attendance off to see standings on performance alone; turn Ranking off to see who simply turns up. Achievement points &mdash; 180s, high outs, short legs, tons &mdash; are always counted.</p>
+                    <p><strong>💡 None of this alters a stored result.</strong> It changes how the totals are worked out for display, nothing more.</p>
+                `
+            },
+            leaderboard: {
+                title: "Leaderboard",
+                content: `
+                    <p>One row per player across the selected tournaments. Click any column heading to sort by it.</p>
+                    <ul>
+                        <li><strong>Placements</strong> &mdash; 1st, 2nd, 3rd, 4th, 5-6th and 7-8th finishes</li>
+                        <li><strong>Achievements</strong> &mdash; 180s, high outs and short legs</li>
+                        <li><strong>Personal bests</strong> &mdash; Best Out (highest checkout) and Best Leg (fewest darts)</li>
+                        <li><strong>Avg</strong> &mdash; three-dart average. Only matches scored on the Chalker have the detail to calculate this, so it is blank for manually entered results</li>
+                        <li><strong>MW / ML</strong> &mdash; matches won and lost; <strong>LW / LL</strong> &mdash; legs won and lost</li>
+                    </ul>
+                    <p><strong>Export CSV</strong> and <strong>Export JSON</strong> save the table as it currently stands &mdash; same Lens, same point settings &mdash; for a spreadsheet or a club website.</p>
+                `
+            },
+            players: {
+                title: "Players",
+                content: `
+                    <p>The player list on the left shows everyone who appears in the selected tournaments, with matches played and their win/loss record. Select a player to see their detail on the right.</p>
+                    <p>Players are matched by name across tournaments, so someone entered as "Dave" in one and "dave " in another is treated as the same person. Genuinely different spellings are not &mdash; consistent names are worth the small effort at registration.</p>
+                `
+            },
             tournaments: {
                 title: "Tournament List",
                 content: `
@@ -431,42 +510,46 @@ const HELP_CONTENT = {
 
     // Contextual Help for Common Scenarios
     scenarios: {
-        firstTime: {
-            title: "First Time Setup",
-            content: `
-                <h4>Welcome to Tournament Manager!</h4>
-                <p><strong>Quick Start Guide:</strong></p>
-                <ol>
-                    <li><strong>Setup:</strong> Create your first tournament with name and date</li>
-                    <li><strong>Registration:</strong> Add players and mark them as paid</li>
-                    <li><strong>Tournament:</strong> Generate bracket and start managing matches</li>
-                    <li><strong>Config:</strong> Customize point values and settings (optional)</li>
-                </ol>
-                <p><strong>💡 Need help?</strong> Each page has specific guidance - click the help button (?) for detailed instructions.</p>
-            `
-        },
-        troubleshooting: {
-            title: "Common Issues",
-            content: `
-                <p><strong>Can't generate bracket:</strong></p>
-                <ul>
-                    <li>Need at least 4 paid players</li>
-                    <li>Check that players are marked as "Paid"</li>
-                    <li>If tournament is in progress, use "Reset Tournament" first</li>
-                </ul>
-                <p><strong>Match won't start:</strong></p>
-                <ul>
-                    <li>Both players must be determined (not "Awaiting Player")</li>
-                    <li>Previous matches may need to be completed first</li>
-                    <li>Check for walkover situations</li>
-                </ul>
-                <p><strong>Points not calculating correctly:</strong></p>
-                <ul>
-                    <li>Verify point values in Config page</li>
-                    <li>Check player statistics are entered correctly</li>
-                    <li>Ensure tournament is properly completed</li>
-                </ul>
-            `
+        title: "Common Scenarios",
+        overview: "Guidance for getting started, and for the problems that come up most often.",
+        sections: {
+            firstTime: {
+                title: "First Time Setup",
+                content: `
+                    <h4>Welcome to Tournament Manager!</h4>
+                    <p><strong>Quick Start Guide:</strong></p>
+                    <ol>
+                        <li><strong>Setup:</strong> Create your first tournament with name and date</li>
+                        <li><strong>Registration:</strong> Add players and mark them as paid</li>
+                        <li><strong>Tournament:</strong> Generate bracket and start managing matches</li>
+                        <li><strong>Config:</strong> Customize point values and settings (optional)</li>
+                    </ol>
+                    <p><strong>💡 Need help?</strong> Each page has specific guidance - click the help button (?) for detailed instructions.</p>
+                `
+            },
+            troubleshooting: {
+                title: "Common Issues",
+                content: `
+                    <p><strong>Can't generate bracket:</strong></p>
+                    <ul>
+                        <li>Need at least 4 paid players</li>
+                        <li>Check that players are marked as "Paid"</li>
+                        <li>If tournament is in progress, use "Reset Tournament" first</li>
+                    </ul>
+                    <p><strong>Match won't start:</strong></p>
+                    <ul>
+                        <li>Both players must be determined (not "Awaiting Player")</li>
+                        <li>Previous matches may need to be completed first</li>
+                        <li>Check for walkover situations</li>
+                    </ul>
+                    <p><strong>Points not calculating correctly:</strong></p>
+                    <ul>
+                        <li>Verify point values in Config page</li>
+                        <li>Check player statistics are entered correctly</li>
+                        <li>Ensure tournament is properly completed</li>
+                    </ul>
+                `
+            }
         }
     }
 };

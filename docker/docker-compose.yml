@@ -23,6 +23,7 @@ services:
       # - NEWTON_RELAY_ALLOWLIST=results.myclub.org  # Optional: restrict relay API to these hosts (comma-separated)
       - NEWTON_DEMO_MODE=false           # Set to 'true' to show demo banner (privacy notice)
       - NEWTON_GITHUB_URL=https://github.com/skrodahl/NewTon  # GitHub link in demo banner
+      # - NEWTON_TM_PASSWORD=choose-something  # Password for the ?tm maintenance URL (analytics-only instances)
 
       # SSL configuration (optional — omit all to run HTTP only)
       # Option A: Auto-generate a self-signed certificate (30-year expiry)

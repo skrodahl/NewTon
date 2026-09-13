@@ -18,7 +18,16 @@
     if (function_exists('getenv')) {
         $demoMode = getenv('NEWTON_DEMO_MODE') === 'true' ? 'true' : 'false';
         $githubUrl = getenv('NEWTON_GITHUB_URL') ?: 'https://github.com/skrodahl/NewTon';
-        $appMode = isset($_GET['tm']) ? 'full' : (getenv('NEWTON_MODE') ?: 'full');
+        // ?tm switches an analytics-only deployment into the full Tournament Manager,
+        // which is how a shared instance is maintained. NEWTON_TM_PASSWORD gates it:
+        //   unset  -> no gate, bare ?tm works (unchanged behaviour)
+        //   set    -> ?tm=<password> required; anything else falls through
+        // A wrong or missing password lands on the ordinary Analytics page rather than
+        // an error, so the gate never advertises that there is something behind it.
+        $tmSecret = getenv('NEWTON_TM_PASSWORD');
+        $tmGranted = isset($_GET['tm']) &&
+            (!$tmSecret || hash_equals((string)$tmSecret, (string)$_GET['tm']));
+        $appMode = $tmGranted ? 'full' : (getenv('NEWTON_MODE') ?: 'full');
         $readonlyAnalytics = getenv('NEWTON_READONLY_ANALYTICS') === 'true' ? 'true' : 'false';
         echo "\n        window.NEWTON_CONFIG = {\n";
         echo "            demoMode: $demoMode,\n";
@@ -785,10 +794,10 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                     <label for="chalkerHandover">Handover</label>
                                     <select id="chalkerHandover">
                                         <option value="qr" selected>QR code</option>
-                                        <option value="network">Network (experimental)</option>
+                                        <option value="network">Network (experimental, Docker only)</option>
                                         <option value="none">None</option>
                                     </select>
-                                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">QR shows a code to scan. Network sends the match to a device on the local network &mdash; experimental, and it hides the QR buttons. None leaves matches to be entered by hand.</p>
+                                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">QR shows a code to scan. Network sends the match to a device on the local network and hides the QR buttons &mdash; experimental, and it <strong>requires the Docker image</strong>, because it needs the server that comes with it. It does nothing if you opened this file directly or are using the hosted version. None leaves matches to be entered by hand.</p>
                                 </div>
                             </div>
                             <div class="config-buttons">

@@ -129,6 +129,35 @@ environment:
   - NEWTON_MODE=analytics              # Analytics-only mode
 ```
 
+#### Maintaining an analytics-only instance
+
+An analytics-only instance hides tournament management, including the register
+import/export tools. To do maintenance on it — correcting a finished tournament,
+restoring a register backup — append `?tm` to the URL, which loads the full
+Tournament Manager for that browser:
+
+```
+https://your-analytics-host/tournament.php?tm
+```
+
+If the instance is shared with club members, set a password so `?tm` alone is not
+enough:
+
+```yaml
+environment:
+  - NEWTON_TM_PASSWORD=choose-something
+```
+
+The URL then becomes `?tm=choose-something`. A missing or wrong password simply
+loads the ordinary Analytics page, with no error and no hint that a maintenance
+mode exists.
+
+This is a shared password in an environment variable, not user accounts. It stops
+a curious club member; it is not protection against someone determined, and the
+password appears in the server's access log and your browser history. If the
+instance is reachable beyond people you broadly trust, put the whole thing behind
+a password at the web server as well.
+
 Mount the `./tournaments` and `./images` volumes. Configure the venue instance to auto-backup to this server's relay API, or share the same tournaments directory.
 
 ---
@@ -144,6 +173,7 @@ Mount the `./tournaments` and `./images` volumes. Configure the venue instance t
 | `NEWTON_API_ENABLED` | `true` | Enables REST API endpoints for tournament upload, download, and delete. `false`, `0`, `off`, and `no` (any case) all disable |
 | `NEWTON_RELAY_ALLOWLIST` | *(unset)* | Comma-separated hostnames the relay API (`api/relay.php`) may forward to, e.g. `results.myclub.org`. Unset = any host |
 | `NEWTON_MODE` | `full` | App mode. `analytics` hides tournament management tabs, shows only Analytics and limited Global Settings |
+| `NEWTON_TM_PASSWORD` | *(unset)* | Password for the `?tm` maintenance URL (see below). Unset = no password required |
 | `NEWTON_DEMO_MODE` | `false` | Shows a privacy banner at the top of the app |
 | `NEWTON_LANDING_PAGE` | `false` | Shows a landing page at the root URL instead of loading the app directly |
 | `NEWTON_BASE_URL` | *(unset)* | Canonical URL for Open Graph and Twitter Card meta tags on the landing page |
