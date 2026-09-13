@@ -1,3 +1,25 @@
+## **Unreleased**
+
+### Docker: tournament storage was not writable on Linux
+
+- **Uploading a tournament and network match handover both failed with a server error on Linux deployments.** The container writes both into `tournaments/`, which the documented compose file supplies as a bind mount. When that host directory does not already exist, Docker creates it as **root** — and the web server runs as `www-data`, which then cannot write to it. Every upload and every match transfer returned a 500. Stack managers such as Dockge make this the default case, since they create the stack directory themselves.
+
+  It hid well: macOS and Windows Docker use a file-sharing layer that ignores the ownership mismatch, so the same setup works there. Only real Linux deployments were affected, and only if anyone tried to use the features.
+
+  The container now checks at startup whether the web server can actually write to `tournaments/` and corrects the ownership if not, logging that it did so. A directory that is already set up correctly is left untouched. If the correction is impossible, it now says so loudly in the log with the command to fix it, rather than failing silently at request time hours later.
+- **Network handover state directory.** `tournaments/network/` is likewise created at startup, as root and after the volume is mounted — the only moment both are true. The endpoints still create it themselves when missing, so non-Docker deployments are unaffected.
+- **A failed transfer now tells you what went wrong.** The endpoints have always answered with a readable explanation — `{"ok":false,"error":"..."}` — even on a 500, and both clients were throwing it away and reporting a bare failure. The Tournament Manager now shows the server's own words, and the Chalker logs them. The directory error also names the exact path and the user it was running as, which is the part that depends on the deployment rather than the code.
+- **Verified against a real container**, not a stub: the image was built, the clients were driven against it, and a match was dispatched to a lane, collected, scored, returned, reviewed and cleared. The failure mode was reproduced first, then fixed, then re-tested.
+
+### Files changed
+
+- `docker/entrypoint.sh` — ensures `tournaments/` is writable by the web server (correcting ownership only when it is not), creates and chowns `tournaments/network/`, and warns in the log with a fix command if either is impossible
+- `licensed/api/v1/_common.php` — directory and write errors name the resolved path and effective uid
+- `licensed/js/network-tm.js` — `post()` preserves the server's error text; dispatch failures show it
+- `licensed/js/network-chalker.js` — `post()` logs the server's error text instead of discarding it
+
+---
+
 ## **v5.1.8-beta.1** — Behind the Bar (2026-09-07)
 
 ### Analytics safety

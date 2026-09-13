@@ -30,13 +30,30 @@ const NetworkClient = (() => {
     let _pollTimer = null;
     let _lanes = [];
 
-    /** POST JSON. Resolves to the body or null; never rejects — a dropped request is normal. */
+    /**
+     * POST JSON. Resolves to the body, or to `{ok:false, error}` describing what went
+     * wrong; never rejects, because a dropped request on club wifi is normal.
+     *
+     * A failed response still carries the server's explanation — the endpoints answer
+     * with `{ok:false,error:"..."}` even on a 500 — so it is parsed and passed on rather
+     * than thrown away. Discarding it is why an unwritable directory presented as a bare
+     * "500" with nothing to act on.
+     */
     function post(endpoint, body) {
         return fetch(API + endpoint, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
-        }).then(r => (r.ok ? r.json() : null)).catch(() => null);
+        }).then(r => r.text().then(text => {
+            let parsed = null;
+            try { parsed = JSON.parse(text); } catch (e) { /* not JSON — a server error page */ }
+            if (r.ok && parsed) return parsed;
+            return {
+                ok: false,
+                error: (parsed && parsed.error) ||
+                       `HTTP ${r.status}${text ? ' — ' + text.slice(0, 200) : ''}`
+            };
+        })).catch(e => ({ ok: false, error: 'Could not reach the server: ' + e.message }));
     }
 
     /** GET JSON. Same contract as post(). */
@@ -125,7 +142,10 @@ const NetworkClient = (() => {
                         updateStatusCenter(`${matchId} sent to Lane ${match.lane}`);
                     }
                 } else {
-                    alert(`Could not send ${matchId} to Lane ${match.lane}.\n\nThe Chalker may still pick it up on its next check. If not, switch Handover to "QR code" on the Config page.`);
+                    const why = (res && res.error) ? res.error : 'Unknown error';
+                    console.error(`[network] dispatch of ${matchId} failed:`, why);
+                    alert(`Could not send ${matchId} to Lane ${match.lane}.\n\n${why}\n\n` +
+                          'Switch Handover to "QR code" on the Config page to carry on without the network.');
                 }
                 refreshMatchControls();
             });

@@ -63,8 +63,18 @@
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(body)
-        }).then(function (r) { return r.ok ? r.json() : null; })
-          .catch(function () { return null; });
+        }).then(function (r) {
+            return r.text().then(function (text) {
+                var parsed = null;
+                try { parsed = JSON.parse(text); } catch (e) { /* server error page */ }
+                if (r.ok && parsed) return parsed;
+                // Keep the server's explanation rather than discarding it — the endpoints
+                // answer with {ok:false,error:"..."} even on a 500
+                console.warn('[network] ' + endpoint + ': ' +
+                    ((parsed && parsed.error) || ('HTTP ' + r.status)));
+                return null;
+            });
+        }).catch(function () { return null; });
     }
 
     /** GET JSON, resolving to the parsed body or null. Same reasoning as post(). */

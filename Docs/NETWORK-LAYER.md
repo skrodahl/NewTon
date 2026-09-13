@@ -1,6 +1,8 @@
 # NewTon Network Layer
 
-**Status: proof of concept, not started. Nothing here is built yet.**
+**Status: proof of concept, built and working.** The full round trip — dispatch, collect,
+score, return, review, clear — has been verified against a real container (2026-09-13).
+Not yet run at a tournament, and not yet tried on real phones over club wifi.
 
 Direct transfer of matches between the Tournament Manager and the Chalker over
 the local network, as an alternative to the QR code round trip.
@@ -364,6 +366,13 @@ Two design points worth keeping:
 
 State lives in `tournaments/network/` — the volume that is already mounted and already
 written to by the upload endpoint, so it survives a restart and needs no new config.
+
+**The container entrypoint creates that directory**, as root and after the volume is
+mounted. This matters: the endpoints originally created it themselves on first use, as
+the web server user, and on a bind-mounted volume owned by the host user that fails —
+which is what made every transfer return a 500. Creating it at startup is the only point
+where the volume is mounted *and* the process is root. The runtime `mkdir` remains as a
+fallback for deployments that are not the container.
 Writes are atomic (temp file plus rename) so a poller never reads a half-written mailbox.
 Match ids reaching a filename are whitelisted to `[A-Za-z0-9-]`, which is the one place
 request data touches a path.

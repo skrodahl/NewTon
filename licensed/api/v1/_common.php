@@ -29,11 +29,16 @@ function nw_state_dir() {
  */
 function nw_require_state_dir() {
     $dir = nw_state_dir();
+    // Errors name the resolved path and the effective user. A bare "500" tells whoever
+    // is debugging nothing, and this is the one thing that depends on the deployment
+    // rather than the code.
+    $who = function_exists('posix_geteuid') ? ('uid ' . posix_geteuid()) : 'the web server user';
     if (!is_dir($dir) && !@mkdir($dir, 0755, true)) {
-        nw_fail(500, 'Could not create the network state directory');
+        nw_fail(500, "Could not create the network state directory: $dir (running as $who). "
+                   . 'Its parent must be writable by the web server user.');
     }
     if (!is_writable($dir)) {
-        nw_fail(500, 'The network state directory is not writable');
+        nw_fail(500, "The network state directory is not writable: $dir (running as $who).");
     }
     return $dir;
 }
@@ -145,7 +150,7 @@ function nw_write_json($path, $data) {
     $tmp = $path . '.' . getmypid() . '.tmp';
     if (@file_put_contents($tmp, json_encode($data)) === false || !@rename($tmp, $path)) {
         @unlink($tmp);
-        nw_fail(500, 'Could not write network state');
+        nw_fail(500, "Could not write network state to $path");
     }
 }
 

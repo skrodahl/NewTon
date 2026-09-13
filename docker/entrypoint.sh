@@ -71,6 +71,44 @@ else
         > /etc/nginx/http.d/default.conf
 fi
 
+# ─── Tournament storage ──────────────────────────────────────────────────────
+# /var/www/html/tournaments holds uploaded tournaments and the network handover
+# mailboxes. Both are written by php-fpm, which runs as www-data.
+#
+# This has to happen here rather than in the Dockerfile. The directory is a volume,
+# so whatever the image put there — including its ownership — is replaced the moment
+# the volume is mounted. With a bind mount (the documented compose setup) the host
+# directory's ownership applies instead, and Docker creates a missing one as root.
+# On Linux that leaves it root-owned and unwritable by www-data, which silently
+# breaks tournament upload and network handover alike. On macOS and Windows the
+# Docker file-sharing layer hides the problem, so it only shows on real deployments.
+#
+# The entrypoint runs as root, after mounting: the only moment both are true.
+TOURNAMENTS_DIR=/var/www/html/tournaments
+
+mkdir -p "$TOURNAMENTS_DIR" 2>/dev/null || true
+
+# Only touch ownership when it is actually a problem — a directory the operator has
+# already set up correctly (group-writable, or owned by www-data) is left alone.
+# busybox `su` is used to ask the question as the right user; su-exec is not in this image.
+if su www-data -s /bin/sh -c "test -w '$TOURNAMENTS_DIR'" 2>/dev/null; then
+    : # already writable by the web server user
+else
+    if chown www-data:www-data "$TOURNAMENTS_DIR" 2>/dev/null; then
+        echo "[newton] tournaments/ was not writable by the web server; ownership adjusted"
+    else
+        echo "[newton] WARNING: $TOURNAMENTS_DIR is not writable by www-data and could not be changed."
+        echo "[newton]          Tournament upload and network handover will fail."
+        echo "[newton]          Fix on the host with:  sudo chown -R 82:82 <the mounted directory>"
+    fi
+fi
+
+if mkdir -p "$TOURNAMENTS_DIR/network" 2>/dev/null; then
+    chown www-data:www-data "$TOURNAMENTS_DIR/network" 2>/dev/null || true
+else
+    echo "[newton] WARNING: could not create $TOURNAMENTS_DIR/network — network handover will not work"
+fi
+
 # ─── Start services ──────────────────────────────────────────────────────────
 php-fpm -D
 exec nginx -g 'daemon off;'
