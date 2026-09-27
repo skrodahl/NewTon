@@ -72,8 +72,9 @@ else
 fi
 
 # ─── Tournament storage ──────────────────────────────────────────────────────
-# /var/www/html/tournaments holds uploaded tournaments and the network handover
-# mailboxes. Both are written by php-fpm, which runs as www-data.
+# /var/www/html/tournaments holds uploaded tournaments, the network handover
+# mailboxes and the Analytics achievement corrections. All are written by php-fpm,
+# which runs as www-data.
 #
 # This has to happen here rather than in the Dockerfile. The directory is a volume,
 # so whatever the image put there — including its ownership — is replaced the moment
@@ -107,6 +108,12 @@ if mkdir -p "$TOURNAMENTS_DIR/network" 2>/dev/null; then
     chown www-data:www-data "$TOURNAMENTS_DIR/network" 2>/dev/null || true
 else
     echo "[newton] WARNING: could not create $TOURNAMENTS_DIR/network — network handover will not work"
+fi
+
+if mkdir -p "$TOURNAMENTS_DIR/corrections" 2>/dev/null; then
+    chown www-data:www-data "$TOURNAMENTS_DIR/corrections" 2>/dev/null || true
+else
+    echo "[newton] WARNING: could not create $TOURNAMENTS_DIR/corrections — achievement corrections will not save"
 fi
 
 # ─── Start services ──────────────────────────────────────────────────────────

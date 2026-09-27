@@ -158,6 +158,13 @@ password appears in the server's access log and your browser history. If the
 instance is reachable beyond people you broadly trust, put the whole thing behind
 a password at the web server as well.
 
+**Correcting achievements.** Under `?tm`, each tournament in Analytics → Register →
+Tournaments has an **Edit** button. Pick a player and add or remove 180s, tons,
+lollipops, high outs and short legs. Corrections are saved on the server in
+`tournaments/corrections/corrections.json` and apply to Analytics on every device the
+next time it loads. The tournament itself and each browser's register are left as
+recorded, so re-uploading or re-importing a tournament keeps its corrections.
+
 Mount the `./tournaments` and `./images` volumes. Configure the venue instance to auto-backup to this server's relay API, or share the same tournaments directory.
 
 ---

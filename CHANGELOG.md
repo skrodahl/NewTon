@@ -1,3 +1,27 @@
+## **v5.1.9** — Every Chalker Needs an Eraser (2026-09-27)
+
+### Analytics: achievement corrections (Docker only)
+
+- **A tournament's achievements can now be corrected after the fact, from Analytics.** Under `?tm`, each tournament in Register → Tournaments has an **Edit** button. Pick a player and add or remove 180s, tons, lollipops, high outs and short legs; **Reset Player** goes back to what was recorded. The modal shows the recorded values alongside, so it's always clear what has been changed.
+
+  Correcting a finished tournament had turned out to be nearly impossible. Achievements reach Analytics as a one-time snapshot: each browser pulls a tournament from disk into its own register once and never reads it again. Editing the file, deleting and re-uploading it, or editing an exported register all failed somewhere along that chain — often in a browser nobody was looking at.
+
+  Corrections go around the chain instead of through it. They are stored on the server as the *difference* from what was recorded, one record per player per tournament, and applied every time Analytics loads its tournaments. The recorded tournament and each browser's register are never modified, so the upload → pull flow is unchanged, and a tournament that is deleted and pulled again keeps its corrections. Because they are applied at the one point every view loads from, the Dashboard, Leaderboard and Players views, the tournament points and both point modes all include them. Match-level views keep showing what was recorded on the night.
+
+  Counts can't go below zero, and high outs and short legs use the same ranges as the tournament's own statistics editor (101–170, 9–21 darts). Corrections are always applied and carry no marker. There is no reason field — the Edit modal is the record.
+
+  Docker only: without the server there is nowhere shared to keep them, so the button only appears when the corrections API answers, and never on the public Analytics page.
+
+  Files changed: `api/corrections.php` (new), `js/newton-history.js` (`_loadAllTournaments()` applies corrections; new corrections section and Edit action), `tournament.html` (Correct achievements modal), `docker/entrypoint.sh` (creates `tournaments/corrections/` owned by www-data), `js/dynamic-help-system.js`, `api/README.md`, `DOCKER-QUICKSTART.md`
+
+### Fixes
+
+- **Undo now clears lane and referee assignments on downstream matches that hadn't started.** If the winner or loser of a match had been placed in a next-round match, and that match already had a lane or referee assigned, undoing the first match left those assignments in place. The referee stayed marked as assigned and the lane as in use, until someone found the match and cleared them by hand.
+
+  Undo already removed those assignment transactions from history; it just didn't clear the same fields on the live match objects, so the two disagreed. They are now cleared together. (A live or completed downstream match blocks undo in the first place, so only matches still waiting for players are affected.)
+
+  Files changed: `js/bracket-rendering.js` (`undoManualTransaction()`)
+
 ## **v5.1.8** — Off the Wire (2026-09-13)
 
 ### Fixes

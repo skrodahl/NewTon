@@ -484,6 +484,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>View →</strong> Opens the match list for that tournament</li>
                         <li><strong>Delete:</strong> Permanently removes the tournament and all its matches. You must type the tournament name to confirm — this cannot be undone</li>
+                        <li><strong>Edit:</strong> Correct a player's 180s, tons, lollipops, high outs and short legs for that tournament. Corrections are saved on the server and apply on every device; the recorded tournament is not changed. <strong>Reset Player</strong> goes back to what was recorded. Docker only, and not shown on the public Analytics page</li>
                     </ul>
                 `
             },

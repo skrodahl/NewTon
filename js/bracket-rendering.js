@@ -2780,6 +2780,14 @@ function undoManualTransaction(transactionId) {
         console.log(`✅ ${transaction.matchId} rolled back: ${match.player1?.name || 'TBD'} vs ${match.player2?.name || 'TBD'}`);
     });
 
+    // Clear lane/referee on downstream matches that were only pre-assigned (not completed).
+    // Their ASSIGN_LANE/ASSIGN_REFEREE transactions were removed in step 1; keep live data in sync.
+    consequentialMatches.forEach(({ match }) => {
+        if (match.completed) return;
+        match.lane = null;
+        match.referee = null;
+    });
+
     // 7. Update match states and UI
     updateAllMatchStates();
     if (typeof refreshTournamentUI === 'function') {

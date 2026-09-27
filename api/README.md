@@ -103,6 +103,36 @@ Uploads a tournament to the server.
 }
 ```
 
+### GET / POST /api/corrections.php
+
+Achievement corrections for Analytics: per tournament, per player, the difference from what was recorded. Analytics applies them when it loads; the register in each browser is never modified. Stored in `tournaments/corrections/corrections.json`.
+
+**GET** returns every correction:
+```json
+{
+  "corrections": [
+    {
+      "tournamentId": "1790000000001",
+      "playerId": "2",
+      "playerName": "Bob",
+      "oneEighties": 1,
+      "tons": -2,
+      "lollipops": 0,
+      "highOuts": { "add": [140], "remove": [121] },
+      "shortLegs": { "add": [], "remove": [] },
+      "updatedAt": 1790540598
+    }
+  ]
+}
+```
+
+**POST** replaces all corrections for one tournament. An empty list removes them.
+```json
+{ "tournamentId": "1790000000001", "corrections": [ /* records as above */ ] }
+```
+
+Writes are made under a file lock, so simultaneous saves can't overwrite each other.
+
 ## Security
 
 - **Filename validation**: Only alphanumeric, spaces, hyphens, underscores, and `.json` extension allowed

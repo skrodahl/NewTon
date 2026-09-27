@@ -979,6 +979,80 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
             </div>
         </div>
 
+        <!-- Analytics: Achievement Corrections Modal (Docker only, full mode / ?tm) -->
+        <div id="correctionsModal" class="modal">
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Tournament</div>
+                        <div class="dlg__sidebar-value" id="correctionsTournamentName">-</div>
+                        <div class="dlg__sidebar-label">Date</div>
+                        <div class="dlg__sidebar-value" id="correctionsTournamentDate">-</div>
+                        <div class="dlg__sidebar-label">As recorded</div>
+                        <div class="dlg__sidebar-value" id="correctionsRecorded" style="white-space:pre-line;">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <h2 class="dlg__title">Correct achievements</h2>
+                        <p class="dlg__desc">Corrections are saved on the server and apply to Analytics on every device. The recorded tournament is not changed.</p>
+                        <div>
+                            <label class="dlg__label" for="correctionsPlayer">Player</label>
+                            <select id="correctionsPlayer" class="dlg__input" onchange="NewtonHistory.selectCorrectionPlayer(this.value)"></select>
+                        </div>
+
+                        <div class="stats-counter-row">
+                            <div class="stat-counter">
+                                <div class="stat-counter__label">180s</div>
+                                <div class="stat-counter__controls">
+                                    <button type="button" class="stat-counter__btn stat-counter__btn--minus" onclick="NewtonHistory.adjustCorrection('oneEighties', -1)">−</button>
+                                    <span class="stat-counter__value" id="corrOneEighties">0</span>
+                                    <button type="button" class="stat-counter__btn stat-counter__btn--plus" onclick="NewtonHistory.adjustCorrection('oneEighties', 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="stat-counter">
+                                <div class="stat-counter__label">Tons</div>
+                                <div class="stat-counter__controls">
+                                    <button type="button" class="stat-counter__btn stat-counter__btn--minus" onclick="NewtonHistory.adjustCorrection('tons', -1)">−</button>
+                                    <span class="stat-counter__value" id="corrTons">0</span>
+                                    <button type="button" class="stat-counter__btn stat-counter__btn--plus" onclick="NewtonHistory.adjustCorrection('tons', 1)">+</button>
+                                </div>
+                            </div>
+                            <div class="stat-counter">
+                                <div class="stat-counter__label">Lollipops</div>
+                                <div class="stat-counter__controls">
+                                    <button type="button" class="stat-counter__btn stat-counter__btn--minus" onclick="NewtonHistory.adjustCorrection('lollipops', -1)">−</button>
+                                    <span class="stat-counter__value" id="corrLollipops">0</span>
+                                    <button type="button" class="stat-counter__btn stat-counter__btn--plus" onclick="NewtonHistory.adjustCorrection('lollipops', 1)">+</button>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="stat-list-editor">
+                            <label class="dlg__label" for="corrShortLegInput">Short Legs (max 21 darts)</label>
+                            <div class="stat-list-editor__input-row">
+                                <input type="number" id="corrShortLegInput" class="dlg__input" min="9" max="21" placeholder="Enter dart count">
+                                <button type="button" class="btn" onclick="NewtonHistory.addCorrectionValue('shortLegs')">Add</button>
+                            </div>
+                            <div id="corrShortLegsList" class="stat-list-editor__items"></div>
+                        </div>
+
+                        <div class="stat-list-editor">
+                            <label class="dlg__label" for="corrHighOutInput">High Out Score (101+)</label>
+                            <div class="stat-list-editor__input-row">
+                                <input type="number" id="corrHighOutInput" class="dlg__input" min="101" max="170" placeholder="Enter high out score">
+                                <button type="button" class="btn" onclick="NewtonHistory.addCorrectionValue('highOuts')">Add</button>
+                            </div>
+                            <div id="corrHighOutsList" class="stat-list-editor__items"></div>
+                        </div>
+                    </div>
+                </div>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()">Cancel</button>
+                    <button class="btn" onclick="NewtonHistory.resetCorrectionPlayer()">Reset Player</button>
+                    <button class="btn btn-success" onclick="NewtonHistory.saveCorrections()">Save Corrections</button>
+                </div>
+            </div>
+        </div>
+
         <!-- Statistics Modal -->
         <div id="statsModal" class="modal">
             <div class="dlg">

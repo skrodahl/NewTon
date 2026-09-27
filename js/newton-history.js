@@ -64,12 +64,18 @@ const NewtonHistory = (() => {
     let _renderSeq = { dashboard: 0, leaderboard: 0, players: 0 };
 
     /**
-     * Load all tournaments from DB (cached). Call _invalidateCache() to force reload.
+     * Load all tournaments from DB (cached), with achievement corrections applied.
+     * Every view reads tournaments through here, so corrections reach all of them.
+     * Call _invalidateCache() to force reload.
      * @returns {Promise<object[]>}
      */
     async function _loadAllTournaments() {
         if (_allTournaments) return _allTournaments;
-        _allTournaments = await NewtonDB.getFinalTournaments();
+        const [records, corrections] = await Promise.all([
+            NewtonDB.getFinalTournaments(),
+            _fetchCorrections()
+        ]);
+        _allTournaments = records.map(t => _applyCorrections(t, corrections));
         return _allTournaments;
     }
 
@@ -1484,6 +1490,9 @@ const NewtonHistory = (() => {
                         key: '_actions', label: '', sortable: false, align: 'right',
                         render: (v, row) => {
                             let html = '';
+                            if (window.NEWTON_APP_MODE !== 'analytics' && _correctionsAvailable) {
+                                html += `<button class="btn btn-sm" data-nh-action="edit-corrections" data-tid="${escHtml(row.tournamentId)}">Edit</button> `;
+                            }
                             if (window.NEWTON_APP_MODE === 'analytics') {
                                 const safeId = escHtml(row.tournamentId);
                                 html += `<button class="btn btn-sm" data-nh-action="view-bracket" data-tid="${safeId}">Bracket</button> `;
@@ -1880,6 +1889,7 @@ const NewtonHistory = (() => {
                 case 'toggle-tournament': toggleTournament(tid, el.checked); break;
                 case 'view-bracket':      viewBracketForTournament(tid); break;
                 case 'delete-tournament': promptDeleteTournament(tid, el.getAttribute('data-name'), el.getAttribute('data-date')); break;
+                case 'edit-corrections':  openCorrections(tid); break;
                 case 'open-tournament':   openTournament(tid); break;
             }
         }, true);
@@ -2537,6 +2547,252 @@ const NewtonHistory = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // Achievement corrections (Docker only)
+    // ---------------------------------------------------------------------------
+    //
+    // A layer on top of the register: per tournament, per player, add or subtract
+    // achievements. Stored on the server (api/corrections.php) so every browser sees
+    // the same thing, and applied in _loadAllTournaments() — the register in IndexedDB
+    // is never modified. Each record holds the difference from what was recorded:
+    //   { tournamentId, playerId, playerName, oneEighties, tons, lollipops,
+    //     highOuts: {add, remove}, shortLegs: {add, remove} }
+
+    /** True once the corrections API has answered — i.e. we are served by the container. */
+    let _correctionsAvailable = false;
+
+    /** Correction modal state: { tournamentId, base, edited, pid } */
+    let _corr = null;
+
+    /**
+     * Fetch all corrections from the server. Never cached — a correction saved on one
+     * device must show on every other device's next load.
+     * @returns {Promise<object[]>} empty when there is no server
+     */
+    async function _fetchCorrections() {
+        try {
+            const res = await fetch('api/corrections.php', { cache: 'no-store' });
+            if (!res.ok) { _correctionsAvailable = false; return []; }
+            const data = await res.json();
+            _correctionsAvailable = true;
+            return Array.isArray(data.corrections) ? data.corrections : [];
+        } catch (e) {
+            _correctionsAvailable = false;
+            return [];
+        }
+    }
+
+    /** Normalized stats with list copies, safe to edit. */
+    function _copyStats(stats) {
+        const s = NewtonDB.normalizeStats(stats);
+        return Object.assign({}, s, { highOuts: s.highOuts.slice(), shortLegs: s.shortLegs.slice() });
+    }
+
+    /** Apply {add, remove} to a list of values. Removes one occurrence per value. */
+    function _applyListChange(list, change) {
+        const out = list.slice();
+        ((change && change.remove) || []).forEach(v => {
+            const i = out.indexOf(v);
+            if (i > -1) out.splice(i, 1);
+        });
+        return out.concat((change && change.add) || []);
+    }
+
+    /** The {add, remove} that turns list `base` into list `edited`. */
+    function _listDiff(base, edited) {
+        const add = edited.slice();
+        const remove = [];
+        base.forEach(v => {
+            const i = add.indexOf(v);
+            if (i > -1) add.splice(i, 1);
+            else remove.push(v);
+        });
+        return { add, remove };
+    }
+
+    /**
+     * Return the tournament with its corrections applied to tournamentAchievements.
+     * The record passed in is left untouched. Counts never go below zero.
+     * @param {object} t - tournament record from NewtonDB
+     * @param {object[]} corrections - all corrections from the server
+     * @returns {object}
+     */
+    function _applyCorrections(t, corrections) {
+        const mine = corrections.filter(c => String(c.tournamentId) === String(t.tournamentId));
+        if (!mine.length || !t.tournamentAchievements) return t;
+
+        const ta = Object.assign({}, t.tournamentAchievements);
+        mine.forEach(c => {
+            const pid = String(c.playerId);
+            const entry = ta[pid];
+            if (!entry) return;
+            const s = _copyStats(entry.stats);
+            s.oneEighties = Math.max(0, s.oneEighties + (c.oneEighties || 0));
+            s.tons        = Math.max(0, s.tons + (c.tons || 0));
+            s.lollipops   = Math.max(0, s.lollipops + (c.lollipops || 0));
+            s.highOuts    = _applyListChange(s.highOuts, c.highOuts);
+            s.shortLegs   = _applyListChange(s.shortLegs, c.shortLegs);
+            ta[pid] = Object.assign({}, entry, { stats: s });
+        });
+        return Object.assign({}, t, { tournamentAchievements: ta });
+    }
+
+    /**
+     * Open the correction modal for a tournament. Shows each player's totals with
+     * corrections applied; saving stores only the difference from what was recorded.
+     * @param {string} tournamentId
+     */
+    async function openCorrections(tournamentId) {
+        let t, corrections;
+        try {
+            [t, corrections] = await Promise.all([NewtonDB.getTournament(tournamentId), _fetchCorrections()]);
+        } catch (e) {
+            alert('Could not load tournament: ' + e.message);
+            return;
+        }
+        if (!t) { alert('Tournament not found.'); return; }
+        if (!_correctionsAvailable) { alert('Could not reach the server. Corrections are not available.'); return; }
+
+        const ta = t.tournamentAchievements || {};
+        const pids = Object.keys(ta).sort((a, b) =>
+            String(ta[a].name || a).localeCompare(String(ta[b].name || b)));
+        if (!pids.length) { alert('This tournament has no player achievements to correct.'); return; }
+
+        const corrected = _applyCorrections(t, corrections).tournamentAchievements;
+        _corr = { tournamentId, base: {}, edited: {}, pid: pids[0] };
+        pids.forEach(pid => {
+            _corr.base[pid]   = { name: ta[pid].name || pid, stats: _copyStats(ta[pid].stats) };
+            _corr.edited[pid] = _copyStats(corrected[pid].stats);
+        });
+
+        document.getElementById('correctionsTournamentName').textContent = t.tournamentName || tournamentId;
+        document.getElementById('correctionsTournamentDate').textContent =
+            t.tournamentDate || (t.closedAt ? fmtDate(t.closedAt) : '-');
+
+        const select = document.getElementById('correctionsPlayer');
+        select.replaceChildren();
+        pids.forEach(pid => {
+            const opt = document.createElement('option');
+            opt.value = pid;
+            opt.textContent = _corr.base[pid].name;
+            select.appendChild(opt);
+        });
+        select.value = _corr.pid;
+
+        document.getElementById('corrHighOutInput').value = '';
+        document.getElementById('corrShortLegInput').value = '';
+        _renderCorrectionPlayer();
+        pushDialog('correctionsModal', null, true);
+    }
+
+    /** Redraw the modal for the selected player. */
+    function _renderCorrectionPlayer() {
+        if (!_corr) return;
+        const s = _corr.edited[_corr.pid];
+        const b = _corr.base[_corr.pid].stats;
+
+        document.getElementById('corrOneEighties').textContent = s.oneEighties;
+        document.getElementById('corrTons').textContent = s.tons;
+        document.getElementById('corrLollipops').textContent = s.lollipops;
+
+        [['highOuts', 'corrHighOutsList'], ['shortLegs', 'corrShortLegsList']].forEach(([field, id]) => {
+            const container = document.getElementById(id);
+            container.replaceChildren();
+            s[field].forEach((v, i) => {
+                container.appendChild(_buildStatListItem(v, () => {
+                    s[field].splice(i, 1);
+                    _renderCorrectionPlayer();
+                }));
+            });
+        });
+
+        const list = (arr) => arr.length ? arr.join(', ') : '—';
+        document.getElementById('correctionsRecorded').textContent =
+            `180s: ${b.oneEighties}\nTons: ${b.tons}\nLollipops: ${b.lollipops}\n` +
+            `High outs: ${list(b.highOuts)}\nShort legs: ${list(b.shortLegs)}`;
+    }
+
+    function selectCorrectionPlayer(pid) {
+        if (!_corr || !_corr.edited[pid]) return;
+        _corr.pid = pid;
+        _renderCorrectionPlayer();
+    }
+
+    /** Step a counter (oneEighties, tons, lollipops). Never below zero. */
+    function adjustCorrection(field, step) {
+        if (!_corr) return;
+        const s = _corr.edited[_corr.pid];
+        s[field] = Math.max(0, s[field] + step);
+        _renderCorrectionPlayer();
+    }
+
+    /** Add a high out (101-170) or short leg (9-21) from its input. */
+    function addCorrectionValue(field) {
+        if (!_corr) return;
+        const isHighOut = field === 'highOuts';
+        const input = document.getElementById(isHighOut ? 'corrHighOutInput' : 'corrShortLegInput');
+        const value = parseInt(input.value, 10);
+        const [min, max] = isHighOut ? [101, 170] : [9, 21];
+        if (!value || value < min || value > max) {
+            alert(isHighOut ? 'Please enter a valid high out score (101-170)' : 'Please enter valid dart count (9-21)');
+            return;
+        }
+        _corr.edited[_corr.pid][field].push(value);
+        input.value = '';
+        _renderCorrectionPlayer();
+    }
+
+    /** Put the selected player back to what was recorded. */
+    function resetCorrectionPlayer() {
+        if (!_corr) return;
+        _corr.edited[_corr.pid] = _copyStats(_corr.base[_corr.pid].stats);
+        _renderCorrectionPlayer();
+    }
+
+    /** Save the difference from what was recorded, for every player in the tournament. */
+    async function saveCorrections() {
+        if (!_corr) return;
+
+        const list = [];
+        Object.keys(_corr.base).forEach(pid => {
+            const b = _corr.base[pid].stats;
+            const e = _corr.edited[pid];
+            const c = {
+                playerId: pid,
+                playerName: _corr.base[pid].name,
+                oneEighties: e.oneEighties - b.oneEighties,
+                tons: e.tons - b.tons,
+                lollipops: e.lollipops - b.lollipops,
+                highOuts: _listDiff(b.highOuts, e.highOuts),
+                shortLegs: _listDiff(b.shortLegs, e.shortLegs)
+            };
+            const changed = c.oneEighties || c.tons || c.lollipops ||
+                c.highOuts.add.length || c.highOuts.remove.length ||
+                c.shortLegs.add.length || c.shortLegs.remove.length;
+            if (changed) list.push(c);
+        });
+
+        try {
+            const res = await fetch('api/corrections.php', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ tournamentId: _corr.tournamentId, corrections: list })
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+        } catch (e) {
+            alert('Could not save corrections: ' + e.message);
+            return;
+        }
+
+        _corr = null;
+        popDialog();
+        _invalidateCache();
+        _recomputePoints();
+    }
+
+    // ---------------------------------------------------------------------------
     // Export / Import
     // ---------------------------------------------------------------------------
 
@@ -2596,6 +2852,7 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache };
+             setScope, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache,
+             selectCorrectionPlayer, adjustCorrection, addCorrectionValue, resetCorrectionPlayer, saveCorrections };
 
 })();
