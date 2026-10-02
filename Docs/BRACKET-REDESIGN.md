@@ -1,0 +1,241 @@
+# Bracket Redesign - Design & Planning
+
+**Status:** Proposal. Layout agreed on an interactive mockup; no application code changed. Implementation not yet planned or approved.
+**Last Updated:** 3 October 2026
+
+Mockup (private artifact, version 13): https://claude.ai/artifact/2MW8SuVVN7kKVxeJbe2CbJ
+
+---
+
+## Goal
+
+A tournament bracket that fits on one page, with every round visible, and that reads as easily as today's butterfly. Today's 32-player bracket either shows the matches too small to read or hides where the lines go. The fix is a canvas built from scratch, with real coordinates and bounds, rather than a restyle of the current one.
+
+The redesign covers the bracket layout only. Match operations (declare winner, lane, referee, undo) move to a modal, opened from the selection bar after clicking a match.
+
+---
+
+## Agreed Decisions
+
+| Decision | Choice |
+|---|---|
+| Layout | **Butterfly**: backside mirrored to the left, frontside to the right. Stacked (frontside above backside) was tried and rejected as too tall. |
+| Rounds | **All rounds visible.** No folding or collapsed rounds. |
+| Finals | **Display choice**: "Right" (as today) or "Middle" (both halves end beside the finals). A **Right | Middle toggle on the bracket toolbar**, as in the mockup, so it can be switched at any time. Remembered as an optional config value; missing means "right". |
+| Fit | **Fills a single page.** Fit all is the furthest you can zoom out. The bracket can't be panned off-screen. |
+| Scroll | **Scroll zooms**, centred on the cursor, as today. Drag pans. |
+| Cards | **Compact, no controls.** Simplified "far away" cards were tried and rejected. |
+| Colours | **Quiet.** Only live matches stand out. Round badges were removed as too busy. |
+| Card size | **The same card at every bracket size.** The spacing between cards grows to fill the page. Fit all never zooms past 100%. |
+| Hover | **Magnifies the match** when zoomed out, as today. When zoomed in, shows just where its players go. |
+| Click | **Selects the match**, as in the mockup: its lines and connected matches are highlighted until cleared. An **"Open match"** button in the selection bar opens the match modal. |
+| Follow player | **Keep.** "Follow <player>" traces one player's path through the bracket and dims everything else. Confirmed as really useful. |
+| Card borders | Never thinner than 1px on screen (1.5px for live, ready and final), but no thicker when zoomed in. |
+
+---
+
+## Layout Rules
+
+One function covers 8, 16 and 32 players. It reads the progression table (`getProgressionTable()`) and never modifies it. With the frontside alone it also covers single elimination.
+
+- **Columns are rounds.** Frontside round *r* is column *r* on its side; backside round *r* is column *r* on the other side. The finals get their own column.
+- **Frontside rows.** Round 1 is spaced evenly. Every later match sits midway between the two matches whose winners feed it.
+- **Backside rows.** Backside round 1 sits midway between the two frontside matches whose losers it receives. Later rounds sit midway between their backside feeders, or level with their single backside feeder in rounds where frontside losers drop in.
+- **Finals.** BS-FINAL and GRAND-FINAL are stacked around the vertical middle.
+- **World coordinates.** Everything is placed from 0,0 with known width and height, so the camera can fit the whole bracket, fit a set of matches, and tell when a match is off-screen.
+
+### Geometry used in the mockup
+
+| Constant | Value | Meaning |
+|---|---|---|
+| Card | 200 × 80, names 20px | World units. Fixed for every bracket size |
+| Row gap | 10, grows up to 90 | Between cards in a column |
+| Column gap | 34, grows up to 134 | Between rounds |
+| Centre gap | 64, grows with the column gap | Between backside and frontside |
+| Finals gap | 64, grows with the column gap | Before the finals column |
+
+**Spacing fills the page, not the cards.** The bracket is first fitted at its tightest spacing, with fit-all capped at 100%. Whatever space is left over goes into the row and column gaps, up to their limits; anything beyond that is left as margin around a centred bracket. A 32-player bracket on a wide screen gets wider column gaps; an 8-player bracket gets taller row gaps. The card itself never changes, so 8, 16 and 32 players look alike, just at different zoom levels.
+
+An earlier version stretched the card height (and name size) per window instead. It filled the page, but cards looked wildly different between 8, 16 and 32 players, so it was dropped.
+
+### Lines
+
+- **Winner lines** run from the centre of a match to the centre of the next, with the corner halfway across the gap. Two feeders form a fork; a single feeder is a straight line.
+- **Crossing lines.** A winner line that would cross other matches is routed around the bracket instead. In "Right", the backside winner's line to the finals runs below the bracket.
+- **Loser drops** are drawn only for the selected match: dashed, entering the player row they fill, with a small "loser" tag.
+- **Line width** is constant on screen at any zoom.
+
+### Other Formats
+
+The layout is the one part that depends on the tournament format. Everything around it is shared.
+
+- **Shared:** the card, the camera (fit, zoom, pan), the hover magnifier and progression tip, the selection bar (Follow player, Open match) and the match modal.
+- **Per format:** a layout function that takes the format's matches and returns positions, connections and labels in world coordinates. The rest of the screen only asks it where things go.
+
+Double elimination gets the butterfly described above; single elimination is its frontside alone. A future format can be drawn in a completely different way (a grid for round robin, columns that fill in as pairings are made for Swiss) without stretching this layout to fit it. Adding a format means writing one layout, not a new renderer.
+
+The format already picks the progression table (`getProgressionTable()`); the same choice would pick the layout. Layouts only read the progression data, never replace it. There is still one progression table per format.
+
+---
+
+## The Card
+
+Proposed 200 × 80, the same at every bracket size (today: 280 × 150).
+
+- **Top strip:** match ID, state, lane and best-of. No controls on the card.
+- **Two player rows** with leg scores in a right-aligned column, so results can be read straight down a round.
+- **Empty slots name their source**, for example "Winner FS-2-1" or "Loser FS-4-2".
+- **States:**
+  - Live: orange border and fill, pulsing dot.
+  - Ready: amber border, soft yellow fill.
+  - Completed: green outline, green winner row, loser greyed. A player eliminated from the tournament is struck through.
+  - Waiting: dashed grey border.
+  - Walkover: faded.
+- **Throws first:** a small dot before the player who throws first. Whether the app has this data for every match is still to be checked.
+
+---
+
+## Navigation (Camera)
+
+- **Camera** is position and zoom over world coordinates.
+- **Zoom is multiplicative** and centred on the cursor (today it adds a fixed 0.025 per tick).
+- **Minimum zoom is fit all**; maximum is 200%.
+- **Pan is clamped** so the bracket stays on screen. When the whole bracket fits, it is centred.
+- **Toolbar:** Finals Right | Middle, Fit all, −, zoom %, on-screen name size, +. A "Now" button (fit the live and ready matches) was tried and dropped: live and ready matches are usually spread across both halves, so it landed close to Fit all.
+- **Header (agreed).** Two rows above the bracket, as in the mockup:
+  - Top row: tournament name and date (and page navigation) on the left; Finals Right | Middle, Fit all and the zoom controls on the right.
+  - Second row: a status line (players, matches, played, walkovers, live, ready) and the state legend.
+  - No on-canvas usage hint ("Hover a match to magnify it · …"). It was redundant and covered the side labels; how to use the bracket belongs in the help system.
+  - The mockup's Players 8 | 16 | 32 selector and the "cards … names …" figures are mockup-only and do not go into the app.
+- **Magnifier.** Hovering a match while zoomed out (below 90%) shows a full-size copy over it after a short delay, with its paths ("Winner → X · Loser → Y"). It ignores the pointer and is hidden while dragging or animating.
+- **Progression tip.** Hovering a match at 90% or more shows only the paths line, just below the card (above it near the bottom edge), since the card itself is already readable.
+- **Selection.** Clicking a match highlights its lines and connected matches. Off-screen connected matches get markers at the viewport edge; clicking a marker moves to that match. "Follow <player>" traces a player's path and dims everything else. The Follow buttons toggle in place, so the selection bar never changes under the pointer: click another player to switch, or the same one again to stop. "Open match" opens the match modal. Esc or a click on empty space clears the selection.
+
+---
+
+## How Big It Gets
+
+Fit-all zoom and name size on screen, calculated from the mockup's layout with the fixed card. Viewports allow for browser bars and toolbar. Around 10px is readable at arm's length; below 7px you see shapes and colours rather than names.
+
+| Bracket | Today (default view) | Laptop 1400 × 800 | TV 1920 × 1080 |
+|---|---|---|---|
+| 8 players | 61% · 9.8px | 79% · 15.9px | 100% · 20px |
+| 16 players | 45% · 7.2px | 56% · 11.2px | 78% · 15.6px |
+| 32 players | 33% · 5.3px | 38% · 7.5px | 56% · 11.1px |
+
+Today's figures use the zoom from `getDefaultView()` with 16px names. At 32 players on a laptop the magnifier does the reading.
+
+---
+
+## What's Wrong With Today's Canvas
+
+- **No bounds.** Positions are measured from `centerX: 500`, the backside reaches about x = −2000 at 32 players, and `.bracket-canvas` is a fixed 3000×3000 box. With no bounds there is no way to fit, so `getDefaultView()` uses hand-tuned zoom and pan per size.
+- **Zoom steps by fixed amounts.** `handleZoom()`, `zoomIn()` and `zoomOut()` add or subtract 0.025: an 8% jump at 0.3 and about 1% at 2.0. The 0.3 floor can stop a 32-player bracket from fitting.
+- **Positions only exist in the DOM.** `renderMatch()` writes them to `style.left`/`style.top`, so code can't ask where a match is and the view can't move to one.
+- **Written out per size.** 8, 16 and 32 players each have their own render and line functions; `bracket-lines.js` alone is about 1,900 lines.
+
+---
+
+## Match Operations (Direction, Not Decided)
+
+"Open match" in the selection bar opens a modal. The likely route is to reuse `createMatchCard()` from Match Controls (`bracket-rendering.js`), which already has the winner buttons (`completeMatchFromCommandCenter()` → winner confirmation), lane and referee selects, Start/Stop, QR, network transfer and result review. It would need:
+
+- a **completed** state showing the score, with Undo through `isMatchUndoable()` → `handleSurgicalUndo()`
+- a **waiting** state showing where the players come from
+
+An alternative is a redesign of the Match Controls card itself. Either way, no new path for completing or undoing matches.
+
+---
+
+## Design Language
+
+Notes, started 3 October 2026. The bracket sets the visual language; the rest of the app is expected to follow it page by page. The recently reworked modals (winner confirmation, edit statistics) are already close. This section may move to its own document once other pages start.
+
+**Goal:** distinct contrast without going monochrome, and without a circus of colours or shadows.
+
+### Principles
+
+Three tools, each with one job:
+
+- **Lightness carries hierarchy.** One solid dark button per view for the main action (like "Open match"). Secondary actions are outlined. Surfaces step from page grey to white panels to light grey insets. What matters most is darkest, not most colourful.
+- **Colour carries meaning, and only meaning.** Orange is live, amber is ready, green is winner or done, red is destructive or removing. Colour never decorates, so when it appears it says something. Live matches stand out because nothing else competes with them.
+- **Shadows mark floating layers only.** Modals, the magnifier and the selection bar float above the page and get one soft shadow. Nothing that sits on the page has a shadow. Edges come from crisp borders instead.
+
+Type does the fine work: bold for names and headings, small uppercase with wide letter spacing for labels, monospace for match IDs, scores and other figures.
+
+### Interaction rules
+
+- **The frame stays put; only the content changes.** A bar, panel or modal never changes shape or moves its buttons under the pointer. Toggles switch in place (the Follow buttons). Learned from the first selection bar, which swapped its contents when Follow was clicked.
+- **Hover informs, click acts.** Hovering shows information (magnifier, progression tip) and never changes state. Clicking selects or acts.
+- **No redundant controls.** If a control mostly does what another already does, drop it (the "Now" button, the on-canvas usage hint).
+- **One primary action per view.**
+
+### Components
+
+| Component | Look | Seen in |
+|---|---|---|
+| Primary button | Solid dark (`--header`) with light text; turns accent on hover | "Open match", selected segment of a toggle |
+| Secondary button | Outlined, light fill, dark text | Follow, Cancel |
+| Segmented toggle | Joined outlined buttons; the selected one is solid dark | Finals Right \| Middle |
+| Active toggle button | Accent-soft fill, accent border and text | Follow while following |
+| Panel | Light grey fill, light border, rounded corners, no shadow | Statistics tiles, score box |
+| Section label | Small uppercase, bold, wide letter spacing, muted grey | Bracket column labels, MATCH PROGRESSION, 180S |
+| Floating bar | White, light border, rounded, one soft shadow | Selection bar |
+| Modal | Optional grey sidebar for fixed facts, white content, footer separated by a rule | Winner confirmation |
+| Status line | Plain text with bold figures, then the state legend | Bracket header, second row |
+
+Modals in the app currently use a green-outlined primary button ("Confirm Winner", "Save Statistics"). The direction is the solid dark primary, with green kept for meaning ("Jimmy advances to FS-2-4").
+
+### Colour tokens (from the mockup)
+
+| Token | Light | Dark | Use |
+|---|---|---|---|
+| `--bg` | `#f4f3f1` | `#15161a` | Page |
+| `--surface` | `#ffffff` | `#1e2026` | Cards, panels, bars |
+| `--surface-2` | `#faf9f7` | `#23252c` | Insets, card meta strip |
+| `--band` | `#ecebe8` | `#202127` | Backside band |
+| `--ink` / `--ink-2` | `#111827` / `#374151` | `#f3f4f6` / `#d1d5db` | Text |
+| `--muted` / `--faint` | `#6b7280` / `#9ca3af` | `#9ca3af` / `#6b7280` | Labels / placeholders, waiting borders |
+| `--line` | `#d6d3d1` | `#3a3d46` | Light borders, lines between matches |
+| `--line-strong` | `#78716c` | `#a8a29e` | Lines between played matches |
+| `--card-line` | `#a8a29e` | `#5f6470` | Card border |
+| `--header` | `#1f2937` | `#0d0e11` | Primary button, selected toggle, dark tip |
+| `--accent` / `--accent-soft` | `#ff6b35` / `#ffe7dc` | `#ff7d4d` / `#42261b` | Live, selection |
+| `--ready` / `--ready-soft` | `#d4a017` / `#fbf0c8` | `#e7b93a` / `#3a3115` | Ready |
+| `--done-border` / `--done-win` | `#6fa684` / `#e3f2e8` | `#3f7a52` / `#1d3326` | Completed card / winner row |
+
+Live, ready and waiting cards also have their own fills (`--live-fill`, `--ready-fill`, `--pending-fill`). Light and dark mode are both defined; dark follows the system setting unless overridden.
+
+### Type
+
+- **Sans:** Inter, already bundled in `fonts/`.
+- **Mono:** the mockup uses JetBrains Mono from Google Fonts. The app must stay offline, so use the bundled Cascadia Code, or bundle JetBrains Mono.
+
+---
+
+## Constraints
+
+- **Foundations untouched.** The progression tables in `clean-match-progression.js`, the transaction history and the undo system are read, never modified or duplicated. The layout only derives positions from the tables.
+- **Config is additive.** The finals position is a new optional config value; missing means "right".
+- **Test with 8, 16 and 32 players**, both finals positions, light and dark mode, and single elimination.
+
+---
+
+## Implementation Outline (For Discussion)
+
+Not approved. A rough order to discuss before any code changes:
+
+1. **Layout function.** Progression table + bracket size + finals position → world positions and bounds. Pure, no DOM. Chosen by format, so other formats can bring their own layout (see [Other Formats](#other-formats)).
+2. **Camera.** Fit, zoom at cursor, clamped pan, animate. Replaces `getDefaultView()`, `handleZoom()`, `zoomIn()`, `zoomOut()`, `resetZoom()`.
+3. **Cards.** New `renderMatch()` from the layout positions.
+4. **Lines.** One generic routine from the layout, replacing the per-size functions in `bracket-lines.js`.
+5. **Hover magnifier, selection bar (Follow, Open match) and the match modal.**
+6. **Finals toggle** on the bracket toolbar.
+
+---
+
+## Open Questions
+
+- **Loser drops.** Today they are always drawn. In the mockup they appear only for the selected match. Is that enough?
+- **Screen.** What is the bracket actually run on at tournaments: laptop, TV, or both?
+- **Throws first.** Is the data available for every match, or should the dot go?
