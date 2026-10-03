@@ -1,0 +1,144 @@
+/* config-page.css - Global Settings page (js/config-page.js)
+ *
+ * Grouped sections with a section list, one setting per row, and a single save bar.
+ * Uses the shared tokens in css/design-tokens.css. Light only, desktop first.
+ */
+
+#config.page.active { display: block; background: var(--nt-bg); padding: 0; overflow: visible; font-family: var(--nt-sans); color: var(--nt-ink); }
+
+.cfg-wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 140px; display: grid; grid-template-columns: 200px minmax(0, 780px); gap: 16px 40px; justify-content: center; }
+.cfg-title { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
+.cfg-title h2 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; color: var(--nt-ink); }
+.cfg-title p { margin: 4px 0 0; color: var(--nt-muted); font-size: 14px; }
+
+/* section list: follows the page as it scrolls */
+.cfg-toc { position: sticky; top: 16px; align-self: start; display: flex; flex-direction: column; gap: 2px; }
+.cfg-toc button { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 8px 12px; border: 0; border-radius: 8px; background: transparent; color: var(--nt-ink-2); font: inherit; font-size: 14px; font-weight: 500; text-align: left; cursor: pointer; }
+.cfg-toc button:hover { background: var(--nt-surface); }
+.cfg-toc button:focus { outline: none; }
+.cfg-toc button:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 1px; }
+.cfg-toc button.on { background: var(--nt-surface); color: var(--nt-ink); font-weight: 700; box-shadow: inset 3px 0 0 var(--nt-ink); }
+.cfg-toc .cfg-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--nt-accent); visibility: hidden; }
+.cfg-toc button.dirty .cfg-dot { visibility: visible; }
+
+/* sections and panels */
+.cfg-main { display: flex; flex-direction: column; gap: 36px; min-width: 0; }
+.cfg-section { scroll-margin-top: 16px; }
+.cfg-sec-head { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin-bottom: 10px; }
+.cfg-sec-head h3 { margin: 0; font-size: 12px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--nt-muted); }
+.cfg-sec-head p { margin: 2px 0 0; color: var(--nt-muted); font-size: 13px; }
+.cfg-panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; }
+.cfg-panel + .cfg-panel { margin-top: 12px; }
+.cfg-panel-title { padding: 14px 20px 0; font-weight: 700; font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.cfg-panel-note { margin: 4px 20px 14px; color: var(--nt-muted); font-size: 13px; }
+.cfg-link { border: 0; background: none; padding: 0; color: var(--nt-muted); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
+.cfg-link:hover { color: var(--nt-ink); }
+
+/* one setting per row: what it is on the left, the control on the right */
+.cfg-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 8px 24px; align-items: center; padding: 16px 20px; }
+.cfg-row + .cfg-row { border-top: 1px solid var(--nt-line); }
+.cfg-row.stack { grid-template-columns: 1fr; }
+.cfg-label { font-weight: 600; color: var(--nt-ink); font-size: 14px; }
+.cfg-desc { color: var(--nt-muted); font-size: 13px; margin-top: 2px; max-width: 58ch; }
+.cfg-ctl { display: flex; align-items: center; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+.cfg-row.stack .cfg-ctl { justify-content: flex-start; }
+
+/* controls */
+#config .cfg-text { height: 36px; width: 280px; max-width: 100%; border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 0 12px; background: var(--nt-surface); color: var(--nt-ink); font: inherit; font-size: 14px; }
+#config .cfg-text.mono { font-family: var(--nt-mono); font-size: 13px; }
+#config .cfg-text[readonly] { background: var(--nt-inset); color: var(--nt-muted); }
+#config select.cfg-text { width: auto; padding-right: 8px; }
+#config .cfg-text:focus, #config .cfg-num:focus { outline: 2px solid var(--nt-accent); outline-offset: 1px; }
+#config .cfg-num { width: 68px; height: 32px; border: 1px solid var(--nt-line-2); border-radius: 8px; text-align: right; padding: 0 10px; font-family: var(--nt-mono); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; color: var(--nt-ink); background: var(--nt-surface); }
+.cfg-switch { position: relative; display: inline-block; width: 42px; height: 24px; flex: none; }
+.cfg-switch input { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; margin: 0; cursor: pointer; z-index: 1; }
+.cfg-switch span { position: absolute; inset: 0; border-radius: 99px; background: var(--nt-line-2); transition: background .15s; }
+.cfg-switch span::after { content: ""; position: absolute; top: 3px; left: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; box-shadow: 0 1px 2px rgba(17,24,39,.25); transition: transform .15s; }
+.cfg-switch input:checked + span { background: var(--nt-header); }
+.cfg-switch input:checked + span::after { transform: translateX(18px); }
+.cfg-switch input:focus-visible + span { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+.cfg-seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; background: var(--nt-surface); }
+.cfg-seg button { border: 0; background: transparent; padding: 7px 14px; font: inherit; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); cursor: pointer; }
+.cfg-seg button + button { border-left: 1px solid var(--nt-line-2); }
+.cfg-seg button[aria-pressed="true"] { background: var(--nt-header); color: var(--nt-header-ink); }
+.cfg-seg button:hover:not([aria-pressed="true"]) { background: var(--nt-surface-2); }
+.cfg-step { display: inline-flex; align-items: center; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; background: var(--nt-surface); }
+.cfg-step button { width: 32px; height: 34px; border: 0; background: transparent; cursor: pointer; font-size: 16px; color: var(--nt-ink-2); }
+.cfg-step button:hover { background: var(--nt-surface-2); }
+.cfg-step button:disabled { color: var(--nt-line-2); cursor: default; background: transparent; }
+.cfg-step output { min-width: 64px; text-align: center; font-family: var(--nt-mono); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; border-inline: 1px solid var(--nt-line-2); line-height: 34px; padding-inline: 6px; }
+.cfg-btn { height: 36px; border-radius: 8px; padding: 0 14px; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); }
+.cfg-btn:hover { border-color: var(--nt-ink-2); }
+.cfg-btn.primary { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.cfg-btn.primary:hover { background: var(--nt-accent); border-color: var(--nt-accent); color: #fff; }
+#config code { font-family: var(--nt-mono); font-size: 12px; background: var(--nt-inset); border-radius: 4px; padding: 1px 5px; }
+.cfg-logo { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 1px solid var(--nt-line); }
+.cfg-warn { color: var(--nt-warn); background: var(--nt-warn-soft); border-radius: 8px; padding: 6px 10px; font-size: 12px; margin: 0; }
+
+/* formats to offer: one card per format (rendered by renderFormatVisibilityOptions()) */
+.cfg-choices { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 10px; padding: 0 20px 18px; }
+.cfg-choice { display: flex; gap: 12px; align-items: flex-start; border: 1px solid var(--nt-line-2); border-radius: 10px; padding: 14px; cursor: pointer; }
+.cfg-choice:has(input:checked) { border-color: var(--nt-ink); box-shadow: inset 0 0 0 1px var(--nt-ink); }
+.cfg-choice input { margin: 3px 0 0; accent-color: var(--nt-header); width: 16px; height: 16px; flex: none; }
+.cfg-choice input:disabled { cursor: not-allowed; }
+.cfg-choice b { display: block; }
+.cfg-choice small { color: var(--nt-muted); font-size: 13px; }
+
+/* match length and points: two columns of label / control rows */
+.cfg-cols { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); }
+.cfg-cols > div { padding: 6px 20px 16px; }
+.cfg-cols > div + div { border-left: 1px solid var(--nt-line); }
+.cfg-cols h4 { margin: 10px 0 6px; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); }
+.cfg-line { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 0; font-size: 14px; }
+.cfg-line + .cfg-line { border-top: 1px dashed var(--nt-line); }
+.cfg-rank { font-family: var(--nt-mono); font-weight: 700; color: var(--nt-ink-2); font-size: 13px; }
+.cfg-line small { color: var(--nt-muted); }
+
+/* lanes not in use */
+.cfg-lanes { display: flex; flex-wrap: wrap; gap: 6px; }
+.cfg-lane { width: 40px; height: 34px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); font-family: var(--nt-mono); font-weight: 700; font-size: 13px; color: var(--nt-ink); cursor: pointer; }
+.cfg-lane:hover { border-color: var(--nt-ink-2); }
+.cfg-lane[aria-pressed="true"] { background: var(--nt-inset); color: var(--nt-faint); text-decoration: line-through; border-style: dashed; }
+
+/* finals position, with small pictures */
+.cfg-pics { display: flex; gap: 10px; flex-wrap: wrap; }
+.cfg-pic { border: 1px solid var(--nt-line-2); border-radius: 10px; padding: 10px 12px 8px; background: var(--nt-surface); cursor: pointer; display: grid; gap: 6px; justify-items: center; font: inherit; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); }
+.cfg-pic[aria-pressed="true"] { border-color: var(--nt-ink); box-shadow: inset 0 0 0 1px var(--nt-ink); color: var(--nt-ink); }
+.cfg-pic svg { display: block; }
+
+/* save bar: appears when something has changed */
+.cfg-savebar { position: fixed; left: 50%; bottom: 18px; transform: translate(-50%, 160%); transition: transform .2s ease; z-index: 900;
+  display: flex; align-items: center; gap: 14px; background: var(--nt-header); color: var(--nt-header-ink); border-radius: 12px; padding: 10px 10px 10px 18px;
+  box-shadow: 0 10px 30px rgba(17,24,39,.3); max-width: calc(100% - 32px); font-family: var(--nt-sans); font-size: 14px; }
+.cfg-savebar.show { transform: translate(-50%, 0); }
+.cfg-count { background: var(--nt-accent); color: #fff; border-radius: 99px; padding: 1px 8px; font-weight: 700; font-size: 12px; }
+.cfg-bar-error { color: #fecaca; font-weight: 600; }
+.cfg-savebar .cfg-btn { height: 34px; }
+.cfg-savebar .cfg-btn.ghost { background: transparent; border-color: rgba(255,255,255,.25); color: var(--nt-header-ink); }
+.cfg-savebar .cfg-btn.ghost:hover { border-color: #fff; }
+.cfg-savebar .cfg-btn.save { background: #fff; border-color: #fff; color: var(--nt-ink); }
+.cfg-savebar .cfg-btn.save:hover { background: var(--nt-accent); border-color: var(--nt-accent); color: #fff; }
+.cfg-toast { position: fixed; left: 50%; bottom: 24px; transform: translateX(-50%); background: var(--nt-ok); color: #fff; border-radius: 99px; padding: 8px 16px; font-family: var(--nt-sans); font-weight: 700; opacity: 0; transition: opacity .2s; pointer-events: none; z-index: 901; }
+.cfg-toast.show { opacity: 1; }
+
+/* leaving with unsaved changes */
+.cfg-dialog-back { position: fixed; inset: 0; background: rgba(17,24,39,.4); display: grid; place-items: center; z-index: 1000; padding-inline: 16px; }
+.cfg-dialog-back[hidden] { display: none; }
+.cfg-dialog { background: var(--nt-surface); border-radius: 14px; max-width: 460px; width: 100%; padding: 22px 22px 18px; box-shadow: 0 20px 60px rgba(17,24,39,.35); font-family: var(--nt-sans); color: var(--nt-ink); }
+.cfg-dialog h3 { margin: 0 0 6px; font-size: 18px; letter-spacing: -.01em; }
+.cfg-dialog p { margin: 0 0 18px; color: var(--nt-ink-2); font-size: 14px; }
+.cfg-dialog .cfg-acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
+
+/* Analytics-only mode: only Club and Points apply */
+.mode-analytics #config .cfg-panel:not(#configClub):not(#configPoints) { display: none; }
+.mode-analytics #config .cfg-section:not(#cfg-club):not(#cfg-tournaments) { display: none; }
+.mode-analytics #config .cfg-toc button:not([data-target="cfg-club"]):not([data-target="cfg-tournaments"]) { display: none; }
+
+@media (max-width: 900px) {
+  .cfg-wrap { grid-template-columns: 1fr; }
+  .cfg-toc { position: static; flex-direction: row; flex-wrap: wrap; }
+  .cfg-row { grid-template-columns: 1fr; }
+  .cfg-ctl { justify-content: flex-start; }
+  .cfg-cols > div + div { border-left: 0; border-top: 1px solid var(--nt-line); }
+}
+@media (prefers-reduced-motion: reduce) { .cfg-savebar, .cfg-toast, .cfg-switch span, .cfg-switch span::after { transition: none; } }

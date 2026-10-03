@@ -260,13 +260,18 @@ function saveGlobalConfig() {
 // ... (The rest of the functions remain the same as the original file)
 
 // APPLICATION SETTINGS
-function saveApplicationSettings() {
+/**
+ * Save the club name from the Global Settings form.
+ * @param {{silent?: boolean}} [options] - silent: no alerts (the page's save bar reports)
+ * @returns {boolean} false when the name is empty
+ */
+function saveApplicationSettings(options = {}) {
     const clubNameElement = document.getElementById('applicationTitle');
     const newClubName = clubNameElement ? clubNameElement.value.trim() : '';
 
     if (!newClubName) {
-        alert('Club name cannot be empty');
-        return;
+        if (!options.silent) alert('Club name cannot be empty');
+        return false;
     }
 
     config.clubName = newClubName;
@@ -279,7 +284,8 @@ function saveApplicationSettings() {
         renderBracket();
     }
 
-    alert('✓ Branding saved successfully!');
+    if (!options.silent) alert('✓ Branding saved successfully!');
+    return true;
 }
 
 /**
@@ -358,10 +364,10 @@ function renderFormatVisibilityOptions() {
         ? config.ui.hiddenFormats : [];
 
     host.innerHTML = TOURNAMENT_FORMATS.map(f => `
-        <label class="checkbox-label">
+        <label class="cfg-choice">
             <input type="checkbox" class="format-visibility-toggle" data-format-id="${escapeHtml(f.id)}"
                    ${hidden.indexOf(f.id) === -1 ? 'checked' : ''}>
-            <span>${escapeHtml(f.name)}<small class="field-help">${escapeHtml(f.blurb)}</small></span>
+            <span><b>${escapeHtml(f.name)}</b><small>${escapeHtml(f.blurb)}</small></span>
         </label>
     `).join('');
 
@@ -448,7 +454,12 @@ function parseExcludedLanesString(excludedLanesString) {
 }
 
 // LANE CONFIGURATION
-function saveLaneConfiguration() {
+/**
+ * Save lane settings from the Global Settings form.
+ * @param {{silent?: boolean}} [options] - silent: no alerts
+ * @returns {void}
+ */
+function saveLaneConfiguration(options = {}) {
     const maxLanesElement = document.getElementById('maxLanes');
     const excludedLanesElement = document.getElementById('excludedLanes');
     const requireLaneElement = document.getElementById('requireLaneForStart');
@@ -467,13 +478,14 @@ function saveLaneConfiguration() {
     const validExcludedLanes = excludedLanes.filter(lane => lane <= maxLanes);
     if (validExcludedLanes.length !== excludedLanes.length) {
         const invalidLanes = excludedLanes.filter(lane => lane > maxLanes);
-        alert(`Warning: Some excluded lanes (${invalidLanes.join(', ')}) are above the maximum lane number (${maxLanes}) and will be ignored.`);
+        if (!options.silent) alert(`Warning: Some excluded lanes (${invalidLanes.join(', ')}) are above the maximum lane number (${maxLanes}) and will be ignored.`);
     }
 
     config.lanes = config.lanes || {};
     config.lanes.maxLanes = maxLanes;
     config.lanes.excludedLanes = validExcludedLanes;
-    config.lanes.requireLaneForStart = requireLaneElement ? requireLaneElement.checked : false;
+    // No control on the page for this one: keep what is stored rather than switching it off
+    config.lanes.requireLaneForStart = requireLaneElement ? requireLaneElement.checked : !!config.lanes.requireLaneForStart;
 
     saveGlobalConfig();
 
@@ -482,11 +494,16 @@ function saveLaneConfiguration() {
         setTimeout(refreshAllLaneDropdowns, 100);
     }
 
-    alert('✓ Lane settings saved successfully!');
+    if (!options.silent) alert('✓ Lane settings saved successfully!');
 }
 
 // UI CONFIGURATION
-function saveUIConfiguration() {
+/**
+ * Save user interface and server settings from the Global Settings form.
+ * @param {{silent?: boolean}} [options] - silent: no alerts
+ * @returns {void}
+ */
+function saveUIConfiguration(options = {}) {
     const confirmWinnerElement = document.getElementById('confirmWinnerSelection');
     const autoOpenElement = document.getElementById('autoOpenMatchControls');
     const defaultPaidElement = document.getElementById('defaultPaid');
@@ -543,7 +560,7 @@ function saveUIConfiguration() {
         renderBracket();
     }
 
-    alert('✓ UI settings saved successfully!');
+    if (!options.silent) alert('✓ UI settings saved successfully!');
 }
 
 // UPDATE APPLICATION TITLE
@@ -581,7 +598,12 @@ function resetConfigToDefaults() {
 }
 
 // SAVE POINT CONFIGURATION
-function savePointConfiguration() {
+/**
+ * Save point values from the Global Settings form.
+ * @param {{silent?: boolean}} [options] - silent: no alerts
+ * @returns {void}
+ */
+function savePointConfiguration(options = {}) {
     // Read values from UI
     config.points = config.points || {};
     config.points.participation = parseInt(document.getElementById('participationPoints').value) || 0;
@@ -604,11 +626,16 @@ function savePointConfiguration() {
         updateResultsTable();
     }
 
-    alert('✓ Point values saved successfully!');
+    if (!options.silent) alert('✓ Point values saved successfully!');
 }
 
 // SAVE MATCH CONFIGURATION
-function saveMatchConfiguration() {
+/**
+ * Save match lengths and Chalker settings from the Global Settings form.
+ * @param {{silent?: boolean}} [options] - silent: no alerts
+ * @returns {void}
+ */
+function saveMatchConfiguration(options = {}) {
     // Read values from UI — Double Elimination
     config.legs = config.legs || {};
     config.legs.regularRounds = parseInt(document.getElementById('regularRoundsLegs').value) || 3;
@@ -644,67 +671,69 @@ function saveMatchConfiguration() {
     // Save to localStorage
     saveGlobalConfig();
 
-    alert('✓ Match configuration saved successfully!');
+    if (!options.silent) alert('✓ Match configuration saved successfully!');
 }
 
-// RESET POINT VALUES TO DEFAULTS
+/**
+ * Put the default point values into the Global Settings form. Nothing is saved until
+ * the page's Save changes.
+ * @returns {void}
+ */
 function resetPointValuesToDefaults() {
-    if (confirm('Reset all point values to defaults?')) {
-        // Reset point values to defaults
-        config.points = JSON.parse(JSON.stringify(DEFAULT_CONFIG.points));
-
-        // Apply to UI
-        safeSetValue('participationPoints', config.points.participation);
-        safeSetValue('firstPlacePoints', config.points.first);
-        safeSetValue('secondPlacePoints', config.points.second);
-        safeSetValue('thirdPlacePoints', config.points.third);
-        safeSetValue('fourthPlacePoints', config.points.fourth);
-        safeSetValue('fifthSixthPlacePoints', config.points.fifthSixth);
-        safeSetValue('seventhEighthPlacePoints', config.points.seventhEighth);
-        safeSetValue('highOutPoints', config.points.highOut);
-        safeSetValue('tonPoints', config.points.ton);
-        safeSetValue('shortLegPoints', config.points.shortLeg);
-        safeSetValue('oneEightyPoints', config.points.oneEighty);
-
-        // Save to localStorage
-        saveGlobalConfig();
-
-        // Update results table if visible
-        if (typeof updateResultsTable === 'function') {
-            updateResultsTable();
-        }
-
-        alert('✓ Point values reset to defaults');
-    }
+    const d = DEFAULT_CONFIG.points;
+    safeSetValue('participationPoints', d.participation);
+    safeSetValue('firstPlacePoints', d.first);
+    safeSetValue('secondPlacePoints', d.second);
+    safeSetValue('thirdPlacePoints', d.third);
+    safeSetValue('fourthPlacePoints', d.fourth);
+    safeSetValue('fifthSixthPlacePoints', d.fifthSixth);
+    safeSetValue('seventhEighthPlacePoints', d.seventhEighth);
+    safeSetValue('highOutPoints', d.highOut);
+    safeSetValue('tonPoints', d.ton);
+    safeSetValue('shortLegPoints', d.shortLeg);
+    safeSetValue('oneEightyPoints', d.oneEighty);
 }
 
-// RESET MATCH CONFIGURATION TO DEFAULTS
+/**
+ * Put the default match lengths into the Global Settings form. Nothing is saved until
+ * the page's Save changes.
+ * @returns {void}
+ */
 function resetMatchConfigToDefaults() {
-    if (confirm('Reset all match configuration to defaults?')) {
-        // Reset leg configuration to defaults
-        config.legs = JSON.parse(JSON.stringify(DEFAULT_CONFIG.legs));
+    const d = DEFAULT_CONFIG.legs;
+    safeSetValue('regularRoundsLegs', d.regularRounds);
+    safeSetValue('frontsideSemifinalLegs', d.frontsideSemifinal);
+    safeSetValue('backsideSemifinalLegs', d.backsideSemifinal);
+    safeSetValue('backsideFinalLegs', d.backsideFinal);
+    safeSetValue('grandFinalLegs', d.grandFinal);
+    safeSetValue('seRegularRoundsLegs', d.seRegularRounds);
+    safeSetValue('seQuarterfinalLegs', d.seQuarterfinal);
+    safeSetValue('seSemifinalLegs', d.seSemifinal);
+    safeSetValue('seBronzeLegs', d.seBronze);
+    safeSetValue('seFinalLegs', d.seFinal);
+}
 
-        // Apply to UI — Double Elimination
-        safeSetValue('regularRoundsLegs', config.legs.regularRounds);
-        safeSetValue('frontsideSemifinalLegs', config.legs.frontsideSemifinal);
-        safeSetValue('backsideSemifinalLegs', config.legs.backsideSemifinal);
-        safeSetValue('backsideFinalLegs', config.legs.backsideFinal);
-        safeSetValue('grandFinalLegs', config.legs.grandFinal);
+/**
+ * Save every Global Settings section in one go (the page's single Save changes).
+ * Checks the form first, so nothing is saved when something is invalid.
+ * @returns {{ok: boolean, error?: string, field?: string}}
+ */
+function saveAllSettings() {
+    const clubName = (document.getElementById('applicationTitle')?.value || '').trim();
+    if (!clubName) return { ok: false, error: 'Enter a club name', field: 'applicationTitle' };
 
-        // Apply to UI — Single Elimination
-        safeSetValue('seRegularRoundsLegs', config.legs.seRegularRounds);
-        safeSetValue('seQuarterfinalLegs', config.legs.seQuarterfinal);
-        safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
-        safeSetValue('seBronzeLegs', config.legs.seBronze);
-        safeSetValue('seFinalLegs', config.legs.seFinal);
-        initX01Toggle(config.legs.x01Format);
-        safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
-
-        // Save to localStorage
-        saveGlobalConfig();
-
-        alert('✓ Match configuration reset to defaults');
+    const customToggle = document.getElementById('chalkerX01CustomToggle');
+    if (customToggle && customToggle.checked) {
+        const v = parseInt(document.getElementById('chalkerX01Custom').value);
+        if (!(v >= 2 && v <= 1001)) return { ok: false, error: 'Starting score must be 2 to 1001', field: 'chalkerX01Custom' };
     }
+
+    saveApplicationSettings({ silent: true });
+    saveLaneConfiguration({ silent: true });
+    savePointConfiguration({ silent: true });
+    saveMatchConfiguration({ silent: true });
+    saveUIConfiguration({ silent: true });
+    return { ok: true };
 }
 
 // RESULTS DISPLAY FUNCTIONS
@@ -1189,6 +1218,7 @@ if (typeof window !== 'undefined') {
     // Reset to defaults functions
     window.resetPointValuesToDefaults = resetPointValuesToDefaults;
     window.resetMatchConfigToDefaults = resetMatchConfigToDefaults;
+    window.saveAllSettings = saveAllSettings;
 
     // Export modal functions
     window.showExportConfirmModal = showExportConfirmModal;

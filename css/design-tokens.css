@@ -1,0 +1,46 @@
+/* design-tokens.css - Shared colours and fonts for the redesigned pages
+ *
+ * One set of values for the bracket page (css/bracket-view.css) and Global Settings
+ * (css/config-page.css), so the pages that follow the new design language look alike.
+ * Light only. See Docs/BRACKET-REDESIGN.md, "Design Language".
+ */
+
+:root {
+  /* surfaces */
+  --nt-bg: #f4f3f1;          /* page */
+  --nt-surface: #ffffff;     /* panels, cards, bars */
+  --nt-surface-2: #faf9f7;   /* insets, card meta strip */
+  --nt-inset: #f1f0ee;       /* read-only fields, waiting cards */
+  --nt-band: #ecebe8;        /* backside band */
+
+  /* text */
+  --nt-ink: #111827;
+  --nt-ink-2: #374151;
+  --nt-muted: #6b7280;
+  --nt-faint: #9ca3af;
+
+  /* lines */
+  --nt-line: #e2e0dc;        /* hairlines between rows */
+  --nt-line-2: #d6d3d1;      /* control borders, lines between matches */
+  --nt-line-strong: #78716c;
+  --nt-card-line: #a8a29e;
+
+  /* primary action and selected states */
+  --nt-header: #1f2937;
+  --nt-header-ink: #f9fafb;
+
+  /* meaning */
+  --nt-accent: #ff6b35;      /* live, selection, unsaved */
+  --nt-accent-soft: #ffe7dc;
+  --nt-ready: #d4a017;
+  --nt-ready-soft: #fbf0c8;
+  --nt-ok: #166534;          /* winner, done, saved */
+  --nt-ok-soft: #e8f3ec;
+  --nt-warn: #92400e;
+  --nt-warn-soft: #fef3c7;
+  --nt-danger: #b91c1c;
+
+  /* type (Inter and Cascadia Code are bundled in fonts/) */
+  --nt-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --nt-mono: 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+}

@@ -12,6 +12,8 @@
     <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/design-tokens.css">
+    <link rel="stylesheet" href="css/config-page.css">
     <link rel="stylesheet" href="css/bracket-view.css">
 
     <!-- Docker Configuration (only executes when served via PHP) -->
@@ -322,493 +324,226 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Configuration Page -->
         <div id="config" class="page config-page">
-            <div class="config-page-header">
-                <h2>Global Settings <span class="help-info-icon" data-page="config">ℹ️</span></h2>
-            </div>
-
-            <div class="config-sections-container">
-                <!-- Left Column -->
-                <div class="config-column">
-                    <!-- Logo Section -->
-                    <div class="config-section" id="configLogo">
-                        <h3>Logo</h3>
-                        <div class="config-content">
-                            <div class="info-text">
-                                To change the logo, place a square image with the name 'logo.png', 'logo.jpg',
-                                'logo.jpeg', or 'logo.svg' in the 'images' folder. Browser
-                                favicon uses the file 'logo.jpg'.
-                            </div>
-                        </div>
+            <div class="cfg-wrap">
+                <div class="cfg-title">
+                    <div>
+                        <h2>Global Settings</h2>
+                        <p>Settings for this computer. They apply to every tournament.</p>
                     </div>
-
-                    <!-- Branding Section -->
-                    <div class="config-section" id="configBranding">
-                        <h3>Branding</h3>
-                        <div class="config-content">
-                            <div class="form-group">
-                                <label for="applicationTitle">Club Name</label>
-                                <input type="text" id="applicationTitle" value="NewTon DC" placeholder="Your Club Name">
-                            </div>
-                            <button class="btn btn-success" onclick="saveApplicationSettings()">Save Branding</button>
-                        </div>
-                    </div>
-
-                    <!-- Lane Management Section -->
-                    <div class="config-section">
-                        <h3>Lane Management</h3>
-                        <div class="config-content">
-                            <div class="config-grid">
-                                <div class="form-group">
-                                    <label for="maxLanes">Maximum Number of Lanes</label>
-                                    <select id="maxLanes">
-                                        <option value="1">1 Lane</option>
-                                        <option value="2">2 Lanes</option>
-                                        <option value="3">3 Lanes</option>
-                                        <option value="4">4 Lanes</option>
-                                        <option value="5">5 Lanes</option>
-                                        <option value="6">6 Lanes</option>
-                                        <option value="7">7 Lanes</option>
-                                        <option value="8">8 Lanes</option>
-                                        <option value="9">9 Lanes</option>
-                                        <option value="10" selected>10 Lanes</option>
-                                        <option value="11">11 Lanes</option>
-                                        <option value="12">12 Lanes</option>
-                                        <option value="13">13 Lanes</option>
-                                        <option value="14">14 Lanes</option>
-                                        <option value="15">15 Lanes</option>
-                                        <option value="16">16 Lanes</option>
-                                        <option value="17">17 Lanes</option>
-                                        <option value="18">18 Lanes</option>
-                                        <option value="19">19 Lanes</option>
-                                        <option value="20">20 Lanes</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="excludedLanes">Excluded Lanes (comma-separated)</label>
-                                    <input type="text" id="excludedLanes" placeholder="e.g. 5,7,9">
-                                    <small class="field-help">Enter lane numbers to exclude from assignment</small>
-                                </div>
-                            </div>
-                            <div class="config-buttons">
-                                <button class="btn btn-success" onclick="saveLaneConfiguration()">Save Lane
-                                    Settings</button>
-                                <button class="btn" onclick="showLaneUsage()">Show Current Lane Usage</button>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- User Interface Section -->
-                    <div class="config-section">
-                        <h3>User Interface</h3>
-                        <div class="config-content">
-                            <div class="checkbox-group">
-                                <div class="form-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="confirmWinnerSelection" checked>
-                                        <span>
-                                            Show confirmation dialog when selecting match winner
-                                            <small class="field-help">When disabled, matches complete instantly without
-                                                entering scores or statistics</small>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="autoOpenMatchControls" checked>
-                                        <span>Automatically open Match Controls when entering Tournament page</span>
-                                    </label>
-                                </div>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="defaultPaid">
-                                    <span>
-                                        New players default to paid
-                                        <small class="field-help">When enabled, players added to a tournament are already marked as paid. Removing a player requires toggling to unpaid first.</small>
-                                    </span>
-                                </label>
-                            </div>
-                            <div class="form-group">
-                                <label class="checkbox-label">
-                                    <input type="checkbox" id="developerMode">
-                                    <span>
-                                        Enable Developer Console
-                                        <small class="field-help">Show advanced diagnostics and developer tools (Console
-                                            link in the Tournament page header)</small>
-                                    </span>
-                                </label>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Tournament formats to offer</label>
-                                <small class="field-help">Which formats appear when starting a tournament. Hide the ones your club never plays so they cannot be picked by mistake. Existing tournaments are unaffected.</small>
-                                <div id="formatVisibilityOptions" class="checkbox-group" style="margin-top: 8px;"></div>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="refereeSuggestionsLimit">Number of referee suggestions to show</label>
-                                <input type="number" id="refereeSuggestionsLimit" value="10" min="5" max="20" style="width: 80px;">
-                                <small class="field-help">Maximum number of players to show in each referee category (Winners, Losers, Assignments)</small>
-                            </div>
-
-                            <div class="form-group">
-                                <label for="bracketFinals">Finals position in the bracket</label>
-                                <select id="bracketFinals" style="width: 220px;">
-                                    <option value="right">Right</option>
-                                    <option value="middle">Middle</option>
-                                </select>
-                                <small class="field-help">Double elimination: the finals at the right edge, or in the middle between the frontside and backside. The same setting as the Finals toggle in the bracket header.</small>
-                            </div>
-
-                            <button class="btn btn-success" onclick="saveUIConfiguration()">Save UI Settings</button>
-                        </div>
-                    </div>
-
-                    <!-- Server Settings Section -->
-                    <div class="config-section">
-                        <h3>Server Settings <a href="docker-quickstart.html" target="_blank" rel="noopener" title="Docker Quick Start" class="doc-link-icon">ℹ️</a></h3>
-                        <div class="config-content">
-                            <div class="form-group">
-                                <label for="serverIdDisplay">Server ID</label>
-                                <input type="text" id="serverIdDisplay" readonly style="background:#f3f4f6;color:#6b7280;cursor:default;">
-                                <small class="field-help">Auto-generated identifier for this TM instance. Used in QR payloads.</small>
-                            </div>
-                            <div class="checkbox-group">
-                                <div class="form-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="allowSharedTournamentDelete">
-                                        <span>
-                                            Allow deleting tournaments
-                                            <small class="field-help">When disabled, delete buttons are hidden for shared tournaments and in the Analytics register</small>
-                                        </span>
-                                    </label>
-                                </div>
-                                <div class="form-group">
-                                    <label class="checkbox-label">
-                                        <input type="checkbox" id="autoUploadTournament">
-                                        <span>
-                                            Automatically backup tournaments on completion <a href="automatic-backup.html" target="_blank" rel="noopener" title="Automatic Backup documentation" class="doc-link-icon">ℹ️</a>
-                                            <small class="field-help">Saves the tournament to the server when a tournament is completed. Backed up tournaments are available from any computer connecting to this server.</small>
-                                        </span>
-                                    </label>
-                                </div>
-                            </div>
-
-                            <h4 style="margin-top: 20px; margin-bottom: 10px; font-size: 16px;">Remote Backup</h4>
-                            <div class="form-group">
-                                <label for="remoteServerUrl">Remote server URL</label>
-                                <input type="text" id="remoteServerUrl" placeholder="https://newton.example.com">
-                                <small class="field-help">Tournament data will be uploaded to this server in addition to the local server</small>
-                            </div>
-                            <div class="form-group">
-                                <label for="remoteServerUsername">Username</label>
-                                <input type="text" id="remoteServerUsername" placeholder="(optional)">
-                            </div>
-                            <div class="form-group">
-                                <label for="remoteServerPassword">Password</label>
-                                <input type="password" id="remoteServerPassword" placeholder="(optional)">
-                            </div>
-
-                            <button class="btn btn-success" onclick="saveUIConfiguration()">Save Server Settings</button>
-                        </div>
-                    </div>
+                    <button type="button" class="cfg-btn help-info-icon" data-page="config">Help</button>
                 </div>
 
+                <nav class="cfg-toc" aria-label="Settings sections">
+                    <button type="button" data-target="cfg-club">Club<span class="cfg-dot"></span></button>
+                    <button type="button" data-target="cfg-tournaments">Tournaments<span class="cfg-dot"></span></button>
+                    <button type="button" data-target="cfg-matchday">Match day<span class="cfg-dot"></span></button>
+                    <button type="button" data-target="cfg-bracket">Bracket<span class="cfg-dot"></span></button>
+                    <button type="button" data-target="cfg-chalker">Chalker<span class="cfg-dot"></span></button>
+                    <button type="button" data-target="cfg-server">Server &amp; backup<span class="cfg-dot"></span></button>
+                    <button type="button" data-target="cfg-developer">Developer<span class="cfg-dot"></span></button>
+                </nav>
 
-                <!-- Right Column -->
-                <div class="config-column">
+                <div class="cfg-main">
+                <!-- CLUB -->
+                <section class="cfg-section" id="cfg-club">
+                    <div class="cfg-sec-head"><h3>Club</h3></div>
+                    <div class="cfg-panel" id="configClub">
+                        <div class="cfg-row">
+                            <div><label class="cfg-label" for="applicationTitle">Club name</label><div class="cfg-desc">Shown in the page title and at the top of the bracket.</div></div>
+                            <div class="cfg-ctl"><input class="cfg-text" type="text" id="applicationTitle" value="NewTon DC" placeholder="Your club name"></div>
+                        </div>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Logo</div><div class="cfg-desc">Put a square image named <code>logo.png</code>, <code>logo.jpg</code>, <code>logo.jpeg</code> or <code>logo.svg</code> in the <code>images</code> folder. The browser tab icon uses <code>logo.jpg</code>.</div></div>
+                            <div class="cfg-ctl"><img class="cfg-logo" id="cfgLogoPreview" alt="Current logo" hidden></div>
+                        </div>
+                    </div>
+                </section>
 
-                    <!-- Point Values Section -->
-                    <div class="config-section" id="configPoints">
-                        <h3>Point Values</h3>
-                        <div class="config-content">
-                            <div class="config-grid">
-                                <div class="form-group">
-                                    <label for="participationPoints">Participation Points</label>
-                                    <input type="number" id="participationPoints" value="5" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="firstPlacePoints">1st Place Points</label>
-                                    <input type="number" id="firstPlacePoints" value="15" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="secondPlacePoints">2nd Place Points</label>
-                                    <input type="number" id="secondPlacePoints" value="13" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="thirdPlacePoints">3rd Place Points</label>
-                                    <input type="number" id="thirdPlacePoints" value="10" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fourthPlacePoints">4th Place Points</label>
-                                    <input type="number" id="fourthPlacePoints" value="9" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="fifthSixthPlacePoints">5th-6th Place Points</label>
-                                    <input type="number" id="fifthSixthPlacePoints" value="8" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="seventhEighthPlacePoints">7th-8th Place Points</label>
-                                    <input type="number" id="seventhEighthPlacePoints" value="7" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="highOutPoints">High Out Points (101+)</label>
-                                    <input type="number" id="highOutPoints" value="1" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="tonPoints">Ton Points (100+)</label>
-                                    <input type="number" id="tonPoints" value="0" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="shortLegPoints">Short Leg Points</label>
-                                    <input type="number" id="shortLegPoints" value="1" min="0">
-                                </div>
-                                <div class="form-group">
-                                    <label for="oneEightyPoints">180 Points</label>
-                                    <input type="number" id="oneEightyPoints" value="1" min="0">
-                                </div>
+                <!-- TOURNAMENTS -->
+                <section class="cfg-section" id="cfg-tournaments">
+                    <div class="cfg-sec-head"><h3>Tournaments</h3></div>
+                    <div class="cfg-panel">
+                        <div class="cfg-panel-title">Formats to offer</div>
+                        <p class="cfg-panel-note">Which formats appear when starting a tournament. Hide the ones your club never plays. Existing tournaments are unaffected.</p>
+                        <div class="cfg-choices" id="formatVisibilityOptions"></div>
+                    </div>
+                    <div class="cfg-panel">
+                        <div class="cfg-panel-title">Match length <button type="button" class="cfg-link" data-reset="legs">Reset to defaults</button></div>
+                        <div class="cfg-cols">
+                            <div>
+                                <h4>Double elimination</h4>
+                                <div class="cfg-line"><span>Regular rounds</span><span class="cfg-step" data-target="regularRoundsLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="regularRoundsLegs"></div>
+                                <div class="cfg-line"><span>Frontside semifinal</span><span class="cfg-step" data-target="frontsideSemifinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="frontsideSemifinalLegs"></div>
+                                <div class="cfg-line"><span>Backside semifinal</span><span class="cfg-step" data-target="backsideSemifinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="backsideSemifinalLegs"></div>
+                                <div class="cfg-line"><span>Backside final</span><span class="cfg-step" data-target="backsideFinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="backsideFinalLegs"></div>
+                                <div class="cfg-line"><span>Grand final</span><span class="cfg-step" data-target="grandFinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="grandFinalLegs"></div>
                             </div>
-                            <div class="config-buttons">
-                                <button class="btn btn-success" onclick="savePointConfiguration()">Save Point Values</button>
-                                <button class="btn" onclick="resetPointValuesToDefaults()">Reset to Defaults</button>
+                            <div>
+                                <h4>Single elimination</h4>
+                                <div class="cfg-line"><span>Regular rounds</span><span class="cfg-step" data-target="seRegularRoundsLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seRegularRoundsLegs"></div>
+                                <div class="cfg-line"><span>Quarterfinal</span><span class="cfg-step" data-target="seQuarterfinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seQuarterfinalLegs"></div>
+                                <div class="cfg-line"><span>Semifinal</span><span class="cfg-step" data-target="seSemifinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seSemifinalLegs"></div>
+                                <div class="cfg-line"><span>Bronze final</span><span class="cfg-step" data-target="seBronzeLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seBronzeLegs"></div>
+                                <div class="cfg-line"><span>Final</span><span class="cfg-step" data-target="seFinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seFinalLegs"></div>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Match Configuration Section -->
-                    <div class="config-section">
-                        <h3>Match Configuration</h3>
-                        <div class="config-content">
-                            <h4 style="margin: 0 0 10px 0; color: #333; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #ddd; padding-bottom: 6px;">Single Elimination</h4>
-                            <div class="config-grid">
-                                <div class="form-group">
-                                    <label for="seRegularRoundsLegs">Regular Rounds</label>
-                                    <select id="seRegularRoundsLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3" selected>Best of 3</option>
-                                        <option value="5">Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="seQuarterfinalLegs">Quarterfinal</label>
-                                    <select id="seQuarterfinalLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3" selected>Best of 3</option>
-                                        <option value="5">Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="seSemifinalLegs">Semifinal</label>
-                                    <select id="seSemifinalLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3" selected>Best of 3</option>
-                                        <option value="5">Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="seBronzeLegs">Bronze Match</label>
-                                    <select id="seBronzeLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="seFinalLegs">Final</label>
-                                    <select id="seFinalLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
+                    <div class="cfg-panel" id="configPoints">
+                        <div class="cfg-panel-title">Points <button type="button" class="cfg-link" data-reset="points">Reset to defaults</button></div>
+                        <div class="cfg-cols">
+                            <div>
+                                <h4>Placing</h4>
+                                <div class="cfg-line"><span>Taking part</span><input class="cfg-num" type="number" min="0" id="participationPoints" aria-label="Taking part points"></div>
+                                <div class="cfg-line"><span class="cfg-rank">1st</span><input class="cfg-num" type="number" min="0" id="firstPlacePoints" aria-label="1st points"></div>
+                                <div class="cfg-line"><span class="cfg-rank">2nd</span><input class="cfg-num" type="number" min="0" id="secondPlacePoints" aria-label="2nd points"></div>
+                                <div class="cfg-line"><span class="cfg-rank">3rd</span><input class="cfg-num" type="number" min="0" id="thirdPlacePoints" aria-label="3rd points"></div>
+                                <div class="cfg-line"><span class="cfg-rank">4th</span><input class="cfg-num" type="number" min="0" id="fourthPlacePoints" aria-label="4th points"></div>
+                                <div class="cfg-line"><span class="cfg-rank">5th–6th</span><input class="cfg-num" type="number" min="0" id="fifthSixthPlacePoints" aria-label="5th–6th points"></div>
+                                <div class="cfg-line"><span class="cfg-rank">7th–8th</span><input class="cfg-num" type="number" min="0" id="seventhEighthPlacePoints" aria-label="7th–8th points"></div>
                             </div>
-                            <h4 style="margin: 22px 0 10px 0; color: #333; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #ddd; padding-bottom: 6px;">Double Elimination</h4>
-                            <div class="config-grid">
-                                <div class="form-group">
-                                    <label for="regularRoundsLegs">Regular Rounds</label>
-                                    <select id="regularRoundsLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3" selected>Best of 3</option>
-                                        <option value="5">Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="backsideSemifinalLegs">Backside Semifinal</label>
-                                    <select id="backsideSemifinalLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3" selected>Best of 3</option>
-                                        <option value="5">Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="frontsideSemifinalLegs">Frontside Semifinal</label>
-                                    <select id="frontsideSemifinalLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="backsideFinalLegs">Backside Final</label>
-                                    <select id="backsideFinalLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label for="grandFinalLegs">Grand Final</label>
-                                    <select id="grandFinalLegs">
-                                        <option value="1">Best of 1</option>
-                                        <option value="3">Best of 3</option>
-                                        <option value="5" selected>Best of 5</option>
-                                        <option value="7">Best of 7</option>
-                                        <option value="9">Best of 9</option>
-                                        <option value="11">Best of 11</option>
-                                        <option value="13">Best of 13</option>
-                                        <option value="15">Best of 15</option>
-                                        <option value="17">Best of 17</option>
-                                        <option value="19">Best of 19</option>
-                                        <option value="21">Best of 21</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <h4 style="margin: 22px 0 6px 0; color: #333; font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; border-bottom: 2px solid #ddd; padding-bottom: 6px;">Chalker</h4>
-                            <p style="margin: 0 0 12px 0; color: #666; font-size: 13px;">x01 format, max rounds, and short leg threshold sent to the Chalker when starting a match. Handover chooses how a match reaches the device.</p>
-                            <div class="config-grid">
-                                <div class="form-group">
-                                    <label for="chalkerX01Format">x01 Format</label>
-                                    <select id="chalkerX01Format">
-                                        <option value="101">101</option>
-                                        <option value="201">201</option>
-                                        <option value="301">301</option>
-                                        <option value="401">401</option>
-                                        <option value="501" selected>501</option>
-                                        <option value="601">601</option>
-                                        <option value="701">701</option>
-                                        <option value="801">801</option>
-                                        <option value="901">901</option>
-                                        <option value="1001">1001</option>
-                                    </select>
-                                    <input type="number" id="chalkerX01Custom" min="2" max="1001" placeholder="2–1001" style="display: none;">
-                                    <label style="margin-top: 6px; font-size: 12px; color: #6b7280; font-weight: normal; cursor: pointer; display: inline-flex; align-items: center; gap: 4px; white-space: nowrap;">
-                                        <input type="checkbox" id="chalkerX01CustomToggle">Custom score
-                                    </label>
-                                    <p id="chalkerX01Warning" style="display: none; margin: 4px 0 0 0; font-size: 11px; color: #92400e;">Unusual scores may produce larger QR codes that are harder to scan.</p>
-                                </div>
-                                <div class="form-group">
-                                    <label for="chalkerMaxRounds">Max Rounds</label>
-                                    <select id="chalkerMaxRounds">
-                                        <option value="7">7 (21 darts)</option>
-                                        <option value="8">8 (24 darts)</option>
-                                        <option value="9">9 (27 darts)</option>
-                                        <option value="10">10 (30 darts)</option>
-                                        <option value="11">11 (33 darts)</option>
-                                        <option value="12">12 (36 darts)</option>
-                                        <option value="13" selected>13 (39 darts)</option>
-                                        <option value="14">14 (42 darts)</option>
-                                        <option value="15">15 (45 darts)</option>
-                                        <option value="16">16 (48 darts)</option>
-                                        <option value="17">17 (51 darts)</option>
-                                        <option value="18">18 (54 darts)</option>
-                                        <option value="19">19 (57 darts)</option>
-                                        <option value="20">20 (60 darts)</option>
-                                        <option value="100">Unlimited</option>
-                                    </select>
-                                </div>
-                            </div>
-                            <div class="config-grid" style="margin-top: 12px;">
-                                <div class="form-group">
-                                    <label for="chalkerShortLegThreshold">Short Leg Threshold (darts)</label>
-                                    <input type="number" id="chalkerShortLegThreshold" min="3" max="60" value="21" style="width: 80px;">
-                                </div>
-                                <div class="form-group">
-                                    <label for="chalkerHandover">Handover</label>
-                                    <select id="chalkerHandover">
-                                        <option value="qr" selected>QR code</option>
-                                        <option value="network">Network (experimental, Docker only)</option>
-                                        <option value="none">None</option>
-                                    </select>
-                                    <p style="margin: 4px 0 0 0; font-size: 11px; color: #666;">QR shows a code to scan. Network sends the match to a device on the local network and hides the QR buttons &mdash; experimental, and it <strong>requires the Docker image</strong>, because it needs the server that comes with it. It does nothing if you opened this file directly or are using the hosted version. None leaves matches to be entered by hand.</p>
-                                </div>
-                            </div>
-                            <div class="config-buttons">
-                                <button class="btn btn-success" onclick="saveMatchConfiguration()">Save Match Configuration</button>
-                                <button class="btn" onclick="resetMatchConfigToDefaults()">Reset to Defaults</button>
+                            <div>
+                                <h4>Achievements, each</h4>
+                                <div class="cfg-line"><span>180</span><input class="cfg-num" type="number" min="0" id="oneEightyPoints" aria-label="180 points"></div>
+                                <div class="cfg-line"><span>High out <small>101+</small></span><input class="cfg-num" type="number" min="0" id="highOutPoints" aria-label="High out 101+ points"></div>
+                                <div class="cfg-line"><span>Short leg</span><input class="cfg-num" type="number" min="0" id="shortLegPoints" aria-label="Short leg points"></div>
+                                <div class="cfg-line"><span>Ton <small>100+</small></span><input class="cfg-num" type="number" min="0" id="tonPoints" aria-label="Ton 100+ points"></div>
                             </div>
                         </div>
+                    </div>
+                </section>
+
+                <!-- MATCH DAY -->
+                <section class="cfg-section" id="cfg-matchday">
+                    <div class="cfg-sec-head"><h3>Match day</h3></div>
+                    <div class="cfg-panel">
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Lanes</div><div class="cfg-desc">How many dartboards you have.</div></div>
+                            <div class="cfg-ctl"><span class="cfg-step" data-target="maxLanes" data-min="1" data-max="20" data-step="1"><button type="button" aria-label="Fewer lanes">−</button><output></output><button type="button" aria-label="More lanes">+</button></span><input type="hidden" id="maxLanes"></div>
+                        </div>
+                        <div class="cfg-row stack">
+                            <div><div class="cfg-label">Lanes not in use</div><div class="cfg-desc">Click a lane to leave it out of lane assignment, for example a broken board.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-lanes" id="cfgLaneChips"></div><input type="hidden" id="excludedLanes"><button type="button" class="cfg-btn" style="margin-left:auto" onclick="showLaneUsage()">Show current lane usage</button></div>
+                        </div>
+                        <div class="cfg-row">
+                        <div><label class="cfg-label" for="confirmWinnerSelection">Confirm the winner</label><div class="cfg-desc">Ask for the score and statistics when a winner is chosen. When off, matches complete at once with nothing entered.</div></div>
+                        <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="confirmWinnerSelection" checked><span></span></span></div>
+                    </div>
+                        <div class="cfg-row">
+                        <div><label class="cfg-label" for="autoOpenMatchControls">Open Match Controls with the bracket</label><div class="cfg-desc">Show Match Controls straight away when you open the bracket.</div></div>
+                        <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="autoOpenMatchControls" checked><span></span></span></div>
+                    </div>
+                        <div class="cfg-row">
+                        <div><label class="cfg-label" for="defaultPaid">New players are paid</label><div class="cfg-desc">Players added to a tournament start as paid. To remove a player, set them to unpaid first.</div></div>
+                        <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="defaultPaid"><span></span></span></div>
+                    </div>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Referee suggestions</div><div class="cfg-desc">How many players to suggest in each group (winners, losers, assignments).</div></div>
+                            <div class="cfg-ctl"><span class="cfg-step" data-target="refereeSuggestionsLimit" data-min="5" data-max="20" data-step="1"><button type="button" aria-label="Fewer">−</button><output></output><button type="button" aria-label="More">+</button></span><input type="hidden" id="refereeSuggestionsLimit"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- BRACKET -->
+                <section class="cfg-section" id="cfg-bracket">
+                    <div class="cfg-sec-head"><h3>Bracket</h3></div>
+                    <div class="cfg-panel">
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Finals position</div><div class="cfg-desc">Double elimination. The same setting as the Finals toggle in the bracket header.</div></div>
+                            <div class="cfg-ctl cfg-pics" data-target="bracketFinals">
+                                <button type="button" class="cfg-pic" data-value="right"><svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><rect x="2" y="4" width="34" height="36" rx="3" fill="#ecebe8"/><g fill="#6b7280"><rect x="6" y="8" width="10" height="5" rx="1"/><rect x="6" y="31" width="10" height="5" rx="1"/><rect x="22" y="19" width="10" height="5" rx="1"/><rect x="40" y="8" width="10" height="5" rx="1"/><rect x="40" y="31" width="10" height="5" rx="1"/><rect x="56" y="19" width="10" height="5" rx="1"/></g><g fill="#1f2937"><rect x="76" y="14" width="14" height="6" rx="1"/><rect x="76" y="25" width="14" height="6" rx="1"/></g></svg>Right</button>
+                                <button type="button" class="cfg-pic" data-value="middle"><svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><rect x="60" y="4" width="34" height="36" rx="3" fill="#ecebe8"/><g fill="#6b7280"><rect x="4" y="8" width="10" height="5" rx="1"/><rect x="4" y="31" width="10" height="5" rx="1"/><rect x="20" y="19" width="10" height="5" rx="1"/><rect x="80" y="8" width="10" height="5" rx="1"/><rect x="80" y="31" width="10" height="5" rx="1"/><rect x="64" y="19" width="10" height="5" rx="1"/></g><g fill="#1f2937"><rect x="38" y="14" width="14" height="6" rx="1"/><rect x="38" y="25" width="14" height="6" rx="1"/></g></svg>Middle</button>
+                            </div>
+                            <input type="hidden" id="bracketFinals">
+                        </div>
+                    </div>
+                </section>
+
+                <!-- CHALKER -->
+                <section class="cfg-section" id="cfg-chalker">
+                    <div class="cfg-sec-head"><div><h3>Chalker</h3><p>Sent to the Chalker when a match starts.</p></div></div>
+                    <div class="cfg-panel">
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Game</div><div class="cfg-desc">Starting score for every leg.</div></div>
+                            <div class="cfg-ctl">
+                                <div class="cfg-seg" id="cfgX01Seg"><button type="button" data-value="301">301</button><button type="button" data-value="501">501</button><button type="button" data-value="701">701</button><button type="button" data-value="other">Other</button></div>
+                                <select id="chalkerX01Format" hidden><option value="301">301</option><option value="501" selected>501</option><option value="701">701</option></select>
+                                <input type="checkbox" id="chalkerX01CustomToggle" hidden>
+                                <input class="cfg-text mono" type="number" id="chalkerX01Custom" min="2" max="1001" placeholder="2–1001" style="display: none; width: 110px;" aria-label="Starting score">
+                                <p class="cfg-warn" id="chalkerX01Warning" style="display: none;">Unusual scores may make larger QR codes that are harder to scan.</p>
+                            </div>
+                        </div>
+                        <div class="cfg-row">
+                            <div><label class="cfg-label" for="chalkerMaxRounds">Most rounds per leg</label><div class="cfg-desc">A leg ends after this many rounds of three darts.</div></div>
+                            <div class="cfg-ctl"><select class="cfg-text" id="chalkerMaxRounds"><option value="7">7 rounds · 21 darts</option><option value="8">8 rounds · 24 darts</option><option value="9">9 rounds · 27 darts</option><option value="10">10 rounds · 30 darts</option><option value="11">11 rounds · 33 darts</option><option value="12">12 rounds · 36 darts</option><option value="13">13 rounds · 39 darts</option><option value="14">14 rounds · 42 darts</option><option value="15">15 rounds · 45 darts</option><option value="16">16 rounds · 48 darts</option><option value="17">17 rounds · 51 darts</option><option value="18">18 rounds · 54 darts</option><option value="19">19 rounds · 57 darts</option><option value="20">20 rounds · 60 darts</option><option value="100">No limit</option></select></div>
+                        </div>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Short leg</div><div class="cfg-desc">A leg won in this many darts or fewer counts as a short leg.</div></div>
+                            <div class="cfg-ctl"><span class="cfg-step" data-target="chalkerShortLegThreshold" data-min="3" data-max="60" data-step="1" data-format="darts"><button type="button" aria-label="Fewer darts">−</button><output></output><button type="button" aria-label="More darts">+</button></span><input type="hidden" id="chalkerShortLegThreshold"></div>
+                        </div>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Handover</div><div class="cfg-desc" id="cfgHandoverDesc"></div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="chalkerHandover"><button type="button" data-value="qr">QR code</button><button type="button" data-value="network">Network</button><button type="button" data-value="none">None</button></div><input type="hidden" id="chalkerHandover"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- SERVER -->
+                <section class="cfg-section" id="cfg-server">
+                    <div class="cfg-sec-head"><div><h3>Server &amp; backup</h3><p>Only when the Tournament Manager runs from the Docker image.</p></div><a class="cfg-link" href="docker-quickstart.html" target="_blank" rel="noopener">Docker guide</a></div>
+                    <div class="cfg-panel">
+                        <div class="cfg-row">
+                            <div><label class="cfg-label" for="serverIdDisplay">Server ID</label><div class="cfg-desc">Identifies this Tournament Manager in QR codes. Set automatically.</div></div>
+                            <div class="cfg-ctl"><input class="cfg-text mono" type="text" id="serverIdDisplay" readonly style="width: 180px;"></div>
+                        </div>
+                        <div class="cfg-row">
+                        <div><label class="cfg-label" for="autoUploadTournament">Back up finished tournaments</label><div class="cfg-desc">Save each tournament to the server when it finishes, so any computer connected to the server can open it. <a class="cfg-link" href="automatic-backup.html" target="_blank" rel="noopener">How backup works</a></div></div>
+                        <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="autoUploadTournament"><span></span></span></div>
+                    </div>
+                        <div class="cfg-row">
+                        <div><label class="cfg-label" for="allowSharedTournamentDelete">Allow deleting tournaments</label><div class="cfg-desc">Shows delete buttons for shared tournaments and in the Analytics register.</div></div>
+                        <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="allowSharedTournamentDelete"><span></span></span></div>
+                    </div>
+                    </div>
+                    <div class="cfg-panel">
+                        <div class="cfg-panel-title">Remote backup <span style="font-weight:500;color:var(--nt-muted);font-size:13px">optional</span></div>
+                        <div class="cfg-row">
+                            <div><label class="cfg-label" for="remoteServerUrl">Server address</label><div class="cfg-desc">Also upload tournaments to this server.</div></div>
+                            <div class="cfg-ctl"><input class="cfg-text mono" type="text" id="remoteServerUrl" placeholder="https://newton.example.com"></div>
+                        </div>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Username and password</div></div>
+                            <div class="cfg-ctl"><input class="cfg-text" type="text" id="remoteServerUsername" placeholder="Username" style="width: 136px;" aria-label="Username"><input class="cfg-text" type="password" id="remoteServerPassword" placeholder="Password" style="width: 136px;" aria-label="Password"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- DEVELOPER -->
+                <section class="cfg-section" id="cfg-developer">
+                    <div class="cfg-sec-head"><h3>Developer</h3></div>
+                    <div class="cfg-panel">
+                        <div class="cfg-row">
+                        <div><label class="cfg-label" for="developerMode">Developer Console</label><div class="cfg-desc">Diagnostics and developer tools. Adds a Console link to the bracket header.</div></div>
+                        <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="developerMode"><span></span></span></div>
+                    </div>
+                    </div>
+                </section>
+                </div>
+            </div>
+
+            <div class="cfg-savebar" id="cfgSaveBar" role="region" aria-label="Unsaved changes">
+                <span id="cfgBarText"><span class="cfg-count" id="cfgCount">1</span> <span id="cfgCountText">unsaved change</span></span>
+                <button type="button" class="cfg-btn ghost" id="cfgDiscard">Discard</button>
+                <button type="button" class="cfg-btn save" id="cfgSave">Save changes</button>
+            </div>
+            <div class="cfg-toast" id="cfgToast" role="status">Settings saved</div>
+            <div class="cfg-dialog-back" id="cfgLeave" hidden>
+                <div class="cfg-dialog" role="dialog" aria-modal="true" aria-labelledby="cfgLeaveTitle">
+                    <h3 id="cfgLeaveTitle">Save your changes?</h3>
+                    <p>You have <b id="cfgLeaveCount">1 unsaved change</b> on Global Settings. Save before you continue?</p>
+                    <div class="cfg-acts">
+                        <button type="button" class="cfg-btn" id="cfgLeaveStay">Stay</button>
+                        <button type="button" class="cfg-btn" id="cfgLeaveDiscard">Discard and continue</button>
+                        <button type="button" class="cfg-btn primary" id="cfgLeaveSave">Save and continue</button>
                     </div>
                 </div>
             </div>
@@ -1311,6 +1046,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/bracket-view.js"></script>
         <script src="js/newton-csv.js"></script>
         <script src="js/results-config.js"></script>
+        <script src="js/config-page.js"></script>
         <script src="js/dynamic-help-system.js"></script>
         <script src="js/analytics.js"></script>
         <script src="js/newton-stats.js"></script>

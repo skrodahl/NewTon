@@ -694,6 +694,27 @@ const BracketView = (() => {
         renderSelbar();
         updateMarkers();
     }
+    /**
+     * The round's name as the bracket's headers give it ("Frontside final", "Semifinal", …),
+     * for the selection bar.
+     * @param {string} id - match ID
+     * @returns {string}
+     */
+    function roundName(id) {
+        const st = cur.st, r = roundOf(id);
+        if (getFormat() === 'SE') {
+            if (r === st.maxFS) return 'Final';
+            if (r === st.maxFS - 1) return 'Bronze final';
+            if (r === st.maxFS - 2) return 'Semifinal';
+            if (r === st.maxFS - 3) return 'Quarterfinal';
+            return 'Round ' + r;
+        }
+        if (id === 'GRAND-FINAL') return 'Grand final';
+        if (id === 'BS-FINAL') return 'Backside final';
+        if (sideOf(id) === 'FS') return r === st.maxFS ? 'Frontside final' : 'Frontside round ' + r;
+        return 'Backside round ' + r;
+    }
+
     function renderSelbar() {
         const bar = els.selbar;
         if (!selected) { bar.hidden = true; bar.innerHTML = ''; return; }
@@ -710,7 +731,7 @@ const BracketView = (() => {
         // tournament says so on every match instead.
         const undo = tournament.readOnly ? '<span class="bv-readonly" title="This tournament is read-only">Read only</span>'
             : isMatchUndoable(selected) ? '<button type="button" data-act="undo" title="Undo this result">Undo match</button>' : '';
-        bar.innerHTML = `<span class="bv-sid">${selected}</span><span>${escapeHtml(getRoundDescription(v.match))} · ${what}</span>` +
+        bar.innerHTML = `<span class="bv-sid">${selected}</span><span>${escapeHtml(roundName(selected))} · ${what}</span>` +
             follow + undo +
             // Match Controls is always the rightmost button, just before ×
             `<button type="button" class="bv-primary" data-act="controls">Match Controls</button>` +
@@ -860,6 +881,7 @@ const BracketView = (() => {
             return;
         }
         title.textContent = tournament.name || 'Tournament';
+        title.title = title.textContent; // a long name is cut short with …; hover shows it in full
         sub.textContent = tournament.date || '';
         const all = (typeof matches !== 'undefined' && Array.isArray(matches)) ? matches : [];
         const paid = (typeof players !== 'undefined' && Array.isArray(players)) ? players.filter(p => p.paid).length : 0;

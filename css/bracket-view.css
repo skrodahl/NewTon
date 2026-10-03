@@ -4,32 +4,33 @@
  * rest of the app is unaffected. See Docs/BRACKET-REDESIGN.md, "Design Language".
  */
 
+/* aliases into the shared tokens (css/design-tokens.css); the bracket-only fills stay here */
 .bracket-container {
-  --bv-band: #ecebe8;
-  --bv-surface: #ffffff;
-  --bv-surface-2: #faf9f7;
-  --bv-ink: #111827;
-  --bv-ink-2: #374151;
-  --bv-muted: #6b7280;
-  --bv-faint: #9ca3af;
-  --bv-line: #d6d3d1;
-  --bv-line-strong: #78716c;
-  --bv-card-line: #a8a29e;
-  --bv-accent: #ff6b35;
-  --bv-accent-soft: #ffe7dc;
-  --bv-ready: #d4a017;
-  --bv-ready-soft: #fbf0c8;
+  --bv-band: var(--nt-band);
+  --bv-surface: var(--nt-surface);
+  --bv-surface-2: var(--nt-surface-2);
+  --bv-ink: var(--nt-ink);
+  --bv-ink-2: var(--nt-ink-2);
+  --bv-muted: var(--nt-muted);
+  --bv-faint: var(--nt-faint);
+  --bv-line: var(--nt-line-2);
+  --bv-line-strong: var(--nt-line-strong);
+  --bv-card-line: var(--nt-card-line);
+  --bv-accent: var(--nt-accent);
+  --bv-accent-soft: var(--nt-accent-soft);
+  --bv-ready: var(--nt-ready);
+  --bv-ready-soft: var(--nt-ready-soft);
   --bv-done-meta: #f7faf8;
   --bv-done-border: #6fa684;
   --bv-done-win: #e3f2e8;
   --bv-ready-fill: #fffaea;
   --bv-live-fill: #ffeee4;
   --bv-pending-fill: #f1f0ee;
-  --bv-header: #1f2937;
-  --bv-header-ink: #f9fafb;
+  --bv-header: var(--nt-header);
+  --bv-header-ink: var(--nt-header-ink);
   --bv-shadow: 0 1px 2px rgba(17,24,39,.06), 0 2px 8px rgba(17,24,39,.05);
-  --bv-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-  --bv-mono: 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, monospace;
+  --bv-sans: var(--nt-sans);
+  --bv-mono: var(--nt-mono);
 }
 
 /* Pinch and drag are handled by the view, not the browser */
@@ -163,11 +164,15 @@
 }
 .bracket-viewport {
   position: relative; flex: 1; min-height: 0; overflow: hidden; cursor: grab;
+  contain: layout paint; /* redrawing the bracket never repaints the rest of the page */
   background: var(--bv-surface-2); border: 1px solid var(--bv-line); border-radius: 10px;
   user-select: none; -webkit-user-select: none;
 }
-/* The zoomed layer: the bracket view sets its transform; everything in it is positioned in world units */
-.bracket-canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; will-change: transform; }
+/* The zoomed layer: the bracket view sets its transform; everything in it is positioned in world units.
+   No will-change: as one GPU layer, a large bracket above 100% outgrows the graphics memory and the
+   whole page flickers while Chrome redraws it. Painted normally, only the visible part is drawn,
+   and text stays sharp at every zoom. */
+.bracket-canvas { position: absolute; left: 0; top: 0; transform-origin: 0 0; }
 .bracket-canvas, .bracket-canvas * { user-select: none; -webkit-user-select: none; }
 
 /* ---- header ---- */
@@ -185,7 +190,9 @@
 /* the status row is centred on the page, under all three groups */
 .bv-header > .bv-status-row { grid-column: 1 / -1; grid-row: 2; }
 .bv-title-block { min-width: 0; }
-.bv-title { font-weight: 800; font-size: 24px; line-height: 1.1; letter-spacing: -.02em; color: var(--bv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40ch; }
+.bv-title { font-weight: 800; font-size: 24px; line-height: 1.1; letter-spacing: -.02em; color: var(--bv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+  /* stop before the centred status line (about 960px wide, centred on the page); long names end in … */
+  max-width: max(160px, calc(50vw - 500px)); }
 .bv-subtitle { font-weight: 600; font-size: 14px; color: var(--bv-ink-2); margin-top: 2px; font-variant-numeric: tabular-nums; }
 .bv-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
 .bv-links { display: inline-flex; align-items: center; gap: 2px; }

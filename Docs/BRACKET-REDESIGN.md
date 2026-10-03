@@ -192,7 +192,11 @@ Type does the fine work: bold for names and headings, small uppercase with wide 
 
 Modals in the app currently use a green-outlined primary button ("Confirm Winner", "Save Statistics"). The direction is the solid dark primary, with green kept for meaning ("Jimmy advances to FS-2-4").
 
-### Colour tokens (from the mockup)
+### Colour tokens
+
+Shared by the redesigned pages in `css/design-tokens.css` (`--nt-*`); `css/bracket-view.css` aliases them as `--bv-*`, and Global Settings (`css/config-page.css`) uses them directly. Global Settings was the second page redesigned in this language, from its own mockup (https://claude.ai/artifact/BUn1sDA9XgfG1SDh2grUbi): grouped sections, one setting per row, one save bar, and a save-or-discard check when leaving with unsaved changes.
+
+The values, from the bracket mockup:
 
 | Token | Light | Dark | Use |
 |---|---|---|---|

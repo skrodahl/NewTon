@@ -448,6 +448,9 @@ function debugConfigState() {
 
 // UPDATE: Enhanced showPage function with help integration
 function showPage(pageId) {
+    // Leaving Global Settings with unsaved changes: ask to save or discard first
+    if (typeof ConfigPage !== 'undefined' && ConfigPage.interceptLeave(pageId)) return;
+
     document.querySelectorAll('.page').forEach(page => {
         page.classList.remove('active');
     });
@@ -472,6 +475,11 @@ function showPage(pageId) {
         if (typeof loadRecentTournaments === 'function') {
             loadRecentTournaments();
         }
+    }
+
+    // Global Settings: fill the form from the stored settings and track changes from there
+    if (pageId === 'config' && typeof ConfigPage !== 'undefined') {
+        ConfigPage.onShow();
     }
 
     // Bracket page header: refresh on entry (settings such as the Developer Console may have changed)

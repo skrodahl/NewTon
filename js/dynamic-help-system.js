@@ -281,118 +281,86 @@ const HELP_CONTENT = {
 
     // Config Page Help
     config: {
-        title: "Tournament Configuration",
-        overview: "Customize point values, match formats, and application settings.",
+        title: "Global Settings",
+        overview: "Settings for this computer, used by every tournament. Change what you need, then click <strong>Save changes</strong> in the bar at the bottom.",
         sections: {
-            points: {
-                title: "Point System Configuration",
+            application: {
+                title: "Saving and the Page Layout",
                 content: `
-                    <p><strong>Point Categories:</strong></p>
+                    <p><strong>Sections:</strong> <strong>Club</strong>, <strong>Tournaments</strong>, <strong>Match day</strong>, <strong>Bracket</strong>, <strong>Chalker</strong>, <strong>Server &amp; backup</strong> and <strong>Developer</strong>. Click a name in the list on the left to jump to it.</p>
+                    <p><strong>Saving:</strong></p>
                     <ul>
-                        <li><strong>Participation:</strong> Base points for entering tournament</li>
-                        <li><strong>Placement:</strong> Bonus points based on final ranking</li>
-                        <li><strong>Achievements:</strong> Points for 180s, high outs, short legs, tons</li>
+                        <li>Any change brings up a bar at the bottom: <strong>Discard</strong> or <strong>Save changes</strong>. Nothing is saved until you click Save changes.</li>
+                        <li>An orange dot in the section list marks each section with unsaved changes.</li>
+                        <li>Leaving the page with unsaved changes asks first: <strong>Stay</strong>, <strong>Discard and continue</strong> or <strong>Save and continue</strong>.</li>
                     </ul>
-                    <p><strong>Auto-save:</strong> Point values save automatically when changed.</p>
-                    <p><strong>💡 Tip:</strong> Adjust values to balance participation vs. performance rewards.</p>
+                    <p><strong>Club:</strong> the club name is shown in the page title and at the top of the bracket. For a logo, put a square <code>logo.png</code>, <code>logo.jpg</code>, <code>logo.jpeg</code> or <code>logo.svg</code> in the <code>images</code> folder.</p>
+                    <p><strong>Match day:</strong></p>
+                    <ul>
+                        <li><strong>Lanes:</strong> how many dartboards you have. Under <strong>Lanes not in use</strong>, click a lane to leave it out of lane assignment.</li>
+                        <li><strong>Confirm the winner:</strong> ask for the score and statistics when a winner is chosen. When off, matches complete at once with nothing entered.</li>
+                        <li><strong>Open Match Controls with the bracket</strong>, <strong>New players are paid</strong>, <strong>Referee suggestions</strong>.</li>
+                    </ul>
+                    <p><strong>Bracket:</strong> <strong>Finals position</strong>, Right or Middle (double elimination). The same setting as the Finals toggle in the bracket header.</p>
+                    <p><strong>Developer:</strong> <strong>Developer Console</strong> adds a <strong>Console</strong> link to the bracket header, with diagnostics, validation checks, lane usage and transaction tools.</p>
                 `
             },
             formats: {
                 title: "Tournament Formats",
                 content: `
-                    <p><strong>Tournament formats to offer</strong> (User Interface section) controls which formats appear on the Shuffle &amp; Draw screen when starting a tournament.</p>
-                    <p>Untick the ones your club never plays and they stop being offered, so the wrong format cannot be picked by mistake. At least one format always stays available.</p>
-                    <p><strong>💡 Existing tournaments are unaffected</strong> — hiding a format only changes the screen where a new tournament is started. A tournament already created in that format still opens, renders and exports as normal.</p>
-                `
-            },
-            handover: {
-                title: "Chalker Handover",
-                content: `
-                    <p><strong>How a match reaches the Chalker.</strong> Set under Chalker on the Config page:</p>
-                    <ul>
-                        <li><strong>QR code</strong> (default) &mdash; show a code on the match card for the Chalker to scan, and scan its result code back. Works offline and needs no network.</li>
-                        <li><strong>Network</strong> (experimental) &mdash; send the match to a Chalker on the same local network, and the result comes back on its own. Hides the QR buttons and offers <strong>Transfer</strong> on a started match instead. Requires the Docker deployment, with the Chalker opened from your own server rather than newtondarts.com.</li>
-                        <li><strong>None</strong> &mdash; hides both, for entering every result by hand.</li>
-                    </ul>
-                    <p><strong>💡 Tip:</strong> A result arriving over the network is never applied on its own &mdash; you accept it, and accepting opens the same review a scanned result QR opens.</p>
+                    <p><strong>Formats to offer</strong> (Tournaments) controls which formats appear on the Shuffle &amp; Draw screen when starting a tournament.</p>
+                    <p>Untick the ones your club never plays so they can't be picked by mistake. At least one format always stays available.</p>
+                    <p><strong>💡 Existing tournaments are unaffected:</strong> a tournament already created in a hidden format still opens, renders and exports as normal.</p>
                 `
             },
             matches: {
-                title: "Match Format Configuration",
+                title: "Match Length",
                 content: `
-                    <p><strong>Double Elimination:</strong></p>
+                    <p><strong>Match length</strong> (Tournaments) sets best-of legs per round, with − and + (Bo1 to Bo21).</p>
                     <ul>
-                        <li><strong>Regular Rounds:</strong> Early bracket matches</li>
-                        <li><strong>Semi-Finals:</strong> Last frontside and backside matches</li>
-                        <li><strong>Backside Final:</strong> Qualifier match for Grand Final</li>
-                        <li><strong>Grand Final:</strong> Championship match</li>
+                        <li><strong>Double elimination:</strong> regular rounds, frontside and backside semifinal, backside final, grand final</li>
+                        <li><strong>Single elimination:</strong> regular rounds, quarterfinal, semifinal, bronze final, final</li>
                     </ul>
-                    <p><strong>Single Elimination:</strong></p>
+                    <p><strong>Reset to defaults</strong> fills in the standard lengths; click Save changes to keep them. New lengths apply to matches that haven't started.</p>
+                `
+            },
+            points: {
+                title: "Points",
+                content: `
+                    <p><strong>Points</strong> (Tournaments):</p>
                     <ul>
-                        <li><strong>Regular Rounds:</strong> Early bracket matches</li>
-                        <li><strong>Quarter-Finals:</strong> Last 8 players</li>
-                        <li><strong>Semi-Finals:</strong> Last 4 players</li>
-                        <li><strong>Bronze Match:</strong> 3rd place play-off</li>
-                        <li><strong>Final:</strong> Championship match</li>
+                        <li><strong>Placing:</strong> points for taking part, and for each final placing</li>
+                        <li><strong>Achievements, each:</strong> 180s, high outs (101+), short legs and tons (100+)</li>
                     </ul>
-                    <p><strong>Format:</strong> Choose Best of 3, 5, or 7 legs for each round type.</p>
-                    <p><strong>Chalker Settings:</strong></p>
+                    <p><strong>Reset to defaults</strong> fills in the standard values; click Save changes to keep them.</p>
+                `
+            },
+            handover: {
+                title: "Chalker Settings",
+                content: `
+                    <p><strong>Chalker</strong> settings are sent to the Chalker when a match starts:</p>
                     <ul>
-                        <li><strong>x01 Format:</strong> Starting score sent to the Chalker via QR (101 / 201 / 301 / 501)</li>
-                        <li><strong>Max Rounds:</strong> Tiebreak threshold sent to the Chalker via QR (7–20, default 13)</li>
+                        <li><strong>Game:</strong> 301, 501, 701, or <strong>Other</strong> for a starting score of your own (2–1001; unusual scores make larger QR codes)</li>
+                        <li><strong>Most rounds per leg</strong> and <strong>Short leg</strong> (darts)</li>
                     </ul>
-                    <p><strong>Auto-save:</strong> Settings apply immediately to new tournaments.</p>
+                    <p><strong>Handover</strong>, how a match reaches the Chalker:</p>
+                    <ul>
+                        <li><strong>QR code</strong> (default): show a code on the match for the Chalker to scan, and scan its result code back. Works offline.</li>
+                        <li><strong>Network</strong> (experimental): send the match to a Chalker on the same local network; the result comes back on its own and is counted on the <strong>Match Controls</strong> button until you accept it. Needs the Docker image, with the Chalker opened from your own server.</li>
+                        <li><strong>None:</strong> results are entered by hand.</li>
+                    </ul>
                 `
             },
             server: {
-                title: "Server & Automatic Backup",
+                title: "Server & Backup",
                 content: `
-                    <p><strong>Only relevant when running the Docker container.</strong> These settings do nothing if you opened the app as a file.</p>
+                    <p><strong>Only when running the Docker image.</strong> These settings do nothing if you opened the app as a file.</p>
                     <ul>
-                        <li><strong>Automatic backup:</strong> when enabled, a tournament is uploaded to the server the moment it is completed &mdash; no one has to remember to do it. This is what fills Shared Tournaments, and what lets a separate Analytics instance collect a season's results on its own.</li>
-                        <li><strong>Remote server:</strong> a second destination, so results can also reach a machine elsewhere &mdash; a club Analytics box, for instance. Optional, with its own address and credentials.</li>
-                        <li><strong>Allow deleting shared tournaments:</strong> off by default. Turn it on only if you want the delete button available on the server's tournament list.</li>
+                        <li><strong>Back up finished tournaments:</strong> upload a tournament to the server when it finishes. This fills Shared Tournaments, and lets a separate Analytics instance collect a season's results.</li>
+                        <li><strong>Allow deleting tournaments:</strong> off by default. Shows delete buttons for shared tournaments and in the Analytics register.</li>
+                        <li><strong>Remote backup:</strong> optional second destination, with its own address and username and password.</li>
                     </ul>
-                    <p><strong>💡 If Shared Tournaments stays empty</strong> on a Linux server, the container could not write to its tournament folder &mdash; look at its startup log, which now says so and gives the command to fix it.</p>
-                `
-            },
-            application: {
-                title: "Application Settings",
-                content: `
-                    <p><strong>Customization Options:</strong></p>
-                    <ul>
-                        <li><strong>Application Title:</strong> Customize header text and browser title</li>
-                        <li><strong>Club Logo:</strong> Add logo.png/jpg/jpeg/svg file to images/ folder</li>
-                        <li><strong>Lane Management:</strong> Set maximum lanes and requirements</li>
-                    </ul>
-                    <p><strong>UI Settings:</strong></p>
-                    <ul>
-                        <li><strong>Winner Confirmation:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
-                        <li><strong>Match Controls Auto-Open:</strong> Automatically show Command Center when entering Tournament page</li>
-                        <li><strong>Finals position in the bracket:</strong> Right or Middle (double elimination). The same setting as the Finals toggle in the bracket header</li>
-                    </ul>
-                    <p><strong>Developer Console:</strong></p>
-                    <ul>
-                        <li><strong>Enable Developer Console:</strong> Show advanced diagnostics and developer tools
-                            <ul>
-                                <li>When enabled, click <strong>Console</strong> in the Tournament page header to open the Developer Console</li>
-                                <li><strong>Real-time statistics:</strong> Transaction health, match states, player counts, lane usage, localStorage usage</li>
-                                <li><strong>Lane Usage monitoring:</strong> Track dartboard lane availability, detect conflicts in LIVE matches (critical), and READY matches (preventive warnings)</li>
-                                <li><strong>Validation checks:</strong> Lane conflicts, referee conflicts, match state integrity, transaction limits, player IDs, progression integrity</li>
-                                <li><strong>Developer commands:</strong> Re-render bracket, recalculate rankings, refresh dropdowns, validate everything, manage transaction log</li>
-                                <li><strong>Transaction management:</strong> Smart pruning to free up storage space while preserving tournament data</li>
-                                <li>Developer tool - the only visible change is the Console link in the Tournament page header</li>
-                                <li>Auto-refreshes every 2 seconds for real-time monitoring during tournaments</li>
-                            </ul>
-                        </li>
-                    </ul>
-                    <p><strong>Server Settings:</strong></p>
-                    <ul>
-                        <li><strong>Allow Deleting Shared Tournaments:</strong> Control delete button visibility for server-hosted tournaments</li>
-                        <li>Default: Disabled (prevents accidental deletion on shared deployments)</li>
-                        <li>Enable this only if you want operators to be able to delete shared tournaments</li>
-                    </ul>
-                    <p><strong>💡 Tip:</strong> Personalize the application for your club or organization.</p>
+                    <p><strong>💡 If Shared Tournaments stays empty</strong> on a Linux server, the container could not write to its tournament folder. Its startup log says so and gives the command to fix it.</p>
                 `
             }
         }
