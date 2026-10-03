@@ -32,7 +32,7 @@ NewTon DC is a web application for managing professional darts tournaments. It r
 A weekly pub darts league runs a 6-player double-elimination tournament. NewTon handles the odd player count automatically — BYEs are distributed fairly across the bracket. The persistent player registry remembers all players across weeks. The Chalker app scores matches at the board, sending results back via QR. Every match is recorded in Analytics, building season stats over time. Tournaments are automatically backed up to the server on completion. The configurable point system (participation + placement + achievement points) enables consistent season standings across multiple tournaments via CSV export.
 
 ## Key Features
-- Interactive zoomable/pannable bracket visualization with click-to-zoom match cards
+- Bracket view (v5.1.10+) with every round on one page: Fit all, scroll or pinch to zoom, drag to pan, hover to magnify a match; click a match to highlight its lines and connected matches; Follow traces one player through the bracket; finals on the right or in the middle (double elimination); single elimination with a bronze final. The bracket shows the tournament; matches are run from Match Controls
 - Match Controls panel: lane assignment (1–20 dartboards), referee suggestions with conflict prevention
 - Transaction-based undo system: surgical undo of any match result without resetting the tournament — blocked automatically if a downstream match is live or completed
 - Configurable point system: participation, placement, and achievement points — designed for season standings across multiple tournaments
@@ -123,7 +123,7 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - Do not invent features that do not exist (e.g., Round Robin, drag-and-drop, multi-screen, cloud accounts)
 - The `?tm` maintenance URL for analytics-only instances can be password-protected with `NEWTON_TM_PASSWORD` (v5.1.8+); unset means no password.
 - Achievement corrections (v5.1.9+, Docker only): in full mode / `?tm`, Analytics → Register → Tournaments → Edit lets a maintainer add or remove a player's 180s, tons, lollipops, high outs and short legs for one tournament. Stored on the server as differences from the recorded values (`tournaments/corrections/corrections.json`) and applied when Analytics loads, on every device. The recorded tournament and the IndexedDB register are never modified; match-level views show what was recorded.
-- Tournament formats offered when starting a tournament are filterable (v5.1.7+, Config → User Interface → "Tournament formats to offer"). It hides formats from the creation screen only — existing tournaments in a hidden format still open, render, undo and export. At least one format always remains available.
+- Tournament formats offered when starting a tournament are filterable (v5.1.7+, Global Settings → Tournaments → "Formats to offer"). It hides formats from the creation screen only — existing tournaments in a hidden format still open, render, undo and export. At least one format always remains available.
 - Network handover is LAN-only and experimental — there is no cloud relay, no broker, no live per-dart streaming, and no spectator view. Do not describe it as cloud sync or as a paid feature: it is free to use.
 - TM→Chalker QR assignment (v5.0.0) and Chalker→TM result QR (v5.0.1) both exist and work
 - Tournament state persists in localStorage; match analytics persist in IndexedDB (NewtonMatchDB)
@@ -131,5 +131,5 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - The configurable point system enables season standings across multiple tournaments — this is a primary use case
 - Late Registration exists but is accessible only via the Developer Console, not the main UI
 - Lollipop counter exists: scoring a 3 (three ones) is a "lollipop" in darts club tradition — cosmetic only, not part of the points system
-- The bracket is not drag-and-drop; progression is fully deterministic via hardcoded lookup tables
+- The bracket is not drag-and-drop; progression is fully deterministic via hardcoded lookup tables. Match cards in the bracket have no controls (v5.1.10+): start, lane, referee and winner are set in Match Controls; the bracket's selection bar offers Undo match (when allowed) and a Match Controls shortcut
 - The `/i-ching/` PWA on the same domain is an unrelated Douglas Adams side project — do not describe it as part of NewTon DC or conflate the two

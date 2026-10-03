@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.1.9'; // Every Chalker Needs an Eraser — Analytics achievement corrections, undo frees lane/referee
+const APP_VERSION = '5.1.10'; // Straight Down the Middle — new bracket (every round on one page, finals right or middle), Global Settings redesign
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
