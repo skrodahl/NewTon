@@ -91,6 +91,10 @@ const BracketView = (() => {
             x['BS-FINAL'] = x['GRAND-FINAL'] = fx;
             const bs0 = fx + W + g.FINALS_GAP;
             ids.forEach(id => { if (sideOf(id) === 'BS') x[id] = bs0 + (maxBS - roundOf(id)) * P; });
+            // Each half's last match lines up with the final it feeds: the frontside final with the
+            // grand final, the backside's last match with the backside final (straight lines)
+            y[`FS-${maxFS}-1`] = y['GRAND-FINAL'];
+            y[`BS-${maxBS}-1`] = y['BS-FINAL'];
         }
         const minX = Math.min(...ids.map(i => x[i])), minY = Math.min(...ids.map(i => y[i]));
         const pos = {};
@@ -305,7 +309,7 @@ const BracketView = (() => {
         lblMid('Finals', pos['BS-FINAL'].x, -84, 'bv-side-label');
         const place = placings(size, st);
         // every header sits the same distance above the topmost match of its round
-        const LABEL_GAP = 22;
+        const LABEL_GAP = 26;
         const topOf = (side, r) => Math.min(...st.ids.filter(i => sideOf(i) === side && roundOf(i) === r).map(i => pos[i].y));
         for (let r = 1; r <= st.maxFS; r++) lblMid(r === st.maxFS ? 'Frontside final' : 'Round ' + r, pos[`FS-${r}-1`].x, topOf('FS', r) - LABEL_GAP);
         for (let r = 1; r <= st.maxBS; r++) lblMid(`${place[r]} place`, pos[`BS-${r}-1`].x, topOf('BS', r) - LABEL_GAP);
@@ -335,16 +339,21 @@ const BracketView = (() => {
             const d = prog[src][kind]; if (!d) return;
             const [dst, slot] = d;
             const s = pos[src], t = pos[dst];
-            // Loser lines show on selection only, except with the finals on the right: round 1 to
-            // backside round 1 (mirroring the frontside forks) and the frontside final to the
-            // backside final (it feeds both finals) are always drawn
-            const always = kind === 'winner' || (variant === 'right' && (/^FS-1-/.test(src) || (sideOf(src) === 'FS' && dst === 'BS-FINAL')));
+            // Loser lines show on selection only, except: the frontside final to the backside final
+            // (it feeds both finals, a T-junction off its line to the grand final), and with the finals
+            // on the right, round 1 to backside round 1 (mirroring the frontside forks)
+            const always = kind === 'winner' || (sideOf(src) === 'FS' && dst === 'BS-FINAL') ||
+                (variant === 'right' && /^FS-1-/.test(src));
             let path;
             if (variant === 'right' && sideOf(src) === 'BS' && dst === 'BS-FINAL') {
                 // The backside runs right to left: its last match leaves from its left side, goes
                 // round under the bracket, up the right edge, and enters the backside final from the right
                 const x1 = s.x, ox = x1 - GX / 2, yR = L.ch + 30, xR = t.x + W + GX / 2;
                 path = `M${x1} ${cy(src)} H${ox} V${yR} H${xR} V${cy(dst)} H${t.x + W}`;
+            } else if (kind === 'loser' && dst === 'BS-FINAL') {
+                // The frontside final's loser drops from the bottom middle of its card and turns into the
+                // backside final from the left
+                path = `M${s.x + W / 2} ${s.y + H} V${cy(dst)} H${t.x}`;
             } else if (variant === 'right' && src === 'BS-FINAL') {
                 // The backside final's winner continues up the same line into the grand final from the
                 // right, a T-junction beside the backside final (mirroring the frontside final's split),

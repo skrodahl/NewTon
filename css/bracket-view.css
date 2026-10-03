@@ -40,7 +40,7 @@
 .bv-world { position: absolute; left: 0; top: 0; --inv: 1; font-family: var(--bv-sans); color: var(--bv-ink); }
 .bv-world svg { position: absolute; left: 0; top: 0; overflow: visible; pointer-events: none; }
 .bv-band { position: absolute; background: var(--bv-band); border-radius: 10px; }
-.bv-col-label { position: absolute; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--bv-muted); white-space: nowrap; }
+.bv-col-label { position: absolute; font-size: 15px; line-height: 1.2; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; color: var(--bv-muted); white-space: nowrap; }
 .bv-col-label span { font-weight: 500; letter-spacing: .02em; text-transform: none; }
 .bv-finals-label { z-index: 1; background: var(--bv-surface-2); padding: 0 6px; }
 .bv-side-label { position: absolute; font-size: 24px; line-height: 1; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--bv-ink-2); white-space: nowrap; }
