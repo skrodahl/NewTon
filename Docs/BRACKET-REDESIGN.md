@@ -235,7 +235,9 @@ The bracket page keeps its own full-screen header (tournament name, Match Contro
 
 **On trial (after v5.1.10):** `css/app-header.css` applies this header, and a matching footer, to the existing markup. There are no markup or script changes: the logo is 40px; the tournament name and date stay to the left of the clock. The footer is full width with a hairline above, and on short pages it sits at the bottom of the window. To go back to the old header and footer, remove the stylesheet's `<link>` from `tournament.html`.
 
-Kept after trying it. **Pages redesigned so far:** Global Settings (v5.1.10), Tournament Setup (`css/setup-page.css`, after v5.1.10). Next: Player Registration, Analytics.
+**Page widths** (tokens in `css/design-tokens.css`): `--nt-page-max` 1520px for forms and short lists (Setup, Global Settings, Registration), `--nt-page-wide` 1840px for table-heavy pages (Analytics). Both sit inside 24px side margins. The app runs full screen, so the browser is at least 1920px wide. The header always spans the full window.
+
+Kept after trying it. **Pages redesigned so far:** Global Settings (v5.1.10), Tournament Setup (`css/setup-page.css`), Player Registration (`css/registration-page.css`, reuses Setup's `st-*` panel, button and field styles). Next: Analytics (wide width). The registration *process* (saved players especially) is to be reworked later; the current page is laid out to take that.
 
 ---
 

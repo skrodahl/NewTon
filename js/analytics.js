@@ -2,7 +2,7 @@
  * Analytics & Developer Console
  *
  * Hidden developer tool for real-time tournament diagnostics, validation checks,
- * and developer commands. Accessible by clicking version number when enabled in Config.
+ * and developer commands. Opened from the Console link in the bracket header when enabled in Config.
  *
  * Features:
  * - Real-time statistics (transactions, matches, players, lanes)

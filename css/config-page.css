@@ -6,7 +6,7 @@
 
 #config.page.active { display: block; background: var(--nt-bg); padding: 0; overflow: visible; font-family: var(--nt-sans); color: var(--nt-ink); }
 
-.cfg-wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 140px; display: grid; grid-template-columns: 200px minmax(0, 780px); gap: 16px 40px; justify-content: center; }
+.cfg-wrap { max-width: var(--nt-page-max); margin: 0 auto; padding: 28px 24px 140px; display: grid; grid-template-columns: 200px minmax(0, 780px); gap: 16px 40px; justify-content: center; }
 .cfg-title { grid-column: 1 / -1; display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 8px; }
 .cfg-title h2 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; color: var(--nt-ink); }
 .cfg-title p { margin: 4px 0 0; color: var(--nt-muted); font-size: 14px; }

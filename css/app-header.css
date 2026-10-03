@@ -15,7 +15,17 @@
   background: var(--nt-surface);
   font-family: var(--nt-sans);
   color: var(--nt-ink);
+  /* tournament name and clock on the right, centred over both rows like the bracket header's */
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  column-gap: 16px;
 }
+.header .header-top { display: contents; }
+/* the negative top margin takes in the header's top padding (there is none below the links),
+   so it centres in the whole header rather than 7px low */
+.header .header-right { grid-column: 2; grid-row: 1 / span 2; align-self: center; margin-top: -14px; }
+.header .header-tournament-narrow,
+.header .nav { grid-column: 1; }
 
 .header h1 {
   font-family: var(--nt-sans);

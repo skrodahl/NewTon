@@ -40,6 +40,11 @@
   --nt-warn-soft: #fef3c7;
   --nt-danger: #b91c1c;
 
+  /* page widths: standard for forms and short lists, wide for table-heavy pages
+     (both inside the 24px side margins). The app runs full screen, so at least 1920px. */
+  --nt-page-max: 1520px;
+  --nt-page-wide: 1840px;
+
   /* type (Inter and Cascadia Code are bundled in fonts/) */
   --nt-sans: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --nt-mono: 'Cascadia Code', ui-monospace, SFMono-Regular, Menlo, monospace;

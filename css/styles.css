@@ -417,46 +417,12 @@ body {
 
 /* Registration page flex layout - sticky footer */
 /* !IMPORTANT CLEANUP: Could use higher specificity instead of !important - OPTIMIZATION CANDIDATE */
-#registration.registration-page-flex {
-  display: flex !important;
-  flex-direction: column;
-}
 
 /* Only apply when page is actually active */
-#registration:not(.active) {
-  display: none !important;
-}
-
-.registration-page-header {
-  flex-shrink: 0;
-}
 
 /* Registration page two-column layout */
-.registration-layout {
-  display: flex;
-  flex-direction: row; /* Explicitly set horizontal layout */
-  gap: 30px;
-  margin-top: 20px;
-  align-items: flex-start;
-  flex: 1;
-}
-
-.players-column {
-  width: 580px; /* Fixed width for player cards + breathing room */
-  flex-shrink: 0;
-}
-
-.results-column {
-  flex: 1; /* Takes remaining space */
-  min-width: 0; /* Allows table to shrink if needed */
-}
 
 /* Player cards in single column */
-.players-list {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  gap: 16px;
-}
 
 /* Results section adjustments */
 #resultsSection {
@@ -1896,18 +1862,6 @@ a:hover { color: #1e40af; }
 
 /* Backside match styling - darker header background */
 
-.player-info {
-  flex: 1;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
-
-.player-info span {
-  display: inline !important;
-  white-space: nowrap !important;
-}
-
 /* Stats Modal Scrolling Fixes */
 #statsModal .modal-content {
   display: flex !important;
@@ -1939,221 +1893,22 @@ a:hover { color: #1e40af; }
    ========================================== */
 
 /* Form Elements - Only for redesigned pages */
-.registration-page-flex input[type="text"],
-.registration-page-flex input[type="number"],
-.registration-page-flex input[type="date"],
-.registration-page-flex select {
-  width: 100%;
-  padding: 10px 12px;
-  border: 1px solid #c0c0c0;
-  border-radius: 0;
-  background: #ffffff;
-  color: #2a2a2a;
-  font-size: 14px;
-  height: 44px;
-  box-sizing: border-box;
-  transition: border-color 0.15s ease;
-}
-
-.registration-page-flex input[type="text"]:focus,
-.registration-page-flex input[type="number"]:focus,
-.registration-page-flex input[type="date"]:focus,
-.registration-page-flex select:focus {
-  outline: none;
-  border-color: rgba(180, 83, 9, 1);
-  box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.1);
-}
-
-.registration-page-flex .form-group {
-  margin-bottom: 16px;
-}
-
-.registration-page-flex .form-group label {
-  display: block;
-  margin-bottom: 6px;
-  font-weight: 600;
-  color: #222222;
-  font-size: 14px;
-}
-
-.two-column-container {
-  display: flex;
-  gap: 24px;
-  flex: 1;
-}
 
 /* ===============================================
    FLAT DESIGN STYLES - ACTIVE (v2.2.0+)
    =============================================== */
-.scrollable-column {
-  background: #ffffff;
-  border: 1px solid #e8e8e8;
-  border-radius: 0;
-  color: #2a2a2a;
-  display: flex;
-  flex-direction: column;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-}
-
-.scrollable-column h3 {
-  color: #222222;
-  margin: 0;
-  padding: 0 24px;
-  border-bottom: 1px solid #e8e8e8;
-  flex-shrink: 0;
-  height: 60px;
-  min-height: 60px;
-  max-height: 60px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  font-size: 1.15rem;
-  font-weight: 600;
-  background: #f5f5f5;
-}
-
-.scrollable-column h3 .btn {
-  height: 28px;
-  padding: 6px 12px;
-  font-size: 12px;
-  margin: 0;
-}
-
-.scrollable-column-content {
-  flex: 1;
-  padding: 24px;
-  overflow-y: auto;
-}
 
 /* Registration page - remove fixed heights and internal scrolling */
-.registration-page-flex .scrollable-column-content {
-  overflow-y: visible;
-  min-height: initial;
-}
 
 /* Removed incorrect margin-right that broke the working spacing */
 
 /* Registration Page Styles */
-.page.registration-page-flex.active {
-  display: flex;
-  flex-direction: column;
-  overflow-y: auto;
-  border: 1px solid #666666;
-}
-
-.registration-page-header {
-  flex-shrink: 0;
-  padding: 24px;
-  background: #f5f5f5;
-  border-bottom: 1px solid #e8e8e8;
-  border: 1px solid #e8e8e8;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
-  display: grid;
-  grid-template-columns: 1fr auto;
-  gap: 32px;
-  align-items: stretch;
-  position: relative;
-}
-
-.registration-page-header h2 {
-  margin: 0;
-  color: #222222;
-  font-size: 1.5rem;
-  font-weight: 600;
-  margin-bottom: 0px;
-}
-
-.registration-page-header .btn {
-  margin-bottom: 0;
-}
-
-.player-registration-row {
-  display: flex;
-  align-items: end;
-  gap: 16px;
-  margin-bottom: 24px;
-  margin-top: -6px;
-}
-
-.player-registration-row .form-group {
-  margin-bottom: 0;
-}
-
-.player-registration-row .btn {
-  margin-bottom: 0;
-}
-
-.player-name-field {
-  width: 441px;
-}
-
-.control-buttons {
-  display: flex;
-  gap: 16px;
-}
 
 /* Registration Header - Two Column Layout */
-.header-left-content {
-  display: flex;
-  flex-direction: column;
-  gap: 16px;
-}
-
-.header-left-content h2 {
-  margin-bottom: 0;
-}
-
-.header-right-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  padding-top: 8px;
-  min-height: 100%;
-}
-
-.header-right-content img {
-  height: 175px;
-  width: auto;
-  border: 1px solid #e8e8e8;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-}
-
-.header-right-content .player-count {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #222222;
-  text-align: center;
-  margin-top: auto;
-}
-
-.player-count {
-  font-size: 1rem;
-  font-weight: 600;
-  color: #222222;
-}
-
-.registration-page-main {
-  display: flex;
-  gap: 24px;
-  padding: 24px 24px 0px 0px;
-  align-items: flex-start;
-}
 
 /* Column Proportions - Registration Page Only */
-.registration-page-main .scrollable-column:first-child {
-  flex: 0 0 34%;
-}
-
-.registration-page-main .scrollable-column:last-child {
-  flex: 0 0 66%;
-}
 
 /* Registration Page Two-Column Layout */
-.registration-page-main {
-  height: calc(100vh - 140px); /* Account for header and form */
-}
 
 /* Player List Header */
 .player-list-header {
@@ -2182,198 +1937,10 @@ a:hover { color: #1e40af; }
 }
 
 /* Saved Players Sections */
-.saved-players-section {
-  margin-bottom: 16px;
-}
-
-.saved-players-section-header {
-  color: #222222;
-  margin: 0;
-  padding: 12px 16px;
-  border-bottom: 1px solid #e8e8e8;
-  font-size: 14px;
-  font-weight: 600;
-  background: #fafafa;
-}
 
 /* Player List Items */
-.player-list-items {
-  padding: 8px;
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-.player-list-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 10px 12px;
-  border: 1px solid #d1d5db;
-  background: white;
-}
-
-.player-list-item.in-tournament {
-  background: #f0fdf4;
-  border: 1px solid #d1d5db;
-}
-
-.player-list-item-name {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #111827;
-}
-
-.player-list-item.in-tournament .player-list-item-name {
-  font-weight: normal;
-  color: #111827;
-}
-
-.player-list-item-name .checkmark {
-  color: #16a34a;
-  font-size: 16px;
-}
-
-.player-list-item-actions {
-  display: flex;
-  gap: 8px;
-}
-
-.player-list-item-actions button {
-  width: 24px;
-  height: 24px;
-  padding: 0;
-  font-size: 18px;
-  border: 1px solid #dc2626;
-  border-radius: 6px;
-  background: white;
-  color: #dc2626;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  line-height: 1;
-}
-
-.player-list-delete-btn:hover {
-  background: #dc2626;
-  color: white;
-}
 
 /* Player Grid */
-.players-list {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 12px;
-}
-
-.player-card {
-  border: 1px solid #e8e8e8;
-  height: 48px;
-  min-height: 48px;
-  max-height: 48px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  overflow: hidden;
-  transition: all 0.15s ease;
-  cursor: pointer;
-  padding: 8px 12px;
-  background: #ffffff;
-  position: relative;
-}
-
-.player-card:hover {
-  transform: translateY(-1px);
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-.player-card.paid {
-  background: #f0f9f4;
-  border-color: #166534;
-}
-
-.player-card.paid:hover {
-  background: #dcfce7;
-}
-
-.player-card.unpaid {
-  background: #ffffff;
-  border-color: #d97706;
-}
-
-.player-card.unpaid:hover {
-  background: #f9f9f9;
-}
-
-.player-card .player-info {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.player-name {
-  font-size: 14px;
-  font-weight: 500;
-  color: #333333;
-}
-
-.player-status {
-  font-size: 12px;
-  font-weight: 400;
-  color: #666666;
-}
-
-.player-card.paid .player-status {
-  color: #166534;
-}
-
-.player-card.unpaid .player-status {
-  color: #d97706;
-}
-
-.player-actions {
-  display: flex;
-  gap: 4px;
-  position: relative;
-  z-index: 2;
-}
-
-.btn-small {
-  padding: 4px 8px;
-  font-size: 14px;
-  height: auto;
-  font-weight: 400;
-  border: 1px solid #d0d0d0;
-  border-radius: 6px;
-  background: #ffffff;
-  color: #666666;
-  transition: all 0.15s ease;
-  width: 24px;
-  height: 24px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0;
-}
-
-.btn-small:hover {
-  background: #f8f8f8;
-  border-color: #c0c0c0;
-}
-
-.btn-small.btn-danger {
-  color: #dc2626;
-  border-color: #dc2626;
-}
-
-.btn-small.btn-danger:hover {
-  background: #fef2f2;
-  border-color: #b91c1c;
-}
 
 /* Results Table */
 .results-table-container {

@@ -2,8 +2,9 @@
 
 ### App header and footer
 
-- **The app header and footer use the new design language**, as agreed in v5.1.10 for the redesign of the remaining pages (Docs/BRACKET-REDESIGN.md, "App header"). The header runs the full width: white, with one hairline underneath. It has a 40px round logo, the club name in Inter, and the tournament name and date. The clock is the same as the bracket header's. The page links are plain text, with the current page bold and underlined in ink. The footer is full width with a hairline above, and on short pages it sits at the bottom of the window. This is done as one stylesheet over the existing markup, with no markup or script changes, so it can be removed in one line.
-- Files changed: `css/app-header.css` (new), `tournament.html` (stylesheet link), `Docs/BRACKET-REDESIGN.md`.
+- **The app header and footer use the new design language**, as agreed in v5.1.10 for the redesign of the remaining pages (Docs/BRACKET-REDESIGN.md, "App header"). The header runs the full width: white, with one hairline underneath. It has a 40px round logo, the club name in Inter, and the tournament name and date. The clock is the same as the bracket header's. The name, date and clock are centred vertically in the whole header, as on the bracket page. The page links are plain text, with the current page bold and underlined in ink. The footer is full width with a hairline above, and on short pages it sits at the bottom of the window. This is done as one stylesheet over the existing markup, with no markup or script changes, so it can be removed in one line.
+- **Two shared page widths** in `css/design-tokens.css`: `--nt-page-max` (1520px, forms and short lists) and `--nt-page-wide` (1840px, table-heavy pages), for a full-screen browser of at least 1920px. Setup, Registration and Global Settings use the first.
+- Files changed: `css/app-header.css` (new), `tournament.html` (stylesheet link), `css/design-tokens.css`, `css/setup-page.css`, `css/config-page.css`, `Docs/BRACKET-REDESIGN.md`.
 
 ### Tournament Setup redesign
 
@@ -13,12 +14,28 @@
   - Export, Backup to server and Reset tournament moved into this panel as quiet links, since they act on the loaded tournament.
   - **New tournament** is its own form, with Import tournament under it.
 - **Tournaments is one scrolling table**, newest first. "Show All / Show Less" and the separate Shared / My Tournaments lists are gone. When a server answers, "This computer" and "Server" are two tabs; the Server tab lists the shared tournaments with Import / Re-import and ×. The loaded tournament is marked "Loaded" and has no Load or × button, so the "can't delete the active tournament" alert can no longer be reached. Storage is a small meter in the table header, still opening the storage dialog.
-- **Match history** is one entry per match: the winner in green, "beat", the loser and the score (winner's legs first), then lane, referee and where both players went ("Ida to FS-2-2, Siri to BS-1-2", "out (7th-8th)", "wins the tournament"). It follows the tournament's format: single elimination previously showed no progression, and its bronze final reads "takes 3rd place" / "takes 4th place".
+- **Match history** is one entry per match: the winner in green, "beat", the loser and the score (winner's legs first), then lane, referee and where both players went ("Ida to FS-2-2, Siri to BS-1-2", "out (7th-8th)", "wins the tournament"). Walkovers between two empty slots (no one moves on) are left out; the bracket still shows them. The match number is a tag showing the side: frontside outlined, backside grey, grand final dark. It follows the tournament's format: single elimination previously showed no progression, and its bronze final reads "takes 3rd place" / "takes 4th place".
 - **Fix: the tournament list could show stale data.** `loadRecentTournaments()` overlaps itself, because each call waits for the server check. An earlier call that finished late overwrote the list with what it had read before a save. Only the latest call renders now. The table no longer waits for the Analytics registry (IndexedDB) either: it is drawn first, and the Analytics column is filled in when the registry answers.
 - Reset tournament now refreshes the Setup page (status, match history, tournament list).
 - In-app help for Setup rewritten for the new page.
 - About 440 lines of old Setup CSS removed from `styles.css` (Setup layout, Recent Tournaments, match history cards, storage link, Analytics labels, plus unused `.tournament-item` / `.match-result-item` rules).
 - Files changed: `css/setup-page.css` (new), `tournament.html` (Setup markup, stylesheet link), `js/tournament-management.js` (`renderSetupCurrent()` new; `loadRecentTournaments()`, `updateStorageIndicator()`, `updateTournamentStatus()`, `showImportStatus()`, `confirmReset()`, `loadSharedTournaments()`; `toggleSharedTournamentView()` / `toggleLocalTournamentView()` removed), `js/main.js` (`updateMatchHistory()`, `getPlayerProgressionForDisplay()`, `showPage()`), `js/dynamic-help-system.js`, `css/styles.css`.
+
+### Player Registration redesign
+
+- **The Registration page is rebuilt in the new design language** (mockup: https://claude.ai/artifact/TnxY3JWiqVPWJ7CpoPUXAU). It behaves the same way; the registration process itself will be reworked later.
+- **Next step strip:** Players / Paid / Unpaid counts, then what to do now.
+  - Before the draw: "Draw the bracket" with Open bracket. The button is disabled below the formats' minimum of paid players or above their maximum; the limits are read from `TOURNAMENT_FORMATS` via `getVisibleFormats()`.
+  - After the draw: the matches still to play.
+  - With no tournament loaded: Go to Setup.
+- **The "Need N more paid players" / "You now have enough players" pop-ups are gone** (`showHelpHint` calls in `addPlayer()` and `togglePaid()`); the next step shows the same thing all the time.
+- **Players** are rows in as many columns as fit (three at 1920px; more after the draw, when rows show names only), with a Paid / Unpaid pill. Clicking a row toggles paid, and × removes an unpaid player, as before. The name field and Add player sit at the top of the list. After the draw the list is locked: rows have no click or ×, so the "tournament in progress" warning can't be reached from it. "Player arrived late?" sits under it.
+- **Saved players** shows only the saved names not in the tournament, as chips: click a name to add the player, × to delete the name from the list. The separate "In Tournament" list is gone (the Players list shows them), and with it `removePlayerFromTournament()`. A paid player is now removed by marking them unpaid first.
+- **Payment QR** has its own panel, hidden when `images/payment.png` is missing.
+- **After the draw the Leaderboard takes the wide column**, with Export CSV / JSON in its header. Clicking a row still opens the statistics dialog.
+- **Fix: "Player arrived late?" told you to click the version number** in the bracket's lower-right corner, which went with the CAD box in v5.1.10. It now points to the Console link in the bracket header.
+- In-app help for Registration rewritten. About 430 lines of old Registration CSS removed from `styles.css` (layout, player cards, saved-player items, `.scrollable-column`, `.two-column-container`, `.btn-small`), keeping the `.results-table` styles the statistics dialog uses.
+- Files changed: `css/registration-page.css` (new), `tournament.html` (Registration markup, late-registration text, stylesheet link), `js/player-management.js` (`renderRegistrationNext()` new; `updateRegistrationPageLayout()`, `renderPlayerList()`, `updatePlayersDisplay()`, `updatePlayerCount()`, `addPlayer()`, `togglePaid()`, `showLateRegInfoModal()`; `removePlayerFromTournament()` removed), `js/dynamic-help-system.js`, `js/analytics.js` (comment), `css/styles.css`.
 
 ## **v5.1.10** — Straight Down the Middle (2026-10-04)
 

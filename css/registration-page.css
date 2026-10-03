@@ -1,0 +1,88 @@
+/* registration-page.css - Player Registration page
+ *
+ * Next step, the tournament's players, payment, saved players, and (once the bracket is
+ * drawn) the Leaderboard. Panels, buttons, fields and the page title reuse the st-* styles
+ * in css/setup-page.css. Uses the shared tokens in css/design-tokens.css. Light only.
+ */
+
+#registration.page.active { display: block; background: var(--nt-bg); padding: 0; font-family: var(--nt-sans); color: var(--nt-ink); }
+
+.rg-wrap { max-width: var(--nt-page-max); margin: 0 auto; padding: 28px 24px 40px; display: grid; gap: 20px; }
+.st-panel-head .rg-tools { display: flex; align-items: center; gap: 16px; }
+
+/* ---- next step: the counts, what to do now, and the bracket button ---- */
+.rg-next { display: flex; align-items: center; justify-content: space-between; gap: 12px 24px; flex-wrap: wrap; padding: 14px 18px; border-radius: 12px; background: var(--nt-surface); border: 1px solid var(--nt-line); }
+.rg-counts { margin: 0; display: flex; gap: 22px; align-items: baseline; }
+.rg-counts > div { display: grid; }
+.rg-counts dt { font-size: 12px; color: var(--nt-muted); }
+.rg-counts dd { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; color: var(--nt-ink); }
+.rg-counts dd.rg-warn { color: var(--nt-warn); }
+.rg-next .st-btn.st-primary { height: 40px; padding: 0 18px; font-size: 15px; }
+.rg-next .st-btn:disabled { opacity: .45; cursor: not-allowed; }
+.rg-next .st-btn.st-primary:disabled:hover { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+
+/* ---- two columns: players wide before the draw, the Leaderboard wide after it ---- */
+.rg-cols { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.rg-cols.rg-running { grid-template-columns: minmax(0, 1fr) minmax(0, 1.9fr); }
+.rg-side { display: grid; gap: 20px; min-width: 0; }
+
+/* ---- players: one row each, the paid state on the right ---- */
+.rg-add { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 0 20px 16px; }
+.rg-add[hidden] { display: none; }
+/* as many columns as fit; each row draws its own right edge, and the last column's is
+   clipped by the list (the panel's border is there) */
+.rg-plist { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); border-top: 1px solid var(--nt-line); overflow: hidden; }
+.rg-running .rg-plist { grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); } /* names only after the draw */
+.rg-prow { display: flex; align-items: center; justify-content: space-between; gap: 10px; min-height: 44px; padding: 6px 12px 6px 20px; border-bottom: 1px solid var(--nt-line); box-shadow: 1px 0 0 var(--nt-line); min-width: 0; }
+.rg-prow[onclick] { cursor: pointer; }
+.rg-prow[onclick]:hover { background: var(--nt-surface-2); }
+.rg-prow .rg-name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rg-prow .rg-right { display: flex; align-items: center; gap: 6px; flex: none; }
+.rg-paid { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 2px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
+.rg-paid.rg-yes { background: var(--nt-ok-soft); color: var(--nt-ok); }
+.rg-paid.rg-yes::before { content: "\2713"; font-weight: 800; }
+.rg-paid.rg-no { background: var(--nt-warn-soft); color: var(--nt-warn); }
+.rg-x { width: 26px; height: 26px; border-radius: 6px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-muted); font: inherit; line-height: 1; cursor: pointer; }
+.rg-x:hover { color: var(--nt-danger); border-color: var(--nt-danger); }
+.rg-plist .st-empty { grid-column: 1 / -1; }
+.rg-pfoot { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 20px 14px; font-size: 13px; color: var(--nt-muted); }
+.rg-pfoot:empty { display: none; }
+
+/* ---- payment ---- */
+.rg-pay { display: flex; gap: 16px; align-items: center; padding: 16px 20px; }
+.rg-pay[hidden] { display: none; }
+.rg-pay img { width: 108px; height: 108px; flex: none; object-fit: contain; border-radius: 8px; border: 1px solid var(--nt-line); background: #fff; }
+.rg-pay b { display: block; font-size: 15px; color: var(--nt-ink); }
+.rg-pay span { color: var(--nt-muted); font-size: 13px; }
+
+/* ---- saved players: click a name to add, × to delete from the list ---- */
+.rg-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 16px; max-height: 420px; overflow-y: auto; }
+.rg-chips .st-empty { flex: 1; min-height: 0; padding: 12px 0 4px; }
+.rg-chip { display: inline-flex; align-items: center; height: 32px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); overflow: hidden; }
+.rg-chip:hover { border-color: var(--nt-ink-2); }
+.rg-chip button { border: 0; background: transparent; font: inherit; cursor: pointer; height: 100%; }
+.rg-chip-add { padding: 0 6px 0 12px; font-size: 13px; font-weight: 600; color: var(--nt-ink-2); }
+.rg-chip-add::before { content: "+"; font-weight: 800; color: var(--nt-muted); margin-right: 6px; }
+.rg-chip-add:hover { color: var(--nt-ink); }
+.rg-chip-add:disabled { cursor: default; color: var(--nt-muted); }
+.rg-chip-del { width: 26px; color: var(--nt-faint); font-size: 14px; }
+.rg-chip-del:hover { background: var(--nt-inset); color: var(--nt-danger); }
+
+/* ---- Leaderboard ---- */
+.rg-scroll { overflow: auto; max-height: 640px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
+.rg-lb { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rg-lb th { position: sticky; top: 0; z-index: 1; background: var(--nt-surface); text-align: right; font-size: 12px; font-weight: 600; color: var(--nt-muted); padding: 6px 8px; border-top: 1px solid var(--nt-line); border-bottom: 1px solid var(--nt-line); white-space: nowrap; }
+.rg-lb td { padding: 9px 8px; border-bottom: 1px solid var(--nt-line); text-align: right; font-variant-numeric: tabular-nums; color: var(--nt-ink-2); white-space: nowrap; }
+.rg-lb th:nth-child(-n+2), .rg-lb td:nth-child(-n+2) { text-align: left; }
+.rg-lb th:first-child, .rg-lb td:first-child { padding-left: 20px; }
+.rg-lb th:last-child, .rg-lb td:last-child { padding-right: 20px; }
+.rg-lb tbody tr { cursor: pointer; }
+.rg-lb tbody tr:hover { background: var(--nt-surface-2); }
+.rg-lb tbody tr:last-child td { border-bottom: 0; }
+.rg-lb td.rank { font-family: var(--nt-mono); font-size: 12px; font-weight: 700; color: var(--nt-ink-2); }
+.rg-lb td.player-name { font-weight: 600; color: var(--nt-ink); width: 100%; }
+.rg-lb td.points { font-weight: 800; color: var(--nt-ink); }
+
+@media (max-width: 1000px) {
+  .rg-cols, .rg-cols.rg-running { grid-template-columns: 1fr; }
+}

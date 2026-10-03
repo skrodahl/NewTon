@@ -403,6 +403,13 @@ function autoLoadCurrentTournament() {
                 updatePlayerCount();
             }
 
+            // The last page is restored before the tournament loads, so Registration picked
+            // its layout (players or Leaderboard) and saved players without it: redo them now
+            if (typeof updateRegistrationPageLayout === 'function') {
+                updateRegistrationPageLayout();
+                renderPlayerList();
+            }
+
             // Render bracket if exists
             if (tournament.bracket && matches.length > 0 && typeof renderBracket === 'function') {
                 renderBracket();
@@ -606,7 +613,8 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
 /**
  * Fill the Setup page's match history: the current tournament's completed matches, latest
  * first, one entry each (winner, score, then lane, referee and where both players went).
- * A played match opens its details; walkovers are greyed out.
+ * A played match opens its details; walkovers are greyed out, and walkovers between two
+ * empty slots are left out.
  * @returns {void}
  */
 function updateMatchHistory() {
@@ -620,8 +628,11 @@ function updateMatchHistory() {
             ? `Match history<small>${escapeHtml(tournament.name)}</small>` : 'Match history';
     }
 
+    // A walkover between two empty slots moves no one on, so it isn't listed (the bracket shows it)
+    const isEmptySlot = p => !p || p.isBye === true || p.name === 'Walkover' ||
+        String(p.id || '').startsWith('walkover-');
     const completedMatches = (tournament && Array.isArray(matches) ? matches : [])
-        .filter(match => match.completed)
+        .filter(match => match.completed && !isEmptySlot(match.winner))
         .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0)); // latest first
 
     const playedCount = completedMatches.filter(m => !(m.autoAdvanced || isWalkoverMatch(m))).length;
@@ -642,11 +653,13 @@ function updateMatchHistory() {
     matchResultsContainer.innerHTML = completedMatches.map(match => {
         const winner = match.winner || {};
         const loser = match.loser || ([match.player1, match.player2].find(p => p && p.id !== winner.id) || {});
-        const id = escapeHtml(match.id);
+        // The match number shows the side: backside grey (as in the bracket), frontside outlined
+        const side = match.id === 'GRAND-FINAL' ? 'st-gf' : match.id.startsWith('BS-') ? 'st-bs' : 'st-fs';
+        const id = `<span class="st-id ${side}">${escapeHtml(match.id)}</span>`;
 
         if (match.autoAdvanced || isWalkoverMatch(match)) {
             const meta = where(winner, match.id, true);
-            return `<div class="st-hrow st-wo"><span class="st-id">${id}</span><span class="st-players"><b>${escapeHtml(winner.name || 'Unknown')}</b><span class="st-vs">walkover</span></span><span class="st-score">W/O</span>${meta ? `<span class="st-meta">${meta}</span>` : ''}</div>`;
+            return `<div class="st-hrow st-wo">${id}<span class="st-players"><b>${escapeHtml(winner.name || 'Unknown')}</b><span class="st-vs">walkover</span></span><span class="st-score">W/O</span>${meta ? `<span class="st-meta">${meta}</span>` : ''}</div>`;
         }
 
         const score = match.finalScore && match.finalScore.winnerLegs !== undefined
@@ -657,7 +670,7 @@ function updateMatchHistory() {
             [where(winner, match.id, true), where(loser, match.id, false)].filter(Boolean).join(', ')
         ].filter(Boolean).join(' · ');
         const idx = historyRows.push({ tournamentId: String(tournament.id), matchId: match.id }) - 1;
-        return `<div class="st-hrow" data-mh-idx="${idx}" title="Open match details"><span class="st-id">${id}</span><span class="st-players"><b>${escapeHtml(winner.name || 'Unknown')}</b><span class="st-vs">beat</span>${escapeHtml(loser.name || 'Unknown')}</span><span class="st-score">${score}</span>${meta ? `<span class="st-meta">${meta}</span>` : ''}</div>`;
+        return `<div class="st-hrow" data-mh-idx="${idx}" title="Open match details">${id}<span class="st-players"><b>${escapeHtml(winner.name || 'Unknown')}</b><span class="st-vs">beat</span>${escapeHtml(loser.name || 'Unknown')}</span><span class="st-score">${score}</span>${meta ? `<span class="st-meta">${meta}</span>` : ''}</div>`;
     }).join('');
 
     // One delegated click listener (attached once): opens the match modal by index,

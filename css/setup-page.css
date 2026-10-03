@@ -7,7 +7,7 @@
 
 #setup.page.active { display: block; background: var(--nt-bg); padding: 0; font-family: var(--nt-sans); color: var(--nt-ink); }
 
-.st-wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 40px; display: grid; gap: 20px; }
+.st-wrap { max-width: var(--nt-page-max); margin: 0 auto; padding: 28px 24px 40px; display: grid; gap: 20px; }
 .st-title { display: flex; align-items: flex-end; justify-content: space-between; gap: 16px; flex-wrap: wrap; margin-bottom: 4px; }
 .st-title h2 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; color: var(--nt-ink); }
 .st-title p { margin: 4px 0 0; color: var(--nt-muted); font-size: 14px; }
@@ -119,11 +119,13 @@
 
 /* ---- match history: one entry per match ---- */
 .st-hlist { max-height: 470px; overflow-y: auto; border-top: 1px solid var(--nt-line); border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
-.st-hrow { display: grid; grid-template-columns: 76px minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; padding: 10px 20px; }
+.st-hrow { display: grid; grid-template-columns: 96px minmax(0, 1fr) auto; gap: 4px 12px; align-items: baseline; padding: 10px 20px; }
 .st-hrow + .st-hrow { border-top: 1px solid var(--nt-line); }
 .st-hrow[data-mh-idx] { cursor: pointer; }
 .st-hrow[data-mh-idx]:hover { background: var(--nt-surface-2); }
-.st-hrow .st-id { font-family: var(--nt-mono); font-size: 12px; font-weight: 700; color: var(--nt-ink-2); white-space: nowrap; }
+.st-hrow .st-id { justify-self: start; font-family: var(--nt-mono); font-size: 12px; font-weight: 700; line-height: 20px; padding: 0 7px; border-radius: 5px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); white-space: nowrap; }
+.st-hrow .st-id.st-bs { background: var(--nt-line); border-color: var(--nt-line-2); color: var(--nt-ink); } /* backside grey, a step darker than the bracket's band so it reads on white */
+.st-hrow .st-id.st-gf { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
 .st-hrow .st-players { min-width: 0; color: var(--nt-ink); }
 .st-hrow .st-players b { font-weight: 700; color: var(--nt-ok); }
 .st-hrow .st-vs { color: var(--nt-faint); margin-inline: 4px; }

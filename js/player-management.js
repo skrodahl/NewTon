@@ -53,158 +53,132 @@ function removeFromPlayerList(playerName) {
 function updateRegistrationPageLayout() {
     const playerListSection = document.getElementById('playerListSection');
     const tournamentResultsSection = document.getElementById('tournamentResultsSection');
+    if (!playerListSection || !tournamentResultsSection) return;
 
-    // Check if tournament has started
-    const tournamentStarted = tournament && tournament.bracket && matches.length > 0;
+    // Before the draw: players wide, payment and saved players beside them.
+    // After it: the Leaderboard wide, payments locked.
+    const tournamentStarted = !!(tournament && tournament.bracket && matches.length > 0);
+    playerListSection.style.display = tournamentStarted ? 'none' : '';
+    tournamentResultsSection.style.display = tournamentStarted ? '' : 'none';
 
-    if (tournamentStarted) {
-        // Tournament active - show results
-        playerListSection.style.display = 'none';
-        tournamentResultsSection.style.display = 'block';
-    } else {
-        // Setup mode - show player list
-        playerListSection.style.display = 'block';
-        tournamentResultsSection.style.display = 'none';
+    const cols = document.getElementById('registrationCols');
+    if (cols) cols.classList.toggle('rg-running', tournamentStarted);
+    const addRow = document.getElementById('playerAddRow');
+    if (addRow) addRow.hidden = tournamentStarted || !tournament;
+    const hint = document.getElementById('registrationPlayersHint');
+    if (hint) hint.textContent = !tournament ? '' : tournamentStarted ? 'payments locked' : 'click a player to toggle paid';
+    const subtitle = document.getElementById('registrationSubtitle');
+    if (subtitle) {
+        subtitle.textContent = !tournamentStarted ? 'Add the players, and mark who has paid.'
+            : tournament.status === 'completed' ? 'The tournament is over. Click a player in the Leaderboard to correct statistics.'
+            : 'The bracket is drawn: payments are locked, and the Leaderboard is live.';
     }
+    updatePlayerCount();
 }
 
-// RENDER PLAYER LIST
+/**
+ * Fill the Registration page's next step: what to do now and the button for it. Before
+ * the draw it follows the paid count against the formats' player limits; after it, the
+ * matches still to play.
+ * @returns {void}
+ */
+function renderRegistrationNext() {
+    const title = document.getElementById('registrationNextTitle');
+    const hint = document.getElementById('registrationNextHint');
+    const btn = document.getElementById('registrationNextBtn');
+    if (!title || !hint || !btn) return;
+
+    const paid = players.filter(p => p.paid).length;
+    const unpaid = players.length - paid;
+    const started = !!(tournament && tournament.bracket && matches.length > 0);
+    const formats = typeof getVisibleFormats === 'function' ? getVisibleFormats() : [];
+    const minPlayers = formats.length ? Math.min(...formats.map(f => f.minPlayers)) : 4;
+    const maxPlayers = formats.length ? Math.max(...formats.map(f => f.maxPlayers)) : 32;
+
+    let text = ['Draw the bracket', `Only paid players go into the bracket. ${unpaid ? `${unpaid} still unpaid.` : 'Everyone has paid.'}`];
+    let button = ['Open bracket →', "showPage('tournament')"];
+    let enabled = true;
+    if (!tournament) {
+        text = ['No tournament loaded', 'Create or load one on the Setup page.'];
+        button = ['Go to Setup →', "showPage('setup')"];
+    } else if (started && tournament.status === 'completed') {
+        text = ['Tournament completed', 'Final standings are in the Leaderboard.'];
+    } else if (started) {
+        const toGo = matches.filter(m => !m.completed).length;
+        const live = matches.filter(m => getMatchState(m) === 'live').length;
+        text = ['Run the matches', `${toGo} match${toGo === 1 ? '' : 'es'} to go${live ? `, ${live} being played now` : ''}.`];
+    } else if (paid < minPlayers) {
+        const needed = minPlayers - paid;
+        text = [`Register at least ${minPlayers} paid players`, `${needed} more paid player${needed > 1 ? 's' : ''} needed before the draw.`];
+        enabled = false;
+    } else if (paid > maxPlayers) {
+        text = ['Too many paid players', `A bracket holds at most ${maxPlayers} players, and ${paid} have paid.`];
+        enabled = false;
+    }
+
+    title.textContent = text[0];
+    hint.textContent = text[1];
+    btn.textContent = button[0];
+    btn.setAttribute('onclick', button[1]);
+    btn.disabled = !enabled;
+}
+
+/**
+ * Fill the Registration page's Saved players: the saved names not in this tournament, as
+ * chips. Click a name to add the player; × deletes the name from the saved list.
+ * @returns {void}
+ */
 function renderPlayerList() {
     const playerList = getPlayerList();
     const container = document.getElementById('playerListContainer');
     const countSpan = document.getElementById('playerListCount');
+    if (!container) return;
 
-    // Update header
-    countSpan.textContent = 'Saved Players';
+    const tournamentPlayerNames = new Set(players.map(p => p.name.toLowerCase()));
+    const availablePlayers = playerList
+        .filter(name => !tournamentPlayerNames.has(name.toLowerCase()))
+        .sort((a, b) => a.toLowerCase().localeCompare(b.toLowerCase()));
 
-    // Check if no players
+    if (countSpan) countSpan.textContent = availablePlayers.length ? `${availablePlayers.length} not in this tournament` : '';
+
     if (playerList.length === 0) {
-        container.innerHTML = '<p style="padding: 20px; text-align: center; color: #6b7280;">No players yet. Add players above to build your list.</p>';
+        container.innerHTML = '<div class="st-empty"><span>No saved players yet. Everyone you add is saved here for next time.</span></div>';
         return;
     }
-
-    // Sort player list alphabetically (case-insensitive)
-    const sortedPlayerList = [...playerList].sort((a, b) =>
-        a.toLowerCase().localeCompare(b.toLowerCase())
-    );
-
-    // Get current tournament players for comparison
-    const tournamentPlayerNames = players.map(p => p.name.toLowerCase());
-
-    // Separate players into two groups
-    const availablePlayers = sortedPlayerList.filter(name =>
-        !tournamentPlayerNames.includes(name.toLowerCase())
-    );
-    const inTournamentPlayers = sortedPlayerList.filter(name =>
-        tournamentPlayerNames.includes(name.toLowerCase())
-    );
-
-    // Sort "In Tournament" players: unpaid first, then paid (both alphabetically within groups)
-    inTournamentPlayers.sort((a, b) => {
-        const playerA = players.find(p => p.name.toLowerCase() === a.toLowerCase());
-        const playerB = players.find(p => p.name.toLowerCase() === b.toLowerCase());
-
-        const paidA = playerA?.paid || false;
-        const paidB = playerB?.paid || false;
-
-        // If payment status differs, unpaid comes first (false < true)
-        if (paidA !== paidB) {
-            return paidA ? 1 : -1;
-        }
-
-        // If same payment status, sort alphabetically
-        return a.toLowerCase().localeCompare(b.toLowerCase());
-    });
+    if (availablePlayers.length === 0) {
+        container.innerHTML = '<div class="st-empty"><span>Everyone on the list is in the tournament.</span></div>';
+        return;
+    }
 
     // Per-render lookup: click handlers reference entries by numeric index so a
     // player's name is never passed through an inline handler string. (HTML-escaping
     // a name does not make it safe inside onclick="fn('…')" — see escapeHtml note.)
     const cardActions = [];
-
-    // Helper function to render player cards
-    const renderPlayerCard = (playerName, isInTournament) => {
-        const itemClass = isInTournament ? 'player-list-item in-tournament' : 'player-list-item';
-        const idx = cardActions.push({ name: playerName, action: isInTournament ? 'remove' : 'add' }) - 1;
-
-        // Only show delete button for available players (not in tournament)
-        const deleteButton = !isInTournament
-            ? `<button class="player-list-delete-btn" data-pl-delete="${idx}" title="Remove from saved players">×</button>`
-            : '';
-
-        // Add "(Paid)" indicator for players in tournament who have paid
-        let displayName = escapeHtml(playerName);
-        if (isInTournament) {
-            const player = players.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-            if (player && player.paid) {
-                displayName = `${escapeHtml(playerName)} <span style="font-weight: normal; font-size: 13px; color: #059669;">(Paid)</span>`;
-            }
-        }
-
-        return `
-            <div class="${itemClass}" data-pl-idx="${idx}" style="cursor: pointer;">
-                <div class="player-list-item-name">
-                    <span>${displayName}</span>
-                </div>
-                <div class="player-list-item-actions">
-                    ${deleteButton}
-                </div>
-            </div>
-        `;
-    };
-
-    // Build HTML with two sections
-    let html = '';
-
-    // Available Players section
-    html += '<div class="saved-players-section">';
-    html += '<h4 class="saved-players-section-header">Available Players <span style="font-weight: normal; font-size: 13px; color: #6b7280;">(Click to add player to tournament)</span></h4>';
-    html += '<div class="player-list-items">';
-    if (availablePlayers.length === 0) {
-        html += '<p style="padding: 20px; text-align: center; color: #6b7280; grid-column: 1 / -1;">All players added to tournament</p>';
-    } else {
-        html += availablePlayers.map(name => renderPlayerCard(name, false)).join('');
-    }
-    html += '</div></div>';
-
-    // In Tournament section
-    html += '<div class="saved-players-section">';
-    html += '<h4 class="saved-players-section-header">In Tournament <span style="font-weight: normal; font-size: 13px; color: #6b7280;">(Click to remove player from tournament)</span></h4>';
-    html += '<div class="player-list-items">';
-    if (inTournamentPlayers.length === 0) {
-        html += '<p style="padding: 20px; text-align: center; color: #6b7280; grid-column: 1 / -1;">No players added yet</p>';
-    } else {
-        html += inTournamentPlayers.map(name => renderPlayerCard(name, true)).join('');
-    }
-    html += '</div></div>';
-
-    container.innerHTML = html;
+    const canAdd = !!tournament;
+    container.innerHTML = availablePlayers.map(name => {
+        const idx = cardActions.push({ name }) - 1;
+        const safe = escapeHtml(name);
+        return `<span class="rg-chip"><button type="button" class="rg-chip-add" data-pl-idx="${idx}"${canAdd ? ` title="Add ${safe} to the tournament"` : ' disabled'}>${safe}</button><button type="button" class="rg-chip-del" data-pl-delete="${idx}" title="Delete ${safe} from saved players" aria-label="Delete ${safe} from saved players">×</button></span>`;
+    }).join('');
 
     // One delegated click listener (attached once). Reads the numeric index from the
-    // clicked card/button and dispatches to the name-based handlers via the current
-    // render's lookup — no user text is ever placed in an inline handler.
+    // clicked button and dispatches via the current render's lookup — no user text is
+    // ever placed in an inline handler.
     renderPlayerList._cardActions = cardActions;
     if (!container._plDelegated) {
         container._plDelegated = true;
         container.addEventListener('click', (e) => {
             const actions = renderPlayerList._cardActions || [];
-
-            const delBtn = e.target.closest('.player-list-delete-btn[data-pl-delete]');
+            const delBtn = e.target.closest('[data-pl-delete]');
             if (delBtn) {
-                e.stopPropagation();
                 const entry = actions[parseInt(delBtn.getAttribute('data-pl-delete'), 10)];
                 if (entry) deleteFromPlayerList(entry.name);
                 return;
             }
-
-            const card = e.target.closest('[data-pl-idx]');
-            if (!card) return;
-            const entry = actions[parseInt(card.getAttribute('data-pl-idx'), 10)];
-            if (!entry) return;
-            if (entry.action === 'add') {
-                addPlayerFromList(entry.name);
-            } else {
-                removePlayerFromTournament(entry.name);
-            }
+            const addBtn = e.target.closest('[data-pl-idx]');
+            if (!addBtn || addBtn.disabled) return;
+            const entry = actions[parseInt(addBtn.getAttribute('data-pl-idx'), 10)];
+            if (entry) addPlayerFromList(entry.name);
         });
     }
 }
@@ -249,25 +223,6 @@ function addPlayerFromList(playerName) {
     renderPlayerList();
 
     console.log(`[Player List] Added ${playerName} to tournament from Player List`);
-}
-
-// REMOVE PLAYER FROM TOURNAMENT (via Player List tab)
-function removePlayerFromTournament(playerName) {
-    const player = players.find(p => p.name.toLowerCase() === playerName.toLowerCase());
-    if (!player) return;
-
-    // Warn if removing a paid player
-    if (player.paid) {
-        if (!confirm(`Remove paid player "${playerName}" from tournament?\n\nThis will remove them from the current tournament but keep them in Saved Players.`)) {
-            return;
-        }
-    }
-
-    // Use existing removePlayer function
-    removePlayer(player.id);
-
-    // Re-render Player List to show updated state
-    renderPlayerList();
 }
 
 // DELETE FROM PLAYER LIST
@@ -460,14 +415,6 @@ function addPlayer() {
     // Re-render Player List to show updated state
     renderPlayerList();
 
-    // HELP SYSTEM INTEGRATION
-    const paidPlayers = players.filter(p => p.paid).length;
-    if (paidPlayers === 4 && !tournament.bracket && typeof showHelpHint === 'function') {
-        showHelpHint('You now have enough players to generate a bracket! Go to Tournament page.', 4000);
-    } else if (paidPlayers < 4 && typeof showHelpHint === 'function') {
-        const needed = 4 - paidPlayers;
-        showHelpHint(`Need ${needed} more paid player${needed > 1 ? 's' : ''} to generate bracket.`, 3000);
-    }
 }
 
 /**
@@ -530,11 +477,6 @@ function togglePaid(playerId) {
         // Re-render Player List to show updated payment status and re-sort
         renderPlayerList();
 
-        // HELP SYSTEM INTEGRATION
-        const paidPlayers = players.filter(p => p.paid).length;
-        if (paidPlayers === 4 && !tournament.bracket && typeof showHelpHint === 'function') {
-            showHelpHint('Great! You now have 4 paid players. Ready to generate bracket!', 4000);
-        }
     }
 }
 
@@ -635,49 +577,34 @@ function closeStatsModal() {
 
 function updatePlayersDisplay() {
     const container = document.getElementById('playersContainer');
-    
-    if (players.length === 0) {
-        container.innerHTML = '<p style="text-align: center; color: #666;">No players added yet</p>';
-        return;
-    }
+    if (!container) return;
 
-    // Sort players alphabetically by name (case-insensitive, first character)
-    const sortedPlayers = [...players].sort((a, b) => {
-        const nameA = a.name.toLowerCase();
-        const nameB = b.name.toLowerCase();
-        return nameA.localeCompare(nameB);
-    });
-
- const html = sortedPlayers.map(player => {
-        // Only show remove button for unpaid players
-        const removeButton = !player.paid
-            ? `<button class="btn-small btn-danger" onclick="event.stopPropagation(); removePlayer(${player.id})">×</button>`
-            : '';
-
-        return `
-            <div class="player-card ${player.paid ? 'paid' : 'unpaid'}" onclick="togglePaid(${player.id})">
-                <div class="player-info">
-                    <div class="player-name">${escapeHtml(player.name)}</div>
-                    <div class="player-status">${player.paid ? 'Paid' : 'Unpaid'}</div>
-                </div>
-                <div class="player-actions">
-                    ${removeButton}
-                </div>
-            </div>
-        `;
-    }).join('');
-
-    container.innerHTML = html;
-
-    const tournamentStarted = tournament && tournament.bracket && matches.length > 0;
+    const tournamentStarted = !!(tournament && tournament.bracket && matches.length > 0);
     const lateRegBtn = document.getElementById('lateRegBtnContainer');
     if (lateRegBtn) {
         lateRegBtn.innerHTML = tournamentStarted
-            ? `<div style="text-align: center; margin-top: 16px; padding-top: 12px; border-top: 1px solid #e5e7eb;">
-                <button class="btn btn-warning" onclick="showLateRegInfoModal()">Player arrived late?</button>
-               </div>`
+            ? '<span>Someone arrived after the draw?</span><button type="button" class="st-link" onclick="showLateRegInfoModal()">Player arrived late?</button>'
             : '';
     }
+
+    if (players.length === 0) {
+        container.innerHTML = `<div class="st-empty st-small"><span>${tournament ? 'No players yet. Add them above, or from Saved players.' : 'No tournament loaded.'}</span></div>`;
+        return;
+    }
+
+    // Alphabetical (case-insensitive). Before the draw a row toggles paid and an unpaid
+    // player can be removed; after it the list is locked, so rows get neither.
+    const sortedPlayers = [...players].sort((a, b) => a.name.toLowerCase().localeCompare(b.name.toLowerCase()));
+    container.innerHTML = sortedPlayers.map(player => {
+        const pill = player.paid
+            ? (tournamentStarted ? '' : '<span class="rg-paid rg-yes">Paid</span>')
+            : '<span class="rg-paid rg-no">Unpaid</span>';
+        const removeButton = !player.paid && !tournamentStarted
+            ? `<button type="button" class="rg-x" title="Remove ${escapeHtml(player.name)}" aria-label="Remove ${escapeHtml(player.name)}" onclick="event.stopPropagation(); removePlayer(${player.id})">×</button>`
+            : '';
+        const toggle = tournamentStarted ? '' : ` onclick="togglePaid(${player.id})" title="Click to mark ${player.paid ? 'unpaid' : 'paid'}"`;
+        return `<div class="rg-prow"${toggle}><span class="rg-name">${escapeHtml(player.name)}</span><span class="rg-right">${pill}${removeButton}</span></div>`;
+    }).join('');
 }
 
 function showLateRegInfoModal() {
@@ -686,19 +613,31 @@ function showLateRegInfoModal() {
     const firstPara = document.getElementById('lateRegInfoFirstPara');
     if (firstPara) {
         firstPara.innerHTML = developerMode
-            ? 'To register a late arrival, open the <strong>Developer Console</strong> by clicking the version number in the lower-right corner of the Tournament Bracket.'
-            : 'To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open it by clicking the version number in the lower-right corner of the Tournament Bracket.';
+            ? 'To register a late arrival, open the <strong>Developer Console</strong> from the <strong>Console</strong> link in the Tournament Bracket header.'
+            : 'To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open it from the <strong>Console</strong> link in the Tournament Bracket header.';
     }
 
     pushDialog('lateRegInfoModal', null, true);
 }
 
+/**
+ * Update the Registration page's Players / Paid / Unpaid counts and its next step.
+ * Called whenever players or their payments change, and when the page is shown.
+ * @returns {void}
+ */
 function updatePlayerCount() {
     const totalPlayers = players.length;
     const paidPlayers = players.filter(p => p.paid).length;
-
-    document.getElementById('playerCount').textContent = totalPlayers;
-    document.getElementById('paidCount').textContent = paidPlayers;
+    const total = document.getElementById('playerCount');
+    const paid = document.getElementById('paidCount');
+    const unpaid = document.getElementById('unpaidCount');
+    if (total) total.textContent = totalPlayers;
+    if (paid) paid.textContent = paidPlayers;
+    if (unpaid) {
+        unpaid.textContent = totalPlayers - paidPlayers;
+        unpaid.classList.toggle('rg-warn', totalPlayers > paidPlayers);
+    }
+    renderRegistrationNext();
 }
 
 function clearAllPlayers() {

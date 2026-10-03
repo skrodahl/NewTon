@@ -67,68 +67,49 @@ const HELP_CONTENT = {
 
     // Registration Page Help
     registration: {
-        title: "Player Registration & Management",
-        overview: "Add players, manage payment status, and access saved players or tournament results based on tournament state.",
+        title: "Player Registration",
+        overview: "Add the players and mark who has paid. Once the bracket is drawn, the page shows the Leaderboard.",
         sections: {
             adding: {
                 title: "Adding Players",
                 content: `
-                    <p><strong>Quick Add:</strong></p>
                     <ol>
-                        <li>Type player name in the "Add New Player" field</li>
-                        <li>Press Enter or click "Add Player"</li>
-                        <li>Click player card to toggle paid status (Paid/Unpaid)</li>
-                        <li>Only paid players can be removed (× button hidden for paid players)</li>
+                        <li>Type a name in the field at the top of <strong>Players</strong></li>
+                        <li>Press Enter or click <strong>Add player</strong></li>
+                        <li>Click a player to switch between <strong>Paid</strong> and <strong>Unpaid</strong></li>
+                        <li><strong>×</strong> removes an unpaid player (mark a paid player unpaid first)</li>
                     </ol>
-                    <p><strong>Saved Players (During Setup):</strong></p>
-                    <ul>
-                        <li><strong>Available Players:</strong> Click any player to add to tournament</li>
-                        <li><strong>In Tournament:</strong> Click to remove from tournament (warns if paid)</li>
-                        <li>Players automatically move between sections when added/removed</li>
-                        <li>Click <strong>×</strong> on Available Players to permanently delete from saved list</li>
-                        <li>Cannot delete players currently in tournament</li>
-                        <li>Saved Players automatically switches to Tournament Results when bracket is generated</li>
-                    </ul>
-                    <p><strong>Import Saved Players:</strong></p>
-                    <ul>
-                        <li>Import from tournament export file to quickly rebuild player roster</li>
-                        <li>Saved Players persist across tournaments for easy reuse</li>
-                    </ul>
-                    <p><strong>Important:</strong> Only paid players are included in the tournament bracket.</p>
-                    <p><strong>Minimum Players:</strong> You need at least 4 paid players to generate an 8-player bracket.</p>
-                    <p><strong>Payment QR Code:</strong> Display your payment information (Swish, bank account, etc.) by adding payment.png to the images/ folder. The QR code appears in the top-right corner of the registration page.</p>
+                    <p><strong>Next step</strong> shows the player, paid and unpaid counts, and what's needed before the draw. <strong>Open bracket</strong> works once there are at least 4 paid players. Only paid players go into the bracket.</p>
+                    <p><strong>Saved players:</strong> Everyone you add is saved for next time. The list shows the saved players who aren't in this tournament: click a name to add them, <strong>×</strong> to delete them from the list.</p>
+                    <p><strong>Import saved players:</strong> Rebuild the list from a tournament export file.</p>
+                    <p><strong>Payment QR code:</strong> Add <code>payment.png</code> to the <code>images/</code> folder (Swish, bank details, etc.) and it is shown next to the players. Without it, the panel is hidden.</p>
                 `
             },
             statistics: {
                 title: "Player Statistics",
                 content: `
-                    <p><strong>Tracking Performance:</strong></p>
-                    <p>Click any player name to open their statistics panel and record:</p>
+                    <p>Once the bracket is drawn, click a player in the <strong>Leaderboard</strong> to record or correct:</p>
                     <ul>
                         <li><strong>Short Legs:</strong> Legs finished within the dart count set by Short Leg Threshold on the Config page (default 21)</li>
                         <li><strong>High Outs:</strong> Finishing scores of 101+ points</li>
                         <li><strong>180s:</strong> Maximum dart scores</li>
                         <li><strong>Tons:</strong> Any score of 100+ points</li>
                     </ul>
-                    <p><strong>💡 Tip:</strong> Statistics affect final point calculations and can be edited during matches.</p>
+                    <p>Statistics count towards the points.</p>
+                    <p><strong>Player arrived late?</strong> Under the player list once the bracket is drawn. It explains how to register a late arrival from the Developer Console.</p>
                 `
             },
             results: {
-                title: "Live Results Table",
+                title: "Leaderboard",
                 content: `
-                    <p><strong>Understanding the Results:</strong></p>
                     <ul>
                         <li><strong>Rank:</strong> Tournament placement (1st, 2nd, 3rd, etc.)</li>
-                        <li><strong>Points:</strong> Total calculated based on placement + achievements</li>
-                        <li><strong>Legs Won/Lost:</strong> Match performance from completed games</li>
+                        <li><strong>Points:</strong> Placement plus achievements, using the points in Global Settings</li>
+                        <li><strong>Legs Won/Lost:</strong> From completed matches</li>
                     </ul>
-                    <p><strong>Export Results:</strong></p>
-                    <ul>
-                        <li><strong>Export CSV:</strong> Save results table for record keeping or league management</li>
-                        <li><strong>Export JSON:</strong> Export results and tournament match history in JSON format</li>
-                    </ul>
-                    <p><strong>Note:</strong> Rankings update automatically as matches are completed.</p>
-                    <p><strong>💡 Tip:</strong> Use Export JSON for automated import into external tournament statistics websites and league management systems.</p>
+                    <p><strong>Export CSV:</strong> The Leaderboard as a spreadsheet, for records or league management.</p>
+                    <p><strong>Export JSON:</strong> Results and match history, for importing into other systems.</p>
+                    <p>Rankings update as matches are completed.</p>
                 `
             }
         }
