@@ -2469,7 +2469,7 @@ function commandResetAllConfig() {
     comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">User Interface Settings:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
     comparisonHtml += `<li>Winner Confirmation: ${currentConfig.ui?.confirmWinnerSelection ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.confirmWinnerSelection ? 'Enabled' : 'Disabled'}</li>`;
     comparisonHtml += `<li>Auto-open Match Controls: ${currentConfig.ui?.autoOpenMatchControls ? 'Yes' : 'No'} → ${defaultConfig.ui.autoOpenMatchControls ? 'Yes' : 'No'}</li>`;
-    comparisonHtml += `<li>Developer Analytics: ${currentConfig.ui?.developerMode ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.developerMode ? 'Enabled' : 'Disabled'}</li>`;
+    comparisonHtml += `<li>Developer Console: ${currentConfig.ui?.developerMode ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.developerMode ? 'Enabled' : 'Disabled'}</li>`;
     comparisonHtml += `<li>Referee Suggestions: ${currentConfig.ui?.refereeSuggestionsLimit || 10} → ${defaultConfig.ui.refereeSuggestionsLimit}</li>`;
     comparisonHtml += '</ul></div>';
 

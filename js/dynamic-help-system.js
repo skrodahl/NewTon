@@ -191,8 +191,8 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Developer Console:</strong></p>
                     <ul>
-                        <li><strong>Enable in Config page:</strong> Turn on "Enable Developer Analytics"</li>
-                        <li><strong>Access:</strong> Click version number (bottom-right watermark) on Tournament page</li>
+                        <li><strong>Enable in Config page:</strong> Turn on "Enable Developer Console"</li>
+                        <li><strong>Access:</strong> Click <strong>Console</strong> in the Tournament page header (after Analytics)</li>
                         <li><strong>Features:</strong> Real-time statistics, validation checks, lane usage monitoring, transaction management, and developer commands</li>
                     </ul>
                     <p><strong>💡 Tip:</strong> Use the top-left navigation buttons to quickly access other pages without leaving the bracket view.</p>
@@ -378,17 +378,17 @@ const HELP_CONTENT = {
                         <li><strong>Winner Confirmation:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
                         <li><strong>Match Controls Auto-Open:</strong> Automatically show Command Center when entering Tournament page</li>
                     </ul>
-                    <p><strong>Developer Analytics:</strong></p>
+                    <p><strong>Developer Console:</strong></p>
                     <ul>
-                        <li><strong>Enable Developer Analytics:</strong> Show advanced diagnostics and developer tools
+                        <li><strong>Enable Developer Console:</strong> Show advanced diagnostics and developer tools
                             <ul>
-                                <li>When enabled, click version number in Tournament page to open Developer Console</li>
+                                <li>When enabled, click <strong>Console</strong> in the Tournament page header to open the Developer Console</li>
                                 <li><strong>Real-time statistics:</strong> Transaction health, match states, player counts, lane usage, localStorage usage</li>
                                 <li><strong>Lane Usage monitoring:</strong> Track dartboard lane availability, detect conflicts in LIVE matches (critical), and READY matches (preventive warnings)</li>
                                 <li><strong>Validation checks:</strong> Lane conflicts, referee conflicts, match state integrity, transaction limits, player IDs, progression integrity</li>
                                 <li><strong>Developer commands:</strong> Re-render bracket, recalculate rankings, refresh dropdowns, validate everything, manage transaction log</li>
                                 <li><strong>Transaction management:</strong> Smart pruning to free up storage space while preserving tournament data</li>
-                                <li>Hidden developer tool - no visual changes when enabled, only version number becomes clickable</li>
+                                <li>Developer tool - the only visible change is the Console link in the Tournament page header</li>
                                 <li>Auto-refreshes every 2 seconds for real-time monitoring during tournaments</li>
                             </ul>
                         </li>

@@ -758,6 +758,9 @@ const BracketView = (() => {
         config.ui = config.ui || {};
         config.ui.bracketFinals = value === 'middle' ? 'middle' : 'right';
         saveGlobalConfig();
+        // One setting: keep the Config page's control in step, so saving there doesn't undo this
+        const configControl = document.getElementById('bracketFinals');
+        if (configControl) configControl.value = config.ui.bracketFinals;
         updateHeader();
         if (isActive()) render();
     }

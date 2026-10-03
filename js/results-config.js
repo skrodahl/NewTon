@@ -43,7 +43,8 @@ const DEFAULT_CONFIG = {
         autoOpenMatchControls: true,
         defaultPaid: false,
         developerMode: false,
-        refereeSuggestionsLimit: 10
+        refereeSuggestionsLimit: 10,
+        bracketFinals: 'right'
     },
     chalker: {
         handover: 'qr'
@@ -177,6 +178,7 @@ function applyConfigToUI() {
         safeSetChecked('defaultPaid', config.ui.defaultPaid);
         safeSetChecked('developerMode', config.ui.developerMode);
         safeSetValue('refereeSuggestionsLimit', config.ui.refereeSuggestionsLimit);
+        safeSetValue('bracketFinals', config.ui.bracketFinals === 'middle' ? 'middle' : 'right');
     }
 
     // Server configuration
@@ -498,6 +500,8 @@ function saveUIConfiguration() {
     config.ui.defaultPaid = defaultPaidElement ? defaultPaidElement.checked : false;
     config.ui.developerMode = developerModeElement ? developerModeElement.checked : false;
     config.ui.refereeSuggestionsLimit = refereeSuggestionsElement ? parseInt(refereeSuggestionsElement.value) || 10 : 10;
+    const bracketFinalsElement = document.getElementById('bracketFinals');
+    if (bracketFinalsElement) config.ui.bracketFinals = bracketFinalsElement.value === 'middle' ? 'middle' : 'right';
 
     // Formats to hide when starting a tournament — stored as the unticked ones, so a
     // format added in a future release is shown by default. Only written when the
@@ -534,9 +538,9 @@ function saveUIConfiguration() {
         loadRecentTournaments();
     }
 
-    // Refresh watermark if on Tournament page to update version number clickability
-    if (typeof updateTournamentWatermark === 'function') {
-        updateTournamentWatermark();
+    // Redraw the bracket so the finals position and the header's Console link follow the new settings
+    if (typeof renderBracket === 'function' && typeof tournament !== 'undefined' && tournament && tournament.bracket) {
+        renderBracket();
     }
 
     alert('✓ UI settings saved successfully!');
