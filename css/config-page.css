@@ -17,7 +17,7 @@
 .cfg-toc button:hover { background: var(--nt-surface); }
 .cfg-toc button:focus { outline: none; }
 .cfg-toc button:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 1px; }
-.cfg-toc button.on { background: var(--nt-surface); color: var(--nt-ink); font-weight: 700; box-shadow: inset 3px 0 0 var(--nt-ink); }
+.cfg-toc button.on { background: var(--nt-surface); } /* the same as hover */
 .cfg-toc .cfg-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--nt-accent); visibility: hidden; }
 .cfg-toc button.dirty .cfg-dot { visibility: visible; }
 
