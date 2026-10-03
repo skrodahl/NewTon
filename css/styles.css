@@ -391,7 +391,6 @@ body {
 
 /* Remove blue focus outline from buttons, except modal default buttons */
 .btn:focus:not([style*="boxShadow"]),
-.zoom-btn:focus,
 .nav-btn:focus {
   outline: none;
 }
@@ -399,7 +398,6 @@ body {
 /* Press feedback — subtle tactile shift on click */
 .btn:active,
 .nav-btn:active,
-.zoom-btn:active,
 .help-btn:active,
 .cc-match-action-btn:active,
 .achievement-export-btn:active,
@@ -466,226 +464,12 @@ body {
   margin-top: 0; /* Remove top margin since it's now inline */
 }
 
-/* Bracket container (light) */
-.bracket-container {
-  position: relative;
-  width: 100%;
-  height: 100vh;
-  background: #f5f5f5;
-  border: 8px solid rgba(17,24,39,0.15);
-  border-radius: 10px;
-  overflow: hidden;
-  box-shadow: 0 4px 25px rgba(0,0,0,0.25);
-}
-
-.bracket-viewport {
-  width: 100%;
-  height: 100%;
-  overflow: hidden;
-  position: relative;
-  cursor: grab;
-  /* Prevent text selection on the viewport itself */
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.bracket-viewport:active { cursor: grabbing; }
-
-.bracket-canvas {
-  position: relative;
-  width: 3000px;
-  height: 3000px;
-  background: #f5f5f5;
-  transform-origin: 0 0;
-  will-change: transform;
-}
-
-/* Bracket controls - CORRECTED 2x2 grid layout */
-.bracket-controls {
-  position: absolute;
-  top: 20px;
-  left: 0;
-  right: 0;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  z-index: 100;
-  pointer-events: none;
-}
-
-.bracket-controls-middle-left {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-.bracket-controls-middle-right {
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-/* Wide buttons for middle-left too */
-.bracket-controls-middle-left .zoom-btn {
-  width: 150px;
-  font-size: 14px;
-  font-weight: 700;
-}
-
-.bracket-controls-top,
-.bracket-controls-middle,
-.bracket-controls-bottom {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  margin: 0 20px;
-  pointer-events: none; /* Changed from auto to none */
-}
-
-/* Only the button groups should capture pointer events, not the full-width containers */
-.bracket-controls-top-left,
-.bracket-controls-top-right,
-.bracket-controls-middle-left,
-.bracket-controls-middle-right,
-.bracket-controls-bottom-left,
-.bracket-controls-bottom-right {
-  pointer-events: auto; /* Only these specific button groups capture events */
-}
-
-.bracket-controls-top-left,
-.bracket-controls-top-right,
-.bracket-controls-middle-right,
-.bracket-controls-bottom-left,
-.bracket-controls-bottom-right {
-  display: flex;
-  gap: 10px;
-  align-items: flex-start;
-}
-
-/* Keep the middle row aligned to the right */
-.bracket-controls-middle {
-  justify-content: space-between;
-}
-
-/* Prevent text selection during canvas dragging */
-.bracket-canvas,
-.bracket-canvas * {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-/* Maintain grab cursor consistently across the canvas */
-.bracket-canvas {
-  cursor: inherit;
-}
-
-/* Override text selection for watermarks specifically */
-/* Prevent text selection on all watermark elements */
-.bracket-watermarks,
-.bracket-watermarks * {
-  user-select: none !important;
-  -webkit-user-select: none !important;
-  -moz-user-select: none !important;
-  -ms-user-select: none !important;
-}
-
-/* Disable pointer events by default, will be overridden for specific elements */
-.bracket-watermarks {
-  pointer-events: none;
-}
-
-/* Prevent text selection within match cards during drag operations */
-.bracket-match * {
-  user-select: none;
-  -webkit-user-select: none;
-  -moz-user-select: none;
-  -ms-user-select: none;
-}
-
-.zoom-btn {
-  width: 45px;
-  height: 45px;
-  border: none;
-  border-radius: 0;
-  background: rgba(39, 39, 39, 0.95);
-  color: #ffffff;
-  font-size: 18px;
-  font-weight: 800;
-  cursor: pointer;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 0.2s ease;
-  box-shadow: 0 2px 10px rgba(0,0,0,0.35);
-  white-space: nowrap;
-}
-
-.zoom-btn:hover {
-  background: rgba(17,24,39,1);
-  color: white;
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
-}
-
-/* Subtle color tints for key tournament buttons */
-.zoom-btn.match-controls-btn {
-  background: rgba(22, 101, 52, 0.9); /* Subtle green tint */
-}
-.zoom-btn.match-controls-btn:hover {
-  background: rgba(22, 101, 52, 1);
-  transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(0,0,0,0.35);
-}
-
-.bracket-controls-top-left .zoom-btn,
-.bracket-controls-middle-left .zoom-btn,
-.bracket-controls-bottom-left .zoom-btn {
-  width: 150px;
-  font-size: 14px;
-  font-weight: 700;
-}
-
 /* Navigation button layout with left-aligned icon/arrow and centered text */
 .nav-btn {
   position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
-}
-
-.nav-arrow,
-.nav-icon {
-  position: absolute;
-  left: 12px;
-  width: 20px;
-  text-align: center;
-}
-
-.nav-text {
-  flex: 1;
-  text-align: center;
-  padding-left: 32px; /* Account for icon space (12px left + 20px icon width) */
-  padding-right: 12px; /* Balance the padding */
-}
-
-/* Bracket watermarks */
-.bracket-watermarks {
-  position: absolute;
-  bottom: 0;
-  left: 20px;
-  right: 20px;
-  height: 45px;
-  z-index: 100;
-  pointer-events: none;
-  display: flex;
-  align-items: center;
-  overflow: visible;
 }
 
 .watermark-left {
@@ -696,276 +480,9 @@ body {
   color: #696969;
 }
 
-.watermark-center {
-  position: absolute;
-  left: 50%;
-  bottom: 8px;
-  transform: translateX(-50%);
-  font-family: 'Inter';
-  font-size: 16px;
-  font-weight: 500;
-  color: #333333;
-  letter-spacing: normal;
-  transition: all 0.2s ease;
-}
-
-.watermark-center.active {
-  background: rgba(255, 255, 255, 0.85);
-  backdrop-filter: blur(6px);
-  border-radius: 8px;
-  padding: 8px 16px;
-  border: 1px solid rgba(0, 0, 0, 0.12);
-}
-
-.status-line1 {
-  font-weight: 600;
-  margin-bottom: 2px;
-  text-align: center;
-}
-
-.status-line2 {
-  font-weight: 400;
-  font-size: 14px;
-  opacity: 0.85;
-  text-align: center;
-}
-
-#watermark-right {
-  position: absolute;
-  right: -20px;
-  bottom: 0px;
-  font-family: 'Courier New', 'Monaco', 'Menlo', monospace;
-  font-size: 13px !important;
-  font-weight: 400;
-  color: #2c3e50;
-  letter-spacing: 0.5px;
-  background: rgba(255, 255, 255, 0.6);
-  border-left: 1px solid #34495e;
-  border-top: 1px solid #34495e;
-  border-right: none;
-  border-bottom: none;
-  border-radius: 0px;
-  padding: 0;
-  line-height: 1.2;
-  backdrop-filter: blur(6px);
-  width: 336px;
-}
-
-/* CAD Title Block Structure */
-#watermark-right .cad-header-container {
-  display: flex;
-  background: #ecf0f1;
-  border-bottom: 1px solid #34495e;
-}
-
-#watermark-right .cad-header-title {
-  flex: 1;
-  padding: 7px 10px;
-  text-align: left;
-  font-weight: 600;
-  font-size: 12px;
-  color: #2c3e50;
-  letter-spacing: 1px;
-}
-
-#watermark-right .cad-header-clock {
-  width: auto;
-  padding: 7px 10px;
-  text-align: center;
-  font-weight: 600;
-  font-size: 12px;
-  color: #2c3e50;
-  border-left: 1px solid #34495e;
-}
-
-#watermark-right .cad-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr 1fr;
-  grid-template-rows: 36px 36px 36px;
-  border-collapse: collapse;
-}
-
-#watermark-right .cad-cell {
-  padding: 5px 7px;
-  display: flex;
-  align-items: center;
-  font-size: 12px;
-  line-height: 1.1;
-}
-
 /* Internal borders - only where needed for CAD style */
 
 /* Row 1: Format spans two columns, Players on right */
-#watermark-right .cad-format {
-  grid-column: 1 / 3;
-  grid-row: 1;
-  border-right: 1px solid #34495e;
-  border-bottom: 1px solid #34495e;
-}
-
-#watermark-right .cad-players {
-  grid-column: 3;
-  grid-row: 1 / 3;
-  border-bottom: 1px solid #34495e;
-  flex-direction: column;
-  justify-content: center;
-  text-align: center;
-}
-
-/* Row 2: Bracket and Matches separate cells */
-#watermark-right .cad-bracket {
-  grid-column: 1;
-  grid-row: 2;
-  border-right: 1px solid #34495e;
-  border-bottom: 1px solid #34495e;
-  justify-content: center;
-}
-
-#watermark-right .cad-matches {
-  grid-column: 2;
-  grid-row: 2;
-  border-right: 1px solid #34495e;
-  border-bottom: 1px solid #34495e;
-  justify-content: center;
-}
-
-/* Row 3: Date, Version, Status */
-#watermark-right .cad-date {
-  grid-column: 1;
-  grid-row: 3;
-  border-right: 1px solid #34495e;
-  justify-content: center;
-}
-
-#watermark-right .cad-version {
-  grid-column: 2;
-  grid-row: 3;
-  border-right: 1px solid #34495e;
-  justify-content: center;
-  position: relative;
-  z-index: 100;
-}
-
-/* Allow version number to be clickable when cursor is pointer (developer mode enabled) */
-#watermark-right .cad-version[style*="cursor: pointer"] {
-  pointer-events: auto;
-}
-
-#watermark-right .cad-status {
-  position: absolute;
-  bottom: 0;
-  right: 0;
-  width: 112px;
-  height: 36px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 11px;
-  font-weight: 600;
-  color: #e74c3c;
-}
-
-/* Bracket section titles */
-.bracket-title {
-  position: absolute;
-  font-family: 'Inter';
-  font-size: 28px;
-  font-weight: 900;
-  color: rgba(17,24,39,0.35);
-  letter-spacing: 3px;
-  text-transform: uppercase;
-  z-index: 5;
-  text-shadow: 2px 2px 4px rgba(255,255,255,0.8);
-  pointer-events: none;
-}
-.bracket-title.finals {
-  font-size: 24px;
-  color: #ff6b35;
-  text-shadow: 2px 2px 4px rgba(0,0,0,0.1);
-}
-
-/* Match cards (light) */
-.bracket-match {
-  position: absolute;
-  width: 280px;
-  height: 150px;
-  background: #ffffff;
-  border: 2px solid #d1d5db;
-  transition: transform 0.3s ease-out, z-index 0s;
-  transform-origin: center;
-  border-radius: 0;
-  display: flex;
-  flex-direction: column;
-  font-size: 11px;
-  transition: all 0.2s ease;
-  cursor: pointer;
-  z-index: 10;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-  color: #111827;
-}
-
-.bracket-match:hover {
-  border-color: #ff6b35;
-  box-shadow: 0 8px 20px rgba(255,107,53,0.25);
-  transform: translateY(-2px);
-  z-index: 20;
-}
-
-/* Match state styles */
-.bracket-match.match-pending {
-  background: #f8f9fa;
-  border-color: #6b7280;
-  opacity: 0.85;
-}
-.bracket-match.match-pending .match-player {
-  color: #6b7280;
-  cursor: default;
-}
-.bracket-match.match-pending:hover {
-  border-color: #6b7280;
-  transform: none;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-}
-
-.bracket-match.match-ready {
-  background: linear-gradient(135deg, #fff3cd 0%, #ffeaa7 100%);
-  border-color: rgba(240, 196, 25, 0.9);
-  border-width: 3px;
-}
-.bracket-match.match-ready:hover {
-  border-color: rgba(240, 196, 25, 1);
-  box-shadow: 0 8px 22px rgba(240, 196, 25, 0.35);
-}
-
-.bracket-match.match-live,
-.bracket-match.active {
-  background: linear-gradient(135deg, #fff8f0 0%, #ffe8d6 100%);
-  border-color: #ff6b35;
-  border-width: 3px;
-}
-.bracket-match.match-live:hover,
-.bracket-match.active:hover {
-  border-color: #e55a2b;
-  box-shadow: 0 10px 26px rgba(255,107,53,0.45);
-}
-
-/* Disable animation during zoom hover to prevent conflict */
-.bracket-match.zoom-hover {
-  animation: none !important;
-  transform-origin: center;
-}
-
-.bracket-match.match-completed,
-.bracket-match.completed {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  border-color: rgba(22, 101, 52, 1);
-  border-width: 2px;
-}
-.bracket-match.match-completed:hover,
-.bracket-match.completed:hover {
-  border-color: rgba(22, 101, 52, 1);
-  box-shadow: 0 8px 22px rgba(22, 101, 52, 0.32);
-}
 
 /* Match internals */
 .match-header {
@@ -983,102 +500,6 @@ body {
   color: #111827;
 }
 
-.match-info {
-  font-size: 12px;
-  color: #374151;
-}
-
-.match-players {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-}
-
-.match-player {
-  flex: 1;
-  padding: 10px;
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  border-bottom: 1px solid #f3f4f6;
-  transition: background 0.15s ease;
-  cursor: pointer;
-  min-height: 36px;
-  color: #111827;
-}
-.match-player:last-child { border-bottom: none; }
-.match-player:hover { background: rgba(255,107,53,0.08); }
-
-.match-player.disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
-}
-.match-player.disabled:hover { background: none; }
-
-.match-player.winner {
-  background: linear-gradient(135deg, #d4edda 0%, #c3e6cb 100%);
-  font-weight: 800;
-  min-height: 38px;
-}
-
-.match-player.first-throw {
-  border-left: 4px solid #ff6b35;
-  background: rgba(255,107,53,0.06);
-}
-
-.match-player.bye {
-  color: #6b7280;
-  font-style: italic;
-  cursor: default;
-}
-
-.bracket-match.match-completed .match-player.bye,
-.bracket-match.completed .match-player.bye {
-  background: #e8f5e9;
-}
-
-.player-name-short {
-  font-size: 16px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-width: 200px;
-  font-weight: 600;
-  color: #111827;
-}
-
-.player-eliminated {
-  position: relative;
-  color: #b87070;
-  overflow: visible; /* allow ::after line to extend beyond clipped text bounds */
-}
-
-.player-eliminated::after {
-  content: '';
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 50%;
-  border-top: 1.5px solid #555;
-  transform: rotate(-10deg);
-  transform-origin: center;
-}
-
-.awaiting-player {
-  font-style: italic;
-  color: #999;
-  font-weight: 400;
-}
-
-.winner-check {
-  color: #16a34a;
-  font-weight: 900;
-  font-size: 18px;
-  margin-left: 8px;
-  min-width: 20px;
-  text-shadow: 0 1px 2px rgba(0,0,0,0.08);
-}
-
 .match-controls {
   padding: 6px 10px;
   background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
@@ -1091,19 +512,6 @@ body {
   border-radius: 0 0 8px 8px;
   color: #111827;
 }
-
-/* Round indicators */
-.round-indicator {
-  background: #2563eb;
-  color: #ffffff;
-  padding: 2px 6px;
-  border-radius: 10px;
-  font-size: 8px;
-  font-weight: 800;
-}
-.round-indicator.backside { background: #6f42c1; }
-.round-indicator.final   { background: #f59e0b; color: #111827; }
-.round-indicator.grand   { background: #dc2626; animation: glow 2s infinite alternate; }
 
 /* State badges */
 .match-state-badge {
@@ -1121,19 +529,6 @@ body {
 .match-state-badge.ready     { background: #f59e0b; color: #111827; }
 .match-state-badge.live      { background: #ff6b35; animation: pulse 2s infinite; }
 .match-state-badge.completed { background: #16a34a; }
-
-/* Subtle hover glow */
-.bracket-match::before {
-  content: '';
-  position: absolute;
-  inset: -2px;
-  background: linear-gradient(45deg, transparent, rgba(255,107,53,0.12), transparent);
-  border-radius: 12px;
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-.bracket-match:hover::before { opacity: 1; }
 
 /* Config sections */
 .config-section {
@@ -1170,7 +565,6 @@ body {
   flex-direction: column;
   overflow: hidden; /* Prevent content overflow */
 }
-
 
 /* Analytics Modal - Override default modal constraints */
 .analytics-modal-content {
@@ -1358,10 +752,6 @@ body {
   50%  { box-shadow: 0 10px 26px rgba(255,107,53,0.45); transform: translateY(-1px); }
   100% { box-shadow: 0 6px 18px rgba(255,107,53,0.28); }
 }
-@keyframes glow {
-  0%   { text-shadow: 0 0 5px rgba(220,38,38,0.45); }
-  100% { text-shadow: 0 0 20px rgba(220,38,38,0.8), 0 0 30px rgba(220,38,38,0.35); }
-}
 
 /* Footer */
 footer {
@@ -1491,22 +881,6 @@ a:hover { color: #1e40af; }
         transform: translateX(-50%) translateY(0); 
         opacity: 1; 
     }
-}
-
-/* Surgical Undo */
-.winner-check .undo-icon {
-  display: none;
-  color: #065f46; /* Dark cold green */
-  font-weight: bold;
-  font-size: 18px;
-}
-
-.match-player.undoable:hover .winner-check .undo-icon {
-  display: inline;
-}
-
-.match-player.undoable:hover .winner-check .checkmark {
-  display: none;
 }
 
 /* Stats modal should appear above Command Center */
@@ -3054,21 +2428,6 @@ a:hover { color: #1e40af; }
   font-weight: 500;
 }
 
-.setup-page-flex .match-players {
-  font-size: 14px;
-  color: #333333;
-  font-weight: 500;
-  display: block;
-  white-space: nowrap;
-}
-
-.setup-page-flex .match-players span,
-.setup-page-flex .match-players .player-name,
-.setup-page-flex .match-players .match-text {
-  display: inline !important;
-  white-space: nowrap !important;
-}
-
 /* Registration Page Styles */
 .page.registration-page-flex.active {
   display: flex;
@@ -3484,7 +2843,6 @@ a:hover { color: #1e40af; }
 .results-table tbody tr:hover {
   background: #f1f5f9;
 }
-
 
 /* Cell styling */
 .results-table .rank {
@@ -4556,7 +3914,6 @@ a:hover { color: #1e40af; }
     display: none;
 }
 
-
 /* Limit Global Settings — hide all sections except Branding and Point Values */
 .mode-analytics #headerTournamentStatus,
 .mode-analytics #headerTournamentStatusNarrow {
@@ -4581,14 +3938,6 @@ a:hover { color: #1e40af; }
 
 /* Default page — hide Setup in analytics mode, let JS showPage('history') activate Analytics */
 .mode-analytics #setup.page {
-    display: none;
-}
-
-/* Bracket controls — hide tournament management buttons in analytics mode */
-.mode-analytics .bracket-controls-top-left .nav-btn:not(.analytics-back-btn) {
-    display: none;
-}
-.mode-analytics .bracket-controls-middle-left .nav-btn {
     display: none;
 }
 
@@ -4622,12 +3971,6 @@ a:hover { color: #1e40af; }
 @keyframes nw-result-pulse {
     0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
     50%      { box-shadow: 0 0 10px 3px rgba(34, 197, 94, 0.25); }
-}
-
-/* Same state on the bracket card, so it is visible without opening Match Controls. */
-.match-result-waiting {
-    outline: 2px solid #22c55e;
-    outline-offset: 2px;
 }
 
 @media (prefers-reduced-motion: reduce) {
