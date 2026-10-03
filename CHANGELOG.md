@@ -21,6 +21,15 @@
 - About 440 lines of old Setup CSS removed from `styles.css` (Setup layout, Recent Tournaments, match history cards, storage link, Analytics labels, plus unused `.tournament-item` / `.match-result-item` rules).
 - Files changed: `css/setup-page.css` (new), `tournament.html` (Setup markup, stylesheet link), `js/tournament-management.js` (`renderSetupCurrent()` new; `loadRecentTournaments()`, `updateStorageIndicator()`, `updateTournamentStatus()`, `showImportStatus()`, `confirmReset()`, `loadSharedTournaments()`; `toggleSharedTournamentView()` / `toggleLocalTournamentView()` removed), `js/main.js` (`updateMatchHistory()`, `getPlayerProgressionForDisplay()`, `showPage()`), `js/dynamic-help-system.js`, `css/styles.css`.
 
+### One Leaderboard look
+
+- **The Leaderboard dialog** (Leaderboard in the bracket header and Match Controls) **now looks the same as the Registration Leaderboard.** Both were already filled by `updateResultsTable()` with the same rows; only the styling differed.
+  - The table style moved from `css/registration-page.css` (`.rg-lb`) to a new `css/components.css` as `.nt-leaderboard`, used by both.
+  - The dialog is rebuilt on the `.dlg` pattern ("Leaderboard", the table edge to edge, Close), with no exports. Clicking a player still opens the statistics editor.
+  - The dialog stack no longer shows `statisticsModal` as `flex` (a leftover from the old box's centring, which stretched the new dialog to the window height); it is `block` like every other dialog.
+- The old `.results-table` CSS (dark header, stripes) and the dialog's old box rule are removed from `styles.css`; nothing else used them.
+- Files changed: `css/components.css` (new), `css/registration-page.css`, `css/styles.css`, `tournament.html`, `js/main.js` (`pushDialog`), `js/results-config.js` (empty row).
+
 ### Player Registration redesign
 
 - **The Registration page is rebuilt in the new design language** (mockup: https://claude.ai/artifact/TnxY3JWiqVPWJ7CpoPUXAU). It behaves the same way; the registration process itself will be reworked later.

@@ -13,6 +13,7 @@
     <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/design-tokens.css">
+    <link rel="stylesheet" href="css/components.css">
     <link rel="stylesheet" href="css/config-page.css">
     <link rel="stylesheet" href="css/setup-page.css">
     <link rel="stylesheet" href="css/registration-page.css">
@@ -215,7 +216,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             </div>
                         </div>
                         <div class="rg-scroll">
-                            <table class="rg-lb" id="resultsSection">
+                            <table class="nt-leaderboard" id="resultsSection">
                                 <thead>
                                     <tr>
                                         <th>Rank</th>
@@ -1302,32 +1303,33 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         </div>
 
         <!-- Statistics Modal -->
+        <!-- Leaderboard dialog, opened from the bracket header and Match Controls (no exports here) -->
         <div id="statisticsModal" class="modal">
-            <div class="modal-content" style="width: 90%; max-width: 1200px;">
-                <h3 style="text-align: center; margin-bottom: 20px;">Leaderboard</h3>
-
-                <div class="statistics-container" style="max-height: 70vh; overflow-y: auto;">
-                    <table class="results-table" id="statisticsTable">
-                        <thead>
-                            <tr>
-                                <th>Rank</th>
-                                <th>Player</th>
-                                <th>Points</th>
-                                <th>Short Legs</th>
-                                <th>High Outs</th>
-                                <th>180s</th>
-                                <th>Tons</th>
-                                <th>Legs Won</th>
-                                <th>Legs Lost</th>
-                            </tr>
-                        </thead>
-                        <tbody id="statisticsTableBody">
-                        </tbody>
-                    </table>
+            <div class="dlg dlg--leaderboard">
+                <div class="dlg__main">
+                    <h2 class="dlg__title">Leaderboard<small>click a player to edit statistics</small></h2>
+                    <div class="nt-leaderboard-scroll">
+                        <table class="nt-leaderboard" id="statisticsTable">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Player</th>
+                                    <th>Points</th>
+                                    <th>Short legs</th>
+                                    <th>High outs</th>
+                                    <th>180s</th>
+                                    <th>Tons</th>
+                                    <th>Legs won</th>
+                                    <th>Legs lost</th>
+                                </tr>
+                            </thead>
+                            <tbody id="statisticsTableBody">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-
-                <div class="text-center mt-20">
-                    <button class="btn" onclick="popDialog()">Close</button>
+                <div class="dlg__foot">
+                    <button class="btn btn-primary" onclick="popDialog()">Close</button>
                 </div>
             </div>
         </div>

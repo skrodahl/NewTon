@@ -70,18 +70,6 @@
 
 /* ---- Leaderboard ---- */
 .rg-scroll { overflow: auto; max-height: 640px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
-.rg-lb { width: 100%; border-collapse: collapse; font-size: 14px; }
-.rg-lb th { position: sticky; top: 0; z-index: 1; background: var(--nt-surface); text-align: right; font-size: 12px; font-weight: 600; color: var(--nt-muted); padding: 6px 8px; border-top: 1px solid var(--nt-line); border-bottom: 1px solid var(--nt-line); white-space: nowrap; }
-.rg-lb td { padding: 9px 8px; border-bottom: 1px solid var(--nt-line); text-align: right; font-variant-numeric: tabular-nums; color: var(--nt-ink-2); white-space: nowrap; }
-.rg-lb th:nth-child(-n+2), .rg-lb td:nth-child(-n+2) { text-align: left; }
-.rg-lb th:first-child, .rg-lb td:first-child { padding-left: 20px; }
-.rg-lb th:last-child, .rg-lb td:last-child { padding-right: 20px; }
-.rg-lb tbody tr { cursor: pointer; }
-.rg-lb tbody tr:hover { background: var(--nt-surface-2); }
-.rg-lb tbody tr:last-child td { border-bottom: 0; }
-.rg-lb td.rank { font-family: var(--nt-mono); font-size: 12px; font-weight: 700; color: var(--nt-ink-2); }
-.rg-lb td.player-name { font-weight: 600; color: var(--nt-ink); width: 100%; }
-.rg-lb td.points { font-weight: 800; color: var(--nt-ink); }
 
 @media (max-width: 1000px) {
   .rg-cols, .rg-cols.rg-running { grid-template-columns: 1fr; }

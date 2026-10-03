@@ -63,7 +63,7 @@ window.pushDialog = function(dialogId, restoreFunction, enableEsc = false) {
     if (window.dialogStack.length > 0 && window.dialogStack[window.dialogStack.length - 1].id === dialogId) {
         // Just show the dialog, don't add to stack again
         const zIndex = BASE_Z_INDEX + window.dialogStack.length;
-        dialog.style.display = dialog.id === 'statisticsModal' ? 'flex' : 'block';
+        dialog.style.display = 'block';
         dialog.style.zIndex = zIndex;
         console.log(`📚 Dialog restored: [${window.dialogStack.map(d => d.id).join(' → ')}]`);
         return;
@@ -90,7 +90,7 @@ window.pushDialog = function(dialogId, restoreFunction, enableEsc = false) {
     });
 
     // Show dialog with proper z-index
-    dialog.style.display = dialog.id === 'statisticsModal' ? 'flex' : 'block';
+    dialog.style.display = 'block';
     dialog.style.zIndex = zIndex;
 
     console.log(`📚 Dialog stack: [${window.dialogStack.map(d => d.id).join(' → ')}]`);

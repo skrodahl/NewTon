@@ -1,0 +1,27 @@
+/* components.css - Shared parts of the new design used on more than one page
+ *
+ * Uses the shared tokens in css/design-tokens.css. Light only.
+ */
+
+/* ---- the tournament Leaderboard: Player Registration, and the Leaderboard dialog opened
+   from the bracket and Match Controls (both filled by updateResultsTable()) ---- */
+.nt-leaderboard { width: 100%; border-collapse: collapse; font-size: 14px; }
+.nt-leaderboard th { position: sticky; top: 0; z-index: 1; background: var(--nt-surface); text-align: right; font-size: 12px; font-weight: 600; color: var(--nt-muted); padding: 6px 8px; border-top: 1px solid var(--nt-line); border-bottom: 1px solid var(--nt-line); white-space: nowrap; }
+.nt-leaderboard td { padding: 9px 8px; border-bottom: 1px solid var(--nt-line); text-align: right; font-variant-numeric: tabular-nums; color: var(--nt-ink-2); white-space: nowrap; }
+.nt-leaderboard th:nth-child(-n+2), .nt-leaderboard td:nth-child(-n+2) { text-align: left; }
+.nt-leaderboard th:first-child, .nt-leaderboard td:first-child { padding-left: 20px; }
+.nt-leaderboard th:last-child, .nt-leaderboard td:last-child { padding-right: 20px; }
+.nt-leaderboard tbody tr { cursor: pointer; }
+.nt-leaderboard tbody tr:hover { background: var(--nt-surface-2); }
+.nt-leaderboard tbody tr:last-child td { border-bottom: 0; }
+.nt-leaderboard td.rank { font-family: var(--nt-mono); font-size: 12px; font-weight: 700; color: var(--nt-ink-2); }
+.nt-leaderboard td.player-name { font-weight: 600; color: var(--nt-ink); width: 100%; }
+.nt-leaderboard td.points { font-weight: 800; color: var(--nt-ink); }
+.nt-leaderboard td[colspan] { text-align: center; color: var(--nt-muted); padding: 24px 20px; white-space: normal; }
+
+/* ---- the Leaderboard dialog (#statisticsModal): a wide .dlg, the table edge to edge ---- */
+.dlg.dlg--leaderboard { max-width: 1100px; font-family: var(--nt-sans); }
+.dlg--leaderboard .dlg__main { padding: 22px 0 0; }
+.dlg--leaderboard .dlg__title { padding: 0 24px 14px; border-bottom: 0; font-weight: 700; color: var(--nt-ink); }
+.dlg--leaderboard .dlg__title small { font-size: 13px; font-weight: 500; color: var(--nt-muted); margin-left: 8px; letter-spacing: 0; }
+.dlg--leaderboard .nt-leaderboard-scroll { max-height: 65vh; overflow: auto; margin-top: 0; }

@@ -807,9 +807,7 @@ function updateResultsTable(targetTbodyId = 'resultsTableBody') {
             // Statistics modal: show message in tbody
             tbody.innerHTML = `
                 <tr>
-                    <td colspan="9" style="text-align: center; color: #666; font-style: italic; padding: 20px;">
-                        No players added yet
-                    </td>
+                    <td colspan="9">No paid players yet.</td>
                 </tr>
             `;
         }
