@@ -98,7 +98,7 @@ const BracketView = (() => {
         const cw = Math.max(...ids.map(i => pos[i].x)) + W, ch = Math.max(...ids.map(i => pos[i].y)) + H;
         return { pos, cw, ch, mid: mid - minY + H / 2 };
     }
-    const worldBox = L => ({ x0: -40, y0: -TOP, x1: L.cw + 30, y1: L.ch + BOTTOM }); // room for lines routed round the outside
+    const worldBox = L => ({ x0: -40, y0: -TOP, x1: L.cw + 50, y1: L.ch + BOTTOM }); // room for lines routed round the outside
 
     // The card never changes. Fit the bracket at its tightest spacing (never above 100%),
     // then grow the row and column gaps into whatever space is left, so it fills the page.
@@ -345,6 +345,12 @@ const BracketView = (() => {
                 // round under the bracket, up the right edge, and enters the backside final from the right
                 const x1 = s.x, ox = x1 - GX / 2, yR = L.ch + 30, xR = t.x + W + GX / 2;
                 path = `M${x1} ${cy(src)} H${ox} V${yR} H${xR} V${cy(dst)} H${t.x + W}`;
+            } else if (variant === 'right' && src === 'BS-FINAL') {
+                // The backside final's winner continues up the same line into the grand final from the
+                // right, a T-junction beside the backside final (mirroring the frontside final's split),
+                // so the two halves meet in the grand final from both sides
+                const xR = s.x + W + GX / 2;
+                path = `M${s.x + W} ${cy(src)} H${xR} V${cy(dst)} H${t.x + W}`;
             } else if (s.x === t.x) {
                 path = s.y < t.y ? `M${s.x + W / 2} ${s.y + H} V${t.y}` : `M${s.x + W / 2} ${s.y} V${t.y + H}`;
             } else {
