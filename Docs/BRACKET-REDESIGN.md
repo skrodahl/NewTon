@@ -42,7 +42,7 @@ One function covers 8, 16 and 32 players. It reads the progression table (`getPr
 - **Frontside rows.** Round 1 is spaced evenly. Every later match sits midway between the two matches whose winners feed it.
 - **Backside rows.** Backside round 1 sits midway between the two frontside matches whose losers it receives. Later rounds sit midway between their backside feeders, or level with their single backside feeder in rounds where frontside losers drop in.
 - **Finals ("Right").** The finals get their own column. The grand final is level with the frontside final, so the frontside winner's line is straight; the backside final sits directly below the grand final and feeds it with a short vertical line. Tried and dropped: the backside final above the grand final (the backside line had to run past the grand final), and the backside final in the frontside final's column (hard to read).
-- **Finals ("Middle").** BS-FINAL and GRAND-FINAL are stacked around the vertical middle.
+- **Finals ("Middle").** The grand final and backside final are stacked around the vertical middle, grand final on top, matching "Right".
 - **World coordinates.** Everything is placed from 0,0 with known width and height, so the camera can fit the whole bracket, fit a set of matches, and tell when a match is off-screen.
 
 ### Geometry used in the mockup
