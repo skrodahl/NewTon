@@ -52,6 +52,18 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 
 ---
 
+### Registration process rework
+
+The maintainer plans to rework how players are registered, saved players especially. v5.2.0 redesigned the Player Registration page but kept its behaviour, and laid it out to take this: saved players are chips in their own panel, separate from the tournament's players. Not scoped yet; start with a discussion and a mockup.
+
+---
+
+### Grey frame around the redesigned pages
+
+The `body` background in `styles.css` (`#f1f5f5`) differs slightly from the redesign's page background (`--nt-bg` in `design-tokens.css`), so a faint frame shows around Setup, Registration, Analytics and Global Settings. To decide: set the body background to `--nt-bg` (check the bracket page and the dialogs), or leave it.
+
+---
+
 ## Later
 *Worth tracking but not urgent*
 
@@ -60,16 +72,16 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 The tab is named Analytics — it should earn that name over time. The IndexedDB foundation is already there; this is purely a UI and query layer on top.
 
 **Player tab**
-Dedicated per-player drill-down — form over time, head-to-head records, tournament history.
+v5.2.0 added a profile (Leaderboard figures, rank, placement counts, every tournament played) and side-by-side comparison. Still open: form over time and head-to-head records.
 
 **Graphs**
 Performance and form over time — the kind of thing that makes improvement (or decline) visible in a way a table never can.
 
-**Leaderboard export**
-Export leaderboard data (CSV or similar) for use outside the app.
-
 **Table cogwheel**
 Column visibility toggle and top-N threshold control on Analytics tables.
+
+**Filtering for members**
+Raised 2026-09-07: the Lens read as maintainer-facing. v5.2.0 moved it to a strip on every view, saying how many tournaments are counted and why, and turning orange when not everything is counted. Revisit only if members on https://newton.skrodahl.net still find it confusing.
 
 ---
 
