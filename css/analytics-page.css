@@ -66,6 +66,9 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
 .an-tile-value small { font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--nt-muted); margin-left: 4px; }
 .an-tile-sub { font-size: 13px; color: var(--nt-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
+/* Dashboard: the top 10 and the latest tournaments under the tiles */
+.an-dash-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; align-items: start; }
+
 /* Leaderboard: the top 16 end at a line */
 .an-legend { display: inline-flex; align-items: center; font-size: 12px; color: var(--nt-muted); }
 .an-legend i { display: inline-block; width: 18px; border-top: 2px solid var(--nt-ink-2); margin-right: 6px; }
@@ -75,10 +78,23 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
 .an-players { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 16px; align-items: start; }
 .an-prof-head { padding: 20px 20px 4px; }
 .an-prof-head h3 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.an-prof-head p { margin: 2px 0 0; color: var(--nt-muted); }
 .an-facts { display: flex; gap: 12px 28px; flex-wrap: wrap; margin: 0; padding: 8px 20px 18px; }
 .an-facts > div { display: grid; }
 .an-facts dt { font-size: 12px; color: var(--nt-muted); }
 .an-facts dd { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+.an-facts dd small { font-size: 12px; font-weight: 600; color: var(--nt-muted); margin-left: 3px; }
+/* the profile's facts: a ruled grid */
+.an-facts.an-facts--grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 0; margin: 12px 20px 16px; padding: 0; border: 1px solid var(--nt-line); border-radius: 10px; overflow: hidden; }
+.an-facts--grid > div { padding: 10px 14px; box-shadow: 1px 0 0 var(--nt-line), 0 1px 0 var(--nt-line); }
+/* placements, one box each */
+.an-place { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 8px; margin: 0 20px 18px; }
+.an-place > div { border-radius: 8px; border: 1px solid var(--nt-line); background: var(--nt-surface-2); padding: 8px 10px; text-align: center; }
+.an-place dt { font-size: 12px; font-weight: 600; color: var(--nt-muted); }
+.an-place dd { margin: 0; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
+.an-place .an-zero dd { color: var(--nt-faint); font-weight: 600; }
+.an-sub { margin: 0; padding: 4px 20px 10px; font-size: 13px; font-weight: 700; color: var(--nt-ink-2); }
+.st-pill.an-first { background: var(--nt-ok-soft); color: var(--nt-ok); }
 
 /* unticked tournaments and players are dimmed */
 .newton-table tr.an-off td:not(:first-child) { color: var(--nt-faint); }
@@ -103,7 +119,7 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
   .an-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
 }
 @media (max-width: 1000px) {
-  .an-players { grid-template-columns: minmax(0, 1fr); }
+  .an-players, .an-dash-cols { grid-template-columns: minmax(0, 1fr); }
 }
 
 /* ---- phones ---- */
@@ -130,7 +146,9 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
   .an-tile-value { font-size: 26px; }
   .an-wrap .st-panel-head { padding: 14px 14px 10px; }
   .an-foot { padding-inline: 14px; }
-  .an-prof-head, .an-facts { padding-inline: 14px; }
+  .an-prof-head, .an-facts, .an-sub { padding-inline: 14px; }
+  .an-facts.an-facts--grid { margin-inline: 14px; padding: 0; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .an-place { margin-inline: 14px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
   .newton-table .an-wide-only { display: none; }
   #analyticsViewRegister .newton-table td.nt-name, #analyticsViewPlayers .newton-table td.nt-name { white-space: normal; }
   /* the player list scrolls in its own box, so the profile under it stays close */

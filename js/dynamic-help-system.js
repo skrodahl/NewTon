@@ -352,9 +352,9 @@ const HELP_CONTENT = {
                 content: `
                     <p>Buttons along the top switch between them. All four show the same set of tournaments &mdash; whichever ones the <strong>Lens</strong> currently selects.</p>
                     <ul>
-                        <li><strong>Dashboard</strong> &mdash; the headline numbers: tournaments, matches, unique players, total points, 180s, the highest checkout and the shortest leg. Click a card to jump to the view behind it.</li>
+                        <li><strong>Dashboard</strong> &mdash; the headline numbers: tournaments, matches, unique players, total points, 180s, the highest checkout and the shortest leg. Click a card to jump to the view behind it. Under them, the Leaderboard's top 10 and the latest tournaments.</li>
                         <li><strong>Leaderboard</strong> &mdash; the standings. One row per player, sortable by any column.</li>
-                        <li><strong>Players</strong> &mdash; the player list; pick one to see their record on the right.</li>
+                        <li><strong>Players</strong> &mdash; the player list; tick one to see their profile, or several to compare them.</li>
                         <li><strong>Register</strong> &mdash; the underlying records: every tournament, and every match within them.</li>
                     </ul>
                 `
@@ -410,14 +410,15 @@ const HELP_CONTENT = {
             players: {
                 title: "Players",
                 content: `
-                    <p>The player list shows everyone who appears in the selected tournaments, with tournaments played and their win/loss record. Tick one player to see their detail, or several to compare them.</p>
+                    <p>The player list shows everyone who appears in the selected tournaments, with tournaments played and their win/loss record. Tick one player to see their profile, or several to compare them.</p>
+                    <p>The profile has the player's Leaderboard figures, how often they finished in each place, and every tournament they played, with their placing and points. Click a tournament to open it.</p>
                     <p>Players are matched by name across tournaments, so someone entered as "Dave" in one and "dave " in another is treated as the same person. Genuinely different spellings are not &mdash; consistent names are worth the small effort at registration.</p>
                 `
             },
             tournaments: {
                 title: "Tournament List",
                 content: `
-                    <p>Each row shows a finalized tournament — date, format, players, matches and points. Unticked tournaments are left out of every view.</p>
+                    <p>Each row shows a finalized tournament — date, format, players, matches, points and the winner. Unticked tournaments are left out of every view.</p>
                     <ul>
                         <li><strong>Click a tournament</strong> to open its matches</li>
                         <li><strong>Delete:</strong> Permanently removes the tournament and all its matches. You must type the tournament name to confirm — this cannot be undone</li>

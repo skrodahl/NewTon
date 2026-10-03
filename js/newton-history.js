@@ -493,6 +493,9 @@ const NewtonHistory = (() => {
                 totalPoints += _computeAchievementPoints(t);
             });
 
+            const playerRows = await _computePlayerRows(tournaments);
+            const latest = tournaments.slice().sort((a, b) => tsToMs(b.closedAt) - tsToMs(a.closedAt)).slice(0, 10);
+
             if (seq !== _renderSeq.dashboard) return; // superseded during the DB reads above
 
             // Render cards
@@ -509,7 +512,19 @@ const NewtonHistory = (() => {
                     (shortestLeg.darts < Infinity
                         ? _statCard('Shortest Leg', shortestLeg.darts, shortestLeg.player, 'players', shortestLeg.player, 'darts')
                         : _statCard('Shortest Leg', '—', 'No data yet', null)) +
-                '</div>';
+                '</div>' +
+                _dashboardPanels(playerRows.slice(0, 10), latest);
+
+            // The top 10 open a player; the latest tournaments open in the Register
+            container.querySelectorAll('[data-an-player]').forEach(tr => {
+                tr.addEventListener('click', () => focusPlayer(playerRows[+tr.dataset.anPlayer].name));
+            });
+            container.querySelectorAll('[data-an-tournament]').forEach(tr => {
+                tr.addEventListener('click', () => { switchView('register'); openTournament(latest[+tr.dataset.anTournament].tournamentId); });
+            });
+            container.querySelectorAll('[data-an-go]').forEach(btn => {
+                btn.addEventListener('click', () => switchView(btn.dataset.anGo));
+            });
 
             // Wire up card clicks
             container.querySelectorAll('.an-tile[data-target-view]').forEach(card => {
@@ -554,6 +569,44 @@ const NewtonHistory = (() => {
             '<span class="an-tile-value">' + escHtml(String(value)) + (unit ? '<small>' + escHtml(unit) + '</small>' : '') + '</span>' +
             '<span class="an-tile-sub">' + escHtml(subtitle) + '</span>' +
         '</' + tag + '>';
+    }
+
+    /**
+     * The Dashboard's two panels: the Leaderboard's top 10 and the latest tournaments.
+     * Rows carry only an index; the click handlers look the row up.
+     * @param {object[]} top - the first ten rows of _computePlayerRows()
+     * @param {object[]} latest - the newest tournaments, newest first
+     * @returns {string} HTML
+     */
+    function _dashboardPanels(top, latest) {
+        const dim = (v) => v || _DIM_DASH;
+        return '<div class="an-dash-cols">' +
+            '<section class="st-panel">' +
+                '<div class="st-panel-head"><h3>Leaderboard <small>top 10</small></h3>' +
+                '<button type="button" class="st-link" data-an-go="leaderboard">Full Leaderboard</button></div>' +
+                '<div class="newton-table-scroll"><table class="newton-table"><thead><tr>' +
+                    '<th>#</th><th>Player</th><th style="text-align:right">Played</th><th style="text-align:right">1st</th><th style="text-align:right">Points</th>' +
+                '</tr></thead><tbody>' +
+                top.map((r, i) => `<tr class="newton-table-clickable" data-an-player="${i}">` +
+                    `<td class="nt-rank">${r._rank}</td><td class="nt-name" style="width:100%">${escHtml(r.name)}</td>` +
+                    `<td style="text-align:right">${r.tournaments}</td><td style="text-align:right">${dim(r.p1st)}</td>` +
+                    `<td class="nt-pts" style="text-align:right">${r.points}</td></tr>`).join('') +
+                '</tbody></table></div>' +
+            '</section>' +
+            '<section class="st-panel">' +
+                '<div class="st-panel-head"><h3>Latest tournaments</h3>' +
+                '<button type="button" class="st-link" data-an-go="register">All in the Register</button></div>' +
+                '<div class="newton-table-scroll"><table class="newton-table"><thead><tr>' +
+                    '<th>Tournament</th><th>Date</th><th class="an-wide-only" style="text-align:right">Players</th><th>Winner</th>' +
+                '</tr></thead><tbody>' +
+                latest.map((t, i) => `<tr class="newton-table-clickable" data-an-tournament="${i}">` +
+                    `<td class="nt-name" style="width:100%">${escHtml(t.tournamentName || t.tournamentId)}</td>` +
+                    `<td>${t.closedAt ? fmtDate(t.closedAt) : '—'}</td>` +
+                    `<td class="an-wide-only" style="text-align:right">${t.playerCount || '—'}</td>` +
+                    `<td>${dim(escHtml(_winnerName(t)))}</td></tr>`).join('') +
+                '</tbody></table></div>' +
+            '</section>' +
+        '</div>';
     }
 
     /** Force the next render to show the Dashboard tab. */
@@ -639,34 +692,11 @@ const NewtonHistory = (() => {
                 return;
             }
 
-            // Build unique player map from tournament achievements
-            const playerMap = {};
-
-            for (const t of tournaments) {
-                const ta = t.tournamentAchievements || {};
-                Object.entries(ta).forEach(([pid, entry]) => {
-                    const name = entry.name || pid;
-                    const key = _playerKey(name);
-                    if (!playerMap[key]) {
-                        playerMap[key] = {
-                            name: name,
-                            tournaments: 0,
-                            matchesWon: 0,
-                            matchesLost: 0
-                        };
-                    }
-                    playerMap[key].tournaments++;
-                });
-            }
-
-            // Scan matches for win/loss counts
-            for (const matches of await _loadMatchesFor(tournaments)) {
-                _tallyMatchWinLoss(matches, playerMap);
-            }
+            // The same rows as the Leaderboard, so the list, the profile and the Leaderboard agree
+            const rows = (await _computePlayerRows(tournaments)).slice();
 
             if (seq !== _renderSeq.players) return; // superseded during the DB reads above
 
-            const rows = Object.values(playerMap);
             rows.sort((a, b) => a.name.localeCompare(b.name));
             rows.forEach(r => { r._rowId = r.name; });
 
@@ -812,46 +842,129 @@ const NewtonHistory = (() => {
         }
 
         if (selected.length === 1) {
-            // Single player profile
             _comparisonTable = null;
-            const p = selected[0];
-            panel.innerHTML =
-                '<div class="an-prof-head"><h3>' + escHtml(p.name) + '</h3></div>' +
-                '<dl class="an-facts">' +
-                    '<div><dt>Tournaments</dt><dd>' + p.tournaments + '</dd></div>' +
-                    '<div><dt>Matches</dt><dd>' + p.matchesWon + '–' + p.matchesLost + '</dd></div>' +
-                '</dl>';
+            _renderProfile(panel, selected[0], _playersTable.data.length);
             return;
         }
 
-        // Multiple players — comparison table via NewtonTable
+        // Several players — compare them on the Leaderboard's numbers
         panel.innerHTML =
-            '<div class="st-panel-head"><h3>Compare <small>' + selected.length + ' players</small></h3></div>' +
-            '<div id="playerComparisonTableContainer"></div>';
+            '<div class="st-panel-head"><h3>Compare <small>' + selected.length + ' players</small></h3>' +
+            '<button type="button" class="st-link" onclick="NewtonHistory.toggleAllPlayers(false)">Clear</button></div>' +
+            '<div id="playerComparisonTableContainer"></div>' +
+            '<div class="an-foot">Click a player to see them alone.</div>';
         selected.forEach(r => { r._rowId = r.name; });
 
         _comparisonTable = NewtonTable.create({
             tableId: 'analytics-player-comparison',
             containerId: 'playerComparisonTableContainer',
-            defaultSortKey: 'name',
+            defaultSortKey: '_rank',
             defaultSortDir: 'asc',
             emptyMessage: 'No player data available.',
+            onRowClick: (row) => focusPlayer(row.name),
             columns: [
+                { key: '_rank', label: '#', cellClass: 'nt-rank' },
+                { key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name', render: (v) => escHtml(v) },
+                { key: 'points', label: 'Points', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts' },
+                { key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc' },
+                _lbCount('p1st', '1st'),
                 {
-                    key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name',
-                    render: (v) => escHtml(v)
+                    key: '_top4', label: 'Top 4', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
+                    render: (v, row) => _top4(row) || _DIM_DASH, sortValue: (v, row) => _top4(row)
+                },
+                Object.assign(_lbCount('oneEighties', '180s'), { columnClass: 'an-wide-only' }),
+                {
+                    key: 'bestHighOut', label: 'Best out', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
+                    render: (v) => v > 0 ? v : _DIM_DASH, sortValue: (v) => v > 0 ? v : 0
                 },
                 {
-                    key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc'
+                    key: 'bestShortLeg', label: 'Best leg', align: 'right', defaultDir: 'asc', columnClass: 'an-wide-only',
+                    render: (v) => v < Infinity ? v : _DIM_DASH, sortValue: (v) => v < Infinity ? v : 99999
                 },
                 {
-                    key: 'matchesWon', label: 'W–L', align: 'right', defaultDir: 'desc',
-                    render: (v, row) => `${row.matchesWon}–${row.matchesLost}`,
-                    sortValue: (v, row) => row.matchesWon - row.matchesLost
+                    key: 'avg', label: 'Avg', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
+                    render: (v) => v || _DIM_DASH, sortValue: (v) => v ? parseFloat(v) : 0
+                },
+                {
+                    key: 'matchesWon', label: 'Matches', align: 'right', defaultDir: 'desc',
+                    render: (v, row) => `${row.matchesWon}–${row.matchesLost}`, sortValue: (v, row) => row.matchesWon - row.matchesLost
+                },
+                {
+                    key: 'legsWon', label: 'Legs', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
+                    render: (v, row) => `${row.legsWon}–${row.legsLost}`, sortValue: (v, row) => row.legsWon - row.legsLost
                 }
             ]
         });
         _comparisonTable.setData(selected);
+    }
+
+    /** First to fourth places. */
+    function _top4(row) {
+        return row.p1st + row.p2nd + row.p3rd + row.p4th;
+    }
+
+    /**
+     * One player's profile: their Leaderboard row as facts, their placements, and every
+     * tournament they played (click one to open it in the Register).
+     * @param {HTMLElement} panel
+     * @param {object} p - the player's row from _computePlayerRows()
+     * @param {number} playerCount - players in the lens, for "Rank 4 of 28"
+     */
+    function _renderProfile(panel, p, playerCount) {
+        const fact = (label, value, unit) => `<div><dt>${label}</dt><dd>${value}${unit ? `<small>${unit}</small>` : ''}</dd></div>`;
+        const place = (label, n) => `<div${n ? '' : ' class="an-zero"'}><dt>${label}</dt><dd>${n}</dd></div>`;
+        const best = p.bestShortLeg < Infinity;
+        panel.innerHTML =
+            '<div class="an-prof-head"><h3>' + escHtml(p.name) + '</h3>' +
+                '<p>Rank ' + p._rank + ' of ' + playerCount + ' in the lens</p></div>' +
+            '<dl class="an-facts an-facts--grid">' +
+                fact('Points', p.points) +
+                fact('Played', p.tournaments) +
+                fact('Matches', p.matchesWon + '–' + p.matchesLost) +
+                fact('Legs', p.legsWon + '–' + p.legsLost) +
+                fact('Avg', p.avg || '—') +
+                fact('Best out', p.bestHighOut > 0 ? p.bestHighOut : '—') +
+                fact('Best leg', best ? p.bestShortLeg : '—', best ? 'darts' : '') +
+                fact('180s', p.oneEighties) +
+                fact('High outs', p.highOuts) +
+                fact('Short legs', p.shortLegs) +
+            '</dl>' +
+            '<dl class="an-place">' +
+                place('1st', p.p1st) + place('2nd', p.p2nd) + place('3rd', p.p3rd) +
+                place('4th', p.p4th) + place('5–6th', p.p56th) + place('7–8th', p.p78th) +
+            '</dl>' +
+            '<h4 class="an-sub">Tournaments</h4>' +
+            '<div id="playerTournamentsTableContainer"></div>';
+
+        const rows = p.history.map(h => Object.assign({}, h, {
+            _rowId: h.tournament.tournamentId,
+            name: h.tournament.tournamentName || h.tournament.tournamentId,
+            closedAt: h.tournament.closedAt,
+            oneEighties: h.stats.oneEighties || 0
+        }));
+        NewtonTable.create({
+            tableId: 'analytics-player-tournaments',
+            containerId: 'playerTournamentsTableContainer',
+            defaultSortKey: 'closedAt',
+            defaultSortDir: 'desc',
+            emptyMessage: 'No tournaments.',
+            onRowClick: (row) => { switchView('register'); openTournament(row._rowId); },
+            columns: [
+                { key: 'name', label: 'Tournament', width: '100%', cellClass: 'nt-name', render: (v) => escHtml(v) },
+                { key: 'closedAt', label: 'Date', render: (v) => v ? fmtDate(v) : '—', sortValue: (v) => v ? tsToMs(v) : 0 },
+                {
+                    key: 'placement', label: 'Placed', defaultDir: 'asc',
+                    render: (v) => v && v <= 4 ? `<span class="st-pill nt-pill${v === 1 ? ' an-first' : ''}">${formatRanking(v)}</span>` : (v ? formatRanking(v) : '—'),
+                    sortValue: (v) => v || 999
+                },
+                Object.assign(_lbCount('oneEighties', '180s'), { columnClass: 'an-wide-only' }),
+                {
+                    key: 'matchesWon', label: 'Matches', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
+                    render: (v, row) => `${row.matchesWon}–${row.matchesLost}`, sortValue: (v, row) => row.matchesWon - row.matchesLost
+                },
+                { key: 'points', label: 'Points', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts' }
+            ]
+        }).setData(rows);
     }
 
     // ---------------------------------------------------------------------------
@@ -879,6 +992,163 @@ const NewtonHistory = (() => {
     }
 
     /**
+     * Every player's totals across the given tournaments: points (under the active point
+     * mode and layers), placements, achievements, personal bests, three-dart average, match
+     * and leg W/L, and one history entry per tournament. Ranked by points. The one source
+     * for the Leaderboard, the Dashboard's top 10, and the Players list and profile.
+     * @param {object[]} tournaments - the scoped tournament records
+     * @returns {Promise<object[]>} rows, `_rank` 1 = most points
+     */
+    async function _computePlayerRows(tournaments) {
+        // Aggregate per-player stats across all scoped tournaments
+        const playerMap = {}; // normalized name → { name, points, tournaments, wins, oneEighties, tons, highOuts, shortLegs }
+
+        for (const t of tournaments) {
+            const p = _getActivePoints(t);
+            const ta = t.tournamentAchievements || {};
+            const placements = t.placements || {};
+
+            // Build playerId → placement lookup
+            const playerPlacements = {};
+            Object.entries(placements).forEach(([pid, rank]) => {
+                playerPlacements[String(pid)] = rank;
+            });
+
+            Object.entries(ta).forEach(([pid, entry]) => {
+                const name = entry.name || pid;
+                const key = _playerKey(name);
+                const s = entry.stats || {};
+
+                if (!playerMap[key]) {
+                    playerMap[key] = {
+                        name: name,
+                        points: 0,
+                        tournaments: 0,
+                        p1st: 0, p2nd: 0, p3rd: 0, p4th: 0, p56th: 0, p78th: 0,
+                        oneEighties: 0,
+                        tons: 0,
+                        highOuts: 0,
+                        shortLegs: 0,
+                        bestHighOut: 0,
+                        bestShortLeg: Infinity,
+                        matchesWon: 0,
+                        matchesLost: 0,
+                        legsWon: 0,
+                        legsLost: 0,
+                        _totalScored: 0,
+                        _totalDarts: 0,
+                        history: [] // one entry per tournament, in the order of `tournaments`
+                    };
+                }
+
+                const pm = playerMap[key];
+                pm.tournaments++;
+
+                // Points: achievements always; placement and participation per layer
+                const rank = playerPlacements[String(pid)];
+                const points = calculatePoints(s, rank, p, { ranking: _layerRanking, attendance: _layerAttendance });
+                pm.points += points;
+                pm.history.push({ tournament: t, placement: rank || null, stats: s, points, matchesWon: 0, matchesLost: 0 });
+
+                // Track placement counts
+                if (rank === 1) pm.p1st++;
+                else if (rank === 2) pm.p2nd++;
+                else if (rank === 3) pm.p3rd++;
+                else if (rank === 4) pm.p4th++;
+                else if (rank === 5 || rank === 6) pm.p56th++;
+                else if (rank === 7 || rank === 8) pm.p78th++;
+
+                // Achievement totals (for display)
+                pm.oneEighties += (s.oneEighties || 0);
+                pm.tons += (s.tons || 0);
+                pm.highOuts += (Array.isArray(s.highOuts) ? s.highOuts.length : 0);
+                pm.shortLegs += (Array.isArray(s.shortLegs) ? s.shortLegs.length : 0);
+
+                // Personal bests
+                if (Array.isArray(s.highOuts)) {
+                    s.highOuts.forEach(v => { if (v > pm.bestHighOut) pm.bestHighOut = v; });
+                }
+                if (Array.isArray(s.shortLegs)) {
+                    s.shortLegs.forEach(v => { if (v < pm.bestShortLeg) pm.bestShortLeg = v; });
+                }
+            });
+        }
+
+        // Scan matches for win/loss (shared) and leg counts; each tournament's W/L also goes
+        // into that tournament's history entry (the player profile's tournament list)
+        const matchLists = await _loadMatchesFor(tournaments);
+        for (let ti = 0; ti < tournaments.length; ti++) {
+            const matches = matchLists[ti];
+            _tallyMatchWinLoss(matches, playerMap);
+            const entryFor = (pm) => pm && pm.history.find(h => h.tournament === tournaments[ti]);
+            matches.forEach(m => {
+                const h1 = entryFor(m.player1Name && playerMap[_playerKey(m.player1Name)]);
+                const h2 = entryFor(m.player2Name && playerMap[_playerKey(m.player2Name)]);
+                if (m.winner === 1) { if (h1) h1.matchesWon++; if (h2) h2.matchesLost++; }
+                else if (m.winner === 2) { if (h2) h2.matchesWon++; if (h1) h1.matchesLost++; }
+            });
+
+            matches.forEach(m => {
+                const k1 = _playerKey(m.player1Name);
+                const k2 = _playerKey(m.player2Name);
+                const pm1 = k1 ? playerMap[k1] : null;
+                const pm2 = k2 ? playerMap[k2] : null;
+
+                if (m.legsWon) {
+                    if (pm1) { pm1.legsWon += (m.legsWon.p1 || 0); pm1.legsLost += (m.legsWon.p2 || 0); }
+                    if (pm2) { pm2.legsWon += (m.legsWon.p2 || 0); pm2.legsLost += (m.legsWon.p1 || 0); }
+                }
+
+                // Three-dart average — Chalker matches only
+                if (m.matchType === 'CHALKER' && Array.isArray(m.legs) && m.legs.length) {
+                    const startScore = (m.format && m.format.sc) || 501;
+                    m.legs.forEach(leg => {
+                        try {
+                            // Tiebreak legs (cd === 0) have no 501 scoring — including
+                            // them corrupts the average (extractAchievements excludes
+                            // them for the same reason)
+                            if (leg.cd === 0) return;
+                            const v1 = NewtonStats.decodeVisits(leg.s, 0);
+                            const v2 = NewtonStats.decodeVisits(leg.s, 1);
+
+                            // Player 1
+                            if (pm1 && v1.length) {
+                                if (leg.w === 1) {
+                                    pm1._totalScored += startScore;
+                                    pm1._totalDarts += (v1.length - 1) * 3 + (leg.cd || 3);
+                                } else {
+                                    pm1._totalScored += v1.reduce((a, b) => a + b, 0);
+                                    pm1._totalDarts += v1.length * 3;
+                                }
+                            }
+                            // Player 2
+                            if (pm2 && v2.length) {
+                                if (leg.w === 2) {
+                                    pm2._totalScored += startScore;
+                                    pm2._totalDarts += (v2.length - 1) * 3 + (leg.cd || 3);
+                                } else {
+                                    pm2._totalScored += v2.reduce((a, b) => a + b, 0);
+                                    pm2._totalDarts += v2.length * 3;
+                                }
+                            }
+                        } catch (_) {}
+                    });
+                }
+            });
+        }
+
+        // Convert to array, sort by points descending, assign ranks
+        const rows = Object.values(playerMap);
+        rows.sort((a, b) => b.points - a.points);
+        rows.forEach((r, i) => {
+            r._rank = i + 1;
+            r.avg = r._totalDarts > 0 ? ((r._totalScored / r._totalDarts) * 3).toFixed(2) : null;
+            r._rowId = r.name;
+        });
+        return rows;
+    }
+
+    /**
      * Compute per-player points across scoped tournaments and render the leaderboard.
      */
     async function renderLeaderboard() {
@@ -902,138 +1172,7 @@ const NewtonHistory = (() => {
                 return;
             }
 
-            // Aggregate per-player stats across all scoped tournaments
-            const playerMap = {}; // normalized name → { name, points, tournaments, wins, oneEighties, tons, highOuts, shortLegs }
-
-            for (const t of tournaments) {
-                const p = _getActivePoints(t);
-                const ta = t.tournamentAchievements || {};
-                const placements = t.placements || {};
-
-                // Build playerId → placement lookup
-                const playerPlacements = {};
-                Object.entries(placements).forEach(([pid, rank]) => {
-                    playerPlacements[String(pid)] = rank;
-                });
-
-                Object.entries(ta).forEach(([pid, entry]) => {
-                    const name = entry.name || pid;
-                    const key = _playerKey(name);
-                    const s = entry.stats || {};
-
-                    if (!playerMap[key]) {
-                        playerMap[key] = {
-                            name: name,
-                            points: 0,
-                            tournaments: 0,
-                            p1st: 0, p2nd: 0, p3rd: 0, p4th: 0, p56th: 0, p78th: 0,
-                            oneEighties: 0,
-                            tons: 0,
-                            highOuts: 0,
-                            shortLegs: 0,
-                            bestHighOut: 0,
-                            bestShortLeg: Infinity,
-                            matchesWon: 0,
-                            matchesLost: 0,
-                            legsWon: 0,
-                            legsLost: 0,
-                            _totalScored: 0,
-                            _totalDarts: 0
-                        };
-                    }
-
-                    const pm = playerMap[key];
-                    pm.tournaments++;
-
-                    // Points: achievements always; placement and participation per layer
-                    const rank = playerPlacements[String(pid)];
-                    pm.points += calculatePoints(s, rank, p, { ranking: _layerRanking, attendance: _layerAttendance });
-
-                    // Track placement counts
-                    if (rank === 1) pm.p1st++;
-                    else if (rank === 2) pm.p2nd++;
-                    else if (rank === 3) pm.p3rd++;
-                    else if (rank === 4) pm.p4th++;
-                    else if (rank === 5 || rank === 6) pm.p56th++;
-                    else if (rank === 7 || rank === 8) pm.p78th++;
-
-                    // Achievement totals (for display)
-                    pm.oneEighties += (s.oneEighties || 0);
-                    pm.tons += (s.tons || 0);
-                    pm.highOuts += (Array.isArray(s.highOuts) ? s.highOuts.length : 0);
-                    pm.shortLegs += (Array.isArray(s.shortLegs) ? s.shortLegs.length : 0);
-
-                    // Personal bests
-                    if (Array.isArray(s.highOuts)) {
-                        s.highOuts.forEach(v => { if (v > pm.bestHighOut) pm.bestHighOut = v; });
-                    }
-                    if (Array.isArray(s.shortLegs)) {
-                        s.shortLegs.forEach(v => { if (v < pm.bestShortLeg) pm.bestShortLeg = v; });
-                    }
-                });
-            }
-
-            // Scan matches for win/loss (shared) and leg counts (leaderboard only)
-            for (const matches of await _loadMatchesFor(tournaments)) {
-                _tallyMatchWinLoss(matches, playerMap);
-
-                matches.forEach(m => {
-                    const k1 = _playerKey(m.player1Name);
-                    const k2 = _playerKey(m.player2Name);
-                    const pm1 = k1 ? playerMap[k1] : null;
-                    const pm2 = k2 ? playerMap[k2] : null;
-
-                    if (m.legsWon) {
-                        if (pm1) { pm1.legsWon += (m.legsWon.p1 || 0); pm1.legsLost += (m.legsWon.p2 || 0); }
-                        if (pm2) { pm2.legsWon += (m.legsWon.p2 || 0); pm2.legsLost += (m.legsWon.p1 || 0); }
-                    }
-
-                    // Three-dart average — Chalker matches only
-                    if (m.matchType === 'CHALKER' && Array.isArray(m.legs) && m.legs.length) {
-                        const startScore = (m.format && m.format.sc) || 501;
-                        m.legs.forEach(leg => {
-                            try {
-                                // Tiebreak legs (cd === 0) have no 501 scoring — including
-                                // them corrupts the average (extractAchievements excludes
-                                // them for the same reason)
-                                if (leg.cd === 0) return;
-                                const v1 = NewtonStats.decodeVisits(leg.s, 0);
-                                const v2 = NewtonStats.decodeVisits(leg.s, 1);
-
-                                // Player 1
-                                if (pm1 && v1.length) {
-                                    if (leg.w === 1) {
-                                        pm1._totalScored += startScore;
-                                        pm1._totalDarts += (v1.length - 1) * 3 + (leg.cd || 3);
-                                    } else {
-                                        pm1._totalScored += v1.reduce((a, b) => a + b, 0);
-                                        pm1._totalDarts += v1.length * 3;
-                                    }
-                                }
-                                // Player 2
-                                if (pm2 && v2.length) {
-                                    if (leg.w === 2) {
-                                        pm2._totalScored += startScore;
-                                        pm2._totalDarts += (v2.length - 1) * 3 + (leg.cd || 3);
-                                    } else {
-                                        pm2._totalScored += v2.reduce((a, b) => a + b, 0);
-                                        pm2._totalDarts += v2.length * 3;
-                                    }
-                                }
-                            } catch (_) {}
-                        });
-                    }
-                });
-            }
-
-            // Convert to array, sort by points descending, assign ranks
-            const rows = Object.values(playerMap);
-            rows.sort((a, b) => b.points - a.points);
-            rows.forEach((r, i) => {
-                r._rank = i + 1;
-                r.avg = r._totalDarts > 0 ? ((r._totalScored / r._totalDarts) * 3).toFixed(2) : null;
-                r._rowId = r.name;
-            });
+            const rows = await _computePlayerRows(tournaments);
 
             // Create or reuse table
             if (!_leaderboardTable) {
@@ -1050,6 +1189,8 @@ const NewtonHistory = (() => {
                     columns: [
                         { key: '_rank', label: '#', cellClass: 'nt-rank' },
                         { key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name', render: (v) => escHtml(v) },
+                        { key: 'points', label: 'Points', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts', render: (v) => v ?? 0 },
+                        { key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc' },
                         _lbCount('p1st', '1st', 'Placements'),
                         _lbCount('p2nd', '2nd', 'Placements'),
                         _lbCount('p3rd', '3rd', 'Placements'),
@@ -1059,8 +1200,6 @@ const NewtonHistory = (() => {
                         _lbCount('oneEighties', '180s', 'Achievements'),
                         _lbCount('highOuts', 'High outs', 'Achievements'),
                         _lbCount('shortLegs', 'Short legs', 'Achievements'),
-                        { key: 'tournaments', label: 'Played', group: 'Total', align: 'right', defaultDir: 'desc' },
-                        { key: 'points', label: 'Points', group: 'Total', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts', render: (v) => v ?? 0 },
                         {
                             key: 'bestHighOut', label: 'Out', group: 'Best', align: 'right', defaultDir: 'desc',
                             render: (v) => v > 0 ? v : _DIM_DASH,
@@ -1300,6 +1439,18 @@ const NewtonHistory = (() => {
         return total;
     }
 
+    /**
+     * The tournament's winner: the player placed 1st.
+     * @param {object} tournament
+     * @returns {string} name, or '' when there is no placement
+     */
+    function _winnerName(tournament) {
+        const placements = tournament.placements || {};
+        const pid = Object.keys(placements).find(id => placements[id] === 1);
+        const entry = pid && (tournament.tournamentAchievements || {})[pid];
+        return entry ? (entry.name || '') : '';
+    }
+
     // ---------------------------------------------------------------------------
     // Tournament list
     // ---------------------------------------------------------------------------
@@ -1379,6 +1530,10 @@ const NewtonHistory = (() => {
                         sortValue: (v) => v || 0
                     },
                     {
+                        key: '_winner', label: 'Winner', columnClass: 'an-wide-only',
+                        render: (v) => v ? escHtml(v) : _DIM_DASH
+                    },
+                    {
                         key: '_actions', label: '', sortable: false, align: 'right', cellClass: 'an-acts', columnClass: 'an-wide-only',
                         render: (v, row) => {
                             let html = '';
@@ -1419,6 +1574,7 @@ const NewtonHistory = (() => {
         // Compute achievement points per tournament
         for (const t of all) {
             t._achievementPoints = _computeAchievementPoints(t);
+            t._winner = _winnerName(t);
         }
 
         // Apply all filters — show only matching tournaments
@@ -2004,7 +2160,8 @@ const NewtonHistory = (() => {
             fact('Format', escHtml(format)) +
             fact('Players', tournament.playerCount || '—') +
             fact('Matches', matchRecords.length) +
-            fact('Points', _computeAchievementPoints(counted));
+            fact('Points', _computeAchievementPoints(counted)) +
+            fact('Winner', escHtml(_winnerName(counted)) || '—');
 
         // Create the table instance once, reuse on subsequent calls
         if (!_matchTable) {

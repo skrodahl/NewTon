@@ -52,6 +52,15 @@
 - In-app help for Registration rewritten. About 430 lines of old Registration CSS removed from `styles.css` (layout, player cards, saved-player items, `.scrollable-column`, `.two-column-container`, `.btn-small`), keeping the `.results-table` styles the statistics dialog uses.
 - Files changed: `css/registration-page.css` (new), `tournament.html` (Registration markup, late-registration text, stylesheet link), `js/player-management.js` (`renderRegistrationNext()` new; `updateRegistrationPageLayout()`, `renderPlayerList()`, `updatePlayersDisplay()`, `updatePlayerCount()`, `addPlayer()`, `togglePaid()`, `showLateRegInfoModal()`; `removePlayerFromTournament()` removed), `js/dynamic-help-system.js`, `js/analytics.js` (comment), `css/styles.css`.
 
+### Analytics: new content
+
+- **Dashboard:** under the tiles, the Leaderboard's top 10 (click a player to open their profile) and the latest ten tournaments with their winner (click one to open it in the Register).
+- **Player profile:** one ticked player now shows their Leaderboard figures (points, played, matches, legs, average, best out, best leg, 180s, high outs, short legs), their rank in the lens, how often they finished 1st to 7th–8th, and every tournament they played with their placing, 180s, match W–L and points (click one to open it). Comparing several players shows the same figures side by side; click one to see them alone.
+- **Winner** column in the Register's tournament list, and Winner in an opened tournament's facts.
+- **Leaderboard:** Points and Played come right after the player's name.
+- **One set of player figures:** the Leaderboard's per-player calculation is now `_computePlayerRows()`, used by the Leaderboard, the Dashboard's top 10 and the Players list and profile. The Players list had its own count of tournaments and W–L; it now uses the same rows, so all views agree. The rows also carry one entry per tournament (placing, stats, points, W–L), which the profile lists.
+- Files changed: `js/newton-history.js` (`_computePlayerRows()`, `_dashboardPanels()`, `_renderProfile()`, `_winnerName()` new), `css/analytics-page.css`, `js/dynamic-help-system.js`.
+
 ### Analytics redesign
 
 - **The Analytics page is rebuilt in the new design language**, at the wide page width (mockup: https://claude.ai/artifact/3L3xkvRYMGJLcXyCGCatdZ). It shows the same things; new content (Dashboard top 10 and latest tournaments, a fuller player profile, a Winner column, Points and Played next to the name) follows separately.
