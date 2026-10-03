@@ -149,7 +149,7 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Setting Up Your Tournament:</strong></p>
                     <ol>
-                        <li>Click "<strong>Match Controls</strong>" button (top-left)</li>
+                        <li>Click "<strong>Match Controls</strong>" in the header</li>
                         <li>Use the Setup Command Center to manage players and tournament</li>
                         <li>Add players directly in Match Controls or navigate to Registration page</li>
                         <li>Toggle player paid status by clicking on player names</li>
@@ -173,49 +173,44 @@ const HELP_CONTENT = {
             navigation: {
                 title: "Bracket Navigation & Quick Access",
                 content: `
-                    <p><strong>Top-Left Navigation Buttons:</strong></p>
+                    <p><strong>Header:</strong></p>
                     <ul>
-                        <li><strong>Leaderboard (≡):</strong> View tournament leaderboard, rankings, and detailed results</li>
-                        <li><strong>Match Controls (➹):</strong> Manage LIVE and ready matches - start, complete, assign lanes/referees</li>
-                        <li><strong>Setup (⬅):</strong> Return to Setup page for tournament management</li>
-                        <li><strong>Registration (⬅):</strong> Navigate to Registration page to manage players</li>
-                        <li><strong>Config (⬅):</strong> Access Config page for point values and match formats</li>
-                        <li><strong>Chalker:</strong> Open the Chalker scoring app in a new tab</li>
+                        <li><strong>Left:</strong> tournament name and date, and links to <strong>Setup</strong>, <strong>Registration</strong>, <strong>Config</strong> and <strong>Analytics</strong> (plus <strong>Console</strong> when the Developer Console is enabled in Config)</li>
+                        <li><strong>Centre:</strong> <strong>Match Controls</strong> and <strong>Leaderboard</strong></li>
+                        <li><strong>Right:</strong> <strong>Finals Right | Middle</strong>, <strong>Fit all</strong>, zoom (− / +) and the clock</li>
+                        <li><strong>Status line:</strong> players, matches played, walkovers, live and ready, with the colour legend</li>
                     </ul>
-                    <p><strong>Bracket Controls:</strong></p>
+                    <p><strong>Moving around:</strong></p>
                     <ul>
-                        <li><strong>Mouse:</strong> Click and drag to pan around the bracket</li>
-                        <li><strong>Zoom:</strong> Use + and - buttons or mouse wheel</li>
-                        <li><strong>Hover Zoom:</strong> When zoomed out, hover over any match for 1 second to automatically scale it to readable size</li>
-                        <li><strong>Reset (⌂):</strong> Return to default view</li>
+                        <li><strong>Pan:</strong> drag the bracket</li>
+                        <li><strong>Zoom:</strong> scroll or pinch, at the pointer. <strong>Fit all</strong> shows the whole bracket, and is as far out as you can go</li>
+                        <li><strong>Hover a match:</strong> zoomed out, it is magnified; zoomed in, a tip shows where the winner and loser go</li>
                     </ul>
-                    <p><strong>Developer Console:</strong></p>
+                    <p><strong>Selecting a match (double elimination):</strong></p>
                     <ul>
-                        <li><strong>Enable in Config page:</strong> Turn on "Enable Developer Console"</li>
-                        <li><strong>Access:</strong> Click <strong>Console</strong> in the Tournament page header (after Analytics)</li>
-                        <li><strong>Features:</strong> Real-time statistics, validation checks, lane usage monitoring, transaction management, and developer commands</li>
+                        <li><strong>Click a match</strong> to highlight its lines and the matches it is connected to. The view follows if they are off-screen; markers at the edge point to the rest</li>
+                        <li><strong>Follow [player]</strong> traces that player through the bracket. Click it again to stop</li>
+                        <li><strong>Undo match</strong> appears when the result can be undone</li>
+                        <li><strong>Match Controls</strong> opens Match Controls</li>
+                        <li>Click empty space or press <strong>Esc</strong> to clear the selection</li>
                     </ul>
-                    <p><strong>💡 Tip:</strong> Use the top-left navigation buttons to quickly access other pages without leaving the bracket view.</p>
+                    <p><strong>Finals Right | Middle:</strong> the finals at the right edge, or in the middle between the frontside and backside. Also in Config → User Interface.</p>
                 `
             },
             matches: {
                 title: "Match Management",
                 content: `
-                    <p><strong>Match States:</strong></p>
+                    <p><strong>Match Colours:</strong></p>
                     <ul>
-                        <li><strong>Grey (Pending):</strong> Waiting for players to advance</li>
-                        <li><strong>Yellow (Ready):</strong> Both players determined, can start</li>
-                        <li><strong>Orange (Live):</strong> Match is currently active</li>
-                        <li><strong>Green (Completed):</strong> Winner has been selected</li>
+                        <li><strong>Dashed grey (Waiting):</strong> players not decided yet; empty slots say where they come from</li>
+                        <li><strong>Yellow (Ready):</strong> both players known, can start</li>
+                        <li><strong>Orange (Live):</strong> being played</li>
+                        <li><strong>Green (Completed):</strong> winner highlighted, with the leg score when entered</li>
+                        <li><strong>Faded (Walkover):</strong> advanced automatically</li>
+                        <li><strong>Orange dot:</strong> throws first</li>
                     </ul>
-                    <p><strong>Starting Matches:</strong></p>
-                    <ol>
-                        <li>Click "<strong>Start</strong>" button on ready matches</li>
-                        <li>Match becomes LIVE</li>
-                        <li>Assign lane number (optional)</li>
-                        <li>Select referee from dropdown (optional)</li>
-                    </ol>
-                    <p><strong>Chalker QR:</strong> Click the QR button on any LIVE match card to generate an assignment QR. The Chalker scans it to receive player names, format, and lane/referee automatically.</p>
+                    <p><strong>Running Matches:</strong> matches are run from <strong>Match Controls</strong>: start, lane, referee, winner and Chalker handover. The bracket shows where things stand.</p>
+                    <p><strong>Chalker QR:</strong> click <strong>QR</strong> on a LIVE match in Match Controls. The Chalker scans it to receive player names, format, and lane/referee automatically.</p>
                 `
             },
             completion: {
@@ -223,21 +218,18 @@ const HELP_CONTENT = {
                 content: `
             <p><strong>Selecting Winners:</strong></p>
             <ol>
-                <li>Click on winner's name in LIVE match</li>
+                <li>In Match Controls, click <strong>[Player] Wins</strong> on the LIVE match</li>
                 <li>Enter leg scores (optional but recommended)</li>
                 <li>Click "<strong>Confirm Winner</strong>"</li>
             </ol>
             <p><strong>Scan Results QR:</strong> If the match was scored on the Chalker, click <strong>Scan Results QR</strong> in the confirmation dialog to import the result and player achievements directly from the Chalker's QR code — no manual entry needed.</p>
             <p><strong>Correcting Match Results:</strong></p>
             <ul>
-                <li><strong>Hover over completed matches</strong> to see if undo is available</li>
-                <li><strong>Click the undo symbol (↺)</strong> to reverse that specific match</li>
-                <li><strong>Only safe matches show the undo option</strong> - no downstream matches completed</li>
-                <li><strong>Safety protection</strong> prevents accidentally undoing large portions of the tournament</li>
-                <li><strong>Multi-step correction</strong> allows undoing several matches by working backwards through the bracket</li>
-                <li><strong>Perfect for late discoveries</strong> - fix errors found well into the tournament</li>
+                <li><strong>Select the match</strong> in the bracket and click <strong>Undo match</strong> (single elimination: click the ↺ on the winner)</li>
+                <li><strong>Only safe matches can be undone</strong> - none of the matches it feeds may be live or played</li>
+                <li><strong>Multi-step correction:</strong> undo several matches by working backwards through the bracket</li>
             </ul>
-            <p><strong>💡 Tips:</strong> The undo symbol only appears when safe to use. Great for 32-player tournaments where mistakes might be discovered late.</p>
+            <p><strong>💡 Tip:</strong> Undo match only appears when it is safe to use.</p>
             `
             },
             lanes: {
@@ -245,7 +237,7 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Assigning Lanes/Referees:</strong></p>
                     <ul>
-                        <li>Use lane/referee dropdown (L)/(Ref) in each match</li>
+                        <li>Use the <strong>Lane</strong> and <strong>Referee</strong> dropdowns on each match in Match Controls</li>
                         <li>System prevents multiple matches with same lane/referee</li>
                         <li>Players in LIVE matches cannot be selected as referees</li>
                         <li>Players in LIVE matches may be selected as referees in their own match</li>
@@ -253,6 +245,7 @@ const HELP_CONTENT = {
                         <li>Lane/referee history is retained for completed matches</li>
                         <li>Configure max lanes in Config page</li>
                     </ul>
+                    <p><strong>In the bracket:</strong> a live match shows its lane (L1, L2 …); hover it to see the referee.</p>
                     <p><strong>QR Integration:</strong> When a lane or referee is assigned, it is automatically included in the Chalker assignment QR code. The Chalker displays the lane in its info bar and the referee name throughout the match.</p>
                     <p><strong>💡 Tip:</strong> Assign lanes to organize physical dartboard usage and avoid conflicts.</p>
                 `
@@ -262,9 +255,8 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Accessing Match Controls:</strong></p>
                     <ul>
-                        <li>Click the "<strong>Match Controls (➹)</strong>" button in the bracket toolbar</li>
-                        <li>Centralized command center for all match management</li>
-                        <li>Stay in one interface instead of clicking individual matches</li>
+                        <li>Click <strong>Match Controls</strong> in the header, or in the selection bar after clicking a match</li>
+                        <li>The one place where matches are run</li>
                     </ul>
                     <p><strong>Interface Organization:</strong></p>
                     <ul>
@@ -377,6 +369,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Winner Confirmation:</strong> Enable/disable confirmation dialogs (disabling skips match result and statistics entry)</li>
                         <li><strong>Match Controls Auto-Open:</strong> Automatically show Command Center when entering Tournament page</li>
+                        <li><strong>Finals position in the bracket:</strong> Right or Middle (double elimination). The same setting as the Finals toggle in the bracket header</li>
                     </ul>
                     <p><strong>Developer Console:</strong></p>
                     <ul>
