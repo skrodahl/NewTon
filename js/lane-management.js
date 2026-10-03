@@ -155,31 +155,15 @@ function generateLaneOptions(currentMatchId, currentLane = null) {
 }
 
 /**
- * Refresh lane dropdowns for all visible matches
+ * Refresh the lane dropdowns in Match Controls, so a lane in use is not offered twice.
+ * @returns {void}
  */
 function refreshAllLaneDropdowns() {
     if (!matches || matches.length === 0) return;
 
     matches.forEach(match => {
-        // Check both bracket matches and command center matches
-        const bracketElement = document.getElementById(`bracket-match-${match.id}`);
+        // The lane dropdowns live in Match Controls (the bracket's cards have none)
         const commandCenterElement = document.getElementById(`cc-match-card-${match.id}`);
-
-        // Update bracket dropdown if it exists
-        if (bracketElement) {
-            const dropdown = bracketElement.querySelector('select[onchange*="updateMatchLane"]');
-            if (dropdown) {
-                const currentValue = dropdown.value;
-                dropdown.innerHTML = generateLaneOptions(match.id, match.lane);
-
-                // Maintain selection if still valid
-                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
-                    dropdown.value = currentValue;
-                }
-            }
-        }
-
-        // Update command center dropdown if it exists
         if (commandCenterElement) {
             const dropdown = commandCenterElement.querySelector('select[onchange*="updateMatchLane"]');
             if (dropdown) {
@@ -372,53 +356,6 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
 }
 
 /**
- * Enhanced match lane update function with conflict checking
- */
-function updateMatchLaneWithValidation(matchId, newLane) {
-    const match = matches.find(m => m.id === matchId);
-    if (!match) {
-        console.error(`Match ${matchId} not found`);
-        return false;
-    }
-
-    const lane = newLane ? parseInt(newLane) : null;
-
-    // If removing lane assignment, just clear it
-    if (!lane) {
-        match.lane = null;
-        saveTournament();
-        return true;
-    }
-
-    // Check for conflicts with other LIVE matches
-    if (isLaneInUse(lane, matchId)) {
-        alert(`Lane ${lane} is already in use by another LIVE match`);
-
-        // Reset dropdown to previous value
-        const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchLane"]`);
-        if (dropdown) {
-            dropdown.value = match.lane || '';
-        }
-
-        return false;
-    }
-
-    // Update the lane
-    const oldLane = match.lane;
-    match.lane = lane;
-
-    console.log(`Lane updated for ${matchId}: ${oldLane} → ${lane}`);
-
-    // Save and refresh UI
-    saveTournament();
-
-    // Refresh lane dropdowns for all matches to show updated availability
-    refreshAllLaneDropdowns();
-
-    return true;
-}
-
-/**
  * Check if a player is available as referee for a specific match
  */
 function isPlayerAvailableAsReferee(playerId, excludeMatchId = null) {
@@ -431,86 +368,36 @@ function isPlayerAvailableAsReferee(playerId, excludeMatchId = null) {
 }
 
 /**
- * Refresh referee dropdowns for all visible matches
+ * Refresh the referee dropdowns in Match Controls, so a referee already assigned is not offered twice.
+ * @returns {void}
  */
 function refreshAllRefereeDropdowns() {
     if (!matches || matches.length === 0) return;
 
     matches.forEach(match => {
-        const matchElement = document.getElementById(`bracket-match-${match.id}`);
-        if (matchElement) {
-            const dropdown = matchElement.querySelector('select[onchange*="updateMatchReferee"]');
-            if (dropdown) {
-                const currentValue = dropdown.value;
-                dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
+        // The referee dropdowns live in Match Controls (the bracket's cards have none)
+        const commandCenterElement = document.getElementById(`cc-match-card-${match.id}`);
+        if (!commandCenterElement) return;
+        const dropdown = commandCenterElement.querySelector('select[onchange*="updateMatchReferee"]');
+        if (!dropdown) return;
+        const currentValue = dropdown.value;
+        dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
 
-                // Maintain selection if still valid
-                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
-                    dropdown.value = currentValue;
-                }
-            }
+        // Maintain selection if still valid
+        if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
+            dropdown.value = currentValue;
         }
     });
-}
-
-/**
- * Refresh a specific lane dropdown with current conflict detection
- */
-function refreshLaneDropdown(matchId) {
-    const matchElement = document.getElementById(`bracket-match-${matchId}`);
-    if (!matchElement) return;
-    
-    const dropdown = matchElement.querySelector('select[onchange*="updateMatchLane"]');
-    if (!dropdown) return;
-    
-    // Get current match data
-    const match = matches.find(m => m.id === matchId);
-    if (!match) return;
-    
-    // Generate fresh options with current conflict detection
-    const currentValue = dropdown.value;
-    dropdown.innerHTML = generateLaneOptions(matchId, match.lane);
-    
-    // Restore selection if still valid, otherwise clear it
-    if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
-        dropdown.value = currentValue;
-    } else {
-        dropdown.value = match.lane || '';
-    }
-}
-
-function refreshRefereeDropdown(matchId) {
-    console.log('DEBUG: refreshRefereeDropdown called for', matchId);
-    const matchElement = document.getElementById(`bracket-match-${matchId}`);
-    if (!matchElement) return;
-    
-    const dropdown = matchElement.querySelector('select[onchange*="updateMatchReferee"]');
-    if (!dropdown) return;
-    
-    const match = matches.find(m => m.id === matchId);
-    if (!match) return;
-    
-    const currentValue = dropdown.value;
-    console.log('DEBUG: About to call generateRefereeOptionsWithConflicts');
-    dropdown.innerHTML = generateRefereeOptionsWithConflicts(matchId, match.referee);
-    
-    if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
-        dropdown.value = currentValue;
-    } else {
-        dropdown.value = match.referee || '';
-    }
 }
 
 // Make functions globally available
 if (typeof window !== 'undefined') {
     window.getAvailableLanes = getAvailableLanes;
     window.isLaneInUse = isLaneInUse;
-    window.updateMatchLaneWithValidation = updateMatchLaneWithValidation;
     window.toggleActiveWithLaneValidation = toggleActiveWithLaneValidation;
     window.showLaneUsage = showLaneUsage;
     window.debugLaneManagement = debugLaneManagement;
     window.refreshAllLaneDropdowns = refreshAllLaneDropdowns;
+    window.refreshAllRefereeDropdowns = refreshAllRefereeDropdowns;
     window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
-    window.refreshLaneDropdown = refreshLaneDropdown;
-    window.refreshRefereeDropdown = refreshRefereeDropdown;
 }

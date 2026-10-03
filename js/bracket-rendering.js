@@ -282,7 +282,8 @@ function updateMatchReferee(matchId, refereeId) {
         const currentRefereeId = match.referee;
         if (refereeId !== currentRefereeId && !isPlayerAvailableAsReferee(refereeId, matchId)) {
             alert('This referee is already assigned to another match or currently playing.');
-            const dropdown = document.querySelector(`#bracket-match-${matchId} select[onchange*="updateMatchReferee"]`);
+            // Put the Match Controls dropdown back to the current referee
+            const dropdown = document.querySelector(`#cc-match-card-${matchId} select[onchange*="updateMatchReferee"]`);
             if (dropdown) dropdown.value = currentRefereeId || '';
             return false;
         }
@@ -308,8 +309,8 @@ function updateMatchReferee(matchId, refereeId) {
 
     saveTournament();
 
-    // Re-render bracket to update referee conflict indicators. This rebuilds every
-    // referee dropdown, so a separate refreshAllRefereeDropdowns() call is redundant.
+    // Re-render the bracket to update referee conflict markers; Match Controls (below)
+    // rebuilds its own referee dropdowns
     renderBracket();
 
     // Refresh Match Controls if it is open
@@ -323,55 +324,6 @@ function updateMatchReferee(matchId, refereeId) {
     }
 
     return true;
-}
-
-function refreshAllRefereeDropdowns() {
-    if (!matches) return;
-    matches.forEach(match => {
-        // Check both bracket matches and command center matches
-        const bracketElement = document.getElementById(`bracket-match-${match.id}`);
-        const commandCenterElement = document.getElementById(`cc-match-card-${match.id}`);
-
-        // Update bracket dropdown if it exists
-        if (bracketElement) {
-            const dropdown = bracketElement.querySelector('select[onchange*="updateMatchReferee"]');
-            if (dropdown) {
-                const currentValue = dropdown.value;
-                dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
-                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
-                    dropdown.value = currentValue;
-                }
-            }
-        }
-
-        // Update command center dropdown if it exists
-        if (commandCenterElement) {
-            const dropdown = commandCenterElement.querySelector('select[onchange*="updateMatchReferee"]');
-            if (dropdown) {
-                const currentValue = dropdown.value;
-                dropdown.innerHTML = generateRefereeOptionsWithConflicts(match.id, match.referee);
-                if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
-                    dropdown.value = currentValue;
-                }
-            }
-        }
-    });
-}
-
-function refreshRefereeDropdown(matchId) {
-    const matchElement = document.getElementById(`bracket-match-${matchId}`);
-    if (!matchElement) return;
-    const dropdown = matchElement.querySelector('select[onchange*="updateMatchReferee"]');
-    if (!dropdown) return;
-    const match = matches.find(m => m.id === matchId);
-    if (!match) return;
-    const currentValue = dropdown.value;
-    dropdown.innerHTML = generateRefereeOptionsWithConflicts(matchId, match.referee);
-    if (dropdown.querySelector(`option[value="${currentValue}"]`)) {
-        dropdown.value = currentValue;
-    } else {
-        dropdown.value = match.referee || '';
-    }
 }
 
 /**
@@ -700,8 +652,6 @@ if (typeof window !== 'undefined') {
     // Original functions needed by HTML
     window.updateMatchReferee = updateMatchReferee;
     window.generateRefereeOptionsWithConflicts = generateRefereeOptionsWithConflicts;
-    window.refreshRefereeDropdown = refreshRefereeDropdown;
-    window.refreshAllRefereeDropdowns = refreshAllRefereeDropdowns;
     window.getAssignedReferees = getAssignedReferees;
     window.getPlayersInLiveMatches = getPlayersInLiveMatches;
     window.isPlayerAvailableAsReferee = isPlayerAvailableAsReferee;

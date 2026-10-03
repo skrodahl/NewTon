@@ -2008,8 +2008,10 @@ function updateMatchLane(matchId, newLane) {
         refreshAllLaneDropdowns();
     }
 
-    // Note: No renderBracket() call needed - dropdown refresh is sufficient
-    // and prevents losing match card hover zoom state
+    // Redraw the bracket so the match's lane label (L1, L2 …) shows the new lane
+    if (typeof renderBracket === 'function') {
+        renderBracket();
+    }
 
     // Refresh Match Controls if it's open
     const modal = document.getElementById('matchCommandCenterModal');
