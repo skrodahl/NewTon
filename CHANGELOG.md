@@ -1,3 +1,14 @@
+## Unreleased
+
+### New bracket view (double elimination) — in progress
+
+- **Double-elimination brackets are drawn by a new bracket view.** The layout is derived from the progression table instead of being written out per bracket size, so 8, 16 and 32 players share one set of rules and one card. Fit all shows the whole bracket on one page and is the furthest you can zoom out; scroll (or pinch) zooms at the cursor and dragging pans, and the bracket can't be dragged off-screen. Hovering a match magnifies it when zoomed out, or shows where its winner and loser go when zoomed in. Clicking a match selects it and highlights its lines, with markers pointing to connected matches that are off-screen; **Follow** traces a player through the bracket. The finals can sit on the right, as before, or in the middle (**Finals: Right | Middle**, remembered in the global config as `ui.bracketFinals`; missing means right).
+- **The bracket page has a header instead of floating buttons.** Tournament name and date, Leaderboard and Match Controls, links to Setup, Registration, Config and Analytics, the Finals toggle, Fit all and zoom, then a status line (players, matches, played, walkovers, live, ready) and a legend. The CAD info box and the bottom watermark line are gone from the bracket page, as is the hover status text in the bottom centre.
+- **Cards have no controls.** Lane, referee, start and winner are handled in Match Controls. **Undo is not available from the bracket for now**: it used to be reached by clicking the winner on the card, and returns with the planned match panel.
+- Single elimination is unchanged and still uses the classic renderer (inside the new header). It moves to the new view in a later step, after which the classic double-elimination rendering code is removed.
+
+  Files changed: `js/bracket-view.js` (new), `css/bracket-view.css` (new), `js/bracket-rendering.js` (`renderBracket()`, `renderCleanBracket()` hand double elimination to the new view; zoom, pan and drag functions defer to it), `tournament.html` (bracket page header replaces the floating controls and watermarks; new stylesheet and script), `Docs/BRACKET-REDESIGN.md`
+
 ## **v5.1.9** — Every Chalker Needs an Eraser (2026-09-27)
 
 ### Analytics: achievement corrections (Docker only)

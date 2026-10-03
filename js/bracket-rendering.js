@@ -58,10 +58,15 @@ function renderBracket() {
     const canvas = document.getElementById('bracketCanvas');
     if (!canvas) return;
 
+    BracketView.updateHeader();
+
     if (!tournament || !tournament.bracket) {
+        BracketView.deactivate();
         document.getElementById('bracketMatches').innerHTML = '<p style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); color: #333;">No bracket generated yet</p>';
         return;
     }
+    // Double elimination is drawn by BracketView (js/bracket-view.js), which owns its camera
+    if (!BracketView.isActive()) BracketView.deactivate();
 
     clearBracket();
 
@@ -87,6 +92,8 @@ function renderBracket() {
             console.log('Application configuration restored');
         }
     }, 300);
+
+    if (BracketView.isActive()) return;
 
     // Set default zoom and position for initial bracket render
     if (initialBracketRender && tournament && tournament.bracket) {
@@ -132,6 +139,12 @@ function renderCleanBracket() {
     // SE uses its own rendering path — DE path completely untouched
     if (tournament.format === 'SE') {
         renderSEBracket();
+        return;
+    }
+
+    // Double elimination: the bracket view lays out, draws and frames the whole bracket
+    if (BracketView.isActive()) {
+        BracketView.render();
         return;
     }
 
@@ -1714,6 +1727,7 @@ function getButtonClickHandler(matchState, matchId) {
 // ZOOM AND PAN FUNCTIONALITY
 
 function handleZoom(e) {
+    if (BracketView.isActive()) return; // the bracket view handles its own zoom
     e.preventDefault();
     const viewport = document.getElementById('bracketViewport');
     const rect = viewport.getBoundingClientRect();
@@ -1736,6 +1750,7 @@ function handleZoom(e) {
 }
 
 function zoomIn() {
+    if (BracketView.isActive()) { BracketView.zoomIn(); return; }
     const viewport = document.getElementById('bracketViewport');
     const centerX = viewport.clientWidth / 2;
     const centerY = viewport.clientHeight / 2;
@@ -1748,6 +1763,7 @@ function zoomIn() {
 }
 
 function zoomOut() {
+    if (BracketView.isActive()) { BracketView.zoomOut(); return; }
     const viewport = document.getElementById('bracketViewport');
     const centerX = viewport.clientWidth / 2;
     const centerY = viewport.clientHeight / 2;
@@ -1760,6 +1776,7 @@ function zoomOut() {
 }
 
 function resetZoom() {
+    if (BracketView.isActive()) { BracketView.fitAll(); return; }
     // Set zoom and pan based on current bracket format and size
     if (tournament && tournament.bracketSize) {
         const view = getDefaultView(tournament.format, tournament.bracketSize);
@@ -1781,9 +1798,12 @@ function updateCanvasTransform() {
     if (canvas) {
         canvas.style.transform = `translate(${panOffset.x}px, ${panOffset.y}px) scale(${zoomLevel})`;
     }
+    const zoomOutput = document.getElementById('bvZoom');
+    if (zoomOutput) zoomOutput.textContent = Math.round(zoomLevel * 100) + '%';
 }
 
 function startDrag(e) {
+    if (BracketView.isActive()) return; // the bracket view handles its own panning
     // Don't start drag if clicking on interactive elements
     if (e.target.closest('.bracket-match button') ||
         e.target.closest('.bracket-match select') ||
@@ -1802,13 +1822,14 @@ function startDrag(e) {
 }
 
 function handleDrag(e) {
-    if (!isDragging) return;
+    if (!isDragging || BracketView.isActive()) return;
     panOffset.x = e.clientX - dragStart.x;
     panOffset.y = e.clientY - dragStart.y;
     updateCanvasTransform();
 }
 
 function endDrag() {
+    if (BracketView.isActive()) return;
     isDragging = false;
     document.body.style.cursor = 'grab';
 }

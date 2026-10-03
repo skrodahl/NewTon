@@ -12,6 +12,7 @@
     <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="css/styles.css">
+    <link rel="stylesheet" href="css/bracket-view.css">
 
     <!-- Docker Configuration (only executes when served via PHP) -->
     <script><?php
@@ -255,58 +256,49 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <!-- Tournament Page -->
         <div id="tournament" class="page">
             <div class="bracket-container">
-                <div class="bracket-controls">
-                    <!-- Top row -->
-                    <div class="bracket-controls-top">
-                        <div class="bracket-controls-top-left">
-                            <button class="zoom-btn nav-btn analytics-back-btn" onclick="exitAnalyticsBracketPreview();" title="Return to Analytics"><span class="nav-arrow">⬅</span><span class="nav-text">Analytics</span></button>
-                            <button class="zoom-btn nav-btn" onclick="showStatisticsModal()"
-                                title="View tournament statistics and rankings"><span class="nav-icon">≡</span><span class="nav-text">Leaderboard</span></button>
-                            <button class="zoom-btn match-controls-btn nav-btn" onclick="showMatchCommandCenter()"
-                                title="Show LIVE and UPCOMING matches"><span class="nav-icon">➹</span><span class="nav-text">Match Controls</span></button>
+                <header class="bv-header">
+                    <div class="bv-header-row">
+                        <div class="bv-title-block">
+                            <div class="bv-title" id="bvTitle">No tournament</div>
+                            <div class="bv-subtitle" id="bvSubtitle"></div>
                         </div>
-                        <div class="bracket-controls-top-right">
-                            <button class="zoom-btn" onclick="zoomOut()" title="Zoom Out">−</button>
-                        </div>
-                    </div>
-
-                    <!-- Middle row -->
-                    <div class="bracket-controls-middle">
-                        <div class="bracket-controls-middle-left">
-                            <button class="zoom-btn nav-btn" onclick="showPage('setup')"
-                                title="Return to Setup page"><span class="nav-arrow">⬅</span><span class="nav-text">Setup</span></button>
-                            <button class="zoom-btn nav-btn" onclick="showPage('registration')"
-                                title="Exit Tournament to edit statistics and see current results"><span class="nav-arrow">⬅</span><span class="nav-text">Registration</span></button>
-                            <button class="zoom-btn nav-btn" onclick="showPage('config')"
-                                title="Open Config page"><span class="nav-arrow">⬅</span><span class="nav-text">Config</span></button>
-                            <button class="zoom-btn nav-btn" onclick="showPage('history')"
-                                title="Open Analytics page"><span class="nav-arrow">⬅</span><span class="nav-text">Analytics</span></button>
-                        </div>
-                        <div class="bracket-controls-middle-right">
-                            <button class="zoom-btn" onclick="resetZoom()" title="Reset Zoom">⌂</button>
-                            <button class="zoom-btn" onclick="zoomIn()" title="Zoom In">+</button>
-                        </div>
-                    </div>
-
-                    <!-- Bottom row -->
-                    <div class="bracket-controls-bottom">
-                        <div class="bracket-controls-bottom-left">
-                            <!-- Empty - Players/Points moved to middle row -->
-                        </div>
-                        <div class="bracket-controls-bottom-right">
-                            <!-- Empty - zoom in moved to middle row -->
+                        <nav class="bv-nav">
+                            <button type="button" class="bv-btn bv-nav-btn analytics-back-btn" onclick="exitAnalyticsBracketPreview();" title="Return to Analytics">⬅ Analytics</button>
+                            <button type="button" class="bv-btn bv-nav-btn" onclick="showStatisticsModal()" title="View tournament statistics and rankings">Leaderboard</button>
+                            <button type="button" class="bv-btn bv-btn-primary bv-nav-btn" onclick="showMatchCommandCenter()" title="Show LIVE and UPCOMING matches">Match Controls</button>
+                            <span class="bv-links">
+                                <button type="button" class="bv-link bv-nav-btn" onclick="showPage('setup')" title="Return to Setup page">Setup</button>
+                                <button type="button" class="bv-link bv-nav-btn" onclick="showPage('registration')" title="Exit Tournament to edit statistics and see current results">Registration</button>
+                                <button type="button" class="bv-link bv-nav-btn" onclick="showPage('config')" title="Open Config page">Config</button>
+                                <button type="button" class="bv-link bv-nav-btn" onclick="showPage('history')" title="Open Analytics page">Analytics</button>
+                            </span>
+                        </nav>
+                        <div class="bv-tools">
+                            <div class="bv-seg" id="bvFinals" hidden>
+                                <span class="bv-seglabel">Finals</span>
+                                <button type="button" data-finals="right" aria-pressed="true" onclick="BracketView.setFinals('right')">Right</button>
+                                <button type="button" data-finals="middle" aria-pressed="false" onclick="BracketView.setFinals('middle')">Middle</button>
+                            </div>
+                            <button type="button" class="bv-btn" onclick="resetZoom()" title="Fit the whole bracket">Fit all</button>
+                            <div class="bv-seg bv-zoom">
+                                <button type="button" onclick="zoomOut()" title="Zoom out" aria-label="Zoom out">−</button>
+                                <output id="bvZoom">100%</output>
+                                <button type="button" onclick="zoomIn()" title="Zoom in" aria-label="Zoom in">+</button>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <div class="bracket-watermarks">
-                    <div class="watermark-left" id="watermark-left">
+                    <div class="bv-header-row bv-status-row">
+                        <div class="bv-status" id="bvStatus"></div>
+                        <div class="bv-legend">
+                            <span><i class="bv-sw bv-sw-live"></i>Live</span>
+                            <span><i class="bv-sw bv-sw-ready"></i>Ready</span>
+                            <span><i class="bv-sw bv-sw-done"></i>Completed</span>
+                            <span><i class="bv-sw bv-sw-pending"></i>Waiting</span>
+                            <span><i class="bv-sw bv-sw-walkover"></i>Walkover</span>
+                            <span><i class="bv-throw"></i>Throws first</span>
+                        </div>
                     </div>
-                    <div class="watermark-center" id="watermark-center">
-                    </div>
-                    <div class="watermark-right" id="watermark-right">
-                        No Tournament
-                    </div>
-                </div>
+                </header>
 
                 <div class="bracket-viewport" id="bracketViewport">
                     <div class="bracket-canvas" id="bracketCanvas">
@@ -1305,6 +1297,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/clean-match-progression.js"></script>
         <script src="js/bracket-lines.js"></script>
         <script src="js/bracket-rendering.js"></script>
+        <script src="js/bracket-view.js"></script>
         <script src="js/newton-csv.js"></script>
         <script src="js/results-config.js"></script>
         <script src="js/dynamic-help-system.js"></script>

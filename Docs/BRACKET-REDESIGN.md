@@ -1,9 +1,9 @@
 # Bracket Redesign - Design & Planning
 
-**Status:** Proposal. Layout agreed on an interactive mockup; no application code changed. Implementation not yet planned or approved.
+**Status:** Phase 1 implemented (double elimination drawn by `js/bracket-view.js`, new bracket page header), not yet released. Single elimination and the match panel are next. See [Implementation](#implementation).
 **Last Updated:** 3 October 2026
 
-Mockup (private artifact, version 13): https://claude.ai/artifact/2MW8SuVVN7kKVxeJbe2CbJ
+Mockup (private artifact, version 17): https://claude.ai/artifact/2MW8SuVVN7kKVxeJbe2CbJ
 
 ---
 
@@ -28,7 +28,7 @@ The redesign covers the bracket layout only. Match operations (declare winner, l
 | Colours | **Quiet.** Only live matches stand out. Round badges were removed as too busy. |
 | Card size | **The same card at every bracket size.** The spacing between cards grows to fill the page. Fit all never zooms past 100%. |
 | Hover | **Magnifies the match** when zoomed out, as today. When zoomed in, shows just where its players go. |
-| Click | **Selects the match**, as in the mockup: its lines and connected matches are highlighted until cleared. An **"Open match"** button in the selection bar opens the match modal. |
+| Click | **Selects the match**, as in the mockup: its lines and connected matches are highlighted until cleared. The selection bar will open the match panel (see [Match Operations](#match-operations)); until then matches are handled from Match Controls. |
 | Follow player | **Keep.** "Follow <player>" traces one player's path through the bracket and dims everything else. Confirmed as really useful. |
 | Card borders | Never thinner than 1px on screen (1.5px for live, ready and final), but no thicker when zoomed in. |
 
@@ -69,7 +69,7 @@ An earlier version stretched the card height (and name size) per window instead.
 
 The layout is the one part that depends on the tournament format. Everything around it is shared.
 
-- **Shared:** the card, the camera (fit, zoom, pan), the hover magnifier and progression tip, the selection bar (Follow player, Open match) and the match modal.
+- **Shared:** the card, the camera (fit, zoom, pan), the hover magnifier and progression tip, the selection bar (Follow player) and the match panel.
 - **Per format:** a layout function that takes the format's matches and returns positions, connections and labels in world coordinates. The rest of the screen only asks it where things go.
 
 Double elimination gets the butterfly described above; single elimination is its frontside alone. A future format can be drawn in a completely different way (a grid for round robin, columns that fill in as pairings are made for Swiss) without stretching this layout to fit it. Adding a format means writing one layout, not a new renderer.
@@ -91,7 +91,7 @@ Proposed 200 × 80, the same at every bracket size (today: 280 × 150).
   - Completed: green outline, green winner row, loser greyed. A player eliminated from the tournament is struck through.
   - Waiting: dashed grey border.
   - Walkover: faded.
-- **Throws first:** a small dot before the player who throws first. Whether the app has this data for every match is still to be checked.
+- **Throws first:** a small dot before player 1, who always throws first in this app (the classic card marked the same).
 
 ---
 
@@ -106,10 +106,12 @@ Proposed 200 × 80, the same at every bracket size (today: 280 × 150).
   - Top row: tournament name and date (and page navigation) on the left; Finals Right | Middle, Fit all and the zoom controls on the right.
   - Second row: a status line (players, matches, played, walkovers, live, ready) and the state legend.
   - No on-canvas usage hint ("Hover a match to magnify it · …"). It was redundant and covered the side labels; how to use the bracket belongs in the help system.
+  - Navigation lives in the header: Leaderboard and Match Controls as buttons (they open over the bracket), Setup, Registration, Config and Analytics as quieter links (they leave the page).
+  - The CAD info box and the bottom identity line are removed from the bracket page; the header carries the name and date, and the status line the counts. Clock, version and status were dropped for now, to reconsider later.
   - The mockup's Players 8 | 16 | 32 selector and the "cards … names …" figures are mockup-only and do not go into the app.
 - **Magnifier.** Hovering a match while zoomed out (below 90%) shows a full-size copy over it after a short delay, with its paths ("Winner → X · Loser → Y"). It ignores the pointer and is hidden while dragging or animating.
 - **Progression tip.** Hovering a match at 90% or more shows only the paths line, just below the card (above it near the bottom edge), since the card itself is already readable.
-- **Selection.** Clicking a match highlights its lines and connected matches. Off-screen connected matches get markers at the viewport edge; clicking a marker moves to that match. "Follow <player>" traces a player's path and dims everything else. The Follow buttons toggle in place, so the selection bar never changes under the pointer: click another player to switch, or the same one again to stop. "Open match" opens the match modal. Esc or a click on empty space clears the selection.
+- **Selection.** Clicking a match highlights its lines and connected matches. Off-screen connected matches get markers at the viewport edge; clicking a marker moves to that match. "Follow <player>" traces a player's path and dims everything else. The Follow buttons toggle in place, so the selection bar never changes under the pointer: click another player to switch, or the same one again to stop. Later, the bar will also open the match panel. Esc or a click on empty space clears the selection.
 
 ---
 
@@ -136,14 +138,19 @@ Today's figures use the zoom from `getDefaultView()` with 16px names. At 32 play
 
 ---
 
-## Match Operations (Direction, Not Decided)
+## Match Operations
 
-"Open match" in the selection bar opens a modal. The likely route is to reuse `createMatchCard()` from Match Controls (`bracket-rendering.js`), which already has the winner buttons (`completeMatchFromCommandCenter()` → winner confirmation), lane and referee selects, Start/Stop, QR, network transfer and result review. It would need:
+**Decided: a slide-in panel**, not a modal (as in the first mockup). About 360px wide, sliding in from the right over the bracket, so the bracket stays visible and the panel stays put while its contents change. Opened from the selection bar. Contents:
 
-- a **completed** state showing the score, with Undo through `isMatchUndoable()` → `handleSurgicalUndo()`
-- a **waiting** state showing where the players come from
+- Header: match ID, round · best of · state.
+- Players: for a live match, one button per player to declare the winner; otherwise names, with scores once played.
+- Lane and referee selects for ready and live matches.
+- Paths: where each player comes from and where the winner and loser go, as links to those matches.
+- One action: Start match (ready); Stop match plus the QR / Transfer / Result ✓ handover (live); Undo this result (completed).
 
-An alternative is a redesign of the Match Controls card itself. Either way, no new path for completing or undoing matches.
+Every control calls an existing function (`updateMatchLane()`, `updateMatchReferee()`, `toggleActiveWithValidation()`, `toggleActive()`, `completeMatchFromCommandCenter()`, `isMatchUndoable()` → `handleSurgicalUndo()`). The handover choice (QR, Transfer or Result ✓) currently sits inside `createMatchCard()` and would move into a small shared helper used by both. No new path for completing or undoing matches. Details to be settled once the new bracket is in place.
+
+**Until the panel exists:** matches are handled from Match Controls. There is no "Open match" button and **no undo from the bracket** (it was only reachable by clicking the winner on the old card).
 
 ---
 
@@ -221,16 +228,26 @@ Live, ready and waiting cards also have their own fills (`--live-fill`, `--ready
 
 ---
 
-## Implementation Outline (For Discussion)
+## Implementation
 
-Not approved. A rough order to discuss before any code changes:
+### Phases
 
-1. **Layout function.** Progression table + bracket size + finals position → world positions and bounds. Pure, no DOM. Chosen by format, so other formats can bring their own layout (see [Other Formats](#other-formats)).
-2. **Camera.** Fit, zoom at cursor, clamped pan, animate. Replaces `getDefaultView()`, `handleZoom()`, `zoomIn()`, `zoomOut()`, `resetZoom()`.
-3. **Cards.** New `renderMatch()` from the layout positions.
-4. **Lines.** One generic routine from the layout, replacing the per-size functions in `bracket-lines.js`.
-5. **Hover magnifier, selection bar (Follow, Open match) and the match modal.**
-6. **Finals toggle** on the bracket toolbar.
+1. **New bracket view for double elimination — done (unreleased).** `js/bracket-view.js` and `css/bracket-view.css`: layout from `getProgressionTable()`, camera, cards, lines, hover magnifier and progression tip, selection with edge markers, Follow, Finals Right | Middle. The bracket page header replaced the floating buttons and the CAD box (moved forward from the cosmetic phase so nothing floats over the bracket and Fit all can use the whole viewport).
+2. **Match panel** (see [Match Operations](#match-operations)), bringing back undo from the bracket.
+3. **Remove the classic double-elimination code:** the `render*Player*` functions, the DE half of `bracket-lines.js`, `getDefaultView()` for DE, and the old zoom and pan once single elimination no longer needs them.
+4. **Single-elimination layout** (4/8/16/32 with bronze) on the new view, then remove the rest of the classic renderer.
+5. **Cosmetic changes** (the maintainer's list).
+
+### How phase 1 fits into the existing code
+
+- `renderBracket()` and `renderCleanBracket()` stay the entry points, so their callers are unchanged. For double elimination `renderCleanBracket()` calls `BracketView.render()`; `renderBracket()` skips the classic default view and transform.
+- `handleZoom()`, `startDrag()`, `handleDrag()`, `endDrag()` return early, and `zoomIn()`, `zoomOut()`, `resetZoom()` forward to the view, while it is active. Single elimination keeps the classic behaviour.
+- The view re-renders on every `renderBracket()` and keeps the camera, selection and Follow. A different tournament, size or finals position clears the selection and fits again; a viewport resize only fits again.
+- Cards keep the `bracket-match-<id>` element ids. The lane and referee lookups in `lane-management.js` find no select inside them and return quietly.
+- The application signature (`#tournament-watermark`) is drawn below the last first-round match, where `renderBracket()`'s identity check expects it.
+- Player 1 throws first (the classic card marked the same), so the dot is always on the top row.
+- Finals position: `config.ui.bracketFinals` (`'right'` | `'middle'`), additive; missing means right.
+- Colour tokens are scoped to `.bracket-container` (`--bv-*`), light only. Mono font: the bundled Cascadia Code.
 
 ---
 
@@ -238,4 +255,3 @@ Not approved. A rough order to discuss before any code changes:
 
 - **Loser drops.** Today they are always drawn. In the mockup they appear only for the selected match. Is that enough?
 - **Screen.** What is the bracket actually run on at tournaments: laptop, TV, or both?
-- **Throws first.** Is the data available for every match, or should the dot go?
