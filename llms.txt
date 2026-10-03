@@ -39,12 +39,16 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - Multi-tournament support with JSON import/export and CSV results export
 - Persistent player registry across tournaments with paid/unpaid tracking and optional payment QR code
 - Non-power-of-two player counts fully supported (e.g. 6, 10, 20 players) with fair BYE distribution
+- One design across every page (v5.2.0+): Tournament Setup opens with the loaded tournament and its next step; Player Registration counts players, paid and unpaid and says what to do next; the Leaderboard looks the same on Registration and in the bracket
 - Dynamic context-sensitive help system
 - Survives browser restart and hard reload — all state persists in localStorage
 
 ## Analytics (v5.0.3+)
-- **Dashboard**: six live stat cards computed from IndexedDB — Tournaments, Matches, Players, 180s, Highest Checkout, Shortest Leg
-- **Control bar**: view tabs (Dashboard, Leaderboard, Players, Register) with point mode toggle (Original, Current, Custom)
+- **Dashboard**: seven stat tiles computed from IndexedDB — Tournaments, Matches, Players, Points, 180s, Highest Checkout, Shortest Leg — plus the Leaderboard's top 10 and the latest tournaments with their winners (v5.2.0+)
+- **Control strip**: view tabs (Dashboard, Leaderboard, Players, Register), point values (Original or Current) and the Ranking and Attendance point layers; under them, how many tournaments are counted and the Lens (name, date range, half-year buttons, Show all), which applies to every view (v5.2.0+)
+- **Leaderboard**: season standings across the selected tournaments — points, placements, achievements, personal bests, three-dart average (Chalker matches), match and leg W/L; CSV and JSON export
+- **Players**: tick one player for a profile (Leaderboard figures, rank, placement counts, every tournament played), several to compare (v5.2.0+)
+- **Phones** (v5.2.0+): Analytics, and the Club and Points settings, have a phone layout, for club members using a shared analytics-only instance. The rest of the app is a desktop app
 - **Register**: sortable, paginated tournament and match tables with persistent sort/page preferences
 - **Match detail**: two-line title, P1-score-P2 result with winner bold/loser muted, horizontal stats table (Short Legs, High Outs, 180s, Tons), Best of N and Manual/Chalker badges
 - **Backfill** (v5.0.4+): historical tournaments can be added to Analytics from Tournament Setup. Per-match achievements are reconstructed by diffing transaction history snapshots — works for manually scored v4 tournaments
@@ -56,7 +60,7 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - **Remote backup**: configure a remote NewTon instance URL with optional basic auth credentials. Auto-backup sends to both local and remote servers.
 - **Relay endpoint** (`api/relay.php`): PHP forwards uploads to remote servers with basic auth, bypassing browser CORS/preflight limitations. Docker-to-Docker communication.
 - **Backup to Server button**: modal with source choice (active tournament or from file), uploads to all configured destinations with per-destination success/failure summary.
-- **Shared Tournaments**: collapsed by default in Tournament Setup. Shows count, expands to full list. "Import" for new tournaments, "Re-import" for existing ones.
+- **Shared Tournaments**: the Server tab of Tournament Setup's tournament list (v5.2.0+). "Import" for new tournaments, "Re-import" for existing ones.
 
 ## Companion App: NewTon Chalker
 - Tablet-optimized x01 scoring app for referees at the dartboard

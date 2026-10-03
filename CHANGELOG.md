@@ -1,4 +1,4 @@
-## Unreleased
+## **v5.2.0** — New Flights, Same Arrows (2026-10-04)
 
 ### App header and footer
 
@@ -49,6 +49,7 @@
 - **Saved players** shows only the saved names not in the tournament, as chips: click a name to add the player, × to delete the name from the list. The separate "In Tournament" list is gone (the Players list shows them), and with it `removePlayerFromTournament()`. A paid player is now removed by marking them unpaid first.
 - **Payment QR** has its own panel, hidden when `images/payment.png` is missing.
 - **After the draw the Leaderboard takes the wide column**, with Export CSV / JSON in its header. Clicking a row still opens the statistics dialog.
+- **Fix: reloading the Registration page during a tournament showed the pre-draw layout.** The page was restored before the tournament had loaded; `autoLoadCurrentTournament()` now redoes the layout and the saved players once it has.
 - **Fix: "Player arrived late?" told you to click the version number** in the bracket's lower-right corner, which went with the CAD box in v5.1.10. It now points to the Console link in the bracket header.
 - In-app help for Registration rewritten. About 430 lines of old Registration CSS removed from `styles.css` (layout, player cards, saved-player items, `.scrollable-column`, `.two-column-container`, `.btn-small`), keeping the `.results-table` styles the statistics dialog uses.
 - Files changed: `css/registration-page.css` (new), `tournament.html` (Registration markup, late-registration text, stylesheet link), `js/player-management.js` (`renderRegistrationNext()` new; `updateRegistrationPageLayout()`, `renderPlayerList()`, `updatePlayersDisplay()`, `updatePlayerCount()`, `addPlayer()`, `togglePaid()`, `showLateRegInfoModal()`; `removePlayerFromTournament()` removed), `js/dynamic-help-system.js`, `js/analytics.js` (comment), `css/styles.css`.
