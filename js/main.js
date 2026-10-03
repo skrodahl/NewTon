@@ -611,6 +611,18 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
 }
 
 /**
+ * A match number as a tag that shows the side: frontside outlined, backside grey (as in the
+ * bracket), the Grand Final dark. Used by Match History and Analytics (css/components.css).
+ * @param {string} matchId - e.g. 'FS-2-1', 'BS-FINAL', 'GRAND-FINAL'
+ * @returns {string} HTML
+ */
+function matchIdTag(matchId) {
+    const id = String(matchId || '');
+    const side = id === 'GRAND-FINAL' ? ' nt-gf' : id.startsWith('BS-') ? ' nt-bs' : '';
+    return `<span class="nt-id${side}">${escapeHtml(id)}</span>`;
+}
+
+/**
  * Fill the Setup page's match history: the current tournament's completed matches, latest
  * first, one entry each (winner, score, then lane, referee and where both players went).
  * A played match opens its details; walkovers are greyed out, and walkovers between two
@@ -653,9 +665,7 @@ function updateMatchHistory() {
     matchResultsContainer.innerHTML = completedMatches.map(match => {
         const winner = match.winner || {};
         const loser = match.loser || ([match.player1, match.player2].find(p => p && p.id !== winner.id) || {});
-        // The match number shows the side: backside grey (as in the bracket), frontside outlined
-        const side = match.id === 'GRAND-FINAL' ? 'st-gf' : match.id.startsWith('BS-') ? 'st-bs' : 'st-fs';
-        const id = `<span class="st-id ${side}">${escapeHtml(match.id)}</span>`;
+        const id = matchIdTag(match.id);
 
         if (match.autoAdvanced || isWalkoverMatch(match)) {
             const meta = where(winner, match.id, true);

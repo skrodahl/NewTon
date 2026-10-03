@@ -19,6 +19,10 @@ const NewtonTable = (() => {
      * @param {string} [config.columns[].align]  - 'left' (default), 'center', 'right'
      * @param {Function} [config.columns[].render] - (value, row) => HTML string
      * @param {Function} [config.columns[].sortValue] - (value, row) => comparable value for sorting
+     * @param {string} [config.columns[].cellClass]   - class on the column's data cells
+     * @param {string} [config.columns[].columnClass] - class on the column's heading and data cells
+     * @param {string} [config.columns[].group]  - heading shared by neighbouring columns (e.g. 'Placements');
+     *                                             if any column has one, a row of group headings is drawn
      * @param {string} [config.defaultSortKey]  - column key for initial sort
      * @param {string} [config.defaultSortDir='desc'] - 'asc' or 'desc'
      * @param {Function} [config.onRowClick]    - (row) => void, called when a data row is clicked
@@ -97,19 +101,36 @@ const NewtonTable = (() => {
         const start = inst.page * rpp;
         const pageData = rpp >= totalRows ? sorted : sorted.slice(start, start + rpp);
 
-        // Build HTML
-        let html = '<table class="history-table newton-table">';
+        // A column starting a group gets a divider on its left
+        const groupStart = new Set();
+        columns.forEach((col, i) => { if (col.group && (i === 0 || columns[i - 1].group !== col.group)) groupStart.add(col.key); });
 
-        // Thead
-        html += '<thead><tr>';
+        // Build HTML (the scroll box lets a wide table scroll sideways on a narrow screen)
+        let html = '<div class="newton-table-scroll"><table class="newton-table">';
+
+        // Thead: group headings first, when there are any
+        html += '<thead>';
+        if (groupStart.size) {
+            html += '<tr class="newton-table-groups">';
+            for (let i = 0; i < columns.length;) {
+                const group = columns[i].group;
+                let span = 1;
+                while (i + span < columns.length && columns[i + span].group === group) span++;
+                html += `<th colspan="${span}"${group ? ' class="newton-table-gs"' : ''}>${group ? _escHtml(group) : ''}</th>`;
+                i += span;
+            }
+            html += '</tr>';
+        }
+        html += '<tr>';
         for (const col of columns) {
             const width = col.width ? `width:${col.width};` : '';
             const align = col.align ? `text-align:${col.align};` : '';
             const style = width + align;
             const sortable = col.sortable !== false;
             const isActive = inst.sortKey === col.key;
-            const arrow = isActive ? (inst.sortDir === 'asc' ? ' ▲' : ' ▼') : '';
-            const cls = sortable ? ' class="newton-table-sortable"' : '';
+            const arrow = isActive ? (inst.sortDir === 'asc' ? ' ↑' : ' ↓') : '';
+            const thCls = [sortable ? 'newton-table-sortable' : '', isActive ? 'newton-table-sorted' : '', groupStart.has(col.key) ? 'newton-table-gs' : '', col.columnClass || ''].filter(Boolean).join(' ');
+            const cls = thCls ? ` class="${thCls}"` : '';
             const click = sortable
                 ? ` onclick="NewtonTable._onSort('${inst.config.tableId}','${col.key}')"` : '';
             const headerContent = col.headerRender ? col.headerRender() : _escHtml(col.label) + arrow;
@@ -121,7 +142,7 @@ const NewtonTable = (() => {
         html += '<tbody>';
         if (pageData.length === 0) {
             const msg = inst.config.emptyMessage || 'No data.';
-            html += `<tr><td colspan="${columns.length}" style="text-align:center;color:#888;padding:24px;">${_escHtml(msg)}</td></tr>`;
+            html += `<tr><td colspan="${columns.length}" class="newton-table-empty">${_escHtml(msg)}</td></tr>`;
         } else {
             // Map each row object to its index in inst.data so a row click dispatches by
             // a plain integer — no row identifier (possibly user text) enters the onclick.
@@ -130,7 +151,7 @@ const NewtonTable = (() => {
                 const clickAttr = inst.config.onRowClick
                     ? ` onclick="NewtonTable._onRowClick('${inst.config.tableId}',${rowIndex.get(row)})"` : '';
                 const extraCls = inst.config.rowClass ? inst.config.rowClass(row) : '';
-                const classes = [inst.config.onRowClick ? 'history-row' : '', extraCls].filter(Boolean).join(' ');
+                const classes = [inst.config.onRowClick ? 'newton-table-clickable' : '', extraCls].filter(Boolean).join(' ');
                 const rowStyle = inst.config.rowStyle ? inst.config.rowStyle(row) : '';
                 html += `<tr${classes ? ` class="${classes}"` : ''}${clickAttr}${rowStyle ? ` style="${rowStyle}"` : ''}>`;
                 for (const col of columns) {
@@ -138,13 +159,13 @@ const NewtonTable = (() => {
                     const extra = col.cellStyle || '';
                     const value = row[col.key];
                     const rendered = col.render ? col.render(value, row) : _escHtml(value != null ? String(value) : '—');
-                    const cls = col.cellClass || '';
+                    const cls = [col.cellClass || '', col.columnClass || '', groupStart.has(col.key) ? 'newton-table-gs' : ''].filter(Boolean).join(' ');
                     html += `<td${cls ? ` class="${cls}"` : ''} style="${align}${extra}">${rendered}</td>`;
                 }
                 html += '</tr>';
             }
         }
-        html += '</tbody></table>';
+        html += '</tbody></table></div>';
 
         // Pagination controls
         if (totalRows > 10) {
@@ -164,21 +185,20 @@ const NewtonTable = (() => {
         html += '<div class="newton-table-page-nav">';
         const prevDisabled = inst.page <= 0 ? ' disabled' : '';
         const nextDisabled = inst.page >= totalPages - 1 ? ' disabled' : '';
-        html += `<button class="btn btn-sm newton-table-page-btn"${prevDisabled} onclick="NewtonTable._onPage('${tableId}','prev')">← Prev</button>`;
+        html += `<button type="button" class="newton-table-page-btn"${prevDisabled} onclick="NewtonTable._onPage('${tableId}','prev')">← Prev</button>`;
         html += `<span class="newton-table-page-info">Page ${inst.page + 1} of ${totalPages}</span>`;
-        html += `<button class="btn btn-sm newton-table-page-btn"${nextDisabled} onclick="NewtonTable._onPage('${tableId}','next')">Next →</button>`;
+        html += `<button type="button" class="newton-table-page-btn"${nextDisabled} onclick="NewtonTable._onPage('${tableId}','next')">Next →</button>`;
         html += '</div>';
 
         // Rows per page selector
         html += '<div class="newton-table-rpp">';
-        html += '<span class="newton-table-rpp-label">Rows:</span>';
+        html += '<span class="newton-table-rpp-label">Rows</span><span class="newton-table-rpp-seg">';
         const options = [10, 25, 50, 'all'];
         for (const opt of options) {
             const label = opt === 'all' ? 'All' : opt;
-            const active = rpp === opt || (opt === 'all' && rpp === 'all') ? ' newton-table-rpp-active' : '';
-            html += `<button class="btn btn-sm newton-table-rpp-btn${active}" onclick="NewtonTable._onRpp('${tableId}','${opt}')">${label}</button>`;
+            html += `<button type="button" aria-pressed="${rpp === opt}" onclick="NewtonTable._onRpp('${tableId}','${opt}')">${label}</button>`;
         }
-        html += '</div>';
+        html += '</span></div>';
 
         html += '</div>';
         return html;

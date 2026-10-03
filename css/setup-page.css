@@ -123,9 +123,7 @@
 .st-hrow + .st-hrow { border-top: 1px solid var(--nt-line); }
 .st-hrow[data-mh-idx] { cursor: pointer; }
 .st-hrow[data-mh-idx]:hover { background: var(--nt-surface-2); }
-.st-hrow .st-id { justify-self: start; font-family: var(--nt-mono); font-size: 12px; font-weight: 700; line-height: 20px; padding: 0 7px; border-radius: 5px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); white-space: nowrap; }
-.st-hrow .st-id.st-bs { background: var(--nt-line); border-color: var(--nt-line-2); color: var(--nt-ink); } /* backside grey, a step darker than the bracket's band so it reads on white */
-.st-hrow .st-id.st-gf { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.st-hrow .nt-id { justify-self: start; } /* the tag itself: .nt-id in css/components.css */
 .st-hrow .st-players { min-width: 0; color: var(--nt-ink); }
 .st-hrow .st-players b { font-weight: 700; color: var(--nt-ok); }
 .st-hrow .st-vs { color: var(--nt-faint); margin-inline: 4px; }

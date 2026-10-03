@@ -52,6 +52,23 @@
 - In-app help for Registration rewritten. About 430 lines of old Registration CSS removed from `styles.css` (layout, player cards, saved-player items, `.scrollable-column`, `.two-column-container`, `.btn-small`), keeping the `.results-table` styles the statistics dialog uses.
 - Files changed: `css/registration-page.css` (new), `tournament.html` (Registration markup, late-registration text, stylesheet link), `js/player-management.js` (`renderRegistrationNext()` new; `updateRegistrationPageLayout()`, `renderPlayerList()`, `updatePlayersDisplay()`, `updatePlayerCount()`, `addPlayer()`, `togglePaid()`, `showLateRegInfoModal()`; `removePlayerFromTournament()` removed), `js/dynamic-help-system.js`, `js/analytics.js` (comment), `css/styles.css`.
 
+### Analytics redesign
+
+- **The Analytics page is rebuilt in the new design language**, at the wide page width (mockup: https://claude.ai/artifact/3L3xkvRYMGJLcXyCGCatdZ). It shows the same things; new content (Dashboard top 10 and latest tournaments, a fuller player profile, a Winner column, Points and Played next to the name) follows separately.
+- **One strip for the controls:** the view buttons (Dashboard / Leaderboard / Players / Register) and Points (Original / Current, Ranking, Attendance) on the first row; on the second, how many tournaments are counted and why ("23 of 24 tournaments · 1 unticked"), and the Lens. The strip turns orange when not everything is counted. "Choose tournaments" opens the Register's tournament list.
+- **The Lens moved out of Register → Tournaments to the strip**, so it is visible and works from every view (name, from / to, the half-year buttons, now labelled "H2 2026", and Show all, formerly Reset). The tick boxes for single tournaments stay in the Register. The ticks are now set up before any view draws (`_ensureChecked()`), so the Lens works before the Register has been opened, and changing it redraws the view on screen (`_refreshActiveView()`).
+- **Dashboard:** the seven numbers as tiles, still clickable.
+- **Leaderboard:** the Leaderboard look, with group headings (Placements, Achievements, Total, Best, Matches, Legs). A line under the 16th player marks the top 16 while the table is in points order (it used to tint the top 16 rows whatever the order). Export CSV / JSON in the panel header.
+- **Players:** the list shows Played and W–L; unticked players are dimmed. One ticked player shows a profile, several a comparison.
+- **Register:** Tournaments / Matches tabs and a path back from an opened tournament or match. Tables show the match number as a side tag (as in Match History), the winner in bold, and Chalker / Manual as a pill. An opened tournament shows Format, Players, Matches and Points.
+- **Match detail** (Analytics, and the match dialog opened from Match History): the match number, length and how it was scored, then a large score line, the achievements table, and the legs for Chalker matches. The match dialog is rebuilt on the `.dlg` pattern.
+- **Phones:** Analytics is the page club members open on their phones (the analytics-only instance), so it has a phone layout below 700px: the controls stack, the tiles go two to a row, columns that don't fit are left out (Format, Matches, Date, Type, the buttons), and the Leaderboard scrolls sideways with rank and name kept in view. The app header and footer run edge to edge with the page links scrolling sideways, and Global Settings (Club and Points) fits a phone as it was.
+- **NewtonTable** (only Analytics uses it): optional column groups (`group`), a class for heading and cells (`columnClass`), a scroll box around the table, and the new look in `css/components.css`. Pagination stays, with Rows 10 / 25 / 50 / All as a segmented control. The Players list no longer hides its page controls (with more than 25 players the rest could not be reached).
+- **One match-number tag:** `matchIdTag()` in `main.js` makes the side tag for Match History and Analytics; its style moved from `setup-page.css` to `.nt-id` in `components.css`.
+- In-app help for Analytics updated (where the Lens is, Show all, the top-16 line, the Players tick boxes).
+- About 740 lines of old Analytics CSS removed from `styles.css`, including a narrow-screen block that also changed `.container`, `.page` and `.nav` on every page below 1120px.
+- Files changed: `css/analytics-page.css` (new), `css/components.css`, `css/app-header.css`, `css/setup-page.css`, `css/styles.css`, `tournament.html` (Analytics markup, match dialog, stylesheet link), `js/newton-history.js`, `js/newton-table.js`, `js/main.js` (`matchIdTag()`), `js/dynamic-help-system.js`.
+
 ## **v5.1.10** — Straight Down the Middle (2026-10-04)
 
 ### New bracket view

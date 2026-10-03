@@ -363,22 +363,22 @@ const HELP_CONTENT = {
                 title: "The Lens — Choosing What You Are Looking At",
                 content: `
                     <p>The <strong>Lens</strong> decides which tournaments the numbers are drawn from. Everything else follows it &mdash; Dashboard, Leaderboard and Players all reflect whatever the Lens currently selects.</p>
-                    <p>You set it under <strong>Register &rarr; Tournaments</strong>, using the filter bar above the list:</p>
+                    <p>It sits at the top of every view, under the view buttons:</p>
                     <ul>
-                        <li><strong>Filter by name</strong> &mdash; narrows the list as you type</li>
-                        <li><strong>From / To</strong> &mdash; limits it to a date range</li>
+                        <li><strong>Tournament name</strong> &mdash; narrows it as you type</li>
+                        <li><strong>From / to</strong> &mdash; limits it to a date range</li>
                         <li><strong>Half-year buttons</strong> &mdash; the current or previous half-year in one click, which is usually what a season is</li>
-                        <li><strong>The tick boxes</strong> &mdash; choose individual tournaments directly</li>
-                        <li><strong>Reset</strong> &mdash; back to everything</li>
+                        <li><strong>Show all</strong> &mdash; back to everything</li>
                     </ul>
-                    <p><strong>💡 The indicator at the top right of the page always tells you what is currently selected</strong> &mdash; so if a number looks wrong, check there first. It is the usual explanation.</p>
+                    <p>To leave out single tournaments, click <strong>Choose tournaments</strong> and untick them in the Register's tournament list.</p>
+                    <p><strong>💡 To the left of the Lens it says how many tournaments are counted, and why</strong> &mdash; so if a number looks wrong, check there first. It is the usual explanation. The bar turns orange when you are not seeing everything.</p>
                     <p>Your selection is remembered between visits.</p>
                 `
             },
             points: {
                 title: "How Points Are Counted",
                 content: `
-                    <p>Two controls sit beside the view buttons, and both change every figure on screen as soon as you touch them.</p>
+                    <p>The <strong>Points</strong> controls sit beside the view buttons, and change every figure on screen as soon as you touch them.</p>
                     <p><strong>Original or Current:</strong></p>
                     <ul>
                         <li><strong>Original</strong> &mdash; each tournament is scored with the point values that were in force on the night it was played. The honest historical record.</li>
@@ -396,13 +396,13 @@ const HELP_CONTENT = {
             leaderboard: {
                 title: "Leaderboard",
                 content: `
-                    <p>One row per player across the selected tournaments. Click any column heading to sort by it.</p>
+                    <p>One row per player across the selected tournaments. Click any column heading to sort by it. In points order, a line marks the top 16.</p>
                     <ul>
                         <li><strong>Placements</strong> &mdash; 1st, 2nd, 3rd, 4th, 5-6th and 7-8th finishes</li>
                         <li><strong>Achievements</strong> &mdash; 180s, high outs and short legs</li>
                         <li><strong>Personal bests</strong> &mdash; Best Out (highest checkout) and Best Leg (fewest darts)</li>
                         <li><strong>Avg</strong> &mdash; three-dart average. Only matches scored on the Chalker have the detail to calculate this, so it is blank for manually entered results</li>
-                        <li><strong>MW / ML</strong> &mdash; matches won and lost; <strong>LW / LL</strong> &mdash; legs won and lost</li>
+                        <li><strong>Matches W / L</strong> and <strong>Legs W / L</strong> &mdash; won and lost</li>
                     </ul>
                     <p><strong>Export CSV</strong> and <strong>Export JSON</strong> save the table as it currently stands &mdash; same Lens, same point settings &mdash; for a spreadsheet or a club website.</p>
                 `
@@ -410,16 +410,16 @@ const HELP_CONTENT = {
             players: {
                 title: "Players",
                 content: `
-                    <p>The player list on the left shows everyone who appears in the selected tournaments, with matches played and their win/loss record. Select a player to see their detail on the right.</p>
+                    <p>The player list shows everyone who appears in the selected tournaments, with tournaments played and their win/loss record. Tick one player to see their detail, or several to compare them.</p>
                     <p>Players are matched by name across tournaments, so someone entered as "Dave" in one and "dave " in another is treated as the same person. Genuinely different spellings are not &mdash; consistent names are worth the small effort at registration.</p>
                 `
             },
             tournaments: {
                 title: "Tournament List",
                 content: `
-                    <p>Each row shows a finalized tournament — format, date, player count, and status.</p>
+                    <p>Each row shows a finalized tournament — date, format, players, matches and points. Unticked tournaments are left out of every view.</p>
                     <ul>
-                        <li><strong>View →</strong> Opens the match list for that tournament</li>
+                        <li><strong>Click a tournament</strong> to open its matches</li>
                         <li><strong>Delete:</strong> Permanently removes the tournament and all its matches. You must type the tournament name to confirm — this cannot be undone</li>
                         <li><strong>Edit:</strong> Correct a player's 180s, tons, lollipops, high outs and short legs for that tournament. Corrections are saved on the server and apply on every device; the recorded tournament is not changed. <strong>Reset Player</strong> goes back to what was recorded. Docker only, and not shown on the public Analytics page</li>
                     </ul>

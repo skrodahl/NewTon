@@ -1,0 +1,143 @@
+/* analytics-page.css - Analytics
+ *
+ * One strip with the views, the point mode and the lens (which tournaments every view
+ * counts), then the active view: Dashboard, Leaderboard, Players or Register. Panels,
+ * buttons and the page title reuse the st-* styles in css/setup-page.css; the tables are
+ * NewtonTable's, styled in css/components.css. Uses the shared tokens in
+ * css/design-tokens.css. Light only.
+ *
+ * Analytics is the one page made for phones too: club members open the analytics-only
+ * instance on their phones. The phone layout is the @media block at the end.
+ */
+
+#history.page.active { display: block; background: var(--nt-bg); padding: 0; font-family: var(--nt-sans); color: var(--nt-ink); }
+
+.an-wrap { max-width: var(--nt-page-wide); margin: 0 auto; padding: 28px 24px 40px; display: grid; gap: 16px; }
+.an-lbl { font-size: 12px; font-weight: 600; color: var(--nt-muted); }
+.an-title-tools { display: flex; align-items: center; gap: 8px 20px; flex-wrap: wrap; }
+.an-maint { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.an-tools { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.an-note { font-size: 13px; color: var(--nt-muted); }
+.an-foot { padding: 10px 20px 12px; border-top: 1px solid var(--nt-line); font-size: 13px; color: var(--nt-muted); }
+
+/* ---- the strip: views and points, then the lens ---- */
+.an-strip { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; }
+.an-strip.an-filtered { border-color: #f0a07f; }
+.an-strip-row { display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; padding: 12px 16px; }
+.an-strip-row + .an-strip-row { border-top: 1px solid var(--nt-line); }
+.an-strip .st-seg button { padding: 7px 14px; }
+.an-points { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+/* Ranking and Attendance: a button with a tick box */
+.an-chk { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px 0 10px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); font: inherit; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); cursor: pointer; }
+.an-chk::before { content: ""; width: 14px; height: 14px; border-radius: 4px; border: 1.5px solid var(--nt-line-2); background: var(--nt-surface); }
+.an-chk[aria-pressed="true"]::before { background: var(--nt-header); border-color: var(--nt-header); box-shadow: inset 0 0 0 2px var(--nt-surface); }
+.an-chk:hover { border-color: var(--nt-ink-2); }
+.an-chk:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+
+/* how many tournaments are counted, and why */
+.an-scope { display: flex; align-items: baseline; gap: 4px 10px; flex-wrap: wrap; }
+.an-scope b { font-size: 15px; font-weight: 700; }
+.an-scope b span { font-variant-numeric: tabular-nums; }
+.an-filtered .an-scope b { color: #b2410f; }
+.an-why { font-size: 13px; color: var(--nt-muted); }
+.an-lens { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.an-text { height: 34px; border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 0 10px; background: var(--nt-surface); font: inherit; font-size: 14px; color: var(--nt-ink); min-width: 0; }
+.an-text:focus { outline: none; border-color: var(--nt-ink-2); box-shadow: 0 0 0 3px var(--nt-inset); }
+.an-text.an-name { width: 220px; }
+.an-dates { display: inline-flex; align-items: center; gap: 6px; }
+.an-dates .an-text { width: 150px; font-variant-numeric: tabular-nums; }
+
+/* ---- the views ---- */
+.analytics-view { display: none; }
+.analytics-view.active { display: grid; gap: 12px; }
+.analytics-placeholder { padding: 48px 24px; text-align: center; color: var(--nt-muted); }
+.analytics-placeholder h3 { margin: 0 0 4px; font-size: 16px; color: var(--nt-ink); }
+.analytics-placeholder p { margin: 0; }
+.st-panel-head h3 small { font-variant-numeric: tabular-nums; }
+
+/* Dashboard: one tile per number */
+.an-tiles { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 12px; }
+.an-tile { display: grid; gap: 2px; align-content: start; text-align: left; min-width: 0; padding: 14px 16px 16px; border-radius: 12px; border: 1px solid var(--nt-line); background: var(--nt-surface); font: inherit; color: var(--nt-ink); }
+button.an-tile { cursor: pointer; }
+button.an-tile:hover { border-color: var(--nt-ink-2); }
+button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+.an-tile-label { font-size: 12px; font-weight: 600; color: var(--nt-muted); }
+.an-tile-value { font-size: 34px; font-weight: 800; line-height: 1.1; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.an-tile-value small { font-size: 14px; font-weight: 600; letter-spacing: 0; color: var(--nt-muted); margin-left: 4px; }
+.an-tile-sub { font-size: 13px; color: var(--nt-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+/* Leaderboard: the top 16 end at a line */
+.an-legend { display: inline-flex; align-items: center; font-size: 12px; color: var(--nt-muted); }
+.an-legend i { display: inline-block; width: 18px; border-top: 2px solid var(--nt-ink-2); margin-right: 6px; }
+.newton-table tr.an-cut td { border-bottom: 2px solid var(--nt-ink-2); }
+
+/* Players: the list, and the profile or comparison */
+.an-players { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 16px; align-items: start; }
+.an-prof-head { padding: 20px 20px 4px; }
+.an-prof-head h3 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.an-facts { display: flex; gap: 12px 28px; flex-wrap: wrap; margin: 0; padding: 8px 20px 18px; }
+.an-facts > div { display: grid; }
+.an-facts dt { font-size: 12px; color: var(--nt-muted); }
+.an-facts dd { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; }
+
+/* unticked tournaments and players are dimmed */
+.newton-table tr.an-off td:not(:first-child) { color: var(--nt-faint); }
+.newton-table tr.an-off .nt-name { color: var(--nt-muted); font-weight: 500; }
+
+/* Register: tabs, the path back, and the tables */
+.an-reg-nav { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
+.an-crumbs { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; font-size: 14px; }
+.an-crumbs .st-link { font-size: 14px; font-weight: 600; }
+.an-crumbs b { font-weight: 700; }
+.an-crumbs small { margin-left: 6px; font-weight: 500; color: var(--nt-muted); }
+.an-sep { color: var(--nt-faint); }
+.newton-table td.an-acts { width: 1%; }
+.newton-table td.an-acts .st-btn + .st-btn { margin-left: 6px; }
+.st-btn.an-danger:hover { border-color: var(--nt-danger); color: var(--nt-danger); }
+.newton-table td .st-link { font-size: 14px; text-align: left; }
+#historyMatchList .an-facts { padding-top: 0; }
+#historyMatchList .an-facts dd { font-size: 18px; }
+
+/* ---- below desktop width ---- */
+@media (max-width: 1400px) {
+  .an-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+}
+@media (max-width: 1000px) {
+  .an-players { grid-template-columns: minmax(0, 1fr); }
+}
+
+/* ---- phones ---- */
+@media (max-width: 700px) {
+  .an-wrap { padding: 16px 12px 28px; gap: 12px; }
+  .an-wrap .st-title h2 { font-size: 24px; }
+  .an-wrap .st-title p { display: none; }
+  .an-strip-row { padding: 10px 12px; }
+  /* the views fill the width; the lens stacks */
+  .an-views { width: 100%; }
+  .an-views .st-seg { display: flex; }
+  .an-views .st-seg button { flex: 1; padding-inline: 6px; }
+  .an-points { width: 100%; }
+  .an-points .st-seg { flex: 1 1 calc(100% - 60px); display: flex; } /* Original/Current beside the label; Ranking and Attendance below */
+  .an-points .st-seg button { flex: 1; }
+  .an-chk { flex: 1 1 40%; justify-content: center; }
+  .an-lens { width: 100%; }
+  .an-text.an-name { width: 100%; }
+  .an-dates { width: 100%; }
+  .an-dates .an-text { flex: 1; width: auto; }
+  .an-tiles { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .an-tile { padding: 10px 12px 12px; }
+  .an-tile:last-child:nth-child(odd) { grid-column: 1 / -1; } /* no tile alone in a half row */
+  .an-tile-value { font-size: 26px; }
+  .an-wrap .st-panel-head { padding: 14px 14px 10px; }
+  .an-foot { padding-inline: 14px; }
+  .an-prof-head, .an-facts { padding-inline: 14px; }
+  .newton-table .an-wide-only { display: none; }
+  #analyticsViewRegister .newton-table td.nt-name, #analyticsViewPlayers .newton-table td.nt-name { white-space: normal; }
+  /* the player list scrolls in its own box, so the profile under it stays close */
+  #playersTableContainer .newton-table-scroll { max-height: 320px; overflow-y: auto; }
+  /* the Leaderboard scrolls sideways with rank and name kept in view */
+  #leaderboardTableContainer :is(td, tr:not(.newton-table-groups) th):nth-child(-n+2),
+  #leaderboardTableContainer .newton-table-groups th:first-child { position: sticky; z-index: 1; background: var(--nt-surface); }
+  #leaderboardTableContainer :is(td, th):nth-child(1) { left: 0; min-width: 40px; }
+  #leaderboardTableContainer :is(td, tr:not(.newton-table-groups) th):nth-child(2) { left: 40px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; box-shadow: 1px 0 0 var(--nt-line); }
+}

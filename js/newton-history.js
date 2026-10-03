@@ -226,35 +226,37 @@ const NewtonHistory = (() => {
 
         const all = await _loadAllTournaments();
         const total = all.length;
-
-        if (!total) {
-            el.innerHTML = '';
-            return;
-        }
-
         const scoped = _scope ? _scope.length : total;
         const isAll = !_scope || scoped === total;
 
-        let tags = '';
-        if (isAll) {
-            tags = '<span class="analytics-scope-tag">All</span>';
-        } else if (scoped === 1) {
-            const t = all.find(t => t.tournamentId === _scope[0]);
-            const name = t ? escHtml(t.tournamentName || t.tournamentId) : escHtml(_scope[0]);
-            const date = t && t.closedAt ? ' ' + fmtDate(t.closedAt) : '';
-            tags = '<span class="analytics-scope-tag">' + name + date + '</span>';
-        } else {
-            tags = '<span class="analytics-scope-tag">' + scoped + ' selected</span>';
-        }
+        // Why fewer than all are counted: the lens filters, and tournaments unticked in Register
+        const why = [];
+        if (_textFilter) why.push('name contains \u201c' + escHtml(_textFilter) + '\u201d');
+        if (_dateFrom || _dateTo) why.push(escHtml(_dateFrom || '\u2026') + ' to ' + escHtml(_dateTo || '\u2026'));
+        const unticked = _applyAllFilters(all).filter(t => !_checkedIds.has(t.tournamentId)).length;
+        if (unticked) why.push(unticked + ' unticked');
 
-        el.innerHTML =
-            '<span>Viewing: <span class="analytics-scope-count">' + scoped + ' of ' + total + '</span> tournaments</span> ' +
-            tags;
+        el.innerHTML = total
+            ? '<b><span>' + scoped + '</span> of ' + total + ' tournaments</b>' +
+              '<span class="an-why">' + (isAll ? 'All finalized tournaments' : why.join(' \u00b7 ')) + '</span>' +
+              '<button type="button" class="st-link" data-an-choose>Choose tournaments</button>'
+            : '<b>No finalized tournaments yet</b>';
 
-        el.onclick = () => switchView('register');
+        const choose = el.querySelector('[data-an-choose]');
+        if (choose) choose.onclick = () => { switchView('register'); switchRegisterTab('tournaments'); };
 
-        const resetBtn = document.getElementById('analyticsResetBtn');
-        if (resetBtn) resetBtn.classList.toggle('has-filter', !isAll);
+        const strip = document.getElementById('analyticsStrip');
+        if (strip) strip.classList.toggle('an-filtered', !isAll);
+    }
+
+    /**
+     * Re-render what is on screen after the lens changed. The Register's tournament list is
+     * updated by the lens handlers themselves, and a tournament or match opened from it does
+     * not depend on the lens; every other view re-renders (switchView redraws a dirty view).
+     */
+    function _refreshActiveView() {
+        if (_activeView !== 'register') { switchView(_activeView); return; }
+        if (_activePanel === 'allMatches') renderAllMatches();
     }
 
     // ---------------------------------------------------------------------------
@@ -285,7 +287,7 @@ const NewtonHistory = (() => {
 
         // Update tab buttons
         document.querySelectorAll('.analytics-view-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.view === view);
+            btn.setAttribute('aria-pressed', btn.dataset.view === view);
         });
 
         // Update view panels
@@ -335,7 +337,7 @@ const NewtonHistory = (() => {
         _pointMode = mode;
 
         document.querySelectorAll('.analytics-point-btn').forEach(btn => {
-            btn.classList.toggle('active', btn.dataset.pointMode === mode);
+            btn.setAttribute('aria-pressed', btn.dataset.pointMode === mode);
         });
 
         _recomputePoints();
@@ -377,7 +379,7 @@ const NewtonHistory = (() => {
     function toggleLayer(layer, btn) {
         if (layer === 'ranking') _layerRanking = !_layerRanking;
         if (layer === 'attendance') _layerAttendance = !_layerAttendance;
-        btn.classList.toggle('active');
+        btn.setAttribute('aria-pressed', layer === 'ranking' ? _layerRanking : _layerAttendance);
 
         _recomputePoints();
     }
@@ -495,7 +497,7 @@ const NewtonHistory = (() => {
 
             // Render cards
             container.innerHTML =
-                '<div class="analytics-dashboard">' +
+                '<div class="an-tiles">' +
                     _statCard('Tournaments', tournaments.length, 'Finalized', 'register') +
                     _statCard('Matches', allMatches.length, 'Completed', 'allMatches') +
                     _statCard('Players', playerSet.size, 'Unique', 'players') +
@@ -505,12 +507,12 @@ const NewtonHistory = (() => {
                         ? _statCard('Highest Checkout', highestCheckout.score, highestCheckout.player, 'players', highestCheckout.player)
                         : _statCard('Highest Checkout', '—', 'No data yet', null)) +
                     (shortestLeg.darts < Infinity
-                        ? _statCard('Shortest Leg', shortestLeg.darts, shortestLeg.player, 'players', shortestLeg.player)
+                        ? _statCard('Shortest Leg', shortestLeg.darts, shortestLeg.player, 'players', shortestLeg.player, 'darts')
                         : _statCard('Shortest Leg', '—', 'No data yet', null)) +
                 '</div>';
 
             // Wire up card clicks
-            container.querySelectorAll('.analytics-stat-card[data-target-view]').forEach(card => {
+            container.querySelectorAll('.an-tile[data-target-view]').forEach(card => {
                 card.addEventListener('click', () => {
                     const target = card.dataset.targetView;
                     const playerName = card.dataset.targetPlayer;
@@ -533,23 +535,25 @@ const NewtonHistory = (() => {
     }
 
     /**
-     * Build HTML for a single stat card.
+     * Build HTML for a single stat tile.
      * @param {string} label
      * @param {string|number} value
      * @param {string} subtitle
      * @param {string|null} targetView - view to navigate to on click, or null for non-clickable
      * @param {string} [targetPlayer] - player name to focus on click (Players tab)
+     * @param {string} [unit] - small unit after the value, e.g. 'darts'
      * @returns {string}
      */
-    function _statCard(label, value, subtitle, targetView, targetPlayer) {
-        const clickable = targetView ? ` data-target-view="${targetView}"` : '';
-        const playerAttr = targetPlayer ? ` data-target-player="${escHtml(targetPlayer)}"` : '';
-        const clickClass = targetView ? ' clickable' : '';
-        return '<div class="analytics-stat-card' + clickClass + '"' + clickable + playerAttr + '>' +
-            '<div class="analytics-stat-value">' + escHtml(String(value)) + '</div>' +
-            '<div class="analytics-stat-label">' + escHtml(label) + '</div>' +
-            '<div class="analytics-stat-subtitle">' + escHtml(subtitle) + '</div>' +
-        '</div>';
+    function _statCard(label, value, subtitle, targetView, targetPlayer, unit) {
+        const tag = targetView ? 'button' : 'div';
+        const attrs = targetView
+            ? ` type="button" data-target-view="${targetView}"` + (targetPlayer ? ` data-target-player="${escHtml(targetPlayer)}"` : '')
+            : '';
+        return '<' + tag + ' class="an-tile"' + attrs + '>' +
+            '<span class="an-tile-label">' + escHtml(label) + '</span>' +
+            '<span class="an-tile-value">' + escHtml(String(value)) + (unit ? '<small>' + escHtml(unit) + '</small>' : '') + '</span>' +
+            '<span class="an-tile-sub">' + escHtml(subtitle) + '</span>' +
+        '</' + tag + '>';
     }
 
     /** Force the next render to show the Dashboard tab. */
@@ -680,38 +684,33 @@ const NewtonHistory = (() => {
                     defaultSortKey: 'name',
                     defaultSortDir: 'asc',
                     emptyMessage: 'No player data available.',
-                    onRowClick: (row) => {
-                        const key = _playerKey(row.name);
-                        const nowChecked = !_selectedPlayers.has(key);
-                        togglePlayer(row.name, nowChecked);
-                        // Update the checkbox in this row
-                        const cbs = document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox');
-                        cbs.forEach(cb => {
-                            const tr = cb.closest('tr');
-                            if (tr) {
-                                const nameCell = tr.querySelector('td:nth-child(2)');
-                                if (nameCell && _playerKey(nameCell.textContent) === key) {
-                                    cb.checked = nowChecked;
-                                }
-                            }
-                        });
-                    },
+                    rowClass: (row) => _selectedPlayers.has(_playerKey(row.name)) ? '' : 'an-off',
+                    onRowClick: (row) => togglePlayer(row.name, !_selectedPlayers.has(_playerKey(row.name))),
                     columns: [
                         {
-                            key: '_select', sortable: false, width: '32px', align: 'center',
+                            key: '_select', sortable: false, width: '1%',
                             headerRender: () => {
-                                const allChecked = rows.length > 0 && rows.every(r => _selectedPlayers.has(_playerKey(r.name)));
-                                return `<input type="checkbox" class="analytics-scope-checkbox"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllPlayers(this.checked)">`;
+                                const data = _playersTable ? _playersTable.data : [];
+                                const allChecked = data.length > 0 && data.every(r => _selectedPlayers.has(_playerKey(r.name)));
+                                return `<input type="checkbox" class="an-check" aria-label="Tick all"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllPlayers(this.checked)">`;
                             },
                             render: (v, row) => {
                                 const key = _playerKey(row.name);
                                 const checked = _selectedPlayers.has(key) ? ' checked' : '';
-                                return `<input type="checkbox" class="analytics-scope-checkbox"${checked} data-nh-action="toggle-player" data-name="${escHtml(row.name)}">`;
+                                return `<input type="checkbox" class="an-check" aria-label="Select this player"${checked} data-nh-action="toggle-player" data-name="${escHtml(row.name)}">`;
                             }
                         },
                         {
-                            key: 'name', label: 'Player',
-                            render: (v) => `<strong>${escHtml(v)}</strong>`
+                            key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name',
+                            render: (v) => escHtml(v)
+                        },
+                        {
+                            key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc'
+                        },
+                        {
+                            key: 'matchesWon', label: 'W–L', align: 'right', defaultDir: 'desc',
+                            render: (v, row) => `${row.matchesWon}–${row.matchesLost}`,
+                            sortValue: (v, row) => row.matchesWon - row.matchesLost
                         }
                     ]
                 });
@@ -719,6 +718,8 @@ const NewtonHistory = (() => {
 
             _playersTable.setData(rows);
             _wireTableActions('playersTableContainer');
+            const meta = document.getElementById('playersMeta');
+            if (meta) meta.textContent = rows.length;
 
             // Apply pending focus or render profile panel with current selection
             if (_pendingPlayerFocus) {
@@ -745,11 +746,7 @@ const NewtonHistory = (() => {
         } else {
             _selectedPlayers.delete(key);
         }
-        // Update header checkbox
-        const headerCb = document.querySelector('#playersTableContainer thead .analytics-scope-checkbox');
-        if (headerCb && _playersTable && _playersTable.data) {
-            headerCb.checked = _playersTable.data.every(r => _selectedPlayers.has(_playerKey(r.name)));
-        }
+        if (_playersTable) _playersTable.refresh(); // the tick-all box and the dimmed rows
         _persistPlayerSelection();
         renderProfilePanel();
     }
@@ -764,10 +761,7 @@ const NewtonHistory = (() => {
         if (checked) {
             _playersTable.data.forEach(r => _selectedPlayers.add(_playerKey(r.name)));
         }
-        // Update all row checkboxes
-        document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox').forEach(cb => {
-            cb.checked = checked;
-        });
+        _playersTable.refresh();
         _persistPlayerSelection();
         renderProfilePanel();
     }
@@ -795,12 +789,7 @@ const NewtonHistory = (() => {
         _pendingPlayerFocus = null;
         _selectedPlayers.clear();
         _selectedPlayers.add(key);
-        // Update checkboxes in the list
-        document.querySelectorAll('#playersTableContainer tbody .analytics-scope-checkbox').forEach(cb => {
-            const row = _playersTable.data.find(r => r._rowId === cb.closest('tr')?.dataset?.rowId);
-            // simpler: re-render the table
-        });
-        if (_playersTable) _playersTable.setData(_playersTable.data);
+        if (_playersTable) _playersTable.refresh();
         _persistPlayerSelection();
         renderProfilePanel();
     }
@@ -817,38 +806,28 @@ const NewtonHistory = (() => {
         if (selected.length === 0) {
             _comparisonTable = null;
             panel.innerHTML = '<div class="analytics-placeholder">' +
-                '<h3>Select a player</h3>' +
-                '<p>Check one or more names to view their stats.</p></div>';
+                '<h3>No player selected</h3>' +
+                '<p>Tick a name to see their profile, or several to compare them.</p></div>';
             return;
         }
 
         if (selected.length === 1) {
-            // Single player profile card
+            // Single player profile
             _comparisonTable = null;
             const p = selected[0];
             panel.innerHTML =
-                '<h3>' + escHtml(p.name) + '</h3>' +
-                '<div id="playerProfileTableContainer"></div>';
-
-            const profileTable = NewtonTable.create({
-                tableId: 'analytics-player-profile',
-                containerId: 'playerProfileTableContainer',
-                defaultSortKey: null,
-                emptyMessage: 'No data.',
-                columns: [
-                    { key: 'stat', label: 'Stat', sortable: false, render: (v) => `<strong>${escHtml(v)}</strong>` },
-                    { key: 'value', label: 'Value', sortable: false, align: 'right' }
-                ]
-            });
-            profileTable.setData([
-                { _rowId: 'tournaments', stat: 'Tournaments', value: p.tournaments },
-                { _rowId: 'matches', stat: 'Matches', value: p.matchesWon + 'W - ' + p.matchesLost + 'L' }
-            ]);
+                '<div class="an-prof-head"><h3>' + escHtml(p.name) + '</h3></div>' +
+                '<dl class="an-facts">' +
+                    '<div><dt>Tournaments</dt><dd>' + p.tournaments + '</dd></div>' +
+                    '<div><dt>Matches</dt><dd>' + p.matchesWon + '–' + p.matchesLost + '</dd></div>' +
+                '</dl>';
             return;
         }
 
         // Multiple players — comparison table via NewtonTable
-        panel.innerHTML = '<div id="playerComparisonTableContainer"></div>';
+        panel.innerHTML =
+            '<div class="st-panel-head"><h3>Compare <small>' + selected.length + ' players</small></h3></div>' +
+            '<div id="playerComparisonTableContainer"></div>';
         selected.forEach(r => { r._rowId = r.name; });
 
         _comparisonTable = NewtonTable.create({
@@ -857,19 +836,17 @@ const NewtonHistory = (() => {
             defaultSortKey: 'name',
             defaultSortDir: 'asc',
             emptyMessage: 'No player data available.',
-            rowClass: () => 'history-row',
             columns: [
                 {
-                    key: 'name', label: 'Player',
-                    render: (v) => `<strong>${escHtml(v)}</strong>`
+                    key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name',
+                    render: (v) => escHtml(v)
                 },
                 {
-                    key: 'tournaments', label: 'Played', align: 'center', width: '80px', defaultDir: 'desc',
-                    render: (v) => v
+                    key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc'
                 },
                 {
-                    key: 'matchesWon', label: 'W/L', align: 'center', width: '80px', defaultDir: 'desc',
-                    render: (v, row) => `${row.matchesWon}-${row.matchesLost}`,
+                    key: 'matchesWon', label: 'W–L', align: 'right', defaultDir: 'desc',
+                    render: (v, row) => `${row.matchesWon}–${row.matchesLost}`,
                     sortValue: (v, row) => row.matchesWon - row.matchesLost
                 }
             ]
@@ -886,6 +863,20 @@ const NewtonHistory = (() => {
 
     /** @type {object[]|null} Current leaderboard rows (for export) */
     let _leaderboardRows = null;
+
+    /** A dash for "none", dimmed so the numbers stand out. */
+    const _DIM_DASH = '<span class="nt-dim">\u2014</span>';
+
+    /**
+     * A Leaderboard column that counts something (placements, achievements): a dimmed dash for 0.
+     * @param {string} key
+     * @param {string} label
+     * @param {string} group - the heading it sits under
+     * @returns {object} a NewtonTable column
+     */
+    function _lbCount(key, label, group) {
+        return { key, label, group, align: 'right', defaultDir: 'desc', render: (v) => v || _DIM_DASH };
+    }
 
     /**
      * Compute per-player points across scoped tournaments and render the leaderboard.
@@ -1052,94 +1043,43 @@ const NewtonHistory = (() => {
                     defaultSortKey: 'points',
                     defaultSortDir: 'desc',
                     emptyMessage: 'No player data available.',
-                    rowClass: (row) => row._rank <= 16 ? 'leaderboard-top' : '',
+                    // A line under the 16th player, while the table is in points order
+                    rowClass: (row) => row._rank === 16 && _leaderboardTable.data.length > 16 &&
+                        _leaderboardTable.sortKey === 'points' && _leaderboardTable.sortDir === 'desc' ? 'an-cut' : '',
                     onRowClick: (row) => { focusPlayer(row.name); },
                     columns: [
+                        { key: '_rank', label: '#', cellClass: 'nt-rank' },
+                        { key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name', render: (v) => escHtml(v) },
+                        _lbCount('p1st', '1st', 'Placements'),
+                        _lbCount('p2nd', '2nd', 'Placements'),
+                        _lbCount('p3rd', '3rd', 'Placements'),
+                        _lbCount('p4th', '4th', 'Placements'),
+                        _lbCount('p56th', '5–6th', 'Placements'),
+                        _lbCount('p78th', '7–8th', 'Placements'),
+                        _lbCount('oneEighties', '180s', 'Achievements'),
+                        _lbCount('highOuts', 'High outs', 'Achievements'),
+                        _lbCount('shortLegs', 'Short legs', 'Achievements'),
+                        { key: 'tournaments', label: 'Played', group: 'Total', align: 'right', defaultDir: 'desc' },
+                        { key: 'points', label: 'Points', group: 'Total', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts', render: (v) => v ?? 0 },
                         {
-                            key: '_rank', label: '#', width: '50px', align: 'center',
-                            render: (v) => `<div class="newton-table-badge"><span style="font-weight:600;">${v}</span></div>`,
-                            cellClass: 'newton-table-badge-cell'
-                        },
-                        {
-                            key: 'name', label: 'Player',
-                            render: (v) => `<strong style="font-size:15px;">${escHtml(v)}</strong>`
-                        },
-                        {
-                            key: 'p1st', label: '1st', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'p2nd', label: '2nd', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'p3rd', label: '3rd', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'p4th', label: '4th', align: 'center', width: '45px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'p56th', label: '5-6th', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'p78th', label: '7-8th', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'oneEighties', label: '180s', align: 'center', width: '60px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'highOuts', label: 'High Outs', align: 'center', width: '80px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'shortLegs', label: 'Short Legs', align: 'center', width: '90px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'tournaments', label: 'Played', align: 'center', width: '70px', defaultDir: 'desc',
-                            render: (v) => v
-                        },
-                        {
-                            key: 'points', label: 'Points', align: 'center', width: '80px', defaultDir: 'desc',
-                            render: (v) => `<div class="newton-table-badge"><strong>${v ?? 0}</strong></div>`,
-                            cellClass: 'newton-table-badge-cell'
-                        },
-                        {
-                            key: 'bestHighOut', label: 'Best Out', align: 'center', width: '75px', defaultDir: 'desc',
-                            render: (v) => v > 0 ? v : '',
+                            key: 'bestHighOut', label: 'Out', group: 'Best', align: 'right', defaultDir: 'desc',
+                            render: (v) => v > 0 ? v : _DIM_DASH,
                             sortValue: (v) => v > 0 ? v : 0
                         },
                         {
-                            key: 'bestShortLeg', label: 'Best Leg', align: 'center', width: '75px',
-                            render: (v) => v < Infinity ? v : '',
+                            key: 'bestShortLeg', label: 'Leg', group: 'Best', align: 'right', defaultDir: 'asc',
+                            render: (v) => v < Infinity ? v : _DIM_DASH,
                             sortValue: (v) => v < Infinity ? v : 99999
                         },
                         {
-                            key: 'avg', label: 'Avg', align: 'center', width: '60px', defaultDir: 'desc',
-                            render: (v) => v || '',
+                            key: 'avg', label: 'Avg', group: 'Best', align: 'right', defaultDir: 'desc',
+                            render: (v) => v || _DIM_DASH,
                             sortValue: (v) => v ? parseFloat(v) : 0
                         },
-                        {
-                            key: 'matchesWon', label: 'MW', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'matchesLost', label: 'ML', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'legsWon', label: 'LW', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        },
-                        {
-                            key: 'legsLost', label: 'LL', align: 'center', width: '50px', defaultDir: 'desc',
-                            render: (v) => v || ''
-                        }
+                        { key: 'matchesWon', label: 'W', group: 'Matches', align: 'right', defaultDir: 'desc' },
+                        { key: 'matchesLost', label: 'L', group: 'Matches', align: 'right', defaultDir: 'desc' },
+                        { key: 'legsWon', label: 'W', group: 'Legs', align: 'right', defaultDir: 'desc' },
+                        { key: 'legsLost', label: 'L', group: 'Legs', align: 'right', defaultDir: 'desc' }
                     ]
                 });
             }
@@ -1148,6 +1088,8 @@ const NewtonHistory = (() => {
 
             _leaderboardRows = rows;
             _leaderboardTable.setData(rows);
+            const meta = document.getElementById('leaderboardMeta');
+            if (meta) meta.textContent = `${rows.length} players \u00b7 ${tournaments.length} tournaments`;
 
         } catch (e) {
             console.error('Leaderboard render failed:', e);
@@ -1248,6 +1190,11 @@ const NewtonHistory = (() => {
         _initHalfYearButtons();
         await _autoImportFromDisk();
         await _restoreScope();
+        try {
+            const all = await _loadAllTournaments();
+            _ensureChecked(all);
+            _syncLensInputs(all);
+        } catch (e) { /* the views show their own error */ }
         await renderScopeIndicator();
         switchView(_activeView);
     }
@@ -1381,14 +1328,7 @@ const NewtonHistory = (() => {
             return;
         }
 
-        // Initialise checked set from current scope (or all)
-        if (!_checkedIds.size) {
-            if (_scope) {
-                _checkedIds = new Set(_scope);
-            } else {
-                _checkedIds = new Set(all.map(t => t.tournamentId));
-            }
-        }
+        _ensureChecked(all);
 
         // Create the table instance once, reuse on subsequent calls
         if (!_tournamentTable) {
@@ -1398,62 +1338,62 @@ const NewtonHistory = (() => {
                 defaultSortKey: 'closedAt',
                 defaultSortDir: 'desc',
                 emptyMessage: 'No completed tournaments yet. Close a tournament to register it here.',
+                rowClass: (row) => _checkedIds.has(row.tournamentId) ? '' : 'an-off',
                 columns: [
                     {
-                        key: '_select', sortable: false, width: '40px', align: 'center',
+                        key: '_select', sortable: false, width: '1%',
                         headerRender: () => {
                             const visible = _allTournaments ? _applyAllFilters(_allTournaments) : [];
                             const allChecked = visible.length > 0 && visible.every(t => _checkedIds.has(t.tournamentId));
-                            return `<input type="checkbox" class="analytics-scope-checkbox"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllTournaments(this.checked)">`;
+                            return `<input type="checkbox" class="an-check" aria-label="Tick all"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllTournaments(this.checked)">`;
                         },
                         render: (v, row) => {
                             const checked = _checkedIds.has(row.tournamentId) ? ' checked' : '';
-                            return `<input type="checkbox" class="analytics-scope-checkbox" data-nh-action="toggle-tournament" data-tid="${escHtml(row.tournamentId)}"${checked}>`;
+                            return `<input type="checkbox" class="an-check" aria-label="Count this tournament" data-nh-action="toggle-tournament" data-tid="${escHtml(row.tournamentId)}"${checked}>`;
                         }
                     },
                     {
-                        key: 'tournamentName', label: 'Tournament', width: '100%',
-                        render: (v, row) => `<strong style="font-size:15px;">${escHtml(v || row.tournamentId)}</strong>`
+                        key: 'tournamentName', label: 'Tournament', width: '100%', cellClass: 'nt-name',
+                        render: (v, row) => escHtml(v || row.tournamentId)
                     },
                     {
-                        key: 'closedAt', label: 'Date', width: '120px', cellStyle: 'white-space:nowrap;',
+                        key: 'closedAt', label: 'Date',
                         render: (v) => v ? fmtDate(v) : '',
                         sortValue: (v) => v ? tsToMs(v) : 0
                     },
                     {
-                        key: 'playerCount', label: 'Players', align: 'center', width: '80px',
+                        key: 'tournamentFormat', label: 'Format', columnClass: 'an-wide-only',
+                        render: (v) => v ? `<span class="st-pill nt-pill">${v === 'SE' ? 'Single elim.' : v === 'DE' ? 'Double elim.' : escHtml(v)}</span>` : '—'
+                    },
+                    {
+                        key: 'playerCount', label: 'Players', align: 'right', defaultDir: 'desc',
                         render: (v) => v || '—'
                     },
                     {
-                        key: 'matchCount', label: 'Matches', align: 'center', width: '80px',
+                        key: 'matchCount', label: 'Matches', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
                         render: (v) => v != null ? v : '—'
                     },
                     {
-                        key: '_achievementPoints', label: 'Points', align: 'center', width: '80px',
+                        key: '_achievementPoints', label: 'Points', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts',
                         render: (v) => v != null ? v : '—',
                         sortValue: (v) => v || 0
                     },
                     {
-                        key: 'tournamentFormat', label: 'Format', width: '80px',
-                        render: (v) => escHtml(v || '—')
-                    },
-                    {
-                        key: '_actions', label: '', sortable: false, align: 'right',
+                        key: '_actions', label: '', sortable: false, align: 'right', cellClass: 'an-acts', columnClass: 'an-wide-only',
                         render: (v, row) => {
                             let html = '';
-                            if (window.NEWTON_APP_MODE !== 'analytics' && _correctionsAvailable) {
-                                html += `<button class="btn btn-sm" data-nh-action="edit-corrections" data-tid="${escHtml(row.tournamentId)}">Edit</button> `;
-                            }
                             if (window.NEWTON_APP_MODE === 'analytics') {
-                                const safeId = escHtml(row.tournamentId);
-                                html += `<button class="btn btn-sm" data-nh-action="view-bracket" data-tid="${safeId}">Bracket</button> `;
+                                html += `<button type="button" class="st-btn st-sm" data-nh-action="view-bracket" data-tid="${escHtml(row.tournamentId)}">Bracket</button>`;
+                            }
+                            if (window.NEWTON_APP_MODE !== 'analytics' && _correctionsAvailable) {
+                                html += `<button type="button" class="st-btn st-sm" data-nh-action="edit-corrections" data-tid="${escHtml(row.tournamentId)}">Edit</button>`;
                             }
                             const allowDelete = typeof config !== 'undefined' && config.server && config.server.allowSharedTournamentDelete;
                             if (allowDelete) {
                                 const safeId = escHtml(row.tournamentId);
                                 const safeName = escHtml(row.tournamentName || row.tournamentId);
                                 const safeDate = row.closedAt ? escHtml(fmtDate(row.closedAt)) : '';
-                                html += `<button class="btn btn-sm" data-nh-action="delete-tournament" data-tid="${safeId}" data-name="${safeName}" data-date="${safeDate}" style="color:#dc2626;border-color:#dc2626;">Delete</button>`;
+                                html += `<button type="button" class="st-btn st-sm an-danger" data-nh-action="delete-tournament" data-tid="${safeId}" data-name="${safeName}" data-date="${safeDate}">Delete</button>`;
                             }
                             return html;
                         }
@@ -1488,13 +1428,30 @@ const NewtonHistory = (() => {
         tournaments.forEach(t => { t._rowId = t.tournamentId; });
         _tournamentTable.setData(tournaments);
         _wireTableActions('historyTournamentTableContainer');
+        _updateTournamentMeta();
+        _syncLensInputs(all);
+    }
 
-        // Restore filter input values
+    /**
+     * Tick every tournament the first time, or the ones in a restored scope. Done before
+     * any view draws, so the lens works from every view, not only once Register has opened.
+     * @param {object[]} all - every finalized tournament
+     */
+    function _ensureChecked(all) {
+        if (_checkedIds.size) return;
+        _checkedIds = new Set(_scope ? _scope : all.map(t => t.tournamentId));
+    }
+
+    /**
+     * Show the lens values in its inputs: the saved ones, or the register's first and last
+     * dates when no date range is set.
+     * @param {object[]} all - every finalized tournament
+     */
+    function _syncLensInputs(all) {
         const filterInput = document.getElementById('analyticsTextFilter');
         if (filterInput && filterInput.value !== _textFilter) {
             filterInput.value = _textFilter;
         }
-        // Prefill date inputs — use persisted values, or earliest/latest from register
         const fromInput = document.getElementById('analyticsDateFrom');
         const toInput = document.getElementById('analyticsDateTo');
         if (fromInput && toInput) {
@@ -1503,12 +1460,19 @@ const NewtonHistory = (() => {
                 toInput.value = _dateTo;
             } else {
                 const dates = all.filter(t => t.closedAt).map(t => fmtDate(t.closedAt)).sort();
-                if (dates.length) {
-                    fromInput.value = dates[0];
-                    toInput.value = dates[dates.length - 1];
-                }
+                fromInput.value = dates.length ? dates[0] : '';
+                toInput.value = dates.length ? dates[dates.length - 1] : '';
             }
         }
+    }
+
+    /** "N of M ticked" in the tournament list's heading. */
+    function _updateTournamentMeta() {
+        const el = document.getElementById('historyTournamentMeta');
+        if (!el) return;
+        const visible = _allTournaments ? _applyAllFilters(_allTournaments) : [];
+        const ticked = visible.filter(t => _checkedIds.has(t.tournamentId)).length;
+        el.textContent = visible.length ? `${ticked} of ${visible.length} ticked` : '';
     }
 
     /**
@@ -1523,13 +1487,8 @@ const NewtonHistory = (() => {
             _checkedIds.delete(tournamentId);
         }
         _applySelectionAsScope();
-
-        // Update header checkbox to reflect current state of visible rows
-        const headerCb = document.querySelector('#historyTournamentTableContainer thead .analytics-scope-checkbox');
-        if (headerCb) {
-            const visible = _allTournaments ? _applyAllFilters(_allTournaments) : [];
-            headerCb.checked = visible.length > 0 && visible.every(t => _checkedIds.has(t.tournamentId));
-        }
+        if (_tournamentTable) _tournamentTable.refresh(); // the tick-all box and the dimmed rows
+        _updateTournamentMeta();
     }
 
     /**
@@ -1545,6 +1504,7 @@ const NewtonHistory = (() => {
         }
         _applySelectionAsScope();
         if (_tournamentTable) _tournamentTable.refresh();
+        _updateTournamentMeta();
     }
 
     /** Convert the current checkbox + filter state into the active scope. */
@@ -1596,6 +1556,8 @@ const NewtonHistory = (() => {
 
         // Recompute scope — filters narrow what's in scope
         _applySelectionAsScope();
+        _updateTournamentMeta();
+        _refreshActiveView();
     }
 
     /** Save text filter to localStorage. */
@@ -1652,6 +1614,8 @@ const NewtonHistory = (() => {
         if (_tournamentTable) _tournamentTable.setData(filtered);
 
         _applySelectionAsScope();
+        _updateTournamentMeta();
+        _refreshActiveView();
     }
 
     /** Save date filter to localStorage. */
@@ -1701,7 +1665,7 @@ const NewtonHistory = (() => {
 
         const from = half === 1 ? `${year}-01-01` : `${year}-07-01`;
         const to   = half === 1 ? `${year}-06-30` : `${year}-12-31`;
-        const label = `${year}H${half}`;
+        const label = `H${half} ${year}`;
 
         return { from, to, label };
     }
@@ -1738,6 +1702,8 @@ const NewtonHistory = (() => {
         if (_tournamentTable) _tournamentTable.setData(filtered);
 
         _applySelectionAsScope();
+        _updateTournamentMeta();
+        _refreshActiveView();
     }
 
     // ---------------------------------------------------------------------------
@@ -1756,15 +1722,15 @@ const NewtonHistory = (() => {
         _checkedIds = new Set(all.map(t => t.tournamentId));
         setScope(null);
 
-        // Reset UI inputs
-        const textInput = document.getElementById('analyticsTextFilter');
-        if (textInput) textInput.value = '';
+        // Reset the lens inputs (the dates show the register's range again)
+        _syncLensInputs(all);
 
-        // Re-render table (will prefill dates from register range)
+        // Re-render the list (re-created so its tick-all box resets), then the view on screen
         if (_tournamentTable) {
-            _tournamentTable = null; // force re-create to reset header checkbox
+            _tournamentTable = null;
         }
         await renderTournamentList();
+        _refreshActiveView();
     }
 
     // ---------------------------------------------------------------------------
@@ -1850,43 +1816,80 @@ const NewtonHistory = (() => {
         const container = document.getElementById('registerBreadcrumb');
         if (!container) return;
 
-        let html = '';
+        const onTournaments = _activeRegisterTab === 'tournaments';
+        let html = '<div class="st-seg" role="group" aria-label="Register">' +
+            `<button type="button" aria-pressed="${onTournaments}" onclick="NewtonHistory.switchRegisterTab('tournaments')">Tournaments</button>` +
+            `<button type="button" aria-pressed="${!onTournaments}" onclick="NewtonHistory.switchRegisterTab('matches')">Matches</button>` +
+            '</div>';
 
-        // Tournaments side (with optional drill-down crumbs)
-        const isOnTournaments = _activeRegisterTab === 'tournaments';
-        const isOnMatches = _activeRegisterTab === 'matches';
-
-        if (isOnTournaments && !_breadcrumbTournament) {
-            // Top-level tournaments list — active tab
-            html += '<span class="register-sub-tab active">Tournaments</span>';
-        } else {
-            // Tournaments is clickable crumb (navigates back to list)
-            html += `<button class="register-sub-tab" onclick="NewtonHistory.switchRegisterTab('tournaments')">Tournaments</button>`;
-        }
-
-        if (isOnTournaments && _breadcrumbTournament) {
-            const tLabel = escHtml(_breadcrumbTournament.name) + (_breadcrumbTournament.date ? ` <span style="color:#9ca3af;font-weight:400;">(${escHtml(_breadcrumbTournament.date)})</span>` : '');
-            html += '<span class="register-crumb-sep">/</span>';
+        // The path back from an opened tournament or match
+        if (onTournaments && _breadcrumbTournament) {
+            const tLabel = escHtml(_breadcrumbTournament.name);
+            const tDate = _breadcrumbTournament.date ? `<small>${escHtml(_breadcrumbTournament.date)}</small>` : '';
+            html += '<div class="an-crumbs">' +
+                `<button type="button" class="st-link" onclick="NewtonHistory.switchRegisterTab('tournaments')">Tournaments</button>` +
+                '<span class="an-sep">/</span>';
             if (_breadcrumbMatch) {
-                // Tournament name is clickable (goes back to tournament match list)
-                html += `<button class="register-sub-tab" data-nh-action="open-tournament" data-tid="${escHtml(_breadcrumbTournament.id)}">${tLabel}</button>`;
-                html += '<span class="register-crumb-sep">/</span>';
-                html += `<span class="register-sub-tab active">${escHtml(_breadcrumbMatch.id)}</span>`;
+                html += `<button type="button" class="st-link" data-nh-action="open-tournament" data-tid="${escHtml(_breadcrumbTournament.id)}">${tLabel}</button>` +
+                    '<span class="an-sep">/</span>' +
+                    `<b>${escHtml(_breadcrumbMatch.id)}</b>`;
             } else {
-                // Tournament name is the current view (active, not clickable)
-                html += `<span class="register-sub-tab active">${tLabel}</span>`;
+                html += `<b>${tLabel}${tDate}</b>`;
             }
-        }
-
-        // Matches tab
-        if (isOnMatches) {
-            html += '<span class="register-sub-tab active">Matches</span>';
-        } else {
-            html += `<button class="register-sub-tab" onclick="NewtonHistory.switchRegisterTab('matches')">Matches</button>`;
+            html += '</div>';
         }
 
         container.innerHTML = html;
         _wireTableActions('registerBreadcrumb');
+    }
+
+    /**
+     * The match table's columns, shared by a tournament's matches and the list of all matches.
+     * @param {boolean} withTournament - add the Tournament column (all matches)
+     * @returns {object[]} NewtonTable columns
+     */
+    function _matchColumns(withTournament) {
+        const player = (n) => (v, row) => `<span class="${row.winner === n ? 'nt-win' : 'nt-lose'}">${escHtml(v)}</span>`;
+        const cols = [
+            { key: 'matchId', label: 'Match', render: (v) => matchIdTag(v) },
+            { key: 'player1Name', label: 'Player 1', render: player(1) },
+            {
+                key: 'score', label: 'Result', align: 'center', sortable: false, cellClass: 'nt-score',
+                render: (v, row) => row.legsWon ? `${row.legsWon.p1}–${row.legsWon.p2}` : '—'
+            },
+            { key: 'player2Name', label: 'Player 2', width: '100%', render: player(2) },
+            {
+                key: '_achievementPoints', label: 'Points', align: 'right', defaultDir: 'desc',
+                render: (v) => v || _DIM_DASH,
+                sortValue: (v) => v || 0
+            }
+        ];
+        if (withTournament) {
+            cols.push({
+                key: '_tournamentName', label: 'Tournament', columnClass: 'an-wide-only',
+                render: (v, row) => `<button type="button" class="st-link" data-nh-action="open-tournament" data-tid="${escHtml(row._tournamentId)}">${escHtml(v)}</button>`
+            });
+        }
+        cols.push(
+            {
+                key: 'completedAt', label: 'Date', columnClass: 'an-wide-only',
+                render: (v) => v ? fmtDate(v) : '—',
+                sortValue: (v) => v ? tsToMs(v) : 0
+            },
+            { key: 'matchType', label: 'Type', columnClass: 'an-wide-only', render: (v) => _typePill(v) }
+        );
+        return cols;
+    }
+
+    /**
+     * How a match was scored, as a pill.
+     * @param {string} matchType - 'CHALKER' or anything else (entered by hand)
+     * @returns {string} HTML
+     */
+    function _typePill(matchType) {
+        return matchType === 'CHALKER'
+            ? '<span class="st-pill nt-pill nt-chalker">Chalker</span>'
+            : '<span class="st-pill nt-pill">Manual</span>';
     }
 
     /**
@@ -1923,7 +1926,7 @@ const NewtonHistory = (() => {
 
             // Update meta
             const metaEl = document.getElementById('historyAllMatchesMeta');
-            if (metaEl) metaEl.textContent = `${allMatches.length} matches across ${tournaments.length} tournaments`;
+            if (metaEl) metaEl.textContent = `${allMatches.length} in ${tournaments.length} tournaments`;
         } catch (e) {
             console.error('All-matches render failed:', e);
             const c = document.getElementById('historyAllMatchesTableContainer');
@@ -1938,45 +1941,8 @@ const NewtonHistory = (() => {
                 containerId: 'historyAllMatchesTableContainer',
                 defaultSortKey: 'completedAt',
                 defaultSortDir: 'desc',
-                emptyMessage: 'No matches in the current scope.',
-                columns: [
-                    {
-                        key: 'matchId', label: 'Match', width: '130px',
-                        render: (v) => `<span style="font-family:monospace;font-size:13px;">${escHtml(v)}</span>`
-                    },
-                    {
-                        key: 'player1Name', label: 'Player 1',
-                        render: (v, row) => row.winner === 1 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
-                    },
-                    {
-                        key: 'player2Name', label: 'Player 2',
-                        render: (v, row) => row.winner === 2 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
-                    },
-                    {
-                        key: 'score', label: 'Result', align: 'center', width: '80px', sortable: false,
-                        render: (v, row) => row.legsWon ? `<strong style="font-size:15px;">${row.legsWon.p1}–${row.legsWon.p2}</strong>` : '—'
-                    },
-                    {
-                        key: '_achievementPoints', label: 'Points', align: 'center', width: '70px',
-                        render: (v) => v || '—',
-                        sortValue: (v) => v || 0
-                    },
-                    {
-                        key: '_tournamentName', label: 'Tournament',
-                        render: (v, row) => `<strong style="font-size:15px;cursor:pointer;text-decoration:underline;" data-nh-action="open-tournament" data-tid="${escHtml(row._tournamentId)}">${escHtml(v)}</strong>`
-                    },
-                    {
-                        key: 'completedAt', label: 'Date', width: '110px',
-                        render: (v) => v ? fmtDate(v) : '—',
-                        sortValue: (v) => v ? tsToMs(v) : 0
-                    },
-                    {
-                        key: 'matchType', label: 'Type', width: '90px',
-                        render: (v) => v === 'CHALKER'
-                            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
-                            : '<span class="history-type-badge history-type-manual">Manual</span>'
-                    }
-                ],
+                emptyMessage: 'No matches in the lens.',
+                columns: _matchColumns(true),
                 onRowClick: (row) => openMatch(row._tournamentId, row.matchId)
             });
         }
@@ -2019,8 +1985,26 @@ const NewtonHistory = (() => {
             return;
         }
 
-        document.getElementById('historyMatchListMeta').textContent =
-            `${tournament.tournamentFormat === 'DE' ? 'Double Elimination' : tournament.tournamentFormat === 'SE' ? 'Single Elimination' : (tournament.tournamentFormat || '')} · ${tournament.playerCount || '?'} players · ${tournament.closedAt ? fmtDate(tournament.closedAt) : ''}`;
+        // Heading, buttons and facts. Points come from the corrected record the views use.
+        const counted = (_allTournaments || []).find(t => t.tournamentId === tournamentId) || tournament;
+        const format = tournament.tournamentFormat === 'DE' ? 'Double elim.' : tournament.tournamentFormat === 'SE' ? 'Single elim.' : (tournament.tournamentFormat || '—');
+        const fact = (label, value) => `<div><dt>${label}</dt><dd>${value}</dd></div>`;
+        document.getElementById('historyMatchListTitle').innerHTML =
+            escHtml(tournament.tournamentName || tournamentId) + (tournament.closedAt ? ` <small>${fmtDate(tournament.closedAt)}</small>` : '');
+        let tools = '';
+        if (window.NEWTON_APP_MODE === 'analytics') {
+            tools += `<button type="button" class="st-btn st-sm" data-nh-action="view-bracket" data-tid="${escHtml(tournamentId)}">Bracket</button>`;
+        }
+        if (window.NEWTON_APP_MODE !== 'analytics' && _correctionsAvailable) {
+            tools += `<button type="button" class="st-btn st-sm" data-nh-action="edit-corrections" data-tid="${escHtml(tournamentId)}">Edit</button>`;
+        }
+        document.getElementById('historyMatchListTools').innerHTML = tools;
+        _wireTableActions('historyMatchListTools');
+        document.getElementById('historyMatchListMeta').innerHTML =
+            fact('Format', escHtml(format)) +
+            fact('Players', tournament.playerCount || '—') +
+            fact('Matches', matchRecords.length) +
+            fact('Points', _computeAchievementPoints(counted));
 
         // Create the table instance once, reuse on subsequent calls
         if (!_matchTable) {
@@ -2030,40 +2014,7 @@ const NewtonHistory = (() => {
                 defaultSortKey: 'completedAt',
                 defaultSortDir: 'asc',
                 emptyMessage: 'No match records found.',
-                columns: [
-                    {
-                        key: 'matchId', label: 'Match', width: '130px',
-                        render: (v) => `<span style="font-family:monospace;font-size:13px;">${escHtml(v)}</span>`
-                    },
-                    {
-                        key: 'player1Name', label: 'Player 1',
-                        render: (v, row) => row.winner === 1 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
-                    },
-                    {
-                        key: 'player2Name', label: 'Player 2',
-                        render: (v, row) => row.winner === 2 ? `<strong style="font-size:15px;">${escHtml(v)}</strong>` : `<span style="font-size:15px;">${escHtml(v)}</span>`
-                    },
-                    {
-                        key: 'score', label: 'Result', align: 'center', width: '80px', sortable: false,
-                        render: (v, row) => row.legsWon ? `<strong style="font-size:15px;">${row.legsWon.p1}–${row.legsWon.p2}</strong>` : '—'
-                    },
-                    {
-                        key: '_achievementPoints', label: 'Points', align: 'center', width: '70px',
-                        render: (v) => v || '—',
-                        sortValue: (v) => v || 0
-                    },
-                    {
-                        key: 'completedAt', label: 'Date', width: '110px',
-                        render: (v) => v ? fmtDate(v) : '—',
-                        sortValue: (v) => v ? tsToMs(v) : 0
-                    },
-                    {
-                        key: 'matchType', label: 'Type', width: '90px',
-                        render: (v) => v === 'CHALKER'
-                            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
-                            : '<span class="history-type-badge history-type-manual">Manual</span>'
-                    }
-                ],
+                columns: _matchColumns(false),
                 onRowClick: (row) => openMatch(row._tournamentId, row.matchId)
             });
         }
@@ -2218,107 +2169,69 @@ const NewtonHistory = (() => {
     // ---------------------------------------------------------------------------
 
     function _buildMatchDetailHtml(match, tournamentInfo, tournamentRecord) {
-        const winnerName = match.winner === 1 ? match.player1Name : match.player2Name;
-        const legs       = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
-        const date       = match.completedAt ? fmtDateTime(match.completedAt) : '—';
-        const typeBadge  = match.matchType === 'CHALKER'
-            ? '<span class="history-type-badge history-type-chalker">Chalker</span>'
-            : '<span class="history-type-badge history-type-manual">Manual</span>';
-
-        const p1 = match.winner === 1 ? `<strong>${escHtml(match.player1Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player1Name)}</span>`;
-        const p2 = match.winner === 2 ? `<strong>${escHtml(match.player2Name)}</strong>` : `<span style="color:#6b7280;">${escHtml(match.player2Name)}</span>`;
-        const score = `<span style="font-family:'SF Mono',Monaco,'Cascadia Code','Courier New',monospace;font-size:14px;color:#374151;margin:0 4px;">${legs}</span>`;
+        const w1 = match.winner === 1;
+        const w2 = match.winner === 2;
+        const n1 = escHtml(match.player1Name);
+        const n2 = escHtml(match.player2Name);
+        const legs = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
+        const date = match.completedAt ? fmtDateTime(match.completedAt) : '—';
         const tName = (tournamentInfo && tournamentInfo.name) || match.tournamentName || '';
-        const tDate = (tournamentInfo && tournamentInfo.date) || '';
-        const tournamentLine = tName ? `${escHtml(tName)}${tDate ? ' · ' + escHtml(tDate) : ''}` : '';
+        const bo = match.format && match.format.bo ? `<span class="st-pill nt-pill">Best of ${match.format.bo}</span>` : '';
 
-        let html = `<div class="history-detail-header" style="display:flex;justify-content:space-between;align-items:flex-start;">
-            <div>
-            <div style="font-size:18px;"><strong>${escHtml(match.matchId)}</strong> · ${p1} ${score} ${p2}</div>
-            <div style="margin-top:6px;color:#6b7280;font-size:13px;">${tournamentLine ? `<strong style="color:#374151;">${escHtml(tName)}</strong> · ` : ''}${date}</div>
-            </div>
-            <div>${match.format && match.format.bo ? `<span class="history-type-badge" style="background:#f3f4f6;color:#374151;">Best of ${match.format.bo}</span> ` : ''}${typeBadge}</div>
-        </div>`;
+        // Match number, length and how it was scored; then where and when
+        let html = '<div class="nt-match">' +
+            '<div class="nt-match-head">' +
+                `<div class="nt-match-tags">${matchIdTag(match.matchId)}${bo}${_typePill(match.matchType)}</div>` +
+                `<span class="nt-match-when">${tName ? escHtml(tName) + ' · ' : ''}${date}</span>` +
+            '</div>' +
+            '<div class="nt-match-score">' +
+                `<div class="nt-match-p${w1 ? ' nt-match-w' : ''}">${n1}</div>` +
+                `<div class="nt-match-s">${legs}</div>` +
+                `<div class="nt-match-p${w2 ? ' nt-match-w' : ''}">${n2}</div>` +
+            '</div>';
 
-        // Legs table (Chalker only)
-        if (match.matchType === 'CHALKER' && Array.isArray(match.legs) && match.legs.length > 0) {
-            html += `<h4 style="margin:16px 0 6px;">Legs</h4>
-            <div style="overflow-x:auto;">
-            <table class="qr-result-legs">
-                <thead><tr>
-                    <th>#</th><th>Winner</th><th>First</th>
-                    <th>${escHtml(match.player1Name)}</th>
-                    <th>${escHtml(match.player2Name)}</th>
-                    <th>CD</th>
-                </tr></thead><tbody>`;
-
-            match.legs.forEach((leg, i) => {
-                const fls = match.firstStarter || 1;
-                const throwsFirst = ((fls - 1 + i) % 2 === 0) ? match.player1Name : match.player2Name;
-                const legWinner   = leg.w === 1 ? match.player1Name : match.player2Name;
-                const cd          = leg.cd === 0 ? 'TB' : String(leg.cd);
-
-                const v1 = NewtonStats.decodeVisits(leg.s, 0);
-                const v2 = NewtonStats.decodeVisits(leg.s, 1);
-
-                html += `<tr>
-                    <td>${i + 1}</td>
-                    <td>${escHtml(legWinner)}</td>
-                    <td>${escHtml(throwsFirst)}</td>
-                    <td class="qr-visits">${v1.join(', ') || '—'}</td>
-                    <td class="qr-visits">${v2.join(', ') || '—'}</td>
-                    <td>${cd}</td>
-                </tr>`;
-            });
-
-            html += '</tbody></table></div>';
-        }
-
-        // Match stats table — always shown, same format as Results/Leaderboard
+        // Achievements and points, each player — always shown
         const ach = match.achievements || {};
         const a1 = (ach.p1 || ach[match.player1Id]) || {};
         const a2 = (ach.p2 || ach[match.player2Id]) || {};
-        const fmt = (v) => (v !== undefined && v !== null && v !== 0) ? v : '—';
-        const fmtArr = (v) => (Array.isArray(v) && v.length) ? v.join(', ') : '—';
-
-        const p1Bold = match.winner === 1;
-        const p2Bold = match.winner === 2;
-        const p1Name = p1Bold ? `<strong>${escHtml(match.player1Name)}</strong>` : escHtml(match.player1Name);
-        const p2Name = p2Bold ? `<strong>${escHtml(match.player2Name)}</strong>` : escHtml(match.player2Name);
-
-        // Compute per-player achievement points
+        const num = (v) => v ? v : '<span class="nt-dim">—</span>';
+        const list = (v) => (Array.isArray(v) && v.length) ? v.join(', ') : '<span class="nt-dim">—</span>';
         const p = tournamentRecord ? _getActivePoints(tournamentRecord) : { oneEighty: 0, ton: 0, highOut: 0, shortLeg: 0 };
-        const pts1 = calculateAchievementPoints(a1, p);
-        const pts2 = calculateAchievementPoints(a2, p);
+        const row = (name, a, won) => `<tr>
+                <td class="nt-name"><span class="${won ? 'nt-win' : 'nt-lose'}">${name}</span></td>
+                <td>${num(a.oneEighties)}</td>
+                <td>${num(a.tons)}</td>
+                <td>${list(a.highOuts)}</td>
+                <td>${list(a.shortLegs)}</td>
+                <td class="nt-pts">${num(calculateAchievementPoints(a, p))}</td>
+            </tr>`;
+        html += `<div class="newton-table-scroll"><table class="newton-table nt-match-stats">
+            <thead><tr><th>Player</th><th>180s</th><th>Tons</th><th>High outs</th><th>Short legs</th><th>Points</th></tr></thead>
+            <tbody>${row(n1, a1, w1)}${row(n2, a2, w2)}</tbody></table></div>`;
 
-        html += `<table class="history-table newton-table" style="margin-top:16px;">
-            <thead><tr>
-                <th>Player</th>
-                <th style="text-align:center;">Short Legs</th>
-                <th style="text-align:center;">High Outs</th>
-                <th style="text-align:center;width:70px;">180s</th>
-                <th style="text-align:center;width:70px;">Tons</th>
-                <th style="text-align:center;width:70px;">Points</th>
-            </tr></thead><tbody>
-            <tr>
-                <td>${p1Name}</td>
-                <td style="text-align:center;">${fmtArr(a1.shortLegs)}</td>
-                <td style="text-align:center;">${fmtArr(a1.highOuts)}</td>
-                <td style="text-align:center;">${fmt(a1.oneEighties)}</td>
-                <td style="text-align:center;">${fmt(a1.tons)}</td>
-                <td style="text-align:center;">${pts1 || '—'}</td>
-            </tr>
-            <tr>
-                <td>${p2Name}</td>
-                <td style="text-align:center;">${fmtArr(a2.shortLegs)}</td>
-                <td style="text-align:center;">${fmtArr(a2.highOuts)}</td>
-                <td style="text-align:center;">${fmt(a2.oneEighties)}</td>
-                <td style="text-align:center;">${fmt(a2.tons)}</td>
-                <td style="text-align:center;">${pts2 || '—'}</td>
-            </tr>
-            </tbody></table>`;
+        // Legs (Chalker only)
+        if (match.matchType === 'CHALKER' && Array.isArray(match.legs) && match.legs.length > 0) {
+            const fls = match.firstStarter || 1;
+            html += `<h4 class="nt-match-sub">Legs <small>from the Chalker</small></h4>
+            <div class="newton-table-scroll"><table class="newton-table nt-match-legs">
+                <thead><tr><th>#</th><th>Winner</th><th>Threw first</th><th>${n1}</th><th>${n2}</th><th title="Darts at double">CD</th></tr></thead><tbody>`;
+            match.legs.forEach((leg, i) => {
+                const throwsFirst = ((fls - 1 + i) % 2 === 0) ? n1 : n2;
+                const v1 = NewtonStats.decodeVisits(leg.s, 0);
+                const v2 = NewtonStats.decodeVisits(leg.s, 1);
+                html += `<tr>
+                    <td class="nt-rank">${i + 1}</td>
+                    <td class="nt-name">${leg.w === 1 ? n1 : n2}</td>
+                    <td>${throwsFirst}</td>
+                    <td class="nt-visits">${v1.join(', ') || '—'}</td>
+                    <td class="nt-visits">${v2.join(', ') || '—'}</td>
+                    <td>${leg.cd === 0 ? 'TB' : leg.cd}</td>
+                </tr>`;
+            });
+            html += '</tbody></table></div>';
+        }
 
-        return html;
+        return html + '</div>';
     }
 
     // ---------------------------------------------------------------------------
@@ -2437,13 +2350,11 @@ const NewtonHistory = (() => {
         }
         if (!match) { alert('No detailed record found for this match.'); return; }
 
-        const titleEl = document.getElementById('matchDetailModalTitle');
-        const bodyEl  = document.getElementById('matchDetailModalBody');
+        const bodyEl = document.getElementById('matchDetailModalBody');
 
         const t = await NewtonDB.getTournament(tournamentId);
         const tInfo = t ? { name: t.tournamentName, date: t.tournamentDate } : null;
-        titleEl.textContent = `${match.matchId} — ${match.player1Name} vs ${match.player2Name}`;
-        bodyEl.innerHTML    = _buildMatchDetailHtml(match, tInfo, t);
+        bodyEl.innerHTML = _buildMatchDetailHtml(match, tInfo, t);
 
         pushDialog('matchDetailModal', null, true);
     }

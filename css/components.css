@@ -25,3 +25,87 @@
 .dlg--leaderboard .dlg__title { padding: 0 24px 14px; border-bottom: 0; font-weight: 700; color: var(--nt-ink); }
 .dlg--leaderboard .dlg__title small { font-size: 13px; font-weight: 500; color: var(--nt-muted); margin-left: 8px; letter-spacing: 0; }
 .dlg--leaderboard .nt-leaderboard-scroll { max-height: 65vh; overflow: auto; margin-top: 0; }
+
+/* ---- a match number that shows the side (matchIdTag() in js/main.js): frontside outlined,
+   backside grey (a step darker than the bracket's band so it reads on white), Grand Final dark ---- */
+.nt-id { display: inline-block; font-family: var(--nt-mono); font-size: 12px; font-weight: 700; line-height: 20px; padding: 0 7px; border-radius: 5px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); white-space: nowrap; }
+.nt-id.nt-bs { background: var(--nt-line); color: var(--nt-ink); }
+.nt-id.nt-gf { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+
+/* ---- NewtonTable (js/newton-table.js): Analytics' sortable, paged tables, in the Leaderboard
+   look. Also the match detail's tables, in Analytics and in the match dialog. ---- */
+.newton-table-scroll { overflow-x: auto; }
+.newton-table { width: 100%; border-collapse: collapse; font-family: var(--nt-sans); font-size: 14px; }
+.newton-table th { background: var(--nt-surface); text-align: left; font-size: 12px; font-weight: 600; color: var(--nt-muted); padding: 6px 8px; border-top: 1px solid var(--nt-line); border-bottom: 1px solid var(--nt-line); white-space: nowrap; }
+.newton-table td { padding: 9px 8px; border-bottom: 1px solid var(--nt-line); font-variant-numeric: tabular-nums; color: var(--nt-ink-2); white-space: nowrap; vertical-align: middle; }
+.newton-table th:first-child, .newton-table td:first-child { padding-left: 20px; }
+.newton-table th:last-child, .newton-table td:last-child { padding-right: 20px; }
+.newton-table tbody tr:last-child td { border-bottom: 0; }
+/* group headings over neighbouring columns, and a divider where a group starts */
+.newton-table .newton-table-groups th { border-bottom: 0; padding-bottom: 0; text-align: center; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-faint); }
+.newton-table .newton-table-groups + tr th { border-top: 0; }
+.newton-table .newton-table-gs { box-shadow: inset 1px 0 0 var(--nt-line); }
+.newton-table-sortable { cursor: pointer; user-select: none; }
+.newton-table-sortable:hover, .newton-table-sorted { color: var(--nt-ink); }
+.newton-table-clickable { cursor: pointer; }
+.newton-table-clickable:hover td { background: var(--nt-surface-2); }
+.newton-table td.newton-table-empty { text-align: center; color: var(--nt-muted); padding: 28px 20px; white-space: normal; }
+.newton-table input[type="checkbox"] { width: 16px; height: 16px; margin: 0; vertical-align: middle; accent-color: var(--nt-header); cursor: pointer; }
+/* cells */
+.newton-table .nt-name { font-weight: 600; color: var(--nt-ink); }
+.newton-table .nt-rank { font-family: var(--nt-mono); font-size: 12px; font-weight: 700; color: var(--nt-ink-2); }
+.newton-table .nt-pts { font-weight: 800; color: var(--nt-ink); }
+.newton-table .nt-score { font-family: var(--nt-mono); font-size: 13px; font-weight: 700; color: var(--nt-ink); }
+.nt-dim { color: var(--nt-faint); }
+.nt-win { color: var(--nt-ink); font-weight: 700; }
+.nt-lose { color: var(--nt-muted); }
+.st-pill.nt-pill { font-weight: 600; }
+.st-pill.nt-pill::before { display: none; }
+.st-pill.nt-chalker { background: var(--nt-accent-soft); color: #b2410f; }
+/* pages: Prev / Next, and how many rows a page shows */
+.newton-table-pagination { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; padding: 10px 20px 12px; border-top: 1px solid var(--nt-line); font-family: var(--nt-sans); font-size: 13px; color: var(--nt-muted); }
+.newton-table-page-nav, .newton-table-rpp { display: flex; align-items: center; gap: 10px; }
+.newton-table-page-info { font-variant-numeric: tabular-nums; }
+.newton-table-page-btn { height: 32px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); font: inherit; font-weight: 600; color: var(--nt-ink-2); cursor: pointer; }
+.newton-table-page-btn:hover:not(:disabled) { border-color: var(--nt-ink-2); }
+.newton-table-page-btn:disabled { opacity: .4; cursor: default; }
+.newton-table-rpp-seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; }
+.newton-table-rpp-seg button { height: 30px; min-width: 38px; padding: 0 10px; border: 0; background: var(--nt-surface); font: inherit; font-weight: 600; color: var(--nt-ink-2); cursor: pointer; }
+.newton-table-rpp-seg button + button { border-left: 1px solid var(--nt-line-2); }
+.newton-table-rpp-seg button[aria-pressed="true"] { background: var(--nt-header); color: var(--nt-header-ink); }
+.newton-table-rpp-seg button:hover:not([aria-pressed="true"]) { background: var(--nt-surface-2); }
+.newton-table-page-btn:focus-visible, .newton-table-rpp-seg button:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+
+/* ---- one match (NewtonHistory._buildMatchDetailHtml): Analytics, and the match dialog ---- */
+.nt-match { font-family: var(--nt-sans); color: var(--nt-ink); }
+.nt-match-head { display: flex; align-items: center; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; padding: 16px 20px 0; }
+.nt-match-tags { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.nt-match-when { font-size: 13px; color: var(--nt-muted); }
+.nt-match-score { display: grid; grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); align-items: center; gap: 20px; padding: 14px 20px 20px; }
+.nt-match-p { font-size: 22px; font-weight: 600; color: var(--nt-muted); min-width: 0; overflow-wrap: anywhere; }
+.nt-match-p:last-child { text-align: right; }
+.nt-match-p.nt-match-w { font-weight: 800; color: var(--nt-ink); }
+.nt-match-s { font-family: var(--nt-mono); font-size: 34px; font-weight: 700; letter-spacing: -.02em; font-variant-numeric: tabular-nums; }
+.nt-match-sub { margin: 0; padding: 18px 20px 10px; font-size: 15px; font-weight: 700; }
+.nt-match-sub small { font-size: 13px; font-weight: 500; color: var(--nt-muted); margin-left: 6px; }
+.nt-match-stats th:not(:first-child), .nt-match-stats td:not(:first-child) { text-align: right; }
+.nt-match-stats td:first-child { width: 100%; }
+.nt-match-legs .nt-visits { font-family: var(--nt-mono); font-size: 12px; white-space: normal; min-width: 200px; }
+.nt-match .newton-table tbody tr:last-child td { border-bottom: 0; }
+
+/* the match dialog (#matchDetailModal): the match edge to edge */
+.dlg.dlg--match { max-width: 820px; font-family: var(--nt-sans); }
+.dlg--match .dlg__main { padding: 4px 0 8px; max-height: 75vh; overflow-y: auto; }
+
+@media (max-width: 700px) {
+  .newton-table { font-size: 13px; }
+  .newton-table th:first-child, .newton-table td:first-child { padding-left: 14px; }
+  .newton-table th:last-child, .newton-table td:last-child { padding-right: 14px; }
+  .newton-table-pagination { padding-inline: 14px; }
+  .nt-match-head { padding-inline: 14px; }
+  .nt-match-score { padding-inline: 14px; gap: 10px; }
+  .nt-match-p { font-size: 16px; }
+  .nt-match-s { font-size: 26px; }
+  .nt-match-sub { padding-inline: 14px; }
+  .nt-match-stats th, .nt-match-stats td { padding-inline: 5px; white-space: normal; }
+}

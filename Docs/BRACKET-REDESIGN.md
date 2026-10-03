@@ -237,7 +237,7 @@ The bracket page keeps its own full-screen header (tournament name, Match Contro
 
 **Page widths** (tokens in `css/design-tokens.css`): `--nt-page-max` 1520px for forms and short lists (Setup, Global Settings, Registration), `--nt-page-wide` 1840px for table-heavy pages (Analytics). Both sit inside 24px side margins. The app runs full screen, so the browser is at least 1920px wide. The header always spans the full window.
 
-Kept after trying it. **Pages redesigned so far:** Global Settings (v5.1.10), Tournament Setup (`css/setup-page.css`), Player Registration (`css/registration-page.css`, reuses Setup's `st-*` panel, button and field styles). Next: Analytics (wide width). The registration *process* (saved players especially) is to be reworked later; the current page is laid out to take that.
+Kept after trying it. **Pages redesigned so far:** Global Settings (v5.1.10), Tournament Setup (`css/setup-page.css`), Player Registration (`css/registration-page.css`, reuses Setup's `st-*` panel, button and field styles), Analytics (`css/analytics-page.css`, wide width; the one page with a phone layout, since club members use the analytics-only instance on their phones). Shared parts (the Leaderboard table, NewtonTable, the match-number tag, the match detail) are in `css/components.css`. The registration *process* (saved players especially) is to be reworked later; the current page is laid out to take that.
 
 ---
 

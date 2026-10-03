@@ -110,3 +110,18 @@
   color: var(--nt-muted);
 }
 .container > footer a { color: var(--nt-ink-2); font-weight: 600; }
+
+/* ---- phones (club members open Analytics and Global Settings on them): the header and
+   footer run edge to edge, the page links scroll sideways ---- */
+@media (max-width: 700px) {
+  .container { padding: 0; }
+  .container > .header { margin: 0 0 16px; padding: 12px 16px 0; row-gap: 10px; }
+  .header .header-right { margin-top: -12px; }
+  .header h1 { font-size: 16px; gap: 10px; min-width: 0; }
+  .header .logo-placeholder,
+  .header .club-logo { width: 32px; height: 32px; flex: none; }
+  .header .nav { gap: 18px; flex-wrap: nowrap; overflow-x: auto; scrollbar-width: none; }
+  .header .nav-btn { white-space: nowrap; flex: none; }
+  .container > .page { margin-bottom: 16px; }
+  .container > footer { margin: auto 0 0; padding: 12px 16px; }
+}
