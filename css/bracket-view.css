@@ -138,6 +138,7 @@
   font-size: 13px; color: var(--bv-ink-2); cursor: default;
 }
 .bv-selbar[hidden] { display: none; }
+.bv-readonly { font-size: 12px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--bv-muted); border: 1px dashed var(--bv-faint); border-radius: 6px; padding: 3px 8px; }
 .bv-selbar .bv-sid { font-family: var(--bv-mono); font-weight: 700; color: var(--bv-ink); }
 .bv-selbar button { font: inherit; font-size: 12px; font-weight: 600; padding: 4px 10px; border-radius: 6px; border: 1px solid var(--bv-line); background: var(--bv-surface-2); color: var(--bv-ink); cursor: pointer; }
 .bv-selbar button:hover { border-color: var(--bv-accent); color: var(--bv-accent); }
@@ -192,6 +193,8 @@
 }
 .bv-btn:hover { background: var(--bv-surface-2); border-color: var(--bv-ink-2); }
 .bv-btn-primary { background: var(--bv-header); border-color: var(--bv-header); color: var(--bv-header-ink); }
+.bv-badge { margin-left: 8px; padding: 1px 7px; border-radius: 99px; background: var(--bv-accent); color: #fff; font-size: 12px; font-weight: 700; }
+.bv-badge[hidden] { display: none; }
 .bv-btn-primary:hover { background: var(--bv-accent); border-color: var(--bv-accent); color: #fff; }
 .bv-link { font: inherit; font-size: 13px; font-weight: 600; padding: 6px 8px; border: 0; border-radius: 6px; background: transparent; color: var(--bv-muted); cursor: pointer; }
 .bv-link:hover { color: var(--bv-ink); background: var(--bv-surface); }

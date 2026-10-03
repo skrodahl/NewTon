@@ -274,7 +274,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         </nav>
                     </div>
                     <div class="bv-head-center">
-                        <button type="button" class="bv-btn bv-btn-primary bv-nav-btn" onclick="showMatchCommandCenter()" title="Show LIVE and UPCOMING matches">Match Controls</button>
+                        <button type="button" class="bv-btn bv-btn-primary bv-nav-btn" onclick="showMatchCommandCenter()" title="Show LIVE and UPCOMING matches">Match Controls<span class="bv-badge" id="bvResultsWaiting" hidden></span></button>
                         <button type="button" class="bv-btn bv-nav-btn" onclick="showStatisticsModal()" title="View tournament statistics and rankings">Leaderboard</button>
                     </div>
                     <div class="bv-head-right">
@@ -308,9 +308,6 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
                 <div class="bracket-viewport" id="bracketViewport">
                     <div class="bracket-canvas" id="bracketCanvas">
-                        <!--<div class="bracket-title back">BACKSIDE</div>
-                        <div class="bracket-title front">FRONTSIDE</div> -->
-
                         <div id="bracketMatches">
                             <!-- Bracket matches will be rendered here -->
                         </div>
@@ -1310,7 +1307,6 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/tournament-management.js"></script>
         <script src="js/player-management.js"></script>
         <script src="js/clean-match-progression.js"></script>
-        <script src="js/bracket-lines.js"></script>
         <script src="js/bracket-rendering.js"></script>
         <script src="js/bracket-view.js"></script>
         <script src="js/newton-csv.js"></script>

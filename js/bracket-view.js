@@ -706,8 +706,10 @@ const BracketView = (() => {
             const on = traced === sl.id;
             return `<button type="button" data-trace="${escapeHtml(String(sl.id))}"${on ? ' class="bv-on" aria-pressed="true"' : ' aria-pressed="false"'}>Follow ${escapeHtml(sl.name)}</button>`;
         }).join('');
-        // Undo only appears when the match can be undone (isMatchUndoable() decides)
-        const undo = isMatchUndoable(selected) ? '<button type="button" data-act="undo" title="Undo this result">Undo match</button>' : '';
+        // Undo only appears when the match can be undone (isMatchUndoable() decides). A read-only
+        // tournament says so on every match instead.
+        const undo = tournament.readOnly ? '<span class="bv-readonly" title="This tournament is read-only">Read only</span>'
+            : isMatchUndoable(selected) ? '<button type="button" data-act="undo" title="Undo this result">Undo match</button>' : '';
         bar.innerHTML = `<span class="bv-sid">${selected}</span><span>${escapeHtml(getRoundDescription(v.match))} · ${what}</span>` +
             follow + undo +
             // Match Controls is always the rightmost button, just before ×
@@ -837,6 +839,16 @@ const BracketView = (() => {
         const sub = document.getElementById('bvSubtitle');
         const status = document.getElementById('bvStatus');
         const finals = document.getElementById('bvFinals');
+        // Results that have arrived from the Chalker over the network and wait to be accepted:
+        // counted on the Match Controls button until accepted there
+        const mcCount = document.getElementById('bvResultsWaiting');
+        if (mcCount) {
+            const all = (typeof matches !== 'undefined' && Array.isArray(matches)) ? matches : [];
+            const waiting = (typeof NetworkClient !== 'undefined' && typeof NetworkClient.hasPendingResult === 'function')
+                ? all.filter(m => NetworkClient.hasPendingResult(m.id)).length : 0;
+            mcCount.textContent = waiting ? `${waiting} result${waiting > 1 ? 's' : ''}` : '';
+            mcCount.hidden = !waiting;
+        }
         // Console link only when the Developer Console is enabled in Config
         const consoleLink = document.getElementById('bvConsole');
         if (consoleLink) consoleLink.hidden = !isDeveloperMode();

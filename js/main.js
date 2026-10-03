@@ -321,11 +321,6 @@ function setupEventListeners() {
             }
         });
     }
-
-    // Initialize bracket controls
-    if (typeof initializeBracketControls === 'function') {
-        initializeBracketControls();
-    }
 }
 
 // ANALYTICS BRACKET PREVIEW - exit/restore helper (Phase 4.3)

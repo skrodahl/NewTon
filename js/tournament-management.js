@@ -196,7 +196,6 @@ function createTournament() {
         displayResults();
     }
 
-    updateTournamentWatermark();
 
     alert('✓ New tournament created successfully! Start by adding players.');
 
@@ -699,9 +698,6 @@ function saveTournament() {
     saveTournamentOnly(shouldLog);
 
     // Update CAD-style information box whenever tournament is saved
-    if (typeof updateTournamentWatermark === 'function') {
-        updateTournamentWatermark();
-    }
 
     // Update storage indicator
     if (typeof updateStorageIndicator === 'function') {
@@ -756,7 +752,6 @@ function updateTournamentStatus() {
         }
     }
 
-    updateTournamentWatermark();
 }
 
 // SHARED TOURNAMENTS (SERVER FEATURE)
@@ -1184,7 +1179,6 @@ function continueLoadProcess(selectedTournament) {
     updateTournamentStatus();
     updatePlayersDisplay();
     updatePlayerCount();
-    updateTournamentWatermark();
 
     // Display results with current global config
     if (typeof displayResults === 'function') {
@@ -1419,7 +1413,6 @@ function continueImportProcess(importedData) {
         updateTournamentStatus();
         updatePlayersDisplay();
         updatePlayerCount();
-        updateTournamentWatermark();
         loadRecentTournaments();
 
         // Update storage indicator
@@ -1451,7 +1444,6 @@ function continueImportProcess(importedData) {
         }, 1500);
 
         // Update watermark
-        updateTournamentWatermark();
 
         console.log(`✓ Tournament imported (v${importedData.exportVersion} format, global config preserved)`);
     } catch (error) {
@@ -1525,11 +1517,6 @@ function confirmReset() {
         localStorage.removeItem(historyKey);
     }
     localStorage.removeItem('undoneTransactions');
-
-    // Reset bracket rendering flag for proper zoom/pan on new bracket
-    if (typeof initialBracketRender !== 'undefined') {
-        initialBracketRender = true;
-    }
 
     players.forEach(player => {
         player.eliminated = false;
@@ -1772,176 +1759,12 @@ function showImportStatus(type, message) {
     }
 }
 
-/**
- * Redraw the CAD-style status panel (the "watermark" box on the Tournament page)
- * from the current tournament state.
- *
- * Takes player and match counts from the **globals** `players` and `matches`, which
- * are the live arrays, exactly as `saveTournamentOnly()` does when it serializes.
- *
- * It must NOT read `tournament.players` / `tournament.matches`. Nothing ever assigns
- * those: they are set to empty literals when a tournament is created and are only
- * ever re-aliased to the globals on load (`players = tournament.players`). Any action
- * that *reassigns* a global breaks that aliasing for good — generating a bracket
- * (`matches = []`), removing a player (`players = players.filter(...)`), or creating a
- * tournament — after which `tournament.players`/`tournament.matches` are frozen at
- * whatever they last happened to be. That produced a live panel reporting 9 players
- * and 0 matches during a 14-player tournament, which only looked right again after a
- * reload re-aliased them.
- *
- * @returns {void}
- */
-function updateTournamentWatermark() {
-    const watermark = document.getElementById('watermark-right');
-    if (watermark) {
-        if (tournament) {
-            // Truncate tournament name if needed
-            const truncatedName = tournament.name.length > 38
-                ? tournament.name.substring(0, 35) + "..."
-                : tournament.name;
-
-            // Calculate tournament statistics — from the live globals, not the
-            // tournament object's stale copies (see the note above)
-            const livePlayers = (typeof players !== 'undefined' && Array.isArray(players)) ? players : [];
-            const paidPlayers = livePlayers.filter(p => p.paid);
-            const playerCount = paidPlayers.length;
-            const bracketSize = tournament.bracketSize || 8;
-
-            // Calculate total matches (excluding walkovers/byes — player slots are
-            // objects, so a string comparison against 'BYE' never matched)
-            const liveMatches = (typeof matches !== 'undefined' && Array.isArray(matches)) ? matches : [];
-            const realMatches = liveMatches.filter(match => !isWalkoverMatch(match));
-            const matchCount = realMatches.length;
-
-            // Calculate completed matches
-            const completedMatches = realMatches.filter(match => match.completed);
-            const completedCount = completedMatches.length;
-
-            // Determine tournament status using built-in tournament.status property
-            let status = 'SETUP';  // default fallback
-            if (tournament.status === 'setup') {
-                status = 'SETUP';
-            } else if (tournament.status === 'active') {
-                status = 'ACTIVE';
-            } else if (tournament.status === 'completed') {
-                status = 'COMPLETE';
-            }
-
-            // Determine format display text
-            let formatText = ` COMPLETED MATCHES: ${completedCount}`;
-            if (tournament.status === 'completed') {
-                // Find winner (1st place) from tournament.placements
-                let winner = null;
-                if (tournament.placements) {
-                    // Find player ID with placement 1
-                    const winnerID = Object.keys(tournament.placements).find(playerID =>
-                        tournament.placements[playerID] === 1
-                    );
-                    if (winnerID) {
-                        winner = players.find(p => String(p.id) === winnerID);
-                    }
-                }
-
-                if (winner) {
-                    const nameParts = winner.name.trim().split(' ');
-                    let firstName = nameParts[0].toUpperCase();
-                    const lastInitial = nameParts.length > 1 ? nameParts[nameParts.length - 1][0].toUpperCase() : '';
-
-                    // Truncate first name if needed to fit " WINNER: NAME L." in ~25 chars
-                    // " WINNER: " = 9 chars, " L." = 3 chars, so 13 chars max for first name
-                    if (lastInitial && firstName.length > 13) {
-                        firstName = firstName.substring(0, 13);
-                    } else if (!lastInitial && firstName.length > 16) {
-                        // Single name gets more space
-                        firstName = firstName.substring(0, 16);
-                    }
-
-                    const displayName = lastInitial ? `${firstName} ${lastInitial}.` : firstName;
-                    formatText = ` WINNER: ${displayName}`;
-                } else {
-                    // Fallback if no winner found
-                    formatText = `TOURNAMENT COMPLETE`;
-                }
-            }
-
-            // Get app version
-            const version = window.APP_VERSION || 'v2.0.3';
-
-            // Check if developer mode is enabled (read directly from localStorage)
-            const developerMode = isDeveloperMode();
-            const versionStyle = developerMode ? 'cursor: pointer;' : '';
-            const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
-
-            // Get current time in HH:MM format
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const currentTime = `${hours}:${minutes}`;
-
-            watermark.innerHTML = `
-                <div class="cad-header-container">
-                    <div class="cad-header-title">${escapeHtml(truncatedName)}</div>
-                    <div class="cad-header-clock" id="cad-clock">${currentTime}</div>
-                </div>
-                <div class="cad-grid">
-                    <div class="cad-cell cad-format">${escapeHtml(formatText)}</div>
-                    <div class="cad-cell cad-players">
-                        <div>${playerCount}</div>
-                        <div>PLAYERS</div>
-                    </div>
-                    <div class="cad-cell cad-bracket">${bracketSize}-BRACKET</div>
-                    <div class="cad-cell cad-matches">${matchCount} MATCHES</div>
-                    <div class="cad-cell cad-date">${escapeHtml(tournament.date)}</div>
-                    <div class="cad-cell cad-version" style="${versionStyle}" ${versionClick}>v${version}</div>
-                </div>
-                <div class="cad-status">${status}</div>
-            `;
-        } else {
-            // Check if developer mode is enabled (read directly from localStorage)
-            const developerMode = isDeveloperMode();
-            const versionStyle = developerMode ? 'cursor: pointer;' : '';
-            const versionClick = developerMode ? 'onclick="openAnalyticsModal()"' : '';
-
-            // Get current time in HH:MM format
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const currentTime = `${hours}:${minutes}`;
-
-            watermark.innerHTML = `
-                <div class="cad-header-container">
-                    <div class="cad-header-title">NO TOURNAMENT</div>
-                    <div class="cad-header-clock" id="cad-clock">${currentTime}</div>
-                </div>
-                <div class="cad-grid">
-                    <div class="cad-cell cad-format">-</div>
-                    <div class="cad-cell cad-players">
-                        <div>0</div>
-                        <div>PLAYERS</div>
-                    </div>
-                    <div class="cad-cell cad-bracket">-</div>
-                    <div class="cad-cell cad-matches">-</div>
-                    <div class="cad-cell cad-date">-</div>
-                    <div class="cad-cell cad-version" style="${versionStyle}" ${versionClick}>v${window.APP_VERSION || '2.0.3'}</div>
-                </div>
-                <div class="cad-status">SETUP</div>
-            `;
-        }
-    }
-}
-
 // Update clocks in Status Panel and header
 function updateClock() {
     const now = new Date();
     const hours = String(now.getHours()).padStart(2, '0');
     const minutes = String(now.getMinutes()).padStart(2, '0');
     const timeString = `${hours}:${minutes}`;
-
-    // Update Status Panel clock (CAD modal)
-    const cadClockElement = document.getElementById('cad-clock');
-    if (cadClockElement) {
-        cadClockElement.textContent = timeString;
-    }
 
     // Update header clock (visible on all pages)
     const headerClockElement = document.getElementById('headerClock');
