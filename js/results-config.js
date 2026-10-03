@@ -869,35 +869,59 @@ function calculatePlayerLegs(playerId) {
     return { legsWon, legsLost };
 }
 
-function calculatePlayerPoints(player) {
-    let points = 0;
+/**
+ * Placement → the point setting it earns. 5th-6th and 7th-8th are shared places, stored
+ * as 5 and 7; 6 and 8 map the same way.
+ * @type {Object<number, string>}
+ */
+const PLACEMENT_POINT_KEYS = {
+    1: 'first', 2: 'second', 3: 'third', 4: 'fourth',
+    5: 'fifthSixth', 6: 'fifthSixth', 7: 'seventhEighth', 8: 'seventhEighth'
+};
 
-    // Use GLOBAL config for point calculation
-    points += config.points.participation;
+/**
+ * Achievement points: 180s, tons, high outs and short legs, each times its point value.
+ * Part of the single points formula (see calculatePoints).
+ * @param {object} stats - player stats or one match's achievements:
+ *   { oneEighties, tons, highOuts: number[], shortLegs: number[] }
+ * @param {object} pointValues - point values in the shape of config.points
+ * @returns {number}
+ */
+function calculateAchievementPoints(stats, pointValues) {
+    if (!stats || !pointValues) return 0;
+    const n = v => Number(v) || 0;
+    return n(stats.oneEighties) * n(pointValues.oneEighty)
+        + n(stats.tons) * n(pointValues.ton)
+        + (Array.isArray(stats.highOuts) ? stats.highOuts.length : 0) * n(pointValues.highOut)
+        + (Array.isArray(stats.shortLegs) ? stats.shortLegs.length : 0) * n(pointValues.shortLeg);
+}
 
-
-    // Placement points based on ranking
-    if (player.placement === 1) {
-        points += config.points.first;
-    } else if (player.placement === 2) {
-        points += config.points.second;
-    } else if (player.placement === 3) {
-        points += config.points.third;
-    } else if (player.placement === 4) {
-        points += config.points.fourth || 0;
-    } else if (player.placement === 5) {
-        points += config.points.fifthSixth || 0;
-    } else if (player.placement === 7) {
-        points += config.points.seventhEighth || 0;
-    }
-
-    const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
-    points += shortLegsCount * (config.points.shortLeg || 0);
-    points += (player.stats.highOuts || []).length * config.points.highOut;
-    points += (player.stats.tons || 0) * config.points.ton;
-    points += (player.stats.oneEighties || 0) * config.points.oneEighty;
-
+/**
+ * One player's points for one tournament: achievements + placement + participation.
+ * The single place the points formula lives: the tournament Leaderboard (Registration,
+ * the Leaderboard dialog, exports) and Analytics (Leaderboard, Dashboard) all use it.
+ * @param {object} stats - see calculateAchievementPoints
+ * @param {number|null} placement - final place (1, 2, 3, 4, 5 for 5th-6th, 7 for 7th-8th…)
+ * @param {object} pointValues - point values in the shape of config.points
+ * @param {{ranking?: boolean, attendance?: boolean}} [include] - leave out placement
+ *   (ranking: false) or participation (attendance: false) points; both count by default
+ * @returns {number}
+ */
+function calculatePoints(stats, placement, pointValues, include = {}) {
+    const p = pointValues || {};
+    let points = calculateAchievementPoints(stats, p);
+    if (include.ranking !== false && placement) points += Number(p[PLACEMENT_POINT_KEYS[placement]]) || 0;
+    if (include.attendance !== false) points += Number(p.participation) || 0;
     return points;
+}
+
+/**
+ * A player's points in the current tournament, with the point values in Global Settings.
+ * @param {object} player - a player from the global players array (stats, placement)
+ * @returns {number}
+ */
+function calculatePlayerPoints(player) {
+    return calculatePoints(player.stats, player.placement, config.points);
 }
 
 /**
@@ -1202,6 +1226,8 @@ if (typeof window !== 'undefined') {
     window.displayResults = displayResults;
     window.updateResultsTable = updateResultsTable;
     window.calculatePlayerPoints = calculatePlayerPoints;
+    window.calculatePoints = calculatePoints;
+    window.calculateAchievementPoints = calculateAchievementPoints;
     window.formatRanking = formatRanking;
     window.getOrdinalSuffix = getOrdinalSuffix;
     window.exportResultsCSV = exportResultsCSV;

@@ -370,21 +370,6 @@ const NewtonHistory = (() => {
     }
 
     /**
-     * Achievement points for one stats/achievement object under the active point values.
-     * Single source of the achievement-points formula (180s, tons, high outs, short legs).
-     * @param {object} stats - a player-stats or per-match achievement object
-     * @param {object} p - active point values from _getActivePoints()
-     * @returns {number}
-     */
-    function _achPoints(stats, p) {
-        if (!stats || !p) return 0;
-        return ((stats.oneEighties || 0) * p.oneEighty)
-             + ((stats.tons || 0) * p.ton)
-             + ((Array.isArray(stats.highOuts) ? stats.highOuts.length : 0) * p.highOut)
-             + ((Array.isArray(stats.shortLegs) ? stats.shortLegs.length : 0) * p.shortLeg);
-    }
-
-    /**
      * Toggle a point layer (ranking/attendance) and re-render.
      * @param {string} layer - 'ranking' | 'attendance'
      * @param {HTMLElement} btn
@@ -969,15 +954,10 @@ const NewtonHistory = (() => {
                     const pm = playerMap[key];
                     pm.tournaments++;
 
-                    // Achievement points (always)
-                    pm.points += _achPoints(s, p);
-
-                    // Ranking points
+                    // Points: achievements always; placement and participation per layer
                     const rank = playerPlacements[String(pid)];
-                    if (_layerRanking && rank) {
-                        const rankKey = _placementKeys[rank];
-                        if (rankKey && p[rankKey]) pm.points += p[rankKey];
-                    }
+                    pm.points += calculatePoints(s, rank, p, { ranking: _layerRanking, attendance: _layerAttendance });
+
                     // Track placement counts
                     if (rank === 1) pm.p1st++;
                     else if (rank === 2) pm.p2nd++;
@@ -985,11 +965,6 @@ const NewtonHistory = (() => {
                     else if (rank === 4) pm.p4th++;
                     else if (rank === 5 || rank === 6) pm.p56th++;
                     else if (rank === 7 || rank === 8) pm.p78th++;
-
-                    // Attendance points
-                    if (_layerAttendance) {
-                        pm.points += p.participation;
-                    }
 
                     // Achievement totals (for display)
                     pm.oneEighties += (s.oneEighties || 0);
@@ -1358,47 +1333,23 @@ const NewtonHistory = (() => {
     // ---------------------------------------------------------------------------
 
     /**
-     * Compute total achievement points for a tournament using its configSnapshot
-     * and tournamentAchievements. Achievement points = 180s + tons + high outs + short legs,
-     * each multiplied by the point value from the frozen config.
+     * A tournament's total points under the active point mode and layers: the sum of each
+     * player's points (calculatePoints), so it matches the Leaderboard.
      * @param {object} tournament
      * @returns {number}
      */
-    /** Placement rank → point config key mapping */
-    const _placementKeys = {
-        1: 'first', 2: 'second', 3: 'third', 4: 'fourth',
-        5: 'fifthSixth', 6: 'fifthSixth', 7: 'seventhEighth', 8: 'seventhEighth'
-    };
-
     function _computeAchievementPoints(tournament) {
         const ta = tournament.tournamentAchievements;
         if (!ta) return 0;
 
         const p = _getActivePoints(tournament);
-        const playerCount = Object.keys(ta).length;
+        const placements = tournament.placements || {};
+        const include = { ranking: _layerRanking, attendance: _layerAttendance };
 
         let total = 0;
-
-        // Achievement points (always included)
-        Object.values(ta).forEach(entry => {
-            const s = entry.stats;
-            if (!s) return;
-            total += _achPoints(s, p);
+        Object.entries(ta).forEach(([pid, entry]) => {
+            total += calculatePoints(entry.stats, placements[String(pid)], p, include);
         });
-
-        // Ranking points (placement-based)
-        if (_layerRanking && tournament.placements) {
-            Object.values(tournament.placements).forEach(rank => {
-                const key = _placementKeys[rank];
-                if (key && p[key]) total += p[key];
-            });
-        }
-
-        // Attendance points (participation)
-        if (_layerAttendance) {
-            total += playerCount * p.participation;
-        }
-
         return total;
     }
 
@@ -1959,7 +1910,7 @@ const NewtonHistory = (() => {
                     let pts = 0;
                     Object.values(ach).forEach(a => {
                         if (!a || typeof a !== 'object') return;
-                        pts += _achPoints(a, p);
+                        pts += calculateAchievementPoints(a, p);
                     });
                     m._achievementPoints = pts;
                     m._tournamentName = t.tournamentName || t.tournamentId;
@@ -2126,7 +2077,7 @@ const NewtonHistory = (() => {
             let total = 0;
             Object.values(ach).forEach(a => {
                 if (!a || typeof a !== 'object') return;
-                total += _achPoints(a, p);
+                total += calculateAchievementPoints(a, p);
             });
             m._achievementPoints = total;
         });
@@ -2337,8 +2288,8 @@ const NewtonHistory = (() => {
 
         // Compute per-player achievement points
         const p = tournamentRecord ? _getActivePoints(tournamentRecord) : { oneEighty: 0, ton: 0, highOut: 0, shortLeg: 0 };
-        const pts1 = _achPoints(a1, p);
-        const pts2 = _achPoints(a2, p);
+        const pts1 = calculateAchievementPoints(a1, p);
+        const pts2 = calculateAchievementPoints(a2, p);
 
         html += `<table class="history-table newton-table" style="margin-top:16px;">
             <thead><tr>

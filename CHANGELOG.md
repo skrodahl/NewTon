@@ -21,6 +21,12 @@
 - About 440 lines of old Setup CSS removed from `styles.css` (Setup layout, Recent Tournaments, match history cards, storage link, Analytics labels, plus unused `.tournament-item` / `.match-result-item` rules).
 - Files changed: `css/setup-page.css` (new), `tournament.html` (Setup markup, stylesheet link), `js/tournament-management.js` (`renderSetupCurrent()` new; `loadRecentTournaments()`, `updateStorageIndicator()`, `updateTournamentStatus()`, `showImportStatus()`, `confirmReset()`, `loadSharedTournaments()`; `toggleSharedTournamentView()` / `toggleLocalTournamentView()` removed), `js/main.js` (`updateMatchHistory()`, `getPlayerProgressionForDisplay()`, `showPage()`), `js/dynamic-help-system.js`, `css/styles.css`.
 
+### One points formula
+
+- **Points are calculated in one place.** Participation + placement + achievements was written out separately in `calculatePlayerPoints()` (Registration, the Leaderboard dialog, exports) and three times in Analytics (the Leaderboard, the Dashboard's Points total, and per-match achievement points in the Register). Now `calculatePoints(stats, placement, pointValues, include)` and `calculateAchievementPoints(stats, pointValues)` in `results-config.js` do it, with `PLACEMENT_POINT_KEYS` for placement → point setting. Analytics passes its Ranking / Attendance layers as `include`, and its point mode (Original / Current) as `pointValues`; `calculatePlayerPoints()` stays as the Global Settings wrapper.
+- No visible change: checked against the old code on 20,000 random players and tournaments, with identical results. Two edge cases now behave consistently: a missing point value counts as 0 instead of making the total `NaN`, and the Dashboard's Points total is the sum of the players' points (it previously also counted any placement entry without a matching player).
+- Files changed: `js/results-config.js`, `js/newton-history.js` (`_achPoints()` and `_placementKeys` removed).
+
 ### One Leaderboard look
 
 - **The Leaderboard dialog** (Leaderboard in the bracket header and Match Controls) **now looks the same as the Registration Leaderboard.** Both were already filled by `updateResultsTable()` with the same rows; only the styling differed.
