@@ -3,6 +3,7 @@
 ### App header and footer
 
 - **The app header and footer use the new design language**, as agreed in v5.1.10 for the redesign of the remaining pages (Docs/BRACKET-REDESIGN.md, "App header"). The header runs the full width: white, with one hairline underneath. It has a 40px round logo, the club name in Inter, and the tournament name and date. The clock is the same as the bracket header's. The name, date and clock are centred vertically in the whole header, as on the bracket page. The page links are plain text, with the current page bold and underlined in ink. The footer is full width with a hairline above, and on short pages it sits at the bottom of the window. This is done as one stylesheet over the existing markup, with no markup or script changes, so it can be removed in one line.
+- **The header title is set in Insignia Regular** (20px), the club's display face, instead of Inter bold. It was tried and kept; Insignia has only a regular weight, so the title is not bolded.
 - **Two shared page widths** in `css/design-tokens.css`: `--nt-page-max` (1520px, forms and short lists) and `--nt-page-wide` (1840px, table-heavy pages), for a full-screen browser of at least 1920px. Setup, Registration and Global Settings use the first.
 - Files changed: `css/app-header.css` (new), `tournament.html` (stylesheet link), `css/design-tokens.css`, `css/setup-page.css`, `css/config-page.css`, `Docs/BRACKET-REDESIGN.md`.
 

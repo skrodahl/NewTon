@@ -27,11 +27,12 @@
 .header .header-tournament-narrow,
 .header .nav { grid-column: 1; }
 
+/* the title in Insignia, the club's display face (it has only a regular weight) */
 .header h1 {
-  font-family: var(--nt-sans);
+  font-family: 'Insignia', var(--nt-sans);
   font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -.01em;
+  font-weight: 400;
+  letter-spacing: 0;
   line-height: 1.2;
   color: var(--nt-ink);
   gap: 12px;

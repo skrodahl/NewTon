@@ -226,7 +226,7 @@ Live, ready and waiting cards also have their own fills (`--live-fill`, `--ready
 
 The header in the Global Settings mockup (https://claude.ai/artifact/BUn1sDA9XgfG1SDh2grUbi, version 2) is the header for every page as the rest of the app is redesigned:
 
-- **Top row:** club logo (round, about 34px) and "<Club name> - Tournament Manager" in Inter, bold, about 20px, on the left; the clock on the right.
+- **Top row:** club logo (round, about 34px) and "<Club name> - Tournament Manager" in Insignia Regular, 20px (Inter bold was tried first; the maintainer chose Insignia), on the left; the clock on the right.
 - **Clock:** the same as the bracket header's: 30px, weight 800, tabular digits so its width never changes, with a thin divider on its left.
 - **Second row:** the page links (Tournament Setup, Player Registration, Tournament Bracket, Analytics, Global Settings, Chalker) as plain text; the current page is darker and bold, underlined by a 2px line.
 - White, with a single hairline under it; no boxed border, no shadow.
