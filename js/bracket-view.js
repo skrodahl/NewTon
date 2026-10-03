@@ -302,7 +302,7 @@ const BracketView = (() => {
         // side labels centred over each side's first round
         lblMid('Frontside ▶', fsX0, -84, 'bv-side-label');
         lblMid('◀ Backside', pos['BS-1-1'].x, -84, 'bv-side-label');
-        if (variant === 'middle') lblMid('Finals', pos['BS-FINAL'].x, -84, 'bv-side-label');
+        lblMid('Finals', pos['BS-FINAL'].x, -84, 'bv-side-label');
         const place = placings(size, st);
         // every header sits the same distance above the topmost match of its round
         const LABEL_GAP = 22;
