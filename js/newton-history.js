@@ -2793,7 +2793,7 @@ const NewtonHistory = (() => {
         try {
             const res = await fetch('api/corrections.php', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: apiWriteHeaders(),
                 body: JSON.stringify({ tournamentId: _corr.tournamentId, corrections: list })
             });
             if (!res.ok) {

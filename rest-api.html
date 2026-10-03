@@ -178,13 +178,12 @@
 
     <h3>4. Relay (Remote Upload)</h3>
     <p><strong>POST</strong> <code>/api/relay.php</code></p>
-    <p>Forwards a tournament upload to a remote NewTon instance. Used when the browser can&rsquo;t make cross-origin requests with basic auth (CORS preflight blocks authenticated OPTIONS requests). PHP handles the remote request server-side &mdash; no CORS, no preflight, auth works naturally.</p>
+    <p>Forwards a tournament upload to a remote NewTon instance. The browser can&rsquo;t post to another origin without CORS, so PHP makes the request server-side and adds the remote server&rsquo;s API key as the <code>X-API-Key</code> header.</p>
 
     <p><strong>Request body:</strong></p>
     <pre><code>{
   "url": "https://newton.example.com/api/upload-tournament.php?overwrite=true",
-  "username": "NewTon",
-  "password": "tournament",
+  "apiKey": "the-remote-servers-NEWTON_API_KEY",
   "payload": {
     "filename": "MyTournament_2025-10-02.json",
     "data": { ... tournament object ... }
@@ -195,8 +194,7 @@
     <table>
         <tr><th>Parameter</th><th>Type</th><th>Required</th><th>Description</th></tr>
         <tr><td><code>url</code></td><td>string</td><td>Yes</td><td>Full URL of the remote upload endpoint</td></tr>
-        <tr><td><code>username</code></td><td>string</td><td>No</td><td>Basic auth username for the remote server</td></tr>
-        <tr><td><code>password</code></td><td>string</td><td>No</td><td>Basic auth password for the remote server</td></tr>
+        <tr><td><code>apiKey</code></td><td>string</td><td>No</td><td>The remote server&rsquo;s <code>NEWTON_API_KEY</code>, sent on as <code>X-API-Key</code> (v5.2.1+; replaces <code>username</code> and <code>password</code>)</td></tr>
         <tr><td><code>payload</code></td><td>object</td><td>Yes</td><td>The tournament payload (filename + data)</td></tr>
     </table>
 
@@ -210,7 +208,7 @@
         <tr><td>502</td><td><code>Could not reach remote server</code></td><td>Remote server unreachable</td></tr>
     </table>
 
-    <p><strong>Use case:</strong> A local Docker instance backs up tournaments to a remote server with basic auth. The browser talks to the local server (same origin, no CORS), and PHP relays to the remote server with credentials.</p>
+    <p><strong>Use case:</strong> A local Docker instance backs up tournaments to a remote server that has an API key. The browser talks to the local server (same origin, no CORS), and PHP relays to the remote server with the key.</p>
 
     <hr>
 
@@ -268,7 +266,7 @@ Access-Control-Allow-Headers: Content-Type</code></pre>
         <li>Filename sanitized with <code>basename()</code> — prevents directory traversal</li>
         <li>Rejects filenames containing <code>..</code>, <code>/</code>, <code>\</code>, or null bytes</li>
         <li>JSON encoding validated before writing to disk</li>
-        <li>No authentication built in — access control is the operator's responsibility (see <a href="privacy.html">Privacy Architecture</a> for the full data model)</li>
+        <li><strong>API key for writes</strong> (v5.2.1+): with <code>NEWTON_API_KEY</code> set, Upload, Delete, Relay and saving corrections need the <code>X-API-Key</code> header, or get <code>401 Missing or wrong API key</code>. Reading never needs it. Without it there is no authentication, and access control is the operator&rsquo;s responsibility (see <a href="privacy.html">Privacy Architecture</a> for the full data model)</li>
     </ul>
 
     <h3>Recommended Practices</h3>
@@ -276,7 +274,7 @@ Access-Control-Allow-Headers: Content-Type</code></pre>
         <li>Restrict <code>Access-Control-Allow-Origin</code> to your domain in production</li>
         <li>Use HTTPS — terminate TLS at your reverse proxy</li>
         <li>Don't expose the container directly to the public internet without a reverse proxy or VPN</li>
-        <li>Consider adding HTTP basic authentication at the nginx/Caddy level for write operations</li>
+        <li>Set <code>NEWTON_API_KEY</code> on any instance reachable from the internet, so only your venue can write to it</li>
         <li>Back up the <code>/tournaments</code> directory regularly</li>
         <li>Disable the API entirely with <code>NEWTON_API_ENABLED=false</code> if you don't need sharing</li>
     </ul>

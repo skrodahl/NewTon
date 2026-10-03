@@ -37,10 +37,16 @@
             (!$tmSecret || hash_equals((string)$tmSecret, (string)$_GET['tm']));
         $appMode = $tmGranted ? 'full' : (getenv('NEWTON_MODE') ?: 'full');
         $readonlyAnalytics = getenv('NEWTON_READONLY_ANALYTICS') === 'true' ? 'true' : 'false';
+        // NEWTON_API_KEY (api/api-check.php) guards uploads, deletes and corrections. A page
+        // opened with the correct ?tm password gets the key, so maintaining the instance
+        // works as before. Only behind a password: an open ?tm never hands the key out.
+        $apiKey = getenv('NEWTON_API_KEY');
+        $pageApiKey = ($tmGranted && $tmSecret && $apiKey) ? trim($apiKey) : '';
         echo "\n        window.NEWTON_CONFIG = {\n";
         echo "            demoMode: $demoMode,\n";
         echo "            appMode: '$appMode',\n";
         echo "            readonlyAnalytics: $readonlyAnalytics,\n";
+        echo "            apiKey: " . json_encode($pageApiKey, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ",\n";
         echo "            githubUrl: '$githubUrl'\n";
         echo "        };\n    ";
     }
@@ -497,8 +503,8 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div class="cfg-ctl"><input class="cfg-text mono" type="text" id="remoteServerUrl" placeholder="https://newton.example.com"></div>
                         </div>
                         <div class="cfg-row">
-                            <div><div class="cfg-label">Username and password</div></div>
-                            <div class="cfg-ctl"><input class="cfg-text" type="text" id="remoteServerUsername" placeholder="Username" style="width: 136px;" aria-label="Username"><input class="cfg-text" type="password" id="remoteServerPassword" placeholder="Password" style="width: 136px;" aria-label="Password"></div>
+                            <div><label class="cfg-label" for="remoteServerApiKey">API key</label><div class="cfg-desc">The <code>NEWTON_API_KEY</code> set on that server.</div></div>
+                            <div class="cfg-ctl"><input class="cfg-text mono" type="password" id="remoteServerApiKey" autocomplete="off" spellcheck="false" placeholder="API key"></div>
                         </div>
                     </div>
                 </section>

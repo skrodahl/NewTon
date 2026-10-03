@@ -155,6 +155,7 @@ networks:
             <tr><td><code>SSL_HOSTNAME</code></td><td><code>newtondarts</code></td><td>Hostname used in the auto-generated SSL certificate&rsquo;s Subject Alternative Name. Set this to match the <code>.local</code> hostname you advertise via mDNS &mdash; see <a href="https://github.com/skrodahl/NewTon/blob/main/Docs/MDNS.md" target="_blank" rel="noopener">Docs/MDNS.md</a>. Falls back to deprecated <code>MDNS_HOSTNAME</code> if unset.</td></tr>
             <tr><td><code>NEWTON_API_ENABLED</code></td><td><code>true</code></td><td>Enables REST API endpoints for tournament upload, download, and delete</td></tr>
             <tr><td><code>NEWTON_MODE</code></td><td><code>full</code></td><td>App mode. <code>analytics</code> hides tournament management tabs, shows only Analytics and limited Global Settings</td></tr>
+            <tr><td><code>NEWTON_API_KEY</code></td><td><em>unset</em></td><td>Key required (as the <code>X-API-Key</code> header) for uploads, deletes, corrections and the relay. Reading never needs it. Unset = no key required</td></tr>
             <tr><td><code>NEWTON_DEMO_MODE</code></td><td><code>false</code></td><td>Shows a privacy banner at the top of the app</td></tr>
             <tr><td><code>NEWTON_LANDING_PAGE</code></td><td><code>false</code></td><td>Shows a landing page at the root URL instead of loading the app directly</td></tr>
             <tr><td><code>NEWTON_BASE_URL</code></td><td><em>unset</em></td><td>Canonical URL for Open Graph and Twitter Card meta tags on the landing page</td></tr>
@@ -168,7 +169,7 @@ networks:
     <h2 id="security">Security</h2>
 
     <h3>REST API</h3>
-    <p><strong>The REST API has no built-in authentication.</strong> Do not expose the container directly to the public internet without additional protection. Safe options:</p>
+    <p><strong>Without <code>NEWTON_API_KEY</code>, the REST API has no authentication.</strong> Do not expose the container directly to the public internet without additional protection. Safe options:</p>
     <ul>
         <li>&#x2705; <strong>Local network only</strong> &mdash; home or club WiFi, default setup is fine</li>
         <li>&#x2705; <strong>Localhost only</strong> &mdash; by default, Docker binds to <code>0.0.0.0</code>, meaning the container is reachable from any device on your network. To restrict access to the local machine only, specify the loopback address explicitly in your <code>ports</code> mapping:
@@ -177,7 +178,8 @@ networks:
             With this in place, <code>http://localhost:8080</code> still works, but other devices on the network cannot reach the container.
         </li>
         <li>&#x2705; <strong>Behind VPN</strong> &mdash; Tailscale, WireGuard, or similar</li>
-        <li>&#x2705; <strong>Reverse proxy with auth</strong> &mdash; nginx or Caddy with HTTP basic authentication</li>
+        <li>&#x2705; <strong>API key for writes</strong> &mdash; set <code>NEWTON_API_KEY</code>: uploading or deleting a tournament, saving corrections and the relay need it (as the <code>X-API-Key</code> header); reading never does. This is the way to run a public analytics-only instance that members open without a login. The venue enters the same key under Global Settings &rarr; Server &amp; backup &rarr; Remote backup, and <code>?tm</code> with the correct <code>NEWTON_TM_PASSWORD</code> works as before. Network handover is switched off on an analytics-only instance.</li>
+        <li>&#x2705; <strong>Reverse proxy with auth</strong> &mdash; nginx or Caddy with HTTP basic authentication (members then need the login too)</li>
         <li>&#x2705; <strong>Disable API</strong> &mdash; set <code>NEWTON_API_ENABLED=false</code></li>
     </ul>
 

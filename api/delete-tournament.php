@@ -11,7 +11,7 @@ require_once 'api-check.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-API-Key');
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -25,6 +25,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => 'Method not allowed']);
     exit;
 }
+
+// Writes need the API key when NEWTON_API_KEY is set (see api-check.php)
+require_api_key();
 
 $tournamentsDir = dirname(__DIR__) . '/tournaments/';
 

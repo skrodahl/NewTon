@@ -171,3 +171,9 @@ function nw_read_json($path) {
     $data = json_decode($raw, true);
     return is_array($data) ? $data : null;
 }
+
+// Handover is for the club's own network. An analytics-only instance (NEWTON_MODE=analytics)
+// is often public, so it refuses every handover request.
+if (getenv('NEWTON_MODE') === 'analytics') {
+    nw_fail(403, 'Network handover is not available on an analytics-only instance.');
+}

@@ -1,3 +1,17 @@
+## **v5.2.1** — Open Bar, Locked Cellar (2026-10-04)
+
+### API key for writes
+
+- **`NEWTON_API_KEY`** (new, optional): when set, every API request that changes something needs the `X-API-Key` header to match: Upload, Delete, Relay, and saving corrections (`POST api/corrections.php`). Reading never does: the page, List Tournaments, the files in `/tournaments/`, and reading corrections. A missing or wrong key gets 401. Unset means no key, as before. Compared with `hash_equals()` in `require_api_key()` (`api/api-check.php`).
+  - Purpose: a public analytics-only instance that members open without a login, which only the club's backups can write to. Until now the whole site had to sit behind a proxy login to keep strangers from uploading or deleting.
+- **`?tm` works as before:** with the correct `NEWTON_TM_PASSWORD`, `tournament.html` hands the instance's key to the page (`NEWTON_CONFIG.apiKey`), and the page's own writes (corrections, delete, Backup to server, shared upload) send it via `apiWriteHeaders()`. Only behind a password: with an open `?tm` the key is never handed out.
+- **Global Settings → Server & backup → Remote backup:** **API key** replaces Username and Password. The relay sends it to the remote server as `X-API-Key` instead of basic auth. The remote username and password are removed from the saved settings the next time they're saved; nothing needs migrating.
+- **Server credentials stay out of tournament files.** Tournament exports and uploads carried a full copy of the settings, including the remote username and password; on a public instance those files are readable by anyone. The copy now leaves out the API key and the old username and password (`configForExport()` / `withoutServerCredentials()` in `results-config.js`), as does the config snapshot in the Analytics register (`newton-db.js`). **Tournament files uploaded before v5.2.1 may still contain the old remote username and password**: retire those credentials when switching to the API key.
+- **Network handover is off on analytics-only instances:** with `NEWTON_MODE=analytics`, the handover endpoints answer 403. They are for the club's own network.
+- CORS allows the `X-API-Key` header on the write endpoints.
+- Docs: DOCKER-QUICKSTART.md (analytics-only section, environment table, Security), `Docs/REST_API.md` (new Authentication section, Relay, settings), `api/README.md`, `Docs/NETWORK-LAYER.md`, the compose files, `automatic-backup.html`, `docker-quickstart.html`, `rest-api.html`, `llms.txt`, and the in-app help.
+- Files changed: `api/api-check.php`, `api/upload-tournament.php`, `api/delete-tournament.php`, `api/relay.php`, `api/corrections.php`, `licensed/api/v1/_common.php`, `tournament.html` (`?tm` key hand-over, Remote backup API key field), `js/tournament-management.js` (`apiWriteHeaders()` new), `js/newton-history.js`, `js/results-config.js`, `js/newton-db.js`, `js/types.js`, `js/dynamic-help-system.js`, `js/main.js` and `chalker/js/chalker.js` (version), `chalker/index.html` and `chalker/sw.js` (cache).
+
 ## **v5.2.0** — New Flights, Same Arrows (2026-10-04)
 
 ### App header and footer

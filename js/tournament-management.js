@@ -329,7 +329,7 @@ function buildTournamentPayload() {
             bracketSize: tournament.bracketSize,
             format: tournament.format,
             readOnly: tournament.readOnly || false,
-            config: typeof config !== 'undefined' ? config : {},
+            config: configForExport(),
             players: players,
             matches: matches,
             bracket: tournament.bracket,
@@ -342,13 +342,25 @@ function buildTournamentPayload() {
 }
 
 /**
+ * Headers for a request that changes something on this server (upload, delete,
+ * corrections). Adds the API key when the server handed one to the page, which it does
+ * only for a ?tm page opened with the correct password (NEWTON_API_KEY, api/api-check.php).
+ * @returns {Object<string, string>}
+ */
+function apiWriteHeaders() {
+    const headers = { 'Content-Type': 'application/json' };
+    const key = window.NEWTON_CONFIG && window.NEWTON_CONFIG.apiKey;
+    if (key) headers['X-API-Key'] = key;
+    return headers;
+}
+
+/**
  * Upload a tournament payload to a server.
  * @param {object} payload - { filename, data } from buildTournamentPayload()
  * @param {object} [options]
  * @param {boolean} [options.silent=false] - true for fire-and-forget, false for user feedback
  * @param {string} [options.remoteUrl] - remote server URL (uses relay.php); omit for local upload
- * @param {string} [options.username] - basic auth username for remote
- * @param {string} [options.password] - basic auth password for remote
+ * @param {string} [options.apiKey] - the remote server's API key (sent on by relay.php)
  * @returns {Promise<boolean>} true if upload succeeded
  */
 async function uploadToServer(payload, options = {}) {
@@ -363,12 +375,11 @@ async function uploadToServer(payload, options = {}) {
     let fetchUrl, fetchBody;
 
     if (remoteUrl) {
-        // Remote upload via relay — PHP handles auth and forwarding
+        // Remote upload via relay — PHP forwards it with the remote server's API key
         fetchUrl = '/api/relay.php';
         fetchBody = JSON.stringify({
             url: remoteUrl.replace(/\/+$/, '') + '/api/upload-tournament.php?overwrite=true',
-            username: options.username || '',
-            password: options.password || '',
+            apiKey: options.apiKey || '',
             payload: payload
         });
     } else {
@@ -382,7 +393,7 @@ async function uploadToServer(payload, options = {}) {
     try {
         const response = await fetch(fetchUrl, {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+            headers: apiWriteHeaders(),
             body: fetchBody
         });
 
@@ -425,8 +436,7 @@ async function autoUploadTournament() {
         uploadToServer(payload, {
             silent: true,
             remoteUrl: remote,
-            username: config.server.remoteUsername || '',
-            password: config.server.remotePassword || ''
+            apiKey: config.server.remoteApiKey || ''
         });
     }
 }
@@ -525,8 +535,7 @@ async function _uploadToAllDestinations(payload) {
         const remoteOk = await uploadToServer(payload, {
             silent: true,
             remoteUrl: remote,
-            username: config.server.remoteUsername || '',
-            password: config.server.remotePassword || ''
+            apiKey: config.server.remoteApiKey || ''
         });
         results.push(remoteOk ? `✓ ${remote}` : `✗ ${remote}`);
     }
@@ -554,9 +563,7 @@ async function uploadTournamentFile(event, overwrite = false) {
 
         const response = await fetch(url, {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: apiWriteHeaders(),
             body: JSON.stringify({
                 filename: filename,
                 data: tournamentData
@@ -1027,9 +1034,7 @@ async function deleteSharedTournament(filename) {
     try {
         const response = await fetch('/api/delete-tournament.php', {
             method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
+            headers: apiWriteHeaders(),
             body: JSON.stringify({ filename: filename })
         });
 

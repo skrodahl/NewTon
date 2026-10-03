@@ -53,8 +53,7 @@ const DEFAULT_CONFIG = {
         allowSharedTournamentDelete: false,
         autoUpload: false,
         remoteUrl: '',
-        remoteUsername: '',
-        remotePassword: ''
+        remoteApiKey: ''
     }
 };
 
@@ -186,8 +185,7 @@ function applyConfigToUI() {
         safeSetChecked('allowSharedTournamentDelete', config.server.allowSharedTournamentDelete);
         safeSetChecked('autoUploadTournament', config.server.autoUpload);
         safeSetValue('remoteServerUrl', config.server.remoteUrl);
-        safeSetValue('remoteServerUsername', config.server.remoteUsername);
-        safeSetValue('remoteServerPassword', config.server.remotePassword);
+        safeSetValue('remoteServerApiKey', config.server.remoteApiKey || '');
         safeSetValue('serverIdDisplay', config.server.serverId || '—');
     }
 
@@ -245,6 +243,31 @@ function initX01Toggle(value) {
             custom.focus();
         }
     };
+}
+
+/**
+ * A copy of a config without the server credentials: the remote API key, and the
+ * username and password it replaced. Tournament files and the Analytics register keep a
+ * copy of the config, and tournament files are uploaded to servers that members can read.
+ * @param {object} cfg - a config (the global one, or a snapshot from a file)
+ * @returns {object} a copy; the config passed in is left untouched
+ */
+function withoutServerCredentials(cfg) {
+    const copy = JSON.parse(JSON.stringify(cfg || {}));
+    if (copy.server) {
+        delete copy.server.remoteApiKey;
+        delete copy.server.remoteUsername;
+        delete copy.server.remotePassword;
+    }
+    return copy;
+}
+
+/**
+ * The global config as it goes into a tournament file, without the server credentials.
+ * @returns {object}
+ */
+function configForExport() {
+    return withoutServerCredentials(typeof config !== 'undefined' ? config : {});
 }
 
 // SAVE GLOBAL CONFIG
@@ -534,13 +557,14 @@ function saveUIConfiguration(options = {}) {
 
     const autoUploadElement = document.getElementById('autoUploadTournament');
     const remoteUrlElement = document.getElementById('remoteServerUrl');
-    const remoteUsernameElement = document.getElementById('remoteServerUsername');
-    const remotePasswordElement = document.getElementById('remoteServerPassword');
+    const remoteApiKeyElement = document.getElementById('remoteServerApiKey');
 
     config.server.autoUpload = autoUploadElement ? autoUploadElement.checked : false;
     config.server.remoteUrl = remoteUrlElement ? remoteUrlElement.value.trim() : '';
-    config.server.remoteUsername = remoteUsernameElement ? remoteUsernameElement.value.trim() : '';
-    config.server.remotePassword = remotePasswordElement ? remotePasswordElement.value : '';
+    config.server.remoteApiKey = remoteApiKeyElement ? remoteApiKeyElement.value.trim() : '';
+    // The remote username and password were replaced by the API key in v5.2.1
+    delete config.server.remoteUsername;
+    delete config.server.remotePassword;
 
     saveGlobalConfig();
 

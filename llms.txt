@@ -57,8 +57,9 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 
 ## Server Backup (v5.0.6+)
 - **Automatic backup**: opt-in via Global Settings. Tournament JSON saved to the server's `/tournaments/` directory at finalization. Available from any computer connecting to the server.
-- **Remote backup**: configure a remote NewTon instance URL with optional basic auth credentials. Auto-backup sends to both local and remote servers.
-- **Relay endpoint** (`api/relay.php`): PHP forwards uploads to remote servers with basic auth, bypassing browser CORS/preflight limitations. Docker-to-Docker communication.
+- **Remote backup**: configure a remote NewTon instance URL and, optionally, its API key. Auto-backup sends to both local and remote servers.
+- **API key for writes** (v5.2.1+): `NEWTON_API_KEY` on an instance makes uploads, deletes, corrections and the relay require the `X-API-Key` header, while reading stays open — so a public analytics-only instance needs no member login. The `?tm` page gets the key when its password (`NEWTON_TM_PASSWORD`) is correct. The key is never written into tournament files.
+- **Relay endpoint** (`api/relay.php`): PHP forwards uploads to remote servers with the remote API key, bypassing browser CORS/preflight limitations. Docker-to-Docker communication.
 - **Backup to Server button**: modal with source choice (active tournament or from file), uploads to all configured destinations with per-destination success/failure summary.
 - **Shared Tournaments**: the Server tab of Tournament Setup's tournament list (v5.2.0+). "Import" for new tournaments, "Re-import" for existing ones.
 

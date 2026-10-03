@@ -84,6 +84,25 @@ See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for complete Docker setup gu
 - Files created with 0644 permissions
 - Directory requires 0755 permissions
 
+## Authentication (API key)
+
+Set `NEWTON_API_KEY` on an instance, and every request that changes something must carry it in the `X-API-Key` header: Upload, Delete, Relay, and saving corrections (`POST api/corrections.php`). Reading never needs it: List Tournaments, the files in `/tournaments/`, and `GET api/corrections.php`. Unset means no key is required (as before v5.2.1).
+
+A missing or wrong key gets:
+
+*401 Unauthorized*
+```json
+{
+  "error": "Missing or wrong API key"
+}
+```
+
+- The check is `require_api_key()` in `api/api-check.php`, comparing with `hash_equals()`.
+- The Tournament Manager sends the key in two cases. Backups to a remote server carry the **Remote backup → API key** from Global Settings (the relay adds it). A page opened with the correct `?tm` password is given the instance's own key, so maintenance (corrections, deletes, Backup to server) works as before; without `NEWTON_TM_PASSWORD`, `?tm` never receives it.
+- Typical use: an analytics-only instance that members open without a login, which only the club's backups can write to. See DOCKER-QUICKSTART.md § "Analytics-only".
+
+---
+
 ## Endpoints
 
 ### 1. List Tournaments
@@ -323,7 +342,7 @@ Content-Type: application/json
 
 **Endpoint:** `POST /api/relay.php`
 
-**Description:** Forwards a tournament upload to a remote NewTon instance. Used when the browser can't make cross-origin requests with basic auth (CORS preflight blocks authenticated OPTIONS requests). PHP handles the remote request server-side — no CORS, no preflight, auth works naturally.
+**Description:** Forwards a tournament upload to a remote NewTon instance. The browser can't post to another origin without CORS, so PHP makes the request server-side and adds the remote server's API key as the `X-API-Key` header. The relay itself needs this instance's own key when `NEWTON_API_KEY` is set here.
 
 **Request:**
 ```http
@@ -332,8 +351,7 @@ Content-Type: application/json
 
 {
   "url": "https://newton.example.com/api/upload-tournament.php?overwrite=true",
-  "username": "NewTon",
-  "password": "tournament",
+  "apiKey": "the-remote-servers-NEWTON_API_KEY",
   "payload": {
     "filename": "MyTournament_2025-10-02.json",
     "data": { ... tournament object ... }
@@ -346,8 +364,7 @@ Content-Type: application/json
 | Parameter | Type | Required | Description |
 |-----------|------|----------|-------------|
 | `url` | string | Yes | Full URL of the remote upload endpoint |
-| `username` | string | No | Basic auth username for the remote server |
-| `password` | string | No | Basic auth password for the remote server |
+| `apiKey` | string | No | The remote server's `NEWTON_API_KEY`, sent on as `X-API-Key` (v5.2.1+; replaces `username`/`password`) |
 | `payload` | object | Yes | The tournament payload (filename + data) |
 
 **Success Response:** The remote server's response is passed through directly — same status code, same JSON body.
@@ -378,12 +395,12 @@ Content-Type: application/json
 
 **Security:**
 - URL validated with `filter_var()` — only http/https allowed
-- Credentials never logged or stored by the relay
+- The API key is never logged or stored by the relay
 - 15-second timeout on the remote request
 - Follows redirects (`CURLOPT_FOLLOWLOCATION`)
 - The relay requires `NEWTON_API_ENABLED=true` on the local instance
 
-**Use Case:** A local Docker instance in a basement with spotty internet backs up tournaments to a remote server with a proper SSL certificate and basic auth. The browser talks to the local server (same origin, no CORS), and PHP relays to the remote server with credentials.
+**Use Case:** A local Docker instance in a basement with spotty internet backs up tournaments to a remote server with a proper SSL certificate and an API key. The browser talks to the local server (same origin, no CORS), and PHP relays to the remote server with the key.
 
 ---
 
@@ -394,7 +411,7 @@ All endpoints include CORS headers for cross-origin requests:
 ```
 Access-Control-Allow-Origin: *
 Access-Control-Allow-Methods: GET, POST
-Access-Control-Allow-Headers: Content-Type
+Access-Control-Allow-Headers: Content-Type, X-API-Key
 ```
 
 **Note:** For production deployments, restrict `Access-Control-Allow-Origin` to specific domains.
@@ -451,8 +468,7 @@ Uploads to all configured destinations. Shows a summary with success/failure per
 | Allow deleting shared tournaments | `config.server.allowSharedTournamentDelete` | `false` | Shows delete buttons on shared tournaments |
 | Automatically backup on completion | `config.server.autoUpload` | `false` | Uploads tournament to server(s) at finalization |
 | Remote server URL | `config.server.remoteUrl` | `''` | Remote NewTon instance URL |
-| Remote username | `config.server.remoteUsername` | `''` | Basic auth username for remote |
-| Remote password | `config.server.remotePassword` | `''` | Basic auth password for remote |
+| Remote API key | `config.server.remoteApiKey` | `''` | The remote server's `NEWTON_API_KEY` (v5.2.1+; replaces the remote username and password). Never written into tournament files |
 
 ### Error Handling
 

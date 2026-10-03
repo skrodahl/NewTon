@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.2.0'; // New Flights, Same Arrows — every page in the new design, Analytics rebuilt and on phones
+const APP_VERSION = '5.2.1'; // Open Bar, Locked Cellar — NEWTON_API_KEY for writes, open reading
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

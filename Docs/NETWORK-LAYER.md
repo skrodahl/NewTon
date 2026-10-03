@@ -260,6 +260,12 @@ things already in place make it comfortable, and both are free:
 Recorded here as a deliberate, bounded exception rather than leaving the older
 threat-model statement quietly untrue.
 
+**Analytics-only instances (v5.2.1):** handover is for the club's own network, and an
+analytics-only instance is often public. With `NEWTON_MODE=analytics`, every handover
+endpoint answers 403 (`licensed/api/v1/_common.php`). The same release added
+`NEWTON_API_KEY` for the other write endpoints (upload, delete, corrections, relay); see
+`Docs/REST_API.md` § Authentication.
+
 ---
 
 ## What already exists (found 2026-09-06)

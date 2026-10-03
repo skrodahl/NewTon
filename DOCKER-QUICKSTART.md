@@ -154,9 +154,30 @@ mode exists.
 
 This is a shared password in an environment variable, not user accounts. It stops
 a curious club member; it is not protection against someone determined, and the
-password appears in the server's access log and your browser history. If the
-instance is reachable beyond people you broadly trust, put the whole thing behind
-a password at the web server as well.
+password appears in the server's access log and your browser history.
+
+**Protecting uploads with an API key.** Set `NEWTON_API_KEY` on the analytics
+instance, and members can open it without a login while only the club can write to it:
+
+```yaml
+environment:
+  - NEWTON_MODE=analytics
+  - NEWTON_TM_PASSWORD=choose-something
+  - NEWTON_API_KEY=a-long-random-string
+```
+
+- Everything that changes the server needs the key: uploading or deleting a
+  tournament, saving corrections, and the relay. Reading never does, so Analytics
+  works for everyone.
+- On the venue instance, enter the same key in **Global Settings → Server & backup →
+  Remote backup → API key**. Backups then carry it.
+- `?tm` works as before: with the correct password, the page is given the key, so
+  corrections and deletes go through. This needs `NEWTON_TM_PASSWORD`; without a
+  password, `?tm` never receives the key.
+- Network handover (Chalker lanes) is switched off on an analytics-only instance.
+
+Set the key on the instance that receives backups. On a venue instance that runs
+tournaments, its own Backup to server and Delete would then need `?tm`.
 
 **Correcting achievements.** Under `?tm`, each tournament in Analytics → Register →
 Tournaments has an **Edit** button. Pick a player and add or remove 180s, tons,
@@ -165,7 +186,7 @@ lollipops, high outs and short legs. Corrections are saved on the server in
 next time it loads. The tournament itself and each browser's register are left as
 recorded, so re-uploading or re-importing a tournament keeps its corrections.
 
-Mount the `./tournaments` and `./images` volumes. Configure the venue instance to auto-backup to this server's relay API, or share the same tournaments directory.
+Mount the `./tournaments` and `./images` volumes. Configure the venue instance to auto-backup to this server (Remote backup in Global Settings, with the API key if you set one), or share the same tournaments directory.
 
 ---
 
@@ -181,6 +202,7 @@ Mount the `./tournaments` and `./images` volumes. Configure the venue instance t
 | `NEWTON_RELAY_ALLOWLIST` | *(unset)* | Comma-separated hostnames the relay API (`api/relay.php`) may forward to, e.g. `results.myclub.org`. Unset = any host |
 | `NEWTON_MODE` | `full` | App mode. `analytics` hides tournament management tabs, shows only Analytics and limited Global Settings |
 | `NEWTON_TM_PASSWORD` | *(unset)* | Password for the `?tm` maintenance URL (see below). Unset = no password required |
+| `NEWTON_API_KEY` | *(unset)* | Key required (as the `X-API-Key` header) for uploads, deletes, corrections and the relay. Reading never needs it. Unset = no key required |
 | `NEWTON_DEMO_MODE` | `false` | Shows a privacy banner at the top of the app |
 | `NEWTON_LANDING_PAGE` | `false` | Shows a landing page at the root URL instead of loading the app directly |
 | `NEWTON_BASE_URL` | *(unset)* | Canonical URL for Open Graph and Twitter Card meta tags on the landing page |
@@ -193,7 +215,7 @@ Mount the `./tournaments` and `./images` volumes. Configure the venue instance t
 
 ### REST API
 
-**The REST API has no built-in authentication.** Do not expose the container directly to the public internet without additional protection. Safe options:
+**Without `NEWTON_API_KEY`, the REST API has no authentication.** Do not expose the container directly to the public internet without additional protection. Safe options:
 
 - ✅ **Local network only** — home or club WiFi, default setup is fine
 - ✅ **Localhost only** — by default, Docker binds to `0.0.0.0`, meaning the container is reachable from any device on your network. To restrict access to the local machine only, specify the loopback address explicitly in your `ports` mapping:
@@ -203,7 +225,8 @@ Mount the `./tournaments` and `./images` volumes. Configure the venue instance t
   ```
   With this in place, `http://localhost:8080` still works, but other devices on the network cannot reach the container.
 - ✅ **Behind VPN** — Tailscale, WireGuard, or similar
-- ✅ **Reverse proxy with auth** — nginx or Caddy with HTTP basic authentication
+- ✅ **API key for writes** — set `NEWTON_API_KEY`: uploads, deletes, corrections and the relay need it; reading stays open. The way to run a public analytics-only instance (see above)
+- ✅ **Reverse proxy with auth** — nginx or Caddy with HTTP basic authentication (members then need the login too)
 - ✅ **Disable API** — set `NEWTON_API_ENABLED=false`
 
 ### Security Headers

@@ -23,7 +23,7 @@ header('Content-Type: application/json');
 header('Cache-Control: no-store');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: GET, POST');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-API-Key');
 
 // Handle preflight requests
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
@@ -59,6 +59,9 @@ if ($method === 'GET') {
 }
 
 // ─── POST ────────────────────────────────────────────────────────────────────
+// Saving needs the API key when NEWTON_API_KEY is set; reading (GET) never does
+require_api_key();
+
 $input = file_get_contents('php://input');
 
 // Corrections for one tournament are a few hundred bytes; anything this size is a mistake

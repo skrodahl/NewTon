@@ -275,6 +275,16 @@ const NewtonDB = (() => {
      * @param {number} closedAt        - Unix timestamp
      * @returns {Promise<void>}
      */
+    /**
+     * The config snapshot as stored in the register: without the server credentials
+     * (withoutServerCredentials() in results-config.js), since Export Register shares it.
+     * @param {object} cfg
+     * @returns {object}
+     */
+    function _stripCredentials(cfg) {
+        return typeof withoutServerCredentials === 'function' ? withoutServerCredentials(cfg) : (cfg || {});
+    }
+
     async function finalizeTournament(tournamentId, configSnapshot, tournamentAchievements, closedAt) {
         await initDB();
 
@@ -288,7 +298,7 @@ const NewtonDB = (() => {
         const tournRecord = Object.assign({}, existing, {
             status:                 'final',
             closedAt:               closedAt,
-            configSnapshot:         configSnapshot,
+            configSnapshot:         _stripCredentials(configSnapshot),
             tournamentAchievements: tournamentAchievements || {},
             matchCount:             matches.length
         });
@@ -570,7 +580,7 @@ const NewtonDB = (() => {
             playerCount: Array.isArray(t.players) ? t.players.length : 0,
             status: 'final',
             closedAt: Math.floor(tournamentDate.getTime() / 1000),
-            configSnapshot: configSnapshot || {}
+            configSnapshot: _stripCredentials(configSnapshot)
         };
 
         await saveTournamentMeta(meta);

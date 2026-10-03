@@ -1,8 +1,8 @@
 <?php
 /**
  * Relay API — forwards tournament uploads to a remote NewTon instance.
- * Used when the browser can't make cross-origin requests with basic auth (CORS preflight).
- * PHP handles the remote request server-side — no CORS, no preflight, auth works naturally.
+ * The browser can't post to another origin without CORS, so PHP makes the request
+ * server-side, adding the remote server's API key (X-API-Key) when one is given.
  */
 
 // Check if API is enabled
@@ -11,7 +11,7 @@ require_once 'api-check.php';
 header('Content-Type: application/json');
 header('Access-Control-Allow-Origin: *');
 header('Access-Control-Allow-Methods: POST');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, X-API-Key');
 
 if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     http_response_code(200);
@@ -23,6 +23,9 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     echo json_encode(['error' => 'Method not allowed']);
     exit;
 }
+
+// Writes need the API key when NEWTON_API_KEY is set (see api-check.php)
+require_api_key();
 
 $input = file_get_contents('php://input');
 $request = json_decode($input, true);
@@ -41,8 +44,7 @@ if (empty($request['url']) || !isset($request['payload'])) {
 }
 
 $remoteUrl = $request['url'];
-$username  = $request['username'] ?? '';
-$password  = $request['password'] ?? '';
+$apiKey    = isset($request['apiKey']) ? trim((string)$request['apiKey']) : '';
 $payload   = json_encode($request['payload']);
 
 if ($payload === false) {
@@ -85,15 +87,14 @@ $ch = curl_init($remoteUrl);
 curl_setopt($ch, CURLOPT_POST, true);
 curl_setopt($ch, CURLOPT_POSTFIELDS, $payload);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-curl_setopt($ch, CURLOPT_HTTPHEADER, ['Content-Type: application/json']);
+// The remote server's API key, when given, travels as the X-API-Key header
+$headers = ['Content-Type: application/json'];
+if ($apiKey !== '' && strpbrk($apiKey, "\r\n") === false) {
+    $headers[] = 'X-API-Key: ' . $apiKey;
+}
+curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
 curl_setopt($ch, CURLOPT_TIMEOUT, 15);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
-
-// Basic auth if provided
-if ($username !== '') {
-    curl_setopt($ch, CURLOPT_USERPWD, $username . ':' . $password);
-    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_BASIC);
-}
 
 $response   = curl_exec($ch);
 $httpCode   = curl_getinfo($ch, CURLINFO_HTTP_CODE);

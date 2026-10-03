@@ -142,7 +142,7 @@ Writes are made under a file lock, so simultaneous saves can't overwrite each ot
 - **API kill switch**: `NEWTON_API_ENABLED` accepts `false`, `0`, `off`, `no` (any case) to disable all endpoints
 - **CORS headers**: Configured for cross-origin requests (adjust as needed)
 - **File permissions**: Tournaments directory requires write access (755 recommended)
-- **No built-in authentication**: Protect exposed instances at the deployment layer (reverse proxy with basic auth, VPN, or LAN-only) — see DOCKER-QUICKSTART.md § Security
+- **API key for writes** (`NEWTON_API_KEY`): when set, upload, delete, corrections (POST) and relay need the `X-API-Key` header (`require_api_key()` in `api-check.php`); reading never does. Unset: no authentication — protect exposed instances at the deployment layer (reverse proxy with basic auth, VPN, or LAN-only) — see DOCKER-QUICKSTART.md § Security
 
 ## Local Development
 
