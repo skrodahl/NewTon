@@ -41,7 +41,8 @@ One function covers 8, 16 and 32 players. It reads the progression table (`getPr
 - **Columns are rounds.** Frontside round *r* is column *r* on its side; backside round *r* is column *r* on the other side. The finals get their own column.
 - **Frontside rows.** Round 1 is spaced evenly. Every later match sits midway between the two matches whose winners feed it.
 - **Backside rows.** Backside round 1 sits midway between the two frontside matches whose losers it receives. Later rounds sit midway between their backside feeders, or level with their single backside feeder in rounds where frontside losers drop in.
-- **Finals.** BS-FINAL and GRAND-FINAL are stacked around the vertical middle.
+- **Finals ("Right").** The finals get their own column. The grand final is level with the frontside final, so the frontside winner's line is straight; the backside final sits directly below the grand final and feeds it with a short vertical line. Tried and dropped: the backside final above the grand final (the backside line had to run past the grand final), and the backside final in the frontside final's column (hard to read).
+- **Finals ("Middle").** BS-FINAL and GRAND-FINAL are stacked around the vertical middle.
 - **World coordinates.** Everything is placed from 0,0 with known width and height, so the camera can fit the whole bracket, fit a set of matches, and tell when a match is off-screen.
 
 ### Geometry used in the mockup
@@ -51,7 +52,7 @@ One function covers 8, 16 and 32 players. It reads the progression table (`getPr
 | Card | 200 × 80, names 20px | World units. Fixed for every bracket size |
 | Row gap | 10, grows up to 90 | Between cards in a column |
 | Column gap | 34, grows up to 134 | Between rounds |
-| Centre gap | 64, grows with the column gap | Between backside and frontside |
+| Centre gap | 34, grows with the column gap | Between backside and frontside; equal to the column gap so the round-1 forks match |
 | Finals gap | 64, grows with the column gap | Before the finals column |
 
 **Spacing fills the page, not the cards.** The bracket is first fitted at its tightest spacing, with fit-all capped at 100%. Whatever space is left over goes into the row and column gaps, up to their limits; anything beyond that is left as margin around a centred bracket. A 32-player bracket on a wide screen gets wider column gaps; an 8-player bracket gets taller row gaps. The card itself never changes, so 8, 16 and 32 players look alike, just at different zoom levels.
@@ -61,8 +62,11 @@ An earlier version stretched the card height (and name size) per window instead.
 ### Lines
 
 - **Winner lines** run from the centre of a match to the centre of the next, with the corner halfway across the gap. Two feeders form a fork; a single feeder is a straight line.
-- **Crossing lines.** A winner line that would cross other matches is routed around the bracket instead. In "Right", the backside winner's line to the finals runs below the bracket.
-- **Loser drops** are drawn only for the selected match: dashed, entering the player row they fill, with a small "loser" tag.
+- **Crossing lines.** A winner line that would cross other matches is routed around the bracket instead.
+- **Backside into the finals ("Right").** The backside runs right to left, so its last match's line leaves from its left side, runs under the bracket, up the right edge, and enters the backside final from the right.
+- **Frontside final ("Right").** It feeds both finals, so its line splits: straight on to the grand final, and down into the backside final from the left. Both are always drawn.
+- **Loser drops** are drawn only for the selected match: dashed, entering the player row they fill, with a small "loser" tag. Exceptions, with the finals on the right: frontside final → backside final (above), and frontside round 1 → backside round 1 is always drawn, exactly like the winner lines: centre to centre, so they mirror the frontside forks. With the finals in the middle those would cross the whole bracket, so they stay selection-only.
+- **Line colour** is the same for every drawn line, except fainter into a match that has no players assigned yet.
 - **Line width** is constant on screen at any zoom.
 
 ### Other Formats
@@ -253,5 +257,4 @@ Live, ready and waiting cards also have their own fills (`--live-fill`, `--ready
 
 ## Open Questions
 
-- **Loser drops.** Today they are always drawn. In the mockup they appear only for the selected match. Is that enough?
 - **Screen.** What is the bracket actually run on at tournaments: laptop, TV, or both?

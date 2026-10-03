@@ -16,9 +16,9 @@
 const BracketView = (() => {
     // One card for every bracket size; the spacing between cards absorbs the difference
     const W = 200, H = 80, FS = 20, META = 20, FINALS_SPLIT = 40;
-    const GAP_MIN = 10, GX_MIN = 34, CG_MIN = 64, FG_MIN = 64; // row gap, column gap, centre gap, finals gap
+    const GAP_MIN = 10, GX_MIN = 34, CG_MIN = 34, FG_MIN = 64; // row gap, column gap, centre gap (= column gap, so forks match), finals gap
     const GAP_GROW = 80, GX_GROW = 100;                        // how far spacing may grow to fill the page
-    const TOP = 80, BOTTOM = 70, PAD = 16, Z_MAX = 2, Z_FIT_MAX = 1, MAG_BELOW = 0.9;
+    const TOP = 96, BOTTOM = 70, PAD = 16, Z_MAX = 2, Z_FIT_MAX = 1, MAG_BELOW = 0.9;
     let PITCH = H + GAP_MIN, GX = GX_MIN, CENTER_GAP = CG_MIN, FINALS_GAP = FG_MIN;
 
     const svgNS = 'http://www.w3.org/2000/svg';
@@ -77,7 +77,13 @@ const BracketView = (() => {
                 if (sideOf(id) === 'FS') x[id] = fs0 + (roundOf(id) - 1) * P;
                 else if (sideOf(id) === 'BS') x[id] = fs0 - g.CENTER_GAP - W - (roundOf(id) - 1) * P;
             });
+            // Finals in their own column; the grand final level with the frontside final (a straight
+            // line), the backside final below it, so the backside's line coming round from below
+            // reaches the backside final first
+            const fsFinal = `FS-${maxFS}-1`;
             x['BS-FINAL'] = x['GRAND-FINAL'] = fs0 + (maxFS - 1) * P + W + g.FINALS_GAP;
+            y['GRAND-FINAL'] = y[fsFinal];
+            y['BS-FINAL'] = y[fsFinal] + H + 2 * FINALS_SPLIT;
         } else {
             ids.forEach(id => { if (sideOf(id) === 'FS') x[id] = (roundOf(id) - 1) * P; });
             const fx = (maxFS - 1) * P + W + g.FINALS_GAP;
@@ -91,7 +97,7 @@ const BracketView = (() => {
         const cw = Math.max(...ids.map(i => pos[i].x)) + W, ch = Math.max(...ids.map(i => pos[i].y)) + H;
         return { pos, cw, ch, mid: mid - minY + H / 2 };
     }
-    const worldBox = L => ({ x0: -10, y0: -TOP, x1: L.cw + 10, y1: L.ch + BOTTOM });
+    const worldBox = L => ({ x0: -30, y0: -TOP, x1: L.cw + 30, y1: L.ch + BOTTOM }); // room for lines routed round the outside
 
     // The card never changes. Fit the bracket at its tightest spacing (never above 100%),
     // then grow the row and column gaps into whatever space is left, so it fills the page.
@@ -276,7 +282,8 @@ const BracketView = (() => {
             d.className = cls; d.innerHTML = html; d.style.left = x + 'px'; d.style.top = y + 'px';
             world.appendChild(d); return d;
         };
-        const lblEnd = (html, x, y) => { const d = lbl(html, x, y, 'bv-side-label'); d.style.transform = 'translateX(-100%)'; return d; };
+        // a label centred over a column (x is the column's left edge)
+        const lblMid = (html, x, y, cls) => { const d = lbl(html, x + W / 2, y, cls); d.style.transform = 'translateX(-50%)'; return d; };
 
         // backside band
         const bsIds = st.ids.filter(i => sideOf(i) === 'BS');
@@ -288,25 +295,26 @@ const BracketView = (() => {
 
         // side and column labels
         const fsX0 = pos['FS-1-1'].x;
-        if (variant === 'right') {
-            lblEnd('◀ Backside', fsX0 - CENTER_GAP / 2 - 12, -72);
-            lbl('Frontside ▶', fsX0 - CENTER_GAP / 2 + 12, -72, 'bv-side-label');
-        } else {
-            lbl('Frontside ▶', fsX0, -72, 'bv-side-label');
-            lbl('Finals', pos['BS-FINAL'].x, -72, 'bv-side-label');
-            lblEnd('◀ Backside', L.cw, -72);
-        }
+        // side labels centred over each side's first round
+        lblMid('Frontside ▶', fsX0, -84, 'bv-side-label');
+        lblMid('◀ Backside', pos['BS-1-1'].x, -84, 'bv-side-label');
+        if (variant === 'middle') lblMid('Finals', pos['BS-FINAL'].x, -84, 'bv-side-label');
         const place = placings(size, st);
-        for (let r = 1; r <= st.maxFS; r++) lbl(r === st.maxFS ? 'Frontside final' : 'Round ' + r, pos[`FS-${r}-1`].x, -32);
-        for (let r = 1; r <= st.maxBS; r++) lbl(`${place[r]} place`, pos[`BS-${r}-1`].x, -32);
-        lbl('Backside final <span>· 3rd place</span>', pos['BS-FINAL'].x, pos['BS-FINAL'].y - 22);
-        lbl('Grand final', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - 22);
+        // every header sits the same distance above the topmost match of its round
+        const LABEL_GAP = 22;
+        const topOf = (side, r) => Math.min(...st.ids.filter(i => sideOf(i) === side && roundOf(i) === r).map(i => pos[i].y));
+        for (let r = 1; r <= st.maxFS; r++) lblMid(r === st.maxFS ? 'Frontside final' : 'Round ' + r, pos[`FS-${r}-1`].x, topOf('FS', r) - LABEL_GAP);
+        for (let r = 1; r <= st.maxBS; r++) lblMid(`${place[r]} place`, pos[`BS-${r}-1`].x, topOf('BS', r) - LABEL_GAP);
+        // the line from the backside final to the grand final runs behind these
+        lblMid('Backside final <span>· 3rd place</span>', pos['BS-FINAL'].x, pos['BS-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+        lblMid('Grand final', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
 
         // application signature, below the last first-round match (checked by renderBracket())
         const lastFS1 = st.ids.filter(i => /^FS-1-/.test(i)).sort((a, b) => numOf(b) - numOf(a))[0];
-        const sig = lbl(String.fromCharCode(..._0x7a, ..._0x9b), pos[lastFS1].x, L.ch + 44, 'bv-signature');
+        // centred under round 1 with the finals on the right; left-aligned at the bracket's edge with them in the middle
+        const sigText = String.fromCharCode(..._0x7a, ..._0x9b);
+        const sig = variant === 'right' ? lblMid(sigText, pos[lastFS1].x, L.ch + 44, 'bv-signature') : lbl(sigText, pos[lastFS1].x, L.ch + 44, 'bv-signature');
         sig.id = 'tournament-watermark';
-        sig.style.width = W + 'px';
 
         // lines
         const svg = document.createElementNS(svgNS, 'svg');
@@ -322,15 +330,24 @@ const BracketView = (() => {
             const d = prog[src][kind]; if (!d) return;
             const [dst, slot] = d;
             const s = pos[src], t = pos[dst];
+            // Loser lines show on selection only, except with the finals on the right: round 1 to
+            // backside round 1 (mirroring the frontside forks) and the frontside final to the
+            // backside final (it feeds both finals) are always drawn
+            const always = kind === 'winner' || (variant === 'right' && (/^FS-1-/.test(src) || (sideOf(src) === 'FS' && dst === 'BS-FINAL')));
             let path;
-            if (s.x === t.x) {
+            if (variant === 'right' && sideOf(src) === 'BS' && dst === 'BS-FINAL') {
+                // The backside runs right to left: its last match leaves from its left side, goes
+                // round under the bracket, up the right edge, and enters the backside final from the right
+                const x1 = s.x, ox = x1 - GX / 2, yR = L.ch + 30, xR = t.x + W + GX / 2;
+                path = `M${x1} ${cy(src)} H${ox} V${yR} H${xR} V${cy(dst)} H${t.x + W}`;
+            } else if (s.x === t.x) {
                 path = s.y < t.y ? `M${s.x + W / 2} ${s.y + H} V${t.y}` : `M${s.x + W / 2} ${s.y} V${t.y + H}`;
             } else {
                 const dir = Math.sign((t.x + W / 2) - (s.x + W / 2));
                 const x1 = dir > 0 ? s.x + W : s.x, x2 = dir > 0 ? t.x : t.x + W;
-                // winners: centre to centre, so two feeders make a fork and one feeder a straight line
-                // loser drops: enter the player row they fill
-                const y1 = cy(src), y2 = kind === 'winner' ? cy(dst) : slotY(dst, slot);
+                // drawn lines: centre to centre, so two feeders make a fork and one feeder a straight line
+                // loser drops on selection: enter the player row they fill
+                const y1 = cy(src), y2 = always ? cy(dst) : slotY(dst, slot);
                 const adjacent = Math.abs(x2 - x1) <= Math.max(GX, CENTER_GAP, FINALS_GAP) + 1;
                 const mx = adjacent ? (x1 + x2) / 2 : x2 - dir * GX / 2;
                 if (kind === 'winner' && !adjacent && crosses(x1, mx, y1, [src, dst])) {
@@ -352,7 +369,9 @@ const BracketView = (() => {
             }
             const p = document.createElementNS(svgNS, 'path');
             p.setAttribute('d', path);
-            p.setAttribute('class', kind === 'winner' ? 'bv-edge' + (M[src] && M[src].state === 'completed' ? ' bv-known' : '') : 'bv-drop');
+            // All lines alike, except fainter into a match that has no players assigned yet
+            const assigned = M[dst] && M[dst].p.some(sl => sl.kind !== 'tbd');
+            p.setAttribute('class', always ? 'bv-edge' + (assigned ? ' bv-known' : '') : 'bv-drop');
             svg.appendChild(p);
             edges.push({ src, dst, kind, el: p });
         }));

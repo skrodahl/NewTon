@@ -42,8 +42,9 @@
 .bv-band { position: absolute; background: var(--bv-band); border-radius: 10px; }
 .bv-col-label { position: absolute; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--bv-muted); white-space: nowrap; }
 .bv-col-label span { font-weight: 500; letter-spacing: .02em; text-transform: none; }
-.bv-side-label { position: absolute; font-size: 15px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--bv-ink-2); white-space: nowrap; }
-.bv-signature { position: absolute; font-size: 16px; letter-spacing: 1px; color: rgba(17,24,39,.5); text-align: center; pointer-events: none; white-space: nowrap; }
+.bv-finals-label { z-index: 1; background: var(--bv-surface-2); padding: 0 6px; }
+.bv-side-label { position: absolute; font-size: 24px; line-height: 1; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--bv-ink-2); white-space: nowrap; }
+.bv-signature { position: absolute; font-size: 16px; letter-spacing: 1px; color: rgba(17,24,39,.5); pointer-events: none; white-space: nowrap; }
 
 /* ---- cards ---- */
 .bv-card {
