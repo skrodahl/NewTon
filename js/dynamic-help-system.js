@@ -8,63 +8,58 @@ const HELP_CONTENT = {
     // Setup Page Help
     setup: {
         title: "Tournament Setup",
-        overview: "Create, load, or manage tournaments. Start here for each new tournament.",
+        overview: "Start a tournament, or pick one up where you left off. The tournament you're running is at the top, with its next step.",
         sections: {
-            creation: {
-                title: "Creating Tournaments",
+            current: {
+                title: "Current Tournament",
                 content: `
-                    <p><strong>Quick Start:</strong></p>
-                    <ol>
-                        <li>Enter a descriptive tournament name (e.g., "Weekly League Round 5")</li>
-                        <li>Select the tournament date (defaults to today)</li>
-                        <li>Click "Create New Tournament"</li>
-                        <li>Go to Registration page to add players</li>
-                    </ol>
-                    <p><strong>Tips:</strong></p>
+                    <p>The loaded tournament, with its status (<strong>Setup</strong>, <strong>Active</strong> or <strong>Completed</strong>), players, bracket size, matches completed, and the matches being played now (or the winner, once it's over).</p>
+                    <p><strong>Next step</strong> changes with the status:</p>
                     <ul>
-                        <li>Use consistent naming for easy organization</li>
-                        <li>Tournament names appear in export files and results</li>
-                        <li>Dates help track tournament history</li>
+                        <li><strong>Setup:</strong> Register players, then draw the bracket from the bracket page</li>
+                        <li><strong>Active:</strong> Open bracket</li>
+                        <li><strong>Completed:</strong> Open in Analytics (or Add to Analytics, if it isn't there yet)</li>
                     </ul>
-                `
-            },
-            management: {
-                title: "Tournament Management",
-                content: `
-                    <p><strong>Export Tournament:</strong> Save tournament data as JSON file for backup or sharing between computers.</p>
-                    <p><strong>Import Tournament:</strong> Load previously exported tournament data. Useful for:</p>
-                    <ul>
-                        <li>Moving tournaments between computers</li>
-                        <li>Restoring from backups</li>
-                        <li>Sharing tournament setups</li>
-                    </ul>
-                    <p><strong>Reset Tournament:</strong> Clear all bracket progress while keeping players. Use when you need to restart with same players.</p>
+                    <p><strong>Export tournament:</strong> Save the tournament as a JSON file, for backup or to move it to another computer.</p>
+                    <p><strong>Backup to server:</strong> Shown when the Tournament Manager runs on a server. Uploads the tournament, or a tournament file.</p>
+                    <p><strong>Reset tournament:</strong> Clears all bracket progress and keeps the players. You type the tournament's name to confirm.</p>
                     <p><strong>⚠️ Warning:</strong> Reset permanently deletes all match results and standings.</p>
                 `
             },
-            recent: {
-                title: "Recent Tournaments",
+            creation: {
+                title: "New Tournament",
                 content: `
-                    <p>View and manage previously created tournaments:</p>
+                    <ol>
+                        <li>Enter a name (e.g., "Thursday Cup #42")</li>
+                        <li>Check the date (defaults to today)</li>
+                        <li>Click <strong>Create tournament</strong>. You go straight to Player Registration</li>
+                    </ol>
+                    <p><strong>Import tournament:</strong> Load a tournament from an exported JSON file.</p>
+                `
+            },
+            recent: {
+                title: "Tournaments",
+                content: `
+                    <p>Every tournament on this computer, newest first, with date, players, status and Analytics.</p>
                     <ul>
-                        <li><strong>Load:</strong> Switch to a different tournament</li>
-                        <li><strong>Delete (×):</strong> Permanently remove tournament</li>
-                        <li><strong>[ACTIVE]:</strong> Shows your current tournament</li>
+                        <li><strong>Load:</strong> Switch to that tournament</li>
+                        <li><strong>×:</strong> Delete it permanently (asks first)</li>
+                        <li><strong>Loaded:</strong> Marks the current tournament, which can't be deleted</li>
+                        <li><strong>Analytics:</strong> <strong>View</strong> opens it in Analytics; <strong>+ Add</strong> adds a completed tournament that isn't there yet</li>
                     </ul>
-                    <p><strong>Note:</strong> You cannot delete the currently active tournament.</p>
+                    <p><strong>Server:</strong> When the Tournament Manager runs on a server, a <strong>Server</strong> tab lists the tournaments shared there, with <strong>Import</strong> (or <strong>Re-import</strong> if it's already on this computer).</p>
+                    <p><strong>Storage:</strong> How full this computer's browser storage is. Click it for details.</p>
                 `
             },
             results: {
                 title: "Match History",
                 content: `
-                    <p><strong>Live Match History:</strong> View completed matches with enhanced progression information.</p>
-                    <p><strong>Display Format:</strong></p>
+                    <p>The current tournament's completed matches, latest first.</p>
                     <ul>
-                        <li><strong>Player Names:</strong> Winner highlighted in green</li>
-                        <li><strong>Progression Info:</strong> <em>Shows where each player advances (FS-2-1) or elimination rank (7th-8th)</em></li>
-                        <li><strong>Match Score:</strong> Right-aligned final leg scores when available</li>
+                        <li>The winner in green, then the score</li>
+                        <li>Lane, referee, and where both players went: the next match, or their final placing</li>
+                        <li>Click a match to see its details. Walkovers are greyed out</li>
                     </ul>
-                    <p><strong>💡 Tip:</strong> Progression info updates immediately after each match completion.</p>
                 `
             }
         }

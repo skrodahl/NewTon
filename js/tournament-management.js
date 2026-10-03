@@ -1,8 +1,9 @@
 // tournament-management.js - Config-Free Tournament Operations
 // NEVER touches global config - only tournament-specific data
 
-let sharedTournamentViewState = 'collapsed'; // 'collapsed' | 'all'
-let showingAllLocalTournaments = false;
+// Setup page tournament list: which tab shows ('local' | 'server'), and whether a server answered
+let setupListSource = 'local';
+let setupServerAvailable = false;
 
 // One-time guard so a corrupt registry only alerts the user once per session
 let _registryReadFailed = false;
@@ -710,21 +711,12 @@ function saveTournament() {
 }
 
 function updateTournamentStatus() {
-    const statusDiv = document.getElementById('tournamentStatus');
     const headerStatusDiv = document.getElementById('headerTournamentStatus');
     const headerStatusNarrow = document.getElementById('headerTournamentStatusNarrow');
 
     if (tournament) {
         const safeName = escapeHtml(tournament.name);
         const safeDate = escapeHtml(tournament.date);
-        const statusText = `Active Tournament: <strong>${safeName}</strong> (${safeDate})`;
-
-        // Update main status div (in Setup page)
-        if (statusDiv) {
-            statusDiv.innerHTML = statusText;
-            statusDiv.className = 'alert alert-success';
-            statusDiv.style.display = 'block';
-        }
 
         // Update wide header (two-row: name over date)
         if (headerStatusDiv) {
@@ -737,12 +729,6 @@ function updateTournamentStatus() {
         }
     } else {
         // No tournament
-        if (statusDiv) {
-            statusDiv.innerHTML = 'No active tournament';
-            statusDiv.className = 'alert alert-info';
-            statusDiv.style.display = 'block';
-        }
-
         if (headerStatusDiv) {
             headerStatusDiv.innerHTML = '<strong>None</strong><span class="tournament-date"></span>';
         }
@@ -752,6 +738,93 @@ function updateTournamentStatus() {
         }
     }
 
+    renderSetupCurrent();
+}
+
+/**
+ * Fill the Setup page's current tournament panel: name, date, format and status, four
+ * figures (players, bracket, matches completed, live now or the winner), the next step
+ * for its status, and Export / Backup to server / Reset. Reads the live globals only.
+ * @returns {void}
+ */
+function renderSetupCurrent() {
+    const panel = document.getElementById('setupCurrent');
+    if (!panel) return;
+    if (!tournament) {
+        panel.className = 'st-panel';
+        panel.innerHTML = '<div class="st-empty"><b>No tournament loaded</b><span>Start a new one, or load one from the list below.</span></div>';
+        return;
+    }
+
+    const status = tournamentStatusLabel(tournament);
+    const all = Array.isArray(matches) ? matches : [];
+    const list = Array.isArray(players) ? players : [];
+    const paid = list.filter(p => p.paid).length;
+    const done = all.filter(m => m.completed).length;
+    const live = all.filter(m => getMatchState(m) === 'live');
+    const hasBracket = !!tournament.bracket && all.length > 0;
+    const format = hasBracket ? TOURNAMENT_FORMATS.find(f => f.id === getFormat()) : null;
+    const lanes = live.map(m => m.lane).filter(Boolean).sort((a, b) => a - b);
+
+    let lastFact = ['Live now', '—'];
+    if (status === 'Completed') {
+        const winnerId = Object.keys(tournament.placements || {}).find(id => tournament.placements[id] === 1);
+        const winner = winnerId && list.find(p => String(p.id) === winnerId);
+        lastFact = ['Winner', winner ? escapeHtml(winner.name) : '—'];
+    } else if (hasBracket) {
+        lastFact = ['Live now', `${live.length}${lanes.length ? ` <small>lane${lanes.length > 1 ? 's' : ''} ${lanes.join(', ')}</small>` : ''}`];
+    }
+
+    // The next step for the tournament's status: [title, hint, secondary button, main button]
+    const toGo = all.length - done;
+    const next = {
+        Setup: ['Register players',
+            list.length ? 'Draw the bracket from the bracket page when everyone is in.' : 'Add the players who are taking part.',
+            ['Open bracket', "showPage('tournament')"], ['Register players', "showPage('registration')"]],
+        Active: ['Run the matches',
+            `${toGo} match${toGo === 1 ? '' : 'es'} to go${live.length ? `, ${live.length} being played now` : ''}.`,
+            ['Player registration', "showPage('registration')"], ['Open bracket', "showPage('tournament')"]],
+        Completed: ['See the results', 'Final standings, points and statistics are in Analytics.',
+            ['Open bracket', "showPage('tournament')"], ['Open in Analytics', 'openAnalyticsForTournament(tournament.id)']]
+    }[status] || null;
+
+    panel.className = 'st-panel st-current';
+    panel.innerHTML = `
+        <div class="st-current-head">
+            <div>
+                <p class="st-eyebrow">Current tournament</p>
+                <h3>${escapeHtml(tournament.name)}</h3>
+                <div class="st-sub">${escapeHtml(tournament.date)}${format ? ` · ${escapeHtml(format.name)}` : ''}</div>
+            </div>
+            <span class="st-pill st-${status.toLowerCase()}">${escapeHtml(status)}</span>
+        </div>
+        <dl class="st-facts">
+            <div><dt>Players</dt><dd>${list.length} <small>${list.length && paid === list.length ? 'all paid' : `${paid} paid`}</small></dd></div>
+            <div><dt>Bracket</dt><dd>${hasBracket ? tournament.bracketSize : '—'}</dd></div>
+            <div><dt>Matches completed</dt><dd>${hasBracket ? `${done} <small>of ${all.length}</small>` : '—'}</dd>${hasBracket ? `<div class="st-progress"><span style="width: ${Math.round(100 * done / all.length)}%"></span></div>` : ''}</div>
+            <div><dt>${lastFact[0]}</dt><dd>${lastFact[1]}</dd></div>
+        </dl>
+        ${next ? `<div class="st-next">
+            <div class="st-next-what"><p class="st-eyebrow">Next step</p><b>${next[0]}</b><span class="st-hint" id="setupNextHint">${next[1]}</span></div>
+            <div class="st-next-acts"><button type="button" class="st-btn" onclick="${next[2][1]}">${next[2][0]}</button><button type="button" class="st-btn st-primary" id="setupNextMain" onclick="${next[3][1]}">${next[3][0]} →</button></div>
+        </div>` : ''}
+        <div class="st-quiet">
+            <button type="button" class="st-link" onclick="exportTournament()">Export tournament</button>
+            <button type="button" class="st-link" id="uploadToServerBtn" onclick="showUploadModal()"${setupServerAvailable ? '' : ' hidden'}>Backup to server</button>
+            <button type="button" class="st-link st-danger" onclick="showResetTournamentModal()">Reset tournament…</button>
+        </div>`;
+
+    // A completed tournament that isn't in Analytics yet: offer to add it instead
+    if (status === 'Completed' && typeof NewtonDB !== 'undefined') {
+        const id = tournament.id;
+        NewtonDB.getTournament(String(id)).then(found => {
+            const main = document.getElementById('setupNextMain');
+            if (found || !main || !tournament || tournament.id !== id) return;
+            main.textContent = 'Add to Analytics →';
+            main.setAttribute('onclick', 'addTournamentToAnalytics(tournament.id)');
+            document.getElementById('setupNextHint').textContent = 'Add it to Analytics to see final standings, points and statistics.';
+        }).catch(() => {});
+    }
 }
 
 // SHARED TOURNAMENTS (SERVER FEATURE)
@@ -774,13 +847,10 @@ async function loadSharedTournaments() {
         const data = await response.json();
         console.log('[Shared Tournaments] Data received:', data);
 
-        // If successful, show the upload button
+        // A server answered: offer Backup to server and the Server tab
+        setupServerAvailable = true;
         const uploadBtn = document.getElementById('uploadToServerBtn');
-        console.log('[Shared Tournaments] Upload button element:', uploadBtn);
-        if (uploadBtn) {
-            uploadBtn.style.display = 'inline-block';
-            console.log('[Shared Tournaments] Upload button shown');
-        }
+        if (uploadBtn) uploadBtn.hidden = false;
 
         console.log('[Shared Tournaments] Returning', data.tournaments?.length || 0, 'tournaments');
         return data.tournaments || [];
@@ -791,113 +861,116 @@ async function loadSharedTournaments() {
     }
 }
 
+/**
+ * Fill the Setup page's Tournaments table: the tournaments saved on this computer, newest
+ * first, or (on the Server tab, shown when a server answers) the tournaments shared on it.
+ * The table scrolls; the loaded tournament is marked and can't be loaded or deleted again.
+ * @returns {Promise<void>}
+ */
 async function loadRecentTournaments() {
-    const tournaments = readTournamentsRegistry();
     const container = document.getElementById('recentTournaments');
+    if (!container) return;
 
-    // Try to load shared tournaments from server
+    // Calls overlap (each waits for the server); only the latest one renders, so an earlier
+    // call that finishes late can't overwrite the list with what it read before a save
+    const token = loadRecentTournaments._token = (loadRecentTournaments._token || 0) + 1;
+
+    // Try to load shared tournaments from server (null when there is no server)
     const sharedTournaments = await loadSharedTournaments();
+    if (token !== loadRecentTournaments._token) return;
+    if (!sharedTournaments) setupListSource = 'local';
+    const tournaments = readTournamentsRegistry();
 
-    // Build HTML sections
-    let htmlSections = [];
     // Per-render lookup: interactive elements reference entries by numeric index so
     // server-supplied filenames and tournament ids never enter inline handler strings.
     const rowActions = [];
 
-    // Shared Tournaments Section (if available)
-    if (sharedTournaments && sharedTournaments.length > 0) {
-        // Sort by date (newest first)
-        const sortedShared = sharedTournaments.sort((a, b) => {
-            const dateA = new Date(a.date + 'T00:00:00');
-            const dateB = new Date(b.date + 'T00:00:00');
-            return dateB - dateA;
-        });
-
-        // Build a set of local tournament identifiers (name + date) for matching
-        const localTournamentKeys = new Set(
-            tournaments.map(t => `${t.name}_${t.date}`)
-        );
-
-        // Filter to tournaments not already in localStorage
-        const newShared = sortedShared.filter(t => !localTournamentKeys.has(`${t.name}_${t.date}`));
-
-        // Determine what to show based on view state
-        let sharedToShow = [];
-        if (sharedTournamentViewState === 'all') {
-            sharedToShow = sortedShared;
-        }
-        // 'collapsed' shows nothing
-
-        const sharedHtml = sharedToShow.map(t => {
-            const playerCount = t.players || '?';
-            const isLocal = localTournamentKeys.has(`${t.name}_${t.date}`);
-            const buttonLabel = isLocal ? 'Re-import' : 'Import';
-            const allowDelete = config.server && config.server.allowSharedTournamentDelete;
-            const importIdx = rowActions.push({ action: 'import', value: t.filename }) - 1;
-            const deleteButton = allowDelete
-                ? `<button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" data-rt-idx="${rowActions.push({ action: 'shared-delete', value: t.filename }) - 1}">×</button>`
-                : '';
-            return `
-                <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; background: #f0f8ff;">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>
-                            <strong>${escapeHtml(t.name)}</strong> (${escapeHtml(t.date)}) - ${escapeHtml(String(playerCount))}p
-                        </span>
-                        <div>
-                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" data-rt-idx="${importIdx}">${buttonLabel}</button>
-                            ${deleteButton}
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Toggle button text based on state
-        const toggleLabel = sharedTournamentViewState === 'collapsed' ? 'Show All' : 'Collapse';
-
-        const toggleButton = `<button class="btn" style="padding: 5px 10px; font-size: 14px; margin-left: 10px;" onclick="toggleSharedTournamentView()">${toggleLabel}</button>`;
-
-        htmlSections.push(`
-            <h3 style="margin-top: 0; margin-bottom: 10px; font-size: 16px; color: #555; display: flex; align-items: center;">
-                Shared Tournaments (${sortedShared.length})
-                ${toggleButton}
-            </h3>
-            ${sharedHtml}
-        `);
+    // This computer | Server tabs, only when a server answered
+    const tabs = document.getElementById('setupListSource');
+    if (tabs) {
+        tabs.hidden = !sharedTournaments;
+        tabs.innerHTML = sharedTournaments ? [['local', 'This computer', tournaments.length], ['server', 'Server', sharedTournaments.length]]
+            .map(([src, label, n]) => `<button type="button" data-rt-idx="${rowActions.push({ action: 'source', value: src }) - 1}" aria-pressed="${setupListSource === src}">${label}<span class="st-n">${n}</span></button>`)
+            .join('') : '';
     }
 
-    // Local Tournaments Section
-    if (tournaments.length === 0 && !sharedTournaments) {
-        container.innerHTML = '<p>No tournaments found</p>';
-        const toggleBtn = document.getElementById('toggleTournamentsBtn');
-        if (toggleBtn) {
-            toggleBtn.style.display = 'none';
-        }
-        return;
-    }
-
-    if (tournaments.length > 0) {
-        // Sort tournaments by creation timestamp (newest first)
-        const sortedTournaments = tournaments.sort((a, b) => {
-            if (a.created && b.created) {
-                return new Date(b.created) - new Date(a.created);
-            } else if (a.created) {
-                return -1;
-            } else if (b.created) {
-                return 1;
-            } else {
-                const dateA = new Date(a.date + 'T00:00:00');
-                const dateB = new Date(b.date + 'T00:00:00');
-                return dateB - dateA;
+    // One delegated click listener per element (attached once): dispatches by the numeric
+    // index stored on each interactive element via the current render's rowActions lookup.
+    loadRecentTournaments._rowActions = rowActions;
+    [container, tabs].forEach(el => {
+        if (!el || el._rtDelegated) return;
+        el._rtDelegated = true;
+        el.addEventListener('click', (e) => {
+            const btn = e.target.closest('[data-rt-idx]');
+            if (!btn) return;
+            const entry = (loadRecentTournaments._rowActions || [])[parseInt(btn.getAttribute('data-rt-idx'), 10)];
+            if (!entry) return;
+            switch (entry.action) {
+                case 'source':         setupListSource = entry.value; loadRecentTournaments(); break;
+                case 'import':         loadSharedTournament(entry.value); break;
+                case 'shared-delete':  deleteSharedTournament(entry.value); break;
+                case 'analytics-view': openAnalyticsForTournament(entry.value); break;
+                case 'analytics-add':  addTournamentToAnalytics(entry.value); break;
+                case 'load':           loadSpecificTournament(entry.value); break;
+                case 'local-delete':   deleteTournament(entry.value); break;
             }
         });
+    });
 
-        // Determine which tournaments to show
-        const tournamentsToShow = showingAllLocalTournaments ?
-            sortedTournaments :
-            sortedTournaments.slice(0, 5);
 
-        // Check which tournaments are in the Analytics registry
+    if (setupListSource === 'server') {
+        const localTournamentKeys = new Set(tournaments.map(t => `${t.name}_${t.date}`));
+        const allowDelete = config.server && config.server.allowSharedTournamentDelete;
+        const sortedShared = sharedTournaments.slice().sort((a, b) =>
+            new Date(b.date + 'T00:00:00') - new Date(a.date + 'T00:00:00'));
+        const rows = sortedShared.map(t => {
+            const isLocal = localTournamentKeys.has(`${t.name}_${t.date}`);
+            const importIdx = rowActions.push({ action: 'import', value: t.filename }) - 1;
+            const deleteButton = allowDelete
+                ? `<button type="button" class="st-btn st-sm st-icon" title="Delete from server" aria-label="Delete from server" data-rt-idx="${rowActions.push({ action: 'shared-delete', value: t.filename }) - 1}">×</button>`
+                : '';
+            return `<tr>
+                <td class="st-name"><b>${escapeHtml(t.name)}</b></td>
+                <td class="st-date">${escapeHtml(t.date)}</td>
+                <td class="st-num">${escapeHtml(String(t.players || '?'))}</td>
+                <td>${isLocal ? 'Yes' : '<span class="st-faint">No</span>'}</td>
+                <td><span class="st-row-acts"><button type="button" class="st-btn st-sm" data-rt-idx="${importIdx}">${isLocal ? 'Re-import' : 'Import'}</button>${deleteButton}</span></td>
+            </tr>`;
+        }).join('');
+        container.innerHTML = rows
+            ? `<table class="st-table"><thead><tr><th>Name</th><th>Date</th><th class="st-num">Players</th><th>On this computer</th><th></th></tr></thead><tbody>${rows}</tbody></table>`
+            : '<div class="st-empty st-small"><span>No tournaments on the server yet.</span></div>';
+    } else if (tournaments.length === 0) {
+        container.innerHTML = '<div class="st-empty st-small"><span>No tournaments on this computer yet.</span></div>';
+    } else {
+        // Newest first, by creation time (older records without it by date)
+        const sortedTournaments = tournaments.sort((a, b) => {
+            if (a.created && b.created) return new Date(b.created) - new Date(a.created);
+            if (a.created) return -1;
+            if (b.created) return 1;
+            return new Date(b.date + 'T00:00:00') - new Date(a.date + 'T00:00:00');
+        });
+
+        const rows = sortedTournaments.map((t, i) => {
+            const isLoaded = tournament && tournament.id === t.id;
+            const status = tournamentStatusLabel(t);
+            // The loaded tournament can't be loaded again or deleted, so it gets neither button
+            const acts = isLoaded ? '' :
+                `<button type="button" class="st-btn st-sm" data-rt-idx="${rowActions.push({ action: 'load', value: t.id }) - 1}">Load</button>` +
+                `<button type="button" class="st-btn st-sm st-icon" title="Delete ${escapeHtml(t.name)}" aria-label="Delete ${escapeHtml(t.name)}" data-rt-idx="${rowActions.push({ action: 'local-delete', value: t.id }) - 1}">×</button>`;
+            return `<tr${isLoaded ? ' class="st-loaded"' : ''}>
+                <td class="st-name"><b>${escapeHtml(t.name)}</b>${isLoaded ? '<span class="st-tag">Loaded</span>' : ''}</td>
+                <td class="st-date">${escapeHtml(t.date)}</td>
+                <td class="st-num">${Array.isArray(t.players) ? t.players.length : 0}</td>
+                <td><span class="st-pill st-${status.toLowerCase()}">${escapeHtml(status)}</span></td>
+                <td data-analytics-row="${i}"></td>
+                <td><span class="st-row-acts">${acts}</span></td>
+            </tr>`;
+        }).join('');
+        container.innerHTML = `<table class="st-table"><thead><tr><th>Name</th><th>Date</th><th class="st-num">Players</th><th>Status</th><th>Analytics</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+
+        // The Analytics column is filled in when the Analytics registry answers, so the list
+        // is never held up by it
         let analyticsIds = new Set();
         try {
             if (typeof NewtonDB !== 'undefined') {
@@ -907,93 +980,18 @@ async function loadRecentTournaments() {
         } catch (e) {
             console.warn('Could not check Analytics registry:', e);
         }
-
-        const localHtml = tournamentsToShow.map(t => {
-            const isActiveTournament = tournament && tournament.id === t.id;
-            const playerCount = Array.isArray(t.players) ? t.players.length : 0;
-            const playerCountText = playerCount > 0 ? ` - ${playerCount}p` : '';
-            const inAnalytics = analyticsIds.has(String(t.id));
-            const isCompleted = t.status === 'completed';
-            let analyticsLabel = '';
-            if (inAnalytics) {
-                analyticsLabel = `<span class="analytics-label analytics-label--active" data-rt-idx="${rowActions.push({ action: 'analytics-view', value: t.id }) - 1}" title="View in Analytics">Analytics</span>`;
-            } else if (isCompleted) {
-                analyticsLabel = `<span class="analytics-label analytics-label--add" data-rt-idx="${rowActions.push({ action: 'analytics-add', value: t.id }) - 1}" title="Add to Analytics registry">+ Analytics</span>`;
-            }
-            const loadIdx = rowActions.push({ action: 'load', value: t.id }) - 1;
-            const localDeleteIdx = rowActions.push({ action: 'local-delete', value: t.id }) - 1;
-            return `
-                <div style="padding: 10px; border: 1px solid #ddd; margin-bottom: 10px; ${isActiveTournament ? 'background: #e8f5e8;' : ''}">
-                    <div style="display: flex; justify-content: space-between; align-items: center;">
-                        <span>
-                            <strong>${escapeHtml(t.name)}</strong> (${escapeHtml(t.date)})${playerCountText}
-                            ${isActiveTournament ? '<span style="color: #28a745; font-size: 12px; margin-left: 10px;">[ACTIVE]</span>' : ''}
-                            ${analyticsLabel}
-                        </span>
-                        <div>
-                            <button class="btn" style="padding: 5px 10px; font-size: 14px; margin-right: 5px;" data-rt-idx="${loadIdx}">Load</button>
-                            <button class="btn btn-danger" style="padding: 5px 8px; font-size: 12px;" data-rt-idx="${localDeleteIdx}">×</button>
-                        </div>
-                    </div>
-                </div>
-            `;
-        }).join('');
-
-        // Add toggle button inline with header if more than 5 local tournaments
-        const toggleButton = sortedTournaments.length > 5
-            ? `<button class="btn" style="padding: 5px 10px; font-size: 14px; margin-left: 10px;" onclick="toggleLocalTournamentView()">${showingAllLocalTournaments ? 'Show Less' : 'Show All'}</button>`
-            : '';
-
-        // Always show "My Tournaments" header when local tournaments exist
-        const headerMarginTop = sharedTournaments && sharedTournaments.length > 0 ? '20px' : '0';
-
-        htmlSections.push(`
-            <h3 style="margin-top: ${headerMarginTop}; margin-bottom: 10px; font-size: 16px; color: #555; display: flex; align-items: center;">
-                My Tournaments
-                ${toggleButton}
-            </h3>
-            ${localHtml}
-        `);
-
-        // Hide the old standalone toggle button (will be removed from HTML next)
-        const toggleBtn = document.getElementById('toggleTournamentsBtn');
-        if (toggleBtn) {
-            toggleBtn.style.display = 'none';
-        }
-    }
-
-    container.innerHTML = htmlSections.join('');
-
-    // One delegated click listener (attached once): dispatches by the numeric index
-    // stored on each interactive element via the current render's rowActions lookup.
-    loadRecentTournaments._rowActions = rowActions;
-    if (!container._rtDelegated) {
-        container._rtDelegated = true;
-        container.addEventListener('click', (e) => {
-            const el = e.target.closest('[data-rt-idx]');
-            if (!el) return;
-            const entry = (loadRecentTournaments._rowActions || [])[parseInt(el.getAttribute('data-rt-idx'), 10)];
-            if (!entry) return;
-            switch (entry.action) {
-                case 'import':         loadSharedTournament(entry.value); break;
-                case 'shared-delete':  deleteSharedTournament(entry.value); break;
-                case 'analytics-view': openAnalyticsForTournament(entry.value); break;
-                case 'analytics-add':  addTournamentToAnalytics(entry.value); break;
-                case 'load':           loadSpecificTournament(entry.value); break;
-                case 'local-delete':   deleteTournament(entry.value); break;
+        if (token !== loadRecentTournaments._token) return;
+        container.querySelectorAll('[data-analytics-row]').forEach(cell => {
+            const t = sortedTournaments[parseInt(cell.getAttribute('data-analytics-row'), 10)];
+            if (analyticsIds.has(String(t.id))) {
+                cell.innerHTML = `<button type="button" class="st-alink" title="View in Analytics" data-rt-idx="${rowActions.push({ action: 'analytics-view', value: t.id }) - 1}">View</button>`;
+            } else if (t.status === 'completed') {
+                cell.innerHTML = `<button type="button" class="st-alink st-add" title="Add to the Analytics registry" data-rt-idx="${rowActions.push({ action: 'analytics-add', value: t.id }) - 1}">+ Add</button>`;
+            } else {
+                cell.innerHTML = '<span class="st-faint">—</span>';
             }
         });
     }
-}
-
-function toggleSharedTournamentView() {
-    sharedTournamentViewState = sharedTournamentViewState === 'collapsed' ? 'all' : 'collapsed';
-    loadRecentTournaments();
-}
-
-function toggleLocalTournamentView() {
-    showingAllLocalTournaments = !showingAllLocalTournaments;
-    loadRecentTournaments();
 }
 
 // Load shared tournament from server
@@ -1057,7 +1055,7 @@ async function deleteSharedTournament(filename) {
 
 /**
  * Initiates tournament loading by showing confirmation modal.
- * Entry point for loading a tournament from the Recent Tournaments list.
+ * Entry point for loading a tournament from the Setup page's Tournaments list.
  *
  * @param {number} id - Tournament ID (timestamp-based) to load
  * @returns {void}
@@ -1196,7 +1194,7 @@ function continueLoadProcess(selectedTournament) {
     localStorage.setItem('currentTournament', JSON.stringify(tournament));
     console.log(`✓ Set "${tournament.name}" as current tournament for persistence`);
 
-    // Update Recent Tournaments display to show correct active tournament
+    // Update the Tournaments list to mark the loaded tournament
     loadRecentTournaments();
 }
 
@@ -1552,6 +1550,11 @@ function confirmReset() {
         }, 100);
     }
 
+    // Refresh the Setup page: status, match history and the tournament list
+    updateTournamentStatus();
+    if (typeof updateMatchHistory === 'function') updateMatchHistory();
+    loadRecentTournaments();
+
     alert(`✓ Tournament "${tournamentName}" has been reset successfully.\n\nYou can now generate a new bracket using Match Controls.`);
 }
 
@@ -1747,7 +1750,7 @@ function showImportStatus(type, message) {
     if (!statusDiv) return;
 
     // Set styling based on type
-    statusDiv.className = `alert alert-${type}`;
+    statusDiv.className = `st-import-status alert-${type}`;
     statusDiv.innerHTML = message;
     statusDiv.style.display = 'block';
 
@@ -1797,25 +1800,24 @@ function getStorageColor(percentage) {
 }
 
 /**
- * Update the storage indicator link in the Recent Tournaments header
+ * Update the storage meter in the Setup page's Tournaments header
  */
 function updateStorageIndicator() {
     const link = document.getElementById('storage-indicator-link');
-    if (!link) return;
+    const text = document.getElementById('storageIndicatorText');
+    const bar = document.getElementById('storageIndicatorBar');
+    if (!link || !text || !bar) return;
 
     // Get storage stats from analytics.js
     if (typeof getLocalStorageStats !== 'function') {
-        link.textContent = 'Storage: N/A';
+        text.textContent = 'Storage N/A';
         return;
     }
 
-    const stats = getLocalStorageStats();
-    const percentage = Math.round(stats.percentage);
-    const colorClass = getStorageColor(percentage);
-
-    // Update link text and color
-    link.textContent = `Storage: ${percentage}%`;
-    link.className = `storage-link storage-${colorClass}`;
+    const percentage = Math.round(getLocalStorageStats().percentage);
+    text.textContent = `Storage ${percentage}%`;
+    bar.style.width = `${Math.min(100, percentage)}%`;
+    link.className = `st-storage storage-${getStorageColor(percentage)}`;
 }
 
 /**

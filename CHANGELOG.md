@@ -1,3 +1,25 @@
+## Unreleased
+
+### App header and footer
+
+- **The app header and footer use the new design language**, as agreed in v5.1.10 for the redesign of the remaining pages (Docs/BRACKET-REDESIGN.md, "App header"). The header runs the full width: white, with one hairline underneath. It has a 40px round logo, the club name in Inter, and the tournament name and date. The clock is the same as the bracket header's. The page links are plain text, with the current page bold and underlined in ink. The footer is full width with a hairline above, and on short pages it sits at the bottom of the window. This is done as one stylesheet over the existing markup, with no markup or script changes, so it can be removed in one line.
+- Files changed: `css/app-header.css` (new), `tournament.html` (stylesheet link), `Docs/BRACKET-REDESIGN.md`.
+
+### Tournament Setup redesign
+
+- **The Setup page is rebuilt in the new design language** (mockup: https://claude.ai/artifact/Urawx3Mei3FK7SisBE22gd).
+  - **Current tournament** comes first: name, date, format, a status pill (Setup / Active / Completed) and four figures. The figures are players (and how many have paid), bracket size, matches completed (with a progress bar), and the matches being played now with their lanes (the winner, once completed).
+  - **Next step** changes with the status: Register players / Open bracket / Open in Analytics. The last becomes "Add to Analytics" when a completed tournament isn't in the Analytics registry.
+  - Export, Backup to server and Reset tournament moved into this panel as quiet links, since they act on the loaded tournament.
+  - **New tournament** is its own form, with Import tournament under it.
+- **Tournaments is one scrolling table**, newest first. "Show All / Show Less" and the separate Shared / My Tournaments lists are gone. When a server answers, "This computer" and "Server" are two tabs; the Server tab lists the shared tournaments with Import / Re-import and ×. The loaded tournament is marked "Loaded" and has no Load or × button, so the "can't delete the active tournament" alert can no longer be reached. Storage is a small meter in the table header, still opening the storage dialog.
+- **Match history** is one entry per match: the winner in green, "beat", the loser and the score (winner's legs first), then lane, referee and where both players went ("Ida to FS-2-2, Siri to BS-1-2", "out (7th-8th)", "wins the tournament"). It follows the tournament's format: single elimination previously showed no progression, and its bronze final reads "takes 3rd place" / "takes 4th place".
+- **Fix: the tournament list could show stale data.** `loadRecentTournaments()` overlaps itself, because each call waits for the server check. An earlier call that finished late overwrote the list with what it had read before a save. Only the latest call renders now. The table no longer waits for the Analytics registry (IndexedDB) either: it is drawn first, and the Analytics column is filled in when the registry answers.
+- Reset tournament now refreshes the Setup page (status, match history, tournament list).
+- In-app help for Setup rewritten for the new page.
+- About 440 lines of old Setup CSS removed from `styles.css` (Setup layout, Recent Tournaments, match history cards, storage link, Analytics labels, plus unused `.tournament-item` / `.match-result-item` rules).
+- Files changed: `css/setup-page.css` (new), `tournament.html` (Setup markup, stylesheet link), `js/tournament-management.js` (`renderSetupCurrent()` new; `loadRecentTournaments()`, `updateStorageIndicator()`, `updateTournamentStatus()`, `showImportStatus()`, `confirmReset()`, `loadSharedTournaments()`; `toggleSharedTournamentView()` / `toggleLocalTournamentView()` removed), `js/main.js` (`updateMatchHistory()`, `getPlayerProgressionForDisplay()`, `showPage()`), `js/dynamic-help-system.js`, `css/styles.css`.
+
 ## **v5.1.10** — Straight Down the Middle (2026-10-04)
 
 ### New bracket view

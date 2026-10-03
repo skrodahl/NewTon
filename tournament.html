@@ -14,7 +14,9 @@
     <link rel="stylesheet" href="css/styles.css">
     <link rel="stylesheet" href="css/design-tokens.css">
     <link rel="stylesheet" href="css/config-page.css">
+    <link rel="stylesheet" href="css/setup-page.css">
     <link rel="stylesheet" href="css/bracket-view.css">
+    <link rel="stylesheet" href="css/app-header.css">
 
     <!-- Docker Configuration (only executes when served via PHP) -->
     <script><?php
@@ -107,59 +109,52 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
             </div>
         </div>
 
-        <!-- Setup Page -->
-        <div id="setup" class="page active setup-page-flex">
-            <div class="setup-page-header">
-                <h2>Tournament Setup <span class="help-info-icon" data-page="setup">ℹ️</span></h2>
-                <div class="tournament-creation-row">
-                    <div class="form-group tournament-name-field">
-                        <label for="tournamentName">Tournament Name</label>
-                        <input type="text" id="tournamentName" placeholder="Enter tournament name">
-                    </div>
-                    <div class="form-group tournament-date-field">
-                        <label for="tournamentDate">Tournament Date</label>
-                        <input type="date" id="tournamentDate">
-                    </div>
-                    <button class="btn btn-success tournament-create-button" onclick="createTournament()">Create New
-                        Tournament</button>
+        <!-- Setup Page (css/setup-page.css): the current tournament, a new one, the saved tournaments and match history -->
+        <div id="setup" class="page active setup-page">
+            <div class="st-wrap">
+                <div class="st-title">
+                    <div><h2>Tournament Setup</h2><p>Start a tournament, or pick one up where you left off.</p></div>
+                    <button type="button" class="st-btn help-info-icon" data-page="setup">Help</button>
                 </div>
 
-                <div class="form-group">
-                    <button class="btn btn-success" onclick="exportTournament()">Export Tournament</button>
-                    <button class="btn btn-warning" onclick="document.getElementById('importFile').click()">Import
-                        Tournament</button>
-                    <button class="btn btn-danger" onclick="showResetTournamentModal()">Reset Tournament</button>
-                    <button id="uploadToServerBtn" class="btn btn-success"
-                        onclick="showUploadModal()" style="display: none;">Backup to
-                        Server</button>
-                    <input type="file" id="importFile" accept=".json" style="display: none;"
-                        onchange="importTournament(event)">
-                    <input type="file" id="uploadFileInput" accept=".json" style="display: none;"
-                        onchange="handleUploadFileSelected(event)">
-                </div>
+                <div class="st-top">
+                    <!-- Filled by renderSetupCurrent() -->
+                    <section class="st-panel" id="setupCurrent" aria-label="Current tournament"></section>
 
-                <div id="importStatus" class="alert" style="display: none; margin-top: 10px;">
-                    <!-- Import status messages will appear here -->
-                </div>
-            </div>
-
-            <div class="two-column-container setup-page-main">
-                <div class="scrollable-column">
-                    <h3>Recent Tournaments <a href="#" id="storage-indicator-link" class="storage-link" onclick="showStorageModal(); return false;" title="View storage usage">Storage: --</a></h3>
-                    <div class="scrollable-column-content">
-                        <div id="recentTournaments">
-                            <p>No tournaments found</p>
+                    <section class="st-panel st-create" aria-labelledby="setupNewTitle">
+                        <div><p class="st-eyebrow">New tournament</p><h3 id="setupNewTitle">Start a new tournament</h3></div>
+                        <div class="st-create-row">
+                            <div class="st-field"><label for="tournamentName">Name</label><input type="text" class="st-text" id="tournamentName" placeholder="e.g. Thursday Cup #42"></div>
+                            <div class="st-field"><label for="tournamentDate">Date</label><input type="date" class="st-text st-mono" id="tournamentDate"></div>
                         </div>
-                    </div>
+                        <div><button type="button" class="st-btn st-primary" onclick="createTournament()">Create tournament</button></div>
+                        <div class="st-or">Have a tournament file? <button type="button" class="st-link" onclick="document.getElementById('importFile').click()">Import tournament</button></div>
+                        <div id="importStatus" class="st-import-status" style="display: none;"></div>
+                        <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTournament(event)">
+                        <input type="file" id="uploadFileInput" accept=".json" style="display: none;" onchange="handleUploadFileSelected(event)">
+                    </section>
                 </div>
 
-                <div class="scrollable-column">
-                    <h3 id="matchHistoryHeading">Match History</h3>
-                    <div class="scrollable-column-content">
-                        <div id="matchResults">
-                            <p style="color: #6b7280; font-style: italic;">No match results yet</p>
+                <div class="st-bottom">
+                    <section class="st-panel" aria-labelledby="setupListTitle">
+                        <div class="st-panel-head">
+                            <div class="st-head-l">
+                                <h3 id="setupListTitle">Tournaments</h3>
+                                <!-- This computer | Server tabs, filled by loadRecentTournaments() when a server answers -->
+                                <div class="st-seg" id="setupListSource" hidden></div>
+                            </div>
+                            <button type="button" id="storage-indicator-link" class="st-storage" onclick="showStorageModal()" title="Storage used on this computer"><span id="storageIndicatorText">Storage --</span><span class="st-meter"><span id="storageIndicatorBar"></span></span></button>
                         </div>
-                    </div>
+                        <div class="st-scroll" id="recentTournaments"></div>
+                    </section>
+
+                    <section class="st-panel" aria-labelledby="matchHistoryHeading">
+                        <div class="st-panel-head">
+                            <h3 id="matchHistoryHeading">Match history</h3>
+                            <span class="st-eyebrow" id="matchHistoryCount"></span>
+                        </div>
+                        <div class="st-hlist" id="matchResults"></div>
+                    </section>
                 </div>
             </div>
         </div>

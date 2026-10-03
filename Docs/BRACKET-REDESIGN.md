@@ -233,6 +233,10 @@ The header in the Global Settings mockup (https://claude.ai/artifact/BUn1sDA9Xgf
 
 The bracket page keeps its own full-screen header (tournament name, Match Controls, Finals, zoom, clock), which follows the same type and clock.
 
+**On trial (after v5.1.10):** `css/app-header.css` applies this header, and a matching footer, to the existing markup. There are no markup or script changes: the logo is 40px; the tournament name and date stay to the left of the clock. The footer is full width with a hairline above, and on short pages it sits at the bottom of the window. To go back to the old header and footer, remove the stylesheet's `<link>` from `tournament.html`.
+
+Kept after trying it. **Pages redesigned so far:** Global Settings (v5.1.10), Tournament Setup (`css/setup-page.css`, after v5.1.10). Next: Player Registration, Analytics.
+
 ---
 
 ## Constraints

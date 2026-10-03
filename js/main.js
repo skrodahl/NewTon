@@ -219,8 +219,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Step 6: Auto-load current tournament (if exists) - Never loads config
     autoLoadCurrentTournament();
 
-    // Step 7: Update match history on initial load (since Setup page is default)
+    // Step 7: Fill the Setup page's current tournament and match history on initial load
     setTimeout(() => {
+        renderSetupCurrent();
         updateMatchHistory();
     }, 200);
 
@@ -469,8 +470,9 @@ function showPage(pageId) {
         navBtn.classList.add('active');
     }
 
-    // Update match history and tournament list when showing setup page
+    // Update the current tournament, match history and tournament list when showing setup page
     if (pageId === 'setup') {
+        renderSetupCurrent();
         updateMatchHistory();
         if (typeof loadRecentTournaments === 'function') {
             loadRecentTournaments();
@@ -574,144 +576,89 @@ function humanizeMatchId(matchId) {
     return matchId;
 }
 
-// Helper function to get player progression info for display
+/**
+ * Where a player went after a match, for the Setup page's match history: "to FS-3-2",
+ * "out (13th-16th)", "wins the tournament". Reads the progression table for the format.
+ * @param {string|number} playerId
+ * @param {string} matchId
+ * @param {boolean} isWinner
+ * @returns {string} empty when unknown
+ */
 function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
-    if (!tournament || !tournament.bracketSize || !DE_MATCH_PROGRESSION) {
-        return '';
-    }
+    if (!tournament || !tournament.bracketSize) return '';
+    const size = tournament.bracketSize;
+    if (getFormat() === 'SE' && isSEBronzeMatch(matchId, size)) return isWinner ? 'takes 3rd place' : 'takes 4th place';
 
-    const progression = DE_MATCH_PROGRESSION[tournament.bracketSize] && DE_MATCH_PROGRESSION[tournament.bracketSize][matchId];
-    if (!progression) {
-        return '';
-    }
+    const table = getProgressionTable();
+    const progression = table && table[matchId];
+    if (!progression) return '';
 
-    if (isWinner) {
-        if (progression.winner) {
-            const nextMatch = progression.winner[0];
-            const displayMatch = humanizeMatchId(nextMatch);
-            return `(${displayMatch})`;
-        } else {
-            return '(Tournament Winner!)';
-        }
-    } else {
-        // For losers
-        if (progression.loser) {
-            const nextMatch = progression.loser[0];
-            const displayMatch = humanizeMatchId(nextMatch);
-            return `(${displayMatch})`;
-        } else {
-            // Player is eliminated - show rank
-            const rank = getEliminationRankForMatch(matchId, tournament.bracketSize);
-            if (rank && typeof formatRanking === 'function') {
-                return `(${formatRanking(rank)})`;
-            }
-            return '(Eliminated)';
-        }
-    }
+    const next = isWinner ? progression.winner : progression.loser;
+    if (next) return `to ${humanizeMatchId(next[0])}`;
+    if (isWinner) return 'wins the tournament';
+
+    // Eliminated: the rank for the match, or the placement once it has been set
+    const rank = getEliminationRankForMatch(matchId, size) ||
+        (tournament.placements && tournament.placements[String(playerId)]);
+    return rank && typeof formatRanking === 'function' ? `out (${formatRanking(rank)})` : 'out';
 }
 
-// Update match history for Setup page
+/**
+ * Fill the Setup page's match history: the current tournament's completed matches, latest
+ * first, one entry each (winner, score, then lane, referee and where both players went).
+ * A played match opens its details; walkovers are greyed out.
+ * @returns {void}
+ */
 function updateMatchHistory() {
     const matchResultsContainer = document.getElementById('matchResults');
     const matchHistoryHeading = document.getElementById('matchHistoryHeading');
+    const matchHistoryCount = document.getElementById('matchHistoryCount');
     if (!matchResultsContainer) return;
 
-    // Update heading with tournament info
     if (matchHistoryHeading) {
-        if (tournament && tournament.name && tournament.date) {
-            matchHistoryHeading.innerHTML = `Match History: ${escapeHtml(tournament.name)} <span style="font-weight: normal;">(${escapeHtml(tournament.date)})</span>`;
-        } else {
-            matchHistoryHeading.textContent = 'Match History: None';
-        }
+        matchHistoryHeading.innerHTML = tournament && tournament.name
+            ? `Match history<small>${escapeHtml(tournament.name)}</small>` : 'Match history';
     }
 
-    // If no tournament or no matches, show empty state
-    if (!tournament || !matches || matches.length === 0) {
-        matchResultsContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No match results yet</p>';
-        return;
-    }
-
-    // Get completed matches sorted chronologically (latest first)
-    const completedMatches = matches
+    const completedMatches = (tournament && Array.isArray(matches) ? matches : [])
         .filter(match => match.completed)
-        .sort((a, b) => {
-            // Sort by completion timestamp if available, otherwise by match ID
-            const aTime = a.completedAt || 0;
-            const bTime = b.completedAt || 0;
-            return bTime - aTime; // Latest first
-        });
+        .sort((a, b) => (b.completedAt || 0) - (a.completedAt || 0)); // latest first
+
+    const playedCount = completedMatches.filter(m => !(m.autoAdvanced || isWalkoverMatch(m))).length;
+    if (matchHistoryCount) matchHistoryCount.textContent = playedCount ? `${playedCount} played` : '';
 
     if (completedMatches.length === 0) {
-        matchResultsContainer.innerHTML = '<p style="color: #6b7280; font-style: italic;">No matches completed yet</p>';
+        const text = !tournament ? 'No tournament loaded.' : 'No matches played yet.';
+        matchResultsContainer.innerHTML = `<div class="st-empty st-small"><span>${text}</span></div>`;
         return;
     }
 
-    // Build match history HTML
-    let historyHtml = '';
     // Per-render lookup so match/tournament ids never pass through inline handlers
     const historyRows = [];
-    completedMatches.forEach(match => {
-        const isWalkover = match.autoAdvanced || isWalkoverMatch(match);
-        const isBackside = match.id && match.id.startsWith('BS-');
+    const where = (player, matchId, isWinner) => {
+        const text = player && getPlayerProgressionForDisplay(player.id, matchId, isWinner);
+        return text ? `${escapeHtml(player.name)} ${text}` : '';
+    };
+    matchResultsContainer.innerHTML = completedMatches.map(match => {
+        const winner = match.winner || {};
+        const loser = match.loser || ([match.player1, match.player2].find(p => p && p.id !== winner.id) || {});
+        const id = escapeHtml(match.id);
 
-        let itemClass = 'match-history-item';
-        if (isWalkover) itemClass += ' walkover';
-        if (isBackside) itemClass += ' backside';
-        const clickable = !isWalkover;
-        const clickAttr = clickable
-            ? ` style="cursor:pointer;" data-mh-idx="${historyRows.push({ tournamentId: String(tournament.id), matchId: match.id }) - 1}"`
-            : '';
-
-        const player1Name = escapeHtml(match.player1?.name || 'Unknown');
-        const player2Name = escapeHtml(match.player2?.name || 'Unknown');
-        const winnerName = escapeHtml(match.winner?.name || 'Unknown');
-        
-        // Get progression info for both players
-        const player1Id = match.player1?.id;
-        const player2Id = match.player2?.id;
-        const winnerId = match.winner?.id;
-        
-        const player1IsWinner = player1Id === winnerId;
-        const player2IsWinner = player2Id === winnerId;
-        
-        const player1Progression = getPlayerProgressionForDisplay(player1Id, match.id, player1IsWinner);
-        const player2Progression = getPlayerProgressionForDisplay(player2Id, match.id, player2IsWinner);
-        
-        // Format match result with winner highlighting and progression info
-        let player1Display = player1IsWinner ? `<span class="winner-name">${player1Name}</span>${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}` : `${player1Name}${player1Progression ? ` <span class="progression-info">${player1Progression}</span>` : ''}`;
-        let player2Display = player2IsWinner ? `<span class="winner-name">${player2Name}</span>${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}` : `${player2Name}${player2Progression ? ` <span class="progression-info">${player2Progression}</span>` : ''}`;
-        
-        const score = formatMatchScore(match);
-        const scoreText = score ? `(${score})` : '';
-        
-        const autoCompletedText = isWalkover ? ' <span class="auto-completed">(auto-completed)</span>' : '';
-
-        // Add lane and referee information
-        let matchDetailsText = '';
-        const laneText = match.lane ? `Lane ${match.lane}` : '';
-        const refereeText = match.referee ? `Referee: ${escapeHtml(getPlayerNameById(match.referee))}` : '';
-
-        if (laneText || refereeText) {
-            const details = [refereeText, laneText].filter(Boolean).join(' • ');
-            matchDetailsText = `<div class="match-details"><span class="match-meta">${details}</span></div>`;
+        if (match.autoAdvanced || isWalkoverMatch(match)) {
+            const meta = where(winner, match.id, true);
+            return `<div class="st-hrow st-wo"><span class="st-id">${id}</span><span class="st-players"><b>${escapeHtml(winner.name || 'Unknown')}</b><span class="st-vs">walkover</span></span><span class="st-score">W/O</span>${meta ? `<span class="st-meta">${meta}</span>` : ''}</div>`;
         }
 
-        historyHtml += `
-            <div class="${itemClass}"${clickAttr}>
-                <div class="match-header">
-                    <span class="match-id">${match.id}${autoCompletedText}</span>
-                    <span class="match-winner">Winner: ${winnerName}</span>
-                </div>
-                <div class="match-result-enhanced">
-                    <span class="player-info">${player1Display} vs ${player2Display}</span>
-                    <span class="result-score">${scoreText}</span>
-                </div>
-                ${matchDetailsText}
-            </div>
-        `;
-    });
-
-    matchResultsContainer.innerHTML = historyHtml;
+        const score = match.finalScore && match.finalScore.winnerLegs !== undefined
+            ? `${match.finalScore.winnerLegs}-${match.finalScore.loserLegs}` : '';
+        const meta = [
+            match.lane ? `Lane ${escapeHtml(String(match.lane))}` : '',
+            match.referee ? `Ref: ${escapeHtml(getPlayerNameById(match.referee))}` : '',
+            [where(winner, match.id, true), where(loser, match.id, false)].filter(Boolean).join(', ')
+        ].filter(Boolean).join(' · ');
+        const idx = historyRows.push({ tournamentId: String(tournament.id), matchId: match.id }) - 1;
+        return `<div class="st-hrow" data-mh-idx="${idx}" title="Open match details"><span class="st-id">${id}</span><span class="st-players"><b>${escapeHtml(winner.name || 'Unknown')}</b><span class="st-vs">beat</span>${escapeHtml(loser.name || 'Unknown')}</span><span class="st-score">${score}</span>${meta ? `<span class="st-meta">${meta}</span>` : ''}</div>`;
+    }).join('');
 
     // One delegated click listener (attached once): opens the match modal by index,
     // keeping tournament/match ids out of inline handler strings.

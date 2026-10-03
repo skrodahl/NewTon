@@ -1,0 +1,102 @@
+/* app-header.css - The app header and footer in the new design language
+ *
+ * Restyles the existing header and footer markup (no markup or script changes), using the
+ * shared tokens in css/design-tokens.css. To go back to the old header and footer, remove
+ * this stylesheet's <link> from tournament.html. See Docs/BRACKET-REDESIGN.md, "App header".
+ */
+
+/* ---- header: full width, white, one hairline underneath ---- */
+.container > .header {
+  margin: -20px -20px 24px;
+  padding: 14px 24px 0;
+  gap: 12px;
+  border: 0;
+  border-bottom: 1px solid var(--nt-line);
+  background: var(--nt-surface);
+  font-family: var(--nt-sans);
+  color: var(--nt-ink);
+}
+
+.header h1 {
+  font-family: var(--nt-sans);
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: -.01em;
+  line-height: 1.2;
+  color: var(--nt-ink);
+  gap: 12px;
+}
+
+/* the logo, or the placeholder when there is none */
+.header .logo-placeholder,
+.header .club-logo {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: 1px solid var(--nt-line-2);
+  background: var(--nt-surface-2);
+  color: var(--nt-muted);
+  font-size: 7px;
+}
+/* max-* wins over the 60px the logo loader sets inline */
+.header .club-logo img { max-width: 100%; max-height: 100%; }
+
+/* ---- tournament name and date, then the clock ---- */
+.header-right { gap: 16px; }
+
+.header-tournament-status {
+  font-family: var(--nt-sans);
+  color: var(--nt-muted);
+}
+.header-tournament-status strong { color: var(--nt-ink); font-weight: 700; }
+.header-tournament-wide strong { font-size: 15px; }
+.header-tournament-wide .tournament-date { font-size: 13px; font-weight: 600; color: var(--nt-ink-2); font-variant-numeric: tabular-nums; }
+
+/* the same clock as the bracket header's: large, extra bold, fixed-width digits, a thin divider on its left */
+.header-clock {
+  font-family: var(--nt-sans);
+  font-size: 30px;
+  font-weight: 800;
+  line-height: 1;
+  letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums;
+  color: var(--nt-ink);
+  padding: 4px 0 4px 16px;
+  border: 0;
+  border-left: 1px solid var(--nt-line-2);
+  border-radius: 0;
+  box-shadow: none;
+}
+
+/* ---- page links: the selected page underlined in ink, the line sitting on the header's edge ---- */
+.header .nav { gap: 22px; }
+
+.header .nav-btn {
+  padding: 0 0 10px;
+  font-size: 14px;
+  font-weight: 400;
+  color: var(--nt-ink-2);
+  border-bottom: 2px solid transparent;
+}
+.header .nav-btn:hover { color: var(--nt-ink); }
+.header .nav-btn.active { color: var(--nt-ink); font-weight: 600; border-bottom-color: var(--nt-ink); }
+.header .nav-btn:active { transform: none; }
+
+.header-tournament-narrow { border-bottom-color: var(--nt-line); }
+
+/* ---- footer: full width, one hairline above, at the bottom of the window on short pages ---- */
+.container { min-height: 100vh; display: flex; flex-direction: column; }
+.container > .page { margin-bottom: 24px; }
+
+.container > footer {
+  margin: auto -20px -20px;
+  padding: 14px 24px;
+  border: 0;
+  border-top: 1px solid var(--nt-line);
+  background: var(--nt-surface);
+  font-family: var(--nt-sans);
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--nt-muted);
+}
+.container > footer a { color: var(--nt-ink-2); font-weight: 600; }
