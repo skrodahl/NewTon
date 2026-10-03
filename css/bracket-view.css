@@ -112,6 +112,7 @@
 /* Lines keep a constant on-screen width at any zoom */
 .bv-edge { fill: none; stroke: var(--bv-line); stroke-width: calc(2px * var(--inv)); transition: opacity .15s; }
 .bv-edge.bv-known { stroke: var(--bv-line-strong); }
+.bv-edge.bv-dashed { stroke-dasharray: calc(7px * var(--inv)) calc(5px * var(--inv)); }
 .bv-edge.bv-on { stroke: var(--bv-accent); stroke-width: calc(3px * var(--inv)); opacity: 1; }
 .bv-drop { fill: none; stroke: var(--bv-accent); stroke-width: calc(2.5px * var(--inv)); stroke-dasharray: calc(7px * var(--inv)) calc(5px * var(--inv)); opacity: 0; }
 .bv-drop.bv-on { opacity: 1; }

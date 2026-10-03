@@ -136,15 +136,15 @@ function clearBracket() {
 }
 
 function renderCleanBracket() {
-    // SE uses its own rendering path — DE path completely untouched
-    if (tournament.format === 'SE') {
-        renderSEBracket();
+    // The bracket view lays out, draws and frames the whole bracket (double and single elimination)
+    if (BracketView.isActive()) {
+        BracketView.render();
         return;
     }
 
-    // Double elimination: the bracket view lays out, draws and frames the whole bracket
-    if (BracketView.isActive()) {
-        BracketView.render();
+    // SE uses its own rendering path — DE path completely untouched
+    if (tournament.format === 'SE') {
+        renderSEBracket();
         return;
     }
 

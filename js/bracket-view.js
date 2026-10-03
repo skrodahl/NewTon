@@ -102,13 +102,41 @@ const BracketView = (() => {
         const cw = Math.max(...ids.map(i => pos[i].x)) + W, ch = Math.max(...ids.map(i => pos[i].y)) + H;
         return { pos, cw, ch, mid: mid - minY + H / 2 };
     }
+    // ---------- single-elimination layout ----------
+    // Rounds up to the semifinals as on the frontside; then the bronze final in the next column, level
+    // with the top semifinal, and the final in the column after, midway between the semifinals. The
+    // semifinal winners fork straight after the semifinals and run under the bronze final to the final.
+    function layoutSE(st, g) {
+        const { ids, feeds, maxFS } = st;
+        const P = W + g.GX, pitch = g.PITCH, semis = maxFS - 2;
+        const y = {}, x = {};
+        const avg = a => a.reduce((s, v) => s + v, 0) / a.length;
+        const rowOf = id => {
+            if (y[id] !== undefined) return y[id];
+            if (roundOf(id) === 1) return (y[id] = (numOf(id) - 1) * pitch);
+            return (y[id] = avg((feeds[id] || []).filter(f => f.kind === 'winner').map(f => rowOf(f.src))));
+        };
+        ids.filter(i => roundOf(i) <= semis).forEach(id => { rowOf(id); x[id] = (roundOf(id) - 1) * P; });
+        const sf = ids.filter(i => roundOf(i) === semis).map(i => y[i]);
+        const bronze = `FS-${maxFS - 1}-1`, final = `FS-${maxFS}-1`;
+        x[bronze] = semis * P; y[bronze] = Math.min(...sf);
+        x[final] = (semis + 1) * P; y[final] = (Math.min(...sf) + Math.max(...sf)) / 2;
+        const minY = Math.min(...ids.map(i => y[i]));
+        const pos = {};
+        ids.forEach(i => { pos[i] = { x: x[i], y: y[i] - minY }; });
+        const cw = Math.max(...ids.map(i => pos[i].x)) + W, ch = Math.max(...ids.map(i => pos[i].y)) + H;
+        return { pos, cw, ch, mid: y[final] - minY + H / 2 };
+    }
+    // The layout is the one part chosen by format (see Docs/BRACKET-REDESIGN.md, "Other Formats")
+    const layoutFor = (st, variant, g) => variant === 'se' ? layoutSE(st, g) : layout(st, variant, g);
+
     const worldBox = L => ({ x0: -40, y0: -TOP, x1: L.cw + 50, y1: L.ch + BOTTOM }); // room for lines routed round the outside
 
     // The card never changes. Fit the bracket at its tightest spacing (never above 100%),
     // then grow the row and column gaps into whatever space is left, so it fills the page.
     function geometry(st, variant, vw, vh) {
         const g = (dg, dx) => ({ PITCH: H + GAP_MIN + dg, GX: GX_MIN + dx, CENTER_GAP: CG_MIN + dx, FINALS_GAP: FG_MIN + dx });
-        const size = (dg, dx) => { const b = worldBox(layout(st, variant, g(dg, dx))); return { w: b.x1 - b.x0, h: b.y1 - b.y0 }; };
+        const size = (dg, dx) => { const b = worldBox(layoutFor(st, variant, g(dg, dx))); return { w: b.x1 - b.x0, h: b.y1 - b.y0 }; };
         const b0 = size(0, 0), b1 = size(1, 1); // width and height grow linearly with the gaps
         const aw = vw - PAD * 2, ah = vh - PAD * 2;
         const z = Math.min(Z_FIT_MAX, aw / b0.w, ah / b0.h);
@@ -168,6 +196,9 @@ const BracketView = (() => {
         };
     }
 
+    const isSEFinalOrBronze = id => getFormat() === 'SE' &&
+        (isSEFinalMatch(id, tournament.bracketSize) || isSEBronzeMatch(id, tournament.bracketSize));
+
     const sourceLabel = (st, id, slot) => {
         const f = (st.feeds[id] || []).find(x => x.slot === slot);
         return f ? (f.kind === 'winner' ? 'Winner ' : 'Loser ') + f.src : 'Awaiting player';
@@ -195,7 +226,7 @@ const BracketView = (() => {
             const sc = v.score ? `<span class="bv-score">${escapeHtml(String(v.score[i]))}</span>` : '';
             return `<div class="${cls}">${thr}<span class="bv-name"${title}>${name}</span>${sc}</div>`;
         };
-        const cls = 'bv-card bv-' + s + (v.wo ? ' bv-walkover' : '') + (sideOf(id) === 'FIN' ? ' bv-final' : '') +
+        const cls = 'bv-card bv-' + s + (v.wo ? ' bv-walkover' : '') + (sideOf(id) === 'FIN' || isSEFinalOrBronze(id) ? ' bv-final' : '') +
             (v.refConflict[0] || v.refConflict[1] ? ' bv-conflict' : '');
         return { cls, html: `<div class="bv-meta">${meta}</div>${row(0)}${row(1)}` };
     }
@@ -231,16 +262,18 @@ const BracketView = (() => {
     const vp = () => ({ w: els.viewport.clientWidth, h: els.viewport.clientHeight });
 
     /**
-     * True when the current tournament is drawn by this view (double elimination with a
-     * progression table). Single elimination keeps the classic renderer for now.
+     * True when the current tournament is drawn by this view (double or single elimination with a
+     * progression table for its size).
      * @returns {boolean}
      */
     function isActive() {
-        return !!(typeof tournament !== 'undefined' && tournament && tournament.bracket &&
-            getFormat() === 'DE' && DE_MATCH_PROGRESSION[tournament.bracketSize]);
+        if (typeof tournament === 'undefined' || !tournament || !tournament.bracket) return false;
+        const table = getFormat() === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
+        return !!table[tournament.bracketSize];
     }
 
     function finalsVariant() {
+        if (getFormat() === 'SE') return 'se';
         return (typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle') ? 'middle' : 'right';
     }
 
@@ -262,7 +295,7 @@ const BracketView = (() => {
         if (hidden) { vw = 1400; vh = 800; }
         const g = geometry(st, variant, vw, vh);
         ({ PITCH, GX, CENTER_GAP, FINALS_GAP } = g);
-        const L = layout(st, variant, g);
+        const L = layoutFor(st, variant, g);
         const pos = L.pos;
 
         const byId = {};
@@ -290,48 +323,62 @@ const BracketView = (() => {
         // a label centred over a column (x is the column's left edge)
         const lblMid = (html, x, y, cls) => { const d = lbl(html, x + W / 2, y, cls); d.style.transform = 'translateX(-50%)'; return d; };
 
-        // backside band
-        const bsIds = st.ids.filter(i => sideOf(i) === 'BS');
-        // With the finals on the right, the band also takes in the line from the last backside match,
-        // which leaves to the left and runs under the bracket (see the edges below)
-        const around = variant === 'right' ? GX / 2 : 0, under = variant === 'right' ? 30 : 0;
-        const bx0 = Math.min(...bsIds.map(i => pos[i].x)) - around - 14, bx1 = Math.max(...bsIds.map(i => pos[i].x)) + W + 14;
-        const band = document.createElement('div');
-        band.className = 'bv-band';
-        Object.assign(band.style, { left: bx0 + 'px', top: '-42px', width: (bx1 - bx0) + 'px', height: (L.ch + under + 56) + 'px' });
-        world.appendChild(band);
+        const LABEL_GAP = 26; // every header sits the same distance above the topmost match of its round
+        if (variant === 'se') {
+            const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
+            lbl(club, 0, -94, 'bv-club');
+            const semis = st.maxFS - 2, bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
+            const roundName = r => r === semis ? 'Semifinals' : r === semis - 1 ? 'Quarterfinals' : 'Round ' + r;
+            const topOf = r => Math.min(...st.ids.filter(i => roundOf(i) === r).map(i => pos[i].y));
+            for (let r = 1; r <= semis; r++) lblMid(roundName(r), pos[`FS-${r}-1`].x, topOf(r) - LABEL_GAP);
+            lblMid('Bronze final', pos[bronze].x, pos[bronze].y - LABEL_GAP);
+            lblMid('3rd place', pos[bronze].x, pos[bronze].y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+            lblMid('Final', pos[final].x, pos[final].y - LABEL_GAP);
+            // application signature, centred under round 1 (checked by renderBracket())
+            const lastR1 = st.ids.filter(i => roundOf(i) === 1).sort((a, b) => numOf(b) - numOf(a))[0];
+            lblMid(String.fromCharCode(..._0x7a, ..._0x9b), pos[lastR1].x, L.ch + 44, 'bv-signature').id = 'tournament-watermark';
+        } else {
+            // backside band
+            const bsIds = st.ids.filter(i => sideOf(i) === 'BS');
+            // With the finals on the right, the band also takes in the line from the last backside match,
+            // which leaves to the left and runs under the bracket (see the edges below)
+            const around = variant === 'right' ? GX / 2 : 0, under = variant === 'right' ? 30 : 0;
+            const bx0 = Math.min(...bsIds.map(i => pos[i].x)) - around - 14, bx1 = Math.max(...bsIds.map(i => pos[i].x)) + W + 14;
+            const band = document.createElement('div');
+            band.className = 'bv-band';
+            Object.assign(band.style, { left: bx0 + 'px', top: '-42px', width: (bx1 - bx0) + 'px', height: (L.ch + under + 56) + 'px' });
+            world.appendChild(band);
 
-        // side and column labels
-        const fsX0 = pos['FS-1-1'].x;
-        // the club name, on the side labels' line: top left with the finals on the right; with them in
-        // the middle, centred on the edge of the backside's shaded area
-        const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
-        if (variant === 'right') lbl(club, 0, -94, 'bv-club');
-        else lblMid(club, bx0 - W / 2, -94, 'bv-club');
+            // side and column labels
+            const fsX0 = pos['FS-1-1'].x;
+            // the club name, on the side labels' line: top left with the finals on the right; with them in
+            // the middle, centred on the edge of the backside's shaded area
+            const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
+            if (variant === 'right') lbl(club, 0, -94, 'bv-club');
+            else lblMid(club, bx0 - W / 2, -94, 'bv-club');
 
-        // side labels centred over each side's first round
-        lblMid('Frontside ▶', fsX0, -84, 'bv-side-label');
-        lblMid('◀ Backside', pos['BS-1-1'].x, -84, 'bv-side-label');
-        const place = placings(size, st);
-        // every header sits the same distance above the topmost match of its round
-        const LABEL_GAP = 26;
-        const topOf = (side, r) => Math.min(...st.ids.filter(i => sideOf(i) === side && roundOf(i) === r).map(i => pos[i].y));
-        for (let r = 1; r <= st.maxFS; r++) lblMid(r === st.maxFS ? 'Frontside final' : 'Round ' + r, pos[`FS-${r}-1`].x, topOf('FS', r) - LABEL_GAP);
-        for (let r = 1; r <= st.maxBS; r++) lblMid(`${place[r]} place`, pos[`BS-${r}-1`].x, topOf('BS', r) - LABEL_GAP);
-        // the line from the backside final to the grand final runs behind these
-        lblMid('Backside final', pos['BS-FINAL'].x, pos['BS-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
-        lblMid('3rd place', pos['BS-FINAL'].x, pos['BS-FINAL'].y + H + 8, 'bv-col-label bv-sub-label');
-        lblMid('Grand final', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
-        // FINALS sits just above the finals, in the style of BACKSIDE and FRONTSIDE
-        lblMid('Finals', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - LABEL_GAP - 40, 'bv-side-label');
+            // side labels centred over each side's first round
+            lblMid('Frontside ▶', fsX0, -84, 'bv-side-label');
+            lblMid('◀ Backside', pos['BS-1-1'].x, -84, 'bv-side-label');
+            const place = placings(size, st);
+            const topOf = (side, r) => Math.min(...st.ids.filter(i => sideOf(i) === side && roundOf(i) === r).map(i => pos[i].y));
+            for (let r = 1; r <= st.maxFS; r++) lblMid(r === st.maxFS ? 'Frontside final' : 'Round ' + r, pos[`FS-${r}-1`].x, topOf('FS', r) - LABEL_GAP);
+            for (let r = 1; r <= st.maxBS; r++) lblMid(`${place[r]} place`, pos[`BS-${r}-1`].x, topOf('BS', r) - LABEL_GAP);
+            // the line from the backside final to the grand final runs behind these
+            lblMid('Backside final', pos['BS-FINAL'].x, pos['BS-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+            lblMid('3rd place', pos['BS-FINAL'].x, pos['BS-FINAL'].y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+            lblMid('Grand final', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+            // FINALS sits just above the finals, in the style of BACKSIDE and FRONTSIDE
+            lblMid('Finals', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - LABEL_GAP - 40, 'bv-side-label');
 
-        // application signature, below the last first-round match (checked by renderBracket())
-        const lastFS1 = st.ids.filter(i => /^FS-1-/.test(i)).sort((a, b) => numOf(b) - numOf(a))[0];
-        // centred under round 1 with the finals on the right; left-aligned at the bracket's edge with them in the middle
-        const sigText = String.fromCharCode(..._0x7a, ..._0x9b);
-        const sigY = L.ch + (variant === 'right' ? 62 : 44);
-        const sig = variant === 'right' ? lblMid(sigText, pos[lastFS1].x, sigY, 'bv-signature') : lbl(sigText, pos[lastFS1].x, sigY, 'bv-signature');
-        sig.id = 'tournament-watermark';
+            // application signature, below the last first-round match (checked by renderBracket())
+            const lastFS1 = st.ids.filter(i => /^FS-1-/.test(i)).sort((a, b) => numOf(b) - numOf(a))[0];
+            // centred under round 1 with the finals on the right; left-aligned at the bracket's edge with them in the middle
+            const sigText = String.fromCharCode(..._0x7a, ..._0x9b);
+            const sigY = L.ch + (variant === 'right' ? 62 : 44);
+            const sig = variant === 'right' ? lblMid(sigText, pos[lastFS1].x, sigY, 'bv-signature') : lbl(sigText, pos[lastFS1].x, sigY, 'bv-signature');
+            sig.id = 'tournament-watermark';
+        }
 
         // lines
         const svg = document.createElementNS(svgNS, 'svg');
@@ -358,6 +405,10 @@ const BracketView = (() => {
                 // round under the bracket, up the right edge, and enters the backside final from the right
                 const x1 = s.x, ox = x1 - GX / 2, yR = L.ch + 30, xR = t.x + W + GX / 2;
                 path = `M${x1} ${cy(src)} H${ox} V${yR} H${xR} V${cy(dst)} H${t.x + W}`;
+            } else if (variant === 'se' && kind === 'winner' && !prog[dst].winner && roundOf(dst) === st.maxFS) {
+                // Semifinal winners fork straight after the semifinals and run under the bronze final
+                const xg = s.x + W + GX / 2;
+                path = `M${s.x + W} ${cy(src)} H${xg} V${cy(dst)} H${t.x}`;
             } else if (kind === 'loser' && dst === 'BS-FINAL') {
                 // The frontside final's loser drops from the bottom middle of its card and turns into the
                 // backside final from the left
@@ -403,6 +454,16 @@ const BracketView = (() => {
             svg.appendChild(p);
             edges.push({ src, dst, kind, el: p });
         }));
+
+        // single elimination: a dashed line from the bronze final down to the line into the final
+        if (variant === 'se') {
+            const bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
+            const d = document.createElementNS(svgNS, 'path');
+            d.setAttribute('d', `M${pos[bronze].x + W / 2} ${pos[bronze].y + H} V${cy(final)}`);
+            const assigned = M[final] && M[final].p.some(sl => sl.kind !== 'tbd');
+            d.setAttribute('class', 'bv-edge bv-dashed' + (assigned ? ' bv-known' : ''));
+            svg.appendChild(d);
+        }
 
         // cards
         const cardEls = {};
@@ -513,7 +574,7 @@ const BracketView = (() => {
     }
     function fitAll(animate = true) {
         if (!cur) return;
-        const t = fitTarget(worldBox(cur), PAD, Z_MAX);
+        const t = fitTarget(worldBox(cur), PAD, Z_FIT_MAX); // Fit all never zooms past 100%
         if (animate) animateTo(t); else { Object.assign(cam, t); apply(); }
     }
     const onScreen = id => {
@@ -798,7 +859,7 @@ const BracketView = (() => {
             ? `<b>${paid}</b> players · ${all.length} matches · ${played} played, ${wo} walkovers · <b>${live}</b> live · <b>${ready}</b> ready`
             : `<b>${paid}</b> players · no bracket yet`;
         if (finals) {
-            finals.hidden = !isActive();
+            finals.hidden = !isActive() || getFormat() === 'SE'; // the finals position is a double-elimination choice
             const v = finalsVariant();
             finals.querySelectorAll('button[data-finals]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.finals === v)));
         }

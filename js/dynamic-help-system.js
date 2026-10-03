@@ -186,7 +186,7 @@ const HELP_CONTENT = {
                         <li><strong>Zoom:</strong> scroll or pinch, at the pointer. <strong>Fit all</strong> shows the whole bracket, and is as far out as you can go</li>
                         <li><strong>Hover a match:</strong> zoomed out, it is magnified; zoomed in, a tip shows where the winner and loser go</li>
                     </ul>
-                    <p><strong>Selecting a match (double elimination):</strong></p>
+                    <p><strong>Selecting a match:</strong></p>
                     <ul>
                         <li><strong>Click a match</strong> to highlight its lines and the matches it is connected to. The view follows if they are off-screen; markers at the edge point to the rest</li>
                         <li><strong>Follow [player]</strong> traces that player through the bracket. Click it again to stop</li>
@@ -225,7 +225,7 @@ const HELP_CONTENT = {
             <p><strong>Scan Results QR:</strong> If the match was scored on the Chalker, click <strong>Scan Results QR</strong> in the confirmation dialog to import the result and player achievements directly from the Chalker's QR code — no manual entry needed.</p>
             <p><strong>Correcting Match Results:</strong></p>
             <ul>
-                <li><strong>Select the match</strong> in the bracket and click <strong>Undo match</strong> (single elimination: click the ↺ on the winner)</li>
+                <li><strong>Select the match</strong> in the bracket and click <strong>Undo match</strong></li>
                 <li><strong>Only safe matches can be undone</strong> - none of the matches it feeds may be live or played</li>
                 <li><strong>Multi-step correction:</strong> undo several matches by working backwards through the bracket</li>
             </ul>

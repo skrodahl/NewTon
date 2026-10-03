@@ -1,6 +1,6 @@
 # Bracket Redesign - Design & Planning
 
-**Status:** Phase 1 implemented (double elimination drawn by `js/bracket-view.js`, new bracket page header), not yet released. Single elimination is next. See [Implementation](#implementation).
+**Status:** Implemented for both formats (double and single elimination drawn by `js/bracket-view.js`, new bracket page header), not yet released. Removing the classic renderer is next. See [Implementation](#implementation).
 **Last Updated:** 3 October 2026
 
 Mockup (private artifact, version 17): https://claude.ai/artifact/2MW8SuVVN7kKVxeJbe2CbJ
@@ -233,8 +233,8 @@ Live, ready and waiting cards also have their own fills (`--live-fill`, `--ready
 
 1. **New bracket view for double elimination — done (unreleased).** `js/bracket-view.js` and `css/bracket-view.css`: layout from `getProgressionTable()`, camera, cards, lines, hover magnifier and progression tip, selection with edge markers, Follow, Finals Right | Middle. The bracket page header replaced the floating buttons and the CAD box (moved forward from the cosmetic phase so nothing floats over the bracket and Fit all can use the whole viewport).
 2. **Selection bar shortcuts — done (unreleased):** Undo match (only when possible) and Match Controls. Replaces the planned match panel, which was dropped (see [Match Operations](#match-operations)).
-3. **Remove the classic double-elimination code:** the `render*Player*` functions, the DE half of `bracket-lines.js`, `getDefaultView()` for DE, and the old zoom and pan once single elimination no longer needs them.
-4. **Single-elimination layout** (4/8/16/32 with bronze) on the new view, then remove the rest of the classic renderer.
+3. **Remove the classic renderer:** the `render*Player*` and `render*SE*` functions, `bracket-lines.js`, `getDefaultView()`, and the old zoom and pan. Nothing uses them any more.
+4. **Single-elimination layout — done (unreleased).** `layoutSE()` in `js/bracket-view.js`: rounds up to the semifinals; the bronze final in the next column, level with the top semifinal; the final in the column after, midway between the semifinals. Semifinal winners fork straight after the semifinals and run under the bronze final to the final; a dashed line joins the bronze final to that line. Labels: Round 1…, Quarterfinals, Semifinals, Bronze final (with "3rd place" below), Final. The layout is chosen by format (`layoutFor()`); everything else is shared. The classic renderer is now unused for both formats.
 5. **Cosmetic changes** (the maintainer's list) — in progress alongside the phases above.
 
 ### How phase 1 fits into the existing code
