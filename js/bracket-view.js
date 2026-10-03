@@ -18,7 +18,7 @@ const BracketView = (() => {
     const W = 200, H = 80, FS = 20, META = 20, FINALS_SPLIT = 40;
     const GAP_MIN = 10, GX_MIN = 34, CG_MIN = 34, FG_MIN = 64; // row gap, column gap, centre gap (= column gap, so forks match), finals gap
     const GAP_GROW = 80, GX_GROW = 100;                        // how far spacing may grow to fill the page
-    const TOP = 96, BOTTOM = 90, PAD = 16, Z_MAX = 2, Z_FIT_MAX = 1, MAG_BELOW = 0.9;
+    const TOP = 104, BOTTOM = 90, PAD = 16, Z_MAX = 2, Z_FIT_MAX = 1, MAG_BELOW = 0.9;
     let PITCH = H + GAP_MIN, GX = GX_MIN, CENTER_GAP = CG_MIN, FINALS_GAP = FG_MIN;
 
     const svgNS = 'http://www.w3.org/2000/svg';
@@ -303,10 +303,15 @@ const BracketView = (() => {
 
         // side and column labels
         const fsX0 = pos['FS-1-1'].x;
+        // the club name, on the side labels' line: top left with the finals on the right; with them in
+        // the middle, centred on the edge of the backside's shaded area
+        const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
+        if (variant === 'right') lbl(club, 0, -94, 'bv-club');
+        else lblMid(club, bx0 - W / 2, -94, 'bv-club');
+
         // side labels centred over each side's first round
         lblMid('Frontside ▶', fsX0, -84, 'bv-side-label');
         lblMid('◀ Backside', pos['BS-1-1'].x, -84, 'bv-side-label');
-        lblMid('Finals', pos['BS-FINAL'].x, -84, 'bv-side-label');
         const place = placings(size, st);
         // every header sits the same distance above the topmost match of its round
         const LABEL_GAP = 26;
@@ -317,6 +322,8 @@ const BracketView = (() => {
         lblMid('Backside final', pos['BS-FINAL'].x, pos['BS-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
         lblMid('3rd place', pos['BS-FINAL'].x, pos['BS-FINAL'].y + H + 8, 'bv-col-label bv-sub-label');
         lblMid('Grand final', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+        // FINALS sits just above the finals, in the style of BACKSIDE and FRONTSIDE
+        lblMid('Finals', pos['GRAND-FINAL'].x, pos['GRAND-FINAL'].y - LABEL_GAP - 40, 'bv-side-label');
 
         // application signature, below the last first-round match (checked by renderBracket())
         const lastFS1 = st.ids.filter(i => /^FS-1-/.test(i)).sort((a, b) => numOf(b) - numOf(a))[0];
@@ -638,8 +645,13 @@ const BracketView = (() => {
             const on = traced === sl.id;
             return `<button type="button" data-trace="${escapeHtml(String(sl.id))}"${on ? ' class="bv-on" aria-pressed="true"' : ' aria-pressed="false"'}>Follow ${escapeHtml(sl.name)}</button>`;
         }).join('');
+        // Undo only appears when the match can be undone (isMatchUndoable() decides)
+        const undo = isMatchUndoable(selected) ? '<button type="button" data-act="undo" title="Undo this result">Undo match</button>' : '';
         bar.innerHTML = `<span class="bv-sid">${selected}</span><span>${escapeHtml(getRoundDescription(v.match))} · ${what}</span>` +
-            follow + `<button type="button" class="bv-x" data-act="clear" aria-label="Clear selection">×</button>`;
+            follow + undo +
+            // Match Controls is always the rightmost button, just before ×
+            `<button type="button" class="bv-primary" data-act="controls">Match Controls</button>` +
+            `<button type="button" class="bv-x" data-act="clear" aria-label="Clear selection">×</button>`;
         bar.querySelectorAll('[data-trace]').forEach(b => b.addEventListener('click', () => {
             const sl = v.p.find(x => x.kind === 'player' && String(x.id) === b.dataset.trace);
             if (!sl) return;
@@ -647,6 +659,9 @@ const BracketView = (() => {
             else trace(sl.id);
         }));
         bar.querySelector('[data-act="clear"]').addEventListener('click', clearSel);
+        bar.querySelector('[data-act="controls"]').addEventListener('click', () => showMatchCommandCenter());
+        const undoBtn = bar.querySelector('[data-act="undo"]');
+        if (undoBtn) undoBtn.addEventListener('click', () => handleSurgicalUndo(selected));
     }
     function select(id, forceFollow) {
         if (!cur || !cur.cardEls[id]) return;
@@ -758,6 +773,9 @@ const BracketView = (() => {
         const sub = document.getElementById('bvSubtitle');
         const status = document.getElementById('bvStatus');
         const finals = document.getElementById('bvFinals');
+        // Console link only when the Developer Console is enabled in Config
+        const consoleLink = document.getElementById('bvConsole');
+        if (consoleLink) consoleLink.hidden = !isDeveloperMode();
         if (!tournament) {
             title.textContent = 'No tournament';
             sub.textContent = '';

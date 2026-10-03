@@ -257,22 +257,27 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <div id="tournament" class="page">
             <div class="bracket-container">
                 <header class="bv-header">
-                    <div class="bv-header-row">
+                    <div class="bv-head-left">
                         <div class="bv-title-block">
                             <div class="bv-title" id="bvTitle">No tournament</div>
                             <div class="bv-subtitle" id="bvSubtitle"></div>
                         </div>
                         <nav class="bv-nav">
                             <button type="button" class="bv-btn bv-nav-btn analytics-back-btn" onclick="exitAnalyticsBracketPreview();" title="Return to Analytics">⬅ Analytics</button>
-                            <button type="button" class="bv-btn bv-nav-btn" onclick="showStatisticsModal()" title="View tournament statistics and rankings">Leaderboard</button>
-                            <button type="button" class="bv-btn bv-btn-primary bv-nav-btn" onclick="showMatchCommandCenter()" title="Show LIVE and UPCOMING matches">Match Controls</button>
                             <span class="bv-links">
                                 <button type="button" class="bv-link bv-nav-btn" onclick="showPage('setup')" title="Return to Setup page">Setup</button>
                                 <button type="button" class="bv-link bv-nav-btn" onclick="showPage('registration')" title="Exit Tournament to edit statistics and see current results">Registration</button>
                                 <button type="button" class="bv-link bv-nav-btn" onclick="showPage('config')" title="Open Config page">Config</button>
                                 <button type="button" class="bv-link bv-nav-btn" onclick="showPage('history')" title="Open Analytics page">Analytics</button>
+                                <button type="button" class="bv-link bv-nav-btn" id="bvConsole" onclick="openAnalyticsModal()" title="Open the Developer Console" hidden>Console</button>
                             </span>
                         </nav>
+                    </div>
+                    <div class="bv-head-center">
+                        <button type="button" class="bv-btn bv-btn-primary bv-nav-btn" onclick="showMatchCommandCenter()" title="Show LIVE and UPCOMING matches">Match Controls</button>
+                        <button type="button" class="bv-btn bv-nav-btn" onclick="showStatisticsModal()" title="View tournament statistics and rankings">Leaderboard</button>
+                    </div>
+                    <div class="bv-head-right">
                         <div class="bv-tools">
                             <div class="bv-seg" id="bvFinals" hidden>
                                 <span class="bv-seglabel">Finals</span>
@@ -286,6 +291,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                 <button type="button" onclick="zoomIn()" title="Zoom in" aria-label="Zoom in">+</button>
                             </div>
                         </div>
+                        <time class="bv-clock" id="bvClock" aria-label="Current time">--:--</time>
                     </div>
                     <div class="bv-header-row bv-status-row">
                         <div class="bv-status" id="bvStatus"></div>

@@ -1948,6 +1948,12 @@ function updateClock() {
     if (headerClockElement) {
         headerClockElement.textContent = timeString;
     }
+
+    // Update bracket page clock (the bracket runs full screen, hiding the OS clock)
+    const bracketClockElement = document.getElementById('bvClock');
+    if (bracketClockElement) {
+        bracketClockElement.textContent = timeString;
+    }
 }
 
 // Start clock update interval (every 10 seconds to catch minute changes quickly)

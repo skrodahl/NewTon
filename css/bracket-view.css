@@ -44,6 +44,7 @@
 .bv-col-label span, .bv-col-label.bv-sub-label { font-weight: 500; letter-spacing: .02em; text-transform: none; }
 .bv-finals-label { z-index: 1; background: var(--bv-surface-2); padding: 0 6px; }
 .bv-side-label { position: absolute; font-size: 24px; line-height: 1; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--bv-ink-2); white-space: nowrap; }
+.bv-club { position: absolute; font-size: 34px; line-height: 1; font-weight: 800; letter-spacing: -.02em; color: var(--bv-ink); white-space: nowrap; }
 .bv-signature { position: absolute; font-size: 16px; letter-spacing: 1px; color: rgba(17,24,39,.5); pointer-events: none; white-space: nowrap; }
 
 /* ---- cards ---- */
@@ -164,13 +165,24 @@
 .bracket-container .bracket-canvas { background: transparent; }
 
 /* ---- header ---- */
-.bv-header { display: flex; flex-direction: column; gap: 6px; flex: none; }
-.bv-header-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 8px 16px; }
+.bv-header { display: grid; grid-template-columns: 1fr auto 1fr; gap: 6px 16px; align-items: center; flex: none; }
+.bv-head-left { grid-column: 1; grid-row: 1 / span 2; align-self: stretch; display: flex; gap: 16px; min-width: 0; }
+/* name and date centred vertically in the header, like the clock; the links stay on the top row */
+.bv-head-left .bv-title-block { align-self: center; }
+.bv-head-left .bv-nav { align-self: flex-start; }
+/* Match Controls and Leaderboard, centred on the page */
+.bv-head-center { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 8px; }
+/* tools on the top row; the clock spans both rows, centred vertically in the header */
+.bv-head-right { grid-column: 3; grid-row: 1 / span 2; align-self: stretch; display: flex; justify-content: flex-end; gap: 16px; min-width: 0; }
+.bv-head-right .bv-tools { align-self: flex-start; }
+.bv-head-right .bv-clock { align-self: center; }
+/* the status row is centred on the page, under all three groups */
+.bv-header > .bv-status-row { grid-column: 1 / -1; grid-row: 2; }
 .bv-title-block { min-width: 0; }
-.bv-title { font-weight: 800; font-size: 16px; letter-spacing: -.01em; color: var(--bv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40ch; }
-.bv-subtitle { font-weight: 500; font-size: 12px; color: var(--bv-muted); }
-.bv-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-right: auto; }
-.bv-links { display: inline-flex; align-items: center; gap: 2px; margin-left: 8px; }
+.bv-title { font-weight: 800; font-size: 24px; line-height: 1.1; letter-spacing: -.02em; color: var(--bv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 40ch; }
+.bv-subtitle { font-weight: 600; font-size: 14px; color: var(--bv-ink-2); margin-top: 2px; font-variant-numeric: tabular-nums; }
+.bv-nav { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.bv-links { display: inline-flex; align-items: center; gap: 2px; }
 .bv-tools { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; }
 
 .bv-btn {
@@ -196,7 +208,12 @@
 .bv-seg output { min-width: 58px; text-align: center; font-family: var(--bv-mono); font-size: 12px; font-variant-numeric: tabular-nums; }
 .bv-seglabel { font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--bv-muted); padding: 0 8px 0 10px; }
 
-.bv-status-row { justify-content: flex-start; gap: 6px 22px; }
+.bv-clock {
+  font-family: var(--bv-sans); font-size: 30px; font-weight: 800; line-height: 1; letter-spacing: -.02em;
+  font-variant-numeric: tabular-nums; color: var(--bv-ink);
+  padding: 4px 0 4px 16px; border-left: 1px solid var(--bv-line);
+}
+.bv-status-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 22px; }
 .bv-status { font-size: 13px; color: var(--bv-ink-2); }
 .bv-status b { color: var(--bv-ink); }
 .bv-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 12px; color: var(--bv-muted); }

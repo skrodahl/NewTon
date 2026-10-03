@@ -479,6 +479,11 @@ function showPage(pageId) {
         }
     }
 
+    // Bracket page header: refresh on entry (settings such as the Developer Console may have changed)
+    if (pageId === 'tournament' && typeof BracketView !== 'undefined') {
+        BracketView.updateHeader();
+    }
+
     // Auto-open Match Controls when navigating to tournament page (if enabled and tournament exists)
     if (pageId === 'tournament' && config.ui.autoOpenMatchControls && tournament && !tournament._analyticsPreview) {
         // Small delay to ensure page transition is complete
