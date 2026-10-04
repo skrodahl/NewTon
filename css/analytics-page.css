@@ -114,9 +114,95 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
 #historyMatchList .an-facts { padding-top: 0; }
 #historyMatchList .an-facts dd { font-size: 18px; }
 
+/* ---- player charts (js/newton-charts.js): Last 10, cards, the chart, compare, full screen ---- */
+.pc-form { display: grid; gap: 12px; padding: 4px 20px 20px; border-top: 1px solid var(--nt-line); margin-top: 2px; padding-top: 16px; }
+.pc-last { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; }
+.pc-lbl { font-size: 12px; font-weight: 600; color: var(--nt-muted); }
+.pc-note { font-size: 12px; color: var(--nt-muted); margin: 0; }
+.pc-results { display: flex; gap: 4px; flex-wrap: wrap; }
+.pc-res { min-width: 34px; height: 26px; padding: 0 6px; border-radius: 6px; display: inline-grid; place-items: center; font-family: var(--nt-mono); font-size: 11px; font-weight: 700; border: 1px solid var(--nt-line-2); color: var(--nt-ink-2); background: var(--nt-surface); }
+.pc-res.pc-t1 { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.pc-res.pc-t2 { background: var(--nt-ink-2); border-color: var(--nt-ink-2); color: #fff; }
+.pc-res.pc-t4 { background: var(--nt-line); }
+.pc-res.pc-dnp { border-style: dashed; color: var(--nt-faint); background: transparent; }
+
+.pc-cards { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; }
+.pc-card { display: grid; gap: 2px; text-align: left; min-width: 0; border: 1px solid var(--nt-line); border-radius: 10px; padding: 10px 12px 8px; background: var(--nt-surface); font: inherit; color: var(--nt-ink); cursor: pointer; }
+.pc-card:hover { border-color: var(--nt-ink-2); }
+.pc-card[aria-pressed="true"] { border-color: var(--nt-ink); box-shadow: inset 0 0 0 1px var(--nt-ink); }
+.pc-card:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+.pc-k { font-size: 12px; font-weight: 600; color: var(--nt-muted); }
+.pc-v { font-size: 22px; font-weight: 800; letter-spacing: -.01em; line-height: 1.15; font-variant-numeric: tabular-nums; }
+.pc-v small { font-size: 12px; font-weight: 600; color: var(--nt-muted); margin-left: 3px; letter-spacing: 0; }
+.pc-t { font-size: 12px; color: var(--nt-ink-2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.pc-t.up { color: var(--nt-ok); }
+.pc-t.down { color: #b2410f; }
+.pc-card svg { width: 100%; height: 34px; display: block; margin-top: 4px; }
+
+.pc-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px 16px; flex-wrap: wrap; margin-top: 4px; }
+.pc-title { margin: 0; font-size: 16px; font-weight: 700; }
+.pc-desc { margin: 2px 0 0; color: var(--nt-muted); font-size: 13px; max-width: 80ch; }
+.pc-tools { display: flex; align-items: center; gap: 10px 16px; flex-wrap: wrap; }
+.pc-legend { display: flex; gap: 6px 14px; flex-wrap: wrap; align-items: center; font-size: 12px; color: var(--nt-ink-2); }
+.pc-legend i { display: inline-block; width: 16px; border-top: 2.5px solid; vertical-align: middle; margin-right: 6px; }
+.pc-legend i.pc-dash { border-top: 2px dashed var(--nt-muted); }
+.pc-legend i.pc-box { width: 12px; height: 10px; border: 0; }
+.pc-fullbtn { height: 30px; padding: 0 12px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); font: inherit; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); cursor: pointer; white-space: nowrap; }
+.pc-fullbtn::before { content: "\2922"; margin-right: 6px; }
+.pc-fullbtn:hover { border-color: var(--nt-ink-2); }
+
+/* the players: chips, + Compare with, The field */
+.pc-pick { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.pc-chip { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 4px 0 10px; border: 1px solid var(--nt-line-2); border-radius: 99px; font-weight: 600; font-size: 13px; background: var(--nt-surface); }
+.pc-chip.pc-fixed { padding-right: 12px; }
+.pc-chip i { width: 10px; height: 10px; border-radius: 50%; flex: none; }
+.pc-chip button { border: 0; background: none; width: 24px; height: 24px; border-radius: 50%; cursor: pointer; color: var(--nt-muted); font: inherit; font-size: 15px; line-height: 1; }
+.pc-chip button:hover { background: var(--nt-inset); color: var(--nt-ink); }
+.pc-add { height: 32px; border: 1px dashed var(--nt-line-2); border-radius: 99px; padding: 0 10px; background: var(--nt-surface); font: inherit; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); max-width: 100%; }
+.pc-field { display: inline-flex; align-items: center; gap: 7px; height: 32px; padding: 0 12px 0 10px; border-radius: 99px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); font: inherit; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); cursor: pointer; }
+.pc-field::before { content: ""; width: 14px; border-top: 2px dashed var(--nt-muted); }
+.pc-field[aria-pressed="true"] { border-color: var(--nt-ink); box-shadow: inset 0 0 0 1px var(--nt-ink); }
+.pc-field:disabled { opacity: .4; cursor: default; box-shadow: none; border-color: var(--nt-line-2); }
+
+/* the chart: an SVG drawn to the box's width, and its tooltip */
+.pc-chart { position: relative; min-width: 0; }
+.pc-chart svg { display: block; max-width: 100%; height: auto; overflow: visible; }
+.pc-chart svg text { font-family: var(--nt-sans); fill: var(--nt-muted); font-size: 11px; }
+.pc-chart svg .pc-ylab { font-variant-numeric: tabular-nums; }
+.pc-chart svg .pc-strip { fill: var(--nt-ink-2); font-weight: 600; }
+.pc-chart svg .pc-empty { font-size: 13px; }
+.pc-chart svg .pc-hit { cursor: pointer; }
+.pc-tip { position: absolute; z-index: 5; pointer-events: none; transform: translate(-50%, calc(-100% - 10px)); background: var(--nt-header); color: var(--nt-header-ink); border-radius: 8px; padding: 8px 10px; font-size: 12px; line-height: 1.45; white-space: nowrap; box-shadow: 0 6px 20px rgba(17,24,39,.25); }
+.pc-tip b { display: block; font-size: 13px; }
+.pc-tip[hidden] { display: none; }
+.pc-foot { margin: 0; font-size: 12px; color: var(--nt-muted); }
+
+/* several players: measure buttons over the chart */
+.pc-compare { display: grid; gap: 12px; padding: 0 20px 20px; }
+.pc-seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; justify-self: start; }
+.pc-seg button { border: 0; background: var(--nt-surface); padding: 7px 14px; font: inherit; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); cursor: pointer; }
+.pc-seg button + button { border-left: 1px solid var(--nt-line-2); }
+.pc-seg button[aria-pressed="true"] { background: var(--nt-header); color: var(--nt-header-ink); }
+.pc-seg button:hover:not([aria-pressed="true"]) { background: var(--nt-surface-2); }
+.pc-desc-c { margin: 0; }
+.pc-head-c { align-items: center; margin: 0; }
+.pc-capnote { color: #b2410f; }
+
+/* full screen */
+.pc-full { position: fixed; inset: 0; z-index: 2000; background: var(--nt-surface); display: grid; grid-template-rows: auto auto auto minmax(0, 1fr) auto; gap: 10px; padding: 16px 24px 14px; font-family: var(--nt-sans); color: var(--nt-ink); }
+.pc-full-head { display: flex; align-items: center; gap: 10px 20px; flex-wrap: wrap; }
+.pc-full-head h3 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+.pc-close { margin-left: auto; width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); font-size: 22px; line-height: 1; color: var(--nt-ink-2); cursor: pointer; }
+.pc-close:hover { border-color: var(--nt-ink-2); }
+.pc-full .pc-desc { margin: 0; }
+.pc-full-chart { min-height: 0; }
+.pc-full-chart svg { height: 100%; }
+.pc-close:focus-visible, .pc-fullbtn:focus-visible, .pc-field:focus-visible, .pc-seg button:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+
 /* ---- below desktop width ---- */
 @media (max-width: 1400px) {
   .an-tiles { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+  .pc-cards { grid-template-columns: repeat(3, minmax(0, 1fr)); }
 }
 @media (max-width: 1000px) {
   .an-players, .an-dash-cols { grid-template-columns: minmax(0, 1fr); }
@@ -153,6 +239,13 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
   #analyticsViewRegister .newton-table td.nt-name, #analyticsViewPlayers .newton-table td.nt-name { white-space: normal; }
   /* the player list scrolls in its own box, so the profile under it stays close */
   #playersTableContainer .newton-table-scroll { max-height: 320px; overflow-y: auto; }
+  .pc-form, .pc-compare { padding-inline: 14px; }
+  .pc-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+  .pc-v { font-size: 19px; }
+  .pc-full { padding: 12px 12px 10px; }
+  .pc-full-head { display: grid; grid-template-columns: minmax(0, 1fr) auto; }
+  .pc-full-head .pc-seg { grid-column: 1 / -1; grid-row: 2; }
+  .pc-seg button { padding: 6px 9px; font-size: 12px; }
   /* the Leaderboard scrolls sideways with rank and name kept in view */
   #leaderboardTableContainer :is(td, tr:not(.newton-table-groups) th):nth-child(-n+2),
   #leaderboardTableContainer .newton-table-groups th:first-child { position: sticky; z-index: 1; background: var(--nt-surface); }

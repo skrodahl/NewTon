@@ -638,6 +638,10 @@ const NewtonHistory = (() => {
     /** @type {object|null} NewtonTable instance for the comparison/profile panel */
     let _comparisonTable = null;
 
+    /** The player charts' figures for the Lens (_buildChartData), and everyone by rank. */
+    let _chartData = null;
+    let _chartOptions = [];
+
     /** @type {Set<string>} Selected player keys (lowercase trimmed) */
     let _selectedPlayers = new Set();
 
@@ -704,6 +708,10 @@ const NewtonHistory = (() => {
             const rows = (await _computePlayerRows(tournaments)).slice();
 
             if (seq !== _renderSeq.players) return; // superseded during the DB reads above
+
+            // what the player charts draw, and the players to compare with (by rank)
+            _chartData = _buildChartData(rows, tournaments);
+            _chartOptions = rows.slice().sort((a, b) => a._rank - b._rank).map(r => r.name);
 
             rows.sort((a, b) => a.name.localeCompare(b.name));
             rows.forEach(r => { r._rowId = r.name; });
@@ -855,60 +863,27 @@ const NewtonHistory = (() => {
             return;
         }
 
-        // Several players — compare them on the Leaderboard's numbers
+        // Several players: compared on the player charts (the six highest ranked when more are ticked)
+        _comparisonTable = null;
+        const compared = () => _playersTable.data
+            .filter(r => _selectedPlayers.has(_playerKey(r.name)))
+            .sort((x, y) => x._rank - y._rank)
+            .slice(0, NewtonCharts.MAX_PLAYERS)
+            .map(r => r.name);
+        const capped = selected.length > NewtonCharts.MAX_PLAYERS;
         panel.innerHTML =
-            '<div class="st-panel-head"><h3>Compare <small>' + selected.length + ' players</small></h3>' +
+            '<div class="st-panel-head"><h3>Compare <small>' + compared().length + ' players</small></h3>' +
             '<button type="button" class="st-link" onclick="NewtonHistory.toggleAllPlayers(false)">Clear</button></div>' +
-            '<div id="playerComparisonTableContainer"></div>' +
-            '<div class="an-foot">Click a player to see them alone.</div>';
-        selected.forEach(r => { r._rowId = r.name; });
-
-        _comparisonTable = NewtonTable.create({
-            tableId: 'analytics-player-comparison',
-            containerId: 'playerComparisonTableContainer',
-            defaultSortKey: '_rank',
-            defaultSortDir: 'asc',
-            emptyMessage: 'No player data available.',
-            onRowClick: (row) => focusPlayer(row.name),
-            columns: [
-                { key: '_rank', label: '#', cellClass: 'nt-rank' },
-                { key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name', render: (v) => escHtml(v) },
-                { key: 'points', label: 'Points', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts' },
-                { key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc' },
-                _lbCount('p1st', '1st'),
-                {
-                    key: '_top4', label: 'Top 4', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
-                    render: (v, row) => _top4(row) || _DIM_DASH, sortValue: (v, row) => _top4(row)
-                },
-                Object.assign(_lbCount('oneEighties', '180s'), { columnClass: 'an-wide-only' }),
-                {
-                    key: 'bestHighOut', label: 'Best out', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
-                    render: (v) => v > 0 ? v : _DIM_DASH, sortValue: (v) => v > 0 ? v : 0
-                },
-                {
-                    key: 'bestShortLeg', label: 'Best leg', align: 'right', defaultDir: 'asc', columnClass: 'an-wide-only',
-                    render: (v) => v < Infinity ? v : _DIM_DASH, sortValue: (v) => v < Infinity ? v : 99999
-                },
-                {
-                    key: 'avg', label: 'Avg', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
-                    render: (v) => v || _DIM_DASH, sortValue: (v) => v ? parseFloat(v) : 0
-                },
-                {
-                    key: 'matchesWon', label: 'Matches', align: 'right', defaultDir: 'desc',
-                    render: (v, row) => `${row.matchesWon}–${row.matchesLost}`, sortValue: (v, row) => row.matchesWon - row.matchesLost
-                },
-                {
-                    key: 'legsWon', label: 'Legs', align: 'right', defaultDir: 'desc', columnClass: 'an-wide-only',
-                    render: (v, row) => `${row.legsWon}–${row.legsLost}`, sortValue: (v, row) => row.legsWon - row.legsLost
-                }
-            ]
+            '<div class="pc-compare"></div>';
+        if (!_chartData) return;
+        NewtonCharts.renderCompare(panel.querySelector('.pc-compare'), {
+            data: _chartData,
+            getNames: compared,
+            options: _chartOptions,
+            onAdd: (name) => togglePlayer(name, true),
+            onRemove: (name) => togglePlayer(name, false),
+            note: capped ? `${selected.length} players are ticked; the charts show the six highest ranked.` : ''
         });
-        _comparisonTable.setData(selected);
-    }
-
-    /** First to fourth places. */
-    function _top4(row) {
-        return row.p1st + row.p2nd + row.p3rd + row.p4th;
     }
 
     /**
@@ -941,8 +916,12 @@ const NewtonHistory = (() => {
                 place('1st', p.p1st) + place('2nd', p.p2nd) + place('3rd', p.p3rd) +
                 place('4th', p.p4th) + place('5–6th', p.p56th) + place('7–8th', p.p78th) +
             '</dl>' +
+            '<div class="pc-form"></div>' +
             '<h4 class="an-sub">Tournaments</h4>' +
             '<div id="playerTournamentsTableContainer"></div>';
+        if (_chartData && _chartData.players[p.name]) {
+            NewtonCharts.renderForm(panel.querySelector('.pc-form'), { data: _chartData, player: p.name, options: _chartOptions });
+        }
 
         const rows = p.history.map(h => Object.assign({}, h, {
             _rowId: h.tournament.tournamentId,
@@ -1056,7 +1035,8 @@ const NewtonHistory = (() => {
                 const rank = playerPlacements[String(pid)];
                 const points = calculatePoints(s, rank, p, { ranking: _layerRanking, attendance: _layerAttendance });
                 pm.points += points;
-                pm.history.push({ tournament: t, placement: rank || null, stats: s, points, matchesWon: 0, matchesLost: 0 });
+                pm.history.push({ tournament: t, placement: rank || null, stats: s, points, matchesWon: 0, matchesLost: 0,
+                    _scored: 0, _darts: 0, _matchAvgs: [] }); // three-dart average per tournament (Chalker matches)
 
                 // Track placement counts
                 if (rank === 1) pm.p1st++;
@@ -1110,6 +1090,8 @@ const NewtonHistory = (() => {
                 // Three-dart average — Chalker matches only
                 if (m.matchType === 'CHALKER' && Array.isArray(m.legs) && m.legs.length) {
                     const startScore = (m.format && m.format.sc) || 501;
+                    // this match's score and darts per player, for the tournament's average
+                    let s1 = 0, d1 = 0, s2 = 0, d2 = 0;
                     m.legs.forEach(leg => {
                         try {
                             // Tiebreak legs (cd === 0) have no 501 scoring — including
@@ -1122,24 +1104,32 @@ const NewtonHistory = (() => {
                             // Player 1
                             if (pm1 && v1.length) {
                                 if (leg.w === 1) {
-                                    pm1._totalScored += startScore;
-                                    pm1._totalDarts += (v1.length - 1) * 3 + (leg.cd || 3);
+                                    s1 += startScore;
+                                    d1 += (v1.length - 1) * 3 + (leg.cd || 3);
                                 } else {
-                                    pm1._totalScored += v1.reduce((a, b) => a + b, 0);
-                                    pm1._totalDarts += v1.length * 3;
+                                    s1 += v1.reduce((a, b) => a + b, 0);
+                                    d1 += v1.length * 3;
                                 }
                             }
                             // Player 2
                             if (pm2 && v2.length) {
                                 if (leg.w === 2) {
-                                    pm2._totalScored += startScore;
-                                    pm2._totalDarts += (v2.length - 1) * 3 + (leg.cd || 3);
+                                    s2 += startScore;
+                                    d2 += (v2.length - 1) * 3 + (leg.cd || 3);
                                 } else {
-                                    pm2._totalScored += v2.reduce((a, b) => a + b, 0);
-                                    pm2._totalDarts += v2.length * 3;
+                                    s2 += v2.reduce((a, b) => a + b, 0);
+                                    d2 += v2.length * 3;
                                 }
                             }
                         } catch (_) {}
+                    });
+                    // into the player's totals, and into this tournament's history entry
+                    [[pm1, s1, d1], [pm2, s2, d2]].forEach(([pm, sc, da]) => {
+                        if (!pm || !da) return;
+                        pm._totalScored += sc;
+                        pm._totalDarts += da;
+                        const h = entryFor(pm);
+                        if (h) { h._scored += sc; h._darts += da; h._matchAvgs.push(sc / da * 3); }
                     });
                 }
             });
@@ -1152,8 +1142,77 @@ const NewtonHistory = (() => {
             r._rank = i + 1;
             r.avg = r._totalDarts > 0 ? ((r._totalScored / r._totalDarts) * 3).toFixed(2) : null;
             r._rowId = r.name;
+            // each tournament's average, and its worst and best match
+            r.history.forEach(h => {
+                h.avg = h._darts > 0 ? h._scored / h._darts * 3 : null;
+                h.avgLo = h._matchAvgs.length ? Math.min(...h._matchAvgs) : null;
+                h.avgHi = h._matchAvgs.length ? Math.max(...h._matchAvgs) : null;
+            });
         });
         return rows;
+    }
+
+    /**
+     * The figures the player charts draw (js/newton-charts.js), from the player rows: the
+     * tournaments in date order, each player's result per tournament, their place in the
+     * standings after each tournament (by points so far, as the Leaderboard ranks), and the
+     * field (the median of everyone who played).
+     * @param {object[]} rows - from _computePlayerRows()
+     * @param {object[]} tournaments - the scoped tournaments
+     * @returns {object}
+     */
+    function _buildChartData(rows, tournaments) {
+        const ordered = tournaments.slice().sort((a, b) => tsToMs(a.closedAt) - tsToMs(b.closedAt));
+        const index = new Map(ordered.map((t, i) => [t, i]));
+        const median = (a) => {
+            if (!a.length) return null;
+            const s = a.slice().sort((x, y) => x - y), m = s.length >> 1;
+            return s.length % 2 ? s[m] : (s[m - 1] + s[m]) / 2;
+        };
+
+        const players = {};
+        rows.forEach(r => {
+            const entries = ordered.map(() => null);
+            r.history.forEach(h => {
+                const i = index.get(h.tournament);
+                if (i == null) return;
+                const s = h.stats || {};
+                entries[i] = {
+                    place: h.placement || null, points: h.points,
+                    matchesWon: h.matchesWon, matchesLost: h.matchesLost,
+                    avg: h.avg, avgLo: h.avgLo, avgHi: h.avgHi,
+                    oneEighties: s.oneEighties || 0,
+                    highOuts: Array.isArray(s.highOuts) ? s.highOuts : [],
+                    shortLegs: Array.isArray(s.shortLegs) ? s.shortLegs : []
+                };
+            });
+            players[r.name] = { name: r.name, rank: r._rank, entries, position: ordered.map(() => null) };
+        });
+
+        // standings after each tournament: running points, ranked like the Leaderboard
+        const running = {};
+        const ranked = ordered.map((t, i) => {
+            Object.values(players).forEach(p => { if (p.entries[i]) running[p.name] = (running[p.name] || 0) + p.entries[i].points; });
+            const order = Object.keys(running).sort((a, b) => running[b] - running[a]);
+            order.forEach((name, k) => { players[name].position[i] = k + 1; });
+            return order.length;
+        });
+
+        const field = {
+            points: ordered.map((t, i) => median(Object.values(players).map(p => p.entries[i]).filter(Boolean).map(e => e.points))),
+            average: ordered.map((t, i) => median(Object.values(players).map(p => p.entries[i]).filter(e => e && e.avg != null).map(e => e.avg)))
+        };
+
+        return {
+            tournaments: ordered.map((t, i) => ({
+                id: t.tournamentId,
+                name: t.tournamentName || t.tournamentId,
+                date: new Date(tsToMs(t.closedAt)),
+                players: t.playerCount || Object.values(players).filter(p => p.entries[i]).length,
+                chalker: Object.values(players).some(p => p.entries[i] && p.entries[i].avg != null)
+            })),
+            players, ranked, field
+        };
     }
 
     /**

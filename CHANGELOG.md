@@ -1,5 +1,20 @@
 ## Unreleased
 
+### Player charts
+
+- **A player's progression, as charts** (Analytics → Players; mockup: https://claude.ai/artifact/VqxXWoFhDpuUpMc1hMhZd7). The profile gains their last 10 finishes, and six cards with a sparkline and a one-line verdict ("▲ 2 places in 10", "10.4 last 5, ▼ average 12.8"). A card opens its chart:
+  - **Position**: place in the standings after each tournament, by points so far (ranked as the Leaderboard ranks), with the top 16 shaded.
+  - **Points**: points each tournament, and the form line (the average of the last 5 played).
+  - **Finishes**: each tournament's finish on bands (Winner, Final, Top 4, Top 8, Top 16, 17th+).
+  - **Average**: three-dart average each tournament, with the worst-to-best match spread; tournaments without Chalker matches are shaded.
+  - **Matches**: won and lost each tournament.
+  - **Highlights**: 180s, high outs and short legs on one time axis.
+- **Comparing:** "+ Compare with" adds up to five more players, each in its own colour, and "The field" adds the median of everyone who played (Points and Average). With several players, Points shows the form lines and Matches the win rate over each player's last 5 tournaments. **Full screen** shows the same chart, measure and players on the whole screen (Esc closes it).
+- **Ticking several players** now compares them on these charts instead of in a table (the six highest ranked when more are ticked).
+- Everything follows the Lens and the Points controls. Hover or tap a tournament for its figures. Phones: cards two to a row, charts to the screen's width.
+- **Under the hood:** `js/newton-charts.js` (new) draws the charts as plain SVG and never changes data. The figures come from `_computePlayerRows()`, whose per-tournament history now also carries the three-dart average and the worst and best match (checked: the Leaderboard's averages are unchanged), via `_buildChartData()` (tournaments in date order, results per tournament, standings after each, the field).
+- Files changed: `js/newton-charts.js` (new), `js/newton-history.js`, `css/analytics-page.css`, `tournament.html` (script), `js/dynamic-help-system.js`, `llms.txt`, `Docs/PARKING-LOT.md`.
+
 ### Analytics opens on the current half-year
 
 - **The Lens starts every visit on the current half-year** (H2 2026 = 1 July to 31 December), or on the previous half-year while the current one has no tournaments yet, or on everything if both are empty. Every tournament in it is ticked. What a visitor changes lasts until they leave the page; **nothing about the Lens is remembered between visits any more** (it used to be saved in the browser, so a member could be left looking at an old selection). Show all still shows every tournament.

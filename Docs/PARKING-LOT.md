@@ -75,7 +75,7 @@ The tab is named Analytics — it should earn that name over time. The IndexedDB
 v5.2.0 added a profile (Leaderboard figures, rank, placement counts, every tournament played) and side-by-side comparison. Still open: form over time and head-to-head records.
 
 **Graphs**
-Performance and form over time — the kind of thing that makes improvement (or decline) visible in a way a table never can.
+Done: player charts in Analytics → Players (Position, Points, Finishes, Average, Matches, Highlights over the Lens; compare up to six players; full screen). Ideas left: head-to-head records between two players.
 
 **Table cogwheel**
 Column visibility toggle and top-N threshold control on Analytics tables.

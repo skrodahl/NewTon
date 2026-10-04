@@ -412,6 +412,7 @@ const HELP_CONTENT = {
                 content: `
                     <p>The player list shows everyone who appears in the selected tournaments, with tournaments played and their win/loss record. Tick one player to see their profile, or several to compare them.</p>
                     <p>The profile has the player's Leaderboard figures, how often they finished in each place, and every tournament they played, with their placing and points. Click a tournament to open it.</p>
+                    <p><strong>Charts</strong> show how the player has done over the tournaments in the Lens: their last 10 finishes, then six cards (Position in the standings, Points, Finishes, Average, Matches, Highlights). Click a card for its chart; hover or tap a tournament for the figures. <strong>+ Compare with</strong> adds up to five more players, <strong>The field</strong> adds the median of everyone who played (Points and Average), and <strong>Full screen</strong> gives the chart the whole screen. Ticking several players in the list compares them the same way.</p>
                     <p>Players are matched by name across tournaments, so someone entered as "Dave" in one and "dave " in another is treated as the same person. Genuinely different spellings are not &mdash; consistent names are worth the small effort at registration.</p>
                 `
             },
