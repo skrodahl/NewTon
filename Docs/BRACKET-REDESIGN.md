@@ -238,7 +238,8 @@ Match Controls is no longer a dialog. It is a view in the bracket page's frame, 
 - Match Controls is a layer over the bracket (`.bv-stage` holds both), so the bracket keeps its size and camera underneath and comes back exactly as it was left.
 - On Match Controls the bracket's tools (Finals, Fit all, zoom) and the colour legend are hidden; the clock and the status line stay. Match Controls' own header and footer are gone: **Scan QR results** sits in the Lanes heading, and the start view is a Global Setting, **Start on Match Controls** (on by default; `config.ui.autoOpenMatchControls`, the old auto-open setting).
 - The layer keeps the id `matchCommandCenterModal` and is shown with `style.display = 'block'`, so the code that redraws Match Controls after an action (including `clean-match-progression.js`, unchanged) still finds it open.
-- Leaderboard stays a dialog. The Developer Console is the planned third tab.
+- Leaderboard stays a dialog.
+- **Console** is the third tab, shown when the Developer Console is enabled in Global Settings (`#devConsoleView`, `css/dev-console.css`, filled by `js/analytics.js`). Left: the status figures (with a dot for health) and the commands, grouped Inspect / Repair / Change; right: the current view over a collapsible console output. It runs (captures `console.log`, refreshes every 2 seconds) only while its tab shows: `startDeveloperConsole()` / `stopDeveloperConsole()`, called by `showBracketView()` and on leaving the page. The page never starts on it.
 - The same frame with tabs may later host other tournament formats; those need their own source of truth, designed with the core foundations, and are to be discussed first.
 
 The bracket page keeps its own full-screen header (tournament name, Match Controls, Finals, zoom, clock), which follows the same type and clock.

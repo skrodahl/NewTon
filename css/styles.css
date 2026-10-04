@@ -488,13 +488,6 @@ body {
   overflow: hidden; /* Prevent content overflow */
 }
 
-/* Analytics Modal - Override default modal constraints */
-.analytics-modal-content {
-  margin: 1% auto !important;
-  max-height: 98vh !important;
-  max-width: none !important;
-}
-
 /* Remove rounded corners from all inputs in modals */
 .modal-content input[type="text"],
 .modal-content input[type="number"],
@@ -876,14 +869,12 @@ a:hover { color: #1e40af; }
    to match the .dlg aesthetic without restructuring the content inside. */
 #matchQRModal .modal-content,
 #qrResultScanModal .modal-content,
-#matchDetailModal .modal-content,
-#analyticsModal .modal-content {
+#matchDetailModal .modal-content {
   border-radius: 10px;
   background-color: #ffffff;
 }
 /* Title separator — mirrors the .dlg__title border-bottom for light-touch alignment */
-#matchDetailModal .modal-content > h3,
-#analyticsModal .modal-content > h3 {
+#matchDetailModal .modal-content > h3 {
   border-bottom: 1px solid #ecedf1;
   padding-bottom: 14px;
 }

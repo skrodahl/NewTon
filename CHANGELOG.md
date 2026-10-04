@@ -1,5 +1,16 @@
 ## Unreleased
 
+### Developer Console: a tab on the bracket page
+
+- **The Developer Console is the third tab, Console**, next to Bracket | Match Controls, shown when the Developer Console is enabled in Global Settings. It replaces the Console link and the dialog. Like Match Controls it is a layer over the bracket; the bracket's tools and legend hide while it shows. The page never starts on it, and turning the console off in Global Settings hides the tab (and leaves it if it was showing).
+- **Redesigned in the new design language** (`css/dev-console.css`), decided without a mockup while the maintainer was away:
+  - **Left:** a panel with the status figures as items, each with its live value and a coloured dot for health (instead of ✅ ⚠️ 🔴): Overview, Transactions, Matches, Players, Lanes, Storage. Then the commands, grouped **Inspect** (Transaction history, Transaction log, Match progression, Validate everything, QR payload inspector), **Repair** (Re-render bracket, Recalculate rankings, Refresh all dropdowns) and **Change** (Toggle read-only, Late registration in amber, Reset all config in red). The item showing is highlighted; sub-views (Progression code, the pruning preview) count as their parent. "Updated hh:mm:ss · every 2 seconds" at the bottom.
+  - **Right:** the current view in a white panel, over **Console output** (collapsed; opens to up to 40% of the height, with the line count, Copy and Clear).
+  - The views' repeated inline styles became classes (`dc-title`, `dc-box`, `dc-boxhead`, `dc-lines`, `dc-link`, `dc-btn`, `dc-input`); rounded boxes, the app's fonts and buttons. The eleven "← Back to Overview" links are gone, as the left panel is always there. What each view shows, and every command, is unchanged.
+- **It runs only while its tab shows:** `startDeveloperConsole()` (capture `console.log`, draw, refresh every 2 seconds) and `stopDeveloperConsole()` replace `openAnalyticsModal()` / `closeAnalyticsModal()`; `showBracketView()` calls them, and so does leaving the page. The scroll listeners are added once.
+- The late registration hints (Player Registration) and the help point to the Console tab.
+- Files changed: `css/dev-console.css` (new), `tournament.html` (the view replaces `#analyticsModal`; tab; stylesheet link), `js/analytics.js`, `js/bracket-rendering.js` (`showBracketView()` knows three views), `js/bracket-view.js` (the tab follows the setting), `js/main.js`, `js/player-management.js`, `js/results-config.js`, `js/dynamic-help-system.js`, `css/bracket-view.css`, `css/styles.css` (old console rules removed), `Docs/BRACKET-REDESIGN.md`, `Docs/DIALOGS.md`.
+
 ### Match Controls in the bracket's frame
 
 - **Match Controls is no longer a dialog**: it shares the Tournament Bracket page's frame, switched with the tabs **Bracket | Match Controls** in the header (mockup: frame-views.html, approved 2026-10-04). It is a layer over the bracket, so the bracket keeps its camera underneath. The results-waiting badge (network handover) moved onto the Match Controls tab.

@@ -243,9 +243,9 @@
 .bv-sw-pending { background: var(--bv-pending-fill); border: 1px dashed var(--bv-faint); }
 .bv-sw-walkover { background: var(--bv-surface); border-color: var(--bv-done-border); opacity: .55; }
 
-/* ---- views: Bracket | Match Controls (showBracketView in js/bracket-rendering.js) ---- */
+/* ---- views: Bracket | Match Controls | Console (showBracketView in js/bracket-rendering.js) ---- */
 .bv-views button { padding: 8px 16px; font-size: 14px; }
 .bv-views .bv-badge { background: #16a34a; } /* results waiting: green, as on the Match Controls tile */
-/* on Match Controls, the bracket's own tools and the colour legend have nothing to act on */
-.bracket-container.bv-on-controls .bv-tools,
-.bracket-container.bv-on-controls .bv-legend { display: none; }
+/* on Match Controls or the Console, the bracket's own tools and the colour legend have nothing to act on */
+.bracket-container.bv-on-layer .bv-tools,
+.bracket-container.bv-on-layer .bv-legend { display: none; }

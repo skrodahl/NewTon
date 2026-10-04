@@ -1,0 +1,89 @@
+/* dev-console.css - Developer Console (#devConsoleView)
+ *
+ * The third view on the Tournament Bracket page, when the Developer Console is enabled in
+ * Global Settings. A layer over the bracket, like Match Controls. Left: the status figures and
+ * the commands; right: the current view (filled by js/analytics.js) over the console output.
+ * Uses the shared tokens in css/design-tokens.css. Light only.
+ */
+
+#devConsoleView.dc-view {
+  position: absolute; inset: 0; z-index: 20; overflow: hidden;
+  background: var(--nt-bg);
+  font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; color: var(--nt-ink);
+}
+/* the layer is shown with display: block (showBracketView), so the grid is one level in */
+.dc-frame { display: grid; grid-template-columns: 280px minmax(0, 1fr); gap: 16px; height: 100%; padding: 2px 0 16px; box-sizing: border-box; }
+.dc-view button, .dc-view input, .dc-view select { font: inherit; }
+.dc-view :focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+.dc-view [hidden] { display: none !important; }
+
+.dc-panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; min-width: 0; }
+
+/* ---- left: status and commands ---- */
+.dc-nav { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; overflow-y: auto; min-height: 0; padding: 6px 0 12px; }
+.dc-group { padding: 10px 10px 6px; }
+.dc-group + .dc-group { border-top: 1px solid var(--nt-line); }
+.dc-group h3 { margin: 4px 8px 6px; font-size: 11px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); }
+.dc-nav button {
+  display: flex; flex-direction: column; align-items: flex-start; gap: 1px; width: 100%;
+  border: 0; background: none; border-radius: 8px; padding: 6px 8px; text-align: left; cursor: pointer;
+  font-size: 14px; font-weight: 600; color: var(--nt-ink-2);
+}
+.dc-nav button:hover { background: var(--nt-surface-2); color: var(--nt-ink); }
+.dc-nav button[aria-current="true"] { background: var(--nt-header); color: var(--nt-header-ink); }
+.dc-nav button small { font-size: 12px; font-weight: 500; color: var(--nt-muted); display: inline-flex; align-items: center; gap: 6px; font-variant-numeric: tabular-nums; }
+.dc-nav button[aria-current="true"] small { color: #d1d5db; }
+.dc-nav button small:empty { display: none; }
+.dc-nav .dc-warn { color: var(--nt-warn); }
+.dc-nav .dc-danger { color: var(--nt-danger); }
+.dc-nav .dc-warn[aria-current="true"], .dc-nav .dc-danger[aria-current="true"] { color: var(--nt-header-ink); }
+.dc-stamp { margin: 10px 18px 0; font-size: 12px; color: var(--nt-faint); font-variant-numeric: tabular-nums; }
+.dc-dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; flex: none; }
+.dc-dot.dc-ok { background: #16a34a; }
+.dc-dot.dc-warn { background: var(--nt-ready); }
+.dc-dot.dc-bad { background: var(--nt-danger); }
+
+/* ---- right: the view, and the console output under it ---- */
+.dc-main { display: flex; flex-direction: column; gap: 16px; min-height: 0; min-width: 0; }
+.dc-content { flex: 1; min-height: 0; overflow: auto; padding: 20px 24px; color: var(--nt-ink-2); }
+.dc-log { flex: none; display: flex; flex-direction: column; min-height: 0; }
+.dc-log.dc-open { flex: 0 1 40%; }
+.dc-loghead { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 10px 14px 10px 10px; }
+.dc-logtoggle { border: 0; background: none; cursor: pointer; font-weight: 700; font-size: 14px; color: var(--nt-ink); padding: 4px 8px; border-radius: 6px; display: inline-flex; align-items: center; gap: 6px; }
+.dc-logtoggle:hover { background: var(--nt-surface-2); }
+.dc-logtoggle span { display: inline-block; width: 12px; font-size: 10px; color: var(--nt-muted); }
+.dc-logtoggle small { font-weight: 500; color: var(--nt-muted); font-size: 12px; }
+.dc-logacts { display: flex; gap: 6px; }
+.dc-logbody { overflow: auto; min-height: 0; border-top: 1px solid var(--nt-line); padding: 8px 18px 12px; font-family: var(--nt-mono); font-size: 12px; line-height: 1.55; }
+.dc-logline { display: grid; grid-template-columns: max-content minmax(0, 1fr); gap: 10px; padding: 3px 0; border-bottom: 1px solid var(--nt-surface-2); }
+.dc-logline time { color: var(--nt-faint); font-variant-numeric: tabular-nums; }
+.dc-logline span { white-space: pre-wrap; word-break: break-word; color: var(--nt-ink); }
+.dc-logempty { color: var(--nt-muted); font-style: italic; font-family: var(--nt-sans); }
+
+/* ---- the views' content (js/analytics.js) ---- */
+.dc-content h4 { margin: 18px 0 8px; font-size: 15px; font-weight: 700; color: var(--nt-ink); }
+.dc-content h4.dc-title { margin: 0 0 14px; font-size: 20px; font-weight: 800; letter-spacing: -.01em; }
+.dc-content h5 { margin: 14px 0 6px; font-size: 13px; font-weight: 700; color: var(--nt-ink); }
+.dc-content p { margin: 6px 0; }
+.dc-content strong { color: var(--nt-ink); }
+.dc-content ul, .dc-content ol { padding-left: 20px; }
+.dc-content pre, .dc-content code { font-family: var(--nt-mono); font-size: 12px; }
+.dc-content [style*="border: 1px solid"] { border-radius: 8px; }
+.dc-box { margin: 0 0 16px; padding: 16px 18px; border: 1px solid var(--nt-line); border-radius: 10px; background: var(--nt-surface-2); }
+.dc-box-bad { background: #fef2f2; border-color: #fca5a5; }
+.dc-boxhead { font-weight: 700; font-size: 15px; margin-bottom: 8px; }
+.dc-lines { color: var(--nt-ink-2); line-height: 1.7; font-size: 14px; }
+.dc-lines > div { margin: 3px 0 !important; }
+.dc-link { color: var(--nt-ink-2); font-size: 14px; font-weight: 600; text-decoration: underline; text-underline-offset: 3px; }
+.dc-link:hover { color: var(--nt-ink); }
+
+.dc-btn { height: 32px; border-radius: 8px; padding: 0 12px; font-weight: 600; font-size: 13px; cursor: pointer; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); white-space: nowrap; display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+.dc-btn:hover { border-color: var(--nt-ink-2); color: var(--nt-ink); }
+.dc-btn.dc-sm { height: 28px; padding: 0 10px; font-size: 12px; }
+.dc-btn-primary { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.dc-btn-primary:hover { background: var(--nt-accent); border-color: var(--nt-accent); color: #fff; }
+.dc-btn-warn { background: var(--nt-warn); border-color: var(--nt-warn); color: #fff; }
+.dc-btn-danger { background: var(--nt-danger); border-color: var(--nt-danger); color: #fff; }
+.dc-btn-warn:hover, .dc-btn-danger:hover { color: #fff; filter: brightness(1.1); }
+.dc-input { height: 34px; border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 0 10px; background: var(--nt-surface); font-size: 13px; color: var(--nt-ink); box-sizing: border-box; }
+.dc-input:focus { outline: none; border-color: var(--nt-ink-2); box-shadow: 0 0 0 3px var(--nt-inset); }

@@ -2,7 +2,9 @@
  * Analytics & Developer Console
  *
  * Hidden developer tool for real-time tournament diagnostics, validation checks,
- * and developer commands. Opened from the Console link in the bracket header when enabled in Config.
+ * and developer commands. The Console tab on the Tournament Bracket page, shown when it is
+ * enabled in Global Settings (#devConsoleView, css/dev-console.css; showBracketView() in
+ * js/bracket-rendering.js switches to it and away).
  *
  * Features:
  * - Real-time statistics (transactions, matches, players, lanes)
@@ -27,67 +29,36 @@ let scrollTimeout = null;
 let currentView = 'overview';
 
 /**
- * Open Analytics Modal
+ * Start the Developer Console: capture console output, draw it, refresh every 2 seconds.
+ * Called when its tab is shown; stopDeveloperConsole() when it is left.
  */
-function openAnalyticsModal() {
-    const modal = document.getElementById('analyticsModal');
-    if (!modal) {
-        console.error('Analytics modal not found in DOM');
-        return;
-    }
+function startDeveloperConsole() {
+    if (!document.getElementById('devConsoleView')) return;
 
-    // Use dialog stack system with Escape key support
-    if (typeof window.pushDialog === 'function') {
-        window.pushDialog('analyticsModal', () => {
-            const m = document.getElementById('analyticsModal');
-            if (m) m.style.display = 'block';
-        }, true); // true enables Escape key
-    } else {
-        modal.style.display = 'block';
-    }
-
-    // Start console capture
     startConsoleCapture();
-
-    // Setup scroll detection (must be done after modal is displayed)
     setupScrollDetection();
 
-    // Hide DE-only commands for SE format
+    // Match progression is double elimination only
     const matchProgressionLink = document.getElementById('devConsoleMatchProgressionLink');
     if (matchProgressionLink) {
-        matchProgressionLink.style.display = (typeof getFormat === 'function' && getFormat() === 'SE') ? 'none' : 'block';
+        matchProgressionLink.hidden = typeof getFormat === 'function' && getFormat() === 'SE';
     }
 
-    // Initial render
     refreshAnalytics();
     showQuickOverview();
-
-    // Start auto-refresh
     startAutoRefresh();
 
     console.log('Developer Console opened');
 }
 
 /**
- * Close Analytics Modal
+ * Stop the Developer Console's capture and refresh (its tab was left, or the page).
+ * Safe to call when it is not running.
  */
-function closeAnalyticsModal() {
-    // Use dialog stack system
-    if (typeof window.popDialog === 'function') {
-        window.popDialog();
-    } else {
-        const modal = document.getElementById('analyticsModal');
-        if (modal) {
-            modal.style.display = 'none';
-        }
-    }
-
-    // Stop console capture
+function stopDeveloperConsole() {
+    if (!originalConsoleLog && !analyticsRefreshInterval) return;
     stopConsoleCapture();
-
-    // Stop auto-refresh
     stopAutoRefresh();
-
     console.log('Developer Console closed');
 }
 
@@ -165,9 +136,12 @@ function stopAutoRefresh() {
 /**
  * Detect user scrolling and pause refresh
  */
+let scrollDetectionReady = false;
 function setupScrollDetection() {
+    if (scrollDetectionReady) return; // the panes stay; listen once
+    scrollDetectionReady = true;
     const contentArea = document.getElementById('analyticsContentArea');
-    const consoleFooter = document.getElementById('analyticsConsoleFooter');
+    const consoleFooter = document.getElementById('consoleOutputContent'); // the log scrolls, not its panel
 
     const handleScroll = () => {
         isUserScrolling = true;
@@ -223,20 +197,19 @@ function updateStatisticsPane() {
     const transactionEl = document.getElementById('stat-transactions');
     if (transactionEl) {
         const percentage = Math.round((stats.total / 1000) * 100);
-        const status = percentage < 50 ? '✅' : (percentage < 80 ? '⚠️' : '🔴');
-        transactionEl.innerHTML = `${stats.total}/1000 (${percentage}%) ${status}`;
+        transactionEl.innerHTML = `${_dcDot(percentage < 50 ? 'ok' : percentage < 80 ? 'warn' : 'bad')}${stats.total} of 1000 (${percentage}%)`;
     }
 
     // Update Match State
     const matchEl = document.getElementById('stat-matches');
     if (matchEl) {
-        matchEl.innerHTML = `${matchStats.completed} completed | ${matchStats.ready} ready | ${matchStats.live} live`;
+        matchEl.innerHTML = `${matchStats.completed} done · ${matchStats.live} live · ${matchStats.ready} ready`;
     }
 
     // Update Player Count
     const playerEl = document.getElementById('stat-players');
     if (playerEl) {
-        playerEl.innerHTML = `${playerStats.paid} paid | ${playerStats.unpaid} unpaid`;
+        playerEl.innerHTML = `${playerStats.paid} paid · ${playerStats.unpaid} unpaid`;
     }
 
     // Update Lane Usage
@@ -244,8 +217,7 @@ function updateStatisticsPane() {
     if (laneEl) {
         const hasLiveConflicts = laneStats.conflicts > 0;
         const hasReadyConflicts = laneStats.readyConflicts > 0;
-        const status = hasLiveConflicts ? '🔴' : (hasReadyConflicts ? '⚠️' : '✅');
-        laneEl.innerHTML = `${laneStats.inUse}/${laneStats.max} in use ${status}`;
+        laneEl.innerHTML = `${_dcDot(hasLiveConflicts ? 'bad' : hasReadyConflicts ? 'warn' : 'ok')}${laneStats.inUse} of ${laneStats.max} in use`;
     }
 
     // Update localStorage Usage
@@ -253,8 +225,7 @@ function updateStatisticsPane() {
     if (storageEl) {
         const storageStats = getLocalStorageStats();
         const percentage = Math.round((storageStats.used / storageStats.limit) * 100);
-        const status = percentage < 50 ? '✅' : (percentage < 80 ? '⚠️' : '🔴');
-        storageEl.innerHTML = `${storageStats.used.toFixed(2)}/${storageStats.limit} MB ${status}`;
+        storageEl.innerHTML = `${_dcDot(percentage < 50 ? 'ok' : percentage < 80 ? 'warn' : 'bad')}${storageStats.used.toFixed(2)} of ${storageStats.limit} MB`;
     }
 
     // Update Quick Overview (tournament duration)
@@ -262,8 +233,13 @@ function updateStatisticsPane() {
     if (overviewEl) {
         // Get tournament duration
         const timingStats = getTournamentTimingStats();
-        overviewEl.innerHTML = `Duration: ${timingStats.tournamentDuration}`;
+        overviewEl.textContent = `Duration ${timingStats.tournamentDuration}`;
     }
+}
+
+/** A status dot for the left pane. @param {'ok'|'warn'|'bad'} tone */
+function _dcDot(tone) {
+    return `<i class="dc-dot dc-${tone}"></i>`;
 }
 
 /**
@@ -273,7 +249,7 @@ function updateTimestamp() {
     const timestampEl = document.getElementById('analytics-timestamp');
     if (timestampEl) {
         const now = new Date();
-        timestampEl.textContent = `Last updated: ${now.toLocaleTimeString()}`;
+        timestampEl.textContent = `Updated ${now.toLocaleTimeString()} · every 2 seconds`;
     }
 }
 
@@ -523,13 +499,13 @@ function showQuickOverview() {
     const statusIcon = hasCriticalIssues ? '⚠️' : (laneHasReadyConflicts ? '⚠️' : '✓');
 
     const html = `
-        <h4 style="margin-top: 0; color: #111827;">Quick Overview</h4>
+        <h4 class="dc-title">Quick Overview</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} ${allHealthy ? 'Tournament Health: Good' : 'Issues Detected'}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
                 <div style="margin: 8px 0;">
                     <strong>Matches:</strong> ${matchStats.completed}/${matchStats.total} completed (${matchPercentage}%)
                 </div>
@@ -587,13 +563,13 @@ function showTransactionBreakdown() {
     const statusText = isHealthy ? 'Healthy' : (percentage < 80 ? 'Moderate' : 'High');
 
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">Transaction Breakdown (${stats.total} total)</h4>
+        <h4 class="dc-title">Transaction Breakdown (${stats.total} total)</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} Status: ${statusText}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
     `;
 
     for (const [type, count] of Object.entries(stats.breakdown)) {
@@ -615,12 +591,6 @@ function showTransactionBreakdown() {
             </div>
         </div>
 
-        <div>
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -658,13 +628,13 @@ function showMatchStateDetails() {
     const statusIcon = hasActive ? '✓' : 'ℹ️';
 
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">Match State Breakdown (${matchStats.total} total)</h4>
+        <h4 class="dc-title">Match State Breakdown (${matchStats.total} total)</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} ${hasActive ? 'Active Tournament' : 'Tournament Status'}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
     `;
 
     // Display each state with color coding
@@ -700,12 +670,6 @@ function showMatchStateDetails() {
             </div>
         </div>
 
-        <div>
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -789,7 +753,7 @@ function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSe
 
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Transaction Type:</label>
-                    <select id="filterType" style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
+                    <select id="filterType" class="dc-input" style="width: 100%;">
                         <option value="all" ${filterType === 'all' ? 'selected' : ''}>All Types</option>
                         <option value="COMPLETE_MATCH" ${filterType === 'COMPLETE_MATCH' ? 'selected' : ''}>COMPLETE_MATCH</option>
                         <option value="ASSIGN_REFEREE" ${filterType === 'ASSIGN_REFEREE' ? 'selected' : ''}>ASSIGN_REFEREE</option>
@@ -802,18 +766,18 @@ function showTransactionHistory(filterType = 'all', filterMatchId = '', filterSe
                 <div style="margin-bottom: 16px;">
                     <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Match ID:</label>
                     <input type="text" id="filterMatchId" placeholder="Match ID" value="${escapeHtml(filterMatchId)}"
-                           style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
+                           class="dc-input" style="width: 100%;">
                 </div>
 
                 <div style="margin-bottom: 20px;">
                     <label style="display: block; font-size: 12px; font-weight: bold; margin-bottom: 6px;">Search String:</label>
                     <input type="text" id="filterSearch" placeholder="Search..." value="${escapeHtml(filterSearch)}"
-                           style="width: 100%; padding: 6px; font-size: 12px; border: 1px solid #ccc; box-sizing: border-box;">
+                           class="dc-input" style="width: 100%;">
                 </div>
 
                 <div style="display: flex; gap: 8px;">
-                    <button class="btn" onclick="applyTransactionFilters()" style="flex: 1; margin: 0; padding: 8px; font-size: 12px;">Filter</button>
-                    <button class="btn" onclick="showTransactionHistory()" style="flex: 1; margin: 0; padding: 8px; font-size: 12px;">Clear</button>
+                    <button class="dc-btn" onclick="applyTransactionFilters()" style="flex: 1;">Filter</button>
+                    <button class="dc-btn" onclick="showTransactionHistory()" style="flex: 1;">Clear</button>
                 </div>
             </div>
         </div>
@@ -842,8 +806,8 @@ function showConsoleOutput() {
     let html = `
         <h4>Console Output (last ${consoleBuffer.length} entries)</h4>
         <div style="margin-bottom: 15px;">
-            <button class="btn" onclick="clearConsoleOutput()" style="margin-right: 10px;">Clear Console</button>
-            <button class="btn" onclick="copyConsoleOutput()">Copy to Clipboard</button>
+            <button class="dc-btn" onclick="clearConsoleOutput()" style="margin-right: 10px;">Clear Console</button>
+            <button class="dc-btn" onclick="copyConsoleOutput()">Copy to Clipboard</button>
         </div>
         <div style="font-family: monospace; font-size: 12px; line-height: 1.6; background: #f5f5f5; padding: 15px; border-radius: 4px;">
     `;
@@ -869,14 +833,8 @@ function showPlayerDetails() {
 
     if (!players || players.length === 0) {
         updateRightPane(`
-            <h4 style="margin-top: 0; color: #111827;">Player Details</h4>
+            <h4 class="dc-title">Player Details</h4>
             <p style="color: #666;">No players registered</p>
-            <div style="margin-top: 30px;">
-                <a href="#" onclick="showQuickOverview(); return false;"
-                   style="text-decoration: none; color: #065f46; font-size: 14px;">
-                    ← Back to Overview
-                </a>
-            </div>
         `);
         return;
     }
@@ -892,13 +850,13 @@ function showPlayerDetails() {
     const statusIcon = allPaid ? '✓' : '⚠️';
 
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">Player Details (${players.length} total)</h4>
+        <h4 class="dc-title">Player Details (${players.length} total)</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} ${allPaid ? 'All Players Paid' : `${unpaidPlayers.length} Unpaid Player${unpaidPlayers.length > 1 ? 's' : ''}`}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
     `;
 
     // Paid Players Section
@@ -935,12 +893,6 @@ function showPlayerDetails() {
             </div>
         </div>
 
-        <div>
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -1019,13 +971,13 @@ function showLaneUsageDetails() {
     }
 
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">Lane Usage Details</h4>
+        <h4 class="dc-title">Lane Usage Details</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} ${statusMessage}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
                 <div style="margin: 8px 0;">
                     <strong>Available Lanes:</strong> ${availableLanesList.join(', ')} (${laneStats.max} total)
                 </div>
@@ -1113,12 +1065,6 @@ function showLaneUsageDetails() {
     }
 
     html += `
-        <div style="margin-top: 30px;">
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -1411,13 +1357,13 @@ function showLocalStorageUsage() {
     }
 
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">localStorage Usage</h4>
+        <h4 class="dc-title">localStorage Usage</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} Storage Status: ${statusText}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
                 <div style="margin: 8px 0;">
                     <strong>Total Used:</strong> ${storageStats.used.toFixed(2)} MB of ${storageStats.limit} MB (${storageStats.percentage}%)
                 </div>
@@ -1433,12 +1379,6 @@ function showLocalStorageUsage() {
         ${globalStorageHtml}
         ${cleanupHtml}
 
-        <div style="margin-top: 20px;">
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -1581,7 +1521,7 @@ function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {
 
     // Build HTML
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">Match Progression (${bracketSize}-player bracket)</h4>
+        <h4 class="dc-title">Match Progression (${bracketSize}-player bracket)</h4>
 
         <!-- Filter Bar -->
         <div style="margin: 20px 0; padding: 15px; background: #f9fafb; border: 1px solid #e5e7eb;">
@@ -1589,7 +1529,7 @@ function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {
                 <div>
                     <label style="font-size: 13px; color: #666; margin-right: 5px;">Status:</label>
                     <select id="progressionStatusFilter" onchange="applyProgressionFilters()"
-                            style="padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+                            class="dc-input">
                         <option value="live-ready" ${statusFilter === 'live-ready' ? 'selected' : ''}>Live + Ready (default)</option>
                         <option value="all" ${statusFilter === 'all' ? 'selected' : ''}>All Matches</option>
                         <option value="live" ${statusFilter === 'live' ? 'selected' : ''}>Live Only</option>
@@ -1601,18 +1541,18 @@ function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {
                 <div>
                     <label style="font-size: 13px; color: #666; margin-right: 5px;">Side:</label>
                     <select id="progressionSideFilter" onchange="applyProgressionFilters()"
-                            style="padding: 6px 10px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 13px;">
+                            class="dc-input">
                         <option value="all" ${sideFilter === 'all' ? 'selected' : ''}>All Sides</option>
                         <option value="frontside" ${sideFilter === 'frontside' ? 'selected' : ''}>Frontside Only</option>
                         <option value="backside" ${sideFilter === 'backside' ? 'selected' : ''}>Backside Only</option>
                     </select>
                 </div>
                 <button onclick="showMatchProgression('all', 'all')"
-                        style="padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 4px; background: white; cursor: pointer; font-size: 13px;">
+                        class="dc-btn">
                     Show All Matches
                 </button>
                 <button onclick="showProgressionCode()"
-                        style="padding: 6px 12px; border: 1px solid #d1d5db; border-radius: 4px; background: white; cursor: pointer; font-size: 13px;">
+                        class="dc-btn">
                     Progression Code
                 </button>
             </div>
@@ -1786,12 +1726,6 @@ function showMatchProgression(statusFilter = 'live-ready', sideFilter = 'all') {
         html += `<p style="color: #9ca3af; font-size: 13px; margin-top: 20px;">Showing ${displayedCount} of ${Object.keys(progression).length} matches</p>`;
     }
     html += `
-        <div style="margin-top: 30px;">
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -1826,15 +1760,15 @@ function showProgressionCode() {
     }
 
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">Progression Code (${bracketSize}-player bracket)</h4>
+        <h4 class="dc-title">Progression Code (${bracketSize}-player bracket)</h4>
         <p style="color: #666; font-size: 13px; margin-bottom: 10px;">Raw DE_MATCH_PROGRESSION lookup table for debugging</p>
 
         <button onclick="showMatchProgression('all', 'all')"
-                style="padding: 6px 12px; margin-bottom: 20px; border: 1px solid #d1d5db; border-radius: 4px; background: white; cursor: pointer; font-size: 13px;">
+                class="dc-btn" style="margin-bottom: 16px;">
             ← Back to Match Progression
         </button>
 
-        <div style="background: #f9fafb; padding: 15px; border: 1px solid #e5e7eb; font-family: 'Courier New', monospace; font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-x: auto;">`;
+        <div style="background: #f9fafb; padding: 15px; border: 1px solid #e5e7eb; font-family: var(--nt-mono); font-size: 12px; line-height: 1.6; white-space: pre-wrap; overflow-x: auto;">`;
 
     // Display progression rules in original text format
     for (const [matchId, rule] of Object.entries(progression)) {
@@ -1862,12 +1796,8 @@ function showProgressionCode() {
     html += `
         <div style="margin-top: 30px;">
             <a href="#" onclick="showMatchProgression('all', 'all'); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px; margin-right: 20px;">
+               class="dc-link" style="margin-right: 20px;">
                 ← Back to Match Progression
-            </a>
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
             </a>
         </div>
     `;
@@ -1895,13 +1825,13 @@ function showValidationResults() {
     const statusIcon = allPassed ? '✓' : '⚠️';
 
     let html = `
-        <h4 style="margin-top: 0; color: #111827;">Validation Results</h4>
+        <h4 class="dc-title">Validation Results</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} ${allPassed ? 'All Checks Passed' : `${failCount} Issue${failCount > 1 ? 's' : ''} Detected`}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
     `;
 
     results.forEach(result => {
@@ -1934,12 +1864,6 @@ function showValidationResults() {
             Validated at: ${timestamp}
         </div>
 
-        <div>
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -1953,6 +1877,13 @@ function updateRightPane(html) {
     if (contentArea) {
         contentArea.innerHTML = html;
     }
+    // mark the left pane's item for this view (sub-views count as their parent)
+    const parent = { 'progression-code': 'progression', 'pruning-preview': 'transaction-management' };
+    const current = parent[currentView] || currentView;
+    document.querySelectorAll('#devConsoleView .dc-nav [data-dc]').forEach(b => {
+        if (b.dataset.dc === current) b.setAttribute('aria-current', 'true');
+        else b.removeAttribute('aria-current');
+    });
 }
 
 /**
@@ -1969,27 +1900,25 @@ function updateConsoleFooter() {
     }
 
     lastConsoleUpdateLength = consoleBuffer.length;
+    const count = document.getElementById('dcLogCount');
+    if (count) count.textContent = consoleBuffer.length ? `${consoleBuffer.length} lines` : '';
 
     if (consoleBuffer.length === 0) {
-        consoleContent.innerHTML = '<div style="color: #666; font-style: italic;">No console output yet...</div>';
+        consoleContent.innerHTML = '<div class="dc-logempty">No console output yet.</div>';
         return;
     }
 
     // Show last 50 entries (most recent at bottom)
     const entries = consoleBuffer.slice(-50);
     const html = entries.map(entry => {
-        return `<div style="margin-bottom: 4px; border-bottom: 1px solid #e5e7eb; padding-bottom: 4px;">
-            <span style="color: #6b7280; font-size: 10px;">${entry.timestamp}</span>
-            <div style="color: #111827; white-space: pre-wrap; word-break: break-word;">${escapeHtml(entry.message)}</div>
-        </div>`;
+        return `<div class="dc-logline"><time>${entry.timestamp}</time><span>${escapeHtml(entry.message)}</span></div>`;
     }).join('');
 
     consoleContent.innerHTML = html;
 
     // Auto-scroll to bottom if user isn't actively scrolling the console
-    const consoleFooter = document.getElementById('analyticsConsoleFooter');
-    if (consoleFooter && !isUserScrolling) {
-        consoleFooter.scrollTop = consoleFooter.scrollHeight;
+    if (!isUserScrolling) {
+        consoleContent.scrollTop = consoleContent.scrollHeight;
     }
 }
 
@@ -2290,23 +2219,17 @@ function showCommandFeedback(commandName, status, details) {
         .join('');
 
     const html = `
-        <h4 style="margin-top: 0; color: #111827;">Command Executed: ${commandName}</h4>
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${borderColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <h4 class="dc-title">Command Executed: ${commandName}</h4>
+        <div class="dc-box" style="background: ${bgColor}; border-color: ${borderColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} ${status === 'success' ? 'Success' : status === 'warning' ? 'Warning' : 'Error'}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
                 ${detailsHtml}
             </div>
         </div>
         <div style="color: #666; font-size: 13px; margin-bottom: 30px;">
             Executed at: ${timestamp}
-        </div>
-        <div>
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
         </div>
     `;
 
@@ -2468,7 +2391,7 @@ function commandResetAllConfig() {
     // UI settings section
     comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">User Interface Settings:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
     comparisonHtml += `<li>Winner Confirmation: ${currentConfig.ui?.confirmWinnerSelection ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.confirmWinnerSelection ? 'Enabled' : 'Disabled'}</li>`;
-    comparisonHtml += `<li>Auto-open Match Controls: ${currentConfig.ui?.autoOpenMatchControls ? 'Yes' : 'No'} → ${defaultConfig.ui.autoOpenMatchControls ? 'Yes' : 'No'}</li>`;
+    comparisonHtml += `<li>Start on Match Controls: ${currentConfig.ui?.autoOpenMatchControls ? 'Yes' : 'No'} → ${defaultConfig.ui.autoOpenMatchControls ? 'Yes' : 'No'}</li>`;
     comparisonHtml += `<li>Developer Console: ${currentConfig.ui?.developerMode ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.developerMode ? 'Enabled' : 'Disabled'}</li>`;
     comparisonHtml += `<li>Referee Suggestions: ${currentConfig.ui?.refereeSuggestionsLimit || 10} → ${defaultConfig.ui.refereeSuggestionsLimit}</li>`;
     comparisonHtml += '</ul></div>';
@@ -2488,9 +2411,9 @@ function commandResetAllConfig() {
     comparisonHtml += '</div>';
 
     const html = `
-        <h4 style="margin-top: 0; color: #111827;">Reset All Config to Defaults</h4>
+        <h4 class="dc-title">Reset All Config to Defaults</h4>
 
-        <div style="margin: 20px 0; padding: 20px; background: #fef2f2; border: 1px solid #dc2626; border-radius: 0;">
+        <div class="dc-box dc-box-bad">
             <div style="color: #dc2626; font-weight: 600; font-size: 16px; margin-bottom: 10px;">
                 ⚠️ Warning: Destructive Action
             </div>
@@ -2502,26 +2425,19 @@ function commandResetAllConfig() {
         <h5 style="color: #111827; margin: 20px 0 10px 0;">What will be reset:</h5>
         ${comparisonHtml}
 
-        <div style="margin: 30px 0; padding: 20px; background: #f0fdf4; border: 1px solid #166534; border-radius: 0;">
+        <div style="margin: 30px 0; padding: 20px; background: #f0fdf4; border: 1px solid #166534;">
             <div style="font-weight: 600; margin-bottom: 10px;">To confirm this action:</div>
             <div style="margin-bottom: 15px; line-height: 1.6;">Type <strong>RESET</strong> in the box below and click "Reset Config"</div>
             <div style="margin-bottom: 10px;">
                 <input type="text" id="resetConfirmInput"
-                       style="width: 200px; padding: 8px 12px; border: 1px solid #c0c0c0; border-radius: 0; font-size: 14px;"
+                       class="dc-input" style="width: 200px;"
                        placeholder="Type RESET">
             </div>
-            <button onclick="executeResetAllConfig()" class="btn btn-danger"
-                    style="background: #dc2626; color: white; border: none; padding: 10px 20px; cursor: pointer; font-weight: 600;">
+            <button onclick="executeResetAllConfig()" class="dc-btn dc-btn-danger">
                 Reset Config to Defaults
             </button>
         </div>
 
-        <div style="margin-top: 30px;">
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
-        </div>
     `;
 
     updateRightPane(html);
@@ -2762,33 +2678,27 @@ function commandLateRegistration() {
         .join('');
 
     const html = `
-        <h4 style="margin-top: 0; color: #111827;">Command Executed: Late Registration</h4>
-        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${statusColor}; border-radius: 0;">
-            <div style="color: ${statusColor}; font-weight: 600; font-size: 16px; margin-bottom: 15px;">
+        <h4 class="dc-title">Command Executed: Late Registration</h4>
+        <div style="margin: 20px 0; padding: 20px; background: ${bgColor}; border: 1px solid ${statusColor};">
+            <div class="dc-boxhead" style="color: ${statusColor};">
                 ${statusIcon} ${statusLabel}
             </div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
                 ${detailsHtml}
             </div>
         </div>
         <div style="margin: 20px 0; color: #374151; font-size: 14px; line-height: 1.7;">
             Late Registration adds a new player to the tournament. The player must be entering the full tournament from the start — they will be placed randomly in an available walkover spot in Frontside Round 1, replacing a BYE.
         </div>
-        <div style="margin: 20px 0; padding: 20px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 0;">
+        <div class="dc-box">
             <div style="font-weight: 600; color: #111827; margin-bottom: 12px;">Register New Player</div>
             <input type="text" id="lateRegPlayerName" placeholder="Enter player name"
-                style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;"
+                class="dc-input" style="width: 100%; margin-bottom: 12px;"
                 onkeydown="if(event.key==='Enter') commandLateRegistrationStep2()">
             <button onclick="commandLateRegistrationStep2()"
-                style="padding: 8px 20px; background: #92400e; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                class="dc-btn dc-btn-warn">
                 Next →
             </button>
-        </div>
-        <div>
-            <a href="#" onclick="showQuickOverview(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">
-                ← Back to Overview
-            </a>
         </div>
     `;
 
@@ -2819,15 +2729,15 @@ function commandLateRegistrationStep2() {
     if (players.find(p => p.name.toLowerCase() === playerName.toLowerCase())) {
         currentView = 'command-feedback';
         updateRightPane(`
-            <h4 style="margin-top: 0; color: #111827;">Command Executed: Late Registration</h4>
-            <div style="margin: 20px 0; padding: 20px; background: #fef2f2; border: 1px solid #dc2626; border-radius: 0;">
+            <h4 class="dc-title">Command Executed: Late Registration</h4>
+            <div class="dc-box dc-box-bad">
                 <div style="color: #dc2626; font-weight: 600; font-size: 16px; margin-bottom: 15px;">⚠️ Error</div>
                 <div style="color: #374151; font-size: 14px;">
                     <div style="margin: 8px 0;">A player named <strong>${playerName}</strong> is already registered in this tournament.</div>
                 </div>
             </div>
             <a href="#" onclick="commandLateRegistration(); return false;"
-               style="text-decoration: none; color: #065f46; font-size: 14px;">← Try again</a>
+               class="dc-link">← Try again</a>
         `);
         return;
     }
@@ -2853,26 +2763,26 @@ function commandLateRegistrationStep2() {
     lateRegState = { playerName, slotMatchId };
 
     const html = `
-        <h4 style="margin-top: 0; color: #111827;">Command Executed: Late Registration</h4>
-        <div style="margin: 20px 0; padding: 20px; background: #fffbeb; border: 1px solid #92400e; border-radius: 0;">
+        <h4 class="dc-title">Command Executed: Late Registration</h4>
+        <div style="margin: 20px 0; padding: 20px; background: #fffbeb; border: 1px solid #92400e;">
             <div style="color: #92400e; font-weight: 600; font-size: 16px; margin-bottom: 15px;">⚠️ Confirm Placement</div>
-            <div style="color: #374151; line-height: 1.8; font-size: 14px;">
+            <div class="dc-lines">
                 <div style="margin: 8px 0;"><strong>${playerName}</strong> will be placed in <strong>${slotMatchId}</strong> vs <strong>${opponentName}</strong>.</div>
                 <div style="margin: 8px 0;">This operation cannot be undone.</div>
             </div>
         </div>
-        <div style="margin: 20px 0; padding: 20px; background: #f9fafb; border: 1px solid #d1d5db; border-radius: 0;">
+        <div class="dc-box">
             <div style="font-weight: 600; color: #111827; margin-bottom: 8px;">Type <strong>${playerName}</strong> to confirm:</div>
             <input type="text" id="lateRegConfirmName" placeholder="Type player name exactly"
-                style="width: 100%; padding: 8px 12px; border: 1px solid #d1d5db; border-radius: 4px; font-size: 14px; margin-bottom: 12px; box-sizing: border-box;"
+                class="dc-input" style="width: 100%; margin-bottom: 12px;"
                 onkeydown="if(event.key==='Enter') commandLateRegistrationStep3()">
             <button onclick="commandLateRegistrationStep3()"
-                style="padding: 8px 20px; background: #dc2626; color: white; border: none; border-radius: 4px; font-weight: 600; font-size: 14px; cursor: pointer;">
+                class="dc-btn dc-btn-danger">
                 Confirm Registration
             </button>
         </div>
         <a href="#" onclick="commandLateRegistration(); return false;"
-           style="text-decoration: none; color: #065f46; font-size: 14px;">← Cancel</a>
+           class="dc-link">← Cancel</a>
     `;
 
     currentView = 'command-feedback';
@@ -3018,7 +2928,7 @@ function showTransactionLogManagement() {
             <h5 style="margin: 0 0 10px 0; color: #166534;">Smart Pruning</h5>
 
             <div style="margin-bottom: 15px;">
-                <button class="btn btn-success" onclick="previewSmartPruning(); return false;" style="margin: 0;">Preview Smart Pruning</button>
+                <button class="dc-btn dc-btn-primary" onclick="previewSmartPruning(); return false;">Preview Smart Pruning</button>
             </div>
 
             <p style="margin: 8px 0; font-size: 14px;">Removes redundant transactions for completed matches:</p>
@@ -3204,8 +3114,8 @@ function previewSmartPruning() {
         </div>
 
         <div style="margin-top: 20px;">
-            <button class="btn" onclick="showTransactionLogManagement(); return false;" style="margin-right: 10px;">Cancel</button>
-            <button class="btn btn-success" onclick="executeSmartPruning(); return false;">Prune Now</button>
+            <button class="dc-btn" onclick="showTransactionLogManagement(); return false;" style="margin-right: 10px;">Cancel</button>
+            <button class="dc-btn dc-btn-primary" onclick="executeSmartPruning(); return false;">Prune Now</button>
         </div>
     `;
 
@@ -3380,13 +3290,12 @@ function toggleConsoleOutput() {
     const icon = document.getElementById('consoleToggleIcon');
 
     if (content && icon) {
-        if (content.style.display === 'none') {
-            content.style.display = 'block';
-            icon.textContent = '▼';
-        } else {
-            content.style.display = 'none';
-            icon.textContent = '▶';
-        }
+        const open = content.style.display === 'none';
+        content.style.display = open ? 'block' : 'none';
+        icon.textContent = open ? '▼' : '▶';
+        const footer = document.getElementById('analyticsConsoleFooter');
+        if (footer) footer.classList.toggle('dc-open', open);
+        if (open) content.scrollTop = content.scrollHeight;
     }
 }
 
@@ -3411,8 +3320,8 @@ function debugAnalytics() {
 
 // Make functions globally accessible
 if (typeof window !== 'undefined') {
-    window.openAnalyticsModal = openAnalyticsModal;
-    window.closeAnalyticsModal = closeAnalyticsModal;
+    window.startDeveloperConsole = startDeveloperConsole;
+    window.stopDeveloperConsole = stopDeveloperConsole;
     window.debugAnalytics = debugAnalytics;
     window.showQuickOverview = showQuickOverview;
     window.showTransactionBreakdown = showTransactionBreakdown;

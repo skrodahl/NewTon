@@ -767,8 +767,8 @@ function showLateRegInfoModal() {
     const firstPara = document.getElementById('lateRegInfoFirstPara');
     if (firstPara) {
         firstPara.innerHTML = developerMode
-            ? 'To register a late arrival, open the <strong>Developer Console</strong> from the <strong>Console</strong> link in the Tournament Bracket header.'
-            : 'To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open it from the <strong>Console</strong> link in the Tournament Bracket header.';
+            ? 'To register a late arrival, open the <strong>Console</strong> tab on the Tournament Bracket page.'
+            : 'To register a late arrival, enable the <strong>Developer Console</strong> in <strong>Global Settings</strong>, then open the <strong>Console</strong> tab on the Tournament Bracket page.';
     }
 
     pushDialog('lateRegInfoModal', null, true);

@@ -573,7 +573,7 @@ function saveUIConfiguration(options = {}) {
         loadRecentTournaments();
     }
 
-    // Redraw the bracket so the finals position and the header's Console link follow the new settings
+    // Redraw the bracket so the finals position and the header's Console tab follow the new settings
     if (typeof renderBracket === 'function' && typeof tournament !== 'undefined' && tournament && tournament.bracket) {
         renderBracket();
     }

@@ -160,9 +160,9 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Header:</strong></p>
                     <ul>
-                        <li><strong>Left:</strong> tournament name and date, and links to <strong>Setup</strong>, <strong>Registration</strong>, <strong>Config</strong> and <strong>Analytics</strong> (plus <strong>Console</strong> when the Developer Console is enabled in Config)</li>
-                        <li><strong>Centre:</strong> the tabs <strong>Bracket | Match Controls</strong>, and <strong>Leaderboard</strong></li>
-                        <li><strong>Right:</strong> <strong>Finals Right | Middle</strong>, <strong>Fit all</strong>, zoom (− / +) and the clock. On Match Controls only the clock shows</li>
+                        <li><strong>Left:</strong> tournament name and date, and links to <strong>Setup</strong>, <strong>Registration</strong>, <strong>Config</strong> and <strong>Analytics</strong></li>
+                        <li><strong>Centre:</strong> the tabs <strong>Bracket | Match Controls</strong> (plus <strong>Console</strong> when the Developer Console is enabled in Config), and <strong>Leaderboard</strong></li>
+                        <li><strong>Right:</strong> <strong>Finals Right | Middle</strong>, <strong>Fit all</strong>, zoom (− / +) and the clock. On Match Controls and the Console only the clock shows</li>
                         <li><strong>Status line:</strong> players, matches played, walkovers, live and ready, with the colour legend on the bracket</li>
                     </ul>
                     <p><strong>Moving around:</strong></p>
@@ -283,7 +283,7 @@ const HELP_CONTENT = {
                         <li><strong>Start on Match Controls</strong>, <strong>New players are paid</strong>, <strong>Referee suggestions</strong>.</li>
                     </ul>
                     <p><strong>Bracket:</strong> <strong>Finals position</strong>, Right or Middle (double elimination). The same setting as the Finals toggle in the bracket header.</p>
-                    <p><strong>Developer:</strong> <strong>Developer Console</strong> adds a <strong>Console</strong> link to the bracket header, with diagnostics, validation checks, lane usage and transaction tools.</p>
+                    <p><strong>Developer:</strong> <strong>Developer Console</strong> adds a <strong>Console</strong> tab to the Tournament Bracket page, with diagnostics, validation checks, lane usage and transaction tools.</p>
                 `
             },
             formats: {

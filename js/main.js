@@ -515,6 +515,9 @@ function showPage(pageId) {
         BracketView.updateHeader();
     }
 
+    // Leaving the bracket page stops the Developer Console's capture and refresh
+    if (pageId !== 'tournament' && typeof stopDeveloperConsole === 'function') stopDeveloperConsole();
+
     // The bracket page starts on Match Controls or on the bracket (Global Settings: Start on Match Controls)
     if (pageId === 'tournament' && typeof showBracketView === 'function') {
         const onControls = config.ui.autoOpenMatchControls && tournament && !tournament._analyticsPreview;

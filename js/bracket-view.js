@@ -870,9 +870,12 @@ const BracketView = (() => {
             mcCount.textContent = waiting ? `${waiting} result${waiting > 1 ? 's' : ''}` : '';
             mcCount.hidden = !waiting;
         }
-        // Console link only when the Developer Console is enabled in Config
-        const consoleLink = document.getElementById('bvConsole');
-        if (consoleLink) consoleLink.hidden = !isDeveloperMode();
+        // Console tab only when the Developer Console is enabled in Config
+        const consoleTab = document.getElementById('bvConsoleTab');
+        if (consoleTab) {
+            consoleTab.hidden = !isDeveloperMode();
+            if (consoleTab.hidden && consoleTab.getAttribute('aria-pressed') === 'true') showBracketView('bracket');
+        }
         if (!tournament) {
             title.textContent = 'No tournament';
             sub.textContent = '';

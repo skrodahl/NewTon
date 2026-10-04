@@ -2291,27 +2291,39 @@ function getMatchProgressionText(matchId) {
 }
 
 
-// --- The bracket page's views: Bracket | Match Controls, in the same frame ---
+// --- The bracket page's views: Bracket | Match Controls | Console, in the same frame ---
 //
-// Match Controls is a layer over the bracket (#matchCommandCenterModal, shown with
-// style.display 'block'), so the bracket keeps its size and camera underneath. Code that
+// Match Controls and the Developer Console are layers over the bracket, shown with
+// style.display 'block', so the bracket keeps its size and camera underneath. Code that
 // redraws Match Controls after an action checks that display, as it did for the dialog.
 
-/** Show one view without drawing anything: the layer, the tabs, the header tools. */
+const _BV_LAYERS = { controls: 'matchCommandCenterModal', console: 'devConsoleView' };
+
+/** Show one view without drawing anything: the layers, the tabs, the header tools. */
 function _bvSetView(view) {
-    const layer = document.getElementById('matchCommandCenterModal');
-    if (layer) layer.style.display = view === 'controls' ? 'block' : 'none';
-    const frame = layer && layer.closest('.bracket-container');
-    if (frame) frame.classList.toggle('bv-on-controls', view === 'controls');
+    const dc = document.getElementById(_BV_LAYERS.console);
+    // leaving the Console stops its capture and refresh (js/analytics.js)
+    if (view !== 'console' && dc && dc.style.display === 'block' && typeof stopDeveloperConsole === 'function') stopDeveloperConsole();
+    Object.entries(_BV_LAYERS).forEach(([v, id]) => {
+        const layer = document.getElementById(id);
+        if (layer) layer.style.display = v === view ? 'block' : 'none';
+    });
+    const frame = document.querySelector('#tournament .bracket-container');
+    if (frame) frame.classList.toggle('bv-on-layer', view !== 'bracket');
     document.querySelectorAll('#bvViews [data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
 }
 
 /**
- * Switch the bracket page between the bracket and Match Controls (the tabs in its header).
- * @param {'bracket'|'controls'} view
+ * Switch the bracket page between its views (the tabs in its header).
+ * @param {'bracket'|'controls'|'console'} view
  * @param {string} [matchId] - on Match Controls, bring this match into view and flash it
  */
 function showBracketView(view, matchId) {
+    if (view === 'console') {
+        _bvSetView('console');
+        if (typeof startDeveloperConsole === 'function') startDeveloperConsole();
+        return;
+    }
     if (view !== 'controls') { _bvSetView('bracket'); return; }
     showMatchCommandCenter();
     if (!matchId) return;

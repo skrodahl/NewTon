@@ -240,8 +240,7 @@ All migrateable dialogs have been addressed.
 
 ### Intentionally excluded
 
-- **`matchCommandCenterModal`** — Match Controls. Content-dense custom layout (live + ready + completed match panels, referee suggestions, lane controls); not a fit for the `.dlg` pattern. Received light-touch visual alignment.
-- **`analyticsModal`** — Developer Console (the id is historical; the modal displays as "Developer Console" and opens via the version-number click when developer mode is enabled). Content-dense split view with commands and inspection panels. Received light-touch visual alignment.
+- **Match Controls** and the **Developer Console** are no longer dialogs: they are views in the Tournament Bracket page's frame (tabs Bracket | Match Controls | Console; see Docs/BRACKET-REDESIGN.md). Match Controls keeps the id `matchCommandCenterModal`; the console is `devConsoleView`.
 - **`statisticsModal`** — Leaderboard. 1200px-wide table view — also a page-in-a-modal rather than a dialog. Received a **light-touch visual alignment** (see below) instead of a full migration.
 - **`matchQRModal`** — Match assignment QR display. The QR image dominates and the rest is just a title, subtitle, and Close — restructuring into a `.dlg` layout wouldn't add value. Received the same light-touch visual alignment.
 - **`qrResultScanModal`** — Camera viewport for scanning result QRs. The `<video>` element dominates; the rest is just a title, hint, and Cancel. Light-touch alignment, no restructuring.
@@ -260,7 +259,7 @@ For non-`.dlg` modals (Match Controls, Analytics, Leaderboard, Developer Console
 
 Plus drop decorative emojis from the `<h3>` title. That's enough to make them feel part of the same family without restructuring page-style content.
 
-Already applied to: `statisticsModal`, `matchQRModal`, `qrResultScanModal`, `matchDetailModal`, `matchCommandCenterModal`, `analyticsModal` (Developer Console).
+Already applied to: `statisticsModal`, `matchQRModal`, `qrResultScanModal`, `matchDetailModal`.
 
 ---
 
