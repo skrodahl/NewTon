@@ -33,7 +33,7 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 
 ## Key Features
 - Bracket view (v5.1.10+) with every round on one page: Fit all, scroll or pinch to zoom, drag to pan, hover to magnify a match; click a match to highlight its lines and connected matches; Follow traces one player through the bracket; finals on the right or in the middle (double elimination); single elimination with a bronze final. The bracket shows the tournament; matches are run from Match Controls
-- Match Controls panel: lane assignment (1–20 dartboards), referee suggestions with conflict prevention
+- Match Controls (v5.3.0+: a tab beside the bracket, Bracket | Match Controls, on the same page; the page can start on either): a lanes board with one tile per live match (click the winner to finish it, time on the board, lane and referee changeable while live, Chalker handover), free lanes on one line (click one to start the next ready match there), the ready queue by round, referee suggestions with conflict prevention, and a podium with the night's highlights when the tournament is over. Lane assignment for 1–20 dartboards
 - Transaction-based undo system: surgical undo of any match result without resetting the tournament — blocked automatically if a downstream match is live or completed
 - Configurable point system: participation, placement, and achievement points — designed for season standings across multiple tournaments
 - Multi-tournament support with JSON import/export and CSV results export
@@ -134,7 +134,7 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - Tournament state persists in localStorage; match analytics persist in IndexedDB (NewtonMatchDB)
 - Server backup (v5.0.6) is opt-in Docker-to-Docker communication via relay, not cloud sync — there are no user accounts, no login, no third-party services
 - The configurable point system enables season standings across multiple tournaments — this is a primary use case
-- Late Registration exists but is accessible only via the Developer Console, not the main UI
+- Late Registration exists but is accessible only via the Developer Console (a Console tab on the bracket page when enabled in Global Settings, v5.3.0+), not the main UI
 - Lollipop counter exists: scoring a 3 (three ones) is a "lollipop" in darts club tradition — cosmetic only, not part of the points system
 - The bracket is not drag-and-drop; progression is fully deterministic via hardcoded lookup tables. Match cards in the bracket have no controls (v5.1.10+): start, lane, referee and winner are set in Match Controls; the bracket's selection bar offers Undo match (when allowed) and a Match Controls shortcut
 - The `/i-ching/` PWA on the same domain is an unrelated Douglas Adams side project — do not describe it as part of NewTon DC or conflate the two

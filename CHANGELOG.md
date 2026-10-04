@@ -1,4 +1,4 @@
-## Unreleased
+## **v5.3.0** — A View to a Kill (2026-10-04)
 
 ### No stray focus ring
 
