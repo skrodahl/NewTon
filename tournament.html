@@ -61,14 +61,12 @@
     <script>
         // Initialize help system when DOM is ready
         document.addEventListener('DOMContentLoaded', function () {
-            // Load help system after other initialization (not in analytics mode)
-            if (window.NEWTON_APP_MODE !== 'analytics') {
-                setTimeout(() => {
-                    if (typeof initializeHelpSystem === 'function') {
-                        initializeHelpSystem();
-                    }
-                }, 500);
-            }
+            // Load help system after other initialization
+            setTimeout(() => {
+                if (typeof initializeHelpSystem === 'function') {
+                    initializeHelpSystem();
+                }
+            }, 500);
 
             // Analytics-only mode — navigate to Analytics on load
             if (window.NEWTON_APP_MODE === 'analytics') {

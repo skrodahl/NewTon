@@ -513,9 +513,6 @@ let helpState = {
  * Call this after DOM is loaded
  */
 function initializeHelpSystem() {
-    // Skip help system entirely in analytics mode
-    if (window.NEWTON_APP_MODE === 'analytics') return;
-
     console.log('🔧 Initializing dynamic help system...');
 
     // Initialize help icons with tooltips
@@ -740,8 +737,8 @@ function setHelpPage(pageId) {
 function setupContextDetection() {
     // Page changes arrive via setHelpPage(), called from showPage()
 
-    // Detect first-time user
-    if (!localStorage.getItem('helpSystemSeen')) {
+    // Detect first-time user (the first-run guide is for the Tournament Manager, not Analytics)
+    if (window.NEWTON_APP_MODE !== 'analytics' && !localStorage.getItem('helpSystemSeen')) {
         setTimeout(() => {
             showHelp('scenarios', 'firstTime');
             localStorage.setItem('helpSystemSeen', 'true');

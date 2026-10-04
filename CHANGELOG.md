@@ -1,5 +1,10 @@
 ## Unreleased
 
+### Help buttons work on an analytics-only instance
+
+- **The Help buttons in Analytics and Custom Settings now open the help.** The help system had been switched off in analytics mode back when Analytics had no help topics of its own; the topics came later, but the switch stayed. F1, Esc and Ctrl+H work there too. The first-run welcome guide is for the Tournament Manager, so it is still not shown on an analytics-only instance.
+- Files changed: `tournament.html`, `js/dynamic-help-system.js`.
+
 ### Bracket header on an analytics-only instance
 
 - **The status line no longer runs into the Finals buttons** when a bracket is viewed on an analytics-only instance. The header's top row takes its height from the centre group (the tabs and Leaderboard), as the left and right groups span both rows; with those buttons hidden in analytics mode the row collapsed, and the status row rose into the tools. The centre group now keeps the tabs' height (38px) when empty. Full mode is unchanged.
