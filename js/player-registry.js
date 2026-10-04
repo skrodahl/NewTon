@@ -295,16 +295,20 @@ const PlayerRegistry = (() => {
      * Who has played: per registry player, the finished tournaments in the Analytics
      * register and the last date, and whether they have ever been in Analytics at all
      * (a finished tournament there, or a played match in a tournament on this computer).
-     * Players who have been in Analytics can't be deleted.
-     * @returns {Promise<Map<string, {played: number, lastPlayed: number|null, entered: boolean}>>}
+     * Players who have been in Analytics can't be deleted. Also which tournaments each was
+     * in (ID → name), so two players who played the same tournament aren't merged.
+     * @returns {Promise<Map<string, {played: number, lastPlayed: number|null, entered: boolean, tournaments: Map<string, string>}>>}
      */
     async function usage() {
         const out = new Map();
-        const mark = (p, closedAt, final) => {
+        const mark = (p, closedAt, final, tid, tname) => {
             if (!p) return;
-            const u = out.get(p.id) || { played: 0, lastPlayed: null, entered: false };
+            const u = out.get(p.id) || { played: 0, lastPlayed: null, entered: false, tournaments: new Map() };
             u.entered = true;
-            if (final) {
+            const key = String(tid);
+            const seen = u.tournaments.has(key);
+            if (tid != null) u.tournaments.set(key, tname || key);
+            if (final && !seen) {
                 u.played++;
                 if (closedAt && (!u.lastPlayed || closedAt > u.lastPlayed)) u.lastPlayed = closedAt;
             }
@@ -317,7 +321,7 @@ const PlayerRegistry = (() => {
                     const ids = t.registryIds || {};
                     const ms = t.closedAt ? (t.closedAt > 1e12 ? t.closedAt : t.closedAt * 1000) : null;
                     Object.entries(t.tournamentAchievements || {}).forEach(([pid, a]) => {
-                        mark(get(ids[pid]) || byName(a && a.name), ms, t.status === 'final');
+                        mark(get(ids[pid]) || byName(a && a.name), ms, t.status === 'final', t.tournamentId, t.tournamentName);
                     });
                 });
             } catch (e) { /* the register is not available here */ }
@@ -326,14 +330,14 @@ const PlayerRegistry = (() => {
         let local = [];
         try { local = JSON.parse(localStorage.getItem('dartsTournaments') || '[]') || []; } catch (e) { local = []; }
         if (typeof tournament !== 'undefined' && tournament && typeof players !== 'undefined') {
-            local = local.filter(t => String(t.id) !== String(tournament.id)).concat([{ players, matches: typeof matches !== 'undefined' ? matches : [] }]);
+            local = local.filter(t => String(t.id) !== String(tournament.id)).concat([{ id: tournament.id, name: tournament.name, players, matches: typeof matches !== 'undefined' ? matches : [] }]);
         }
         local.forEach(t => {
             const played = (t.matches || []).filter(m => m.completed && !m.autoAdvanced);
             if (!played.length) return;
             const inPlay = new Set();
             played.forEach(m => [m.player1, m.player2].forEach(x => { if (x && x.id != null) inPlay.add(String(x.id)); }));
-            (t.players || []).forEach(pl => { if (inPlay.has(String(pl.id))) mark(get(pl.registryId) || byName(pl.name), null, false); });
+            (t.players || []).forEach(pl => { if (inPlay.has(String(pl.id))) mark(get(pl.registryId) || byName(pl.name), null, false, t.id, t.name); });
         });
         return out;
     }

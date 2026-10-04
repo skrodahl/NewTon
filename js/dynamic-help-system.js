@@ -89,7 +89,7 @@ const HELP_CONTENT = {
                     <p>Every player has a permanent ID, a <strong>short name</strong> (what the bracket, Match Controls, the Chalker and the Leaderboard show; it must be unique) and a first and last name. Analytics follows the ID, so a player's results stay together whatever they are called.</p>
                     <ul>
                         <li><strong>Edit:</strong> change the names. A changed short name is kept under <em>Previous names</em>, so older results under it still count for the player.</li>
-                        <li><strong>Merge…:</strong> for duplicates (“Erik” and “Eirik”). Choose whose details to keep; the other's tournaments and Analytics become theirs. This can't be undone.</li>
+                        <li><strong>Merge…:</strong> for duplicates (“Erik” and “Eirik”). Choose whose details to keep; the other's tournaments and Analytics become theirs. This can't be undone. Two players who played in the same tournament are two people, so they can't be merged.</li>
                         <li><strong>Archive:</strong> hides a player from the list for new tournaments. Players who have played are kept for Analytics, so they can be archived but not deleted. Players who never played can be deleted.</li>
                         <li><strong>Import from file:</strong> adds the players from a tournament export file. It never replaces the database.</li>
                     </ul>

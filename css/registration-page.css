@@ -127,6 +127,8 @@
 .rg-merge-keep label:has(input:checked) { border-color: var(--nt-ink); box-shadow: inset 0 0 0 1px var(--nt-ink); }
 .rg-merge-keep input { margin-top: 3px; accent-color: var(--nt-header); }
 .rg-merge-keep small { display: block; color: var(--nt-muted); font-size: 12px; }
+.rg-merge-block { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fdecec; color: var(--nt-danger); font-size: 13px; }
+.rg-merge-block[hidden] { display: none; }
 
 @media (max-width: 1000px) {
   .rg-cols, .rg-cols.rg-running { grid-template-columns: 1fr; }

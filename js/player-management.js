@@ -420,7 +420,9 @@ function openPlayerForm(id, presetShort) {
  * Merge two players who are the same person: one keeps its details, the other's ID and
  * names are kept with it, so all their tournaments and Analytics count as one player.
  */
-function openMergeDialog() {
+async function openMergeDialog() {
+    // who played where, for the guard below (the database tab usually has it already)
+    if (!renderPlayerDatabase._usage) renderPlayerDatabase._usage = await PlayerRegistry.usage();
     const list = PlayerRegistry.all().sort((a, b) => a.short.localeCompare(b.short));
     if (list.length < 2) { alert('There need to be at least two players to merge.'); return; }
     const opts = list.map((p, i) => `<option value="${i}">${escapeHtml(p.short)}${PlayerRegistry.fullName(p) ? ' — ' + escapeHtml(PlayerRegistry.fullName(p)) : ''}${p.archived ? ' (archived)' : ''}</option>`).join('');
@@ -434,6 +436,7 @@ function openMergeDialog() {
             </div>
             <div><span class="dlg__label">Keep the details of</span><div class="rg-merge-keep" id="mgKeep"></div>
                 <p class="rg-form-msg">The other's short name is kept as a previous name.</p></div>
+            <p class="rg-merge-block" id="mgBlock" hidden></p>
         </div>
         <div class="dlg__foot">
             <button type="button" class="btn" data-dlg-cancel>Cancel</button>
@@ -441,15 +444,28 @@ function openMergeDialog() {
         </div>`);
     if (!d) return;
     const a = d.querySelector('#mgA'), b = d.querySelector('#mgB'), keep = d.querySelector('#mgKeep'), go = d.querySelector('#mgDo');
+    const block = d.querySelector('#mgBlock');
     b.value = '1';
     const usage = renderPlayerDatabase._usage || new Map();
+    // Two players who were in the same tournament are two people: refuse, and say where
+    const together = (pa, pb) => {
+        const ta = (usage.get(pa.id) || {}).tournaments, tb = (usage.get(pb.id) || {}).tournaments;
+        if (!ta || !tb) return [];
+        return [...ta.entries()].filter(([id]) => tb.has(id)).map(([, name]) => name);
+    };
     const draw = () => {
         const pa = list[+a.value], pb = list[+b.value];
         keep.innerHTML = [pa, pb].map((p, i) => {
             const u = usage.get(p.id) || {};
             return `<label><input type="radio" name="mgKeep" value="${i}"${i === 0 ? ' checked' : ''}><span><b>${escapeHtml(p.short)}</b> ${escapeHtml(PlayerRegistry.fullName(p))}<small>${u.played || 0} tournaments${p.prev.length ? ' · was ' + escapeHtml(p.prev.join(', ')) : ''}</small></span></label>`;
         }).join('');
-        go.disabled = a.value === b.value;
+        const both = a.value === b.value ? [] : together(pa, pb);
+        block.hidden = !both.length;
+        if (both.length) {
+            const shown = both.slice(0, 3).join(', ') + (both.length > 3 ? ` and ${both.length - 3} more` : '');
+            block.textContent = `${pa.short} and ${pb.short} both played in ${both.length === 1 ? 'the same tournament' : both.length + ' of the same tournaments'} (${shown}), so they are two different people and can't be merged.`;
+        }
+        go.disabled = a.value === b.value || both.length > 0;
     };
     a.addEventListener('change', draw);
     b.addEventListener('change', draw);
@@ -458,6 +474,7 @@ function openMergeDialog() {
         const pair = [list[+a.value], list[+b.value]];
         const k = +(d.querySelector('input[name="mgKeep"]:checked') || { value: 0 }).value;
         const kept = pair[k], gone = pair[1 - k];
+        if (together(kept, gone).length) return;
         if (!PlayerRegistry.merge(kept.id, gone.id)) return;
         // the loaded tournament: the merged player is now the kept one
         if (tournament && !tournament.readOnly) {

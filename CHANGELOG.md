@@ -16,6 +16,7 @@
 - **Analytics follows the ID:** each tournament in the register records which database player each tournament player is (`registryIds`, at finalization and import). Analytics groups by it, merged IDs included, and links older tournaments by name (short or previous name). It shows the current short name everywhere (Leaderboard, Players, Dashboard, winners, match lists and match detail) and the full name in the profile.
 - **The database travels with tournaments:** exports and uploads carry it (`playerDatabase`, with full names; the `playerList` of short names stays for older versions). Importing a tournament file **adds** its players by ID instead of replacing the saved-players list. The server keeps the newest uploaded copy in `tournaments/registry/player-database.json`, which an analytics-only instance reads (`instanceMode` in the page tells it apart under `?tm`).
 - Match Controls' add-player field and late registration (Developer Console) take players from the database too (found by name, or created).
+- **Merge guard:** two players who played in the same tournament are two people, so Merge refuses them and names the tournaments (`usage()` now also records which tournaments each player was in).
 - Files changed: `js/player-registry.js` (new), `js/player-management.js`, `js/newton-history.js`, `js/newton-db.js`, `js/tournament-management.js`, `js/analytics.js`, `js/main.js`, `js/types.js`, `js/dynamic-help-system.js`, `css/registration-page.css`, `tournament.html`, `api/upload-tournament.php`, `Docs/REST_API.md`, `llms.txt`.
 
 ### Player charts
