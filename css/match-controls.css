@@ -153,10 +153,10 @@
 .mc-head-hl small { font-size: 13px; color: var(--nt-ink-2); }
 /* the plaque under the podium: club, tournament and date, like the plate on a trophy */
 .mc-podpanel { display: flex; flex-direction: column; }
-.mc-plaque { margin-top: auto; display: grid; justify-items: center; gap: 2px; text-align: center; padding: 18px 20px 20px; background: var(--nt-inset); color: var(--nt-ink); border-top: 1px solid var(--nt-line); border-radius: 0 0 11px 11px; }
+.mc-plaque { margin-top: auto; display: grid; justify-items: center; gap: 2px; text-align: center; padding: 18px 20px 20px; background: #4b5563; color: #fff; border-radius: 0 0 11px 11px; }
 .mc-plaque-club { font-family: 'Insignia', var(--nt-sans); font-size: 30px; line-height: 1.15; }
 .mc-plaque b { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
-.mc-plaque time { font-size: 14px; font-weight: 600; color: var(--nt-muted); font-variant-numeric: tabular-nums; }
+.mc-plaque time { font-size: 14px; font-weight: 600; color: #d1d5db; font-variant-numeric: tabular-nums; }
 /* each highlight draws its own right edge; the list clips the last column's */
 .mc-hls { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--nt-line); overflow: hidden; }
 .mc-hl { display: grid; gap: 1px; padding: 10px 18px; border-bottom: 1px solid var(--nt-line); box-shadow: 1px 0 0 var(--nt-line); min-width: 0; }
