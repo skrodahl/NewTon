@@ -253,7 +253,7 @@ const HELP_CONTENT = {
                         <li><strong>Referees:</strong> live matches without a referee first, then recent losers, recent winners and who refereed recently. Players in live matches aren't suggested.</li>
                         <li><strong>Scan QR results</strong> is in the Lanes heading while matches are live (QR handover).</li>
                     </ul>
-                    <p><strong>When the tournament is finished:</strong> the podium, the night's highlights (most points, best average, the backside run, deciders, the busiest referee and lane, and more) and Tournament Analytics.</p>
+                    <p><strong>When the tournament is finished:</strong> the podium with Most 180s, Shortest leg and Highest out under it, and a plaque with the club, tournament and date; then 4th, 5th–6th and 7th–8th (the places that still score placement points) and the night's awards, one per row (Most points, Most matches won, Backside run, Best average, Most tons, Lollipops, Busiest lane), the night in numbers, and Tournament Analytics.</p>
                     <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action.</p>
                 `
             }

@@ -2014,9 +2014,17 @@ function _mcHighlights() {
     const out = shared(p => len(p.stats.highOuts) ? Math.max(...p.stats.highOuts) : null, (a, b) => a > b);
     headline('Highest out', out, v => v);
 
-    const pts = best(p => typeof calculatePlayerPoints === 'function' ? calculatePlayerPoints(p) : null, (a, b) => a > b);
+    // First the places after the podium that still score placement points, then the awards,
+    // one per row (shown when there is data). Best average is filled in once the Analytics
+    // register has been read (_mcFillAverage).
+    [4, 5, 7].forEach(rank => {
+        const names = paid.filter(p => tournament.placements && tournament.placements[String(p.id)] === rank).map(p => p.name);
+        if (names.length) list.push({ label: typeof formatRanking === 'function' ? formatRanking(rank).replace('-', '–') : String(rank), value: names.join(', '), who: '', place: true });
+    });
+    const later = id => list.push({ label: 'Best average', value: '', who: '', id, hidden: true });
+    const points = p => typeof calculatePlayerPoints === 'function' ? calculatePlayerPoints(p) : 0;
+    const pts = best(p => points(p), (a, b) => a > b);
     if (pts) add(list, 'Most points', pts.p.name, `${pts.v} points`);
-    list.push({ label: 'Best average', value: '', who: '', id: 'mcBestAverage', hidden: true }); // filled from the Chalker matches
     const wins = {}, total = {};
     played.forEach(m => {
         if (m.winner && m.winner.id != null) wins[m.winner.id] = (wins[m.winner.id] || 0) + 1;
@@ -2024,13 +2032,6 @@ function _mcHighlights() {
     });
     const topWins = Object.entries(wins).sort((a, b) => b[1] - a[1])[0];
     if (topWins && _mcPlayer(topWins[0])) add(list, 'Most matches won', _mcPlayer(topWins[0]).name, `${topWins[1]} of ${total[topWins[0]]}`);
-    const tons = best(p => p.stats.tons || 0, (a, b) => a > b);
-    if (tons && tons.v > 0) add(list, 'Most tons', tons.p.name, String(tons.v));
-    const lolly = best(p => p.stats.lollipops || 0, (a, b) => a > b);
-    if (lolly && lolly.v > 0) {
-        const others = paid.filter(p => (p.stats.lollipops || 0) > 0).length - 1;
-        add(list, 'Lollipops', lolly.p.name, `${lolly.v}${others > 0 ? ` · and ${others} more player${others === 1 ? '' : 's'}` : ''}`);
-    }
     // the backside run: the most wins on the backside (double elimination)
     if (typeof getFormat !== 'function' || getFormat() !== 'SE') {
         const bs = {};
@@ -2041,27 +2042,29 @@ function _mcHighlights() {
             add(list, 'Backside run', _mcPlayer(run[0]).name, `${run[1]} wins on the backside${place && typeof formatRanking === 'function' ? `, to ${formatRanking(place)}` : ''}`);
         }
     }
-    const scored = played.filter(m => m.finalScore && m.legs > 1);
-    const deciders = scored.filter(m => m.finalScore.loserLegs === Math.floor(m.legs / 2)).length;
-    if (scored.length) add(list, 'Deciders', String(deciders), 'matches went to the last leg');
-    const refs = {}, lanes = {};
-    played.forEach(m => {
-        if (m.referee) refs[m.referee] = (refs[m.referee] || 0) + 1;
-        if (m.lane) lanes[m.lane] = (lanes[m.lane] || 0) + 1;
-    });
-    const ref = Object.entries(refs).sort((a, b) => b[1] - a[1])[0];
-    if (ref && _mcPlayer(ref[0])) add(list, 'Busiest referee', _mcPlayer(ref[0]).name, `${ref[1]} match${ref[1] === 1 ? '' : 'es'}`);
+    later('mcBestAverage');
+    const tons = best(p => p.stats.tons || 0, (a, b) => a > b);
+    if (tons && tons.v > 0) add(list, 'Most tons', tons.p.name, String(tons.v));
+    const lolly = best(p => p.stats.lollipops || 0, (a, b) => a > b);
+    if (lolly && lolly.v > 0) {
+        const others = paid.filter(p => (p.stats.lollipops || 0) > 0).length - 1;
+        add(list, 'Lollipops', lolly.p.name, `${lolly.v}${others > 0 ? ` · and ${others} more player${others === 1 ? '' : 's'}` : ''}`);
+    }
+    const lanes = {};
+    played.forEach(m => { if (m.lane) lanes[m.lane] = (lanes[m.lane] || 0) + 1; });
     const lane = Object.entries(lanes).sort((a, b) => b[1] - a[1])[0];
     if (lane) add(list, 'Busiest lane', `Lane ${lane[0]}`, `${lane[1]} match${lane[1] === 1 ? '' : 'es'}`);
 
+    // The night in numbers: always the same six
     const sum = f => paid.reduce((s, p) => s + f(p), 0);
+    const format = typeof getFormat === 'function' && getFormat() === 'SE' ? 'Single elimination' : 'Double elimination';
     const facts = [
+        ['Bracket', `${format} · ${tournament.bracketSize || players.length}`],
+        ['Total points', sum(points)],
         ['Matches played', played.length],
-        ['Bracket', `${tournament.bracketSize || players.length} players`],
-        ['180s', sum(p => p.stats.oneEighties || 0)],
-        ['High outs', sum(p => len(p.stats.highOuts))],
         ['Short legs', sum(p => len(p.stats.shortLegs))],
-        ['Legs played', scored.concat(played.filter(m => m.finalScore && m.legs <= 1)).reduce((s, m) => s + (m.finalScore.winnerLegs || 0) + (m.finalScore.loserLegs || 0), 0)]
+        ['180s', sum(p => p.stats.oneEighties || 0)],
+        ['High outs', sum(p => len(p.stats.highOuts))]
     ];
     return { head, list, facts };
 }
@@ -2075,7 +2078,7 @@ function _mcCompletedHTML() {
     const top = rank => { const id = tournament.placements && Object.keys(tournament.placements).find(k => tournament.placements[k] === rank); const p = id && _mcPlayer(id); return p ? escapeHtml(p.name) : '–'; };
     const pod = (cls, rank, label) => `<div class="mc-pod ${cls}"><div class="mc-podcard"><div class="mc-medal">${rank}</div><span class="mc-podrank">${label}</span><span class="mc-podname">${top(rank)}</span></div><div class="mc-podblock">${rank}</div></div>`;
     const h = _mcHighlights();
-    const hl = x => `<div class="mc-hl"${x.id ? ` id="${x.id}"` : ''}${x.hidden ? ' hidden' : ''}><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`;
+    const hl = x => `<div class="mc-aw${x.place ? ' mc-place' : ''}"${x.id ? ` id="${x.id}"` : ''}${x.hidden ? ' hidden' : ''}><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`;
     const club = escapeHtml((config && config.clubName) || 'NewTon DC');
     return `<div class="mc-done">
         <section class="mc-panel mc-podpanel"><div class="mc-ph"><h3>Tournament complete</h3></div>
@@ -2084,7 +2087,8 @@ function _mcCompletedHTML() {
             <div class="mc-plaque"><span class="mc-plaque-club">${club}</span><b>${escapeHtml(tournament.name || '')}</b>${tournament.date ? `<time>${escapeHtml(tournament.date)}</time>` : ''}</div>
         </section>
         <section class="mc-panel mc-hlpanel"><div class="mc-ph"><h3>Highlights</h3><span class="mc-hint">From tonight's matches</span></div>
-            <div class="mc-hls">${h.list.map(hl).join('')}</div>
+            <div class="mc-aws">${h.list.map(hl).join('')}</div>
+            <p class="mc-factshead">The night in numbers</p>
             <dl class="mc-facts">${h.facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join('')}</dl>
             <div class="mc-doneacts">
                 <button type="button" class="mc-btn mc-primary" onclick="if (tournament && tournament.id) openAnalyticsForTournament(tournament.id)">Tournament Analytics</button>
@@ -2094,9 +2098,18 @@ function _mcCompletedHTML() {
     </div>`;
 }
 
+/** Fill in an award row that waits for the Analytics register, and show it. */
+function _mcFillRow(id, name, detail) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.querySelector('b').textContent = name;
+    el.querySelector('small').textContent = detail;
+    el.hidden = false;
+}
+
 /**
  * Best three-dart average of the night, from the Chalker matches in the Analytics register
- * (they carry every visit). Fills in the highlight when there is one; it stays hidden when
+ * (they carry every visit). Fills in the award when there is one; it stays hidden when
  * no match was scored on the Chalker.
  */
 async function _mcFillAverage() {
@@ -2119,11 +2132,7 @@ async function _mcFillAverage() {
         });
     });
     const best = Object.values(acc).filter(a => a.darts >= 30).sort((a, b) => b.scored / b.darts - a.scored / a.darts)[0];
-    const el = document.getElementById('mcBestAverage');
-    if (!best || !el) return;
-    el.querySelector('b').textContent = best.name;
-    el.querySelector('small').textContent = `${(best.scored / best.darts * 3).toFixed(1)} · Chalker matches`;
-    el.hidden = false;
+    if (best) _mcFillRow('mcBestAverage', best.name, `${(best.scored / best.darts * 3).toFixed(1)} · Chalker matches`);
 }
 
 // Tournament export function for celebration button
