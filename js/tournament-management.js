@@ -62,12 +62,14 @@ function getFormat() {
  */
 function tournamentStatusLabel(t) {
     if (!t) return '-';
+    // Shown as New / Active / Completed; the stored status 'setup' reads as New
+    const label = { setup: 'New', active: 'Active', completed: 'Completed' };
     if (t.status) {
-        return t.status.charAt(0).toUpperCase() + t.status.slice(1);
+        return label[t.status] || t.status.charAt(0).toUpperCase() + t.status.slice(1);
     }
-    if (!t.bracket) return 'Setup';
+    if (!t.bracket) return 'New';
     const matchesArr = t.matches || [];
-    if (matchesArr.length === 0) return 'Setup';
+    if (matchesArr.length === 0) return 'New';
     if (matchesArr.every(m => m.completed)) return 'Completed';
     return 'Active';
 }
@@ -845,7 +847,7 @@ function renderSetupCurrent() {
     // The next step for the tournament's status: [title, hint, secondary button, main button]
     const toGo = all.length - done;
     const next = {
-        Setup: ['Register players',
+        New: ['Register players',
             list.length ? 'Draw the bracket from the bracket page when everyone is in.' : 'Add the players who are taking part.',
             ['Open bracket', "showPage('tournament')"], ['Register players', "showPage('registration')"]],
         Active: ['Run the matches',
@@ -855,15 +857,15 @@ function renderSetupCurrent() {
             ['Open bracket', "showPage('tournament')"], ['Open in Analytics', 'openAnalyticsForTournament(tournament.id)']]
     }[status] || null;
 
-    panel.className = 'st-panel st-current';
+    // The status is the heading, in its colour, with a coloured top edge (css/setup-page.css)
+    panel.className = `st-panel st-current st-is-${status.toLowerCase()}`;
     panel.innerHTML = `
         <div class="st-current-head">
             <div>
-                <p class="st-eyebrow">Current tournament</p>
+                <p class="st-eyebrow st-status">${escapeHtml(status)} tournament</p>
                 <h3>${escapeHtml(tournament.name)}</h3>
                 <div class="st-sub">${escapeHtml(tournament.date)}${format ? ` · ${escapeHtml(format.name)}` : ''}</div>
             </div>
-            <span class="st-pill st-${status.toLowerCase()}">${escapeHtml(status)}</span>
         </div>
         <dl class="st-facts">
             <div><dt>Players</dt><dd>${list.length} <small>${list.length && paid === list.length ? 'all paid' : `${paid} paid`}</small></dd></div>

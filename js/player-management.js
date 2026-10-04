@@ -84,6 +84,16 @@ function renderRegistrationNext() {
         enabled = false;
     }
 
+    // The tournament's status leads the heading, with a coloured top edge, as on Setup
+    const status = tournament && typeof tournamentStatusLabel === 'function' ? tournamentStatusLabel(tournament) : '';
+    const section = title.closest('.rg-next');
+    if (section) section.className = 'rg-next' + (status ? ` st-is-${status.toLowerCase()}` : '');
+    const eyebrow = document.getElementById('registrationNextStatus');
+    if (eyebrow) {
+        eyebrow.textContent = status ? `${status} · Next step` : 'Next step';
+        eyebrow.classList.toggle('st-status', !!status);
+    }
+
     title.textContent = text[0];
     hint.textContent = text[1];
     btn.textContent = button[0];

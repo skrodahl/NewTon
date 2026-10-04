@@ -55,6 +55,16 @@
 .st-bottom > .st-panel { display: flex; flex-direction: column; }
 .st-bottom .st-scroll, .st-bottom .st-hlist { flex: 1 1 auto; }
 
+/* The tournament's status (Setup's current tournament, Registration's next step): the heading
+   in its colour, and a coloured top edge on the panel, as on Match Controls' live tiles */
+.st-is-new { box-shadow: inset 0 4px 0 var(--nt-faint); }
+.st-is-active { box-shadow: inset 0 4px 0 var(--nt-accent); }
+.st-is-completed { box-shadow: inset 0 4px 0 #16a34a; }
+.st-status { display: inline-flex; align-items: center; gap: 7px; font-size: 14px; }
+.st-status::before { content: ""; width: 8px; height: 8px; border-radius: 50%; background: currentColor; }
+.st-is-new .st-status { color: var(--nt-ink-2); }
+.st-is-active .st-status { color: #b2410f; }
+.st-is-completed .st-status { color: var(--nt-ok); }
 .st-current { padding: 20px 22px; display: grid; gap: 16px; align-content: start; }
 .st-current-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
 .st-current-head > div { min-width: 0; }

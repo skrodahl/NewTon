@@ -1,5 +1,11 @@
 ## Unreleased
 
+### Tournament status at a glance
+
+- **Setup's current tournament and Registration's next step lead with the tournament's status**: the heading reads "New tournament" / "Active tournament" / "Completed tournament" (Registration: "Active · Next step"), with a dot, in the status colour, and the panel has a 4px top edge in the same colour (grey, orange, green), as on Match Controls' live tiles. The small status pill on Setup is gone, as the heading replaces it.
+- **"Setup" is now "New" wherever the status is shown** (the tournament list, the Load, Delete, Import, Export, Reset and Analytics import dialogs): `tournamentStatusLabel()` maps the stored `setup` to New. The stored status is unchanged.
+- Files changed: `js/tournament-management.js`, `js/player-management.js` (`renderRegistrationNext()`), `tournament.html`, `css/setup-page.css` (`.st-is-*`, `.st-status`), `js/dynamic-help-system.js`.
+
 ### Developer Console: a tab on the bracket page
 
 - **The Developer Console is the third tab, Console**, next to Bracket | Match Controls, shown when the Developer Console is enabled in Global Settings. It replaces the Console link and the dialog. Like Match Controls it is a layer over the bracket; the bracket's tools and legend hide while it shows. The page never starts on it, and turning the console off in Global Settings hides the tab (and leaves it if it was showing).
