@@ -2148,7 +2148,6 @@ function exportTournamentJSON() {
 // Expose functions to global scope
 if (typeof window !== 'undefined') {
     window.exportTournamentJSON = exportTournamentJSON;
-    window.getMatchProgressionText = getMatchProgressionText;
 }
 
 // --- END: Tournament Celebration Functions ---
@@ -2218,75 +2217,6 @@ function getDetailedMatchState(matchId) {
         return { state: 'completed', text: `Cannot Undo, blocked by ${blockingMatches[0]} and ${blockingMatches[1]}` };
     }
 }
-
-// Generate two-line match information using the appropriate progression table and state logic
-function getMatchProgressionText(matchId) {
-    if (!tournament || !tournament.bracketSize) {
-        return null;
-    }
-
-    const progressionTable = getProgressionTable();
-    if (!progressionTable) {
-        return null;
-    }
-
-    const progression = progressionTable[matchId];
-    if (!progression) {
-        return null;
-    }
-
-    // Get detailed state information
-    const stateInfo = getDetailedMatchState(matchId);
-    if (!stateInfo) {
-        return null;
-    }
-
-    // Generate first line: Match ID + State
-    const line1 = `${matchId} • ${stateInfo.text}`;
-
-    // SE: visual bracket lines make progression self-evident — show state only
-    if (getFormat() === 'SE') {
-        return { line1, line2: null };
-    }
-
-    // Generate second line: Progression
-    const destinations = [];
-    if (progression.winner && progression.winner[0]) {
-        destinations.push(progression.winner[0]);
-    }
-    if (progression.loser && progression.loser[0]) {
-        destinations.push(progression.loser[0]);
-    }
-
-    let line2;
-    if (destinations.length === 0) {
-        line2 = "Leads to tournament completion";
-    } else if (destinations.length === 1) {
-        line2 = `Leads to ${destinations[0]}`;
-    } else {
-        line2 = `Leads to ${destinations[0]} and ${destinations[1]}`;
-    }
-
-    // For backside matches, show which matches feed into this one
-    let line3 = null;
-    if (matchId.startsWith('BS-')) {
-        const sourcesLookup = buildMatchSourcesLookup(tournament.bracketSize);
-        const sources = sourcesLookup[matchId];
-        if (sources) {
-            const allSources = [...sources.losers, ...sources.winners];
-            if (allSources.length > 0) {
-                line3 = `Fed by ${allSources.join(', ')}`;
-            }
-        }
-    }
-
-    return {
-        line1: line1,
-        line2: line2,
-        line3: line3
-    };
-}
-
 
 // --- The bracket page's views: Bracket | Match Controls | Console, in the same frame ---
 //
