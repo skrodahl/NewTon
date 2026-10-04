@@ -136,7 +136,7 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Setting Up Your Tournament:</strong></p>
                     <ol>
-                        <li>Click "<strong>Match Controls</strong>" in the header</li>
+                        <li>Open the <strong>Match Controls</strong> tab in the header</li>
                         <li>Before the draw it shows the players: click a name to mark them paid or unpaid, or add a player (found in the player database, or created)</li>
                         <li>When ready, choose a format under <strong>Shuffle &amp; Draw</strong> and click "<strong>Draw a [X]-player bracket</strong>"</li>
                     </ol>
@@ -161,9 +161,9 @@ const HELP_CONTENT = {
                     <p><strong>Header:</strong></p>
                     <ul>
                         <li><strong>Left:</strong> tournament name and date, and links to <strong>Setup</strong>, <strong>Registration</strong>, <strong>Config</strong> and <strong>Analytics</strong> (plus <strong>Console</strong> when the Developer Console is enabled in Config)</li>
-                        <li><strong>Centre:</strong> <strong>Match Controls</strong> and <strong>Leaderboard</strong></li>
-                        <li><strong>Right:</strong> <strong>Finals Right | Middle</strong>, <strong>Fit all</strong>, zoom (− / +) and the clock</li>
-                        <li><strong>Status line:</strong> players, matches played, walkovers, live and ready, with the colour legend</li>
+                        <li><strong>Centre:</strong> the tabs <strong>Bracket | Match Controls</strong>, and <strong>Leaderboard</strong></li>
+                        <li><strong>Right:</strong> <strong>Finals Right | Middle</strong>, <strong>Fit all</strong>, zoom (− / +) and the clock. On Match Controls only the clock shows</li>
+                        <li><strong>Status line:</strong> players, matches played, walkovers, live and ready, with the colour legend on the bracket</li>
                     </ul>
                     <p><strong>Moving around:</strong></p>
                     <ul>
@@ -176,7 +176,7 @@ const HELP_CONTENT = {
                         <li><strong>Click a match</strong> to highlight its lines and the matches it is connected to. The view follows if they are off-screen; markers at the edge point to the rest</li>
                         <li><strong>Follow [player]</strong> traces that player through the bracket. Click it again to stop</li>
                         <li><strong>Undo match</strong> appears when the result can be undone</li>
-                        <li><strong>Match Controls</strong> opens Match Controls</li>
+                        <li><strong>Match Controls</strong> switches to Match Controls and points out that match</li>
                         <li>Click empty space or press <strong>Esc</strong> to clear the selection</li>
                     </ul>
                     <p><strong>Finals Right | Middle:</strong> the finals at the right edge, or in the middle between the frontside and backside. Also in Config → User Interface.</p>
@@ -240,7 +240,9 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Accessing Match Controls:</strong></p>
                     <ul>
-                        <li>Click <strong>Match Controls</strong> in the header, or in the selection bar after clicking a match</li>
+                        <li>The <strong>Match Controls</strong> tab in the header, or <strong>Match Controls</strong> in the selection bar after clicking a match</li>
+                        <li>The page starts on Match Controls; turn off <strong>Start on Match Controls</strong> in Config to start on the bracket</li>
+                        <li>Switching tabs keeps the bracket where you left it</li>
                         <li>The one place where matches are run</li>
                     </ul>
                     <p><strong>While the tournament runs:</strong></p>
@@ -249,7 +251,7 @@ const HELP_CONTENT = {
                         <li><strong>Free:</strong> the free lanes on one line, with the next ready match. Click a free lane to start that match there.</li>
                         <li><strong>Ready to start:</strong> the matches that can start, by round (frontside and backside side by side), each with Lane, Referee and <strong>Start</strong>. A player who is refereeing another match is marked, and Start waits until that is sorted.</li>
                         <li><strong>Referees:</strong> live matches without a referee first, then recent losers, recent winners and who refereed recently. Players in live matches aren't suggested.</li>
-                        <li><strong>Scan QR results</strong> and <strong>Leaderboard</strong> are at the bottom.</li>
+                        <li><strong>Scan QR results</strong> is in the Lanes heading while matches are live (QR handover).</li>
                     </ul>
                     <p><strong>When the tournament is finished:</strong> the podium, the night's highlights (most points, best average, the backside run, deciders, the longest match, the busiest referee and lane, and more) and Tournament Analytics.</p>
                     <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action.</p>
@@ -278,7 +280,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Lanes:</strong> how many dartboards you have. Under <strong>Lanes not in use</strong>, click a lane to leave it out of lane assignment.</li>
                         <li><strong>Confirm the winner:</strong> ask for the score and statistics when a winner is chosen. When off, matches complete at once with nothing entered.</li>
-                        <li><strong>Open Match Controls with the bracket</strong>, <strong>New players are paid</strong>, <strong>Referee suggestions</strong>.</li>
+                        <li><strong>Start on Match Controls</strong>, <strong>New players are paid</strong>, <strong>Referee suggestions</strong>.</li>
                     </ul>
                     <p><strong>Bracket:</strong> <strong>Finals position</strong>, Right or Middle (double elimination). The same setting as the Finals toggle in the bracket header.</p>
                     <p><strong>Developer:</strong> <strong>Developer Console</strong> adds a <strong>Console</strong> link to the bracket header, with diagnostics, validation checks, lane usage and transaction tools.</p>
@@ -325,7 +327,7 @@ const HELP_CONTENT = {
                     <p><strong>Handover</strong>, how a match reaches the Chalker:</p>
                     <ul>
                         <li><strong>QR code</strong> (default): show a code on the match for the Chalker to scan, and scan its result code back. Works offline.</li>
-                        <li><strong>Network</strong> (experimental): send the match to a Chalker on the same local network; the result comes back on its own and is counted on the <strong>Match Controls</strong> button until you accept it. Needs the Docker image, with the Chalker opened from your own server.</li>
+                        <li><strong>Network</strong> (experimental): send the match to a Chalker on the same local network; the result comes back on its own and is counted on the <strong>Match Controls</strong> tab until you accept it. Needs the Docker image, with the Chalker opened from your own server.</li>
                         <li><strong>None:</strong> results are entered by hand.</li>
                     </ul>
                 `
@@ -945,7 +947,7 @@ function addQuickActions(pageId) {
 
         case 'tournament':
             if (tournament && !tournament.bracket) {
-                actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showMatchCommandCenter();" style="font-size: 12px; padding: 6px 12px;">Open Match Controls</button>';
+                actionsHTML = '<button class="btn btn-success" onclick="hideHelp(); showBracketView(\'controls\');" style="font-size: 12px; padding: 6px 12px;">Open Match Controls</button>';
             }
             break;
 

@@ -162,6 +162,8 @@
   display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 12px;
   background: #f4f3f1; font-family: var(--bv-sans);
 }
+/* the views share this stage: the bracket, with Match Controls as a layer over it */
+.bv-stage { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
 .bracket-viewport {
   position: relative; flex: 1; min-height: 0; overflow: hidden; cursor: grab;
   contain: layout paint; /* redrawing the bracket never repaints the rest of the page */
@@ -240,3 +242,10 @@
 .bv-sw-done { background: var(--bv-surface); border: 2px solid var(--bv-done-border); }
 .bv-sw-pending { background: var(--bv-pending-fill); border: 1px dashed var(--bv-faint); }
 .bv-sw-walkover { background: var(--bv-surface); border-color: var(--bv-done-border); opacity: .55; }
+
+/* ---- views: Bracket | Match Controls (showBracketView in js/bracket-rendering.js) ---- */
+.bv-views button { padding: 8px 16px; font-size: 14px; }
+.bv-views .bv-badge { background: #16a34a; } /* results waiting: green, as on the Match Controls tile */
+/* on Match Controls, the bracket's own tools and the colour legend have nothing to act on */
+.bracket-container.bv-on-controls .bv-tools,
+.bracket-container.bv-on-controls .bv-legend { display: none; }

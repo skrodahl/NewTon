@@ -545,8 +545,9 @@ function applyQRResult(includeAchievements) {
     renderBracket();
     refreshTournamentUI();
 
-    // Refresh Match Controls if it is currently open
-    const ccIsOpen = window.dialogStack && window.dialogStack.some(d => d.id === 'matchCommandCenterModal');
+    // Refresh Match Controls if it is showing
+    const cc = document.getElementById('matchCommandCenterModal');
+    const ccIsOpen = cc && cc.style.display === 'block';
     if (ccIsOpen && typeof showMatchCommandCenter === 'function') {
         showMatchCommandCenter();
     }

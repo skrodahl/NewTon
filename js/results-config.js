@@ -568,12 +568,6 @@ function saveUIConfiguration(options = {}) {
 
     saveGlobalConfig();
 
-    // Sync with Match Controls modal checkbox in real-time
-    const matchControlsCheckbox = document.getElementById('autoOpenMatchControlsToggle');
-    if (matchControlsCheckbox) {
-        matchControlsCheckbox.checked = config.ui.autoOpenMatchControls;
-    }
-
     // Refresh tournament list if on Setup page to update delete button visibility
     if (typeof loadRecentTournaments === 'function') {
         loadRecentTournaments();

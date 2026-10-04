@@ -118,6 +118,14 @@ window.popDialog = function() {
         if (previousDialog.restoreFunction) {
             previousDialog.restoreFunction();
         }
+    } else {
+        // Match Controls lies under every dialog on the bracket page: redraw it when the last
+        // one closes (after a match is completed, a result accepted …), as the stack did when
+        // Match Controls was itself a dialog
+        const mc = document.getElementById('matchCommandCenterModal');
+        if (mc && mc.style.display === 'block' && typeof showMatchCommandCenter === 'function') {
+            showMatchCommandCenter();
+        }
     }
 
     console.log(`📚 Dialog stack: [${window.dialogStack.map(d => d.id).join(' → ')}]`);
@@ -507,14 +515,10 @@ function showPage(pageId) {
         BracketView.updateHeader();
     }
 
-    // Auto-open Match Controls when navigating to tournament page (if enabled and tournament exists)
-    if (pageId === 'tournament' && config.ui.autoOpenMatchControls && tournament && !tournament._analyticsPreview) {
-        // Small delay to ensure page transition is complete
-        setTimeout(() => {
-            if (typeof showMatchCommandCenter === 'function') {
-                showMatchCommandCenter();
-            }
-        }, 100);
+    // The bracket page starts on Match Controls or on the bracket (Global Settings: Start on Match Controls)
+    if (pageId === 'tournament' && typeof showBracketView === 'function') {
+        const onControls = config.ui.autoOpenMatchControls && tournament && !tournament._analyticsPreview;
+        showBracketView(onControls ? 'controls' : 'bracket');
     }
 
     // Load history when showing history page

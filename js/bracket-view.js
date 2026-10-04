@@ -743,7 +743,7 @@ const BracketView = (() => {
             else trace(sl.id);
         }));
         bar.querySelector('[data-act="clear"]').addEventListener('click', clearSel);
-        bar.querySelector('[data-act="controls"]').addEventListener('click', () => showMatchCommandCenter());
+        bar.querySelector('[data-act="controls"]').addEventListener('click', () => showBracketView('controls', selected));
         const undoBtn = bar.querySelector('[data-act="undo"]');
         if (undoBtn) undoBtn.addEventListener('click', () => handleSurgicalUndo(selected));
     }
@@ -861,7 +861,7 @@ const BracketView = (() => {
         const status = document.getElementById('bvStatus');
         const finals = document.getElementById('bvFinals');
         // Results that have arrived from the Chalker over the network and wait to be accepted:
-        // counted on the Match Controls button until accepted there
+        // counted on the Match Controls tab until accepted there
         const mcCount = document.getElementById('bvResultsWaiting');
         if (mcCount) {
             const all = (typeof matches !== 'undefined' && Array.isArray(matches)) ? matches : [];

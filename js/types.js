@@ -35,7 +35,7 @@
  * Priority 4 - Match state functions (bracket-rendering.js): ✅ DONE
  * - getMatchState(match) → MatchState
  * - showMatchCommandCenter() → void
- * - showMatchCommandCenter() → void (Match Controls)
+ * - showBracketView(view, matchId?) → void (Bracket | Match Controls)
  *
  * Priority 5 - History/Undo system (bracket-rendering.js): ✅ DONE
  * - handleSurgicalUndo(matchId) → void
@@ -217,7 +217,7 @@
 /**
  * @typedef {Object} UIConfig
  * @property {boolean} confirmWinnerSelection - Show confirmation dialog when selecting winner (default: true)
- * @property {boolean} autoOpenMatchControls - Auto-open Match Controls when navigating to tournament (default: true)
+ * @property {boolean} autoOpenMatchControls - Start on Match Controls: the Tournament Bracket page opens on Match Controls rather than the bracket (default: true)
  * @property {boolean} developerMode - Enable developer features (default: false)
  * @property {number} refereeSuggestionsLimit - Max number of referee suggestions to show (default: 10)
  */

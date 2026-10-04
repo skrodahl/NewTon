@@ -1,5 +1,17 @@
 ## Unreleased
 
+### Match Controls in the bracket's frame
+
+- **Match Controls is no longer a dialog**: it shares the Tournament Bracket page's frame, switched with the tabs **Bracket | Match Controls** in the header (mockup: frame-views.html, approved 2026-10-04). It is a layer over the bracket, so the bracket keeps its camera underneath. The results-waiting badge (network handover) moved onto the Match Controls tab.
+- On Match Controls, the bracket's tools (Finals, Fit all, zoom) and the colour legend are hidden; the clock and the status line stay.
+- Match Controls' own header and footer are gone. **Scan QR results** is in the Lanes heading (QR handover, while matches are live); Leaderboard is the header's button; Close is the Bracket tab.
+- **"Open Match Controls with the bracket" is now "Start on Match Controls"** (Global Settings, same stored setting `config.ui.autoOpenMatchControls`, on by default): the page opens on Match Controls, or on the bracket when off. A tournament opened from Analytics for viewing still opens on the bracket.
+- The bracket's selection bar **Match Controls** switches to Match Controls and flashes that match's tile or queue row (`showBracketView('controls', id)`).
+- The layer keeps the id `matchCommandCenterModal` and `style.display = 'block'`, so every existing "redraw Match Controls if open" check works unchanged, including those in `clean-match-progression.js` (not touched). Two checks that didn't fit are fixed: `qr-bridge.js` looked for Match Controls on the dialog stack, and the tournament reset in `tournament-management.js` only accepted `display: flex` (so it never refreshed).
+- When the last dialog closes, `popDialog()` redraws Match Controls if it is showing. As a dialog, Match Controls was restored by the stack after the winner dialog, a QR result and so on, and that restore was its redraw; this keeps it (e.g. a finished match leaves the lanes board straight away).
+- Decided: the start view applies every time the page is opened, as the auto-open did. Match Controls' links (Player Registration, Global Settings, Tournament Analytics) no longer pop a dialog first.
+- Files changed: `tournament.html`, `css/bracket-view.css`, `css/match-controls.css`, `js/bracket-rendering.js` (`showBracketView()`, `_bvSetView()`), `js/bracket-view.js`, `js/main.js`, `js/qr-bridge.js`, `js/tournament-management.js`, `js/results-config.js`, `js/dynamic-help-system.js`, `js/types.js`, `Docs/BRACKET-REDESIGN.md`.
+
 ### Global Settings: Test connection
 
 - **Remote backup has a Test connection button**, next to the API key. It tests the address and key as they are in the form (saved or not), through this computer's relay, the way a backup travels, and says what it found: connected and the key accepted; the key wrong or missing; the server doesn't ask for a key (with a nudge to set one); it can't be reached (with the reason); it asks for a web-server login; or it is an older version that can't be checked.

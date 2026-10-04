@@ -313,7 +313,10 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         </nav>
                     </div>
                     <div class="bv-head-center">
-                        <button type="button" class="bv-btn bv-btn-primary bv-nav-btn" onclick="showMatchCommandCenter()" title="Show LIVE and UPCOMING matches">Match Controls<span class="bv-badge" id="bvResultsWaiting" hidden></span></button>
+                        <!-- The page's views: the bracket, or Match Controls in the same frame (showBracketView) -->
+                        <div class="bv-seg bv-views bv-nav-btn" id="bvViews" role="group" aria-label="View">
+                            <button type="button" data-view="bracket" aria-pressed="true" onclick="showBracketView('bracket')">Bracket</button><button type="button" data-view="controls" aria-pressed="false" onclick="showBracketView('controls')" title="Run the matches: lanes, the ready queue, referees">Match Controls<span class="bv-badge" id="bvResultsWaiting" hidden></span></button>
+                        </div>
                         <button type="button" class="bv-btn bv-nav-btn" onclick="showStatisticsModal()" title="View tournament statistics and rankings">Leaderboard</button>
                     </div>
                     <div class="bv-head-right">
@@ -345,16 +348,25 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     </div>
                 </header>
 
-                <div class="bracket-viewport" id="bracketViewport">
-                    <div class="bracket-canvas" id="bracketCanvas">
-                        <div id="bracketMatches">
-                            <!-- Bracket matches will be rendered here -->
-                        </div>
+                <div class="bv-stage">
+                    <div class="bracket-viewport" id="bracketViewport">
+                        <div class="bracket-canvas" id="bracketCanvas">
+                            <div id="bracketMatches">
+                                <!-- Bracket matches will be rendered here -->
+                            </div>
 
-                        <div id="bracketLines">
-                            <!-- Connection lines will be rendered here -->
+                            <div id="bracketLines">
+                                <!-- Connection lines will be rendered here -->
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Match Controls (css/match-controls.css): a layer over the bracket, so the bracket keeps
+                         its camera underneath. Filled by showCommandCenterModal() in js/bracket-rendering.js.
+                         Keeps the old dialog's id: code that redraws it after an action looks for it. -->
+                    <section id="matchCommandCenterModal" class="mc-view" aria-label="Match Controls" style="display:none">
+                        <div class="mc-body" id="mcBody"></div>
+                    </section>
                 </div>
             </div>
         </div>
@@ -466,7 +478,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="confirmWinnerSelection" checked><span></span></span></div>
                     </div>
                         <div class="cfg-row">
-                        <div><label class="cfg-label" for="autoOpenMatchControls">Open Match Controls with the bracket</label><div class="cfg-desc">Show Match Controls straight away when you open the bracket.</div></div>
+                        <div><label class="cfg-label" for="autoOpenMatchControls">Start on Match Controls</label><div class="cfg-desc">The Tournament Bracket page opens on Match Controls; off, it opens on the bracket. Switch with the tabs in its header.</div></div>
                         <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="autoOpenMatchControls" checked><span></span></span></div>
                     </div>
                         <div class="cfg-row">
@@ -1180,30 +1192,6 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Match Controls Modal -->
         <!-- Match Controls Modal -->
-        <!-- Match Controls (css/match-controls.css): filled by showCommandCenterModal() in
-             js/bracket-rendering.js: before the draw, the running tournament (lanes board, ready
-             queue, referees), or the finished one (podium and highlights) -->
-        <div id="matchCommandCenterModal" class="modal">
-            <div class="mc" role="dialog" aria-modal="true" aria-labelledby="commandCenterTitle">
-                <header class="mc-head">
-                    <div class="mc-title"><h2 id="commandCenterTitle">Match Controls</h2><p id="mcSubtitle"></p></div>
-                    <dl class="mc-stats" id="mcStats"></dl>
-                    <div class="mc-clock"><b id="match-controls-clock"></b><button type="button" class="mc-x" onclick="popDialog()" aria-label="Close">×</button></div>
-                </header>
-                <div class="mc-body" id="mcBody"></div>
-                <footer class="mc-foot">
-                    <div class="mc-foot-l">
-                        <button type="button" class="mc-btn" id="showStatisticsBtn">Leaderboard</button>
-                        <button type="button" class="mc-btn" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="display:none">Scan QR results</button>
-                    </div>
-                    <div class="mc-foot-r">
-                        <label class="mc-switch"><input type="checkbox" id="autoOpenMatchControlsToggle"> Open Match Controls with the bracket</label>
-                        <button type="button" class="mc-btn mc-primary" id="commandCenterOK">Close</button>
-                    </div>
-                </footer>
-            </div>
-        </div>
-
         <!-- Statistics Modal -->
         <!-- Leaderboard dialog, opened from the bracket header and Match Controls (no exports here) -->
         <div id="statisticsModal" class="modal">

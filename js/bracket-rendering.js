@@ -1398,6 +1398,9 @@ function _mcActiveHTML(matchData) {
     const queued = front.concat(back).flatMap(k => matchData.rounds[k]);
     const next = queued.find(m => !checkRefereeConflict(m.id).hasConflict);
 
+    // QR handover: results come back by scanning the Chalker's result code
+    const qrMode = typeof getChalkerHandover !== 'function' || getChalkerHandover() === 'qr';
+    const scanQR = qrMode && live.length ? ` <button type="button" class="mc-btn mc-sm mc-scan" onclick="openResultQRScanner(null)">Scan QR results</button>` : '';
     const tiles = live.filter(m => m.lane).concat(live.filter(m => !m.lane)).map(_mcLiveTile).join('');
     const freeLine = `<div class="mc-free"><span class="mc-k">Free</span>` +
         (free.length
@@ -1417,7 +1420,7 @@ function _mcActiveHTML(matchData) {
         : `<div class="mc-qcols"><div class="mc-qcol">${column(front, 'Nothing ready on the frontside.')}</div><div class="mc-qcol">${column(back, 'Nothing ready on the backside.')}</div></div>`;
 
     return `<div class="mc-col">
-        <section class="mc-panel"><div class="mc-ph"><h3>Lanes<small>${live.length} live · ${free.length} free</small></h3><span class="mc-hint">Click the winner to finish a match</span></div>
+        <section class="mc-panel"><div class="mc-ph"><h3>Lanes<small>${live.length} live · ${free.length} free</small></h3><span class="mc-hint">Click the winner to finish a match${scanQR}</span></div>
             ${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}${freeLine}</section>
         <section class="mc-panel"><div class="mc-ph"><h3>Ready to start<small>${queued.length}</small></h3><span class="mc-hint">Lane and referee are optional</span></div>${queue}</section>
     </div>
@@ -1463,10 +1466,10 @@ function _mcSetupHTML() {
         ? [['Regular rounds', `Bo${l.seRegularRounds || 3}`], ['Semifinal', `Bo${l.seSemifinal || 3}`], ['Bronze', `Bo${l.seBronze || 5}`], ['Final', `Bo${l.seFinal || 5}`]]
         : [['Regular rounds', `Bo${l.regularRounds}`], ['Frontside semifinal', `Bo${l.frontsideSemifinal}`], ['Backside final', `Bo${l.backsideFinal}`], ['Grand Final', `Bo${l.grandFinal}`]];
     return `<div class="mc-col">
-        <section class="mc-panel"><div class="mc-ph"><h3>Players<small>click to mark paid</small></h3><button type="button" class="mc-link" onclick="popDialog(); showPage('registration')">Player Registration</button></div>
+        <section class="mc-panel"><div class="mc-ph"><h3>Players<small>click to mark paid</small></h3><button type="button" class="mc-link" onclick="showPage('registration')">Player Registration</button></div>
             ${players.length < 32 ? `<div class="mc-addrow"><input type="text" id="ccPlayerName" class="mc-text" placeholder="Add a player (found in the database, or created)" autocomplete="off" onkeydown="if (event.key === 'Enter') addPlayerFromCC()"><button type="button" class="mc-btn mc-primary" onclick="addPlayerFromCC()">Add</button></div>` : ''}
             <div class="mc-chips">${chips || '<span class="mc-note">No players yet.</span>'}</div></section>
-        <section class="mc-panel"><div class="mc-ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><button type="button" class="mc-link" onclick="popDialog(); showPage('config')">Global Settings</button></div>
+        <section class="mc-panel"><div class="mc-ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><button type="button" class="mc-link" onclick="showPage('config')">Global Settings</button></div>
             <div class="mc-settings">
                 <div><h4>Points</h4>${dl([['Taking part', p.participation], ['1st · 2nd · 3rd · 4th', `${p.first} · ${p.second} · ${p.third} · ${p.fourth}`], ['5–6th · 7–8th', `${p.fifthSixth} · ${p.seventhEighth}`], ['180 · High out · Short leg · Ton', `${p.oneEighty} · ${p.highOut} · ${p.shortLeg} · ${p.ton}`]])}</div>
                 <div><h4>Match length</h4>${dl(legs)}</div>
@@ -1481,42 +1484,17 @@ function _mcSetupHTML() {
 
 /**
  * Show Match Controls: the header (name, counts, clock), the view for the tournament's
- * status (setup, running, completed), and the footer.
+ * status (setup, running, completed), and shows it in the bracket page's frame.
  * @param {{live: object[], rounds: Object<string, object[]>}|object[]} matchData
  */
 function showCommandCenterModal(matchData) {
     const modal = document.getElementById('matchCommandCenterModal');
     const body = document.getElementById('mcBody');
     if (!modal || !body) return;
-    const scrollTop = body.scrollTop;
+    const scrollTop = modal.scrollTop; // the view scrolls, not its body
     const status = tournament && tournament.status;
     _mcStarts = null;
 
-    // header: name, counts, clock
-    const title = document.getElementById('commandCenterTitle');
-    const sub = document.getElementById('mcSubtitle');
-    const stats = document.getElementById('mcStats');
-    if (title) title.textContent = 'Match Controls';
-    const formatName = typeof getFormat === 'function' && getFormat() === 'SE' ? 'single elimination' : 'double elimination';
-    if (sub) sub.textContent = !tournament ? 'No tournament loaded'
-        : `${tournament.name || 'Tournament'} · ${status === 'setup' ? 'before the draw' : status === 'completed' ? 'finished' : formatName}`;
-    const stat = (k, v, cls) => `<div${cls ? ` class="${cls}"` : ''}><dt>${k}</dt><dd>${v}</dd></div>`;
-    if (stats) {
-        if (status === 'setup') {
-            const paid = players.filter(p => p.paid).length;
-            stats.innerHTML = stat('Players', players.length) + stat('Paid', paid) + stat('Unpaid', players.length - paid, players.length > paid ? 'mc-warnstat' : '');
-        } else if (status === 'active') {
-            const real = matches.filter(m => !(m.autoAdvanced || (typeof isWalkoverMatch === 'function' && isWalkoverMatch(m))));
-            const lanes = _mcLanes();
-            const used = new Set(matches.filter(m => !m.completed && m.lane).map(m => String(m.lane)));
-            stats.innerHTML = stat('Live', (matchData.live || []).length, 'mc-livestat') +
-                stat('Ready', Object.values(matchData.rounds || {}).reduce((s, r) => s + r.length, 0)) +
-                stat('Played', `${real.filter(m => m.completed).length}<small> of ${real.length}</small>`) +
-                (lanes.usable.length ? stat('Free lanes', lanes.usable.filter(l => !used.has(String(l))).length) : '');
-        } else if (status === 'completed') {
-            stats.innerHTML = stat('Matches', _mcPlayedMatches().length) + stat('Players', players.filter(p => p.paid).length);
-        } else stats.innerHTML = '';
-    }
     updateMatchControlsClock();
 
     // the view
@@ -1525,27 +1503,10 @@ function showCommandCenterModal(matchData) {
     else if (status === 'setup') body.innerHTML = _mcSetupHTML();
     else if (status === 'completed') body.innerHTML = _mcCompletedHTML();
     else body.innerHTML = _mcActiveHTML(matchData && !Array.isArray(matchData) ? matchData : { live: [], rounds: {} });
-    body.scrollTop = scrollTop;
     if (status === 'completed') _mcFillAverage();
 
-    pushDialog('matchCommandCenterModal', () => showMatchCommandCenter(), true);
-
-    // footer
-    const autoOpen = document.getElementById('autoOpenMatchControlsToggle');
-    if (autoOpen) {
-        autoOpen.checked = !!(config && config.ui && config.ui.autoOpenMatchControls);
-        autoOpen.onchange = function () {
-            if (!config || !config.ui) return;
-            config.ui.autoOpenMatchControls = this.checked;
-            if (typeof saveGlobalConfig === 'function') saveGlobalConfig();
-            const cfgBox = document.getElementById('autoOpenMatchControls');
-            if (cfgBox) cfgBox.checked = this.checked;
-        };
-    }
-    const statsBtn = document.getElementById('showStatisticsBtn');
-    if (statsBtn) statsBtn.onclick = () => showStatisticsModal();
-    const okBtn = document.getElementById('commandCenterOK');
-    if (okBtn) okBtn.onclick = () => popDialog();
+    _bvSetView('controls');
+    modal.scrollTop = scrollTop;
 }
 
 /**
@@ -1571,14 +1532,6 @@ function showMatchCommandCenter() {
 
     const liveMatches = matches.filter(m => getMatchState(m) === 'live');
     const readyMatches = matches.filter(m => getMatchState(m) === 'ready');
-
-    // Show QR Results button only during an active tournament with live matches
-    const _qrBtn = document.getElementById('qrResultsBtn');
-    if (_qrBtn) {
-        const _active = tournament && tournament.status === 'active';
-        const _qrMode = (typeof getChalkerHandover !== 'function') || getChalkerHandover() === 'qr';
-        _qrBtn.style.display = (_qrMode && _active && liveMatches.length > 0) ? '' : 'none';
-    }
 
     // Group ready matches by round for chronological organization
     const roundGroups = {};
@@ -2008,6 +1961,7 @@ function completeMatchFromCommandCenter(matchId, playerNumber) {
 // Export Command Center functions
 if (typeof window !== 'undefined') {
     window.showMatchCommandCenter = showMatchCommandCenter;
+    window.showBracketView = showBracketView;
     window.completeMatchFromCommandCenter = completeMatchFromCommandCenter;
     window.startMatchOnLane = startMatchOnLane;
     window.getMatchFormatDescription = getMatchFormatDescription;
@@ -2145,7 +2099,7 @@ function _mcCompletedHTML() {
             <div class="mc-hls">${h.list.map(hl).join('')}</div>
             <dl class="mc-facts">${h.facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join('')}</dl>
             <div class="mc-doneacts">
-                <button type="button" class="mc-btn mc-primary" onclick="popDialog(); if (tournament && tournament.id) openAnalyticsForTournament(tournament.id)">Tournament Analytics</button>
+                <button type="button" class="mc-btn mc-primary" onclick="if (tournament && tournament.id) openAnalyticsForTournament(tournament.id)">Tournament Analytics</button>
                 <button type="button" class="mc-btn" onclick="exportTournamentJSON()">Export tournament</button>
                 <button type="button" class="mc-btn" onclick="showStatisticsModal()">Leaderboard</button>
             </div></section>
@@ -2337,13 +2291,40 @@ function getMatchProgressionText(matchId) {
 }
 
 
-// The clock in Match Controls' header, and each live match's time on the board
+// --- The bracket page's views: Bracket | Match Controls, in the same frame ---
+//
+// Match Controls is a layer over the bracket (#matchCommandCenterModal, shown with
+// style.display 'block'), so the bracket keeps its size and camera underneath. Code that
+// redraws Match Controls after an action checks that display, as it did for the dialog.
+
+/** Show one view without drawing anything: the layer, the tabs, the header tools. */
+function _bvSetView(view) {
+    const layer = document.getElementById('matchCommandCenterModal');
+    if (layer) layer.style.display = view === 'controls' ? 'block' : 'none';
+    const frame = layer && layer.closest('.bracket-container');
+    if (frame) frame.classList.toggle('bv-on-controls', view === 'controls');
+    document.querySelectorAll('#bvViews [data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
+}
+
+/**
+ * Switch the bracket page between the bracket and Match Controls (the tabs in its header).
+ * @param {'bracket'|'controls'} view
+ * @param {string} [matchId] - on Match Controls, bring this match into view and flash it
+ */
+function showBracketView(view, matchId) {
+    if (view !== 'controls') { _bvSetView('bracket'); return; }
+    showMatchCommandCenter();
+    if (!matchId) return;
+    const el = document.getElementById(`cc-match-card-${matchId}`);
+    if (!el) return;
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el.classList.remove('mc-flash');
+    void el.offsetWidth; // restart the animation
+    el.classList.add('mc-flash');
+}
+
+// Each live match's time on the board
 function updateMatchControlsClock() {
-    const clockElement = document.getElementById('match-controls-clock');
-    if (clockElement) {
-        const now = new Date();
-        clockElement.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
-    }
     document.querySelectorAll('#matchCommandCenterModal [data-mc-started]').forEach(el => {
         el.textContent = _mcSince(+el.getAttribute('data-mc-started'));
     });

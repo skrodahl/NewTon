@@ -1607,7 +1607,7 @@ function confirmReset() {
 
     // Refresh Match Controls if it's open to show new SETUP state
     if (document.getElementById('matchCommandCenterModal') &&
-        document.getElementById('matchCommandCenterModal').style.display === 'flex' &&
+        ['flex', 'block'].includes(document.getElementById('matchCommandCenterModal').style.display) &&
         typeof showMatchCommandCenter === 'function') {
         setTimeout(() => {
             showMatchCommandCenter();

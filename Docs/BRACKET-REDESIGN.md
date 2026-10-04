@@ -110,7 +110,7 @@ Proposed 200 × 80, the same at every bracket size (today: 280 × 150).
   - Top row: tournament name and date (and page navigation) on the left; Finals Right | Middle, Fit all and the zoom controls on the right.
   - Second row: a status line (players, matches, played, walkovers, live, ready) and the state legend.
   - No on-canvas usage hint ("Hover a match to magnify it · …"). It was redundant and covered the side labels; how to use the bracket belongs in the help system.
-  - Navigation lives in the header: Leaderboard and Match Controls as buttons (they open over the bracket), Setup, Registration, Config and Analytics as quieter links (they leave the page).
+  - Navigation lives in the header: the tabs Bracket | Match Controls (Match Controls shares the bracket's frame; see [Views](#views-bracket--match-controls)), Leaderboard as a button (it opens over the bracket), Setup, Registration, Config and Analytics as quieter links (they leave the page).
   - The CAD info box and the bottom identity line are removed from the bracket page; the header carries the name and date, and the status line the counts. Clock, version and status were dropped for now, to reconsider later.
   - The mockup's Players 8 | 16 | 32 selector and the "cards … names …" figures are mockup-only and do not go into the app.
 - **Magnifier.** Hovering a match while zoomed out (below 90%) shows a full-size copy over it after a short delay, with its paths ("Winner → X · Loser → Y"). It ignores the pointer and is hidden while dragging or animating.
@@ -147,7 +147,7 @@ Today's figures use the zoom from `getDefaultView()` with 16px names. At 32 play
 **Decided: matches are not controlled from the bracket.** The bracket is for seeing the tournament; Match Controls stays the one place where matches are run (start, lane, referee, winner, handover). The selection bar adds two shortcuts that need the selected match:
 
 - **Undo match**, shown only when `isMatchUndoable()` allows it; it calls `handleSurgicalUndo()` (its confirmation dialog included). This replaces clicking the winner's ✓ on the classic card.
-- **Match Controls**, always the rightmost button in the bar (before ×); it opens Match Controls.
+- **Match Controls**, always the rightmost button in the bar (before ×); it switches to Match Controls and flashes that match there.
 
 Dropped: a slide-in match panel (about 360px, from the right, with winner buttons, lane and referee selects, paths and one action per state). It was agreed at first, then dropped once the selection bar's shortcuts proved enough, so match operations keep a single home.
 
@@ -230,6 +230,16 @@ The header in the Global Settings mockup (https://claude.ai/artifact/BUn1sDA9Xgf
 - **Clock:** the same as the bracket header's: 30px, weight 800, tabular digits so its width never changes, with a thin divider on its left.
 - **Second row:** the page links (Tournament Setup, Player Registration, Tournament Bracket, Analytics, Global Settings, Chalker) as plain text; the current page is darker and bold, underlined by a 2px line.
 - White, with a single hairline under it; no boxed border, no shadow.
+
+### Views: Bracket | Match Controls
+
+Match Controls is no longer a dialog. It is a view in the bracket page's frame, switched with the tabs **Bracket | Match Controls** in the header (`showBracketView()` in `js/bracket-rendering.js`). Mockup: `frame-views.html`, approved 2026-10-04.
+
+- Match Controls is a layer over the bracket (`.bv-stage` holds both), so the bracket keeps its size and camera underneath and comes back exactly as it was left.
+- On Match Controls the bracket's tools (Finals, Fit all, zoom) and the colour legend are hidden; the clock and the status line stay. Match Controls' own header and footer are gone: **Scan QR results** sits in the Lanes heading, and the start view is a Global Setting, **Start on Match Controls** (on by default; `config.ui.autoOpenMatchControls`, the old auto-open setting).
+- The layer keeps the id `matchCommandCenterModal` and is shown with `style.display = 'block'`, so the code that redraws Match Controls after an action (including `clean-match-progression.js`, unchanged) still finds it open.
+- Leaderboard stays a dialog. The Developer Console is the planned third tab.
+- The same frame with tabs may later host other tournament formats; those need their own source of truth, designed with the core foundations, and are to be discussed first.
 
 The bracket page keeps its own full-screen header (tournament name, Match Controls, Finals, zoom, clock), which follows the same type and clock.
 

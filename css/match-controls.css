@@ -6,34 +6,20 @@
  * shared tokens in css/design-tokens.css. Light only.
  */
 
-/* ---- the dialog: nearly the whole window, over the bracket ---- */
-#matchCommandCenterModal .mc {
-  position: absolute; inset: 2.5vh 2vw; max-width: 1800px; margin: 0 auto;
-  display: grid; grid-template-rows: auto minmax(0, 1fr) auto;
-  background: var(--nt-bg); border-radius: 16px; overflow: hidden;
-  box-shadow: 0 30px 80px rgba(17,24,39,.4);
+/* ---- the view: a layer over the bracket in the same frame ---- */
+#matchCommandCenterModal.mc-view {
+  position: absolute; inset: 0; z-index: 20; overflow: auto;
+  background: var(--nt-bg); border-radius: 10px;
   font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; color: var(--nt-ink);
 }
-.mc button, .mc input, .mc select { font: inherit; color: inherit; }
-.mc :focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
-.mc [hidden] { display: none !important; }
+.mc-view button, .mc-view input, .mc-view select { font: inherit; color: inherit; }
+.mc-view :focus-visible { outline: 2px solid var(--nt-accent); outline-offset: 2px; }
+.mc-view [hidden] { display: none !important; }
+/* a match picked in the bracket's selection bar flashes once */
+.mc-flash { animation: mc-flash 1.8s ease-out 1; }
+@keyframes mc-flash { 0% { box-shadow: 0 0 0 4px rgba(255,107,53,.7); } 100% { box-shadow: 0 0 0 0 rgba(255,107,53,0); } }
 
-.mc-head { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; align-items: center; gap: 12px 24px; padding: 14px 20px; background: var(--nt-surface); border-bottom: 1px solid var(--nt-line); }
-.mc-title h2 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: -.01em; color: var(--nt-ink); }
-.mc-title p { margin: 2px 0 0; color: var(--nt-muted); font-size: 13px; }
-.mc-stats { display: flex; gap: 22px; margin: 0; }
-.mc-stats > div { display: grid; }
-.mc-stats dt { font-size: 12px; color: var(--nt-muted); }
-.mc-stats dd { margin: 0; font-size: 20px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.mc-stats dd small { font-size: 13px; color: var(--nt-muted); font-weight: 600; }
-.mc-stats .mc-livestat dd { color: #b2410f; }
-.mc-stats .mc-warnstat dd { color: var(--nt-warn); }
-.mc-clock { display: flex; align-items: center; gap: 16px; }
-.mc-clock b { font-size: 30px; font-weight: 800; letter-spacing: -.02em; font-variant-numeric: tabular-nums; padding-left: 16px; border-left: 1px solid var(--nt-line-2); }
-.mc-x { width: 38px; height: 38px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); font-size: 22px; line-height: 1; cursor: pointer; color: var(--nt-ink-2); }
-.mc-x:hover { border-color: var(--nt-ink-2); }
-
-.mc-body { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 20px; padding: 20px; overflow: auto; align-content: start; }
+.mc-body { display: grid; grid-template-columns: minmax(0, 1fr) 320px; gap: 16px; padding: 2px 0 16px; align-content: start; }
 .mc-body.mc-one { grid-template-columns: minmax(0, 1fr); }
 .mc-col { display: grid; gap: 20px; align-content: start; min-width: 0; }
 
@@ -42,6 +28,7 @@
 .mc-ph h3 { margin: 0; font-size: 15px; font-weight: 700; color: var(--nt-ink); }
 .mc-ph h3 small { font-weight: 500; color: var(--nt-muted); font-size: 13px; margin-left: 6px; }
 .mc-hint, .mc-note { font-size: 12px; color: var(--nt-muted); }
+.mc-hint .mc-scan { margin-left: 10px; }
 .mc-note { margin: 0; padding: 0 18px 14px; }
 .mc-empty { display: grid; gap: 4px; place-items: center; text-align: center; padding: 48px 20px; color: var(--nt-muted); }
 .mc-empty b { color: var(--nt-ink); font-size: 16px; }
@@ -122,11 +109,6 @@
 .mc-refs li b { font-weight: 600; display: inline-flex; align-items: center; gap: 6px; }
 .mc-refs li span { color: var(--nt-muted); font-size: 12px; white-space: nowrap; }
 
-/* ---- footer ---- */
-.mc-foot { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; padding: 12px 20px; background: var(--nt-surface); border-top: 1px solid var(--nt-line); }
-.mc-foot-l, .mc-foot-r { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.mc-switch { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--nt-ink-2); cursor: pointer; }
-.mc-switch input { accent-color: var(--nt-header); width: 16px; height: 16px; margin: 0; }
 
 /* ---- before the draw ---- */
 .mc-addrow { display: flex; gap: 8px; padding: 0 18px 14px; }
@@ -188,4 +170,4 @@
   .mc-settings { grid-template-columns: 1fr; }
   .mc-settings > div + div { border-left: 0; border-top: 1px solid var(--nt-line); }
 }
-@media (prefers-reduced-motion: reduce) { .mc-btn.mc-result { animation: none; } }
+@media (prefers-reduced-motion: reduce) { .mc-btn.mc-result, .mc-flash { animation: none; } }
