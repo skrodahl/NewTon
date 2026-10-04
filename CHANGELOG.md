@@ -1,5 +1,13 @@
 ## Unreleased
 
+### Analytics → Players: at most six ticked
+
+- **The Players list opens on the best player in the Lens** (or everyone sharing the top points, at most six), instead of ticking everyone.
+- **At most six players can be ticked,** the most the charts compare. With six ticked, the other boxes are greyed out ("Compare up to six players: untick one to swap"). The note "N players are ticked; the charts show the six highest ranked" is gone, as it can't happen any more.
+- **The box at the top ticks the six best players** in the Lens (it shows ticked when exactly they are), or unticks everyone.
+- **The selection lasts for the visit,** like the Lens: it is no longer saved in the browser (the value older versions saved, `newton_analytics_playerSelection`, is cleared with the old Lens values). Players who drop out when the Lens changes are unticked; with nobody left, the best player is ticked again.
+- Files changed: `js/newton-history.js` (`_bestPlayers()`; the save and restore of the selection removed), `tournament.html` (the list's hint), `js/dynamic-help-system.js`.
+
 ### Analytics: Finishes chart draws lines
 
 - **The Finishes chart (Analytics → Players) draws a line through each player's finishes**, with the marks on top, like the Average chart. It showed marks only, which made a player's run hard to follow, especially when comparing. A tournament a player missed is bridged, as on the other charts; the hollow marks on the axis still show which. The card's sparkline was already a line.

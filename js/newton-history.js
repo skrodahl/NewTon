@@ -268,9 +268,9 @@ const NewtonHistory = (() => {
      */
     function _initLens(all) {
         _lensReady = true;
-        // Lens settings used to be remembered between visits; clear what older versions saved
+        // Lens settings and the player selection used to be remembered between visits; clear what older versions saved
         try {
-            ['newton_analytics_scope', 'newton_analytics_textFilter', 'newton_analytics_dateFilter']
+            ['newton_analytics_scope', 'newton_analytics_textFilter', 'newton_analytics_dateFilter', 'newton_analytics_playerSelection']
                 .forEach(k => localStorage.removeItem(k));
         } catch (e) { /* ignore */ }
 
@@ -749,37 +749,20 @@ const NewtonHistory = (() => {
     /** @type {Set<string>} Selected player keys (lowercase trimmed) */
     let _selectedPlayers = new Set();
 
-    /** Save player selection to localStorage. Null = all selected (default). */
-    function _persistPlayerSelection() {
-        try {
-            if (_playersTable && _playersTable.data) {
-                const allKeys = _playersTable.data.map(r => _playerKey(r.name));
-                const allSelected = allKeys.every(k => _selectedPlayers.has(k));
-                if (allSelected || _selectedPlayers.size === 0) {
-                    localStorage.removeItem('newton_analytics_playerSelection');
-                } else {
-                    localStorage.setItem('newton_analytics_playerSelection', JSON.stringify([..._selectedPlayers]));
-                }
-            }
-        } catch (e) { /* ignore */ }
-    }
+    /** At most this many players are ticked: the most the charts compare. */
+    const MAX_TICKED = 6;
 
-    /** Restore player selection from localStorage. */
-    function _restorePlayerSelection(rows) {
-        try {
-            const raw = localStorage.getItem('newton_analytics_playerSelection');
-            if (!raw) return false;
-            const keys = JSON.parse(raw);
-            if (!Array.isArray(keys) || keys.length === 0) return false;
-            const validKeys = new Set(rows.map(r => _playerKey(r.name)));
-            const filtered = keys.filter(k => validKeys.has(k));
-            if (filtered.length === 0) return false;
-            _selectedPlayers = new Set(filtered);
-            return true;
-        } catch (e) {
-            localStorage.removeItem('newton_analytics_playerSelection');
-            return false;
-        }
+    /**
+     * The best players in the Lens, by rank: up to `max` (the "tick the six best" box), or,
+     * without `max`, everyone sharing the top points (the default selection).
+     * @param {object[]} rows - from _computePlayerRows()
+     * @param {number} [max]
+     * @returns {string[]} player keys
+     */
+    function _bestPlayers(rows, max) {
+        const ranked = rows.slice().sort((a, b) => a._rank - b._rank);
+        const top = max ? ranked : ranked.filter(r => ranked.length && r.points === ranked[0].points);
+        return top.slice(0, max || MAX_TICKED).map(r => _playerKey(r.name));
     }
 
     /** @type {string|null} Player name to focus after next render */
@@ -820,12 +803,11 @@ const NewtonHistory = (() => {
             rows.sort((a, b) => a.name.localeCompare(b.name));
             rows.forEach(r => { r._rowId = r.name; });
 
-            // Restore persisted selection, or default to all selected
-            if (_selectedPlayers.size === 0) {
-                if (!_restorePlayerSelection(rows)) {
-                    rows.forEach(r => _selectedPlayers.add(_playerKey(r.name)));
-                }
-            }
+            // Players who are no longer in the Lens are unticked; with nobody ticked, the best
+            // player (or those sharing the top points) is. The selection lasts for the visit.
+            const inLens = new Set(rows.map(r => _playerKey(r.name)));
+            _selectedPlayers = new Set([..._selectedPlayers].filter(k => inLens.has(k)));
+            if (_selectedPlayers.size === 0) _bestPlayers(rows).forEach(k => _selectedPlayers.add(k));
 
             if (!_playersTable) {
                 _playersTable = NewtonTable.create({
@@ -835,19 +817,22 @@ const NewtonHistory = (() => {
                     defaultSortDir: 'asc',
                     emptyMessage: 'No player data available.',
                     rowClass: (row) => _selectedPlayers.has(_playerKey(row.name)) ? '' : 'an-off',
-                    onRowClick: (row) => togglePlayer(row.name, !_selectedPlayers.has(_playerKey(row.name))),
+                    onRowClick: (row) => togglePlayer(row.name, !_selectedPlayers.has(_playerKey(row.name))), // at most six (togglePlayer)
                     columns: [
                         {
                             key: '_select', sortable: false, width: '1%',
                             headerRender: () => {
+                                // ticks the six best players; ticked when exactly they are
                                 const data = _playersTable ? _playersTable.data : [];
-                                const allChecked = data.length > 0 && data.every(r => _selectedPlayers.has(_playerKey(r.name)));
-                                return `<input type="checkbox" class="an-check" aria-label="Tick all"${allChecked ? ' checked' : ''} onclick="NewtonHistory.toggleAllPlayers(this.checked)">`;
+                                const best = _bestPlayers(data, MAX_TICKED);
+                                const on = best.length > 0 && best.length === _selectedPlayers.size && best.every(k => _selectedPlayers.has(k));
+                                return `<input type="checkbox" class="an-check" aria-label="Tick the six best players" title="Tick the six best players"${on ? ' checked' : ''} onclick="NewtonHistory.toggleAllPlayers(this.checked)">`;
                             },
                             render: (v, row) => {
                                 const key = _playerKey(row.name);
-                                const checked = _selectedPlayers.has(key) ? ' checked' : '';
-                                return `<input type="checkbox" class="an-check" aria-label="Select this player"${checked} data-nh-action="toggle-player" data-name="${escHtml(row.name)}">`;
+                                const on = _selectedPlayers.has(key);
+                                const full = !on && _selectedPlayers.size >= MAX_TICKED;
+                                return `<input type="checkbox" class="an-check" aria-label="Select this player"${on ? ' checked' : ''}${full ? ' disabled title="Compare up to six players: untick one to swap"' : ''} data-nh-action="toggle-player" data-name="${escHtml(row.name)}">`;
                             }
                         },
                         {
@@ -892,27 +877,26 @@ const NewtonHistory = (() => {
     function togglePlayer(playerName, checked) {
         const key = _playerKey(playerName);
         if (checked) {
+            if (!_selectedPlayers.has(key) && _selectedPlayers.size >= MAX_TICKED) return; // six at most
             _selectedPlayers.add(key);
         } else {
             _selectedPlayers.delete(key);
         }
-        if (_playersTable) _playersTable.refresh(); // the tick-all box and the dimmed rows
-        _persistPlayerSelection();
+        if (_playersTable) _playersTable.refresh(); // the tick-six box, the greyed boxes and the dimmed rows
         renderProfilePanel();
     }
 
     /**
-     * Toggle all players' selection.
+     * The box at the top of the list: tick the six best players in the Lens, or untick all.
      * @param {boolean} checked
      */
     function toggleAllPlayers(checked) {
         if (!_playersTable || !_playersTable.data) return;
         _selectedPlayers.clear();
         if (checked) {
-            _playersTable.data.forEach(r => _selectedPlayers.add(_playerKey(r.name)));
+            _bestPlayers(_playersTable.data, MAX_TICKED).forEach(k => _selectedPlayers.add(k));
         }
         _playersTable.refresh();
-        _persistPlayerSelection();
         renderProfilePanel();
     }
 
@@ -940,7 +924,6 @@ const NewtonHistory = (() => {
         _selectedPlayers.clear();
         _selectedPlayers.add(key);
         if (_playersTable) _playersTable.refresh();
-        _persistPlayerSelection();
         renderProfilePanel();
     }
 
@@ -967,14 +950,13 @@ const NewtonHistory = (() => {
             return;
         }
 
-        // Several players: compared on the player charts (the six highest ranked when more are ticked)
+        // Several players (at most six): compared on the player charts
         _comparisonTable = null;
         const compared = () => _playersTable.data
             .filter(r => _selectedPlayers.has(_playerKey(r.name)))
             .sort((x, y) => x._rank - y._rank)
             .slice(0, NewtonCharts.MAX_PLAYERS)
             .map(r => r.name);
-        const capped = selected.length > NewtonCharts.MAX_PLAYERS;
         panel.innerHTML =
             '<div class="st-panel-head"><h3>Compare <small>' + compared().length + ' players</small></h3>' +
             '<button type="button" class="st-link" onclick="NewtonHistory.toggleAllPlayers(false)">Clear</button></div>' +
@@ -986,7 +968,7 @@ const NewtonHistory = (() => {
             options: _chartOptions,
             onAdd: (name) => togglePlayer(name, true),
             onRemove: (name) => togglePlayer(name, false),
-            note: capped ? `${selected.length} players are ticked; the charts show the six highest ranked.` : ''
+            note: ''
         });
     }
 
