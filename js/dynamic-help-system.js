@@ -253,7 +253,7 @@ const HELP_CONTENT = {
                         <li><strong>Referees:</strong> live matches without a referee first, then recent losers, recent winners and who refereed recently. Players in live matches aren't suggested.</li>
                         <li><strong>Scan QR results</strong> is in the Lanes heading while matches are live (QR handover).</li>
                     </ul>
-                    <p><strong>When the tournament is finished:</strong> the podium, the night's highlights (most points, best average, the backside run, deciders, the longest match, the busiest referee and lane, and more) and Tournament Analytics.</p>
+                    <p><strong>When the tournament is finished:</strong> the podium, the night's highlights (most points, best average, the backside run, deciders, the busiest referee and lane, and more) and Tournament Analytics.</p>
                     <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action.</p>
                 `
             }

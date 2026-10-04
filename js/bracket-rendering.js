@@ -2039,24 +2039,6 @@ function _mcHighlights() {
     if (scored.length) add(list, 'Deciders', String(deciders), 'matches went to the last leg');
     const white = scored.filter(m => m.finalScore.loserLegs === 0).length;
     if (scored.length) add(list, 'Whitewashes', String(white), 'wins without dropping a leg');
-    // match lengths: from the last Start to the result, in the history
-    const history = typeof getTournamentHistory === 'function' ? getTournamentHistory().slice().reverse() : [];
-    const durations = [];
-    played.forEach(m => {
-        let start = null, end = null;
-        history.forEach(tx => {
-            if (tx.matchId !== m.id) return;
-            if (tx.type === 'START_MATCH') start = Date.parse(tx.timestamp);
-            if (tx.type === 'COMPLETE_MATCH' && start) end = Date.parse(tx.timestamp);
-        });
-        if (start && end && end > start) durations.push({ m, min: Math.round((end - start) / 60000) });
-    });
-    if (durations.length >= 2) {
-        durations.sort((a, b) => b.min - a.min);
-        const d = x => `${x.m.id} · ${x.m.player1.name} v ${x.m.player2.name}`;
-        add(list, 'Longest match', `${durations[0].min} min`, d(durations[0]));
-        add(list, 'Quickest match', `${durations[durations.length - 1].min} min`, d(durations[durations.length - 1]));
-    }
     const refs = {}, lanes = {};
     played.forEach(m => {
         if (m.referee) refs[m.referee] = (refs[m.referee] || 0) + 1;
