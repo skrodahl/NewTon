@@ -2000,12 +2000,19 @@ function _mcHighlights() {
     const head = [], list = [];
     const add = (arr, label, value, who) => arr.push({ label, value, who });
 
-    const o180 = best(p => p.stats.oneEighties || 0, (a, b) => a > b);
-    if (o180 && o180.v > 0) add(head, 'Most 180s', o180.v, o180.p.name);
-    const out = best(p => len(p.stats.highOuts) ? Math.max(...p.stats.highOuts) : null, (a, b) => a > b);
-    if (out) add(head, 'Highest checkout', out.v, out.p.name);
-    const leg = best(p => len(p.stats.shortLegs) ? Math.min(...p.stats.shortLegs) : null, (a, b) => a < b);
-    if (leg) add(head, 'Shortest leg', `${leg.v} darts`, leg.p.name);
+    // Under the podium, always: the best of the night and everyone who shares it, or "None tonight"
+    const shared = (pick, better) => {
+        const top = best(pick, better);
+        if (!top) return null;
+        return { v: top.v, who: paid.filter(p => pick(p) === top.v).map(p => p.name).join(', ') };
+    };
+    const headline = (label, top, fmt) => add(head, label, top ? fmt(top.v) : '–', top ? top.who : 'None tonight');
+    const o180 = shared(p => p.stats.oneEighties || null, (a, b) => a > b);
+    headline('Most 180s', o180, v => v);
+    const leg = shared(p => len(p.stats.shortLegs) ? Math.min(...p.stats.shortLegs) : null, (a, b) => a < b);
+    headline('Shortest leg', leg, v => `${v} darts`);
+    const out = shared(p => len(p.stats.highOuts) ? Math.max(...p.stats.highOuts) : null, (a, b) => a > b);
+    headline('Highest out', out, v => v);
 
     const pts = best(p => typeof calculatePlayerPoints === 'function' ? calculatePlayerPoints(p) : null, (a, b) => a > b);
     if (pts) add(list, 'Most points', pts.p.name, `${pts.v} points`);
@@ -2075,7 +2082,7 @@ function _mcCompletedHTML() {
     return `<div class="mc-done">
         <section class="mc-panel"><div class="mc-ph"><h3>Tournament complete</h3><span class="mc-hint">${escapeHtml(tournament.name || '')}${date ? ' · ' + date : ''}</span></div>
             <div class="mc-podium">${pod('mc-s', 2, 'Final')}${pod('mc-g', 1, 'Champion')}${pod('mc-b', 3, 'Third')}</div>
-            ${h.head.length ? `<div class="mc-heads">${h.head.map(x => `<div class="mc-head-hl"><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`).join('')}</div>` : ''}
+            <div class="mc-heads">${h.head.map(x => `<div class="mc-head-hl"><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`).join('')}</div>
         </section>
         <section class="mc-panel"><div class="mc-ph"><h3>Highlights</h3><span class="mc-hint">From tonight's matches</span></div>
             <div class="mc-hls">${h.list.map(hl).join('')}</div>
