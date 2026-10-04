@@ -2335,6 +2335,25 @@ function showBracketView(view, matchId) {
     el.classList.add('mc-flash');
 }
 
+// Left / right arrow: the previous / next tab, round the end. Not while typing, choosing in a
+// list or a dialog is open, and only when the tabs show (not in analytics-only mode).
+document.addEventListener('keydown', e => {
+    if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const page = document.getElementById('tournament');
+    if (!page || !page.classList.contains('active')) return;
+    if (window.dialogStack && window.dialogStack.length) return;
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
+    const views = document.getElementById('bvViews');
+    if (!views || !views.offsetParent) return;
+    const tabs = [...views.querySelectorAll('[data-view]')].filter(b => !b.hidden);
+    const at = tabs.findIndex(b => b.getAttribute('aria-pressed') === 'true');
+    if (tabs.length < 2 || at < 0) return;
+    e.preventDefault();
+    const next = tabs[(at + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
+    showBracketView(next.dataset.view);
+});
+
 // Each live match's time on the board
 function updateMatchControlsClock() {
     document.querySelectorAll('#matchCommandCenterModal [data-mc-started]').forEach(el => {

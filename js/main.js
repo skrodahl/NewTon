@@ -235,6 +235,9 @@ document.addEventListener('DOMContentLoaded', function () {
     // Step 7: Auto-load current tournament (if exists) - Never loads config
     autoLoadCurrentTournament();
 
+    // The page was restored before the tournament loaded: choose the bracket page's start view again
+    if (savedPage === 'tournament') showBracketStartView();
+
     // Step 8: Fill the Setup page's current tournament and match history on initial load
     setTimeout(() => {
         renderSetupCurrent();
@@ -474,6 +477,16 @@ function debugConfigState() {
 }
 
 // UPDATE: Enhanced showPage function with help integration
+/**
+ * The bracket page starts on Match Controls or on the bracket (Global Settings: Start on
+ * Match Controls). A tournament opened from Analytics for viewing starts on the bracket.
+ */
+function showBracketStartView() {
+    if (typeof showBracketView !== 'function') return;
+    const onControls = config.ui.autoOpenMatchControls && tournament && !tournament._analyticsPreview;
+    showBracketView(onControls ? 'controls' : 'bracket');
+}
+
 function showPage(pageId) {
     // Leaving Global Settings with unsaved changes: ask to save or discard first
     if (typeof ConfigPage !== 'undefined' && ConfigPage.interceptLeave(pageId)) return;
@@ -518,11 +531,7 @@ function showPage(pageId) {
     // Leaving the bracket page stops the Developer Console's capture and refresh
     if (pageId !== 'tournament' && typeof stopDeveloperConsole === 'function') stopDeveloperConsole();
 
-    // The bracket page starts on Match Controls or on the bracket (Global Settings: Start on Match Controls)
-    if (pageId === 'tournament' && typeof showBracketView === 'function') {
-        const onControls = config.ui.autoOpenMatchControls && tournament && !tournament._analyticsPreview;
-        showBracketView(onControls ? 'controls' : 'bracket');
-    }
+    if (pageId === 'tournament') showBracketStartView();
 
     // Load history when showing history page
     if (pageId === 'history' && typeof NewtonHistory !== 'undefined') {
