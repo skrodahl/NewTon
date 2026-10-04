@@ -2078,11 +2078,12 @@ function _mcCompletedHTML() {
     const pod = (cls, rank, label) => `<div class="mc-pod ${cls}"><div class="mc-podcard"><div class="mc-medal">${rank}</div><span class="mc-podrank">${label}</span><span class="mc-podname">${top(rank)}</span></div><div class="mc-podblock">${rank}</div></div>`;
     const h = _mcHighlights();
     const hl = x => `<div class="mc-hl"${x.id ? ` id="${x.id}"` : ''}${x.hidden ? ' hidden' : ''}><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`;
-    const date = tournament.date ? escapeHtml(tournament.date) : '';
+    const club = escapeHtml((config && config.clubName) || 'NewTon DC');
     return `<div class="mc-done">
-        <section class="mc-panel"><div class="mc-ph"><h3>Tournament complete</h3><span class="mc-hint">${escapeHtml(tournament.name || '')}${date ? ' · ' + date : ''}</span></div>
+        <section class="mc-panel mc-podpanel"><div class="mc-ph"><h3>Tournament complete</h3></div>
             <div class="mc-podium">${pod('mc-s', 2, 'Final')}${pod('mc-g', 1, 'Champion')}${pod('mc-b', 3, 'Third')}</div>
             <div class="mc-heads">${h.head.map(x => `<div class="mc-head-hl"><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`).join('')}</div>
+            <div class="mc-plaque"><span class="mc-plaque-club">${club}</span><b>${escapeHtml(tournament.name || '')}</b>${tournament.date ? `<time>${escapeHtml(tournament.date)}</time>` : ''}</div>
         </section>
         <section class="mc-panel"><div class="mc-ph"><h3>Highlights</h3><span class="mc-hint">From tonight's matches</span></div>
             <div class="mc-hls">${h.list.map(hl).join('')}</div>

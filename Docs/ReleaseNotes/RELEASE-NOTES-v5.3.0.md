@@ -23,7 +23,7 @@ Match Controls is now laid out the way the room is: by dartboard.
 - **Ready to start:** the matches that can start, by round, frontside and backside side by side, each with Lane, Referee and Start. A player who is refereeing another match is flagged on the row, and Start waits until that's sorted.
 - **Referees:** live matches without a referee first, then suggestions: recent losers, recent winners, and who refereed lately. The list updates after every action.
 - **Before the draw:** the players as chips you click to mark paid, a field to add a player, a short summary of the points, match lengths and lanes, and Shuffle & Draw.
-- **When it's over:** the podium and the night's highlights: most 180s, highest checkout, shortest leg, most points, best three-dart average, the longest backside run, deciders, whitewashes, the busiest referee and lane, and more. Anything without data is left out.
+- **When it's over:** the podium, with a plaque for the club, the tournament and the date, and the night's highlights: most 180s, highest checkout, shortest leg, most points, best three-dart average, the longest backside run, deciders, whitewashes, the busiest referee and lane, and more. Anything without data is left out.
 
 Under the hood, about 1,100 lines of old Match Controls code and 620 lines of its styles are gone. On the way, the old finished view's "Most Achievement Points", which always said "None", got fixed.
 

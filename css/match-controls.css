@@ -131,7 +131,7 @@
 .mc-settings dd { margin: 0; font-weight: 700; font-variant-numeric: tabular-nums; text-align: right; }
 
 /* ---- the finished tournament ---- */
-.mc-done { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: start; }
+.mc-done { display: grid; grid-template-columns: minmax(0, 1.4fr) minmax(0, 1fr); gap: 20px; align-items: stretch; }
 .mc-podium { display: grid; grid-template-columns: 1fr 1.15fr 1fr; align-items: end; gap: 14px; padding: 24px 24px 0; }
 .mc-pod { display: grid; gap: 8px; text-align: center; min-width: 0; }
 .mc-podcard { border: 1px solid var(--nt-line); border-radius: 12px; padding: 14px 10px; background: var(--nt-surface); display: grid; gap: 4px; }
@@ -151,6 +151,12 @@
 .mc-head-hl span { font-size: 12px; color: var(--nt-muted); font-weight: 600; }
 .mc-head-hl b { font-size: 22px; font-weight: 800; }
 .mc-head-hl small { font-size: 13px; color: var(--nt-ink-2); }
+/* the plaque under the podium: club, tournament and date, like the plate on a trophy */
+.mc-podpanel { display: flex; flex-direction: column; }
+.mc-plaque { margin-top: auto; display: grid; justify-items: center; gap: 2px; text-align: center; padding: 18px 20px 20px; background: var(--nt-inset); color: var(--nt-ink); border-top: 1px solid var(--nt-line); border-radius: 0 0 11px 11px; }
+.mc-plaque-club { font-family: 'Insignia', var(--nt-sans); font-size: 30px; line-height: 1.15; }
+.mc-plaque b { font-size: 20px; font-weight: 700; letter-spacing: -.01em; }
+.mc-plaque time { font-size: 14px; font-weight: 600; color: var(--nt-muted); font-variant-numeric: tabular-nums; }
 /* each highlight draws its own right edge; the list clips the last column's */
 .mc-hls { display: grid; grid-template-columns: 1fr 1fr; border-top: 1px solid var(--nt-line); overflow: hidden; }
 .mc-hl { display: grid; gap: 1px; padding: 10px 18px; border-bottom: 1px solid var(--nt-line); box-shadow: 1px 0 0 var(--nt-line); min-width: 0; }
