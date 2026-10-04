@@ -21,6 +21,7 @@
 
 - **Match Controls is no longer a dialog**: it shares the Tournament Bracket page's frame, switched with the tabs **Bracket | Match Controls** in the header (mockup: frame-views.html, approved 2026-10-04). It is a layer over the bracket, so the bracket keeps its camera underneath. The results-waiting badge (network handover) moved onto the Match Controls tab.
 - On Match Controls, the bracket's tools (Finals, Fit all, zoom) and the colour legend are hidden; the clock and the status line stay.
+- **Leaderboard** beside the tabs has the tabs' height and text size, so it no longer looks like a stray, smaller tab.
 - Match Controls' own header and footer are gone. **Scan QR results** is in the Lanes heading (QR handover, while matches are live); Leaderboard is the header's button; Close is the Bracket tab.
 - **"Open Match Controls with the bracket" is now "Start on Match Controls"** (Global Settings, same stored setting `config.ui.autoOpenMatchControls`, on by default): the page opens on Match Controls, or on the bracket when off. A tournament opened from Analytics for viewing still opens on the bracket.
 - **The left and right arrow keys switch between Bracket and Match Controls** (not the Console, and nothing while it shows). Not while typing or choosing in a list, with a dialog open, or in analytics-only mode.

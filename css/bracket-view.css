@@ -245,6 +245,8 @@
 
 /* ---- views: Bracket | Match Controls | Console (showBracketView in js/bracket-rendering.js) ---- */
 .bv-views button { padding: 8px 16px; font-size: 14px; }
+/* Leaderboard beside the tabs: the same height and text size, so it reads as an equal button */
+.bv-head-center > .bv-btn { padding: 8px 16px; font-size: 14px; }
 .bv-views .bv-badge { background: #16a34a; } /* results waiting: green, as on the Match Controls tile */
 /* on Match Controls or the Console, the bracket's own tools and the colour legend have nothing to act on */
 .bracket-container.bv-on-layer .bv-tools,
