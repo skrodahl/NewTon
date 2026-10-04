@@ -137,10 +137,8 @@ const HELP_CONTENT = {
                     <p><strong>Setting Up Your Tournament:</strong></p>
                     <ol>
                         <li>Click "<strong>Match Controls</strong>" in the header</li>
-                        <li>Use the Setup Command Center to manage players and tournament</li>
-                        <li>Add players directly in Match Controls or navigate to Registration page</li>
-                        <li>Toggle player paid status by clicking on player names</li>
-                        <li>When ready, choose a format and click "<strong>Generate [X]-Player Bracket</strong>"</li>
+                        <li>Before the draw it shows the players: click a name to mark them paid or unpaid, or add a player (found in the player database, or created)</li>
+                        <li>When ready, choose a format under <strong>Shuffle &amp; Draw</strong> and click "<strong>Draw a [X]-player bracket</strong>"</li>
                     </ol>
                     <p><strong>Tournament Formats:</strong></p>
                     <ul>
@@ -205,7 +203,7 @@ const HELP_CONTENT = {
                 content: `
             <p><strong>Selecting Winners:</strong></p>
             <ol>
-                <li>In Match Controls, click <strong>[Player] Wins</strong> on the LIVE match</li>
+                <li>In Match Controls, click the winner's name (<strong>Wins</strong>) on the match's lane tile</li>
                 <li>Enter leg scores (optional but recommended)</li>
                 <li>Click "<strong>Confirm Winner</strong>"</li>
             </ol>
@@ -245,21 +243,15 @@ const HELP_CONTENT = {
                         <li>Click <strong>Match Controls</strong> in the header, or in the selection bar after clicking a match</li>
                         <li>The one place where matches are run</li>
                     </ul>
-                    <p><strong>Interface Organization:</strong></p>
+                    <p><strong>While the tournament runs:</strong></p>
                     <ul>
-                        <li><strong>LIVE Matches Section:</strong> Currently active matches shown first</li>
-                        <li><strong>Frontside Ready:</strong> Ready frontside matches</li>
-                        <li><strong>Backside Ready:</strong> Ready backside matches with darker styling</li>
+                        <li><strong>Lanes:</strong> one tile per live match, by lane: the players as <strong>Wins</strong> buttons, how long the match has been on the board, its lane and referee (both can be changed while it is live), the handover (<strong>QR</strong>, <strong>Transfer</strong>, or the green <strong>Result ✓</strong> when a Chalker has sent one back) and <strong>Stop</strong>. A live match without a lane gets a <em>No lane</em> tile.</li>
+                        <li><strong>Free:</strong> the free lanes on one line, with the next ready match. Click a free lane to start that match there.</li>
+                        <li><strong>Ready to start:</strong> the matches that can start, by round (frontside and backside side by side), each with Lane, Referee and <strong>Start</strong>. A player who is refereeing another match is marked, and Start waits until that is sorted.</li>
+                        <li><strong>Referees:</strong> live matches without a referee first, then recent losers, recent winners and who refereed recently. Players in live matches aren't suggested.</li>
+                        <li><strong>Scan QR results</strong> and <strong>Leaderboard</strong> are at the bottom.</li>
                     </ul>
-                    <p><strong>Available Actions:</strong></p>
-                    <ul>
-                        <li><strong>Start Match:</strong> Move ready matches to LIVE status</li>
-                        <li><strong>[Player Name] Wins:</strong> Direct winner selection buttons</li>
-                        <li><strong>Lane/Referee Assignment:</strong> Dropdowns for each match</li>
-                        <li><strong>QR:</strong> Generate a Chalker assignment QR for a live match</li>
-                        <li><strong>Scan QR Results:</strong> Appears at the bottom when matches are live — scan a Chalker result QR to import the result automatically</li>
-                        <li><strong>Leaderboard:</strong> Access tournament rankings without leaving the Tournament page</li>
-                    </ul>
+                    <p><strong>When the tournament is finished:</strong> the podium, the night's highlights (most points, best average, the backside run, deciders, the longest match, the busiest referee and lane, and more) and Tournament Analytics.</p>
                     <p><strong>Real-time Updates:</strong> Interface refreshes automatically after each action.</p>
                 `
             }

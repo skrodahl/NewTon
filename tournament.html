@@ -19,6 +19,7 @@
     <link rel="stylesheet" href="css/registration-page.css">
     <link rel="stylesheet" href="css/analytics-page.css">
     <link rel="stylesheet" href="css/bracket-view.css">
+    <link rel="stylesheet" href="css/match-controls.css">
     <link rel="stylesheet" href="css/app-header.css">
 
     <!-- Docker Configuration (only executes when served via PHP) -->
@@ -1178,203 +1179,27 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
 
         <!-- Match Controls Modal -->
         <!-- Match Controls Modal -->
+        <!-- Match Controls (css/match-controls.css): filled by showCommandCenterModal() in
+             js/bracket-rendering.js: before the draw, the running tournament (lanes board, ready
+             queue, referees), or the finished one (podium and highlights) -->
         <div id="matchCommandCenterModal" class="modal">
-            <div class="modal-content match-controls-modal" style="width: 90%; height: 90%; max-width: 90%;">
-                <h3 id="commandCenterTitle">Match Controls</h3>
-
-                <div class="match-controls-main-container">
-                    <div class="match-controls-container">
-                        <!-- LIVE Matches Section -->
-                        <div id="liveMatchesSection" class="cc-match-section">
-                            <h4 class="cc-section-header">🔴 LIVE Matches</h4>
-                            <div id="liveMatchesContainer" class="cc-matches-container">
-                                <!-- LIVE match cards will be populated here -->
-                            </div>
-                        </div>
-
-                        <!-- Round-based Matches Section (repurposing front section) -->
-                        <div id="frontMatchesSection" class="cc-match-section">
-                            <!-- Section header will be dynamically created for each round -->
-                            <div id="frontMatchesContainer" class="cc-matches-container">
-                                <!-- Round-based match cards will be populated here -->
-                            </div>
-                        </div>
-
-                        <!-- Back Bracket Matches Section (hidden - no longer used) -->
-                        <div id="backMatchesSection" class="cc-match-section" style="display: none;">
-                            <h4 class="cc-section-header">⚫ Backside - Ready to Start</h4>
-                            <div id="backMatchesContainer" class="cc-matches-container">
-                                <!-- Back bracket ready match cards will be populated here -->
-                            </div>
-                        </div>
-
-                        <!-- Setup state message -->
-                        <div id="setupMessage" class="cc-setup-message" style="display: none;">
-                            <p>🔧 Tournament in setup mode</p>
-                            <p style="font-size: 14px; color: #666; margin-top: 8px;">Add players and configure the
-                                tournament to generate matches.</p>
-                        </div>
-
-                        <!-- Tournament Configuration Display -->
-                        <div id="tournamentConfigDisplay" class="cc-setup-message" style="display: none;">
-                            <p>Tournament Configuration (Change in Global Settings Page)</p>
-                            <div class="config-display-grid" style="margin-top: 15px;">
-                                <!-- Column 1: Point Values -->
-                                <div>
-                                    <p style="font-weight: 600; margin-bottom: 8px;">Point Values</p>
-                                    <div style="font-size: 14px; color: #666;"><b>Participation:</b> <span id="cfg-participation">5</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>1st</b> <span id="cfg-first">15</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>2nd:</b> <span id="cfg-second">13</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>3rd:</b> <span id="cfg-third">10</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>4th:</b> <span id="cfg-fourth">9</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>5th-6th:</b> <span id="cfg-fifth">8</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>7th-8th:</b> <span id="cfg-seventh">7</span></div>
-                                </div>
-
-                                <!-- Column 2: Achievement Points (no header) -->
-                                <div>
-                                    <p style="font-weight: 600; margin-bottom: 8px;">&nbsp;</p>
-                                    <div style="font-size: 14px; color: #666;"><b>High Out:</b> <span id="cfg-highout">1</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Short Leg:</b> <span id="cfg-shortleg">1</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>180:</b> <span id="cfg-180">1</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Ton:</b> <span id="cfg-ton">0</span></div>
-                                </div>
-
-                                <!-- Column 3: Match Configuration -->
-                                <div>
-                                    <p style="font-weight: 600; margin-bottom: 8px;">Match Configuration</p>
-                                    <p style="font-size: 12px; color: #888; margin: 0 0 4px 0; text-transform: uppercase; letter-spacing: 0.05em;">Single Elimination</p>
-                                    <div style="font-size: 14px; color: #666;"><b>Regular Rounds:</b> <span id="cfg-se-regular">Best of 3</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Quarterfinal:</b> <span id="cfg-se-qf">Best of 3</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Semifinal:</b> <span id="cfg-se-semi">Best of 3</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Bronze Match:</b> <span id="cfg-se-bronze">Best of 5</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Final:</b> <span id="cfg-se-final">Best of 5</span></div>
-                                    <p style="font-size: 12px; color: #888; margin: 8px 0 4px 0; text-transform: uppercase; letter-spacing: 0.05em;">Double Elimination</p>
-                                    <div style="font-size: 14px; color: #666;"><b>Regular Rounds:</b> <span id="cfg-regular">Best of 3</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Frontside Semifinal:</b> <span id="cfg-fs-semi">Best of 5</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Backside Semifinal:</b> <span id="cfg-bs-semi">Best of 3</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Backside Final:</b> <span id="cfg-bs-final">Best of 5</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Grand Final:</b> <span id="cfg-grand">Best of 5</span></div>
-                                </div>
-
-                                <!-- Column 4: Lanes -->
-                                <div>
-                                    <p style="font-weight: 600; margin-bottom: 8px;">Lanes</p>
-                                    <div style="font-size: 14px; color: #666;"><b>Available:</b> <span id="cfg-lanes-avail">1-4</span></div>
-                                    <div style="font-size: 14px; color: #666;"><b>Excluded:</b> <span id="cfg-lanes-excl">None</span></div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- Empty state message -->
-                        <div id="noMatchesMessage" class="cc-no-matches-message" style="display: none;">
-                            <p>No matches currently active or ready to start.</p>
-                        </div>
-
-                        <!-- Tournament Completion Celebration -->
-                        <div id="tournamentCelebration" class="tournament-celebration" style="display: none;">
-                            <svg class="celebration-garlands" viewBox="0 0 800 400" preserveAspectRatio="none" aria-hidden="true">
-                                <g fill="none" stroke-linecap="round" opacity="0.65">
-                                    <path d="M-20,260 C 250,320 550,70  820,60"  stroke="#c8392f" stroke-width="12"/>
-                                    <path d="M-20,282 C 250,342 550,92  820,82"  stroke="#d8c898" stroke-width="12"/>
-                                    <path d="M-20,304 C 250,364 550,114 820,104" stroke="#2a8a5a" stroke-width="12"/>
-                                    <path d="M-20,326 C 250,386 550,136 820,126" stroke="#1a1a1a" stroke-width="12"/>
-                                </g>
-                            </svg>
-
-                            <div class="celebration-header">
-                                <div class="celebration-title">Tournament Complete!</div>
-                                <div class="celebration-subtitle" id="celebrationSubtitle">Congratulations to all players!</div>
-                            </div>
-
-                            <div class="podium-container">
-                                <div class="podium-position" id="podium-second">
-                                    <div class="podium-card">
-                                        <div class="medal medal--silver podium-medal">2</div>
-                                        <div class="podium-rank">Silver</div>
-                                        <div class="podium-name">-</div>
-                                    </div>
-                                    <div class="podium-block podium-block--silver">2</div>
-                                </div>
-                                <div class="podium-position" id="podium-first">
-                                    <div class="podium-card">
-                                        <div class="medal medal--gold podium-medal">1</div>
-                                        <div class="podium-rank">Champion</div>
-                                        <div class="podium-name">-</div>
-                                    </div>
-                                    <div class="podium-block podium-block--gold">1</div>
-                                </div>
-                                <div class="podium-position" id="podium-third">
-                                    <div class="podium-card">
-                                        <div class="medal medal--bronze podium-medal">3</div>
-                                        <div class="podium-rank">Bronze</div>
-                                        <div class="podium-name">-</div>
-                                    </div>
-                                    <div class="podium-block podium-block--bronze">3</div>
-                                </div>
-                            </div>
-
-                            <div class="celebration-highlights">
-                                <div class="highlights-grid" id="highlightsGrid">
-                                    <!-- Highlights will be populated here -->
-                                </div>
-                            </div>
-
-                            <div class="celebration-analytics">
-                                <button class="btn" onclick="popDialog(); if (tournament && tournament.id) openAnalyticsForTournament(tournament.id)">Tournament Analytics</button>
-                            </div>
-                        </div>
+            <div class="mc" role="dialog" aria-modal="true" aria-labelledby="commandCenterTitle">
+                <header class="mc-head">
+                    <div class="mc-title"><h2 id="commandCenterTitle">Match Controls</h2><p id="mcSubtitle"></p></div>
+                    <dl class="mc-stats" id="mcStats"></dl>
+                    <div class="mc-clock"><b id="match-controls-clock"></b><button type="button" class="mc-x" onclick="popDialog()" aria-label="Close">×</button></div>
+                </header>
+                <div class="mc-body" id="mcBody"></div>
+                <footer class="mc-foot">
+                    <div class="mc-foot-l">
+                        <button type="button" class="mc-btn" id="showStatisticsBtn">Leaderboard</button>
+                        <button type="button" class="mc-btn" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="display:none">Scan QR results</button>
                     </div>
-
-                    <!-- Referee Suggestions Column -->
-                    <div class="referee-suggestions-container">
-                        <h4 class="cc-section-header">👥 Referee Suggestions</h4>
-                        <div class="referee-suggestions-content">
-                            <div id="refereeLosersSection" class="referee-section">
-                                <h5 class="referee-subsection-header">Recent Losers</h5>
-                                <div id="refereeLosersContainer" class="referee-list">
-                                    <!-- Recent losers will be populated here -->
-                                </div>
-                            </div>
-                            <div id="refereeWinnersSection" class="referee-section">
-                                <h5 class="referee-subsection-header">Recent Winners</h5>
-                                <div id="refereeWinnersContainer" class="referee-list">
-                                    <!-- Recent winners will be populated here -->
-                                </div>
-                            </div>
-                            <div id="refereeAssignmentsSection" class="referee-section">
-                                <h5 class="referee-subsection-header">Recent Assignments</h5>
-                                <div id="refereeAssignmentsContainer" class="referee-list">
-                                    <!-- Recent referee assignments will be populated here -->
-                                </div>
-                            </div>
-                            <div id="refereeSetupMessage" class="referee-setup-message" style="display: none;">
-                                <p>🔧 Tournament in setup mode</p>
-                                <p style="font-size: 14px; color: #666; margin-top: 8px;">Referee suggestions will
-                                    appear when the tournament starts.</p>
-                            </div>
-                            <div id="noRefereeSuggestionsMessage" class="referee-empty-message" style="display: none;">
-                                <p>No referee suggestions available</p>
-                            </div>
-                        </div>
+                    <div class="mc-foot-r">
+                        <label class="mc-switch"><input type="checkbox" id="autoOpenMatchControlsToggle"> Open Match Controls with the bracket</label>
+                        <button type="button" class="mc-btn mc-primary" id="commandCenterOK">Close</button>
                     </div>
-                </div>
-
-                <div class="text-center mt-20" style="position: relative;">
-                    <div style="display: flex; justify-content: center; align-items: center; position: relative;">
-                        <div>
-                            <button class="btn" id="showStatisticsBtn" style="margin-right: 10px;">Leaderboard</button>
-                            <button class="btn btn-success" id="qrResultsBtn" onclick="openResultQRScanner(null)" style="display:none; margin-right: 10px; box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1); border-color: #fb923c;">Scan QR Results</button>
-                            <button class="btn" id="commandCenterOK">Close</button>
-                        </div>
-                        <div style="display: flex; align-items: center; gap: 8px; position: absolute; right: 0;">
-                            <label for="autoOpenMatchControlsToggle" style="margin: 0; cursor: pointer; user-select: none; font-weight: 500; font-size: 14px; color: #333333;">
-                                Automatically open Match Controls
-                            </label>
-                            <input type="checkbox" id="autoOpenMatchControlsToggle" style="cursor: pointer; width: 18px; height: 18px;">
-                        </div>
-                    </div>
-                </div>
+                </footer>
             </div>
         </div>
 

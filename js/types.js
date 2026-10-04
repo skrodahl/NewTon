@@ -35,7 +35,7 @@
  * Priority 4 - Match state functions (bracket-rendering.js): ✅ DONE
  * - getMatchState(match) → MatchState
  * - showMatchCommandCenter() → void
- * - populateRefereeSuggestions() → void
+ * - showMatchCommandCenter() → void (Match Controls)
  *
  * Priority 5 - History/Undo system (bracket-rendering.js): ✅ DONE
  * - handleSurgicalUndo(matchId) → void

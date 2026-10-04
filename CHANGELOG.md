@@ -1,5 +1,20 @@
 ## Unreleased
 
+### Match Controls redesign
+
+- **Match Controls is rebuilt around the dartboards** (mockup: https://claude.ai/artifact/KKXAavLSXz6QDqm7xEbHoZ), in the new design language (`css/match-controls.css`). Same functions and rules as before: lanes, referees and their conflicts, Start/Stop, the winner dialog, QR and network handover, undo.
+  - **Header:** the tournament, Live / Ready / Played / Free lanes (Players / Paid / Unpaid before the draw), the clock and ×.
+  - **Lanes:** one tile per live match, in lane order: the players as big **Wins** buttons, the match number, best of, **time on the board** (from the match's Start in the history; updates with the clock), the lane and referee (both still changeable while live), the round, the handover (QR, Transfer, or the pulsing **Result ✓**) and Stop. A live match without a lane gets a **No lane** tile (Transfer needs a lane).
+  - **Free lanes collapse into one line**, with the next ready match without a referee conflict: click a free lane to put that match on it and start it (`startMatchOnLane()`, using `updateMatchLane` and the usual Start handler). Lanes not in use are listed.
+  - **Ready to start:** a compact queue by round, frontside and backside side by side (one column in single elimination), each row with Lane, Referee and Start; a referee conflict is written on the row and blocks Start, as before.
+  - **Referees:** live matches without a referee first, then recent losers, recent winners and who refereed recently (`getRefereeSuggestions()`, unchanged). Redrawn after every action.
+  - **Before the draw:** the players as chips to mark paid, an Add field (the player database, via `addPlayer()`), a compact summary of the points, match lengths and lanes, and Shuffle &amp; Draw per format.
+  - **Finished:** the podium and three headline highlights (most 180s, highest checkout, shortest leg); on the right, more highlights: most points, best three-dart average (from the Chalker matches in the register), most matches won, most tons, lollipops, the backside run, deciders, whitewashes, longest and quickest match, busiest referee and lane, each left out when there is no data; the night in numbers; Tournament Analytics, Export, Leaderboard.
+- The lane and referee dropdowns say **No lane** / **No referee** instead of "No" / "None".
+- **Fix:** the old finished view's "Most Achievement Points" always said "None": its helper `calculateAchievementPoints(player)` was shadowed by the points function of the same name in `results-config.js`. The new view uses `calculatePlayerPoints()`.
+- About 1,100 lines of old Match Controls code (`createMatchCard`, the old `showCommandCenterModal`, `populateRefereeSuggestions`, the celebration functions, `updateTournamentConfigDisplay`) and about 620 lines of its CSS are gone.
+- Files changed: `css/match-controls.css` (new), `js/bracket-rendering.js`, `js/lane-management.js` (No lane), `tournament.html` (Match Controls markup, stylesheet link), `css/styles.css`, `js/dynamic-help-system.js`, `js/types.js`.
+
 ### Analytics: As played | Custom
 
 - **The points controls are two buttons: As played | Custom.** As played (the default) scores each tournament as it was played: its own point values, placement and attendance included. Custom opens a small panel: point values (today's from Global Settings, or as played) and whether placement and attendance points count. The button then says what is custom ("Custom: today's values, no attendance"); the choice is kept for the visit. It replaces Original | Current and the Ranking and Attendance switches ("Ranking" is now "Placement points").

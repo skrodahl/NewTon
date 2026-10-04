@@ -396,8 +396,6 @@ body {
 .btn:active,
 .nav-btn:active,
 .help-btn:active,
-.cc-match-action-btn:active,
-.achievement-export-btn:active,
 .analytics-reset-btn:active,
 .analytics-back-btn:active,
 .close:active {
@@ -446,18 +444,6 @@ body {
 
 /* Row 1: Format spans two columns, Players on right */
 
-.match-controls {
-  padding: 6px 10px;
-  background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
-  border-top: 1px solid #e5e7eb;
-  font-size: 9px;
-  display: flex;
-  justify-content: space-between;
-  min-height: 28px;
-  align-items: center;
-  border-radius: 0 0 8px 8px;
-  color: #111827;
-}
 
 /* State badges */
 .match-state-badge {
@@ -825,518 +811,35 @@ a:hover { color: #1e40af; }
 }
 
 /* Match Command Center */
-.cc-match-section {
-  margin-bottom: 25px;
-}
 
-.cc-section-header {
-  font-size: 16px;
-  font-weight: 600;
-  color: #111827;
-  margin-bottom: 15px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid #e5e7eb;
-}
-
-.cc-matches-container {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.cc-match-card {
-  background: #f8f9fa;
-  border: 1px solid #e5e7eb;
-  border-radius: 0;
-  padding: 15px;
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-}
-
-.cc-match-card-live {
-  box-shadow: 0 0 12px rgba(249, 115, 22, 0.4), 0 0 20px rgba(249, 115, 22, 0.1);
-  border-color: #fb923c;
-}
-
-.cc-match-card-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: flex-start;
-  min-height: 36px;
-}
-
-.cc-match-id {
-  font-weight: 600;
-  font-size: 14px;
-  color: #111827;
-}
-
-.cc-match-format {
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.cc-match-players {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  gap: 8px;
-}
-
-.cc-player-name {
-  font-size: 16px;
-  font-weight: 700;
-  color: #065f46;
-  cursor: pointer;
-  text-decoration: none;
-}
-
-.cc-player-name:hover {
-  text-decoration: underline;
-}
-
-.cc-vs-divider {
-  color: #6b7280;
-  font-weight: 400;
-}
-
-.cc-match-controls {
-  display: flex;
-  justify-content: flex-start;
-  align-items: center;
-  gap: 12px;
-  flex-wrap: wrap;
-}
-
-.cc-control-group {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
-.cc-control-label {
-  font-size: 12px;
-  color: #6b7280;
-  font-weight: 500;
-  min-width: 30px;
-}
-
-.cc-match-dropdown {
-  font-size: 12px;
-  padding: 4px 8px;
-  border: 1px solid #d1d5db;
-  border-radius: 4px;
-  background: white;
-  color: #111827;
-  min-width: 80px;
-}
-
-.cc-lane-dropdown {
-  min-width: 0;
-  width: 58px;
-}
-
-.cc-referee-dropdown {
-  min-width: 0;
-  width: 120px;
-}
-
-.cc-match-action-btn {
-  padding: 6px 12px;
-  border: none;
-  border-radius: 6px;
-  font-size: 12px;
-  font-weight: 600;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.cc-btn-start {
-  background: rgba(22, 101, 52, 0.9);
-  color: white;
-}
-
-.cc-btn-start:hover {
-  background: rgba(22, 101, 52, 1);
-}
-
-.cc-btn-stop {
-  background: rgba(154, 52, 18, 0.9);
-  color: white;
-}
-
-.cc-btn-stop:hover {
-  background: rgba(154, 52, 18, 1);
-}
-
-.cc-btn-qr {
-  background: white;
-  color: #111827;
-  border: 1px solid #d1d5db;
-  margin-right: 8px;
-}
-
-.cc-btn-qr:hover {
-  background: #f3f4f6;
-}
-
-.cc-btn-complete {
-  background: rgba(180, 83, 9, 0.9);
-  color: white;
-}
-
-.cc-btn-complete:hover {
-  background: rgba(180, 83, 9, 1);
-}
-
-.cc-winner-buttons {
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-}
-
-.cc-btn-winner {
-  background: rgba(22, 101, 52, 0.9);
-  color: white;
-  flex: 1;
-  min-width: 120px;
-}
-
-.cc-btn-winner:hover {
-  background: rgba(22, 101, 52, 1);
-}
-
-/* Darker background for backside matches in Match Controls */
-#backMatchesSection .cc-match-card {
-  background: #d1d5db;
-}
-
-/* Keep backside matches darker even when live */
-.cc-match-card-backside {
-  background: #d1d5db; /* Darker gray for backside matches */
-}
-
-.cc-match-card-backside.cc-match-card-live {
-  background: #d1d5db !important; /* Same darker gray as ready backside matches */
-}
-
-/* Referee conflict warning - frontside matches */
-.cc-match-card-referee-conflict {
-  background: #f5f0e8 !important; /* Muted beige for conflict warning */
-}
-
-/* Referee conflict warning - backside matches (darker beige) */
-.cc-match-card-backside.cc-match-card-referee-conflict {
-  background: #e8e0d5 !important; /* Darker beige for backside conflict */
-}
-
-/* Disabled start button for referee conflicts */
-.cc-btn-start:disabled {
-  background: #9ca3af;
-  cursor: not-allowed;
-  opacity: 0.6;
-}
-
-.cc-btn-start:disabled:hover {
-  background: #9ca3af;
-}
-
-.cc-no-matches-message {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-  margin: 40px 0;
-}
-
-.cc-setup-message {
-  text-align: center;
-  color: #4b5563;
-  margin: 40px 0;
-  padding: 20px;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
 
 /* Tournament Configuration Display Grid */
-.config-display-grid {
-  display: grid;
-  grid-template-columns: 17% 20% 35% 23%;
-  gap: 20px;
-  text-align: left;
-  padding-left: 40px;
-}
+
 
 /* Tournament Completion Celebration Podium */
 /* === Tournament Completion Celebration === */
-.tournament-celebration {
-  position: relative;
-  overflow: hidden;
-  background: linear-gradient(180deg, #f0f4fa 0%, #f8f9fb 60%);
-  border-radius: 16px;
-  padding: 36px 40px;
-  margin: 15px auto;
-  max-width: 800px;
-  color: #1a1f2a;
-  box-shadow: 0 14px 50px rgba(20, 25, 35, 0.14);
-}
+
 
 /* Dynamic garland strands — decorative SVG behind the podium */
-.celebration-garlands {
-  position: absolute;
-  left: 0;
-  right: 0;
-  top: 90px;
-  height: 400px;
-  z-index: 0;
-  pointer-events: none;
-}
+
 
 /* Keep all content above the garlands */
-.celebration-header,
-.podium-container,
-.celebration-highlights,
-.celebration-analytics {
-  position: relative;
-  z-index: 1;
-}
 
-.celebration-header {
-  text-align: center;
-  margin-bottom: 28px;
-}
-
-.celebration-title {
-  font-size: 22px;
-  font-weight: 700;
-  color: #1a1f2a;
-  margin-bottom: 6px;
-}
-
-.celebration-subtitle {
-  font-size: 13px;
-  color: #7a8090;
-}
 
 /* Podium — tiered Olympic-style blocks with cards on top */
-.podium-container {
-  display: flex;
-  justify-content: center;
-  align-items: flex-end;
-  gap: 20px;
-  max-width: 600px;
-  margin: 0 auto;
-}
 
-.podium-position {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 180px;
-}
-
-.podium-card {
-  background: white;
-  border-radius: 14px 14px 0 0;
-  padding: 24px 16px 22px;
-  text-align: center;
-  width: 100%;
-  box-shadow: 0 -10px 28px rgba(20, 25, 35, 0.08);
-  position: relative;
-  z-index: 2;
-}
 
 /* Medal discs — CSS-only with metallic radial gradients */
-.medal {
-  border-radius: 50%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  color: white;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.25);
-  border: 3px solid rgba(255, 255, 255, 0.35);
-  flex-shrink: 0;
-}
 
-.podium-medal {
-  width: 56px;
-  height: 56px;
-  font-size: 22px;
-  margin: 0 auto 12px;
-}
-
-.medal--gold {
-  background: radial-gradient(circle at 32% 30%, #f4d068, #e6b542 55%, #a07410);
-  box-shadow: 0 4px 12px rgba(212, 175, 55, 0.45);
-}
-.medal--silver {
-  background: radial-gradient(circle at 32% 30%, #d8dadc, #b6b9be 55%, #7a7e84);
-  box-shadow: 0 4px 12px rgba(140, 144, 150, 0.40);
-}
-.medal--bronze {
-  background: radial-gradient(circle at 32% 30%, #d49158, #b87333 55%, #7a4818);
-  box-shadow: 0 4px 12px rgba(184, 115, 51, 0.45);
-}
-
-.podium-rank {
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 1.5px;
-  color: #8b91a0;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.podium-name {
-  font-size: 17px;
-  font-weight: 600;
-  color: #1a1f2a;
-  letter-spacing: -0.2px;
-  word-break: break-word;
-}
 
 /* Tiered blocks below each card */
-.podium-block {
-  width: 100%;
-  display: flex;
-  align-items: flex-start;
-  justify-content: center;
-  padding-top: 16px;
-  font-size: 34px;
-  font-weight: 700;
-  color: rgba(255, 255, 255, 0.85);
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.15);
-  position: relative;
-  z-index: 1;
-  box-shadow: 0 16px 32px rgba(20, 25, 35, 0.40);
-}
 
-.podium-block::before {
-  content: "";
-  position: absolute;
-  top: 0; left: 0; right: 0;
-  height: 4px;
-  background: rgba(255, 255, 255, 0.25);
-}
-
-.podium-block--gold {
-  height: 160px;
-  background: linear-gradient(180deg, #e6b542 0%, #a07410 100%);
-}
-
-.podium-block--silver {
-  height: 120px;
-  background: linear-gradient(180deg, #b6b9be 0%, #7a7e84 100%);
-}
-
-.podium-block--bronze {
-  height: 88px;
-  background: linear-gradient(180deg, #b87333 0%, #7a4818 100%);
-}
 
 /* Highlights */
-.celebration-highlights {
-  margin-top: 32px;
-}
 
-.highlights-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 10px;
-  background: white;
-  border-radius: 12px;
-  padding: 14px;
-  border: 1px solid #ecedf1;
-}
-
-.highlight-item {
-  text-align: center;
-  padding: 10px;
-}
-
-.highlight-label {
-  font-size: 11px;
-  color: #8b91a0;
-  text-transform: uppercase;
-  letter-spacing: 1.2px;
-  font-weight: 600;
-  margin-bottom: 4px;
-}
-
-.highlight-value {
-  font-size: 17px;
-  font-weight: 700;
-  color: #1a1f2a;
-}
-
-.celebration-analytics {
-  text-align: center;
-  margin-top: 24px;
-}
 
 /* Tournament Achievements Column Styling */
-.achievement-list {
-  display: flex;
-  flex-direction: column;
-  gap: 8px;
-}
 
-.achievement-item {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 8px 12px;
-  background: rgba(255, 255, 255, 0.7);
-  border-radius: 0;
-  border: 1px solid #e5e7eb;
-  font-size: 14px;
-}
-
-.achievement-label {
-  font-weight: 600;
-  color: #374151;
-}
-
-.achievement-value {
-  font-weight: 500;
-  color: #1f2937;
-  text-align: right;
-  word-break: break-word;
-}
-
-.achievement-export-section {
-  text-align: center;
-  padding: 10px 0;
-}
-
-.achievement-export-btn {
-  background: linear-gradient(135deg, #3b82f6, #1d4ed8);
-  color: white;
-  border: none;
-  padding: 12px 20px;
-  border-radius: 0;
-  font-weight: 600;
-  font-size: 14px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
-  width: 100%;
-  margin-bottom: 8px;
-}
-
-.achievement-export-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(59, 130, 246, 0.4);
-  background: linear-gradient(135deg, #2563eb, #1e40af);
-}
-
-.achievement-export-btn:active {
-  transform: translateY(0);
-}
 
 .export-description {
   font-size: 12px;
@@ -1374,14 +877,12 @@ a:hover { color: #1e40af; }
 #matchQRModal .modal-content,
 #qrResultScanModal .modal-content,
 #matchDetailModal .modal-content,
-#matchCommandCenterModal .modal-content,
 #analyticsModal .modal-content {
   border-radius: 10px;
   background-color: #ffffff;
 }
 /* Title separator — mirrors the .dlg__title border-bottom for light-touch alignment */
 #matchDetailModal .modal-content > h3,
-#matchCommandCenterModal .modal-content > h3,
 #analyticsModal .modal-content > h3 {
   border-bottom: 1px solid #ecedf1;
   padding-bottom: 14px;
@@ -1703,158 +1204,13 @@ a:hover { color: #1e40af; }
 }
 
 /* Match Controls Modal - Same Flexbox Layout as Undo Dialog */
-.match-controls-modal {
-  display: flex !important;
-  flex-direction: column !important;
-  margin: 1% auto !important;
-  max-height: 98vh !important;
-  overflow: hidden !important;
-}
 
-.match-controls-modal h3 {
-  flex-shrink: 0; /* Don't shrink title */
-  margin-bottom: 20px;
-}
 
 /* Two-column layout container */
-.match-controls-main-container {
-  display: flex;
-  gap: 20px;
-  flex: 1;
-  min-height: 0;
-}
 
-.match-controls-container {
-  flex: 2; /* Takes 2/3 of the space */
-  overflow-y: auto;
-  padding-right: 8px; /* Space for scrollbar */
-  margin-bottom: 20px; /* Space before buttons */
-  min-height: 0; /* Allow flexbox shrinking */
-}
 
 /* Referee suggestions column */
-.referee-suggestions-container {
-  width: 380px; /* Fixed width - approximately 60% of previous 1/3 space */
-  flex-shrink: 0;
-  border-left: 2px solid #e5e7eb;
-  padding-left: 20px;
-  display: flex;
-  flex-direction: column;
-  min-height: 0;
-}
 
-.referee-suggestions-content {
-  flex: 1;
-  overflow-y: auto;
-  padding-right: 8px;
-  min-height: 0;
-}
-
-.referee-section {
-  margin-bottom: 20px;
-}
-
-.referee-subsection-header {
-  font-size: 14px;
-  font-weight: 600;
-  color: #374151;
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid #e5e7eb;
-}
-
-.referee-list {
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.referee-suggestion-item {
-  background: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.08);
-  padding: 10px 12px;
-  font-size: 14px;
-  color: #374151;
-  cursor: pointer;
-  transition: all 0.2s ease;
-}
-
-.referee-suggestion-item:hover {
-  background: #f3f4f6;
-  border-color: #d1d5db;
-}
-
-.referee-suggestion-name {
-  font-weight: 600;
-  color: #111827;
-}
-
-/* Color-coded left borders per category */
-#refereeLosersContainer .referee-suggestion-item {
-  border-left: 3px solid #d4a0a0;
-}
-
-#refereeWinnersContainer .referee-suggestion-item {
-  border-left: 3px solid #a0c4a0;
-}
-
-#refereeAssignmentsContainer .referee-suggestion-item {
-  border-left: 3px solid #a0b4c4;
-}
-
-.referee-suggestion-round {
-  color: #6b7280;
-  font-size: 11px;
-  margin-left: 4px;
-}
-
-/* Backside color scheme for referee suggestions */
-.referee-suggestion-item.referee-suggestion-backside {
-  background: #d1d5db; /* Same darker gray as backside matches */
-}
-
-.referee-suggestion-item.referee-suggestion-backside:hover {
-  background: #c1c6cd; /* Slightly darker on hover for backside */
-  border-color: #9ca3af;
-}
-
-.referee-empty-message {
-  text-align: center;
-  color: #6b7280;
-  font-style: italic;
-  padding: 20px;
-  margin-top: 20px;
-}
-
-.referee-setup-message {
-  text-align: center;
-  color: #4b5563;
-  padding: 20px;
-  margin-top: 20px;
-  background-color: #f9fafb;
-  border: 1px solid #e5e7eb;
-  border-radius: 0;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-}
-
-/* Match Controls modal button container - keep buttons at bottom */
-.match-controls-modal .text-center.mt-20 {
-  flex-shrink: 0; /* Don't shrink button area */
-  margin-top: 20px;
-}
-
-/* Match Controls Clock */
-.match-controls-clock {
-  display: inline-block;
-  font-weight: normal;
-  font-family: var(--font-clock);
-  border: 1px solid #ccc;
-  padding: 8px 16px;
-  border-radius: 6px;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.24);
-}
 
 /* Backside match styling - darker header background */
 
@@ -2074,28 +1430,6 @@ a:hover { color: #1e40af; }
 
 .doc-link-icon:hover {
     transform: scale(1.15);
-}
-
-/* ==========================================================================
-   Network handover (experimental) — see Docs/NETWORK-LAYER.md
-   Styling only; the behaviour lives in licensed/, which may be absent.
-   ========================================================================== */
-
-/* A finished match has come back from a Chalker and is waiting to be accepted. */
-.cc-btn-result-ready {
-    background: #16a34a;
-    border-color: #22c55e;
-    color: #fff;
-    animation: nw-result-pulse 1.6s ease-in-out infinite;
-}
-
-@keyframes nw-result-pulse {
-    0%, 100% { box-shadow: 0 0 0 0 rgba(34, 197, 94, 0.55); }
-    50%      { box-shadow: 0 0 10px 3px rgba(34, 197, 94, 0.25); }
-}
-
-@media (prefers-reduced-motion: reduce) {
-    .cc-btn-result-ready { animation: none; }
 }
 
 /* Analytics maintenance tools — Export/Import Register, Import Tournament.

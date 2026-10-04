@@ -616,7 +616,7 @@ function refreshTournamentUI() {
  * Generate referee dropdown options with conflict detection.
  */
 function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = null) {
-    let options = '<option value="">None</option>';
+    let options = '<option value="">No referee</option>';
 
     if (typeof players !== 'undefined' && Array.isArray(players)) {
         const paidPlayers = players.filter(player => player.paid);
@@ -1227,104 +1227,325 @@ function getRoundDescription(match) {
     return 'Match';
 }
 
-// Create match card HTML
-function createMatchCard(match) {
-    const format = getMatchFormatDescription(match);
-    const round = getRoundDescription(match);
-    const state = getMatchState(match);
-    
-    const laneOptions = generateLaneOptions(match.id, match.lane);
-    const refereeOptions = generateRefereeOptionsWithConflicts(match.id, match.referee);
-    
-    const player1Name = escapeHtml(match.player1?.name || 'TBD');
-    const player2Name = escapeHtml(match.player2?.name || 'TBD');
-    const player1Id = match.player1?.id || '';
-    const player2Id = match.player2?.id || '';
+// --- Match Controls: the lanes board, the ready queue and referees (css/match-controls.css) ---
+//
+// Drawing only: every action calls the same functions as before (updateMatchLane,
+// updateMatchReferee, the Start handler, toggleActive, completeMatchFromCommandCenter, the
+// QR and network handover), with the same rules. Each live tile and queue row keeps the id
+// `cc-match-card-<id>`, where refreshAllLaneDropdowns()/refreshAllRefereeDropdowns() find
+// their dropdowns.
 
-    // Use shared utility function to check for referee conflicts
-    const conflictInfo = checkRefereeConflict(match.id);
+/** Redraw Match Controls if it is open (after an action). */
+function _mcRefresh(delay) {
+    setTimeout(() => {
+        const modal = document.getElementById('matchCommandCenterModal');
+        if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter();
+    }, delay || 100);
+}
 
-    // Modify player names if they're refereeing
-    const displayPlayer1 = conflictInfo.player1IsReferee ? `⚠️ ${player1Name} (Referee)` : player1Name;
-    const displayPlayer2 = conflictInfo.player2IsReferee ? `⚠️ ${player2Name} (Referee)` : player2Name;
+/** A match number as a side tag (matchIdTag in main.js). */
+function _mcTag(id) {
+    return typeof matchIdTag === 'function' ? matchIdTag(id) : escapeHtml(id);
+}
 
-    const hasRefereeConflict = conflictInfo.hasConflict;
-
-    // Use same button logic as tournament bracket, but add Command Center refresh
-    const originalClickHandler = getButtonClickHandler(state, match.id);
-    const commandCenterClickHandler = originalClickHandler ?
-        `${originalClickHandler}; setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100)` :
-        '';
-
-    // For live matches, show stop button; for non-live matches, show start button
-    // Disable start button if there's a referee conflict
-
-    // Handover affordance for a live match — QR code, network transfer, or nothing,
-    // per the global Chalker Handover setting (see getChalkerHandover()).
-    const _handover = (typeof getChalkerHandover === 'function') ? getChalkerHandover() : 'qr';
-    let qrButton = '';
-    const _resultWaiting = state === 'live' && typeof NetworkClient !== 'undefined' &&
-        typeof NetworkClient.hasPendingResult === 'function' && NetworkClient.hasPendingResult(match.id);
-    if (_resultWaiting) {
-        // A finished match has come back from the Chalker. Reviewing it opens the same
-        // preview a scanned QR opens; nothing is applied until the operator accepts.
-        qrButton = `<button class="cc-match-action-btn cc-btn-qr cc-btn-result-ready" onclick="NetworkClient.reviewResult('${match.id}')" title="A result has arrived from the Chalker — review and accept it">Result ✓</button>`;
-    } else if (state === 'live' && _handover === 'qr') {
-        qrButton = `<button class="cc-match-action-btn cc-btn-qr" onclick="openMatchQR('${match.id}')" title="Show Chalker QR code">QR</button>`;
-    } else if (state === 'live' && _handover === 'network') {
-        qrButton = `<button class="cc-match-action-btn cc-btn-qr" onclick="transferMatchToDevice('${match.id}')" title="Send this match to a Chalker on the network">Transfer</button>`;
+/**
+ * When a live match was started: the latest START_MATCH in the history.
+ * @param {string} matchId
+ * @returns {number|null} ms
+ */
+let _mcStarts = null; // matchId → ms of its latest Start, built once per redraw
+function _mcStartedAt(matchId) {
+    if (!_mcStarts) {
+        _mcStarts = {};
+        const history = typeof getTournamentHistory === 'function' ? getTournamentHistory() : []; // newest first
+        history.forEach(tx => {
+            if (tx && tx.type === 'START_MATCH' && !(tx.matchId in _mcStarts)) {
+                const t = Date.parse(tx.timestamp);
+                if (!isNaN(t)) _mcStarts[tx.matchId] = t;
+            }
+        });
     }
+    return _mcStarts[matchId] || null;
+}
 
-    const actionButton = state === 'live' ?
-        `<button class="cc-match-action-btn cc-btn-stop" onclick="toggleActive('${match.id}'); setTimeout(() => { const modal = document.getElementById('matchCommandCenterModal'); if (modal && (modal.style.display === 'flex' || modal.style.display === 'block')) showMatchCommandCenter(); }, 100);">Stop Match</button>` :
-        `<button class="cc-match-action-btn cc-btn-start" onclick="${commandCenterClickHandler}"${hasRefereeConflict ? ' disabled' : ''}>Start Match</button>`;
+/** "14 min" since a start time. */
+function _mcSince(ms) {
+    if (!ms) return '';
+    const min = Math.max(0, Math.floor((Date.now() - ms) / 60000));
+    return min < 60 ? `${min} min` : `${Math.floor(min / 60)} h ${min % 60} min`;
+}
 
-    const liveClass = state === 'live' ? ' cc-match-card-live' : '';
-    const backsideClass = (match.side === 'backside' || match.id.startsWith('BS-')) ? ' cc-match-card-backside' : '';
-    const conflictClass = hasRefereeConflict ? ' cc-match-card-referee-conflict' : '';
+/** Lanes in use for this tournament: 1..maxLanes, and those excluded in Global Settings. */
+function _mcLanes() {
+    const max = (config && config.lanes && config.lanes.maxLanes) || 0;
+    const excluded = ((config && config.lanes && config.lanes.excludedLanes) || []).map(Number);
+    const all = [];
+    for (let l = 1; l <= max; l++) all.push(l);
+    return { all, excluded, usable: all.filter(l => !excluded.includes(l)) };
+}
 
-    // Get progression text
-    const progressionInfo = getMatchProgressionText(match.id);
-    const progressionText = progressionInfo ? progressionInfo.line2 : '';
+/** The handover button for a live match: Result ✓ when a Chalker sent one, else QR or Transfer. */
+function _mcHandover(match) {
+    const handover = typeof getChalkerHandover === 'function' ? getChalkerHandover() : 'qr';
+    const waiting = typeof NetworkClient !== 'undefined' && typeof NetworkClient.hasPendingResult === 'function' && NetworkClient.hasPendingResult(match.id);
+    if (waiting) return `<button type="button" class="mc-btn mc-sm mc-result" onclick="NetworkClient.reviewResult('${match.id}')" title="A result has arrived from the Chalker: review and accept it">Result ✓</button>`;
+    if (handover === 'qr') return `<button type="button" class="mc-btn mc-sm" onclick="openMatchQR('${match.id}')" title="Show the Chalker QR code">QR</button>`;
+    if (handover === 'network') {
+        return match.lane
+            ? `<button type="button" class="mc-btn mc-sm" onclick="transferMatchToDevice('${match.id}')" title="Send this match to the Chalker on Lane ${escapeHtml(String(match.lane))}">Transfer</button>`
+            : `<button type="button" class="mc-btn mc-sm" disabled title="Assign a lane to transfer this match">Transfer</button>`;
+    }
+    return '';
+}
 
-    return `
-        <div id="cc-match-card-${match.id}" class="cc-match-card${liveClass}${backsideClass}${conflictClass}">
-            <div class="cc-match-card-header">
-                <div class="cc-match-id">${match.id}${progressionText ? ` • <span style="font-weight: 400; color: #6b7280;">${progressionText}</span>` : ''}</div>
-                <div class="cc-match-format">${format} • <strong>${round}</strong></div>
-            </div>
+/** A player's name with a warning when they are refereeing another match. */
+function _mcName(match, n, conflict) {
+    const p = match['player' + n];
+    const name = escapeHtml(p && p.name ? p.name : 'TBD');
+    return conflict[`player${n}IsReferee`] ? `<span class="mc-warnname" title="${name} is refereeing another match">⚠ ${name}</span>` : name;
+}
 
-            <div class="cc-match-players">
-                ${state === 'live' ?
-                    `<button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 1)">${displayPlayer1} Wins</button>
-                     <button class="cc-match-action-btn cc-btn-winner" onclick="completeMatchFromCommandCenter('${match.id}', 2)">${displayPlayer2} Wins</button>` :
-                    `<span class="cc-player-name" onclick="openStatsModal(${player1Id})">${displayPlayer1}</span>
-                     <span class="cc-vs-divider">vs</span>
-                     <span class="cc-player-name" onclick="openStatsModal(${player2Id})">${displayPlayer2}</span>`
-                }
-            </div>
-            
-            <div class="cc-match-controls">
-                <div class="cc-control-group">
-                    <label class="cc-control-label">Lane:</label>
-                    <select class="cc-match-dropdown cc-lane-dropdown" onchange="updateMatchLane('${match.id}', this.value);">
-                        ${laneOptions}
-                    </select>
-                </div>
-
-                <div class="cc-control-group">
-                    <label class="cc-control-label">Referee:</label>
-                    <select class="cc-match-dropdown cc-referee-dropdown" onchange="updateMatchReferee('${match.id}', this.value);">
-                        ${refereeOptions}
-                    </select>
-                </div>
-
-                <div style="flex: 1;"></div>
-                ${qrButton}
-                ${actionButton}
-            </div>
+/**
+ * A live match as a lane tile: the players as winner buttons, time on the board, lane and
+ * referee, the handover, Stop.
+ * @param {object} match
+ * @returns {string}
+ */
+function _mcLiveTile(match) {
+    const conflict = checkRefereeConflict(match.id);
+    const started = _mcStartedAt(match.id);
+    const lane = match.lane ? `Lane ${escapeHtml(String(match.lane))}` : 'No lane';
+    const win = n => `<button type="button" class="mc-wins" onclick="completeMatchFromCommandCenter('${match.id}', ${n})" title="${escapeHtml((match['player' + n] || {}).name || '')} wins ${match.id}"><b>${_mcName(match, n, conflict)}</b><span>Wins</span></button>`;
+    return `<div id="cc-match-card-${match.id}" class="mc-lane mc-on${match.lane ? '' : ' mc-nolane'}">
+        <div class="mc-lane-top"><span class="mc-lane-no">${lane}</span>
+            <span class="mc-lane-meta">${_mcTag(match.id)}<span>Bo${escapeHtml(String(match.legs || ''))}</span>${started ? `<span class="mc-dotsep">·</span><span class="mc-lane-time" data-mc-started="${started}">${_mcSince(started)}</span>` : ''}</span></div>
+        <div class="mc-lane-play">${win(1)}${win(2)}</div>
+        <div class="mc-lane-ctl">
+            <select class="mc-sel" aria-label="Lane for ${match.id}" onchange="updateMatchLane('${match.id}', this.value);">${generateLaneOptions(match.id, match.lane)}</select>
+            <select class="mc-sel" aria-label="Referee for ${match.id}" onchange="updateMatchReferee('${match.id}', this.value);">${generateRefereeOptionsWithConflicts(match.id, match.referee)}</select>
         </div>
-    `;
+        <div class="mc-lane-foot"><span class="mc-round">${escapeHtml(getRoundDescription(match))}</span>
+            <span class="mc-acts">${_mcHandover(match)}<button type="button" class="mc-btn mc-sm" onclick="toggleActive('${match.id}'); _mcRefresh();">Stop</button></span></div>
+    </div>`;
+}
+
+/**
+ * A ready match as a queue row: who plays, lane, referee, Start. A referee conflict is said
+ * on the row and blocks Start, as before.
+ * @param {object} match
+ * @returns {string}
+ */
+function _mcQueueRow(match) {
+    const conflict = checkRefereeConflict(match.id);
+    const handler = getButtonClickHandler('ready', match.id);
+    const who = [1, 2].filter(n => conflict[`player${n}IsReferee`]).map(n => (match['player' + n] || {}).name).filter(Boolean);
+    const note = conflict.hasConflict
+        ? `<small class="mc-warn">⚠ ${escapeHtml(who.join(' and '))} ${who.length > 1 ? 'are' : 'is'} refereeing another match</small>`
+        : `<small>Best of ${escapeHtml(String(match.legs || ''))}</small>`;
+    return `<div id="cc-match-card-${match.id}" class="mc-qrow">
+        ${_mcTag(match.id)}
+        <div class="mc-who"><span><b>${_mcName(match, 1, conflict)}</b><span class="mc-vs">v</span><b>${_mcName(match, 2, conflict)}</b></span>${note}</div>
+        <select class="mc-sel" aria-label="Lane for ${match.id}" onchange="updateMatchLane('${match.id}', this.value);">${generateLaneOptions(match.id, match.lane)}</select>
+        <select class="mc-sel" aria-label="Referee for ${match.id}" onchange="updateMatchReferee('${match.id}', this.value);">${generateRefereeOptionsWithConflicts(match.id, match.referee)}</select>
+        <button type="button" class="mc-btn mc-sm mc-primary" onclick="${handler}; _mcRefresh();"${conflict.hasConflict ? ' disabled' : ''}>Start</button>
+    </div>`;
+}
+
+/**
+ * Put a ready match on a free lane and start it (the free-lane buttons).
+ * @param {string} matchId
+ * @param {number} lane
+ */
+function startMatchOnLane(matchId, lane) {
+    const match = matches.find(m => m.id === matchId);
+    if (!match || getMatchState(match) !== 'ready') return;
+    if (String(match.lane || '') !== String(lane)) updateMatchLane(matchId, String(lane));
+    const fn = typeof toggleActiveWithValidation === 'function' ? toggleActiveWithValidation : toggleActive;
+    fn(matchId);
+    _mcRefresh();
+}
+
+/** The round heading for a group of ready matches. */
+function _mcRoundTitle(key) {
+    if (key === 'GRAND-FINAL') return 'Grand Final';
+    if (key === 'BS-FINAL') return 'Backside Final';
+    if (getFormat && getFormat() === 'SE' && key.startsWith('FS-R') && typeof getSERoundDisplayName === 'function') {
+        return getSERoundDisplayName(parseInt(key.replace('FS-R', '')), tournament && tournament.bracketSize);
+    }
+    if (key.startsWith('FS-R')) return `Frontside · Round ${key.replace('FS-R', '')}`;
+    if (key.startsWith('BS-R')) return `Backside · Round ${key.replace('BS-R', '')}`;
+    return key;
+}
+
+/**
+ * The running tournament: lanes board (live matches; free lanes on one line), the ready
+ * queue by round, and the referees.
+ * @param {{live: object[], rounds: Object<string, object[]>}} matchData
+ * @returns {string}
+ */
+function _mcActiveHTML(matchData) {
+    const isSE = typeof getFormat === 'function' && getFormat() === 'SE';
+    const live = matchData.live || [];
+    const lanes = _mcLanes();
+    const used = new Set(matches.filter(m => !m.completed && m.lane).map(m => String(m.lane)));
+    const free = lanes.usable.filter(l => !used.has(String(l)));
+
+    // the order matches are queued in: frontside rounds, then the finals; backside beside
+    const order = k => k === 'GRAND-FINAL' ? 90 : k === 'BS-FINAL' ? 91 : parseInt(k.replace(/\D/g, '')) || 50;
+    const keys = Object.keys(matchData.rounds || {});
+    const front = keys.filter(k => k.startsWith('FS-') || k === 'GRAND-FINAL' || k === 'OTHER').sort((a, b) => order(a) - order(b));
+    const back = keys.filter(k => k.startsWith('BS-') || k === 'BS-FINAL').sort((a, b) => order(a) - order(b));
+    const queued = front.concat(back).flatMap(k => matchData.rounds[k]);
+    const next = queued.find(m => !checkRefereeConflict(m.id).hasConflict);
+
+    const tiles = live.filter(m => m.lane).concat(live.filter(m => !m.lane)).map(_mcLiveTile).join('');
+    const freeLine = `<div class="mc-free"><span class="mc-k">Free</span>` +
+        (free.length
+            ? free.map(l => next
+                ? `<button type="button" class="mc-lanechip" onclick="startMatchOnLane('${next.id}', ${l})" title="Start ${next.id} on Lane ${l}">${l}</button>`
+                : `<span class="mc-lanechip mc-idle">${l}</span>`).join('')
+            : `<span class="mc-none">${lanes.usable.length ? 'No free lanes' : 'No lanes set up'}</span>`) +
+        (next && free.length ? `<span class="mc-next">Next up: ${_mcTag(next.id)} ${escapeHtml(next.player1.name)} v ${escapeHtml(next.player2.name)}<em>click a free lane to start it there</em></span>` : '') +
+        (lanes.excluded.length ? `<span class="mc-off">Not in use: ${lanes.excluded.join(', ')}</span>` : '') +
+        `</div>`;
+
+    const group = k => `<div class="mc-qround"><span>${escapeHtml(_mcRoundTitle(k))}</span><span>${matchData.rounds[k].length} ready</span></div>` +
+        matchData.rounds[k].slice().sort((a, b) => (parseInt(a.id.split('-')[2]) || 0) - (parseInt(b.id.split('-')[2]) || 0)).map(_mcQueueRow).join('');
+    const column = (ks, empty) => ks.length ? ks.map(group).join('') : `<div class="mc-qempty">${empty}</div>`;
+    const queue = isSE
+        ? `<div class="mc-qcols mc-one"><div class="mc-qcol">${column(front, 'Nothing ready to start.')}</div></div>`
+        : `<div class="mc-qcols"><div class="mc-qcol">${column(front, 'Nothing ready on the frontside.')}</div><div class="mc-qcol">${column(back, 'Nothing ready on the backside.')}</div></div>`;
+
+    return `<div class="mc-col">
+        <section class="mc-panel"><div class="mc-ph"><h3>Lanes<small>${live.length} live · ${free.length} free</small></h3><span class="mc-hint">Click the winner to finish a match</span></div>
+            ${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}${freeLine}</section>
+        <section class="mc-panel"><div class="mc-ph"><h3>Ready to start<small>${queued.length}</small></h3><span class="mc-hint">Lane and referee are optional</span></div>${queue}</section>
+    </div>
+    <div class="mc-col">${_mcRefereesHTML(live)}</div>`;
+}
+
+/**
+ * Referee suggestions (getRefereeSuggestions), with the live matches that have no
+ * referee first.
+ * @param {object[]} live
+ * @returns {string}
+ */
+function _mcRefereesHTML(live) {
+    const s = getRefereeSuggestions();
+    const item = x => `<li class="${x.round && x.round.startsWith('BS-') ? 'mc-bs' : ''}"><b>${escapeHtml(x.name)}</b><span>${escapeHtml(x.round || '')}${x.lane ? ` · Lane ${escapeHtml(String(x.lane))}` : ''}</span></li>`;
+    const list = (title, xs) => xs.length ? `<div><h4>${title}</h4><ul>${xs.map(item).join('')}</ul></div>` : '';
+    const noRef = live.filter(m => !m.referee);
+    const body = (noRef.length ? `<div><h4>Live without a referee</h4><ul>${noRef.map(m => `<li><b>${_mcTag(m.id)}${m.lane ? ` Lane ${escapeHtml(String(m.lane))}` : ''}</b><span>${escapeHtml(m.player1.name)} v ${escapeHtml(m.player2.name)}</span></li>`).join('')}</ul></div>` : '') +
+        list('Recent losers', s.losers) + list('Recent winners', s.winners) + list('Recently refereed', s.recentReferees);
+    return `<section class="mc-panel"><div class="mc-ph"><h3>Referees</h3></div>
+        <div class="mc-refs">${body || '<p class="mc-note">Suggestions appear as matches finish.</p>'}</div>
+        <p class="mc-note">Players in live matches aren't suggested.</p></section>`;
+}
+
+/**
+ * Before the draw: the players to mark paid, add a player, the settings, Shuffle & Draw.
+ * @returns {string}
+ */
+function _mcSetupHTML() {
+    const paid = players.filter(p => p.paid).length;
+    const chips = players.slice().sort((a, b) => a.name.localeCompare(b.name)).map(p =>
+        `<button type="button" class="mc-chip ${p.paid ? 'mc-paid' : 'mc-unpaid'}" onclick="togglePaid(${p.id}); _mcRefresh();" title="Mark ${escapeHtml(p.name)} ${p.paid ? 'unpaid' : 'paid'}">${escapeHtml(p.name)}</button>`).join('');
+    const formats = (typeof getVisibleFormats === 'function' ? getVisibleFormats() : [{ id: 'DE', name: 'Double Elimination Cup', blurb: '', minPlayers: 4, maxPlayers: 32 }]).map(fmt => {
+        let label = `Draw a ${calculateBracketSize(paid, fmt.id)}-player bracket`, ok = true;
+        if (paid < fmt.minPlayers) { label = `Needs ${fmt.minPlayers}+ paid players`; ok = false; }
+        else if (paid > fmt.maxPlayers) { label = `At most ${fmt.maxPlayers} players`; ok = false; }
+        return `<div class="mc-fmt"><b>${escapeHtml(fmt.name)}</b><p>${escapeHtml(fmt.blurb || '')}</p><button type="button" class="mc-btn mc-primary" onclick="generateBracket('${escapeHtml(fmt.id)}')"${ok ? '' : ' disabled'}>${label}</button></div>`;
+    }).join('');
+    const p = config.points, l = config.legs, lanes = _mcLanes();
+    const dl = rows => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
+    const isSE = typeof getVisibleFormats === 'function' && getVisibleFormats().length === 1 && getVisibleFormats()[0].id === 'SE';
+    const legs = isSE
+        ? [['Regular rounds', `Bo${l.seRegularRounds || 3}`], ['Semifinal', `Bo${l.seSemifinal || 3}`], ['Bronze', `Bo${l.seBronze || 5}`], ['Final', `Bo${l.seFinal || 5}`]]
+        : [['Regular rounds', `Bo${l.regularRounds}`], ['Frontside semifinal', `Bo${l.frontsideSemifinal}`], ['Backside final', `Bo${l.backsideFinal}`], ['Grand Final', `Bo${l.grandFinal}`]];
+    return `<div class="mc-col">
+        <section class="mc-panel"><div class="mc-ph"><h3>Players<small>click to mark paid</small></h3><button type="button" class="mc-link" onclick="popDialog(); showPage('registration')">Player Registration</button></div>
+            ${players.length < 32 ? `<div class="mc-addrow"><input type="text" id="ccPlayerName" class="mc-text" placeholder="Add a player (found in the database, or created)" autocomplete="off" onkeydown="if (event.key === 'Enter') addPlayerFromCC()"><button type="button" class="mc-btn mc-primary" onclick="addPlayerFromCC()">Add</button></div>` : ''}
+            <div class="mc-chips">${chips || '<span class="mc-note">No players yet.</span>'}</div></section>
+        <section class="mc-panel"><div class="mc-ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><button type="button" class="mc-link" onclick="popDialog(); showPage('config')">Global Settings</button></div>
+            <div class="mc-settings">
+                <div><h4>Points</h4>${dl([['Taking part', p.participation], ['1st · 2nd · 3rd · 4th', `${p.first} · ${p.second} · ${p.third} · ${p.fourth}`], ['5–6th · 7–8th', `${p.fifthSixth} · ${p.seventhEighth}`], ['180 · High out · Short leg · Ton', `${p.oneEighty} · ${p.highOut} · ${p.shortLeg} · ${p.ton}`]])}</div>
+                <div><h4>Match length</h4>${dl(legs)}</div>
+                <div><h4>Lanes</h4>${dl([['In use', lanes.usable.length ? lanes.usable.join(', ') : 'None'], ['Not in use', lanes.excluded.length ? lanes.excluded.join(', ') : 'None']])}</div>
+            </div></section>
+    </div>
+    <div class="mc-col">
+        <section class="mc-panel"><div class="mc-ph"><h3>Shuffle &amp; Draw</h3></div><div class="mc-formats">${formats}</div>
+            <p class="mc-note">Only paid players go into the bracket.${players.length - paid ? ` ${players.length - paid} still unpaid.` : ''}</p></section>
+    </div>`;
+}
+
+/**
+ * Show Match Controls: the header (name, counts, clock), the view for the tournament's
+ * status (setup, running, completed), and the footer.
+ * @param {{live: object[], rounds: Object<string, object[]>}|object[]} matchData
+ */
+function showCommandCenterModal(matchData) {
+    const modal = document.getElementById('matchCommandCenterModal');
+    const body = document.getElementById('mcBody');
+    if (!modal || !body) return;
+    const scrollTop = body.scrollTop;
+    const status = tournament && tournament.status;
+    _mcStarts = null;
+
+    // header: name, counts, clock
+    const title = document.getElementById('commandCenterTitle');
+    const sub = document.getElementById('mcSubtitle');
+    const stats = document.getElementById('mcStats');
+    if (title) title.textContent = 'Match Controls';
+    const formatName = typeof getFormat === 'function' && getFormat() === 'SE' ? 'single elimination' : 'double elimination';
+    if (sub) sub.textContent = !tournament ? 'No tournament loaded'
+        : `${tournament.name || 'Tournament'} · ${status === 'setup' ? 'before the draw' : status === 'completed' ? 'finished' : formatName}`;
+    const stat = (k, v, cls) => `<div${cls ? ` class="${cls}"` : ''}><dt>${k}</dt><dd>${v}</dd></div>`;
+    if (stats) {
+        if (status === 'setup') {
+            const paid = players.filter(p => p.paid).length;
+            stats.innerHTML = stat('Players', players.length) + stat('Paid', paid) + stat('Unpaid', players.length - paid, players.length > paid ? 'mc-warnstat' : '');
+        } else if (status === 'active') {
+            const real = matches.filter(m => !(m.autoAdvanced || (typeof isWalkoverMatch === 'function' && isWalkoverMatch(m))));
+            const lanes = _mcLanes();
+            const used = new Set(matches.filter(m => !m.completed && m.lane).map(m => String(m.lane)));
+            stats.innerHTML = stat('Live', (matchData.live || []).length, 'mc-livestat') +
+                stat('Ready', Object.values(matchData.rounds || {}).reduce((s, r) => s + r.length, 0)) +
+                stat('Played', `${real.filter(m => m.completed).length}<small> of ${real.length}</small>`) +
+                (lanes.usable.length ? stat('Free lanes', lanes.usable.filter(l => !used.has(String(l))).length) : '');
+        } else if (status === 'completed') {
+            stats.innerHTML = stat('Matches', _mcPlayedMatches().length) + stat('Players', players.filter(p => p.paid).length);
+        } else stats.innerHTML = '';
+    }
+    updateMatchControlsClock();
+
+    // the view
+    body.classList.toggle('mc-one', status === 'completed' || !status);
+    if (!tournament || !status) body.innerHTML = '<div class="mc-panel mc-empty"><b>No tournament loaded</b>Create or load one on the Setup page.</div>';
+    else if (status === 'setup') body.innerHTML = _mcSetupHTML();
+    else if (status === 'completed') body.innerHTML = _mcCompletedHTML();
+    else body.innerHTML = _mcActiveHTML(matchData && !Array.isArray(matchData) ? matchData : { live: [], rounds: {} });
+    body.scrollTop = scrollTop;
+    if (status === 'completed') _mcFillAverage();
+
+    pushDialog('matchCommandCenterModal', () => showMatchCommandCenter(), true);
+
+    // footer
+    const autoOpen = document.getElementById('autoOpenMatchControlsToggle');
+    if (autoOpen) {
+        autoOpen.checked = !!(config && config.ui && config.ui.autoOpenMatchControls);
+        autoOpen.onchange = function () {
+            if (!config || !config.ui) return;
+            config.ui.autoOpenMatchControls = this.checked;
+            if (typeof saveGlobalConfig === 'function') saveGlobalConfig();
+            const cfgBox = document.getElementById('autoOpenMatchControls');
+            if (cfgBox) cfgBox.checked = this.checked;
+        };
+    }
+    const statsBtn = document.getElementById('showStatisticsBtn');
+    if (statsBtn) statsBtn.onclick = () => showStatisticsModal();
+    const okBtn = document.getElementById('commandCenterOK');
+    if (okBtn) okBtn.onclick = () => popDialog();
 }
 
 /**
@@ -1711,633 +1932,6 @@ function getRefereeSuggestions() {
  * Shows empty state if no suggestions available.
  * Respects config.ui.refereeSuggestionsLimit setting.
  */
-function populateRefereeSuggestions() {
-
-    const losersContainer = document.getElementById('refereeLosersContainer');
-    const winnersContainer = document.getElementById('refereeWinnersContainer');
-    const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
-    const losersSection = document.getElementById('refereeLosersSection');
-    const winnersSection = document.getElementById('refereeWinnersSection');
-    const assignmentsSection = document.getElementById('refereeAssignmentsSection');
-    const noSuggestionsMessage = document.getElementById('noRefereeSuggestionsMessage');
-
-    if (!losersContainer || !winnersContainer || !assignmentsContainer) {
-        console.log('❌ Missing referee suggestion containers');
-        return;
-    }
-
-    const suggestions = getRefereeSuggestions();
-    const hasAnysuggestions = suggestions.losers.length > 0 || suggestions.winners.length > 0 || suggestions.recentReferees.length > 0;
-
-    if (!hasAnysuggestions) {
-        // Show empty state
-        losersSection.style.display = 'none';
-        winnersSection.style.display = 'none';
-        assignmentsSection.style.display = 'none';
-        noSuggestionsMessage.style.display = 'block';
-        return;
-    }
-
-    noSuggestionsMessage.style.display = 'none';
-
-    // Populate losers
-    if (suggestions.losers.length > 0) {
-        losersSection.style.display = 'block';
-        losersContainer.innerHTML = suggestions.losers.map(loser => {
-            const isBackside = loser.round.startsWith('BS-');
-            const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
-            const laneText = loser.lane ? ` · Lane ${loser.lane}` : '';
-            return `<div class="referee-suggestion-item${backsideClass}">
-                <span class="referee-suggestion-name">${escapeHtml(loser.name)}</span>
-                <span class="referee-suggestion-round">(${loser.round}${laneText})</span>
-            </div>`;
-        }).join('');
-    } else {
-        losersSection.style.display = 'none';
-    }
-
-    // Populate winners
-    if (suggestions.winners.length > 0) {
-        winnersSection.style.display = 'block';
-        winnersContainer.innerHTML = suggestions.winners.map(winner => {
-            const isBackside = winner.round.startsWith('BS-');
-            const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
-            const laneText = winner.lane ? ` · Lane ${winner.lane}` : '';
-            return `<div class="referee-suggestion-item${backsideClass}">
-                <span class="referee-suggestion-name">${escapeHtml(winner.name)}</span>
-                <span class="referee-suggestion-round">(${winner.round}${laneText})</span>
-            </div>`;
-        }).join('');
-    } else {
-        winnersSection.style.display = 'none';
-    }
-
-    // Populate recent assignments
-    if (suggestions.recentReferees.length > 0) {
-        assignmentsSection.style.display = 'block';
-        assignmentsContainer.innerHTML = suggestions.recentReferees.map(assignment => {
-            const isBackside = assignment.round.startsWith('BS-');
-            const backsideClass = isBackside ? ' referee-suggestion-backside' : '';
-            const laneText = assignment.lane ? ` · Lane ${assignment.lane}` : '';
-            return `<div class="referee-suggestion-item${backsideClass}">
-                <span class="referee-suggestion-name">${escapeHtml(assignment.name)}</span>
-                <span class="referee-suggestion-round">(${assignment.round}${laneText})</span>
-            </div>`;
-        }).join('');
-    } else {
-        assignmentsSection.style.display = 'none';
-    }
-}
-
-function showCommandCenterModal(matchData) {
-    const modal = document.getElementById('matchCommandCenterModal');
-    const liveContainer = document.getElementById('liveMatchesContainer');
-    const frontContainer = document.getElementById('frontMatchesContainer');
-    const backContainer = document.getElementById('backMatchesContainer');
-    const liveSection = document.getElementById('liveMatchesSection');
-    const frontSection = document.getElementById('frontMatchesSection');
-    const backSection = document.getElementById('backMatchesSection');
-    const noMatchesMessage = document.getElementById('noMatchesMessage');
-    const okBtn = document.getElementById('commandCenterOK');
-
-    // Get the scrollable container and preserve scroll position
-    const scrollContainer = document.querySelector('.match-controls-container');
-    const initialScrollTop = scrollContainer ? scrollContainer.scrollTop : 0;
-
-    if (!modal || !liveContainer || !frontContainer || !backContainer) {
-        console.error('Match command center modal elements not found');
-        return;
-    }
-
-    // Clear existing content and hide all sections first
-    liveContainer.innerHTML = '';
-    frontContainer.innerHTML = '';
-    backContainer.innerHTML = '';
-
-    // Get all possible display elements
-    const setupMessage = document.getElementById('setupMessage');
-    const celebrationDiv = document.getElementById('tournamentCelebration');
-
-    // Hide all possible states initially
-    liveSection.style.display = 'none';
-    frontSection.style.display = 'none';
-    backSection.style.display = 'none';
-    noMatchesMessage.style.display = 'none';
-    if (setupMessage) setupMessage.style.display = 'none';
-    if (celebrationDiv) celebrationDiv.style.display = 'none';
-
-    // STATE-DRIVEN LOGIC: Use tournament status to determine what to show
-    if (!tournament || !tournament.status) {
-        // Fallback: show empty state if no tournament data
-        noMatchesMessage.style.display = 'block';
-    } else {
-        // Update title based on tournament state
-        const titleElement = document.getElementById('commandCenterTitle');
-        if (titleElement) {
-            // Get current time in HH:MM format
-            const now = new Date();
-            const hours = String(now.getHours()).padStart(2, '0');
-            const minutes = String(now.getMinutes()).padStart(2, '0');
-            const currentTime = `${hours}:${minutes}`;
-
-            if (tournament.name && (tournament.status === 'setup' || tournament.status === 'active')) {
-                titleElement.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span>Match Controls - ${escapeHtml(tournament.name)}</span>
-                        <div id="match-controls-clock" class="match-controls-clock">${currentTime}</div>
-                    </div>
-                `;
-            } else {
-                titleElement.innerHTML = `
-                    <div style="display: flex; justify-content: space-between; align-items: center; width: 100%;">
-                        <span>Match Controls</span>
-                        <div id="match-controls-clock" class="match-controls-clock">${currentTime}</div>
-                    </div>
-                `;
-            }
-        }
-
-        // Set modal width based on tournament status
-        const modalContent = modal.querySelector('.modal-content');
-        if (modalContent) {
-            if (tournament.status === 'setup') {
-                modalContent.style.width = '75%';
-            } else if (tournament.status === 'active') {
-                modalContent.style.width = '90%';
-            }
-            // Note: 'completed' status sets width to 75% in showTournamentCelebration()
-        }
-
-        switch (tournament.status) {
-            case 'setup':
-                // Tournament in setup - show enhanced setup interface
-                if (setupMessage) {
-                    // Update setup message with player count and bracket info
-                    const totalPlayers = players ? players.length : 0;
-                    const paidPlayers = players ? players.filter(p => p.paid).length : 0;
-
-                    // Determine bracket size based on paid players
-                    let bracketInfo;
-                    if (paidPlayers < 4) {
-                        bracketInfo = 'need 4+ paid players to start';
-                    } else if (paidPlayers <= 8) {
-                        bracketInfo = 'ready for 8-player bracket';
-                    } else if (paidPlayers <= 16) {
-                        bracketInfo = 'ready for 16-player bracket';
-                    } else if (paidPlayers <= 32) {
-                        bracketInfo = 'ready for 32-player bracket';
-                    } else {
-                        bracketInfo = 'remove 2+ players for 32-player bracket';
-                    }
-
-                    // Create player lists with toggle functionality
-                    const paidPlayersList = players.filter(p => p.paid);
-                    const unpaidPlayersList = players.filter(p => !p.paid);
-
-                    let paidPlayersHTML = '';
-                    if (paidPlayersList.length > 0) {
-                        paidPlayersHTML = `
-                            <div style="margin-top: 15px;">
-                                <div style="font-size: 13px; font-weight: 500; color: #065f46;">Entrance Fee Paid (${paidPlayersList.length}):</div>
-                                <div style="margin-top: 8px; line-height: 1.6;">
-                                    ${paidPlayersList.map(player =>
-                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">✓ ${escapeHtml(player.name)}</span>`
-                                    ).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    let unpaidPlayersHTML = '';
-                    if (unpaidPlayersList.length > 0) {
-                        unpaidPlayersHTML = `
-                            <div style="margin-top: 15px;">
-                                <div style="font-size: 13px; font-weight: 500; color: #dc2626;">Entrance Fee Not Paid (${unpaidPlayersList.length}):</div>
-                                <div style="margin-top: 8px; line-height: 1.6;">
-                                    ${unpaidPlayersList.map(player =>
-                                        `<span onclick="togglePaid(${player.id}); setTimeout(() => showMatchCommandCenter(), 100);" style="cursor: pointer; color: #000; margin-right: 12px; display: inline-block;">☐ ${escapeHtml(player.name)}</span>`
-                                    ).join('')}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    // Add player input section
-                    let addPlayerHTML = '';
-                    if (totalPlayers < 32) { // Only show if we haven't hit the max
-                        addPlayerHTML = `
-                            <div style="margin-top: 15px; padding-top: 15px; border-top: 1px solid #e5e7eb;">
-                                <div style="font-size: 13px; font-weight: 500; color: #374151;">Add Player:</div>
-                                <div style="margin-top: 8px; display: flex; gap: 8px; max-width: 400px; margin: 8px auto 0 auto;">
-                                    <input type="text" id="ccPlayerName" placeholder="Player name" style="flex: 1; padding: 4px 8px; border: 1px solid #ccc;" onkeypress="if(event.key==='Enter') addPlayerFromCC()">
-                                    <button onclick="addPlayerFromCC()" style="padding: 4px 12px; background: #065f46; color: white; border: none; cursor: pointer;">Add</button>
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    // Add helpful hint for player interaction
-                    let hintHTML = '';
-                    if (totalPlayers > 0) {
-                        hintHTML = `
-                            <p style="font-size: 12px; color: #6b7280; margin-top: 12px; font-style: italic;">💡 Click player names to toggle paid/unpaid status</p>
-                        `;
-                    }
-
-                    setupMessage.innerHTML = `
-                        <p>🔧 Tournament in setup mode</p>
-                        <p style="font-size: 14px; color: #666; margin-top: 8px;">${totalPlayers} players registered, ${paidPlayers} entrance fees paid (${bracketInfo})</p>
-                        ${hintHTML}
-                        ${paidPlayersHTML}
-                        ${unpaidPlayersHTML}
-                        ${addPlayerHTML}
-                    `;
-                    setupMessage.style.display = 'block';
-                } else {
-                    noMatchesMessage.style.display = 'block'; // Fallback
-                }
-                break;
-
-            case 'completed':
-                // Tournament completed - show celebration
-                showTournamentCelebration();
-                break;
-
-            case 'active':
-            default: {
-                // Tournament active - show matches (guaranteed to exist in active state)
-                const activeFormat = typeof getFormat === 'function' ? getFormat() : null;
-                const isSE = activeFormat === 'SE';
-
-                // Populate LIVE matches
-                if (matchData.live && matchData.live.length > 0) {
-                    liveSection.style.display = 'block';
-
-                    if (isSE) {
-                        // SE: two-column layout — live matches in left column
-                        const allLiveHTML = matchData.live.map(match => createMatchCard(match)).join('');
-                        liveContainer.innerHTML = `
-                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                                <div style="flex: 1; min-width: 0;">
-                                    <div class="cc-matches-container">${allLiveHTML}</div>
-                                </div>
-                                <div style="flex: 1; min-width: 0;"></div>
-                            </div>
-                        `;
-                    } else {
-                        // DE: two-column layout (Frontside/Backside)
-                        const liveFrontside = matchData.live.filter(m =>
-                            m.id.startsWith('FS-') || m.id === 'GRAND-FINAL'
-                        );
-                        const liveBackside = matchData.live.filter(m =>
-                            m.id.startsWith('BS-') || m.id === 'BS-FINAL'
-                        );
-
-                        const liveFrontsideHTML = liveFrontside.map(match => createMatchCard(match)).join('');
-                        const liveBacksideHTML = liveBackside.map(match => createMatchCard(match)).join('');
-
-                        liveContainer.innerHTML = `
-                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                                <div style="flex: 1; min-width: 0;">
-                                    <div class="cc-matches-container">
-                                        ${liveFrontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches live</p>'}
-                                    </div>
-                                </div>
-                                <div style="flex: 1; min-width: 0;">
-                                    <div class="cc-matches-container">
-                                        ${liveBacksideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches live</p>'}
-                                    </div>
-                                </div>
-                            </div>
-                        `;
-                    }
-                }
-
-                // Populate Round-based matches with two-column layout
-                if (matchData.rounds && Object.keys(matchData.rounds).length > 0) {
-                    let twoColumnHTML;
-
-                    if (isSE) {
-                        // SE: left = earliest ready round, right = remaining rounds
-                        const bracketSize = tournament?.bracketSize;
-                        const sortedKeys = Object.keys(matchData.rounds).sort((a, b) => {
-                            const numA = parseInt(a.replace('FS-R', '')) || 99;
-                            const numB = parseInt(b.replace('FS-R', '')) || 99;
-                            return numA - numB;
-                        });
-
-                        // Helper to build SE round section HTML
-                        const buildSERoundHTML = (roundKey) => {
-                            const roundMatches = matchData.rounds[roundKey];
-                            if (!roundMatches || roundMatches.length === 0) return '';
-                            const roundNum = parseInt(roundKey.replace('FS-R', ''));
-                            const name = getSERoundDisplayName(roundNum, bracketSize);
-                            const emoji = name === 'Final' ? '🏆' : name === 'Bronze' ? '🥉' : '⚪';
-                            return `
-                                <div class="cc-match-section" style="display: block;">
-                                    <h4 class="cc-section-header">${emoji} ${name} - Ready to Start</h4>
-                                    <div class="cc-matches-container">
-                                        ${roundMatches.map(match => createMatchCard(match)).join('')}
-                                    </div>
-                                </div>
-                            `;
-                        };
-
-                        // Left column: earliest round
-                        const leftHTML = sortedKeys.length > 0 ? buildSERoundHTML(sortedKeys[0]) : '';
-
-                        // Right column: all remaining rounds
-                        const rightHTML = sortedKeys.slice(1).map(buildSERoundHTML).join('');
-
-                        twoColumnHTML = `
-                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                                <div style="flex: 1; min-width: 0;">
-                                    ${leftHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No matches ready</p>'}
-                                </div>
-                                <div style="flex: 1; min-width: 0;">
-                                    ${rightHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No upcoming matches</p>'}
-                                </div>
-                            </div>
-                        `;
-                    } else {
-                        // DE: two-column layout (Frontside / Backside)
-                        const frontsideRounds = {};
-                        const backsideRounds = {};
-
-                        Object.keys(matchData.rounds).forEach(roundKey => {
-                            if (roundKey.startsWith('FS-') || roundKey === 'GRAND-FINAL') {
-                                frontsideRounds[roundKey] = matchData.rounds[roundKey];
-                            } else if (roundKey.startsWith('BS-') || roundKey === 'BS-FINAL') {
-                                backsideRounds[roundKey] = matchData.rounds[roundKey];
-                            } else {
-                                frontsideRounds[roundKey] = matchData.rounds[roundKey];
-                            }
-                        });
-
-                        const sortFrontsideKeys = (a, b) => {
-                            const order = {
-                                'FS-R1': 1, 'FS-R2': 2, 'FS-R3': 3, 'FS-R4': 4, 'FS-R5': 5,
-                                'GRAND-FINAL': 10, 'OTHER': 99
-                            };
-                            return (order[a] || 99) - (order[b] || 99);
-                        };
-
-                        const sortBacksideKeys = (a, b) => {
-                            const order = {
-                                'BS-R1': 1, 'BS-R2': 2, 'BS-R3': 3, 'BS-R4': 4, 'BS-R5': 5,
-                                'BS-R6': 6, 'BS-R7': 7, 'BS-FINAL': 10
-                            };
-                            return (order[a] || 99) - (order[b] || 99);
-                        };
-
-                        let frontsideHTML = '';
-                        Object.keys(frontsideRounds).sort(sortFrontsideKeys).forEach(roundKey => {
-                            const roundMatches = frontsideRounds[roundKey];
-                            if (roundMatches && roundMatches.length > 0) {
-                                let roundDisplayName;
-                                if (roundKey === 'GRAND-FINAL') {
-                                    roundDisplayName = '🏆 Grand Final';
-                                } else if (roundKey.startsWith('FS-R')) {
-                                    const roundNum = roundKey.replace('FS-R', '');
-                                    roundDisplayName = `⚪ Round ${roundNum} (Frontside)`;
-                                } else {
-                                    roundDisplayName = `📋 ${roundKey}`;
-                                }
-
-                                frontsideHTML += `
-                                    <div class="cc-match-section" style="display: block;">
-                                        <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
-                                        <div class="cc-matches-container">
-                                            ${roundMatches.map(match => createMatchCard(match)).join('')}
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        });
-
-                        let backsideHTML = '';
-                        Object.keys(backsideRounds).sort(sortBacksideKeys).forEach(roundKey => {
-                            const roundMatches = backsideRounds[roundKey];
-                            if (roundMatches && roundMatches.length > 0) {
-                                let roundDisplayName;
-                                if (roundKey === 'BS-FINAL') {
-                                    roundDisplayName = '🥈 Backside Final';
-                                } else if (roundKey.startsWith('BS-R')) {
-                                    const roundNum = roundKey.replace('BS-R', '');
-                                    roundDisplayName = `⚫ Round ${roundNum} (Backside)`;
-                                } else {
-                                    roundDisplayName = `📋 ${roundKey}`;
-                                }
-
-                                backsideHTML += `
-                                    <div class="cc-match-section" style="display: block;">
-                                        <h4 class="cc-section-header">${roundDisplayName} - Ready to Start</h4>
-                                        <div class="cc-matches-container">
-                                            ${roundMatches.map(match => createMatchCard(match)).join('')}
-                                        </div>
-                                    </div>
-                                `;
-                            }
-                        });
-
-                        twoColumnHTML = `
-                            <div style="display: flex; gap: 20px; align-items: stretch; min-height: 100px;">
-                                <div style="flex: 1; min-width: 0;">
-                                    ${frontsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Frontside matches ready</p>'}
-                                </div>
-                                <div style="flex: 1; min-width: 0;">
-                                    ${backsideHTML || '<p style="color: #6b7280; text-align: center; padding: 20px;">No Backside matches ready</p>'}
-                                </div>
-                            </div>
-                        `;
-                    }
-
-                    frontContainer.innerHTML = twoColumnHTML;
-                    frontSection.style.display = 'block';
-                }
-
-                // If no matches in active state, show fallback message
-                const hasActiveMatches = (matchData.live && matchData.live.length > 0) ||
-                                       (matchData.rounds && Object.keys(matchData.rounds).length > 0);
-                if (!hasActiveMatches) {
-                    noMatchesMessage.style.display = 'block';
-                }
-                break;
-            }
-        }
-    }
-
-    // Clear and populate referee section using STATE-DRIVEN LOGIC (same pattern as match section)
-    const losersContainer = document.getElementById('refereeLosersContainer');
-    const winnersContainer = document.getElementById('refereeWinnersContainer');
-    const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
-    const refereeHeader = document.querySelector('.referee-suggestions-container .cc-section-header');
-    const refereeSetupMessage = document.getElementById('refereeSetupMessage');
-    const noRefereeSuggestionsMessage = document.getElementById('noRefereeSuggestionsMessage');
-
-    // Clear existing content first
-    if (losersContainer) losersContainer.innerHTML = '';
-    if (winnersContainer) winnersContainer.innerHTML = '';
-    if (assignmentsContainer) assignmentsContainer.innerHTML = '';
-
-    // Hide all referee sections initially
-    const refereeSections = document.querySelectorAll('#refereeLosersSection, #refereeWinnersSection, #refereeAssignmentsSection');
-    refereeSections.forEach(section => section.style.display = 'none');
-    if (refereeSetupMessage) refereeSetupMessage.style.display = 'none';
-    if (noRefereeSuggestionsMessage) noRefereeSuggestionsMessage.style.display = 'none';
-
-    // STATE-DRIVEN LOGIC: Use tournament status to determine referee column content
-    if (!tournament || !tournament.status) {
-        // Fallback: show empty state if no tournament data
-        if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
-        if (noRefereeSuggestionsMessage) noRefereeSuggestionsMessage.style.display = 'block';
-    } else {
-        switch (tournament.status) {
-            case 'setup':
-                // Tournament in setup - show setup actions
-                if (refereeHeader) refereeHeader.textContent = 'Setup Actions';
-                if (refereeSetupMessage) {
-                    // Build a card per offered format, from the shared registry — the same
-                    // list the Config page's visibility checkboxes are built from, so the two
-                    // cannot disagree about which formats exist. Clubs can hide the formats
-                    // they never play (Config → User Interface), which is what stops the wrong
-                    // one being picked by accident.
-                    const paidPlayers = players ? players.filter(p => p.paid).length : 0;
-                    const offeredFormats = (typeof getVisibleFormats === 'function')
-                        ? getVisibleFormats()
-                        : [{ id: 'DE', name: 'Double Elimination Cup', blurb: 'Players get a second chance through the backside', minPlayers: 4, maxPlayers: 32 }];
-
-                    const cardStyle = 'border: 1px solid #d1d5db; border-radius: 8px; padding: 12px; background: #f0f0f0; box-shadow: 0 2px 4px rgba(0,0,0,0.08);';
-
-                    const formatCards = offeredFormats.map(fmt => {
-                        let buttonText, disabled = '';
-                        if (paidPlayers < fmt.minPlayers) {
-                            buttonText = `Need ${fmt.minPlayers}+ players`;
-                            disabled = 'disabled';
-                        } else if (paidPlayers > fmt.maxPlayers) {
-                            buttonText = `Max ${fmt.maxPlayers} players`;
-                            disabled = 'disabled';
-                        } else {
-                            buttonText = `Generate ${calculateBracketSize(paidPlayers, fmt.id)}-Player Bracket`;
-                        }
-                        return `
-                            <div style="${cardStyle}">
-                                <div style="font-weight: 600; font-size: 17px; margin-bottom: 2px;">${escapeHtml(fmt.name)}</div>
-                                <div style="font-size: 12px; color: #666; margin-bottom: 10px;">${escapeHtml(fmt.blurb)}</div>
-                                <button class="btn btn-success" onclick="generateBracket('${escapeHtml(fmt.id)}')" ${disabled} style="padding: 8px 16px; font-size: 14px; width: 100%;">${buttonText}</button>
-                            </div>`;
-                    }).join('');
-
-                    refereeSetupMessage.innerHTML = `
-                        <p style="font-weight: 600; font-size: 16px; margin-bottom: 0;">Shuffle & Draw</p>
-                        <div style="margin-top: 15px; display: flex; flex-direction: column; gap: 10px;">
-                            ${formatCards}
-                        </div>
-                        <div style="margin-top: 30px; display: flex; flex-direction: column; gap: 10px;">
-                            <p style="font-weight: 600; font-size: 16px; margin-bottom: 0;">Navigation</p>
-                            <button class="btn" onclick="popDialog(); showPage('registration')" style="padding: 8px 16px; font-size: 14px;">Player Registration Page</button>
-                            <button class="btn" onclick="popDialog(); showPage('config')" style="padding: 8px 16px; font-size: 14px;">Global Settings Page</button>
-                        </div>
-                    `;
-                    refereeSetupMessage.style.display = 'block';
-                } else if (noRefereeSuggestionsMessage) {
-                    noRefereeSuggestionsMessage.style.display = 'block'; // Fallback
-                }
-
-                // Show and populate tournament configuration display
-                updateTournamentConfigDisplay();
-                break;
-
-            case 'completed':
-                // Tournament completed - show achievements
-                showTournamentAchievements();
-
-                // Hide tournament configuration display (only shown in setup)
-                const configDisplayCompleted = document.getElementById('tournamentConfigDisplay');
-                if (configDisplayCompleted) configDisplayCompleted.style.display = 'none';
-                break;
-
-            case 'active':
-            default:
-                // Tournament active - show referee suggestions
-                if (refereeHeader) refereeHeader.textContent = '👥 Referee Suggestions';
-
-                // Hide tournament configuration display (only shown in setup)
-                const configDisplayActive = document.getElementById('tournamentConfigDisplay');
-                if (configDisplayActive) configDisplayActive.style.display = 'none';
-
-                // Reset subsection headers to their original values for active state
-                const losersSection = document.getElementById('refereeLosersSection');
-                const winnersSection = document.getElementById('refereeWinnersSection');
-                const assignmentsSection = document.getElementById('refereeAssignmentsSection');
-
-                if (losersSection) {
-                    const header = losersSection.querySelector('.referee-subsection-header');
-                    if (header) header.textContent = 'Recent Losers';
-                }
-                if (winnersSection) {
-                    const header = winnersSection.querySelector('.referee-subsection-header');
-                    if (header) header.textContent = 'Recent Winners';
-                }
-                if (assignmentsSection) {
-                    const header = assignmentsSection.querySelector('.referee-subsection-header');
-                    if (header) {
-                        header.textContent = 'Recent Assignments';
-                        header.style.display = '';  // Restore display (remove inline style)
-                    }
-                }
-
-                refereeSections.forEach(section => section.style.display = 'block');
-                populateRefereeSuggestions();
-                break;
-        }
-    }
-
-    // Restore scroll position
-    if (scrollContainer && initialScrollTop > 0) {
-        scrollContainer.scrollTop = initialScrollTop;
-    }
-
-    // Use dialog stack to show modal
-    pushDialog('matchCommandCenterModal', () => showMatchCommandCenter(), true);
-
-    // Set up event handlers
-
-    // Auto-open Match Controls checkbox handler
-    const autoOpenCheckbox = document.getElementById('autoOpenMatchControlsToggle');
-    if (autoOpenCheckbox) {
-        // Sync checkbox with current config setting
-        autoOpenCheckbox.checked = config?.ui?.autoOpenMatchControls || false;
-
-        // Update config when checkbox is toggled
-        autoOpenCheckbox.onchange = function() {
-            if (config && config.ui) {
-                config.ui.autoOpenMatchControls = this.checked;
-                if (typeof saveGlobalConfig === 'function') {
-                    saveGlobalConfig();
-                    console.log('Auto-open Match Controls:', this.checked ? 'enabled' : 'disabled');
-
-                    // Sync with Config page checkbox in real-time
-                    const configPageCheckbox = document.getElementById('autoOpenMatchControls');
-                    if (configPageCheckbox) {
-                        configPageCheckbox.checked = this.checked;
-                    }
-                } else {
-                    console.error('saveGlobalConfig function not available');
-                }
-            }
-        };
-    }
-
-    // Statistics button handler
-    const statsBtn = document.getElementById('showStatisticsBtn');
-    if (statsBtn) {
-        statsBtn.onclick = () => showStatisticsModal();
-    }
-
-    okBtn.onclick = () => popDialog(); // Use dialog stack to close
-}
-
 // Wrapper function to add player from Command Center
 function addPlayerFromCC() {
     const ccInput = document.getElementById('ccPlayerName');
@@ -2415,352 +2009,179 @@ function completeMatchFromCommandCenter(matchId, playerNumber) {
 if (typeof window !== 'undefined') {
     window.showMatchCommandCenter = showMatchCommandCenter;
     window.completeMatchFromCommandCenter = completeMatchFromCommandCenter;
-    window.createMatchCard = createMatchCard;
+    window.startMatchOnLane = startMatchOnLane;
     window.getMatchFormatDescription = getMatchFormatDescription;
     window.getRoundDescription = getRoundDescription;
 }
 
 // --- END: Match Command Center Implementation ---
 
+// --- Match Controls: the finished tournament (podium, highlights, the night in numbers) ---
+
+/** Matches actually played: completed, not walkovers. */
+function _mcPlayedMatches() {
+    return (matches || []).filter(m => m.completed && !m.autoAdvanced && !isWalkover(m.player1) && !isWalkover(m.player2));
+}
+
+/** The paid player with a placement, by id. */
+function _mcPlayer(id) {
+    return players.find(p => String(p.id) === String(id)) || null;
+}
+
 /**
- * TOURNAMENT CELEBRATION FUNCTIONS
- * Display celebratory podium when tournament is completed
+ * Highlights of the night, from the tournament itself: player statistics, match scores,
+ * placements, and the Start and finish times in the history. A highlight with no data
+ * is left out.
+ * @returns {{head: object[], list: object[], facts: object[]}}
  */
+function _mcHighlights() {
+    const paid = players.filter(p => p.paid && p.stats);
+    const played = _mcPlayedMatches();
+    const best = (pick, better) => {
+        let top = null;
+        paid.forEach(p => { const v = pick(p); if (v != null && (top === null || better(v, top.v))) top = { p, v }; });
+        return top;
+    };
+    const len = a => Array.isArray(a) ? a.length : 0;
+    const head = [], list = [];
+    const add = (arr, label, value, who) => arr.push({ label, value, who });
 
-function showTournamentCelebration() {
-    const celebrationDiv = document.getElementById('tournamentCelebration');
-    const refereeSuggestionsContainer = document.querySelector('.referee-suggestions-container');
-    const modal = document.getElementById('matchCommandCenterModal');
+    const o180 = best(p => p.stats.oneEighties || 0, (a, b) => a > b);
+    if (o180 && o180.v > 0) add(head, 'Most 180s', o180.v, o180.p.name);
+    const out = best(p => len(p.stats.highOuts) ? Math.max(...p.stats.highOuts) : null, (a, b) => a > b);
+    if (out) add(head, 'Highest checkout', out.v, out.p.name);
+    const leg = best(p => len(p.stats.shortLegs) ? Math.min(...p.stats.shortLegs) : null, (a, b) => a < b);
+    if (leg) add(head, 'Shortest leg', `${leg.v} darts`, leg.p.name);
 
-    if (!celebrationDiv || !tournament || !tournament.placements) {
-        console.error('Cannot show celebration: missing elements or tournament data');
-        return;
+    const pts = best(p => typeof calculatePlayerPoints === 'function' ? calculatePlayerPoints(p) : null, (a, b) => a > b);
+    if (pts) add(list, 'Most points', pts.p.name, `${pts.v} points`);
+    list.push({ label: 'Best average', value: '', who: '', id: 'mcBestAverage', hidden: true }); // filled from the Chalker matches
+    const wins = {}, total = {};
+    played.forEach(m => {
+        if (m.winner && m.winner.id != null) wins[m.winner.id] = (wins[m.winner.id] || 0) + 1;
+        [m.player1, m.player2].forEach(x => { if (x && x.id != null) total[x.id] = (total[x.id] || 0) + 1; });
+    });
+    const topWins = Object.entries(wins).sort((a, b) => b[1] - a[1])[0];
+    if (topWins && _mcPlayer(topWins[0])) add(list, 'Most matches won', _mcPlayer(topWins[0]).name, `${topWins[1]} of ${total[topWins[0]]}`);
+    const tons = best(p => p.stats.tons || 0, (a, b) => a > b);
+    if (tons && tons.v > 0) add(list, 'Most tons', tons.p.name, String(tons.v));
+    const lolly = best(p => p.stats.lollipops || 0, (a, b) => a > b);
+    if (lolly && lolly.v > 0) {
+        const others = paid.filter(p => (p.stats.lollipops || 0) > 0).length - 1;
+        add(list, 'Lollipops', lolly.p.name, `${lolly.v}${others > 0 ? ` · and ${others} more player${others === 1 ? '' : 's'}` : ''}`);
     }
-
-    // Set modal width to 75% for celebration view
-    if (modal) {
-        const modalContent = modal.querySelector('.modal-content');
-        if (modalContent) {
-            modalContent.style.width = '75%';
+    // the backside run: the most wins on the backside (double elimination)
+    if (typeof getFormat !== 'function' || getFormat() !== 'SE') {
+        const bs = {};
+        played.forEach(m => { if (m.id.startsWith('BS-') && m.winner && m.winner.id != null) bs[m.winner.id] = (bs[m.winner.id] || 0) + 1; });
+        const run = Object.entries(bs).sort((a, b) => b[1] - a[1])[0];
+        if (run && run[1] >= 2 && _mcPlayer(run[0])) {
+            const place = tournament.placements && tournament.placements[String(run[0])];
+            add(list, 'Backside run', _mcPlayer(run[0]).name, `${run[1]} wins on the backside${place && typeof formatRanking === 'function' ? `, to ${formatRanking(place)}` : ''}`);
         }
     }
-
-    // Show the celebration container
-    celebrationDiv.style.display = 'block';
-
-    // Update subtitle with player count
-    updateCelebrationSubtitle();
-
-    // Get top 3 players from placements
-    const topPlayers = getTopThreePlayers();
-
-    // Populate podium positions
-    populatePodium(topPlayers);
-
-    // Generate and display highlights
-    generateTournamentHighlights();
-
-    // Referee column is now handled by main dialog logic based on tournament status
-
-    console.log('🏆 Tournament celebration displayed');
-}
-
-function updateCelebrationSubtitle() {
-    const subtitleDiv = document.getElementById('celebrationSubtitle');
-    const titleDiv = document.querySelector('.celebration-title');
-    if (!subtitleDiv) return;
-
-    // Update main title with tournament name
-    if (titleDiv && tournament.name) {
-        titleDiv.textContent = `${tournament.name} Complete!`;
-    }
-
-    // Update subtitle with tournament date and actual player count (paid players only)
-    const playerCount = players ? players.filter(p => p.paid).length : 0;
-    let subtitleText = `Congratulations to all ${playerCount} players!`;
-
-    if (tournament.date) {
-        // Format the date nicely for display
-        const tournamentDate = new Date(tournament.date);
-        const formattedDate = tournamentDate.toLocaleDateString('en-US', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric'
+    const scored = played.filter(m => m.finalScore && m.legs > 1);
+    const deciders = scored.filter(m => m.finalScore.loserLegs === Math.floor(m.legs / 2)).length;
+    if (scored.length) add(list, 'Deciders', String(deciders), 'matches went to the last leg');
+    const white = scored.filter(m => m.finalScore.loserLegs === 0).length;
+    if (scored.length) add(list, 'Whitewashes', String(white), 'wins without dropping a leg');
+    // match lengths: from the last Start to the result, in the history
+    const history = typeof getTournamentHistory === 'function' ? getTournamentHistory().slice().reverse() : [];
+    const durations = [];
+    played.forEach(m => {
+        let start = null, end = null;
+        history.forEach(tx => {
+            if (tx.matchId !== m.id) return;
+            if (tx.type === 'START_MATCH') start = Date.parse(tx.timestamp);
+            if (tx.type === 'COMPLETE_MATCH' && start) end = Date.parse(tx.timestamp);
         });
-        subtitleText = `${formattedDate} • ${subtitleText}`;
+        if (start && end && end > start) durations.push({ m, min: Math.round((end - start) / 60000) });
+    });
+    if (durations.length >= 2) {
+        durations.sort((a, b) => b.min - a.min);
+        const d = x => `${x.m.id} · ${x.m.player1.name} v ${x.m.player2.name}`;
+        add(list, 'Longest match', `${durations[0].min} min`, d(durations[0]));
+        add(list, 'Quickest match', `${durations[durations.length - 1].min} min`, d(durations[durations.length - 1]));
     }
+    const refs = {}, lanes = {};
+    played.forEach(m => {
+        if (m.referee) refs[m.referee] = (refs[m.referee] || 0) + 1;
+        if (m.lane) lanes[m.lane] = (lanes[m.lane] || 0) + 1;
+    });
+    const ref = Object.entries(refs).sort((a, b) => b[1] - a[1])[0];
+    if (ref && _mcPlayer(ref[0])) add(list, 'Busiest referee', _mcPlayer(ref[0]).name, `${ref[1]} match${ref[1] === 1 ? '' : 'es'}`);
+    const lane = Object.entries(lanes).sort((a, b) => b[1] - a[1])[0];
+    if (lane) add(list, 'Busiest lane', `Lane ${lane[0]}`, `${lane[1]} match${lane[1] === 1 ? '' : 'es'}`);
 
-    subtitleDiv.textContent = subtitleText;
-}
-
-function getTopThreePlayers() {
-    if (!tournament.placements || !players) return { first: null, second: null, third: null };
-
-    const placements = tournament.placements;
-    const topPlayers = { first: null, second: null, third: null };
-
-    // Find players by their placement rank
-    for (const playerId in placements) {
-        const rank = placements[playerId];
-        const player = players.find(p => String(p.id) === playerId);
-
-        if (player) {
-            if (rank === 1) topPlayers.first = player;
-            else if (rank === 2) topPlayers.second = player;
-            else if (rank === 3) topPlayers.third = player;
-        }
-    }
-
-    return topPlayers;
-}
-
-function populatePodium(topPlayers) {
-    // Update first place
-    if (topPlayers.first) {
-        const firstDiv = document.getElementById('podium-first');
-        if (firstDiv) {
-            const nameDiv = firstDiv.querySelector('.podium-name');
-            if (nameDiv) nameDiv.textContent = topPlayers.first.name;
-        }
-    }
-
-    // Update second place
-    if (topPlayers.second) {
-        const secondDiv = document.getElementById('podium-second');
-        if (secondDiv) {
-            const nameDiv = secondDiv.querySelector('.podium-name');
-            if (nameDiv) nameDiv.textContent = topPlayers.second.name;
-        }
-    }
-
-    // Update third place
-    if (topPlayers.third) {
-        const thirdDiv = document.getElementById('podium-third');
-        if (thirdDiv) {
-            const nameDiv = thirdDiv.querySelector('.podium-name');
-            if (nameDiv) nameDiv.textContent = topPlayers.third.name;
-        }
-    }
-}
-
-function generateTournamentHighlights() {
-    const highlightsGrid = document.getElementById('highlightsGrid');
-    if (!highlightsGrid || !players) return;
-
-    // Calculate tournament statistics
-    const stats = calculateTournamentStats();
-
-    // Create highlight items
-    const highlights = [
-        {
-            label: 'Most 180s',
-            value: stats.most180s.count > 0 ? `${stats.most180s.player} (${stats.most180s.count})` : 'None'
-        },
-        {
-            label: 'Highest Checkout',
-            value: stats.highestCheckout.value > 0 ? `${stats.highestCheckout.player} (${stats.highestCheckout.value})` : 'None'
-        },
-        {
-            label: 'Shortest Leg',
-            value: stats.shortestLeg.value !== Infinity ? `${stats.shortestLeg.player} (${stats.shortestLeg.value} darts)` : 'None'
-        }
+    const sum = f => paid.reduce((s, p) => s + f(p), 0);
+    const facts = [
+        ['Matches played', played.length],
+        ['Bracket', `${tournament.bracketSize || players.length} players`],
+        ['180s', sum(p => p.stats.oneEighties || 0)],
+        ['High outs', sum(p => len(p.stats.highOuts))],
+        ['Short legs', sum(p => len(p.stats.shortLegs))],
+        ['Legs played', scored.concat(played.filter(m => m.finalScore && m.legs <= 1)).reduce((s, m) => s + (m.finalScore.winnerLegs || 0) + (m.finalScore.loserLegs || 0), 0)]
     ];
+    return { head, list, facts };
+}
 
-    // Generate HTML for highlights
-    let highlightsHTML = '';
-    highlights.forEach(highlight => {
-        highlightsHTML += `
-            <div class="highlight-item">
-                <div class="highlight-label">${highlight.label}</div>
-                <div class="highlight-value">${highlight.value}</div>
-            </div>
-        `;
+/**
+ * The finished tournament: the podium and three headline highlights, then more highlights,
+ * the night in numbers, and Tournament Analytics / Export / Leaderboard.
+ * @returns {string}
+ */
+function _mcCompletedHTML() {
+    const top = rank => { const id = tournament.placements && Object.keys(tournament.placements).find(k => tournament.placements[k] === rank); const p = id && _mcPlayer(id); return p ? escapeHtml(p.name) : '–'; };
+    const pod = (cls, rank, label) => `<div class="mc-pod ${cls}"><div class="mc-podcard"><div class="mc-medal">${rank}</div><span class="mc-podrank">${label}</span><span class="mc-podname">${top(rank)}</span></div><div class="mc-podblock">${rank}</div></div>`;
+    const h = _mcHighlights();
+    const hl = x => `<div class="mc-hl"${x.id ? ` id="${x.id}"` : ''}${x.hidden ? ' hidden' : ''}><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`;
+    const date = tournament.date ? escapeHtml(tournament.date) : '';
+    return `<div class="mc-done">
+        <section class="mc-panel"><div class="mc-ph"><h3>Tournament complete</h3><span class="mc-hint">${escapeHtml(tournament.name || '')}${date ? ' · ' + date : ''}</span></div>
+            <div class="mc-podium">${pod('mc-s', 2, 'Final')}${pod('mc-g', 1, 'Champion')}${pod('mc-b', 3, 'Third')}</div>
+            ${h.head.length ? `<div class="mc-heads">${h.head.map(x => `<div class="mc-head-hl"><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`).join('')}</div>` : ''}
+        </section>
+        <section class="mc-panel"><div class="mc-ph"><h3>Highlights</h3><span class="mc-hint">From tonight's matches</span></div>
+            <div class="mc-hls">${h.list.map(hl).join('')}</div>
+            <dl class="mc-facts">${h.facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join('')}</dl>
+            <div class="mc-doneacts">
+                <button type="button" class="mc-btn mc-primary" onclick="popDialog(); if (tournament && tournament.id) openAnalyticsForTournament(tournament.id)">Tournament Analytics</button>
+                <button type="button" class="mc-btn" onclick="exportTournamentJSON()">Export tournament</button>
+                <button type="button" class="mc-btn" onclick="showStatisticsModal()">Leaderboard</button>
+            </div></section>
+    </div>`;
+}
+
+/**
+ * Best three-dart average of the night, from the Chalker matches in the Analytics register
+ * (they carry every visit). Fills in the highlight when there is one; it stays hidden when
+ * no match was scored on the Chalker.
+ */
+async function _mcFillAverage() {
+    if (typeof NewtonDB === 'undefined' || !tournament || typeof NewtonStats === 'undefined') return;
+    let records;
+    try { records = await NewtonDB.getMatchesByTournament(String(tournament.id)); } catch (e) { return; }
+    const acc = {};
+    (records || []).forEach(m => {
+        if (m.matchType !== 'CHALKER' || !Array.isArray(m.legs)) return;
+        const start = (m.format && m.format.sc) || 501;
+        m.legs.forEach(leg => {
+            if (leg.cd === 0) return;
+            [[1, m.player1Id, m.player1Name], [2, m.player2Id, m.player2Name]].forEach(([n, id, name]) => {
+                const v = NewtonStats.decodeVisits(leg.s, n - 1);
+                if (!v.length) return;
+                const a = acc[id] = acc[id] || { name, scored: 0, darts: 0 };
+                if (leg.w === n) { a.scored += start; a.darts += (v.length - 1) * 3 + (leg.cd || 3); }
+                else { a.scored += v.reduce((x, y) => x + y, 0); a.darts += v.length * 3; }
+            });
+        });
     });
-
-    highlightsGrid.innerHTML = highlightsHTML;
-}
-
-function calculateTournamentStats() {
-    const stats = {
-        mostAchievementPoints: { player: '', points: 0 },
-        most180s: { player: '', count: 0 },
-        highestCheckout: { player: '', value: 0 },
-        mostTons: { player: '', count: 0 },
-        mostLollipops: { player: '', count: 0 },
-        shortestLeg: { player: '', value: Infinity }
-    };
-
-    players.forEach(player => {
-        if (!player.stats) return;
-
-        // Check most achievement points (excluding placement/participation)
-        const achievementPoints = calculateAchievementPoints(player);
-        if (achievementPoints > stats.mostAchievementPoints.points) {
-            stats.mostAchievementPoints = { player: player.name, points: achievementPoints };
-        }
-
-        // Check 180s
-        const oneEighties = player.stats.oneEighties || 0;
-        if (oneEighties > stats.most180s.count) {
-            stats.most180s = { player: player.name, count: oneEighties };
-        }
-
-        // Check highest checkout
-        const highOuts = player.stats.highOuts || [];
-        if (Array.isArray(highOuts) && highOuts.length > 0) {
-            const playerHighest = Math.max(...highOuts);
-            if (playerHighest > stats.highestCheckout.value) {
-                stats.highestCheckout = { player: player.name, value: playerHighest };
-            }
-        }
-
-        // Check tons
-        const tons = player.stats.tons || 0;
-        if (tons > stats.mostTons.count) {
-            stats.mostTons = { player: player.name, count: tons };
-        }
-
-        // Check lollipops
-        const lollipops = player.stats.lollipops || 0;
-        if (lollipops > stats.mostLollipops.count) {
-            stats.mostLollipops = { player: player.name, count: lollipops };
-        }
-
-        // Check shortest leg
-        const shortLegs = player.stats.shortLegs || [];
-        if (Array.isArray(shortLegs) && shortLegs.length > 0) {
-            const playerShortest = Math.min(...shortLegs);
-            if (playerShortest < stats.shortestLeg.value) {
-                stats.shortestLeg = { player: player.name, value: playerShortest };
-            }
-        }
-    });
-
-    return stats;
-}
-
-function calculateAchievementPoints(player) {
-    if (!player.stats) return 0;
-
-    let points = 0;
-
-    // Achievement points only (no placement or participation)
-    const shortLegsCount = Array.isArray(player.stats.shortLegs) ? player.stats.shortLegs.length : 0;
-    points += shortLegsCount * (config.points.shortLeg || 0);
-    points += (player.stats.highOuts || []).length * config.points.highOut;
-    points += (player.stats.tons || 0) * config.points.ton;
-    points += (player.stats.oneEighties || 0) * config.points.oneEighty;
-
-    return points;
-}
-
-
-
-function showTournamentAchievements() {
-    console.log('🏆 Showing tournament achievements...');
-
-    // Update header
-    const header = document.querySelector('.referee-suggestions-container .cc-section-header');
-    if (header) {
-        header.textContent = '🏆 Tournament Achievements';
-    }
-
-    // Use existing referee containers to display achievement data
-    const losersContainer = document.getElementById('refereeLosersContainer');
-    const winnersContainer = document.getElementById('refereeWinnersContainer');
-    const assignmentsContainer = document.getElementById('refereeAssignmentsContainer');
-    const losersSection = document.getElementById('refereeLosersSection');
-    const winnersSection = document.getElementById('refereeWinnersSection');
-    const assignmentsSection = document.getElementById('refereeAssignmentsSection');
-
-    if (!losersContainer || !winnersContainer || !assignmentsContainer) {
-        console.error('Missing achievement containers');
-        return;
-    }
-
-    // Calculate comprehensive stats
-    console.log('📊 Calculating tournament stats...');
-    const stats = calculateTournamentStats();
-    const tournamentSummary = calculateTournamentSummary();
-
-    console.log('Stats calculated:', stats);
-    console.log('Tournament summary:', tournamentSummary);
-
-    // Update section headers
-    if (losersSection) {
-        const header = losersSection.querySelector('.referee-subsection-header');
-        if (header) header.textContent = '🎯 Player Achievements';
-    }
-    if (winnersSection) {
-        const header = winnersSection.querySelector('.referee-subsection-header');
-        if (header) header.textContent = '📊 Tournament Summary';
-    }
-    if (assignmentsSection) {
-        const header = assignmentsSection.querySelector('.referee-subsection-header');
-        if (header) header.style.display = 'none';
-    }
-
-    // Populate Player Achievements in losers container
-    losersContainer.innerHTML = `
-        <div class="achievement-list">
-            ${generateAchievementItem('Most Achievement Points', stats.mostAchievementPoints.points > 0 ? `${stats.mostAchievementPoints.player} (${stats.mostAchievementPoints.points})` : 'None')}
-            ${generateAchievementItem('Most 180s', stats.most180s.count > 0 ? `${stats.most180s.player} (${stats.most180s.count})` : 'None')}
-            ${generateAchievementItem('Highest Checkout', stats.highestCheckout.value > 0 ? `${stats.highestCheckout.player} (${stats.highestCheckout.value})` : 'None')}
-            ${generateAchievementItem('Shortest Leg', stats.shortestLeg.value !== Infinity ? `${stats.shortestLeg.player} (${stats.shortestLeg.value} darts)` : 'None')}
-            ${generateAchievementItem('Most Tons', stats.mostTons.count > 0 ? `${stats.mostTons.player} (${stats.mostTons.count})` : 'None')}
-            ${stats.mostLollipops.count > 0 ? generateAchievementItem('Most Lollipops 🍭', `${stats.mostLollipops.player} (${stats.mostLollipops.count})`) : ''}
-        </div>
-    `;
-
-    // Populate Tournament Summary in winners container
-    winnersContainer.innerHTML = `
-        <div class="achievement-list">
-            ${generateAchievementItem('Matches Played', tournamentSummary.matchesPlayed)}
-            ${generateAchievementItem('Bracket Size', tournamentSummary.bracketSize)}
-        </div>
-    `;
-
-    // Populate Export section in assignments container
-    assignmentsContainer.innerHTML = `
-        <div class="achievement-export-section">
-            <button class="achievement-export-btn" onclick="exportTournamentJSON()">
-                📊 Export Tournament Data
-            </button>
-            <p class="export-description">Download complete tournament results as JSON file</p>
-        </div>
-    `;
-
-    // Make all sections visible after populating them
-    if (losersSection) losersSection.style.display = 'block';
-    if (winnersSection) winnersSection.style.display = 'block';
-    if (assignmentsSection) assignmentsSection.style.display = 'block';
-
-    console.log('✓ Tournament achievements displayed and sections made visible');
-}
-
-function generateAchievementItem(label, value) {
-    return `
-        <div class="achievement-item">
-            <span class="achievement-label">${label}:</span>
-            <span class="achievement-value">${value}</span>
-        </div>
-    `;
-}
-
-function calculateTournamentSummary() {
-    // Count only matches that were actually played (not walkovers)
-    const matchesPlayed = matches ? matches.filter(m => {
-        return m.completed && !m.autoAdvanced &&
-               (!isWalkover(m.player1) && !isWalkover(m.player2));
-    }).length : 0;
-
-    const summary = {
-        matchesPlayed: matchesPlayed,
-        completedMatches: matches ? matches.filter(m => m.completed).length : 0,
-        bracketSize: tournament.bracketSize || (players ? players.length : 0)
-    };
-
-    return summary;
+    const best = Object.values(acc).filter(a => a.darts >= 30).sort((a, b) => b.scored / b.darts - a.scored / a.darts)[0];
+    const el = document.getElementById('mcBestAverage');
+    if (!best || !el) return;
+    el.querySelector('b').textContent = best.name;
+    el.querySelector('small').textContent = `${(best.scored / best.darts * 3).toFixed(1)} · Chalker matches`;
+    el.hidden = false;
 }
 
 // Tournament export function for celebration button
@@ -2775,7 +2196,6 @@ function exportTournamentJSON() {
 
 // Expose functions to global scope
 if (typeof window !== 'undefined') {
-    window.showTournamentCelebration = showTournamentCelebration;
     window.exportTournamentJSON = exportTournamentJSON;
     window.getMatchProgressionText = getMatchProgressionText;
 }
@@ -2917,64 +2337,20 @@ function getMatchProgressionText(matchId) {
 }
 
 
-// Update clock in Match Controls modal title
+// The clock in Match Controls' header, and each live match's time on the board
 function updateMatchControlsClock() {
     const clockElement = document.getElementById('match-controls-clock');
     if (clockElement) {
         const now = new Date();
-        const hours = String(now.getHours()).padStart(2, '0');
-        const minutes = String(now.getMinutes()).padStart(2, '0');
-        clockElement.textContent = `${hours}:${minutes}`;
+        clockElement.textContent = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
     }
+    document.querySelectorAll('#matchCommandCenterModal [data-mc-started]').forEach(el => {
+        el.textContent = _mcSince(+el.getAttribute('data-mc-started'));
+    });
 }
 
 // Start clock update interval (every 10 seconds to catch minute changes)
 setInterval(updateMatchControlsClock, 10000);
-
-/**
- * Update Tournament Configuration Display
- * Populates the configuration display in Setup Actions panel with current config values
- */
-function updateTournamentConfigDisplay() {
-    const configDisplay = document.getElementById('tournamentConfigDisplay');
-    if (!configDisplay) return;
-
-    // Show the configuration display
-    configDisplay.style.display = 'block';
-
-    // Point values
-    document.getElementById('cfg-participation').textContent = config.points.participation;
-    document.getElementById('cfg-first').textContent = config.points.first;
-    document.getElementById('cfg-second').textContent = config.points.second;
-    document.getElementById('cfg-third').textContent = config.points.third;
-    document.getElementById('cfg-fourth').textContent = config.points.fourth;
-    document.getElementById('cfg-fifth').textContent = config.points.fifthSixth;
-    document.getElementById('cfg-seventh').textContent = config.points.seventhEighth;
-    document.getElementById('cfg-highout').textContent = config.points.highOut;
-    document.getElementById('cfg-ton').textContent = config.points.ton;
-    document.getElementById('cfg-180').textContent = config.points.oneEighty;
-    document.getElementById('cfg-shortleg').textContent = config.points.shortLeg;
-
-    // Match configuration — Double Elimination
-    document.getElementById('cfg-regular').textContent = `Best of ${config.legs.regularRounds}`;
-    document.getElementById('cfg-fs-semi').textContent = `Best of ${config.legs.frontsideSemifinal}`;
-    document.getElementById('cfg-bs-semi').textContent = `Best of ${config.legs.backsideSemifinal}`;
-    document.getElementById('cfg-bs-final').textContent = `Best of ${config.legs.backsideFinal}`;
-    document.getElementById('cfg-grand').textContent = `Best of ${config.legs.grandFinal}`;
-
-    // Match configuration — Single Elimination
-    document.getElementById('cfg-se-regular').textContent = `Best of ${config.legs.seRegularRounds || 3}`;
-    document.getElementById('cfg-se-qf').textContent = `Best of ${config.legs.seQuarterfinal || 3}`;
-    document.getElementById('cfg-se-semi').textContent = `Best of ${config.legs.seSemifinal || 3}`;
-    document.getElementById('cfg-se-bronze').textContent = `Best of ${config.legs.seBronze || 5}`;
-    document.getElementById('cfg-se-final').textContent = `Best of ${config.legs.seFinal || 5}`;
-
-    // Lanes
-    const maxLanes = config.lanes.maxLanes || 4;
-    const excludedLanes = config.lanes.excludedLanes || [];
-    document.getElementById('cfg-lanes-avail').textContent = `1-${maxLanes}`;
-    document.getElementById('cfg-lanes-excl').textContent = excludedLanes.length > 0 ? excludedLanes.join(', ') : 'None';
-}
 
 // UNDO SYSTEM FUNCTIONS - Refactored for Transactional History
 

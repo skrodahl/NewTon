@@ -130,7 +130,7 @@ function generateLaneOptions(currentMatchId, currentLane = null) {
     const maxLanes = (config && config.lanes && config.lanes.maxLanes) || 10;
     const excludedLanes = (config && config.lanes && config.lanes.excludedLanes) || [];
 
-    let options = '<option value="">No</option>';
+    let options = '<option value="">No lane</option>';
 
     for (let i = 1; i <= maxLanes; i++) {
         const isCurrentLane = currentLane && parseInt(currentLane) === i;
