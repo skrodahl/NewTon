@@ -173,47 +173,55 @@ const NewtonHistory = (() => {
     function setScope(tournamentIds) {
         _scope = tournamentIds;
         _dirty = { dashboard: true, leaderboard: true, players: true, register: true };
-        _persistScope();
         renderScopeIndicator();
     }
 
-    /** Save scope to localStorage. */
-    function _persistScope() {
-        try {
-            if (_scope) {
-                localStorage.setItem('newton_analytics_scope', JSON.stringify(_scope));
-            } else {
-                localStorage.removeItem('newton_analytics_scope');
-            }
-        } catch (e) { /* ignore */ }
+    /**
+     * Open Analytics on just these tournaments (Setup's "Open in Analytics"): no date
+     * range or name filter, only these ticked. Counts as the Lens for this visit, so the
+     * half-year default doesn't replace it.
+     * @param {string[]} tournamentIds
+     */
+    function scopeTo(tournamentIds) {
+        _textFilter = '';
+        _dateFrom = '';
+        _dateTo = '';
+        _checkedIds = new Set(tournamentIds);
+        _lensReady = true;
+        setScope(tournamentIds);
     }
 
+    /** Set once the Lens has its starting point for this visit. Nothing is kept between visits. */
+    let _lensReady = false;
+
     /**
-     * Restore scope from localStorage, filtering out stale IDs.
-     * Must be called after tournaments are loaded.
+     * The Lens a visit starts with: the current half-year, or the previous one while the
+     * current one has no tournaments yet, or everything if both are empty. Every tournament
+     * in it is ticked. Runs once per page load; changes last until the page is left.
+     * @param {object[]} all - every finalized tournament
      */
-    async function _restoreScope() {
+    function _initLens(all) {
+        _lensReady = true;
+        // Lens settings used to be remembered between visits; clear what older versions saved
         try {
-            const raw = localStorage.getItem('newton_analytics_scope');
-            if (!raw) return;
-            const ids = JSON.parse(raw);
-            if (!Array.isArray(ids)) return;
+            ['newton_analytics_scope', 'newton_analytics_textFilter', 'newton_analytics_dateFilter']
+                .forEach(k => localStorage.removeItem(k));
+        } catch (e) { /* ignore */ }
 
-            const all = await _loadAllTournaments();
-            const validIds = new Set(all.map(t => t.tournamentId));
-            const filtered = ids.filter(id => validIds.has(id));
+        const hasTournaments = (hy) => all.some(t => {
+            if (!t.closedAt) return false;
+            const d = fmtDate(t.closedAt);
+            return d >= hy.from && d <= hy.to;
+        });
+        let hy = _getHalfYear(0);
+        if (!hasTournaments(hy)) hy = _getHalfYear(-1);
+        if (!hasTournaments(hy)) hy = null;
 
-            if (filtered.length === all.length) {
-                // All selected — reset to all
-                _scope = null;
-                localStorage.removeItem('newton_analytics_scope');
-            } else {
-                _scope = filtered;
-                _checkedIds = new Set(filtered);
-            }
-        } catch (e) {
-            localStorage.removeItem('newton_analytics_scope');
-        }
+        _textFilter = '';
+        _dateFrom = hy ? hy.from : '';
+        _dateTo = hy ? hy.to : '';
+        _checkedIds = new Set(all.map(t => t.tournamentId));
+        _applySelectionAsScope();
     }
 
     /**
@@ -1324,13 +1332,11 @@ const NewtonHistory = (() => {
      */
     async function render() {
         initControls();
-        _restoreTextFilter();
-        _restoreDateFilter();
         _initHalfYearButtons();
         await _autoImportFromDisk();
-        await _restoreScope();
         try {
             const all = await _loadAllTournaments();
+            if (!_lensReady) _initLens(all);
             _ensureChecked(all);
             _syncLensInputs(all);
         } catch (e) { /* the views show their own error */ }
@@ -1702,7 +1708,6 @@ const NewtonHistory = (() => {
      */
     function onTextFilter(value) {
         _textFilter = value.trim();
-        _persistTextFilter();
 
         if (!_allTournaments) return;
 
@@ -1714,24 +1719,6 @@ const NewtonHistory = (() => {
         _applySelectionAsScope();
         _updateTournamentMeta();
         _refreshActiveView();
-    }
-
-    /** Save text filter to localStorage. */
-    function _persistTextFilter() {
-        try {
-            if (_textFilter) {
-                localStorage.setItem('newton_analytics_textFilter', _textFilter);
-            } else {
-                localStorage.removeItem('newton_analytics_textFilter');
-            }
-        } catch (e) { /* ignore */ }
-    }
-
-    /** Restore text filter from localStorage. */
-    function _restoreTextFilter() {
-        try {
-            _textFilter = localStorage.getItem('newton_analytics_textFilter') || '';
-        } catch (e) { _textFilter = ''; }
     }
 
     // ---------------------------------------------------------------------------
@@ -1761,7 +1748,6 @@ const NewtonHistory = (() => {
         const toEl = document.getElementById('analyticsDateTo');
         _dateFrom = fromEl ? fromEl.value : '';
         _dateTo = toEl ? toEl.value : '';
-        _persistDateFilter();
 
         if (!_allTournaments) return;
 
@@ -1772,32 +1758,6 @@ const NewtonHistory = (() => {
         _applySelectionAsScope();
         _updateTournamentMeta();
         _refreshActiveView();
-    }
-
-    /** Save date filter to localStorage. */
-    function _persistDateFilter() {
-        try {
-            const val = JSON.stringify({ from: _dateFrom, to: _dateTo });
-            if (_dateFrom || _dateTo) {
-                localStorage.setItem('newton_analytics_dateFilter', val);
-            } else {
-                localStorage.removeItem('newton_analytics_dateFilter');
-            }
-        } catch (e) { /* ignore */ }
-    }
-
-    /** Restore date filter from localStorage. */
-    function _restoreDateFilter() {
-        try {
-            const raw = localStorage.getItem('newton_analytics_dateFilter');
-            if (!raw) return;
-            const parsed = JSON.parse(raw);
-            _dateFrom = parsed.from || '';
-            _dateTo = parsed.to || '';
-        } catch (e) {
-            _dateFrom = '';
-            _dateTo = '';
-        }
     }
 
     // ---------------------------------------------------------------------------
@@ -1844,7 +1804,6 @@ const NewtonHistory = (() => {
         const hy = _getHalfYear(offset);
         _dateFrom = hy.from;
         _dateTo = hy.to;
-        _persistDateFilter();
 
         const fromInput = document.getElementById('analyticsDateFrom');
         const toInput = document.getElementById('analyticsDateTo');
@@ -1871,8 +1830,6 @@ const NewtonHistory = (() => {
         _textFilter = '';
         _dateFrom = '';
         _dateTo = '';
-        _persistTextFilter();
-        _persistDateFilter();
 
         const all = await _loadAllTournaments();
         _checkedIds = new Set(all.map(t => t.tournamentId));
@@ -2871,7 +2828,7 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache,
+             setScope: scopeTo, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache,
              selectCorrectionPlayer, adjustCorrection, addCorrectionValue, resetCorrectionPlayer, saveCorrections };
 
 })();

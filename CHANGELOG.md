@@ -1,5 +1,12 @@
 ## Unreleased
 
+### Analytics opens on the current half-year
+
+- **The Lens starts every visit on the current half-year** (H2 2026 = 1 July to 31 December), or on the previous half-year while the current one has no tournaments yet, or on everything if both are empty. Every tournament in it is ticked. What a visitor changes lasts until they leave the page; **nothing about the Lens is remembered between visits any more** (it used to be saved in the browser, so a member could be left looking at an old selection). Show all still shows every tournament.
+- Setup's **Open in Analytics** still opens on just that tournament: it now sets the Lens directly for the visit (`scopeTo()`), with no date range, instead of going through the saved selection.
+- The Lens values older versions saved (`newton_analytics_scope`, `_textFilter`, `_dateFilter`) are cleared on the first visit.
+- Files changed: `js/newton-history.js` (`_initLens()`, `scopeTo()` new; the Lens save/restore functions removed), `js/dynamic-help-system.js`, `llms.txt`.
+
 ### Tournament Setup: New tournament on top
 
 - **The New tournament form is now one row at the top of Setup** (title, name, date, Create tournament, with Import tournament under it), and the current tournament is full width under it. Before, the form sat to the right of the current tournament and was easy to miss. Tournaments and Match history are unchanged.

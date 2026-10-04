@@ -372,7 +372,7 @@ const HELP_CONTENT = {
                     </ul>
                     <p>To leave out single tournaments, click <strong>Choose tournaments</strong> and untick them in the Register's tournament list.</p>
                     <p><strong>💡 To the left of the Lens it says how many tournaments are counted, and why</strong> &mdash; so if a number looks wrong, check there first. It is the usual explanation. The bar turns orange when you are not seeing everything.</p>
-                    <p>Your selection is remembered between visits.</p>
+                    <p>Analytics always opens on the <strong>current half-year</strong> (the previous one until the new half-year has its first tournament). What you change lasts until you leave the page.</p>
                 `
             },
             points: {
