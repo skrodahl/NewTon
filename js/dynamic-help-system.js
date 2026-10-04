@@ -13,7 +13,7 @@ const HELP_CONTENT = {
             current: {
                 title: "Current Tournament",
                 content: `
-                    <p>The loaded tournament, with its status as the heading (<strong>New</strong>, <strong>Active</strong> or <strong>Completed</strong>, also shown by the panel's coloured top edge: grey, orange, green), players, bracket size, matches completed, and the matches being played now (or the winner, once it's over).</p>
+                    <p>The loaded tournament, with its status in a band across the top (<strong>New</strong>, <strong>Active</strong> or <strong>Completed</strong>; grey, orange or green), players, bracket size, matches completed, and the matches being played now (or the winner, once it's over).</p>
                     <p><strong>Next step</strong> changes with the status:</p>
                     <ul>
                         <li><strong>New:</strong> Register players, then draw the bracket from the bracket page</li>

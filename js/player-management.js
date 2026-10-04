@@ -84,14 +84,11 @@ function renderRegistrationNext() {
         enabled = false;
     }
 
-    // The tournament's status leads the heading, with a coloured top edge, as on Setup
-    const status = tournament && typeof tournamentStatusLabel === 'function' ? tournamentStatusLabel(tournament) : '';
-    const section = title.closest('.rg-next');
-    if (section) section.className = 'rg-next' + (status ? ` st-is-${status.toLowerCase()}` : '');
-    const eyebrow = document.getElementById('registrationNextStatus');
-    if (eyebrow) {
-        eyebrow.textContent = status ? `${status} · Next step` : 'Next step';
-        eyebrow.classList.toggle('st-status', !!status);
+    // The tournament's status band across the top, as on Setup
+    const band = document.getElementById('registrationStatusBand');
+    if (band) {
+        band.innerHTML = typeof currentTournamentStatusBand === 'function' ? currentTournamentStatusBand() : '';
+        band.hidden = !band.innerHTML;
     }
 
     title.textContent = text[0];

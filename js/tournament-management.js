@@ -816,6 +816,28 @@ function updateTournamentStatus() {
  * for its status, and Export / Backup to server / Reset. Reads the live globals only.
  * @returns {void}
  */
+/**
+ * The loaded tournament's status band, across the top of Setup's current tournament and
+ * Registration's next step: New / Active / Completed with a short fact, tinted by status
+ * (css/setup-page.css, .st-band).
+ * @returns {string} HTML, or '' when no tournament is loaded
+ */
+function currentTournamentStatusBand() {
+    if (!tournament) return '';
+    const status = tournamentStatusLabel(tournament);
+    const all = Array.isArray(matches) ? matches : [];
+    const done = all.filter(m => m.completed).length;
+    let fact = 'the bracket isn\'t drawn yet';
+    if (status === 'Completed') {
+        const winnerId = Object.keys(tournament.placements || {}).find(id => tournament.placements[id] === 1);
+        const winner = winnerId && (players || []).find(p => String(p.id) === winnerId);
+        fact = winner ? `won by ${escapeHtml(winner.name)}` : 'the bracket is played out';
+    } else if (status === 'Active') {
+        fact = `${done} of ${all.length} matches completed`;
+    }
+    return `<div class="st-band st-band-${status.toLowerCase()}"><b>${escapeHtml(status)}</b><span>${fact}</span></div>`;
+}
+
 function renderSetupCurrent() {
     const panel = document.getElementById('setupCurrent');
     if (!panel) return;
@@ -857,12 +879,12 @@ function renderSetupCurrent() {
             ['Open bracket', "showPage('tournament')"], ['Open in Analytics', 'openAnalyticsForTournament(tournament.id)']]
     }[status] || null;
 
-    // The status is the heading, in its colour, with a coloured top edge (css/setup-page.css)
-    panel.className = `st-panel st-current st-is-${status.toLowerCase()}`;
+    panel.className = 'st-panel st-current';
     panel.innerHTML = `
+        ${currentTournamentStatusBand()}
         <div class="st-current-head">
             <div>
-                <p class="st-eyebrow st-status">${escapeHtml(status)} tournament</p>
+                <p class="st-eyebrow">Current tournament</p>
                 <h3>${escapeHtml(tournament.name)}</h3>
                 <div class="st-sub">${escapeHtml(tournament.date)}${format ? ` · ${escapeHtml(format.name)}` : ''}</div>
             </div>

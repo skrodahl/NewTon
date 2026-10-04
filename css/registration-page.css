@@ -17,6 +17,7 @@
 .rg-counts dt { font-size: 12px; color: var(--nt-muted); }
 .rg-counts dd { margin: 0; font-size: 22px; font-weight: 800; letter-spacing: -.01em; font-variant-numeric: tabular-nums; color: var(--nt-ink); }
 .rg-counts dd.rg-warn { color: var(--nt-warn); }
+.rg-band { flex: 0 0 calc(100% + 36px); margin: -14px -18px 0; }
 .rg-next .st-btn.st-primary { height: 40px; padding: 0 18px; font-size: 15px; }
 .rg-next .st-btn:disabled { opacity: .45; cursor: not-allowed; }
 .rg-next .st-btn.st-primary:disabled:hover { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }

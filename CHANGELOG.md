@@ -2,9 +2,9 @@
 
 ### Tournament status at a glance
 
-- **Setup's current tournament and Registration's next step lead with the tournament's status**: the heading reads "New tournament" / "Active tournament" / "Completed tournament" (Registration: "Active · Next step"), with a dot, in the status colour, and the panel has a 4px top edge in the same colour (grey, orange, green), as on Match Controls' live tiles. The small status pill on Setup is gone, as the heading replaces it.
+- **Setup's current tournament and Registration's next step have a status band across the top**, tinted by status: grey **New** · the bracket isn't drawn yet; orange **Active** · 12 of 30 matches completed; green **Completed** · won by (the winner). One helper, `currentTournamentStatusBand()`, draws it for both. The small status pill on Setup is gone. (A coloured heading with a 4px top edge was tried first; the maintainer preferred the band.)
 - **"Setup" is now "New" wherever the status is shown** (the tournament list, the Load, Delete, Import, Export, Reset and Analytics import dialogs): `tournamentStatusLabel()` maps the stored `setup` to New. The stored status is unchanged.
-- Files changed: `js/tournament-management.js`, `js/player-management.js` (`renderRegistrationNext()`), `tournament.html`, `css/setup-page.css` (`.st-is-*`, `.st-status`), `js/dynamic-help-system.js`.
+- Files changed: `js/tournament-management.js` (`currentTournamentStatusBand()`), `js/player-management.js` (`renderRegistrationNext()`), `tournament.html`, `css/setup-page.css` (`.st-band`), `css/registration-page.css`, `js/dynamic-help-system.js`.
 
 ### Developer Console: a tab on the bracket page
 
