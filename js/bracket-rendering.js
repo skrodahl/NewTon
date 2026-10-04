@@ -2044,8 +2044,6 @@ function _mcHighlights() {
     const scored = played.filter(m => m.finalScore && m.legs > 1);
     const deciders = scored.filter(m => m.finalScore.loserLegs === Math.floor(m.legs / 2)).length;
     if (scored.length) add(list, 'Deciders', String(deciders), 'matches went to the last leg');
-    const white = scored.filter(m => m.finalScore.loserLegs === 0).length;
-    if (scored.length) add(list, 'Whitewashes', String(white), 'wins without dropping a leg');
     const refs = {}, lanes = {};
     played.forEach(m => {
         if (m.referee) refs[m.referee] = (refs[m.referee] || 0) + 1;
