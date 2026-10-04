@@ -1,5 +1,12 @@
 ## Unreleased
 
+### Global Settings: Test connection
+
+- **Remote backup has a Test connection button**, next to the API key. It tests the address and key as they are in the form (saved or not), through this computer's relay, the way a backup travels, and says what it found: connected and the key accepted; the key wrong or missing; the server doesn't ask for a key (with a nudge to set one); it can't be reached (with the reason); it asks for a web-server login; or it is an older version that can't be checked.
+- **New `api/key-check.php`:** says whether the instance asks for an API key and whether the `X-API-Key` header matches. Writes nothing.
+- Checked against real containers: right key, wrong key, no key, a server without a key, an unknown host, an older server, no address.
+- Files changed: `api/key-check.php` (new), `js/tournament-management.js` (`testRemoteConnection()`), `tournament.html`, `css/config-page.css`, `js/dynamic-help-system.js`, `Docs/REST_API.md`.
+
 ### Match Controls redesign
 
 - **Match Controls is rebuilt around the dartboards** (mockup: https://claude.ai/artifact/KKXAavLSXz6QDqm7xEbHoZ), in the new design language (`css/match-controls.css`). Same functions and rules as before: lanes, referees and their conflicts, Start/Stop, the winner dialog, QR and network handover, undo.

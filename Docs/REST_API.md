@@ -404,6 +404,21 @@ Content-Type: application/json
 
 ---
 
+### 5. Key Check
+
+**Endpoint:** `GET` or `POST /api/key-check.php`
+
+**Description:** Says whether this instance asks for an API key, and whether the `X-API-Key` header matches. Writes nothing. Used by Global Settings → Remote backup → **Test connection**, through the relay (v5.2.2+).
+
+**Response:**
+```json
+{ "ok": true, "app": "newton", "keyRequired": true, "keyAccepted": false }
+```
+
+An older instance has no such endpoint (404); Test connection then says the key can't be checked.
+
+---
+
 ## CORS Configuration
 
 All endpoints include CORS headers for cross-origin requests:

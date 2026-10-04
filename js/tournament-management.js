@@ -343,6 +343,65 @@ function buildTournamentPayload() {
 }
 
 /**
+ * Global Settings → Remote backup → Test connection. Asks the remote server's key check
+ * (api/key-check.php) through this computer's relay, the way a backup travels, with the
+ * address and API key as they are in the form (saved or not). Says whether the server was
+ * reached, and whether it asks for a key and accepts this one. Writes nothing anywhere.
+ * @returns {Promise<void>}
+ */
+async function testRemoteConnection() {
+    const out = document.getElementById('remoteTestResult');
+    const btn = document.getElementById('remoteTestBtn');
+    const url = (document.getElementById('remoteServerUrl') || {}).value || '';
+    const key = (document.getElementById('remoteServerApiKey') || {}).value || '';
+    if (!out) return;
+    const say = (cls, text) => { out.className = 'cfg-test ' + cls; out.textContent = text; out.hidden = false; };
+    const base = url.trim().replace(/\/+$/, '');
+    if (!base) { say('cfg-warn', 'Enter the server address first.'); return; }
+    if (!/^https?:\/\//i.test(base)) { say('cfg-warn', 'The address must start with https:// (or http://).'); return; }
+    let host = base;
+    try { host = new URL(base).host; } catch (e) { say('cfg-warn', 'That doesn\'t look like a web address.'); return; }
+
+    say('', `Testing ${host}…`);
+    if (btn) btn.disabled = true;
+    try {
+        let res;
+        try {
+            res = await fetch('/api/relay.php', {
+                method: 'POST',
+                headers: apiWriteHeaders(),
+                body: JSON.stringify({ url: base + '/api/key-check.php', apiKey: key.trim(), payload: {} })
+            });
+        } catch (e) {
+            say('cfg-bad', 'This computer has no backup server to send through. Backups need the Docker version of NewTon.');
+            return;
+        }
+        let data = null;
+        try { data = await res.json(); } catch (e) { data = null; }
+
+        if (data && data.app === 'newton') {
+            if (data.keyRequired && data.keyAccepted) say('cfg-ok', `✓ Connected to ${host}. The API key is accepted.`);
+            else if (data.keyRequired) say('cfg-bad', key.trim() ? `✗ ${host} answered, but the API key is wrong.` : `✗ ${host} asks for an API key. Enter the NEWTON_API_KEY set on that server.`);
+            else say('cfg-warn', `Connected to ${host}, but it doesn't ask for an API key${key.trim() ? ', so the key here isn\'t needed' : ''}. Anyone who can reach it can upload; set NEWTON_API_KEY there to protect it.`);
+        } else if (res.status === 502) {
+            say('cfg-bad', `✗ Could not reach ${host}${data && data.detail ? ': ' + data.detail : ''}. Check the address, and that the server is running.`);
+        } else if (res.status === 401 && data && data.error) {
+            say('cfg-bad', `✗ This computer's own server needs its API key to send backups (${data.error}).`);
+        } else if (res.status === 401) {
+            say('cfg-bad', `✗ ${host} asks for a login (a password on the web server in front of it). Backups use the API key instead; remove that login, or let /api/ through.`);
+        } else if (res.status === 403 && data && data.error) {
+            say('cfg-bad', `✗ ${data.error}`);
+        } else if (res.status === 404) {
+            say('cfg-warn', `${host} answered, but it is an older version of NewTon (or not NewTon), so the key can't be checked. Backups may still work.`);
+        } else {
+            say('cfg-bad', `✗ ${host} answered with an error (${res.status}${data && data.error ? ': ' + data.error : ''}).`);
+        }
+    } finally {
+        if (btn) btn.disabled = false;
+    }
+}
+
+/**
  * Headers for a request that changes something on this server (upload, delete,
  * corrections). Adds the API key when the server handed one to the page, which it does
  * only for a ?tm page opened with the correct password (NEWTON_API_KEY, api/api-check.php).

@@ -337,7 +337,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Back up finished tournaments:</strong> upload a tournament to the server when it finishes. This fills Shared Tournaments, and lets a separate Analytics instance collect a season's results.</li>
                         <li><strong>Allow deleting tournaments:</strong> off by default. Shows delete buttons for shared tournaments and in the Analytics register.</li>
-                        <li><strong>Remote backup:</strong> optional second destination: its address, and its API key if that server has one (<code>NEWTON_API_KEY</code>).</li>
+                        <li><strong>Remote backup:</strong> optional second destination: its address, and its API key if that server has one (<code>NEWTON_API_KEY</code>). <strong>Test connection</strong> checks both before you rely on them: whether the server answers, and whether it accepts the key. It sends nothing to keep.</li>
                     </ul>
                     <p><strong>💡 If Shared Tournaments stays empty</strong> on a Linux server, the container could not write to its tournament folder. Its startup log says so and gives the command to fix it.</p>
                 `

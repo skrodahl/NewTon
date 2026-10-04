@@ -549,8 +549,9 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         </div>
                         <div class="cfg-row">
                             <div><label class="cfg-label" for="remoteServerApiKey">API key</label><div class="cfg-desc">The <code>NEWTON_API_KEY</code> set on that server.</div></div>
-                            <div class="cfg-ctl"><input class="cfg-text mono" type="password" id="remoteServerApiKey" autocomplete="off" spellcheck="false" placeholder="API key"></div>
+                            <div class="cfg-ctl"><input class="cfg-text mono" type="password" id="remoteServerApiKey" autocomplete="off" spellcheck="false" placeholder="API key"><button type="button" class="cfg-btn" id="remoteTestBtn" onclick="testRemoteConnection()">Test connection</button></div>
                         </div>
+                        <p class="cfg-test" id="remoteTestResult" role="status" hidden></p>
                     </div>
                 </section>
 

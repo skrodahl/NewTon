@@ -69,6 +69,13 @@
 .cfg-step output { min-width: 64px; text-align: center; font-family: var(--nt-mono); font-weight: 700; font-size: 13px; font-variant-numeric: tabular-nums; border-inline: 1px solid var(--nt-line-2); line-height: 34px; padding-inline: 6px; }
 .cfg-btn { height: 36px; border-radius: 8px; padding: 0 14px; font: inherit; font-weight: 600; font-size: 14px; cursor: pointer; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); }
 .cfg-btn:hover { border-color: var(--nt-ink-2); }
+.cfg-btn:disabled { opacity: .5; cursor: wait; }
+/* Remote backup → Test connection: the answer under the row */
+.cfg-test { margin: 0 20px 16px; padding: 10px 12px; border-radius: 8px; font-size: 13px; background: var(--nt-inset); color: var(--nt-ink-2); }
+.cfg-test[hidden] { display: none; }
+.cfg-test.cfg-ok { background: var(--nt-ok-soft); color: var(--nt-ok); }
+.cfg-test.cfg-warn { background: var(--nt-warn-soft); color: var(--nt-warn); }
+.cfg-test.cfg-bad { background: #fdecec; color: var(--nt-danger); }
 .cfg-btn.primary { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
 .cfg-btn.primary:hover { background: var(--nt-accent); border-color: var(--nt-accent); color: #fff; }
 #config code { font-family: var(--nt-mono); font-size: 12px; background: var(--nt-inset); border-radius: 4px; padding: 1px 5px; }
