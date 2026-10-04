@@ -50,7 +50,10 @@
 /* ---- top row: the current tournament, and a new one ---- */
 .st-top { display: grid; gap: 20px; } /* New tournament on top, then the current tournament, both full width */
 .st-bottom { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
-.st-bottom { align-items: start; }
+/* Tournaments and Match history end at the same line: both panels take the row's height,
+   and each list fills its panel (still scrolling past 470px) */
+.st-bottom > .st-panel { display: flex; flex-direction: column; }
+.st-bottom .st-scroll, .st-bottom .st-hlist { flex: 1 1 auto; }
 
 .st-current { padding: 20px 22px; display: grid; gap: 16px; align-content: start; }
 .st-current-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
