@@ -2904,16 +2904,18 @@ function commandLateRegistrationStep3() {
     lateRegState = null;
 
     // 1. Create and register the player (reusing addPlayer logic, bypassing the in-progress guard)
+    // the late player comes from the player database (found by name, or created)
+    const entry = typeof PlayerRegistry !== 'undefined' ? PlayerRegistry.findOrCreate(playerName) : null;
     const newPlayer = {
         id: Date.now(),
-        name: playerName,
+        name: entry ? entry.short : playerName,
+        registryId: entry ? entry.id : undefined,
         paid: true,
         stats: { shortLegs: 0, highOuts: [], tons: 0, oneEighties: 0 },
         placement: null,
         eliminated: false
     };
     players.push(newPlayer);
-    addToPlayerList(playerName);
     if (typeof updatePlayersDisplay === 'function') updatePlayersDisplay();
     if (typeof updatePlayerCount === 'function') updatePlayerCount();
 

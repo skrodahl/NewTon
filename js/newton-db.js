@@ -281,6 +281,18 @@ const NewtonDB = (() => {
      * @param {object} cfg
      * @returns {object}
      */
+    /**
+     * Which player database entry each tournament player is ({ player id: registry id },
+     * js/player-registry.js), so Analytics follows renames and merges. Empty for
+     * tournaments from before the player database; Analytics links those by name.
+     * @param {string} tournamentId
+     * @param {object[]} [list] - the tournament's players, when known
+     * @returns {Object<string, string>}
+     */
+    function _registryIds(tournamentId, list) {
+        return typeof PlayerRegistry !== 'undefined' ? PlayerRegistry.registryIdsFor(tournamentId, list) : {};
+    }
+
     function _stripCredentials(cfg) {
         return typeof withoutServerCredentials === 'function' ? withoutServerCredentials(cfg) : (cfg || {});
     }
@@ -300,6 +312,7 @@ const NewtonDB = (() => {
             closedAt:               closedAt,
             configSnapshot:         _stripCredentials(configSnapshot),
             tournamentAchievements: tournamentAchievements || {},
+            registryIds:            _registryIds(tournamentId),
             matchCount:             matches.length
         });
 
@@ -580,7 +593,8 @@ const NewtonDB = (() => {
             playerCount: Array.isArray(t.players) ? t.players.length : 0,
             status: 'final',
             closedAt: Math.floor(tournamentDate.getTime() / 1000),
-            configSnapshot: _stripCredentials(configSnapshot)
+            configSnapshot: _stripCredentials(configSnapshot),
+            registryIds: _registryIds(tid, t.players)
         };
 
         await saveTournamentMeta(meta);

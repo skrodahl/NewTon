@@ -132,9 +132,31 @@ if (file_put_contents($filepath, $jsonData) === false) {
     exit;
 }
 
+// The club's player database travels with each upload (js/player-registry.js). Keep the
+// newest copy for Analytics, which reads it to show current names and follow renames and
+// merges. Outside the top level, so the tournament list doesn't pick it up.
+$registrySaved = false;
+if (isset($data['playerDatabase']['players']) && is_array($data['playerDatabase']['players'])) {
+    $registryDir = $tournamentsDir . 'registry/';
+    $registryFile = $registryDir . 'player-database.json';
+    if (is_dir($registryDir) || @mkdir($registryDir, 0755, true)) {
+        $incomingAt = isset($data['playerDatabase']['updatedAt']) ? (float)$data['playerDatabase']['updatedAt'] : 0;
+        $current = is_file($registryFile) ? json_decode((string)@file_get_contents($registryFile), true) : null;
+        $currentAt = is_array($current) && isset($current['updatedAt']) ? (float)$current['updatedAt'] : -1;
+        if ($incomingAt >= $currentAt) {
+            $registryJson = json_encode([
+                'players' => array_values($data['playerDatabase']['players']),
+                'updatedAt' => $incomingAt
+            ], JSON_PRETTY_PRINT);
+            $registrySaved = $registryJson !== false && @file_put_contents($registryFile, $registryJson) !== false;
+        }
+    }
+}
+
 // Success
 echo json_encode([
     'success' => true,
+    'playerDatabaseSaved' => $registrySaved,
     'filename' => $filename,
     'path' => '/tournaments/' . $filename,
     'message' => $wasOverwritten ? 'Tournament updated successfully' : 'Tournament uploaded successfully',

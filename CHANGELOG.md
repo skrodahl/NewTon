@@ -1,5 +1,23 @@
 ## Unreleased
 
+### No more pop-up hints
+
+- **The orange pop-up hints are gone**: "Need more paid players. Press F1…", "Tournament created!", "Bracket generated!", "N matches ready to start", "Many matches are live…", "Tournament completed!" and the rest. The pages show the same things (Registration's next step, the bracket, Match Controls), and anything that blocks an action still says so in its own dialog. Help is still on F1 and the Help buttons.
+- `showHelpHint()`, `suggestHelp()`, `triggerContextualHelp()` and the `onTournamentCreated` / `onBracketGenerated` / `onFirstMatchCompleted` hooks are removed from `dynamic-help-system.js`. Their callers elsewhere (including `clean-match-progression.js`, unchanged) check that they exist first, so they now do nothing.
+- Files changed: `js/dynamic-help-system.js`.
+
+### Player database
+
+- **A global player database in Player Registration** (mockup: https://claude.ai/artifact/XpVNb6RwbahYizDRmQow1m). Every player has a permanent ID, a **short name** (what the bracket, Match Controls, the Chalker and the Leaderboard show; unique), and a first and last name. It replaces the saved-players list.
+  - **Tonight** tab: tonight's players (short name, full name under it), and **Add from the database** with a search over short, first, last and previous names (Enter adds the first match, or offers to create the player), the most active players first. **+ New player** suggests the short name from the first name, with the last name's initial when it is taken.
+  - **Player database** tab: every player with their names, previous names, finished tournaments played and last played. **Edit** renames (the old short name is kept as a previous name, so older results still find the player); **Merge…** joins duplicates (one keeps its details; the other's ID and names stay with it); **Archive** hides a player from the pick list. **Players who have been in Analytics can't be deleted**, only archived; players who never played a match can.
+  - **First run:** the saved players, and the names in saved tournaments and the Analytics register, become database players (short name = the name; first and last empty to fill in), with a notice saying how many. Not on an analytics-only instance.
+- **Tournament players carry the database ID** as `registryId` (additive; their own `id`, used by the bracket, the history and undo, is unchanged). Players in a tournament from before the database are linked by name when it is loaded before the draw.
+- **Analytics follows the ID:** each tournament in the register records which database player each tournament player is (`registryIds`, at finalization and import). Analytics groups by it, merged IDs included, and links older tournaments by name (short or previous name). It shows the current short name everywhere (Leaderboard, Players, Dashboard, winners, match lists and match detail) and the full name in the profile.
+- **The database travels with tournaments:** exports and uploads carry it (`playerDatabase`, with full names; the `playerList` of short names stays for older versions). Importing a tournament file **adds** its players by ID instead of replacing the saved-players list. The server keeps the newest uploaded copy in `tournaments/registry/player-database.json`, which an analytics-only instance reads (`instanceMode` in the page tells it apart under `?tm`).
+- Match Controls' add-player field and late registration (Developer Console) take players from the database too (found by name, or created).
+- Files changed: `js/player-registry.js` (new), `js/player-management.js`, `js/newton-history.js`, `js/newton-db.js`, `js/tournament-management.js`, `js/analytics.js`, `js/main.js`, `js/types.js`, `js/dynamic-help-system.js`, `css/registration-page.css`, `tournament.html`, `api/upload-tournament.php`, `Docs/REST_API.md`, `llms.txt`.
+
 ### Player charts
 
 - **A player's progression, as charts** (Analytics → Players; mockup: https://claude.ai/artifact/VqxXWoFhDpuUpMc1hMhZd7). The profile gains their last 10 finishes, and six cards with a sparkline and a one-line verdict ("▲ 2 places in 10", "10.4 last 5, ▼ average 12.8"). A card opens its chart:

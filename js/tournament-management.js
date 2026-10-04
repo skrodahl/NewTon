@@ -335,7 +335,8 @@ function buildTournamentPayload() {
             bracket: tournament.bracket,
             placements: tournament.placements || {},
             history: history,
-            playerList: playerList,
+            playerList: playerList, // the active short names, for older versions of the app
+            playerDatabase: typeof PlayerRegistry !== 'undefined' ? PlayerRegistry.exportData() : undefined,
             exportedAt: new Date().toISOString()
         }
     };
@@ -1393,15 +1394,14 @@ function continueImportProcess(importedData) {
         // Clear any undone transactions (fresh import)
         localStorage.removeItem('undoneTransactions');
 
-        // Restore playerList if included in export (v4.0 snapshot).
-        // Key must be 'playerList' — that's what player-management.js reads;
-        // 'savedPlayers' is a legacy key nothing consumes.
-        if (importedData.playerList && Array.isArray(importedData.playerList)) {
+        // Bring the file's players into the player database: by ID from its playerDatabase,
+        // or by name from an older file's playerList. Adds; never replaces the database.
+        if (typeof PlayerRegistry !== 'undefined') {
             try {
-                localStorage.setItem('playerList', JSON.stringify(importedData.playerList));
-                console.log(`✓ Restored ${importedData.playerList.length} saved players from export snapshot`);
+                const added = PlayerRegistry.mergeFrom(importedData);
+                if (added) console.log(`✓ Added ${added} players to the player database from the file`);
             } catch (e) {
-                console.warn('Could not restore saved players:', e);
+                console.warn('Could not add the file\'s players to the player database:', e);
             }
         }
 

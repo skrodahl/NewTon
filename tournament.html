@@ -45,6 +45,10 @@
         echo "\n        window.NEWTON_CONFIG = {\n";
         echo "            demoMode: $demoMode,\n";
         echo "            appMode: '$appMode',\n";
+        // what the instance is, even when ?tm opens it in full mode (the player database
+        // is the club's uploaded copy on an analytics-only instance)
+        $instanceMode = getenv('NEWTON_MODE') === 'analytics' ? 'analytics' : 'full';
+        echo "            instanceMode: '$instanceMode',\n";
         echo "            readonlyAnalytics: $readonlyAnalytics,\n";
         echo "            apiKey: " . json_encode($pageApiKey, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ",\n";
         echo "            githubUrl: '$githubUrl'\n";
@@ -168,13 +172,21 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
             </div>
         </div>
 
-        <!-- Registration Page (css/registration-page.css): next step, players, payment, saved players, Leaderboard -->
+        <!-- Registration Page (css/registration-page.css): Tonight (next step, players, payment, the
+             player database to pick from, Leaderboard) and the Player database (js/player-registry.js) -->
         <div id="registration" class="page registration-page">
             <div class="rg-wrap">
                 <div class="st-title">
                     <div><h2>Player Registration</h2><p id="registrationSubtitle">Add the players, and mark who has paid.</p></div>
-                    <button type="button" class="st-btn help-info-icon" data-page="registration">Help</button>
+                    <div class="rg-title-tools">
+                        <div class="st-seg" id="registrationTabs" role="group" aria-label="Registration">
+                            <button type="button" data-tab="tonight" aria-pressed="true" onclick="switchRegistrationTab('tonight')">Tonight</button><button type="button" data-tab="database" aria-pressed="false" onclick="switchRegistrationTab('database')">Player database</button>
+                        </div>
+                        <button type="button" class="st-btn help-info-icon" data-page="registration">Help</button>
+                    </div>
                 </div>
+
+                <div class="rg-tab" id="registrationTonight">
 
                 <!-- Counts are kept by updatePlayerCount(); the rest by renderRegistrationNext() -->
                 <section class="rg-next" aria-label="Next step">
@@ -190,10 +202,6 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                 <div class="rg-cols" id="registrationCols">
                     <section class="st-panel" aria-labelledby="registrationPlayersTitle">
                         <div class="st-panel-head"><h3 id="registrationPlayersTitle">Players<small id="registrationPlayersHint">click a player to toggle paid</small></h3></div>
-                        <div class="rg-add" id="playerAddRow">
-                            <input type="text" class="st-text" id="playerName" placeholder="Player name, then Enter" autocomplete="off">
-                            <button type="button" class="st-btn st-primary" onclick="addPlayer()">Add player</button>
-                        </div>
                         <div id="playersContainer" class="rg-plist"></div>
                         <div class="rg-pfoot" id="lateRegBtnContainer"></div>
                     </section>
@@ -204,12 +212,15 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <img src="images/payment.png" alt="Payment QR code" onerror="document.getElementById('paymentPanel').hidden = true">
                             <div><b>Pay here</b><span>Scan to pay the entry fee.</span></div>
                         </section>
+                        <!-- The player database to pick from: filled by renderPlayerList() -->
                         <section class="st-panel" aria-labelledby="savedPlayersTitle">
                             <div class="st-panel-head">
-                                <h3 id="savedPlayersTitle">Saved players<small id="playerListCount"></small></h3>
-                                <button type="button" class="st-link" onclick="importPlayerListFromFile()" title="Import saved players from a tournament export file">Import saved players</button>
+                                <h3 id="savedPlayersTitle">Add from the database<small id="playerListCount"></small></h3>
+                                <button type="button" class="st-btn st-sm st-primary" onclick="openPlayerForm(null, _playerSearch)">+ New player</button>
                             </div>
-                            <div id="playerListContainer" class="rg-chips"></div>
+                            <div class="rg-search"><input type="search" class="st-text" id="playerName" placeholder="Search short name, first or last name" autocomplete="off" aria-label="Search the player database"></div>
+                            <div id="playerListContainer" class="rg-pick"></div>
+                            <div class="rg-pick-foot"><span>Archived players are hidden. Enter adds the first match.</span><button type="button" class="st-link" onclick="switchRegistrationTab('database')">Manage database</button></div>
                         </section>
                     </div>
 
@@ -244,7 +255,40 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         </div>
                     </section>
                 </div>
+                </div>
+
+                <!-- Player database: filled by renderPlayerDatabase() -->
+                <div class="rg-tab" id="registrationDatabase" hidden>
+                    <div class="rg-notice" id="playerDbNotice" hidden>
+                        <span><b><span id="playerDbNoticeCount"></span> created from your saved players and Analytics.</b> First and last names are empty: fill them in when you can, and merge any duplicates.</span>
+                        <button type="button" class="st-link" onclick="dismissPlayerDbNotice()">Dismiss</button>
+                    </div>
+                    <section class="st-panel" aria-labelledby="playerDbTitle">
+                        <div class="st-panel-head">
+                            <h3 id="playerDbTitle">Player database<small id="playerDbCount"></small></h3>
+                            <div class="rg-tools">
+                                <input type="search" class="st-text rg-db-search" id="playerDbSearch" placeholder="Search" aria-label="Search the player database" oninput="onPlayerDbSearch(this.value)">
+                                <label class="rg-check"><input type="checkbox" onchange="onPlayerDbShowArchived(this.checked)"> Show archived</label>
+                                <button type="button" class="st-link" onclick="importPlayerListFromFile()" title="Add the players from a tournament export file">Import from file</button>
+                                <button type="button" class="st-btn st-sm" onclick="openMergeDialog()">Merge…</button>
+                                <button type="button" class="st-btn st-sm st-primary" onclick="openPlayerForm(null)">+ New player</button>
+                            </div>
+                        </div>
+                        <div class="rg-db-scroll">
+                            <table class="rg-db">
+                                <thead><tr><th>Short name</th><th>First name</th><th>Last name</th><th>Previous names</th><th class="rg-num">Played</th><th class="rg-num">Last played</th><th>Status</th><th></th></tr></thead>
+                                <tbody id="playerDbBody"></tbody>
+                            </table>
+                        </div>
+                        <div class="rg-pfoot rg-db-foot"><span>Has played: kept for Analytics, so it can be archived but not deleted.</span><span>Renaming keeps the old name under Previous names, so older results still find the player.</span></div>
+                    </section>
+                </div>
             </div>
+        </div>
+
+        <!-- Player database dialogs (new / edit player, merge, delete): filled by player-management.js -->
+        <div id="playerDbModal" class="modal">
+            <div class="dlg rg-dlg" id="playerDbDialog"></div>
         </div>
 
         <!-- Tournament Page -->
@@ -1043,6 +1087,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/main.js"></script>
         <script src="js/lane-management.js"></script>
         <script src="js/tournament-management.js"></script>
+        <script src="js/player-registry.js"></script>
         <script src="js/player-management.js"></script>
         <script src="js/clean-match-progression.js"></script>
         <script src="js/bracket-rendering.js"></script>

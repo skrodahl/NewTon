@@ -166,7 +166,7 @@ GET /api/list-tournaments.php HTTP/1.1
 
 **Endpoint:** `POST /api/upload-tournament.php`
 
-**Description:** Uploads a tournament JSON file to the server.
+**Description:** Uploads a tournament JSON file to the server. When the tournament carries the club's player database (`data.playerDatabase`, v5.2.2+), the server also keeps the newest copy (by `updatedAt`) in `tournaments/registry/player-database.json`, outside the top level so the tournament list doesn't pick it up. Analytics on an analytics-only instance reads it to show current names and follow renames and merges. The response says whether it was saved (`playerDatabaseSaved`).
 
 **Request:**
 ```http

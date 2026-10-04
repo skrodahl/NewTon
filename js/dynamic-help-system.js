@@ -68,21 +68,32 @@ const HELP_CONTENT = {
     // Registration Page Help
     registration: {
         title: "Player Registration",
-        overview: "Add the players and mark who has paid. Once the bracket is drawn, the page shows the Leaderboard.",
+        overview: "Pick tonight's players from the club's player database and mark who has paid. Once the bracket is drawn, the page shows the Leaderboard.",
         sections: {
             adding: {
                 title: "Adding Players",
                 content: `
                     <ol>
-                        <li>Type a name in the field at the top of <strong>Players</strong></li>
-                        <li>Press Enter or click <strong>Add player</strong></li>
-                        <li>Click a player to switch between <strong>Paid</strong> and <strong>Unpaid</strong></li>
-                        <li><strong>×</strong> removes an unpaid player (mark a paid player unpaid first)</li>
+                        <li>Type in <strong>Add from the database</strong>: it searches short, first, last and previous names</li>
+                        <li>Click a player, or press Enter to add the first match</li>
+                        <li>Not in the database yet? <strong>+ New player</strong> (or Enter when no one matches) creates them and adds them</li>
+                        <li>Click a player in <strong>Players</strong> to switch between <strong>Paid</strong> and <strong>Unpaid</strong>; <strong>×</strong> removes an unpaid player</li>
                     </ol>
                     <p><strong>Next step</strong> shows the player, paid and unpaid counts, and what's needed before the draw. <strong>Open bracket</strong> works once there are at least 4 paid players. Only paid players go into the bracket.</p>
-                    <p><strong>Saved players:</strong> Everyone you add is saved for next time. The list shows the saved players who aren't in this tournament: click a name to add them, <strong>×</strong> to delete them from the list.</p>
-                    <p><strong>Import saved players:</strong> Rebuild the list from a tournament export file.</p>
                     <p><strong>Payment QR code:</strong> Add <code>payment.png</code> to the <code>images/</code> folder (Swish, bank details, etc.) and it is shown next to the players. Without it, the panel is hidden.</p>
+                `
+            },
+            database: {
+                title: "The Player Database",
+                content: `
+                    <p>Every player has a permanent ID, a <strong>short name</strong> (what the bracket, Match Controls, the Chalker and the Leaderboard show; it must be unique) and a first and last name. Analytics follows the ID, so a player's results stay together whatever they are called.</p>
+                    <ul>
+                        <li><strong>Edit:</strong> change the names. A changed short name is kept under <em>Previous names</em>, so older results under it still count for the player.</li>
+                        <li><strong>Merge…:</strong> for duplicates (“Erik” and “Eirik”). Choose whose details to keep; the other's tournaments and Analytics become theirs. This can't be undone.</li>
+                        <li><strong>Archive:</strong> hides a player from the list for new tournaments. Players who have played are kept for Analytics, so they can be archived but not deleted. Players who never played can be deleted.</li>
+                        <li><strong>Import from file:</strong> adds the players from a tournament export file. It never replaces the database.</li>
+                    </ul>
+                    <p>The database is kept on this computer and travels with every tournament export and upload, so a shared Analytics instance shows the current names.</p>
                 `
             },
             statistics: {
@@ -985,127 +996,6 @@ function showHelpSection(pageId, sectionId) {
     showHelp(pageId, sectionId);
 }
 
-/**
- * SMART HELP SUGGESTIONS
- * Analyze current context and suggest relevant help
- */
-function suggestHelp() {
-    if (window.NEWTON_APP_MODE === 'analytics') return null;
-
-    // No tournament created
-    if (!tournament) {
-        return { page: 'setup', section: 'creation', reason: 'No active tournament' };
-    }
-
-    // Few players
-    if (players.filter(p => p.paid).length < 4) {
-        return { page: 'registration', section: 'adding', reason: 'Need more paid players' };
-    }
-
-    // No bracket generated
-    if (!tournament.bracket) {
-        return { page: 'tournament', section: 'bracket', reason: 'Ready to generate bracket in Match Controls' };
-    }
-
-    // Active matches available
-    /*
-    if (matches && matches.some(m => getMatchState && getMatchState(m) === 'live')) {
-        return { page: 'tournament', section: 'completion', reason: 'Live matches need attention' };
-    } */
-
-    return null;
-}
-
-/**
- * CONTEXTUAL HELP NOTIFICATIONS
- * Show subtle help hints based on user actions
- */
-function showHelpHint(message, duration = 3000) {
-    // Remove existing hints
-    const existingHint = document.getElementById('helpHint');
-    if (existingHint) {
-        existingHint.remove();
-    }
-
-    const hint = document.createElement('div');
-    hint.id = 'helpHint';
-    hint.style.cssText = `
-        position: fixed;
-        top: 20px;
-        left: 50%;
-        transform: translateX(-50%);
-        background: linear-gradient(135deg, #ff6b35 0%, #e55a2b 100%);
-        color: white;
-        padding: 12px 20px;
-        border-radius: 8px;
-        box-shadow: 0 4px 12px rgba(255,107,53,0.3);
-        z-index: 1001;
-        font-size: 14px;
-        font-weight: 500;
-        animation: slideDown 0.3s ease;
-    `;
-
-    hint.innerHTML = `
-        💡 ${message}
-        <button onclick="this.parentElement.remove()" style="
-            background: none;
-            border: none;
-            color: white;
-            margin-left: 10px;
-            cursor: pointer;
-            font-size: 16px;
-        ">×</button>
-    `;
-
-    // Add animation CSS if not exists
-    if (!document.querySelector('#helpAnimations')) {
-        const style = document.createElement('style');
-        style.id = 'helpAnimations';
-        style.textContent = `
-            @keyframes slideDown {
-                from { transform: translateX(-50%) translateY(-100%); opacity: 0; }
-                to { transform: translateX(-50%) translateY(0); opacity: 1; }
-            }
-        `;
-        document.head.appendChild(style);
-    }
-
-    document.body.appendChild(hint);
-
-    // Auto-remove after duration
-    setTimeout(() => {
-        if (hint.parentElement) {
-            hint.remove();
-        }
-    }, duration);
-}
-
-/**
- * INTEGRATION HOOKS
- * Functions to call from main application
- */
-
-// Call when user seems confused or stuck
-function triggerContextualHelp() {
-    const suggestion = suggestHelp();
-    if (suggestion) {
-        showHelpHint(`${suggestion.reason}. Press F1 for help with ${suggestion.page}.`);
-    }
-}
-
-// Call when significant actions occur
-function onTournamentCreated() {
-    showHelpHint('Tournament created! Add players on the Registration page.');
-}
-
-function onBracketGenerated() {
-    showHelpHint('Bracket generated! Click "Start" on ready matches to begin.');
-}
-
-function onFirstMatchCompleted() {
-    showHelpHint('Great! Tournament is underway. Use undo (↩) if needed.');
-}
-
 // Make functions globally available
 if (typeof window !== 'undefined') {
     // Core help functions
@@ -1115,16 +1005,6 @@ if (typeof window !== 'undefined') {
     window.toggleHelp = toggleHelp;
     window.toggleHelpSection = toggleHelpSection;
     window.showHelpSection = showHelpSection;
-
-    // Utility functions
-    window.showHelpHint = showHelpHint;
-    window.triggerContextualHelp = triggerContextualHelp;
-    window.suggestHelp = suggestHelp;
-
-    // Integration hooks
-    window.onTournamentCreated = onTournamentCreated;
-    window.onBracketGenerated = onBracketGenerated;
-    window.onFirstMatchCompleted = onFirstMatchCompleted;
 
     console.log('✅ Dynamic help system functions registered globally');
 }

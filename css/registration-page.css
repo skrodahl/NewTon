@@ -27,8 +27,6 @@
 .rg-side { display: grid; gap: 20px; min-width: 0; }
 
 /* ---- players: one row each, the paid state on the right ---- */
-.rg-add { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 10px; padding: 0 20px 16px; }
-.rg-add[hidden] { display: none; }
 /* as many columns as fit; each row draws its own right edge, and the last column's is
    clipped by the list (the panel's border is there) */
 .rg-plist { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); border-top: 1px solid var(--nt-line); overflow: hidden; }
@@ -37,6 +35,9 @@
 .rg-prow[onclick] { cursor: pointer; }
 .rg-prow[onclick]:hover { background: var(--nt-surface-2); }
 .rg-prow .rg-name { font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.rg-who { display: grid; min-width: 0; }
+.rg-who b { font-weight: 700; color: var(--nt-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.rg-who span { font-size: 12px; color: var(--nt-muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .rg-prow .rg-right { display: flex; align-items: center; gap: 6px; flex: none; }
 .rg-paid { display: inline-flex; align-items: center; gap: 6px; border-radius: 99px; padding: 2px 10px; font-size: 12px; font-weight: 700; white-space: nowrap; }
 .rg-paid.rg-yes { background: var(--nt-ok-soft); color: var(--nt-ok); }
@@ -55,22 +56,79 @@
 .rg-pay b { display: block; font-size: 15px; color: var(--nt-ink); }
 .rg-pay span { color: var(--nt-muted); font-size: 13px; }
 
-/* ---- saved players: click a name to add, × to delete from the list ---- */
-.rg-chips { display: flex; flex-wrap: wrap; gap: 6px; padding: 0 20px 16px; max-height: 420px; overflow-y: auto; }
-.rg-chips .st-empty { flex: 1; min-height: 0; padding: 12px 0 4px; }
-.rg-chip { display: inline-flex; align-items: center; height: 32px; border-radius: 8px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); overflow: hidden; }
-.rg-chip:hover { border-color: var(--nt-ink-2); }
-.rg-chip button { border: 0; background: transparent; font: inherit; cursor: pointer; height: 100%; }
-.rg-chip-add { padding: 0 6px 0 12px; font-size: 13px; font-weight: 600; color: var(--nt-ink-2); }
-.rg-chip-add::before { content: "+"; font-weight: 800; color: var(--nt-muted); margin-right: 6px; }
-.rg-chip-add:hover { color: var(--nt-ink); }
-.rg-chip-add:disabled { cursor: default; color: var(--nt-muted); }
-.rg-chip-del { width: 26px; color: var(--nt-faint); font-size: 14px; }
-.rg-chip-del:hover { background: var(--nt-inset); color: var(--nt-danger); }
 
 /* ---- Leaderboard ---- */
 .rg-scroll { overflow: auto; max-height: 640px; border-bottom-left-radius: 12px; border-bottom-right-radius: 12px; }
 
+/* ---- tabs: Tonight and the Player database ---- */
+.rg-title-tools { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; }
+.rg-title-tools .st-seg button { padding: 8px 16px; }
+.rg-tab { display: grid; gap: 20px; }
+.rg-tab[hidden] { display: none; }
+
+/* ---- add from the database: search, then the players (most active first) ---- */
+.rg-search { padding: 0 20px 12px; }
+.rg-pick { max-height: 520px; overflow-y: auto; border-top: 1px solid var(--nt-line); }
+.rg-pick-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 10px; padding: 8px 14px 8px 20px; border-bottom: 1px solid var(--nt-line); }
+.rg-pick-row[data-rg-add] { cursor: pointer; }
+.rg-pick-row[data-rg-add]:hover { background: var(--nt-surface-2); }
+.rg-pick-row[data-rg-add]:focus-visible { outline: 2px solid var(--nt-accent); outline-offset: -2px; }
+.rg-pick-add { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--nt-line-2); display: grid; place-items: center; font-weight: 800; color: var(--nt-muted); background: var(--nt-surface); }
+.rg-pick-row[data-rg-add]:hover .rg-pick-add { border-color: var(--nt-ink); color: var(--nt-ink); }
+.rg-pick-row.rg-in { background: var(--nt-surface-2); }
+.rg-pick-row.rg-in .rg-pick-add { border: 0; background: var(--nt-ok-soft); color: var(--nt-ok); font-size: 12px; width: auto; padding: 0 8px; }
+.rg-pick mark { background: #fff3a8; color: inherit; border-radius: 2px; }
+.rg-pick .st-empty { min-height: 0; padding: 24px 20px; }
+.rg-pick .st-empty .st-btn { justify-self: center; }
+.rg-pick-foot { display: flex; justify-content: space-between; align-items: center; gap: 8px 12px; flex-wrap: wrap; padding: 10px 20px 12px; font-size: 13px; color: var(--nt-muted); }
+
+/* ---- the player database ---- */
+.rg-notice { display: flex; align-items: center; justify-content: space-between; gap: 10px 16px; flex-wrap: wrap; padding: 12px 18px; border-radius: 12px; background: var(--nt-accent-soft); color: #b2410f; font-size: 14px; }
+.rg-notice[hidden] { display: none; }
+.rg-notice b { color: var(--nt-ink); }
+.rg-db-search { width: 220px; height: 34px; }
+.rg-check { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--nt-ink-2); cursor: pointer; }
+.rg-check input { accent-color: var(--nt-header); }
+.rg-db-scroll { overflow: auto; max-height: 640px; }
+.rg-db { width: 100%; border-collapse: collapse; font-size: 14px; }
+.rg-db th { position: sticky; top: 0; z-index: 1; background: var(--nt-surface); text-align: left; font-size: 12px; font-weight: 600; color: var(--nt-muted); padding: 6px 8px; border-top: 1px solid var(--nt-line); border-bottom: 1px solid var(--nt-line); white-space: nowrap; }
+.rg-db td { padding: 9px 8px; border-bottom: 1px solid var(--nt-line); vertical-align: middle; color: var(--nt-ink-2); font-variant-numeric: tabular-nums; }
+.rg-db th:first-child, .rg-db td:first-child { padding-left: 20px; }
+.rg-db th:last-child, .rg-db td:last-child { padding-right: 20px; }
+.rg-db tbody tr:hover td { background: var(--nt-surface-2); }
+.rg-db .rg-num { text-align: right; white-space: nowrap; }
+.rg-db .rg-short { font-weight: 700; color: var(--nt-ink); }
+.rg-db .rg-prev { color: var(--nt-muted); font-size: 13px; }
+.rg-db .rg-acts { width: 1%; white-space: nowrap; text-align: right; }
+.rg-db .rg-acts .st-btn + .st-btn { margin-left: 6px; }
+.rg-db tr.rg-archived td { color: var(--nt-faint); }
+.rg-db tr.rg-archived .rg-short { color: var(--nt-muted); font-weight: 600; }
+.rg-db .rg-db-empty { text-align: center; color: var(--nt-muted); padding: 28px 20px; }
+.rg-dim { color: var(--nt-faint); }
+.st-pill.rg-status { font-weight: 600; }
+.st-pill.rg-status::before { display: none; }
+.st-pill.rg-lock::before { display: inline; content: "\1F512"; width: auto; height: auto; background: none; font-size: 10px; }
+.st-btn.rg-danger:hover { border-color: var(--nt-danger); color: var(--nt-danger); }
+.rg-db-foot { border-top: 1px solid var(--nt-line); gap: 6px 20px; }
+
+/* ---- dialogs: new / edit player, merge, delete ---- */
+.dlg.rg-dlg { max-width: 560px; font-family: var(--nt-sans); }
+.rg-dlg .dlg__main { display: grid; gap: 14px; }
+.rg-form2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+.rg-form-msg { margin: 6px 0 0; font-size: 12px; color: var(--nt-muted); }
+.rg-form-msg.rg-err { color: var(--nt-danger); }
+.rg-dlg .dlg__input.rg-err { border-color: var(--nt-danger); }
+.rg-prevs { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 6px; }
+.rg-prevs span { border: 1px solid var(--nt-line-2); border-radius: 6px; padding: 1px 8px; font-size: 12px; color: var(--nt-ink-2); background: var(--nt-surface-2); }
+.rg-form-id { margin: 0; font-size: 13px; color: var(--nt-muted); }
+.rg-form-id code { font-family: var(--nt-mono); font-size: 12px; }
+.rg-merge-keep { display: grid; gap: 8px; margin-top: 6px; }
+.rg-merge-keep label { display: flex; gap: 10px; align-items: flex-start; border: 1px solid var(--nt-line-2); border-radius: 10px; padding: 10px 12px; cursor: pointer; }
+.rg-merge-keep label:has(input:checked) { border-color: var(--nt-ink); box-shadow: inset 0 0 0 1px var(--nt-ink); }
+.rg-merge-keep input { margin-top: 3px; accent-color: var(--nt-header); }
+.rg-merge-keep small { display: block; color: var(--nt-muted); font-size: 12px; }
+
 @media (max-width: 1000px) {
   .rg-cols, .rg-cols.rg-running { grid-template-columns: 1fr; }
+  .rg-form2 { grid-template-columns: 1fr; }
 }

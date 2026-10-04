@@ -59,7 +59,8 @@
 /**
  * @typedef {Object} Player
  * @property {number} id - Unique identifier (timestamp-based, e.g., Date.now())
- * @property {string} name - Player's display name
+ * @property {string} name - Player's display name (the short name from the player database when added)
+ * @property {string} [registryId] - The player database ID (js/player-registry.js); absent in tournaments from before it
  * @property {boolean} paid - Whether player has paid entry fee
  * @property {PlayerStats} stats - Player statistics object
  * @property {number|null} placement - Final tournament placement (1, 2, 3, 4, 5, 7, 9, 13, 17, 25), null if not yet determined

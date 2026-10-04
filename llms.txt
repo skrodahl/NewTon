@@ -37,7 +37,7 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - Transaction-based undo system: surgical undo of any match result without resetting the tournament — blocked automatically if a downstream match is live or completed
 - Configurable point system: participation, placement, and achievement points — designed for season standings across multiple tournaments
 - Multi-tournament support with JSON import/export and CSV results export
-- Persistent player registry across tournaments with paid/unpaid tracking and optional payment QR code
+- Player database (Player Registration): every player has a permanent ID, a unique short name (shown in the bracket, Chalker and Leaderboard) and first and last name; rename (old names kept), archive, merge duplicates. Players who have played can't be deleted. Analytics follows the ID, so renames and merges keep results together; it travels with tournament exports and uploads. Paid/unpaid tracking and an optional payment QR code
 - Non-power-of-two player counts fully supported (e.g. 6, 10, 20 players) with fair BYE distribution
 - One design across every page (v5.2.0+): Tournament Setup opens with the loaded tournament and its next step; Player Registration counts players, paid and unpaid and says what to do next; the Leaderboard looks the same on Registration and in the bracket
 - Dynamic context-sensitive help system

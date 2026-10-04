@@ -216,16 +216,24 @@ document.addEventListener('DOMContentLoaded', function () {
     // Step 5: Set today's date
     setTodayDate();
 
-    // Step 6: Auto-load current tournament (if exists) - Never loads config
+    // Step 6: The player database: created from the saved players and Analytics names the
+    // first time (js/player-registry.js); Registration redraws once the names are in
+    if (typeof PlayerRegistry !== 'undefined') {
+        PlayerRegistry.migrate().then(created => {
+            if (created && typeof _afterRegistryChange === 'function') _afterRegistryChange();
+        });
+    }
+
+    // Step 7: Auto-load current tournament (if exists) - Never loads config
     autoLoadCurrentTournament();
 
-    // Step 7: Fill the Setup page's current tournament and match history on initial load
+    // Step 8: Fill the Setup page's current tournament and match history on initial load
     setTimeout(() => {
         renderSetupCurrent();
         updateMatchHistory();
     }, 200);
 
-    // Step 8: Update storage indicator
+    // Step 9: Update storage indicator
     setTimeout(() => {
         if (typeof updateStorageIndicator === 'function') {
             updateStorageIndicator();
@@ -314,11 +322,14 @@ function setupEventListeners() {
     });
 
     // Enter key handlers
+    // The player search on Registration: filter as you type, Enter adds the first match
     const playerNameInput = document.getElementById('playerName');
     if (playerNameInput) {
-        playerNameInput.addEventListener('keypress', function (e) {
+        playerNameInput.addEventListener('input', () => onPlayerSearchInput(playerNameInput.value));
+        playerNameInput.addEventListener('keydown', function (e) {
             if (e.key === 'Enter') {
-                addPlayer();
+                e.preventDefault();
+                onPlayerSearchEnter();
             }
         });
     }

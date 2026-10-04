@@ -73,7 +73,8 @@ const NewtonHistory = (() => {
         if (_allTournaments) return _allTournaments;
         const [records, corrections] = await Promise.all([
             NewtonDB.getFinalTournaments(),
-            _fetchCorrections()
+            _fetchCorrections(),
+            _loadRegistry()
         ]);
         _allTournaments = records.map(t => _applyCorrections(t, corrections));
         return _allTournaments;
@@ -82,6 +83,7 @@ const NewtonHistory = (() => {
     /** Invalidate the cached tournament list and match lists (e.g. after import or delete). */
     function _invalidateCache() {
         _allTournaments = null;
+        _registry = null;
         _matchesByTournament.clear();
     }
 
@@ -103,6 +105,69 @@ const NewtonHistory = (() => {
     }
 
     /**
+     * The player database Analytics names players by: the club's own (js/player-registry.js)
+     * on the computer that runs tournaments, or on an analytics-only instance the copy the
+     * club uploads (tournaments/registry/player-database.json). Indexed by ID (merged IDs
+     * included) and by name (short names first, then previous names).
+     * @type {{byId: Map<string, object>, byName: Map<string, object>}|null}
+     */
+    let _registry = null;
+
+    async function _loadRegistry() {
+        if (_registry) return _registry;
+        let list = [];
+        const remote = typeof PlayerRegistry === 'undefined' || PlayerRegistry.onAnalyticsInstance();
+        if (!remote) {
+            list = PlayerRegistry.all();
+        } else {
+            try {
+                const res = await fetch('tournaments/registry/player-database.json', { cache: 'no-store' });
+                if (res.ok) { const data = await res.json(); list = Array.isArray(data.players) ? data.players : []; }
+            } catch (e) { /* no copy on this server: players are matched by name */ }
+        }
+        const byId = new Map(), byName = new Map();
+        list.forEach(e => {
+            if (!e || !e.id || !e.short) return;
+            byId.set(String(e.id), e);
+            (e.merged || []).forEach(id => byId.set(String(id), e));
+            byName.set(_playerKey(e.short), e);
+        });
+        list.forEach(e => (e && e.prev || []).forEach(n => { const k = _playerKey(n); if (k && !byName.has(k)) byName.set(k, e); }));
+        _registry = { byId, byName };
+        return _registry;
+    }
+
+    /**
+     * Who a tournament player is: the player database entry (by the ID the tournament
+     * recorded, or by name for tournaments from before the database), so renames and merges
+     * are followed; otherwise the name itself.
+     * @param {object|null} t - the tournament record (its registryIds)
+     * @param {string|number|null} pid - the tournament's player id
+     * @param {string} name - the name the tournament recorded
+     * @returns {{key: string|null, name: string, full: string}}
+     */
+    function _person(t, pid, name) {
+        const reg = _registry;
+        const rid = t && t.registryIds && pid != null ? t.registryIds[String(pid)] : null;
+        let e = reg && rid ? reg.byId.get(String(rid)) : null;
+        if (!e && reg && name) e = reg.byName.get(_playerKey(name));
+        if (e) return { key: 'r:' + e.id, name: e.short, full: [e.first, e.last].filter(Boolean).join(' ') };
+        const k = _playerKey(name);
+        return { key: k ? 'n:' + k : null, name: name || '', full: '' };
+    }
+
+    /**
+     * A match's player as Analytics shows them: their current short name.
+     * @param {object} m - match record
+     * @param {1|2} n
+     * @returns {string}
+     */
+    function _matchPlayerName(m, n) {
+        const t = (_allTournaments || []).find(x => String(x.tournamentId) === String(m.tournamentId || m._tournamentId)) || null;
+        return _person(t, m['player' + n + 'Id'], m['player' + n + 'Name']).name;
+    }
+
+    /**
      * Tally match wins and losses into a player map (6.11).
      *
      * Shared by the Leaderboard and the Players tab, which had byte-identical copies of
@@ -111,13 +176,14 @@ const NewtonHistory = (() => {
      * players absent from the map are skipped, exactly as before.
      *
      * @param {object[]} matches - match records for one tournament
-     * @param {Object<string, {matchesWon: number, matchesLost: number}>} playerMap - keyed by _playerKey()
+     * @param {Object<string, {matchesWon: number, matchesLost: number}>} playerMap - keyed by _person().key
+     * @param {object} t - the tournament record the matches belong to
      * @returns {void} mutates playerMap
      */
-    function _tallyMatchWinLoss(matches, playerMap) {
+    function _tallyMatchWinLoss(matches, playerMap, t) {
         matches.forEach(m => {
-            const k1 = _playerKey(m.player1Name);
-            const k2 = _playerKey(m.player2Name);
+            const k1 = _person(t, m.player1Id, m.player1Name).key;
+            const k2 = _person(t, m.player2Id, m.player2Name).key;
             const pm1 = k1 ? playerMap[k1] : null;
             const pm2 = k2 ? playerMap[k2] : null;
 
@@ -450,15 +516,13 @@ const NewtonHistory = (() => {
 
             // Gather all matches across all tournaments
             const allMatches = [];
-            (await _loadMatchesFor(tournaments)).forEach(matches => {
+            const playerSet = new Set(); // unique players: one per person (_person)
+            (await _loadMatchesFor(tournaments)).forEach((matches, i) => {
                 allMatches.push(...matches);
-            });
-
-            // Unique players (deduplicate by normalized name across tournaments)
-            const playerSet = new Set();
-            allMatches.forEach(m => {
-                if (m.player1Name) playerSet.add(_playerKey(m.player1Name));
-                if (m.player2Name) playerSet.add(_playerKey(m.player2Name));
+                matches.forEach(m => {
+                    [_person(tournaments[i], m.player1Id, m.player1Name), _person(tournaments[i], m.player2Id, m.player2Name)]
+                        .forEach(p => { if (p.key) playerSet.add(p.key); });
+                });
             });
 
             // Scan tournament-level achievements (includes both manual and Chalker data)
@@ -469,9 +533,10 @@ const NewtonHistory = (() => {
             tournaments.forEach(t => {
                 const ta = t.tournamentAchievements;
                 if (!ta) return;
-                Object.values(ta).forEach(entry => {
+                Object.entries(ta).forEach(([pid, entry]) => {
                     const stats = entry.stats;
                     if (!stats) return;
+                    const who = _person(t, pid, entry.name).name; // their current name
 
                     // 180s
                     if (stats.oneEighties) total180s += stats.oneEighties;
@@ -480,7 +545,7 @@ const NewtonHistory = (() => {
                     if (stats.highOuts && stats.highOuts.length) {
                         const max = Math.max(...stats.highOuts);
                         if (max > highestCheckout.score) {
-                            highestCheckout = { score: max, player: entry.name };
+                            highestCheckout = { score: max, player: who };
                         }
                     }
 
@@ -489,7 +554,7 @@ const NewtonHistory = (() => {
                     if (Array.isArray(legs) && legs.length) {
                         const min = Math.min(...legs);
                         if (min < shortestLeg.darts) {
-                            shortestLeg = { darts: min, player: entry.name };
+                            shortestLeg = { darts: min, player: who };
                         }
                     }
                 });
@@ -899,7 +964,7 @@ const NewtonHistory = (() => {
         const best = p.bestShortLeg < Infinity;
         panel.innerHTML =
             '<div class="an-prof-head"><h3>' + escHtml(p.name) + '</h3>' +
-                '<p>Rank ' + p._rank + ' of ' + playerCount + ' in the lens</p></div>' +
+                '<p>' + (p.fullName ? escHtml(p.fullName) + ' · ' : '') + 'Rank ' + p._rank + ' of ' + playerCount + ' in the lens</p></div>' +
             '<dl class="an-facts an-facts--grid">' +
                 fact('Points', p.points) +
                 fact('Played', p.tournaments) +
@@ -988,7 +1053,7 @@ const NewtonHistory = (() => {
      */
     async function _computePlayerRows(tournaments) {
         // Aggregate per-player stats across all scoped tournaments
-        const playerMap = {}; // normalized name → { name, points, tournaments, wins, oneEighties, tons, highOuts, shortLegs }
+        const playerMap = {}; // person key (_person) → { name, fullName, points, tournaments, … }
 
         for (const t of tournaments) {
             const p = _getActivePoints(t);
@@ -1002,13 +1067,16 @@ const NewtonHistory = (() => {
             });
 
             Object.entries(ta).forEach(([pid, entry]) => {
-                const name = entry.name || pid;
-                const key = _playerKey(name);
+                const person = _person(t, pid, entry.name || pid);
+                const name = person.name;
+                const key = person.key;
+                if (!key) return;
                 const s = entry.stats || {};
 
                 if (!playerMap[key]) {
                     playerMap[key] = {
                         name: name,
+                        fullName: person.full,
                         points: 0,
                         tournaments: 0,
                         p1st: 0, p2nd: 0, p3rd: 0, p4th: 0, p56th: 0, p78th: 0,
@@ -1067,18 +1135,19 @@ const NewtonHistory = (() => {
         const matchLists = await _loadMatchesFor(tournaments);
         for (let ti = 0; ti < tournaments.length; ti++) {
             const matches = matchLists[ti];
-            _tallyMatchWinLoss(matches, playerMap);
-            const entryFor = (pm) => pm && pm.history.find(h => h.tournament === tournaments[ti]);
+            const t = tournaments[ti];
+            _tallyMatchWinLoss(matches, playerMap, t);
+            const entryFor = (pm) => pm && pm.history.find(h => h.tournament === t);
             matches.forEach(m => {
-                const h1 = entryFor(m.player1Name && playerMap[_playerKey(m.player1Name)]);
-                const h2 = entryFor(m.player2Name && playerMap[_playerKey(m.player2Name)]);
+                const h1 = entryFor(playerMap[_person(t, m.player1Id, m.player1Name).key]);
+                const h2 = entryFor(playerMap[_person(t, m.player2Id, m.player2Name).key]);
                 if (m.winner === 1) { if (h1) h1.matchesWon++; if (h2) h2.matchesLost++; }
                 else if (m.winner === 2) { if (h2) h2.matchesWon++; if (h1) h1.matchesLost++; }
             });
 
             matches.forEach(m => {
-                const k1 = _playerKey(m.player1Name);
-                const k2 = _playerKey(m.player2Name);
+                const k1 = _person(t, m.player1Id, m.player1Name).key;
+                const k2 = _person(t, m.player2Id, m.player2Name).key;
                 const pm1 = k1 ? playerMap[k1] : null;
                 const pm2 = k2 ? playerMap[k2] : null;
 
@@ -1513,7 +1582,7 @@ const NewtonHistory = (() => {
         const placements = tournament.placements || {};
         const pid = Object.keys(placements).find(id => placements[id] === 1);
         const entry = pid && (tournament.tournamentAchievements || {})[pid];
-        return entry ? (entry.name || '') : '';
+        return entry ? _person(tournament, pid, entry.name || '').name : '';
     }
 
     // ---------------------------------------------------------------------------
@@ -2021,7 +2090,7 @@ const NewtonHistory = (() => {
      * @returns {object[]} NewtonTable columns
      */
     function _matchColumns(withTournament) {
-        const player = (n) => (v, row) => `<span class="${row.winner === n ? 'nt-win' : 'nt-lose'}">${escHtml(v)}</span>`;
+        const player = (n) => (v, row) => `<span class="${row.winner === n ? 'nt-win' : 'nt-lose'}">${escHtml(_matchPlayerName(row, n))}</span>`;
         const cols = [
             { key: 'matchId', label: 'Match', render: (v) => matchIdTag(v) },
             { key: 'player1Name', label: 'Player 1', render: player(1) },
@@ -2344,8 +2413,8 @@ const NewtonHistory = (() => {
     function _buildMatchDetailHtml(match, tournamentInfo, tournamentRecord) {
         const w1 = match.winner === 1;
         const w2 = match.winner === 2;
-        const n1 = escHtml(match.player1Name);
-        const n2 = escHtml(match.player2Name);
+        const n1 = escHtml(_person(tournamentRecord, match.player1Id, match.player1Name).name);
+        const n2 = escHtml(_person(tournamentRecord, match.player2Id, match.player2Name).name);
         const legs = match.legsWon ? `${match.legsWon.p1}–${match.legsWon.p2}` : '—';
         const date = match.completedAt ? fmtDateTime(match.completedAt) : '—';
         const tName = (tournamentInfo && tournamentInfo.name) || match.tournamentName || '';
