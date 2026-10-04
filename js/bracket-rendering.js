@@ -2085,7 +2085,7 @@ function _mcCompletedHTML() {
             <div class="mc-heads">${h.head.map(x => `<div class="mc-head-hl"><span>${escapeHtml(x.label)}</span><b>${escapeHtml(String(x.value))}</b><small>${escapeHtml(x.who)}</small></div>`).join('')}</div>
             <div class="mc-plaque"><span class="mc-plaque-club">${club}</span><b>${escapeHtml(tournament.name || '')}</b>${tournament.date ? `<time>${escapeHtml(tournament.date)}</time>` : ''}</div>
         </section>
-        <section class="mc-panel"><div class="mc-ph"><h3>Highlights</h3><span class="mc-hint">From tonight's matches</span></div>
+        <section class="mc-panel mc-hlpanel"><div class="mc-ph"><h3>Highlights</h3><span class="mc-hint">From tonight's matches</span></div>
             <div class="mc-hls">${h.list.map(hl).join('')}</div>
             <dl class="mc-facts">${h.facts.map(([k, v]) => `<div><dt>${k}</dt><dd>${escapeHtml(String(v))}</dd></div>`).join('')}</dl>
             <div class="mc-doneacts">

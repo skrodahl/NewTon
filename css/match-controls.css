@@ -167,7 +167,9 @@
 .mc-facts > div { padding: 10px 18px; border-bottom: 1px solid var(--nt-line); }
 .mc-facts dt { font-size: 12px; color: var(--nt-muted); }
 .mc-facts dd { margin: 0; font-size: 18px; font-weight: 800; font-variant-numeric: tabular-nums; }
-.mc-doneacts { display: flex; gap: 8px; flex-wrap: wrap; padding: 16px 18px; }
+/* the actions sit centred at the foot of the Highlights panel, level with the plaque opposite */
+.mc-hlpanel { display: flex; flex-direction: column; }
+.mc-doneacts { display: flex; gap: 8px; flex-wrap: wrap; justify-content: center; margin-top: auto; padding: 16px 18px 20px; }
 
 @media (max-width: 1200px) {
   .mc-body, .mc-done { grid-template-columns: minmax(0, 1fr); }
