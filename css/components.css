@@ -3,6 +3,12 @@
  * Uses the shared tokens in css/design-tokens.css. Light only.
  */
 
+/* ---- words that differ on an analytics-only instance (body.mode-analytics): put both
+   versions in spans, e.g. Global Settings, which members use as Custom Settings ---- */
+.nt-in-analytics { display: none; }
+.mode-analytics .nt-in-analytics { display: inline; }
+.mode-analytics .nt-in-full { display: none; }
+
 /* ---- the tournament Leaderboard: Player Registration, and the Leaderboard dialog opened
    from the bracket and Match Controls (both filled by updateResultsTable()) ---- */
 .nt-leaderboard { width: 100%; border-collapse: collapse; font-size: 14px; }

@@ -263,7 +263,7 @@ const HELP_CONTENT = {
     // Config Page Help
     config: {
         title: "Global Settings",
-        overview: "Settings for this computer, used by every tournament. Change what you need, then click <strong>Save changes</strong> in the bar at the bottom.",
+        overview: "Settings for this computer, used by every tournament. Change what you need, then click <strong>Save changes</strong> in the bar at the bottom. On a shared Analytics instance the page is called <strong>Custom Settings</strong> and shows the Points only: members try other point values there, kept in their own browser, and see them in Analytics with <strong>Custom</strong>.",
         sections: {
             application: {
                 title: "Saving and the Page Layout",
@@ -388,10 +388,10 @@ const HELP_CONTENT = {
                         <li><strong>As played</strong> &mdash; each tournament scored as it was played: its own point values, with placement and attendance points. The honest record, and what Analytics opens with.</li>
                         <li><strong>Custom</strong> &mdash; opens a small panel:
                             <ul>
-                                <li><strong>Point values:</strong> today's, from Global Settings (useful for "what would last season look like under this year's rules?"), or as each tournament was played</li>
+                                <li><strong>Point values:</strong> from Global Settings (<strong>Custom Settings</strong> on a shared Analytics instance; useful for "what would last season look like under this year's rules?"), or as each tournament was played</li>
                                 <li><strong>Count:</strong> placement points and attendance points, each on or off. Turn attendance off to see standings on performance alone; turn placement off to see who simply turns up</li>
                             </ul>
-                            The button then says what is custom, e.g. <em>Custom: today's values, no attendance</em>. Your choice is kept until you leave the page.</li>
+                            The button then says what is custom, e.g. <em>Custom: Global Settings values, no attendance</em> (<em>Custom: custom values</em> on a shared Analytics instance). Your choice is kept until you leave the page.</li>
                     </ul>
                     <p>Achievement points &mdash; 180s, high outs, short legs, tons &mdash; always count.</p>
                     <p><strong>💡 None of this alters a stored result.</strong> It changes how the totals are worked out for display, nothing more.</p>

@@ -1,5 +1,11 @@
 ## Unreleased
 
+### Custom Settings on an analytics-only instance
+
+- **On an analytics-only instance, Global Settings is called Custom Settings and shows only the Points.** Members use it to try other point values and see them in Analytics with **Custom**; the description says so, and that the values are kept in their browser only and the club's results don't change. The Club panel, the section list and the section heading are hidden there; the full app is unchanged. The names switch with two small classes in `css/components.css` (`.nt-in-full`, `.nt-in-analytics`), so both versions sit side by side in the markup.
+- **"Today's values" is gone from the Custom points**, as it was unclear where they came from: the panel's choice reads **From Global Settings** (**From Custom Settings** on an analytics-only instance), and the button **Custom: Global Settings values** (**Custom: custom values**).
+- Files changed: `tournament.html`, `css/components.css`, `css/config-page.css`, `js/newton-history.js`, `js/dynamic-help-system.js`, `llms.txt`.
+
 ### Analytics → Players: at most six ticked
 
 - **The Players list opens on the best player in the Lens** (or everyone sharing the top points, at most six), instead of ticking everyone.

@@ -404,7 +404,8 @@ const NewtonHistory = (() => {
     /**
      * The points controls. "As played" scores each tournament as it was played: its own
      * point values, placement and attendance included. "Custom" uses the choices in its
-     * panel (today's point values or the tournament's own, and whether placement and
+     * panel (the point values in Global Settings, or Custom Settings on an analytics-only
+     * instance, or the tournament's own, and whether placement and
      * attendance points count), remembered for the visit. Both set _pointMode,
      * _layerRanking and _layerAttendance, which the views read.
      */
@@ -462,7 +463,8 @@ const NewtonHistory = (() => {
         btn.setAttribute('aria-pressed', custom);
         // the Custom button says what differs from As played
         const parts = [];
-        if (_pointMode === 'current') parts.push("today's values");
+        // on an analytics-only instance the values come from Custom Settings
+        if (_pointMode === 'current') parts.push(window.NEWTON_APP_MODE === 'analytics' ? 'custom values' : 'Global Settings values');
         if (!_layerRanking) parts.push('no placement');
         if (!_layerAttendance) parts.push('no attendance');
         btn.textContent = custom && parts.length ? 'Custom: ' + parts.join(', ') : 'Custom';

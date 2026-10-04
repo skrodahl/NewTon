@@ -136,10 +136,13 @@
 .cfg-dialog p { margin: 0 0 18px; color: var(--nt-ink-2); font-size: 14px; }
 .cfg-dialog .cfg-acts { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
 
-/* Analytics-only mode: only Club and Points apply */
-.mode-analytics #config .cfg-panel:not(#configClub):not(#configPoints) { display: none; }
-.mode-analytics #config .cfg-section:not(#cfg-club):not(#cfg-tournaments) { display: none; }
-.mode-analytics #config .cfg-toc button:not([data-target="cfg-club"]):not([data-target="cfg-tournaments"]) { display: none; }
+/* Analytics-only mode: Custom Settings, the Points only (for trying other point values in
+   Analytics). One panel, so no section list or section heading; the column centres. */
+.mode-analytics #config .cfg-panel:not(#configPoints),
+.mode-analytics #config .cfg-section:not(#cfg-tournaments),
+.mode-analytics #config .cfg-toc,
+.mode-analytics #config #cfg-tournaments .cfg-sec-head { display: none; }
+.mode-analytics #config .cfg-wrap { grid-template-columns: minmax(0, 780px); }
 
 @media (max-width: 900px) {
   .cfg-wrap { grid-template-columns: 1fr; }

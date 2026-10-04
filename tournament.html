@@ -119,7 +119,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                 <button class="nav-btn" data-page="registration">Player Registration</button>
                 <button class="nav-btn" data-page="tournament">Tournament Bracket</button>
                 <button class="nav-btn" data-page="history">Analytics</button>
-                <button class="nav-btn" data-page="config">Global Settings</button>
+                <button class="nav-btn" data-page="config"><span class="nt-in-full">Global Settings</span><span class="nt-in-analytics">Custom Settings</span></button>
                 <a class="nav-btn" href="chalker/index.html" target="_blank">Chalker</a>
             </div>
         </div>
@@ -425,8 +425,8 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
             <div class="cfg-wrap">
                 <div class="cfg-title">
                     <div>
-                        <h2>Global Settings</h2>
-                        <p>Settings for this computer. They apply to every tournament.</p>
+                        <h2><span class="nt-in-full">Global Settings</span><span class="nt-in-analytics">Custom Settings</span></h2>
+                        <p><span class="nt-in-full">Settings for this computer. They apply to every tournament.</span><span class="nt-in-analytics">Try other point values on the results: choose Custom in Analytics to see the standings with them. They're kept in this browser only; the club's results don't change.</span></p>
                     </div>
                     <button type="button" class="cfg-btn help-info-icon" data-page="config">Help</button>
                 </div>
@@ -638,7 +638,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
             <div class="cfg-dialog-back" id="cfgLeave" hidden>
                 <div class="cfg-dialog" role="dialog" aria-modal="true" aria-labelledby="cfgLeaveTitle">
                     <h3 id="cfgLeaveTitle">Save your changes?</h3>
-                    <p>You have <b id="cfgLeaveCount">1 unsaved change</b> on Global Settings. Save before you continue?</p>
+                    <p>You have <b id="cfgLeaveCount">1 unsaved change</b> on <span class="nt-in-full">Global Settings</span><span class="nt-in-analytics">Custom Settings</span>. Save before you continue?</p>
                     <div class="cfg-acts">
                         <button type="button" class="cfg-btn" id="cfgLeaveStay">Stay</button>
                         <button type="button" class="cfg-btn" id="cfgLeaveDiscard">Discard and continue</button>
@@ -686,7 +686,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div class="an-points-panel" id="anPointsPanel" role="dialog" aria-label="Custom points" hidden>
                                 <fieldset>
                                     <legend>Point values</legend>
-                                    <label><input type="radio" name="anPointValues" value="current" checked> Today's, from Global Settings</label>
+                                    <label><input type="radio" name="anPointValues" value="current" checked> <span class="nt-in-full">From Global Settings</span><span class="nt-in-analytics">From Custom Settings</span></label>
                                     <label><input type="radio" name="anPointValues" value="original"> As each tournament was played</label>
                                 </fieldset>
                                 <fieldset>
