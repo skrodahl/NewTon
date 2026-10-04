@@ -48,7 +48,8 @@
 .st-pill.st-completed { background: var(--nt-ok-soft); color: var(--nt-ok); }
 
 /* ---- top row: the current tournament, and a new one ---- */
-.st-top, .st-bottom { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
+.st-top { display: grid; gap: 20px; } /* New tournament on top, then the current tournament, both full width */
+.st-bottom { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
 .st-bottom { align-items: start; }
 
 .st-current { padding: 20px 22px; display: grid; gap: 16px; align-content: start; }
@@ -75,15 +76,19 @@
 .st-empty b { color: var(--nt-ink); font-size: 17px; }
 .st-empty.st-small { min-height: 140px; }
 
-.st-create { padding: 20px 22px; display: grid; gap: 14px; align-content: start; }
+/* New tournament: one row (title, name and date, Create), Import under it */
+.st-create { padding: 18px 22px; display: grid; grid-template-columns: auto minmax(0, 760px) auto; justify-content: start; align-items: end; gap: 12px 28px; }
+.st-create-title { align-self: center; }
+.st-create .st-or, .st-create .st-import-status { grid-column: 1 / -1; }
 .st-create h3 { margin: 6px 0 0; font-size: 18px; font-weight: 800; letter-spacing: -.01em; color: var(--nt-ink); }
 .st-create-row { display: grid; grid-template-columns: minmax(0, 1fr) 170px; gap: 10px; }
+.st-create .st-btn.st-primary { height: 38px; }
 .st-field { display: grid; gap: 6px; }
 .st-field label { font-weight: 600; font-size: 13px; color: var(--nt-ink-2); }
 .st-text { height: 38px; border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 0 12px; background: var(--nt-surface); width: 100%; font: inherit; font-size: 14px; color: var(--nt-ink); }
 .st-text:focus { outline: none; border-color: var(--nt-ink-2); box-shadow: 0 0 0 3px var(--nt-inset); }
 .st-text.st-mono { font-family: var(--nt-mono); font-size: 13px; }
-.st-or { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--nt-muted); font-size: 13px; padding-top: 14px; border-top: 1px solid var(--nt-line); }
+.st-or { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; color: var(--nt-muted); font-size: 13px; }
 .st-import-status { font-size: 13px; color: var(--nt-ink-2); background: var(--nt-surface-2); border: 1px solid var(--nt-line); border-radius: 8px; padding: 8px 12px; }
 .st-import-status.alert-success { color: var(--nt-ok); background: var(--nt-ok-soft); border-color: transparent; }
 .st-import-status.alert-warning { color: var(--nt-warn); background: var(--nt-warn-soft); border-color: transparent; }
@@ -133,5 +138,6 @@
 .st-hrow.st-wo .st-players b { color: var(--nt-muted); }
 
 @media (max-width: 1000px) {
-  .st-top, .st-bottom { grid-template-columns: 1fr; }
+  .st-bottom { grid-template-columns: 1fr; }
+  .st-create { grid-template-columns: minmax(0, 1fr); align-items: stretch; }
 }

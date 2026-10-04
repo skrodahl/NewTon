@@ -8,7 +8,7 @@ const HELP_CONTENT = {
     // Setup Page Help
     setup: {
         title: "Tournament Setup",
-        overview: "Start a tournament, or pick one up where you left off. The tournament you're running is at the top, with its next step.",
+        overview: "Start a tournament, or pick one up where you left off. A new tournament starts at the top; the tournament you're running is under it, with its next step.",
         sections: {
             current: {
                 title: "Current Tournament",

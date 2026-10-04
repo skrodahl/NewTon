@@ -1,3 +1,10 @@
+## Unreleased
+
+### Tournament Setup: New tournament on top
+
+- **The New tournament form is now one row at the top of Setup** (title, name, date, Create tournament, with Import tournament under it), and the current tournament is full width under it. Before, the form sat to the right of the current tournament and was easy to miss. Tournaments and Match history are unchanged.
+- Files changed: `tournament.html` (order of the two panels), `css/setup-page.css`, `js/dynamic-help-system.js` (Setup overview).
+
 ## **v5.2.1** — Open Bar, Locked Cellar (2026-10-04)
 
 ### API key for writes
