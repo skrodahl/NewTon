@@ -219,9 +219,13 @@ const NewtonCharts = (() => {
                 if (tr % 2) el('rect', { x: M.l, y: y(tr) - ih / 10, width: iw, height: ih / 5, fill: '#f3f1ed' }, svg);
                 el('text', { x: M.l - 8, y: y(tr) + 4, 'text-anchor': 'end' }, svg).textContent = narrow ? TIERS_SHORT[tr] : TIERS[tr];
             }
-            ss.forEach((s, k) => s.forEach((p, i) => {
-                if (p) el('circle', { cx: xc(i) + off(k), cy: y(tier(p)), r: one ? (narrow ? 3.5 : 5.5) : (narrow ? 2.8 : 4.2), fill: col(k) }, svg);
-            }));
+            // a line through each player's finishes, then the marks on top (the first player uppermost)
+            ss.slice().reverse().forEach((s, rk) => {
+                const k = ss.length - 1 - rk;
+                const pts = s.map((p, i) => p ? [xc(i) + off(k), y(tier(p))] : null).filter(Boolean);
+                line(pts, col(k), wid(k));
+                pts.forEach(pt => el('circle', { cx: pt[0], cy: pt[1], r: one ? (narrow ? 3.5 : 5.5) : (narrow ? 2.8 : 4.2), fill: col(k) }, svg));
+            });
             T.forEach((t, i) => names.forEach((nm, k) => rows[i].push(tipLine(k, `${esc(nm)}: ${ss[k][i] ? esc(placeLong(ss[k][i])) : 'not played'}`))));
         }
 

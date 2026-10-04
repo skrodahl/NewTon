@@ -1,5 +1,10 @@
 ## Unreleased
 
+### Analytics: Finishes chart draws lines
+
+- **The Finishes chart (Analytics → Players) draws a line through each player's finishes**, with the marks on top, like the Average chart. It showed marks only, which made a player's run hard to follow, especially when comparing. A tournament a player missed is bridged, as on the other charts; the hollow marks on the axis still show which. The card's sparkline was already a line.
+- Files changed: `js/newton-charts.js`.
+
 ### Analytics instance: no Match Controls from a selected match
 
 - **On an analytics-only instance, the bracket's selection bar no longer offers Match Controls.** Clicking a match in a tournament opened from Analytics showed the bar with a Match Controls button, which opened Match Controls for the tournament. The header's tabs were already hidden there; the bar's button now is too (`.mode-analytics`, as for the header). Follow and the rest of the bar are unchanged.
