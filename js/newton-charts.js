@@ -214,9 +214,11 @@ const NewtonCharts = (() => {
         }
 
         if (metric === 'finish') {
-            const y = tr => M.t + (tr - 1) / 5 * ih;
+            // six equal bands that fill the plot exactly (a tier's mark sits in the middle of its band),
+            // so nothing spills over the players above or the axis below, however tall the chart
+            const y = tr => M.t + (tr - 0.5) / 6 * ih;
             for (let tr = 1; tr <= 6; tr++) {
-                if (tr % 2) el('rect', { x: M.l, y: y(tr) - ih / 10, width: iw, height: ih / 5, fill: '#f3f1ed' }, svg);
+                if (tr % 2) el('rect', { x: M.l, y: y(tr) - ih / 12, width: iw, height: ih / 6, fill: '#f3f1ed' }, svg);
                 el('text', { x: M.l - 8, y: y(tr) + 4, 'text-anchor': 'end' }, svg).textContent = narrow ? TIERS_SHORT[tr] : TIERS[tr];
             }
             // a line through each player's finishes, then the marks on top (the first player uppermost)

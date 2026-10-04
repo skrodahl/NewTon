@@ -1,3 +1,10 @@
+## Unreleased
+
+### Analytics: Finishes chart fits its frame
+
+- **The Finishes chart no longer spills out of its frame**, which showed full screen: the Winner band climbed over the player chips and the 17th+ band ran over the month labels. The bands were spaced as five gaps with each band a gap tall, so the outer two stuck out by half a gap, a tenth of the chart's height. The six bands now share the plot equally, each tier's mark in the middle of its band.
+- Files changed: `js/newton-charts.js`.
+
 ## **v5.3.0** — A View to a Kill (2026-10-04)
 
 ### Custom Settings on an analytics-only instance
