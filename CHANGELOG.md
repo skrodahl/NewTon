@@ -1,5 +1,10 @@
 ## Unreleased
 
+### Bracket header on an analytics-only instance
+
+- **The status line no longer runs into the Finals buttons** when a bracket is viewed on an analytics-only instance. The header's top row takes its height from the centre group (the tabs and Leaderboard), as the left and right groups span both rows; with those buttons hidden in analytics mode the row collapsed, and the status row rose into the tools. The centre group now keeps the tabs' height (38px) when empty. Full mode is unchanged.
+- Files changed: `css/bracket-view.css`.
+
 ### Analytics: Finishes chart fits its frame
 
 - **The Finishes chart no longer spills out of its frame**, which showed full screen: the Winner band climbed over the player chips and the 17th+ band ran over the month labels. The bands were spaced as five gaps with each band a gap tall, so the outer two stuck out by half a gap, a tenth of the chart's height. The six bands now share the plot equally, each tier's mark in the middle of its band.

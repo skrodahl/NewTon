@@ -184,7 +184,10 @@
 .bv-head-left .bv-title-block { align-self: center; }
 .bv-head-left .bv-nav { align-self: flex-start; }
 /* Match Controls and Leaderboard, centred on the page */
-.bv-head-center { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 8px; }
+.bv-head-center { grid-column: 2; grid-row: 1; display: flex; align-items: center; gap: 8px;
+  /* the top row's height: kept when the buttons are hidden (analytics-only mode), so the
+     status row stays under the Finals and zoom tools instead of rising into them */
+  min-height: 38px; }
 /* tools on the top row; the clock spans both rows, centred vertically in the header */
 .bv-head-right { grid-column: 3; grid-row: 1 / span 2; align-self: stretch; display: flex; justify-content: flex-end; gap: 16px; min-width: 0; }
 .bv-head-right .bv-tools { align-self: flex-start; }
