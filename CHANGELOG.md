@@ -1,3 +1,10 @@
+## Unreleased
+
+### Analytics instance: no Match Controls from a selected match
+
+- **On an analytics-only instance, the bracket's selection bar no longer offers Match Controls.** Clicking a match in a tournament opened from Analytics showed the bar with a Match Controls button, which opened Match Controls for the tournament. The header's tabs were already hidden there; the bar's button now is too (`.mode-analytics`, as for the header). Follow and the rest of the bar are unchanged.
+- Files changed: `css/bracket-view.css`.
+
 ## **v5.3.0** — A View to a Kill (2026-10-04)
 
 ### No stray focus ring

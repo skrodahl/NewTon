@@ -214,6 +214,8 @@
 .bv-header .analytics-back-btn { display: none; }
 .mode-analytics .bv-header .analytics-back-btn { display: inline-flex; }
 .mode-analytics .bv-header .bv-nav-btn:not(.analytics-back-btn) { display: none; }
+/* nor from a selected match: an analytics-only instance only shows the bracket */
+.mode-analytics .bv-selbar [data-act="controls"] { display: none; }
 
 .bv-seg { display: inline-flex; align-items: center; border: 1px solid var(--bv-line); border-radius: 8px; overflow: hidden; background: var(--bv-surface); }
 .bv-seg[hidden] { display: none; }
