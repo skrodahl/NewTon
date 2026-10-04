@@ -1,5 +1,11 @@
 ## Unreleased
 
+### Analytics: As played | Custom
+
+- **The points controls are two buttons: As played | Custom.** As played (the default) scores each tournament as it was played: its own point values, placement and attendance included. Custom opens a small panel: point values (today's from Global Settings, or as played) and whether placement and attendance points count. The button then says what is custom ("Custom: today's values, no attendance"); the choice is kept for the visit. It replaces Original | Current and the Ranking and Attendance switches ("Ranking" is now "Placement points").
+- The focus ring on the strip's button groups is drawn inside the button, so the group's edge no longer clips it to an orange sliver.
+- Files changed: `tournament.html`, `js/newton-history.js` (`_setPoints()` and the panel replace `switchPointMode()` and `toggleLayer()`), `css/analytics-page.css`, `js/dynamic-help-system.js`, `llms.txt`.
+
 ### No more pop-up hints
 
 - **The orange pop-up hints are gone**: "Need more paid players. Press F1…", "Tournament created!", "Bracket generated!", "N matches ready to start", "Many matches are live…", "Tournament completed!" and the rest. The pages show the same things (Registration's next step, the bracket, Match Controls), and anything that blocks an action still says so in its own dialog. Help is still on F1 and the Help buttons.

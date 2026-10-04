@@ -389,18 +389,17 @@ const HELP_CONTENT = {
             points: {
                 title: "How Points Are Counted",
                 content: `
-                    <p>The <strong>Points</strong> controls sit beside the view buttons, and change every figure on screen as soon as you touch them.</p>
-                    <p><strong>Original or Current:</strong></p>
+                    <p>The <strong>Points</strong> buttons sit beside the view buttons, and change every figure on screen as soon as you touch them.</p>
                     <ul>
-                        <li><strong>Original</strong> &mdash; each tournament is scored with the point values that were in force on the night it was played. The honest historical record.</li>
-                        <li><strong>Current</strong> &mdash; everything is rescored with today's values from Global Settings. Useful for asking "what would last season look like under this year's rules?"</li>
+                        <li><strong>As played</strong> &mdash; each tournament scored as it was played: its own point values, with placement and attendance points. The honest record, and what Analytics opens with.</li>
+                        <li><strong>Custom</strong> &mdash; opens a small panel:
+                            <ul>
+                                <li><strong>Point values:</strong> today's, from Global Settings (useful for "what would last season look like under this year's rules?"), or as each tournament was played</li>
+                                <li><strong>Count:</strong> placement points and attendance points, each on or off. Turn attendance off to see standings on performance alone; turn placement off to see who simply turns up</li>
+                            </ul>
+                            The button then says what is custom, e.g. <em>Custom: today's values, no attendance</em>. Your choice is kept until you leave the page.</li>
                     </ul>
-                    <p><strong>Ranking and Attendance</strong> switch whole categories of points on and off:</p>
-                    <ul>
-                        <li><strong>Ranking</strong> &mdash; the points awarded for finishing position</li>
-                        <li><strong>Attendance</strong> &mdash; the points for simply taking part</li>
-                    </ul>
-                    <p>Both are on by default. Turn Attendance off to see standings on performance alone; turn Ranking off to see who simply turns up. Achievement points &mdash; 180s, high outs, short legs, tons &mdash; are always counted.</p>
+                    <p>Achievement points &mdash; 180s, high outs, short legs, tons &mdash; always count.</p>
                     <p><strong>💡 None of this alters a stored result.</strong> It changes how the totals are worked out for display, nothing more.</p>
                 `
             },

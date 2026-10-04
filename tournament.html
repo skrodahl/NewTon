@@ -614,13 +614,25 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                 <button type="button" class="analytics-view-btn" data-view="dashboard" aria-pressed="true">Dashboard</button><button type="button" class="analytics-view-btn" data-view="leaderboard" aria-pressed="false">Leaderboard</button><button type="button" class="analytics-view-btn" data-view="players" aria-pressed="false">Players</button><button type="button" class="analytics-view-btn" data-view="register" aria-pressed="false">Register</button>
                             </div>
                         </div>
+                        <!-- Points: as each tournament was scored, or custom (NewtonHistory points controls) -->
                         <div class="an-points">
                             <span class="an-lbl">Points</span>
-                            <div class="st-seg" role="group" aria-label="Point values">
-                                <button type="button" class="analytics-point-btn" data-point-mode="original" aria-pressed="true" title="The point values each tournament was played with">Original</button><button type="button" class="analytics-point-btn" data-point-mode="current" aria-pressed="false" title="Today's point values from Global Settings">Current</button>
+                            <div class="st-seg" role="group" aria-label="Points">
+                                <button type="button" id="anPointsPlayed" aria-pressed="true" title="Each tournament's own point values, placement and attendance included">As played</button><button type="button" id="anPointsCustom" aria-pressed="false" aria-expanded="false" aria-controls="anPointsPanel">Custom</button>
                             </div>
-                            <button type="button" class="an-chk" data-layer="ranking" aria-pressed="true" title="Placement points" onclick="NewtonHistory.toggleLayer('ranking', this)">Ranking</button>
-                            <button type="button" class="an-chk" data-layer="attendance" aria-pressed="true" title="Participation points" onclick="NewtonHistory.toggleLayer('attendance', this)">Attendance</button>
+                            <div class="an-points-panel" id="anPointsPanel" role="dialog" aria-label="Custom points" hidden>
+                                <fieldset>
+                                    <legend>Point values</legend>
+                                    <label><input type="radio" name="anPointValues" value="current" checked> Today's, from Global Settings</label>
+                                    <label><input type="radio" name="anPointValues" value="original"> As each tournament was played</label>
+                                </fieldset>
+                                <fieldset>
+                                    <legend>Count</legend>
+                                    <label><input type="checkbox" id="anCountPlacement" checked> Placement points</label>
+                                    <label><input type="checkbox" id="anCountAttendance" checked> Attendance points</label>
+                                </fieldset>
+                                <p>Achievement points (180s, high outs, short legs) always count.</p>
+                            </div>
                         </div>
                     </div>
                     <div class="an-strip-row">

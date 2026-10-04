@@ -345,10 +345,8 @@ const NewtonHistory = (() => {
         document.querySelectorAll('.analytics-view-btn').forEach(btn => {
             btn.addEventListener('click', () => switchView(btn.dataset.view));
         });
-        // Point mode toggle
-        document.querySelectorAll('.analytics-point-btn').forEach(btn => {
-            btn.addEventListener('click', () => switchPointMode(btn.dataset.pointMode));
-        });
+        // Points: As played | Custom, and the Custom panel
+        _initPointsControls();
         // Register breadcrumb is rendered dynamically via _updateBreadcrumb()
     }
 
@@ -404,16 +402,70 @@ const NewtonHistory = (() => {
     }
 
     /**
-     * Switch the point mode.
-     * @param {string} mode - 'original' | 'current' | 'custom'
+     * The points controls. "As played" scores each tournament as it was played: its own
+     * point values, placement and attendance included. "Custom" uses the choices in its
+     * panel (today's point values or the tournament's own, and whether placement and
+     * attendance points count), remembered for the visit. Both set _pointMode,
+     * _layerRanking and _layerAttendance, which the views read.
      */
-    function switchPointMode(mode) {
-        _pointMode = mode;
+    let _pointsChoice = 'played';
+    const _custom = { values: 'current', placement: true, attendance: true };
 
-        document.querySelectorAll('.analytics-point-btn').forEach(btn => {
-            btn.setAttribute('aria-pressed', btn.dataset.pointMode === mode);
+    function _initPointsControls() {
+        const played = document.getElementById('anPointsPlayed');
+        const custom = document.getElementById('anPointsCustom');
+        const panel = document.getElementById('anPointsPanel');
+        if (!played || !custom || !panel) return;
+        played.addEventListener('click', () => { _closePointsPanel(); _setPoints('played'); });
+        custom.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (_pointsChoice !== 'custom') _setPoints('custom');
+            if (panel.hidden) _openPointsPanel(); else _closePointsPanel();
         });
+        panel.addEventListener('change', () => {
+            const v = panel.querySelector('input[name="anPointValues"]:checked');
+            _custom.values = v ? v.value : 'current';
+            _custom.placement = document.getElementById('anCountPlacement').checked;
+            _custom.attendance = document.getElementById('anCountAttendance').checked;
+            _setPoints('custom');
+        });
+        panel.addEventListener('click', (e) => e.stopPropagation());
+        document.addEventListener('click', () => _closePointsPanel());
+        document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !panel.hidden) { _closePointsPanel(); custom.focus(); } });
+    }
 
+    function _openPointsPanel() {
+        const panel = document.getElementById('anPointsPanel');
+        panel.hidden = false;
+        document.getElementById('anPointsCustom').setAttribute('aria-expanded', 'true');
+    }
+    function _closePointsPanel() {
+        const panel = document.getElementById('anPointsPanel');
+        if (!panel || panel.hidden) return;
+        panel.hidden = true;
+        document.getElementById('anPointsCustom').setAttribute('aria-expanded', 'false');
+    }
+
+    /**
+     * Apply As played or Custom, label the buttons, and recompute.
+     * @param {'played'|'custom'} choice
+     */
+    function _setPoints(choice) {
+        _pointsChoice = choice;
+        const custom = choice === 'custom';
+        _pointMode = custom && _custom.values === 'current' ? 'current' : 'original';
+        _layerRanking = custom ? _custom.placement : true;
+        _layerAttendance = custom ? _custom.attendance : true;
+
+        document.getElementById('anPointsPlayed').setAttribute('aria-pressed', !custom);
+        const btn = document.getElementById('anPointsCustom');
+        btn.setAttribute('aria-pressed', custom);
+        // the Custom button says what differs from As played
+        const parts = [];
+        if (_pointMode === 'current') parts.push("today's values");
+        if (!_layerRanking) parts.push('no placement');
+        if (!_layerAttendance) parts.push('no attendance');
+        btn.textContent = custom && parts.length ? 'Custom: ' + parts.join(', ') : 'Custom';
         _recomputePoints();
     }
 
@@ -443,19 +495,6 @@ const NewtonHistory = (() => {
             fifthSixth:   Number(pts.fifthSixth) || 0,
             seventhEighth: Number(pts.seventhEighth) || 0
         };
-    }
-
-    /**
-     * Toggle a point layer (ranking/attendance) and re-render.
-     * @param {string} layer - 'ranking' | 'attendance'
-     * @param {HTMLElement} btn
-     */
-    function toggleLayer(layer, btn) {
-        if (layer === 'ranking') _layerRanking = !_layerRanking;
-        if (layer === 'attendance') _layerAttendance = !_layerAttendance;
-        btn.setAttribute('aria-pressed', layer === 'ranking' ? _layerRanking : _layerAttendance);
-
-        _recomputePoints();
     }
 
     /** Shared recompute after point mode or layer change. Preserves scroll position. */
@@ -2956,7 +2995,7 @@ const NewtonHistory = (() => {
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
-             setScope: scopeTo, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, toggleLayer, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache,
+             setScope: scopeTo, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache,
              selectCorrectionPlayer, adjustCorrection, addCorrectionValue, resetCorrectionPlayer, saveCorrections };
 
 })();
