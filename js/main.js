@@ -132,6 +132,19 @@ window.popDialog = function() {
 };
 
 // =============================================================================
+// FOCUS AFTER A CLICK - no stray focus ring
+// =============================================================================
+
+// A clicked button keeps focus, and the browser draws its blue focus ring as soon as a key
+// is pressed (an arrow to switch tabs, Esc to close a dialog, + / - …). Release the focus
+// first. Tab, Enter, Space and the modifier keys are left alone, so keyboard use still works.
+document.addEventListener('keydown', e => {
+    if (['Tab', 'Enter', ' ', 'Shift', 'Control', 'Alt', 'Meta'].includes(e.key)) return;
+    const el = document.activeElement;
+    if (el && el.tagName === 'BUTTON') el.blur();
+}, true);
+
+// =============================================================================
 // STACK-AWARE ESC KEY HANDLER - Works with dialog stack system
 // =============================================================================
 

@@ -1,5 +1,10 @@
 ## Unreleased
 
+### No stray focus ring
+
+- **A clicked button no longer turns up with a thin blue border.** A clicked button keeps the focus, and the browser draws its focus ring as soon as a key is pressed: an arrow to switch tabs, Esc to close a dialog opened from it, + / −. A key now releases a button's focus first, on every page. Tab, Enter, Space and the modifier keys are left alone, so keyboard use is unchanged.
+- Files changed: `js/main.js`.
+
 ### Tournament status at a glance
 
 - **Setup's current tournament and Registration's next step have a status band across the top**, tinted by status: grey **New** · the bracket isn't drawn yet; orange **Active** · 12 of 30 matches completed; green **Completed** · won by (the winner). One helper, `currentTournamentStatusBand()`, draws it for both. The small status pill on Setup is gone. (A coloured heading with a 4px top edge was tried first; the maintainer preferred the band.)
