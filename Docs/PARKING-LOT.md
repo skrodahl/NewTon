@@ -7,6 +7,18 @@ Ideas and suggestions for future consideration.
 ## Inbox
 *Raw ideas awaiting triage*
 
+### Reset tournament: Restart the draw (same pairings)
+
+Raised 2026-10-04. Early in a night, the wrong players get called to a board, or a late arrival can't be let in because matches on the backside or in frontside round 2 have started, and people ask to restart. Reset tournament… today goes back to New, which means a new shuffle: not wanted. Undoing matches until one BYE slot frees up is unfair, because the operator then decides where the late arrival goes (Late registration places them randomly among the free slots).
+
+**Proposal (discussed, not approved):** Reset tournament… offers two choices, **Restart the draw** (preselected) and **Back to New**.
+- *Restart the draw* keeps the pairings and clears everything played: results, live matches (lanes, referees), history, placements, statistics. The draw is read back from the current frontside round 1 matches (FS-1-n holds positions 2n-1 and 2n; later rounds start empty), not from `tournament.bracket`, because Late registration changes the round 1 match but not `tournament.bracket`, so late arrivals keep their place. Then the two steps the app runs after a shuffle: `generateAllMatches()` and `processAutoAdvancements()`, existing functions, `clean-match-progression.js` untouched; `tournament.bracket` is updated to match. Afterwards every BYE slot is free, so a late arrival goes in fairly through Late registration.
+- *Back to New* is today's reset. Restart = Back to New + rebuilding the same draw, so the clearing is written once.
+- **Gaps in today's reset, fixed for both:** (1) the Analytics register keeps the results already written (each real result is saved at completion; walkovers are not), so remove the tournament's records, as undo removes one; (2) network handover keeps lane assignments and results waiting on the server, so clear them; (3) a Chalker still scoring a voided match can return a result for the same match number, now a different pairing, and nothing checks the names: compare the result's player names with the match's and refuse a mismatch (no Chalker change; short names are unique since the player database). Alternative: a draw number echoed by the Chalker (changes the Chalker and its QR format).
+- **Confirmation:** what is discarded ("1 result, 4 live matches"), the live matches' lanes so the boards can be told to stop, type the tournament name, and **Export first** when there are real results.
+- Lost on restart: the history entry recording a late registration (the player stays).
+- Open: name check or draw number; which release (it changes how results are accepted, so not a patch-level change).
+
 ### A Season concept
 
 Raised 2026-10-04, while building the v5.3.0 podium. A "Season leader" award (who tops the half-year in Analytics) was tried and dropped: a half-year holds every finalized tournament, including cups and one-off nights that don't belong to the club's season, so it could crown the wrong player in the photo that goes to the club chat. Analytics gets away with half-years because the Lens lets a viewer pick tournaments; a fixed award can't. A season would name which tournaments count (and when it starts and ends), so standings, a Season leader award, and perhaps the Lens default could use it. Not scoped; discuss first, including where a season lives (Global Settings, the Analytics register, or the tournament itself).
