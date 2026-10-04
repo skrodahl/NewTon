@@ -2335,8 +2335,9 @@ function showBracketView(view, matchId) {
     el.classList.add('mc-flash');
 }
 
-// Left / right arrow: the previous / next tab, round the end. Not while typing, choosing in a
-// list or a dialog is open, and only when the tabs show (not in analytics-only mode).
+// Left / right arrow: switch between Bracket and Match Controls (not the Console; nothing
+// while it shows). Not while typing, choosing in a list or a dialog is open, and only when
+// the tabs show (not in analytics-only mode).
 document.addEventListener('keydown', e => {
     if ((e.key !== 'ArrowLeft' && e.key !== 'ArrowRight') || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
     const page = document.getElementById('tournament');
@@ -2346,7 +2347,7 @@ document.addEventListener('keydown', e => {
     if (t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
     const views = document.getElementById('bvViews');
     if (!views || !views.offsetParent) return;
-    const tabs = [...views.querySelectorAll('[data-view]')].filter(b => !b.hidden);
+    const tabs = [...views.querySelectorAll('[data-view="bracket"], [data-view="controls"]')];
     const at = tabs.findIndex(b => b.getAttribute('aria-pressed') === 'true');
     if (tabs.length < 2 || at < 0) return;
     e.preventDefault();
