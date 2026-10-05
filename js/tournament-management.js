@@ -382,7 +382,15 @@ async function testRemoteConnection() {
         try { data = await res.json(); } catch (e) { data = null; }
 
         if (data && data.app === 'newton') {
-            if (data.keyRequired && data.keyAccepted) say('cfg-ok', `✓ Connected to ${host}. The API key is accepted.`);
+            if (data.keyRequired && data.keyAccepted) {
+                say('cfg-ok', `✓ Connected to ${host}. The API key is accepted.`);
+                // Lock the address and key (an unsaved change, like any other on the page)
+                const flag = document.getElementById('remoteServerVerified');
+                if (flag && flag.value !== '1') {
+                    flag.value = '1';
+                    flag.dispatchEvent(new Event('input', { bubbles: true }));
+                }
+            }
             else if (data.keyRequired) say('cfg-bad', key.trim() ? `✗ ${host} answered, but the API key is wrong.` : `✗ ${host} asks for an API key. Enter the NEWTON_API_KEY set on that server.`);
             else say('cfg-warn', `Connected to ${host}, but it doesn't ask for an API key${key.trim() ? ', so the key here isn\'t needed' : ''}. Anyone who can reach it can upload; set NEWTON_API_KEY there to protect it.`);
         } else if (res.status === 502) {

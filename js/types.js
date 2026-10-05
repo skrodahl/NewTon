@@ -228,6 +228,7 @@
  * @property {boolean} autoUpload - Upload a tournament to the server(s) when it is completed (default: false)
  * @property {string} remoteUrl - Remote server to back up to as well (default: '')
  * @property {string} remoteApiKey - The remote server's NEWTON_API_KEY, sent as X-API-Key by api/relay.php (default: '')
+ * @property {boolean} [remoteVerified] - Test connection found the key accepted; the address and key are then locked in Global Settings (default: false)
  */
 
 // ============================================================================

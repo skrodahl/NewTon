@@ -75,6 +75,8 @@
 .cfg-test[hidden] { display: none; }
 .cfg-test.cfg-ok { background: var(--nt-ok-soft); color: var(--nt-ok); }
 .cfg-test.cfg-warn { background: var(--nt-warn-soft); color: var(--nt-warn); }
+.cfg-test.cfg-lock { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; }
+.cfg-test.cfg-lock[hidden] { display: none; }
 .cfg-test.cfg-bad { background: #fdecec; color: var(--nt-danger); }
 .cfg-btn.primary { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
 .cfg-btn.primary:hover { background: var(--nt-accent); border-color: var(--nt-accent); color: #fff; }

@@ -74,6 +74,23 @@ const ConfigPage = (() => {
         if (img && img.src) { preview.src = img.src; preview.hidden = false; } else preview.hidden = true;
     }
 
+    /** A verified remote server locks its address and key; "Change…" asks before unlocking. */
+    function drawRemoteLock() {
+        const locked = $('remoteServerVerified').value === '1';
+        $('remoteServerUrl').readOnly = locked;
+        $('remoteServerApiKey').readOnly = locked;
+        $('remoteLockNote').hidden = !locked;
+    }
+    function closeUnlock() { $('cfgUnlock').hidden = true; }
+    function unlockRemote() {
+        closeUnlock();
+        $('remoteServerApiKey').value = '';
+        $('remoteTestResult').hidden = true;
+        $('remoteServerVerified').value = '';
+        $('remoteServerVerified').dispatchEvent(new Event('input', { bubbles: true }));
+        $('remoteServerApiKey').focus();
+    }
+
     /** Redraw every control from the hidden fields (after the form was filled). */
     function syncControls() {
         root().querySelectorAll('.cfg-step').forEach(drawStepper);
@@ -82,6 +99,7 @@ const ConfigPage = (() => {
         drawX01();
         $('cfgHandoverDesc').innerHTML = HANDOVER_TEXT[$('chalkerHandover').value] || HANDOVER_TEXT.qr;
         drawLogo();
+        drawRemoteLock();
     }
 
     // ---------- what has changed ----------
@@ -298,6 +316,11 @@ const ConfigPage = (() => {
         root().addEventListener('input', refresh);
         root().addEventListener('change', refresh);
 
+        $('remoteServerVerified').addEventListener('input', drawRemoteLock);
+        $('remoteUnlockBtn').addEventListener('click', () => { $('cfgUnlock').hidden = false; $('cfgUnlockGo').focus(); });
+        $('cfgUnlockCancel').addEventListener('click', closeUnlock);
+        $('cfgUnlockGo').addEventListener('click', unlockRemote);
+
         $('cfgSave').addEventListener('click', save);
         $('cfgDiscard').addEventListener('click', discard);
         $('cfgLeaveStay').addEventListener('click', () => { pendingPage = null; closeLeave(); });
@@ -305,6 +328,7 @@ const ConfigPage = (() => {
         $('cfgLeaveSave').addEventListener('click', () => { if (save()) continueTo(); else closeLeave(); });
         document.addEventListener('keydown', e => {
             if (e.key === 'Escape' && !$('cfgLeave').hidden) { pendingPage = null; closeLeave(); }
+            if (e.key === 'Escape' && !$('cfgUnlock').hidden) closeUnlock();
         });
         // Closing or reloading the tab: the browser's own warning
         window.addEventListener('beforeunload', e => {

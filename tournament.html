@@ -611,6 +611,8 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div class="cfg-ctl"><input class="cfg-text mono" type="password" id="remoteServerApiKey" autocomplete="off" spellcheck="false" placeholder="API key"><button type="button" class="cfg-btn" id="remoteTestBtn" onclick="testRemoteConnection()">Test connection</button></div>
                         </div>
                         <p class="cfg-test" id="remoteTestResult" role="status" hidden></p>
+                        <p class="cfg-test cfg-ok cfg-lock" id="remoteLockNote" hidden><span>&#10003; Verified. The address and key are locked, so they can't be changed by accident.</span><button type="button" class="cfg-btn" id="remoteUnlockBtn">Change&hellip;</button></p>
+                        <input type="hidden" id="remoteServerVerified">
                     </div>
                 </section>
 
@@ -633,6 +635,16 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                 <button type="button" class="cfg-btn save" id="cfgSave">Save changes</button>
             </div>
             <div class="cfg-toast" id="cfgToast" role="status">Settings saved</div>
+            <div class="cfg-dialog-back" id="cfgUnlock" hidden>
+                <div class="cfg-dialog" role="dialog" aria-modal="true" aria-labelledby="cfgUnlockTitle">
+                    <h3 id="cfgUnlockTitle">Change the server address or key?</h3>
+                    <p>They are locked because the key was verified against this server. The key is cleared, and backups use whatever you save next. Run <b>Test connection</b> again to lock them.</p>
+                    <div class="cfg-acts">
+                        <button type="button" class="cfg-btn" id="cfgUnlockCancel">Cancel</button>
+                        <button type="button" class="cfg-btn primary" id="cfgUnlockGo">Change</button>
+                    </div>
+                </div>
+            </div>
             <div class="cfg-dialog-back" id="cfgLeave" hidden>
                 <div class="cfg-dialog" role="dialog" aria-modal="true" aria-labelledby="cfgLeaveTitle">
                     <h3 id="cfgLeaveTitle">Save your changes?</h3>

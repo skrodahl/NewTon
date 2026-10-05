@@ -1,5 +1,11 @@
 ## Unreleased
 
+### Remote backup: a verified key is locked
+
+- **Once Test connection finds the API key accepted, the server address and the key are locked** in Global Settings → Remote backup, with a note "Verified. The address and key are locked, so they can't be changed by accident." **Change…** asks first, then clears the key and unlocks both; Test connection locks them again. Until a key has been verified the fields stay editable, and a failed test never locks or unlocks anything. The lock is part of the form like any other change: it takes effect with **Save changes**, and **Discard** puts it back.
+- **Stored as `server.remoteVerified`**, a new optional flag (absent means not verified, so older settings read as before). It is only kept while an address and key are present, and is left out of exported tournament files with the key.
+- Files changed: `tournament.html`, `css/config-page.css`, `js/config-page.js`, `js/results-config.js`, `js/tournament-management.js`, `js/types.js`, `js/dynamic-help-system.js`.
+
 ### Help buttons work on an analytics-only instance
 
 - **The Help buttons in Analytics and Custom Settings now open the help.** The help system had been switched off in analytics mode back when Analytics had no help topics of its own; the topics came later, but the switch stayed. F1, Esc and Ctrl+H work there too. The first-run welcome guide is for the Tournament Manager, so it is still not shown on an analytics-only instance.

@@ -53,7 +53,8 @@ const DEFAULT_CONFIG = {
         allowSharedTournamentDelete: false,
         autoUpload: false,
         remoteUrl: '',
-        remoteApiKey: ''
+        remoteApiKey: '',
+        remoteVerified: false
     }
 };
 
@@ -186,6 +187,7 @@ function applyConfigToUI() {
         safeSetChecked('autoUploadTournament', config.server.autoUpload);
         safeSetValue('remoteServerUrl', config.server.remoteUrl);
         safeSetValue('remoteServerApiKey', config.server.remoteApiKey || '');
+        safeSetValue('remoteServerVerified', config.server.remoteVerified ? '1' : '');
         safeSetValue('serverIdDisplay', config.server.serverId || '—');
     }
 
@@ -246,8 +248,8 @@ function initX01Toggle(value) {
 }
 
 /**
- * A copy of a config without the server credentials: the remote API key, and the
- * username and password it replaced. Tournament files and the Analytics register keep a
+ * A copy of a config without the server credentials: the remote API key (and its
+ * verified flag), and the username and password it replaced. Tournament files and the Analytics register keep a
  * copy of the config, and tournament files are uploaded to servers that members can read.
  * @param {object} cfg - a config (the global one, or a snapshot from a file)
  * @returns {object} a copy; the config passed in is left untouched
@@ -256,6 +258,7 @@ function withoutServerCredentials(cfg) {
     const copy = JSON.parse(JSON.stringify(cfg || {}));
     if (copy.server) {
         delete copy.server.remoteApiKey;
+        delete copy.server.remoteVerified;
         delete copy.server.remoteUsername;
         delete copy.server.remotePassword;
     }
@@ -562,6 +565,10 @@ function saveUIConfiguration(options = {}) {
     config.server.autoUpload = autoUploadElement ? autoUploadElement.checked : false;
     config.server.remoteUrl = remoteUrlElement ? remoteUrlElement.value.trim() : '';
     config.server.remoteApiKey = remoteApiKeyElement ? remoteApiKeyElement.value.trim() : '';
+    // Set by a successful Test connection; locks the address and key (config-page.js)
+    const remoteVerifiedElement = document.getElementById('remoteServerVerified');
+    config.server.remoteVerified = !!(remoteVerifiedElement && remoteVerifiedElement.value === '1'
+        && config.server.remoteUrl && config.server.remoteApiKey);
     // The remote username and password were replaced by the API key in v5.2.1
     delete config.server.remoteUsername;
     delete config.server.remotePassword;
