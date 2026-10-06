@@ -1,4 +1,4 @@
-## Unreleased
+## **v5.3.1** — Sowing the Seeds of Love (2026-10-06)
 
 ### No clock on an analytics-only instance
 
@@ -37,6 +37,11 @@
 
 - **The Finishes chart no longer spills out of its frame**, which showed full screen: the Winner band climbed over the player chips and the 17th+ band ran over the month labels. The bands were spaced as five gaps with each band a gap tall, so the outer two stuck out by half a gap, a tenth of the chart's height. The six bands now share the plot equally, each tier's mark in the middle of its band.
 - Files changed: `js/newton-charts.js`.
+
+### Release
+
+- Version 5.3.1, "Sowing the Seeds of Love". The Chalker is unchanged, but its version and caches are bumped with the app's (`CHALKER_VERSION`, `chalker.js?v=24`, service worker cache `chalker-v121`).
+- Files changed: `js/main.js` (`APP_VERSION` → `5.3.1`), `chalker/js/chalker.js` (`CHALKER_VERSION` → `5.3.1`), `chalker/index.html`, `chalker/sw.js`, `llms.txt` (seeding, the locked backup key), `sitemap.xml`, `releases/index.html`, `releases/v5.3.1.html`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.3.1.md`.
 
 ## **v5.3.0** — A View to a Kill (2026-10-04)
 
