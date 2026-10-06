@@ -23,10 +23,59 @@ Raised 2026-10-04. Early in a night, the wrong players get called to a board, or
 
 Raised 2026-10-04, while building the v5.3.0 podium. A "Season leader" award (who tops the half-year in Analytics) was tried and dropped: a half-year holds every finalized tournament, including cups and one-off nights that don't belong to the club's season, so it could crown the wrong player in the photo that goes to the club chat. Analytics gets away with half-years because the Lens lets a viewer pick tournaments; a fixed award can't. A season would name which tournaments count (and when it starts and ends), so standings, a Season leader award, and perhaps the Lens default could use it. Not scoped; discuss first, including where a season lives (Global Settings, the Analytics register, or the tournament itself).
 
+Since v5.3.1, seeding does this by name instead: the mini-lens ranks on tournaments whose name matches the active tournament's, in the current (or previous) half-year, with finals left out. A real Season concept could replace that guesswork, and would also be the natural source for the season final's invite list.
+
 ---
 
 ## Next
 *Ready for implementation when time permits*
+
+**The two next things (2026-10-06): Chalker iOS capture, and other tournament formats.**
+
+### Chalker iOS image capture — possibly decoding the previous photo
+
+Observed on iPhone 12 Mini, iOS 26.5, Safari. After multiple captures in the same scan modal session, the decode result *appears* to lag by one — a "really good" photo failed to decode while preceding "bad" photos succeeded, suggesting the decoder may be running against the previously-captured file.
+
+**Suspected cause:** `chalker/js/chalker.js` `startImageCapture()` does not clear `elements.qrImageInput.value` on every code path. On the success-but-validation-failed branches in `handleQRPayload()` (JSON parse error, wrong payload type, integrity check fail) the modal stays open with `input.value` still holding the previous file. iOS Safari's `<input type="file" capture>` is known to misbehave when value isn't reset between captures.
+
+**Next step:** add a small thumbnail preview in the scan modal showing exactly what was just captured. The preview will confirm or rule out the bug visually — if the preview shows the new photo but the decode reports the old result, the bug is real. Apply the targeted fix (clear `input.value` at the top of the `onchange` handler, immediately after grabbing `e.target.files[0]`) once confirmed.
+
+**Also test in Chrome on iPhone** to rule out a Safari-specific issue vs. a code bug.
+
+---
+
+---
+
+### Other tournament formats
+
+Raised 2026-10-06, and the reason for the formats registry and the app remake: the first non-elimination format is **the season final**, in December. Bump the version to **5.4.0** when more formats arrive.
+
+**The season final ("Måndagscup Final"):** the season's top 16 are invited. Four groups of four, seeded, round-robin in each group (everybody plays everybody). The top two of each group go to the **A-final**, the bottom two to the **B-final**. A and B are cups: four matches on each side, progressing towards the middle; the last two standing meet in the Grand Final, the two semifinal losers in the Bronze final.
+
+**What exists to build on:**
+- `TOURNAMENT_FORMATS` (js/results-config.js) is the registry for what to offer; progression tables, rendering and ranking stay per format, as for DE and SE.
+- Seeding (v5.3.1): `js/seeding.js` decides who the seeds are (the ranked list, per tournament name and period) and knows nothing about brackets. A group draw would take the same list and deal it into four groups, instead of calling `placeSeededPlayers()`.
+
+**To work out first (discuss, mockup before code):**
+- The group stage: round-robin tables and tiebreaks (wins, then legs? head-to-head?), how it fits Match Controls, the lanes and the history/undo model, and how groups feed the A and B cups.
+- How the bracket view draws a group stage and two cups (BracketView lays out from the progression tables, one layout per format).
+- Ranking, points and placements for a format with two cups, and what Analytics and the podium show.
+- The invite list: the top 16 from the ranking, shown before the draw (the Season concept in the Inbox is the natural source).
+- Any Round Robin has to be spelled out in `llms.txt` ("do not invent features") once it exists.
+
+---
+
+### Seeding: loose ends
+
+From v5.3.1; none of them urgent.
+- **Point mode:** the ranking follows the Leaderboard's point mode and layers, so someone who switched Analytics to Custom in the same page session seeds from Custom points. Fine in practice (Analytics opens on As played); a fixed mode would remove the coupling.
+- **Read once:** the mini-lens reads the tournament list when setup starts. A backup restored while Match Controls is open needs a reload.
+- **This browser only:** seeding reads the tournaments in the browser that does the draw. A draw on a computer without the history is random, and the panel says so.
+- **First real use:** not seen in a real tournament yet; check the name matching on real tournament names.
+
+---
+
+---
 
 ### Doc pages — back link broken on `file://`
 
@@ -44,18 +93,6 @@ The TM→Chalker QR assignment and result reporting workflow spans two devices a
 
 ---
 
-### Chalker iOS image capture — possibly decoding the previous photo
-
-Observed on iPhone 12 Mini, iOS 26.5, Safari. After multiple captures in the same scan modal session, the decode result *appears* to lag by one — a "really good" photo failed to decode while preceding "bad" photos succeeded, suggesting the decoder may be running against the previously-captured file.
-
-**Suspected cause:** `chalker/js/chalker.js` `startImageCapture()` does not clear `elements.qrImageInput.value` on every code path. On the success-but-validation-failed branches in `handleQRPayload()` (JSON parse error, wrong payload type, integrity check fail) the modal stays open with `input.value` still holding the previous file. iOS Safari's `<input type="file" capture>` is known to misbehave when value isn't reset between captures.
-
-**Next step:** add a small thumbnail preview in the scan modal showing exactly what was just captured. The preview will confirm or rule out the bug visually — if the preview shows the new photo but the decode reports the old result, the bug is real. Apply the targeted fix (clear `input.value` at the top of the `onchange` handler, immediately after grabbing `e.target.files[0]`) once confirmed.
-
-**Also test in Chrome on iPhone** to rule out a Safari-specific issue vs. a code bug.
-
----
-
 ### Storage Space dialog — tighter copy + note that stats survive deletion
 
 The Storage Space dialog (`showStorageManagement` in `tournament-management.js`) is text-heavy and omits a reassuring fact: **deleting a tournament from the Recent list keeps its stats in Analytics.** `confirmDeleteTournament` only removes the localStorage keys (`dartsTournaments` + the per-tournament `tournament_<id>_history` key); it never touches NewtonDB/IndexedDB, so finalized stats (leaderboard, achievements) survive deletion.
@@ -63,12 +100,6 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 **Do:** trim the "How to Free Up Space" bullets, and add a line such as *"Deleting a finalized tournament keeps its stats in Analytics"* so operators aren't afraid to free space.
 
 **Floated but not recommended:** a one-click "delete the oldest 50%" button. Bulk automated deletion is a footgun against the app's export-before-destroy ethos, and "oldest 50%" is an arbitrary heuristic with its own edge cases. The reassurance text is the better lever for the "afraid to delete" concern — keep deletion explicit and per-tournament.
-
----
-
-### Registration process rework
-
-The maintainer plans to rework how players are registered, saved players especially. v5.2.0 redesigned the Player Registration page but kept its behaviour, and laid it out to take this: saved players are chips in their own panel, separate from the tournament's players. Not scoped yet; start with a discussion and a mockup.
 
 ---
 
@@ -80,24 +111,6 @@ The `body` background in `styles.css` (`#f1f5f5`) differs slightly from the rede
 
 ## Later
 *Worth tracking but not urgent*
-
-### Analytics — Future Enhancements
-
-The tab is named Analytics — it should earn that name over time. The IndexedDB foundation is already there; this is purely a UI and query layer on top.
-
-**Player tab**
-v5.2.0 added a profile (Leaderboard figures, rank, placement counts, every tournament played) and side-by-side comparison. Still open: form over time and head-to-head records.
-
-**Graphs**
-Done: player charts in Analytics → Players (Position, Points, Finishes, Average, Matches, Highlights over the Lens; compare up to six players; full screen). Ideas left: head-to-head records between two players.
-
-**Table cogwheel**
-Column visibility toggle and top-N threshold control on Analytics tables.
-
-**Filtering for members**
-Raised 2026-09-07: the Lens read as maintainer-facing. v5.2.0 moved it to a strip on every view, saying how many tournaments are counted and why, and turning orange when not everything is counted. Revisit only if members on https://newton.skrodahl.net still find it confusing.
-
----
 
 ### Automated Testing
 
@@ -162,4 +175,4 @@ For the actual problem (quota), the contained fix is the Phase 4.2 storage gate 
 
 ---
 
-**Last updated:** July 7, 2026 — added Storage Space dialog copy (Next) + localStorage→IndexedDB migration question (Later)
+**Last updated:** October 6, 2026 — Registration rework and Analytics future enhancements done; added Other tournament formats (the December season final), Seeding loose ends; Chalker iOS capture and formats are next
