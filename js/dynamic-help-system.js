@@ -8,12 +8,12 @@ const HELP_CONTENT = {
     // Setup Page Help
     setup: {
         title: "Tournament Setup",
-        overview: "Start a tournament, or pick one up where you left off. A new tournament starts at the top; the tournament you're running is under it, with its next step.",
+        overview: "Start a tournament, or pick one up where you left off. The tournament you're running is at the top, with its next step; starting a new one is a quiet line under it. The panel to act on is framed: the tournament while it is New or Active; once it is completed, the New tournament form moves to the top, open and framed, with Create tournament as the main button (the same when nothing is loaded).",
         sections: {
             current: {
                 title: "Current Tournament",
                 content: `
-                    <p>The loaded tournament, with its status in a band across the top (<strong>New</strong>, <strong>Active</strong> or <strong>Completed</strong>; grey, orange or green), players, bracket size, matches completed, and the matches being played now (or the winner, once it's over).</p>
+                    <p>The loaded tournament, with its status (<strong>New</strong>, <strong>Active</strong> or <strong>Completed</strong>; grey, orange or green) and a short fact beside it: that the bracket isn't drawn, how many matches are completed, or who won. Under the name: players, bracket size, and the matches being played now.</p>
                     <p><strong>Next step</strong> changes with the status:</p>
                     <ul>
                         <li><strong>New:</strong> Register players, then draw the bracket from the bracket page</li>
@@ -29,12 +29,13 @@ const HELP_CONTENT = {
             creation: {
                 title: "New Tournament",
                 content: `
+                    <p>Click <strong>+ New tournament</strong> to open the form (it is open when the tournament is completed, or when nothing is loaded).</p>
                     <ol>
                         <li>Enter a name (e.g., "Thursday Cup #42")</li>
                         <li>Check the date (defaults to today)</li>
-                        <li>Click <strong>Create tournament</strong>. You go straight to Player Registration</li>
+                        <li>Click <strong>Create tournament</strong>. It becomes the current tournament at the top, and its next step is <strong>Register players</strong></li>
                     </ol>
-                    <p><strong>Import tournament:</strong> Load a tournament from an exported JSON file.</p>
+                    <p><strong>Import a tournament file:</strong> Load a tournament from an exported JSON file. It is next to <strong>+ New tournament</strong>.</p>
                 `
             },
             recent: {

@@ -189,10 +189,9 @@ function createTournament() {
     // Refresh recent tournaments list to show the new tournament
     loadRecentTournaments();
 
-    // Clear fields after successful creation
+    // Clear fields after successful creation. Setup stays open: its current tournament card
+    // shows the next step (Register players)
     clearTournamentFields();
-    
-    showPage('registration');
 
     // Ensure results table is populated
     if (typeof displayResults === 'function') {
@@ -817,15 +816,11 @@ function updateTournamentStatus() {
         }
     }
 
+    // Setup stays open when a tournament is created, loaded or imported, so its panels follow along
     renderSetupCurrent();
+    if (typeof updateMatchHistory === 'function') updateMatchHistory();
 }
 
-/**
- * Fill the Setup page's current tournament panel: name, date, format and status, four
- * figures (players, bracket, matches completed, live now or the winner), the next step
- * for its status, and Export / Backup to server / Reset. Reads the live globals only.
- * @returns {void}
- */
 /**
  * The loaded tournament's status band, across the top of Setup's current tournament and
  * Registration's next step: New / Active / Completed with a short fact, tinted by status
@@ -835,24 +830,100 @@ function updateTournamentStatus() {
 function currentTournamentStatusBand() {
     if (!tournament) return '';
     const status = tournamentStatusLabel(tournament);
+    return `<div class="st-band st-band-${status.toLowerCase()}"><b>${escapeHtml(status)}</b><span>${currentTournamentStatusFact(status)}</span></div>`;
+}
+
+/**
+ * The short fact beside the loaded tournament's status: the bracket isn't drawn yet, how many
+ * matches are completed, or who won. Used by the status band and by Setup's current tournament.
+ * @param {string} status - tournamentStatusLabel() of the loaded tournament
+ * @returns {string} HTML-safe text
+ */
+function currentTournamentStatusFact(status) {
     const all = Array.isArray(matches) ? matches : [];
     const done = all.filter(m => m.completed).length;
-    let fact = 'the bracket isn\'t drawn yet';
     if (status === 'Completed') {
         const winnerId = Object.keys(tournament.placements || {}).find(id => tournament.placements[id] === 1);
         const winner = winnerId && (players || []).find(p => String(p.id) === winnerId);
-        fact = winner ? `won by ${escapeHtml(winner.name)}` : 'the bracket is played out';
-    } else if (status === 'Active') {
-        fact = `${done} of ${all.length} matches completed`;
+        return winner ? `won by ${escapeHtml(winner.name)}` : 'the bracket is played out';
     }
-    return `<div class="st-band st-band-${status.toLowerCase()}"><b>${escapeHtml(status)}</b><span>${fact}</span></div>`;
+    if (status === 'Active') return `${done} of ${all.length} matches completed`;
+    return 'the bracket isn\'t drawn yet';
 }
 
+/** The state the New tournament form was last opened or closed for ('none', New, Active or Completed; null: not decided yet). */
+let setupNewForState = null;
+
+/**
+ * Open or close the New tournament form on Setup.
+ * @param {boolean} open
+ * @returns {void}
+ */
+function setSetupNewOpen(open) {
+    const form = document.getElementById('setupNewForm');
+    const panel = document.getElementById('setupNew');
+    const toggle = document.getElementById('setupNewToggle');
+    if (!form || !panel || !toggle) return;
+    form.hidden = !open;
+    panel.classList.toggle('st-collapsed', !open);
+    toggle.setAttribute('aria-expanded', String(open));
+}
+
+/**
+ * The bar's toggle: open the form (and put the cursor in the name) or close it.
+ * @returns {void}
+ */
+function toggleSetupNew() {
+    const form = document.getElementById('setupNewForm');
+    if (!form) return;
+    const open = form.hidden;
+    setSetupNewOpen(open);
+    if (open) {
+        const name = document.getElementById('tournamentName');
+        if (name) name.focus();
+    }
+}
+
+/**
+ * Let the state decide what Setup puts first. New and Active: the current tournament, with its
+ * next step as the one dark button, and New tournament a quiet bar. Completed, or nothing loaded:
+ * the next job is a new tournament, so the form goes first, open, and Create is the dark button.
+ * Whichever panel is the one to act on is framed (.st-focus). The form only opens or closes when the state changes, so a redraw
+ * never closes it under the user's hands.
+ * @param {string|null} status - tournamentStatusLabel() of the loaded tournament, or null when none is loaded
+ * @returns {void}
+ */
+function syncSetupNew(status) {
+    const wantsNew = !status || status === 'Completed';
+    const top = document.querySelector('.st-top');
+    if (top) top.classList.toggle('st-new-first', wantsNew);
+    const create = document.getElementById('setupCreateBtn');
+    if (create) create.classList.toggle('st-primary', wantsNew);
+    // The panel to act on is framed (css/setup-page.css, .st-focus)
+    const current = document.getElementById('setupCurrent');
+    const form = document.getElementById('setupNew');
+    if (current) current.classList.toggle('st-focus', !wantsNew);
+    if (form) form.classList.toggle('st-focus', wantsNew);
+    const key = status || 'none';
+    if (setupNewForState !== key) {
+        setupNewForState = key;
+        setSetupNewOpen(wantsNew);
+    }
+}
+
+/**
+ * Fill the Setup page's current tournament panel: its status and the fact beside it, the name,
+ * date and format, one line of facts (players, bracket, live now), the next step for its status,
+ * and Export / Backup to server / Reset. Also lets the state decide what Setup puts first
+ * (syncSetupNew()). Reads the live globals only.
+ * @returns {void}
+ */
 function renderSetupCurrent() {
     const panel = document.getElementById('setupCurrent');
     if (!panel) return;
+    syncSetupNew(tournament ? tournamentStatusLabel(tournament) : null);
     if (!tournament) {
-        panel.className = 'st-panel';
+        panel.classList.remove('st-current');
         panel.innerHTML = '<div class="st-empty"><b>No tournament loaded</b><span>Start a new one, or load one from the list below.</span></div>';
         return;
     }
@@ -867,14 +938,11 @@ function renderSetupCurrent() {
     const format = hasBracket ? TOURNAMENT_FORMATS.find(f => f.id === getFormat()) : null;
     const lanes = live.map(m => m.lane).filter(Boolean).sort((a, b) => a - b);
 
-    let lastFact = ['Live now', '—'];
-    if (status === 'Completed') {
-        const winnerId = Object.keys(tournament.placements || {}).find(id => tournament.placements[id] === 1);
-        const winner = winnerId && list.find(p => String(p.id) === winnerId);
-        lastFact = ['Winner', winner ? escapeHtml(winner.name) : '—'];
-    } else if (hasBracket) {
-        lastFact = ['Live now', `${live.length}${lanes.length ? ` <small>lane${lanes.length > 1 ? 's' : ''} ${lanes.join(', ')}</small>` : ''}`];
-    }
+    // One line of facts: the players, the bracket, and what is being played now
+    const facts = [];
+    facts.push(list.length ? `${list.length} player${list.length === 1 ? '' : 's'}, ${paid === list.length ? 'all paid' : `${paid} paid`}` : 'No players yet');
+    if (hasBracket) facts.push(`${tournament.bracketSize}-player bracket`);
+    if (hasBracket && status !== 'Completed') facts.push(`${live.length} live now${lanes.length ? ` (lane${lanes.length > 1 ? 's' : ''} ${lanes.join(', ')})` : ''}`);
 
     // The next step for the tournament's status: [title, hint, secondary button, main button]
     const toGo = all.length - done;
@@ -889,25 +957,20 @@ function renderSetupCurrent() {
             ['Open bracket', "showPage('tournament')"], ['Open in Analytics', 'openAnalyticsForTournament(tournament.id)']]
     }[status] || null;
 
-    panel.className = 'st-panel st-current';
+    panel.classList.add('st-current');
     panel.innerHTML = `
-        ${currentTournamentStatusBand()}
         <div class="st-current-head">
             <div>
-                <p class="st-eyebrow">Current tournament</p>
+                <p class="st-state"><span class="st-pill st-${status.toLowerCase()}">${escapeHtml(status)}</span><span>${currentTournamentStatusFact(status)}</span></p>
                 <h3>${escapeHtml(tournament.name)}</h3>
                 <div class="st-sub">${escapeHtml(tournament.date)}${format ? ` · ${escapeHtml(format.name)}` : ''}</div>
             </div>
         </div>
-        <dl class="st-facts">
-            <div><dt>Players</dt><dd>${list.length} <small>${list.length && paid === list.length ? 'all paid' : `${paid} paid`}</small></dd></div>
-            <div><dt>Bracket</dt><dd>${hasBracket ? tournament.bracketSize : '—'}</dd></div>
-            <div><dt>Matches completed</dt><dd>${hasBracket ? `${done} <small>of ${all.length}</small>` : '—'}</dd>${hasBracket ? `<div class="st-progress"><span style="width: ${Math.round(100 * done / all.length)}%"></span></div>` : ''}</div>
-            <div><dt>${lastFact[0]}</dt><dd>${lastFact[1]}</dd></div>
-        </dl>
+        <p class="st-facts-line">${facts.join(' · ')}</p>
+        ${status === 'Active' && all.length ? `<div class="st-progress"><span style="width: ${Math.round(100 * done / all.length)}%"></span></div>` : ''}
         ${next ? `<div class="st-next">
             <div class="st-next-what"><p class="st-eyebrow">Next step</p><b>${next[0]}</b><span class="st-hint" id="setupNextHint">${next[1]}</span></div>
-            <div class="st-next-acts"><button type="button" class="st-btn" onclick="${next[2][1]}">${next[2][0]}</button><button type="button" class="st-btn st-primary" id="setupNextMain" onclick="${next[3][1]}">${next[3][0]} →</button></div>
+            <div class="st-next-acts"><button type="button" class="st-btn" onclick="${next[2][1]}">${next[2][0]}</button><button type="button" class="st-btn${status === 'Completed' ? '' : ' st-primary'}" id="setupNextMain" onclick="${next[3][1]}">${next[3][0]} →</button></div>
         </div>` : ''}
         <div class="st-quiet">
             <button type="button" class="st-link" onclick="exportTournament()">Export tournament</button>
@@ -1287,7 +1350,6 @@ function continueLoadProcess(selectedTournament) {
         renderBracket();
     }
 
-    showPage('registration');
     console.log('✓ Tournament loaded (global config preserved)');
 
     // CRITICAL FIX: Save the loaded tournament as current tournament
@@ -1535,11 +1597,6 @@ function continueImportProcess(importedData) {
             `${players.length} players, ${matches.filter(m => m.completed).length} completed matches, ` +
             `and ${historyCount} transaction history entries loaded.`
         );
-
-        // Auto-switch to registration page
-        setTimeout(() => {
-            showPage('registration');
-        }, 1500);
 
         // Update watermark
 

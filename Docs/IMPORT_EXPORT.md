@@ -586,10 +586,7 @@ function continueImportProcess(importedData) {
         `and ${historyCount} transaction history entries loaded.`
     );
 
-    // 12. Auto-switch to registration page
-    setTimeout(() => {
-        showPage('registration');
-    }, 1500);
+    // 12. Stay on Setup: the imported tournament is now the current one, with its next step
 
     console.log(`✓ Tournament imported (v${importedData.exportVersion} format, global config preserved)`);
 }

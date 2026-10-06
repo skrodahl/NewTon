@@ -131,21 +131,25 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                 </div>
 
                 <div class="st-top">
-                    <section class="st-panel st-create" aria-labelledby="setupNewTitle">
-                        <div class="st-create-title"><p class="st-eyebrow">New tournament</p><h3 id="setupNewTitle">Start a new tournament</h3></div>
-                        <div class="st-create-row">
-                            <div class="st-field"><label for="tournamentName">Name</label><input type="text" class="st-text" id="tournamentName" placeholder="e.g. Thursday Cup #42"></div>
-                            <div class="st-field"><label for="tournamentDate">Date</label><input type="date" class="st-text st-mono" id="tournamentDate"></div>
+                    <!-- Filled by renderSetupCurrent(), which also decides which comes first and whether the form is open -->
+                    <section class="st-panel" id="setupCurrent" aria-label="Current tournament"></section>
+
+                    <section class="st-panel st-create st-collapsed" id="setupNew" aria-label="New tournament">
+                        <div class="st-create-bar">
+                            <button type="button" class="st-new-toggle" id="setupNewToggle" aria-expanded="false" aria-controls="setupNewForm" onclick="toggleSetupNew()"><span class="st-plus" aria-hidden="true"></span>New tournament</button>
+                            <span class="st-or">or <button type="button" class="st-link" onclick="document.getElementById('importFile').click()">import a tournament file</button></span>
                         </div>
-                        <div class="st-create-go"><button type="button" class="st-btn st-primary" onclick="createTournament()">Create tournament</button></div>
-                        <div class="st-or">Have a tournament file? <button type="button" class="st-link" onclick="document.getElementById('importFile').click()">Import tournament</button></div>
+                        <div class="st-create-form" id="setupNewForm" hidden>
+                            <div class="st-create-row">
+                                <div class="st-field"><label for="tournamentName">Name</label><input type="text" class="st-text" id="tournamentName" placeholder="e.g. Thursday Cup #42"></div>
+                                <div class="st-field"><label for="tournamentDate">Date</label><input type="date" class="st-text st-mono" id="tournamentDate"></div>
+                            </div>
+                            <div class="st-create-go"><button type="button" class="st-btn" id="setupCreateBtn" onclick="createTournament()">Create tournament</button></div>
+                        </div>
                         <div id="importStatus" class="st-import-status" style="display: none;"></div>
                         <input type="file" id="importFile" accept=".json" style="display: none;" onchange="importTournament(event)">
                         <input type="file" id="uploadFileInput" accept=".json" style="display: none;" onchange="handleUploadFileSelected(event)">
                     </section>
-
-                    <!-- Filled by renderSetupCurrent() -->
-                    <section class="st-panel" id="setupCurrent" aria-label="Current tournament"></section>
                 </div>
 
                 <div class="st-bottom">
