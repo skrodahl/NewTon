@@ -53,9 +53,11 @@
    or Active, the New tournament form once it is Completed or when nothing is loaded. The frame is a ring
    around the 1px border, so a panel never changes size. The dark button inside is the action. */
 .st-panel.st-focus { border-color: var(--nt-card-line); box-shadow: 0 0 0 1px var(--nt-card-line); }
-/* Completed, or nothing loaded: the form goes first (.st-new-first) */
+/* Completed, or nothing loaded: the form goes first (.st-new-first). Folded away, it is the quiet bar
+   again: no frame, and the ordinary label */
 .st-top.st-new-first .st-create { order: -1; }
-.st-top.st-new-first .st-new-toggle { font-size: 17px; font-weight: 800; color: var(--nt-ink); }
+.st-top.st-new-first .st-create:not(.st-collapsed) .st-new-toggle { font-size: 17px; font-weight: 800; color: var(--nt-ink); }
+.st-create.st-collapsed.st-focus { box-shadow: none; }
 .st-bottom { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr); gap: 20px; }
 /* Tournaments and Match history end at the same line: both panels take the row's height,
    and each list fills its panel (still scrolling past 470px) */

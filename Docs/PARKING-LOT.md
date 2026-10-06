@@ -30,19 +30,7 @@ Since v5.3.1, seeding does this by name instead: the mini-lens ranks on tourname
 ## Next
 *Ready for implementation when time permits*
 
-**The two next things (2026-10-06): Chalker iOS capture, and other tournament formats.**
-
-### Chalker iOS image capture — possibly decoding the previous photo
-
-Observed on iPhone 12 Mini, iOS 26.5, Safari. After multiple captures in the same scan modal session, the decode result *appears* to lag by one — a "really good" photo failed to decode while preceding "bad" photos succeeded, suggesting the decoder may be running against the previously-captured file.
-
-**Suspected cause:** `chalker/js/chalker.js` `startImageCapture()` does not clear `elements.qrImageInput.value` on every code path. On the success-but-validation-failed branches in `handleQRPayload()` (JSON parse error, wrong payload type, integrity check fail) the modal stays open with `input.value` still holding the previous file. iOS Safari's `<input type="file" capture>` is known to misbehave when value isn't reset between captures.
-
-**Next step:** add a small thumbnail preview in the scan modal showing exactly what was just captured. The preview will confirm or rule out the bug visually — if the preview shows the new photo but the decode reports the old result, the bug is real. Apply the targeted fix (clear `input.value` at the top of the `onchange` handler, immediately after grabbing `e.target.files[0]`) once confirmed.
-
-**Also test in Chrome on iPhone** to rule out a Safari-specific issue vs. a code bug.
-
----
+**The two next things (2026-10-06): other tournament formats, then the Chalker iOS capture check** (it waits for an iOS device to borrow).
 
 ### Other tournament formats
 
@@ -60,6 +48,18 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 - Ranking, points and placements for a format with two cups, and what Analytics and the podium show.
 - The invite list: the top 16 from the ranking, shown before the draw (the Season concept in the Inbox is the natural source).
 - Any Round Robin has to be spelled out in `llms.txt` ("do not invent features") once it exists.
+
+---
+
+### Chalker iOS image capture — possibly decoding the previous photo
+
+Observed on iPhone 12 Mini, iOS 26.5, Safari. After multiple captures in the same scan modal session, the decode result *appears* to lag by one — a "really good" photo failed to decode while preceding "bad" photos succeeded, suggesting the decoder may be running against the previously-captured file.
+
+**Suspected cause:** `chalker/js/chalker.js` `startImageCapture()` does not clear `elements.qrImageInput.value` on every code path. On the success-but-validation-failed branches in `handleQRPayload()` (JSON parse error, wrong payload type, integrity check fail) the modal stays open with `input.value` still holding the previous file. iOS Safari's `<input type="file" capture>` is known to misbehave when value isn't reset between captures.
+
+**Next step:** add a small thumbnail preview in the scan modal showing exactly what was just captured. The preview will confirm or rule out the bug visually — if the preview shows the new photo but the decode reports the old result, the bug is real. Apply the targeted fix (clear `input.value` at the top of the `onchange` handler, immediately after grabbing `e.target.files[0]`) once confirmed.
+
+**Also test in Chrome on iPhone** to rule out a Safari-specific issue vs. a code bug.
 
 ---
 
@@ -165,4 +165,4 @@ For the actual problem (quota), the contained fix is the Phase 4.2 storage gate 
 
 ---
 
-**Last updated:** October 6, 2026 — Registration rework, Analytics future enhancements and the grey frame done; added Other tournament formats (the December season final), Seeding loose ends; Chalker iOS capture and formats are next
+**Last updated:** October 6, 2026 — Registration rework, Analytics future enhancements and the grey frame done; added Other tournament formats (the December season final) and Seeding loose ends; next: other formats, then the Chalker iOS capture check (needs a borrowed iOS device)
