@@ -44,8 +44,6 @@ Observed on iPhone 12 Mini, iOS 26.5, Safari. After multiple captures in the sam
 
 ---
 
----
-
 ### Other tournament formats
 
 Raised 2026-10-06, and the reason for the formats registry and the app remake: the first non-elimination format is **the season final**, in December. Bump the version to **5.4.0** when more formats arrive.
@@ -72,8 +70,6 @@ From v5.3.1; none of them urgent.
 - **Read once:** the mini-lens reads the tournament list when setup starts. A backup restored while Match Controls is open needs a reload.
 - **This browser only:** seeding reads the tournaments in the browser that does the draw. A draw on a computer without the history is random, and the panel says so.
 - **First real use:** not seen in a real tournament yet; check the name matching on real tournament names.
-
----
 
 ---
 
