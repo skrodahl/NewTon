@@ -1,5 +1,10 @@
 ## Unreleased
 
+### No clock on an analytics-only instance
+
+- **The clock is hidden on an analytics-only instance**, in the app header and in the bracket header: nobody runs a tournament there, so there is nothing to time. Full mode is unchanged.
+- Files changed: `css/styles.css`.
+
 ### Seeding the draw
 
 - **Shuffle & Draw can keep the best players apart.** A new **Seeding** panel in Match Controls, shown before the draw, ranks the players on earlier tournaments with the same name and seeds the best of them; everyone else is still drawn at random. Seed 1 and 2 go at the top and bottom of the bracket, seeds 3-4 in the two middle quarters, seeds 5-8 in the remaining eighths, and so on, so seeds never meet in round 1.

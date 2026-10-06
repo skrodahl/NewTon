@@ -1396,6 +1396,12 @@ a:hover { color: #1e40af; }
     display: none;
 }
 
+/* No clock on an analytics-only instance: nobody runs a tournament there (the app header's and the bracket header's) */
+.mode-analytics .header-clock,
+.mode-analytics .bv-clock {
+    display: none;
+}
+
 /* Back to Analytics button — hidden in full mode, shown in analytics mode */
 .analytics-back-btn {
     display: none;
