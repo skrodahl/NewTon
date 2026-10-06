@@ -122,6 +122,24 @@
 .mc-fmt { border: 1px solid var(--nt-line-2); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
 .mc-fmt b { font-size: 15px; }
 .mc-fmt p { margin: 0 0 4px; font-size: 13px; color: var(--nt-muted); }
+.mc-check { display: flex; align-items: center; gap: 8px; padding: 2px 18px; font-size: 13px; cursor: pointer; }
+.mc-check small { color: var(--nt-muted); font-size: 12px; }
+.mc-check input { flex: none; }
+.mc-seedon { padding-bottom: 12px; font-weight: 600; }
+.mc-seedctl { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 8px 12px; padding: 0 18px 12px; }
+.mc-seedctl label:first-child { grid-column: 1 / -1; }
+.mc-seedctl label { display: grid; gap: 4px; font-size: 12px; font-weight: 600; color: var(--nt-muted); min-width: 0; }
+.mc-seedctl .mc-text, .mc-seedctl select { font-weight: 400; color: var(--nt-ink); }
+.mc-seedctl select { width: 100%; min-width: 0; height: 36px; border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 0 8px; background: var(--nt-surface); font-size: 14px; }
+.mc-seedlist { padding: 0 0 10px; display: grid; gap: 2px; }
+.mc-seedlist .mc-note { padding: 0 18px 4px; }
+.mc-seedlist details { padding-top: 6px; }
+.mc-seedlist summary { padding: 2px 18px; font-size: 12px; color: var(--nt-muted); cursor: pointer; }
+.mc-seeds { list-style: none; counter-reset: seed; margin: 0; padding: 0 18px 8px; display: grid; gap: 2px; }
+.mc-seeds li { counter-increment: seed; display: flex; justify-content: space-between; gap: 8px; font-size: 13px; padding: 3px 0; }
+.mc-seeds li::before { content: counter(seed); width: 20px; color: var(--nt-muted); font-weight: 700; }
+.mc-seeds li b { flex: 1; font-weight: 600; }
+.mc-seeds li span { color: var(--nt-muted); font-size: 12px; }
 .mc-settings { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--nt-line); }
 .mc-settings > div { padding: 12px 18px 14px; min-width: 0; }
 .mc-settings > div + div { border-left: 1px solid var(--nt-line); }

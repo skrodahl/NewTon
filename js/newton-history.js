@@ -2974,12 +2974,54 @@ const NewtonHistory = (() => {
     }
 
     // ---------------------------------------------------------------------------
+    // For seeding (js/seeding.js)
+    // ---------------------------------------------------------------------------
+
+    /**
+     * The finished tournaments in this browser, newest first: what Seeding lists and ranks on.
+     * @returns {Promise<{id: string, name: string, date: string}[]>} date is YYYY-MM-DD
+     */
+    async function seedingTournaments() {
+        const all = await _loadAllTournaments();
+        return all.filter(t => t.closedAt)
+            .sort((a, b) => tsToMs(b.closedAt) - tsToMs(a.closedAt))
+            .map(t => ({ id: t.tournamentId, name: t.tournamentName || '', date: fmtDate(t.closedAt) }));
+    }
+
+    /**
+     * Rank everyone who played the given tournaments by points, exactly as the Leaderboard
+     * does (so with its point mode and layers). Players are looked up with seedingPlayerKey().
+     * @param {string[]} tournamentIds
+     * @returns {Promise<Map<string, {points: number, rank: number}>>}
+     */
+    async function seedingRanking(tournamentIds) {
+        const ids = new Set(tournamentIds);
+        const tournaments = (await _loadAllTournaments()).filter(t => ids.has(t.tournamentId));
+        if (!tournaments.length) return new Map();
+        const rows = await _computePlayerRows(tournaments);
+        return new Map(rows.map(r => [_playerKey(r.name), { points: r.points, rank: r._rank }]));
+    }
+
+    /**
+     * The key a player of the tournament being set up has in seedingRanking(): the name
+     * Analytics knows them by (their database entry, followed through renames and merges).
+     * Needs seedingTournaments() to have been awaited, which loads the player database.
+     * @param {{registryId?: string, name: string}} player
+     * @returns {string|null}
+     */
+    function seedingPlayerKey(player) {
+        const t = player.registryId ? { registryIds: { p: player.registryId } } : null;
+        return _playerKey(_person(t, t ? 'p' : null, player.name).name);
+    }
+
+    // ---------------------------------------------------------------------------
     // Public API
     // ---------------------------------------------------------------------------
 
     return { render, openTournament, openMatch, openMatchModal, exportDB, importDB,
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
              setScope: scopeTo, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache,
-             selectCorrectionPlayer, adjustCorrection, addCorrectionValue, resetCorrectionPlayer, saveCorrections };
+             selectCorrectionPlayer, adjustCorrection, addCorrectionValue, resetCorrectionPlayer, saveCorrections,
+             seedingTournaments, seedingRanking, seedingPlayerKey, halfYear: _getHalfYear };
 
 })();

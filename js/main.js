@@ -414,6 +414,7 @@ function autoLoadCurrentTournament() {
             bracket: tournamentData.bracket,
             bracketSize: tournamentData.bracketSize, // ✅ Fixed: Include bracketSize
             format: tournamentData.format, // SE/DE format (absent = DE for backward compat)
+            seeding: tournamentData.seeding, // who was seeded in the draw (absent = a random draw)
             placements: tournamentData.placements || {},
             readOnly: tournamentData.readOnly, // ✅ Fixed: Include readOnly flag
             _analyticsPreview: tournamentData._analyticsPreview // 4.3: keep the no-persist guard alive across reload

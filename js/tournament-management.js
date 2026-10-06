@@ -330,6 +330,7 @@ function buildTournamentPayload() {
             status: tournament.status,
             bracketSize: tournament.bracketSize,
             format: tournament.format,
+            seeding: tournament.seeding,
             readOnly: tournament.readOnly || false,
             config: configForExport(),
             players: players,
@@ -714,6 +715,7 @@ function saveTournamentOnly(shouldLog = true) {
             bracket: tournament.bracket,
             bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
             format: tournament.format, // SE/DE format (absent = DE for backward compat)
+            seeding: tournament.seeding, // who was seeded in the draw (absent = a random draw)
             placements: tournament.placements || {},
             readOnly: tournament.readOnly, // ✅ Fixed: Include readOnly flag
             lastSaved: new Date().toISOString()
@@ -1255,6 +1257,7 @@ function continueLoadProcess(selectedTournament) {
         bracket: selectedTournament.bracket,
         bracketSize: bracketSize,
         format: selectedTournament.format, // SE/DE format (absent = DE for backward compat)
+        seeding: selectedTournament.seeding, // who was seeded in the draw (absent = a random draw)
         placements: selectedTournament.placements || {},
         readOnly: (selectedTournament.status === 'completed') // Read-only for completed tournaments
         // NO CONFIG loading - config stays global
@@ -1456,6 +1459,7 @@ function continueImportProcess(importedData) {
             placements: importedData.placements || {},
             bracketSize: bracketSize,
             format: importedData.format, // SE/DE format (absent = DE for backward compat)
+            seeding: importedData.seeding, // who was seeded in the draw (absent = a random draw)
             readOnly: (importedData.status === 'completed') // Read-only for completed imports
         };
 

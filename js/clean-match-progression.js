@@ -1423,7 +1423,9 @@ function confirmBracketGeneration() {
     // Create optimized bracket: real players first, walkovers strategically placed
     console.log(`Generating ${bracketSize}-player ${format} bracket for ${paidPlayers.length} players`);
 
-    const bracket = createOptimizedBracketV2(paidPlayers, bracketSize);
+    // Seeded when the operator asked for it in Match Controls (js/seeding.js); otherwise null
+    const seeding = typeof Seeding !== 'undefined' ? Seeding.forDraw(paidPlayers, bracketSize) : null;
+    const bracket = createOptimizedBracketV2(paidPlayers, bracketSize, seeding);
     if (!bracket) {
         alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
         console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
@@ -1434,6 +1436,7 @@ function confirmBracketGeneration() {
     tournament.bracket = bracket;
     tournament.bracketSize = bracketSize;
     tournament.format = format;
+    if (seeding) tournament.seeding = seeding.record; // who was seeded, and from what (absent = a random draw)
     tournament.status = 'active';
 
     // Generate all match structures with clean TBD placeholders
@@ -1497,8 +1500,17 @@ function confirmBracketGeneration() {
  * This ensures we can always place max 1 BYE per match without BYE-vs-BYE scenarios
  *
  * Works for bracketSize 8, 16, 32
+ *
+ * With `seeding` (js/seeding.js), steps 1 and 2 are replaced by placeSeededPlayers(): the seeds
+ * are kept apart and get the byes, everyone else is still random. Without it the draw is exactly
+ * as before.
+ *
+ * @param {object[]} players - the players going into the draw
+ * @param {number} bracketSize
+ * @param {{seeds: object[], all: boolean}|null} [seeding] - seeds are player objects from `players`, best first; `all`: the mirror draw
+ * @returns {Array|null} the bracket positions (position 2n and 2n+1 meet in FS-1-(n+1)), or null if invalid
  */
-function createOptimizedBracketV2(players, bracketSize) {
+function createOptimizedBracketV2(players, bracketSize, seeding = null) {
     // Defensive checks
     if (!Array.isArray(players)) {
         console.error('createOptimizedBracketV2: players must be an array');
@@ -1521,36 +1533,41 @@ function createOptimizedBracketV2(players, bracketSize) {
         return null;
     }
 
-    // Shuffle players to ensure randomness
-    const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
+    let bracket;
+    if (seeding && Array.isArray(seeding.seeds) && seeding.seeds.length >= 2) {
+        bracket = placeSeededPlayers(players, K, seeding.seeds, !!seeding.all);
+    } else {
+        // Shuffle players to ensure randomness
+        const shuffledPlayers = [...players].sort(() => Math.random() - 0.5);
 
-    // Initialize bracket with null slots
-    const bracket = new Array(K).fill(null);
-    const matchesWithBye = new Set();
+        // Initialize bracket with null slots
+        bracket = new Array(K).fill(null);
+        const matchesWithBye = new Set();
 
-    // Step 1: Randomly distribute BYEs across matches
-    let byesPlaced = 0;
-    while (byesPlaced < numWalkovers) {
-        // Pick a random match that doesn't have a BYE yet
-        const matchIndex = Math.floor(Math.random() * numMatches);
+        // Step 1: Randomly distribute BYEs across matches
+        let byesPlaced = 0;
+        while (byesPlaced < numWalkovers) {
+            // Pick a random match that doesn't have a BYE yet
+            const matchIndex = Math.floor(Math.random() * numMatches);
 
-        if (matchesWithBye.has(matchIndex)) continue;
+            if (matchesWithBye.has(matchIndex)) continue;
 
-        matchesWithBye.add(matchIndex);
+            matchesWithBye.add(matchIndex);
 
-        // Randomly choose player1 (0) or player2 (1) slot within this match
-        const slotInMatch = Math.random() < 0.5 ? 0 : 1;
-        const bracketPosition = matchIndex * 2 + slotInMatch;
+            // Randomly choose player1 (0) or player2 (1) slot within this match
+            const slotInMatch = Math.random() < 0.5 ? 0 : 1;
+            const bracketPosition = matchIndex * 2 + slotInMatch;
 
-        bracket[bracketPosition] = createWalkoverPlayer(bracketPosition);
-        byesPlaced++;
-    }
+            bracket[bracketPosition] = createWalkoverPlayer(bracketPosition);
+            byesPlaced++;
+        }
 
-    // Step 2: Fill remaining slots with shuffled players
-    let playerIndex = 0;
-    for (let i = 0; i < K; i++) {
-        if (bracket[i] === null) {
-            bracket[i] = shuffledPlayers[playerIndex++];
+        // Step 2: Fill remaining slots with shuffled players
+        let playerIndex = 0;
+        for (let i = 0; i < K; i++) {
+            if (bracket[i] === null) {
+                bracket[i] = shuffledPlayers[playerIndex++];
+            }
         }
     }
 
@@ -1572,6 +1589,100 @@ function createOptimizedBracketV2(players, bracketSize) {
     }
 
     console.log(`✓ Distributed seeding completed: ${numWalkovers} BYEs randomly placed across ${numMatches} matches`);
+    return bracket;
+}
+
+/**
+ * PLACE A SEEDED DRAW: the bracket positions when the best players are seeded.
+ *
+ * The seeds are spread over equal segments of the bracket (the number of seeds rounded up to
+ * a power of two). Seed 1 is at the very top and seed 2 at the very bottom (the two halves);
+ * seeds 3 and 4 take the two middle quarters in random order; seeds 5-8 take what is left of
+ * the eighths in random order, and so on, so seeds never meet in round 1. Inside its segment a
+ * seed sits where the draw puts it (seed 1 and 2 at the ends). The best seeds get the byes, in
+ * rank order; any byes beyond the seeds go to matches without a seed first. Everyone else fills
+ * what is left, shuffled.
+ *
+ * With `all`, every ranked player is a seed and round 1 is the mirror draw: seed 1 meets the last
+ * seed, seed 2 the second-last, and so on. The players without a ranking take the leftover
+ * seed numbers at random, and the numbers beyond the players are the byes, which are therefore
+ * the top seeds' (no unseeded player gets a bye while there is a seed without one).
+ *
+ * Only the layout: who the seeds are is decided in js/seeding.js, and what happens after
+ * round 1 is the progression tables'.
+ *
+ * @param {object[]} players - everyone going into the draw (the seeds among them)
+ * @param {number} K - bracket size
+ * @param {object[]} seeds - the seeds, best first; at least 2
+ * @param {boolean} all - every ranked player is seeded: the mirror draw
+ * @returns {Array} K positions, byes as walkover players
+ */
+function placeSeededPlayers(players, K, seeds, all) {
+    const numMatches = K / 2;
+    const numWalkovers = K - players.length;
+    const rand = n => Math.floor(Math.random() * n);
+    const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = rand(i + 1); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+
+    // the segment (0 = top) of each seed, best first, when the bracket is cut into n segments
+    const segmentsFor = n => {
+        let segment = [0, 1];
+        for (let m = 2; m < n; m *= 2) {
+            const split = segment.map((s, i) => i === 0 ? 2 * s : i === 1 ? 2 * s + 1 : 2 * s + rand(2));
+            const free = [];
+            for (let s = 0; s < 2 * m; s++) if (!split.includes(s)) free.push(s);
+            segment = split.concat(shuffle(free));
+        }
+        return segment;
+    };
+
+    const bracket = new Array(K).fill(null);
+
+    if (all) {
+        // seed numbers 1..K: the ranked players, then the others at random, then the byes
+        const field = seeds.concat(shuffle(players.filter(p => !seeds.includes(p))));
+        const at = i => field[i] || null;
+        const matchOf = segmentsFor(numMatches);
+        for (let i = 0; i < numMatches; i++) {
+            const slot = i === 0 ? 0 : i === 1 ? 1 : rand(2);
+            const top = 2 * matchOf[i] + slot, low = 2 * matchOf[i] + 1 - slot;
+            bracket[top] = at(i);
+            bracket[low] = at(K - 1 - i) || createWalkoverPlayer(low);
+        }
+        return bracket;
+    }
+
+    let n = 2;
+    while (n < seeds.length) n *= 2;
+    const segment = segmentsFor(n);
+    const size = K / n;
+    const seedMatch = new Set();
+    seeds.forEach((seed, i) => {
+        const position = i === 0 ? 0 : i === 1 ? K - 1 : segment[i] * size + rand(size);
+        bracket[position] = seed;
+        seedMatch.add(Math.floor(position / 2));
+    });
+
+    // byes: one per match, in the slot the seed (if any) is not in
+    const byeMatch = new Set();
+    let byes = numWalkovers;
+    const placeBye = m => {
+        const free = [2 * m, 2 * m + 1].filter(p => bracket[p] === null);
+        const position = free[rand(free.length)];
+        bracket[position] = createWalkoverPlayer(position);
+        byeMatch.add(m);
+        byes--;
+    };
+    for (const seed of seeds) {
+        if (byes <= 0) break;
+        placeBye(Math.floor(bracket.indexOf(seed) / 2));
+    }
+    const open = [...Array(numMatches).keys()].filter(m => !byeMatch.has(m));
+    shuffle(open.filter(m => !seedMatch.has(m))).concat(shuffle(open.filter(m => seedMatch.has(m))))
+        .forEach(m => { if (byes > 0) placeBye(m); });
+
+    const others = shuffle(players.filter(p => !seeds.includes(p)));
+    let next = 0;
+    for (let i = 0; i < K; i++) if (bracket[i] === null) bracket[i] = others[next++];
     return bracket;
 }
 

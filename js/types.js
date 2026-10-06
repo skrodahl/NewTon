@@ -180,6 +180,7 @@
  * @property {string} clubName - Club/organization name for branding
  * @property {LanesConfig} lanes - Lane assignment configuration
  * @property {UIConfig} ui - User interface settings
+ * @property {SeedingConfig} [seeding] - How the draw may use the ranking (absent = off)
  * @property {ServerConfig} server - Server/API settings
  */
 
@@ -220,6 +221,12 @@
  * @property {boolean} autoOpenMatchControls - Start on Match Controls: the Tournament Bracket page opens on Match Controls rather than the bracket (default: true)
  * @property {boolean} developerMode - Enable developer features (default: false)
  * @property {number} refereeSuggestionsLimit - Max number of referee suggestions to show (default: 10)
+ */
+
+/**
+ * @typedef {Object} SeedingConfig
+ * @property {'off'|'available'|'on'} mode - Whether Shuffle & Draw offers seeding, and ticked or not (default: 'off')
+ * @property {'all'|'half'|'quarter'|'eighth'} seeds - How much of the bracket is seeded: all ranked players, or as many as 1/2, 1/4 or 1/8 of the bracket size (default: 'quarter')
  */
 
 /**

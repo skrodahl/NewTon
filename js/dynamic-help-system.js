@@ -138,6 +138,7 @@ const HELP_CONTENT = {
                     <ol>
                         <li>Open the <strong>Match Controls</strong> tab in the header</li>
                         <li>Before the draw it shows the players: click a name to mark them paid or unpaid, or add a player (found in the player database, or created)</li>
+                        <li>If seeding is on (Global Settings → Tournaments → Seeding), tick <strong>Seed the draw by ranking</strong> to keep the best players apart. The panel shows which earlier tournaments the ranking comes from, and who would be seeded</li>
                         <li>When ready, choose a format under <strong>Shuffle &amp; Draw</strong> and click "<strong>Draw a [X]-player bracket</strong>"</li>
                     </ol>
                     <p><strong>Tournament Formats:</strong></p>
@@ -284,6 +285,16 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Bracket:</strong> <strong>Finals position</strong>, Right or Middle (double elimination). The same setting as the Finals toggle in the bracket header.</p>
                     <p><strong>Developer:</strong> <strong>Developer Console</strong> adds a <strong>Console</strong> tab to the Tournament Bracket page, with diagnostics, validation checks, lane usage and transaction tools.</p>
+                `
+            },
+            seeding: {
+                title: "Seeding",
+                content: `
+                    <p><strong>Seeding</strong> (Tournaments) lets Shuffle &amp; Draw keep the best players apart. <strong>Off</strong>: the draw is always random. <strong>Available</strong>: the option is offered, and you tick it. <strong>On</strong>: it is ticked to start with.</p>
+                    <p><strong>Seeded players</strong> is how many of the best players are seeded, as a share of the bracket: 1/8, 1/4 or 1/2 (2, 4 or 8 players in a 16-player bracket). <strong>All</strong> seeds everyone with a ranking, so the top seed meets the bottom seed. Seeded players can't meet in round 1, and everyone else is drawn at random. You can change it for each draw.</p>
+                    <p><strong>Byes</strong> go to the best seeds. Players with no ranking are never seeded, and only get a bye if there are more byes than seeds.</p>
+                    <p><strong>The ranking</strong> is the Leaderboard's points over earlier tournaments with the same name, from this browser. The name word is taken from the tournament's name ("Måndagscup", "Måndagscup week 43" and "NewTon Måndagscup" are the same cup), and tournaments with "Final" in the name never count. It looks at the current half-year, or the previous one for the first match of a season. In Match Controls you can change the word or the period, and tick tournaments by hand.</p>
+                    <p><strong>💡 New players</strong> are never seeded; Match Controls names them. With no earlier tournaments in this browser, or none ticked, the draw is random. To seed from the club's history, restore a backup on this computer first.</p>
                 `
             },
             formats: {

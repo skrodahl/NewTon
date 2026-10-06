@@ -1477,6 +1477,7 @@ function _mcSetupHTML() {
             </div></section>
     </div>
     <div class="mc-col">
+        ${typeof Seeding !== 'undefined' ? Seeding.html() : ''}
         <section class="mc-panel"><div class="mc-ph"><h3>Shuffle &amp; Draw</h3></div><div class="mc-formats">${formats}</div>
             <p class="mc-note">Only paid players go into the bracket.${players.length - paid ? ` ${players.length - paid} still unpaid.` : ''}</p></section>
     </div>`;

@@ -49,6 +49,10 @@ const DEFAULT_CONFIG = {
     chalker: {
         handover: 'qr'
     },
+    seeding: {
+        mode: 'off',
+        seeds: 'quarter'
+    },
     server: {
         allowSharedTournamentDelete: false,
         autoUpload: false,
@@ -179,6 +183,12 @@ function applyConfigToUI() {
         safeSetChecked('developerMode', config.ui.developerMode);
         safeSetValue('refereeSuggestionsLimit', config.ui.refereeSuggestionsLimit);
         safeSetValue('bracketFinals', config.ui.bracketFinals === 'middle' ? 'middle' : 'right');
+    }
+
+    // Seeding
+    if (config.seeding) {
+        safeSetValue('seedingMode', config.seeding.mode);
+        safeSetValue('seedingSeeds', ['all', 'half', 'quarter', 'eighth'].includes(config.seeding.seeds) ? config.seeding.seeds : 'quarter');
     }
 
     // Server configuration
@@ -554,6 +564,14 @@ function saveUIConfiguration(options = {}) {
         const hidden = formatToggles.filter(cb => !cb.checked).map(cb => cb.dataset.formatId);
         config.ui.hiddenFormats = (hidden.length < formatToggles.length) ? hidden : [];
     }
+
+    // Seeding: how the draw may use the ranking (see js/seeding.js)
+    const seedingModeElement = document.getElementById('seedingMode');
+    const seedingSeedsElement = document.getElementById('seedingSeeds');
+    config.seeding = config.seeding || {};
+    config.seeding.mode = seedingModeElement && ['off', 'available', 'on'].includes(seedingModeElement.value) ? seedingModeElement.value : 'off';
+    config.seeding.seeds = seedingSeedsElement && ['all', 'half', 'quarter', 'eighth'].includes(seedingSeedsElement.value) ? seedingSeedsElement.value : 'quarter';
+    delete config.seeding.byesToSeeds; // an earlier build had this setting; the best seeds always get the byes
 
     config.server = config.server || {};
     config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;

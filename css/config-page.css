@@ -30,6 +30,13 @@
 .cfg-panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; }
 .cfg-panel + .cfg-panel { margin-top: 12px; }
 .cfg-panel-title { padding: 14px 20px 0; font-weight: 700; font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.cfg-seedtable { margin: 0 20px 6px; padding-top: 14px; border-top: 1px solid var(--nt-line); font-size: 13px; overflow-x: auto; }
+.cfg-seedtable table { border-collapse: collapse; width: 100%; max-width: 560px; }
+.cfg-seedtable caption { text-align: left; font-weight: 600; color: var(--nt-ink); padding-bottom: 6px; }
+.cfg-seedtable th, .cfg-seedtable td { text-align: left; padding: 6px 10px 6px 0; border-top: 1px solid var(--nt-line); white-space: nowrap; }
+.cfg-seedtable thead th { border-top: 0; color: var(--nt-muted); font-weight: 600; }
+.cfg-seedtable tbody th { font-weight: 600; }
+.cfg-seedtable p { margin: 8px 0 0; color: var(--nt-muted); }
 .cfg-panel-note { margin: 4px 20px 14px; color: var(--nt-muted); font-size: 13px; }
 .cfg-link { border: 0; background: none; padding: 0; color: var(--nt-muted); font: inherit; font-size: 13px; font-weight: 500; cursor: pointer; text-decoration: underline; text-underline-offset: 3px; }
 .cfg-link:hover { color: var(--nt-ink); }

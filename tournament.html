@@ -464,6 +464,31 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <div class="cfg-choices" id="formatVisibilityOptions"></div>
                     </div>
                     <div class="cfg-panel">
+                        <div class="cfg-panel-title">Seeding</div>
+                        <p class="cfg-panel-note">Keeps the best players apart in the draw, using the ranking of earlier tournaments with the same name. Everyone else is still drawn at random, and new players are never seeded. It reads the tournaments in this browser.</p>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Use seeding</div><div class="cfg-desc"><b>Off</b>: the draw is always random. <b>Available</b>: Shuffle &amp; Draw offers it, and you tick it. <b>On</b>: it is ticked to start with.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="seedingMode"><button type="button" data-value="off">Off</button><button type="button" data-value="available">Available</button><button type="button" data-value="on">On</button></div><input type="hidden" id="seedingMode"></div>
+                        </div>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Seeded players</div><div class="cfg-desc">How many of the best players are seeded, as a share of the bracket: 1/8, 1/4 or 1/2. <b>All</b> seeds everyone with a ranking, so the top seed meets the bottom seed. You can change it for each draw.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="seedingSeeds"><button type="button" data-value="eighth">1/8</button><button type="button" data-value="quarter">1/4</button><button type="button" data-value="half">1/2</button><button type="button" data-value="all">All</button></div><input type="hidden" id="seedingSeeds"></div>
+                        </div>
+                        <div class="cfg-seedtable">
+                            <table>
+                                <caption>Players seeded</caption>
+                                <thead><tr><th></th><th>1/8</th><th>1/4</th><th>1/2</th><th>All</th></tr></thead>
+                                <tbody>
+                                    <tr><th>8-player bracket</th><td>none</td><td>2 players</td><td>4 players</td><td>all ranked</td></tr>
+                                    <tr><th>16-player bracket</th><td>2 players</td><td>4 players</td><td>8 players</td><td>all ranked</td></tr>
+                                    <tr><th>32-player bracket</th><td>4 players</td><td>8 players</td><td>16 players</td><td>all ranked</td></tr>
+                                </tbody>
+                            </table>
+                            <p>The bracket is the next size up from the number of players: 13 players play in a 16-player bracket.</p>
+                        </div>
+                        <p class="cfg-panel-note">The best seeds get the byes. Players with no ranking are never seeded, and only get a bye if there are more byes than seeds.</p>
+                    </div>
+                    <div class="cfg-panel">
                         <div class="cfg-panel-title">Match length <button type="button" class="cfg-link" data-reset="legs">Reset to defaults</button></div>
                         <div class="cfg-cols">
                             <div>
@@ -1033,6 +1058,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/newton-table.js"></script>
         <script src="js/newton-charts.js"></script>
         <script src="js/newton-history.js"></script>
+        <script src="js/seeding.js"></script>
         <script src="js/qr-bridge.js"></script>
     <!-- Optional network client. Separately licensed (see licensed/LICENSE.md) and may be
          absent; the Tournament Manager works fully without it. -->
