@@ -99,12 +99,6 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 
 ---
 
-### Grey frame around the redesigned pages
-
-The `body` background in `styles.css` (`#f1f5f5`) differs slightly from the redesign's page background (`--nt-bg` in `design-tokens.css`), so a faint frame shows around Setup, Registration, Analytics and Global Settings. To decide: set the body background to `--nt-bg` (check the bracket page and the dialogs), or leave it.
-
----
-
 ## Later
 *Worth tracking but not urgent*
 
@@ -171,4 +165,4 @@ For the actual problem (quota), the contained fix is the Phase 4.2 storage gate 
 
 ---
 
-**Last updated:** October 6, 2026 — Registration rework and Analytics future enhancements done; added Other tournament formats (the December season final), Seeding loose ends; Chalker iOS capture and formats are next
+**Last updated:** October 6, 2026 — Registration rework, Analytics future enhancements and the grey frame done; added Other tournament formats (the December season final), Seeding loose ends; Chalker iOS capture and formats are next

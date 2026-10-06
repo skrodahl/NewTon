@@ -1,3 +1,10 @@
+## Unreleased
+
+### One background behind the pages
+
+- **The faint grey frame around the redesigned pages is gone.** The window's background (`#f1f5f5`, a cool grey) differed slightly from the redesigned pages' own (`--nt-bg`, `#f4f3f1`, a warm grey), so a thin strip of the cooler grey showed around Setup, Registration, Analytics and Global Settings. The window now uses the same token; the bracket page, Match Controls and the dialogs look as before. Pages that load `styles.css` without the design tokens (older release pages) keep the old grey through the variable's fallback.
+- Files changed: `css/styles.css`.
+
 ## **v5.3.1** — Sowing the Seeds of Love (2026-10-06)
 
 ### No clock on an analytics-only instance

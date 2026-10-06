@@ -87,7 +87,7 @@
 /* App shell */
 body {
   font-family: var(--font-body);
-  background: #f1f5f5;
+  background: var(--nt-bg, #f1f5f5); /* the redesigned pages' background, so no frame shows around them; old pages without the tokens keep the old grey */
   min-height: 100vh;
   color: #2a2a2a;
 }
