@@ -17,7 +17,7 @@
 
 ### Undo: undone matches leave the Analytics register again
 
-- **Since v5.1.6, every undo stopped at its last step** with an error (`rolledBackMatchIds.map is not a function`): the list of undone matches is a `Set`, which has no `map()`. The tournament itself was already saved by then, so undo looked fine, but the undone matches were never deleted from the match register, so Analytics could keep counting results that had been undone (until the tournament was finalized again). Found while testing Groups and Cups; separate commit (`567c35f`) so it can go to `main` on its own.
+- **Since v5.1.6, every undo stopped at its last step** with an error (`rolledBackMatchIds.map is not a function`): the list of undone matches is a `Set`, which has no `map()`. The tournament itself was already saved by then, so undo looked fine, but the undone matches were never deleted from the match register, so Analytics could keep counting results that had been undone. Found while testing Groups and Cups; separate commit (`567c35f`) so it can go to `main` on its own.
 - Files changed: `js/bracket-rendering.js` (`undoManualTransaction()`).
 
 ### Single elimination: finals in the middle
