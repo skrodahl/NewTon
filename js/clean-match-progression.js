@@ -130,7 +130,9 @@ function renderCompletionAchievements() {
 
 /**
  * Returns the correct match progression table for the current tournament format.
- * Uses SE_MATCH_PROGRESSION for Single Elimination, DE_MATCH_PROGRESSION for Double Elimination.
+ * Uses SE_MATCH_PROGRESSION for Single Elimination, DE_MATCH_PROGRESSION for Double Elimination,
+ * and for Groups and Cups the drawn cups' SE tables with cup IDs (cupsProgressionTable(); empty
+ * before the cup draw, and group matches are never in it).
  *
  * @returns {Object} The progression table for the current format and bracket size
  */

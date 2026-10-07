@@ -62,7 +62,11 @@ Tournaments are exported as JSON files with the following naming convention:
 | `readOnly` | boolean | Yes | Read-only flag (true for completed tournaments) |
 | `players` | array | Yes | Array of player objects |
 | `matches` | array | Yes | Array of match objects |
-| `bracket` | array | No | Bracket structure (null if not generated) |
+| `bracket` | array | No | Bracket structure (null if not generated); Groups and Cups: the players in group-draw order |
+| `format` | string | No | `"DE"`, `"SE"` or `"GROUPS"` (Groups and Cups); absent = DE |
+| `seeding` | object | No | Who was seeded in the draw, and from which tournaments (absent = a random draw) |
+| `groups` | object | No | Groups and Cups: `{ list: [{ name, players: [id…] }], order? }` — the group draw (absent in other formats) |
+| `cups` | object | No | Groups and Cups: `{ bCup, A: { size, seeds }, B: {…} \| null }` — the cup draw (absent until drawn) |
 | `placements` | object | No | Final placements (empty if tournament not finished) |
 | `history` | array | Yes | Per-tournament transaction history |
 | `playerList` | array | Yes | Simple array of player name strings (snapshot of saved players database) |

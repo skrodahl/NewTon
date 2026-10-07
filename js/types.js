@@ -100,6 +100,11 @@
  * @property {boolean} [autoAdvanced] - Optional: true if match was auto-completed (walkover)
  * @property {number} [completedAt] - Optional: timestamp when match was completed (Date.now())
  * @property {MatchFinalScore} [finalScore] - Optional: leg score details
+ * @property {'group'|'cup'} [side] - Groups and cups: 'group' or 'cup' instead of the bracket sides (IDs 'A-3', 'A-QF1', 'B-F')
+ * @property {string} [group] - Groups and cups: the group letter of a group match
+ * @property {'A'|'B'} [cup] - Groups and cups: the cup of a cup match
+ * @property {string} [seId] - Groups and cups: a cup match's single-elimination ID (e.g. 'FS-2-1'), for its layout
+ * @property {{player?: number, loserOf?: string, winnerOf?: string}|null} [plannedReferee] - Groups and cups: the planned referee (filled in at Start when free)
  */
 
 /**
@@ -139,7 +144,9 @@
  * @property {Match[]} matches - Array of all tournament matches
  * @property {Player[]} bracket - Array of players in bracket positions
  * @property {2|4|8|16|32} [bracketSize] - Bracket size (2 and 4 are SE-only)
- * @property {('DE'|'SE')} [format] - Tournament format: 'DE' (Double Elimination) or 'SE' (Single Elimination). Absent = DE for backward compatibility
+ * @property {('DE'|'SE'|'GROUPS')} [format] - Tournament format: 'DE' (Double Elimination), 'SE' (Single Elimination) or 'GROUPS' (Groups and Cups). Absent = DE for backward compatibility
+ * @property {{list: {name: string, players: number[]}[], order?: Object<string, string[]>}} [groups] - Groups and cups: the group draw, players in seed order; order = the operator's tie decisions
+ * @property {{bCup: boolean, A: {size: number, seeds: number[]}, B: {size: number, seeds: number[]}|null}} [cups] - Groups and cups: the cup draw (absent until drawn)
  * @property {Object.<string, number>} placements - Map of player ID (string) to placement rank
  * @property {boolean} [readOnly] - Optional: true for completed tournaments to prevent modifications
  * @property {string} [lastSaved] - Optional: ISO timestamp of last save
@@ -206,6 +213,7 @@
  * @property {number} backsideSemifinal - Legs for backside semifinal (default: 3)
  * @property {number} backsideFinal - Legs for backside final (default: 5)
  * @property {number} grandFinal - Legs for grand final (default: 5)
+ * @property {number} [groupMatches] - Legs for group matches in Groups and Cups (default: 3); the cups use the single-elimination lengths
  */
 
 /**
@@ -257,13 +265,14 @@
  */
 
 /**
- * @typedef {'COMPLETE_MATCH' | 'START_MATCH' | 'STOP_MATCH' | 'ASSIGN_LANE' | 'ASSIGN_REFEREE'} TransactionType
+ * @typedef {'COMPLETE_MATCH' | 'START_MATCH' | 'STOP_MATCH' | 'ASSIGN_LANE' | 'ASSIGN_REFEREE' | 'DRAW_CUPS'} TransactionType
  * Types of transactions that can be recorded
  * - COMPLETE_MATCH: Match result recorded
  * - START_MATCH: Match started (active = true)
  * - STOP_MATCH: Match stopped (active = false)
  * - ASSIGN_LANE: Lane assigned or cleared
  * - ASSIGN_REFEREE: Referee assigned or cleared
+ * - DRAW_CUPS: Groups and cups: the cups drawn from the group tables (no matchId; carries `cups`). undoCupDraw() removes it
  */
 
 /**

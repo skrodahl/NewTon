@@ -66,16 +66,16 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 - **Foundations (2026-10-08): additions only.** Group-stage progression tables per group size; the cups reuse the existing SE tables; group results recorded like any match; the cup draw a new transaction; new optional tournament fields, absent for existing tournaments. Group matches undoable until the cups are drawn, then locked. The cup draw itself is undoable while no cup match has a result (and none is live), reopening the groups; the manual **Draw the cups** step is the first gate. The "draw" is deterministic (seeds from the tables), so drawing again after a fix gives the same cups unless a result changed.
 - **The cups are always drawn with the finals in the middle**, whatever the Finals position setting, so two cups fit the page.
 
-**Next:** a design note on how groups and two cups fit the three foundations (one tournament holding a group stage and two single-elimination cups; transactions and undo for group results and the cup draw) before any code.
+**Built 2026-10-08 (night), on the branch `groups-and-cups`, for review:** design note `Docs/GROUPS-AND-CUPS.md` and the whole format: groups, Match Controls by stage, Draw the cups, both cups, undo, placings. Not merged; the maintainer reviews first. Decided while building (the maintainer may change any of them):
+- The minimum is 6 players; the B cup needs at least two players (one goes without).
+- Group sizes from snake order: the top seed's group is the smaller one when the groups aren't even (15 players: 3, 4, 4, 4).
+- Group of 3 order: 2v3 (ref 1), 1v3 (ref 2), 1v2 (ref 3), so the top seeds meet last, as in a group of 4.
+- Cup referees after round 1: a loser from the round before, counted from the bottom; the bronze final: the loser of the first match two rounds back (a 4-player cup: the first semifinal's winner); the final: the bronze final's loser.
+- Ties left after head-to-head: marked "level", the group seed decides, ▲ in Match Controls' group tables lets the operator decide (before the cups are drawn).
+- Match Controls in the group stage shows each group's next two matches, and the group tables on the right (there was room).
+- B cup final pair both 5th–6th and bronze pair both 7th–8th, as DE's shared places.
 
-**Still open:** how to show the A and B cups side by side (tabs, or both on one page); ranking across groups for the cup seeds (e.g. winners 1-4, runners-up 5-8); whether group-mates may meet in the cup's first round; placings (A 1-8, B 9-16?) and whether and how the final counts for points.
-
-**To work out first (discuss, mockup before code):**
-- The group stage: round-robin tables and tiebreaks (wins, then legs? head-to-head?), how it fits Match Controls, the lanes and the history/undo model, and how groups feed the A and B cups.
-- How the bracket view draws a group stage and two cups (BracketView lays out from the progression tables, one layout per format).
-- Ranking, points and placements for a format with two cups, and what Analytics and the podium show.
-- The invite list: the top 16 from the ranking, shown before the draw (the Season concept in the Inbox is the natural source).
-- Any Round Robin has to be spelled out in `llms.txt` ("do not invent features") once it exists.
+**Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
 

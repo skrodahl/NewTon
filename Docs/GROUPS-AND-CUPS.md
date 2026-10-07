@@ -1,6 +1,6 @@
 # Groups and Cups — Design Note
 
-**Status:** Design note, written 2026-10-08, built on the `groups-and-cups` branch the same night for review
+**Status:** Design note, written 2026-10-08; built on the `groups-and-cups` branch the same night, for review (not merged). Decisions taken while building are listed in Docs/PARKING-LOT.md → Other tournament formats.
 **Mockup:** `Docs/mockups/group-night.html` (reviewed 2026-10-08, decisions in its last box)
 
 A tournament format for the weekly nights and the December season final: round-robin groups,
@@ -131,7 +131,8 @@ is a letter and a number, a cup ID a letter and a round name, so the two never c
 ## Screens
 
 - **Shuffle & Draw:** a third format card, *Groups and Cups* (in the formats registry, so it can
-  be hidden in Global Settings like the others). The confirmation shows the groups.
+  be hidden in Global Settings like the others). The confirmation shows the number and sizes of
+  the groups, and whether the draw is by ranking.
 - **Bracket page:** a *Groups | Cups* switch in the header (instead of Finals position, which
   doesn't apply). Groups: one card per group with its table (top two marked for the A cup) and its
   match list with referee and state. Cups: the two cups, each drawn as single elimination with the
