@@ -1232,7 +1232,7 @@ function undoManualTransaction(transactionId) {
     // consequential matches (e.g. QR-completed downstream results), not just the
     // target, so no orphaned records are left for Analytics to count
     if (typeof NewtonDB !== 'undefined' && tournament && tournament.id) {
-        const deletions = rolledBackMatchIds.map(rolledBackId =>
+        const deletions = [...rolledBackMatchIds].map(rolledBackId => // a Set: spread it first
             NewtonDB.deleteMatch(String(tournament.id), rolledBackId)
                 .catch(e => console.warn('NewtonDB deleteMatch failed:', e))
         );
