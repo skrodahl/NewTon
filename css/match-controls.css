@@ -118,6 +118,12 @@
 .mc-chip.mc-paid { background: var(--nt-ok-soft); border-color: #b9dcc5; color: var(--nt-ok); }
 .mc-chip.mc-paid::before { content: "\2713"; }
 .mc-chip.mc-unpaid { background: var(--nt-warn-soft); border-color: #f4dc9a; color: var(--nt-warn); }
+/* an unpaid chip: the name (mark paid) and a × (remove), two buttons in one chip */
+.mc-chip-split { padding: 0; gap: 0; cursor: default; overflow: hidden; }
+.mc-chip-split button { height: 100%; border: 0; background: none; font: inherit; color: inherit; cursor: pointer; padding: 0 8px 0 12px; }
+.mc-chip-split .mc-chip-x { padding: 0 10px 0 8px; border-left: 1px solid #f4dc9a; font-size: 15px; line-height: 1; }
+.mc-chip-split .mc-chip-x:hover { color: var(--nt-danger); background: #fdecec; }
+.mc-note.mc-warn { color: var(--nt-warn); }
 .mc-formats { display: grid; gap: 10px; padding: 0 18px 14px; }
 .mc-fmt { border: 1px solid var(--nt-line-2); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
 .mc-fmt b { font-size: 15px; }

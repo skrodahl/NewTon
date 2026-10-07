@@ -73,6 +73,14 @@ From v5.3.1; none of them urgent.
 
 ---
 
+### Setup: New tournament form not collapsible when Completed or None
+
+Raised 2026-10-06, right after the Setup focal-point work. In Completed and None the New tournament form is the framed focal point, first on the page, with the dark Create button. Folding it away there contradicts that: it removes the one thing the page points at and leaves no dark button (a bug in exactly that state, the outline around a folded bar, was fixed the same day). Its saving is tiny (one row), and None has nothing else on the page to make room for.
+
+**Proposal (not approved):** in Completed and None, show the form as a plain open panel with a heading and no −/+ toggle (the "or import a tournament file" link stays). Keep the toggle for New and Active, where the form is the quiet "+ New tournament" bar. It also removes the "folded while framed" state, so the `.st-create.st-collapsed.st-focus` rule in `css/setup-page.css` can go. Touches `syncSetupNew()` and `setSetupNewOpen()` in `js/tournament-management.js`, and the toggle markup in `tournament.html`.
+
+---
+
 ### Doc pages — back link broken on `file://`
 
 All doc pages use `href="/"` for the "← NewTon DC Tournament Manager" back link. This works on Docker (`/` is the app root or landing page) but navigates to the filesystem root on `file://`.

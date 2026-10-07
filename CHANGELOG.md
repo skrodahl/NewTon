@@ -1,5 +1,12 @@
 ## Unreleased
 
+### Match Controls: before the draw
+
+- **Shuffle & Draw is above Seeding** in Match Controls before the draw: the draw buttons come first, the seeding choices under them. Seeding still applies when you draw.
+- **Unpaid players can be removed from Match Controls**, with a **×** on their chip, as on Player Registration (the same `removePlayer()`). Paid chips have no ×: mark the player unpaid first, so one stray click can't remove someone who has paid.
+- **The draw card no longer promises what it won't do.** It said "Only paid players go into the bracket", then refused the draw with an alert when someone was unpaid. A draw with an unpaid player in the list must never happen: a real player who wasn't marked paid would be left out of the bracket. So while anyone is unpaid, the draw buttons are disabled and say so ("2 players unpaid"), and the note says what to do (mark paid, or remove a player who isn't playing). The refusal in `generateCleanBracket()` stays as the safety net.
+- Files changed: `js/bracket-rendering.js`, `css/match-controls.css`, `js/dynamic-help-system.js`.
+
 ### Setup: one thing to look at
 
 - **Setup has a focal point.** The current tournament is the first thing on the page, and its next step holds the one dark button. **New tournament** is a quiet line under it (**+ New tournament**, with **import a tournament file** beside it) that opens the form when you need it. Once the tournament is **Completed**, the next job is a new one: the form moves to the top and **Create tournament** becomes the dark button, and the recap card below it has plain buttons (Open in Analytics, or Add to Analytics), so there is still one dark button. With nothing loaded, which only happens before a first tournament is created, it looks the same. **One rule marks the focus: the panel to act on is framed** (a mid-grey ring around its border, so it never changes size): the current tournament while it is New or Active, the New tournament form when it is Completed or nothing is loaded. The dark button inside it is the action. The other panel stays plain, and a form you fold away is the quiet bar again, with no frame. Setup only. The form only opens or closes when the state changes, so a redraw never closes it while you type.

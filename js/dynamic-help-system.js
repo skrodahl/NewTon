@@ -138,7 +138,7 @@ const HELP_CONTENT = {
                     <p><strong>Setting Up Your Tournament:</strong></p>
                     <ol>
                         <li>Open the <strong>Match Controls</strong> tab in the header</li>
-                        <li>Before the draw it shows the players: click a name to mark them paid or unpaid, or add a player (found in the player database, or created)</li>
+                        <li>Before the draw it shows the players: click a name to mark them paid or unpaid, click <strong>×</strong> on an unpaid player to remove them, or add a player (found in the player database, or created). Everyone must be paid before the draw: the draw buttons say how many are still unpaid</li>
                         <li>If seeding is on (Global Settings → Tournaments → Seeding), tick <strong>Seed the draw by ranking</strong> to keep the best players apart. The panel shows which earlier tournaments the ranking comes from, and who would be seeded</li>
                         <li>When ready, choose a format under <strong>Shuffle &amp; Draw</strong> and click "<strong>Draw a [X]-player bracket</strong>"</li>
                     </ol>

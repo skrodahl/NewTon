@@ -1451,11 +1451,21 @@ function _mcRefereesHTML(live) {
  */
 function _mcSetupHTML() {
     const paid = players.filter(p => p.paid).length;
-    const chips = players.slice().sort((a, b) => a.name.localeCompare(b.name)).map(p =>
-        `<button type="button" class="mc-chip ${p.paid ? 'mc-paid' : 'mc-unpaid'}" onclick="togglePaid(${p.id}); _mcRefresh();" title="Mark ${escapeHtml(p.name)} ${p.paid ? 'unpaid' : 'paid'}">${escapeHtml(p.name)}</button>`).join('');
+    const unpaid = players.length - paid;
+    // A chip toggles paid. An unpaid one also has a × to remove the player, as on Player
+    // Registration (removePlayer()); a paid player is marked unpaid first, so one stray click
+    // can't remove someone who has paid.
+    const chips = players.slice().sort((a, b) => a.name.localeCompare(b.name)).map(p => {
+        const name = escapeHtml(p.name);
+        if (p.paid) return `<button type="button" class="mc-chip mc-paid" onclick="togglePaid(${p.id}); _mcRefresh();" title="Mark ${name} unpaid">${name}</button>`;
+        return `<span class="mc-chip mc-unpaid mc-chip-split"><button type="button" onclick="togglePaid(${p.id}); _mcRefresh();" title="Mark ${name} paid">${name}</button><button type="button" class="mc-chip-x" onclick="removePlayer(${p.id}); _mcRefresh();" title="Remove ${name}" aria-label="Remove ${name}">&times;</button></span>`;
+    }).join('');
+    // Never a draw with an unpaid player in the list: a player who is there but not marked paid
+    // would be left out of the bracket. The buttons say so; generateCleanBracket() still refuses.
     const formats = (typeof getVisibleFormats === 'function' ? getVisibleFormats() : [{ id: 'DE', name: 'Double Elimination Cup', blurb: '', minPlayers: 4, maxPlayers: 32 }]).map(fmt => {
         let label = `Draw a ${calculateBracketSize(paid, fmt.id)}-player bracket`, ok = true;
-        if (paid < fmt.minPlayers) { label = `Needs ${fmt.minPlayers}+ paid players`; ok = false; }
+        if (unpaid > 0) { label = `${unpaid} player${unpaid === 1 ? '' : 's'} unpaid`; ok = false; }
+        else if (paid < fmt.minPlayers) { label = `Needs ${fmt.minPlayers}+ paid players`; ok = false; }
         else if (paid > fmt.maxPlayers) { label = `At most ${fmt.maxPlayers} players`; ok = false; }
         return `<div class="mc-fmt"><b>${escapeHtml(fmt.name)}</b><p>${escapeHtml(fmt.blurb || '')}</p><button type="button" class="mc-btn mc-primary" onclick="generateBracket('${escapeHtml(fmt.id)}')"${ok ? '' : ' disabled'}>${label}</button></div>`;
     }).join('');
@@ -1466,7 +1476,7 @@ function _mcSetupHTML() {
         ? [['Regular rounds', `Bo${l.seRegularRounds || 3}`], ['Semifinal', `Bo${l.seSemifinal || 3}`], ['Bronze', `Bo${l.seBronze || 5}`], ['Final', `Bo${l.seFinal || 5}`]]
         : [['Regular rounds', `Bo${l.regularRounds}`], ['Frontside semifinal', `Bo${l.frontsideSemifinal}`], ['Backside final', `Bo${l.backsideFinal}`], ['Grand Final', `Bo${l.grandFinal}`]];
     return `<div class="mc-col">
-        <section class="mc-panel"><div class="mc-ph"><h3>Players<small>click to mark paid</small></h3><button type="button" class="mc-link" onclick="showPage('registration')">Player Registration</button></div>
+        <section class="mc-panel"><div class="mc-ph"><h3>Players<small>click a name to mark paid or unpaid</small></h3><button type="button" class="mc-link" onclick="showPage('registration')">Player Registration</button></div>
             ${players.length < 32 ? `<div class="mc-addrow"><input type="text" id="ccPlayerName" class="mc-text" placeholder="Add a player (found in the database, or created)" autocomplete="off" onkeydown="if (event.key === 'Enter') addPlayerFromCC()"><button type="button" class="mc-btn mc-primary" onclick="addPlayerFromCC()">Add</button></div>` : ''}
             <div class="mc-chips">${chips || '<span class="mc-note">No players yet.</span>'}</div></section>
         <section class="mc-panel"><div class="mc-ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><button type="button" class="mc-link" onclick="showPage('config')">Global Settings</button></div>
@@ -1477,9 +1487,11 @@ function _mcSetupHTML() {
             </div></section>
     </div>
     <div class="mc-col">
-        ${typeof Seeding !== 'undefined' ? Seeding.html() : ''}
         <section class="mc-panel"><div class="mc-ph"><h3>Shuffle &amp; Draw</h3></div><div class="mc-formats">${formats}</div>
-            <p class="mc-note">Only paid players go into the bracket.${players.length - paid ? ` ${players.length - paid} still unpaid.` : ''}</p></section>
+            <p class="mc-note${unpaid ? ' mc-warn' : ''}">${unpaid
+                ? `Everyone must be paid before the draw: ${unpaid} still unpaid. Click a name to mark it paid, or &times; to remove a player who isn't playing.`
+                : (players.length ? `All ${players.length} players are paid and go into the bracket.` : 'Add the players first.')}</p></section>
+        ${typeof Seeding !== 'undefined' ? Seeding.html() : ''}
     </div>`;
 }
 
