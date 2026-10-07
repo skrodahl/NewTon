@@ -154,17 +154,32 @@ const Seeding = (() => {
         if (!config.seeding || config.seeding.mode === 'off') return null;
         const seeds = plan(paid, bracketSize).seeds;
         if (!seeds.length) return null;
+        return { seeds: seeds.map(x => x.player), all: st.fraction === 'all', record: recordOf(seeds, st.fraction) };
+    }
+
+    /**
+     * The seeding for a group draw (groups and cups), or null for a random one: every ranked player,
+     * best first, go into the groups in snake order (the Seeded players choice is a bracket's, so it
+     * doesn't apply). Fewer than two ranked players means no seeding.
+     * @param {object[]} paid - the players going into the draw
+     * @returns {{order: object[], record: object}|null} order: the ranked players, best first
+     */
+    function forGroups(paid) {
+        if (!config.seeding || config.seeding.mode === 'off') return null;
+        const ranked = plan(paid, 0).ranked;
+        if (ranked.length < 2) return null;
+        return { order: ranked.map(x => x.player), record: recordOf(ranked, 'groups') };
+    }
+
+    /** What the tournament keeps of a seeded draw: who was seeded, and from which tournaments. */
+    function recordOf(seeds, fraction) {
         const hy = st.period === 'all' ? null : halfYear(st.period === 'previous' ? -1 : 0);
         return {
-            seeds: seeds.map(x => x.player),
-            all: st.fraction === 'all',
-            record: {
-                fraction: st.fraction,
-                seeds: seeds.map(x => ({ id: x.player.id, name: x.player.name, rank: x.rank, points: x.points })),
-                keyword: st.keyword,
-                period: hy ? hy.label : 'All time',
-                tournaments: st.list.filter(t => st.ticked.has(t.id)).map(t => ({ id: t.id, name: t.name }))
-            }
+            fraction,
+            seeds: seeds.map(x => ({ id: x.player.id, name: x.player.name, rank: x.rank, points: x.points })),
+            keyword: st.keyword,
+            period: hy ? hy.label : 'All time',
+            tournaments: st.list.filter(t => st.ticked.has(t.id)).map(t => ({ id: t.id, name: t.name }))
         };
     }
 
@@ -270,5 +285,5 @@ const Seeding = (() => {
         refresh(s);
     }
 
-    return { html, forDraw, keywordFor, isFinal, nameMatches, setOn, setFraction, setKeyword, setPeriod, toggle, setOthersOpen };
+    return { html, forDraw, forGroups, keywordFor, isFinal, nameMatches, setOn, setFraction, setKeyword, setPeriod, toggle, setOthersOpen };
 })();

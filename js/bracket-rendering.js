@@ -68,6 +68,12 @@ function clearBracket() {
  * @returns {number}
  */
 function getMatchRoundOrder(matchId) {
+    // Groups and cups: group matches first, then each cup's rounds (A-R1-3, A-QF1, A-SF1, A-B, A-F)
+    if (typeof Groups !== 'undefined' && Groups.isGroupId(matchId)) return 0;
+    if (typeof Groups !== 'undefined' && Groups.isCupId(matchId)) {
+        const r = matchId.slice(2);
+        return r === 'F' ? 1000 : r === 'B' ? 999 : r.startsWith('SF') ? 30 : r.startsWith('QF') ? 20 : parseInt(r.slice(1)) || 1;
+    }
     if (matchId === 'FINAL' || matchId === 'GRAND-FINAL') return 1000;
     if (matchId === 'BRONZE') return 999;
     if (matchId === 'BS-FINAL') return 900;
@@ -154,6 +160,12 @@ function canMatchStart(match) {
         if (bronzeMatch && !bronzeMatch.completed) {
             return false;
         }
+    }
+
+    // Groups and cups: each cup's final waits for its bronze final, as in single elimination
+    if (tournament && tournament.format === 'GROUPS' && match.side === 'cup' && /-F$/.test(match.id)) {
+        const bronzeMatch = matches.find(m => m.id === `${match.cup}-B`);
+        if (bronzeMatch && !bronzeMatch.completed) return false;
     }
 
     return true;
@@ -371,6 +383,7 @@ function rollbackAchievements(achievements) {
  * @returns {string}
  */
 function _bracketLabel(matchId) {
+    if (typeof getFormat === 'function' && getFormat() === 'GROUPS' && typeof Groups !== 'undefined') return Groups.roundName(matchId);
     if (matchId === 'GRAND-FINAL') return 'Grand Final';
     if (matchId === 'BS-FINAL') return 'Backside Final';
     if (matchId.startsWith('FS-')) return `Frontside Round ${matchId.split('-')[1]}`;
@@ -395,7 +408,9 @@ function _buildUndoMatchCard(id, match, isFrontside) {
 
     const typeDiv = document.createElement('div');
     typeDiv.className = 'undo-bracket-type';
-    if (match.id === 'GRAND-FINAL' || match.id === 'BS-FINAL') {
+    if (typeof getFormat === 'function' && getFormat() === 'GROUPS' && typeof Groups !== 'undefined') {
+        typeDiv.textContent = Groups.roundName(match);
+    } else if (match.id === 'GRAND-FINAL' || match.id === 'BS-FINAL') {
         typeDiv.textContent = match.id;
     } else if (isFrontside) {
         typeDiv.textContent = `⚪ Frontside - Round ${match.id.split('-')[1]}`;
@@ -648,6 +663,8 @@ function generateRefereeOptionsWithConflicts(currentMatchId, currentRefereeId = 
 if (typeof window !== 'undefined') {
     
     window.refreshTournamentUI = refreshTournamentUI;
+    window.undoCupDraw = undoCupDraw;
+    window.undoCupDrawConfirmed = undoCupDrawConfirmed;
 
     // Original functions needed by HTML
     window.updateMatchReferee = updateMatchReferee;
@@ -733,6 +750,9 @@ function isMatchUndoable(matchId) {
     // Read-only tournaments cannot be undone
     if (tournament && tournament.readOnly) return false;
 
+    // Groups and cups: the group stage is locked once the cups are drawn (undo the cup draw first)
+    if (isGroupMatchLocked(matchId)) return false;
+
     const history = getTournamentHistory();
     if (history.length === 0) return false;
 
@@ -749,6 +769,70 @@ function isMatchUndoable(matchId) {
 
     // Safe to undo when nothing downstream is live or manually/QR completed
     return getUndoBlockingMatches(matchId, history).length === 0;
+}
+
+/**
+ * True for a group match of a groups and cups tournament whose cups have been drawn: the cup
+ * draw was made from the group tables, so their results are locked (Docs/GROUPS-AND-CUPS.md).
+ * @param {string} matchId
+ * @returns {boolean}
+ */
+function isGroupMatchLocked(matchId) {
+    if (!tournament || tournament.format !== 'GROUPS' || !tournament.cups) return false;
+    const match = matches.find(m => m.id === matchId);
+    return !!match && match.side === 'group';
+}
+
+/**
+ * Whether the cup draw of a groups and cups tournament can be undone: the cups are drawn, the
+ * tournament isn't read-only, no cup match is live, and none has a result entered by hand or by the
+ * Chalker (round-1 walkovers don't count; they go with the draw).
+ * @returns {boolean}
+ */
+function canUndoCupDraw() {
+    if (!tournament || tournament.format !== 'GROUPS' || !tournament.cups || tournament.readOnly) return false;
+    const history = getTournamentHistory();
+    const cupIds = new Set(matches.filter(m => m.side === 'cup').map(m => m.id));
+    if (matches.some(m => cupIds.has(m.id) && m.active)) return false;
+    return !history.some(t => t.type === 'COMPLETE_MATCH' && cupIds.has(t.matchId) &&
+        (t.completionType === 'MANUAL' || t.completionType === 'QR'));
+}
+
+/**
+ * Ask, then undo the cup draw (undoCupDrawConfirmed()).
+ * @returns {void}
+ */
+function undoCupDraw() {
+    if (!canUndoCupDraw()) return;
+    const set = (id, text) => { const el = document.getElementById(id); if (el) el.textContent = text; };
+    set('undoCupsName', tournament.name || '-');
+    set('undoCupsA', `${tournament.cups.A.seeds.length} players`);
+    set('undoCupsB', tournament.cups.B ? `${tournament.cups.B.seeds.length} players` : 'Not played');
+    pushDialog('undoCupDrawModal', null, true);
+}
+
+/**
+ * Undo the cup draw: remove the cup matches, their transactions (lanes, referees, the round-1
+ * walkovers) and the DRAW_CUPS transaction, and forget the draw (tournament.cups). The group stage
+ * is open again. Nothing outside the cups changes.
+ * @returns {void}
+ */
+function undoCupDrawConfirmed() {
+    popDialog();
+    if (!canUndoCupDraw()) return;
+    const cupIds = new Set(matches.filter(m => m.side === 'cup').map(m => m.id));
+    const history = getTournamentHistory();
+    const clean = history.filter(t => t.type !== 'DRAW_CUPS' && !cupIds.has(t.matchId));
+    localStorage.setItem(`tournament_${tournament.id}_history`, JSON.stringify(clean));
+
+    // In place: the global array is the live data (saveTournamentOnly() writes it)
+    for (let i = matches.length - 1; i >= 0; i--) if (cupIds.has(matches[i].id)) matches.splice(i, 1);
+    delete tournament.cups;
+    tournament.placements = {};
+    console.log(`↩️ Cup draw undone: removed ${cupIds.size} cup matches and ${history.length - clean.length} transactions`);
+
+    if (typeof refreshTournamentUI === 'function') refreshTournamentUI();
+    _mcRefresh();
 }
 
 // Helper function to find matches that are directly affected by undoing a specific match
@@ -1023,7 +1107,8 @@ function undoManualTransaction(transactionId) {
     // 2. Check if we're undoing the tournament's terminal match (DE: GRAND-FINAL, SE: final FS round)
     const _undoFormat = getFormat();
     const isUndoingFinal = targetTransaction.matchId === 'GRAND-FINAL' ||
-        (_undoFormat === 'SE' && isSEFinalMatch(targetTransaction.matchId, tournament.bracketSize));
+        (_undoFormat === 'SE' && isSEFinalMatch(targetTransaction.matchId, tournament.bracketSize)) ||
+        (_undoFormat === 'GROUPS' && tournament.status === 'completed' && /^[AB]-[FB]$/.test(targetTransaction.matchId));
 
     // 3. Create clean history by removing target + consequences
     const cleanHistory = history.filter(t => !transactionsToRemove.includes(t.id));
@@ -1196,6 +1281,7 @@ function getMatchFormatDescription(match) {
 
 // Helper function to get round description
 function getRoundDescription(match) {
+    if (typeof getFormat === 'function' && getFormat() === 'GROUPS' && typeof Groups !== 'undefined') return Groups.roundName(match);
     if (match.id === 'GRAND-FINAL') return 'Grand Final';
     if (match.id === 'BS-FINAL') return 'Backside Final';
 
@@ -1384,6 +1470,7 @@ function _mcRoundTitle(key) {
  * @returns {string}
  */
 function _mcActiveHTML(matchData) {
+    if (typeof getFormat === 'function' && getFormat() === 'GROUPS') return _mcGroupsHTML(matchData);
     const isSE = typeof getFormat === 'function' && getFormat() === 'SE';
     const live = matchData.live || [];
     const lanes = _mcLanes();
@@ -1425,6 +1512,202 @@ function _mcActiveHTML(matchData) {
         <section class="mc-panel"><div class="mc-ph"><h3>Ready to start<small>${queued.length}</small></h3><span class="mc-hint">Lane and referee are optional</span></div>${queue}</section>
     </div>
     <div class="mc-col">${_mcRefereesHTML(live)}</div>`;
+}
+
+// --- Match Controls: groups and cups (Docs/GROUPS-AND-CUPS.md) ---
+//
+// The same lanes board, queue rows, referee controls and Start as the brackets, by stage: the
+// group stage (the queue by group, planned referees, the group tables), the Draw the cups step once
+// every group match is played, and the cups (A and B side by side, as frontside and backside).
+
+/** Play the B cup: the Draw the cups switch, kept for the tournament while Match Controls redraws. */
+let _mcPlayB = { tid: null, on: true };
+
+/**
+ * The names of a match's players who are playing another match right now (a group stage only).
+ * @param {object} match
+ * @returns {string[]}
+ */
+function _mcBusyPlayers(match) {
+    const playing = getPlayersInLiveMatches(match.id);
+    return [match.player1, match.player2].filter(p => p && playing.includes(parseInt(p.id))).map(p => p.name);
+}
+
+/**
+ * Can this match start now: both players free and no referee conflict.
+ * @param {object} match
+ * @returns {boolean}
+ */
+const _mcCanStart = match => !_mcBusyPlayers(match).length && !checkRefereeConflict(match.id).hasConflict;
+
+/**
+ * A queue row for a groups and cups match: as _mcQueueRow(), with the planned referee chosen in
+ * the referee control (filled in at Start when free), and Start held back while a player is on
+ * another board.
+ * @param {object} match
+ * @returns {string}
+ */
+function _mcPlanRow(match) {
+    const conflict = checkRefereeConflict(match.id);
+    const busy = _mcBusyPlayers(match);
+    const planned = match.referee ? null : Groups.plannedRefereeFor(match);
+    const shownRef = match.referee || (planned ? planned.id : null);
+    const refBusy = planned && !isPlayerAvailableAsReferee(planned.id, match.id);
+    const confl = [1, 2].filter(n => conflict[`player${n}IsReferee`]).map(n => (match['player' + n] || {}).name).filter(Boolean);
+    const plan = !match.referee && !planned ? Groups.plannedRefereeText(match) : '';
+    let note = `<small>Best of ${escapeHtml(String(match.legs || ''))}${plan ? ` · ref: ${escapeHtml(plan)}` : ''}</small>`;
+    if (busy.length) note = `<small class="mc-warn">${escapeHtml(busy.join(' and '))} ${busy.length > 1 ? 'are' : 'is'} playing: wait</small>`;
+    else if (conflict.hasConflict) note = `<small class="mc-warn">⚠ ${escapeHtml(confl.join(' and '))} ${confl.length > 1 ? 'are' : 'is'} refereeing another match</small>`;
+    else if (refBusy) note = `<small class="mc-warn">Referee ${escapeHtml(planned.name)} is busy: change, or wait</small>`;
+    const handler = getButtonClickHandler('ready', match.id);
+    return `<div id="cc-match-card-${match.id}" class="mc-qrow">
+        ${_mcTag(match.id)}
+        <div class="mc-who"><span><b>${_mcName(match, 1, conflict)}</b><span class="mc-vs">v</span><b>${_mcName(match, 2, conflict)}</b></span>${note}</div>
+        <select class="mc-sel" aria-label="Lane for ${match.id}" onchange="updateMatchLane('${match.id}', this.value);">${generateLaneOptions(match.id, match.lane)}</select>
+        <select class="mc-sel" aria-label="Referee for ${match.id}" onchange="updateMatchReferee('${match.id}', this.value);">${generateRefereeOptionsWithConflicts(match.id, shownRef)}</select>
+        <button type="button" class="mc-btn mc-sm mc-primary" onclick="${handler}; _mcRefresh();"${busy.length || conflict.hasConflict ? ' disabled' : ''}>Start</button>
+    </div>`;
+}
+
+/**
+ * The group tables, compact, for Match Controls' right column: place, name, won–lost and leg
+ * difference, the top two marked for the A cup. Before the cups are drawn, a player level with the
+ * one above on everything gets ▲ (the operator decides the tie, Groups.moveUp()).
+ * @returns {string}
+ */
+function _mcGroupTablesHTML() {
+    const canMove = !tournament.cups && !tournament.readOnly;
+    const sign = n => n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0';
+    const body = Groups.groupList().map(g => {
+        const rows = Groups.standings(g.name);
+        return `<div class="mc-gt"><h4>Group ${escapeHtml(g.name)}<small>${Groups.groupMatches(g.name).filter(m => m.completed).length} of ${Groups.groupMatches(g.name).length}</small></h4>
+            <ol>${rows.map((r, i) => {
+                const up = canMove && i > 0 && r.level && rows[i - 1].level && r.played
+                    ? `<button type="button" class="mc-gup" onclick="Groups.moveUp('${escapeHtml(g.name)}', ${JSON.stringify(r.id).replace(/"/g, '&quot;')}); renderBracket(); _mcRefresh(0);" title="Level on everything: put ${escapeHtml(r.player.name)} above ${escapeHtml(rows[i - 1].player.name)}">▲</button>` : '';
+                return `<li class="${r.pos <= 2 ? 'mc-toa' : ''}"><b>${escapeHtml(r.player.name)}</b>${r.level && r.played ? '<i title="Level on wins, legs and head-to-head">level</i>' : ''}${up}<span>${r.won}–${r.lost} · ${sign(r.diff)}</span></li>`;
+            }).join('')}</ol></div>`;
+    }).join('');
+    return `<section class="mc-panel"><div class="mc-ph"><h3>Groups<small>top two to the A cup</small></h3><button type="button" class="mc-link" onclick="showBracketView('bracket'); BracketView.setGroupsView('groups')">Group tables</button></div>
+        <div class="mc-gts">${body}</div></section>`;
+}
+
+/**
+ * The Draw the cups step, once every group match is played: both seeded fields, the B cup switch,
+ * and the button. Nothing is drawn until the operator says so.
+ * @returns {string}
+ */
+function _mcDrawCupsHTML() {
+    if (_mcPlayB.tid !== tournament.id) _mcPlayB = { tid: tournament.id, on: true };
+    const f = Groups.cupFields();
+    const g = Groups.groupList().length;
+    const place = r => r.pos === 1 ? 'winner' : r.pos === 2 ? 'runner-up' : r.pos === 3 ? '3rd' : '4th';
+    const field = (rows, title, off) => `<div class="mc-field${off ? ' mc-off-field' : ''}"><h4>${title}<small>${rows.length} players${off ? ' · not played' : ''}</small></h4>
+        <ol>${rows.map(r => `<li><b>${escapeHtml(r.player.name)}</b><span>Group ${escapeHtml(r.group)} ${place(r)} · ${r.won}–${r.lost}</span></li>`).join('')}</ol></div>`;
+    const canB = f.B.length >= 2;
+    const playB = _mcPlayB.on && canB;
+    const level = Groups.groupList().some(gr => Groups.standings(gr.name).some(r => r.level));
+    return `<section class="mc-panel mc-drawcups"><div class="mc-ph"><h3>Draw the cups<small>every group match is played</small></h3></div>
+        <p class="mc-note">Group winners are seeds 1–${g}, runners-up ${g + 1}–${2 * g}, ranked across the groups per match (win rate, then leg difference). The B cup takes the rest the same way. Top seed meets bottom seed; the best seeds get any byes.</p>
+        <div class="mc-fields">${field(f.rows.A, 'A cup', false)}${field(f.rows.B, 'B cup', !playB)}</div>
+        ${level ? '<p class="mc-note mc-warn">Some players are level on wins, legs and head-to-head: the group seed decides, unless you change it with ▲ in the group tables.</p>' : ''}
+        <div class="mc-drawbar">
+            <label class="mc-check"><input type="checkbox"${playB ? ' checked' : ''}${canB ? '' : ' disabled'} onchange="_mcPlayB.on = this.checked; _mcRefresh(0);"> Play the B cup${canB ? '' : ' <small>(needs two players)</small>'}</label>
+            <button type="button" class="mc-btn mc-primary" onclick="drawCupsFromControls()">Draw the cups →</button>
+        </div></section>`;
+}
+
+/**
+ * Draw the cups from Match Controls (drawCups()), then show them.
+ * @returns {void}
+ */
+function drawCupsFromControls() {
+    const playB = _mcPlayB.tid === tournament.id ? _mcPlayB.on : true;
+    if (drawCups(playB)) _mcRefresh(0);
+}
+
+/**
+ * A running groups and cups tournament: the lanes board and free lanes (Next up prefers a match
+ * whose players and planned referee are free), then by stage: the group queue and the group tables;
+ * the Draw the cups step; or the two cups' queues side by side, with Undo the cup draw while allowed.
+ * @param {{live: object[]}} matchData
+ * @returns {string}
+ */
+function _mcGroupsHTML(matchData) {
+    const live = matchData.live || [];
+    const lanes = _mcLanes();
+    const used = new Set(matches.filter(m => !m.completed && m.lane).map(m => String(m.lane)));
+    const free = lanes.usable.filter(l => !used.has(String(l)));
+    const cups = !!tournament.cups;
+    const drawStep = !cups && Groups.allGroupsDone();
+
+    // the queue: the group stage's next matches by group (two each, in their fixed order), or the cups' ready matches
+    let queued = [], queue = '';
+    if (!cups) {
+        const list = Groups.groupList();
+        const upcoming = list.map(g => ({ g, ms: Groups.groupMatches(g.name).filter(m => !m.completed && !m.active) }));
+        // across the groups, in turn: each group's next match, then each group's one after
+        for (let i = 0; i < 6; i++) upcoming.forEach(u => { if (u.ms[i]) queued.push(u.ms[i]); });
+        const block = u => u.ms.length
+            ? `<div class="mc-qround"><span>Group ${escapeHtml(u.g.name)}</span><span>${Groups.groupMatches(u.g.name).filter(m => m.completed).length} of ${Groups.groupMatches(u.g.name).length} played</span></div>${u.ms.slice(0, 2).map(_mcPlanRow).join('')}`
+            : '';
+        const half = Math.ceil(upcoming.length / 2);
+        const col = us => us.map(block).join('') || '<div class="mc-qempty">These groups are done.</div>';
+        queue = `<div class="mc-qcols"><div class="mc-qcol">${col(upcoming.slice(0, half))}</div><div class="mc-qcol">${col(upcoming.slice(half))}</div></div>`;
+    } else {
+        const ready = cup => matches.filter(m => m.side === 'cup' && m.cup === cup && getMatchState(m) === 'ready')
+            .sort((a, b) => a.round - b.round || a.positionInRound - b.positionInRound);
+        const col = cup => {
+            const rs = ready(cup);
+            if (!tournament.cups[cup]) return '<div class="mc-qempty">No B cup tonight.</div>';
+            if (!rs.length) return `<div class="mc-qempty">Nothing ready in the ${cup} cup.</div>`;
+            let last = null;
+            return rs.map(m => {
+                const title = Groups.roundName(m);
+                const head = title !== last ? `<div class="mc-qround"><span>${escapeHtml(title)}</span></div>` : '';
+                last = title;
+                return head + _mcPlanRow(m);
+            }).join('');
+        };
+        queued = ready('A').concat(ready('B')).sort((a, b) => a.round - b.round);
+        queue = `<div class="mc-qcols"><div class="mc-qcol">${col('A')}</div><div class="mc-qcol">${col('B')}</div></div>`;
+    }
+
+    const startable = queued.filter(_mcCanStart);
+    // a planned referee who is known and free (or no plan); "loser of A-QF1" before that match is played isn't
+    const refFree = m => {
+        if (m.referee || !m.plannedReferee) return true;
+        const p = Groups.plannedRefereeFor(m);
+        return !!p && isPlayerAvailableAsReferee(p.id, m.id);
+    };
+    const next = startable.find(refFree) || startable[0];
+    const nextRef = next && !next.referee && Groups.plannedRefereeFor(next);
+    const nextNote = !next || next.referee ? ''
+        : nextRef ? `, referee ${escapeHtml(nextRef.name)}${refFree(next) ? '' : ' (busy)'}`
+        : next.plannedReferee ? `, referee: ${escapeHtml(Groups.plannedRefereeText(next))} (not played yet)` : '';
+
+    const qrMode = typeof getChalkerHandover !== 'function' || getChalkerHandover() === 'qr';
+    const scanQR = qrMode && live.length ? ` <button type="button" class="mc-btn mc-sm mc-scan" onclick="openResultQRScanner(null)">Scan QR results</button>` : '';
+    const tiles = live.filter(m => m.lane).concat(live.filter(m => !m.lane)).map(_mcLiveTile).join('');
+    const freeLine = `<div class="mc-free"><span class="mc-k">Free</span>` +
+        (free.length
+            ? free.map(l => next
+                ? `<button type="button" class="mc-lanechip" onclick="startMatchOnLane('${next.id}', ${l})" title="Start ${next.id} on Lane ${l}">${l}</button>`
+                : `<span class="mc-lanechip mc-idle">${l}</span>`).join('')
+            : `<span class="mc-none">${lanes.usable.length ? 'No free lanes' : 'No lanes set up'}</span>`) +
+        (next && free.length ? `<span class="mc-next">Next up: ${_mcTag(next.id)} ${escapeHtml(next.player1.name)} v ${escapeHtml(next.player2.name)}${nextNote}<em>click a free lane to start it there</em></span>` : '') +
+        (lanes.excluded.length ? `<span class="mc-off">Not in use: ${lanes.excluded.join(', ')}</span>` : '') +
+        `</div>`;
+
+    const lanesPanel = `<section class="mc-panel"><div class="mc-ph"><h3>Lanes<small>${live.length} live · ${free.length} free</small></h3><span class="mc-hint">Click the winner to finish a match${scanQR}</span></div>
+        ${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}${freeLine}</section>`;
+    const queuePanel = drawStep ? _mcDrawCupsHTML()
+        : `<section class="mc-panel"><div class="mc-ph"><h3>${cups ? 'Ready to start' : 'Up next'}<small>${cups ? `${queued.length}` : 'by group, in their fixed order'}</small></h3><span class="mc-hint">Referees are planned; change them here</span></div>${queue}</section>`;
+    const cupDraw = cups ? `<section class="mc-panel"><div class="mc-ph"><h3>Cup draw</h3></div>
+        <p class="mc-note">A cup: ${tournament.cups.A.seeds.length} players${tournament.cups.B ? ` · B cup: ${tournament.cups.B.seeds.length} players` : ' · no B cup'}.</p>
+        ${canUndoCupDraw() ? '<p class="mc-note"><button type="button" class="mc-btn mc-sm" onclick="undoCupDraw()">Undo the cup draw…</button></p>'
+            : '<p class="mc-note">Group results are locked; the draw can no longer be undone once a cup match has been started or played.</p>'}</section>` : '';
+    return `<div class="mc-col">${lanesPanel}${queuePanel}</div>
+    <div class="mc-col">${cups ? cupDraw + _mcRefereesHTML(live) : _mcGroupTablesHTML() + _mcRefereesHTML(live)}</div>`;
 }
 
 /**
@@ -2071,9 +2354,10 @@ function _mcHighlights() {
 
     // The night in numbers: always the same six
     const sum = f => paid.reduce((s, p) => s + f(p), 0);
-    const format = typeof getFormat === 'function' && getFormat() === 'SE' ? 'Single elimination' : 'Double elimination';
+    const fmtId = typeof getFormat === 'function' ? getFormat() : 'DE';
+    const format = fmtId === 'GROUPS' ? 'Groups and cups' : fmtId === 'SE' ? 'Single elimination' : 'Double elimination';
     const facts = [
-        ['Bracket', `${format} · ${tournament.bracketSize || players.length}`],
+        [fmtId === 'GROUPS' ? 'Format' : 'Bracket', `${format} · ${tournament.bracketSize || players.length}`],
         ['Total points', sum(points)],
         ['Matches played', played.length],
         ['Short legs', sum(p => len(p.stats.shortLegs))],
@@ -2205,6 +2489,10 @@ function getDetailedMatchState(matchId) {
     if (match.player1?.isBye || match.player2?.isBye ||
         match.player1?.name?.includes('Walkover') || match.player2?.name?.includes('Walkover')) {
         return { state: 'completed', text: 'Cannot Undo, Walkover' };
+    }
+
+    if (isGroupMatchLocked(matchId)) {
+        return { state: 'completed', text: 'Cannot Undo, the cups are drawn' };
     }
 
     // Check undo status for regular completed matches

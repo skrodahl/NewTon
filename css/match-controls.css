@@ -206,3 +206,29 @@
   .mc-settings > div + div { border-left: 0; border-top: 1px solid var(--nt-line); }
 }
 @media (prefers-reduced-motion: reduce) { .mc-btn.mc-result, .mc-flash { animation: none; } }
+
+/* ---- groups and cups (Docs/GROUPS-AND-CUPS.md) ---- */
+/* the group tables in the right column */
+.mc-gts { display: grid; gap: 12px; padding: 0 18px 14px; }
+.mc-gt h4 { margin: 0 0 4px; font-size: 12px; font-weight: 700; color: var(--nt-muted); letter-spacing: .04em; text-transform: uppercase; display: flex; justify-content: space-between; }
+.mc-gt h4 small { font-weight: 500; letter-spacing: 0; text-transform: none; }
+.mc-gt ol { list-style: none; counter-reset: gt; margin: 0; padding: 0; display: grid; gap: 1px; }
+.mc-gt li { counter-increment: gt; display: flex; align-items: center; gap: 6px; font-size: 13px; padding: 2px 0 2px 8px; box-shadow: inset 3px 0 0 var(--nt-card-line); }
+.mc-gt li.mc-toa { box-shadow: inset 3px 0 0 var(--nt-ok); }
+.mc-gt li::before { content: counter(gt); width: 14px; color: var(--nt-muted); font-weight: 700; font-size: 12px; }
+.mc-gt li b { flex: 1; font-weight: 600; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.mc-gt li i { font-style: normal; font-size: 10px; font-weight: 700; text-transform: uppercase; color: var(--nt-warn); background: var(--nt-warn-soft); border-radius: 4px; padding: 0 4px; }
+.mc-gt li span { color: var(--nt-muted); font-size: 12px; font-variant-numeric: tabular-nums; white-space: nowrap; }
+.mc-gup { border: 1px solid var(--nt-line-2); background: var(--nt-surface); border-radius: 5px; font-size: 10px; line-height: 1; padding: 3px 5px; cursor: pointer; color: var(--nt-ink-2); }
+.mc-gup:hover { border-color: var(--nt-ink); }
+/* Draw the cups: both seeded fields, then the switch and the button (framed: the one thing to do) */
+.mc-drawcups { border-color: var(--nt-card-line); box-shadow: 0 0 0 1px var(--nt-card-line); }
+.mc-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; padding: 0 18px 12px; }
+.mc-field h4 { margin: 0 0 6px; font-size: 13px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; }
+.mc-field h4 small { font-weight: 500; color: var(--nt-muted); font-size: 12px; }
+.mc-field ol { margin: 0; padding: 0 0 0 22px; display: grid; gap: 3px; font-size: 13px; }
+.mc-field li b { font-weight: 600; }
+.mc-field li span { color: var(--nt-muted); font-size: 12px; margin-left: 6px; }
+.mc-off-field { opacity: .5; }
+.mc-drawbar { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 12px 18px 16px; border-top: 1px solid var(--nt-line); }
+.mc-drawbar .mc-check { padding: 0; }

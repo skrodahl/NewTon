@@ -136,6 +136,8 @@ function renderCompletionAchievements() {
  */
 function getProgressionTable() {
     const format = getFormat();
+    // Groups and cups: only the cups progress anyone (group matches are not in the table)
+    if (format === 'GROUPS') return cupsProgressionTable(tournament.cups);
     const table = format === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
     return table[tournament.bracketSize];
 }
@@ -478,6 +480,66 @@ const SE_MATCH_PROGRESSION = {
 };
 
 /**
+ * GROUPS AND CUPS: the fixed order of each group's matches, by group size (Docs/GROUPS-AND-CUPS.md).
+ * Each entry is [player 1, player 2, referee] by seed in the group (1 = the first player drawn into
+ * it); the referee is from the group, or null. Group matches progress no one (everybody plays
+ * everybody), so they are not in any progression table.
+ *
+ * Group of 4: rounds are matches 1-2, 3-4 and 5-6; duties 2/2/1/1, nobody referees twice in a row,
+ * and only two back-to-back plays (players 2 and 3, once each), the minimum for four players.
+ * Group of 3: the player not playing referees, once each.
+ */
+const GROUP_SCHEDULES = {
+    2: [[1, 2, null]],
+    3: [[2, 3, 1], [1, 3, 2], [1, 2, 3]],
+    4: [[1, 4, 2], [2, 3, 4], [2, 4, 1], [1, 3, 2], [3, 4, 1], [1, 2, 3]]
+};
+
+/**
+ * A cup match's ID: the cup letter and the round's short name, from its single-elimination ID.
+ * 8 players: FS-1-2 → A-QF2, FS-2-1 → A-SF1, FS-3-1 → A-B (bronze final), FS-4-1 → A-F (final);
+ * 16 players' first round: FS-1-3 → A-R1-3. A cup is SE_MATCH_PROGRESSION[size] with its IDs renamed
+ * this way, so the SE table stays the one source of cup progression.
+ * @param {'A'|'B'} cup
+ * @param {string} seId - e.g. 'FS-2-1'
+ * @param {4|8|16} size - the cup's bracket size
+ * @returns {string}
+ */
+function cupMatchId(cup, seId, size) {
+    const [, r, n] = seId.split('-').map(Number);
+    const total = { 4: 3, 8: 4, 16: 5, 32: 6 }[size];
+    if (r === total) return `${cup}-F`;
+    if (r === total - 1) return `${cup}-B`;
+    if (r === total - 2) return `${cup}-SF${n}`;
+    if (r === total - 3) return `${cup}-QF${n}`;
+    return `${cup}-R${r}-${n}`;
+}
+
+/**
+ * The cups' progression: each drawn cup's SE_MATCH_PROGRESSION table with its IDs renamed
+ * (cupMatchId), the two joined. Empty before the cups are drawn. Built from tournament.cups only.
+ * @param {{A?: {size: number}, B?: {size: number}|null}|null|undefined} cups - tournament.cups
+ * @returns {Object} matchId -> { winner: [matchId, slot], loser: [matchId, slot] }
+ */
+function cupsProgressionTable(cups) {
+    const table = {};
+    if (!cups) return table;
+    ['A', 'B'].forEach(cup => {
+        const c = cups[cup];
+        const se = c && SE_MATCH_PROGRESSION[c.size];
+        if (!se) return;
+        Object.entries(se).forEach(([seId, rule]) => {
+            const out = {};
+            ['winner', 'loser'].forEach(kind => {
+                if (rule[kind]) out[kind] = [cupMatchId(cup, rule[kind][0], c.size), rule[kind][1]];
+            });
+            table[cupMatchId(cup, seId, c.size)] = out;
+        });
+    });
+    return table;
+}
+
+/**
  * Advances winner and loser to their next matches using DE_MATCH_PROGRESSION lookup table.
  * This is the ONLY function that moves players between matches - single source of truth.
  *
@@ -724,7 +786,11 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             const completionTable = getProgressionTable();
             const completionRule = completionTable && completionTable[matchId];
             const isSEBronze = getFormat() === 'SE' && isSEBronzeMatch(matchId, tournament.bracketSize);
-            const isTournamentFinal = completionRule && Object.keys(completionRule).length === 0 && !isSEBronze;
+            // Groups and cups: both cups' bronze and final have {} too, so the format says when it
+            // is over instead: when every drawn cup's final has been played
+            const isTournamentFinal = getFormat() === 'GROUPS'
+                ? (typeof Groups !== 'undefined' && Groups.isComplete())
+                : completionRule && Object.keys(completionRule).length === 0 && !isSEBronze;
 
             if (isTournamentFinal) {
                 const format = getFormat();
@@ -733,9 +799,12 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 // Clear any existing placements
                 tournament.placements = {};
 
-                // 1st and 2nd place (final match winner/loser)
-                tournament.placements[String(winner.id)] = 1;
-                tournament.placements[String(loser.id)] = 2;
+                // 1st and 2nd place (final match winner/loser); groups and cups places everyone
+                // from both cups in calculateAllRankings() below
+                if (format !== 'GROUPS') {
+                    tournament.placements[String(winner.id)] = 1;
+                    tournament.placements[String(loser.id)] = 2;
+                }
 
                 if (format === 'DE') {
                     // 3rd place (BS-FINAL loser)
@@ -805,7 +874,8 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
                         // HELP SYSTEM INTEGRATION - Tournament completed
                         if (typeof showHelpHint === 'function') {
-                            showHelpHint(`🏆 Tournament completed! ${winner.name} wins. Check results in Match Controls or on Registration page.`, 8000);
+                            const champion = format === 'GROUPS' ? (matches.find(m => m.id === 'A-F') || {}).winner || winner : winner;
+                            showHelpHint(`🏆 Tournament completed! ${champion.name} wins. Check results in Match Controls or on Registration page.`, 8000);
                         }
                     } catch (e) {
                         console.warn('displayResults failed after completion', e);
@@ -902,6 +972,11 @@ function calculateAllRankings() {
     const format = getFormat();
     if (format === 'SE') {
         calculateSERankings();
+        return;
+    }
+    if (format === 'GROUPS') {
+        // Derived from the cups as they stand (Docs/GROUPS-AND-CUPS.md, Placings)
+        tournament.placements = typeof Groups !== 'undefined' ? Groups.placements() : {};
         return;
     }
 
@@ -1329,9 +1404,10 @@ function generateCleanBracket(format) {
         return false;
     }
 
-    const minPlayers = 4;
+    const formatInfo = typeof TOURNAMENT_FORMATS !== 'undefined' ? TOURNAMENT_FORMATS.find(f => f.id === format) : null;
+    const minPlayers = (formatInfo && formatInfo.minPlayers) || 4;
     if (paidPlayers.length < minPlayers) {
-        alert(`At least ${minPlayers} paid players are required to generate a ${format === 'SE' ? 'Single' : 'Double'} Elimination bracket.`);
+        alert(`At least ${minPlayers} paid players are required to draw ${formatInfo ? `a ${formatInfo.name} tournament` : 'the bracket'}.`);
         console.error(`Bracket generation blocked: fewer than ${minPlayers} paid players`);
 
         // HELP SYSTEM INTEGRATION
@@ -1347,8 +1423,9 @@ function generateCleanBracket(format) {
         return false;
     }
 
-    // Determine bracket size (format-aware: SE supports 2 and 4 player brackets)
-    const bracketSize = calculateBracketSize(paidPlayers.length, format);
+    // Determine bracket size (format-aware: SE supports 2 and 4 player brackets; groups and cups:
+    // the number of players drawn into the groups)
+    const bracketSize = format === 'GROUPS' ? paidPlayers.length : calculateBracketSize(paidPlayers.length, format);
     const byeCount = bracketSize - paidPlayers.length;
 
     // Show confirmation dialog with player list
@@ -1369,17 +1446,24 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
     pendingFormat = format;
 
     // Sidebar — bracket summary
-    const formatLabel = format === 'SE' ? 'Single Elimination' : 'Double Elimination';
-    document.getElementById('bracketConfirmTitle').textContent = `Generate ${formatLabel} Bracket`;
+    const groups = format === 'GROUPS';
+    const formatLabel = groups ? 'Groups and Cups' : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+    document.getElementById('bracketConfirmTitle').textContent = groups ? 'Draw the Groups' : `Generate ${formatLabel} Bracket`;
     document.getElementById('bracketConfirmName').textContent = (tournament && tournament.name) || '-';
     document.getElementById('bracketConfirmFormat').textContent = formatLabel;
-    document.getElementById('bracketConfirmSize').textContent = bracketSize;
+    const sizeLabel = document.getElementById('bracketConfirmSizeLabel');
+    if (sizeLabel) sizeLabel.textContent = groups ? 'Groups' : 'Bracket Size';
+    document.getElementById('bracketConfirmSize').textContent = groups ? Groups.describeSizes(paidPlayers.length) : bracketSize;
     document.getElementById('bracketConfirmPlayerCount').textContent = paidPlayers.length;
+    const desc = document.getElementById('bracketConfirmDesc');
+    if (desc) desc.textContent = groups
+        ? `These players will be drawn into groups${Groups.seededDraw(paidPlayers) ? ', by ranking' : ' at random'}. Everybody plays everybody in their group; the top two of each group go on to the A cup, the rest to the B cup.`
+        : 'These players will be placed into the bracket. Make sure all players are registered before proceeding.';
 
     // Byes field is conditional — show only when there are byes
     const byesLabel = document.getElementById('bracketConfirmByesLabel');
     const byesValue = document.getElementById('bracketConfirmByes');
-    if (byeCount > 0) {
+    if (byeCount > 0 && !groups) {
         byesLabel.style.display = '';
         byesValue.style.display = '';
         byesValue.textContent = byeCount;
@@ -1417,6 +1501,13 @@ function confirmBracketGeneration() {
     const format = pendingFormat;
     const paidPlayers = players.filter(p => p.paid);
 
+    // Groups and cups: the groups are drawn here, the cups later from the groups' results
+    if (format === 'GROUPS') {
+        drawGroups(paidPlayers);
+        afterDraw();
+        return true;
+    }
+
     // Determine bracket size (format-aware)
     const bracketSize = calculateBracketSize(paidPlayers.length, format);
 
@@ -1448,6 +1539,17 @@ function confirmBracketGeneration() {
         processAutoAdvancements();
     }
 
+    console.log(`✓ Clean bracket generated: ${bracketSize} positions, ${paidPlayers.length} real players`);
+    afterDraw();
+    return true;
+}
+
+/**
+ * After a draw (any format): save, draw the bracket page, refresh results, Match Controls and
+ * Registration, and go to the bracket page.
+ * @returns {void}
+ */
+function afterDraw() {
     // Save and render
     if (typeof saveTournament === 'function') {
         saveTournament();
@@ -1456,8 +1558,6 @@ function confirmBracketGeneration() {
     if (typeof renderBracket === 'function') {
         renderBracket();
     }
-
-    console.log(`✓ Clean bracket generated: ${bracketSize} positions, ${paidPlayers.length} real players`);
 
     // Refresh results table immediately after bracket generation
     if (typeof displayResults === 'function') {
@@ -1487,7 +1587,134 @@ function confirmBracketGeneration() {
     if (typeof onBracketGenerated === 'function') {
         onBracketGenerated();
     }
+}
 
+/** A player as a match slot holds it (as advancePlayer() places one). */
+const _slotPlayer = p => ({ id: p.id, name: p.name, paid: p.paid, stats: p.stats });
+
+/**
+ * GROUPS AND CUPS: draw the groups and make every group match, in each group's fixed order
+ * (GROUP_SCHEDULES) with its planned referee. Who goes into which group is Groups.drawGroups()
+ * (snake order, by ranking when seeding is on). Sets the tournament's format, draw and status;
+ * the caller saves. Docs/GROUPS-AND-CUPS.md
+ * @param {Player[]} paid - everyone in the draw (all paid)
+ * @returns {void}
+ */
+function drawGroups(paid) {
+    const draw = Groups.drawGroups(paid);
+    matches = [];
+    let numericId = 1;
+    draw.list.forEach(group => {
+        (GROUP_SCHEDULES[group.players.length] || []).forEach(([a, b, r], i) => {
+            const ref = r ? group.players[r - 1] : null;
+            matches.push({
+                id: `${group.name}-${i + 1}`,
+                numericId: numericId++,
+                round: group.players.length === 4 ? Math.ceil((i + 1) / 2) : i + 1,
+                side: 'group',
+                group: group.name,
+                player1: _slotPlayer(group.players[a - 1]),
+                player2: _slotPlayer(group.players[b - 1]),
+                winner: null,
+                loser: null,
+                lane: null,
+                legs: (config.legs && config.legs.groupMatches) || 3,
+                referee: null,
+                plannedReferee: ref ? { player: ref.id } : null,
+                active: false,
+                completed: false,
+                positionInRound: i
+            });
+        });
+    });
+
+    tournament.bracket = draw.order;            // the players in draw order: "the draw is made"
+    tournament.bracketSize = paid.length;
+    tournament.format = 'GROUPS';
+    tournament.groups = { list: draw.list.map(g => ({ name: g.name, players: g.players.map(p => p.id) })) };
+    delete tournament.cups;
+    if (draw.seeding) tournament.seeding = draw.seeding; else delete tournament.seeding;
+    tournament.status = 'active';
+    console.log(`✓ Groups drawn: ${draw.list.map(g => `${g.name} (${g.players.length})`).join(', ')}; ${matches.length} group matches`);
+}
+
+/**
+ * GROUPS AND CUPS: draw the cups once every group match is played. The fields and seeds come
+ * from the group tables (Groups.cupFields()); each cup is single elimination seeded "All"
+ * (placeSeededPlayers(), top seed v bottom seed, byes to the best seeds), its matches the SE
+ * structure with cup IDs (cupMatchId). Recorded as a DRAW_CUPS transaction, which undoCupDraw()
+ * removes again while no cup result has been entered. Docs/GROUPS-AND-CUPS.md
+ * @param {boolean} playB - play the B cup (needs at least two players)
+ * @returns {boolean} true when the cups were drawn
+ */
+function drawCups(playB) {
+    if (getFormat() !== 'GROUPS' || tournament.cups || tournament.readOnly) return false;
+    if (!Groups.allGroupsDone()) {
+        alert('Every group match must be played before the cups are drawn.');
+        return false;
+    }
+    const fields = Groups.cupFields();
+    const cups = { bCup: !!playB && fields.B.length >= 2, A: null, B: null };
+    let numericId = Math.max(0, ...matches.map(m => m.numericId || 0)) + 1;
+    const made = [];
+
+    ['A', 'B'].forEach(cup => {
+        if (cup === 'B' && !cups.bCup) return;
+        const field = fields[cup].map(_slotPlayer);
+        const size = calculateBracketSize(field.length, 'SE');
+        const bracket = placeSeededPlayers(field, size, field, true);
+        cups[cup] = { size, seeds: field.map(p => p.id) };
+        calculateCleanBracketStructure(size, 'SE').frontside.forEach((roundInfo, roundIndex) => {
+            for (let i = 0; i < roundInfo.matches; i++) {
+                const seId = `FS-${roundInfo.round}-${i + 1}`;
+                const legs = isSEFinalMatch(seId, size) ? config.legs.seFinal
+                    : isSEBronzeMatch(seId, size) ? config.legs.seBronze
+                    : isSESemifinal(seId, size) ? config.legs.seSemifinal
+                    : isSEQuarterfinal(seId, size) ? config.legs.seQuarterfinal
+                    : config.legs.seRegularRounds;
+                const tbd = n => createTBDPlayer(`${cup.toLowerCase()}-${roundInfo.round}-${i}-${n}`);
+                made.push({
+                    id: cupMatchId(cup, seId, size),
+                    seId,
+                    numericId: numericId++,
+                    round: roundInfo.round,
+                    side: 'cup',
+                    cup,
+                    player1: roundIndex === 0 ? bracket[i * 2] : tbd(1),
+                    player2: roundIndex === 0 ? bracket[i * 2 + 1] : tbd(2),
+                    winner: null,
+                    loser: null,
+                    lane: null,
+                    legs: legs || 3,
+                    referee: null,
+                    plannedReferee: null,
+                    active: false,
+                    completed: false,
+                    positionInRound: i
+                });
+            }
+        });
+        Groups.planCupReferees(made.filter(m => m.cup === cup), size);
+    });
+
+    matches.push(...made);
+    tournament.cups = cups;
+
+    if (!window.rebuildInProgress) {
+        saveTransaction({
+            id: generateTransactionId(),
+            type: 'DRAW_CUPS',
+            description: `Cups drawn: A cup ${cups.A.seeds.length} players${cups.B ? `, B cup ${cups.B.seeds.length} players` : ', no B cup'}`,
+            timestamp: new Date().toISOString(),
+            cups: JSON.parse(JSON.stringify(cups))
+        });
+        processAutoAdvancements(); // round-1 walkovers, as in any draw
+    }
+
+    saveTournament();
+    if (typeof renderBracket === 'function') renderBracket();
+    if (typeof displayResults === 'function') displayResults();
+    console.log(`✓ Cups drawn: A ${cups.A.size}${cups.B ? `, B ${cups.B.size}` : ', no B cup'}`);
     return true;
 }
 
@@ -1728,11 +1955,10 @@ function generateAllMatches(bracket, bracketSize) {
 /**
  * CALCULATE CLEAN BRACKET STRUCTURE (rounds and matches per round)
  */
-function calculateCleanBracketStructure(bracketSize) {
+function calculateCleanBracketStructure(bracketSize, format = getFormat()) {
     // SE structures are fully hardcoded — bracketSize equals total match count.
     // Last natural frontside round (1 match) is the bronze final; one extra round
-    // is added for the championship final.
-    const format = getFormat();
+    // is added for the championship final. (A groups and cups tournament asks for 'SE' for its cups.)
     if (format === 'SE') {
         const seStructures = {
             4:  { frontsideRounds: 2, frontside: [{ round: 1, matches: 2 }, { round: 2, matches: 1 }, { round: 3, matches: 1 }], backside: [] },
@@ -2035,6 +2261,15 @@ function toggleActiveWithValidation(matchId) {
     // Only validate when trying to START a match (transition from ready to live)
     // Don't validate when stopping a match
     if (currentState === 'ready') {
+        // A player can't be on two boards at once. Only possible in a group stage, where every
+        // match's players are known from the start.
+        const playing = typeof getPlayersInLiveMatches === 'function' ? getPlayersInLiveMatches(matchId) : [];
+        const busy = [match.player1, match.player2].filter(p => p && playing.includes(parseInt(p.id))).map(p => p.name);
+        if (busy.length) {
+            alert(`Cannot start match: ${busy.join(' and ')} ${busy.length > 1 ? 'are' : 'is'} playing another match`);
+            return false;
+        }
+
         // Check for referee conflicts using shared utility function
         if (typeof checkRefereeConflict === 'function') {
             const conflictInfo = checkRefereeConflict(matchId);
@@ -2044,6 +2279,13 @@ function toggleActiveWithValidation(matchId) {
                 return false;
             }
         }
+    }
+
+    // A planned referee (groups and cups) is filled in as the match starts, when no one has been
+    // chosen and they are free; otherwise the operator picks one, as always
+    if (currentState === 'ready' && !match.referee && typeof Groups !== 'undefined') {
+        const planned = Groups.plannedRefereeFor(match);
+        if (planned && isPlayerAvailableAsReferee(planned.id, matchId)) updateMatchReferee(matchId, planned.id);
     }
 
     // If validation passes (or we're stopping a match), call base toggle function
@@ -2192,7 +2434,11 @@ function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
     const wName = document.createElement('strong');
     wName.textContent = winner.name;
     winnerLine.appendChild(wName);
-    if (progression.winner) {
+    // groups and cups: each cup's bronze and final decide places (getPlayerProgressionForDisplay)
+    const cupEnd = getFormat() === 'GROUPS' && /^[AB]-[FB]$/.test(matchId) && typeof getPlayerProgressionForDisplay === 'function';
+    if (cupEnd) {
+        winnerLine.appendChild(document.createTextNode(' ' + getPlayerProgressionForDisplay(winner.id, matchId, true)));
+    } else if (progression.winner) {
         winnerLine.appendChild(document.createTextNode(' advances to '));
         const dest = document.createElement('strong');
         dest.textContent = progression.winner[0];
@@ -2208,7 +2454,9 @@ function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
     const lName = document.createElement('strong');
     lName.textContent = loser.name;
     loserLine.appendChild(lName);
-    if (progression.loser) {
+    if (cupEnd) {
+        loserLine.appendChild(document.createTextNode(' ' + getPlayerProgressionForDisplay(loser.id, matchId, false)));
+    } else if (progression.loser) {
         loserLine.appendChild(document.createTextNode(' moves to '));
         const dest = document.createElement('strong');
         dest.textContent = progression.loser[0];
@@ -2261,6 +2509,17 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const progression = progressionTable && progressionTable[matchId];
     if (progression) {
         body.appendChild(_buildWinnerProgressionBlock(matchId, winner, loser, progression));
+    } else if (getFormat() === 'GROUPS' && typeof Groups !== 'undefined' && Groups.isGroupId(matchId)) {
+        // a group match moves no one on: the result goes into the group table
+        const block = document.createElement('div');
+        block.className = 'winner-progression';
+        const title = document.createElement('div');
+        title.className = 'winner-progression__title';
+        title.textContent = Groups.roundName(matchId);
+        const line = document.createElement('div');
+        line.textContent = 'The result goes into the group table; the legs count for the table too.';
+        block.append(title, line);
+        body.appendChild(block);
     }
 
     // Populate leg score fields

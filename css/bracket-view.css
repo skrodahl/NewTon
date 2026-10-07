@@ -256,3 +256,49 @@
 /* on Match Controls or the Console, the bracket's own tools and the colour legend have nothing to act on */
 .bracket-container.bv-on-layer .bv-tools,
 .bracket-container.bv-on-layer .bv-legend { display: none; }
+
+/* ---- groups and cups: the group stage (Docs/GROUPS-AND-CUPS.md) ----
+   A page of group cards in the viewport instead of the bracket under the camera; it scrolls. */
+.bracket-viewport.bv-groups-on { cursor: default; touch-action: auto; user-select: text; -webkit-user-select: text; }
+.bracket-viewport.bv-groups-on .bracket-canvas { display: none; }
+.bv-groups { position: absolute; inset: 0; overflow: auto; font-family: var(--bv-sans); color: var(--bv-ink); }
+.bv-gwrap { margin: 0 auto; padding: 18px 18px 28px; display: grid; gap: 14px; }
+.bv-ggrid { display: grid; grid-template-columns: repeat(var(--gcols, 2), minmax(0, 1fr)); gap: 16px; }
+.bv-gcard { background: var(--bv-surface); border: 1px solid var(--nt-line); border-radius: 12px; overflow: hidden; box-shadow: var(--bv-shadow); }
+.bv-gcard h3 { margin: 0; padding: 12px 16px 8px; font-size: 16px; font-weight: 800; display: flex; justify-content: space-between; align-items: baseline; }
+.bv-gcard h3 small { font-weight: 500; font-size: 12px; color: var(--bv-muted); }
+.bv-gtable { width: 100%; border-collapse: collapse; font-size: 13px; }
+.bv-gtable th { text-align: right; font-size: 11px; font-weight: 600; color: var(--bv-muted); padding: 4px 8px; border-bottom: 1px solid var(--nt-line); }
+.bv-gtable td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--nt-line); font-variant-numeric: tabular-nums; }
+.bv-gtable th:first-child, .bv-gtable td:first-child { text-align: left; padding-left: 16px; width: 22px; color: var(--bv-muted); }
+.bv-gtable th:nth-child(2), .bv-gtable td:nth-child(2) { text-align: left; width: 100%; }
+.bv-gtable th:last-child, .bv-gtable td:last-child { padding-right: 16px; }
+.bv-gname b { font-weight: 600; }
+.bv-glevel { font-size: 10px; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; color: var(--nt-warn); background: var(--nt-warn-soft); border-radius: 4px; padding: 1px 5px; margin-left: 4px; }
+.bv-gtable tr.bv-to-a td:first-child { box-shadow: inset 3px 0 0 var(--nt-ok); }
+.bv-gtable tr.bv-to-b td:first-child { box-shadow: inset 3px 0 0 var(--nt-card-line); }
+.bv-gkey { display: flex; gap: 14px; padding: 6px 16px 8px; font-size: 11px; color: var(--bv-muted); }
+.bv-gkey i { display: inline-block; width: 3px; height: 10px; margin-right: 5px; vertical-align: -1px; }
+.bv-gkey-a { background: var(--nt-ok); }
+.bv-gkey-b { background: var(--nt-card-line); }
+.bv-glist { border-top: 1px solid var(--nt-line); }
+.bv-grow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto auto; gap: 10px; align-items: center; padding: 6px 16px; font-size: 13px; cursor: pointer; }
+.bv-grow.bv-gdone { cursor: default; }
+.bv-grow + .bv-grow { border-top: 1px dashed var(--nt-line); }
+.bv-grow:not(.bv-gdone):hover { background: var(--bv-surface-2); }
+.bv-glive-row { background: var(--bv-live-fill); }
+.bv-gno { font-family: var(--bv-mono); font-size: 11px; color: var(--bv-muted); }
+.bv-gwho { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.bv-gwin { color: var(--nt-ok); font-weight: 700; }
+.bv-gref { font-size: 12px; color: var(--bv-muted); white-space: nowrap; }
+.bv-gres { font-family: var(--bv-mono); font-weight: 700; font-size: 12px; min-width: 44px; text-align: right; }
+.bv-gchip { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 8px; white-space: nowrap; text-align: center; min-width: 44px; }
+.bv-glive { background: var(--bv-accent-soft); color: #b2410f; }
+.bv-gready { background: var(--bv-ready-soft); color: #8a6a0a; }
+.bv-gwait { background: var(--nt-inset); color: var(--bv-muted); }
+.bv-gundo { font: inherit; font-size: 11px; font-weight: 600; border: 1px solid var(--nt-line-2); border-radius: 6px; background: var(--bv-surface); color: var(--bv-ink-2); padding: 1px 8px; cursor: pointer; }
+.bv-gundo:hover { border-color: var(--nt-line-strong); }
+.bv-gnote { margin: 0; text-align: center; font-size: 13px; color: var(--bv-muted); }
+.bv-gsig { position: static; text-align: center; }
+/* the cups: each cup's name over its final */
+.bv-cup-name { font-size: 30px; }

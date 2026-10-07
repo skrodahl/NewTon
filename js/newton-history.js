@@ -1671,7 +1671,7 @@ const NewtonHistory = (() => {
                     },
                     {
                         key: 'tournamentFormat', label: 'Format', columnClass: 'an-wide-only',
-                        render: (v) => v ? `<span class="st-pill nt-pill">${v === 'SE' ? 'Single elim.' : v === 'DE' ? 'Double elim.' : escHtml(v)}</span>` : '—'
+                        render: (v) => v ? `<span class="st-pill nt-pill">${v === 'SE' ? 'Single elim.' : v === 'DE' ? 'Double elim.' : v === 'GROUPS' ? 'Groups + cups' : escHtml(v)}</span>` : '—'
                     },
                     {
                         key: 'playerCount', label: 'Players', align: 'right', defaultDir: 'desc',
@@ -2251,7 +2251,7 @@ const NewtonHistory = (() => {
 
         // Heading, buttons and facts. Points come from the corrected record the views use.
         const counted = (_allTournaments || []).find(t => t.tournamentId === tournamentId) || tournament;
-        const format = tournament.tournamentFormat === 'DE' ? 'Double elim.' : tournament.tournamentFormat === 'SE' ? 'Single elim.' : (tournament.tournamentFormat || '—');
+        const format = tournament.tournamentFormat === 'DE' ? 'Double elim.' : tournament.tournamentFormat === 'SE' ? 'Single elim.' : tournament.tournamentFormat === 'GROUPS' ? 'Groups + cups' : (tournament.tournamentFormat || '—');
         const fact = (label, value) => `<div><dt>${label}</dt><dd>${value}</dd></div>`;
         document.getElementById('historyMatchListTitle').innerHTML =
             escHtml(tournament.tournamentName || tournamentId) + (tournament.closedAt ? ` <small>${fmtDate(tournament.closedAt)}</small>` : '');
@@ -2543,7 +2543,7 @@ const NewtonHistory = (() => {
         const totalMatches = Array.isArray(t.matches) ? t.matches.length : 0;
 
         // Populate sidebar with imported file's metadata (safe via textContent)
-        const formatLabel = t.format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+        const formatLabel = t.format === 'SE' ? 'Single Elimination' : t.format === 'GROUPS' ? 'Groups and Cups' : 'Double Elimination';
         const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
         setText('analyticsImportName', t.name);
         setText('analyticsImportDate', t.date || '-');

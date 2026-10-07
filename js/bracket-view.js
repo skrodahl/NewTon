@@ -160,9 +160,49 @@ const BracketView = (() => {
         const cw = Math.max(...ids.map(i => pos[i].x)) + W, ch = Math.max(...ids.map(i => pos[i].y)) + H;
         return { pos, cw, ch, mid: y[final] - minY + H / 2 };
     }
+    // ---------- groups and cups: the cups ----------
+    // Each cup is drawn as single elimination with the final in the middle (layoutSEMiddle() on its
+    // own SE table), A above B, each centred on the widest; CUP_GAP leaves room for the cup's name.
+    const CUP_GAP = 150;
+    /**
+     * The cups' structure: every cup match (by its cup ID), the feeds between them, and per cup its
+     * single-elimination structure and the SE ID → cup ID map.
+     * @param {Object} prog - getProgressionTable() for the cups
+     */
+    function cupsStructure(prog) {
+        const ids = Object.keys(prog);
+        const feeds = {};
+        ids.forEach(src => ['winner', 'loser'].forEach(kind => {
+            const d = prog[src][kind]; if (!d) return;
+            (feeds[d[0]] = feeds[d[0]] || []).push({ src, kind, slot: d[1] });
+        }));
+        const cups = ['A', 'B'].filter(c => tournament.cups && tournament.cups[c]).map(cup => {
+            const size = tournament.cups[cup].size, se = SE_MATCH_PROGRESSION[size];
+            const map = {};
+            Object.keys(se).forEach(seId => { map[seId] = cupMatchId(cup, seId, size); });
+            return { cup, size, st: structure(se), map };
+        });
+        return { ids, feeds, cups, maxFS: 0, maxBS: 0 };
+    }
+    function layoutCups(st, g) {
+        const parts = st.cups.map(c => ({ c, L: layoutSEMiddle(c.st, g) }));
+        const cw = Math.max(...parts.map(p => p.L.cw));
+        const pos = {};
+        let y0 = 0;
+        parts.forEach(p => {
+            const dx = (cw - p.L.cw) / 2;
+            Object.entries(p.L.pos).forEach(([seId, q]) => { pos[p.c.map[seId]] = { x: q.x + dx, y: q.y + y0 }; });
+            p.c.box = { x: dx, y: y0, w: p.L.cw, h: p.L.ch };
+            y0 += p.L.ch + CUP_GAP;
+        });
+        const ch = y0 - CUP_GAP;
+        return { pos, cw, ch, mid: ch / 2 };
+    }
+
     // The layout is the one part chosen by format and finals position (see Docs/BRACKET-REDESIGN.md, "Other Formats")
     const layoutFor = (st, variant, g) => variant === 'se' ? layoutSE(st, g)
-        : variant === 'se-middle' ? layoutSEMiddle(st, g) : layout(st, variant, g);
+        : variant === 'se-middle' ? layoutSEMiddle(st, g)
+        : variant === 'cups' ? layoutCups(st, g) : layout(st, variant, g);
 
     const worldBox = L => ({ x0: -40, y0: -TOP, x1: L.cw + 50, y1: L.ch + BOTTOM }); // room for lines routed round the outside
 
@@ -260,7 +300,8 @@ const BracketView = (() => {
             const sc = v.score ? `<span class="bv-score">${escapeHtml(String(v.score[i]))}</span>` : '';
             return `<div class="${cls}">${thr}<span class="bv-name"${title}>${name}</span>${sc}</div>`;
         };
-        const cls = 'bv-card bv-' + s + (v.wo ? ' bv-walkover' : '') + (sideOf(id) === 'FIN' || isSEFinalOrBronze(id) ? ' bv-final' : '') +
+        const fin = getFormat() === 'GROUPS' ? /^[AB]-[FB]$/.test(id) : (sideOf(id) === 'FIN' || isSEFinalOrBronze(id));
+        const cls = 'bv-card bv-' + s + (v.wo ? ' bv-walkover' : '') + (fin ? ' bv-final' : '') +
             (v.refConflict[0] || v.refConflict[1] ? ' bv-conflict' : '');
         return { cls, html: `<div class="bv-meta">${meta}</div>${row(0)}${row(1)}` };
     }
@@ -276,8 +317,13 @@ const BracketView = (() => {
         overlay.className = 'bv-overlay';
         overlay.innerHTML = '<div class="bv-markers"></div><div class="bv-mag" hidden></div><div class="bv-selbar" hidden></div>';
         viewport.appendChild(overlay);
+        // groups and cups: the group stage is a page of group cards, not a bracket under the camera
+        const groups = document.createElement('div');
+        groups.className = 'bv-groups';
+        groups.hidden = true;
+        viewport.appendChild(groups);
         els = {
-            viewport, canvas, overlay,
+            viewport, canvas, overlay, groups,
             markers: overlay.querySelector('.bv-markers'),
             mag: overlay.querySelector('.bv-mag'),
             selbar: overlay.querySelector('.bv-selbar')
@@ -287,7 +333,7 @@ const BracketView = (() => {
             let raf = null;
             new ResizeObserver(() => {
                 if (raf) cancelAnimationFrame(raf);
-                raf = requestAnimationFrame(() => { raf = null; if (isActive() && cur) render(); });
+                raf = requestAnimationFrame(() => { raf = null; if (isActive() && (cur || !els.groups.hidden)) render(); });
             }).observe(viewport);
         }
         return true;
@@ -302,12 +348,14 @@ const BracketView = (() => {
      */
     function isActive() {
         if (typeof tournament === 'undefined' || !tournament || !tournament.bracket) return false;
+        if (getFormat() === 'GROUPS') return true;
         const table = getFormat() === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
         return !!table[tournament.bracketSize];
     }
 
     /** The layout to use: the format, and where the finals go (one setting for both formats). */
     function finalsVariant() {
+        if (getFormat() === 'GROUPS') return 'cups'; // always the final in the middle: two cups have to fit
         const middle = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle';
         if (getFormat() === 'SE') return middle ? 'se-middle' : 'se';
         return middle ? 'middle' : 'right';
@@ -322,10 +370,14 @@ const BracketView = (() => {
      */
     function render() {
         if (!ensureDom()) return;
+        const groupsFormat = getFormat() === 'GROUPS';
+        if (groupsFormat && gcShown() === 'groups') { renderGroups(); return; }
+        els.groups.hidden = true;
+        els.viewport.classList.remove('bv-groups-on');
         const prog = getProgressionTable();
-        const size = tournament.bracketSize;
+        const size = groupsFormat ? ['A', 'B'].map(c => tournament.cups[c] ? tournament.cups[c].size : 0).join('/') : tournament.bracketSize;
         const variant = finalsVariant();
-        const st = structure(prog);
+        const st = groupsFormat ? cupsStructure(prog) : structure(prog);
         let { w: vw, h: vh } = vp();
         const hidden = vw < 100 || vh < 100;      // page not shown yet; fit again once it is
         if (hidden) { vw = 1400; vh = 800; }
@@ -360,7 +412,32 @@ const BracketView = (() => {
         const lblMid = (html, x, y, cls) => { const d = lbl(html, x + W / 2, y, cls); d.style.transform = 'translateX(-50%)'; return d; };
 
         const LABEL_GAP = 26; // every header sits the same distance above the topmost match of its round
-        if (variant === 'se-middle') {
+        if (variant === 'cups') {
+            // each cup: its name over the final, the rounds over each half's columns, as with the
+            // final in the middle; the signature under the last cup
+            const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
+            st.cups.forEach((c, k) => {
+                const cs = c.st, semis = cs.maxFS - 2, at = seId => pos[c.map[seId]];
+                const final = `FS-${cs.maxFS}-1`, bronze = `FS-${cs.maxFS - 1}-1`;
+                const name = `${c.cup} cup`;
+                lblMid(k === 0 ? `${club} · ${name}` : name, at(final).x, c.box.y - 94, 'bv-club bv-cup-name');
+                const roundName = r => r === semis ? 'Semifinals' : r === semis - 1 ? 'Quarterfinals' : 'Round ' + r;
+                const inRound = r => cs.ids.filter(i => roundOf(i) === r);
+                for (let r = 1; r <= semis; r++) {
+                    const n = inRound(r).length;
+                    [inRound(r).filter(i => numOf(i) <= n / 2), inRound(r).filter(i => numOf(i) > n / 2)].forEach(side => {
+                        if (side.length) lblMid(roundName(r), at(side[0]).x, Math.min(...side.map(i => at(i).y)) - LABEL_GAP);
+                    });
+                }
+                const places = c.cup === 'A' ? ['1st', '3rd place'] : ['5th–6th', '7th–8th'];
+                lblMid('Final', at(final).x, at(final).y - LABEL_GAP, 'bv-col-label bv-finals-label');
+                lblMid('Bronze final', at(bronze).x, at(bronze).y - LABEL_GAP, 'bv-col-label bv-finals-label');
+                lblMid(places[1], at(bronze).x, at(bronze).y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+                if (c.cup === 'B') lblMid(places[0] + ' place', at(final).x, at(final).y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+            });
+            const lastCup = st.cups[st.cups.length - 1];
+            lblMid(String.fromCharCode(..._0x7a, ..._0x9b), pos[lastCup.map[`FS-${lastCup.st.maxFS}-1`]].x, L.ch + 44, 'bv-signature').id = 'tournament-watermark';
+        } else if (variant === 'se-middle') {
             // the club name over the centre column; each half's rounds labelled over its own columns
             const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
             const semis = st.maxFS - 2, bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
@@ -512,6 +589,16 @@ const BracketView = (() => {
         // single elimination: a dashed line ties the bronze final to the final (finals on the right:
         // from the bronze final down to the line into the final; in the middle: from the final down to
         // the bronze final under it)
+        if (variant === 'cups') {
+            st.cups.forEach(c => {
+                const bronze = c.map[`FS-${c.st.maxFS - 1}-1`], final = c.map[`FS-${c.st.maxFS}-1`];
+                const d = document.createElementNS(svgNS, 'path');
+                d.setAttribute('d', `M${pos[final].x + W / 2} ${pos[final].y + H} V${pos[bronze].y}`);
+                const assigned = M[bronze] && M[bronze].p.some(sl => sl.kind !== 'tbd');
+                d.setAttribute('class', 'bv-edge bv-dashed' + (assigned ? ' bv-known' : ''));
+                svg.appendChild(d);
+            });
+        }
         if (variant === 'se' || variant === 'se-middle') {
             const bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
             const d = document.createElementNS(svgNS, 'path');
@@ -556,6 +643,88 @@ const BracketView = (() => {
         paint();
     }
 
+    // ---------- groups and cups: the group stage ----------
+    /** The operator's Groups | Cups choice, for this tournament and cup draw; Cups once they are drawn. */
+    let gcChoice = { key: null, view: null };
+    const gcKey = () => `${tournament.id}|${tournament.cups && tournament.cups.A ? tournament.cups.A.seeds.join(',') : ''}`;
+    const gcShown = () => !tournament.cups ? 'groups' : (gcChoice.key === gcKey() ? gcChoice.view : 'cups');
+
+    /**
+     * Groups or Cups on the bracket page (groups and cups; the header's switch). Before the cups
+     * are drawn there are only groups.
+     * @param {'groups'|'cups'} view
+     * @returns {void}
+     */
+    function setGroupsView(view) {
+        if (typeof tournament === 'undefined' || !tournament) return;
+        gcChoice = { key: gcKey(), view: view === 'cups' ? 'cups' : 'groups' };
+        updateHeader();
+        if (isActive()) render();
+    }
+
+    /** A group match's state as the group card shows it: result, live on lane, ready, or waiting. */
+    function groupMatchState(m) {
+        const s = getMatchState(m);
+        if (s === 'completed') {
+            const f = m.finalScore, w = m.winner && String(m.winner.id) === String(m.player1.id) ? 0 : 1;
+            const score = f ? (w === 0 ? `${f.winnerLegs}–${f.loserLegs}` : `${f.loserLegs}–${f.winnerLegs}`) : 'played';
+            return `<span class="bv-gres">${escapeHtml(score)}</span>`;
+        }
+        if (s === 'live') return `<span class="bv-gchip bv-glive">${m.lane ? `Lane ${escapeHtml(String(m.lane))}` : 'Live'}</span>`;
+        const busy = typeof getPlayersInLiveMatches === 'function' ? getPlayersInLiveMatches(m.id) : [];
+        const free = ![m.player1, m.player2].some(p => p && busy.includes(parseInt(p.id)));
+        return free ? '<span class="bv-gchip bv-gready">Ready</span>' : '<span class="bv-gchip bv-gwait">Waiting</span>';
+    }
+
+    /**
+     * Draw the group stage: one card per group with its table (the top two go to the A cup, the rest
+     * to the B cup) and its matches in their fixed order, each with its referee and state. A played
+     * match that can be undone has Undo; a match that hasn't been played opens it in Match Controls.
+     * @returns {void}
+     */
+    function renderGroups() {
+        stopAnim(); hideMag();
+        cur = null; selected = null; traced = null; bracketKey = null;
+        els.overlay.hidden = true;
+        els.viewport.classList.add('bv-active', 'bv-groups-on');
+        document.getElementById('bracketMatches').innerHTML = '';
+        const drawn = !!tournament.cups;
+        const refName = id => { const p = players.find(x => String(x.id) === String(id)); return p ? p.name : ''; };
+        const card = g => {
+            const rows = Groups.standings(g.name);
+            const ms = Groups.groupMatches(g.name);
+            const played = ms.filter(m => m.completed).length;
+            const sign = n => n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0';
+            const table = rows.map(r => `<tr class="${r.pos <= 2 ? 'bv-to-a' : 'bv-to-b'}"><td>${r.pos}</td><td class="bv-gname"><b>${escapeHtml(r.player.name)}</b>${r.level && r.played ? ' <span class="bv-glevel" title="Level on wins, legs and head-to-head">level</span>' : ''}</td><td>${r.played}</td><td>${r.won}</td><td>${r.lost}</td><td>${sign(r.diff)}</td><td>${r.legsWon}</td></tr>`).join('');
+            const list = ms.map(m => {
+                const done = m.completed, live = getMatchState(m) === 'live';
+                const ref = m.referee ? refName(m.referee) : (!done ? Groups.plannedRefereeText(m) : '');
+                const w = done && m.winner ? String(m.winner.id) : null;
+                const nm = p => `<span${w && String(p.id) === w ? ' class="bv-gwin"' : ''}>${escapeHtml(p.name)}</span>`;
+                const undo = done && !tournament.readOnly && isMatchUndoable(m.id) ? `<button type="button" class="bv-gundo" data-undo="${escapeHtml(m.id)}" title="Undo this result">Undo</button>` : '';
+                return `<div class="bv-grow${done ? ' bv-gdone' : ''}${live ? ' bv-glive-row' : ''}" data-match="${escapeHtml(m.id)}" title="${done ? '' : 'Open in Match Controls'}">
+                    <span class="bv-gno">${escapeHtml(m.id)}</span><span class="bv-gwho">${nm(m.player1)} – ${nm(m.player2)}</span>
+                    <span class="bv-gref">${ref ? `ref ${escapeHtml(ref)}` : ''}</span>${groupMatchState(m)}${undo}</div>`;
+            }).join('');
+            return `<section class="bv-gcard"><h3>Group ${escapeHtml(g.name)}<small>${played} of ${ms.length} played</small></h3>
+                <table class="bv-gtable"><thead><tr><th>#</th><th>Player</th><th title="Played">P</th><th title="Won">W</th><th title="Lost">L</th><th title="Leg difference">±</th><th title="Legs won">Legs</th></tr></thead><tbody>${table}</tbody></table>
+                <div class="bv-gkey"><span><i class="bv-gkey-a"></i>to the A cup</span><span><i class="bv-gkey-b"></i>to the ${tournament.cups && !tournament.cups.B ? 'B cup (not played)' : 'B cup'}</span></div>
+                <div class="bv-glist">${list}</div></section>`;
+        };
+        const lists = Groups.groupList();
+        const note = drawn ? 'The cups are drawn, so the group results are locked.'
+            : Groups.allGroupsDone() ? 'Every group match is played: draw the cups in Match Controls.'
+            : 'Referees are planned from each group and filled in when a match starts; change them in Match Controls.';
+        // as many columns as fit, but rows of equal length (4 groups: 4 across or 2 × 2, never 3 + 1)
+        const fit = Math.max(1, Math.floor((els.viewport.clientWidth - 36) / 420));
+        const cols = [8, 6, 4, 3, 2, 1].filter(c => c <= fit && lists.length % c === 0)[0] || 1;
+        els.groups.innerHTML = `<div class="bv-gwrap"><div class="bv-ggrid" style="--gcols: ${cols}">${lists.map(card).join('')}</div><p class="bv-gnote">${note}</p>
+            <div class="bv-signature bv-gsig" id="tournament-watermark">${String.fromCharCode(..._0x7a, ..._0x9b)}</div></div>`;
+        els.groups.hidden = false;
+        els.groups.querySelectorAll('[data-undo]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); handleSurgicalUndo(b.dataset.undo); }));
+        els.groups.querySelectorAll('.bv-grow:not(.bv-gdone)').forEach(r => r.addEventListener('click', () => showBracketView('controls', r.dataset.match)));
+    }
+
     /** Hide the overlay and release the viewport when another renderer takes over. */
     function deactivate() {
         if (!els) return;
@@ -564,7 +733,8 @@ const BracketView = (() => {
         els.overlay.hidden = true;
         els.markers.innerHTML = '';
         els.selbar.hidden = true;
-        els.viewport.classList.remove('bv-active', 'bv-dragging');
+        els.viewport.classList.remove('bv-active', 'bv-dragging', 'bv-groups-on');
+        els.groups.hidden = true;
         els.canvas.style.removeProperty('--inv');
     }
 
@@ -661,10 +831,17 @@ const BracketView = (() => {
     function hideMag() { clearTimeout(magTimer); magTimer = null; if (els) els.mag.hidden = true; }
     function progressText(id) {
         const p = cur.prog[id], m = cur.M[id].match, bits = [];
-        if (p.winner) bits.push(`Winner → <b>${p.winner[0]}</b>`); else bits.push('Winner takes 1st');
-        if (p.loser) bits.push(`Loser → <b>${p.loser[0]}</b>`);
-        else if (id === 'GRAND-FINAL') bits.push('Loser takes 2nd');
-        else bits.push('Loser is out');
+        // groups and cups: each cup's bronze and final decide places (Docs/GROUPS-AND-CUPS.md)
+        const cupEnd = getFormat() === 'GROUPS' && /^[AB]-[FB]$/.test(id) ? {
+            'A-F': ['Winner takes 1st', 'Loser takes 2nd'], 'A-B': ['Winner takes 3rd', 'Loser takes 4th'],
+            'B-F': ['Winner and loser take 5th–6th'], 'B-B': ['Winner and loser take 7th–8th'] }[id] : null;
+        if (cupEnd) bits.push(...cupEnd);
+        else {
+            if (p.winner) bits.push(`Winner → <b>${p.winner[0]}</b>`); else bits.push('Winner takes 1st');
+            if (p.loser) bits.push(`Loser → <b>${p.loser[0]}</b>`);
+            else if (id === 'GRAND-FINAL') bits.push('Loser takes 2nd');
+            else bits.push('Loser is out');
+        }
         if (m.referee) {
             const ref = (typeof players !== 'undefined' ? players : []).find(pl => pl.id === m.referee);
             if (ref) bits.push(`Ref ${escapeHtml(ref.name)}`);
@@ -760,6 +937,7 @@ const BracketView = (() => {
      * @returns {string}
      */
     function roundName(id) {
+        if (getFormat() === 'GROUPS') return Groups.roundName(id);
         const st = cur.st, r = roundOf(id);
         if (getFormat() === 'SE') {
             if (r === st.maxFS) return 'Final';
@@ -951,11 +1129,26 @@ const BracketView = (() => {
         const played = all.filter(m => m.completed).length - wo;
         const live = all.filter(m => getMatchState(m) === 'live').length;
         const ready = all.filter(m => getMatchState(m) === 'ready').length;
-        status.innerHTML = tournament.bracket
+        const groupsFormat = getFormat() === 'GROUPS' && !!tournament.bracket;
+        status.innerHTML = groupsFormat
+            ? `<b>${paid}</b> players · ${Groups.groupList().length} groups · ${all.filter(m => m.side === 'group').length} group matches${tournament.cups ? ` · ${tournament.cups.B ? 'A and B cups' : 'A cup'}` : ''} · ${played} played${wo ? `, ${wo} walkovers` : ''} · <b>${live}</b> live · <b>${ready}</b> ready`
+            : tournament.bracket
             ? `<b>${paid}</b> players · ${all.length} matches · ${played} played, ${wo} walkovers · <b>${live}</b> live · <b>${ready}</b> ready`
             : `<b>${paid}</b> players · no bracket yet`;
+        // groups and cups: Groups | Cups instead of the finals position (the cups always have it in the middle)
+        const gc = document.getElementById('bvGroupsView');
+        if (gc) {
+            gc.hidden = !groupsFormat;
+            const shown = groupsFormat ? gcShown() : 'groups';
+            gc.querySelectorAll('button[data-gc]').forEach(b => {
+                b.setAttribute('aria-pressed', String(b.dataset.gc === shown));
+                if (b.dataset.gc === 'cups') { b.disabled = !tournament.cups; b.title = tournament.cups ? 'The A and B cups' : 'The cups are drawn when every group match is played'; }
+            });
+        }
+        const zoomTools = document.querySelectorAll('#tournament .bv-tools > .bv-btn, #tournament .bv-tools > .bv-zoom');
+        zoomTools.forEach(el => { el.hidden = groupsFormat && gcShown() === 'groups'; });
         if (finals) {
-            finals.hidden = !isActive(); // both formats: finals on the right or in the middle
+            finals.hidden = !isActive() || getFormat() === 'GROUPS'; // both bracket formats: finals on the right or in the middle
             // the setting, not the layout name (single elimination's layouts are 'se' and 'se-middle')
             const v = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle' ? 'middle' : 'right';
             finals.querySelectorAll('button[data-finals]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.finals === v)));
@@ -968,6 +1161,7 @@ const BracketView = (() => {
         deactivate,
         updateHeader,
         setFinals,
+        setGroupsView,
         fitAll: () => fitAll(true),
         zoomIn: () => zoomCentre(1.25),
         zoomOut: () => zoomCentre(0.8)

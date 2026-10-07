@@ -27,6 +27,7 @@ const DEFAULT_CONFIG = {
         seSemifinal: 3,
         seBronze: 5,
         seFinal: 5,
+        groupMatches: 3,
         x01Format: 501,
         maxRounds: 13,
         shortLegThreshold: 21
@@ -141,6 +142,7 @@ function applyConfigToUI() {
     safeSetValue('seSemifinalLegs', config.legs.seSemifinal);
     safeSetValue('seBronzeLegs', config.legs.seBronze);
     safeSetValue('seFinalLegs', config.legs.seFinal);
+    safeSetValue('groupMatchesLegs', config.legs.groupMatches || 3);
     initX01Toggle(config.legs.x01Format);
     safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
     safeSetValue('chalkerShortLegThreshold', config.legs.shortLegThreshold || 21);
@@ -354,6 +356,13 @@ const TOURNAMENT_FORMATS = [
         name: 'Single Elimination Cup',
         blurb: 'Players are eliminated after one loss',
         minPlayers: 4,
+        maxPlayers: 32
+    },
+    {
+        id: 'GROUPS',
+        name: 'Groups and Cups',
+        blurb: 'Everybody plays everybody in groups, then an A cup and a B cup',
+        minPlayers: 6,
         maxPlayers: 32
     }
 ];
@@ -693,6 +702,7 @@ function saveMatchConfiguration(options = {}) {
     config.legs.seSemifinal = parseInt(document.getElementById('seSemifinalLegs').value) || 3;
     config.legs.seBronze = parseInt(document.getElementById('seBronzeLegs').value) || 5;
     config.legs.seFinal = parseInt(document.getElementById('seFinalLegs').value) || 5;
+    config.legs.groupMatches = parseInt((document.getElementById('groupMatchesLegs') || {}).value) || 3;
 
     // Read values from UI — Chalker
     const x01Toggle = document.getElementById('chalkerX01CustomToggle');
@@ -754,6 +764,7 @@ function resetMatchConfigToDefaults() {
     safeSetValue('seSemifinalLegs', d.seSemifinal);
     safeSetValue('seBronzeLegs', d.seBronze);
     safeSetValue('seFinalLegs', d.seFinal);
+    safeSetValue('groupMatchesLegs', d.groupMatches);
 }
 
 /**

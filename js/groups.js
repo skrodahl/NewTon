@@ -1,0 +1,336 @@
+// groups.js - the groups and cups format: groups, tables, cup fields, planned referees, placings
+//
+// Read-only logic for a tournament with format 'GROUPS' (Docs/GROUPS-AND-CUPS.md): who goes into
+// which group, the group tables, who goes on to which cup as which seed, the planned referees, and
+// the placings. It never changes tournament data itself, except planCupReferees() (on the cup
+// matches being made) and the operator's tie decisions (setOrder()). Drawing the groups and the
+// cups is drawGroups()/drawCups() in clean-match-progression.js; undoing the cup draw is
+// undoCupDraw() in bracket-rendering.js, with the rest of undo.
+
+/**
+ * The groups and cups format.
+ */
+const Groups = (() => {
+    const LETTERS = 'ABCDEFGH';
+    const isGroupId = id => /^[A-H]-\d+$/.test(String(id));
+    const isCupId = id => /^[AB]-(R\d+-\d+|QF\d+|SF\d+|F|B)$/.test(String(id));
+    const real = p => !!p && p.id != null && p.name !== 'TBD' && !isWalkover(p);
+    const all = () => (typeof matches !== 'undefined' && Array.isArray(matches) ? matches : []);
+    const byId = id => all().find(m => m.id === id) || null;
+    const playerOf = id => (typeof players !== 'undefined' ? players : []).find(p => String(p.id) === String(id)) || null;
+    const on = () => typeof tournament !== 'undefined' && tournament && tournament.format === 'GROUPS';
+
+    // ---------- the group draw ----------
+    /**
+     * How many groups: the smallest even number that keeps every group at four players or fewer.
+     * @param {number} n - players
+     * @returns {number}
+     */
+    function groupCount(n) {
+        let g = Math.max(2, Math.ceil(n / 4));
+        if (g % 2) g++;
+        return g;
+    }
+
+    /** The group a player goes into, by their place in the draw (snake order: A→D, then D→A, …). */
+    const snake = (i, g) => { const r = Math.floor(i / g), k = i % g; return r % 2 ? g - 1 - k : k; };
+
+    /**
+     * The group sizes for n players, in group order.
+     * @param {number} n
+     * @returns {number[]}
+     */
+    function groupSizes(n) {
+        const g = groupCount(n), sizes = new Array(g).fill(0);
+        for (let i = 0; i < n; i++) sizes[snake(i, g)]++;
+        return sizes;
+    }
+
+    /**
+     * "4 groups of 4", or "4 groups: 4, 4, 4, 3".
+     * @param {number} n
+     * @returns {string}
+     */
+    function describeSizes(n) {
+        const s = groupSizes(n);
+        return s.every(x => x === s[0]) ? `${s.length} groups of ${s[0]}` : `${s.length} groups: ${s.join(', ')}`;
+    }
+
+    /** True when the group draw would be by ranking (seeding on, and at least two ranked players). */
+    const seededDraw = paid => typeof Seeding !== 'undefined' && !!Seeding.forGroups(paid);
+
+    /**
+     * Who goes into which group: in snake order, by ranking when seeding is on (the ranked players
+     * best first, then the unranked at random), otherwise at random. A player's place in their group
+     * (1 = first in) is their seed there, which sets the order of play (GROUP_SCHEDULES).
+     * @param {Player[]} paid
+     * @returns {{list: {name: string, players: Player[]}[], order: Player[], seeding: object|null}}
+     */
+    function drawGroups(paid) {
+        const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+        const seeded = typeof Seeding !== 'undefined' ? Seeding.forGroups(paid) : null;
+        const order = seeded ? seeded.order.concat(shuffle(paid.filter(p => !seeded.order.includes(p)))) : shuffle(paid);
+        const g = groupCount(order.length);
+        const list = Array.from({ length: g }, (_, i) => ({ name: LETTERS[i], players: [] }));
+        order.forEach((p, i) => list[snake(i, g)].players.push(p));
+        return { list, order, seeding: seeded ? seeded.record : null };
+    }
+
+    // ---------- the group tables ----------
+    /** The groups as drawn: [{name, players: [id, …]}] in seed order. */
+    const groupList = () => (on() && tournament.groups && Array.isArray(tournament.groups.list)) ? tournament.groups.list : [];
+
+    /** A group's matches, in their fixed order. */
+    const groupMatches = name => all().filter(m => m.side === 'group' && m.group === name)
+        .sort((a, b) => (a.positionInRound || 0) - (b.positionInRound || 0));
+
+    /** Legs for one player in a completed match: [won, lost]. */
+    function legsIn(m, pid) {
+        const f = m.finalScore;
+        if (!f) return [0, 0];
+        return String(f.winnerId) === String(pid) ? [f.winnerLegs || 0, f.loserLegs || 0] : [f.loserLegs || 0, f.winnerLegs || 0];
+    }
+
+    /** Tally the completed matches among `ids` (all of them when ids is null) for each player. */
+    function tally(ms, ids) {
+        const t = {};
+        ids.forEach(id => { t[id] = { played: 0, won: 0, lost: 0, legsWon: 0, legsLost: 0 }; });
+        ms.forEach(m => {
+            if (!m.completed || !m.winner) return;
+            const a = String(m.player1.id), b = String(m.player2.id);
+            if (!(a in t) || !(b in t)) return;
+            [a, b].forEach(id => {
+                const [w, l] = legsIn(m, id);
+                const row = t[id];
+                row.played++; row.legsWon += w; row.legsLost += l;
+                if (String(m.winner.id) === id) row.won++; else row.lost++;
+            });
+        });
+        return t;
+    }
+
+    /**
+     * A group's table, best first: wins, then leg difference, then legs won, then head-to-head (a
+     * mini-table of the matches between the players still level, which also settles a three-way
+     * tie), then the operator's decision (setOrder()), then the seed. Rows still level after
+     * head-to-head are marked `level`.
+     * @param {string} name - the group letter
+     * @returns {{player: object, id: string, seed: number, played: number, won: number, lost: number,
+     *            legsWon: number, legsLost: number, diff: number, level: boolean, pos: number}[]}
+     */
+    function standings(name) {
+        const group = groupList().find(g => g.name === name);
+        if (!group) return [];
+        const ids = group.players.map(String);
+        const ms = groupMatches(name);
+        const t = tally(ms, ids);
+        const manual = (tournament.groups.order && tournament.groups.order[name]) || null;
+        const rows = ids.map((id, i) => {
+            const p = playerOf(id);
+            return Object.assign({ player: p || { id, name: '?' }, id, seed: i + 1, level: false }, t[id], { diff: t[id].legsWon - t[id].legsLost });
+        });
+        const key = r => [r.won, r.diff, r.legsWon];
+        const same = (a, b, k) => k(a).every((v, i) => v === k(b)[i]);
+        const cmp = (a, b, k) => { const x = k(a), y = k(b); for (let i = 0; i < x.length; i++) if (x[i] !== y[i]) return y[i] - x[i]; return 0; };
+        rows.sort((a, b) => cmp(a, b, key) || a.seed - b.seed);
+        // head-to-head inside each cluster that is level on wins, leg difference and legs won
+        const out = [];
+        for (let i = 0; i < rows.length;) {
+            let j = i + 1;
+            while (j < rows.length && same(rows[i], rows[j], key)) j++;
+            let cluster = rows.slice(i, j);
+            if (cluster.length > 1) {
+                const mini = tally(ms, cluster.map(r => r.id));
+                const h2h = r => [mini[r.id].won, mini[r.id].legsWon - mini[r.id].legsLost];
+                const rank = r => manual && manual.includes(r.id) ? manual.indexOf(r.id) : 100 + r.seed;
+                cluster.sort((a, b) => cmp(a, b, h2h) || rank(a) - rank(b));
+                cluster.forEach((r, k) => {
+                    r.level = cluster.some((o, m) => m !== k && same(o, r, h2h));
+                });
+            }
+            out.push(...cluster);
+            i = j;
+        }
+        out.forEach((r, i) => { r.pos = i + 1; });
+        return out;
+    }
+
+    /** True when every match of the group has been played. */
+    const groupDone = name => groupMatches(name).every(m => m.completed);
+
+    /** True when every group match has been played (the cups can be drawn). */
+    const allGroupsDone = () => on() && groupList().length > 0 && groupList().every(g => groupDone(g.name));
+
+    /** Per match: win rate, then leg difference per match, then legs won per match (ranks across groups of different sizes). */
+    const perMatch = r => r.played ? [r.won / r.played, r.diff / r.played, r.legsWon / r.played] : [0, 0, 0];
+    const byPerMatch = (a, b) => { const x = perMatch(a), y = perMatch(b); for (let i = 0; i < 3; i++) if (x[i] !== y[i]) return y[i] - x[i]; return 0; };
+
+    /**
+     * Who goes on to which cup, as which seed: the group winners as seeds 1…g, the runners-up after
+     * them (the A cup); the thirds, then the fourths (the B cup). Within each place, ranked across
+     * the groups per match (win rate, leg difference per match, legs won per match), then by group.
+     * @returns {{A: object[], B: object[], rows: {A: object[], B: object[]}}} A/B: players, best seed
+     *   first; rows: the same as table rows with their group, for the draw step
+     */
+    function cupFields() {
+        const byPlace = {};
+        groupList().forEach(g => standings(g.name).forEach(r => { (byPlace[r.pos] = byPlace[r.pos] || []).push(Object.assign({ group: g.name }, r)); }));
+        const place = n => (byPlace[n] || []).slice().sort((a, b) => byPerMatch(a, b) || a.group.localeCompare(b.group));
+        const A = place(1).concat(place(2)), B = place(3).concat(place(4));
+        return { A: A.map(r => r.player), B: B.map(r => r.player), rows: { A, B } };
+    }
+
+    // ---------- planned referees ----------
+    /**
+     * Plan the referees of a cup's matches as they are made (Docs/GROUPS-AND-CUPS.md): round 1's
+     * top half by the bye winners first, then the players of the bottom matches (the last one
+     * first); its bottom half by the losers of the top half, in order. Later rounds up to the
+     * semifinals: the loser of a match of the round before, counted from the bottom. The bronze final:
+     * the loser of the first match two rounds back (in a cup of four, the first semifinal's winner,
+     * who waits for the final anyway); the final: the bronze final's loser. Sets plannedReferee.
+     * @param {object[]} cupMatches - one cup's matches, round 1 with its players
+     * @param {number} size - the cup's bracket size
+     * @returns {void}
+     */
+    function planCupReferees(cupMatches, size) {
+        const round = r => cupMatches.filter(m => m.round === r).sort((a, b) => a.positionInRound - b.positionInRound);
+        const total = Math.log2(size) + 1;          // rounds: the natural ones, then the final
+        const semis = total - 2, bronze = round(total - 1)[0], final = round(total)[0];
+        const isBye = m => isWalkover(m.player1) || isWalkover(m.player2);
+        const r1 = round(1), live = r1.filter(m => !isBye(m));
+        const byeWinners = r1.filter(isBye).map(m => isWalkover(m.player1) ? m.player2 : m.player1).filter(real);
+        const top = live.slice(0, Math.ceil(live.length / 2)), bottom = live.slice(top.length);
+        const pool = byeWinners.map(p => p.id);
+        bottom.slice().reverse().forEach(m => pool.push(m.player1.id, m.player2.id));
+        top.forEach((m, i) => { m.plannedReferee = pool[i] != null ? { player: pool[i] } : null; });
+        bottom.forEach((m, j) => { m.plannedReferee = top[j] ? { loserOf: top[j].id } : null; });
+        for (let r = 2; r <= semis; r++) {
+            const before = round(r - 1).filter(m => r - 1 > 1 || !isBye(m)).reverse();
+            round(r).forEach((m, k) => { m.plannedReferee = before.length ? { loserOf: before[k % before.length].id } : null; });
+        }
+        if (bronze) {
+            const back = semis - 1 >= 1 ? round(semis - 1).filter(m => semis - 1 > 1 || !isBye(m)) : [];
+            bronze.plannedReferee = back.length ? { loserOf: back[0].id } : (round(semis)[0] ? { winnerOf: round(semis)[0].id } : null);
+        }
+        if (final && bronze) final.plannedReferee = { loserOf: bronze.id };
+    }
+
+    /**
+     * The planned referee as a player, when known: the one named, or the loser (winner) of the match
+     * named once it has been played. Null when there is none or it isn't known yet.
+     * @param {object} match
+     * @returns {object|null} a player
+     */
+    function plannedRefereeFor(match) {
+        const plan = match && match.plannedReferee;
+        if (!plan || !on()) return null;
+        if (plan.player != null) return playerOf(plan.player);
+        const from = byId(plan.loserOf || plan.winnerOf);
+        if (!from || !from.completed) return null;
+        const p = plan.loserOf ? from.loser : from.winner;
+        return real(p) ? playerOf(p.id) : null;
+    }
+
+    /**
+     * The planned referee in words, for a match that hasn't started: the name, or "loser of A-QF1"
+     * while that match is still to be played. '' when there is no plan.
+     * @param {object} match
+     * @returns {string}
+     */
+    function plannedRefereeText(match) {
+        const plan = match && match.plannedReferee;
+        if (!plan) return '';
+        const p = plannedRefereeFor(match);
+        if (p) return p.name;
+        if (plan.loserOf) return `loser of ${plan.loserOf}`;
+        if (plan.winnerOf) return `winner of ${plan.winnerOf}`;
+        return '';
+    }
+
+    // ---------- the cups ----------
+    /** A cup's match by its single-elimination round from the end: 0 = final, 1 = bronze final. */
+    const cupMatchesOf = cup => all().filter(m => m.side === 'cup' && m.cup === cup);
+
+    /** True when every drawn cup's final has been played: the tournament is over. */
+    function isComplete() {
+        if (!on() || !tournament.cups || !tournament.cups.A) return false;
+        const done = id => { const m = byId(id); return !!m && m.completed; };
+        return done('A-F') && done('A-B') && (!tournament.cups.B || (done('B-F') && done('B-B')));
+    }
+
+    /**
+     * The placings as the cups stand (for points; everyone also gets participation): A cup final
+     * 1st/2nd, bronze final 3rd/4th; with a B cup its final pair 5th–6th and bronze pair 7th–8th;
+     * without one, the A cup quarterfinal losers 5th–8th by group performance (the best two 5th–6th,
+     * the next two 7th–8th), once all those quarterfinals are played.
+     * @returns {Object<string, number>} player id → placement
+     */
+    function placements() {
+        const out = {};
+        if (!on() || !tournament.cups) return out;
+        const set = (p, r) => { if (real(p)) out[String(p.id)] = r; };
+        const done = id => { const m = byId(id); return m && m.completed ? m : null; };
+        let m;
+        if ((m = done('A-B'))) { set(m.winner, 3); set(m.loser, 4); }
+        if ((m = done('A-F'))) { set(m.winner, 1); set(m.loser, 2); }
+        if (tournament.cups.B) {
+            if ((m = done('B-F'))) { set(m.winner, 5); set(m.loser, 5); }
+            if ((m = done('B-B'))) { set(m.winner, 7); set(m.loser, 7); }
+        } else {
+            const qf = cupMatchesOf('A').filter(x => /-QF\d+$/.test(x.id));
+            if (qf.length && qf.every(x => x.completed)) {
+                const rowOf = {};
+                groupList().forEach(g => standings(g.name).forEach(r => { rowOf[r.id] = r; }));
+                const losers = qf.map(x => x.loser).filter(real).map(p => rowOf[String(p.id)]).filter(Boolean)
+                    .sort((a, b) => byPerMatch(a, b) || a.pos - b.pos);
+                losers.forEach((r, i) => { if (i < 4) out[r.id] = i < 2 ? 5 : 7; });
+            }
+        }
+        return out;
+    }
+
+    // ---------- names ----------
+    /**
+     * The round a match is in, in words: "Group A", "A cup · Quarterfinal", "B cup · Final".
+     * @param {object|string} match - a match, or its ID
+     * @returns {string}
+     */
+    function roundName(match) {
+        const m = typeof match === 'string' ? byId(match) : match;
+        if (!m) return String(match || '');
+        if (m.side === 'group') return `Group ${m.group}`;
+        if (m.side === 'cup') {
+            const size = tournament.cups && tournament.cups[m.cup] && tournament.cups[m.cup].size;
+            const r = typeof getSERoundDisplayName === 'function' ? getSERoundDisplayName(m.round, size) : `Round ${m.round}`;
+            return `${m.cup} cup · ${r === 'Bronze' ? 'Bronze final' : r}`;
+        }
+        return m.id;
+    }
+
+    // ---------- the operator's tie decisions ----------
+    /**
+     * Move a player who is level with the one above them up one place in their group (the operator
+     * decides a tie that head-to-head didn't). Only before the cups are drawn.
+     * @param {string} name - the group letter
+     * @param {*} playerId
+     * @returns {boolean} true when the order changed
+     */
+    function moveUp(name, playerId) {
+        if (!on() || tournament.cups || tournament.readOnly) return false;
+        const rows = standings(name);
+        const i = rows.findIndex(r => r.id === String(playerId));
+        if (i < 1 || !rows[i].level || !rows[i - 1].level) return false;
+        const ids = rows.map(r => r.id);
+        [ids[i - 1], ids[i]] = [ids[i], ids[i - 1]];
+        tournament.groups.order = Object.assign({}, tournament.groups.order, { [name]: ids });
+        if (typeof saveTournament === 'function') saveTournament();
+        return true;
+    }
+
+    return {
+        isGroupId, isCupId, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
+        groupList, groupMatches, standings, groupDone, allGroupsDone, cupFields,
+        planCupReferees, plannedRefereeFor, plannedRefereeText, cupMatchesOf,
+        isComplete, placements, roundName, moveUp
+    };
+})();

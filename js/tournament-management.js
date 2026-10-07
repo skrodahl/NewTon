@@ -330,6 +330,8 @@ function buildTournamentPayload() {
             bracketSize: tournament.bracketSize,
             format: tournament.format,
             seeding: tournament.seeding,
+            groups: tournament.groups, // groups and cups: the group draw (absent in other formats)
+            cups: tournament.cups, // groups and cups: the cup draw (absent until drawn)
             readOnly: tournament.readOnly || false,
             config: configForExport(),
             players: players,
@@ -715,6 +717,8 @@ function saveTournamentOnly(shouldLog = true) {
             bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
             format: tournament.format, // SE/DE format (absent = DE for backward compat)
             seeding: tournament.seeding, // who was seeded in the draw (absent = a random draw)
+            groups: tournament.groups, // groups and cups: the group draw (absent in other formats)
+            cups: tournament.cups, // groups and cups: the cup draw (absent until drawn)
             placements: tournament.placements || {},
             readOnly: tournament.readOnly, // ✅ Fixed: Include readOnly flag
             lastSaved: new Date().toISOString()
@@ -948,7 +952,9 @@ function renderSetupCurrent() {
     // One line of facts: the players, the bracket, and what is being played now
     const facts = [];
     facts.push(list.length ? `${list.length} player${list.length === 1 ? '' : 's'}, ${paid === list.length ? 'all paid' : `${paid} paid`}` : 'No players yet');
-    if (hasBracket) facts.push(`${tournament.bracketSize}-player bracket`);
+    if (hasBracket) facts.push(getFormat() === 'GROUPS' && typeof Groups !== 'undefined'
+        ? `${Groups.groupList().length} groups${tournament.cups ? (tournament.cups.B ? ', A and B cups' : ', A cup') : ''}`
+        : `${tournament.bracketSize}-player bracket`);
     if (hasBracket && status !== 'Completed') facts.push(`${live.length} live now${lanes.length ? ` (lane${lanes.length > 1 ? 's' : ''} ${lanes.join(', ')})` : ''}`);
 
     // The next step for the tournament's status: [title, hint, secondary button, main button]
@@ -1328,6 +1334,8 @@ function continueLoadProcess(selectedTournament) {
         bracketSize: bracketSize,
         format: selectedTournament.format, // SE/DE format (absent = DE for backward compat)
         seeding: selectedTournament.seeding, // who was seeded in the draw (absent = a random draw)
+        groups: selectedTournament.groups, // groups and cups: the group draw (absent in other formats)
+        cups: selectedTournament.cups, // groups and cups: the cup draw (absent until drawn)
         placements: selectedTournament.placements || {},
         readOnly: (selectedTournament.status === 'completed') // Read-only for completed tournaments
         // NO CONFIG loading - config stays global
@@ -1529,6 +1537,8 @@ function continueImportProcess(importedData) {
             bracketSize: bracketSize,
             format: importedData.format, // SE/DE format (absent = DE for backward compat)
             seeding: importedData.seeding, // who was seeded in the draw (absent = a random draw)
+            groups: importedData.groups, // groups and cups: the group draw (absent in other formats)
+            cups: importedData.cups, // groups and cups: the cup draw (absent until drawn)
             readOnly: (importedData.status === 'completed') // Read-only for completed imports
         };
 
@@ -1669,6 +1679,8 @@ function confirmReset() {
     // Reset tournament data only
     matches = [];
     tournament.bracket = null;
+    delete tournament.groups; // groups and cups: the draws go with the bracket
+    delete tournament.cups;
     tournament.status = 'setup';
     tournament.placements = {};
     tournament.readOnly = false; // Clear read-only flag (escape hatch)

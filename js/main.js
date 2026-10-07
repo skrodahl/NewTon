@@ -415,6 +415,8 @@ function autoLoadCurrentTournament() {
             bracketSize: tournamentData.bracketSize, // ✅ Fixed: Include bracketSize
             format: tournamentData.format, // SE/DE format (absent = DE for backward compat)
             seeding: tournamentData.seeding, // who was seeded in the draw (absent = a random draw)
+            groups: tournamentData.groups, // groups and cups: the group draw (absent in other formats)
+            cups: tournamentData.cups, // groups and cups: the cup draw (absent until drawn)
             placements: tournamentData.placements || {},
             readOnly: tournamentData.readOnly, // ✅ Fixed: Include readOnly flag
             _analyticsPreview: tournamentData._analyticsPreview // 4.3: keep the no-persist guard alive across reload
@@ -636,6 +638,13 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
     if (!tournament || !tournament.bracketSize) return '';
     const size = tournament.bracketSize;
     if (getFormat() === 'SE' && isSEBronzeMatch(matchId, size)) return isWinner ? 'takes 3rd place' : 'takes 4th place';
+    if (getFormat() === 'GROUPS') {
+        // groups and cups: group matches move no one; each cup's bronze and final decide places
+        const ends = { 'A-F': ['wins the tournament', 'takes 2nd place'], 'A-B': ['takes 3rd place', 'takes 4th place'],
+            'B-F': ['wins the B cup (5th–6th)', 'takes 5th–6th'], 'B-B': ['takes 7th–8th', 'takes 7th–8th'] };
+        if (ends[matchId]) return ends[matchId][isWinner ? 0 : 1];
+        if (typeof Groups !== 'undefined' && Groups.isGroupId(matchId)) return '';
+    }
 
     const table = getProgressionTable();
     const progression = table && table[matchId];

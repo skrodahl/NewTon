@@ -325,6 +325,10 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     </div>
                     <div class="bv-head-right">
                         <div class="bv-tools">
+                            <div class="bv-seg" id="bvGroupsView" hidden>
+                                <button type="button" data-gc="groups" aria-pressed="true" onclick="BracketView.setGroupsView('groups')">Groups</button>
+                                <button type="button" data-gc="cups" aria-pressed="false" onclick="BracketView.setGroupsView('cups')">Cups</button>
+                            </div>
                             <div class="bv-seg" id="bvFinals" hidden>
                                 <span class="bv-seglabel">Finals</span>
                                 <button type="button" data-finals="right" aria-pressed="true" onclick="BracketView.setFinals('right')">Right</button>
@@ -511,6 +515,11 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                 <div class="cfg-line"><span>Semifinal</span><span class="cfg-step" data-target="seSemifinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seSemifinalLegs"></div>
                                 <div class="cfg-line"><span>Bronze final</span><span class="cfg-step" data-target="seBronzeLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seBronzeLegs"></div>
                                 <div class="cfg-line"><span>Final</span><span class="cfg-step" data-target="seFinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="seFinalLegs"></div>
+                            </div>
+                            <div>
+                                <h4>Groups and cups</h4>
+                                <div class="cfg-line"><span>Group matches</span><span class="cfg-step" data-target="groupMatchesLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="groupMatchesLegs"></div>
+                                <p class="cfg-panel-note">The A and B cups use the single elimination lengths.</p>
                             </div>
                         </div>
                     </div>
@@ -1052,6 +1061,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/player-registry.js"></script>
         <script src="js/player-management.js"></script>
         <script src="js/clean-match-progression.js"></script>
+        <script src="js/groups.js"></script>
         <script src="js/bracket-rendering.js"></script>
         <script src="js/bracket-view.js"></script>
         <script src="js/newton-csv.js"></script>
@@ -1198,7 +1208,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <div class="dlg__sidebar-value" id="bracketConfirmName">-</div>
                         <div class="dlg__sidebar-label">Format</div>
                         <div class="dlg__sidebar-value" id="bracketConfirmFormat">-</div>
-                        <div class="dlg__sidebar-label">Bracket Size</div>
+                        <div class="dlg__sidebar-label" id="bracketConfirmSizeLabel">Bracket Size</div>
                         <div class="dlg__sidebar-value" id="bracketConfirmSize">-</div>
                         <div class="dlg__sidebar-label">Players</div>
                         <div class="dlg__sidebar-value" id="bracketConfirmPlayerCount">-</div>
@@ -1207,13 +1217,38 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     </aside>
                     <div class="dlg__main">
                         <h2 class="dlg__title" id="bracketConfirmTitle">Generate Bracket</h2>
-                        <p class="dlg__desc">These players will be placed into the bracket. Make sure all players are registered before proceeding.</p>
+                        <p class="dlg__desc" id="bracketConfirmDesc">These players will be placed into the bracket. Make sure all players are registered before proceeding.</p>
                         <div id="bracketConfirmPlayers" class="bracket-confirm-players"></div>
                     </div>
                 </div>
                 <div class="dlg__foot">
                     <button class="btn" onclick="popDialog()" autofocus>Cancel</button>
                     <button class="btn btn-success" onclick="confirmBracketGeneration()">Generate</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Undo the cup draw (groups and cups): back to the group stage -->
+        <div id="undoCupDrawModal" class="modal">
+            <div class="dlg dlg--split">
+                <div class="dlg__grid">
+                    <aside class="dlg__sidebar">
+                        <div class="dlg__sidebar-label">Name</div>
+                        <div class="dlg__sidebar-value" id="undoCupsName">-</div>
+                        <div class="dlg__sidebar-label">A cup</div>
+                        <div class="dlg__sidebar-value" id="undoCupsA">-</div>
+                        <div class="dlg__sidebar-label">B cup</div>
+                        <div class="dlg__sidebar-value" id="undoCupsB">-</div>
+                    </aside>
+                    <div class="dlg__main">
+                        <h2 class="dlg__title">Undo the cup draw?</h2>
+                        <p class="dlg__desc">The cups are removed and the group stage opens again: group results can be undone, and the cups are drawn again from the group tables when you're ready.</p>
+                        <p class="dlg__desc">Only possible while no cup match has been started or played.</p>
+                    </div>
+                </div>
+                <div class="dlg__foot">
+                    <button class="btn" onclick="popDialog()" autofocus>Cancel</button>
+                    <button class="btn btn-warning" onclick="undoCupDrawConfirmed()">Undo the cup draw</button>
                 </div>
             </div>
         </div>
