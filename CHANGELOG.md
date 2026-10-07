@@ -1,3 +1,11 @@
+## Unreleased
+
+### Single elimination: finals in the middle
+
+- **The Finals Right | Middle switch now works for single elimination.** In the middle, the bracket is drawn as two halves facing each other: the top half of round 1 from the left, the bottom half from the right, each down to its semifinal, and the final in the middle, level with the semifinals, with the bronze final under it (joined by a dashed line). It is the same single elimination with the same rules; only the drawing differs, so history, undo and everything else are untouched. One setting for both formats (Global Settings → Bracket, or the bracket header). This is the first step towards the season final's A and B cups.
+- **The switch shows the right button pressed** for single elimination: it read the layout's name instead of the setting.
+- Files changed: `js/bracket-view.js` (`layoutSEMiddle()`, `finalsVariant()`, labels and the dashed line, the header toggle), `tournament.html`, `js/dynamic-help-system.js`, `Docs/BRACKET-REDESIGN.md`.
+
 ## **v5.3.2** — Don't You (Forget About Me) (2026-10-07)
 
 ### Match Controls: before the draw

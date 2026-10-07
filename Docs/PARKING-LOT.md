@@ -51,9 +51,9 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 
 - The cups as the maintainer describes them (8 players: two quarterfinals → a semifinal on each side, the final in the middle, semifinal losers in the bronze final) are exactly the existing 8-player SE with bronze. What's new is the drawing: SE always lays out left to right (`finalsVariant()` returns 'se'; the Finals Right | Middle switch is DE only). A mirrored SE "middle" layout in `layoutFor()` (bracket-view.js) would draw the cups this way, and give ordinary SE cups the Middle option too. Presentation only.
 
-**First step (agreed 2026-10-07, after v5.3.2):** the SE middle layout on its own. Small and self-contained, useful at once (every SE cup gets the Middle option members like in DE), and the cups will have been seen on normal nights by December.
+**First step (agreed 2026-10-07, after v5.3.2), built the same day:** the SE middle layout on its own, with the bronze final under the final (confirmed). Small and self-contained, useful at once (every SE cup gets the Middle option members like in DE), and the cups will have been seen on normal nights by December.
 
-**Still open:** where the bronze final sits in the SE middle layout (under the final, in the centre column?); how to show the A and B cups side by side (tabs, or both on one page); ranking across groups for the cup seeds (e.g. winners 1-4, runners-up 5-8); whether group-mates may meet in the cup's first round; placings (A 1-8, B 9-16?) and whether and how the final counts for points.
+**Still open:** how to show the A and B cups side by side (tabs, or both on one page); ranking across groups for the cup seeds (e.g. winners 1-4, runners-up 5-8); whether group-mates may meet in the cup's first round; placings (A 1-8, B 9-16?) and whether and how the final counts for points.
 
 **To work out first (discuss, mockup before code):**
 - The group stage: round-robin tables and tiebreaks (wins, then legs? head-to-head?), how it fits Match Controls, the lanes and the history/undo model, and how groups feed the A and B cups.

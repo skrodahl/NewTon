@@ -181,7 +181,7 @@ const HELP_CONTENT = {
                         <li><strong>Match Controls</strong> switches to Match Controls and points out that match</li>
                         <li>Click empty space or press <strong>Esc</strong> to clear the selection</li>
                     </ul>
-                    <p><strong>Finals Right | Middle:</strong> the finals at the right edge, or in the middle between the frontside and backside. Also in Config → User Interface.</p>
+                    <p><strong>Finals Right | Middle:</strong> the finals at the right edge, or in the middle: between the frontside and backside in double elimination; in single elimination, the two halves of the bracket face a final in the middle, with the bronze final under it. Also in Global Settings → Bracket.</p>
                 `
             },
             matches: {

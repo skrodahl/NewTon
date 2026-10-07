@@ -1,11 +1,11 @@
-// bracket-view.js - Bracket view for double elimination
+// bracket-view.js - Bracket view for double and single elimination
 //
 // Lays the bracket out from the progression table (getProgressionTable(), read only),
 // then draws cards and lines in world coordinates under a camera (fit, zoom, pan).
 // Hovering a match magnifies it; clicking selects it and shows its lines; Follow
 // traces one player through the bracket. Nothing here changes tournament data.
 //
-// Single elimination still uses the classic renderer in bracket-rendering.js.
+// One layout per format and finals position (layoutFor()); everything else is shared.
 // Design and decisions: Docs/BRACKET-REDESIGN.md
 
 /**
@@ -127,8 +127,42 @@ const BracketView = (() => {
         const cw = Math.max(...ids.map(i => pos[i].x)) + W, ch = Math.max(...ids.map(i => pos[i].y)) + H;
         return { pos, cw, ch, mid: y[final] - minY + H / 2 };
     }
-    // The layout is the one part chosen by format (see Docs/BRACKET-REDESIGN.md, "Other Formats")
-    const layoutFor = (st, variant, g) => variant === 'se' ? layoutSE(st, g) : layout(st, variant, g);
+    // ---------- single-elimination layout, finals in the middle ----------
+    // Two halves facing a centre column: the top half of round 1 runs left to right, the bottom half
+    // right to left, each down to its semifinal. The final sits in the centre, level with the
+    // semifinals (a straight line in from each side), and the bronze final under it. The rules are
+    // the same single elimination; only the drawing differs.
+    function layoutSEMiddle(st, g) {
+        const { ids, feeds, maxFS } = st;
+        const P = W + g.GX, pitch = g.PITCH, semis = maxFS - 2;
+        const bronze = `FS-${maxFS - 1}-1`, final = `FS-${maxFS}-1`;
+        const count = r => ids.filter(i => roundOf(i) === r).length;
+        const half = count(1) / 2;
+        const isLeft = id => numOf(id) <= count(roundOf(id)) / 2;
+        const y = {}, x = {};
+        const avg = a => a.reduce((s, v) => s + v, 0) / a.length;
+        const rowOf = id => {
+            if (y[id] !== undefined) return y[id];
+            if (roundOf(id) === 1) return (y[id] = ((isLeft(id) ? numOf(id) : numOf(id) - half) - 1) * pitch);
+            return (y[id] = avg((feeds[id] || []).filter(f => f.kind === 'winner').map(f => rowOf(f.src))));
+        };
+        const cx = (semis - 1) * P + W + g.FINALS_GAP; // the centre column
+        ids.filter(i => roundOf(i) <= semis).forEach(id => {
+            rowOf(id);
+            x[id] = isLeft(id) ? (roundOf(id) - 1) * P : cx + W + g.FINALS_GAP + (semis - roundOf(id)) * P;
+        });
+        x[final] = x[bronze] = cx;
+        y[final] = avg(ids.filter(i => roundOf(i) === semis).map(i => y[i]));
+        y[bronze] = y[final] + H + 2 * FINALS_SPLIT;
+        const minY = Math.min(...ids.map(i => y[i]));
+        const pos = {};
+        ids.forEach(i => { pos[i] = { x: x[i], y: y[i] - minY }; });
+        const cw = Math.max(...ids.map(i => pos[i].x)) + W, ch = Math.max(...ids.map(i => pos[i].y)) + H;
+        return { pos, cw, ch, mid: y[final] - minY + H / 2 };
+    }
+    // The layout is the one part chosen by format and finals position (see Docs/BRACKET-REDESIGN.md, "Other Formats")
+    const layoutFor = (st, variant, g) => variant === 'se' ? layoutSE(st, g)
+        : variant === 'se-middle' ? layoutSEMiddle(st, g) : layout(st, variant, g);
 
     const worldBox = L => ({ x0: -40, y0: -TOP, x1: L.cw + 50, y1: L.ch + BOTTOM }); // room for lines routed round the outside
 
@@ -272,9 +306,11 @@ const BracketView = (() => {
         return !!table[tournament.bracketSize];
     }
 
+    /** The layout to use: the format, and where the finals go (one setting for both formats). */
     function finalsVariant() {
-        if (getFormat() === 'SE') return 'se';
-        return (typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle') ? 'middle' : 'right';
+        const middle = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle';
+        if (getFormat() === 'SE') return middle ? 'se-middle' : 'se';
+        return middle ? 'middle' : 'right';
     }
 
     /**
@@ -324,7 +360,25 @@ const BracketView = (() => {
         const lblMid = (html, x, y, cls) => { const d = lbl(html, x + W / 2, y, cls); d.style.transform = 'translateX(-50%)'; return d; };
 
         const LABEL_GAP = 26; // every header sits the same distance above the topmost match of its round
-        if (variant === 'se') {
+        if (variant === 'se-middle') {
+            // the club name over the centre column; each half's rounds labelled over its own columns
+            const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
+            const semis = st.maxFS - 2, bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
+            lblMid(club, pos[final].x, -94, 'bv-club');
+            const roundName = r => r === semis ? 'Semifinals' : r === semis - 1 ? 'Quarterfinals' : 'Round ' + r;
+            const inRound = r => st.ids.filter(i => roundOf(i) === r);
+            for (let r = 1; r <= semis; r++) {
+                const n = inRound(r).length;
+                [inRound(r).filter(i => numOf(i) <= n / 2), inRound(r).filter(i => numOf(i) > n / 2)].forEach(side => {
+                    lblMid(roundName(r), pos[side[0]].x, Math.min(...side.map(i => pos[i].y)) - LABEL_GAP);
+                });
+            }
+            lblMid('Final', pos[final].x, pos[final].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+            lblMid('Bronze final', pos[bronze].x, pos[bronze].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+            lblMid('3rd place', pos[bronze].x, pos[bronze].y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+            // application signature, centred under the finals (checked by renderBracket())
+            lblMid(String.fromCharCode(..._0x7a, ..._0x9b), pos[final].x, L.ch + 44, 'bv-signature').id = 'tournament-watermark';
+        } else if (variant === 'se') {
             const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
             lbl(club, 0, -94, 'bv-club');
             const semis = st.maxFS - 2, bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
@@ -455,12 +509,17 @@ const BracketView = (() => {
             edges.push({ src, dst, kind, el: p });
         }));
 
-        // single elimination: a dashed line from the bronze final down to the line into the final
-        if (variant === 'se') {
+        // single elimination: a dashed line ties the bronze final to the final (finals on the right:
+        // from the bronze final down to the line into the final; in the middle: from the final down to
+        // the bronze final under it)
+        if (variant === 'se' || variant === 'se-middle') {
             const bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
             const d = document.createElementNS(svgNS, 'path');
-            d.setAttribute('d', `M${pos[bronze].x + W / 2} ${pos[bronze].y + H} V${cy(final)}`);
-            const assigned = M[final] && M[final].p.some(sl => sl.kind !== 'tbd');
+            d.setAttribute('d', variant === 'se'
+                ? `M${pos[bronze].x + W / 2} ${pos[bronze].y + H} V${cy(final)}`
+                : `M${pos[final].x + W / 2} ${pos[final].y + H} V${pos[bronze].y}`);
+            const target = variant === 'se' ? final : bronze;
+            const assigned = M[target] && M[target].p.some(sl => sl.kind !== 'tbd');
             d.setAttribute('class', 'bv-edge bv-dashed' + (assigned ? ' bv-known' : ''));
             svg.appendChild(d);
         }
@@ -833,7 +892,7 @@ const BracketView = (() => {
 
     /**
      * Switch the finals between the right edge and the middle, remembered in the global
-     * config (config.ui.bracketFinals; missing means 'right').
+     * config (config.ui.bracketFinals; missing means 'right'). One setting for both formats.
      * @param {'right'|'middle'} value
      * @returns {void}
      */
@@ -851,7 +910,7 @@ const BracketView = (() => {
 
     /**
      * Fill the bracket page header: tournament name and date, the status line, and the
-     * Finals toggle (shown for double elimination only). Called on every bracket render.
+     * Finals toggle (both formats). Called on every bracket render.
      * @returns {void}
      */
     function updateHeader() {
@@ -896,8 +955,9 @@ const BracketView = (() => {
             ? `<b>${paid}</b> players · ${all.length} matches · ${played} played, ${wo} walkovers · <b>${live}</b> live · <b>${ready}</b> ready`
             : `<b>${paid}</b> players · no bracket yet`;
         if (finals) {
-            finals.hidden = !isActive() || getFormat() === 'SE'; // the finals position is a double-elimination choice
-            const v = finalsVariant();
+            finals.hidden = !isActive(); // both formats: finals on the right or in the middle
+            // the setting, not the layout name (single elimination's layouts are 'se' and 'se-middle')
+            const v = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle' ? 'middle' : 'right';
             finals.querySelectorAll('button[data-finals]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.finals === v)));
         }
     }
