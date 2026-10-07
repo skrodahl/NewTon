@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.3.1'; // Sowing the Seeds of Love — a seeded draw, a locked backup key
+const APP_VERSION = '5.3.2'; // Don't You (Forget About Me) — Setup's one thing to do, never a draw with an unpaid player
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

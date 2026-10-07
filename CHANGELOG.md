@@ -1,4 +1,4 @@
-## Unreleased
+## **v5.3.2** — Don't You (Forget About Me) (2026-10-07)
 
 ### Match Controls: before the draw
 
@@ -24,6 +24,11 @@
 
 - **The faint grey frame around the redesigned pages is gone.** The window's background (`#f1f5f5`, a cool grey) differed slightly from the redesigned pages' own (`--nt-bg`, `#f4f3f1`, a warm grey), so a thin strip of the cooler grey showed around Setup, Registration, Analytics and Global Settings. The window now uses the same token; the bracket page, Match Controls and the dialogs look as before. Pages that load `styles.css` without the design tokens (older release pages) keep the old grey through the variable's fallback.
 - Files changed: `css/styles.css`.
+
+### Release
+
+- Version 5.3.2, "Don't You (Forget About Me)". The Chalker is unchanged; its version and caches are bumped with the app's (`CHALKER_VERSION`, `chalker.js?v=25`, service worker cache `chalker-v122`).
+- Files changed: `js/main.js` (`APP_VERSION` → `5.3.2`), `chalker/js/chalker.js` (`CHALKER_VERSION` → `5.3.2`), `chalker/index.html`, `chalker/sw.js`, `llms.txt` (Setup by state, never a draw with an unpaid player), `sitemap.xml`, `releases/index.html`, `releases/v5.3.2.html`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.3.2.md`, `Docs/PARKING-LOT.md` (the season final's decisions; the SE middle layout as the first formats step).
 
 ## **v5.3.1** — Sowing the Seeds of Love (2026-10-06)
 

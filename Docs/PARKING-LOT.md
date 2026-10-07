@@ -42,6 +42,19 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 - `TOURNAMENT_FORMATS` (js/results-config.js) is the registry for what to offer; progression tables, rendering and ranking stay per format, as for DE and SE.
 - Seeding (v5.3.1): `js/seeding.js` decides who the seeds are (the ranked list, per tournament name and period) and knows nothing about brackets. A group draw would take the same list and deal it into four groups, instead of calling `placeSeededPlayers()`.
 
+**Decided with the maintainer (2026-10-07):**
+- Group tiebreakers today: wins, legs, leg difference, head-to-head; never a tie after that. Suggested order: wins, leg difference, legs won, head-to-head (a mini-table for three-way ties), then "decide on the night" set by the operator. Not settled.
+- Match length: best of 5 on the final night; the final perhaps best of 7.
+- Every group match must finish before the cups are drawn: until then nobody knows where players end up.
+- A and B are separate competitions. Their draws are seeded from the group results; the top two of each group go to A, the bottom two to B.
+- The cups map onto what exists: each is an 8-player single elimination with a bronze final (SE progression tables), drawn with seeding's "All" mode, seeded from the group tables instead of Analytics. New: the group stage (draw, round schedule, table) and the handover into the cups.
+
+- The cups as the maintainer describes them (8 players: two quarterfinals → a semifinal on each side, the final in the middle, semifinal losers in the bronze final) are exactly the existing 8-player SE with bronze. What's new is the drawing: SE always lays out left to right (`finalsVariant()` returns 'se'; the Finals Right | Middle switch is DE only). A mirrored SE "middle" layout in `layoutFor()` (bracket-view.js) would draw the cups this way, and give ordinary SE cups the Middle option too. Presentation only.
+
+**First step (agreed 2026-10-07, after v5.3.2):** the SE middle layout on its own. Small and self-contained, useful at once (every SE cup gets the Middle option members like in DE), and the cups will have been seen on normal nights by December.
+
+**Still open:** where the bronze final sits in the SE middle layout (under the final, in the centre column?); how to show the A and B cups side by side (tabs, or both on one page); ranking across groups for the cup seeds (e.g. winners 1-4, runners-up 5-8); whether group-mates may meet in the cup's first round; placings (A 1-8, B 9-16?) and whether and how the final counts for points.
+
 **To work out first (discuss, mockup before code):**
 - The group stage: round-robin tables and tiebreaks (wins, then legs? head-to-head?), how it fits Match Controls, the lanes and the history/undo model, and how groups feed the A and B cups.
 - How the bracket view draws a group stage and two cups (BracketView lays out from the progression tables, one layout per format).
