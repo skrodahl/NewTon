@@ -146,6 +146,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Single Elimination Cup:</strong> One loss and you're out — 4, 8, 16, or 32 players</li>
                         <li><strong>Double Elimination Cup:</strong> Losers get a second chance through the backside — 8, 16, or 32 players</li>
+                        <li><strong>Groups and Cups:</strong> everybody plays everybody in groups of up to four, then an A cup and a B cup — 6 to 32 players (see <strong>Groups and Cups</strong> below)</li>
                     </ul>
                     <p><strong>Bracket Sizes:</strong></p>
                     <ul>
@@ -164,7 +165,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Left:</strong> tournament name and date, and links to <strong>Setup</strong>, <strong>Registration</strong>, <strong>Config</strong> and <strong>Analytics</strong></li>
                         <li><strong>Centre:</strong> the tabs <strong>Bracket | Match Controls</strong> (plus <strong>Console</strong> when the Developer Console is enabled in Config), and <strong>Leaderboard</strong>. The left and right arrow keys switch between Bracket and Match Controls</li>
-                        <li><strong>Right:</strong> <strong>Finals Right | Middle</strong>, <strong>Fit all</strong>, zoom (− / +) and the clock. On Match Controls and the Console only the clock shows</li>
+                        <li><strong>Right:</strong> <strong>Finals Right | Middle</strong> (<strong>Groups | Cups</strong> in a Groups and Cups tournament), <strong>Fit all</strong>, zoom (− / +) and the clock. On Match Controls and the Console only the clock shows</li>
                         <li><strong>Status line:</strong> players, matches played, walkovers, live and ready, with the colour legend on the bracket</li>
                     </ul>
                     <p><strong>Moving around:</strong></p>
@@ -237,6 +238,24 @@ const HELP_CONTENT = {
                     <p><strong>💡 Tip:</strong> Assign lanes to organize physical dartboard usage and avoid conflicts.</p>
                 `
             },
+            groups: {
+                title: "Groups and Cups",
+                content: `
+                    <p><strong>The format:</strong> players are drawn into groups of up to four (an even number of groups; by ranking when seeding is on, otherwise at random). Everybody plays everybody in their group. Then the top two of each group play the <strong>A cup</strong>, the rest the <strong>B cup</strong>: single elimination with a bronze final, drawn with the final in the middle.</p>
+                    <p><strong>The group stage:</strong></p>
+                    <ul>
+                        <li>Each group plays in a fixed order, and each match has a planned referee from the group. Match Controls shows each group's next matches with the referee filled in; it is set when the match starts, if that player is free. Change it like any referee</li>
+                        <li>A player can't start a match while they are playing another one</li>
+                        <li>The group table: wins, then leg difference, then legs won, then head-to-head. Players still level are marked <strong>level</strong>; the group seed decides unless you click <strong>▲</strong> in Match Controls' group tables</li>
+                        <li><strong>Groups</strong> on the bracket page shows every group's table and matches. Click a match that hasn't been played to open it in Match Controls; a played one has <strong>Undo</strong> while it can be undone</li>
+                    </ul>
+                    <p><strong>Draw the cups:</strong> when the last group match is played, Match Controls shows both cups' seeded fields: group winners first, then runners-up (the B cup: thirds, then fourths), ranked across the groups by win rate, then leg difference per match. Untick <strong>Play the B cup</strong> to play without it. Nothing is drawn until you click <strong>Draw the cups</strong>.</p>
+                    <p><strong>The cups:</strong> A cup and B cup side by side in Match Controls, on the same lanes. Round 1's referees are planned (players with a bye, then the players from the bottom of the round, then the first losers), later rounds take losers as they come. <strong>Cups</strong> on the bracket page shows both.</p>
+                    <p><strong>Undo:</strong> group results can be undone until the cups are drawn. <strong>Undo the cup draw</strong> (Match Controls) is there until a cup match has been started or played; it opens the group stage again. Cup matches undo as in any bracket.</p>
+                    <p><strong>Placings:</strong> A cup: 1st and 2nd from the final, 3rd and 4th from the bronze final. B cup: its final pair 5th–6th, its bronze pair 7th–8th. Without a B cup, the A cup's quarterfinal losers take 5th–8th by their group results. Everyone gets the points for taking part.</p>
+                    <p><strong>Match length:</strong> group matches have their own setting (Global Settings → Match length → Groups and cups); the cups use the single elimination lengths.</p>
+                `
+            },
             matchControls: {
                 title: "Match Controls Interface",
                 content: `
@@ -294,6 +313,7 @@ const HELP_CONTENT = {
                     <p><strong>Seeding</strong> (Tournaments) lets Shuffle &amp; Draw keep the best players apart. <strong>Off</strong>: the draw is always random. <strong>Available</strong>: the option is offered, and you tick it. <strong>On</strong>: it is ticked to start with.</p>
                     <p><strong>Seeded players</strong> is how many of the best players are seeded, as a share of the bracket: 1/8, 1/4 or 1/2 (2, 4 or 8 players in a 16-player bracket). <strong>All</strong> seeds everyone with a ranking, so the top seed meets the bottom seed. Seeded players can't meet in round 1, and everyone else is drawn at random. You can change it for each draw.</p>
                     <p><strong>Byes</strong> go to the best seeds. Players with no ranking are never seeded, and only get a bye if there are more byes than seeds.</p>
+                    <p><strong>Groups and Cups</strong> seeds every ranked player into the groups in snake order (the best in group A, the second in B, …, then back again); Seeded players doesn't apply. The cups are seeded from the group tables.</p>
                     <p><strong>The ranking</strong> is the Leaderboard's points over earlier tournaments with the same name, from this browser. The name word is taken from the tournament's name ("Måndagscup", "Måndagscup week 43" and "NewTon Måndagscup" are the same cup), and tournaments with "Final" in the name never count. It looks at the current half-year, or the previous one for the first match of a season. In Match Controls you can change the word or the period, and tick tournaments by hand.</p>
                     <p><strong>💡 New players</strong> are never seeded; Match Controls names them. With no earlier tournaments in this browser, or none ticked, the draw is random. To seed from the club's history, restore a backup on this computer first.</p>
                 `

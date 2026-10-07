@@ -244,6 +244,9 @@ const Seeding = (() => {
         if (byes > 0 && byes <= p.seeds.length) lines.push(`The bracket has ${byes} bye${byes === 1 ? '' : 's'}; the best seed${byes === 1 ? ' gets it' : 's get them'}.`);
         else if (byes > 0) lines.push(`The bracket has ${byes} byes: each of the ${p.seeds.length} seeds gets one, and the other ${byes - p.seeds.length} go to unseeded players at random.`);
         if (all) lines.push('The top seed meets the bottom seed in round 1, the second seed the second-last, and so on.');
+        if (typeof getVisibleFormats === 'function' && getVisibleFormats().some(f => f.id === 'GROUPS')) {
+            lines.push(`Groups and Cups seeds all ${p.ranked.length} ranked players into the groups instead, in snake order.`);
+        }
         return `<ol class="mc-seeds">${p.seeds.map(x => `<li><b>${escapeHtml(x.player.name)}</b><span>${x.points} pts</span></li>`).join('')}</ol>
             <p class="mc-note">${lines.join(' ')}</p>`;
     }

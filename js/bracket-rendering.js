@@ -1747,7 +1747,8 @@ function _mcSetupHTML() {
     // would be left out of the bracket. The buttons say so; generateCleanBracket() still refuses.
     const formats = (typeof getVisibleFormats === 'function' ? getVisibleFormats() : [{ id: 'DE', name: 'Double Elimination Cup', blurb: '', minPlayers: 4, maxPlayers: 32 }]).map(fmt => {
         const size = calculateBracketSize(paid, fmt.id);
-        let label = `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`, ok = true;
+        let label = fmt.id === 'GROUPS' && typeof Groups !== 'undefined'
+            ? `Draw ${Groups.groupCount(Math.max(paid, fmt.minPlayers))} groups` : `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`, ok = true;
         if (unpaid > 0) { label = `${unpaid} player${unpaid === 1 ? '' : 's'} unpaid`; ok = false; }
         else if (paid < fmt.minPlayers) { label = `Needs ${fmt.minPlayers}+ paid players`; ok = false; }
         else if (paid > fmt.maxPlayers) { label = `At most ${fmt.maxPlayers} players`; ok = false; }

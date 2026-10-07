@@ -429,7 +429,7 @@ const BracketView = (() => {
                         if (side.length) lblMid(roundName(r), at(side[0]).x, Math.min(...side.map(i => at(i).y)) - LABEL_GAP);
                     });
                 }
-                const places = c.cup === 'A' ? ['1st', '3rd place'] : ['5th–6th', '7th–8th'];
+                const places = c.cup === 'A' ? ['1st', '3rd place'] : ['5th–6th', '7th–8th place'];
                 lblMid('Final', at(final).x, at(final).y - LABEL_GAP, 'bv-col-label bv-finals-label');
                 lblMid('Bronze final', at(bronze).x, at(bronze).y - LABEL_GAP, 'bv-col-label bv-finals-label');
                 lblMid(places[1], at(bronze).x, at(bronze).y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
