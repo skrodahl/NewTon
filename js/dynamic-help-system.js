@@ -29,7 +29,7 @@ const HELP_CONTENT = {
             creation: {
                 title: "New Tournament",
                 content: `
-                    <p>Click <strong>+ New tournament</strong> to open the form (it is open when the tournament is completed, or when nothing is loaded).</p>
+                    <p>Click <strong>+ New tournament</strong> to open the form. Once the tournament is completed (or when nothing is loaded), the form is always open at the top, under <strong>Start a new tournament</strong>.</p>
                     <ol>
                         <li>Enter a name (e.g., "Thursday Cup #42")</li>
                         <li>Check the date (defaults to today)</li>

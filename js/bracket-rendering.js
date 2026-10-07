@@ -1463,7 +1463,8 @@ function _mcSetupHTML() {
     // Never a draw with an unpaid player in the list: a player who is there but not marked paid
     // would be left out of the bracket. The buttons say so; generateCleanBracket() still refuses.
     const formats = (typeof getVisibleFormats === 'function' ? getVisibleFormats() : [{ id: 'DE', name: 'Double Elimination Cup', blurb: '', minPlayers: 4, maxPlayers: 32 }]).map(fmt => {
-        let label = `Draw a ${calculateBracketSize(paid, fmt.id)}-player bracket`, ok = true;
+        const size = calculateBracketSize(paid, fmt.id);
+        let label = `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`, ok = true;
         if (unpaid > 0) { label = `${unpaid} player${unpaid === 1 ? '' : 's'} unpaid`; ok = false; }
         else if (paid < fmt.minPlayers) { label = `Needs ${fmt.minPlayers}+ paid players`; ok = false; }
         else if (paid > fmt.maxPlayers) { label = `At most ${fmt.maxPlayers} players`; ok = false; }

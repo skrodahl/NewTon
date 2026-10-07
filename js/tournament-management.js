@@ -887,8 +887,9 @@ function toggleSetupNew() {
 /**
  * Let the state decide what Setup puts first. New and Active: the current tournament, with its
  * next step as the one dark button, and New tournament a quiet bar. Completed, or nothing loaded:
- * the next job is a new tournament, so the form goes first, open, and Create is the dark button.
- * Whichever panel is the one to act on is framed (.st-focus). The form only opens or closes when the state changes, so a redraw
+ * the next job is a new tournament, so the form goes first, always open under a heading (it can't
+ * be folded away), and Create is the dark button. Whichever panel is the one to act on is framed
+ * (.st-focus). In New and Active the form only opens or closes when the state changes, so a redraw
  * never closes it under the user's hands.
  * @param {string|null} status - tournamentStatusLabel() of the loaded tournament, or null when none is loaded
  * @returns {void}
@@ -904,11 +905,17 @@ function syncSetupNew(status) {
     const form = document.getElementById('setupNew');
     if (current) current.classList.toggle('st-focus', !wantsNew);
     if (form) form.classList.toggle('st-focus', wantsNew);
+    // Completed or none: the form is the thing to do, so it is always open, under a heading
+    // instead of the +/− toggle. New or Active: a quiet bar that opens on request, closed when
+    // the state changes to one of them.
+    const toggle = document.getElementById('setupNewToggle');
+    const heading = document.getElementById('setupNewHeading');
+    if (toggle) toggle.hidden = wantsNew;
+    if (heading) heading.hidden = !wantsNew;
     const key = status || 'none';
-    if (setupNewForState !== key) {
-        setupNewForState = key;
-        setSetupNewOpen(wantsNew);
-    }
+    if (wantsNew) setSetupNewOpen(true);
+    else if (setupNewForState !== key) setSetupNewOpen(false);
+    setupNewForState = key;
 }
 
 /**

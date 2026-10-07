@@ -137,6 +137,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <section class="st-panel st-create st-collapsed" id="setupNew" aria-label="New tournament">
                         <div class="st-create-bar">
                             <button type="button" class="st-new-toggle" id="setupNewToggle" aria-expanded="false" aria-controls="setupNewForm" onclick="toggleSetupNew()"><span class="st-plus" aria-hidden="true"></span>New tournament</button>
+                            <h3 class="st-new-heading" id="setupNewHeading" hidden>Start a new tournament</h3>
                             <span class="st-or">or <button type="button" class="st-link" onclick="document.getElementById('importFile').click()">import a tournament file</button></span>
                         </div>
                         <div class="st-create-form" id="setupNewForm" hidden>

@@ -223,7 +223,7 @@ const Seeding = (() => {
             return `<p class="mc-note">${p.ranked.length} of the ${paid.length} players ${p.ranked.length === 1 ? 'has' : 'have'} points in these tournaments, which is too few to seed, so the draw is random.</p>`;
         }
         const all = s.fraction === 'all', byes = size - paid.length;
-        const lines = [`<b>${p.seeds.length} seeded</b> of ${paid.length} players${all ? ': all of the ranked players' : ` (${FRACTIONS[s.fraction].label} of a ${size}-player bracket)`}.`];
+        const lines = [`<b>${p.seeds.length} seeded</b> of ${paid.length} players${all ? ': all of the ranked players' : ` (${FRACTIONS[s.fraction].label} of ${size === 8 ? 'an' : 'a'} ${size}-player bracket)`}.`];
         if (!all && p.wanted > p.seeds.length) lines.push(`Only ${p.seeds.length} of the ${p.wanted} seeds could be filled: the rest have no ranking.`);
         if (p.unranked.length) lines.push(`Not ranked, so not seeded${all ? ' (they take the places left over, at random)' : ' (drawn at random)'}: ${names(p.unranked)}.`);
         if (byes > 0 && byes <= p.seeds.length) lines.push(`The bracket has ${byes} bye${byes === 1 ? '' : 's'}; the best seed${byes === 1 ? ' gets it' : 's get them'}.`);
