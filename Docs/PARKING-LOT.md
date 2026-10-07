@@ -53,6 +53,21 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 
 **First step (agreed 2026-10-07, after v5.3.2), built the same day:** the SE middle layout on its own, with the bronze final under the final (confirmed). Small and self-contained, useful at once (every SE cup gets the Middle option members like in DE), and the cups will have been seen on normal nights by December.
 
+**Weekly nights (2026-10-07): the club may move its weekly nights from double elimination to groups and cups.** Facts: 15–32 players, 5 usable boards, 19:00 start, double elimination takes about 2 hours; Bo3 in the groups, Bo5 for the final and bronze final.
+- Groups: an even number of groups, at most 4 players each (fewer is fine). The top two of each group go to the A cup, the rest to the B cup; walkovers in B (and byes in A, with 6 groups) are acceptable.
+- A and B run side by side, on by default, with a switch to play without the B cup.
+- Placings for points: A final winner 1st, loser 2nd, bronze winner 3rd, loser 4th; B final pair 5th–6th, B bronze pair 7th–8th. Without a B cup, the A quarterfinal losers fill 5th–8th, ordered by group-stage performance. With a B cup, A quarterfinal losers get only participation points (intended).
+- Match counts (groups + A + B) against double elimination: 16 players 40 vs 30, 24 players 60 vs 46, 32 players 80 vs 62; without B close to double elimination. Estimated +25 to +45 minutes with both cups at 5 boards; real nights will tell.
+
+- Ranking across groups of different sizes (for cup seeds and ordering A quarterfinal losers): per match, win rate first, then leg difference per match. Confirmed.
+
+- **Mockup reviewed (2026-10-08, `Docs/mockups/group-night.html`):** Groups | Cups switch on the bracket page; group tables in Match Controls if there's room (try, then decide); referees: groups of 4 fixed order 1v4 r2, 2v3 r4, 2v4 r1, 1v3 r2, 3v4 r1, 1v2 r3, group of 3 the third player, group of 2 none; cups: bye winners first, then players from the bottom of round 1, then losers; all referees and boards pre-filled but chosen or changed by the operator; group rematches in cup round 1 are the default (perhaps a setting to avoid them later); match numbers A-1…D-6, A-QF1…B-F.
+
+- **Foundations (2026-10-08): additions only.** Group-stage progression tables per group size; the cups reuse the existing SE tables; group results recorded like any match; the cup draw a new transaction; new optional tournament fields, absent for existing tournaments. Group matches undoable until the cups are drawn, then locked. The cup draw itself is undoable while no cup match has a result (and none is live), reopening the groups; the manual **Draw the cups** step is the first gate. The "draw" is deterministic (seeds from the tables), so drawing again after a fix gives the same cups unless a result changed.
+- **The cups are always drawn with the finals in the middle**, whatever the Finals position setting, so two cups fit the page.
+
+**Next:** a design note on how groups and two cups fit the three foundations (one tournament holding a group stage and two single-elimination cups; transactions and undo for group results and the cup draw) before any code.
+
 **Still open:** how to show the A and B cups side by side (tabs, or both on one page); ranking across groups for the cup seeds (e.g. winners 1-4, runners-up 5-8); whether group-mates may meet in the cup's first round; placings (A 1-8, B 9-16?) and whether and how the final counts for points.
 
 **To work out first (discuss, mockup before code):**

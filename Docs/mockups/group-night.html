@@ -1,0 +1,346 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: group night</title>
+<link rel="stylesheet" href="../../css/design-tokens.css">
+<style>
+@font-face { font-family: 'Inter'; src: url('../../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Cascadia Code'; src: url('../../fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype'); font-weight: 200 700; font-display: swap; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nt-bg); color: var(--nt-ink); font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 60px; display: grid; gap: 34px; }
+.intro h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+.intro p { margin: 6px 0 0; color: var(--nt-muted); max-width: 80ch; }
+.step { display: grid; gap: 10px; }
+.step > h2 { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--nt-muted); }
+.step > p.why { margin: -4px 0 4px; color: var(--nt-ink-2); max-width: 90ch; }
+.screen { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 14px; overflow: hidden; }
+/* the bracket page header, simplified */
+.hdr { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--nt-line); }
+.hdr b { font-size: 18px; font-weight: 800; }
+.hdr small { display: block; color: var(--nt-muted); font-family: var(--nt-mono); font-size: 12px; }
+.tabs, .seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; background: var(--nt-surface); }
+.tabs span, .seg span { padding: 6px 12px; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); }
+.tabs span + span, .seg span + span { border-left: 1px solid var(--nt-line-2); }
+.tabs .on, .seg .on { background: var(--nt-header); color: var(--nt-header-ink); }
+.hdr .right { justify-self: end; display: flex; gap: 10px; align-items: center; }
+.status { padding: 6px 18px; font-size: 12px; color: var(--nt-muted); border-bottom: 1px solid var(--nt-line); background: var(--nt-surface-2); }
+.body { padding: 18px; background: var(--nt-bg); }
+.new { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #b2410f; background: var(--nt-accent-soft); border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: middle; }
+.note { margin-top: 10px; font-size: 12px; color: var(--nt-muted); }
+
+/* groups view */
+.groups { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.group { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; overflow: hidden; }
+.group h3 { margin: 0; padding: 12px 16px 8px; font-size: 15px; display: flex; justify-content: space-between; align-items: baseline; }
+.group h3 small { font-weight: 500; color: var(--nt-muted); font-size: 12px; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: right; font-size: 11px; font-weight: 600; color: var(--nt-muted); padding: 4px 8px; border-bottom: 1px solid var(--nt-line); }
+td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--nt-line); font-variant-numeric: tabular-nums; }
+th:first-child, td:first-child { text-align: left; padding-left: 16px; width: 22px; color: var(--nt-muted); }
+th:nth-child(2), td:nth-child(2) { text-align: left; width: 100%; }
+th:last-child, td:last-child { padding-right: 16px; }
+td.name b { font-weight: 600; }
+tr.to-a td:first-child { box-shadow: inset 3px 0 0 var(--nt-ok); }
+tr.to-b td:first-child { box-shadow: inset 3px 0 0 var(--nt-card-line); }
+.key { display: flex; gap: 14px; padding: 6px 16px 8px; font-size: 11px; color: var(--nt-muted); }
+.key i { display: inline-block; width: 3px; height: 10px; margin-right: 5px; vertical-align: -1px; }
+.mlist { border-top: 1px solid var(--nt-line); }
+.mrow { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 6px 16px; font-size: 13px; }
+.mrow + .mrow { border-top: 1px dashed var(--nt-line); }
+.mrow .no { font-family: var(--nt-mono); font-size: 11px; color: var(--nt-muted); }
+.mrow .ref { font-size: 12px; color: var(--nt-muted); white-space: nowrap; }
+.mrow .res { font-family: var(--nt-mono); font-weight: 700; font-size: 12px; min-width: 64px; text-align: right; }
+.mrow.done .who b { color: var(--nt-ok); }
+.chip { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 8px; white-space: nowrap; }
+.chip.live { background: var(--nt-accent-soft); color: #b2410f; }
+.chip.ready { background: var(--nt-ready-soft); color: #8a6a0a; }
+.chip.wait { background: var(--nt-inset); color: var(--nt-muted); }
+
+/* match controls */
+.mc { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+.panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; }
+.panel h4 { margin: 0; padding: 12px 16px 8px; font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.panel h4 small { font-weight: 500; color: var(--nt-muted); font-size: 12px; }
+.lanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 16px 14px; }
+.lane { border: 1px solid var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); border-radius: 10px; padding: 10px 12px; display: grid; gap: 6px; }
+.lane .top { display: flex; justify-content: space-between; font-size: 12px; color: var(--nt-muted); }
+.lane .top b { color: #b2410f; font-size: 12px; letter-spacing: .04em; text-transform: uppercase; }
+.lane .wins { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lane .wins span { border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 6px 8px; font-weight: 700; text-align: center; font-size: 13px; }
+.lane .refline { display: flex; gap: 6px; align-items: center; font-size: 12px; color: var(--nt-muted); }
+.select { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--nt-line-2); border-radius: 6px; padding: 2px 8px; color: var(--nt-ink); background: var(--nt-surface); font-size: 12px; }
+.select::after { content: "▾"; color: var(--nt-muted); font-size: 10px; }
+.select.warn { border-color: var(--nt-ready); background: var(--nt-ready-soft); }
+.free { grid-column: 1 / -1; border: 1px dashed var(--nt-line-2); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; }
+.free b { font-size: 12px; letter-spacing: .04em; text-transform: uppercase; color: var(--nt-muted); }
+.free .tip { color: var(--nt-ink-2); }
+.btn { display: inline-block; border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 6px 12px; font-weight: 600; font-size: 13px; background: var(--nt-surface); color: var(--nt-ink-2); white-space: nowrap; }
+.btn.primary { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.btn.big { padding: 9px 18px; font-size: 15px; }
+.queue { padding: 0 16px 12px; display: grid; gap: 10px; }
+.queue h5 { margin: 6px 0 2px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); }
+.qrow { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 8px; align-items: center; font-size: 13px; padding: 4px 0; }
+.qrow .no { font-family: var(--nt-mono); font-size: 11px; color: var(--nt-muted); }
+.qrow small { display: block; color: var(--nt-muted); font-size: 12px; }
+.qrow small.warn { color: var(--nt-warn); }
+.mini { padding: 0 16px 14px; display: grid; gap: 6px; font-size: 12px; }
+.mini div { display: flex; justify-content: space-between; color: var(--nt-ink-2); }
+.mini b { font-weight: 600; }
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0 18px; }
+
+/* draw the cups */
+.drawcups { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.field ol { margin: 0; padding: 0 16px 14px 36px; display: grid; gap: 3px; font-size: 13px; }
+.field li span { color: var(--nt-muted); font-size: 12px; margin-left: 6px; }
+.drawbar { grid-column: 1 / -1; display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; background: var(--nt-surface); border: 1px solid var(--nt-card-line); box-shadow: 0 0 0 1px var(--nt-card-line); border-radius: 12px; padding: 14px 16px; }
+.drawbar p { margin: 0; color: var(--nt-ink-2); }
+.switch { display: inline-flex; align-items: center; gap: 8px; font-size: 13px; color: var(--nt-ink-2); }
+.switch i { width: 34px; height: 20px; border-radius: 99px; background: var(--nt-header); position: relative; }
+.switch i::after { content: ""; position: absolute; right: 3px; top: 3px; width: 14px; height: 14px; border-radius: 50%; background: #fff; }
+
+/* cups view: finals in the middle */
+.cups { display: grid; grid-template-columns: 1fr; gap: 16px; }
+.cup { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; padding: 12px 14px 16px; }
+.cup h3 { margin: 0 0 10px; font-size: 15px; text-align: center; }
+.br { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; align-items: center; }
+.br .col { display: grid; gap: 14px; }
+.br .lbl { font-size: 10px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-muted); text-align: center; }
+.card { border: 1px solid var(--nt-line-2); border-radius: 6px; background: var(--nt-surface); font-size: 12px; overflow: hidden; }
+.card .m { font-family: var(--nt-mono); font-size: 9px; color: var(--nt-muted); padding: 2px 6px; background: var(--nt-surface-2); border-bottom: 1px solid var(--nt-line); display: flex; justify-content: space-between; }
+.card div.p { padding: 2px 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card div.p + div.p { border-top: 1px solid var(--nt-line); }
+.card .tbd { color: var(--nt-faint); font-style: italic; }
+.card.final { border-style: dashed; }
+.card.ready { border-color: var(--nt-ready); box-shadow: inset 3px 0 0 var(--nt-ready); }
+.centre { display: grid; gap: 22px; }
+
+.open { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; padding: 14px 18px; }
+.open h3 { margin: 0 0 6px; font-size: 15px; }
+.open ul { margin: 0; padding-left: 18px; color: var(--nt-ink-2); display: grid; gap: 4px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<div class="intro">
+    <h1>Mockup: a group night</h1>
+    <p>Sixteen players, four seeded groups of four, then an A cup and a B cup. Sample data, static page: nothing here works yet. It shows what each screen would look like, in the app's own colours. Everything marked <span class="new">new</span> doesn't exist today.</p>
+</div>
+
+<!-- 1. GROUPS VIEW -->
+<section class="step">
+    <h2>1 · Bracket page during the group stage</h2>
+    <p class="why">A <b>Groups | Cups</b> switch on the bracket page. Each group: its table (top two shaded green go to the A cup, the rest to the B cup) and its fixed match list, every match with its referee from the group.</p>
+    <div class="screen">
+        <div class="hdr">
+            <div><b>Måndagscup week 43</b><small>2026-10-26</small></div>
+            <div class="tabs"><span class="on">Bracket</span><span>Match Controls</span><span>Leaderboard</span></div>
+            <div class="right"><span class="seg"><span class="on">Groups</span><span>Cups</span></span><span class="new">new</span></div>
+        </div>
+        <div class="status">16 players · 4 groups · 24 group matches · 7 played · <b>4</b> live · <b>1</b> ready</div>
+        <div class="body">
+            <div class="groups">
+                <div class="group">
+                    <h3>Group A <small>3 of 6 played</small></h3>
+                    <table>
+                        <tr><th>#</th><th>Player</th><th>P</th><th>W</th><th>L</th><th>±</th><th>Legs</th></tr>
+                        <tr class="to-a"><td>1</td><td class="name"><b>Hans</b></td><td>2</td><td>2</td><td>0</td><td>+3</td><td>4</td></tr>
+                        <tr class="to-a"><td>2</td><td class="name"><b>Anna</b></td><td>1</td><td>1</td><td>0</td><td>+2</td><td>2</td></tr>
+                        <tr class="to-b"><td>3</td><td class="name"><b>Ida</b></td><td>1</td><td>0</td><td>1</td><td>−1</td><td>1</td></tr>
+                        <tr class="to-b"><td>4</td><td class="name"><b>Pia</b></td><td>2</td><td>0</td><td>2</td><td>−4</td><td>0</td></tr>
+                    </table>
+                    <div class="key"><span><i style="background:var(--nt-ok)"></i>to the A cup</span><span><i style="background:var(--nt-card-line)"></i>to the B cup</span></div>
+                    <div class="mlist">
+                        <div class="mrow done"><span class="no">A-1</span><span class="who"><b>Anna</b> – Pia</span><span class="ref">ref Hans</span><span class="res">2–0</span></div>
+                        <div class="mrow done"><span class="no">A-2</span><span class="who"><b>Hans</b> – Ida</span><span class="ref">ref Pia</span><span class="res">2–1</span></div>
+                        <div class="mrow done"><span class="no">A-3</span><span class="who"><b>Hans</b> – Pia</span><span class="ref">ref Anna</span><span class="res">2–0</span></div>
+                        <div class="mrow"><span class="no">A-4</span><span class="who">Anna – Ida</span><span class="ref">ref Hans</span><span class="res"><span class="chip live">Lane 1</span></span></div>
+                        <div class="mrow"><span class="no">A-5</span><span class="who">Ida – Pia</span><span class="ref">ref Anna</span><span class="res"><span class="chip wait">waiting</span></span></div>
+                        <div class="mrow"><span class="no">A-6</span><span class="who">Anna – Hans</span><span class="ref">ref Ida</span><span class="res"><span class="chip wait">waiting</span></span></div>
+                    </div>
+                </div>
+                <div class="group">
+                    <h3>Group B <small>2 of 6 played</small></h3>
+                    <table>
+                        <tr><th>#</th><th>Player</th><th>P</th><th>W</th><th>L</th><th>±</th><th>Legs</th></tr>
+                        <tr class="to-a"><td>1</td><td class="name"><b>Gro</b></td><td>1</td><td>1</td><td>0</td><td>+2</td><td>2</td></tr>
+                        <tr class="to-a"><td>2</td><td class="name"><b>Bjørn</b></td><td>1</td><td>1</td><td>0</td><td>+1</td><td>2</td></tr>
+                        <tr class="to-b"><td>3</td><td class="name"><b>Ola</b></td><td>1</td><td>0</td><td>1</td><td>−1</td><td>1</td></tr>
+                        <tr class="to-b"><td>4</td><td class="name"><b>Jon</b></td><td>1</td><td>0</td><td>1</td><td>−2</td><td>0</td></tr>
+                    </table>
+                    <div class="key"><span><i style="background:var(--nt-ok)"></i>to the A cup</span><span><i style="background:var(--nt-card-line)"></i>to the B cup</span></div>
+                    <div class="mlist">
+                        <div class="mrow done"><span class="no">B-1</span><span class="who"><b>Bjørn</b> – Ola</span><span class="ref">ref Gro</span><span class="res">2–1</span></div>
+                        <div class="mrow done"><span class="no">B-2</span><span class="who"><b>Gro</b> – Jon</span><span class="ref">ref Ola</span><span class="res">2–0</span></div>
+                        <div class="mrow"><span class="no">B-3</span><span class="who">Gro – Ola</span><span class="ref">ref Bjørn</span><span class="res"><span class="chip live">Lane 2</span></span></div>
+                        <div class="mrow"><span class="no">B-4</span><span class="who">Bjørn – Jon</span><span class="ref">ref Gro</span><span class="res"><span class="chip ready">ready</span></span></div>
+                        <div class="mrow"><span class="no">B-5</span><span class="who">Jon – Ola</span><span class="ref">ref Bjørn</span><span class="res"><span class="chip wait">waiting</span></span></div>
+                        <div class="mrow"><span class="no">B-6</span><span class="who">Bjørn – Gro</span><span class="ref">ref Jon</span><span class="res"><span class="chip wait">waiting</span></span></div>
+                    </div>
+                </div>
+            </div>
+            <p class="note">Groups C and D look the same (left out here). The fixed order for a group of four, seeds 1–4: 1v4 (ref 2), 2v3 (ref 4), 2v4 (ref 1), 1v3 (ref 2), 3v4 (ref 1), 1v2 (ref 3). Referees are pre-filled and can always be changed.</p>
+        </div>
+    </div>
+</section>
+
+<!-- 2. MATCH CONTROLS, GROUP STAGE -->
+<section class="step">
+    <h2>2 · Match Controls during the group stage</h2>
+    <p class="why">The lanes board you know. Every match arrives with its referee filled in, as a control you can change. The free lane's <b>Next up</b> tip suggests the next match whose players are free, and says when its referee isn't.</p>
+    <div class="screen">
+        <div class="hdr">
+            <div><b>Måndagscup week 43</b><small>2026-10-26</small></div>
+            <div class="tabs"><span>Bracket</span><span class="on">Match Controls</span><span>Leaderboard</span></div>
+            <div class="right"></div>
+        </div>
+        <div class="body">
+            <div class="mc">
+                <div class="panel">
+                    <h4>Lanes <small>4 of 5 in use</small></h4>
+                    <div class="lanes">
+                        <div class="lane"><div class="top"><b>Lane 1</b><span>A-4 · Group A · Bo3 · 9 min</span></div><div class="wins"><span>Anna wins</span><span>Ida wins</span></div><div class="refline">Referee <span class="select">Hans</span></div></div>
+                        <div class="lane"><div class="top"><b>Lane 2</b><span>B-3 · Group B · Bo3 · 6 min</span></div><div class="wins"><span>Gro wins</span><span>Ola wins</span></div><div class="refline">Referee <span class="select">Bjørn</span></div></div>
+                        <div class="lane"><div class="top"><b>Lane 3</b><span>C-3 · Group C · Bo3 · 4 min</span></div><div class="wins"><span>Finn wins</span><span>Nils wins</span></div><div class="refline">Referee <span class="select">Cara</span></div></div>
+                        <div class="lane"><div class="top"><b>Lane 4</b><span>D-2 · Group D · Bo3 · 2 min</span></div><div class="wins"><span>Eva wins</span><span>Leif wins</span></div><div class="refline">Referee <span class="select">Mona</span></div></div>
+                        <div class="free"><span><b>Lane 5 free</b> · <span class="tip">Next up: <b style="text-transform:none;letter-spacing:0;color:var(--nt-ink)">B-4 Bjørn – Jon</b>, referee <span class="select warn">Gro (playing on lane 2)</span></span></span><span class="btn">Start on lane 5</span></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h4>Ready to start</h4>
+                    <div class="queue">
+                        <div><h5>Group B</h5>
+                            <div class="qrow"><span class="no">B-4</span><span>Bjørn – Jon<small class="warn">Referee Gro is playing: change, or wait</small></span><span class="btn">Start</span></div></div>
+                        <div><h5>Waiting for players</h5>
+                            <div class="qrow"><span class="no">A-5</span><span>Ida – Pia<small>after A-4 · ref Anna</small></span><span></span></div>
+                            <div class="qrow"><span class="no">C-4</span><span>Cara – Kari<small>after C-3 · ref Finn</small></span><span></span></div>
+                            <div class="qrow"><span class="no">D-3</span><span>Eva – Mona<small>after D-2 · ref Dag</small></span><span></span></div></div>
+                    </div>
+                    <h4>Groups <small>top two to A</small></h4>
+                    <div class="mini">
+                        <div><span>A</span><b>Hans, Anna</b></div>
+                        <div><span>B</span><b>Gro, Bjørn</b></div>
+                        <div><span>C</span><b>Kari, Cara</b></div>
+                        <div><span>D</span><b>Dag, Eva</b></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 3. DRAW THE CUPS -->
+<section class="step">
+    <h2>3 · When the last group match is done: draw the cups <span class="new">new</span></h2>
+    <p class="why">Nothing happens behind your back. The two seeded fields are shown first; the draw happens when you say so. Group winners are seeds 1–4, runners-up 5–8, ranked across groups per match (win rate, then leg difference per match). The B cup takes the 3rd and 4th places.</p>
+    <div class="screen">
+        <div class="body">
+            <div class="drawcups">
+                <div class="panel field"><h4>A cup <small>8 players</small></h4><ol>
+                    <li>Hans <span>Group A winner · 3–0</span></li><li>Gro <span>Group B winner · 3–0</span></li><li>Dag <span>Group D winner · 2–1</span></li><li>Kari <span>Group C winner · 2–1</span></li>
+                    <li>Anna <span>A runner-up · 2–1</span></li><li>Eva <span>D runner-up · 2–1</span></li><li>Bjørn <span>B runner-up · 2–1</span></li><li>Cara <span>C runner-up · 1–2</span></li></ol></div>
+                <div class="panel field"><h4>B cup <small>8 players</small></h4><ol>
+                    <li>Ola <span>Group B 3rd</span></li><li>Ida <span>Group A 3rd</span></li><li>Finn <span>Group C 3rd</span></li><li>Leif <span>Group D 3rd</span></li>
+                    <li>Mona <span>D 4th</span></li><li>Nils <span>C 4th</span></li><li>Jon <span>B 4th</span></li><li>Pia <span>A 4th</span></li></ol></div>
+                <div class="drawbar"><p>All 24 group matches are played. Top seed meets bottom seed; the best seeds get any byes.</p><span class="switch"><i></i>Play the B cup</span><span class="btn primary big">Draw the cups →</span></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- 4. CUPS VIEW -->
+<section class="step">
+    <h2>4 · Bracket page during the cups</h2>
+    <p class="why">The same Groups | Cups switch, now on Cups: the A and B cups, one above the other here (side by side on a wide screen), each drawn with the final in the middle and the bronze final under it (as shipped yesterday). Group tables stay one click away.</p>
+    <div class="screen">
+        <div class="hdr">
+            <div><b>Måndagscup week 43</b><small>2026-10-26</small></div>
+            <div class="tabs"><span class="on">Bracket</span><span>Match Controls</span><span>Leaderboard</span></div>
+            <div class="right"><span class="seg"><span>Groups</span><span class="on">Cups</span></span></div>
+        </div>
+        <div class="body">
+            <div class="cups">
+                <div class="cup"><h3>A cup</h3>
+                    <div class="br">
+                        <div class="col"><div class="lbl">Quarterfinals</div>
+                            <div class="card ready"><div class="m"><span>A-QF1</span><span>ref Bjørn</span></div><div class="p">Hans</div><div class="p">Cara</div></div>
+                            <div class="card ready"><div class="m"><span>A-QF2</span><span>ref Gro</span></div><div class="p">Kari</div><div class="p">Anna</div></div></div>
+                        <div class="col"><div class="lbl">Semifinal</div><div class="card"><div class="m"><span>A-SF1</span><span></span></div><div class="p tbd">Winner QF1</div><div class="p tbd">Winner QF2</div></div></div>
+                        <div class="centre"><div class="col"><div class="lbl">Final</div><div class="card final"><div class="m"><span>A-F</span><span>Bo5</span></div><div class="p tbd">Winner SF1</div><div class="p tbd">Winner SF2</div></div></div>
+                            <div class="col"><div class="lbl">Bronze final</div><div class="card final"><div class="m"><span>A-B</span><span>Bo5</span></div><div class="p tbd">Loser SF1</div><div class="p tbd">Loser SF2</div></div></div></div>
+                        <div class="col"><div class="lbl">Semifinal</div><div class="card"><div class="m"><span>A-SF2</span><span></span></div><div class="p tbd">Winner QF3</div><div class="p tbd">Winner QF4</div></div></div>
+                        <div class="col"><div class="lbl">Quarterfinals</div>
+                            <div class="card ready"><div class="m"><span>A-QF3</span><span>ref QF1 loser</span></div><div class="p">Dag</div><div class="p">Eva</div></div>
+                            <div class="card ready"><div class="m"><span>A-QF4</span><span>ref QF2 loser</span></div><div class="p">Gro</div><div class="p">Bjørn</div></div></div>
+                    </div>
+                </div>
+                <div class="cup"><h3>B cup</h3>
+                    <div class="br">
+                        <div class="col"><div class="lbl">Quarterfinals</div>
+                            <div class="card ready"><div class="m"><span>B-QF1</span><span>ref Jon</span></div><div class="p">Ola</div><div class="p">Pia</div></div>
+                            <div class="card ready"><div class="m"><span>B-QF2</span><span>ref Ida</span></div><div class="p">Leif</div><div class="p">Mona</div></div></div>
+                        <div class="col"><div class="lbl">Semifinal</div><div class="card"><div class="m"><span>B-SF1</span><span></span></div><div class="p tbd">Winner QF1</div><div class="p tbd">Winner QF2</div></div></div>
+                        <div class="centre"><div class="col"><div class="lbl">Final</div><div class="card final"><div class="m"><span>B-F</span><span>Bo5</span></div><div class="p tbd">Winner SF1</div><div class="p tbd">Winner SF2</div></div></div>
+                            <div class="col"><div class="lbl">Bronze final</div><div class="card final"><div class="m"><span>B-B</span><span>Bo5</span></div><div class="p tbd">Loser SF1</div><div class="p tbd">Loser SF2</div></div></div></div>
+                        <div class="col"><div class="lbl">Semifinal</div><div class="card"><div class="m"><span>B-SF2</span><span></span></div><div class="p tbd">Winner QF3</div><div class="p tbd">Winner QF4</div></div></div>
+                        <div class="col"><div class="lbl">Quarterfinals</div>
+                            <div class="card ready"><div class="m"><span>B-QF3</span><span>ref QF1 loser</span></div><div class="p">Finn</div><div class="p">Nils</div></div>
+                            <div class="card ready"><div class="m"><span>B-QF4</span><span>ref QF2 loser</span></div><div class="p">Ida</div><div class="p">Jon</div></div></div>
+                    </div>
+                </div>
+            </div>
+            <p class="note">Simplified: the real view draws the lines between matches, hovers, highlights and Follows a player, as today. Referees in the cups: no byes here, so QF1 and QF2 are refereed by the players from the bottom of round 1 (QF4), and QF3 and QF4 by the losers of QF1 and QF2. Later rounds take losers as they come free. All can be changed.</p>
+        </div>
+    </div>
+</section>
+
+<!-- 5. MATCH CONTROLS, CUPS -->
+<section class="step">
+    <h2>5 · Match Controls during the cups</h2>
+    <p class="why">Borrowed from today's frontside and backside: the A cup and the B cup in two columns, running side by side on the same five lanes.</p>
+    <div class="screen">
+        <div class="body">
+            <div class="mc">
+                <div class="panel">
+                    <h4>Lanes <small>4 of 5 in use</small></h4>
+                    <div class="lanes">
+                        <div class="lane"><div class="top"><b>Lane 1</b><span>A-QF1 · A cup · Bo3</span></div><div class="wins"><span>Hans wins</span><span>Cara wins</span></div><div class="refline">Referee <span class="select">Bjørn</span></div></div>
+                        <div class="lane"><div class="top"><b>Lane 2</b><span>A-QF2 · A cup · Bo3</span></div><div class="wins"><span>Kari wins</span><span>Anna wins</span></div><div class="refline">Referee <span class="select">Gro</span></div></div>
+                        <div class="lane"><div class="top"><b>Lane 3</b><span>B-QF1 · B cup · Bo3</span></div><div class="wins"><span>Ola wins</span><span>Pia wins</span></div><div class="refline">Referee <span class="select">Jon</span></div></div>
+                        <div class="lane"><div class="top"><b>Lane 4</b><span>B-QF2 · B cup · Bo3</span></div><div class="wins"><span>Leif wins</span><span>Mona wins</span></div><div class="refline">Referee <span class="select">Ida</span></div></div>
+                        <div class="free"><span><b>Lane 5 free</b> · <span class="tip">Next up: nothing ready yet; the next quarterfinals wait for referees</span></span></div>
+                    </div>
+                </div>
+                <div class="panel">
+                    <h4>Ready to start</h4>
+                    <div class="queue cols">
+                        <div><h5>A cup</h5>
+                            <div class="qrow"><span class="no">QF3</span><span>Dag – Eva<small>ref: loser of QF1</small></span><span></span></div>
+                            <div class="qrow"><span class="no">QF4</span><span>Gro – Bjørn<small class="warn">both are refereeing (QF2, QF1)</small></span><span></span></div></div>
+                        <div><h5>B cup</h5>
+                            <div class="qrow"><span class="no">QF3</span><span>Finn – Nils<small>ref: loser of QF1</small></span><span></span></div>
+                            <div class="qrow"><span class="no">QF4</span><span>Ida – Jon<small class="warn">both are refereeing (QF2, QF1)</small></span><span></span></div></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<div class="open">
+    <h3>Decided after review (2026-10-08)</h3>
+    <ul>
+        <li><b>Groups | Cups</b> on the bracket page: yes; reviewing the groups after the draw is useful.</li>
+        <li><b>Group tables in Match Controls:</b> yes if there's room; try it in the build and decide then.</li>
+        <li><b>Cup referees:</b> QF3 and QF4 waiting for QF1 and QF2 is intended. The operator can pick both the board and the referee to undo any slow-down.</li>
+        <li><b>Group rematches in round 1:</b> the logical consequence of the seeds, so the default. Perhaps a setting to avoid them later.</li>
+        <li><b>Match numbers</b> A-1…D-6 and A-QF1…B-F: fine.</li>
+    </ul>
+</div>
+
+</div>
+</body>
+</html>
