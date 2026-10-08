@@ -643,6 +643,7 @@ const NewtonDB = (() => {
         if (Array.isArray(t.matches)) {
             for (const match of t.matches) {
                 if (!match.completed || !match.winner) continue;
+                if (match.side === 'qualifier') continue; // nothing in a qualifier counts (Docs/QUALIFIERS.md)
 
                 const isWalkover = match.autoAdvanced ||
                     (match.player1 && (match.player1.name === 'Walkover' || match.player1.isBye)) ||
@@ -712,6 +713,7 @@ const NewtonDB = (() => {
 
         meta.tournamentAchievements = tournamentAchievements;
         meta.placements = t.placements || {};
+        if (Array.isArray(t.notQualified) && t.notQualified.length) meta.notQualified = t.notQualified; // lost a qualifier
         meta.matchCount = savedMatchCount;
         await saveTournamentMeta(meta);
 

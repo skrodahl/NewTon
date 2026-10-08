@@ -490,6 +490,7 @@ const NewtonHistory = (() => {
             highOut:      Number(pts.highOut) || 0,
             shortLeg:     Number(pts.shortLeg) || 0,
             participation: Number(pts.participation) || 0,
+            nonQualifiedParticipation: pts.nonQualifiedParticipation !== false, // absent = on (Docs/QUALIFIERS.md)
             first:        Number(pts.first) || 0,
             second:       Number(pts.second) || 0,
             third:        Number(pts.third) || 0,
@@ -1124,7 +1125,8 @@ const NewtonHistory = (() => {
 
                 // Points: achievements always; placement and participation per layer
                 const rank = playerPlacements[String(pid)];
-                const points = calculatePoints(s, rank, p, { ranking: _layerRanking, attendance: _layerAttendance });
+                const notQualified = Array.isArray(t.notQualified) && t.notQualified.includes(String(pid));
+                const points = calculatePoints(s, rank, p, { ranking: _layerRanking, attendance: _layerAttendance, notQualified });
                 pm.points += points;
                 pm.history.push({ tournament: t, placement: rank || null, stats: s, points, matchesWon: 0, matchesLost: 0,
                     _scored: 0, _darts: 0, _matchAvgs: [] }); // three-dart average per tournament (Chalker matches)
@@ -1590,8 +1592,9 @@ const NewtonHistory = (() => {
         const include = { ranking: _layerRanking, attendance: _layerAttendance };
 
         let total = 0;
+        const nq = Array.isArray(tournament.notQualified) ? tournament.notQualified : [];
         Object.entries(ta).forEach(([pid, entry]) => {
-            total += calculatePoints(entry.stats, placements[String(pid)], p, include);
+            total += calculatePoints(entry.stats, placements[String(pid)], p, Object.assign({ notQualified: nq.includes(String(pid)) }, include));
         });
         return total;
     }

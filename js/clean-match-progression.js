@@ -888,6 +888,8 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                             return NewtonDB.getTournament(String(tournament.id)).then(t => {
                                 if (t) {
                                     t.placements = tournament.placements;
+                                    // qualifiers: who lost one, for Taking part (Docs/QUALIFIERS.md)
+                                    if (tournament.notQualified) t.notQualified = tournament.notQualified; else delete t.notQualified;
                                     return NewtonDB.saveTournamentMeta(t);
                                 }
                             });

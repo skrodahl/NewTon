@@ -5,6 +5,7 @@
 const DEFAULT_CONFIG = {
     points: {
         participation: 5,
+        nonQualifiedParticipation: true, // players who lose a qualifier get Taking part (Docs/QUALIFIERS.md)
         first: 15,
         second: 13,
         third: 10,
@@ -139,6 +140,7 @@ function applyConfigToUI() {
 
     // Point configuration
     safeSetValue('participationPoints', config.points.participation);
+    safeSetChecked('nonQualifiedParticipation', config.points.nonQualifiedParticipation !== false);
     safeSetValue('firstPlacePoints', config.points.first);
     safeSetValue('secondPlacePoints', config.points.second);
     safeSetValue('thirdPlacePoints', config.points.third);
@@ -704,7 +706,7 @@ function defaultConfigKeepingConnection() {
 // Readable names for the reset preview, as on the Global Settings page. A setting without one
 // shows its key, so a new setting is never left out of the preview.
 const CONFIG_LABELS = {
-    points: { _: 'Points', participation: 'Taking part', first: '1st', second: '2nd', third: '3rd', fourth: '4th',
+    points: { _: 'Points', participation: 'Taking part', nonQualifiedParticipation: 'Taking part when not qualified', first: '1st', second: '2nd', third: '3rd', fourth: '4th',
         fifthSixth: '5th–6th', seventhEighth: '7th–8th', highOut: 'High out', ton: 'Ton', oneEighty: '180', shortLeg: 'Short leg' },
     legs: { _: 'Match length', regularRounds: 'Regular rounds (double elimination)', frontsideSemifinal: 'Frontside semifinal',
         backsideSemifinal: 'Backside semifinal', backsideFinal: 'Backside final', grandFinal: 'Grand final',
@@ -770,6 +772,8 @@ function savePointConfiguration(options = {}) {
     // Read values from UI
     config.points = config.points || {};
     config.points.participation = parseInt(document.getElementById('participationPoints').value) || 0;
+    const nqp = document.getElementById('nonQualifiedParticipation');
+    config.points.nonQualifiedParticipation = nqp ? nqp.checked : true;
     config.points.first = parseInt(document.getElementById('firstPlacePoints').value) || 0;
     config.points.second = parseInt(document.getElementById('secondPlacePoints').value) || 0;
     config.points.third = parseInt(document.getElementById('thirdPlacePoints').value) || 0;
@@ -850,6 +854,7 @@ function saveMatchConfiguration(options = {}) {
 function resetPointValuesToDefaults() {
     const d = DEFAULT_CONFIG.points;
     safeSetValue('participationPoints', d.participation);
+    safeSetChecked('nonQualifiedParticipation', d.nonQualifiedParticipation !== false);
     safeSetValue('firstPlacePoints', d.first);
     safeSetValue('secondPlacePoints', d.second);
     safeSetValue('thirdPlacePoints', d.third);
@@ -1026,7 +1031,8 @@ function calculatePlayerLegs(playerId) {
     let legsLost = 0;
     
     matches.forEach(match => {
-        if (match.completed && match.finalScore) {
+        // a qualifier's legs don't count (Docs/QUALIFIERS.md)
+        if (match.completed && match.finalScore && match.side !== 'qualifier') {
             const { winnerLegs, loserLegs, winnerId, loserId } = match.finalScore;
             
             if (winnerId === playerId) {
@@ -1076,15 +1082,18 @@ function calculateAchievementPoints(stats, pointValues) {
  * @param {object} stats - see calculateAchievementPoints
  * @param {number|null} placement - final place (1, 2, 3, 4, 5 for 5th-6th, 7 for 7th-8th…)
  * @param {object} pointValues - point values in the shape of config.points
- * @param {{ranking?: boolean, attendance?: boolean}} [include] - leave out placement
- *   (ranking: false) or participation (attendance: false) points; both count by default
+ * @param {{ranking?: boolean, attendance?: boolean, notQualified?: boolean}} [include] - leave out
+ *   placement (ranking: false) or participation (attendance: false) points; both count by default.
+ *   notQualified: the player lost a qualifier, so Taking part follows the point values'
+ *   nonQualifiedParticipation (absent = on; Docs/QUALIFIERS.md)
  * @returns {number}
  */
 function calculatePoints(stats, placement, pointValues, include = {}) {
     const p = pointValues || {};
     let points = calculateAchievementPoints(stats, p);
     if (include.ranking !== false && placement) points += Number(p[PLACEMENT_POINT_KEYS[placement]]) || 0;
-    if (include.attendance !== false) points += Number(p.participation) || 0;
+    const takesPart = !(include.notQualified && p.nonQualifiedParticipation === false);
+    if (include.attendance !== false && takesPart) points += Number(p.participation) || 0;
     return points;
 }
 
@@ -1094,7 +1103,8 @@ function calculatePoints(stats, placement, pointValues, include = {}) {
  * @returns {number}
  */
 function calculatePlayerPoints(player) {
-    return calculatePoints(player.stats, player.placement, config.points);
+    const notQualified = typeof Qualifiers !== 'undefined' && Qualifiers.isNotQualified(player.id);
+    return calculatePoints(player.stats, player.placement, config.points, { notQualified });
 }
 
 /**
