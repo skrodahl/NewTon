@@ -1,4 +1,10 @@
-## Unreleased
+## **v5.4.0** — Just Around the Corner (2026-10-08)
+
+### Bracket page header: a frame at both ends, tools in line
+
+- The tournament name and date get the clock's divider, mirrored (a line to their right), so the header is framed at both ends.
+- The bracket tools (Finals, Fit all, zoom) were pinned to the top of the header and are smaller than the view buttons, so their tops lined up but their centres didn't. They now get the top row's height and are centred in it, on the same line as Bracket, Match Controls and Leaderboard.
+- Files changed: `css/bracket-view.css`.
 
 ### Match Controls keeps the page header up to date
 
@@ -52,7 +58,7 @@
 - **The Ready label and Bo chip on bracket cards were cut off** ("READ", in every format) since the Groups and Cups build: the group card's match row class `.bv-grow` had the same name as the card's spacer. Renamed to `.bv-gmatch`. The header's ready count leaves out matches that wait.
 - Files changed: `js/groups.js` (`holdFor()`, `realCounts()`, `planCupReferees()`, `placements()`), `css/bracket-view.css`, `js/bracket-rendering.js` (live-only referee conflicts for this format, Match Controls rows), `js/clean-match-progression.js` (start check), `js/bracket-view.js`, `css/match-controls.css`, `js/dynamic-help-system.js`, `Docs/GROUPS-AND-CUPS.md`.
 
-### A new tournament format: Groups and Cups (branch `groups-and-cups`, for review)
+### A new tournament format: Round Robin (groups and cups)
 
 - **Groups and Cups**, a third card under Shuffle & Draw (it can be hidden in Global Settings like the others): everybody plays everybody in groups, then an A cup and a B cup. Built for the weekly nights (15–32 players) and the December season final. Design: `Docs/GROUPS-AND-CUPS.md`; mockup: `Docs/mockups/group-night.html`.
 - **The groups:** the smallest even number of groups that keeps every group at four or fewer (6–8 players: 2 groups, 9–16: 4, 17–24: 6, 25–32: 8). Players go in in snake order, by ranking when seeding is on (every ranked player; the unranked at random after them), otherwise at random. Each group plays in a fixed order with a planned referee from the group (group of 4: 1v4 r2, 2v3 r4, 2v4 r1, 1v3 r2, 3v4 r1, 1v2 r3; group of 3: each referees once; group of 2: no referee). Group matches have their own match length (Global Settings → Match length → Groups and cups, default Bo3).
@@ -78,6 +84,11 @@
 - **The switch shows the right button pressed** for single elimination: it read the layout's name instead of the setting.
 - **New pictures for Finals position** in Global Settings → Bracket: format-neutral, showing only where the final goes. **Right:** rounds narrow left to right into the final at the right edge. **Middle:** both sides narrow into the final in the centre. The final is drawn in the dark button colour; the backside shading, which only fits double elimination, is gone.
 - Files changed: `js/bracket-view.js` (`layoutSEMiddle()`, `finalsVariant()`, labels and the dashed line, the header toggle), `tournament.html`, `js/dynamic-help-system.js`, `Docs/BRACKET-REDESIGN.md`.
+
+### Release
+
+- Version 5.4.0, "Just Around the Corner": the first format that isn't a knockout, Round Robin (groups and cups, or one group), built on the groundwork of the last releases (one layout per format, the formats registry, seeding, single elimination with the final in the middle). The Chalker is unchanged; its version and caches are bumped with the app's (`CHALKER_VERSION`, `chalker.js?v=26`, service worker cache `chalker-v123`).
+- Files changed: `js/main.js` (`APP_VERSION` → `5.4.0`), `chalker/js/chalker.js` (`CHALKER_VERSION` → `5.4.0`), `chalker/index.html`, `chalker/sw.js`, `llms.txt` (Round Robin, single elimination finals in the middle, the new defaults; Round Robin off the "do not invent" list, Swiss, doubles, Cup and Plate and qualifiers on it), `sitemap.xml`, `releases/index.html`, `releases/v5.4.0.html`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.0.md`, `js/dynamic-help-system.js` (help review: Top half named as the default, the format called Round Robin in the header help).
 
 ## **v5.3.2** — Don't You (Forget About Me) (2026-10-07)
 

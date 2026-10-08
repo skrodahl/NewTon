@@ -190,11 +190,13 @@
   min-height: 38px; }
 /* tools on the top row; the clock spans both rows, centred vertically in the header */
 .bv-head-right { grid-column: 3; grid-row: 1 / span 2; align-self: stretch; display: flex; justify-content: flex-end; gap: 16px; min-width: 0; }
-.bv-head-right .bv-tools { align-self: flex-start; }
+/* the top row's height (as .bv-head-center), so the smaller tools are centred on the same line as the view buttons */
+.bv-head-right .bv-tools { align-self: flex-start; min-height: 38px; }
 .bv-head-right .bv-clock { align-self: center; }
 /* the status row is centred on the page, under all three groups */
 .bv-header > .bv-status-row { grid-column: 1 / -1; grid-row: 2; }
-.bv-title-block { min-width: 0; }
+/* the clock's divider, mirrored: the name and date framed at the left as the clock is at the right */
+.bv-title-block { min-width: 0; padding: 4px 16px 4px 0; border-right: 1px solid var(--bv-line); }
 .bv-title { font-weight: 800; font-size: 24px; line-height: 1.1; letter-spacing: -.02em; color: var(--bv-ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
   /* stop before the centred status line (about 960px wide, centred on the page); long names end in … */
   max-width: max(160px, calc(50vw - 500px)); }
