@@ -144,8 +144,8 @@ const HELP_CONTENT = {
                     </ol>
                     <p><strong>Tournament Formats:</strong></p>
                     <ul>
-                        <li><strong>Single Elimination Cup:</strong> One loss and you're out — 4, 8, 16, or 32 players</li>
-                        <li><strong>Double Elimination Cup:</strong> Losers get a second chance through the backside — 8, 16, or 32 players</li>
+                        <li><strong>Single Elimination Cup:</strong> One loss and you're out — 4 to 48 players</li>
+                        <li><strong>Double Elimination Cup:</strong> Losers get a second chance through the backside — 4 to 48 players</li>
                         <li><strong>Round Robin:</strong> everybody plays everybody — in groups (up to four players, or five or six as set) followed by an A cup and a B cup (6 to 32 players), or in one group where the table decides (3 to 8 players), as set in Global Settings → Round Robin (see <strong>Round Robin</strong> below)</li>
                     </ul>
                     <p><strong>Bracket Sizes:</strong></p>
@@ -154,7 +154,9 @@ const HELP_CONTENT = {
                         <li>5-8 players → 8-player bracket</li>
                         <li>9-16 players → 16-player bracket</li>
                         <li>17-32 players → 32-player bracket</li>
+                        <li>33-48 players → 32-player bracket with qualifiers first (see <strong>Qualifiers</strong> below)</li>
                     </ul>
+                    <p><strong>Qualifiers (33 to 48 players):</strong> the players above 32 make it in through qualifier matches (Q1, Q2 …) before round 1, one for each player above 32: 40 players play 8 qualifiers, 48 play 16. The players in them are drawn at random (with seeding, never the seeds; with <strong>All</strong>, the lowest-ranked), and each winner takes the place in round 1 that shows "Winner Q3". A qualifier only decides who gets to play: the loser is not qualified (placed 33rd–48th), and nothing in a qualifier counts, for the winner either (no achievements, no matches or legs in the statistics, never in Analytics). Its length is the format's regular rounds. Double elimination with qualifiers is drawn with the finals in the middle.</p>
                     <p><strong>💡 Tip:</strong> Match Controls adapts based on tournament state - use it for both setup and active tournament management!</p>
                 `
             },
@@ -361,6 +363,7 @@ const HELP_CONTENT = {
                     <p><strong>Points</strong> (Tournaments):</p>
                     <ul>
                         <li><strong>Placing:</strong> points for taking part, and for each final placing</li>
+                        <li><strong>Taking part when not qualified:</strong> whether a player who loses a qualifier (33 to 48 players) gets the Taking part points. On by default; it applies to earlier tournaments too in Analytics' Custom point mode</li>
                         <li><strong>Achievements, each:</strong> 180s, high outs (101+), short legs and tons (100+)</li>
                     </ul>
                     <p><strong>Reset to defaults</strong> fills in the standard values; click Save changes to keep them.</p>

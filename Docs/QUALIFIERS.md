@@ -1,6 +1,6 @@
 # Qualifiers above 32 players
 
-Design note, 2026-10-08. Not built. Mockup: `Docs/mockups/qualifiers.html` (Option A). Decisions are
+Design note, 2026-10-08. **Built 2026-10-09** (unreleased; CHANGELOG.md has the details). Mockup: `Docs/mockups/qualifiers.html` (Option A). Decisions are
 the maintainer's (Docs/PARKING-LOT.md → More formats, after Round Robin); the last three are under Settled.
 
 ## What it is
@@ -106,6 +106,10 @@ exactly what it is today.
   round 1, right of a right-facing one, as with the finals in the middle), level with the slot it
   feeds, and the line is drawn from the merged table like any other. A "Qualifiers" column label.
   With one qualifier per round 1 match, the column never needs more room than round 1.
+  **Double elimination with qualifiers is always drawn with the finals in the middle** (built
+  2026-10-09): with the finals on the right the backside sits straight beside round 1, where the
+  qualifiers go. The Finals toggle shows Middle, with Right disabled and a tooltip saying why (the
+  cups have the same rule).
 - **Match Controls:** qualifiers are ready from the start and go first in Next up (each one
   unblocks a round 1 match); the header and the status band count them. Qualifier losers show in the referee list's losers (Settled, 3).
 - **Help, user guide, `llms.txt`:** the format pages and Global Settings.

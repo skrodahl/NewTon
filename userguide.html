@@ -56,7 +56,7 @@
     <p>Every player gets two chances before they are eliminated. The bracket is split into a <strong>Frontside</strong> (winners) and a <strong>Backside</strong> (losers). A player who loses on the Frontside drops to the Backside and can still win the tournament.</p>
     <ul>
         <li><strong>Best for:</strong> most club tournaments — fair, competitive, and players stay involved longer</li>
-        <li><strong>Player count:</strong> 4 to 32 players. The bracket snaps to the nearest size of 8, 16, or 32 — empty slots are filled with byes that auto-advance real players without a match</li>
+        <li><strong>Player count:</strong> 4 to 48 players. The bracket snaps to the nearest size of 8, 16, or 32 — empty slots are filled with byes that auto-advance real players without a match. Above 32, qualifiers decide the last places (see <a href="#qualifiers">Qualifiers</a>)</li>
         <li><strong>Final:</strong> Frontside finalist vs Backside finalist — the Frontside finalist has a one-match advantage</li>
     </ul>
 
@@ -64,8 +64,19 @@
     <p>One loss and you're out. Straightforward bracket where winners advance and losers are eliminated immediately.</p>
     <ul>
         <li><strong>Best for:</strong> time-limited events, warm-up tournaments, or large fields where DE isn't practical</li>
-        <li><strong>Player count:</strong> 4 to 32 players. Same bracket sizing as DE — byes fill the unused slots automatically</li>
+        <li><strong>Player count:</strong> 4 to 48 players. Same bracket sizing as DE — byes fill the unused slots automatically, and above 32 qualifiers decide the last places</li>
         <li><strong>Includes:</strong> optional bronze match (3rd place play-off)</li>
+    </ul>
+
+    <h3 id="qualifiers">Qualifiers (33 to 48 players)</h3>
+    <p>Double and single elimination take up to 48 players. The bracket stays a 32-player bracket, and the players above 32 make it in through qualifiers before round 1.</p>
+    <ul>
+        <li><strong>How many:</strong> one qualifier for each player above 32. 40 players: 8 qualifiers (16 players), 24 straight into round 1. 48 players: 16 qualifiers, one in every round 1 match</li>
+        <li><strong>Who plays them:</strong> drawn at random. With seeding, the seeds go straight in; with <strong>All</strong>, the lowest-ranked play the qualifiers</li>
+        <li><strong>In the bracket:</strong> a Qualifiers column before round 1. The round 1 place shows "Winner Q3" until the qualifier is played</li>
+        <li><strong>Lose a qualifier:</strong> not qualified, placed 33rd–48th. Taking part points follow <strong>Taking part when not qualified</strong> (Global Settings → Points, on by default)</li>
+        <li><strong>Nothing in a qualifier counts:</strong> only the score is entered, to decide who goes through. No achievements, no matches or legs in the statistics, and the match never goes to Analytics</li>
+        <li><strong>Length:</strong> the format's regular rounds. Qualifier losers show in Match Controls' referee list, free for referee duty</li>
     </ul>
 
     <h3>Round Robin</h3>
@@ -94,7 +105,7 @@
     <h3>Point System</h3>
     <p>NewTon DC Tournament Manager calculates tournament standings automatically from tournament results. Configure point values to match your club's rules:</p>
     <ul>
-        <li><strong>Participation</strong> — Points just for entering (default: 5)</li>
+        <li><strong>Participation</strong> — Points just for entering (default: 5). <strong>Taking part when not qualified</strong> decides whether a player who loses a qualifier gets them too (default: on)</li>
         <li><strong>Placements</strong> — 1st through 8th place (defaults: 15, 13, 11, 9, 7, 7, 5, 5)</li>
         <li><strong>Achievements</strong> — High checkouts, tons, 180s, short legs</li>
     </ul>
