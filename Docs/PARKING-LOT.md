@@ -83,6 +83,8 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 
 4. **Cups: should a match whose planned referee isn't available yet be Ready?** A-QF3 (ref: loser of A-QF1) and A-QF4 (ref: loser of A-QF2) show Start before QF1/QF2 are played; and A-QF4 can never really start first: both its players (Ken, Henry) are on referee duty for QF1/QF2, so it shouldn't look Ready either (today its Start is enabled until QF1/QF2 start, because a planned referee isn't an assignment until Start). Maintainer's view: no referee → maybe not Ready (a waiting state instead), except a cup with only two players, which must be Ready. Ties in with note 1 (what counts as a referee assignment before Start).
 
+5. **Seen in the maintainer's cups view (10 players):** a B cup of two draws its bronze final as Walkover v Walkover under "7th–8th place" (empty; maybe leave the bronze final out, or say no 7th–8th); the Ready label on the cards reads "READ" (cut off, the Bo3 chip pushed out; check whether double and single elimination do the same); ⚠ on Ken in A-QF4 because he is assigned as referee of a match not started yet (note 1).
+
 **Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
