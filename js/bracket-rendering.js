@@ -1621,7 +1621,7 @@ function _mcDrawCupsHTML() {
     if (_mcPlayB.tid !== tournament.id) _mcPlayB = { tid: tournament.id, on: Groups.configSettings().bCup };
     const f = Groups.cupFields();
     const g = Groups.groupList().length;
-    const place = r => r.pos === 1 ? 'winner' : r.pos === 2 ? 'runner-up' : r.pos === 3 ? '3rd' : '4th';
+    const place = r => r.pos === 1 ? 'winner' : r.pos === 2 ? 'runner-up' : r.pos === 3 ? '3rd' : `${r.pos}th`;
     const field = (rows, title, off) => `<div class="mc-field${off ? ' mc-off-field' : ''}"><h4>${title}<small>${rows.length} players${off ? ' · not played' : ''}</small></h4>
         <ol>${rows.map(r => `<li><b>${escapeHtml(r.player.name)}</b><span>Group ${escapeHtml(r.group)} ${place(r)} · ${r.won}–${r.lost}</span></li>`).join('')}</ol></div>`;
     const canB = f.B.length >= 2;

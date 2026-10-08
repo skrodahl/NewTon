@@ -477,8 +477,12 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <div class="cfg-panel-title">Round Robin</div>
                         <p class="cfg-panel-note">Everybody plays everybody in their group, in a fixed order with a referee from the group. A tournament keeps the settings it was drawn with.</p>
                         <div class="cfg-row">
-                            <div><div class="cfg-label">Structure</div><div class="cfg-desc"><b>Groups and cups</b>: groups of up to four (an even number of groups), then an A cup and a B cup, single elimination; 6 to 32 players. <b>One group</b>: everybody plays everybody, and the table decides the placings; 3 to 8 players.</div></div>
+                            <div><div class="cfg-label">Structure</div><div class="cfg-desc"><b>Groups and cups</b>: groups no larger than <b>Largest group</b> (an even number of groups), then an A cup and a B cup, single elimination; 6 to 32 players. <b>One group</b>: everybody plays everybody, and the table decides the placings; 3 to 8 players.</div></div>
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="rrStructure"><button type="button" data-value="groups">Groups and cups</button><button type="button" data-value="single">One group</button></div><input type="hidden" id="rrStructure"></div>
+                        </div>
+                        <div class="cfg-row cfg-rr-cups">
+                            <div><div class="cfg-label">Largest group</div><div class="cfg-desc">The most players in one group. The draw makes the fewest groups it can (always an even number), so a larger limit means fewer, longer groups: 10 players are 4 groups (3, 3, 2, 2) at 4, and 2 groups of 5 at 5 or 6. A group of 4 plays 6 matches, of 5 plays 10, of 6 plays 15.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="rrMaxGroup"><button type="button" data-value="4">4</button><button type="button" data-value="5">5</button><button type="button" data-value="6">6</button></div><input type="hidden" id="rrMaxGroup"></div>
                         </div>
                         <div class="cfg-row cfg-rr-cups">
                             <div><div class="cfg-label">To the A cup</div><div class="cfg-desc"><b>Top two</b>: the group winners and runners-up play the A cup, the rest the B cup. <b>Top half</b>: everyone is ranked across the groups (group place first, then results per match) and the two cups are the same size (A one larger when the number is odd), so a small field doesn't leave a tiny B cup.</div></div>
@@ -540,7 +544,11 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div>
                                 <h4>Groups and cups</h4>
                                 <div class="cfg-line"><span>Group matches</span><span class="cfg-step" data-target="groupMatchesLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="groupMatchesLegs"></div>
-                                <p class="cfg-panel-note">The A and B cups use the single elimination lengths.</p>
+                                <div class="cfg-line"><span>Cup rounds</span><span class="cfg-step" data-target="cupRoundsLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="cupRoundsLegs"></div>
+                                <div class="cfg-line"><span>Cup semifinal</span><span class="cfg-step" data-target="cupSemifinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="cupSemifinalLegs"></div>
+                                <div class="cfg-line"><span>Cup bronze final</span><span class="cfg-step" data-target="cupBronzeLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="cupBronzeLegs"></div>
+                                <div class="cfg-line"><span>Cup final</span><span class="cfg-step" data-target="cupFinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="cupFinalLegs"></div>
+                                <p class="cfg-panel-note">Cup rounds are every round before the semifinals. The A and B cups play the same lengths.</p>
                             </div>
                         </div>
                     </div>

@@ -28,6 +28,10 @@ const DEFAULT_CONFIG = {
         seBronze: 5,
         seFinal: 5,
         groupMatches: 3,
+        cupRounds: 3,         // Round Robin's A and B cups: every round before the semifinals
+        cupSemifinal: 3,
+        cupBronze: 5,
+        cupFinal: 5,
         x01Format: 501,
         maxRounds: 13,
         shortLegThreshold: 21
@@ -58,7 +62,8 @@ const DEFAULT_CONFIG = {
         structure: 'groups',  // 'groups': groups, then an A and a B cup; 'single': one group, the table decides
         cupEntry: 'half',     // 'half': the top half across the groups to the A cup; 'top2': the top two of each group
         rematches: 'allow',   // group rematches in cup round 1: 'allow' (the mirror draw) or 'avoid'
-        bCup: true            // Play the B cup is on to start with at Draw the cups
+        bCup: true,           // Play the B cup is on to start with at Draw the cups
+        maxGroup: 4           // the largest group (4, 5 or 6) in groups and cups
     },
     server: {
         allowSharedTournamentDelete: false,
@@ -80,6 +85,13 @@ function loadConfiguration() {
             // Handover's default became None, but a config saved before the setting existed has always
             // meant QR code (additive-only: absent keeps its old meaning), so it stays QR code
             if (!parsed.chalker || !parsed.chalker.handover) parsed.chalker = Object.assign({}, parsed.chalker, { handover: 'qr' });
+            // The cups had the single elimination lengths before they got their own, so a config saved
+            // before then keeps them
+            const L = parsed.legs;
+            if (L && L.cupRounds == null) {
+                const keep = { cupRounds: L.seQuarterfinal, cupSemifinal: L.seSemifinal, cupBronze: L.seBronze, cupFinal: L.seFinal };
+                Object.keys(keep).forEach(k => { if (keep[k] != null) L[k] = keep[k]; });
+            }
             config = mergeWithDefaults(parsed, DEFAULT_CONFIG);
             console.log('✓ Loaded saved global config');
         } else {
@@ -152,6 +164,10 @@ function applyConfigToUI() {
     safeSetValue('seBronzeLegs', config.legs.seBronze);
     safeSetValue('seFinalLegs', config.legs.seFinal);
     safeSetValue('groupMatchesLegs', config.legs.groupMatches || 3);
+    safeSetValue('cupRoundsLegs', config.legs.cupRounds || 3);
+    safeSetValue('cupSemifinalLegs', config.legs.cupSemifinal || 3);
+    safeSetValue('cupBronzeLegs', config.legs.cupBronze || 5);
+    safeSetValue('cupFinalLegs', config.legs.cupFinal || 5);
     initX01Toggle(config.legs.x01Format);
     safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
     safeSetValue('chalkerShortLegThreshold', config.legs.shortLegThreshold || 21);
@@ -208,6 +224,7 @@ function applyConfigToUI() {
     safeSetValue('rrCupEntry', rr.cupEntry === 'top2' ? 'top2' : 'half');
     safeSetChecked('rrBCup', rr.bCup !== false);
     safeSetValue('rrRematches', rr.rematches === 'avoid' ? 'avoid' : 'allow');
+    safeSetValue('rrMaxGroup', [5, 6].includes(Number(rr.maxGroup)) ? String(rr.maxGroup) : '4');
 
     // Server configuration
     if (config.server) {
@@ -603,11 +620,13 @@ function saveUIConfiguration(options = {}) {
     const rrCupEntry = document.getElementById('rrCupEntry');
     const rrBCup = document.getElementById('rrBCup');
     const rrRematches = document.getElementById('rrRematches');
+    const rrMaxGroup = document.getElementById('rrMaxGroup');
     config.roundRobin = {
         structure: rrStructure && rrStructure.value === 'single' ? 'single' : 'groups',
         cupEntry: rrCupEntry && rrCupEntry.value === 'top2' ? 'top2' : 'half',
         rematches: rrRematches && rrRematches.value === 'avoid' ? 'avoid' : 'allow',
-        bCup: rrBCup ? rrBCup.checked : true
+        bCup: rrBCup ? rrBCup.checked : true,
+        maxGroup: rrMaxGroup && [5, 6].includes(Number(rrMaxGroup.value)) ? Number(rrMaxGroup.value) : 4
     };
 
     config.server = config.server || {};
@@ -691,7 +710,8 @@ const CONFIG_LABELS = {
         backsideSemifinal: 'Backside semifinal', backsideFinal: 'Backside final', grandFinal: 'Grand final',
         seRegularRounds: 'Regular rounds (single elimination)', seQuarterfinal: 'Quarterfinal (single elimination)',
         seSemifinal: 'Semifinal (single elimination)', seBronze: 'Bronze final (single elimination)', seFinal: 'Final (single elimination)',
-        groupMatches: 'Group matches (Round Robin)', x01Format: 'Game', maxRounds: 'Max rounds', shortLegThreshold: 'Short leg (darts)' },
+        groupMatches: 'Group matches (Round Robin)', cupRounds: 'Cup rounds (Round Robin)', cupSemifinal: 'Cup semifinal (Round Robin)',
+        cupBronze: 'Cup bronze final (Round Robin)', cupFinal: 'Cup final (Round Robin)', x01Format: 'Game', maxRounds: 'Max rounds', shortLegThreshold: 'Short leg (darts)' },
     clubName: { _: 'Club name' },
     lanes: { _: 'Lanes', maxLanes: 'Lanes', excludedLanes: 'Lanes not in use', requireLaneForStart: 'Require a lane to start' },
     ui: { _: 'Interface', hiddenFormats: 'Hidden formats', confirmWinnerSelection: 'Confirm the winner',
@@ -699,7 +719,8 @@ const CONFIG_LABELS = {
         refereeSuggestionsLimit: 'Referee suggestions', bracketFinals: 'Finals position' },
     chalker: { _: 'Chalker', handover: 'Handover' },
     seeding: { _: 'Seeding', mode: 'Use seeding', seeds: 'Seeded players' },
-    roundRobin: { _: 'Round Robin', structure: 'Structure', cupEntry: 'To the A cup', rematches: 'Group rematches in cup round 1', bCup: 'Play the B cup' },
+    roundRobin: { _: 'Round Robin', structure: 'Structure', cupEntry: 'To the A cup', rematches: 'Group rematches in cup round 1', bCup: 'Play the B cup',
+        maxGroup: 'Largest group' },
     server: { _: 'Server', allowSharedTournamentDelete: 'Allow deleting tournaments', autoUpload: 'Back up finished tournaments' }
 };
 
@@ -793,6 +814,10 @@ function saveMatchConfiguration(options = {}) {
     config.legs.seBronze = parseInt(document.getElementById('seBronzeLegs').value) || 5;
     config.legs.seFinal = parseInt(document.getElementById('seFinalLegs').value) || 5;
     config.legs.groupMatches = parseInt((document.getElementById('groupMatchesLegs') || {}).value) || 3;
+    config.legs.cupRounds = parseInt((document.getElementById('cupRoundsLegs') || {}).value) || 3;
+    config.legs.cupSemifinal = parseInt((document.getElementById('cupSemifinalLegs') || {}).value) || 3;
+    config.legs.cupBronze = parseInt((document.getElementById('cupBronzeLegs') || {}).value) || 5;
+    config.legs.cupFinal = parseInt((document.getElementById('cupFinalLegs') || {}).value) || 5;
 
     // Read values from UI — Chalker
     const x01Toggle = document.getElementById('chalkerX01CustomToggle');
@@ -855,6 +880,10 @@ function resetMatchConfigToDefaults() {
     safeSetValue('seBronzeLegs', d.seBronze);
     safeSetValue('seFinalLegs', d.seFinal);
     safeSetValue('groupMatchesLegs', d.groupMatches);
+    safeSetValue('cupRoundsLegs', d.cupRounds);
+    safeSetValue('cupSemifinalLegs', d.cupSemifinal);
+    safeSetValue('cupBronzeLegs', d.cupBronze);
+    safeSetValue('cupFinalLegs', d.cupFinal);
 }
 
 /**

@@ -146,7 +146,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Single Elimination Cup:</strong> One loss and you're out — 4, 8, 16, or 32 players</li>
                         <li><strong>Double Elimination Cup:</strong> Losers get a second chance through the backside — 8, 16, or 32 players</li>
-                        <li><strong>Round Robin:</strong> everybody plays everybody — in groups of up to four followed by an A cup and a B cup (6 to 32 players), or in one group where the table decides (3 to 8 players), as set in Global Settings → Round Robin (see <strong>Round Robin</strong> below)</li>
+                        <li><strong>Round Robin:</strong> everybody plays everybody — in groups (up to four players, or five or six as set) followed by an A cup and a B cup (6 to 32 players), or in one group where the table decides (3 to 8 players), as set in Global Settings → Round Robin (see <strong>Round Robin</strong> below)</li>
                     </ul>
                     <p><strong>Bracket Sizes:</strong></p>
                     <ul>
@@ -243,7 +243,7 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Two ways to play</strong> (Global Settings → Round Robin): <strong>Groups and cups</strong> or <strong>One group</strong>. A tournament keeps the setting it was drawn with.</p>
                     <p><strong>One group:</strong> everybody plays everybody in a fixed order, each match with a planned referee from the group; the table decides the placings when the last match is played. 3 to 8 players.</p>
-                    <p><strong>Groups and cups:</strong> players are drawn into groups of up to four (an even number of groups; by ranking when seeding is ticked, otherwise at random). Everybody plays everybody in their group. Then the <strong>A cup</strong> and the <strong>B cup</strong>: single elimination with a bronze final, drawn with the final in the middle. <strong>To the A cup</strong>: <strong>Top half</strong> (the default): everyone ranked across the groups and split into two cups of the same size, or the top two of each group (the rest play the B cup).</p>
+                    <p><strong>Groups and cups:</strong> players are drawn into groups of up to four, or five or six as set in <strong>Largest group</strong> (an even number of groups; by ranking when seeding is ticked, otherwise at random). Everybody plays everybody in their group. Then the <strong>A cup</strong> and the <strong>B cup</strong>: single elimination with a bronze final, drawn with the final in the middle. <strong>To the A cup</strong>: <strong>Top half</strong> (the default): everyone ranked across the groups and split into two cups of the same size, or the top two of each group (the rest play the B cup).</p>
                     <p><strong>The group stage:</strong></p>
                     <ul>
                         <li>Each group plays in a fixed order, and each match has a planned referee from the group. Match Controls shows each group's next matches with the referee filled in; it is set when the match starts, if that player is free. Change it like any referee</li>
@@ -251,12 +251,12 @@ const HELP_CONTENT = {
                         <li>The group table: wins, then leg difference, then legs won, then head-to-head. Players still level when the group has played every match are marked <strong>level</strong>; the group seed decides unless you click <strong>▲</strong> in Match Controls' group tables before drawing the cups</li>
                         <li><strong>Groups</strong> on the bracket page shows every group's table and matches. Click a match that hasn't been played to open it in Match Controls; a played one has <strong>Undo</strong> while it can be undone</li>
                     </ul>
-                    <p><strong>Draw the cups:</strong> when the last group match is played, Match Controls shows both cups' seeded fields: group winners first, then runners-up, and so on, ranked across the groups by win rate, then leg difference per match (with Top half the A cup takes the first half of that order; with top two, the B cup has the thirds, then the fourths). Switch off <strong>Play the B cup</strong> to play without it (whether it starts on is a Global Setting). Nothing is drawn until you click <strong>Draw the cups</strong>.</p>
+                    <p><strong>Draw the cups:</strong> when the last group match is played, Match Controls shows both cups' seeded fields: group winners first, then runners-up, and so on, ranked across the groups by win rate, then leg difference per match (with Top half the A cup takes the first half of that order; with top two, the B cup has the thirds, then the fourths, and so on). Switch off <strong>Play the B cup</strong> to play without it (whether it starts on is a Global Setting). Nothing is drawn until you click <strong>Draw the cups</strong>.</p>
                     <p><strong>The cups:</strong> A cup and B cup side by side in Match Controls, on the same lanes. Round 1's referees are planned (players with a bye, then the players from the bottom of the round, then the first losers), later rounds take losers as they come. <strong>Cups</strong> on the bracket page shows both.</p>
                     <p><strong>Undo:</strong> group results can be undone until the cups are drawn. <strong>Undo the cup draw</strong> (Match Controls) is there until a cup match has been started or played; it opens the group stage again. Cup matches undo as in any bracket.</p>
                     <p><strong>Placings:</strong> everyone is placed. A cup: 1st and 2nd from the final, 3rd and 4th from the bronze final. B cup: its final pair 5th–6th, its bronze pair 7th–8th. Then the A cup's other losers (the latest round first), then the B cup's, each round ordered by group results, then anyone who played no cup. Places run on as shared places (9th–12th, 13th–16th …), so places a small B cup can't fill go to the A cup's quarterfinal losers; without a B cup they take 5th–8th. Everyone gets the points for taking part.</p>
                     <p><strong>Waits:</strong> a match waits (Match Controls says why) while one of its players is the referee of an earlier match in the group or cup, or while its planned referee isn't known yet (the loser of a match still to be played). Choose another referee to start it anyway. A referee chosen for a match that hasn't started is only a plan: it blocks no one until that match is live.</p>
-                    <p><strong>Match length:</strong> group matches have their own setting (Global Settings → Match length → Groups and cups); the cups use the single elimination lengths.</p>
+                    <p><strong>Match length:</strong> group matches and the cups have their own settings (Global Settings → Match length → Groups and cups): <strong>Cup rounds</strong> (every round before the semifinals), <strong>Cup semifinal</strong>, <strong>Cup bronze final</strong> and <strong>Cup final</strong>, the same for the A and the B cup.</p>
                 `
             },
             matchControls: {
@@ -315,7 +315,8 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Round Robin</strong> (Tournaments) shows while the format is ticked under Formats to offer.</p>
                     <ul>
-                        <li><strong>Structure:</strong> <strong>Groups and cups</strong> (groups of up to four, then an A cup and a B cup; 6 to 32 players) or <strong>One group</strong> (everybody plays everybody, the table decides; 3 to 8 players)</li>
+                        <li><strong>Structure:</strong> <strong>Groups and cups</strong> (groups, then an A cup and a B cup; 6 to 32 players) or <strong>One group</strong> (everybody plays everybody, the table decides; 3 to 8 players)</li>
+                        <li><strong>Largest group:</strong> <strong>4</strong> (the default), <strong>5</strong> or <strong>6</strong>. The draw makes the fewest groups it can, always an even number, so a larger limit means fewer, longer groups (a group of 4 plays 6 matches, of 5 plays 10, of 6 plays 15)</li>
                         <li><strong>To the A cup:</strong> <strong>Top two</strong> of each group, or <strong>Top half</strong>: everyone ranked across the groups and split into two cups of the same size, so a small field doesn't leave a tiny B cup</li>
                         <li><strong>Group rematches in cup round 1:</strong> <strong>Allow</strong> (top seed against bottom seed, as drawn) or <strong>Avoid</strong> (a seed gets the nearest opponent from another group, where possible)</li>
                         <li><strong>Play the B cup:</strong> whether the switch at Draw the cups starts on</li>
@@ -349,6 +350,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Double elimination:</strong> regular rounds, frontside and backside semifinal, backside final, grand final</li>
                         <li><strong>Single elimination:</strong> regular rounds, quarterfinal, semifinal, bronze final, final</li>
+                        <li><strong>Groups and cups:</strong> group matches; cup rounds (every round before the semifinals), cup semifinal, cup bronze final, cup final, the same for the A and the B cup. The cups' lengths are taken when the cups are drawn</li>
                     </ul>
                     <p><strong>Reset to defaults</strong> fills in the standard lengths; click Save changes to keep them. New lengths apply to matches that haven't started.</p>
                 `

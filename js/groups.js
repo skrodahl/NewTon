@@ -21,17 +21,19 @@ const Groups = (() => {
     const on = () => typeof tournament !== 'undefined' && tournament && tournament.format === 'GROUPS';
 
     // ---------- settings (Global Settings → Round Robin; each tournament keeps its own) ----------
-    /** Round Robin's settings in Global Settings now: structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup. */
+    /** The largest group: 4, 5 or 6 (absent or anything else is 4, as before the setting). */
+    const maxGroupOf = v => [5, 6].includes(Number(v)) ? Number(v) : 4;
+    /** Round Robin's settings in Global Settings now: structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup, maxGroup. */
     function configSettings() {
         const rr = (typeof config !== 'undefined' && config.roundRobin) || {};
         return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'top2' ? 'top2' : 'half',
-            rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false };
+            rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false, maxGroup: maxGroupOf(rr.maxGroup) };
     }
     /** The settings the tournament was drawn with (absent in the first build: groups and cups, top two). */
     function settings() {
         const s = (on() && tournament.groups && tournament.groups.settings) || {};
         return { structure: s.structure === 'single' ? 'single' : 'groups', cupEntry: s.cupEntry === 'half' ? 'half' : 'top2',
-            rematches: s.rematches === 'avoid' ? 'avoid' : 'allow' };
+            rematches: s.rematches === 'avoid' ? 'avoid' : 'allow', maxGroup: maxGroupOf(s.maxGroup) };
     }
     /** True for one group (a pure round robin: no cups, the table decides). */
     const isSingle = () => settings().structure === 'single';
@@ -42,12 +44,13 @@ const Groups = (() => {
 
     // ---------- the group draw ----------
     /**
-     * How many groups: the smallest even number that keeps every group at four players or fewer.
+     * How many groups: the smallest even number that keeps every group at the largest group or fewer
+     * (Global Settings → Round Robin → Largest group; this is for the next draw).
      * @param {number} n - players
      * @returns {number}
      */
     function groupCount(n) {
-        let g = Math.max(2, Math.ceil(n / 4));
+        let g = Math.max(2, Math.ceil(n / configSettings().maxGroup));
         if (g % 2) g++;
         return g;
     }
@@ -92,7 +95,7 @@ const Groups = (() => {
         const seeded = typeof Seeding !== 'undefined' ? Seeding.forGroups(paid) : null;
         const order = seeded ? seeded.order.concat(shuffle(paid.filter(p => !seeded.order.includes(p)))) : shuffle(paid);
         const cfg = configSettings();
-        const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry, rematches: cfg.rematches };
+        const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry, rematches: cfg.rematches, maxGroup: cfg.maxGroup };
         if (cfg.structure === 'single') return { list: [{ name: 'A', players: order.slice() }], order, seeding: seeded ? seeded.record : null, settings };
         const g = groupCount(order.length);
         const list = Array.from({ length: g }, (_, i) => ({ name: LETTERS[i], players: [] }));
@@ -193,7 +196,7 @@ const Groups = (() => {
 
     /**
      * Who goes on to which cup, as which seed: the group winners as seeds 1…g, the runners-up after
-     * them (the A cup); the thirds, then the fourths (the B cup). Within each place, ranked across
+     * them (the A cup); the thirds, then the fourths, and so on (the B cup). Within each place, ranked across
      * the groups per match (win rate, leg difference per match, legs won per match), then by group.
      * @returns {{A: object[], B: object[], rows: {A: object[], B: object[]}}} A/B: players, best seed
      *   first; rows: the same as table rows with their group, for the draw step
@@ -202,7 +205,8 @@ const Groups = (() => {
         const byPlace = {};
         groupList().forEach(g => standings(g.name).forEach(r => { (byPlace[r.pos] = byPlace[r.pos] || []).push(Object.assign({ group: g.name }, r)); }));
         const place = n => (byPlace[n] || []).slice().sort((a, b) => byPerMatch(a, b) || a.group.localeCompare(b.group));
-        let A = place(1).concat(place(2)), B = place(3).concat(place(4));
+        const places = Object.keys(byPlace).map(Number).sort((a, b) => a - b);
+        let A = place(1).concat(place(2)), B = places.filter(n => n > 2).flatMap(place);
         if (settings().cupEntry === 'half') {
             // Top half: everyone in that order, split into two cups of the same size (A one larger when odd)
             const everyone = A.concat(B);

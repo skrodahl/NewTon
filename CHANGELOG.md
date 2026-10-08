@@ -1,3 +1,12 @@
+## Unreleased
+
+### Round Robin: Largest group and the cups' own match lengths
+
+- **Largest group** (Global Settings → Round Robin): 4 (the default, as before), 5 or 6. The draw makes the smallest even number of groups that keeps every group at that size or less, so a larger limit means fewer, longer groups: 10 players are 3, 3, 2, 2 at 4, and two groups of 5 at 5 or 6 (no more A cup of 8 and B cup of 2 with top two); 20 players are four groups of 5. Groups of 5 and 6 use the circle-method schedule One group already had (in a group of 5 the player sitting the round out referees). The cup fields now take every group place, not just 1st–4th (`cupFields()`), so 5th and 6th go to the B cup with top two, or into the ranking with top half; Draw the cups names them "5th", "6th". At 6, top two with 25 or more players can make a B cup of more than 16, drawn in the 32-player single elimination table (tested: 30 players, A cup 12 in 16, B cup 18 in 32). Each tournament keeps the largest group it was drawn with (`tournament.groups.settings.maxGroup`; absent = 4).
+- **The cups get their own match lengths** (Global Settings → Match length → Groups and cups): **Cup rounds** (every round before the semifinals), **Cup semifinal**, **Cup bronze final** and **Cup final**, the same for the A and the B cup, taken when the cups are drawn. Defaults 3, 3, 5, 5, as single elimination. The cups used the single elimination lengths before, so a saved config without the new fields keeps them (cup rounds from the SE quarterfinal, the rest from the SE semifinal, bronze final and final); a normal single elimination night and the cups can now differ (e.g. a Bo7 cup final).
+- Both are in the Reset all config preview, with their Global Settings names.
+- Files changed: `js/results-config.js` (defaults, the old-config fallback, form load/save, Reset to defaults, `CONFIG_LABELS`), `js/clean-match-progression.js` (`drawCups()` lengths; `roundRobinSchedule()` comment), `js/groups.js` (`maxGroup` in the settings and snapshot, `groupCount()`, `cupFields()`), `js/bracket-rendering.js` (place names at Draw the cups), `tournament.html` (Largest group, four cup steppers), `js/dynamic-help-system.js`, `userguide.html`, `Docs/GROUPS-AND-CUPS.md`, `Docs/PARKING-LOT.md`.
+
 ## **v5.4.0** — Just Around the Corner (2026-10-08)
 
 ### The bracket always shows the current tournament

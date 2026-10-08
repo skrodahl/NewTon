@@ -94,8 +94,9 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
    - One group (pure round robin, everybody plays everybody, the table decides) or several groups with knockout cups.
    - Who goes to the cups: the top two of each group always to the A cup, or balanced knockout rounds (cup sizes that avoid byes and tiny B cups; see notes 2 and 8).
    - More from the discussions: play the B cup by default or not; group match length (already a setting); maximum group size; group rematches allowed in cup round 1 or avoided; how placings are filled when a cup can't fill them (note 8).
+   - **After v5.4.0 (maintainer, 2026-10-08):** built **Largest group** (4, 5 or 6, default 4) and the cups' own match lengths (cup rounds, semifinal, bronze final, final; defaults as single elimination). A setting for the tiebreaker order was dropped: the order is fixed and written down, and ▲ in Match Controls covers a tie that's left.
 
-**Still open:** Analytics views made for groups; `llms.txt` once it is released. Settled since: the rematch setting is built; withdrawals in the middle of a group are handled by a manual walkover (the leaving player loses, maintainer 2026-10-08); the season final's invite list is left out of this work (maintainer, leaning not now: it belongs with the Season concept in the Inbox, and the top 16 can be registered by hand).
+**Still open:** Analytics views made for groups. Settled since: the rematch setting is built; withdrawals in the middle of a group are handled by a manual walkover (the leaving player loses, maintainer 2026-10-08); the season final's invite list is left out of this work (maintainer, leaning not now: it belongs with the Season concept in the Inbox, and the top 16 can be registered by hand).
 
 ### More formats, after Round Robin
 

@@ -18,7 +18,8 @@ Tournaments while it is offered (`config.roundRobin`, additive):
 - **Structure:** `groups` — groups and cups, as below (6–32 players); `single` — one group,
   everybody plays everybody, the table decides the placings (3–8 players). The one group's order is
   `roundRobinSchedule(n)` (circle method, referee from the group: never twice in a row, fewest duties,
-  the player sitting a round out asked first); groups of up to four keep `GROUP_SCHEDULES`.
+  the player sitting a round out asked first); groups of up to four keep `GROUP_SCHEDULES`, and groups
+  of five or six (Largest group) use the same circle method.
 - **To the A cup:** `top2` — the top two of each group, the rest to the B cup; `half` (the default
   since 2026-10-08) — everyone
   ranked across the groups (group place first, then results per match) and split into two cups of the
@@ -28,16 +29,30 @@ Tournaments while it is offered (`config.roundRobin`, additive):
   another group, the best seeds first, as close to the mirror as possible; when no such pairing
   exists, the mirror stands.
 - **Play the B cup:** whether the Draw the cups switch starts on.
+- **Largest group** (`maxGroup`, added after v5.4.0): 4 (the default), 5 or 6. The draw makes the
+  smallest even number of groups that keeps each group at that size or less, so a larger limit means
+  fewer, longer groups: 10 players are 3, 3, 2, 2 at 4 and 5, 5 at 5 or 6; 20 are 5, 5, 5, 5 at 5.
+  The cup fields take every group place (`cupFields()`): with top two, the B cup has the thirds, the
+  fourths, the fifths and the sixths. At 6, top two with 25 or more players can make a B cup of more
+  than 16, drawn in the 32-player single elimination table (30 players: 6 groups of 5, A cup 12, B cup 18).
 
-Each tournament keeps the structure and cup entry it was drawn with (`tournament.groups.settings`);
-absent means groups and cups, top two.
+Each tournament keeps the structure, cup entry, rematches and largest group it was drawn with
+(`tournament.groups.settings`); absent means groups and cups, top two, allow, 4.
+
+**Match length** (Global Settings → Match length → Groups and cups): group matches, and the cups'
+own lengths, added after v5.4.0: cup rounds (every round before the semifinals), cup semifinal, cup
+bronze final, cup final (`config.legs.cupRounds|cupSemifinal|cupBronze|cupFinal`, defaults 3, 3, 5, 5
+as single elimination's). The A and B cups share them, and they are taken when the cups are drawn.
+Before they existed the cups used the single elimination lengths, so a config saved without them
+keeps those (`loadConfiguration()`: cup rounds from the SE quarterfinal, the rest from the SE
+semifinal, bronze final and final).
 
 ## The rules (settled with the maintainer, 2026-10-07/08)
 
 **Groups**
-- An even number of groups, at most four players in each: the smallest even number of groups
-  that holds everyone (15–16 players: 4 groups; 17–24: 6; 25–32: 8). Fewer than four in a group is
-  fine.
+- An even number of groups, at most four players in each (or five or six, Largest group): the
+  smallest even number of groups that holds everyone (at four: 15–16 players: 4 groups; 17–24: 6;
+  25–32: 8). Fewer in a group is fine.
 - Players go into the groups in snake order: by ranking when seeding is on and there is a
   ranking (Seeding, js/seeding.js), at random otherwise. The order a player went in is their seed in
   the group (1–4).
@@ -108,6 +123,8 @@ Absent fields mean what they always meant, so every stored and exported tourname
 | `groups` | tournament | The group draw: `{ list: [{ name: 'A', players: [id, …] }], order: { A: [id, …] } }` (players in seed order; `order` = operator's tie decisions, optional). |
 | `cups` | tournament | The cup draw, absent until drawn: `{ bCup: bool, A: { size, seeds: [id…] }, B: {…} \| null }`. |
 | `groupMatches` | config.legs | Best of for group matches (default 3). |
+| `cupRounds`, `cupSemifinal`, `cupBronze`, `cupFinal` | config.legs | Best of for the cups (defaults 3, 3, 5, 5); absent in a saved config = the single elimination lengths. |
+| `maxGroup` | config.roundRobin, tournament.groups.settings | The largest group, 4, 5 or 6. Absent = 4. |
 | `side: 'group' \| 'cup'`, `group`, `cup`, `seId`, `plannedReferee` | match | Group/cup bookkeeping. `seId` is the cup match's single-elimination ID (FS-2-1…), `plannedReferee` is `{player: id}`, `{loserOf: matchId}` or absent. |
 
 `tournament.bracket` holds the group draw (the players in draw order), so every existing "has the

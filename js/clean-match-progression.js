@@ -498,8 +498,8 @@ const GROUP_SCHEDULES = {
 };
 
 /**
- * The fixed order of a round robin of n players: GROUP_SCHEDULES for up to four; for one group of
- * five to eight (Round Robin, one group), the circle method's rounds in order, each match with a
+ * The fixed order of a round robin of n players: GROUP_SCHEDULES for up to four; for five to eight
+ * (one group, or groups of five or six under Largest group), the circle method's rounds in order, each match with a
  * referee from the group: never twice in a row, then the fewest duties so far (a player who plays
  * in the same round counts one extra, so the one sitting the round out is asked first), then the
  * lowest seed. Every pair meets once; duties come out even or within one (two at seven players).
@@ -1716,11 +1716,11 @@ function drawCups(playB) {
         calculateCleanBracketStructure(size, 'SE').frontside.forEach((roundInfo, roundIndex) => {
             for (let i = 0; i < roundInfo.matches; i++) {
                 const seId = `FS-${roundInfo.round}-${i + 1}`;
-                const legs = isSEFinalMatch(seId, size) ? config.legs.seFinal
-                    : isSEBronzeMatch(seId, size) ? config.legs.seBronze
-                    : isSESemifinal(seId, size) ? config.legs.seSemifinal
-                    : isSEQuarterfinal(seId, size) ? config.legs.seQuarterfinal
-                    : config.legs.seRegularRounds;
+                // the cups' own lengths (Global Settings → Match length → Groups and cups)
+                const legs = isSEFinalMatch(seId, size) ? config.legs.cupFinal
+                    : isSEBronzeMatch(seId, size) ? config.legs.cupBronze
+                    : isSESemifinal(seId, size) ? config.legs.cupSemifinal
+                    : config.legs.cupRounds;
                 const tbd = n => createTBDPlayer(`${cup.toLowerCase()}-${roundInfo.round}-${i}-${n}`);
                 made.push({
                     id: cupMatchId(cup, seId, size),
