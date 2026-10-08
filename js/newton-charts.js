@@ -72,7 +72,7 @@ const NewtonCharts = (() => {
     const fmtDay = d => d.toLocaleDateString('en-GB', { day: 'numeric', month: 'short' });
     /** Placement bands: 1 Winner, 2 Final, 3 Top 4, 4 Top 8, 5 Top 16, 6 the rest. */
     const tier = p => p === 1 ? 1 : p === 2 ? 2 : p <= 4 ? 3 : p <= 8 ? 4 : p <= 16 ? 5 : 6;
-    const placeShort = p => p === 1 ? '1st' : p === 2 ? '2nd' : p === 3 ? '3rd' : p === 4 ? '4th' : p === 5 ? '5–6' : p === 7 ? '7–8' : p === 9 ? '9–12' : p === 13 ? '13–16' : p === 17 ? '17–24' : p === 25 ? '25–32' : ordinal(p);
+    const placeShort = p => p === 1 ? '1st' : p === 2 ? '2nd' : p === 3 ? '3rd' : p === 4 ? '4th' : p === 5 ? '5–6' : p === 7 ? '7–8' : p === 9 ? '9–12' : p === 13 ? '13–16' : p === 17 ? '17–24' : p === 25 ? '25–32' : p === 33 ? '33–48' : ordinal(p);
     const placeLong = p => typeof formatRanking === 'function' ? formatRanking(p) : placeShort(p);
     const mean = a => a.reduce((x, y) => x + y, 0) / a.length;
 
@@ -179,7 +179,7 @@ const NewtonCharts = (() => {
             const y = r => M.t + (r - 1) / (N - 1) * ih;
             const top = Math.min(16, N);
             el('rect', { x: M.l, y: y(1) - 4, width: iw, height: y(top) - y(1) + 8, fill: '#f3f1ed' }, svg);
-            [1, 4, 8, 16, 24, 32].filter(r => r <= N).forEach(r => grid(y(r), r === 1 ? '1st' : r, r === 16));
+            [1, 4, 8, 16, 24, 32, 48].filter(r => r <= N).forEach(r => grid(y(r), r === 1 ? '1st' : r, r === 16));
             if (N > 16) el('text', { x: M.l + 8, y: y(16) - 6 }, svg).textContent = 'Top 16';
             ss.slice().reverse().forEach((s, rk) => {
                 const k = ss.length - 1 - rk;
