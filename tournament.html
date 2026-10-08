@@ -485,6 +485,10 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="rrCupEntry"><button type="button" data-value="top2">Top two</button><button type="button" data-value="half">Top half</button></div><input type="hidden" id="rrCupEntry"></div>
                         </div>
                         <div class="cfg-row cfg-rr-cups">
+                            <div><div class="cfg-label">Group rematches in cup round 1</div><div class="cfg-desc"><b>Allow</b>: the cups are drawn top seed against bottom seed, even when they played in the same group. <b>Avoid</b>: a seed gets the nearest opponent from another group instead, where possible.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="rrRematches"><button type="button" data-value="allow">Allow</button><button type="button" data-value="avoid">Avoid</button></div><input type="hidden" id="rrRematches"></div>
+                        </div>
+                        <div class="cfg-row cfg-rr-cups">
                             <div><label class="cfg-label" for="rrBCup">Play the B cup</label><div class="cfg-desc">On to start with at <b>Draw the cups</b>; you can still change it there.</div></div>
                             <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="rrBCup" checked><span></span></span></div>
                         </div>

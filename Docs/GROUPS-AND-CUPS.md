@@ -22,6 +22,10 @@ Tournaments while it is offered (`config.roundRobin`, additive):
 - **To the A cup:** `top2` — the top two of each group, the rest to the B cup; `half` — everyone
   ranked across the groups (group place first, then results per match) and split into two cups of the
   same size (A one larger when odd), so a small field doesn't leave a tiny B cup (review note 2).
+- **Group rematches in cup round 1:** `allow` — the mirror draw as it falls; `avoid` —
+  `Groups.avoidRematches()` reorders the field so each seed meets the nearest opponent (by seed) from
+  another group, the best seeds first, as close to the mirror as possible; when no such pairing
+  exists, the mirror stands.
 - **Play the B cup:** whether the Draw the cups switch starts on.
 
 Each tournament keeps the structure and cup entry it was drawn with (`tournament.groups.settings`);

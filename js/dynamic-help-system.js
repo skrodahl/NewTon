@@ -317,6 +317,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Structure:</strong> <strong>Groups and cups</strong> (groups of up to four, then an A cup and a B cup; 6 to 32 players) or <strong>One group</strong> (everybody plays everybody, the table decides; 3 to 8 players)</li>
                         <li><strong>To the A cup:</strong> <strong>Top two</strong> of each group, or <strong>Top half</strong>: everyone ranked across the groups and split into two cups of the same size, so a small field doesn't leave a tiny B cup</li>
+                        <li><strong>Group rematches in cup round 1:</strong> <strong>Allow</strong> (top seed against bottom seed, as drawn) or <strong>Avoid</strong> (a seed gets the nearest opponent from another group, where possible)</li>
                         <li><strong>Play the B cup:</strong> whether the switch at Draw the cups starts on</li>
                     </ul>
                     <p>A tournament keeps the settings it was drawn with; a change here applies to the next draw.</p>

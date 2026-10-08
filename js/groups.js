@@ -24,12 +24,14 @@ const Groups = (() => {
     /** Round Robin's settings in Global Settings now: structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup. */
     function configSettings() {
         const rr = (typeof config !== 'undefined' && config.roundRobin) || {};
-        return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'half' ? 'half' : 'top2', bCup: rr.bCup !== false };
+        return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'half' ? 'half' : 'top2',
+            rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false };
     }
     /** The settings the tournament was drawn with (absent in the first build: groups and cups, top two). */
     function settings() {
         const s = (on() && tournament.groups && tournament.groups.settings) || {};
-        return { structure: s.structure === 'single' ? 'single' : 'groups', cupEntry: s.cupEntry === 'half' ? 'half' : 'top2' };
+        return { structure: s.structure === 'single' ? 'single' : 'groups', cupEntry: s.cupEntry === 'half' ? 'half' : 'top2',
+            rematches: s.rematches === 'avoid' ? 'avoid' : 'allow' };
     }
     /** True for one group (a pure round robin: no cups, the table decides). */
     const isSingle = () => settings().structure === 'single';
@@ -90,7 +92,7 @@ const Groups = (() => {
         const seeded = typeof Seeding !== 'undefined' ? Seeding.forGroups(paid) : null;
         const order = seeded ? seeded.order.concat(shuffle(paid.filter(p => !seeded.order.includes(p)))) : shuffle(paid);
         const cfg = configSettings();
-        const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry };
+        const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry, rematches: cfg.rematches };
         if (cfg.structure === 'single') return { list: [{ name: 'A', players: order.slice() }], order, seeding: seeded ? seeded.record : null, settings };
         const g = groupCount(order.length);
         const list = Array.from({ length: g }, (_, i) => ({ name: LETTERS[i], players: [] }));
@@ -206,6 +208,42 @@ const Groups = (() => {
             A = everyone.slice(0, half); B = everyone.slice(half);
         }
         return { A: A.map(r => r.player), B: B.map(r => r.player), rows: { A, B } };
+    }
+
+    /**
+     * A cup's field in the order the mirror draw takes it, with group rematches in round 1 avoided
+     * where possible (Round Robin → Group rematches: Avoid). The draw pairs seed i with seed K+1-i;
+     * when that opponent is from the same group, the top seed gets the nearest opponent (by seed) from
+     * another group instead, the best seeds first, keeping every other pairing as close to the mirror
+     * as it can. When no such pairing exists (one group would have to meet itself), the mirror stands.
+     * @param {object[]} field - the cup's players, best seed first
+     * @param {number} size - the cup's bracket size
+     * @returns {object[]} the field reordered (same players)
+     */
+    function avoidRematches(field, size) {
+        const P = field.length, K = size;
+        const groupOf = {};
+        groupList().forEach(g => g.players.forEach(id => { groupOf[String(id)] = g.name; }));
+        const g = p => groupOf[String(p.id)];
+        const tops = [];                                  // the seeds that meet a player (not a bye)
+        for (let i = Math.max(0, K - P); i < K / 2; i++) tops.push(i);
+        const pool = tops.map(i => field[K - 1 - i]);     // their mirror opponents, in the same order
+        const assign = new Array(tops.length), used = new Array(pool.length).fill(false);
+        const search = k => {
+            if (k === tops.length) return true;
+            const order = pool.map((_, j) => j).filter(j => !used[j]).sort((a, b) => Math.abs(a - k) - Math.abs(b - k) || a - b);
+            for (const j of order) {
+                if (g(pool[j]) === g(field[tops[k]])) continue;
+                used[j] = true; assign[k] = j;
+                if (search(k + 1)) return true;
+                used[j] = false;
+            }
+            return false;
+        };
+        if (!search(0)) return field.slice();             // impossible without a rematch: keep the mirror
+        const out = field.slice();
+        tops.forEach((i, k) => { out[K - 1 - i] = pool[assign[k]]; });
+        return out;
     }
 
     // ---------- planned referees ----------
@@ -446,7 +484,7 @@ const Groups = (() => {
         isGroupId, isCupId, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
         configSettings, settings, isSingle, limits, formatName,
         groupList, groupMatches, standings, groupDone, allGroupsDone, cupFields,
-        planCupReferees, plannedRefereeFor, plannedRefereeText, cupMatchesOf, holdFor,
+        planCupReferees, avoidRematches, plannedRefereeFor, plannedRefereeText, cupMatchesOf, holdFor,
         isComplete, placements, roundName, moveUp
     };
 })();

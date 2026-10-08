@@ -1632,6 +1632,7 @@ function _mcDrawCupsHTML() {
             ? `Everyone is ranked across the groups: group winners first, then runners-up, and so on, each place by results per match (win rate, then leg difference). The top half plays the A cup, the rest the B cup, seeded in that order.`
             : `Group winners are seeds 1–${g}, runners-up ${g + 1}–${2 * g}, ranked across the groups per match (win rate, then leg difference). The B cup takes the rest the same way.`}</p>
         <div class="mc-fields">${field(f.rows.A, 'A cup', false)}${field(f.rows.B, 'B cup', !playB)}</div>
+        ${Groups.settings().rematches === 'avoid' ? '<p class="mc-note">Group rematches in round 1 are avoided where possible, so a seed may meet the next opponent down instead of the mirror one.</p>' : ''}
         ${level ? '<p class="mc-note mc-warn">Some players are level on wins, legs and head-to-head: the group seed decides, unless you change it with ▲ in the group tables.</p>' : ''}
         <div class="mc-drawbar">
             <p>All ${Groups.groupList().reduce((n, gr) => n + Groups.groupMatches(gr.name).length, 0)} group matches are played. Top seed meets bottom seed; the best seeds get any byes.</p>

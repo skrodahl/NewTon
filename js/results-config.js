@@ -57,6 +57,7 @@ const DEFAULT_CONFIG = {
     roundRobin: {
         structure: 'groups',  // 'groups': groups, then an A and a B cup; 'single': one group, the table decides
         cupEntry: 'top2',     // 'top2': the top two of each group to the A cup; 'half': the top half across the groups
+        rematches: 'allow',   // group rematches in cup round 1: 'allow' (the mirror draw) or 'avoid'
         bCup: true            // Play the B cup is on to start with at Draw the cups
     },
     server: {
@@ -203,6 +204,7 @@ function applyConfigToUI() {
     safeSetValue('rrStructure', rr.structure === 'single' ? 'single' : 'groups');
     safeSetValue('rrCupEntry', rr.cupEntry === 'half' ? 'half' : 'top2');
     safeSetChecked('rrBCup', rr.bCup !== false);
+    safeSetValue('rrRematches', rr.rematches === 'avoid' ? 'avoid' : 'allow');
 
     // Server configuration
     if (config.server) {
@@ -597,9 +599,11 @@ function saveUIConfiguration(options = {}) {
     const rrStructure = document.getElementById('rrStructure');
     const rrCupEntry = document.getElementById('rrCupEntry');
     const rrBCup = document.getElementById('rrBCup');
+    const rrRematches = document.getElementById('rrRematches');
     config.roundRobin = {
         structure: rrStructure && rrStructure.value === 'single' ? 'single' : 'groups',
         cupEntry: rrCupEntry && rrCupEntry.value === 'half' ? 'half' : 'top2',
+        rematches: rrRematches && rrRematches.value === 'avoid' ? 'avoid' : 'allow',
         bCup: rrBCup ? rrBCup.checked : true
     };
 

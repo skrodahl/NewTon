@@ -1708,8 +1708,9 @@ function drawCups(playB) {
 
     ['A', 'B'].forEach(cup => {
         if (cup === 'B' && !cups.bCup) return;
-        const field = fields[cup].map(_slotPlayer);
-        const size = calculateBracketSize(field.length, 'SE');
+        const size = calculateBracketSize(fields[cup].length, 'SE');
+        // Round Robin → Group rematches: Avoid reorders the field so round 1 pairs players from different groups
+        const field = (Groups.settings().rematches === 'avoid' ? Groups.avoidRematches(fields[cup], size) : fields[cup]).map(_slotPlayer);
         const bracket = placeSeededPlayers(field, size, field, true);
         cups[cup] = { size, seeds: field.map(p => p.id) };
         calculateCleanBracketStructure(size, 'SE').frontside.forEach((roundInfo, roundIndex) => {
