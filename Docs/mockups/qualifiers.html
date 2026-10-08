@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: qualifiers</title>
+<link rel="stylesheet" href="../../css/design-tokens.css">
+<style>
+@font-face { font-family: 'Inter'; src: url('../../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Cascadia Code'; src: url('../../fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype'); font-weight: 200 700; font-display: swap; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nt-bg); color: var(--nt-ink); font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1240px; margin: 0 auto; padding: 28px 24px 60px; display: grid; gap: 34px; }
+.intro h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+.intro p { margin: 6px 0 0; color: var(--nt-muted); max-width: 86ch; }
+.step { display: grid; gap: 10px; }
+.step > h2 { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--nt-muted); }
+.step > p.why { margin: -4px 0 4px; color: var(--nt-ink-2); max-width: 92ch; }
+.screen { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 14px; overflow: hidden; }
+.hdr { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--nt-line); }
+.hdr b { font-size: 18px; font-weight: 800; }
+.hdr small { display: block; color: var(--nt-muted); font-family: var(--nt-mono); font-size: 12px; }
+.tabs { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; background: var(--nt-surface); }
+.tabs span { padding: 6px 12px; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); }
+.tabs span + span { border-left: 1px solid var(--nt-line-2); }
+.tabs .on { background: var(--nt-header); color: var(--nt-header-ink); }
+.hdr .right { justify-self: end; display: flex; gap: 10px; align-items: center; }
+.status { padding: 6px 18px; font-size: 12px; color: var(--nt-muted); border-bottom: 1px solid var(--nt-line); background: var(--nt-surface-2); }
+.body { padding: 22px 18px; background: var(--nt-bg); overflow-x: auto; }
+.note { margin-top: 12px; font-size: 12px; color: var(--nt-muted); max-width: 92ch; }
+.new { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #b2410f; background: var(--nt-accent-soft); border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+
+/* bracket cards (simplified) */
+.br { display: grid; grid-template-columns: 200px 40px 200px 40px 200px; min-width: 700px; }
+.col-label { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); text-align: center; padding-bottom: 8px; }
+.col-label.q { color: #b2410f; }
+.card { background: var(--nt-surface); border: 1px solid var(--nt-card-line, var(--nt-line-2)); border-radius: 8px; font-size: 13px; overflow: hidden; }
+.card .meta { display: flex; justify-content: space-between; padding: 3px 8px; font-family: var(--nt-mono); font-size: 10px; color: var(--nt-muted); border-bottom: 1px solid var(--nt-line); }
+.card .p { padding: 4px 8px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card .p + .p { border-top: 1px solid var(--nt-line); }
+.card .p.ph { font-weight: 500; font-style: italic; color: var(--nt-muted); }
+.card .p.ph.q { color: #b2410f; }
+.card.qcard { border-color: var(--nt-accent); border-style: dashed; }
+.card.qcard .meta { color: #b2410f; }
+.card .out { padding: 2px 8px 4px; font-size: 10px; color: var(--nt-muted); border-top: 1px dashed var(--nt-line); }
+.cell { height: 82px; display: flex; align-items: center; }
+.cell > .card { width: 100%; }
+.cell.r2 { height: 164px; }
+.link { height: 82px; position: relative; }
+.link::before { content: ""; position: absolute; left: 0; right: 0; top: 50%; border-top: 2px solid var(--nt-accent); }
+.join { height: 164px; position: relative; }
+.join::before { content: ""; position: absolute; left: 0; width: 50%; top: 25%; bottom: 25%; border: 2px solid var(--nt-line-2); border-left: 0; border-radius: 0 6px 6px 0; }
+.join::after { content: ""; position: absolute; left: 50%; right: 0; top: 50%; border-top: 2px solid var(--nt-line-2); }
+
+/* two steps */
+.mc { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 16px; }
+.panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; }
+.panel h4 { margin: 0; padding: 12px 16px 8px; font-size: 14px; font-weight: 700; display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.panel h4 small { font-weight: 500; color: var(--nt-muted); font-size: 12px; }
+.mrow { display: grid; grid-template-columns: 34px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 6px 16px; font-size: 13px; }
+.mrow + .mrow { border-top: 1px dashed var(--nt-line); }
+.mrow .no { font-family: var(--nt-mono); font-size: 11px; color: var(--nt-muted); }
+.mrow .res { font-family: var(--nt-mono); font-weight: 700; font-size: 12px; text-align: right; }
+.mrow.done .who b { color: var(--nt-ok); }
+.mrow.done .who s { color: var(--nt-faint, var(--nt-muted)); }
+.chip { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 8px; white-space: nowrap; }
+.chip.live { background: var(--nt-accent-soft); color: #b2410f; }
+.chip.ready { background: var(--nt-ready-soft); color: #8a6a0a; }
+.list { margin: 0; padding: 0 16px 14px 34px; columns: 2; font-size: 13px; }
+.list li { break-inside: avoid; }
+.drawbar { margin: 4px 16px 16px; border: 1px dashed var(--nt-line-2); border-radius: 10px; padding: 10px 12px; display: flex; justify-content: space-between; align-items: center; gap: 10px; flex-wrap: wrap; font-size: 13px; color: var(--nt-ink-2); }
+.btn { display: inline-block; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; background: var(--nt-header); color: var(--nt-header-ink); opacity: .45; }
+
+table.n { border-collapse: collapse; font-size: 13px; background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 10px; overflow: hidden; }
+table.n th, table.n td { padding: 6px 14px; border-bottom: 1px solid var(--nt-line); text-align: right; font-variant-numeric: tabular-nums; }
+table.n th { font-size: 11px; color: var(--nt-muted); font-weight: 600; }
+table.n td:first-child, table.n th:first-child { text-align: left; }
+.cmp { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+.cmp div { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; padding: 12px 16px; font-size: 13px; }
+.cmp h3 { margin: 0 0 6px; font-size: 14px; }
+.cmp ul { margin: 0; padding-left: 18px; color: var(--nt-ink-2); }
+@media (max-width: 760px) { .mc, .cmp { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="intro">
+    <h1>Qualifiers above 32 players</h1>
+    <p>Quick and dirty mockup. 40 players paid: 32 places in the bracket, so 8 qualifier matches (16 players, drawn at random; seeds exempt). The 24 others go straight into round 1. The qualifiers are spread over round 1 the way byes are below 32. Lose a qualifier and you're not qualified: no placing, no points, nothing counted.</p>
+</div>
+
+<section class="step">
+    <h2>How many</h2>
+    <table class="n">
+        <tr><th>Players</th><th>Qualifier matches</th><th>Players in qualifiers</th><th>Straight in</th><th>Round 1 matches with a qualifier</th></tr>
+        <tr><td>33</td><td>1</td><td>2</td><td>31</td><td>1 of 16</td></tr>
+        <tr><td>40</td><td>8</td><td>16</td><td>24</td><td>8 of 16</td></tr>
+        <tr><td>48</td><td>16</td><td>32</td><td>16</td><td>16 of 16 (one each)</td></tr>
+        <tr><td>56</td><td>24</td><td>48</td><td>8</td><td>16 of 16 (8 with two)</td></tr>
+        <tr><td>64</td><td>32</td><td>64</td><td>0</td><td>16 of 16 (all qualifier winners)</td></tr>
+    </table>
+</section>
+
+<section class="step">
+    <h2>Option A · A round 0 in the bracket <span class="new">drawn at once</span></h2>
+    <p class="why">The 32-player bracket is drawn in one go, with "Winner of Q3" in the qualifiers' places. Everyone sees their path straight away. The qualifiers are a column before round 1; the winner moves on like any match, the loser goes nowhere (in double elimination too: no backside for a qualifier loser).</p>
+    <div class="screen">
+        <div class="hdr">
+            <div><b>Monday Cup 41</b><small>2026 · 10 · 12</small></div>
+            <div class="tabs"><span class="on">Bracket</span><span>Match Controls</span><span>Leaderboard</span></div>
+            <div class="right"><div class="tabs"><span>Finals</span><span>Fit all</span></div></div>
+        </div>
+        <div class="status"><b>40</b> players · <b>8</b> qualifiers · 24 straight in · 32-player bracket · 2 live · 3 ready</div>
+        <div class="body">
+            <div class="br">
+                <div class="col-label q">Qualifiers</div><div></div><div class="col-label">Round 1</div><div></div><div class="col-label">Round 2</div>
+
+                <!-- R1 match 1: a qualifier slot -->
+                <div class="cell"><div class="card qcard"><div class="meta"><span>Q1 · Bo3</span><span>LIVE · lane 3</span></div><div class="p">Kari N.</div><div class="p">Tom S.</div><div class="out">Loser: not qualified</div></div></div>
+                <div class="link"></div>
+                <div class="cell"><div class="card"><div class="meta"><span>FS-1-1 · Bo3</span><span>waiting</span></div><div class="p">Henry A.</div><div class="p ph q">Winner of Q1</div></div></div>
+                <div class="join" style="grid-row: span 2"></div>
+                <div class="cell r2" style="grid-row: span 2"><div class="card" style="width:100%"><div class="meta"><span>FS-2-1 · Bo3</span><span></span></div><div class="p ph">Winner of FS-1-1</div><div class="p ph">Winner of FS-1-2</div></div></div>
+
+                <!-- R1 match 2: straight in -->
+                <div class="cell"></div>
+                <div></div>
+                <div class="cell"><div class="card"><div class="meta"><span>FS-1-2 · Bo3</span><span>ready</span></div><div class="p">Colin B.</div><div class="p">Peter J.</div></div></div>
+
+                <!-- R1 match 3: a qualifier slot -->
+                <div class="cell"><div class="card qcard"><div class="meta"><span>Q2 · Bo3</span><span>done 2–1</span></div><div class="p">Ingrid L.</div><div class="p" style="color:var(--nt-muted);font-weight:500;text-decoration:line-through">Ola M.</div><div class="out">Ola M.: not qualified</div></div></div>
+                <div class="link"></div>
+                <div class="cell"><div class="card"><div class="meta"><span>FS-1-3 · Bo3</span><span>ready</span></div><div class="p">Harry K.</div><div class="p">Ingrid L.</div></div></div>
+                <div class="join" style="grid-row: span 2"></div>
+                <div class="cell r2" style="grid-row: span 2"><div class="card" style="width:100%"><div class="meta"><span>FS-2-2 · Bo3</span><span></span></div><div class="p ph">Winner of FS-1-3</div><div class="p ph">Winner of FS-1-4</div></div></div>
+
+                <!-- R1 match 4: straight in -->
+                <div class="cell"></div>
+                <div></div>
+                <div class="cell"><div class="card"><div class="meta"><span>FS-1-4 · Bo3</span><span>live · lane 1</span></div><div class="p">Adam F.</div><div class="p">Christian D.</div></div></div>
+            </div>
+            <p class="note">One quarter of the left half shown. With 40 players every other round 1 match has a qualifier; with 48, every one; with 64, both places in every match. The 32-player tables stay as they are: the qualifier-to-slot mapping is made at the draw and kept beside them, not in them. Undo a qualifier and "Winner of Q2" comes back, as long as FS-1-3 hasn't started.</p>
+        </div>
+    </div>
+</section>
+
+<section class="step">
+    <h2>Option B · Two steps, like the cups <span class="new">draw after the qualifiers</span></h2>
+    <p class="why">The qualifiers are played first, as their own stage. When the last one is done, <b>Draw the bracket</b> draws the 32-player bracket with the 24 who went straight in and the 8 winners. No placeholders, but nobody knows their path until the qualifiers are over, and the boards that finish early wait.</p>
+    <div class="screen">
+        <div class="hdr">
+            <div><b>Monday Cup 41</b><small>2026 · 10 · 12</small></div>
+            <div class="tabs"><span>Bracket</span><span class="on">Match Controls</span><span>Leaderboard</span></div>
+            <div class="right"></div>
+        </div>
+        <div class="status"><b>40</b> players · Qualifiers: 3 of 8 played · 2 live</div>
+        <div class="body">
+            <div class="mc">
+                <div class="panel">
+                    <h4>Qualifiers <small>3 of 8 played · winner goes into the bracket</small></h4>
+                    <div class="mrow done"><span class="no">Q1</span><span class="who"><b>Kari N.</b> v <s>Tom S.</s></span><span class="res">2–0</span></div>
+                    <div class="mrow done"><span class="no">Q2</span><span class="who"><b>Ingrid L.</b> v <s>Ola M.</s></span><span class="res">2–1</span></div>
+                    <div class="mrow done"><span class="no">Q3</span><span class="who"><s>Siv R.</s> v <b>Jonas E.</b></span><span class="res">1–2</span></div>
+                    <div class="mrow"><span class="no">Q4</span><span class="who">Mona T. v Erik H.</span><span><span class="chip live">Live · lane 1</span></span></div>
+                    <div class="mrow"><span class="no">Q5</span><span class="who">Pål V. v Lene G.</span><span><span class="chip live">Live · lane 2</span></span></div>
+                    <div class="mrow"><span class="no">Q6</span><span class="who">Rune A. v Tone B.</span><span><span class="chip ready">Ready</span></span></div>
+                    <div class="mrow"><span class="no">Q7</span><span class="who">Geir O. v Anne K.</span><span><span class="chip ready">Ready</span></span></div>
+                    <div class="mrow"><span class="no">Q8</span><span class="who">Stig N. v Hege P.</span><span><span class="chip ready">Ready</span></span></div>
+                    <div class="drawbar"><span>The bracket is drawn when every qualifier is played: 24 straight in + 8 winners.</span><span class="btn">Draw the bracket →</span></div>
+                </div>
+                <div class="panel">
+                    <h4>Straight in <small>24 players</small></h4>
+                    <ol class="list">
+                        <li>Henry A.</li><li>Colin B.</li><li>Peter J.</li><li>Harry K.</li><li>Adam F.</li><li>Christian D.</li><li>Ken W.</li><li>Jocke S.</li><li>Lars I.</li><li>Nina H.</li><li>Ove R.</li><li>Bjørn T.</li><li>…12 more</li>
+                    </ol>
+                </div>
+            </div>
+            <p class="note">The bracket page would show a Qualifiers | Bracket switch (like Groups | Cups), with "No bracket yet" until the draw. One more transaction (like DRAW_CUPS), undoable while no bracket match has a result.</p>
+        </div>
+    </div>
+</section>
+
+<section class="step">
+    <h2>Side by side</h2>
+    <div class="cmp">
+        <div><h3>A · Round 0 in the bracket</h3><ul>
+            <li>One draw; every path known at once</li>
+            <li>A bracket match can start as soon as its qualifier is done (no waiting for all eight)</li>
+            <li>Looks like the bracket everyone knows, one column wider</li>
+            <li>Needs the qualifier-to-slot mapping and "Winner of Q3" placeholders</li>
+        </ul></div>
+        <div><h3>B · Two steps</h3><ul>
+            <li>No placeholders; the bracket is an ordinary 32-player draw</li>
+            <li>Same pattern as the cups (a stage, then a draw step)</li>
+            <li>Boards wait for the slowest qualifier before round 1 can start</li>
+            <li>Nobody knows their path until the qualifiers are over</li>
+        </ul></div>
+    </div>
+</section>
+</div>
+</body>
+</html>
