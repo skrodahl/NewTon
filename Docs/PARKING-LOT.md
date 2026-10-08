@@ -90,6 +90,11 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 
 8. **Placings left empty with a small B cup (10 players, B cup of 2).** The B cup only fills 5th–6th, so 7th–8th, which scores points, goes to nobody, and the four A cup quarterfinal losers (all 0 legs won in their quarterfinals) get only participation. Options to discuss: when the B cup can't fill 7th–8th (fewer than four players), give the empty places to the A cup quarterfinal losers by group performance (the same order as without a B cup); or a minimum B cup size (note 2). **And more generally (maintainer): four players got no placing at all.** In double and single elimination every player is placed (9th–12th, 13th–16th…), points or not; here the A cup quarterfinal losers and anyone else outside the placings get "–". Every player should probably get a place, even where it scores only participation. The podium and the rest of the completed view were correct (1st Henry, 2nd Harry, 3rd Peter, 4th Adam, 5th–6th Colin and Christian).
 
+9. **Global Settings: call the format "Round Robin", with its own settings under it when it is offered** (maintainer, 2026-10-08). Ideas so far:
+   - One group (pure round robin, everybody plays everybody, the table decides) or several groups with knockout cups.
+   - Who goes to the cups: the top two of each group always to the A cup, or balanced knockout rounds (cup sizes that avoid byes and tiny B cups; see notes 2 and 8).
+   - More from the discussions: play the B cup by default or not; group match length (already a setting); maximum group size; group rematches allowed in cup round 1 or avoided; how placings are filled when a cup can't fill them (note 8).
+
 **Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
