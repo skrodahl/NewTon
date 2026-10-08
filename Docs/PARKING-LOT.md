@@ -81,6 +81,8 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 2. **10 players: an A cup of 8 and a B cup of 2.** As agreed (an even number of groups, at most four each gives 4 groups of 3, 3, 2, 2; the top two of each go to A), but the maintainer isn't sure it's right. To discuss: e.g. fewer, larger groups for small fields, or a minimum B cup size.
 3. **"Play the B cup" is a checkbox; the mockup has a toggle switch.** Use the switch from the mockup (and the mockup's one-line draw bar wording).
 
+4. **Cups: should a match whose planned referee isn't available yet be Ready?** A-QF3 (ref: loser of A-QF1) and A-QF4 (ref: loser of A-QF2) show Start before QF1/QF2 are played; and QF4's own players (Ken, Henry) are QF1/QF2's planned referees, yet QF4 can start (a planned referee isn't an assignment until Start). Maintainer's view: no referee → maybe not Ready (a waiting state instead), except a cup with only two players, which must be Ready. Ties in with note 1 (what counts as a referee assignment before Start).
+
 **Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
