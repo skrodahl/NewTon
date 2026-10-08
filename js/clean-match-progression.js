@@ -498,6 +498,43 @@ const GROUP_SCHEDULES = {
 };
 
 /**
+ * The fixed order of a round robin of n players: GROUP_SCHEDULES for up to four; for one group of
+ * five to eight (Round Robin, one group), the circle method's rounds in order, each match with a
+ * referee from the group: never twice in a row, then the fewest duties so far (a player who plays
+ * in the same round counts one extra, so the one sitting the round out is asked first), then the
+ * lowest seed. Every pair meets once; duties come out even or within one (two at seven players).
+ * The same n always gives the same schedule. Entries are [player 1, player 2, referee] by seed (1 = first drawn).
+ * @param {number} n - players in the group
+ * @returns {Array<[number, number, number|null]>}
+ */
+function roundRobinSchedule(n) {
+    if (GROUP_SCHEDULES[n]) return GROUP_SCHEDULES[n];
+    const m = n % 2 ? n + 1 : n;                       // an odd group gets a "sits out" slot (0)
+    const ring = Array.from({ length: m }, (_, i) => (i < n ? i + 1 : 0));
+    const out = [], duties = {};
+    let lastRef = null;
+    for (let r = 0; r < m - 1; r++) {
+        const pairs = [];
+        for (let i = 0; i < m / 2; i++) pairs.push([ring[i], ring[m - 1 - i]]);
+        const real = pairs.filter(p => p[0] && p[1]);
+        const playing = new Set(real.flat());           // not the one sitting the round out
+        real.forEach(([a, b]) => {
+            const candidates = [];
+            for (let p = 1; p <= n; p++) if (p !== a && p !== b) candidates.push(p);
+            const busy = p => playing.has(p) ? 1 : 0;
+            const score = p => [p === lastRef ? 1 : 0, (duties[p] || 0) + busy(p), busy(p), p];
+            candidates.sort((x, y) => { const sx = score(x), sy = score(y); for (let k = 0; k < sx.length; k++) if (sx[k] !== sy[k]) return sx[k] - sy[k]; return 0; });
+            const ref = candidates[0];
+            duties[ref] = (duties[ref] || 0) + 1;
+            lastRef = ref;
+            out.push(a < b ? [a, b, ref] : [b, a, ref]);
+        });
+        ring.splice(1, 0, ring.pop());                  // rotate everyone but the first
+    }
+    return out;
+}
+
+/**
  * A cup match's ID: the cup letter and the round's short name, from its single-elimination ID.
  * 8 players: FS-1-2 → A-QF2, FS-2-1 → A-SF1, FS-3-1 → A-B (bronze final), FS-4-1 → A-F (final);
  * 16 players' first round: FS-1-3 → A-R1-3. A cup is SE_MATCH_PROGRESSION[size] with its IDs renamed
@@ -1407,7 +1444,13 @@ function generateCleanBracket(format) {
     }
 
     const formatInfo = typeof TOURNAMENT_FORMATS !== 'undefined' ? TOURNAMENT_FORMATS.find(f => f.id === format) : null;
-    const minPlayers = (formatInfo && formatInfo.minPlayers) || 4;
+    // Round Robin's limits follow its structure (one group: 3-8; groups and cups: 6-32)
+    const limits = format === 'GROUPS' && typeof Groups !== 'undefined' ? Groups.limits() : formatInfo;
+    const minPlayers = (limits && limits.minPlayers) || 4;
+    if (limits && limits.maxPlayers && paidPlayers.length > limits.maxPlayers) {
+        alert(`At most ${limits.maxPlayers} players can play ${formatInfo ? `a ${formatInfo.name} tournament` : 'this format'} as set up in Global Settings.`);
+        return false;
+    }
     if (paidPlayers.length < minPlayers) {
         alert(`At least ${minPlayers} paid players are required to draw ${formatInfo ? `a ${formatInfo.name} tournament` : 'the bracket'}.`);
         console.error(`Bracket generation blocked: fewer than ${minPlayers} paid players`);
@@ -1449,17 +1492,20 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
 
     // Sidebar — bracket summary
     const groups = format === 'GROUPS';
-    const formatLabel = groups ? 'Groups and Cups' : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
-    document.getElementById('bracketConfirmTitle').textContent = groups ? 'Draw the Groups' : `Generate ${formatLabel} Bracket`;
+    const single = groups && Groups.configSettings().structure === 'single';
+    const formatLabel = groups ? (single ? 'Round Robin, one group' : 'Round Robin, groups and cups') : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+    document.getElementById('bracketConfirmTitle').textContent = groups ? (single ? 'Draw the Group' : 'Draw the Groups') : `Generate ${formatLabel} Bracket`;
     document.getElementById('bracketConfirmName').textContent = (tournament && tournament.name) || '-';
     document.getElementById('bracketConfirmFormat').textContent = formatLabel;
     const sizeLabel = document.getElementById('bracketConfirmSizeLabel');
-    if (sizeLabel) sizeLabel.textContent = groups ? 'Groups' : 'Bracket Size';
+    if (sizeLabel) sizeLabel.textContent = groups ? (single ? 'Group' : 'Groups') : 'Bracket Size';
     document.getElementById('bracketConfirmSize').textContent = groups ? Groups.describeSizes(paidPlayers.length) : bracketSize;
     document.getElementById('bracketConfirmPlayerCount').textContent = paidPlayers.length;
     const desc = document.getElementById('bracketConfirmDesc');
-    if (desc) desc.textContent = groups
-        ? `These players will be drawn into groups${Groups.seededDraw(paidPlayers) ? ', by ranking' : ' at random'}. Everybody plays everybody in their group; the top two of each group go on to the A cup, the rest to the B cup.`
+    if (desc) desc.textContent = single
+        ? `Everybody plays everybody, in a fixed order${Groups.seededDraw(paidPlayers) ? ' set by the ranking' : ' drawn at random'}. The table decides the placings.`
+        : groups
+        ? `These players will be drawn into groups${Groups.seededDraw(paidPlayers) ? ', by ranking' : ' at random'}. Everybody plays everybody in their group; ${Groups.configSettings().cupEntry === 'half' ? 'then the top half across the groups plays the A cup, the rest the B cup' : 'the top two of each group go on to the A cup, the rest to the B cup'}.`
         : 'These players will be placed into the bracket. Make sure all players are registered before proceeding.';
 
     // Byes field is conditional — show only when there are byes
@@ -1607,7 +1653,7 @@ function drawGroups(paid) {
     matches = [];
     let numericId = 1;
     draw.list.forEach(group => {
-        (GROUP_SCHEDULES[group.players.length] || []).forEach(([a, b, r], i) => {
+        roundRobinSchedule(group.players.length).forEach(([a, b, r], i) => {
             const ref = r ? group.players[r - 1] : null;
             matches.push({
                 id: `${group.name}-${i + 1}`,
@@ -1633,7 +1679,7 @@ function drawGroups(paid) {
     tournament.bracket = draw.order;            // the players in draw order: "the draw is made"
     tournament.bracketSize = paid.length;
     tournament.format = 'GROUPS';
-    tournament.groups = { list: draw.list.map(g => ({ name: g.name, players: g.players.map(p => p.id) })) };
+    tournament.groups = { list: draw.list.map(g => ({ name: g.name, players: g.players.map(p => p.id) })), settings: draw.settings };
     delete tournament.cups;
     if (draw.seeding) tournament.seeding = draw.seeding; else delete tournament.seeding;
     tournament.status = 'active';

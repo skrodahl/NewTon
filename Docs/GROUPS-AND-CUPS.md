@@ -1,4 +1,4 @@
-# Groups and Cups — Design Note
+# Round Robin (Groups and Cups) — Design Note
 
 **Status:** Design note, written 2026-10-08; built on the `groups-and-cups` branch the same night, for review (not merged). Decisions taken while building are listed in Docs/PARKING-LOT.md → Other tournament formats.
 **Mockup:** `Docs/mockups/group-night.html` (reviewed 2026-10-08, decisions in its last box)
@@ -10,6 +10,22 @@ tables, the transaction history, undo) **as additions**: nothing existing change
 and single elimination run exactly as before.
 
 ---
+
+## Round Robin in Global Settings (review note 9, built 2026-10-08)
+
+The format is offered as **Round Robin** (internal id still `GROUPS`), with its own panel under
+Tournaments while it is offered (`config.roundRobin`, additive):
+- **Structure:** `groups` — groups and cups, as below (6–32 players); `single` — one group,
+  everybody plays everybody, the table decides the placings (3–8 players). The one group's order is
+  `roundRobinSchedule(n)` (circle method, referee from the group: never twice in a row, fewest duties,
+  the player sitting a round out asked first); groups of up to four keep `GROUP_SCHEDULES`.
+- **To the A cup:** `top2` — the top two of each group, the rest to the B cup; `half` — everyone
+  ranked across the groups (group place first, then results per match) and split into two cups of the
+  same size (A one larger when odd), so a small field doesn't leave a tiny B cup (review note 2).
+- **Play the B cup:** whether the Draw the cups switch starts on.
+
+Each tournament keeps the structure and cup entry it was drawn with (`tournament.groups.settings`);
+absent means groups and cups, top two.
 
 ## The rules (settled with the maintainer, 2026-10-07/08)
 

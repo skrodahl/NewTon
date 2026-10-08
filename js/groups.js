@@ -20,6 +20,24 @@ const Groups = (() => {
     const playerOf = id => (typeof players !== 'undefined' ? players : []).find(p => String(p.id) === String(id)) || null;
     const on = () => typeof tournament !== 'undefined' && tournament && tournament.format === 'GROUPS';
 
+    // ---------- settings (Global Settings → Round Robin; each tournament keeps its own) ----------
+    /** Round Robin's settings in Global Settings now: structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup. */
+    function configSettings() {
+        const rr = (typeof config !== 'undefined' && config.roundRobin) || {};
+        return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'half' ? 'half' : 'top2', bCup: rr.bCup !== false };
+    }
+    /** The settings the tournament was drawn with (absent in the first build: groups and cups, top two). */
+    function settings() {
+        const s = (on() && tournament.groups && tournament.groups.settings) || {};
+        return { structure: s.structure === 'single' ? 'single' : 'groups', cupEntry: s.cupEntry === 'half' ? 'half' : 'top2' };
+    }
+    /** True for one group (a pure round robin: no cups, the table decides). */
+    const isSingle = () => settings().structure === 'single';
+    /** How many players the next draw takes, by the structure in Global Settings. */
+    const limits = () => configSettings().structure === 'single' ? { minPlayers: 3, maxPlayers: 8 } : { minPlayers: 6, maxPlayers: 32 };
+    /** The format in words for this tournament: "Round robin, one group" or "Round robin, groups and cups". */
+    const formatName = () => isSingle() ? 'Round robin, one group' : 'Round robin, groups and cups';
+
     // ---------- the group draw ----------
     /**
      * How many groups: the smallest even number that keeps every group at four players or fewer.
@@ -52,6 +70,7 @@ const Groups = (() => {
      * @returns {string}
      */
     function describeSizes(n) {
+        if (configSettings().structure === 'single') return `One group of ${n}`;
         const s = groupSizes(n);
         return s.every(x => x === s[0]) ? `${s.length} groups of ${s[0]}` : `${s.length} groups: ${s.join(', ')}`;
     }
@@ -70,10 +89,13 @@ const Groups = (() => {
         const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
         const seeded = typeof Seeding !== 'undefined' ? Seeding.forGroups(paid) : null;
         const order = seeded ? seeded.order.concat(shuffle(paid.filter(p => !seeded.order.includes(p)))) : shuffle(paid);
+        const cfg = configSettings();
+        const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry };
+        if (cfg.structure === 'single') return { list: [{ name: 'A', players: order.slice() }], order, seeding: seeded ? seeded.record : null, settings };
         const g = groupCount(order.length);
         const list = Array.from({ length: g }, (_, i) => ({ name: LETTERS[i], players: [] }));
         order.forEach((p, i) => list[snake(i, g)].players.push(p));
-        return { list, order, seeding: seeded ? seeded.record : null };
+        return { list, order, seeding: seeded ? seeded.record : null, settings };
     }
 
     // ---------- the group tables ----------
@@ -176,7 +198,13 @@ const Groups = (() => {
         const byPlace = {};
         groupList().forEach(g => standings(g.name).forEach(r => { (byPlace[r.pos] = byPlace[r.pos] || []).push(Object.assign({ group: g.name }, r)); }));
         const place = n => (byPlace[n] || []).slice().sort((a, b) => byPerMatch(a, b) || a.group.localeCompare(b.group));
-        const A = place(1).concat(place(2)), B = place(3).concat(place(4));
+        let A = place(1).concat(place(2)), B = place(3).concat(place(4));
+        if (settings().cupEntry === 'half') {
+            // Top half: everyone in that order, split into two cups of the same size (A one larger when odd)
+            const everyone = A.concat(B);
+            const half = Math.ceil(everyone.length / 2);
+            A = everyone.slice(0, half); B = everyone.slice(half);
+        }
         return { A: A.map(r => r.player), B: B.map(r => r.player), rows: { A, B } };
     }
 
@@ -311,6 +339,7 @@ const Groups = (() => {
 
     /** True when every drawn cup's final has been played: the tournament is over. */
     function isComplete() {
+        if (on() && isSingle()) return allGroupsDone();
         if (!on() || !tournament.cups || !tournament.cups.A) return false;
         const done = id => { const m = byId(id); return !!m && m.completed; };
         return done('A-F') && done('A-B') && (!tournament.cups.B || (done('B-F') && done('B-B')));
@@ -332,6 +361,11 @@ const Groups = (() => {
      */
     function placements() {
         const out = {};
+        // One group: the table decides, once every match is played
+        if (on() && isSingle()) {
+            if (allGroupsDone()) standings('A').forEach(r => { out[r.id] = placeTier(r.pos); });
+            return out;
+        }
         if (!on() || !tournament.cups || !tournament.cups.A) return out;
         const rowOf = {};
         groupList().forEach(g => standings(g.name).forEach(r => { rowOf[r.id] = r; }));
@@ -379,7 +413,7 @@ const Groups = (() => {
     function roundName(match) {
         const m = typeof match === 'string' ? byId(match) : match;
         if (!m) return String(match || '');
-        if (m.side === 'group') return `Group ${m.group}`;
+        if (m.side === 'group') return isSingle() ? 'Round robin' : `Group ${m.group}`;
         if (m.side === 'cup') {
             const size = tournament.cups && tournament.cups[m.cup] && tournament.cups[m.cup].size;
             const r = typeof getSERoundDisplayName === 'function' ? getSERoundDisplayName(m.round, size) : `Round ${m.round}`;
@@ -410,6 +444,7 @@ const Groups = (() => {
 
     return {
         isGroupId, isCupId, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
+        configSettings, settings, isSingle, limits, formatName,
         groupList, groupMatches, standings, groupDone, allGroupsDone, cupFields,
         planCupReferees, plannedRefereeFor, plannedRefereeText, cupMatchesOf, holdFor,
         isComplete, placements, roundName, moveUp

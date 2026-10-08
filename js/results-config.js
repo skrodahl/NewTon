@@ -54,6 +54,11 @@ const DEFAULT_CONFIG = {
         mode: 'off',
         seeds: 'quarter'
     },
+    roundRobin: {
+        structure: 'groups',  // 'groups': groups, then an A and a B cup; 'single': one group, the table decides
+        cupEntry: 'top2',     // 'top2': the top two of each group to the A cup; 'half': the top half across the groups
+        bCup: true            // Play the B cup is on to start with at Draw the cups
+    },
     server: {
         allowSharedTournamentDelete: false,
         autoUpload: false,
@@ -192,6 +197,12 @@ function applyConfigToUI() {
         safeSetValue('seedingMode', config.seeding.mode);
         safeSetValue('seedingSeeds', ['all', 'half', 'quarter', 'eighth'].includes(config.seeding.seeds) ? config.seeding.seeds : 'quarter');
     }
+
+    // Round Robin (groups and cups, or one group)
+    const rr = config.roundRobin || {};
+    safeSetValue('rrStructure', rr.structure === 'single' ? 'single' : 'groups');
+    safeSetValue('rrCupEntry', rr.cupEntry === 'half' ? 'half' : 'top2');
+    safeSetChecked('rrBCup', rr.bCup !== false);
 
     // Server configuration
     if (config.server) {
@@ -360,9 +371,9 @@ const TOURNAMENT_FORMATS = [
     },
     {
         id: 'GROUPS',
-        name: 'Groups and Cups',
-        blurb: 'Everybody plays everybody in groups, then an A cup and a B cup',
-        minPlayers: 6,
+        name: 'Round Robin',
+        blurb: 'Everybody plays everybody: in groups followed by an A and a B cup, or in one group',
+        minPlayers: 6,  // groups and cups; one group: 3-8 (Groups.limits())
         maxPlayers: 32
     }
 ];
@@ -581,6 +592,16 @@ function saveUIConfiguration(options = {}) {
     config.seeding.mode = seedingModeElement && ['off', 'available', 'on'].includes(seedingModeElement.value) ? seedingModeElement.value : 'off';
     config.seeding.seeds = seedingSeedsElement && ['all', 'half', 'quarter', 'eighth'].includes(seedingSeedsElement.value) ? seedingSeedsElement.value : 'quarter';
     delete config.seeding.byesToSeeds; // an earlier build had this setting; the best seeds always get the byes
+
+    // Round Robin: one group or groups and cups, who goes to the A cup, B cup on to start with
+    const rrStructure = document.getElementById('rrStructure');
+    const rrCupEntry = document.getElementById('rrCupEntry');
+    const rrBCup = document.getElementById('rrBCup');
+    config.roundRobin = {
+        structure: rrStructure && rrStructure.value === 'single' ? 'single' : 'groups',
+        cupEntry: rrCupEntry && rrCupEntry.value === 'half' ? 'half' : 'top2',
+        bCup: rrBCup ? rrBCup.checked : true
+    };
 
     config.server = config.server || {};
     config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;

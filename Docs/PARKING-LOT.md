@@ -75,7 +75,7 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 - Match Controls in the group stage shows each group's next two matches, and the group tables on the right (there was room).
 - B cup final pair both 5th–6th and bronze pair both 7th–8th, as DE's shared places.
 
-**Review notes from the maintainer (2026-10-08 morning), to discuss before fixing:**
+**Review notes from the maintainer (2026-10-08 morning).** Built the same day, at the maintainer's request ("I trust your judgement, anything can be modified later"): 1, 4, 6, 7 (referees a plan until live; matches wait; plans avoid walkovers), 3 (the switch), 5 (labels; the READ cut-off was a class clash from the build), 8 (everyone placed), 9 with 2 (Round Robin settings: one group, Top half, B cup default). Kept for the record:
 1. **Changing referees in the group queue can lock both matches.** A-1 Colin v Harry with ref Jocke, A-2 Jocke v Harry with ref Colin: each blocks the other ("is refereeing another match"), so neither can start. Setting A-2 back to no referee clears it, and A-2 then shows its planned referee. Cause: a referee chosen on a match that hasn't started is a real assignment, and `checkRefereeConflict()` counts ready matches as well as live ones. (Planned referees avoid this because they aren't assignments until Start.)
 
 2. **10 players: an A cup of 8 and a B cup of 2.** As agreed (an even number of groups, at most four each gives 4 groups of 3, 3, 2, 2; the top two of each go to A), but the maintainer isn't sure it's right. To discuss: e.g. fewer, larger groups for small fields, or a minimum B cup size.

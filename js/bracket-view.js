@@ -699,12 +699,13 @@ const BracketView = (() => {
         document.getElementById('bracketMatches').innerHTML = '';
         const drawn = !!tournament.cups;
         const refName = id => { const p = players.find(x => String(x.id) === String(id)); return p ? p.name : ''; };
+        const single = Groups.isSingle(), half = Groups.settings().cupEntry === 'half';
         const card = g => {
             const rows = Groups.standings(g.name);
             const ms = Groups.groupMatches(g.name);
             const played = ms.filter(m => m.completed).length;
             const sign = n => n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0';
-            const table = rows.map(r => `<tr class="${r.pos <= 2 ? 'bv-to-a' : 'bv-to-b'}"><td>${r.pos}</td><td class="bv-gname"><b>${escapeHtml(r.player.name)}</b>${r.level && r.played ? ' <span class="bv-glevel" title="Level on wins, legs and head-to-head">level</span>' : ''}</td><td>${r.played}</td><td>${r.won}</td><td>${r.lost}</td><td>${sign(r.diff)}</td><td>${r.legsWon}</td></tr>`).join('');
+            const table = rows.map(r => `<tr class="${single || half ? '' : r.pos <= 2 ? 'bv-to-a' : 'bv-to-b'}"><td>${r.pos}</td><td class="bv-gname"><b>${escapeHtml(r.player.name)}</b>${r.level && r.played ? ' <span class="bv-glevel" title="Level on wins, legs and head-to-head">level</span>' : ''}</td><td>${r.played}</td><td>${r.won}</td><td>${r.lost}</td><td>${sign(r.diff)}</td><td>${r.legsWon}</td></tr>`).join('');
             const list = ms.map(m => {
                 const done = m.completed, live = getMatchState(m) === 'live';
                 const ref = m.referee ? refName(m.referee) : (!done ? Groups.plannedRefereeText(m) : '');
@@ -715,13 +716,15 @@ const BracketView = (() => {
                     <span class="bv-gno">${escapeHtml(m.id)}</span><span class="bv-gwho">${nm(m.player1)} – ${nm(m.player2)}</span>
                     <span class="bv-gref">${ref ? `ref ${escapeHtml(ref)}` : ''}</span>${groupMatchState(m)}${undo}</div>`;
             }).join('');
-            return `<section class="bv-gcard"><h3>Group ${escapeHtml(g.name)}<small>${played} of ${ms.length} played</small></h3>
+            return `<section class="bv-gcard${single ? ' bv-gsingle' : ''}"><h3>${single ? 'The group' : `Group ${escapeHtml(g.name)}`}<small>${played} of ${ms.length} played</small></h3>
                 <table class="bv-gtable"><thead><tr><th>#</th><th>Player</th><th title="Played">P</th><th title="Won">W</th><th title="Lost">L</th><th title="Leg difference">±</th><th title="Legs won">Legs</th></tr></thead><tbody>${table}</tbody></table>
-                <div class="bv-gkey"><span><i class="bv-gkey-a"></i>to the A cup</span><span><i class="bv-gkey-b"></i>to the ${tournament.cups && !tournament.cups.B ? 'B cup (not played)' : 'B cup'}</span></div>
+                ${single ? '' : half ? '<div class="bv-gkey"><span>The top half across the groups goes to the A cup</span></div>'
+                    : `<div class="bv-gkey"><span><i class="bv-gkey-a"></i>to the A cup</span><span><i class="bv-gkey-b"></i>to the ${tournament.cups && !tournament.cups.B ? 'B cup (not played)' : 'B cup'}</span></div>`}
                 <div class="bv-glist">${list}</div></section>`;
         };
         const lists = Groups.groupList();
-        const note = drawn ? 'The cups are drawn, so the group results are locked.'
+        const note = single ? (tournament.status === 'completed' ? 'Every match is played: the table is the result.' : 'Everybody plays everybody; the table decides the placings. Referees are planned and filled in when a match starts.')
+            : drawn ? 'The cups are drawn, so the group results are locked.'
             : Groups.allGroupsDone() ? 'Every group match is played: draw the cups in Match Controls.'
             : 'Referees are planned from each group and filled in when a match starts; change them in Match Controls.';
         // as many columns as fit, but rows of equal length (4 groups: 4 across or 2 × 2, never 3 + 1)
@@ -1140,7 +1143,9 @@ const BracketView = (() => {
         // groups and cups: a match that waits (Groups.holdFor()) isn't counted as ready
         const ready = all.filter(m => getMatchState(m) === 'ready' && !(getFormat() === 'GROUPS' && typeof Groups !== 'undefined' && Groups.holdFor(m))).length;
         const groupsFormat = getFormat() === 'GROUPS' && !!tournament.bracket;
-        status.innerHTML = groupsFormat
+        status.innerHTML = groupsFormat && Groups.isSingle()
+            ? `<b>${paid}</b> players · one group · ${all.length} matches · ${played} played · <b>${live}</b> live · <b>${ready}</b> ready`
+            : groupsFormat
             ? `<b>${paid}</b> players · ${Groups.groupList().length} groups · ${all.filter(m => m.side === 'group').length} group matches${tournament.cups ? ` · ${tournament.cups.B ? 'A and B cups' : 'A cup'}` : ''} · ${played} played${wo ? `, ${wo} walkovers` : ''} · <b>${live}</b> live · <b>${ready}</b> ready`
             : tournament.bracket
             ? `<b>${paid}</b> players · ${all.length} matches · ${played} played, ${wo} walkovers · <b>${live}</b> live · <b>${ready}</b> ready`
@@ -1148,7 +1153,7 @@ const BracketView = (() => {
         // groups and cups: Groups | Cups instead of the finals position (the cups always have it in the middle)
         const gc = document.getElementById('bvGroupsView');
         if (gc) {
-            gc.hidden = !groupsFormat;
+            gc.hidden = !groupsFormat || Groups.isSingle(); // one group: no cups to switch to
             const shown = groupsFormat ? gcShown() : 'groups';
             gc.querySelectorAll('button[data-gc]').forEach(b => {
                 b.setAttribute('aria-pressed', String(b.dataset.gc === shown));

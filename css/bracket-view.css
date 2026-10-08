@@ -300,5 +300,7 @@
 .bv-gundo:hover { border-color: var(--nt-line-strong); }
 .bv-gnote { margin: 0; text-align: center; font-size: 13px; color: var(--bv-muted); }
 .bv-gsig { position: static; text-align: center; }
+/* one group (Round Robin, one group): a single card, not stretched across the page */
+.bv-gcard.bv-gsingle { width: 100%; max-width: 760px; justify-self: center; }
 /* the cups: each cup's name over its final */
 .bv-cup-name { font-size: 30px; }

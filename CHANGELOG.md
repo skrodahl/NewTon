@@ -1,5 +1,13 @@
 ## Unreleased
 
+### Round Robin: one group, Top half, and its own settings
+
+- **The format is called Round Robin**, with its own panel in Global Settings → Tournaments while it is offered (review note 9): **Structure**, Groups and cups (6–32 players) or **One group** (3–8 players: everybody plays everybody, the table decides the placings, no cups); **To the A cup**, Top two of each group or **Top half** (everyone ranked across the groups and split into two cups of the same size, so 10 players play two cups of five instead of eight and two; note 2); **Play the B cup** on or off to start with. A tournament keeps the structure and cup entry it was drawn with (`tournament.groups.settings`, additive).
+- **One group:** a fixed order for five to eight players from `roundRobinSchedule()` beside the group tables (circle method; every pair once; referee from the group, never twice in a row, duties even or within one), planned referees and waits as in the groups, placings from the table when the last match is played. Match Controls shows the next six matches and the table; the bracket page shows the one group (no Cups).
+- **Play the B cup is a switch** in the Draw the cups bar, as in the mockup (note 3).
+- The Shuffle & Draw card, the draw dialog, the Setup facts and Analytics follow the structure ("Draw one group of 6", "Round robin, one group").
+- Files changed: `js/clean-match-progression.js` (`roundRobinSchedule()`, the limits in `generateCleanBracket()`, the dialog), `js/groups.js` (`configSettings()`, `settings()`, `isSingle()`, `limits()`, `formatName()`, one group in the draw, completion and placings, Top half in `cupFields()`), `js/results-config.js` (`roundRobin` defaults, apply/save, the registry name), `js/config-page.js`, `tournament.html`, `js/bracket-rendering.js`, `js/bracket-view.js`, `js/tournament-management.js`, `js/newton-history.js`, `css/match-controls.css`, `css/bracket-view.css`, `js/dynamic-help-system.js`, `Docs/GROUPS-AND-CUPS.md`.
+
 ### Groups and Cups: after the first review
 
 - **Referees are a plan until the match is live** (review notes 1, 6): in this format a referee chosen for a match that hasn't started no longer blocks other matches, so swapping referees between two group matches can't lock them both. Start checks that a referee chosen beforehand is free.

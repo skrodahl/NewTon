@@ -472,6 +472,23 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <p class="cfg-panel-note">Which formats appear when starting a tournament. Hide the ones your club never plays. Existing tournaments are unaffected.</p>
                         <div class="cfg-choices" id="formatVisibilityOptions"></div>
                     </div>
+                    <!-- Round Robin's own settings: shown while the format is offered (config-page.js) -->
+                    <div class="cfg-panel" id="cfgRoundRobin">
+                        <div class="cfg-panel-title">Round Robin</div>
+                        <p class="cfg-panel-note">Everybody plays everybody in their group, in a fixed order with a referee from the group. A tournament keeps the settings it was drawn with.</p>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Structure</div><div class="cfg-desc"><b>Groups and cups</b>: groups of up to four (an even number of groups), then an A cup and a B cup, single elimination; 6 to 32 players. <b>One group</b>: everybody plays everybody, and the table decides the placings; 3 to 8 players.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="rrStructure"><button type="button" data-value="groups">Groups and cups</button><button type="button" data-value="single">One group</button></div><input type="hidden" id="rrStructure"></div>
+                        </div>
+                        <div class="cfg-row cfg-rr-cups">
+                            <div><div class="cfg-label">To the A cup</div><div class="cfg-desc"><b>Top two</b>: the group winners and runners-up play the A cup, the rest the B cup. <b>Top half</b>: everyone is ranked across the groups (group place first, then results per match) and the two cups are the same size (A one larger when the number is odd), so a small field doesn't leave a tiny B cup.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="rrCupEntry"><button type="button" data-value="top2">Top two</button><button type="button" data-value="half">Top half</button></div><input type="hidden" id="rrCupEntry"></div>
+                        </div>
+                        <div class="cfg-row cfg-rr-cups">
+                            <div><label class="cfg-label" for="rrBCup">Play the B cup</label><div class="cfg-desc">On to start with at <b>Draw the cups</b>; you can still change it there.</div></div>
+                            <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="rrBCup" checked><span></span></span></div>
+                        </div>
+                    </div>
                     <div class="cfg-panel">
                         <div class="cfg-panel-title">Seeding</div>
                         <p class="cfg-panel-note">Keeps the best players apart in the draw, using the ranking of earlier tournaments with the same name. Everyone else is still drawn at random, and new players are never seeded. It reads the tournaments in this browser.</p>

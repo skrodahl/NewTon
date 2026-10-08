@@ -91,8 +91,19 @@ const ConfigPage = (() => {
         $('remoteServerApiKey').focus();
     }
 
+    /** Round Robin's panel only while the format is offered; its cup rows only for groups and cups. */
+    function drawRoundRobin() {
+        const panel = $('cfgRoundRobin');
+        if (!panel) return;
+        const offered = root().querySelector('.format-visibility-toggle[data-format-id="GROUPS"]');
+        panel.hidden = !!offered && !offered.checked;
+        const single = $('rrStructure').value === 'single';
+        panel.querySelectorAll('.cfg-rr-cups').forEach(row => { row.hidden = single; });
+    }
+
     /** Redraw every control from the hidden fields (after the form was filled). */
     function syncControls() {
+        drawRoundRobin();
         root().querySelectorAll('.cfg-step').forEach(drawStepper);
         root().querySelectorAll('.cfg-seg[data-target], .cfg-pics[data-target]').forEach(g => drawPressed(g, $(g.dataset.target).value));
         drawLaneChips();
@@ -315,6 +326,8 @@ const ConfigPage = (() => {
 
         root().addEventListener('input', refresh);
         root().addEventListener('change', refresh);
+        root().addEventListener('change', e => { if (e.target.classList.contains('format-visibility-toggle')) drawRoundRobin(); });
+        root().querySelectorAll('.cfg-seg[data-target="rrStructure"] button').forEach(b => b.addEventListener('click', drawRoundRobin));
 
         $('remoteServerVerified').addEventListener('input', drawRemoteLock);
         $('remoteUnlockBtn').addEventListener('click', () => { $('cfgUnlock').hidden = false; $('cfgUnlockGo').focus(); });

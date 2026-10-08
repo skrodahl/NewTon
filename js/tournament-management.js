@@ -953,7 +953,7 @@ function renderSetupCurrent() {
     const facts = [];
     facts.push(list.length ? `${list.length} player${list.length === 1 ? '' : 's'}, ${paid === list.length ? 'all paid' : `${paid} paid`}` : 'No players yet');
     if (hasBracket) facts.push(getFormat() === 'GROUPS' && typeof Groups !== 'undefined'
-        ? `${Groups.groupList().length} groups${tournament.cups ? (tournament.cups.B ? ', A and B cups' : ', A cup') : ''}`
+        ? (Groups.isSingle() ? 'one group' : `${Groups.groupList().length} groups${tournament.cups ? (tournament.cups.B ? ', A and B cups' : ', A cup') : ''}`)
         : `${tournament.bracketSize}-player bracket`);
     if (hasBracket && status !== 'Completed') facts.push(`${live.length} live now${lanes.length ? ` (lane${lanes.length > 1 ? 's' : ''} ${lanes.join(', ')})` : ''}`);
 

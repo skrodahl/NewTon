@@ -1596,17 +1596,19 @@ function _mcPlanRow(match) {
  */
 function _mcGroupTablesHTML() {
     const canMove = !tournament.cups && !tournament.readOnly;
+    const single = Groups.isSingle();
+    const half = Groups.settings().cupEntry === 'half';
     const sign = n => n > 0 ? `+${n}` : n < 0 ? `−${-n}` : '0';
     const body = Groups.groupList().map(g => {
         const rows = Groups.standings(g.name);
-        return `<div class="mc-gt"><h4>Group ${escapeHtml(g.name)}<small>${Groups.groupMatches(g.name).filter(m => m.completed).length} of ${Groups.groupMatches(g.name).length}</small></h4>
+        return `<div class="mc-gt"><h4>${single ? 'Played' : `Group ${escapeHtml(g.name)}`}<small>${Groups.groupMatches(g.name).filter(m => m.completed).length} of ${Groups.groupMatches(g.name).length}</small></h4>
             <ol>${rows.map((r, i) => {
                 const up = canMove && i > 0 && r.level && rows[i - 1].level && r.played
                     ? `<button type="button" class="mc-gup" onclick="Groups.moveUp('${escapeHtml(g.name)}', ${JSON.stringify(r.id).replace(/"/g, '&quot;')}); renderBracket(); _mcRefresh(0);" title="Level on everything: put ${escapeHtml(r.player.name)} above ${escapeHtml(rows[i - 1].player.name)}">▲</button>` : '';
-                return `<li class="${r.pos <= 2 ? 'mc-toa' : ''}"><b>${escapeHtml(r.player.name)}</b>${r.level && r.played ? '<i title="Level on wins, legs and head-to-head">level</i>' : ''}${up}<span>${r.won}–${r.lost} · ${sign(r.diff)}</span></li>`;
+                return `<li class="${r.pos <= 2 && !single && !half ? 'mc-toa' : ''}"><b>${escapeHtml(r.player.name)}</b>${r.level && r.played ? '<i title="Level on wins, legs and head-to-head">level</i>' : ''}${up}<span>${r.won}–${r.lost} · ${sign(r.diff)}</span></li>`;
             }).join('')}</ol></div>`;
     }).join('');
-    return `<section class="mc-panel"><div class="mc-ph"><h3>Groups<small>top two to the A cup</small></h3><button type="button" class="mc-link" onclick="showBracketView('bracket'); BracketView.setGroupsView('groups')">Group tables</button></div>
+    return `<section class="mc-panel"><div class="mc-ph"><h3>${single ? 'Table' : 'Groups'}<small>${single ? 'the table decides the placings' : half ? 'the top half goes to the A cup' : 'top two to the A cup'}</small></h3><button type="button" class="mc-link" onclick="showBracketView('bracket'); BracketView.setGroupsView('groups')">${single ? 'Full table' : 'Group tables'}</button></div>
         <div class="mc-gts">${body}</div></section>`;
 }
 
@@ -1616,7 +1618,7 @@ function _mcGroupTablesHTML() {
  * @returns {string}
  */
 function _mcDrawCupsHTML() {
-    if (_mcPlayB.tid !== tournament.id) _mcPlayB = { tid: tournament.id, on: true };
+    if (_mcPlayB.tid !== tournament.id) _mcPlayB = { tid: tournament.id, on: Groups.configSettings().bCup };
     const f = Groups.cupFields();
     const g = Groups.groupList().length;
     const place = r => r.pos === 1 ? 'winner' : r.pos === 2 ? 'runner-up' : r.pos === 3 ? '3rd' : '4th';
@@ -1626,12 +1628,15 @@ function _mcDrawCupsHTML() {
     const playB = _mcPlayB.on && canB;
     const level = Groups.groupList().some(gr => Groups.standings(gr.name).some(r => r.level));
     return `<section class="mc-panel mc-drawcups"><div class="mc-ph"><h3>Draw the cups<small>every group match is played</small></h3></div>
-        <p class="mc-note">Group winners are seeds 1–${g}, runners-up ${g + 1}–${2 * g}, ranked across the groups per match (win rate, then leg difference). The B cup takes the rest the same way. Top seed meets bottom seed; the best seeds get any byes.</p>
+        <p class="mc-note">${Groups.settings().cupEntry === 'half'
+            ? `Everyone is ranked across the groups: group winners first, then runners-up, and so on, each place by results per match (win rate, then leg difference). The top half plays the A cup, the rest the B cup, seeded in that order.`
+            : `Group winners are seeds 1–${g}, runners-up ${g + 1}–${2 * g}, ranked across the groups per match (win rate, then leg difference). The B cup takes the rest the same way.`}</p>
         <div class="mc-fields">${field(f.rows.A, 'A cup', false)}${field(f.rows.B, 'B cup', !playB)}</div>
         ${level ? '<p class="mc-note mc-warn">Some players are level on wins, legs and head-to-head: the group seed decides, unless you change it with ▲ in the group tables.</p>' : ''}
         <div class="mc-drawbar">
-            <label class="mc-check"><input type="checkbox"${playB ? ' checked' : ''}${canB ? '' : ' disabled'} onchange="_mcPlayB.on = this.checked; _mcRefresh(0);"> Play the B cup${canB ? '' : ' <small>(needs two players)</small>'}</label>
-            <button type="button" class="mc-btn mc-primary" onclick="drawCupsFromControls()">Draw the cups →</button>
+            <p>All ${Groups.groupList().reduce((n, gr) => n + Groups.groupMatches(gr.name).length, 0)} group matches are played. Top seed meets bottom seed; the best seeds get any byes.</p>
+            <label class="mc-switchrow"><span class="mc-switch"><input type="checkbox"${playB ? ' checked' : ''}${canB ? '' : ' disabled'} onchange="_mcPlayB.on = this.checked; _mcRefresh(0);"><span></span></span> Play the B cup${canB ? '' : ' <small>(needs two players)</small>'}</label>
+            <button type="button" class="mc-btn mc-primary mc-big" onclick="drawCupsFromControls()">Draw the cups →</button>
         </div></section>`;
 }
 
@@ -1640,7 +1645,7 @@ function _mcDrawCupsHTML() {
  * @returns {void}
  */
 function drawCupsFromControls() {
-    const playB = _mcPlayB.tid === tournament.id ? _mcPlayB.on : true;
+    const playB = _mcPlayB.tid === tournament.id ? _mcPlayB.on : Groups.configSettings().bCup;
     if (drawCups(playB)) _mcRefresh(0);
 }
 
@@ -1657,7 +1662,8 @@ function _mcGroupsHTML(matchData) {
     const used = new Set(matches.filter(m => !m.completed && m.lane).map(m => String(m.lane)));
     const free = lanes.usable.filter(l => !used.has(String(l)));
     const cups = !!tournament.cups;
-    const drawStep = !cups && Groups.allGroupsDone();
+    const single = Groups.isSingle();
+    const drawStep = !cups && !single && Groups.allGroupsDone();
 
     // the queue: the group stage's next matches by group (two each, in their fixed order), or the cups' ready matches
     let queued = [], queue = '';
@@ -1667,11 +1673,13 @@ function _mcGroupsHTML(matchData) {
         // across the groups, in turn: each group's next match, then each group's one after
         for (let i = 0; i < 6; i++) upcoming.forEach(u => { if (u.ms[i]) queued.push(u.ms[i]); });
         const block = u => u.ms.length
-            ? `<div class="mc-qround"><span>Group ${escapeHtml(u.g.name)}</span><span>${Groups.groupMatches(u.g.name).filter(m => m.completed).length} of ${Groups.groupMatches(u.g.name).length} played</span></div>${u.ms.slice(0, 2).map(_mcPlanRow).join('')}`
+            ? `<div class="mc-qround"><span>${single ? 'The group' : `Group ${escapeHtml(u.g.name)}`}</span><span>${Groups.groupMatches(u.g.name).filter(m => m.completed).length} of ${Groups.groupMatches(u.g.name).length} played</span></div>${u.ms.slice(0, single ? 6 : 2).map(_mcPlanRow).join('')}`
             : '';
         const half = Math.ceil(upcoming.length / 2);
         const col = us => us.map(block).join('') || '<div class="mc-qempty">These groups are done.</div>';
-        queue = `<div class="mc-qcols"><div class="mc-qcol">${col(upcoming.slice(0, half))}</div><div class="mc-qcol">${col(upcoming.slice(half))}</div></div>`;
+        queue = single
+            ? `<div class="mc-qcols mc-one"><div class="mc-qcol">${col(upcoming)}</div></div>`
+            : `<div class="mc-qcols"><div class="mc-qcol">${col(upcoming.slice(0, half))}</div><div class="mc-qcol">${col(upcoming.slice(half))}</div></div>`;
     } else {
         const ready = cup => matches.filter(m => m.side === 'cup' && m.cup === cup && getMatchState(m) === 'ready')
             .sort((a, b) => a.round - b.round || a.positionInRound - b.positionInRound);
@@ -1720,7 +1728,7 @@ function _mcGroupsHTML(matchData) {
     const lanesPanel = `<section class="mc-panel"><div class="mc-ph"><h3>Lanes<small>${live.length} live · ${free.length} free</small></h3><span class="mc-hint">Click the winner to finish a match${scanQR}</span></div>
         ${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}${freeLine}</section>`;
     const queuePanel = drawStep ? _mcDrawCupsHTML()
-        : `<section class="mc-panel"><div class="mc-ph"><h3>${cups ? 'Ready to start' : 'Up next'}<small>${cups ? `${queued.length}` : 'by group, in their fixed order'}</small></h3><span class="mc-hint">Referees are planned; change them here</span></div>${queue}</section>`;
+        : `<section class="mc-panel"><div class="mc-ph"><h3>${cups ? 'Ready to start' : 'Up next'}<small>${cups ? `${queued.length}` : single ? 'in the fixed order' : 'by group, in their fixed order'}</small></h3><span class="mc-hint">Referees are planned; change them here</span></div>${queue}</section>`;
     const cupDraw = cups ? `<section class="mc-panel"><div class="mc-ph"><h3>Cup draw</h3></div>
         <p class="mc-note">A cup: ${tournament.cups.A.seeds.length} players${tournament.cups.B ? ` · B cup: ${tournament.cups.B.seeds.length} players` : ' · no B cup'}.</p>
         ${canUndoCupDraw() ? '<p class="mc-note"><button type="button" class="mc-btn mc-sm" onclick="undoCupDraw()">Undo the cup draw…</button></p>'
@@ -1766,12 +1774,18 @@ function _mcSetupHTML() {
     // would be left out of the bracket. The buttons say so; generateCleanBracket() still refuses.
     const formats = (typeof getVisibleFormats === 'function' ? getVisibleFormats() : [{ id: 'DE', name: 'Double Elimination Cup', blurb: '', minPlayers: 4, maxPlayers: 32 }]).map(fmt => {
         const size = calculateBracketSize(paid, fmt.id);
-        let label = fmt.id === 'GROUPS' && typeof Groups !== 'undefined'
-            ? `Draw ${Groups.groupCount(Math.max(paid, fmt.minPlayers))} groups` : `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`, ok = true;
+        // Round Robin follows its structure in Global Settings (one group, or groups and cups)
+        const rr = fmt.id === 'GROUPS' && typeof Groups !== 'undefined';
+        const single = rr && Groups.configSettings().structure === 'single';
+        const lim = rr ? Groups.limits() : fmt;
+        let label = !rr ? `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`
+            : single ? `Draw one group of ${paid}` : `Draw ${Groups.groupCount(Math.max(paid, lim.minPlayers))} groups`, ok = true;
         if (unpaid > 0) { label = `${unpaid} player${unpaid === 1 ? '' : 's'} unpaid`; ok = false; }
-        else if (paid < fmt.minPlayers) { label = `Needs ${fmt.minPlayers}+ paid players`; ok = false; }
-        else if (paid > fmt.maxPlayers) { label = `At most ${fmt.maxPlayers} players`; ok = false; }
-        return `<div class="mc-fmt"><b>${escapeHtml(fmt.name)}</b><p>${escapeHtml(fmt.blurb || '')}</p><button type="button" class="mc-btn mc-primary" onclick="generateBracket('${escapeHtml(fmt.id)}')"${ok ? '' : ' disabled'}>${label}</button></div>`;
+        else if (paid < lim.minPlayers) { label = `Needs ${lim.minPlayers}+ paid players`; ok = false; }
+        else if (paid > lim.maxPlayers) { label = `At most ${lim.maxPlayers} players${single ? ' in one group' : ''}`; ok = false; }
+        const blurb = !rr ? fmt.blurb : single ? 'Everybody plays everybody in one group; the table decides the placings'
+            : `Everybody plays everybody in groups, then an A cup and a B cup${Groups.configSettings().cupEntry === 'half' ? ' of the same size' : ''}`;
+        return `<div class="mc-fmt"><b>${escapeHtml(fmt.name)}</b><p>${escapeHtml(blurb || '')}</p><button type="button" class="mc-btn mc-primary" onclick="generateBracket('${escapeHtml(fmt.id)}')"${ok ? '' : ' disabled'}>${label}</button></div>`;
     }).join('');
     const p = config.points, l = config.legs, lanes = _mcLanes();
     const dl = rows => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
@@ -2375,7 +2389,7 @@ function _mcHighlights() {
     // The night in numbers: always the same six
     const sum = f => paid.reduce((s, p) => s + f(p), 0);
     const fmtId = typeof getFormat === 'function' ? getFormat() : 'DE';
-    const format = fmtId === 'GROUPS' ? 'Groups and cups' : fmtId === 'SE' ? 'Single elimination' : 'Double elimination';
+    const format = fmtId === 'GROUPS' ? Groups.formatName() : fmtId === 'SE' ? 'Single elimination' : 'Double elimination';
     const facts = [
         [fmtId === 'GROUPS' ? 'Format' : 'Bracket', `${format} · ${tournament.bracketSize || players.length}`],
         ['Total points', sum(points)],
