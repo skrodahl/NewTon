@@ -83,6 +83,10 @@ function renderRegistrationNext() {
         text = ['Too many paid players', `A bracket holds at most ${maxPlayers} players, and ${paid} have paid.`];
         enabled = false;
     }
+    else if (paid > 32 && !started) {
+        // 33-48: a 32-player bracket with qualifiers before it (Docs/QUALIFIERS.md)
+        text = ['Draw the bracket', `${paid} paid: ${paid - 32} qualifier${paid - 32 === 1 ? '' : 's'} decide the last places in the 32-player bracket. ${unpaid ? `${unpaid} still unpaid.` : 'Everyone has paid.'}`];
+    }
 
     // The tournament's status band across the top, as on Setup
     const band = document.getElementById('registrationStatusBand');

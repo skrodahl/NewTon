@@ -1786,7 +1786,7 @@ function _mcSetupHTML() {
         const rr = fmt.id === 'GROUPS' && typeof Groups !== 'undefined';
         const single = rr && Groups.configSettings().structure === 'single';
         const lim = rr ? Groups.limits() : fmt;
-        let label = !rr ? `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`
+        let label = !rr ? (paid > 32 ? `Draw 32 + ${paid - 32} qualifier${paid - 32 === 1 ? '' : 's'}` : `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`)
             : single ? `Draw one group of ${paid}` : `Draw ${Groups.groupCount(Math.max(paid, lim.minPlayers))} groups`, ok = true;
         if (unpaid > 0) { label = `${unpaid} player${unpaid === 1 ? '' : 's'} unpaid`; ok = false; }
         else if (paid < lim.minPlayers) { label = `Needs ${lim.minPlayers}+ paid players`; ok = false; }
@@ -1803,7 +1803,7 @@ function _mcSetupHTML() {
         : [['Regular rounds', `Bo${l.regularRounds}`], ['Frontside semifinal', `Bo${l.frontsideSemifinal}`], ['Backside final', `Bo${l.backsideFinal}`], ['Grand Final', `Bo${l.grandFinal}`]];
     return `<div class="mc-col">
         <section class="mc-panel"><div class="mc-ph"><h3>Players<small>click a name to mark paid or unpaid</small></h3><button type="button" class="mc-link" onclick="showPage('registration')">Player Registration</button></div>
-            ${players.length < 32 ? `<div class="mc-addrow"><input type="text" id="ccPlayerName" class="mc-text" placeholder="Add a player (found in the database, or created)" autocomplete="off" onkeydown="if (event.key === 'Enter') addPlayerFromCC()"><button type="button" class="mc-btn mc-primary" onclick="addPlayerFromCC()">Add</button></div>` : ''}
+            ${players.length < (typeof Qualifiers !== 'undefined' ? Qualifiers.MAX_PLAYERS : 32) ? `<div class="mc-addrow"><input type="text" id="ccPlayerName" class="mc-text" placeholder="Add a player (found in the database, or created)" autocomplete="off" onkeydown="if (event.key === 'Enter') addPlayerFromCC()"><button type="button" class="mc-btn mc-primary" onclick="addPlayerFromCC()">Add</button></div>` : ''}
             <div class="mc-chips">${chips || '<span class="mc-note">No players yet.</span>'}</div></section>
         <section class="mc-panel"><div class="mc-ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><button type="button" class="mc-link" onclick="showPage('config')">Global Settings</button></div>
             <div class="mc-settings">
