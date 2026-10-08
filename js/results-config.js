@@ -382,14 +382,14 @@ const TOURNAMENT_FORMATS = [
         name: 'Double Elimination Cup',
         blurb: 'Players get a second chance through the backside',
         minPlayers: 4,
-        maxPlayers: 32
+        maxPlayers: 48  // above 32 through qualifiers (Docs/QUALIFIERS.md)
     },
     {
         id: 'SE',
         name: 'Single Elimination Cup',
         blurb: 'Players are eliminated after one loss',
         minPlayers: 4,
-        maxPlayers: 32
+        maxPlayers: 48  // above 32 through qualifiers (Docs/QUALIFIERS.md)
     },
     {
         id: 'GROUPS',
@@ -1115,6 +1115,7 @@ function formatRanking(placement) {
         case 13: return '13th-16th'; // Tied ranking (16+ player brackets)
         case 17: return '17th-24th'; // Tied ranking (32+ player brackets)
         case 25: return '25th-32nd'; // Tied ranking (32+ player brackets)
+        case 33: return '33rd-48th'; // Not qualified: lost a qualifier (33-48 players)
         default:
             // For any other rankings, use ordinal format
             const suffix = getOrdinalSuffix(placement);
@@ -1318,6 +1319,7 @@ function formatRankingForCSV(placement) {
         case 13: return '13th-16th'; // 13th-16th place
         case 17: return '17th-24th'; // 17th-24th place
         case 25: return '25th-32nd'; // 25th-32nd place
+        case 33: return '33rd-48th'; // not qualified (lost a qualifier)
         default: return String(placement);
     }
 }

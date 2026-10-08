@@ -442,7 +442,14 @@ function showResultQRPreview(payload) {
     contentEl.innerHTML = html;
 
     // --- Action buttons ---
-    if (isLive) {
+    const qualifier = typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(payload.mid);
+    if (isLive && qualifier) {
+        // a qualifier: only the score, to decide who goes through (Docs/QUALIFIERS.md)
+        actionsEl.innerHTML = `
+            <span style="margin-right:auto;font-size:13px;color:#6b7280;">A qualifier: only the score is kept.</span>
+            <button class="btn btn-secondary" onclick="popDialog()">Cancel</button>
+            <button class="btn btn-primary" onclick="applyQRResult(false)">Score only</button>`;
+    } else if (isLive) {
         actionsEl.innerHTML = `
             <button class="btn btn-secondary" onclick="popDialog()">Cancel</button>
             <button class="btn" onclick="applyQRResult(false)">Score only</button>
@@ -511,6 +518,8 @@ function applyQRResult(includeAchievements) {
     const loserLegs  = winnerPlayerNumber === 1 ? p2Legs : p1Legs;
 
     let achievements = null;
+    // nothing in a qualifier counts (Docs/QUALIFIERS.md)
+    if (typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(payload.mid)) includeAchievements = false;
 
     if (includeAchievements) {
         const threshold = (config.legs && config.legs.shortLegThreshold) || 21;
@@ -534,7 +543,8 @@ function applyQRResult(includeAchievements) {
     }
 
     popDialog();
-    completeMatch(payload.mid, winnerPlayerNumber, winnerLegs, loserLegs, 'QR', achievements, payload.legs || null, payload.fls || null);
+    const keepLegs = !(typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(payload.mid));
+    completeMatch(payload.mid, winnerPlayerNumber, winnerLegs, loserLegs, 'QR', achievements, keepLegs ? (payload.legs || null) : null, payload.fls || null);
 
     // If this result arrived over the network, it can be dropped now that it has been
     // applied — and only now. A result the operator has not accepted stays pending.

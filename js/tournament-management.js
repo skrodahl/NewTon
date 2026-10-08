@@ -332,6 +332,8 @@ function buildTournamentPayload() {
             seeding: tournament.seeding,
             groups: tournament.groups, // groups and cups: the group draw (absent in other formats)
             cups: tournament.cups, // groups and cups: the cup draw (absent until drawn)
+            qualifiers: tournament.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
+            notQualified: tournament.notQualified, // players who lost a qualifier (absent when none)
             readOnly: tournament.readOnly || false,
             config: configForExport(),
             players: players,
@@ -719,6 +721,8 @@ function saveTournamentOnly(shouldLog = true) {
             seeding: tournament.seeding, // who was seeded in the draw (absent = a random draw)
             groups: tournament.groups, // groups and cups: the group draw (absent in other formats)
             cups: tournament.cups, // groups and cups: the cup draw (absent until drawn)
+            qualifiers: tournament.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
+            notQualified: tournament.notQualified, // players who lost a qualifier (absent when none)
             placements: tournament.placements || {},
             readOnly: tournament.readOnly, // ✅ Fixed: Include readOnly flag
             lastSaved: new Date().toISOString()
@@ -1336,6 +1340,8 @@ function continueLoadProcess(selectedTournament) {
         seeding: selectedTournament.seeding, // who was seeded in the draw (absent = a random draw)
         groups: selectedTournament.groups, // groups and cups: the group draw (absent in other formats)
         cups: selectedTournament.cups, // groups and cups: the cup draw (absent until drawn)
+        qualifiers: selectedTournament.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
+        notQualified: selectedTournament.notQualified, // players who lost a qualifier (absent when none)
         placements: selectedTournament.placements || {},
         readOnly: (selectedTournament.status === 'completed') // Read-only for completed tournaments
         // NO CONFIG loading - config stays global
@@ -1539,6 +1545,8 @@ function continueImportProcess(importedData) {
             seeding: importedData.seeding, // who was seeded in the draw (absent = a random draw)
             groups: importedData.groups, // groups and cups: the group draw (absent in other formats)
             cups: importedData.cups, // groups and cups: the cup draw (absent until drawn)
+            qualifiers: importedData.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
+            notQualified: importedData.notQualified, // players who lost a qualifier (absent when none)
             readOnly: (importedData.status === 'completed') // Read-only for completed imports
         };
 
@@ -1681,6 +1689,8 @@ function confirmReset() {
     tournament.bracket = null;
     delete tournament.groups; // groups and cups: the draws go with the bracket
     delete tournament.cups;
+    delete tournament.qualifiers; // qualifiers go with the bracket too
+    delete tournament.notQualified;
     tournament.status = 'setup';
     tournament.placements = {};
     tournament.readOnly = false; // Clear read-only flag (escape hatch)

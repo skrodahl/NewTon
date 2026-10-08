@@ -141,19 +141,25 @@ function getProgressionTable() {
     // Groups and cups: only the cups progress anyone (group matches are not in the table)
     if (format === 'GROUPS') return cupsProgressionTable(tournament.cups);
     const table = format === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
-    return table[tournament.bracketSize];
+    const base = table[tournament.bracketSize];
+    // Qualifiers (33-48 players): the round 0 matches in front of the 32-player table, which itself
+    // is unchanged (Docs/QUALIFIERS.md)
+    if (tournament.qualifiers && base && typeof Qualifiers !== 'undefined') return Qualifiers.withTable(base);
+    return base;
 }
 
 /**
  * Calculates the smallest power-of-2 bracket size that fits the given player count.
- * SE supports smaller brackets (2, 4) that DE doesn't.
+ * SE supports smaller brackets (2, 4) that DE doesn't. 33 to 48 players play a 32-player
+ * bracket with qualifiers before it (Docs/QUALIFIERS.md).
  *
  * @param {number} playerCount - Number of paid players
  * @param {'DE'|'SE'} format - Tournament format
  * @returns {2|4|8|16|32|null} Bracket size, or null if player count is out of range
  */
 function calculateBracketSize(playerCount, format) {
-    if (playerCount > 32) return null;
+    if (playerCount > 48) return null;
+    if (playerCount > 32) return 32; // with playerCount - 32 qualifiers
     if (format === 'SE') {
         if (playerCount <= 4) return 4;
     }
@@ -726,8 +732,9 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
         // readOnly), and every reader in between works off the in-memory object.
         if (typeof updateMatchHistory === 'function') updateMatchHistory();
 
-        // Write to match register (fire-and-forget; skip AUTO walkovers)
-        if (completionType !== 'AUTO' && !window.rebuildInProgress && typeof NewtonDB !== 'undefined') {
+        // Write to match register (fire-and-forget; skip AUTO walkovers, and qualifiers: nothing in a
+        // qualifier counts, Docs/QUALIFIERS.md)
+        if (completionType !== 'AUTO' && match.side !== 'qualifier' && !window.rebuildInProgress && typeof NewtonDB !== 'undefined') {
             const _p1 = match.player1, _p2 = match.player2;
             const _dbMatch = {
                 tournamentId:     String(tournament.id),
@@ -1009,6 +1016,11 @@ function calculateAllRankings() {
     console.log(`Calculating rankings for ${bracketSize}-player bracket...`);
 
     const format = getFormat();
+    // Qualifiers: their losers are not qualified, shared 33rd (Docs/QUALIFIERS.md)
+    if (format !== 'GROUPS' && typeof Qualifiers !== 'undefined') {
+        if (!tournament.placements) tournament.placements = {};
+        Qualifiers.place(tournament.placements);
+    }
     if (format === 'SE') {
         calculateSERankings();
         return;
@@ -1462,16 +1474,18 @@ function generateCleanBracket(format) {
         return false;
     }
 
-    if (paidPlayers.length > 32) {
-        alert('Maximum 32 paid players supported. Please remove some players to generate bracket.');
-        console.error('Bracket generation blocked: more than 32 paid players');
+    // Double and single elimination: up to 48, the players above 32 through qualifiers
+    const maxAll = format === 'GROUPS' ? 32 : (typeof Qualifiers !== 'undefined' ? Qualifiers.MAX_PLAYERS : 32);
+    if (paidPlayers.length > maxAll) {
+        alert(`Maximum ${maxAll} paid players supported. Please remove some players to generate bracket.`);
+        console.error(`Bracket generation blocked: more than ${maxAll} paid players`);
         return false;
     }
 
     // Determine bracket size (format-aware: SE supports 2 and 4 player brackets; groups and cups:
     // the number of players drawn into the groups)
     const bracketSize = format === 'GROUPS' ? paidPlayers.length : calculateBracketSize(paidPlayers.length, format);
-    const byeCount = bracketSize - paidPlayers.length;
+    const byeCount = bracketSize - paidPlayers.length; // negative above 32: that many qualifiers
 
     // Show confirmation dialog with player list
     showBracketConfirmation(paidPlayers, bracketSize, byeCount, format);
@@ -1506,15 +1520,19 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
         ? `Everybody plays everybody, in a fixed order${Groups.seededDraw(paidPlayers) ? ' set by the ranking' : ' drawn at random'}. The table decides the placings.`
         : groups
         ? `These players will be drawn into groups${Groups.seededDraw(paidPlayers) ? ', by ranking' : ' at random'}. Everybody plays everybody in their group; ${Groups.configSettings().cupEntry === 'half' ? 'then the top half across the groups plays the A cup, the rest the B cup' : 'the top two of each group go on to the A cup, the rest to the B cup'}.`
+        : paidPlayers.length > 32
+        ? `${paidPlayers.length - 32} qualifier matches decide the last places in the 32-player bracket: ${2 * (paidPlayers.length - 32)} players are drawn into them, ${64 - paidPlayers.length} go straight into round 1. Lose a qualifier and you are not qualified (33rd); nothing in a qualifier counts.`
         : 'These players will be placed into the bracket. Make sure all players are registered before proceeding.';
 
-    // Byes field is conditional — show only when there are byes
+    // Byes field is conditional — show only when there are byes; above 32 the same field says how
+    // many qualifiers there are (the mirror of byes)
     const byesLabel = document.getElementById('bracketConfirmByesLabel');
     const byesValue = document.getElementById('bracketConfirmByes');
-    if (byeCount > 0 && !groups) {
+    if (byeCount !== 0 && !groups) {
         byesLabel.style.display = '';
         byesValue.style.display = '';
-        byesValue.textContent = byeCount;
+        byesLabel.textContent = byeCount > 0 ? 'Byes' : 'Qualifiers';
+        byesValue.textContent = byeCount > 0 ? byeCount : `${-byeCount} (${-2 * byeCount} players)`;
     } else {
         byesLabel.style.display = 'none';
         byesValue.style.display = 'none';
@@ -1563,12 +1581,26 @@ function confirmBracketGeneration() {
     console.log(`Generating ${bracketSize}-player ${format} bracket for ${paidPlayers.length} players`);
 
     // Seeded when the operator asked for it in Match Controls (js/seeding.js); otherwise null
-    const seeding = typeof Seeding !== 'undefined' ? Seeding.forDraw(paidPlayers, bracketSize) : null;
-    const bracket = createOptimizedBracketV2(paidPlayers, bracketSize, seeding);
+    let seeding = typeof Seeding !== 'undefined' ? Seeding.forDraw(paidPlayers, bracketSize) : null;
+    // Qualifiers (33-48 players): the straight-in players are drawn into the 32 places as if there
+    // were byes, and each gap becomes the place of a qualifier's winner (Docs/QUALIFIERS.md)
+    let qualified = null;
+    if (paidPlayers.length > 32 && typeof Qualifiers !== 'undefined') {
+        qualified = Qualifiers.split(paidPlayers, seeding);
+        seeding = qualified.seeding;
+    }
+    let bracket = createOptimizedBracketV2(qualified ? qualified.straightIn : paidPlayers, bracketSize, seeding);
     if (!bracket) {
         alert('Unable to generate a valid bracket without bye vs bye in Round 1. Please add more players or try again.');
         console.error('Bracket generation failed: createOptimizedBracketV2 returned null');
         return false;
+    }
+
+    let made = null;
+    if (qualified) {
+        const legs = format === 'SE' ? config.legs.seRegularRounds : config.legs.regularRounds;
+        made = Qualifiers.fromBracket(bracket, qualified.qualifierPlayers, legs || 3, 1);
+        bracket = made.bracket;
     }
 
     // Store bracket info
@@ -1576,10 +1608,17 @@ function confirmBracketGeneration() {
     tournament.bracketSize = bracketSize;
     tournament.format = format;
     if (seeding) tournament.seeding = seeding.record; // who was seeded, and from what (absent = a random draw)
+    if (made) tournament.qualifiers = made.qualifiers; else delete tournament.qualifiers;
+    delete tournament.notQualified;
     tournament.status = 'active';
 
     // Generate all match structures with clean TBD placeholders
     generateAllMatches(bracket, bracketSize);
+    if (made) {
+        // the qualifiers go first (Q1… are numbered 1…), the bracket's matches after them
+        matches.forEach(m => { m.numericId += made.made.length; });
+        matches.unshift(...made.made);
+    }
 
     // Process initial auto-advancements (real vs walkover)
     // Skip during rebuild to prevent transaction corruption
@@ -2518,6 +2557,12 @@ function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
         const dest = document.createElement('strong');
         dest.textContent = progression.loser[0];
         loserLine.appendChild(dest);
+    } else if (typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(matchId)) {
+        loserLine.appendChild(document.createTextNode(' is not qualified ('));
+        const rankText = document.createElement('strong');
+        rankText.textContent = formatRanking(33);
+        loserLine.appendChild(rankText);
+        loserLine.appendChild(document.createTextNode(')'));
     } else {
         const rank = typeof getEliminationRankForMatch === 'function'
             ? getEliminationRankForMatch(matchId, tournament.bracketSize)
@@ -2532,6 +2577,14 @@ function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
         }
     }
     block.appendChild(loserLine);
+
+    // a qualifier only decides who gets to play (Docs/QUALIFIERS.md)
+    if (typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(matchId)) {
+        const note = document.createElement('div');
+        note.className = 'winner-progression__note';
+        note.textContent = 'A qualifier: only the score is kept, to decide who goes through. No achievements, and no matches or legs in the statistics.';
+        block.appendChild(note);
+    }
 
     return block;
 }
@@ -2556,6 +2609,11 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const loserLink = document.getElementById('loserStatsLink');
     loserLink.textContent = loser.name;
     loserLink.onclick = () => openStatsModalFromConfirmation(loser.id, matchId);
+    // a qualifier: no statistics to edit (nothing in a qualifier counts)
+    const isQualifier = typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(matchId);
+    const statsStack = winnerLink.parentElement;
+    statsStack.style.display = isQualifier ? 'none' : '';
+    if (statsStack.previousElementSibling) statsStack.previousElementSibling.style.display = isQualifier ? 'none' : '';
 
     // Title — "{winner} beats {loser}"
     document.getElementById('winnerConfirmDialogTitle').textContent = `${winner.name} beats ${loser.name}`;
@@ -2741,6 +2799,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
 
         console.log(`Winner confirmed for match ${matchId}: ${winner.name} (${winnerLegs}-${loserLegs})`);
 
+        if (isQualifier) achievements = null; // nothing in a qualifier counts
         onConfirm(winnerLegs, loserLegs, achievements);
         cleanup();
         popDialog(); // Use dialog stack to close and restore parent

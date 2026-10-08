@@ -855,6 +855,7 @@ a:hover { color: #1e40af; }
 }
 .winner-progression__winner { color: #065f46; margin-bottom: 2px; }
 .winner-progression__loser  { color: #dc2626; }
+.winner-progression__note { margin-top: 8px; font-size: 13px; color: #6b7280; }
 .winner-stats-stack {
   display: flex;
   flex-direction: column;

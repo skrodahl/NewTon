@@ -35,7 +35,8 @@ const BracketView = (() => {
     let els = null;          // { viewport, canvas, overlay, markers, selbar, mag }
 
     // ---------- structure from the progression table ----------
-    const sideOf = id => id.startsWith('FS') ? 'FS' : (id.startsWith('BS-') && id !== 'BS-FINAL' ? 'BS' : 'FIN');
+    const isQ = id => /^Q\d+$/.test(id);  // a qualifier (33-48 players, Docs/QUALIFIERS.md)
+    const sideOf = id => id.startsWith('FS') ? 'FS' : (id.startsWith('BS-') && id !== 'BS-FINAL' ? 'BS' : isQ(id) ? 'Q' : 'FIN');
     const roundOf = id => +id.split('-')[1];
     const numOf = id => +id.split('-')[2];
 
@@ -48,7 +49,7 @@ const BracketView = (() => {
         }));
         const maxFS = Math.max(...ids.filter(i => sideOf(i) === 'FS').map(roundOf));
         const maxBS = Math.max(...ids.filter(i => sideOf(i) === 'BS').map(roundOf));
-        return { ids, feeds, maxFS, maxBS };
+        return { ids, feeds, maxFS, maxBS, qids: ids.filter(isQ), prog };
     }
 
     // ---------- butterfly layout ----------
@@ -200,9 +201,26 @@ const BracketView = (() => {
     }
 
     // The layout is the one part chosen by format and finals position (see Docs/BRACKET-REDESIGN.md, "Other Formats")
-    const layoutFor = (st, variant, g) => variant === 'se' ? layoutSE(st, g)
+    const layoutOf = (st, variant, g) => variant === 'se' ? layoutSE(st, g)
         : variant === 'se-middle' ? layoutSEMiddle(st, g)
         : variant === 'cups' ? layoutCups(st, g) : layout(st, variant, g);
+    // Qualifiers: the format's layout without them, then each qualifier one column outward from the
+    // round 1 match it feeds, level with it (left of a round 1 that runs left to right, right of one
+    // that runs right to left), and everything moved over to make room
+    function layoutFor(st, variant, g) {
+        if (!st.qids || !st.qids.length) return layoutOf(st, variant, g);
+        const L = layoutOf(Object.assign({}, st, { ids: st.ids.filter(i => !isQ(i)) }), variant, g);
+        const P = W + g.GX, pos = L.pos;
+        st.qids.forEach(q => {
+            const r1 = st.prog[q].winner[0], r2 = st.prog[r1] && st.prog[r1].winner && st.prog[r1].winner[0];
+            const out = r2 && pos[r2] && pos[r2].x < pos[r1].x ? 1 : -1;   // the side away from round 2
+            pos[q] = { x: pos[r1].x + out * P, y: pos[r1].y };
+        });
+        const minX = Math.min(...Object.values(pos).map(p => p.x));
+        if (minX < 0) Object.values(pos).forEach(p => { p.x -= minX; });
+        L.cw = Math.max(...Object.values(pos).map(p => p.x)) + W;
+        return L;
+    }
 
     const worldBox = L => ({ x0: -40, y0: -TOP, x1: L.cw + 50, y1: L.ch + BOTTOM }); // room for lines routed round the outside
 
@@ -362,6 +380,9 @@ const BracketView = (() => {
         if (getFormat() === 'GROUPS') return 'cups'; // always the final in the middle: two cups have to fit
         const middle = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle';
         if (getFormat() === 'SE') return middle ? 'se-middle' : 'se';
+        // with qualifiers, always the finals in the middle: with them on the right the backside sits
+        // straight beside round 1, where the qualifiers go (Docs/QUALIFIERS.md)
+        if (typeof tournament !== 'undefined' && tournament && tournament.qualifiers) return 'middle';
         return middle ? 'middle' : 'right';
     }
 
@@ -516,6 +537,13 @@ const BracketView = (() => {
             const sigY = L.ch + (variant === 'right' ? 62 : 44);
             const sig = variant === 'right' ? lblMid(sigText, pos[lastFS1].x, sigY, 'bv-signature') : lbl(sigText, pos[lastFS1].x, sigY, 'bv-signature');
             sig.id = 'tournament-watermark';
+        }
+
+        // qualifiers: a label over each qualifier column
+        if (st.qids && st.qids.length) {
+            const cols = {};
+            st.qids.forEach(q => { (cols[pos[q].x] = cols[pos[q].x] || []).push(q); });
+            Object.values(cols).forEach(c => lblMid('Qualifiers', pos[c[0]].x, Math.min(...c.map(q => pos[q].y)) - LABEL_GAP, 'bv-col-label bv-q-label'));
         }
 
         // lines
@@ -1165,8 +1193,14 @@ const BracketView = (() => {
         if (finals) {
             finals.hidden = !isActive() || getFormat() === 'GROUPS'; // both bracket formats: finals on the right or in the middle
             // the setting, not the layout name (single elimination's layouts are 'se' and 'se-middle')
-            const v = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle' ? 'middle' : 'right';
-            finals.querySelectorAll('button[data-finals]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.finals === v)));
+            // double elimination with qualifiers is always drawn with the finals in the middle (finalsVariant())
+            const fixed = getFormat() === 'DE' && !!(tournament && tournament.qualifiers);
+            const v = fixed || (typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle') ? 'middle' : 'right';
+            finals.querySelectorAll('button[data-finals]').forEach(b => {
+                b.setAttribute('aria-pressed', String(b.dataset.finals === v));
+                b.disabled = fixed && b.dataset.finals === 'right';
+                b.title = b.disabled ? 'With qualifiers, double elimination keeps the finals in the middle: the qualifiers sit where the backside would be' : '';
+            });
         }
     }
 

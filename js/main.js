@@ -417,6 +417,8 @@ function autoLoadCurrentTournament() {
             seeding: tournamentData.seeding, // who was seeded in the draw (absent = a random draw)
             groups: tournamentData.groups, // groups and cups: the group draw (absent in other formats)
             cups: tournamentData.cups, // groups and cups: the cup draw (absent until drawn)
+            qualifiers: tournamentData.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
+            notQualified: tournamentData.notQualified, // players who lost a qualifier (absent when none)
             placements: tournamentData.placements || {},
             readOnly: tournamentData.readOnly, // ✅ Fixed: Include readOnly flag
             _analyticsPreview: tournamentData._analyticsPreview // 4.3: keep the no-persist guard alive across reload
@@ -645,6 +647,9 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
         if (ends[matchId]) return ends[matchId][isWinner ? 0 : 1];
         if (typeof Groups !== 'undefined' && Groups.isGroupId(matchId)) return '';
     }
+
+    // a qualifier's loser is not qualified (33rd); its winner goes into round 1 (below)
+    if (!isWinner && typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(matchId)) return 'not qualified (33rd)';
 
     const table = getProgressionTable();
     const progression = table && table[matchId];

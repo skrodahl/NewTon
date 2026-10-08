@@ -1287,6 +1287,7 @@ function getMatchFormatDescription(match) {
 // Helper function to get round description
 function getRoundDescription(match) {
     if (typeof getFormat === 'function' && getFormat() === 'GROUPS' && typeof Groups !== 'undefined') return Groups.roundName(match);
+    if (typeof Qualifiers !== 'undefined' && Qualifiers.isQualifier(match)) return 'Qualifier';
     if (match.id === 'GRAND-FINAL') return 'Grand Final';
     if (match.id === 'BS-FINAL') return 'Backside Final';
 
@@ -1458,6 +1459,7 @@ function startMatchOnLane(matchId, lane) {
 
 /** The round heading for a group of ready matches. */
 function _mcRoundTitle(key) {
+    if (key === 'QUAL') return 'Qualifiers';
     if (key === 'GRAND-FINAL') return 'Grand Final';
     if (key === 'BS-FINAL') return 'Backside Final';
     if (getFormat && getFormat() === 'SE' && key.startsWith('FS-R') && typeof getSERoundDisplayName === 'function') {
@@ -1483,9 +1485,9 @@ function _mcActiveHTML(matchData) {
     const free = lanes.usable.filter(l => !used.has(String(l)));
 
     // the order matches are queued in: frontside rounds, then the finals; backside beside
-    const order = k => k === 'GRAND-FINAL' ? 90 : k === 'BS-FINAL' ? 91 : parseInt(k.replace(/\D/g, '')) || 50;
+    const order = k => k === 'QUAL' ? 0 : k === 'GRAND-FINAL' ? 90 : k === 'BS-FINAL' ? 91 : parseInt(k.replace(/\D/g, '')) || 50;
     const keys = Object.keys(matchData.rounds || {});
-    const front = keys.filter(k => k.startsWith('FS-') || k === 'GRAND-FINAL' || k === 'OTHER').sort((a, b) => order(a) - order(b));
+    const front = keys.filter(k => k.startsWith('FS-') || k === 'GRAND-FINAL' || k === 'OTHER' || k === 'QUAL').sort((a, b) => order(a) - order(b));
     const back = keys.filter(k => k.startsWith('BS-') || k === 'BS-FINAL').sort((a, b) => order(a) - order(b));
     const queued = front.concat(back).flatMap(k => matchData.rounds[k]);
     const next = queued.find(m => !checkRefereeConflict(m.id).hasConflict);
@@ -1505,7 +1507,7 @@ function _mcActiveHTML(matchData) {
         `</div>`;
 
     const group = k => `<div class="mc-qround"><span>${escapeHtml(_mcRoundTitle(k))}</span><span>${matchData.rounds[k].length} ready</span></div>` +
-        matchData.rounds[k].slice().sort((a, b) => (parseInt(a.id.split('-')[2]) || 0) - (parseInt(b.id.split('-')[2]) || 0)).map(_mcQueueRow).join('');
+        matchData.rounds[k].slice().sort((a, b) => (a.side === 'qualifier' ? a.positionInRound : parseInt(a.id.split('-')[2]) || 0) - (b.side === 'qualifier' ? b.positionInRound : parseInt(b.id.split('-')[2]) || 0)).map(_mcQueueRow).join('');
     const column = (ks, empty) => ks.length ? ks.map(group).join('') : `<div class="mc-qempty">${empty}</div>`;
     const queue = isSE
         ? `<div class="mc-qcols mc-one"><div class="mc-qcol">${column(front, 'Nothing ready to start.')}</div></div>`
@@ -1879,7 +1881,9 @@ function showMatchCommandCenter() {
         // Determine round identifier for grouping
         let roundKey;
 
-        if (match.id === 'GRAND-FINAL') {
+        if (match.side === 'qualifier') {
+            roundKey = 'QUAL'; // qualifiers (33-48 players): first, each one unblocks a round 1 match
+        } else if (match.id === 'GRAND-FINAL') {
             roundKey = 'GRAND-FINAL';
         } else if (match.id === 'BS-FINAL') {
             roundKey = 'BS-FINAL';
@@ -1903,9 +1907,8 @@ function showMatchCommandCenter() {
     Object.keys(roundGroups).forEach(roundKey => {
         roundGroups[roundKey].sort((a, b) => {
             // Extract match numbers from IDs like "FS-1-11" -> 11
-            const matchNumA = parseInt(a.id.split('-')[2]) || 0;
-            const matchNumB = parseInt(b.id.split('-')[2]) || 0;
-            return matchNumA - matchNumB;
+            const num = m => m.side === 'qualifier' ? m.positionInRound : (parseInt(m.id.split('-')[2]) || 0);
+            return num(a) - num(b);
         });
     });
 
