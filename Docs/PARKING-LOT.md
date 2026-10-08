@@ -78,6 +78,9 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 **Review notes from the maintainer (2026-10-08 morning), to discuss before fixing:**
 1. **Changing referees in the group queue can lock both matches.** A-1 Colin v Harry with ref Jocke, A-2 Jocke v Harry with ref Colin: each blocks the other ("is refereeing another match"), so neither can start. Setting A-2 back to no referee clears it, and A-2 then shows its planned referee. Cause: a referee chosen on a match that hasn't started is a real assignment, and `checkRefereeConflict()` counts ready matches as well as live ones. (Planned referees avoid this because they aren't assignments until Start.)
 
+2. **10 players: an A cup of 8 and a B cup of 2.** As agreed (an even number of groups, at most four each gives 4 groups of 3, 3, 2, 2; the top two of each go to A), but the maintainer isn't sure it's right. To discuss: e.g. fewer, larger groups for small fields, or a minimum B cup size.
+3. **"Play the B cup" is a checkbox; the mockup has a toggle switch.** Use the switch from the mockup (and the mockup's one-line draw bar wording).
+
 **Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
