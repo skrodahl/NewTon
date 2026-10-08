@@ -88,6 +88,8 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 6. **After playing A-QF1 and A-QF2 and undoing them, Ken shows as refereeing (A-QF4 blocked) but Henry doesn't.** Both had been filled in at Start as planned referees; after the undos one of them is still assigned (`match.referee` set), the other isn't. To investigate: what undo resets (it clears `referee` on the undone match and on downstream matches, but the order of the two undos, or a re-render, may leave one behind). Expected: after undo both matches back to planned, nobody assigned.
 7. **B-F says "ref: loser of B-B", but B-B is Walkover v Walkover** in a two-player B cup, so that loser never exists. The plan should fall back (no plan, or the A cup / nearest free player) when the source match is a walkover.
 
+8. **Placings left empty with a small B cup (10 players, B cup of 2).** The B cup only fills 5th–6th, so 7th–8th, which scores points, goes to nobody, and the four A cup quarterfinal losers (all 0 legs won in their quarterfinals) get only participation. Options to discuss: when the B cup can't fill 7th–8th (fewer than four players), give the empty places to the A cup quarterfinal losers by group performance (the same order as without a B cup); or a minimum B cup size (note 2). The podium and the rest of the completed view were correct (1st Henry, 2nd Harry, 3rd Peter, 4th Adam, 5th–6th Colin and Christian).
+
 **Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
