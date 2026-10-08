@@ -210,7 +210,7 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
             <div class="showcase-text">
                 <span class="showcase-label">Shuffle &amp; Draw</span>
                 <h3>Pick a Format. Draw. Play.</h3>
-                <p>Double elimination, single elimination or Round Robin, sized to whoever turned up. Keep the best players apart with seeding from your own results, or leave it to a fair random draw, with byes spread so nobody gets an easy ride.</p>
+                <p>Double elimination, single elimination or Round Robin, sized to whoever turned up, up to 48 with qualifiers. Keep the best players apart with seeding from your own results, or leave it to a fair random draw, with byes spread so nobody gets an easy ride.</p>
                 <p class="showcase-closer">The bracket doesn&rsquo;t play favourites.</p>
             </div>
         </div>
