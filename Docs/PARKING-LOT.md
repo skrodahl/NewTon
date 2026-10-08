@@ -75,6 +75,9 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 - Match Controls in the group stage shows each group's next two matches, and the group tables on the right (there was room).
 - B cup final pair both 5th–6th and bronze pair both 7th–8th, as DE's shared places.
 
+**Review notes from the maintainer (2026-10-08 morning), to discuss before fixing:**
+1. **Changing referees in the group queue can lock both matches.** A-1 Colin v Harry with ref Jocke, A-2 Jocke v Harry with ref Colin: each blocks the other ("is refereeing another match"), so neither can start. Setting A-2 back to no referee clears it, and A-2 then shows its planned referee. Cause: a referee chosen on a match that hasn't started is a real assignment, and `checkRefereeConflict()` counts ready matches as well as live ones. (Planned referees avoid this because they aren't assignments until Start.)
+
 **Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
