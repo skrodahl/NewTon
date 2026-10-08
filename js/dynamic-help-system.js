@@ -248,7 +248,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li>Each group plays in a fixed order, and each match has a planned referee from the group. Match Controls shows each group's next matches with the referee filled in; it is set when the match starts, if that player is free. Change it like any referee</li>
                         <li>A player can't start a match while they are playing another one</li>
-                        <li>The group table: wins, then leg difference, then legs won, then head-to-head. Players still level are marked <strong>level</strong>; the group seed decides unless you click <strong>▲</strong> in Match Controls' group tables</li>
+                        <li>The group table: wins, then leg difference, then legs won, then head-to-head. Players still level when the group has played every match are marked <strong>level</strong>; the group seed decides unless you click <strong>▲</strong> in Match Controls' group tables before drawing the cups</li>
                         <li><strong>Groups</strong> on the bracket page shows every group's table and matches. Click a match that hasn't been played to open it in Match Controls; a played one has <strong>Undo</strong> while it can be undone</li>
                     </ul>
                     <p><strong>Draw the cups:</strong> when the last group match is played, Match Controls shows both cups' seeded fields: group winners first, then runners-up (the B cup: thirds, then fourths), ranked across the groups by win rate, then leg difference per match. Switch off <strong>Play the B cup</strong> to play without it (whether it starts on is a Global Setting). Nothing is drawn until you click <strong>Draw the cups</strong>.</p>
@@ -374,9 +374,9 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Handover</strong>, how a match reaches the Chalker:</p>
                     <ul>
-                        <li><strong>QR code</strong> (default): show a code on the match for the Chalker to scan, and scan its result code back. Works offline.</li>
+                        <li><strong>QR code:</strong> show a code on the match for the Chalker to scan, and scan its result code back. Works offline.</li>
                         <li><strong>Network</strong> (experimental): send the match to a Chalker on the same local network; the result comes back on its own and is counted on the <strong>Match Controls</strong> tab until you accept it. Needs the Docker image, with the Chalker opened from your own server.</li>
-                        <li><strong>None:</strong> results are entered by hand.</li>
+                        <li><strong>None</strong> (default): results are entered by hand.</li>
                     </ul>
                 `
             },

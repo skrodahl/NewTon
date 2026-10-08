@@ -48,15 +48,15 @@ const DEFAULT_CONFIG = {
         bracketFinals: 'right'
     },
     chalker: {
-        handover: 'qr'
+        handover: 'none'      // new installs; a saved config without it keeps 'qr' (loadConfiguration())
     },
     seeding: {
-        mode: 'off',
+        mode: 'available',
         seeds: 'quarter'
     },
     roundRobin: {
         structure: 'groups',  // 'groups': groups, then an A and a B cup; 'single': one group, the table decides
-        cupEntry: 'top2',     // 'top2': the top two of each group to the A cup; 'half': the top half across the groups
+        cupEntry: 'half',     // 'half': the top half across the groups to the A cup; 'top2': the top two of each group
         rematches: 'allow',   // group rematches in cup round 1: 'allow' (the mirror draw) or 'avoid'
         bCup: true            // Play the B cup is on to start with at Draw the cups
     },
@@ -77,6 +77,9 @@ function loadConfiguration() {
         const savedConfig = localStorage.getItem('dartsConfig');
         if (savedConfig) {
             const parsed = JSON.parse(savedConfig);
+            // Handover's default became None, but a config saved before the setting existed has always
+            // meant QR code (additive-only: absent keeps its old meaning), so it stays QR code
+            if (!parsed.chalker || !parsed.chalker.handover) parsed.chalker = Object.assign({}, parsed.chalker, { handover: 'qr' });
             config = mergeWithDefaults(parsed, DEFAULT_CONFIG);
             console.log('✓ Loaded saved global config');
         } else {
@@ -202,7 +205,7 @@ function applyConfigToUI() {
     // Round Robin (groups and cups, or one group)
     const rr = config.roundRobin || {};
     safeSetValue('rrStructure', rr.structure === 'single' ? 'single' : 'groups');
-    safeSetValue('rrCupEntry', rr.cupEntry === 'half' ? 'half' : 'top2');
+    safeSetValue('rrCupEntry', rr.cupEntry === 'top2' ? 'top2' : 'half');
     safeSetChecked('rrBCup', rr.bCup !== false);
     safeSetValue('rrRematches', rr.rematches === 'avoid' ? 'avoid' : 'allow');
 
@@ -471,13 +474,13 @@ function transferMatchToDevice(matchId) {
  * How a match is handed over to the Chalker.
  *
  * Global setting, chosen on the Config page:
- *   'qr'      — show the assignment QR and the result scanner (default, current behaviour)
+ *   'qr'      — show the assignment QR and the result scanner
  *   'network' — hand over across the local network instead; all QR affordances are hidden
- *   'none'    — no handover at all; matches are entered manually
+ *   'none'    — no handover at all; matches are entered manually (the default for new installs)
  *
- * Read through this helper rather than reaching into `config` directly, so the
- * default applies uniformly to configs saved before the setting existed
- * (additive-only schema: missing means 'qr').
+ * Read through this helper rather than reaching into `config` directly, so configs saved
+ * before the setting existed read uniformly (additive-only schema: missing means 'qr', as it
+ * always has; loadConfiguration() fills that in, and DEFAULT_CONFIG's 'none' is for new installs).
  *
  * @returns {'qr'|'network'|'none'}
  */
@@ -602,7 +605,7 @@ function saveUIConfiguration(options = {}) {
     const rrRematches = document.getElementById('rrRematches');
     config.roundRobin = {
         structure: rrStructure && rrStructure.value === 'single' ? 'single' : 'groups',
-        cupEntry: rrCupEntry && rrCupEntry.value === 'half' ? 'half' : 'top2',
+        cupEntry: rrCupEntry && rrCupEntry.value === 'top2' ? 'top2' : 'half',
         rematches: rrRematches && rrRematches.value === 'avoid' ? 'avoid' : 'allow',
         bCup: rrBCup ? rrBCup.checked : true
     };
@@ -664,10 +667,72 @@ function forceReloadConfig() {
     alert('Configuration reloaded from localStorage');
 }
 
+// The server connection survives a reset: the Analytics server's address and key, whether it was
+// verified, and the server ID the Chalker's QR codes carry. They can still be changed by hand.
+const SERVER_CONNECTION_KEYS = ['remoteUrl', 'remoteApiKey', 'remoteVerified', 'serverId'];
+
+/**
+ * The settings a reset gives: the defaults, keeping this instance's server connection.
+ * @returns {object} a fresh config
+ */
+function defaultConfigKeepingConnection() {
+    const fresh = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+    const server = (config && config.server) || {};
+    SERVER_CONNECTION_KEYS.forEach(k => { if (server[k] !== undefined) fresh.server[k] = server[k]; });
+    return fresh;
+}
+
+// Readable names for the reset preview, as on the Global Settings page. A setting without one
+// shows its key, so a new setting is never left out of the preview.
+const CONFIG_LABELS = {
+    points: { _: 'Points', participation: 'Taking part', first: '1st', second: '2nd', third: '3rd', fourth: '4th',
+        fifthSixth: '5th–6th', seventhEighth: '7th–8th', highOut: 'High out', ton: 'Ton', oneEighty: '180', shortLeg: 'Short leg' },
+    legs: { _: 'Match length', regularRounds: 'Regular rounds (double elimination)', frontsideSemifinal: 'Frontside semifinal',
+        backsideSemifinal: 'Backside semifinal', backsideFinal: 'Backside final', grandFinal: 'Grand final',
+        seRegularRounds: 'Regular rounds (single elimination)', seQuarterfinal: 'Quarterfinal (single elimination)',
+        seSemifinal: 'Semifinal (single elimination)', seBronze: 'Bronze final (single elimination)', seFinal: 'Final (single elimination)',
+        groupMatches: 'Group matches (Round Robin)', x01Format: 'Game', maxRounds: 'Max rounds', shortLegThreshold: 'Short leg (darts)' },
+    clubName: { _: 'Club name' },
+    lanes: { _: 'Lanes', maxLanes: 'Lanes', excludedLanes: 'Lanes not in use', requireLaneForStart: 'Require a lane to start' },
+    ui: { _: 'Interface', hiddenFormats: 'Hidden formats', confirmWinnerSelection: 'Confirm the winner',
+        autoOpenMatchControls: 'Start on Match Controls', defaultPaid: 'New players are paid', developerMode: 'Developer Console',
+        refereeSuggestionsLimit: 'Referee suggestions', bracketFinals: 'Finals position' },
+    chalker: { _: 'Chalker', handover: 'Handover' },
+    seeding: { _: 'Seeding', mode: 'Use seeding', seeds: 'Seeded players' },
+    roundRobin: { _: 'Round Robin', structure: 'Structure', cupEntry: 'To the A cup', rematches: 'Group rematches in cup round 1', bCup: 'Play the B cup' },
+    server: { _: 'Server', allowSharedTournamentDelete: 'Allow deleting tournaments', autoUpload: 'Back up finished tournaments' }
+};
+
+/**
+ * What a reset would change, setting by setting, walked from the defaults (so a new setting is
+ * always included). The server connection is kept and not listed.
+ * @returns {{section: string, label: string, from: *, to: *}[]}
+ */
+function configChangesOnReset() {
+    const fresh = defaultConfigKeepingConnection();
+    const now = config || {};
+    const same = (a, b) => JSON.stringify(a) === JSON.stringify(b);
+    const out = [];
+    Object.keys(fresh).forEach(section => {
+        const names = CONFIG_LABELS[section] || {};
+        const value = fresh[section];
+        if (value && typeof value === 'object' && !Array.isArray(value)) {
+            Object.keys(value).forEach(key => {
+                if (section === 'server' && SERVER_CONNECTION_KEYS.includes(key)) return;
+                const from = now[section] ? now[section][key] : undefined;
+                if (!same(from, value[key])) out.push({ section: names._ || section, label: names[key] || key, from, to: value[key] });
+            });
+        } else if (!same(now[section], value)) {
+            out.push({ section: names._ || section, label: names._ || section, from: now[section], to: value });
+        }
+    });
+    return out;
+}
+
 // RESET TO DEFAULTS (for debugging)
 function resetConfigToDefaults() {
     if (confirm('⚠️ Reset all settings to defaults? This cannot be undone.')) {
-        config = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+        config = defaultConfigKeepingConnection();
         saveGlobalConfig();
         applyConfigToUI();
         alert('✓ Configuration reset to defaults');

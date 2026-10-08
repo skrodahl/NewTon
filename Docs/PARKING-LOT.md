@@ -71,7 +71,7 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 - Group sizes from snake order: the top seed's group is the smaller one when the groups aren't even (15 players: 3, 4, 4, 4).
 - Group of 3 order: 2v3 (ref 1), 1v3 (ref 2), 1v2 (ref 3), so the top seeds meet last, as in a group of 4.
 - Cup referees after round 1: a loser from the round before, counted from the bottom; the bronze final: the loser of the first match two rounds back (a 4-player cup: the first semifinal's winner); the final: the bronze final's loser.
-- Ties left after head-to-head: marked "level", the group seed decides, ▲ in Match Controls' group tables lets the operator decide (before the cups are drawn).
+- Ties left after head-to-head: marked "level" once the group has played every match (before that, the matches to come can settle it), the group seed decides, ▲ in Match Controls' group tables lets the operator decide (before the cups are drawn). With one group the tournament completes on the last match, so a tie left then (only a three-way cycle with identical legs can be) goes by the group seed; a "confirm the table" step could come later if wanted.
 - Match Controls in the group stage shows each group's next two matches, and the group tables on the right (there was room).
 - B cup final pair both 5th–6th and bronze pair both 7th–8th, as DE's shared places.
 

@@ -73,8 +73,10 @@
 .mc-round { font-size: 12px; color: var(--nt-muted); min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .mc-acts { display: flex; gap: 6px; flex: none; }
 
-/* free lanes on one line: click one to start the next ready match there */
-.mc-free { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; padding: 12px 18px 16px; border-top: 1px solid var(--nt-line); }
+/* free lanes on one line, above the live matches so it stays in one place all night:
+   click one to start the next ready match there */
+.mc-free { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; padding: 4px 18px 14px; border-bottom: 1px solid var(--nt-line); }
+.mc-free + .mc-lanes { padding-top: 16px; }
 .mc-k { font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-muted); }
 .mc-lanechip { min-width: 34px; height: 30px; padding: 0 8px; border-radius: 8px; border: 1px dashed var(--nt-line-2); background: var(--nt-surface-2); font-weight: 800; color: var(--nt-ink-2); cursor: pointer; display: inline-grid; place-items: center; }
 .mc-lanechip:hover { border-style: solid; border-color: var(--nt-ink); background: var(--nt-surface); color: var(--nt-ink); }
@@ -91,6 +93,9 @@
 .mc-qcol { min-width: 0; }
 .mc-qcol + .mc-qcol { border-left: 1px solid var(--nt-line); }
 .mc-qround { display: flex; justify-content: space-between; padding: 10px 18px 4px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-muted); }
+/* a group with nothing left to start: the heading only; greyed only when every match is played */
+.mc-qround.mc-qdone, .mc-qround.mc-qempty-live { padding-bottom: 10px; }
+.mc-qround.mc-qdone { color: var(--nt-faint); }
 .mc-qrow { display: grid; grid-template-columns: auto minmax(0, 1fr) 96px minmax(0, 150px) auto; align-items: center; gap: 10px; padding: 8px 18px; border-bottom: 1px solid var(--nt-line); }
 .mc-qcol .mc-qrow:last-child { border-bottom: 0; }
 .mc-who { min-width: 0; display: grid; }

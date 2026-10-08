@@ -1923,79 +1923,43 @@ function commandValidateEverything() {
 function commandResetAllConfig() {
     currentView = 'reset-config';
 
-    // Get current config for comparison
-    const currentConfig = config ? JSON.parse(JSON.stringify(config)) : {};
-
-    // Get default config
-    const defaultConfig = typeof DEFAULT_CONFIG !== 'undefined' ? DEFAULT_CONFIG : null;
-
-    if (!defaultConfig) {
-        showCommandFeedback('Reset All Config', 'error', 'DEFAULT_CONFIG not available');
+    if (typeof configChangesOnReset !== 'function') {
+        showCommandFeedback('Reset All Config', 'error', 'The default settings are not available');
         return;
     }
 
-    // Build comparison HTML
-    let comparisonHtml = '<div style="margin: 20px 0;">';
-
-    // Points section
-    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Point Values:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
-    comparisonHtml += `<li>Participation: ${currentConfig.points?.participation} → ${defaultConfig.points.participation}</li>`;
-    comparisonHtml += `<li>1st place: ${currentConfig.points?.first} → ${defaultConfig.points.first}</li>`;
-    comparisonHtml += `<li>2nd place: ${currentConfig.points?.second} → ${defaultConfig.points.second}</li>`;
-    comparisonHtml += `<li>3rd place: ${currentConfig.points?.third} → ${defaultConfig.points.third}</li>`;
-    comparisonHtml += `<li>4th place: ${currentConfig.points?.fourth} → ${defaultConfig.points.fourth}</li>`;
-    comparisonHtml += `<li>5th/6th place: ${currentConfig.points?.fifthSixth} → ${defaultConfig.points.fifthSixth}</li>`;
-    comparisonHtml += `<li>7th/8th place: ${currentConfig.points?.seventhEighth} → ${defaultConfig.points.seventhEighth}</li>`;
-    comparisonHtml += `<li>High Out: ${currentConfig.points?.highOut} → ${defaultConfig.points.highOut}</li>`;
-    comparisonHtml += `<li>Ton: ${currentConfig.points?.ton} → ${defaultConfig.points.ton}</li>`;
-    comparisonHtml += `<li>180: ${currentConfig.points?.oneEighty} → ${defaultConfig.points.oneEighty}</li>`;
-    comparisonHtml += `<li>Short Leg: ${currentConfig.points?.shortLeg} → ${defaultConfig.points.shortLeg}</li>`;
-    comparisonHtml += '</ul></div>';
-
-    // Match configuration section
-    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Match Configuration (Best-of Legs):</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
-    comparisonHtml += `<li>Regular Rounds: ${currentConfig.legs?.regularRounds} → ${defaultConfig.legs.regularRounds}</li>`;
-    comparisonHtml += `<li>Frontside Semifinal: ${currentConfig.legs?.frontsideSemifinal} → ${defaultConfig.legs.frontsideSemifinal}</li>`;
-    comparisonHtml += `<li>Backside Semifinal: ${currentConfig.legs?.backsideSemifinal} → ${defaultConfig.legs.backsideSemifinal}</li>`;
-    comparisonHtml += `<li>Backside Final: ${currentConfig.legs?.backsideFinal} → ${defaultConfig.legs.backsideFinal}</li>`;
-    comparisonHtml += `<li>Grand Final: ${currentConfig.legs?.grandFinal} → ${defaultConfig.legs.grandFinal}</li>`;
-    comparisonHtml += '</ul></div>';
-
-    // UI settings section
-    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">User Interface Settings:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
-    comparisonHtml += `<li>Winner Confirmation: ${currentConfig.ui?.confirmWinnerSelection ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.confirmWinnerSelection ? 'Enabled' : 'Disabled'}</li>`;
-    comparisonHtml += `<li>Start on Match Controls: ${currentConfig.ui?.autoOpenMatchControls ? 'Yes' : 'No'} → ${defaultConfig.ui.autoOpenMatchControls ? 'Yes' : 'No'}</li>`;
-    comparisonHtml += `<li>Developer Console: ${currentConfig.ui?.developerMode ? 'Enabled' : 'Disabled'} → ${defaultConfig.ui.developerMode ? 'Enabled' : 'Disabled'}</li>`;
-    comparisonHtml += `<li>Referee Suggestions: ${currentConfig.ui?.refereeSuggestionsLimit || 10} → ${defaultConfig.ui.refereeSuggestionsLimit}</li>`;
-    comparisonHtml += '</ul></div>';
-
-    // Branding section
-    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Branding:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
-    comparisonHtml += `<li>Club Name: "${currentConfig.clubName || 'NewTon DC'}" → "${defaultConfig.clubName}"</li>`;
-    comparisonHtml += '</ul></div>';
-
-    // Lane configuration section
-    comparisonHtml += '<div style="margin-bottom: 20px;"><strong style="color: #065f46;">Lane Configuration:</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">';
-    comparisonHtml += `<li>Max Lanes: ${currentConfig.lanes?.maxLanes || 4} → ${defaultConfig.lanes.maxLanes}</li>`;
-    const excludedLanes = currentConfig.lanes?.excludedLanes || [];
-    comparisonHtml += `<li>Excluded Lanes: ${excludedLanes.length > 0 ? excludedLanes.join(', ') : 'None'} → None</li>`;
-    comparisonHtml += '</ul></div>';
-
-    comparisonHtml += '</div>';
+    // Every setting that would change, walked from the defaults (configChangesOnReset()), by section
+    const changes = configChangesOnReset();
+    const show = v => v === undefined ? '(not set)'
+        : typeof v === 'boolean' ? (v ? 'On' : 'Off')
+        : Array.isArray(v) ? (v.length ? v.join(', ') : 'None')
+        : v === '' ? '(empty)' : String(v);
+    const sections = [];
+    changes.forEach(c => {
+        let s = sections.find(x => x.name === c.section);
+        if (!s) sections.push(s = { name: c.section, rows: [] });
+        s.rows.push(c);
+    });
+    const comparisonHtml = changes.length
+        ? '<div style="margin: 20px 0;">' + sections.map(s =>
+            `<div style="margin-bottom: 20px;"><strong style="color: #065f46;">${escapeHtml(s.name)}</strong><ul style="margin: 5px 0; padding-left: 20px; line-height: 1.8;">` +
+            s.rows.map(c => `<li>${escapeHtml(c.label)}: ${escapeHtml(show(c.from))} → ${escapeHtml(show(c.to))}</li>`).join('') +
+            '</ul></div>').join('') + '</div>'
+        : '<p style="margin: 20px 0;">Every setting is already at its default.</p>';
 
     const html = `
         <h4 class="dc-title">Reset All Config to Defaults</h4>
 
         <div class="dc-box dc-box-bad">
             <div style="color: #dc2626; font-weight: 600; font-size: 16px; margin-bottom: 10px;">
-                ⚠️ Warning: Destructive Action
+                ⚠️ Warning: this cannot be undone
             </div>
             <div style="color: #374151; line-height: 1.6; font-size: 14px;">
-                This will reset ALL configuration settings to factory defaults. Your tournament data (matches, players, brackets, history) will NOT be affected.
+                This puts the Global Settings back to their defaults. The server connection is kept (the server address, API key and server ID). Your tournament data (matches, players, brackets, history) is not affected.
             </div>
         </div>
 
-        <h5 style="color: #111827; margin: 20px 0 10px 0;">What will be reset:</h5>
+        <h5 style="color: #111827; margin: 20px 0 10px 0;">What will change (${changes.length} setting${changes.length === 1 ? '' : 's'}):</h5>
         ${comparisonHtml}
 
         <div style="margin: 30px 0; padding: 20px; background: #f0fdf4; border: 1px solid #166534;">
@@ -2029,21 +1993,16 @@ function executeResetAllConfig() {
 
     console.log('Resetting all config to defaults...');
 
-    // Save current config for comparison
-    const oldConfig = config ? JSON.parse(JSON.stringify(config)) : {};
-
-    // Get default config
-    const defaultConfig = typeof DEFAULT_CONFIG !== 'undefined' ? DEFAULT_CONFIG : null;
-
-    if (!defaultConfig) {
-        console.error('DEFAULT_CONFIG not available');
-        showCommandFeedback('Reset All Config', 'error', 'DEFAULT_CONFIG not available');
+    if (typeof defaultConfigKeepingConnection !== 'function') {
+        console.error('The default settings are not available');
+        showCommandFeedback('Reset All Config', 'error', 'The default settings are not available');
         return;
     }
 
     try {
-        // Reset config to defaults
-        config = JSON.parse(JSON.stringify(defaultConfig));
+        const changed = configChangesOnReset().length;
+        // Reset to the defaults, keeping the server connection (defaultConfigKeepingConnection())
+        config = defaultConfigKeepingConnection();
 
         // Save to localStorage
         if (typeof saveGlobalConfig === 'function') {
@@ -2056,13 +2015,9 @@ function executeResetAllConfig() {
         console.log('✓ Saved to localStorage');
 
         // Build success feedback with comparison
-        let feedback = 'Configuration reset successfully! The page will reload in 2 seconds to apply changes.\n\n';
-        feedback += 'Changed settings:\n';
-        feedback += `• Point values: Reset to defaults\n`;
-        feedback += `• Match configuration: Reset to defaults\n`;
-        feedback += `• UI settings: Reset to defaults\n`;
-        feedback += `• Branding: "${oldConfig.clubName || 'NewTon DC'}" → "${defaultConfig.clubName}"\n`;
-        feedback += `• Lane configuration: Reset to defaults\n`;
+        let feedback = 'Settings reset to their defaults. The page will reload in 2 seconds to apply them.\n\n';
+        feedback += `• ${changed} setting${changed === 1 ? '' : 's'} changed\n`;
+        feedback += '• The server connection is kept\n';
 
         showCommandFeedback('Reset All Config', 'success', feedback);
 

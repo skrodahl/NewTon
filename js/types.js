@@ -233,7 +233,7 @@
 
 /**
  * @typedef {Object} SeedingConfig
- * @property {'off'|'available'|'on'} mode - Whether Shuffle & Draw offers seeding, and ticked or not (default: 'off')
+ * @property {'off'|'available'|'on'} mode - Whether Shuffle & Draw offers seeding, and ticked or not (default: 'available')
  * @property {'all'|'half'|'quarter'|'eighth'} seeds - How much of the bracket is seeded: all ranked players, or as many as 1/2, 1/4 or 1/8 of the bracket size (default: 'quarter')
  */
 

@@ -24,7 +24,7 @@ const Groups = (() => {
     /** Round Robin's settings in Global Settings now: structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup. */
     function configSettings() {
         const rr = (typeof config !== 'undefined' && config.roundRobin) || {};
-        return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'half' ? 'half' : 'top2',
+        return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'top2' ? 'top2' : 'half',
             rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false };
     }
     /** The settings the tournament was drawn with (absent in the first build: groups and cups, top two). */
@@ -137,7 +137,8 @@ const Groups = (() => {
      * A group's table, best first: wins, then leg difference, then legs won, then head-to-head (a
      * mini-table of the matches between the players still level, which also settles a three-way
      * tie), then the operator's decision (setOrder()), then the seed. Rows still level after
-     * head-to-head are marked `level`.
+     * head-to-head are marked `level`, once the group has played every match (before that, the
+     * matches still to come can settle it).
      * @param {string} name - the group letter
      * @returns {{player: object, id: string, seed: number, played: number, won: number, lost: number,
      *            legsWon: number, legsLost: number, diff: number, level: boolean, pos: number}[]}
@@ -148,6 +149,7 @@ const Groups = (() => {
         const ids = group.players.map(String);
         const ms = groupMatches(name);
         const t = tally(ms, ids);
+        const done = ms.every(m => m.completed);
         const manual = (tournament.groups.order && tournament.groups.order[name]) || null;
         const rows = ids.map((id, i) => {
             const p = playerOf(id);
@@ -169,7 +171,7 @@ const Groups = (() => {
                 const rank = r => manual && manual.includes(r.id) ? manual.indexOf(r.id) : 100 + r.seed;
                 cluster.sort((a, b) => cmp(a, b, h2h) || rank(a) - rank(b));
                 cluster.forEach((r, k) => {
-                    r.level = cluster.some((o, m) => m !== k && same(o, r, h2h));
+                    r.level = done && cluster.some((o, m) => m !== k && same(o, r, h2h));
                 });
             }
             out.push(...cluster);

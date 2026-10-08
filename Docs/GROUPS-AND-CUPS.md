@@ -19,7 +19,8 @@ Tournaments while it is offered (`config.roundRobin`, additive):
   everybody plays everybody, the table decides the placings (3–8 players). The one group's order is
   `roundRobinSchedule(n)` (circle method, referee from the group: never twice in a row, fewest duties,
   the player sitting a round out asked first); groups of up to four keep `GROUP_SCHEDULES`.
-- **To the A cup:** `top2` — the top two of each group, the rest to the B cup; `half` — everyone
+- **To the A cup:** `top2` — the top two of each group, the rest to the B cup; `half` (the default
+  since 2026-10-08) — everyone
   ranked across the groups (group place first, then results per match) and split into two cups of the
   same size (A one larger when odd), so a small field doesn't leave a tiny B cup (review note 2).
 - **Group rematches in cup round 1:** `allow` — the mirror draw as it falls; `avoid` —
@@ -49,6 +50,9 @@ absent means groups and cups, top two.
 - The table: wins, then leg difference, then legs won, then head-to-head (a mini-table between the
   players still level, which settles three-way ties too), then the operator decides (the draw
   step shows who is level and lets the operator swap them; untouched, the group seed decides).
+  Players are marked level only once their group has played every match; then two players can't
+  be (their match decides), only a three-way cycle with identical legs. With one group the
+  tournament completes on the last match, so the group seed decides such a tie.
 - All groups must be finished before the cups are drawn.
 
 **Cups**

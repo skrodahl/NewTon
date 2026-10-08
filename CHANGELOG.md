@@ -1,5 +1,39 @@
 ## Unreleased
 
+### Match Controls keeps the page header up to date
+
+- The header's counts (players, live, ready) were only filled in when the bracket was drawn, so adding, removing or marking players paid in Match Controls, or starting and finishing matches there, left them behind. Match Controls now refreshes the header each time it redraws (`BracketView.updateHeader()` in `showCommandCenterModal()`).
+- Files changed: `js/bracket-rendering.js`.
+
+### Match Controls: the free lanes and Next up come first
+
+- The Free line (the free lanes and Next up) moved from under the live matches to straight under the Lanes heading, in every format. It used to move down the page as matches started; now it stays in the same place all night, and starting the next match is the first thing on the page.
+- Files changed: `js/bracket-rendering.js` (the lanes panel in `_mcActiveHTML()` and `_mcGroupsHTML()`), `css/match-controls.css` (`.mc-free`: the divider below it).
+
+### Round Robin: every group keeps its place in Up next
+
+- A group with nothing left to start used to disappear from Up next, and a column whose groups were all finished only said "These groups are done.", without saying which. Now every group keeps its heading: a finished group says "All 3 played", in a lighter grey, with nothing under it; a group whose last matches are live keeps the normal colour (it isn't done) and says "2 of 3 played · 1 live". Any group with a live match says so in its heading. The groups stay in place all night, and what's done can be read at a glance (the results stay in the group tables on the right).
+- Files changed: `js/bracket-rendering.js` (`_mcGroupsHTML()`), `css/match-controls.css` (`.mc-qround.mc-qdone`).
+
+### Round Robin: level only when the group is finished
+
+- Players were marked **level** (with ▲ to decide) while their group still had matches to play, often two players who hadn't met yet, whose match would settle it. Now `Groups.standings()` marks players level only once the group has played every match, so the tables on both pages, ▲ and the warning at Draw the cups follow from one place. After a finished group, two players can't be level (their match decides); only a three-way cycle with identical legs can, and ▲ appears for it at Draw the cups. With one group the tournament completes on the last match, so the group seed decides such a tie.
+- Files changed: `js/groups.js` (`standings()`), `js/dynamic-help-system.js`, `Docs/GROUPS-AND-CUPS.md`, `Docs/PARKING-LOT.md`.
+
+### New defaults in Global Settings
+
+- **Round Robin:** Groups and cups, **Top half** to the A cup, Allow group rematches, Play the B cup (Top half is the new one; the A and B cups come out the same size).
+- **Seeding: Available** (was Off): Shuffle & Draw offers seeding, unticked, so nothing changes unless the operator ticks it.
+- **Chalker handover: None** (was QR code) for new installs and Reset to defaults. A config saved before the Handover setting existed has always meant QR code, so `loadConfiguration()` keeps it QR code (additive-only schema: an absent field keeps its old meaning); a config that has it keeps its choice.
+- Settings already saved are unchanged; the defaults apply to new installs, Reset to defaults, and settings a saved config doesn't have yet (Round Robin, which is new; Seeding for a config from before v5.3.1).
+- Files changed: `js/results-config.js` (`DEFAULT_CONFIG`, `loadConfiguration()`, the Round Robin apply/save fallbacks), `js/groups.js` (`configSettings()`), `js/dynamic-help-system.js`, `js/types.js`, `Docs/GROUPS-AND-CUPS.md`.
+
+### Reset all config: brings the settings back, keeps the server connection
+
+- **The server connection survives a reset.** Reset all config (Developer Console) and Reset to defaults used to set everything to `DEFAULT_CONFIG`, the server section too: the Analytics server's address and API key were wiped, and a new server ID was made on reload (so the Chalker's QR codes carried a new identity). Both now use `defaultConfigKeepingConnection()`, which keeps `remoteUrl`, `remoteApiKey`, `remoteVerified` and `serverId`; they can still be changed by hand in Global Settings. The reset is a way to bring the settings back to sensible values, not a factory reset.
+- **The preview lists every setting that would change.** It was a hand-written list that had fallen behind (no single elimination or group match lengths, Game, Short leg, Require a lane, Hidden formats, New players are paid, Finals position, Chalker, Seeding, Round Robin, or server settings). `configChangesOnReset()` now walks `DEFAULT_CONFIG`, so a new setting is always included, and shows only what changes, by section, with the Global Settings names (`CONFIG_LABELS`; a setting without a name shows its key). Nothing to change says so.
+- Files changed: `js/results-config.js` (`SERVER_CONNECTION_KEYS`, `defaultConfigKeepingConnection()`, `CONFIG_LABELS`, `configChangesOnReset()`, `resetConfigToDefaults()`), `js/analytics.js` (`commandResetAllConfig()`, `executeResetAllConfig()`).
+
 ### Round Robin: one group, Top half, and its own settings
 
 - **The format is called Round Robin**, with its own panel in Global Settings → Tournaments while it is offered (review note 9): **Structure**, Groups and cups (6–32 players) or **One group** (3–8 players: everybody plays everybody, the table decides the placings, no cups); **To the A cup**, Top two of each group or **Top half** (everyone ranked across the groups and split into two cups of the same size, so 10 players play two cups of five instead of eight and two; note 2); **Play the B cup** on or off to start with. A tournament keeps the structure and cup entry it was drawn with (`tournament.groups.settings`, additive).

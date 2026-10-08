@@ -1513,7 +1513,7 @@ function _mcActiveHTML(matchData) {
 
     return `<div class="mc-col">
         <section class="mc-panel"><div class="mc-ph"><h3>Lanes<small>${live.length} live · ${free.length} free</small></h3><span class="mc-hint">Click the winner to finish a match${scanQR}</span></div>
-            ${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}${freeLine}</section>
+            ${freeLine}${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}</section>
         <section class="mc-panel"><div class="mc-ph"><h3>Ready to start<small>${queued.length}</small></h3><span class="mc-hint">Lane and referee are optional</span></div>${queue}</section>
     </div>
     <div class="mc-col">${_mcRefereesHTML(live)}</div>`;
@@ -1673,11 +1673,16 @@ function _mcGroupsHTML(matchData) {
         const upcoming = list.map(g => ({ g, ms: Groups.groupMatches(g.name).filter(m => !m.completed && !m.active) }));
         // across the groups, in turn: each group's next match, then each group's one after
         for (let i = 0; i < 6; i++) upcoming.forEach(u => { if (u.ms[i]) queued.push(u.ms[i]); });
-        const block = u => u.ms.length
-            ? `<div class="mc-qround"><span>${single ? 'The group' : `Group ${escapeHtml(u.g.name)}`}</span><span>${Groups.groupMatches(u.g.name).filter(m => m.completed).length} of ${Groups.groupMatches(u.g.name).length} played</span></div>${u.ms.slice(0, single ? 6 : 2).map(_mcPlanRow).join('')}`
-            : '';
+        // every group keeps its heading, so the groups stay in place all night; a finished one
+        // (or one whose last matches are live) has nothing under it, and only a finished one is greyed
+        const block = u => {
+            const all = Groups.groupMatches(u.g.name), played = all.filter(m => m.completed).length;
+            const live = all.filter(m => !m.completed && m.active).length;
+            const done = played === all.length;
+            return `<div class="mc-qround${done ? ' mc-qdone' : u.ms.length ? '' : ' mc-qempty-live'}"><span>${single ? 'The group' : `Group ${escapeHtml(u.g.name)}`}</span><span>${done ? `All ${all.length} played` : `${played} of ${all.length} played${live ? ` · ${live} live` : ''}`}</span></div>${u.ms.slice(0, single ? 6 : 2).map(_mcPlanRow).join('')}`;
+        };
         const half = Math.ceil(upcoming.length / 2);
-        const col = us => us.map(block).join('') || '<div class="mc-qempty">These groups are done.</div>';
+        const col = us => us.map(block).join('');
         queue = single
             ? `<div class="mc-qcols mc-one"><div class="mc-qcol">${col(upcoming)}</div></div>`
             : `<div class="mc-qcols"><div class="mc-qcol">${col(upcoming.slice(0, half))}</div><div class="mc-qcol">${col(upcoming.slice(half))}</div></div>`;
@@ -1727,7 +1732,7 @@ function _mcGroupsHTML(matchData) {
         `</div>`;
 
     const lanesPanel = `<section class="mc-panel"><div class="mc-ph"><h3>Lanes<small>${live.length} live · ${free.length} free</small></h3><span class="mc-hint">Click the winner to finish a match${scanQR}</span></div>
-        ${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}${freeLine}</section>`;
+        ${freeLine}${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}</section>`;
     const queuePanel = drawStep ? _mcDrawCupsHTML()
         : `<section class="mc-panel"><div class="mc-ph"><h3>${cups ? 'Ready to start' : 'Up next'}<small>${cups ? `${queued.length}` : single ? 'in the fixed order' : 'by group, in their fixed order'}</small></h3><span class="mc-hint">Referees are planned; change them here</span></div>${queue}</section>`;
     const cupDraw = cups ? `<section class="mc-panel"><div class="mc-ph"><h3>Cup draw</h3></div>
@@ -1828,6 +1833,8 @@ function showCommandCenterModal(matchData) {
     _mcStarts = null;
 
     updateMatchControlsClock();
+    // the page header's counts (players, live, ready) change with what's done here
+    if (typeof BracketView !== 'undefined') BracketView.updateHeader();
 
     // the view
     body.classList.toggle('mc-one', status === 'completed' || !status);
