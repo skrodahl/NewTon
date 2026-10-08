@@ -197,9 +197,12 @@ function resetZoom() { BracketView.fitAll(); }
 function getAssignedReferees(excludeMatchId = null) {
     if (!matches || matches.length === 0) return [];
     const assignedReferees = [];
+    // Groups and cups: a referee is only taken while the match is live; one chosen for a match that
+    // hasn't started is a plan (Match Controls holds the matches that depend on it instead)
+    const liveOnly = typeof tournament !== 'undefined' && tournament && tournament.format === 'GROUPS';
     matches.forEach(match => {
         if (excludeMatchId && match.id === excludeMatchId) return;
-        if (match.referee && !match.completed) {
+        if (match.referee && !match.completed && (!liveOnly || match.active)) {
             assignedReferees.push(parseInt(match.referee));
         }
     });
@@ -247,13 +250,15 @@ function checkRefereeConflict(matchId) {
     let player2IsReferee = false;
     const conflictedPlayers = [];
 
+    // Groups and cups: only a live match's referee is busy (see getAssignedReferees())
+    const liveOnly = tournament && tournament.format === 'GROUPS';
     if (matches && player1Id && player2Id) {
         matches.forEach(m => {
             // Skip the current match - players can referee their own matches
             if (m.id === matchId) return;
 
             const matchState = getMatchState(m);
-            if ((matchState === 'ready' || matchState === 'live') && m.referee) {
+            if ((matchState === 'live' || (matchState === 'ready' && !liveOnly)) && m.referee) {
                 if (m.referee === player1Id) {
                     player1IsReferee = true;
                     if (!conflictedPlayers.includes(match.player1.name)) {
@@ -1538,7 +1543,17 @@ function _mcBusyPlayers(match) {
  * @param {object} match
  * @returns {boolean}
  */
-const _mcCanStart = match => !_mcBusyPlayers(match).length && !checkRefereeConflict(match.id).hasConflict;
+const _mcCanStart = match => !_mcBusyPlayers(match).length && !checkRefereeConflict(match.id).hasConflict && !Groups.holdFor(match) && !_mcRefereeBusy(match);
+
+/**
+ * The referee chosen for a match who can't take it now (playing, or refereeing a live match), or null.
+ * @param {object} match
+ * @returns {object|null} the player
+ */
+function _mcRefereeBusy(match) {
+    if (!match.referee || isPlayerAvailableAsReferee(match.referee, match.id)) return null;
+    return players.find(p => String(p.id) === String(match.referee)) || null;
+}
 
 /**
  * A queue row for a groups and cups match: as _mcQueueRow(), with the planned referee chosen in
@@ -1555,9 +1570,13 @@ function _mcPlanRow(match) {
     const refBusy = planned && !isPlayerAvailableAsReferee(planned.id, match.id);
     const confl = [1, 2].filter(n => conflict[`player${n}IsReferee`]).map(n => (match['player' + n] || {}).name).filter(Boolean);
     const plan = !match.referee && !planned ? Groups.plannedRefereeText(match) : '';
+    const hold = Groups.holdFor(match);
+    const chosenBusy = _mcRefereeBusy(match);
     let note = `<small>Best of ${escapeHtml(String(match.legs || ''))}${plan ? ` · ref: ${escapeHtml(plan)}` : ''}</small>`;
     if (busy.length) note = `<small class="mc-warn">${escapeHtml(busy.join(' and '))} ${busy.length > 1 ? 'are' : 'is'} playing: wait</small>`;
-    else if (conflict.hasConflict) note = `<small class="mc-warn">⚠ ${escapeHtml(confl.join(' and '))} ${confl.length > 1 ? 'are' : 'is'} refereeing another match</small>`;
+    else if (conflict.hasConflict) note = `<small class="mc-warn">⚠ ${escapeHtml(confl.join(' and '))} ${confl.length > 1 ? 'are' : 'is'} refereeing a live match</small>`;
+    else if (hold) note = `<small class="mc-wait">Waits: ${escapeHtml(hold)}, or choose another referee</small>`;
+    else if (chosenBusy) note = `<small class="mc-warn">Referee ${escapeHtml(chosenBusy.name)} is busy: change, or wait</small>`;
     else if (refBusy) note = `<small class="mc-warn">Referee ${escapeHtml(planned.name)} is busy: change, or wait</small>`;
     const handler = getButtonClickHandler('ready', match.id);
     return `<div id="cc-match-card-${match.id}" class="mc-qrow">
@@ -1565,7 +1584,7 @@ function _mcPlanRow(match) {
         <div class="mc-who"><span><b>${_mcName(match, 1, conflict)}</b><span class="mc-vs">v</span><b>${_mcName(match, 2, conflict)}</b></span>${note}</div>
         <select class="mc-sel" aria-label="Lane for ${match.id}" onchange="updateMatchLane('${match.id}', this.value);">${generateLaneOptions(match.id, match.lane)}</select>
         <select class="mc-sel" aria-label="Referee for ${match.id}" onchange="updateMatchReferee('${match.id}', this.value);">${generateRefereeOptionsWithConflicts(match.id, shownRef)}</select>
-        <button type="button" class="mc-btn mc-sm mc-primary" onclick="${handler}; _mcRefresh();"${busy.length || conflict.hasConflict ? ' disabled' : ''}>Start</button>
+        <button type="button" class="mc-btn mc-sm mc-primary" onclick="${handler}; _mcRefresh();"${busy.length || conflict.hasConflict || hold || chosenBusy ? ' disabled' : ''}>Start</button>
     </div>`;
 }
 

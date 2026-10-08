@@ -2271,6 +2271,14 @@ function toggleActiveWithValidation(matchId) {
             alert(`Cannot start match: ${busy.join(' and ')} ${busy.length > 1 ? 'are' : 'is'} playing another match`);
             return false;
         }
+        // Groups and cups: a referee chosen before the start must be free when it starts (a referee is
+        // only taken while their match is live, so the choice itself didn't check)
+        if (getFormat() === 'GROUPS' && match.referee && typeof isPlayerAvailableAsReferee === 'function' &&
+            !isPlayerAvailableAsReferee(match.referee, matchId)) {
+            const ref = players.find(p => String(p.id) === String(match.referee));
+            alert(`Cannot start match: the referee${ref ? `, ${ref.name},` : ''} is playing or refereeing another match. Choose another referee, or wait.`);
+            return false;
+        }
 
         // Check for referee conflicts using shared utility function
         if (typeof checkRefereeConflict === 'function') {

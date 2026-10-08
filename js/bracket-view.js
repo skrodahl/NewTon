@@ -279,8 +279,12 @@ const BracketView = (() => {
     };
 
     function cardHTML(st, v, id) {
-        const m = v.match, s = v.state;
-        const label = v.resultWaiting ? 'Result' : s === 'live' ? 'Live' : s === 'ready' ? 'Ready' : '';
+        const m = v.match;
+        // groups and cups: a match that waits for its referee (or its players' referee duty) isn't
+        // shown as Ready (Groups.holdFor(); Match Controls says why)
+        const held = v.state === 'ready' && getFormat() === 'GROUPS' && typeof Groups !== 'undefined' && !!Groups.holdFor(m);
+        const s = held ? 'pending' : v.state;
+        const label = v.resultWaiting ? 'Result' : s === 'live' ? 'Live' : s === 'ready' ? 'Ready' : held ? 'Waits' : '';
         const meta = `<span class="bv-id">${id}</span><span class="bv-grow"></span>` +
             (label ? `<span class="bv-state">${label}</span>` : '') +
             (m.lane && s !== 'completed' ? `<span class="bv-chip">L${escapeHtml(String(m.lane))}</span>` : '') +
@@ -673,7 +677,9 @@ const BracketView = (() => {
         if (s === 'live') return `<span class="bv-gchip bv-glive">${m.lane ? `Lane ${escapeHtml(String(m.lane))}` : 'Live'}</span>`;
         const busy = typeof getPlayersInLiveMatches === 'function' ? getPlayersInLiveMatches(m.id) : [];
         const free = ![m.player1, m.player2].some(p => p && busy.includes(parseInt(p.id)));
-        return free ? '<span class="bv-gchip bv-gready">Ready</span>' : '<span class="bv-gchip bv-gwait">Waiting</span>';
+        const hold = Groups.holdFor(m);
+        if (free && !hold) return '<span class="bv-gchip bv-gready">Ready</span>';
+        return `<span class="bv-gchip bv-gwait"${hold ? ` title="${escapeHtml(hold)}"` : ''}>Waiting</span>`;
     }
 
     /**

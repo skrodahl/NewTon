@@ -197,6 +197,21 @@ const Groups = (() => {
         const total = Math.log2(size) + 1;          // rounds: the natural ones, then the final
         const semis = total - 2, bronze = round(total - 1)[0], final = round(total)[0];
         const isBye = m => isWalkover(m.player1) || isWalkover(m.player2);
+        // Which matches will have two real players (a loser to referee) and which at least one (a
+        // winner), from round 1 and the cup's SE table: a loser of a walkover never exists
+        const bySe = {}, feeds = {};
+        cupMatches.forEach(m => { bySe[m.seId] = m; });
+        Object.entries(SE_MATCH_PROGRESSION[size] || {}).forEach(([src, rule]) => ['winner', 'loser'].forEach(kind => {
+            if (rule[kind]) (feeds[rule[kind][0]] = feeds[rule[kind][0]] || []).push({ src, kind });
+        }));
+        const realIn = {};                          // seId -> number of real players it will have
+        const count = seId => {
+            if (realIn[seId] !== undefined) return realIn[seId];
+            const m = bySe[seId];
+            if (m.round === 1) return (realIn[seId] = [m.player1, m.player2].filter(real).length);
+            return (realIn[seId] = (feeds[seId] || []).filter(f => f.kind === 'winner' ? count(f.src) >= 1 : count(f.src) === 2).length);
+        };
+        const twoReal = m => count(m.seId) === 2;
         const r1 = round(1), live = r1.filter(m => !isBye(m));
         const byeWinners = r1.filter(isBye).map(m => isWalkover(m.player1) ? m.player2 : m.player1).filter(real);
         const top = live.slice(0, Math.ceil(live.length / 2)), bottom = live.slice(top.length);
@@ -205,14 +220,15 @@ const Groups = (() => {
         top.forEach((m, i) => { m.plannedReferee = pool[i] != null ? { player: pool[i] } : null; });
         bottom.forEach((m, j) => { m.plannedReferee = top[j] ? { loserOf: top[j].id } : null; });
         for (let r = 2; r <= semis; r++) {
-            const before = round(r - 1).filter(m => r - 1 > 1 || !isBye(m)).reverse();
+            const before = round(r - 1).filter(twoReal).reverse();
             round(r).forEach((m, k) => { m.plannedReferee = before.length ? { loserOf: before[k % before.length].id } : null; });
         }
-        if (bronze) {
-            const back = semis - 1 >= 1 ? round(semis - 1).filter(m => semis - 1 > 1 || !isBye(m)) : [];
-            bronze.plannedReferee = back.length ? { loserOf: back[0].id } : (round(semis)[0] ? { winnerOf: round(semis)[0].id } : null);
+        if (bronze && twoReal(bronze)) {
+            const back = semis - 1 >= 1 ? round(semis - 1).filter(twoReal) : [];
+            const sf1 = round(semis)[0];
+            bronze.plannedReferee = back.length ? { loserOf: back[0].id } : (sf1 && count(sf1.seId) >= 1 ? { winnerOf: sf1.id } : null);
         }
-        if (final && bronze) final.plannedReferee = { loserOf: bronze.id };
+        if (final) final.plannedReferee = bronze && twoReal(bronze) ? { loserOf: bronze.id } : null;
     }
 
     /**
@@ -245,6 +261,37 @@ const Groups = (() => {
         if (plan.loserOf) return `loser of ${plan.loserOf}`;
         if (plan.winnerOf) return `winner of ${plan.winnerOf}`;
         return '';
+    }
+
+    /** The referee a match would have now: the one chosen, or the planned one once known. */
+    const refereeOf = m => m.referee ? playerOf(m.referee) : plannedRefereeFor(m);
+
+    /**
+     * Why a ready match should wait, or null when it can start (Docs/GROUPS-AND-CUPS.md): one of its
+     * players is the referee of an earlier match in the same group or cup that is ready but not
+     * started (that match goes first), or its planned referee isn't known yet ("the loser of A-QF1")
+     * and no one has been chosen. Choosing another referee for either match lets it start. A cup
+     * whose matches have no plan (two players) never waits.
+     * @param {object} match
+     * @returns {string|null} the reason, e.g. "Ken referees A-QF1 first"
+     */
+    function holdFor(match) {
+        if (!on() || !match || match.completed || match.active) return null;
+        const order = m => m.side === 'group' ? (m.positionInRound || 0) : (m.numericId || 0);
+        const peers = match.side === 'group' ? groupMatches(match.group) : match.side === 'cup' ? cupMatchesOf(match.cup) : [];
+        const earlier = peers.filter(m => m.id !== match.id && order(m) < order(match) && !m.completed && !m.active && getMatchState(m) === 'ready');
+        const duty = [];
+        [match.player1, match.player2].forEach(p => {
+            if (!real(p)) return;
+            const first = earlier.find(e => { const r = refereeOf(e); return r && String(r.id) === String(p.id); });
+            if (first) duty.push(`${p.name} referees ${first.id} first`);
+        });
+        if (duty.length) return duty.join('; ');
+        const plan = match.plannedReferee;
+        if (!match.referee && plan && plan.player == null && !plannedRefereeFor(match)) {
+            return `its referee is the ${plan.loserOf ? 'loser' : 'winner'} of ${plan.loserOf || plan.winnerOf}`;
+        }
+        return null;
     }
 
     // ---------- the cups ----------
@@ -330,7 +377,7 @@ const Groups = (() => {
     return {
         isGroupId, isCupId, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
         groupList, groupMatches, standings, groupDone, allGroupsDone, cupFields,
-        planCupReferees, plannedRefereeFor, plannedRefereeText, cupMatchesOf,
+        planCupReferees, plannedRefereeFor, plannedRefereeText, cupMatchesOf, holdFor,
         isComplete, placements, roundName, moveUp
     };
 })();

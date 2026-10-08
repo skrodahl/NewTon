@@ -99,6 +99,7 @@
 .mc-vs { color: var(--nt-faint); margin: 0 6px; }
 .mc-who small { font-size: 12px; color: var(--nt-muted); }
 .mc-who small.mc-warn { color: var(--nt-warn); }
+.mc-who small.mc-wait { color: var(--nt-ink-2); } /* groups and cups: waits for its referee, or for its players' referee duty */
 .mc-qempty { padding: 16px 18px; color: var(--nt-muted); font-size: 13px; }
 
 /* ---- referees ---- */
