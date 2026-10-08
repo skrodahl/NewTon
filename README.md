@@ -117,7 +117,8 @@ More on the [architecture and focus on resilience here](https://newtondarts.com/
 - **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using [REST API](https://newtondarts.com/rest-api.html)
 
 ### Single and Double Elimination Brackets
-- **Professional Structure**: Single and Double elimination brackets for 8, 16, and 32 players, facilitates tournaments for 4-32 players.
+- **Professional Structure**: Single and Double elimination brackets for 8, 16, and 32 players, facilitates tournaments for 4-48 players.
+- **Qualifiers above 32**: 33 to 48 players play a 32-player bracket with qualifier matches before round 1, one for each player above 32. Lose a qualifier and you're not qualified (33rd–48th); nothing in a qualifier counts towards statistics or Analytics.
 - **Smart Generation**: Prevents two walkovers from meeting in first round
 - **Fair Draw**: Byes randomly distributed to prevent unfair advantages and minimize walkover chains
 - **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
@@ -149,7 +150,7 @@ Intuitive traffic light system for instant priority assessment:
 - **Registration**: Add players and track payment status
 - **Late Registration**: New players can be added to a tournament if there are any walkover spots available
 - **Comprehensive Stats**: Short legs, high outs, tons, 180s with configurable points
-- **Live Rankings**: Real-time 1st through 32nd place calculation
+- **Live Rankings**: Real-time 1st through 48th place calculation
 - **Export Results**: CSV and JSON export with full tournament history
 
 ### Configuration

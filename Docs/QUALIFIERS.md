@@ -116,6 +116,8 @@ exactly what it is today.
 
 ## Everywhere the pages say 32 (maintainer, 2026-10-08)
 
+**Done 2026-10-09** (maintainer asked before release): landing pages (keywords, feature list), `tournament.html` description, README, `llms.txt` (DE/SE 4–48, a Qualifiers line, "more than 48 players" on the do-not-invent list). Search again at release.
+
 Every place that tells people "up to 32 players" for double or single elimination must say 48
 when this ships. Found 2026-10-08 (search again before release, the list may have grown):
 
