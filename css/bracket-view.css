@@ -282,10 +282,10 @@
 .bv-gkey-a { background: var(--nt-ok); }
 .bv-gkey-b { background: var(--nt-card-line); }
 .bv-glist { border-top: 1px solid var(--nt-line); }
-.bv-grow { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto auto; gap: 10px; align-items: center; padding: 6px 16px; font-size: 13px; cursor: pointer; }
-.bv-grow.bv-gdone { cursor: default; }
-.bv-grow + .bv-grow { border-top: 1px dashed var(--nt-line); }
-.bv-grow:not(.bv-gdone):hover { background: var(--bv-surface-2); }
+.bv-gmatch { display: grid; grid-template-columns: 40px minmax(0, 1fr) auto auto auto; gap: 10px; align-items: center; padding: 6px 16px; font-size: 13px; cursor: pointer; }
+.bv-gmatch.bv-gdone { cursor: default; }
+.bv-gmatch + .bv-gmatch { border-top: 1px dashed var(--nt-line); }
+.bv-gmatch:not(.bv-gdone):hover { background: var(--bv-surface-2); }
 .bv-glive-row { background: var(--bv-live-fill); }
 .bv-gno { font-family: var(--bv-mono); font-size: 11px; color: var(--bv-muted); }
 .bv-gwho { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }

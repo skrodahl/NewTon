@@ -711,7 +711,7 @@ const BracketView = (() => {
                 const w = done && m.winner ? String(m.winner.id) : null;
                 const nm = p => `<span${w && String(p.id) === w ? ' class="bv-gwin"' : ''}>${escapeHtml(p.name)}</span>`;
                 const undo = done && !tournament.readOnly && isMatchUndoable(m.id) ? `<button type="button" class="bv-gundo" data-undo="${escapeHtml(m.id)}" title="Undo this result">Undo</button>` : '';
-                return `<div class="bv-grow${done ? ' bv-gdone' : ''}${live ? ' bv-glive-row' : ''}" data-match="${escapeHtml(m.id)}" title="${done ? '' : 'Open in Match Controls'}">
+                return `<div class="bv-gmatch${done ? ' bv-gdone' : ''}${live ? ' bv-glive-row' : ''}" data-match="${escapeHtml(m.id)}" title="${done ? '' : 'Open in Match Controls'}">
                     <span class="bv-gno">${escapeHtml(m.id)}</span><span class="bv-gwho">${nm(m.player1)} – ${nm(m.player2)}</span>
                     <span class="bv-gref">${ref ? `ref ${escapeHtml(ref)}` : ''}</span>${groupMatchState(m)}${undo}</div>`;
             }).join('');
@@ -731,7 +731,7 @@ const BracketView = (() => {
             <div class="bv-signature bv-gsig" id="tournament-watermark">${String.fromCharCode(..._0x7a, ..._0x9b)}</div></div>`;
         els.groups.hidden = false;
         els.groups.querySelectorAll('[data-undo]').forEach(b => b.addEventListener('click', e => { e.stopPropagation(); handleSurgicalUndo(b.dataset.undo); }));
-        els.groups.querySelectorAll('.bv-grow:not(.bv-gdone)').forEach(r => r.addEventListener('click', () => showBracketView('controls', r.dataset.match)));
+        els.groups.querySelectorAll('.bv-gmatch:not(.bv-gdone)').forEach(r => r.addEventListener('click', () => showBracketView('controls', r.dataset.match)));
     }
 
     /** Hide the overlay and release the viewport when another renderer takes over. */
@@ -1137,7 +1137,8 @@ const BracketView = (() => {
         const wo = all.filter(m => m.completed && isWalkoverMatch(m)).length;
         const played = all.filter(m => m.completed).length - wo;
         const live = all.filter(m => getMatchState(m) === 'live').length;
-        const ready = all.filter(m => getMatchState(m) === 'ready').length;
+        // groups and cups: a match that waits (Groups.holdFor()) isn't counted as ready
+        const ready = all.filter(m => getMatchState(m) === 'ready' && !(getFormat() === 'GROUPS' && typeof Groups !== 'undefined' && Groups.holdFor(m))).length;
         const groupsFormat = getFormat() === 'GROUPS' && !!tournament.bracket;
         status.innerHTML = groupsFormat
             ? `<b>${paid}</b> players · ${Groups.groupList().length} groups · ${all.filter(m => m.side === 'group').length} group matches${tournament.cups ? ` · ${tournament.cups.B ? 'A and B cups' : 'A cup'}` : ''} · ${played} played${wo ? `, ${wo} walkovers` : ''} · <b>${live}</b> live · <b>${ready}</b> ready`
