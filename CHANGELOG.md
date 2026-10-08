@@ -1,5 +1,17 @@
 ## **v5.4.0** — Just Around the Corner (2026-10-08)
 
+### The bracket always shows the current tournament
+
+- **The old tournament's groups stayed on the bracket page.** With a Round Robin in its group stage, creating a new tournament and opening the bracket showed the old tournament's group cards. The cards are drawn in their own panel, which `clearBracket()` doesn't reach, and showing the Bracket tab didn't redraw it. Creating, resetting, loading or importing a tournament without a draw never redrew the bracket. Now the bracket is redrawn whenever the Bracket tab shows (`renderBracket()` in `showBracketView()`), so it always shows the current tournament, by whatever path it became current. The same tournament redrawn keeps its zoom, selection and Follow.
+- Files changed: `js/bracket-rendering.js` (`showBracketView()`).
+
+### Landing page: new screenshots and copy
+
+- **See It in Action has new screenshots and new copy throughout**, matching the app as it is now: Bracket (every round on one page, the three formats), Chalker App (**Scan It or Send It.**: QR and network handover side by side), Match Controls, Player Registration (who's here, who's paid; the draw waits for everyone), **Shuffle & Draw** (formats, seeding and fair byes; it takes over the Fair Draw card's message), **Analytics** (new; replaces Fair Draw), and Tournament Complete (the podium for the club chat).
+- **Lighter thumbnails:** 1000px JPGs, about 430 KB together instead of 1.3 MB; the full-size images stay PNG for the lightbox.
+- **Old screenshots removed** (the earlier gallery's images and some unused ones); the poster artwork moves to `Screenshots/posters/`; `backup.png` stays (Automatic Backup uses it). The commented-out Quick Start image is gone from both landing pages.
+- Files changed: `landing.html`, `landing-page.php` (the same gallery for the Docker landing page), `Screenshots/`.
+
 ### Bracket page header: a frame at both ends, tools in line
 
 - The tournament name and date get the clock's divider, mirrored (a line to their right), so the header is framed at both ends.

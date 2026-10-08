@@ -2595,7 +2595,15 @@ function showBracketView(view, matchId) {
         if (typeof startDeveloperConsole === 'function') startDeveloperConsole();
         return;
     }
-    if (view !== 'controls') { _bvSetView('bracket'); return; }
+    if (view !== 'controls') {
+        _bvSetView('bracket');
+        // Always draw the current tournament when the bracket shows: creating, resetting, loading
+        // or importing a tournament without a draw doesn't redraw it, and the old tournament's
+        // picture (the group cards above all, which clearBracket() doesn't reach) would stay.
+        // The same tournament redrawn keeps its zoom, selection and Follow.
+        renderBracket();
+        return;
+    }
     showMatchCommandCenter();
     if (!matchId) return;
     const el = document.getElementById(`cc-match-card-${matchId}`);

@@ -131,9 +131,6 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
                 <p>Deploy on your own server in under 2 minutes. Lightweight Docker container with nginx — perfect for club or venue use.</p>
                 <a href="docker-quickstart.html" class="btn-github">Docker Quickstart</a>
             </div>
-            <!-- <div class="get-started-quickstart has-lightbox">
-                <img src="Screenshots/quickstart.jpg" alt="NewTon DC Tournament Manager — Quick Start Guide: Download, Open, Configure, Create, Register, Generate &amp; Run" class="lightbox-trigger" data-full="Screenshots/quickstart.jpg">
-            </div> -->
             <div class="get-started-card get-started-card--wide">
                 <div class="get-started-card-text">
                     <h3>User Guide</h3>
@@ -160,12 +157,12 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-bracket-zoom.jpg" alt="32-player tournament bracket showing the full double elimination structure with a zoomed match card" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.jpg">
+                <img src="Screenshots/th-bracket-zoom.jpg" alt="Double elimination bracket with every round on one page: played matches, a match ready to start, and the finals waiting" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.png">
             </div>
             <div class="showcase-text">
-                <span class="showcase-label">Bracket View</span>
+                <span class="showcase-label">Bracket</span>
                 <h3>The Bracket, Properly.</h3>
-                <p>Zoomable, pannable bracket canvas. Click any match card for players, score, and status &mdash; then follow progression lines all the way to the final. Clean from 4 players to 32.</p>
+                <p>Every round on one page. Zoom and pan, hover to magnify a match, click it to light up where the winner and loser go, or Follow one player all the way. Double elimination, single elimination, or Round Robin&rsquo;s groups and cups.</p>
                 <p class="showcase-closer">A bracket you can trust.</p>
             </div>
         </div>
@@ -176,68 +173,68 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Chalker App</span>
-                <h3>From Board to Bracket in One Scan.</h3>
-                <p>Scan the assignment QR and the Chalker is ready &mdash; players, format, lane, referee. When the match ends, scan the result QR back and the bracket advances instantly.</p>
+                <h3>Scan It or Send It.</h3>
+                <p>Hand a match to the Chalker with a QR code, or send it straight to the lane over your own network. Players, format, lane and referee arrive with it. When the match ends, the result comes back the same way, with every 180, high out and short leg, ready for you to accept.</p>
                 <p class="showcase-closer">No shouting results across the room.</p>
             </div>
         </div>
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-match-controls.jpg" alt="Match Controls panel showing live matches, referee assignment with conflict detection, and the Scan QR Results button" loading="lazy" class="lightbox-trigger" data-full="Screenshots/match-controls.jpg">
+                <img src="Screenshots/th-match-controls.jpg" alt="Match Controls with a tile for each live match, the free lanes and the next match, and a referee list where players who are playing or already refereeing are greyed out" loading="lazy" class="lightbox-trigger" data-full="Screenshots/match-controls.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Match Controls</span>
                 <h3>One Panel to Run the Night.</h3>
-                <p>See what&rsquo;s ready, assign lanes and referees, and send everything to the board in a single scan. Smart referee suggestions prevent conflicts and keep matches moving.</p>
+                <p>A tile for every board in play: click the winner to finish a match, click a free lane to start the next one. Referees are suggested, and anyone playing or already refereeing is greyed out, so nobody gets double-booked.</p>
                 <p class="showcase-closer">Less admin. More darts.</p>
             </div>
         </div>
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-player-registration-help.jpg" alt="Player registration page with saved players and dynamic help system" loading="lazy" class="lightbox-trigger" data-full="Screenshots/player-registration-help.jpg">
+                <img src="Screenshots/th-player-registration.jpg" alt="Player Registration counting players, paid and unpaid, with the next step and each player marked paid or unpaid" loading="lazy" class="lightbox-trigger" data-full="Screenshots/player-registration.png">
             </div>
             <div class="showcase-text">
-                <span class="showcase-label">Player Management</span>
-                <h3>Registration Without the Fuss.</h3>
-                <p>Add from your saved roster or register walk-ins on the spot. The help system guides first-time operators, and your regulars stay saved for next week.</p>
+                <span class="showcase-label">Player Registration</span>
+                <h3>Who&rsquo;s Here, Who&rsquo;s Paid.</h3>
+                <p>Add your regulars from the player database, or register walk-ins on the spot. Click a name to mark them paid. The draw waits until everyone is, so nobody is left out of the bracket.</p>
                 <p class="showcase-closer">Because retyping names is not a sport.</p>
             </div>
         </div>
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-setup.jpg" alt="Tournament setup page with name, date, and bracket configuration" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-setup.jpg">
+                <img src="Screenshots/th-tournament-setup.jpg" alt="Shuffle and Draw offering double elimination, single elimination and Round Robin, each sized to the paid players" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-setup.png">
             </div>
             <div class="showcase-text">
-                <span class="showcase-label">Setup</span>
-                <h3>From Zero to Bracket in 60 Seconds.</h3>
-                <p>Name it, pick a date, choose single or double elimination &mdash; done. Bracket size adapts to your player count automatically.</p>
-                <p class="showcase-closer">Same steps, same setup, every week.</p>
+                <span class="showcase-label">Shuffle &amp; Draw</span>
+                <h3>Pick a Format. Draw. Play.</h3>
+                <p>Double elimination, single elimination or Round Robin, sized to whoever turned up. Keep the best players apart with seeding from your own results, or leave it to a fair random draw, with byes spread so nobody gets an easy ride.</p>
+                <p class="showcase-closer">The bracket doesn&rsquo;t play favourites.</p>
             </div>
         </div>
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-bracket.jpg" alt="Tournament bracket showing fair draw seeding and BYE placement" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-bracket.jpg">
+                <img src="Screenshots/th-analytics.jpg" alt="Analytics player profile: rank, points, matches and legs won, placements, and form charts for position, points and finishes" loading="lazy" class="lightbox-trigger" data-full="Screenshots/analytics.png">
             </div>
             <div class="showcase-text">
-                <span class="showcase-label">Fair Draw</span>
-                <h3>BYEs Handled Like Adults.</h3>
-                <p>The draw distributes players fairly across the bracket. When the field isn&rsquo;t a power of two, BYEs are placed strategically so nobody gets an unfair edge.</p>
-                <p class="showcase-closer">The bracket doesn&rsquo;t play favorites.</p>
+                <span class="showcase-label">Analytics</span>
+                <h3>Every Night Adds Up.</h3>
+                <p>Every match lands in Analytics: season standings, player profiles with form charts, finishes and averages, filtered to the nights that count. Members can follow it on their phones.</p>
+                <p class="showcase-closer">Settle the bar arguments.</p>
             </div>
         </div>
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-celebration.jpg" alt="Tournament winner celebration screen" loading="lazy" class="lightbox-trigger" data-full="Screenshots/celebration.jpg">
+                <img src="Screenshots/th-celebration.jpg" alt="Tournament complete: a podium with the champion, the runner-up and third place, and the night&rsquo;s most 180s, shortest leg and highest out" loading="lazy" class="lightbox-trigger" data-full="Screenshots/celebration.png">
             </div>
             <div class="showcase-text">
                 <span class="showcase-label">Tournament Complete</span>
                 <h3>Give the Winner Their Moment.</h3>
-                <p>Podium results, final standings, and tournament highlights when the last dart lands. Export CSV for league records or share JSON for next time.</p>
+                <p>A podium with the night&rsquo;s highlights (most 180s, shortest leg, highest out), made to be photographed for the club chat. Placings and points go straight into the season standings.</p>
                 <p class="showcase-closer">The night ends. The record doesn&rsquo;t.</p>
             </div>
         </div>
