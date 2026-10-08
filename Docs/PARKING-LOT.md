@@ -85,6 +85,9 @@ Raised 2026-10-06, and the reason for the formats registry and the app remake: t
 
 5. **Seen in the maintainer's cups view (10 players):** a B cup of two draws its bronze final as Walkover v Walkover under "7th–8th place" (empty; maybe leave the bronze final out, or say no 7th–8th); the Ready label on the cards reads "READ" (cut off, the Bo3 chip pushed out; check whether double and single elimination do the same); ⚠ on Ken in A-QF4 because he is assigned as referee of a match not started yet (note 1).
 
+6. **After playing A-QF1 and A-QF2 and undoing them, Ken shows as refereeing (A-QF4 blocked) but Henry doesn't.** Both had been filled in at Start as planned referees; after the undos one of them is still assigned (`match.referee` set), the other isn't. To investigate: what undo resets (it clears `referee` on the undone match and on downstream matches, but the order of the two undos, or a re-render, may leave one behind). Expected: after undo both matches back to planned, nobody assigned.
+7. **B-F says "ref: loser of B-B", but B-B is Walkover v Walkover** in a two-player B cup, so that loser never exists. The plan should fall back (no plan, or the A cup / nearest free player) when the source match is a walkover.
+
 **Still open:** the invite list for the season final (top 16 from the ranking; the Season concept in the Inbox); a setting to avoid group rematches in cup round 1; withdrawals in the middle of a group; Analytics views made for groups; `llms.txt` once it is released.
 
 ---
