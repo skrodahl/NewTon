@@ -182,6 +182,30 @@ const Groups = (() => {
 
     // ---------- planned referees ----------
     /**
+     * How many real players each of a cup's matches will have, from round 1 and the cup's SE table:
+     * a winner exists when its match has at least one real player, a loser only when it has two (a
+     * walkover has no loser). Known as soon as the cup is drawn.
+     * @param {object[]} cupMatches - one cup's matches, round 1 with its players
+     * @param {number} size - the cup's bracket size
+     * @returns {function(string): number} seId -> 0, 1 or 2
+     */
+    function realCounts(cupMatches, size) {
+        const bySe = {}, feeds = {}, memo = {};
+        cupMatches.forEach(m => { bySe[m.seId] = m; });
+        Object.entries(SE_MATCH_PROGRESSION[size] || {}).forEach(([src, rule]) => ['winner', 'loser'].forEach(kind => {
+            if (rule[kind]) (feeds[rule[kind][0]] = feeds[rule[kind][0]] || []).push({ src, kind });
+        }));
+        const count = seId => {
+            if (memo[seId] !== undefined) return memo[seId];
+            const m = bySe[seId];
+            if (!m) return (memo[seId] = 0);
+            if (m.round === 1) return (memo[seId] = [m.player1, m.player2].filter(real).length);
+            return (memo[seId] = (feeds[seId] || []).filter(f => f.kind === 'winner' ? count(f.src) >= 1 : count(f.src) === 2).length);
+        };
+        return count;
+    }
+
+    /**
      * Plan the referees of a cup's matches as they are made (Docs/GROUPS-AND-CUPS.md): round 1's
      * top half by the bye winners first, then the players of the bottom matches (the last one
      * first); its bottom half by the losers of the top half, in order. Later rounds up to the
@@ -197,20 +221,7 @@ const Groups = (() => {
         const total = Math.log2(size) + 1;          // rounds: the natural ones, then the final
         const semis = total - 2, bronze = round(total - 1)[0], final = round(total)[0];
         const isBye = m => isWalkover(m.player1) || isWalkover(m.player2);
-        // Which matches will have two real players (a loser to referee) and which at least one (a
-        // winner), from round 1 and the cup's SE table: a loser of a walkover never exists
-        const bySe = {}, feeds = {};
-        cupMatches.forEach(m => { bySe[m.seId] = m; });
-        Object.entries(SE_MATCH_PROGRESSION[size] || {}).forEach(([src, rule]) => ['winner', 'loser'].forEach(kind => {
-            if (rule[kind]) (feeds[rule[kind][0]] = feeds[rule[kind][0]] || []).push({ src, kind });
-        }));
-        const realIn = {};                          // seId -> number of real players it will have
-        const count = seId => {
-            if (realIn[seId] !== undefined) return realIn[seId];
-            const m = bySe[seId];
-            if (m.round === 1) return (realIn[seId] = [m.player1, m.player2].filter(real).length);
-            return (realIn[seId] = (feeds[seId] || []).filter(f => f.kind === 'winner' ? count(f.src) >= 1 : count(f.src) === 2).length);
-        };
+        const count = realCounts(cupMatches, size);
         const twoReal = m => count(m.seId) === 2;
         const r1 = round(1), live = r1.filter(m => !isBye(m));
         const byeWinners = r1.filter(isBye).map(m => isWalkover(m.player1) ? m.player2 : m.player1).filter(real);
@@ -305,34 +316,57 @@ const Groups = (() => {
         return done('A-F') && done('A-B') && (!tournament.cups.B || (done('B-F') && done('B-B')));
     }
 
+    /** A place in the order (1, 2, 3 …) as the placing it shows and scores: 5th–6th, 7th–8th, 9th–12th … as in the brackets. */
+    const placeTier = n => n <= 4 ? n : n <= 6 ? 5 : n <= 8 ? 7 : n <= 12 ? 9 : n <= 16 ? 13 : n <= 24 ? 17 : 25;
+
     /**
-     * The placings as the cups stand (for points; everyone also gets participation): A cup final
-     * 1st/2nd, bronze final 3rd/4th; with a B cup its final pair 5th–6th and bronze pair 7th–8th;
-     * without one, the A cup quarterfinal losers 5th–8th by group performance (the best two 5th–6th,
-     * the next two 7th–8th), once all those quarterfinals are played.
+     * The placings as the cups stand: every player gets one (Docs/GROUPS-AND-CUPS.md, Placings). In
+     * order: the A cup's final pair (1st, 2nd) and bronze pair (3rd, 4th); with a B cup, its final
+     * pair and bronze pair; then the A cup's other losers, the latest round first, then the B cup's,
+     * each round by group performance; then anyone in no cup, by group performance. Places run on
+     * through that order as shared places (5th–6th, 7th–8th, 9th–12th …), so a B cup too small to
+     * fill 7th–8th leaves those places to the A cup's quarterfinal losers. Each block is placed once
+     * it is decided (a round when all its matches are played; anyone in no cup at the cup draw);
+     * where it starts is known from the draw.
      * @returns {Object<string, number>} player id → placement
      */
     function placements() {
         const out = {};
-        if (!on() || !tournament.cups) return out;
-        const set = (p, r) => { if (real(p)) out[String(p.id)] = r; };
-        const done = id => { const m = byId(id); return m && m.completed ? m : null; };
-        let m;
-        if ((m = done('A-B'))) { set(m.winner, 3); set(m.loser, 4); }
-        if ((m = done('A-F'))) { set(m.winner, 1); set(m.loser, 2); }
-        if (tournament.cups.B) {
-            if ((m = done('B-F'))) { set(m.winner, 5); set(m.loser, 5); }
-            if ((m = done('B-B'))) { set(m.winner, 7); set(m.loser, 7); }
-        } else {
-            const qf = cupMatchesOf('A').filter(x => /-QF\d+$/.test(x.id));
-            if (qf.length && qf.every(x => x.completed)) {
-                const rowOf = {};
-                groupList().forEach(g => standings(g.name).forEach(r => { rowOf[r.id] = r; }));
-                const losers = qf.map(x => x.loser).filter(real).map(p => rowOf[String(p.id)]).filter(Boolean)
-                    .sort((a, b) => byPerMatch(a, b) || a.pos - b.pos);
-                losers.forEach((r, i) => { if (i < 4) out[r.id] = i < 2 ? 5 : 7; });
+        if (!on() || !tournament.cups || !tournament.cups.A) return out;
+        const rowOf = {};
+        groupList().forEach(g => standings(g.name).forEach(r => { rowOf[r.id] = r; }));
+        const byGroups = (a, b) => { const x = rowOf[String(a.id)], y = rowOf[String(b.id)]; return x && y ? (byPerMatch(x, y) || x.pos - y.pos) : 0; };
+        let next = 1;
+        // a block of `size` places; `players` (in order) when decided
+        const block = (size, players) => {
+            if (players) players.filter(real).forEach((p, i) => { out[String(p.id)] = placeTier(next + i); });
+            next += size;
+        };
+        const pair = (m, size) => block(size, m && m.completed ? [m.winner, m.loser] : null);
+        const cupBlocks = cup => {
+            const ms = cupMatchesOf(cup), c = tournament.cups[cup];
+            return { ms, size: c.size, count: realCounts(ms, c.size), total: Math.log2(c.size) + 1 };
+        };
+        const finals = cup => {
+            const k = cupBlocks(cup), at = r => k.ms.find(m => m.round === r);
+            pair(at(k.total), k.count(at(k.total).seId));          // final
+            pair(at(k.total - 1), k.count(at(k.total - 1).seId));  // bronze final
+        };
+        const losers = cup => {
+            const k = cupBlocks(cup);
+            for (let r = k.total - 3; r >= 1; r--) {                // before the semifinals, latest round first
+                const round = k.ms.filter(m => m.round === r && k.count(m.seId) === 2);
+                const decided = round.length && round.every(m => m.completed);
+                block(round.length, decided ? round.map(m => m.loser).slice().sort(byGroups) : null);
             }
-        }
+        };
+        finals('A');
+        if (tournament.cups.B) finals('B');
+        losers('A');
+        if (tournament.cups.B) losers('B');
+        const inCup = new Set(all().filter(m => m.side === 'cup').flatMap(m => [m.player1, m.player2]).filter(real).map(p => String(p.id)));
+        const rest = groupList().flatMap(g => g.players.map(String)).filter(id => !inCup.has(id)).map(id => rowOf[id] && rowOf[id].player).filter(Boolean);
+        block(rest.length, rest.slice().sort(byGroups));
         return out;
     }
 

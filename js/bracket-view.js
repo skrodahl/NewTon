@@ -436,7 +436,10 @@ const BracketView = (() => {
                 const places = c.cup === 'A' ? ['1st', '3rd place'] : ['5th–6th', '7th–8th place'];
                 lblMid('Final', at(final).x, at(final).y - LABEL_GAP, 'bv-col-label bv-finals-label');
                 lblMid('Bronze final', at(bronze).x, at(bronze).y - LABEL_GAP, 'bv-col-label bv-finals-label');
-                lblMid(places[1], at(bronze).x, at(bronze).y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+                // a bronze final between two walkovers (a cup of two) decides nothing
+                const bm = M[c.map[bronze]] && M[c.map[bronze]].match;
+                const empty = bm && isWalkover(bm.player1) && isWalkover(bm.player2);
+                lblMid(empty ? 'Not played' : places[1], at(bronze).x, at(bronze).y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
                 if (c.cup === 'B') lblMid(places[0] + ' place', at(final).x, at(final).y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
             });
             const lastCup = st.cups[st.cups.length - 1];

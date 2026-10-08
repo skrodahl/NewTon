@@ -1,5 +1,13 @@
 ## Unreleased
 
+### Groups and Cups: after the first review
+
+- **Referees are a plan until the match is live** (review notes 1, 6): in this format a referee chosen for a match that hasn't started no longer blocks other matches, so swapping referees between two group matches can't lock them both. Start checks that a referee chosen beforehand is free.
+- **Matches wait for their referee** (note 4): Match Controls holds a ready match while one of its players referees an earlier match in the group or cup first ("Ken referees A-QF1 first"), or while its planned referee isn't known yet ("its referee is the loser of A-QF1"), with Start disabled; choosing another referee releases it. The bracket and the group cards show it as Waits/Waiting. Next up only suggests matches that can start.
+- **Plans never point at a walkover** (note 7): a two-player B cup's final has no planned referee (so it is Ready), and its empty bronze final reads "Not played".
+- **Everyone is placed** (note 8): after the A and B cups' finals and bronze finals, the A cup's other losers (latest round first), then the B cup's, each round by group results, then anyone in no cup, on shared places (9th–12th, 13th–16th …). A B cup too small to fill 7th–8th leaves those places to the best A cup quarterfinal losers. Cup losers are now struck through in the bracket, like eliminated players in the other formats.
+- Files changed: `js/groups.js` (`holdFor()`, `realCounts()`, `planCupReferees()`, `placements()`), `js/bracket-rendering.js` (live-only referee conflicts for this format, Match Controls rows), `js/clean-match-progression.js` (start check), `js/bracket-view.js`, `css/match-controls.css`, `js/dynamic-help-system.js`, `Docs/GROUPS-AND-CUPS.md`.
+
 ### A new tournament format: Groups and Cups (branch `groups-and-cups`, for review)
 
 - **Groups and Cups**, a third card under Shuffle & Draw (it can be hidden in Global Settings like the others): everybody plays everybody in groups, then an A cup and a B cup. Built for the weekly nights (15–32 players) and the December season final. Design: `Docs/GROUPS-AND-CUPS.md`; mockup: `Docs/mockups/group-night.html`.

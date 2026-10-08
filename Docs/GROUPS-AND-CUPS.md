@@ -45,18 +45,26 @@ and single elimination run exactly as before.
 - Cups are always drawn with the final in the middle, whatever the Finals position setting says
   (two cups have to fit the page).
 
-**Placings** (for points; everyone gets participation)
-- A cup: final winner 1st, loser 2nd; bronze winner 3rd, loser 4th.
-- With a B cup: B final pair 5th–6th, B bronze pair 7th–8th. A cup quarterfinal losers get
-  participation only (intended).
-- Without a B cup: the A cup's quarterfinal losers fill 5th–8th, ordered by group performance (the
-  same cross-group measure): the best two 5th–6th, the next two 7th–8th.
-- The tournament is complete when the last cup final is played.
+**Placings** (for points; everyone gets participation) — revised after review 2026-10-08: everyone is placed
+- In order: the A cup's final pair (1st, 2nd) and bronze pair (3rd, 4th); with a B cup, its final
+  pair and bronze pair; then the A cup's other losers, the latest round first; then the B cup's; each
+  round ordered by group performance; then anyone who played no cup.
+- Places run on through that order as shared places, as in the brackets (5th–6th, 7th–8th,
+  9th–12th, 13th–16th …). A full B cup takes 5th–8th, so the A cup's quarterfinal losers are 9th–12th
+  (participation points only, as intended); a B cup too small to fill 7th–8th leaves those places to
+  the best A cup quarterfinal losers; without a B cup they take 5th–8th.
+- Each block is placed once decided (a round when all its matches are played). The tournament is
+  complete when the last cup final is played.
 
 **Referees and boards**
 - Boards are always the operator's choice.
 - Referees are planned, shown, and filled in when a match starts if the planned referee is free;
   always editable (Match Controls' usual referee control and conflict checks).
+- In this format a referee is only taken while their match is live; one chosen for a match that
+  hasn't started is a plan and blocks no one (review note 1). Instead a ready match **waits** (Match
+  Controls says why) while one of its players is the referee of an earlier ready match in the same
+  group or cup, or while its planned referee isn't known yet ("the loser of A-QF1"). Choosing another
+  referee for either match lets it start. Plans never point at a match that will be a walkover.
 - Cups, round 1: bye winners referee first, then players from the bottom of round 1 (the last
   match's players first), for the top half of the round; the bottom half is refereed by the losers
   of the top half, in order (8 players, no byes: QF1 and QF2 by QF4's players, QF3 by QF1's loser,
