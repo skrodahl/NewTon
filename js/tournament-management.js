@@ -994,7 +994,7 @@ function renderSetupCurrent() {
         <div class="st-quiet">
             <button type="button" class="st-link" onclick="exportTournament()">Export tournament</button>
             <button type="button" class="st-link" id="uploadToServerBtn" onclick="showUploadModal()"${setupServerAvailable ? '' : ' hidden'}>Backup to server</button>
-            <button type="button" class="st-link st-danger" onclick="showResetTournamentModal()">Reset tournament…</button>
+            ${status === 'Completed' ? '' : '<button type="button" class="st-link st-danger" onclick="showResetTournamentModal()">Reset tournament…</button>'}
         </div>`;
 
     // A completed tournament that isn't in Analytics yet: offer to add it instead
@@ -1637,6 +1637,9 @@ function continueImportProcess(importedData) {
 }
 
 function showResetTournamentModal() {
+    // A completed tournament can't be reset: its results are final (to correct one, Developer
+    // Console → Toggle Read-Only, then undo the match)
+    if (!tournament || tournament.status === 'completed') return;
     const tournamentName = tournament.name;
     const completedMatches = matches.filter(m => m.completed).length;
     const totalMatches = matches.length;
@@ -1677,6 +1680,7 @@ function showResetTournamentModal() {
 }
 
 function confirmReset() {
+    if (!tournament || tournament.status === 'completed') return; // never a completed tournament (see showResetTournamentModal())
     const input = document.getElementById('resetConfirmationInput');
     const tournamentName = tournament.name;
 
@@ -1687,6 +1691,18 @@ function confirmReset() {
 
     // Close the modal first
     popDialog();
+
+    // The Analytics register: an unfinished tournament's record (hidden until the tournament
+    // completes) goes with the reset, so a new draw doesn't keep results from the old one; a
+    // completed tournament's record is its result in Analytics and stays.
+    if (typeof NewtonDB !== 'undefined' && tournament && tournament.id != null) {
+        const tid = String(tournament.id);
+        NewtonDB.getTournament(tid).then(t => {
+            if (t && t.status !== 'final') return NewtonDB.deleteTournament(tid);
+        }).then(() => {
+            if (typeof NewtonHistory !== 'undefined' && NewtonHistory.invalidateCache) NewtonHistory.invalidateCache();
+        }).catch(e => console.warn('Reset: could not clear the register record:', e));
+    }
 
     // Reset tournament data only
     matches = [];

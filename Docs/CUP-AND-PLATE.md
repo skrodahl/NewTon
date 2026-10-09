@@ -115,4 +115,5 @@ No new settings.
   up as now. Shuffle & Draw: the Play a Plate switch on the single elimination card (unless Offer
   Play a Plate is off).
 - **Winner dialog:** "Ola M. moves to P-QF1" for a Cup round 1 loser, as on the backside.
+- **Analytics:** the tournament record keeps `plate` (finalize and import), so Analytics names the format **Cup & Plate**. Plate matches are recorded like any other (achievements, matches and legs count; walkovers aren't recorded, as in every format).
 - **Help, user guide, llms.txt, web pages.**

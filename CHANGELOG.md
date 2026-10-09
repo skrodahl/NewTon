@@ -1,5 +1,16 @@
 ## Unreleased
 
+### Reset: never a completed tournament, and an unfinished one leaves the Analytics register clean
+
+- **A completed tournament can't be reset** (maintainer, 2026-10-09). Its results are final, and Reset threw them all away; the link is gone from Tournament Setup for a completed tournament, and `showResetTournamentModal()` and `confirmReset()` refuse one anyway. To correct a result after completion: Developer Console → Toggle Read-Only, then undo the match.
+- **Reset clears an unfinished tournament's Analytics record.** The register keeps a hidden "live" record of every match as it is played, and Reset left it alone, so after a reset and a new draw, a match that became a walkover (never recorded) kept its old result: two matches from an earlier draw, with players no longer in the tournament, showed up in Analytics when the tournament completed. Reset now deletes the tournament's record and matches from the register (`NewtonDB.deleteTournament()`) when the record isn't final; a final record is never touched. Undo already cleaned up after itself; Reset didn't, since the register was added.
+- Files changed: `js/tournament-management.js` (`renderSetupCurrent()`, `showResetTournamentModal()`, `confirmReset()`), `js/dynamic-help-system.js`.
+
+### Cup and Plate in Analytics: "Cup & Plate"
+
+- Analytics named a Cup and Plate night "Single elim.", since the register only stores the format id (`SE`). The tournament record now also keeps `plate` (when finalized, and when imported into the register), and Analytics says **Cup & Plate** in the tournament list, the tournament's facts and the import dialog. Plate matches were always recorded like any other (their achievements, matches and legs count); walkovers, as in every format, are not.
+- Files changed: `js/clean-match-progression.js` (finalize), `js/newton-db.js` (`backfillTournament()`), `js/newton-history.js`.
+
 ### Cup and Plate: single elimination where the round 1 losers play a second knockout
 
 - **Play a Plate**, a switch on single elimination's card in Shuffle & Draw (from 5 players: a Cup of 8 or more). It always starts off; **Offer Play a Plate** in Global Settings (on by default, `config.ui.offerPlate`) leaves it out of the draw for clubs that never play one. Design and decisions: `Docs/CUP-AND-PLATE.md`; mockup `Docs/mockups/cup-and-plate.html`.

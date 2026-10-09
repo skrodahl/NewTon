@@ -22,7 +22,7 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Export tournament:</strong> Save the tournament as a JSON file, for backup or to move it to another computer.</p>
                     <p><strong>Backup to server:</strong> Shown when the Tournament Manager runs on a server. Uploads the tournament, or a tournament file.</p>
-                    <p><strong>Reset tournament:</strong> Clears all bracket progress and keeps the players. You type the tournament's name to confirm.</p>
+                    <p><strong>Reset tournament:</strong> Clears all bracket progress and keeps the players. You type the tournament's name to confirm. Not offered once a tournament is completed: its results are final (to correct one, Developer Console → Toggle Read-Only, then undo the match).</p>
                     <p><strong>⚠️ Warning:</strong> Reset permanently deletes all match results and standings.</p>
                 `
             },

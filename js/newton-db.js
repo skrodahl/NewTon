@@ -714,6 +714,7 @@ const NewtonDB = (() => {
         meta.tournamentAchievements = tournamentAchievements;
         meta.placements = t.placements || {};
         if (Array.isArray(t.notQualified) && t.notQualified.length) meta.notQualified = t.notQualified; // lost a qualifier
+        if (t.plate) meta.plate = t.plate; // Cup and Plate
         meta.matchCount = savedMatchCount;
         await saveTournamentMeta(meta);
 

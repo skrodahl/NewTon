@@ -900,6 +900,8 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                                     t.placements = tournament.placements;
                                     // qualifiers: who lost one, for Taking part (Docs/QUALIFIERS.md)
                                     if (tournament.notQualified) t.notQualified = tournament.notQualified; else delete t.notQualified;
+                                    // Cup and Plate: Analytics names the format (Docs/CUP-AND-PLATE.md)
+                                    if (tournament.plate) t.plate = tournament.plate; else delete t.plate;
                                     return NewtonDB.saveTournamentMeta(t);
                                 }
                             });
