@@ -84,7 +84,7 @@ table.n td.pts { text-align: right; color: var(--nt-muted); }
 
 <section class="step">
     <h2>The bracket <span class="new">Cup above, Plate below</span></h2>
-    <p class="why">Round 1 match 1 and 2 are played: their losers (Ola, Siv) already meet in P-QF1. FS-1-3 is live; its loser and FS-1-4's will meet in P-QF2. The orange dashed lines are the loser drops, shown here for two matches (in the app they show when a match is selected, as in double elimination). The bronze finals are dashed: they are the optional part.</p>
+    <p class="why">Round 1 match 1 and 2 are played: their losers (Ola, Siv) already meet in P-QF1. FS-1-3 is live; its loser and FS-1-4's will meet in P-QF2. The orange dashed lines are the loser drops, shown here for two matches (in the app they show when a match is selected, as in double elimination).</p>
     <div class="screen">
         <div class="hdr">
             <div><b>Monday Cup 42</b><small>2026 · 10 · 19</small></div>
@@ -105,19 +105,18 @@ table.n td.pts { text-align: right; color: var(--nt-muted); }
             <table class="n">
                 <tr><th>Place</th><th>Who</th><th style="text-align:right">Points*</th></tr>
                 <tr><td>1st · 2nd</td><td>Cup final</td><td class="pts">15 · 13</td></tr>
-                <tr><td>3rd · 4th</td><td>Cup bronze final (without it: 3rd–4th shared)</td><td class="pts">10 · 9</td></tr>
+                <tr><td>3rd · 4th</td><td>Cup bronze final</td><td class="pts">10 · 9</td></tr>
                 <tr><td>5th–8th</td><td>Cup quarterfinal losers</td><td class="pts">8 / 7</td></tr>
                 <tr><td><b>9th · 10th</b></td><td><b>Plate final</b></td><td class="pts">–</td></tr>
-                <tr><td><b>11th · 12th</b></td><td><b>Plate bronze final</b> (without it: 11th–12th shared)</td><td class="pts">–</td></tr>
+                <tr><td><b>11th · 12th</b></td><td><b>Plate bronze final</b></td><td class="pts">–</td></tr>
                 <tr><td><b>13th–16th</b></td><td><b>Plate quarterfinal losers</b></td><td class="pts">–</td></tr>
             </table>
             <p class="note">*Placement points go to 8th, so with 16 players the Plate only orders 9th–16th. With <b>8 players</b> the Plate is 4 players and decides <b>5th, 6th, 7th, 8th</b>, which score. The Cup's own places never change.</p>
         </div>
         <div class="panel">
-            <h3>Global Settings (suggested)</h3>
-            <div class="set"><div><b>Play a Plate</b><small>Single elimination: round 1 losers play a second knockout</small></div><div class="seg"><span>Off</span><span class="on">On</span></div></div>
-            <div class="set"><div><b>Bronze final</b><small>Single elimination's 3rd place match</small></div><div class="seg"><span>Skip</span><span class="on">Play</span></div></div>
-            <div class="set"><div><b>Plate bronze final</b><small>The Plate's semifinal losers play for 11th (16 players)</small></div><div class="seg"><span class="on">Skip</span><span>Play</span></div></div>
+            <h3>Settings</h3>
+            <div class="set"><div><b>Play a Plate</b><small>A switch on the single elimination card in Shuffle &amp; Draw; Global Settings decides how it starts (off by default)</small></div><div class="seg"><span>Off</span><span class="on">On</span></div></div>
+            <div class="set"><div><b>Bronze finals</b><small>Always played, in the Cup and in the Plate</small></div><div></div></div>
             <div class="set"><div><b>Match length</b><small>The Plate uses the single elimination lengths by its own rounds (its semifinal Bo3, its final Bo5)</small></div><div></div></div>
             <div class="qh">Match Controls · Ready to start</div>
             <div class="q"><span class="id">FS-1-4</span><span>Adam F. v Christian D.</span><span class="chip">Cup · Round 1</span></div>
@@ -188,12 +187,12 @@ table.n td.pts { text-align: right; color: var(--nt-muted); }
         card(`FS-3-${i + 1}`, colX(2), mid([`FS-2-${2 * i + 1}`, `FS-2-${2 * i + 2}`]), `~Winner FS-2-${2 * i + 1}`, `~Winner FS-2-${2 * i + 2}`);
         line(`FS-2-${2 * i + 1}`, `FS-3-${i + 1}`); line(`FS-2-${2 * i + 2}`, `FS-3-${i + 1}`);
     }
-    card('FS-4-1', colX(3), pos['FS-3-1'].y, '~Loser FS-3-1', '~Loser FS-3-2', { opt: true, tag: 'Bronze' });
+    card('FS-4-1', colX(3), pos['FS-3-1'].y, '~Loser FS-3-1', '~Loser FS-3-2', { tag: 'Bronze' });
     card('FS-5-1', colX(4), mid(['FS-3-1', 'FS-3-2']), '~Winner FS-3-1', '~Winner FS-3-2', { tag: 'Final' });
     line('FS-3-1', 'FS-5-1', 'known', true); line('FS-3-2', 'FS-5-1', 'known', true);
     label('NewTon DC · Cup', colX(2) + W / 2, top - 52, 'big');
     ['Round 1', 'Quarterfinals', 'Semifinals', 'Bronze final', 'Final'].forEach((t, r) => label(t, colX(r) + W / 2, (r === 0 ? top : r === 3 ? pos['FS-4-1'].y : r === 4 ? pos['FS-5-1'].y : pos[`FS-${r + 1}-1`].y) - 20));
-    label('3rd place · optional', colX(3) + W / 2, pos['FS-4-1'].y + H + 6, 'sub');
+    label('3rd place', colX(3) + W / 2, pos['FS-4-1'].y + H + 6, 'sub');
     const cupBottom = y1(7) + H;
 
     // ---- the Plate: QF (4), SF (2), bronze + final ----
@@ -211,12 +210,12 @@ table.n td.pts { text-align: right; color: var(--nt-muted); }
         card(`P-SF${i + 1}`, colX(2), mid([`P-QF${2 * i + 1}`, `P-QF${2 * i + 2}`]), `~Winner P-QF${2 * i + 1}`, `~Winner P-QF${2 * i + 2}`);
         line(`P-QF${2 * i + 1}`, `P-SF${i + 1}`); line(`P-QF${2 * i + 2}`, `P-SF${i + 1}`);
     }
-    card('P-B', colX(3), pos['P-SF1'].y, '~Loser P-SF1', '~Loser P-SF2', { opt: true, tag: 'Bronze' });
+    card('P-B', colX(3), pos['P-SF1'].y, '~Loser P-SF1', '~Loser P-SF2', { tag: 'Bronze' });
     card('P-F', colX(4), mid(['P-SF1', 'P-SF2']), '~Winner P-SF1', '~Winner P-SF2', { tag: 'Final' });
     line('P-SF1', 'P-F', 'known', true); line('P-SF2', 'P-F', 'known', true);
     label('Plate · round 1 losers', colX(2) + W / 2, ptop - 70, 'big plate');
     ['Quarterfinals', 'Semifinals', 'Bronze final', 'Final'].forEach((t, r) => label(t, colX(r + 1) + W / 2, (r === 0 ? ptop : r === 2 ? pos['P-B'].y : r === 3 ? pos['P-F'].y : pos['P-SF1'].y) - 20, 'plate'));
-    label('11th place · optional', colX(3) + W / 2, pos['P-B'].y + H + 6, 'sub');
+    label('11th place', colX(3) + W / 2, pos['P-B'].y + H + 6, 'sub');
     label('9th place', colX(4) + W / 2, pos['P-F'].y + H + 6, 'sub');
 
     // the loser drops shown: FS-1-1 and FS-1-2 into P-QF1, FS-1-3 and FS-1-4 into P-QF2
