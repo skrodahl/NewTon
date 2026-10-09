@@ -180,6 +180,10 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 ## Later
 *Worth tracking but not urgent*
 
+### Maybe: pull the base image from a mirror, not Docker Hub
+
+Raised 2026-10-09, after the v5.4.2 builds failed twice on Docker Hub outages (timeouts and a 504 from `auth.docker.io`). Both workflows depend on Docker Hub even for the GitHub Container Registry image, since `docker/Dockerfile` starts `FROM php:8.2-fpm-alpine` (and Buildx/QEMU pull `moby/buildkit` and `tonistiigi/binfmt` from there too). If outages keep happening, the base image could come from a mirror of the Docker official images that doesn't need Docker Hub's login, e.g. Amazon's `public.ecr.aws/docker/library/php:8.2-fpm-alpine` or Google's `mirror.gcr.io/library/php:8.2-fpm-alpine`: a one-line change in the Dockerfile (the Buildx/QEMU images would still come from Docker Hub unless configured too). Only if it becomes a habit; a re-run fixed it this time.
+
 ### Automated Testing
 
 Flagged as the single most impactful improvement by the independent code audit (April 2026, `Docs/CodeReview/INDEPENDENT-AUDIT-2026-04.md`). The lookup-table architecture is highly testable — each entry in `DE_MATCH_PROGRESSION` and `SE_MATCH_PROGRESSION` can be verified mechanically.
