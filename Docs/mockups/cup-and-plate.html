@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: Cup and Plate</title>
+<link rel="stylesheet" href="../../css/design-tokens.css">
+<style>
+@font-face { font-family: 'Inter'; src: url('../../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Cascadia Code'; src: url('../../fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype'); font-weight: 200 700; font-display: swap; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nt-bg); color: var(--nt-ink); font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 28px 24px 60px; display: grid; gap: 30px; }
+.intro h1 { margin: 0; font-size: 28px; font-weight: 800; letter-spacing: -.02em; }
+.intro p { margin: 6px 0 0; color: var(--nt-muted); max-width: 90ch; }
+.step { display: grid; gap: 10px; }
+.step > h2 { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--nt-muted); }
+.step > p.why { margin: -4px 0 4px; color: var(--nt-ink-2); max-width: 92ch; }
+.screen { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 14px; overflow: hidden; }
+.hdr { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 12px 18px; border-bottom: 1px solid var(--nt-line); }
+.hdr b { font-size: 18px; font-weight: 800; }
+.hdr small { display: block; color: var(--nt-muted); font-family: var(--nt-mono); font-size: 12px; }
+.tabs { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; background: var(--nt-surface); }
+.tabs span { padding: 6px 12px; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); }
+.tabs span + span { border-left: 1px solid var(--nt-line-2); }
+.tabs .on { background: var(--nt-header); color: var(--nt-header-ink); }
+.status { padding: 6px 18px; font-size: 12px; color: var(--nt-muted); border-bottom: 1px solid var(--nt-line); background: var(--nt-surface-2); }
+.body { padding: 18px; background: var(--nt-bg); overflow-x: auto; }
+.note { margin-top: 10px; font-size: 12px; color: var(--nt-muted); max-width: 92ch; }
+.new { display: inline-block; font-size: 10px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: #b2410f; background: var(--nt-accent-soft); border-radius: 4px; padding: 1px 6px; margin-left: 6px; vertical-align: 2px; }
+
+/* the bracket world */
+.world { position: relative; }
+.world svg { position: absolute; left: 0; top: 0; overflow: visible; }
+.world path { fill: none; stroke: var(--nt-line-2); stroke-width: 2; }
+.world path.known { stroke: #a8a29e; }
+.world path.drop { stroke: var(--nt-accent); stroke-dasharray: 5 4; stroke-width: 1.5; }
+.lbl { position: absolute; transform: translateX(-50%); font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); white-space: nowrap; }
+.lbl.big { font-size: 16px; letter-spacing: -.01em; text-transform: none; color: var(--nt-ink); }
+.lbl.plate { color: #b2410f; }
+.lbl.sub { font-weight: 600; letter-spacing: 0; text-transform: none; font-size: 11px; }
+.card { position: absolute; width: 176px; height: 66px; background: var(--nt-surface); border: 1px solid var(--nt-line-2); border-radius: 8px; font-size: 13px; overflow: hidden; }
+.card .meta { display: flex; justify-content: space-between; padding: 2px 8px; font-family: var(--nt-mono); font-size: 10px; color: var(--nt-muted); border-bottom: 1px solid var(--nt-line); height: 18px; }
+.card .p { padding: 3px 8px; height: 23px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: flex; justify-content: space-between; }
+.card .p + .p { border-top: 1px solid var(--nt-line); }
+.card .p.ph { font-weight: 500; font-style: italic; color: var(--nt-muted); }
+.card .p.ph.lose { color: #b2410f; }
+.card .p.win b { color: var(--nt-ok); }
+.card .p.out { color: var(--nt-faint, var(--nt-muted)); font-weight: 500; text-decoration: line-through; }
+.card.ready { border-color: var(--nt-ready); box-shadow: inset 0 3px 0 var(--nt-ready); }
+.card.live { border-color: var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); }
+.card.opt { border-style: dashed; }
+.band { position: absolute; background: #f3efe8; border-radius: 14px; }
+
+/* side panels */
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 16px; }
+.panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; padding: 12px 16px 14px; }
+.panel h3 { margin: 0 0 8px; font-size: 14px; }
+table.n { border-collapse: collapse; width: 100%; font-size: 13px; }
+table.n th, table.n td { padding: 5px 10px; border-bottom: 1px solid var(--nt-line); text-align: left; font-variant-numeric: tabular-nums; }
+table.n th { font-size: 11px; color: var(--nt-muted); font-weight: 600; }
+table.n td.pts { text-align: right; color: var(--nt-muted); }
+.q { display: grid; grid-template-columns: 70px minmax(0, 1fr) auto; gap: 8px; padding: 5px 0; border-top: 1px dashed var(--nt-line); font-size: 13px; align-items: center; }
+.q:first-of-type { border-top: 0; }
+.q .id { font-family: var(--nt-mono); font-size: 11px; color: var(--nt-muted); }
+.chip { font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 8px; background: var(--nt-ready-soft); color: #8a6a0a; }
+.qh { font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); margin: 10px 0 2px; }
+.set { display: flex; justify-content: space-between; align-items: center; gap: 12px; padding: 7px 0; border-top: 1px dashed var(--nt-line); font-size: 13px; }
+.set:first-of-type { border-top: 0; }
+.set small { display: block; color: var(--nt-muted); }
+.seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; flex: none; }
+.seg span { padding: 4px 10px; font-size: 12px; font-weight: 600; color: var(--nt-ink-2); }
+.seg span + span { border-left: 1px solid var(--nt-line-2); }
+.seg .on { background: var(--nt-header); color: var(--nt-header-ink); }
+@media (max-width: 800px) { .cols { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="intro">
+    <h1>Cup and Plate</h1>
+    <p>Quick mockup. 16 players, single elimination with <b>Play a Plate</b> on, partway through round 1. Every round 1 loser goes to a fixed place in the Plate (like double elimination's backside), so a Plate match can start as soon as its two round 1 matches are played. The Plate is a single elimination of its own, drawn under the Cup.</p>
+</div>
+
+<section class="step">
+    <h2>The bracket <span class="new">Cup above, Plate below</span></h2>
+    <p class="why">Round 1 match 1 and 2 are played: their losers (Ola, Siv) already meet in P-QF1. FS-1-3 is live; its loser and FS-1-4's will meet in P-QF2. The orange dashed lines are the loser drops, shown here for two matches (in the app they show when a match is selected, as in double elimination). The bronze finals are dashed: they are the optional part.</p>
+    <div class="screen">
+        <div class="hdr">
+            <div><b>Monday Cup 42</b><small>2026 · 10 · 19</small></div>
+            <div class="tabs"><span class="on">Bracket</span><span>Match Controls</span><span>Leaderboard</span></div>
+            <div style="justify-self:end"><div class="tabs"><span>Finals</span><span class="on">Right</span><span>Middle</span></div></div>
+        </div>
+        <div class="status"><b>16</b> players · Single elimination with a Plate · 31 matches · 2 played · 1 live · 6 ready</div>
+        <div class="body"><div class="world" id="world"></div></div>
+    </div>
+    <p class="note">Plate match IDs follow the cups' pattern: P-QF1…P-QF4, P-SF1, P-SF2, P-B (bronze), P-F. With 8 players the Plate starts at the semifinals (4 players); with 32, at round 1 of 16.</p>
+</section>
+
+<section class="step">
+    <h2>Placings, points and settings</h2>
+    <div class="cols">
+        <div class="panel">
+            <h3>Placings, 16 players</h3>
+            <table class="n">
+                <tr><th>Place</th><th>Who</th><th style="text-align:right">Points*</th></tr>
+                <tr><td>1st · 2nd</td><td>Cup final</td><td class="pts">15 · 13</td></tr>
+                <tr><td>3rd · 4th</td><td>Cup bronze final (without it: 3rd–4th shared)</td><td class="pts">10 · 9</td></tr>
+                <tr><td>5th–8th</td><td>Cup quarterfinal losers</td><td class="pts">8 / 7</td></tr>
+                <tr><td><b>9th · 10th</b></td><td><b>Plate final</b></td><td class="pts">–</td></tr>
+                <tr><td><b>11th · 12th</b></td><td><b>Plate bronze final</b> (without it: 11th–12th shared)</td><td class="pts">–</td></tr>
+                <tr><td><b>13th–16th</b></td><td><b>Plate quarterfinal losers</b></td><td class="pts">–</td></tr>
+            </table>
+            <p class="note">*Placement points go to 8th, so with 16 players the Plate only orders 9th–16th. With <b>8 players</b> the Plate is 4 players and decides <b>5th, 6th, 7th, 8th</b>, which score. The Cup's own places never change.</p>
+        </div>
+        <div class="panel">
+            <h3>Global Settings (suggested)</h3>
+            <div class="set"><div><b>Play a Plate</b><small>Single elimination: round 1 losers play a second knockout</small></div><div class="seg"><span>Off</span><span class="on">On</span></div></div>
+            <div class="set"><div><b>Bronze final</b><small>Single elimination's 3rd place match</small></div><div class="seg"><span>Skip</span><span class="on">Play</span></div></div>
+            <div class="set"><div><b>Plate bronze final</b><small>The Plate's semifinal losers play for 11th (16 players)</small></div><div class="seg"><span class="on">Skip</span><span>Play</span></div></div>
+            <div class="set"><div><b>Match length</b><small>The Plate uses the single elimination lengths by its own rounds (its semifinal Bo3, its final Bo5)</small></div><div></div></div>
+            <div class="qh">Match Controls · Ready to start</div>
+            <div class="q"><span class="id">FS-1-4</span><span>Adam F. v Christian D.</span><span class="chip">Cup · Round 1</span></div>
+            <div class="q"><span class="id">FS-1-5</span><span>Ken W. v Jocke S.</span><span class="chip">Cup · Round 1</span></div>
+            <div class="q"><span class="id">P-QF1</span><span>Ola M. v Siv R.</span><span class="chip">Plate · QF</span></div>
+            <div class="q"><span class="id">FS-2-1</span><span>Henry A. v Colin B.</span><span class="chip">Cup · QF</span></div>
+        </div>
+    </div>
+</section>
+</div>
+
+<script>
+(() => {
+    const W = 176, H = 66, GX = 46, PITCH = 78;
+    const world = document.getElementById('world');
+    const svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+    world.appendChild(svg);
+    const pos = {};
+    const card = (id, x, y, p1, p2, o = {}) => {
+        pos[id] = { x, y };
+        const d = document.createElement('div');
+        d.className = 'card' + (o.state ? ' ' + o.state : '') + (o.opt ? ' opt' : '');
+        d.style.left = x + 'px'; d.style.top = y + 'px';
+        const row = (p, k) => {
+            if (!p) return `<div class="p ph">TBD</div>`;
+            if (p.startsWith('~')) return `<div class="p ph${p.startsWith('~Loser') ? ' lose' : ''}">${p.slice(1)}</div>`;
+            const [name, score] = p.split('|');
+            const cls = o.win === k ? ' win' : o.win && o.win !== k ? ' out' : '';
+            return `<div class="p${cls}"><b>${name}</b><span>${score || ''}</span></div>`;
+        };
+        d.innerHTML = `<div class="meta"><span>${id}</span><span>${o.tag || ''}</span></div>${row(p1, 1)}${row(p2, 2)}`;
+        world.appendChild(d);
+    };
+    const label = (t, x, y, cls = '') => { const d = document.createElement('div'); d.className = 'lbl ' + cls; d.textContent = t; d.style.left = x + 'px'; d.style.top = y + 'px'; world.appendChild(d); };
+    // fork: true turns straight after the source (the semifinals into the final, under the bronze final)
+    const line = (a, b, cls = 'known', fork = false) => {
+        const s = pos[a], t = pos[b], x1 = s.x + W, y1 = s.y + H / 2, x2 = t.x, y2 = t.y + H / 2, mx = fork ? x1 + GX / 2 : (x1 + x2) / 2;
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p.setAttribute('d', `M${x1} ${y1} H${mx} V${y2} H${x2}`); p.setAttribute('class', cls); svg.appendChild(p);
+    };
+    const drop = (a, b, slot) => {
+        const s = pos[a], t = pos[b];
+        // out of the card's left side, down the left edge, and in under the Cup's round 1 column
+        const ox = s.x - 8 - (slot === 1 ? 0 : 6), y1 = s.y + H / 2, ty = t.y + 18 + (slot === 1 ? 11 : 34);
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p.setAttribute('d', `M${s.x} ${y1} H${ox} V${ty} H${t.x}`); p.setAttribute('class', 'drop'); svg.appendChild(p);
+    };
+    const P = W + GX;
+    const colX = r => 30 + r * P;
+
+    // ---- the Cup: R1 (8), QF (4), SF (2), bronze + final ----
+    const top = 54;
+    const r1 = [
+        ['Henry A.|2', 'Ola M.|0', { win: 1, tag: 'done' }], ['Colin B.|2', 'Siv R.|1', { win: 1, tag: 'done' }],
+        ['Harry K.', 'Jonas E.', { state: 'live', tag: 'LIVE · L1' }], ['Adam F.', 'Christian D.', { state: 'ready', tag: 'READY' }],
+        ['Ken W.', 'Jocke S.', { state: 'ready', tag: 'READY' }], ['Lars I.', 'Nina H.', { state: 'ready', tag: 'READY' }],
+        ['Ove R.', 'Bjørn T.', { state: 'ready', tag: 'READY' }], ['Peter J.', 'Mona T.', { state: 'ready', tag: 'READY' }]
+    ];
+    const y1 = i => top + i * PITCH;
+    r1.forEach((m, i) => card(`FS-1-${i + 1}`, colX(0), y1(i), m[0], m[1], Object.assign({ tag: m[2].tag }, m[2])));
+    const mid = (ids) => ids.reduce((s, id) => s + pos[id].y, 0) / ids.length;
+    for (let i = 0; i < 4; i++) {
+        const y = mid([`FS-1-${2 * i + 1}`, `FS-1-${2 * i + 2}`]);
+        card(`FS-2-${i + 1}`, colX(1), y, i === 0 ? 'Henry A.' : `~Winner FS-1-${2 * i + 1}`, i === 0 ? 'Colin B.' : `~Winner FS-1-${2 * i + 2}`, i === 0 ? { state: 'ready', tag: 'READY' } : {});
+        line(`FS-1-${2 * i + 1}`, `FS-2-${i + 1}`); line(`FS-1-${2 * i + 2}`, `FS-2-${i + 1}`);
+    }
+    for (let i = 0; i < 2; i++) {
+        card(`FS-3-${i + 1}`, colX(2), mid([`FS-2-${2 * i + 1}`, `FS-2-${2 * i + 2}`]), `~Winner FS-2-${2 * i + 1}`, `~Winner FS-2-${2 * i + 2}`);
+        line(`FS-2-${2 * i + 1}`, `FS-3-${i + 1}`); line(`FS-2-${2 * i + 2}`, `FS-3-${i + 1}`);
+    }
+    card('FS-4-1', colX(3), pos['FS-3-1'].y, '~Loser FS-3-1', '~Loser FS-3-2', { opt: true, tag: 'Bronze' });
+    card('FS-5-1', colX(4), mid(['FS-3-1', 'FS-3-2']), '~Winner FS-3-1', '~Winner FS-3-2', { tag: 'Final' });
+    line('FS-3-1', 'FS-5-1', 'known', true); line('FS-3-2', 'FS-5-1', 'known', true);
+    label('NewTon DC · Cup', colX(2) + W / 2, top - 52, 'big');
+    ['Round 1', 'Quarterfinals', 'Semifinals', 'Bronze final', 'Final'].forEach((t, r) => label(t, colX(r) + W / 2, (r === 0 ? top : r === 3 ? pos['FS-4-1'].y : r === 4 ? pos['FS-5-1'].y : pos[`FS-${r + 1}-1`].y) - 20));
+    label('3rd place · optional', colX(3) + W / 2, pos['FS-4-1'].y + H + 6, 'sub');
+    const cupBottom = y1(7) + H;
+
+    // ---- the Plate: QF (4), SF (2), bronze + final ----
+    const ptop = cupBottom + 110;
+    const band = document.createElement('div'); band.className = 'band';
+    Object.assign(band.style, { left: (colX(1) - 18) + 'px', top: (ptop - 76) + 'px', width: (4 * P - GX + 36) + 'px', height: (4 * PITCH + 76 + 30) + 'px' });
+    world.insertBefore(band, svg);
+    const pq = [['Ola M.', 'Siv R.', { state: 'ready', tag: 'READY' }]];
+    for (let i = 0; i < 4; i++) {
+        const y = ptop + i * PITCH;
+        if (i === 0) card('P-QF1', colX(1), y, 'Ola M.', 'Siv R.', { state: 'ready', tag: 'READY' });
+        else card(`P-QF${i + 1}`, colX(1), y, `~Loser FS-1-${2 * i + 1}`, `~Loser FS-1-${2 * i + 2}`);
+    }
+    for (let i = 0; i < 2; i++) {
+        card(`P-SF${i + 1}`, colX(2), mid([`P-QF${2 * i + 1}`, `P-QF${2 * i + 2}`]), `~Winner P-QF${2 * i + 1}`, `~Winner P-QF${2 * i + 2}`);
+        line(`P-QF${2 * i + 1}`, `P-SF${i + 1}`); line(`P-QF${2 * i + 2}`, `P-SF${i + 1}`);
+    }
+    card('P-B', colX(3), pos['P-SF1'].y, '~Loser P-SF1', '~Loser P-SF2', { opt: true, tag: 'Bronze' });
+    card('P-F', colX(4), mid(['P-SF1', 'P-SF2']), '~Winner P-SF1', '~Winner P-SF2', { tag: 'Final' });
+    line('P-SF1', 'P-F', 'known', true); line('P-SF2', 'P-F', 'known', true);
+    label('Plate · round 1 losers', colX(2) + W / 2, ptop - 70, 'big plate');
+    ['Quarterfinals', 'Semifinals', 'Bronze final', 'Final'].forEach((t, r) => label(t, colX(r + 1) + W / 2, (r === 0 ? ptop : r === 2 ? pos['P-B'].y : r === 3 ? pos['P-F'].y : pos['P-SF1'].y) - 20, 'plate'));
+    label('11th place · optional', colX(3) + W / 2, pos['P-B'].y + H + 6, 'sub');
+    label('9th place', colX(4) + W / 2, pos['P-F'].y + H + 6, 'sub');
+
+    // the loser drops shown: FS-1-1 and FS-1-2 into P-QF1, FS-1-3 and FS-1-4 into P-QF2
+    drop('FS-1-1', 'P-QF1', 1); drop('FS-1-2', 'P-QF1', 2);
+
+    const h = Math.max(...Object.values(pos).map(p => p.y)) + H + 40;
+    const w = Math.max(...Object.values(pos).map(p => p.x)) + W + 30;
+    world.style.height = h + 'px'; world.style.width = w + 'px';
+    svg.setAttribute('width', w); svg.setAttribute('height', h);
+})();
+</script>
+</body>
+</html>
