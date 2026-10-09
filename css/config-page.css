@@ -109,6 +109,7 @@
 .cfg-line + .cfg-line { border-top: 1px dashed var(--nt-line); }
 .cfg-rank { font-family: var(--nt-mono); font-weight: 700; color: var(--nt-ink-2); font-size: 13px; }
 .cfg-line small { color: var(--nt-muted); }
+.cfg-subline > label { padding-left: 14px; color: var(--nt-ink-2); } /* a question about the row above (Taking part → Also for qualifier losers) */
 
 /* lanes not in use */
 .cfg-lanes { display: flex; flex-wrap: wrap; gap: 6px; }

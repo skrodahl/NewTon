@@ -1,4 +1,20 @@
-## Unreleased
+## **v5.4.1** — Under Pressure (2026-10-09)
+
+### Round Robin: without a B cup, the A cup takes the top two of each group
+
+- Top half is there to keep the B cup from being tiny, so it now only applies when the B cup is played. With **Play the B cup** off at Draw the cups, the A cup takes the group winners and runners-up whatever To the A cup says, and the rest are placed after it by their group results. Before, Top half without a B cup shrank the A cup to half the field (12 players in 4 groups of 3: an A cup of 6 with 2 byes, instead of all 8 winners and runners-up; the maintainer: no top-two player should miss the knockout when there is only one cup).
+- Draw the cups shows it as the switch is flipped (the A field changes, and the note says why), and the draw uses the same fields: `Groups.cupFields(playB)`, called with the switch by `drawCups()` and `_mcDrawCupsHTML()`. Tested: 12 players, Top half: 6/6 with the B cup, 8 and 4 (not played) without; drawn and played to the end, 9th–12th for the thirds.
+- Files changed: `js/groups.js` (`cupFields()`), `js/clean-match-progression.js` (`drawCups()`), `js/bracket-rendering.js` (`_mcDrawCupsHTML()`), `tournament.html` (To the A cup), `js/dynamic-help-system.js`, `Docs/GROUPS-AND-CUPS.md`.
+
+### Tournament Setup: the next step's two buttons are the same size
+
+- The dark main button in the Next step bar was 40px with 15px text, the button beside it the standard 36px with 14px, so the pair didn't line up. Both are now 40px with 15px text; the dark colour alone marks the main step (also in the Completed state, where neither is dark).
+- Files changed: `css/setup-page.css` (`.st-next .st-btn`).
+
+### Match Controls: a live match without a lane has a plain amber border
+
+- A live tile without a lane had a grey border with a thick amber stripe inside its top edge, which curved into a "lip" at the rounded corners. The stripe is gone; the tile has a 2px amber border all round (the border plus a 1px inset shadow, so nothing inside moves), and the orange "No lane" label carries the warning.
+- Files changed: `css/match-controls.css` (`.mc-lane.mc-nolane`).
 
 ### Qualifiers: double and single elimination for 33 to 48 players
 
@@ -6,7 +22,7 @@
 - **The draw** reuses the bye layout as it is: the straight-in players are drawn into 32 places by `createOptimizedBracketV2()` (random or seeded), which leaves one gap per round 1 match where byes would go (opposite the best seeds first), and each gap becomes the place of a qualifier's winner. Who plays a qualifier: drawn at random, never a seed; with seeding **All**, the lowest-ranked (the unranked first, then up from the bottom). Qualifiers are numbered Q1… from the top of the bracket, numbered before the bracket's matches, and played at the format's regular rounds length.
 - **The three foundations, additions only:** `getProgressionTable()` merges the qualifier entries (Qn → its round 1 place, no loser path) in front of the 32-player table, which is unchanged, so advancing, undo (a qualifier can be undone until its round 1 match starts) and the bracket's "Winner Qn" work as they are. A qualifier result is an ordinary `COMPLETE_MATCH`.
 - **A qualifier only decides who gets to play:** the loser is not qualified, placed shared **33rd–48th** and marked (`tournament.notQualified`); nothing in a qualifier counts, for the winner either: score only in the winner dialog and from the Chalker (no achievements, no raw legs), never in the register, and the tournament's leg counts skip it. The tournament result still goes to Analytics, so a non-qualified player counts as attending.
-- **Taking part when not qualified** (Global Settings → Points, on by default): whether a player who loses a qualifier gets the Taking part points. `calculatePoints()` (the one points formula) takes it into account; Analytics reads `notQualified` from the register, and Custom point mode applies the current setting to earlier tournaments too.
+- **Also for qualifier losers** (Global Settings → Points, under Taking part; on by default): whether a player who loses a qualifier gets the Taking part points. `calculatePoints()` (the one points formula) takes it into account; Analytics reads `notQualified` from the register, and Custom point mode applies the current setting to earlier tournaments too.
 - **Bracket view:** a Qualifiers column one step outward from round 1, each qualifier level with the match it feeds (both outer edges with single elimination's finals in the middle). **Double elimination with qualifiers is always drawn with the finals in the middle**: with them on the right the backside sits straight beside round 1, where the qualifiers go; the Finals toggle shows it.
 - **Match Controls:** Qualifiers first in the queue (each unblocks a round 1 match) and in Next up; qualifier losers show in the referee list's losers, free for referee duty; Shuffle & Draw says "Draw 32 + 8 qualifiers"; the add-player row stays until 48. Player Registration says how many qualifiers decide the last places. Match history says "not qualified (33rd)".
 - **Tested in the browser:** 40-player double elimination and 44- and 48-player single elimination, both finals positions; who plays the qualifiers in each seeding mode; undo (blocked once the round 1 match is live, "Winner Q1" back after); a whole 40-player double elimination played to the end (placings 1st to 33rd, the register final with 40 attending, 8 not qualified and no qualifier matches); Taking part on and off; save and reload.
@@ -19,6 +35,11 @@
 - **The cups get their own match lengths** (Global Settings → Match length → Groups and cups): **Cup rounds** (every round before the semifinals), **Cup semifinal**, **Cup bronze final** and **Cup final**, the same for the A and the B cup, taken when the cups are drawn. Defaults 3, 3, 5, 5, as single elimination. The cups used the single elimination lengths before, so a saved config without the new fields keeps them (cup rounds from the SE quarterfinal, the rest from the SE semifinal, bronze final and final); a normal single elimination night and the cups can now differ (e.g. a Bo7 cup final).
 - Both are in the Reset all config preview, with their Global Settings names.
 - Files changed: `js/results-config.js` (defaults, the old-config fallback, form load/save, Reset to defaults, `CONFIG_LABELS`), `js/clean-match-progression.js` (`drawCups()` lengths; `roundRobinSchedule()` comment), `js/groups.js` (`maxGroup` in the settings and snapshot, `groupCount()`, `cupFields()`), `js/bracket-rendering.js` (place names at Draw the cups), `tournament.html` (Largest group, four cup steppers), `js/dynamic-help-system.js`, `userguide.html`, `Docs/GROUPS-AND-CUPS.md`, `Docs/PARKING-LOT.md`.
+
+### Release
+
+- Version 5.4.1, "Under Pressure": qualifiers for 33 to 48 players in double and single elimination, and three Round Robin improvements (Largest group, the cups' own match lengths, the top two of each group without a B cup). The Chalker is unchanged; its version and caches are bumped with the app's (`CHALKER_VERSION`, `chalker.js?v=27`, service worker cache `chalker-v124`).
+- Files changed: `js/main.js` (`APP_VERSION` → `5.4.1`), `chalker/js/chalker.js` (`CHALKER_VERSION` → `5.4.1`), `chalker/index.html`, `chalker/sw.js`, `sitemap.xml`, `releases/index.html`, `releases/v5.4.1.html`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.1.md`. `llms.txt` (reviewed: DE/SE 4–48, Qualifiers and Largest group came with the qualifier work; now also the A cup's top two without a B cup and the cups' own match lengths), and the help (reviewed with the same work).
 
 ## **v5.4.0** — Just Around the Corner (2026-10-08)
 

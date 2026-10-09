@@ -1742,8 +1742,10 @@ function drawCups(playB) {
         alert('Every group match must be played before the cups are drawn.');
         return false;
     }
-    const fields = Groups.cupFields();
-    const cups = { bCup: !!playB && fields.B.length >= 2, A: null, B: null };
+    // the B cup needs at least two players; without it the A cup takes the top two of each group
+    const playsB = !!playB && Groups.cupFields(true).B.length >= 2;
+    const fields = Groups.cupFields(playsB);
+    const cups = { bCup: playsB, A: null, B: null };
     let numericId = Math.max(0, ...matches.map(m => m.numericId || 0)) + 1;
     const made = [];
 

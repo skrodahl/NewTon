@@ -485,7 +485,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="rrMaxGroup"><button type="button" data-value="4">4</button><button type="button" data-value="5">5</button><button type="button" data-value="6">6</button></div><input type="hidden" id="rrMaxGroup"></div>
                         </div>
                         <div class="cfg-row cfg-rr-cups">
-                            <div><div class="cfg-label">To the A cup</div><div class="cfg-desc"><b>Top two</b>: the group winners and runners-up play the A cup, the rest the B cup. <b>Top half</b>: everyone is ranked across the groups (group place first, then results per match) and the two cups are the same size (A one larger when the number is odd), so a small field doesn't leave a tiny B cup.</div></div>
+                            <div><div class="cfg-label">To the A cup</div><div class="cfg-desc"><b>Top two</b>: the group winners and runners-up play the A cup, the rest the B cup. <b>Top half</b>: everyone is ranked across the groups (group place first, then results per match) and the two cups are the same size (A one larger when the number is odd), so a small field doesn't leave a tiny B cup. Top half only applies with a B cup: without one, the top two of each group play the A cup.</div></div>
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="rrCupEntry"><button type="button" data-value="top2">Top two</button><button type="button" data-value="half">Top half</button></div><input type="hidden" id="rrCupEntry"></div>
                         </div>
                         <div class="cfg-row cfg-rr-cups">
@@ -558,13 +558,13 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div>
                                 <h4>Placing</h4>
                                 <div class="cfg-line"><span>Taking part</span><input class="cfg-num" type="number" min="0" id="participationPoints" aria-label="Taking part points"></div>
+                                <div class="cfg-line cfg-subline"><label for="nonQualifiedParticipation">Also for qualifier losers</label><span class="cfg-switch"><input type="checkbox" id="nonQualifiedParticipation" checked><span></span></span></div>
                                 <div class="cfg-line"><span class="cfg-rank">1st</span><input class="cfg-num" type="number" min="0" id="firstPlacePoints" aria-label="1st points"></div>
                                 <div class="cfg-line"><span class="cfg-rank">2nd</span><input class="cfg-num" type="number" min="0" id="secondPlacePoints" aria-label="2nd points"></div>
                                 <div class="cfg-line"><span class="cfg-rank">3rd</span><input class="cfg-num" type="number" min="0" id="thirdPlacePoints" aria-label="3rd points"></div>
                                 <div class="cfg-line"><span class="cfg-rank">4th</span><input class="cfg-num" type="number" min="0" id="fourthPlacePoints" aria-label="4th points"></div>
                                 <div class="cfg-line"><span class="cfg-rank">5th–6th</span><input class="cfg-num" type="number" min="0" id="fifthSixthPlacePoints" aria-label="5th–6th points"></div>
                                 <div class="cfg-line"><span class="cfg-rank">7th–8th</span><input class="cfg-num" type="number" min="0" id="seventhEighthPlacePoints" aria-label="7th–8th points"></div>
-                                <div class="cfg-line"><label for="nonQualifiedParticipation">Taking part when not qualified <small>lost a qualifier</small></label><span class="cfg-switch"><input type="checkbox" id="nonQualifiedParticipation" checked><span></span></span></div>
                             </div>
                             <div>
                                 <h4>Achievements, each</h4>

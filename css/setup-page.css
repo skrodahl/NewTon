@@ -88,7 +88,7 @@
 .st-next-what b { font-size: 16px; font-weight: 700; color: var(--nt-ink); }
 .st-hint { color: var(--nt-muted); font-size: 13px; }
 .st-next-acts { display: flex; gap: 8px; flex-wrap: wrap; flex: none; }
-.st-next .st-btn.st-primary { height: 40px; padding: 0 18px; font-size: 15px; }
+.st-next .st-btn { height: 40px; padding: 0 18px; font-size: 15px; } /* both buttons alike; the dark one is the main step */
 .st-quiet { display: flex; gap: 18px; align-items: center; flex-wrap: wrap; }
 .st-empty { display: grid; gap: 6px; padding: 22px; place-content: center; text-align: center; min-height: 220px; color: var(--nt-muted); }
 .st-empty b { color: var(--nt-ink); font-size: 17px; }

@@ -1621,16 +1621,20 @@ function _mcGroupTablesHTML() {
  */
 function _mcDrawCupsHTML() {
     if (_mcPlayB.tid !== tournament.id) _mcPlayB = { tid: tournament.id, on: Groups.configSettings().bCup };
-    const f = Groups.cupFields();
+    const full = Groups.cupFields(true);
     const g = Groups.groupList().length;
     const place = r => r.pos === 1 ? 'winner' : r.pos === 2 ? 'runner-up' : r.pos === 3 ? '3rd' : `${r.pos}th`;
     const field = (rows, title, off) => `<div class="mc-field${off ? ' mc-off-field' : ''}"><h4>${title}<small>${rows.length} players${off ? ' · not played' : ''}</small></h4>
         <ol>${rows.map(r => `<li><b>${escapeHtml(r.player.name)}</b><span>Group ${escapeHtml(r.group)} ${place(r)} · ${r.won}–${r.lost}</span></li>`).join('')}</ol></div>`;
-    const canB = f.B.length >= 2;
+    const canB = full.B.length >= 2;
     const playB = _mcPlayB.on && canB;
+    // without a B cup the A cup takes the top two of each group, whatever To the A cup says (cupFields())
+    const f = playB ? full : Groups.cupFields(false);
     const level = Groups.groupList().some(gr => Groups.standings(gr.name).some(r => r.level));
     return `<section class="mc-panel mc-drawcups"><div class="mc-ph"><h3>Draw the cups<small>every group match is played</small></h3></div>
-        <p class="mc-note">${Groups.settings().cupEntry === 'half'
+        <p class="mc-note">${!playB
+            ? `Without a B cup, the top two of each group play the A cup, group winners as seeds 1–${g}, runners-up ${g + 1}–${2 * g}, ranked across the groups per match (win rate, then leg difference). The rest play no cup and are placed after it by their group results.`
+            : Groups.settings().cupEntry === 'half'
             ? `Everyone is ranked across the groups: group winners first, then runners-up, and so on, each place by results per match (win rate, then leg difference). The top half plays the A cup, the rest the B cup, seeded in that order.`
             : `Group winners are seeds 1–${g}, runners-up ${g + 1}–${2 * g}, ranked across the groups per match (win rate, then leg difference). The B cup takes the rest the same way.`}</p>
         <div class="mc-fields">${field(f.rows.A, 'A cup', false)}${field(f.rows.B, 'B cup', !playB)}</div>

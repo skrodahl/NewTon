@@ -7,7 +7,7 @@
   'use strict';
 
   // Keep in sync with APP_VERSION in js/main.js
-  const CHALKER_VERSION = '5.4.0';
+  const CHALKER_VERSION = '5.4.1';
 
   /**
    * Escape a value for safe interpolation into innerHTML (element text and quoted

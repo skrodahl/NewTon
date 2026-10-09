@@ -706,7 +706,7 @@ function defaultConfigKeepingConnection() {
 // Readable names for the reset preview, as on the Global Settings page. A setting without one
 // shows its key, so a new setting is never left out of the preview.
 const CONFIG_LABELS = {
-    points: { _: 'Points', participation: 'Taking part', nonQualifiedParticipation: 'Taking part when not qualified', first: '1st', second: '2nd', third: '3rd', fourth: '4th',
+    points: { _: 'Points', participation: 'Taking part', nonQualifiedParticipation: 'Taking part: also for qualifier losers', first: '1st', second: '2nd', third: '3rd', fourth: '4th',
         fifthSixth: '5th–6th', seventhEighth: '7th–8th', highOut: 'High out', ton: 'Ton', oneEighty: '180', shortLeg: 'Short leg' },
     legs: { _: 'Match length', regularRounds: 'Regular rounds (double elimination)', frontsideSemifinal: 'Frontside semifinal',
         backsideSemifinal: 'Backside semifinal', backsideFinal: 'Backside final', grandFinal: 'Grand final',

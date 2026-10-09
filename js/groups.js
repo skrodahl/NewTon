@@ -198,16 +198,20 @@ const Groups = (() => {
      * Who goes on to which cup, as which seed: the group winners as seeds 1…g, the runners-up after
      * them (the A cup); the thirds, then the fourths, and so on (the B cup). Within each place, ranked across
      * the groups per match (win rate, leg difference per match, legs won per match), then by group.
+     * Top half only applies with a B cup (it is there to keep the B cup from being tiny): without
+     * one, the A cup always takes the top two of each group.
+     * @param {boolean} [playB=true] - whether the B cup is played
      * @returns {{A: object[], B: object[], rows: {A: object[], B: object[]}}} A/B: players, best seed
-     *   first; rows: the same as table rows with their group, for the draw step
+     *   first; rows: the same as table rows with their group, for the draw step (B: everyone in no
+     *   A cup, also when the B cup isn't played)
      */
-    function cupFields() {
+    function cupFields(playB = true) {
         const byPlace = {};
         groupList().forEach(g => standings(g.name).forEach(r => { (byPlace[r.pos] = byPlace[r.pos] || []).push(Object.assign({ group: g.name }, r)); }));
         const place = n => (byPlace[n] || []).slice().sort((a, b) => byPerMatch(a, b) || a.group.localeCompare(b.group));
         const places = Object.keys(byPlace).map(Number).sort((a, b) => a - b);
         let A = place(1).concat(place(2)), B = places.filter(n => n > 2).flatMap(place);
-        if (settings().cupEntry === 'half') {
+        if (settings().cupEntry === 'half' && playB !== false) {
             // Top half: everyone in that order, split into two cups of the same size (A one larger when odd)
             const everyone = A.concat(B);
             const half = Math.ceil(everyone.length / 2);

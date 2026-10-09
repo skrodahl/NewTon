@@ -24,6 +24,9 @@ Tournaments while it is offered (`config.roundRobin`, additive):
   since 2026-10-08) — everyone
   ranked across the groups (group place first, then results per match) and split into two cups of the
   same size (A one larger when odd), so a small field doesn't leave a tiny B cup (review note 2).
+  Top half only applies with a B cup (maintainer, 2026-10-09): without one, the A cup takes the
+  top two of each group whatever the setting (`cupFields(playB)`; with 12 players in 4 groups of 3,
+  Top half without a B cup would have made an A cup of 6 with 2 byes, Top two makes a full 8).
 - **Group rematches in cup round 1:** `allow` — the mirror draw as it falls; `avoid` —
   `Groups.avoidRematches()` reorders the field so each seed meets the nearest opponent (by seed) from
   another group, the best seeds first, as close to the mirror as possible; when no such pairing

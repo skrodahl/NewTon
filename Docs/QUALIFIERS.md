@@ -31,8 +31,8 @@ bracket; the players above 32 make it in through **qualifiers**, a round 0 befor
   elimination's shared places), marked as not qualified in the record (`notQualified`), not
   inferred from the number. No placement points (33rd is below every paid place); seeding ranks
   them last.
-- **Taking part:** a new Points setting next to Taking part, *Players who don't qualify get Taking
-  part*, **on by default** (`config.points.nonQualifiedParticipation`; absent = on). Custom point
+- **Taking part:** a new Points setting, a switch directly under Taking part labelled **Also for
+  qualifier losers** (named 2026-10-09), **on by default** (`config.points.nonQualifiedParticipation`; absent = on). Custom point
   mode in Analytics applies it to old tournaments too, which is why the record marks them.
 - **Nothing in a qualifier counts, for the winner either:** no achievements (180s, tons, high outs,
   short legs, lollipops) and no matches or legs won or lost. A qualifier winner's numbers start in

@@ -55,7 +55,7 @@
 .mc-lanes { display: grid; grid-template-columns: repeat(auto-fill, minmax(320px, 1fr)); gap: 12px; padding: 0 18px 16px; }
 .mc-lane { border: 1px solid var(--nt-line); border-radius: 12px; background: var(--nt-surface); display: grid; min-width: 0; overflow: hidden; }
 .mc-lane.mc-on { border-color: var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); }
-.mc-lane.mc-nolane { border-color: var(--nt-line-2); box-shadow: inset 0 3px 0 #f2c94c; }
+.mc-lane.mc-nolane { border-color: #f2c94c; box-shadow: inset 0 0 0 1px #f2c94c; } /* 2px all round, without moving the content */
 .mc-lane-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 14px 6px; }
 .mc-lane-no { font-weight: 800; font-size: 13px; letter-spacing: .04em; text-transform: uppercase; color: #b2410f; }
 .mc-nolane .mc-lane-no { color: var(--nt-warn); }
