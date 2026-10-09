@@ -30,7 +30,15 @@ Since v5.3.1, seeding does this by name instead: the mini-lens ranks on tourname
 ## Next
 *Ready for implementation when time permits*
 
-**The two next things (2026-10-06): other tournament formats, then the Chalker iOS capture check** (it waits for an iOS device to borrow).
+**First (maintainer, 2026-10-09): the two GitHub Actions items below.** Then the formats list and the Chalker iOS capture check (it waits for an iOS device to borrow), as decided 2026-10-06.
+
+### GitHub Actions: move off Node.js 20
+
+Raised 2026-10-09, from the v5.4.2 build logs. Both workflows (`.github/workflows/docker-build.yml`, `docker-hub-publish.yml`) use actions that target Node.js 20, which GitHub has deprecated; for now the runner forces them onto Node.js 24 with a warning on every build. In use: `actions/checkout@v4`, `docker/setup-qemu-action@v3`, `docker/setup-buildx-action@v3`, `docker/login-action@v3`, `docker/metadata-action@v5`, `docker/build-push-action@v5`. Move each to its current major version (check each one's release notes for breaking changes, especially the Docker actions' inputs), then confirm a tagged build pushes to both GitHub Container Registry and Docker Hub. (The v5.4.2 build failures themselves were a Docker Hub outage: timeouts reaching `auth.docker.io` while pulling `tonistiigi/binfmt` and `moby/buildkit`; fixed by re-running the failed jobs, not by these changes.)
+
+### GitHub Actions: `ubuntu-latest` becomes Ubuntu 26 on 2026-10-19
+
+Raised 2026-10-09, from the same logs. Both workflows run on `ubuntu-latest`, which moves to Ubuntu 26 from October 19, 2026 (https://github.com/actions/runner-images/issues/14748). The builds run inside Docker with QEMU/Buildx, so they probably won't notice, but watch the first tagged build after that date. If anything breaks, pin `runs-on: ubuntu-24.04` while it's fixed.
 
 ### Other tournament formats
 
