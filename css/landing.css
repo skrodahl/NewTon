@@ -231,6 +231,97 @@ body {
     border-color: #d4824a;
 }
 
+/* ── Formats ──
+   One card per format, in centred rows that wrap, so a new format starts a tidy new row instead
+   of squeezing the others: up to 4 across; 5 or 6 formats go 3 to a row (3 + 2, 3 + 3), 7 or
+   more 4 to a row again (4 + 3, 4 + 4). Browsers without :has() wrap 4 + 1, still centred. */
+.formats {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 48px 24px 40px;
+    text-align: center;
+}
+
+.formats h2 {
+    font-size: 2rem;
+    margin-bottom: 32px;
+    color: #2b2118;
+    font-family: 'Insignia', Georgia, serif;
+    letter-spacing: 0.5px;
+}
+
+.format-cards {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 20px;
+}
+
+.format-cards:has(> .format-card:nth-child(5)) {
+    max-width: 740px;
+    margin: 0 auto;
+}
+
+.format-cards:has(> .format-card:nth-child(7)) {
+    max-width: none;
+}
+
+.format-card {
+    flex: 1 1 200px;
+    max-width: 230px;
+    background: #fff8f0;
+    border: 2px solid #e0cdb8;
+    border-radius: 14px;
+    padding: 22px 20px;
+    text-align: left;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.format-card h3 {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #2b2118;
+    margin: 0;
+}
+
+.format-card .format-line {
+    margin: 0;
+    font-weight: 700;
+    color: #c0562a;
+}
+
+.format-card p {
+    margin: 0;
+    color: #5c4a3a;
+    font-size: 0.95rem;
+    line-height: 1.5;
+}
+
+.formats-note {
+    margin: 28px auto 0;
+    max-width: 640px;
+    color: #5c4a3a;
+}
+
+/* tablets: two to a row (2 + 2 rather than 3 + 1); phones: one */
+@media (max-width: 900px) {
+    .format-cards,
+    .format-cards:has(> .format-card:nth-child(5)),
+    .format-cards:has(> .format-card:nth-child(7)) {
+        max-width: 500px;
+        margin: 0 auto;
+    }
+}
+
+@media (max-width: 520px) {
+    .format-card {
+        flex-basis: 100%;
+        max-width: none;
+    }
+}
+
 /* ── Get Started ── */
 .get-started {
     max-width: 900px;

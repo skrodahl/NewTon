@@ -1,4 +1,10 @@
-## Unreleased
+## **v5.4.2** — All the Dishes Rattle in the Cupboards (2026-10-09)
+
+### Landing page: Pick Your Format, and Chalk. Send. Done.
+
+- **"Pick Your Format."**, a new section between the hero's Launch/Open buttons and Get Started: a card for each format (Double Elimination, Single Elimination, Cup and Plate, Round Robin) with a short line and its player range, and a note on qualifiers and seeding. The cards sit in centred rows that wrap, so new formats fit as they arrive: up to 4 across; 5 or 6 go 3 to a row, 7 or more 4 to a row again (`:has()`; older browsers wrap 4 + 1, still centred); 2 + 2 on a tablet, one per row on a phone.
+- **"Chalk. Send. Done."** replaces "Scan. Score. Done.": matches go out and results come back by QR code or over your own network.
+- Files changed: `landing.html`, `landing-page.php` (the same hero and section), `css/landing.css` (`.formats`, `.format-cards`, `.format-card`).
 
 ### Reset: never a completed tournament, and an unfinished one leaves the Analytics register clean
 
@@ -21,6 +27,11 @@
 - **Match Controls:** "Cup · Round 1", "Plate · Quarterfinal" in one queue, each Plate round after the Cup's round of the same number. Winner dialog and match history: "moves to P-QF1", "wins the Plate". The draw dialog says "16 + Plate of 8".
 - **Tested in the browser:** 16 players to the end (the Cup final played with 8 Plate matches left, and the tournament waited for the Plate; 1st and 2nd from the Cup; placings 1–4, 5th–8th, 9th–12th, 13th–16th; Plate winner on the finished view); 12 players (4 byes, their Plate places walkovers); undo of a round 1 result (its loser out of the Plate again); 8 players (a Plate of 4); 4 players (no Plate even with the switch on); 40 players with qualifiers and a Plate of 16; save and reload; the switch on the draw card.
 - Files changed: `js/plate.js` (new), `js/clean-match-progression.js` (`getProgressionTable()`, the draw, completion, `calculateAllRankings()`, the draw dialog, the winner dialog), `js/bracket-view.js` (`layoutPlate()`, labels, lines, the finals toggle), `js/bracket-rendering.js` (the switch, queue, round names and order, the Plate winner), `js/groups.js` (`placeTier` exported), `js/main.js`, `js/tournament-management.js` (save, export, load, reset), `js/results-config.js` (`offerPlate`), `tournament.html`, `css/match-controls.css`, `js/dynamic-help-system.js`, `userguide.html`, `Docs/CUP-AND-PLATE.md`, `Docs/PARKING-LOT.md`.
+
+### Release
+
+- Version 5.4.2, "All the Dishes Rattle in the Cupboards": Cup and Plate, Reset only for unfinished tournaments (clearing their Analytics record), Cup & Plate in Analytics, and the landing page's formats section. The Chalker is unchanged; its version and caches are bumped with the app's (`CHALKER_VERSION`, `chalker.js?v=28`, service worker cache `chalker-v125`).
+- Files changed: `js/main.js` (`APP_VERSION` → `5.4.2`), `chalker/js/chalker.js` (`CHALKER_VERSION` → `5.4.2`), `chalker/index.html`, `chalker/sw.js`, `llms.txt` (Cup and Plate; off the do-not-invent list, with optional bronze finals on it; a completed tournament can't be reset), `sitemap.xml`, `releases/index.html`, `releases/v5.4.2.html`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.2.md`. The help was reviewed with the Cup and Plate work.
 
 ## **v5.4.1** — Under Pressure (2026-10-09)
 
