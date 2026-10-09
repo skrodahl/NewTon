@@ -31,6 +31,14 @@ Single elimination (the **Cup**) where the round 1 losers play a second single e
   that is their night: the Plate is for round 1 losers only (the classic rule; it keeps the Plate
   starting early).
 - **Qualifiers:** a qualifier loser is not qualified and never goes to the Plate.
+- **Byes can meet in the Plate (known, kept; maintainer 2026-10-09).** Two byes in neighbouring round
+  1 matches (the pair that feeds one Plate match) make that Plate match walkover against walkover;
+  the walkover then loses a Plate semifinal without a match and drops into the Plate's bronze final,
+  so two Plate players each lose a match. With a random draw and 12 players (4 byes in 8 matches)
+  this happens in about 3 draws in 4 (54 of the 70 ways to place the byes); never with 16; at 9 and
+  10 players there are more byes than pairs, so it can't always be avoided. Seeded draws spread the
+  byes already (they go to the top seeds, in different quarters). Spreading the random byes over the
+  pairs when Play a Plate is on was offered and declined: kept as the draw makes it.
 
 ## Placings and points
 
