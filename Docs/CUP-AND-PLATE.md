@@ -11,9 +11,10 @@ Single elimination (the **Cup**) where the round 1 losers play a second single e
 - **Not a new format: a switch on single elimination.** The draw, the Cup, seeding, qualifiers and
   the finals positions stay exactly as they are; the Plate is added to them.
 - **Play a Plate** is a switch on the single elimination card in Shuffle & Draw, decided at the
-  draw (that's when you know how many turned up and how long the night is). A Global Setting
-  decides whether it starts on (as Play the B cup does); **default off** (decided, maintainer
-  2026-10-09), so single elimination is unchanged unless asked for.
+  draw (that's when you know how many turned up and how long the night is). It **always starts
+  off**, so single elimination is unchanged unless asked for.
+- **Offer Play a Plate** in Global Settings, **on by default**: turned off, the switch isn't shown
+  at the draw at all, for a club that never plays a Plate (maintainer, 2026-10-09).
 - **From 8-player brackets up** (5 or more players). In a 4-player bracket round 1 is already the
   semifinals, whose losers play the bronze final, so there is nothing for a Plate to add.
 
@@ -87,10 +88,18 @@ No new settings.
   bronze final and the Plate's final and bronze final are all done; today it completes on the Cup
   final.
 - **Rankings:** `calculateSERankings()` for the Cup as now; the Plate's places offset by K/2.
-- **Bracket view:** the Plate drawn under the Cup with its own heading and shaded area, like the B
-  cup under the A cup; both finals positions (Right and Middle) for both. Loser drops shown on
-  selection, as in double elimination.
+- **Bracket view: back to back** (maintainer, 2026-10-09; mockup). The Cup runs left to right with
+  its bronze final and final on its right; the Plate mirrors it from the right, its rounds running
+  right to left, so the two finals face each other in the middle and the whole tournament fits
+  without scrolling. The Plate's rounds sit level with the Cup's (its quarterfinals beside the
+  Cup's quarterfinals). Told apart from double elimination by "Cup ▶" and "◀ Plate" labels, the
+  Plate shaded like the backside, and **nothing joining the two finals** (no grand final). Loser
+  drops from Cup round 1 run round under the bracket into the Plate, shown on selection, as in
+  double elimination. With a Plate the layout is always back to back, whatever the Finals setting
+  (as double elimination with qualifiers is always in the middle). With qualifiers, their column
+  stays outside the Cup's round 1 on the left.
 - **Match Controls:** Cup and Plate matches in one queue, labelled Cup · Round 1, Plate · QF; Next
-  up as now. Shuffle & Draw: the Play a Plate switch on the single elimination card.
+  up as now. Shuffle & Draw: the Play a Plate switch on the single elimination card (unless Offer
+  Play a Plate is off).
 - **Winner dialog:** "Ola M. moves to P-QF1" for a Cup round 1 loser, as on the backside.
 - **Help, user guide, llms.txt, web pages.**

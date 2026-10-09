@@ -79,17 +79,17 @@ table.n td.pts { text-align: right; color: var(--nt-muted); }
 <div class="wrap">
 <div class="intro">
     <h1>Cup and Plate</h1>
-    <p>Quick mockup. 16 players, single elimination with <b>Play a Plate</b> on, partway through round 1. Every round 1 loser goes to a fixed place in the Plate (like double elimination's backside), so a Plate match can start as soon as its two round 1 matches are played. The Plate is a single elimination of its own, drawn under the Cup.</p>
+    <p>Quick mockup. 16 players, single elimination with <b>Play a Plate</b> on, partway through round 1. Every round 1 loser goes to a fixed place in the Plate (like double elimination's backside), so a Plate match can start as soon as its two round 1 matches are played. The Plate is a single elimination of its own, drawn <b>back to back</b> with the Cup: the Cup runs left to right, the Plate mirrors it from the right, and the two finals face each other in the middle. Nothing joins them: there is no grand final.</p>
 </div>
 
 <section class="step">
-    <h2>The bracket <span class="new">Cup above, Plate below</span></h2>
-    <p class="why">Round 1 match 1 and 2 are played: their losers (Ola, Siv) already meet in P-QF1. FS-1-3 is live; its loser and FS-1-4's will meet in P-QF2. The orange dashed lines are the loser drops, shown here for two matches (in the app they show when a match is selected, as in double elimination).</p>
+    <h2>The bracket <span class="new">Cup and Plate back to back</span></h2>
+    <p class="why">Round 1 match 1 and 2 are played: their losers (Ola, Siv) already meet in P-QF1. FS-1-3 is live; its loser and FS-1-4's will meet in P-QF2. The orange dashed lines are the loser drops, shown here for two matches: round under the bracket into the Plate (in the app they show when a match is selected, as in double elimination). The Plate's quarterfinals sit level with the Cup's, a mirror image; the Plate is shaded, like the backside.</p>
     <div class="screen">
         <div class="hdr">
             <div><b>Monday Cup 42</b><small>2026 · 10 · 19</small></div>
             <div class="tabs"><span class="on">Bracket</span><span>Match Controls</span><span>Leaderboard</span></div>
-            <div style="justify-self:end"><div class="tabs"><span>Finals</span><span class="on">Right</span><span>Middle</span></div></div>
+            <div style="justify-self:end;font-size:12px;color:var(--nt-muted)">With a Plate: always back to back (the Finals setting doesn't apply)</div>
         </div>
         <div class="status"><b>16</b> players · Single elimination with a Plate · 31 matches · 2 played · 1 live · 6 ready</div>
         <div class="body"><div class="world" id="world"></div></div>
@@ -115,7 +115,8 @@ table.n td.pts { text-align: right; color: var(--nt-muted); }
         </div>
         <div class="panel">
             <h3>Settings</h3>
-            <div class="set"><div><b>Play a Plate</b><small>A switch on the single elimination card in Shuffle &amp; Draw; Global Settings decides how it starts (off by default)</small></div><div class="seg"><span>Off</span><span class="on">On</span></div></div>
+            <div class="set"><div><b>Offer Play a Plate</b><small>Global Settings: whether the single elimination card in Shuffle &amp; Draw has the Play a Plate switch (on by default)</small></div><div class="seg"><span>Off</span><span class="on">On</span></div></div>
+            <div class="set"><div><b>Play a Plate</b><small>The switch at the draw: always starts off</small></div><div class="seg"><span class="on">Off</span><span>On</span></div></div>
             <div class="set"><div><b>Bronze finals</b><small>Always played, in the Cup and in the Plate</small></div><div></div></div>
             <div class="set"><div><b>Match length</b><small>The Plate uses the single elimination lengths by its own rounds (its semifinal Bo3, its final Bo5)</small></div><div></div></div>
             <div class="qh">Match Controls · Ready to start</div>
@@ -190,38 +191,60 @@ table.n td.pts { text-align: right; color: var(--nt-muted); }
     card('FS-4-1', colX(3), pos['FS-3-1'].y, '~Loser FS-3-1', '~Loser FS-3-2', { tag: 'Bronze' });
     card('FS-5-1', colX(4), mid(['FS-3-1', 'FS-3-2']), '~Winner FS-3-1', '~Winner FS-3-2', { tag: 'Final' });
     line('FS-3-1', 'FS-5-1', 'known', true); line('FS-3-2', 'FS-5-1', 'known', true);
-    label('NewTon DC · Cup', colX(2) + W / 2, top - 52, 'big');
     ['Round 1', 'Quarterfinals', 'Semifinals', 'Bronze final', 'Final'].forEach((t, r) => label(t, colX(r) + W / 2, (r === 0 ? top : r === 3 ? pos['FS-4-1'].y : r === 4 ? pos['FS-5-1'].y : pos[`FS-${r + 1}-1`].y) - 20));
     label('3rd place', colX(3) + W / 2, pos['FS-4-1'].y + H + 6, 'sub');
     const cupBottom = y1(7) + H;
 
-    // ---- the Plate: QF (4), SF (2), bronze + final ----
-    const ptop = cupBottom + 110;
-    const band = document.createElement('div'); band.className = 'band';
-    Object.assign(band.style, { left: (colX(1) - 18) + 'px', top: (ptop - 76) + 'px', width: (4 * P - GX + 36) + 'px', height: (4 * PITCH + 76 + 30) + 'px' });
-    world.insertBefore(band, svg);
-    const pq = [['Ola M.', 'Siv R.', { state: 'ready', tag: 'READY' }]];
+    // ---- the Plate, back to back: its final facing the Cup's, its rounds running right to left ----
+    const FG = 96;                                        // the gap between the two finals
+    const px = c => colX(4) + W + FG + c * P;             // c: 0 final, 1 bronze, 2 semifinals, 3 quarterfinals
+    // lines from right to left (out of a card's left side, into the next one's right side)
+    const lineL = (a, b, fork = false) => {
+        const s = pos[a], t = pos[b], x1 = s.x, y1 = s.y + H / 2, x2 = t.x + W, y2 = t.y + H / 2, mx = fork ? x1 - GX / 2 : (x1 + x2) / 2;
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p.setAttribute('d', `M${x1} ${y1} H${mx} V${y2} H${x2}`); p.setAttribute('class', 'known'); svg.appendChild(p);
+    };
     for (let i = 0; i < 4; i++) {
-        const y = ptop + i * PITCH;
-        if (i === 0) card('P-QF1', colX(1), y, 'Ola M.', 'Siv R.', { state: 'ready', tag: 'READY' });
-        else card(`P-QF${i + 1}`, colX(1), y, `~Loser FS-1-${2 * i + 1}`, `~Loser FS-1-${2 * i + 2}`);
+        const y = pos[`FS-2-${i + 1}`].y;                   // level with the Cup's quarterfinals: a mirror image
+        if (i === 0) card('P-QF1', px(3), y, 'Ola M.', 'Siv R.', { state: 'ready', tag: 'READY' });
+        else card(`P-QF${i + 1}`, px(3), y, `~Loser FS-1-${2 * i + 1}`, `~Loser FS-1-${2 * i + 2}`);
     }
     for (let i = 0; i < 2; i++) {
-        card(`P-SF${i + 1}`, colX(2), mid([`P-QF${2 * i + 1}`, `P-QF${2 * i + 2}`]), `~Winner P-QF${2 * i + 1}`, `~Winner P-QF${2 * i + 2}`);
-        line(`P-QF${2 * i + 1}`, `P-SF${i + 1}`); line(`P-QF${2 * i + 2}`, `P-SF${i + 1}`);
+        card(`P-SF${i + 1}`, px(2), mid([`P-QF${2 * i + 1}`, `P-QF${2 * i + 2}`]), `~Winner P-QF${2 * i + 1}`, `~Winner P-QF${2 * i + 2}`);
+        lineL(`P-QF${2 * i + 1}`, `P-SF${i + 1}`); lineL(`P-QF${2 * i + 2}`, `P-SF${i + 1}`);
     }
-    card('P-B', colX(3), pos['P-SF1'].y, '~Loser P-SF1', '~Loser P-SF2', { tag: 'Bronze' });
-    card('P-F', colX(4), mid(['P-SF1', 'P-SF2']), '~Winner P-SF1', '~Winner P-SF2', { tag: 'Final' });
-    line('P-SF1', 'P-F', 'known', true); line('P-SF2', 'P-F', 'known', true);
-    label('Plate · round 1 losers', colX(2) + W / 2, ptop - 70, 'big plate');
-    ['Quarterfinals', 'Semifinals', 'Bronze final', 'Final'].forEach((t, r) => label(t, colX(r + 1) + W / 2, (r === 0 ? ptop : r === 2 ? pos['P-B'].y : r === 3 ? pos['P-F'].y : pos['P-SF1'].y) - 20, 'plate'));
-    label('11th place', colX(3) + W / 2, pos['P-B'].y + H + 6, 'sub');
-    label('9th place', colX(4) + W / 2, pos['P-F'].y + H + 6, 'sub');
+    card('P-B', px(1), pos['P-SF1'].y, '~Loser P-SF1', '~Loser P-SF2', { tag: 'Bronze' });
+    card('P-F', px(0), mid(['P-SF1', 'P-SF2']), '~Winner P-SF1', '~Winner P-SF2', { tag: 'Final' });
+    lineL('P-SF1', 'P-F', true); lineL('P-SF2', 'P-F', true);
 
-    // the loser drops shown: FS-1-1 and FS-1-2 into P-QF1, FS-1-3 and FS-1-4 into P-QF2
-    drop('FS-1-1', 'P-QF1', 1); drop('FS-1-2', 'P-QF1', 2);
+    // the Plate's shaded area, and the labels
+    const pys = ['P-QF1', 'P-QF4', 'P-B', 'P-F'].map(id => pos[id].y);
+    const band = document.createElement('div'); band.className = 'band';
+    Object.assign(band.style, { left: (px(0) - 22) + 'px', top: (Math.min(...pys) - 66) + 'px', width: (3 * P + W + 44) + 'px', height: (Math.max(...pys) - Math.min(...pys) + H + 100) + 'px' });
+    world.insertBefore(band, svg);
+    label('Cup \u25B6', colX(0) + W / 2, top - 52, 'big');
+    label('\u25C0 Plate', px(3) + W / 2, Math.min(...pys) - 56, 'big plate');
+    label('NewTon DC', (colX(4) + W + px(0)) / 2, pos['FS-5-1'].y - 70, 'big');
+    ['Final', 'Bronze final', 'Semifinals', 'Quarterfinals'].forEach((t, c) => {
+        const id = ['P-F', 'P-B', 'P-SF1', 'P-QF1'][c];
+        label(t, px(c) + W / 2, pos[id].y - 20, 'plate');
+    });
+    label('11th place', px(1) + W / 2, pos['P-B'].y + H + 6, 'sub');
+    label('9th place', px(0) + W / 2, pos['P-F'].y + H + 6, 'sub');
+    label('1st place', colX(4) + W / 2, pos['FS-5-1'].y + H + 6, 'sub');
 
-    const h = Math.max(...Object.values(pos).map(p => p.y)) + H + 40;
+    // the loser drops shown: FS-1-1 and FS-1-2 into P-QF1, out of the left side, round under the
+    // bracket and into the Plate's quarterfinal from the right (shown on selection in the app)
+    const yb = Math.max(...Object.values(pos).map(p => p.y)) + H + 24;
+    const drop2 = (a, b, slot) => {
+        const s = pos[a], t = pos[b], k = slot === 1 ? 0 : 7;
+        const ox = s.x - 8 - k, rx = t.x + W + 14 + k, ty = t.y + 18 + (slot === 1 ? 11 : 34);
+        const p = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+        p.setAttribute('d', `M${s.x} ${s.y + H / 2} H${ox} V${yb + k} H${rx} V${ty} H${t.x + W}`); p.setAttribute('class', 'drop'); svg.appendChild(p);
+    };
+    drop2('FS-1-1', 'P-QF1', 1); drop2('FS-1-2', 'P-QF1', 2);
+
+    const h = Math.max(...Object.values(pos).map(p => p.y)) + H + 60;
     const w = Math.max(...Object.values(pos).map(p => p.x)) + W + 30;
     world.style.height = h + 'px'; world.style.width = w + 'px';
     svg.setAttribute('width', w); svg.setAttribute('height', h);
