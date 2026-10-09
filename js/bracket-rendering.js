@@ -68,6 +68,11 @@ function clearBracket() {
  * @returns {number}
  */
 function getMatchRoundOrder(matchId) {
+    // Cup and Plate: the Plate comes after the Cup's round 1, as the backside does
+    if (typeof Plate !== 'undefined' && Plate.isPlateId(matchId)) {
+        const r = matchId.slice(2);
+        return 500 + (r === 'F' ? 100 : r === 'B' ? 99 : r.startsWith('SF') ? 30 : r.startsWith('QF') ? 20 : parseInt(r.slice(1)) || 1);
+    }
     // Groups and cups: group matches first, then each cup's rounds (A-R1-3, A-QF1, A-SF1, A-B, A-F)
     if (typeof Groups !== 'undefined' && Groups.isGroupId(matchId)) return 0;
     if (typeof Groups !== 'undefined' && Groups.isCupId(matchId)) {
@@ -1288,6 +1293,7 @@ function getMatchFormatDescription(match) {
 function getRoundDescription(match) {
     if (typeof getFormat === 'function' && getFormat() === 'GROUPS' && typeof Groups !== 'undefined') return Groups.roundName(match);
     if (typeof Qualifiers !== 'undefined' && Qualifiers.isQualifier(match)) return 'Qualifier';
+    if (typeof Plate !== 'undefined' && match.side === 'plate') return Plate.roundName(match);
     if (match.id === 'GRAND-FINAL') return 'Grand Final';
     if (match.id === 'BS-FINAL') return 'Backside Final';
 
@@ -1460,10 +1466,12 @@ function startMatchOnLane(matchId, lane) {
 /** The round heading for a group of ready matches. */
 function _mcRoundTitle(key) {
     if (key === 'QUAL') return 'Qualifiers';
+    if (key.startsWith('PLATE-R') && typeof Plate !== 'undefined') return Plate.roundName({ round: parseInt(key.slice(7)) });
     if (key === 'GRAND-FINAL') return 'Grand Final';
     if (key === 'BS-FINAL') return 'Backside Final';
     if (getFormat && getFormat() === 'SE' && key.startsWith('FS-R') && typeof getSERoundDisplayName === 'function') {
-        return getSERoundDisplayName(parseInt(key.replace('FS-R', '')), tournament && tournament.bracketSize);
+        const name = getSERoundDisplayName(parseInt(key.replace('FS-R', '')), tournament && tournament.bracketSize);
+        return tournament && tournament.plate ? `Cup · ${name}` : name; // Cup and Plate: the two queues apart
     }
     if (key.startsWith('FS-R')) return `Frontside · Round ${key.replace('FS-R', '')}`;
     if (key.startsWith('BS-R')) return `Backside · Round ${key.replace('BS-R', '')}`;
@@ -1485,9 +1493,10 @@ function _mcActiveHTML(matchData) {
     const free = lanes.usable.filter(l => !used.has(String(l)));
 
     // the order matches are queued in: frontside rounds, then the finals; backside beside
-    const order = k => k === 'QUAL' ? 0 : k === 'GRAND-FINAL' ? 90 : k === 'BS-FINAL' ? 91 : parseInt(k.replace(/\D/g, '')) || 50;
+    const order = k => k === 'QUAL' ? 0 : k === 'GRAND-FINAL' ? 90 : k === 'BS-FINAL' ? 91
+        : k.startsWith('PLATE-R') ? parseInt(k.slice(7)) + 0.5 : parseInt(k.replace(/\D/g, '')) || 50;
     const keys = Object.keys(matchData.rounds || {});
-    const front = keys.filter(k => k.startsWith('FS-') || k === 'GRAND-FINAL' || k === 'OTHER' || k === 'QUAL').sort((a, b) => order(a) - order(b));
+    const front = keys.filter(k => k.startsWith('FS-') || k === 'GRAND-FINAL' || k === 'OTHER' || k === 'QUAL' || k.startsWith('PLATE-R')).sort((a, b) => order(a) - order(b));
     const back = keys.filter(k => k.startsWith('BS-') || k === 'BS-FINAL').sort((a, b) => order(a) - order(b));
     const queued = front.concat(back).flatMap(k => matchData.rounds[k]);
     const next = queued.find(m => !checkRefereeConflict(m.id).hasConflict);
@@ -1797,7 +1806,15 @@ function _mcSetupHTML() {
         else if (paid > lim.maxPlayers) { label = `At most ${lim.maxPlayers} players${single ? ' in one group' : ''}`; ok = false; }
         const blurb = !rr ? fmt.blurb : single ? 'Everybody plays everybody in one group; the table decides the placings'
             : `Everybody plays everybody in groups, then an A cup and a B cup${Groups.configSettings().cupEntry === 'half' ? ' of the same size' : ''}`;
-        return `<div class="mc-fmt"><b>${escapeHtml(fmt.name)}</b><p>${escapeHtml(blurb || '')}</p><button type="button" class="mc-btn mc-primary" onclick="generateBracket('${escapeHtml(fmt.id)}')"${ok ? '' : ' disabled'}>${label}</button></div>`;
+        // Cup and Plate: the Play a Plate switch on single elimination's card, always off to start with
+        // (Global Settings → Offer Play a Plate can leave it out; Docs/CUP-AND-PLATE.md)
+        let plate = '';
+        if (fmt.id === 'SE' && typeof Plate !== 'undefined' && Plate.offered()) {
+            const can = Plate.possible(paid), want = can && Plate.wanted();
+            plate = `<label class="mc-switchrow mc-plate"><span class="mc-switch"><input type="checkbox"${want ? ' checked' : ''}${can ? '' : ' disabled'} onchange="Plate.setWanted(this.checked); _mcRefresh(0);"><span></span></span><span class="mc-plate-t">Play a Plate<small>${can ? 'Round 1 losers play a second knockout' : 'From 5 players'}</small></span></label>`;
+            if (want && ok) label += ' + Plate';
+        }
+        return `<div class="mc-fmt"><b>${escapeHtml(fmt.name)}</b><p>${escapeHtml(blurb || '')}</p>${plate}<button type="button" class="mc-btn mc-primary" onclick="generateBracket('${escapeHtml(fmt.id)}')"${ok ? '' : ' disabled'}>${label}</button></div>`;
     }).join('');
     const p = config.points, l = config.legs, lanes = _mcLanes();
     const dl = rows => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
@@ -1887,6 +1904,8 @@ function showMatchCommandCenter() {
 
         if (match.side === 'qualifier') {
             roundKey = 'QUAL'; // qualifiers (33-48 players): first, each one unblocks a round 1 match
+        } else if (match.side === 'plate') {
+            roundKey = `PLATE-R${match.round}`; // Cup and Plate: after the Cup's round of the same number
         } else if (match.id === 'GRAND-FINAL') {
             roundKey = 'GRAND-FINAL';
         } else if (match.id === 'BS-FINAL') {
@@ -2367,6 +2386,12 @@ function _mcHighlights() {
         const names = paid.filter(p => tournament.placements && tournament.placements[String(p.id)] === rank).map(p => p.name);
         if (names.length) list.push({ label: typeof formatRanking === 'function' ? formatRanking(rank).replace('-', '–') : String(rank), value: names.join(', '), who: '', place: true });
     });
+    // Cup and Plate: the Plate's winner (its places are in the shared tiers, so the podium can't show it)
+    const plateWinner = typeof Plate !== 'undefined' ? Plate.winner() : null;
+    if (plateWinner) {
+        const pf = matches.find(m => m.id === Plate.finalId());
+        list.push({ label: 'Plate winner', value: plateWinner.name, who: pf && pf.loser && pf.loser.name ? `beat ${pf.loser.name} in the final` : '', place: true });
+    }
     const later = id => list.push({ label: 'Best average', value: '', who: '', id, hidden: true });
     const points = p => typeof calculatePlayerPoints === 'function' ? calculatePlayerPoints(p) : 0;
     const pts = best(p => points(p), (a, b) => a > b);

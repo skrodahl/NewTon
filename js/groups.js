@@ -492,7 +492,7 @@ const Groups = (() => {
 
     return {
         isGroupId, isCupId, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
-        configSettings, settings, isSingle, limits, formatName,
+        configSettings, settings, isSingle, limits, formatName, placeTier,
         groupList, groupMatches, standings, groupDone, allGroupsDone, cupFields,
         planCupReferees, avoidRematches, plannedRefereeFor, plannedRefereeText, cupMatchesOf, holdFor,
         isComplete, placements, roundName, moveUp

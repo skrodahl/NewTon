@@ -46,6 +46,7 @@ const DEFAULT_CONFIG = {
     ui: {
         hiddenFormats: [],
         confirmWinnerSelection: true,
+        offerPlate: true,     // Cup and Plate: the Play a Plate switch at single elimination's draw (Docs/CUP-AND-PLATE.md)
         autoOpenMatchControls: true,
         defaultPaid: false,
         developerMode: false,
@@ -207,6 +208,7 @@ function applyConfigToUI() {
     // UI configuration
     if (config.ui) {
         safeSetChecked('confirmWinnerSelection', config.ui.confirmWinnerSelection);
+        safeSetChecked('offerPlate', config.ui.offerPlate !== false);
         safeSetChecked('autoOpenMatchControls', config.ui.autoOpenMatchControls);
         safeSetChecked('defaultPaid', config.ui.defaultPaid);
         safeSetChecked('developerMode', config.ui.developerMode);
@@ -593,6 +595,8 @@ function saveUIConfiguration(options = {}) {
 
     config.ui = config.ui || {};
     config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
+    const offerPlateElement = document.getElementById('offerPlate');
+    config.ui.offerPlate = offerPlateElement ? offerPlateElement.checked : true;
     config.ui.autoOpenMatchControls = autoOpenElement ? autoOpenElement.checked : true;
     config.ui.defaultPaid = defaultPaidElement ? defaultPaidElement.checked : false;
     config.ui.developerMode = developerModeElement ? developerModeElement.checked : false;
@@ -716,7 +720,7 @@ const CONFIG_LABELS = {
         cupBronze: 'Cup bronze final (Round Robin)', cupFinal: 'Cup final (Round Robin)', x01Format: 'Game', maxRounds: 'Max rounds', shortLegThreshold: 'Short leg (darts)' },
     clubName: { _: 'Club name' },
     lanes: { _: 'Lanes', maxLanes: 'Lanes', excludedLanes: 'Lanes not in use', requireLaneForStart: 'Require a lane to start' },
-    ui: { _: 'Interface', hiddenFormats: 'Hidden formats', confirmWinnerSelection: 'Confirm the winner',
+    ui: { _: 'Interface', hiddenFormats: 'Hidden formats', offerPlate: 'Offer Play a Plate', confirmWinnerSelection: 'Confirm the winner',
         autoOpenMatchControls: 'Start on Match Controls', defaultPaid: 'New players are paid', developerMode: 'Developer Console',
         refereeSuggestionsLimit: 'Referee suggestions', bracketFinals: 'Finals position' },
     chalker: { _: 'Chalker', handover: 'Handover' },

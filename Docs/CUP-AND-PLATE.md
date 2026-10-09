@@ -1,6 +1,6 @@
 # Cup and Plate
 
-Design note, 2026-10-09. Not built. Mockup: `Docs/mockups/cup-and-plate.html`. Decisions are the
+Design note, 2026-10-09. **Built 2026-10-09** (unreleased; CHANGELOG.md has the details). Mockup: `Docs/mockups/cup-and-plate.html`. Decisions are the
 maintainer's (Docs/PARKING-LOT.md → More formats, after Round Robin). No open points.
 
 ## What it is
@@ -35,13 +35,18 @@ Single elimination (the **Cup**) where the round 1 losers play a second single e
 ## Placings and points
 
 The Cup's places never change. Round 1 losers share the bottom places of the Cup's bracket, and
-the Plate orders them:
+the Plate orders them **in the app's shared places**, as everywhere beyond 4th (built 2026-10-09;
+the B cup in Round Robin does the same): a place within the Plate, after the Cup's K/2 places,
+mapped to its tier (`Groups.placeTier()`).
 
-- 16 players: Plate winner 9th, runner-up 10th, Plate bronze final 11th and 12th, Plate
-  quarterfinal losers 13th–16th.
-- 8 players: the Plate decides 5th, 6th, 7th, 8th, which score placement points.
-- In general: a Plate place is K/2 plus its place within the Plate (K = the Cup's bracket size),
-  with single elimination's own shared tiers.
+- 8 players: the Plate's finalists 5th–6th, its bronze pair 7th–8th. The points are what exact
+  places would have given (5th and 6th share one value, so do 7th and 8th).
+- 16 players: the Plate's semifinalists 9th–12th, its quarterfinal losers 13th–16th.
+- 32 players: the Plate's last eight 17th–24th, the rest 25th–32nd.
+- The Plate's final and bronze final decide no placings; they are played for the Plate itself.
+  The finished view names the **Plate winner** (and who they beat in the final), since the podium
+  can't show it. Exact places (9th, 10th …) would need a second way of naming places just for
+  the Plate.
 
 ## Bronze finals (decided: always played, no switch)
 

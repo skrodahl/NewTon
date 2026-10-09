@@ -36,7 +36,8 @@ const BracketView = (() => {
 
     // ---------- structure from the progression table ----------
     const isQ = id => /^Q\d+$/.test(id);  // a qualifier (33-48 players, Docs/QUALIFIERS.md)
-    const sideOf = id => id.startsWith('FS') ? 'FS' : (id.startsWith('BS-') && id !== 'BS-FINAL' ? 'BS' : isQ(id) ? 'Q' : 'FIN');
+    const isP = id => /^P-/.test(id);     // a Plate match (Cup and Plate, Docs/CUP-AND-PLATE.md)
+    const sideOf = id => id.startsWith('FS') ? 'FS' : (id.startsWith('BS-') && id !== 'BS-FINAL' ? 'BS' : isQ(id) ? 'Q' : isP(id) ? 'P' : 'FIN');
     const roundOf = id => +id.split('-')[1];
     const numOf = id => +id.split('-')[2];
 
@@ -49,7 +50,7 @@ const BracketView = (() => {
         }));
         const maxFS = Math.max(...ids.filter(i => sideOf(i) === 'FS').map(roundOf));
         const maxBS = Math.max(...ids.filter(i => sideOf(i) === 'BS').map(roundOf));
-        return { ids, feeds, maxFS, maxBS, qids: ids.filter(isQ), prog };
+        return { ids, feeds, maxFS, maxBS, qids: ids.filter(isQ), pids: ids.filter(isP), prog };
     }
 
     // ---------- butterfly layout ----------
@@ -201,7 +202,30 @@ const BracketView = (() => {
     }
 
     // The layout is the one part chosen by format and finals position (see Docs/BRACKET-REDESIGN.md, "Other Formats")
-    const layoutOf = (st, variant, g) => variant === 'se' ? layoutSE(st, g)
+    // ---------- Cup and Plate, back to back ----------
+    // The Cup as single elimination with the finals on the right (layoutSE()); the Plate mirrors it
+    // from the right: its final faces the Cup's across the finals gap, then its bronze final, its
+    // semifinals and so on outwards, each of its rounds level with the Cup's next round (the Plate is
+    // half the Cup), so the two finals face each other in the middle. Nothing joins the two finals.
+    function layoutPlate(st, g) {
+        const L = layoutSE(Object.assign({}, st, { ids: st.ids.filter(i => !isP(i)) }), g);
+        const pos = L.pos, P = W + g.GX, size = tournament.plate.size;
+        const pMax = Math.log2(size) + 1, pSemis = pMax - 2;      // the Plate's final round, and its semifinals
+        const x0 = pos[`FS-${st.maxFS}-1`].x + W + g.FINALS_GAP;  // the Plate's final column
+        const at = seId => cupMatchId('P', seId, size);
+        for (let r = 1; r <= pSemis; r++) {
+            for (let j = 1; pos[`FS-${r + 1}-${j}`] && j <= size / Math.pow(2, r); j++) {
+                pos[at(`FS-${r}-${j}`)] = { x: x0 + (2 + pSemis - r) * P, y: pos[`FS-${r + 1}-${j}`].y };
+            }
+        }
+        const sf = [1, 2].map(j => pos[at(`FS-${pSemis}-${j}`)]).filter(Boolean);
+        pos[at(`FS-${pMax - 1}-1`)] = { x: x0 + P, y: Math.min(...sf.map(p => p.y)) };                       // bronze final
+        pos[at(`FS-${pMax}-1`)] = { x: x0, y: sf.reduce((s, p) => s + p.y, 0) / sf.length };                  // final
+        L.cw = Math.max(...Object.values(pos).map(p => p.x)) + W;
+        return L;
+    }
+
+    const layoutOf = (st, variant, g) => variant === 'plate' ? layoutPlate(st, g) : variant === 'se' ? layoutSE(st, g)
         : variant === 'se-middle' ? layoutSEMiddle(st, g)
         : variant === 'cups' ? layoutCups(st, g) : layout(st, variant, g);
     // Qualifiers: the format's layout without them, then each qualifier one column outward from the
@@ -379,6 +403,8 @@ const BracketView = (() => {
     function finalsVariant() {
         if (getFormat() === 'GROUPS') return 'cups'; // always the final in the middle: two cups have to fit
         const middle = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle';
+        // Cup and Plate: always back to back (Docs/CUP-AND-PLATE.md)
+        if (getFormat() === 'SE' && typeof tournament !== 'undefined' && tournament && tournament.plate) return 'plate';
         if (getFormat() === 'SE') return middle ? 'se-middle' : 'se';
         // with qualifiers, always the finals in the middle: with them on the right the backside sits
         // straight beside round 1, where the qualifiers go (Docs/QUALIFIERS.md)
@@ -483,9 +509,9 @@ const BracketView = (() => {
             lblMid('3rd place', pos[bronze].x, pos[bronze].y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
             // application signature, centred under the finals (checked by renderBracket())
             lblMid(String.fromCharCode(..._0x7a, ..._0x9b), pos[final].x, L.ch + 44, 'bv-signature').id = 'tournament-watermark';
-        } else if (variant === 'se') {
+        } else if (variant === 'se' || variant === 'plate') {
             const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
-            lbl(club, 0, -94, 'bv-club');
+            if (variant === 'se') lbl(club, 0, -94, 'bv-club');
             const semis = st.maxFS - 2, bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
             const roundName = r => r === semis ? 'Semifinals' : r === semis - 1 ? 'Quarterfinals' : 'Round ' + r;
             const topOf = r => Math.min(...st.ids.filter(i => roundOf(i) === r).map(i => pos[i].y));
@@ -493,6 +519,30 @@ const BracketView = (() => {
             lblMid('Bronze final', pos[bronze].x, pos[bronze].y - LABEL_GAP);
             lblMid('3rd place', pos[bronze].x, pos[bronze].y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
             lblMid('Final', pos[final].x, pos[final].y - LABEL_GAP);
+            if (variant === 'plate') {
+                // the Plate: shaded like the backside, its rounds labelled as the Cup's; the club name
+                // between the two finals, and the two sides named over their first rounds
+                const size = tournament.plate.size, pMax = Math.log2(size) + 1, pSemis = pMax - 2;
+                const at = seId => cupMatchId('P', seId, size);
+                const pIds = st.pids.filter(i => pos[i]);
+                const bx0 = Math.min(...pIds.map(i => pos[i].x)) - 14, bx1 = Math.max(...pIds.map(i => pos[i].x)) + W + 14;
+                const band = document.createElement('div');
+                band.className = 'bv-band';
+                Object.assign(band.style, { left: bx0 + 'px', top: '-42px', width: (bx1 - bx0) + 'px', height: (L.ch + 86) + 'px' });
+                world.insertBefore(band, world.firstChild);
+                const pRound = r => r === pSemis ? 'Semifinals' : r === pSemis - 1 ? 'Quarterfinals' : 'Round ' + r;
+                for (let r = 1; r <= pSemis; r++) {
+                    const ids = pIds.filter(i => (st.feeds[i] || []).length && pos[i].x === pos[at(`FS-${r}-1`)].x);
+                    lblMid(pRound(r), pos[at(`FS-${r}-1`)].x, Math.min(...ids.map(i => pos[i].y)) - LABEL_GAP);
+                }
+                const pb = at(`FS-${pMax - 1}-1`), pf = at(`FS-${pMax}-1`);
+                lblMid('Bronze final', pos[pb].x, pos[pb].y - LABEL_GAP);
+                lblMid('Final', pos[pf].x, pos[pf].y - LABEL_GAP);
+                lblMid('Plate winner', pos[pf].x, pos[pf].y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+                lblMid('Cup ▶', pos['FS-1-1'].x, -84, 'bv-side-label');
+                lblMid('◀ Plate', pos[at('FS-1-1')].x, -84, 'bv-side-label');
+                lblMid(club, (pos[final].x + pos[pf].x) / 2, -94, 'bv-club');
+            }
             // application signature, centred under round 1 (checked by renderBracket())
             const lastR1 = st.ids.filter(i => roundOf(i) === 1).sort((a, b) => numOf(b) - numOf(a))[0];
             lblMid(String.fromCharCode(..._0x7a, ..._0x9b), pos[lastR1].x, L.ch + 44, 'bv-signature').id = 'tournament-watermark';
@@ -571,7 +621,17 @@ const BracketView = (() => {
                 // round under the bracket, up the right edge, and enters the backside final from the right
                 const x1 = s.x, ox = x1 - GX / 2, yR = L.ch + 30, xR = t.x + W + GX / 2;
                 path = `M${x1} ${cy(src)} H${ox} V${yR} H${xR} V${cy(dst)} H${t.x + W}`;
-            } else if (variant === 'se' && kind === 'winner' && !prog[dst].winner && roundOf(dst) === st.maxFS) {
+            } else if (variant === 'plate' && kind === 'loser' && isP(dst) && /^FS-1-/.test(src)) {
+                // a Cup round 1 loser into the Plate: out of the card's left side, round under the
+                // bracket, and into the Plate's first round from the right (shown on selection)
+                const xR = t.x + W + GX / 2, yR = L.ch + 30;
+                path = `M${s.x} ${cy(src)} H${s.x - GX / 2} V${yR} H${xR} V${slotY(dst, slot)} H${t.x + W}`;
+            } else if (variant === 'plate' && kind === 'winner' && isP(dst) && !prog[dst].winner && !prog[dst].loser && pos[dst].x < s.x - W - GX / 2 - 1) {
+                // the Plate's semifinal winners fork straight after the semifinals and run under its
+                // bronze final into its final (the mirror image of the Cup's)
+                const xg = s.x - GX / 2;
+                path = `M${s.x} ${cy(src)} H${xg} V${cy(dst)} H${t.x + W}`;
+            } else if ((variant === 'se' || variant === 'plate') && kind === 'winner' && !prog[dst].winner && roundOf(dst) === st.maxFS) {
                 // Semifinal winners fork straight after the semifinals and run under the bronze final
                 const xg = s.x + W + GX / 2;
                 path = `M${s.x + W} ${cy(src)} H${xg} V${cy(dst)} H${t.x}`;
@@ -634,13 +694,26 @@ const BracketView = (() => {
                 svg.appendChild(d);
             });
         }
-        if (variant === 'se' || variant === 'se-middle') {
+        if (variant === 'plate') {
+            // the Plate's bronze final tied to the line into its final, as the Cup's below
+            const size = tournament.plate.size, pMax = Math.log2(size) + 1;
+            const pb = cupMatchId('P', `FS-${pMax - 1}-1`, size), pf = cupMatchId('P', `FS-${pMax}-1`, size);
+            if (pos[pb] && pos[pf]) {
+                const d = document.createElementNS(svgNS, 'path');
+                d.setAttribute('d', `M${pos[pb].x + W / 2} ${pos[pb].y + H} V${cy(pf)}`);
+                const assigned = M[pf] && M[pf].p.some(sl => sl.kind !== 'tbd');
+                d.setAttribute('class', 'bv-edge bv-dashed' + (assigned ? ' bv-known' : ''));
+                svg.appendChild(d);
+            }
+        }
+        if (variant === 'se' || variant === 'se-middle' || variant === 'plate') {
             const bronze = `FS-${st.maxFS - 1}-1`, final = `FS-${st.maxFS}-1`;
             const d = document.createElementNS(svgNS, 'path');
-            d.setAttribute('d', variant === 'se'
+            const right = variant === 'se' || variant === 'plate'; // the Cup of Cup and Plate is drawn as 'se'
+            d.setAttribute('d', right
                 ? `M${pos[bronze].x + W / 2} ${pos[bronze].y + H} V${cy(final)}`
                 : `M${pos[final].x + W / 2} ${pos[final].y + H} V${pos[bronze].y}`);
-            const target = variant === 'se' ? final : bronze;
+            const target = right ? final : bronze;
             const assigned = M[target] && M[target].p.some(sl => sl.kind !== 'tbd');
             d.setAttribute('class', 'bv-edge bv-dashed' + (assigned ? ' bv-known' : ''));
             svg.appendChild(d);
@@ -1191,7 +1264,8 @@ const BracketView = (() => {
         const zoomTools = document.querySelectorAll('#tournament .bv-tools > .bv-btn, #tournament .bv-tools > .bv-zoom');
         zoomTools.forEach(el => { el.hidden = groupsFormat && gcShown() === 'groups'; });
         if (finals) {
-            finals.hidden = !isActive() || getFormat() === 'GROUPS'; // both bracket formats: finals on the right or in the middle
+            // both bracket formats: finals on the right or in the middle; Cup and Plate is always back to back
+            finals.hidden = !isActive() || getFormat() === 'GROUPS' || !!(tournament && tournament.plate);
             // the setting, not the layout name (single elimination's layouts are 'se' and 'se-middle')
             // double elimination with qualifiers is always drawn with the finals in the middle (finalsVariant())
             const fixed = getFormat() === 'DE' && !!(tournament && tournament.qualifiers);

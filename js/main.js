@@ -419,6 +419,7 @@ function autoLoadCurrentTournament() {
             cups: tournamentData.cups, // groups and cups: the cup draw (absent until drawn)
             qualifiers: tournamentData.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
             notQualified: tournamentData.notQualified, // players who lost a qualifier (absent when none)
+            plate: tournamentData.plate, // Cup and Plate: { size } (absent = no Plate)
             placements: tournamentData.placements || {},
             readOnly: tournamentData.readOnly, // ✅ Fixed: Include readOnly flag
             _analyticsPreview: tournamentData._analyticsPreview // 4.3: keep the no-persist guard alive across reload
@@ -640,6 +641,12 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
     if (!tournament || !tournament.bracketSize) return '';
     const size = tournament.bracketSize;
     if (getFormat() === 'SE' && isSEBronzeMatch(matchId, size)) return isWinner ? 'takes 3rd place' : 'takes 4th place';
+    // Cup and Plate: the Plate's final and bronze final decide the Plate (its places are in the
+    // shared tiers, Docs/CUP-AND-PLATE.md)
+    if (typeof Plate !== 'undefined' && Plate.on()) {
+        if (matchId === Plate.finalId()) return isWinner ? 'wins the Plate' : 'Plate runner-up';
+        if (matchId === Plate.bronzeId()) return isWinner ? '3rd in the Plate' : '4th in the Plate';
+    }
     if (getFormat() === 'GROUPS') {
         // groups and cups: group matches move no one; each cup's bronze and final decide places
         const ends = { 'A-F': ['wins the tournament', 'takes 2nd place'], 'A-B': ['takes 3rd place', 'takes 4th place'],

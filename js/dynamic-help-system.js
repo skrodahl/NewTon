@@ -157,6 +157,7 @@ const HELP_CONTENT = {
                         <li>33-48 players → 32-player bracket with qualifiers first (see <strong>Qualifiers</strong> below)</li>
                     </ul>
                     <p><strong>Qualifiers (33 to 48 players):</strong> the players above 32 make it in through qualifier matches (Q1, Q2 …) before round 1, one for each player above 32: 40 players play 8 qualifiers, 48 play 16. The players in them are drawn at random (with seeding, never the seeds; with <strong>All</strong>, the lowest-ranked), and each winner takes the place in round 1 that shows "Winner Q3". A qualifier only decides who gets to play: the loser is not qualified (placed 33rd–48th), and nothing in a qualifier counts, for the winner either (no achievements, no matches or legs in the statistics, never in Analytics). Its length is the format's regular rounds. Double elimination with qualifiers is drawn with the finals in the middle.</p>
+                    <p><strong>Cup and Plate (single elimination):</strong> switch on <strong>Play a Plate</strong> on the single elimination card before you draw (it always starts off; from 5 players). The bracket is then the Cup, and every round 1 loser goes on to the Plate, a second knockout of half the size, at a fixed place: the losers of round 1 match 1 and 2 meet in the Plate's first match, and so on, so a Plate match can start as soon as its two round 1 matches are played. A bye's place in the Plate is a walkover. The Plate is drawn back to back with the Cup, the two finals facing each other. Its places follow the shared places (with 8 players the Plate's finalists are 5th–6th, its bronze pair 7th–8th), and the finished view names the Plate winner. Match lengths and bronze finals as single elimination.</p>
                     <p><strong>💡 Tip:</strong> Match Controls adapts based on tournament state - use it for both setup and active tournament management!</p>
                 `
             },
@@ -342,6 +343,7 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Formats to offer</strong> (Tournaments) controls which formats appear on the Shuffle &amp; Draw screen when starting a tournament.</p>
                     <p>Untick the ones your club never plays so they can't be picked by mistake. At least one format always stays available.</p>
+                    <p><strong>Offer Play a Plate</strong> (on by default): whether single elimination's card at the draw has the <strong>Play a Plate</strong> switch (Cup and Plate). Turn it off if your club never plays a Plate.</p>
                     <p><strong>💡 Existing tournaments are unaffected:</strong> a tournament already created in a hidden format still opens, renders and exports as normal.</p>
                 `
             },

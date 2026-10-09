@@ -141,11 +141,14 @@ function getProgressionTable() {
     // Groups and cups: only the cups progress anyone (group matches are not in the table)
     if (format === 'GROUPS') return cupsProgressionTable(tournament.cups);
     const table = format === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
-    const base = table[tournament.bracketSize];
+    let merged = table[tournament.bracketSize];
     // Qualifiers (33-48 players): the round 0 matches in front of the 32-player table, which itself
     // is unchanged (Docs/QUALIFIERS.md)
-    if (tournament.qualifiers && base && typeof Qualifiers !== 'undefined') return Qualifiers.withTable(base);
-    return base;
+    if (tournament.qualifiers && merged && typeof Qualifiers !== 'undefined') merged = Qualifiers.withTable(merged);
+    // Cup and Plate: the Cup's round 1 losers into the Plate, and the Plate's own table
+    // (Docs/CUP-AND-PLATE.md); the tables themselves are unchanged
+    if (tournament.plate && merged && typeof Plate !== 'undefined') merged = Plate.withTable(merged);
+    return merged;
 }
 
 /**
@@ -834,8 +837,12 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             const isSEBronze = getFormat() === 'SE' && isSEBronzeMatch(matchId, tournament.bracketSize);
             // Groups and cups: both cups' bronze and final have {} too, so the format says when it
             // is over instead: when every drawn cup's final has been played
+            // Cup and Plate: over when every match is played (the Cup's final and bronze final and the
+            // Plate's), whichever comes last
             const isTournamentFinal = getFormat() === 'GROUPS'
                 ? (typeof Groups !== 'undefined' && Groups.isComplete())
+                : tournament.plate
+                ? matches.every(m => m.completed)
                 : completionRule && Object.keys(completionRule).length === 0 && !isSEBronze;
 
             if (isTournamentFinal) {
@@ -848,8 +855,11 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 // 1st and 2nd place (final match winner/loser); groups and cups places everyone
                 // from both cups in calculateAllRankings() below
                 if (format !== 'GROUPS') {
-                    tournament.placements[String(winner.id)] = 1;
-                    tournament.placements[String(loser.id)] = 2;
+                    // with a Plate the last match played may be the Plate's: 1st and 2nd are the Cup final's
+                    const cupFinal = tournament.plate ? matches.find(m => isSEFinalMatch(m.id, tournament.bracketSize)) : null;
+                    const top = cupFinal && cupFinal.completed ? cupFinal : { winner, loser };
+                    tournament.placements[String(top.winner.id)] = 1;
+                    tournament.placements[String(top.loser.id)] = 2;
                 }
 
                 if (format === 'DE') {
@@ -922,7 +932,8 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
                         // HELP SYSTEM INTEGRATION - Tournament completed
                         if (typeof showHelpHint === 'function') {
-                            const champion = format === 'GROUPS' ? (matches.find(m => m.id === 'A-F') || {}).winner || winner : winner;
+                            const champion = format === 'GROUPS' ? (matches.find(m => m.id === 'A-F') || {}).winner || winner
+                                : tournament.plate ? (matches.find(m => isSEFinalMatch(m.id, tournament.bracketSize)) || {}).winner || winner : winner;
                             showHelpHint(`🏆 Tournament completed! ${champion.name} wins. Check results in Match Controls or on Registration page.`, 8000);
                         }
                     } catch (e) {
@@ -1025,6 +1036,8 @@ function calculateAllRankings() {
     }
     if (format === 'SE') {
         calculateSERankings();
+        // Cup and Plate: the Plate orders the Cup's round 1 losers (Docs/CUP-AND-PLATE.md)
+        if (typeof Plate !== 'undefined') Plate.place(tournament.placements);
         return;
     }
     if (format === 'GROUPS') {
@@ -1515,7 +1528,9 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
     document.getElementById('bracketConfirmFormat').textContent = formatLabel;
     const sizeLabel = document.getElementById('bracketConfirmSizeLabel');
     if (sizeLabel) sizeLabel.textContent = groups ? (single ? 'Group' : 'Groups') : 'Bracket Size';
-    document.getElementById('bracketConfirmSize').textContent = groups ? Groups.describeSizes(paidPlayers.length) : bracketSize;
+    // Cup and Plate: the Plate is half the Cup (the switch at the draw)
+    const withPlate = format === 'SE' && bracketSize >= 8 && typeof Plate !== 'undefined' && Plate.wanted();
+    document.getElementById('bracketConfirmSize').textContent = groups ? Groups.describeSizes(paidPlayers.length) : withPlate ? `${bracketSize} + Plate of ${bracketSize / 2}` : bracketSize;
     document.getElementById('bracketConfirmPlayerCount').textContent = paidPlayers.length;
     const desc = document.getElementById('bracketConfirmDesc');
     if (desc) desc.textContent = single
@@ -1524,6 +1539,8 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
         ? `These players will be drawn into groups${Groups.seededDraw(paidPlayers) ? ', by ranking' : ' at random'}. Everybody plays everybody in their group; ${Groups.configSettings().cupEntry === 'half' ? 'then the top half across the groups plays the A cup, the rest the B cup' : 'the top two of each group go on to the A cup, the rest to the B cup'}.`
         : paidPlayers.length > 32
         ? `${paidPlayers.length - 32} qualifier matches decide the last places in the 32-player bracket: ${2 * (paidPlayers.length - 32)} players are drawn into them, ${64 - paidPlayers.length} go straight into round 1. Lose a qualifier and you are not qualified (33rd); nothing in a qualifier counts.`
+        : withPlate
+        ? `These players will be placed into the bracket, the Cup. Every round 1 loser goes on to the Plate, a second knockout of ${bracketSize / 2}, so everyone plays at least two matches.`
         : 'These players will be placed into the bracket. Make sure all players are registered before proceeding.';
 
     // Byes field is conditional — show only when there are byes; above 32 the same field says how
@@ -1612,6 +1629,9 @@ function confirmBracketGeneration() {
     if (seeding) tournament.seeding = seeding.record; // who was seeded, and from what (absent = a random draw)
     if (made) tournament.qualifiers = made.qualifiers; else delete tournament.qualifiers;
     delete tournament.notQualified;
+    // Cup and Plate: the switch at the draw (single elimination, a Cup of 8 or more)
+    const plate = format === 'SE' && bracketSize >= 8 && typeof Plate !== 'undefined' && Plate.wanted();
+    if (plate) tournament.plate = { size: bracketSize / 2 }; else delete tournament.plate;
     tournament.status = 'active';
 
     // Generate all match structures with clean TBD placeholders
@@ -1620,6 +1640,10 @@ function confirmBracketGeneration() {
         // the qualifiers go first (Q1… are numbered 1…), the bracket's matches after them
         matches.forEach(m => { m.numericId += made.made.length; });
         matches.unshift(...made.made);
+    }
+    if (plate) {
+        // the Plate's matches after the Cup's; round 1 fills them as it is played
+        matches.push(...Plate.make(bracketSize, Math.max(0, ...matches.map(m => m.numericId || 0)) + 1).made);
     }
 
     // Process initial auto-advancements (real vs walkover)
@@ -2535,7 +2559,8 @@ function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
     wName.textContent = winner.name;
     winnerLine.appendChild(wName);
     // groups and cups: each cup's bronze and final decide places (getPlayerProgressionForDisplay)
-    const cupEnd = getFormat() === 'GROUPS' && /^[AB]-[FB]$/.test(matchId) && typeof getPlayerProgressionForDisplay === 'function';
+    const cupEnd = typeof getPlayerProgressionForDisplay === 'function' && ((getFormat() === 'GROUPS' && /^[AB]-[FB]$/.test(matchId)) ||
+        (typeof Plate !== 'undefined' && Plate.on() && (matchId === Plate.finalId() || matchId === Plate.bronzeId())));
     if (cupEnd) {
         winnerLine.appendChild(document.createTextNode(' ' + getPlayerProgressionForDisplay(winner.id, matchId, true)));
     } else if (progression.winner) {
