@@ -1,3 +1,11 @@
+## Unreleased
+
+### GitHub Actions: off Node.js 20
+
+- Both Docker workflows used actions targeting Node.js 20, which GitHub has deprecated (each build warned that they were forced onto Node.js 24). Moved to the current majors, all on Node.js 24: `actions/checkout@v7`, `docker/setup-qemu-action@v4`, `docker/setup-buildx-action@v4`, `docker/login-action@v4`, `docker/metadata-action@v6`, `docker/build-push-action@v7`. The workflows only use inputs that are unchanged in these versions (the removed ones were deprecated inputs and environment variables they never used). Build Push v6+ adds a build summary to each run's page and a build record file to the run.
+- **The image digest is printed again:** the GitHub Container Registry workflow's last step reads the digest from a step called `build`, which didn't exist, so it always printed empty; the build step now has `id: build`.
+- Files changed: `.github/workflows/docker-build.yml`, `.github/workflows/docker-hub-publish.yml`, `Docs/PARKING-LOT.md`.
+
 ## **v5.4.2** — All the Dishes Rattle in the Cupboards (2026-10-09)
 
 ### Landing page: Pick Your Format, and Chalk. Send. Done.
