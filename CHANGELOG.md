@@ -1,5 +1,11 @@
 ## Unreleased
 
+### Landing page: the draw's new screenshot and copy, and Swiss in Pick Your Format
+
+- **The draw card** in See It in Action, with the maintainer's new screenshots of Pick a format: labelled **The Draw** (was Shuffle & Draw), still "Pick a Format. Draw. Play.", and a text that names no formats, so new ones don't need it changed: "A card for every format, each showing what it means for tonight's players. Pick one and draw. Seeding from your own results keeps the best players apart; otherwise it's a fair random draw." The alt text likewise.
+- **Pick Your Format** gets a fifth card, **Swiss** ("Same record, new opponent."), wrapping 3 + 2 as designed; Round Robin's says "played once or twice". The feature list and keywords name Cup and Plate and Swiss.
+- Files changed: `landing.html`, `landing-page.php` (the same), `Screenshots/th-tournament-setup.jpg`, `Screenshots/tournament-setup.png` (the maintainer's; committed with `e417384`).
+
 ### Match Controls: lanes keep their place
 
 - The lanes board's top line listed only the free lanes, so the row changed as matches started and finished, and a quick click could land on the wrong lane. Now it lists **every lane in use, in order** (labelled Lanes): a free lane starts Next up there, as before; a busy lane stays in its place, dimmed and not clickable, its tooltip naming the match on it ("R2-1 is being played on lane 1"). One helper for both lane boards (`_mcLaneChips()`), the brackets' and Round Robin's. Requested by the maintainer after picking the wrong lane.

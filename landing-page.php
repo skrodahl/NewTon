@@ -27,7 +27,7 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
 
     <!-- SEO Meta Tags -->
     <meta name="description" content="The offline authority in darts. A complete tournament system that runs locally, syncs across devices, and builds your venue's stats over time. Free, open-source, self-hostable.">
-    <meta name="keywords" content="darts, tournament, bracket, double elimination, single elimination, tournament manager, darts scoring, score keeper, scoring app, darts app, tournament bracket, offline tournament, offline-first, PWA, self-hosted, open source, free, dart league, darts competition, 4 player tournament, 8 player tournament, 16 player tournament, 32 player tournament, 48 player tournament, qualifiers, dartboard, match management, referee management, lane management">
+    <meta name="keywords" content="darts, tournament, bracket, double elimination, single elimination, tournament manager, darts scoring, score keeper, scoring app, darts app, tournament bracket, offline tournament, offline-first, PWA, self-hosted, open source, free, dart league, darts competition, 4 player tournament, 8 player tournament, 16 player tournament, 32 player tournament, 48 player tournament, qualifiers, cup and plate, swiss tournament, round robin, dartboard, match management, referee management, lane management">
 
     <!-- Schema.org Structured Data -->
     <script type="application/ld+json">
@@ -50,7 +50,7 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
         "codeRepository": "<?= $githubUrl ?>",
         "downloadUrl": "<?= $githubUrl ?>",
 		"screenshot": "<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg",
-        "featureList": "Single Elimination, Double Elimination, Round Robin, 4-48 Players, Qualifiers, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
+        "featureList": "Single Elimination, Double Elimination, Cup and Plate, Round Robin, Swiss, 4-48 Players, Qualifiers, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
         "keywords": "darts, tournament, bracket, scoring, score keeper, offline, PWA, self-hosted, open source"
     }
     </script>
@@ -139,7 +139,12 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
             <div class="format-card">
                 <h3>Round Robin</h3>
                 <p class="format-line">Everybody plays everybody.</p>
-                <p>Groups into an A and a B cup, or one group. 3 to 32 players.</p>
+                <p>Groups into an A and a B cup, or one group, played once or twice. 3 to 32 players.</p>
+            </div>
+            <div class="format-card">
+                <h3>Swiss</h3>
+                <p class="format-line">Same record, new opponent.</p>
+                <p>A fixed number of rounds, nobody knocked out, the top four to finish. 4 to 48 players.</p>
             </div>
         </div>
         <p class="formats-note">Above 32, qualifiers decide the last places, up to 48. Seeding from your own results keeps the best players apart.</p>
@@ -236,12 +241,12 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-tournament-setup.jpg" alt="Shuffle and Draw offering double elimination, single elimination and Round Robin, each sized to the paid players" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-setup.png">
+                <img src="Screenshots/th-tournament-setup.jpg" alt="Pick a format: a card for each format with a pictogram and what it means for tonight&rsquo;s players, and the picked format&rsquo;s description" loading="lazy" class="lightbox-trigger" data-full="Screenshots/tournament-setup.png">
             </div>
             <div class="showcase-text">
-                <span class="showcase-label">Shuffle &amp; Draw</span>
+                <span class="showcase-label">The Draw</span>
                 <h3>Pick a Format. Draw. Play.</h3>
-                <p>Double elimination, single elimination or Round Robin, sized to whoever turned up, up to 48 with qualifiers. Keep the best players apart with seeding from your own results, or leave it to a fair random draw, with byes spread so nobody gets an easy ride.</p>
+                <p>A card for every format, each showing what it means for tonight&rsquo;s players. Pick one and draw. Seeding from your own results keeps the best players apart; otherwise it&rsquo;s a fair random draw.</p>
                 <p class="showcase-closer">The bracket doesn&rsquo;t play favourites.</p>
             </div>
         </div>
