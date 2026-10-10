@@ -192,7 +192,6 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 
 Raised 2026-10-10. **x01 only for now** (maintainer). Ideas for later, all for the Chalker (NewTon decides who plays whom; the Chalker decides what is played on the board):
 - **Games:** Cricket, Killer, Shanghai, Round the Clock, popular on casual nights. Each needs its own scoring screen, its own result (no legs and checkouts in the x01 sense), and a decision on what counts for achievements and statistics.
-- **Handicap:** a different starting score per player (e.g. 401 against 501) or a leg's start, so a mixed social night is genuinely competitive; the handicap could come from the ranking seeding already uses. Needs the Chalker to play a different start per player, and handicapped results probably shouldn't count for season standings (the casual-format gate: Leave out of Analytics).
 
 ### Maybe: pull the base image from a mirror, not Docker Hub
 
@@ -257,7 +256,9 @@ For the actual problem (quota), the contained fix is the Phase 4.2 storage gate 
 ## Decided Against
 *Features that were considered but explicitly rejected*
 
-*(empty)*
+- **Handicap** (2026-10-10): a different starting score per player (e.g. 401 against 501) or a leg's start, to even out a mixed social night. Not a darts tradition the maintainer recognises; no.
+- **Optional bronze finals** (2026-10-09): skipping single elimination's or the Plate's bronze final. It saves almost no time (it runs alongside the final), it would change the points (3rd and 4th sharing 3rd's points), and every single elimination ending would have to cope with a missing match. Docs/CUP-AND-PLATE.md.
+- **A knockout with everyone after the groups** (2026-10-09, leaning no): single or double elimination for every player instead of the A and B cups. The B cup and the group stage already give what it would. See More formats, after Round Robin.
 
 ---
 
