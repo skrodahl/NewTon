@@ -64,7 +64,8 @@ const DEFAULT_CONFIG = {
         cupEntry: 'half',     // 'half': the top half across the groups to the A cup; 'top2': the top two of each group
         rematches: 'allow',   // group rematches in cup round 1: 'allow' (the mirror draw) or 'avoid'
         bCup: true,           // Play the B cup is on to start with at Draw the cups
-        maxGroup: 4           // the largest group (4, 5 or 6) in groups and cups
+        maxGroup: 4,          // the largest group (4, 5 or 6) in groups and cups
+        meetings: 1           // one group: each pair meets once, or twice (a double round robin)
     },
     server: {
         allowSharedTournamentDelete: false,
@@ -235,6 +236,7 @@ function applyConfigToUI() {
     safeSetChecked('rrBCup', rr.bCup !== false);
     safeSetValue('rrRematches', rr.rematches === 'avoid' ? 'avoid' : 'allow');
     safeSetValue('rrMaxGroup', [5, 6].includes(Number(rr.maxGroup)) ? String(rr.maxGroup) : '4');
+    safeSetValue('rrMeetings', Number(rr.meetings) === 2 ? '2' : '1');
 
     // Server configuration
     if (config.server) {
@@ -662,12 +664,14 @@ function saveUIConfiguration(options = {}) {
     const rrBCup = document.getElementById('rrBCup');
     const rrRematches = document.getElementById('rrRematches');
     const rrMaxGroup = document.getElementById('rrMaxGroup');
+    const rrMeetings = document.getElementById('rrMeetings');
     config.roundRobin = {
         structure: rrStructure && rrStructure.value === 'single' ? 'single' : 'groups',
         cupEntry: rrCupEntry && rrCupEntry.value === 'top2' ? 'top2' : 'half',
         rematches: rrRematches && rrRematches.value === 'avoid' ? 'avoid' : 'allow',
         bCup: rrBCup ? rrBCup.checked : true,
-        maxGroup: rrMaxGroup && [5, 6].includes(Number(rrMaxGroup.value)) ? Number(rrMaxGroup.value) : 4
+        maxGroup: rrMaxGroup && [5, 6].includes(Number(rrMaxGroup.value)) ? Number(rrMaxGroup.value) : 4,
+        meetings: rrMeetings && Number(rrMeetings.value) === 2 ? 2 : 1
     };
 
     config.server = config.server || {};
@@ -761,7 +765,7 @@ const CONFIG_LABELS = {
     chalker: { _: 'Chalker', handover: 'Handover' },
     seeding: { _: 'Seeding', mode: 'Use seeding', seeds: 'Seeded players' },
     roundRobin: { _: 'Round Robin', structure: 'Structure', cupEntry: 'To the A cup', rematches: 'Group rematches in cup round 1', bCup: 'Play the B cup',
-        maxGroup: 'Largest group' },
+        maxGroup: 'Largest group', meetings: 'Play each other (one group)' },
     server: { _: 'Server', allowSharedTournamentDelete: 'Allow deleting tournaments', autoUpload: 'Back up finished tournaments' }
 };
 

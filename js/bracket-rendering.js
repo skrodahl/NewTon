@@ -1583,7 +1583,7 @@ function _mcPlanRow(match) {
     const plan = !match.referee && !planned ? Groups.plannedRefereeText(match) : '';
     const hold = Groups.holdFor(match);
     const chosenBusy = _mcRefereeBusy(match);
-    let note = `<small>Best of ${escapeHtml(String(match.legs || ''))}${plan ? ` · ref: ${escapeHtml(plan)}` : ''}</small>`;
+    let note = `<small>${match.returnRound ? 'Return round · ' : ''}Best of ${escapeHtml(String(match.legs || ''))}${plan ? ` · ref: ${escapeHtml(plan)}` : ''}</small>`;
     if (busy.length) note = `<small class="mc-warn">${escapeHtml(busy.join(' and '))} ${busy.length > 1 ? 'are' : 'is'} playing: wait</small>`;
     else if (conflict.hasConflict) note = `<small class="mc-warn">⚠ ${escapeHtml(confl.join(' and '))} ${confl.length > 1 ? 'are' : 'is'} refereeing a live match</small>`;
     else if (hold) note = `<small class="mc-wait">Waits: ${escapeHtml(hold)}, or choose another referee</small>`;
@@ -1830,7 +1830,10 @@ function _mcFormatFit(f, paid) {
         Object.assign(out, { fit: `Cup of ${size} · Plate of ${size / 2}`, sum: `Cup of ${size}${byes ? ` (${byes} bye${byes === 1 ? '' : 's'})` : ''}${q ? ` with ${q} qualifier${q === 1 ? '' : 's'}` : ''}, Plate of ${size / 2}`,
             matches: `about ${_mcKnockoutMatches(n32) + q + _mcKnockoutMatches(plateReal)}`, each: byes ? '2 or more (1 for a bye who then loses)' : '2 or more' });
     } else if (rr && single) {
-        Object.assign(out, { fit: `One group of ${paid}`, sum: `one group of ${paid}`, matches: String(paid * (paid - 1) / 2), each: String(paid - 1) });
+        // a double round robin (Play each other: Twice) doubles the matches
+        const twice = Groups.configSettings().meetings === 2, k = twice ? 2 : 1;
+        Object.assign(out, { fit: `One group of ${paid}${twice ? ', twice' : ''}`, sum: `one group of ${paid}${twice ? ', everybody plays everybody twice' : ''}`,
+            matches: String(k * paid * (paid - 1) / 2), each: String(k * (paid - 1)) });
     } else if (rr) {
         const sizes = Groups.groupSizes(paid), cfg = Groups.configSettings();
         const groupMatches = sizes.reduce((s, n) => s + n * (n - 1) / 2, 0);
@@ -1852,7 +1855,7 @@ function _mcPickFormat(id) {
 /** Round Robin's options for this draw (Structure, To the A cup), starting from Global Settings. */
 function _mcRoundRobinChoice(key, value) {
     const cur = Groups.configSettings();
-    Groups.setDrawChoice({ structure: cur.structure, cupEntry: cur.cupEntry, [key]: value });
+    Groups.setDrawChoice({ structure: cur.structure, cupEntry: cur.cupEntry, meetings: cur.meetings, [key]: key === 'meetings' ? Number(value) : value });
     _mcRefresh(0);
 }
 
@@ -1908,8 +1911,8 @@ function _mcSetupHTML() {
         const f = picked.f, fit = picked.fit;
         const single = f.id === 'GROUPS' && Groups.configSettings().structure === 'single';
         const seg = (key, cur, opts) => `<span class="mc-seg">${opts.map(([v, label]) => `<button type="button" class="${v === cur ? 'mc-on' : ''}" onclick="_mcRoundRobinChoice('${key}', '${v}')">${label}</button>`).join('')}</span>`;
-        const rrOpts = f.id === 'GROUPS' ? `<div class="mc-fopts"><span>Structure</span>${seg('structure', Groups.configSettings().structure, [['groups', 'Groups and cups'], ['single', 'One group']])}${single ? '' : `<span>To the A cup</span>${seg('cupEntry', Groups.configSettings().cupEntry, [['top2', 'Top two'], ['half', 'Top half']])}`}<small>this draw only; Global Settings decide how it starts</small></div>` : '';
-        detail = `<div class="mc-fdetail"><div><h4>${escapeHtml(f.name)}</h4><p>${escapeHtml(single && f.aboutSingle ? f.aboutSingle : f.about || f.blurb)}</p>
+        const rrOpts = f.id === 'GROUPS' ? `<div class="mc-fopts"><span>Structure</span>${seg('structure', Groups.configSettings().structure, [['groups', 'Groups and cups'], ['single', 'One group']])}${single ? `<span>Play each other</span>${seg('meetings', String(Groups.configSettings().meetings), [['1', 'Once'], ['2', 'Twice']])}` : `<span>To the A cup</span>${seg('cupEntry', Groups.configSettings().cupEntry, [['top2', 'Top two'], ['half', 'Top half']])}`}<small>this draw only; Global Settings decide how it starts</small></div>` : '';
+        detail = `<div class="mc-fdetail"><div><h4>${escapeHtml(f.name)}</h4><p>${escapeHtml(single && f.aboutSingle ? f.aboutSingle + (Groups.configSettings().meetings === 2 ? ' Played twice: when everybody has played everybody once, the return round follows, in the same order with the players swapped.' : '') : f.about || f.blurb)}</p>
                 <ul>${(f.bests || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>${rrOpts}</div>
             <dl class="mc-ffacts"><div><dt>Players</dt><dd>${escapeHtml(fit.range)}</dd></div><div><dt>Matches tonight</dt><dd>${escapeHtml(fit.matches)}</dd></div><div><dt>Each player</dt><dd>${escapeHtml(fit.each)}</dd></div></dl></div>`;
     }

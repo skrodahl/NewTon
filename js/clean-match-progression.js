@@ -1719,8 +1719,13 @@ function drawGroups(paid) {
     const draw = Groups.drawGroups(paid);
     matches = [];
     let numericId = 1;
+    // One group played twice (a double round robin): the whole schedule again as the return round,
+    // in the same order with player 1 and player 2 swapped, the same planned referees
+    const twice = draw.settings && draw.settings.structure === 'single' && draw.settings.meetings === 2;
     draw.list.forEach(group => {
-        roundRobinSchedule(group.players.length).forEach(([a, b, r], i) => {
+        const once = roundRobinSchedule(group.players.length);
+        const schedule = twice ? once.concat(once.map(([a, b, r]) => [b, a, r])) : once;
+        schedule.forEach(([a, b, r], i) => {
             const ref = r ? group.players[r - 1] : null;
             matches.push({
                 id: `${group.name}-${i + 1}`,
@@ -1738,7 +1743,8 @@ function drawGroups(paid) {
                 plannedReferee: ref ? { player: ref.id } : null,
                 active: false,
                 completed: false,
-                positionInRound: i
+                positionInRound: i,
+                ...(i >= once.length ? { returnRound: true } : {})   // a double round robin's second meeting
             });
         });
     });

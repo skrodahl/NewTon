@@ -32,6 +32,13 @@ Tournaments while it is offered (`config.roundRobin`, additive):
   another group, the best seeds first, as close to the mirror as possible; when no such pairing
   exists, the mirror stands.
 - **Play the B cup:** whether the Draw the cups switch starts on.
+- **Play each other** (`meetings`, one group only, added 2026-10-10): 1 (the default) or 2, a double
+  round robin. With 2 the draw makes the one group's schedule twice: the whole first round robin,
+  then the return round in the same order with player 1 and player 2 swapped and the same planned
+  referees, the return matches marked `returnRound: true` (match numbers continue: 4 players, A-1 to
+  A-6, then A-7 to A-12). Both meetings count in the table, head-to-head included. 3 to 8 players,
+  as one group (8 players twice is 56 matches; the maintainer won't stop anyone). Can be chosen at
+  the draw; the tournament keeps it in `groups.settings.meetings` (absent = 1).
 - **Largest group** (`maxGroup`, added after v5.4.0): 4 (the default), 5 or 6. The draw makes the
   smallest even number of groups that keeps each group at that size or less, so a larger limit means
   fewer, longer groups: 10 players are 3, 3, 2, 2 at 4 and 5, 5 at 5 or 6; 20 are 5, 5, 5, 5 at 5.

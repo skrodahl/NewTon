@@ -99,6 +99,7 @@ const ConfigPage = (() => {
         panel.hidden = !!offered && !offered.checked;
         const single = $('rrStructure').value === 'single';
         panel.querySelectorAll('.cfg-rr-cups').forEach(row => { row.hidden = single; });
+        panel.querySelectorAll('.cfg-rr-single').forEach(row => { row.hidden = !single; });
     }
 
     /** Redraw every control from the hidden fields (after the form was filled). */

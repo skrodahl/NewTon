@@ -1,5 +1,12 @@
 ## Unreleased
 
+### Round Robin: a double round robin for one group
+
+- **Play each other: Once / Twice** (Round Robin, one group): Twice is a double round robin. The draw makes the one group's schedule twice: the whole first round robin, then the return round in the same order with player 1 and player 2 swapped and the same planned referees. Match numbers continue (4 players: A-1 to A-6, then A-7 to A-12), the return matches are marked (`returnRound`) and named "Round robin · return round", and Match Controls' queue says "Return round". Both meetings count in the table, head-to-head included; the table decides the placings, as in one group.
+- **At the draw** it's an option on the Round Robin card when Structure is One group ("Tonight: One group of 4, twice"; matches tonight and per player doubled), for that draw only; **Global Settings → Round Robin → Play each other** decides how it starts (shown for one group; **Once** by default, `config.roundRobin.meetings`, absent = 1). 3 to 8 players, as one group. The tournament keeps it (`groups.settings.meetings`) and its format reads "Round robin, one group, twice".
+- **Tested in the browser:** 4 players, Twice at the draw (Global Settings still Once): 12 matches, A-7 the return of A-1 with the players swapped, played to the end with all 4 placed.
+- Files changed: `js/groups.js` (`meetings` in the settings and the draw choice, the round and format names), `js/clean-match-progression.js` (`drawGroups()`), `js/bracket-rendering.js` (the Round Robin card's option and estimates, the queue's Return round), `js/results-config.js`, `js/config-page.js`, `tournament.html`, `js/dynamic-help-system.js`, `userguide.html`, `Docs/GROUPS-AND-CUPS.md`, `Docs/PARKING-LOT.md`.
+
 ### Match Controls before the draw: pick a format, then draw
 
 - **Pick a format** replaces Shuffle & Draw's stack of buttons and moves into the main column, under Players: a card for every format (Double Elimination, Single Elimination, Cup and Plate, Round Robin), each with its line and what it means for tonight's paid players ("16-player bracket · 4 byes", "Cup of 16 · Plate of 8", "4 groups of 3"). The picked card opens its description, a few bests, three facts (player range, **roughly how many matches tonight**, matches per player) and its options; **one Draw button** draws it ("Draw Cup and Plate →"), with a summary beside it. It opens on the **format of the last tournament drawn in this browser** (if it fits tonight), else the first offered one that fits.

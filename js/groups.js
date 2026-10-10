@@ -28,7 +28,7 @@ const Groups = (() => {
     let drawChoice = null;
     /**
      * Set Round Robin's options for the next draw of the current tournament (null clears them).
-     * @param {{structure?: string, cupEntry?: string}|null} choice
+     * @param {{structure?: string, cupEntry?: string, meetings?: number}|null} choice
      */
     function setDrawChoice(choice) {
         drawChoice = choice && typeof tournament !== 'undefined' && tournament ? Object.assign({ tid: tournament.id }, choice) : null;
@@ -36,27 +36,34 @@ const Groups = (() => {
     /** The draw choice, while it is for the current tournament and the draw hasn't been made. */
     const activeChoice = () => drawChoice && typeof tournament !== 'undefined' && tournament && drawChoice.tid === tournament.id &&
         !(tournament.bracket && all().length) ? drawChoice : null;
+    /** How many times each pair meets in one group: 2 (a double round robin) or 1. Absent = 1. */
+    const meetingsOf = v => Number(v) === 2 ? 2 : 1;
     /** Round Robin's settings for the next draw: Global Settings, with the choices made at the draw:
-     * structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup, maxGroup. */
+     * structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup, maxGroup, meetings (one group: 1 or 2). */
     function configSettings() {
         const rr = Object.assign({}, (typeof config !== 'undefined' && config.roundRobin) || {});
         const choice = activeChoice();
-        if (choice) { if (choice.structure) rr.structure = choice.structure; if (choice.cupEntry) rr.cupEntry = choice.cupEntry; }
+        if (choice) {
+            if (choice.structure) rr.structure = choice.structure;
+            if (choice.cupEntry) rr.cupEntry = choice.cupEntry;
+            if (choice.meetings) rr.meetings = choice.meetings;
+        }
         return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'top2' ? 'top2' : 'half',
-            rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false, maxGroup: maxGroupOf(rr.maxGroup) };
+            rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false, maxGroup: maxGroupOf(rr.maxGroup),
+            meetings: rr.structure === 'single' ? meetingsOf(rr.meetings) : 1 };
     }
     /** The settings the tournament was drawn with (absent in the first build: groups and cups, top two). */
     function settings() {
         const s = (on() && tournament.groups && tournament.groups.settings) || {};
         return { structure: s.structure === 'single' ? 'single' : 'groups', cupEntry: s.cupEntry === 'half' ? 'half' : 'top2',
-            rematches: s.rematches === 'avoid' ? 'avoid' : 'allow', maxGroup: maxGroupOf(s.maxGroup) };
+            rematches: s.rematches === 'avoid' ? 'avoid' : 'allow', maxGroup: maxGroupOf(s.maxGroup), meetings: meetingsOf(s.meetings) };
     }
     /** True for one group (a pure round robin: no cups, the table decides). */
     const isSingle = () => settings().structure === 'single';
     /** How many players the next draw takes, by the structure in Global Settings. */
     const limits = () => configSettings().structure === 'single' ? { minPlayers: 3, maxPlayers: 8 } : { minPlayers: 6, maxPlayers: 32 };
     /** The format in words for this tournament: "Round robin, one group" or "Round robin, groups and cups". */
-    const formatName = () => isSingle() ? 'Round robin, one group' : 'Round robin, groups and cups';
+    const formatName = () => isSingle() ? `Round robin, one group${settings().meetings === 2 ? ', twice' : ''}` : 'Round robin, groups and cups';
 
     // ---------- the group draw ----------
     /**
@@ -111,7 +118,7 @@ const Groups = (() => {
         const seeded = typeof Seeding !== 'undefined' ? Seeding.forGroups(paid) : null;
         const order = seeded ? seeded.order.concat(shuffle(paid.filter(p => !seeded.order.includes(p)))) : shuffle(paid);
         const cfg = configSettings();
-        const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry, rematches: cfg.rematches, maxGroup: cfg.maxGroup };
+        const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry, rematches: cfg.rematches, maxGroup: cfg.maxGroup, meetings: cfg.meetings };
         if (cfg.structure === 'single') return { list: [{ name: 'A', players: order.slice() }], order, seeding: seeded ? seeded.record : null, settings };
         const g = groupCount(order.length);
         const list = Array.from({ length: g }, (_, i) => ({ name: LETTERS[i], players: [] }));
@@ -477,7 +484,7 @@ const Groups = (() => {
     function roundName(match) {
         const m = typeof match === 'string' ? byId(match) : match;
         if (!m) return String(match || '');
-        if (m.side === 'group') return isSingle() ? 'Round robin' : `Group ${m.group}`;
+        if (m.side === 'group') return isSingle() ? (m.returnRound ? 'Round robin · return round' : 'Round robin') : `Group ${m.group}`;
         if (m.side === 'cup') {
             const size = tournament.cups && tournament.cups[m.cup] && tournament.cups[m.cup].size;
             const r = typeof getSERoundDisplayName === 'function' ? getSERoundDisplayName(m.round, size) : `Round ${m.round}`;
