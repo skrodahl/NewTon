@@ -33,6 +33,10 @@ const DEFAULT_CONFIG = {
         cupSemifinal: 3,
         cupBronze: 5,
         cupFinal: 5,
+        swissRounds: 3,       // Swiss: its rounds, and the top four's semifinal, bronze final and final
+        swissSemifinal: 3,
+        swissBronze: 5,
+        swissFinal: 5,
         x01Format: 501,
         maxRounds: 13,
         shortLegThreshold: 21
@@ -66,6 +70,10 @@ const DEFAULT_CONFIG = {
         bCup: true,           // Play the B cup is on to start with at Draw the cups
         maxGroup: 4,          // the largest group (4, 5 or 6) in groups and cups
         meetings: 1           // one group: each pair meets once, or twice (a double round robin)
+    },
+    swiss: {
+        rounds: 'auto',       // 'auto' (by the number of players) or 3-6 (Docs/SWISS.md)
+        finish: 'top4'        // 'top4': semifinals, bronze final and final for the top four; 'table': the table decides
     },
     server: {
         allowSharedTournamentDelete: false,
@@ -179,6 +187,10 @@ function applyConfigToUI() {
     safeSetValue('cupSemifinalLegs', config.legs.cupSemifinal || 3);
     safeSetValue('cupBronzeLegs', config.legs.cupBronze || 5);
     safeSetValue('cupFinalLegs', config.legs.cupFinal || 5);
+    safeSetValue('swissRoundsLegs', config.legs.swissRounds || 3);
+    safeSetValue('swissSemifinalLegs', config.legs.swissSemifinal || 3);
+    safeSetValue('swissBronzeLegs', config.legs.swissBronze || 5);
+    safeSetValue('swissFinalLegs', config.legs.swissFinal || 5);
     initX01Toggle(config.legs.x01Format);
     safeSetValue('chalkerMaxRounds', config.legs.maxRounds);
     safeSetValue('chalkerShortLegThreshold', config.legs.shortLegThreshold || 21);
@@ -237,6 +249,10 @@ function applyConfigToUI() {
     safeSetValue('rrRematches', rr.rematches === 'avoid' ? 'avoid' : 'allow');
     safeSetValue('rrMaxGroup', [5, 6].includes(Number(rr.maxGroup)) ? String(rr.maxGroup) : '4');
     safeSetValue('rrMeetings', Number(rr.meetings) === 2 ? '2' : '1');
+    // Swiss
+    const sw = config.swiss || {};
+    safeSetValue('swissRoundsSetting', [3, 4, 5, 6].includes(Number(sw.rounds)) ? String(sw.rounds) : 'auto');
+    safeSetValue('swissFinish', sw.finish === 'table' ? 'table' : 'top4');
 
     // Server configuration
     if (config.server) {
@@ -375,7 +391,7 @@ function saveApplicationSettings(options = {}) {
  * Every tournament format the application can create.
  *
  * The single source for a format's presentation: its name, its one-line description,
- * and the player range it accepts. Both the Shuffle & Draw cards and the Config
+ * and the player range it accepts. Both Match Controls' Pick a format cards and the Config
  * page's visibility checkboxes are built from this list, so adding a format means
  * adding one entry here rather than editing two places that can drift apart.
  *
@@ -440,6 +456,17 @@ const TOURNAMENT_FORMATS = [
         bests: ['Everyone gets several matches before any knockout', 'Best for: season finals, and nights with time for more matches'],
         minPlayers: 6,  // groups and cups; one group: 3-8 (Groups.limits())
         maxPlayers: 32
+    },
+    {
+        id: 'SWISS',
+        pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="13" width="12" height="5" rx="1"/><rect x="4" y="26" width="12" height="5" rx="1"/><rect x="4" y="34" width="12" height="5" rx="1"/><rect x="24" y="5" width="12" height="5" rx="1"/><rect x="24" y="13" width="12" height="5" rx="1"/><rect x="24" y="26" width="12" height="5" rx="1"/><rect x="24" y="34" width="12" height="5" rx="1"/><rect x="44" y="5" width="12" height="5" rx="1"/><rect x="44" y="13" width="12" height="5" rx="1"/><rect x="44" y="26" width="12" height="5" rx="1"/><rect x="44" y="34" width="12" height="5" rx="1"/></g><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M56 7.5H61V36.5H56M61 22H68M82 22H86"/></g><rect x="68" y="17.5" width="14" height="9" rx="1.5" class="dk" fill="#1f2937"/></svg>',
+        name: 'Swiss',
+        blurb: 'A fixed number of rounds, each pairing players with the same record; nobody is knocked out',
+        line: 'Same record, new opponent.',
+        about: 'Nobody is knocked out. Every round pairs players with the same record who haven\'t met yet, so the night gets more even as it goes. After the last round the table decides, or the top four play semifinals, a bronze final and a final.',
+        bests: ['Everyone plays the same number of matches', 'A predictable night: you know how many rounds there are', 'Best for: nights where everyone should play the whole evening, and a fair winner'],
+        minPlayers: 4,
+        maxPlayers: 48  // Docs/SWISS.md
     }
 ];
 
@@ -673,6 +700,11 @@ function saveUIConfiguration(options = {}) {
         maxGroup: rrMaxGroup && [5, 6].includes(Number(rrMaxGroup.value)) ? Number(rrMaxGroup.value) : 4,
         meetings: rrMeetings && Number(rrMeetings.value) === 2 ? 2 : 1
     };
+    const swRounds = document.getElementById('swissRoundsSetting'), swFinish = document.getElementById('swissFinish');
+    config.swiss = {
+        rounds: swRounds && [3, 4, 5, 6].includes(Number(swRounds.value)) ? Number(swRounds.value) : 'auto',
+        finish: swFinish && swFinish.value === 'table' ? 'table' : 'top4'
+    };
 
     config.server = config.server || {};
     config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;
@@ -756,7 +788,8 @@ const CONFIG_LABELS = {
         seRegularRounds: 'Regular rounds (single elimination)', seQuarterfinal: 'Quarterfinal (single elimination)',
         seSemifinal: 'Semifinal (single elimination)', seBronze: 'Bronze final (single elimination)', seFinal: 'Final (single elimination)',
         groupMatches: 'Group matches (Round Robin)', cupRounds: 'Cup rounds (Round Robin)', cupSemifinal: 'Cup semifinal (Round Robin)',
-        cupBronze: 'Cup bronze final (Round Robin)', cupFinal: 'Cup final (Round Robin)', x01Format: 'Game', maxRounds: 'Max rounds', shortLegThreshold: 'Short leg (darts)' },
+        cupBronze: 'Cup bronze final (Round Robin)', cupFinal: 'Cup final (Round Robin)', swissRounds: 'Rounds (Swiss)',
+        swissSemifinal: 'Semifinal (Swiss)', swissBronze: 'Bronze final (Swiss)', swissFinal: 'Final (Swiss)', x01Format: 'Game', maxRounds: 'Max rounds', shortLegThreshold: 'Short leg (darts)' },
     clubName: { _: 'Club name' },
     lanes: { _: 'Lanes', maxLanes: 'Lanes', excludedLanes: 'Lanes not in use', requireLaneForStart: 'Require a lane to start' },
     ui: { _: 'Interface', hiddenFormats: 'Hidden formats', confirmWinnerSelection: 'Confirm the winner',
@@ -764,6 +797,7 @@ const CONFIG_LABELS = {
         refereeSuggestionsLimit: 'Referee suggestions', bracketFinals: 'Finals position' },
     chalker: { _: 'Chalker', handover: 'Handover' },
     seeding: { _: 'Seeding', mode: 'Use seeding', seeds: 'Seeded players' },
+    swiss: { _: 'Swiss', rounds: 'Rounds', finish: 'Finish' },
     roundRobin: { _: 'Round Robin', structure: 'Structure', cupEntry: 'To the A cup', rematches: 'Group rematches in cup round 1', bCup: 'Play the B cup',
         maxGroup: 'Largest group', meetings: 'Play each other (one group)' },
     server: { _: 'Server', allowSharedTournamentDelete: 'Allow deleting tournaments', autoUpload: 'Back up finished tournaments' }
@@ -865,6 +899,10 @@ function saveMatchConfiguration(options = {}) {
     config.legs.cupSemifinal = parseInt((document.getElementById('cupSemifinalLegs') || {}).value) || 3;
     config.legs.cupBronze = parseInt((document.getElementById('cupBronzeLegs') || {}).value) || 5;
     config.legs.cupFinal = parseInt((document.getElementById('cupFinalLegs') || {}).value) || 5;
+    config.legs.swissRounds = parseInt((document.getElementById('swissRoundsLegs') || {}).value) || 3;
+    config.legs.swissSemifinal = parseInt((document.getElementById('swissSemifinalLegs') || {}).value) || 3;
+    config.legs.swissBronze = parseInt((document.getElementById('swissBronzeLegs') || {}).value) || 5;
+    config.legs.swissFinal = parseInt((document.getElementById('swissFinalLegs') || {}).value) || 5;
 
     // Read values from UI — Chalker
     const x01Toggle = document.getElementById('chalkerX01CustomToggle');
@@ -932,6 +970,10 @@ function resetMatchConfigToDefaults() {
     safeSetValue('cupSemifinalLegs', d.cupSemifinal);
     safeSetValue('cupBronzeLegs', d.cupBronze);
     safeSetValue('cupFinalLegs', d.cupFinal);
+    safeSetValue('swissRoundsLegs', d.swissRounds);
+    safeSetValue('swissSemifinalLegs', d.swissSemifinal);
+    safeSetValue('swissBronzeLegs', d.swissBronze);
+    safeSetValue('swissFinalLegs', d.swissFinal);
 }
 
 /**

@@ -82,6 +82,9 @@
 .mc-lanechip:hover { border-style: solid; border-color: var(--nt-ink); background: var(--nt-surface); color: var(--nt-ink); }
 .mc-lanechip.mc-idle { cursor: default; }
 .mc-lanechip.mc-idle:hover { border-style: dashed; border-color: var(--nt-line-2); background: var(--nt-surface-2); color: var(--nt-ink-2); }
+/* a busy lane keeps its place in the row, dimmed (so the free ones never move under the pointer) */
+.mc-lanechip.mc-busy { cursor: default; border-style: solid; border-color: var(--nt-line); background: var(--nt-inset); color: var(--nt-faint, #a8a29e); }
+.mc-lanechip.mc-busy:hover { border-style: solid; border-color: var(--nt-line); background: var(--nt-inset); color: var(--nt-faint, #a8a29e); }
 .mc-next { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--nt-ink-2); margin-left: 6px; flex-wrap: wrap; }
 .mc-next em { font-style: normal; color: var(--nt-muted); font-size: 12px; }
 .mc-none { font-size: 13px; color: var(--nt-muted); }
@@ -130,6 +133,13 @@
 .mc-chip-split .mc-chip-x { padding: 0 10px 0 8px; border-left: 1px solid #f4dc9a; font-size: 15px; line-height: 1; }
 .mc-chip-split .mc-chip-x:hover { color: var(--nt-danger); background: #fdecec; }
 .mc-note.mc-warn { color: var(--nt-warn); }
+/* Swiss: the table in the right column (as Round Robin's group tables) */
+.mc-swtable { margin: 0; padding: 0 18px 6px 38px; font-size: 13px; }
+.mc-swtable li { padding: 3px 0; }
+.mc-swtable li b { font-weight: 600; }
+.mc-swtable li span { float: right; color: var(--nt-muted); font-variant-numeric: tabular-nums; }
+.mc-swtable li.mc-toa { box-shadow: inset 3px 0 0 var(--nt-ok); margin-left: -20px; padding-left: 17px; }
+.mc-swiss > .mc-note { padding: 0 18px 14px; margin: 0; }
 /* Pick a format: one card per format (the picked one framed), the picked format's description,
    facts and options, then the Draw bar. A format not offered is greyed out and locked; one that
    doesn't fit tonight's field can still be picked (to change its options), and says why. */

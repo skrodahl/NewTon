@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: Swiss</title>
+<link rel="stylesheet" href="../../css/design-tokens.css">
+<style>
+@font-face { font-family: 'Inter'; src: url('../../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Cascadia Code'; src: url('../../fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype'); font-weight: 200 700; font-display: swap; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nt-bg); color: var(--nt-ink); font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; }
+.wrap { max-width: 1280px; margin: 0 auto; padding: 24px 24px 60px; display: grid; gap: 30px; }
+.intro h1 { margin: 0; font-size: 26px; font-weight: 800; letter-spacing: -.02em; }
+.intro p { margin: 6px 0 0; color: var(--nt-muted); max-width: 100ch; }
+.step { display: grid; gap: 10px; }
+.step > h2 { margin: 0; font-size: 13px; font-weight: 800; letter-spacing: .1em; text-transform: uppercase; color: var(--nt-muted); }
+.step > p.why { margin: -4px 0 4px; color: var(--nt-ink-2); max-width: 100ch; }
+.panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; }
+.ph { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 14px 18px 10px; }
+.ph h3 { margin: 0; font-size: 15px; }
+.ph h3 small { font-weight: 500; color: var(--nt-muted); font-size: 12px; margin-left: 6px; }
+.ph .hint { font-size: 12px; color: var(--nt-muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); white-space: nowrap; }
+.btn.dark { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.btn.big { padding: 10px 20px; font-size: 15px; }
+.seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; }
+.seg span { padding: 5px 10px; font-size: 12px; font-weight: 600; color: var(--nt-ink-2); }
+.seg span + span { border-left: 1px solid var(--nt-line-2); }
+.seg .on { background: var(--nt-header); color: var(--nt-header-ink); }
+
+/* 1. the card */
+.pick { display: grid; grid-template-columns: 260px minmax(0, 1fr) 250px; gap: 18px; padding: 0 18px 16px; align-items: start; }
+.fcard { border: 2px solid var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); border-radius: 12px; padding: 12px 14px; display: grid; gap: 3px; position: relative; }
+.fcard b { font-size: 15px; }
+.fcard .line { font-weight: 700; font-size: 13px; color: #c0562a; }
+.fcard .fit { font-size: 12px; color: var(--nt-muted); margin-top: 3px; }
+.fcard .radio { position: absolute; top: 13px; right: 12px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--nt-accent); background: var(--nt-accent); box-shadow: inset 0 0 0 3px var(--nt-surface); }
+.about p { margin: 0 0 8px; color: var(--nt-ink-2); }
+.about ul { margin: 0 0 10px; padding-left: 18px; color: var(--nt-ink-2); font-size: 13px; }
+.opts { display: flex; gap: 8px 10px; align-items: center; flex-wrap: wrap; font-size: 13px; margin-bottom: 6px; }
+.opts small { color: var(--nt-muted); font-size: 12px; }
+.facts { display: grid; gap: 6px; font-size: 13px; }
+.facts div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--nt-line); padding-bottom: 5px; }
+.facts span { color: var(--nt-muted); }
+.drawbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin: 0 18px 16px; padding: 12px 14px; border: 1px solid var(--nt-line-2); border-radius: 10px; background: var(--nt-surface-2); }
+
+/* 2. match controls */
+.mc { display: grid; grid-template-columns: minmax(0, 1fr) 340px; gap: 16px; align-items: start; }
+.col { display: grid; gap: 16px; }
+.lanes { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; padding: 0 18px 14px; }
+.lane { border: 1px solid var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); border-radius: 10px; padding: 9px 12px; display: grid; gap: 6px; }
+.lane .top { display: flex; justify-content: space-between; font-size: 12px; color: var(--nt-muted); }
+.lane .top b { color: #b2410f; letter-spacing: .04em; text-transform: uppercase; }
+.lane .wins { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
+.lane .wins span { border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 6px 8px; font-weight: 700; text-align: center; }
+.qh { display: flex; justify-content: space-between; padding: 8px 18px 4px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); border-top: 1px solid var(--nt-line); }
+.row { display: grid; grid-template-columns: 54px minmax(0, 1fr) auto; gap: 10px; align-items: center; padding: 7px 18px; font-size: 13px; }
+.row + .row { border-top: 1px dashed var(--nt-line); }
+.row .id { font-family: var(--nt-mono); font-size: 11px; color: var(--nt-muted); }
+.row small { display: block; color: var(--nt-muted); font-size: 12px; }
+.row .res { font-family: var(--nt-mono); font-weight: 700; }
+.row.done .who b { color: var(--nt-ok); }
+.chip { font-size: 11px; font-weight: 700; border-radius: 99px; padding: 1px 8px; }
+.chip.live { background: var(--nt-accent-soft); color: #b2410f; }
+.chip.ready { background: var(--nt-ready-soft); color: #8a6a0a; }
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: right; font-size: 11px; font-weight: 600; color: var(--nt-muted); padding: 4px 8px; border-bottom: 1px solid var(--nt-line); }
+td { text-align: right; padding: 5px 8px; border-bottom: 1px solid var(--nt-line); font-variant-numeric: tabular-nums; white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; padding-left: 18px; width: 26px; color: var(--nt-muted); }
+th:nth-child(2), td:nth-child(2) { text-align: left; width: 100%; }
+th:last-child, td:last-child { padding-right: 18px; }
+tr.top4 td:first-child { box-shadow: inset 3px 0 0 var(--nt-ok); }
+.key { padding: 8px 18px 12px; font-size: 12px; color: var(--nt-muted); }
+.drawround { border: 2px solid var(--nt-accent); border-radius: 12px; background: var(--nt-surface); }
+.drawround .body { padding: 0 18px 14px; display: grid; gap: 8px; }
+.drawround ol { margin: 0; padding-left: 18px; columns: 2; font-size: 13px; }
+.drawround ol li { break-inside: avoid; padding: 2px 0; }
+.drawround ol small { color: var(--nt-muted); }
+.note { font-size: 12px; color: var(--nt-muted); margin: 0; }
+
+/* 3. the bracket page: the rounds and the top four */
+.rounds { display: grid; grid-template-columns: repeat(4, 190px) 40px 190px 30px 190px; gap: 0 18px; padding: 18px; overflow-x: auto; align-items: start; }
+.rcol { display: grid; gap: 8px; }
+.rcol h4 { margin: 0 0 4px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); text-align: center; }
+.card { border: 1px solid var(--nt-line-2); border-radius: 8px; background: var(--nt-surface); font-size: 12px; overflow: hidden; }
+.card .meta { display: flex; justify-content: space-between; padding: 2px 8px; font-family: var(--nt-mono); font-size: 10px; color: var(--nt-muted); border-bottom: 1px solid var(--nt-line); }
+.card .p { display: flex; justify-content: space-between; padding: 3px 8px; font-weight: 600; }
+.card .p + .p { border-top: 1px solid var(--nt-line); }
+.card .p.w { color: var(--nt-ok); }
+.card .p.l { color: var(--nt-muted); font-weight: 500; }
+.card .p.tbd { color: var(--nt-muted); font-style: italic; font-weight: 500; }
+.card.live { border-color: var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); }
+.card.ready { border-color: var(--nt-ready); box-shadow: inset 0 3px 0 var(--nt-ready); }
+.card .grp { padding: 1px 8px; font-size: 10px; color: var(--nt-muted); background: var(--nt-surface-2); }
+.ko { align-self: center; display: grid; gap: 70px; }
+.ko.fin { align-self: center; }
+.vline { align-self: stretch; border-left: 1px dashed var(--nt-line-2); }
+@media (max-width: 1000px) { .pick, .mc { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+<div class="intro">
+    <h1>Swiss</h1>
+    <p>Quick mockup, 16 players, 4 rounds, finishing with semifinals and a final for the top 4. Each round pairs players with the same record who haven't met (Monrad: the table 1st v 2nd, 3rd v 4th, skipping rematches); round 1 random, or with seeding the top half against the bottom half. The table: wins, then opponents' wins (Buchholz), then leg difference, then legs won. Shown partway through round 3.</p>
+</div>
+
+<section class="step">
+    <h2>1 · Pick a format: the Swiss card</h2>
+    <div class="panel">
+        <div class="ph"><h3>Pick a format<small>then draw</small></h3></div>
+        <div class="pick">
+            <div class="fcard"><span class="radio"></span>
+                <svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="13" width="12" height="5" rx="1"/><rect x="4" y="26" width="12" height="5" rx="1"/><rect x="4" y="34" width="12" height="5" rx="1"/><rect x="24" y="5" width="12" height="5" rx="1"/><rect x="24" y="13" width="12" height="5" rx="1"/><rect x="24" y="26" width="12" height="5" rx="1"/><rect x="24" y="34" width="12" height="5" rx="1"/><rect x="44" y="5" width="12" height="5" rx="1"/><rect x="44" y="13" width="12" height="5" rx="1"/><rect x="44" y="26" width="12" height="5" rx="1"/><rect x="44" y="34" width="12" height="5" rx="1"/></g><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M56 7.5H61V36.5H56M61 22H68M82 22H86"/></g><rect x="68" y="17.5" width="14" height="9" rx="1.5" fill="#c0562a"/></svg>
+                <b>Swiss</b><span class="line">Same record, new opponent.</span><span class="fit">Tonight: <b>4 rounds, then the top 4</b></span>
+            </div>
+            <div class="about">
+                <p>Nobody is knocked out. Every round pairs players with the same record who haven't met yet, so the night gets more even as it goes. After the last round the table decides, or the top four play semifinals and a final.</p>
+                <ul><li>Everyone plays the same number of matches</li><li>A predictable night: you know how many rounds there are</li><li>Best for: nights where everyone should play the whole evening, and a fair winner</li></ul>
+                <div class="opts"><span>Rounds</span><span class="seg"><span>3</span><span class="on">4</span><span>5</span><span>6</span></span><span>Finish</span><span class="seg"><span class="on">Semifinals and final</span><span>The table decides</span></span></div>
+                <div class="opts"><small>Rounds start at 4 for 9–16 players, 5 for 17–32; at most one fewer than the players. Both are for this draw; Global Settings decide how they start.</small></div>
+            </div>
+            <div class="facts"><div><span>Players</span><b>4 to 48</b></div><div><span>Matches tonight</span><b>32 + 3</b></div><div><span>Each player</span><b>4 (+ up to 2)</b></div></div>
+        </div>
+        <div class="drawbar"><span><b>16 players</b> · Swiss · 4 rounds, then semifinals and a final for the top 4</span><span class="btn dark big">Draw Swiss →</span></div>
+    </div>
+</section>
+
+<section class="step">
+    <h2>2 · Match Controls during round 3</h2>
+    <p class="why">The queue shows the round in play; the table sits where the group tables sit in Round Robin. When the last match of round 3 is played, the panel on the right becomes <b>Draw round 4</b>: the pairings it would make, and one button. Drawing it locks round 3's results (as the cups lock the groups); the draw can be undone while no round 4 match has a result.</p>
+    <div class="mc">
+        <div class="col">
+            <section class="panel">
+                <div class="ph"><h3>Lanes<small>2 live · 2 free</small></h3><span class="hint">Click the winner to finish a match</span></div>
+                <div class="lanes">
+                    <div class="lane"><div class="top"><b>Lane 1</b><span>R3-1 · Bo3 · 6 min</span></div><div class="wins"><span>Henry A.</span><span>Colin B.</span></div></div>
+                    <div class="lane"><div class="top"><b>Lane 2</b><span>R3-3 · Bo3 · 2 min</span></div><div class="wins"><span>Peter J.</span><span>Ken W.</span></div></div>
+                </div>
+            </section>
+            <section class="panel">
+                <div class="ph"><h3>Round 3 of 4<small>2 of 8 played · 2 live</small></h3><span class="hint">Lane and referee are optional</span></div>
+                <div class="qh"><span>2 wins</span><span>2 matches</span></div>
+                <div class="row"><span class="id">R3-1</span><span class="who"><b>Henry A.</b> v <b>Colin B.</b><small>Best of 3</small></span><span class="chip live">Live · L1</span></div>
+                <div class="row done"><span class="id">R3-2</span><span class="who"><b>Adam F.</b> v Harry K.<small>2–1</small></span><span class="res">2–1</span></div>
+                <div class="qh"><span>1 win</span><span>4 matches</span></div>
+                <div class="row"><span class="id">R3-3</span><span class="who"><b>Peter J.</b> v <b>Ken W.</b><small>Best of 3</small></span><span class="chip live">Live · L2</span></div>
+                <div class="row done"><span class="id">R3-4</span><span class="who">Jocke S. v <b>Lars I.</b><small>0–2</small></span><span class="res">0–2</span></div>
+                <div class="row"><span class="id">R3-5</span><span class="who"><b>Nina H.</b> v <b>Ove R.</b><small>Best of 3 · ref: Adam F.</small></span><span class="chip ready">Ready</span></div>
+                <div class="row"><span class="id">R3-6</span><span class="who"><b>Bjørn T.</b> v <b>Mona T.</b><small>Best of 3</small></span><span class="chip ready">Ready</span></div>
+                <div class="qh"><span>0 wins</span><span>2 matches</span></div>
+                <div class="row"><span class="id">R3-7</span><span class="who"><b>Siv R.</b> v <b>Erik H.</b><small>Best of 3</small></span><span class="chip ready">Ready</span></div>
+                <div class="row"><span class="id">R3-8</span><span class="who"><b>Ola M.</b> v <b>Tone B.</b><small>Best of 3</small></span><span class="chip ready">Ready</span></div>
+            </section>
+        </div>
+        <div class="col">
+            <section class="panel">
+                <div class="ph"><h3>The table<small>after round 2</small></h3></div>
+                <table>
+                    <tr><th>#</th><th>Player</th><th title="Won–lost">W–L</th><th title="Opponents' wins (Buchholz)">Opp</th><th title="Leg difference">+/−</th></tr>
+                    <tr class="top4"><td>1</td><td><b>Henry A.</b></td><td>2–0</td><td>3</td><td>+4</td></tr>
+                    <tr class="top4"><td>2</td><td><b>Colin B.</b></td><td>2–0</td><td>2</td><td>+3</td></tr>
+                    <tr class="top4"><td>3</td><td><b>Adam F.</b></td><td>2–0</td><td>2</td><td>+2</td></tr>
+                    <tr class="top4"><td>4</td><td><b>Harry K.</b></td><td>2–0</td><td>1</td><td>+3</td></tr>
+                    <tr><td>5</td><td><b>Peter J.</b></td><td>1–1</td><td>3</td><td>+1</td></tr>
+                    <tr><td>6</td><td><b>Ken W.</b></td><td>1–1</td><td>2</td><td>+1</td></tr>
+                    <tr><td>7</td><td><b>Jocke S.</b></td><td>1–1</td><td>2</td><td>0</td></tr>
+                    <tr><td>8</td><td><b>Lars I.</b></td><td>1–1</td><td>2</td><td>0</td></tr>
+                    <tr><td>9</td><td>Nina H.</td><td>1–1</td><td>2</td><td>−1</td></tr>
+                    <tr><td>…</td><td colspan="4" style="text-align:left;color:var(--nt-muted)">7 more</td></tr>
+                </table>
+                <p class="key">Green: the top four, who play the semifinals after round 4. Opp: opponents' wins, the first tiebreak.</p>
+            </section>
+            <section class="drawround">
+                <div class="ph"><h3>Draw round 4<small>when round 3 is done</small></h3></div>
+                <div class="body">
+                    <p class="note">Every round 3 match is played. Pairs by the table, 1st v 2nd, 3rd v 4th, skipping anyone already played:</p>
+                    <ol><li>Henry A. v Adam F. <small>(not Colin: met in round 3)</small></li><li>Colin B. v Lars I.</li><li>Harry K. v Peter J.</li><li>Ken W. v Nina H.</li><li>…</li></ol>
+                    <span class="btn dark big">Draw round 4 →</span>
+                </div>
+            </section>
+        </div>
+    </div>
+</section>
+
+<section class="step">
+    <h2>3 · The bracket page: the rounds, then the top four</h2>
+    <p class="why">Swiss has no bracket lines between rounds: each round is a column of its matches, grouped by record, played results and the round in play. After round 4, the top four's semifinals and final, drawn as a small knockout (1st v 4th, 2nd v 3rd). Shown here with the knockout still waiting.</p>
+    <div class="panel">
+        <div class="rounds">
+            <div class="rcol"><h4>Round 1</h4>
+                <div class="card"><div class="meta"><span>R1-1</span><span>Bo3</span></div><div class="p w">Henry A.<span>2</span></div><div class="p l">Ola M.<span>0</span></div></div>
+                <div class="card"><div class="meta"><span>R1-2</span><span>Bo3</span></div><div class="p w">Colin B.<span>2</span></div><div class="p l">Siv R.<span>1</span></div></div>
+                <div class="card"><div class="meta"><span>R1-3</span><span>Bo3</span></div><div class="p l">Erik H.<span>0</span></div><div class="p w">Adam F.<span>2</span></div></div>
+                <div class="card"><div class="meta"><span>R1-4</span><span>Bo3</span></div><div class="p w">Harry K.<span>2</span></div><div class="p l">Tone B.<span>1</span></div></div>
+                <div class="card"><div class="meta"><span>R1-5…8</span><span></span></div><div class="p tbd">4 more</div></div>
+            </div>
+            <div class="rcol"><h4>Round 2</h4>
+                <div class="card"><div class="grp">1 win</div><div class="meta"><span>R2-1</span><span>Bo3</span></div><div class="p w">Henry A.<span>2</span></div><div class="p l">Peter J.<span>1</span></div></div>
+                <div class="card"><div class="meta"><span>R2-2</span><span>Bo3</span></div><div class="p w">Colin B.<span>2</span></div><div class="p l">Ken W.<span>0</span></div></div>
+                <div class="card"><div class="meta"><span>R2-3…4</span><span></span></div><div class="p tbd">2 more</div></div>
+                <div class="card"><div class="grp">0 wins</div><div class="meta"><span>R2-5…8</span><span></span></div><div class="p tbd">4 more</div></div>
+            </div>
+            <div class="rcol"><h4>Round 3</h4>
+                <div class="card live"><div class="grp">2 wins</div><div class="meta"><span>R3-1</span><span>Live · L1</span></div><div class="p">Henry A.<span></span></div><div class="p">Colin B.<span></span></div></div>
+                <div class="card"><div class="meta"><span>R3-2</span><span>Bo3</span></div><div class="p w">Adam F.<span>2</span></div><div class="p l">Harry K.<span>1</span></div></div>
+                <div class="card live"><div class="grp">1 win</div><div class="meta"><span>R3-3</span><span>Live · L2</span></div><div class="p">Peter J.<span></span></div><div class="p">Ken W.<span></span></div></div>
+                <div class="card ready"><div class="meta"><span>R3-5</span><span>Ready</span></div><div class="p">Nina H.<span></span></div><div class="p">Ove R.<span></span></div></div>
+                <div class="card"><div class="meta"><span>R3-…</span><span></span></div><div class="p tbd">4 more</div></div>
+            </div>
+            <div class="rcol"><h4>Round 4</h4>
+                <div class="card"><div class="p tbd">Drawn when round 3 is done</div></div>
+            </div>
+            <div class="vline"></div>
+            <div class="rcol ko"><h4 style="margin-bottom:-60px">Semifinals</h4>
+                <div class="card"><div class="meta"><span>SF1</span><span>Bo3</span></div><div class="p tbd">1st after round 4</div><div class="p tbd">4th after round 4</div></div>
+                <div class="card"><div class="meta"><span>SF2</span><span>Bo3</span></div><div class="p tbd">2nd after round 4</div><div class="p tbd">3rd after round 4</div></div>
+            </div>
+            <div></div>
+            <div class="rcol fin"><h4>Final</h4>
+                <div class="card"><div class="meta"><span>F</span><span>Bo5</span></div><div class="p tbd">Winner SF1</div><div class="p tbd">Winner SF2</div></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="step">
+    <h2>Questions the mockup raises</h2>
+    <div class="panel" style="padding:12px 18px">
+        <ul style="margin:0;padding-left:18px;color:var(--nt-ink-2)">
+            <li><b>Bronze final</b> for the semifinal losers, as single elimination always has? (Suggested: yes, for consistency and a 3rd place.)</li>
+            <li><b>Places after the top four:</b> 5th and down from the table, in the shared places (5th–6th, 7th–8th …), as everywhere.</li>
+            <li><b>Match lengths:</b> Swiss rounds as single elimination's regular rounds, the top four as its semifinal, bronze and final lengths? Or their own?</li>
+            <li><b>Referees:</b> suggestions only (no planned referees): with fewer boards than matches, there are always players waiting.</li>
+        </ul>
+    </div>
+</section>
+</div>
+</body>
+</html>

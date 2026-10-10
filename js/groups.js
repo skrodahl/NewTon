@@ -67,14 +67,17 @@ const Groups = (() => {
 
     // ---------- the group draw ----------
     /**
-     * How many groups: the smallest even number that keeps every group at the largest group or fewer
-     * (Global Settings → Round Robin → Largest group; this is for the next draw).
+     * How many groups: the fewest that keep every group at the largest group or fewer (Global
+     * Settings → Round Robin → Largest group; this is for the next draw). With To the A cup: Top two
+     * the number is even, so the group winners and runners-up pair off cleanly in the A cup; with Top
+     * half it can be odd (12 players: 3 groups of 4, not 4 groups of 3).
      * @param {number} n - players
      * @returns {number}
      */
     function groupCount(n) {
-        let g = Math.max(2, Math.ceil(n / configSettings().maxGroup));
-        if (g % 2) g++;
+        const cfg = configSettings();
+        let g = Math.max(2, Math.ceil(n / cfg.maxGroup));
+        if (cfg.cupEntry === 'top2' && g % 2) g++;
         return g;
     }
 

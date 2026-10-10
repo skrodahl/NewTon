@@ -68,6 +68,9 @@ function clearBracket() {
  * @returns {number}
  */
 function getMatchRoundOrder(matchId) {
+    // Swiss: the rounds in order, then the top four
+    if (typeof Swiss !== 'undefined' && Swiss.isRoundId(matchId)) return parseInt(String(matchId).slice(1)) || 1;
+    if (typeof Swiss !== 'undefined' && Swiss.isKnockoutId(matchId)) { const r = String(matchId).slice(2); return 100 + (r === 'F' ? 3 : r === 'B' ? 2 : 1); }
     // Cup and Plate: the Plate comes after the Cup's round 1, as the backside does
     if (typeof Plate !== 'undefined' && Plate.isPlateId(matchId)) {
         const r = matchId.slice(2);
@@ -771,6 +774,9 @@ function isMatchUndoable(matchId) {
         return false;
     }
 
+    // Swiss: a round whose next round (or top four) has started is locked (Docs/SWISS.md)
+    if (getFormat() === 'SWISS' && typeof Swiss !== 'undefined' && Swiss.isLocked(match)) return false;
+
     // MANUAL and QR transactions can be undone; AUTO (walkover/bye) cannot
     const manualTransaction = history.find(t => t.matchId === matchId && (t.completionType === 'MANUAL' || t.completionType === 'QR'));
     if (!manualTransaction) {
@@ -843,6 +849,30 @@ function undoCupDrawConfirmed() {
 
     if (typeof refreshTournamentUI === 'function') refreshTournamentUI();
     _mcRefresh();
+}
+
+/**
+ * Swiss: take back the stage drawn from a round match's round (the next round, or the top four after
+ * the last round), when none of its matches has started: remove its matches, their transactions and
+ * its draw transaction, and forget it (tournament.swiss). Called by undoManualTransaction(). Docs/SWISS.md
+ * @param {string} matchId - the Swiss round match whose result is being undone
+ * @returns {void}
+ */
+function takeBackSwissStage(matchId) {
+    if (typeof Swiss === 'undefined' || !tournament || !tournament.swiss) return;
+    const match = matches.find(m => m.id === matchId);
+    const stage = Swiss.stageAfter(match);
+    if (!stage || Swiss.isLocked(match)) return;
+    const ids = new Set(stage.matches.map(m => m.id));
+    const history = getTournamentHistory();
+    const clean = history.filter(t => !ids.has(t.matchId) &&
+        !(stage.kind === 'round' && t.type === 'DRAW_SWISS_ROUND' && t.round === stage.round) &&
+        !(stage.kind === 'knockout' && t.type === 'DRAW_SWISS_KNOCKOUT'));
+    localStorage.setItem(`tournament_${tournament.id}_history`, JSON.stringify(clean));
+    for (let i = matches.length - 1; i >= 0; i--) if (ids.has(matches[i].id)) matches.splice(i, 1);
+    if (stage.kind === 'round') tournament.swiss.drawn = tournament.swiss.drawn.filter(d => d.round < stage.round);
+    else tournament.swiss.knockout = false;
+    console.log(`↩️ Swiss: ${stage.kind === 'round' ? `round ${stage.round}` : 'the top four'} taken back with ${matchId}`);
 }
 
 // Helper function to find matches that are directly affected by undoing a specific match
@@ -1012,6 +1042,11 @@ function handleSurgicalUndo(matchId) {
     }
 
     const consequentialMatches = getConsequentialMatches(transaction);
+    // Swiss: the round drawn from this result's round (or the top four) goes with it; show it
+    if (getFormat() === 'SWISS' && typeof Swiss !== 'undefined') {
+        const stage = Swiss.stageAfter(matches.find(m => m.id === matchId));
+        if (stage) stage.matches.forEach(m => consequentialMatches.push({ id: m.id, match: m, isFrontside: true }));
+    }
 
     const hasAchievements = transaction.achievements &&
         Object.values(transaction.achievements).some(a => a !== null);
@@ -1073,6 +1108,13 @@ function undoManualTransaction(transactionId) {
     if (tournament && tournament.readOnly) {
         alert('Completed tournament: Read-only - Use Reset Tournament to modify');
         return;
+    }
+
+    // Swiss: a result in a round that the next round (or the top four) was drawn from takes that
+    // draw back first; the history is read again below
+    if (getFormat() === 'SWISS') {
+        const first = getTournamentHistory().find(t => t.id === transactionId);
+        if (first) takeBackSwissStage(first.matchId);
     }
 
     const history = getTournamentHistory();
@@ -1294,6 +1336,7 @@ function getRoundDescription(match) {
     if (typeof getFormat === 'function' && getFormat() === 'GROUPS' && typeof Groups !== 'undefined') return Groups.roundName(match);
     if (typeof Qualifiers !== 'undefined' && Qualifiers.isQualifier(match)) return 'Qualifier';
     if (typeof Plate !== 'undefined' && match.side === 'plate') return Plate.roundName(match);
+    if (typeof Swiss !== 'undefined' && (match.side === 'swiss' || match.side === 'swissko')) return Swiss.roundName(match);
     if (match.id === 'GRAND-FINAL') return 'Grand Final';
     if (match.id === 'BS-FINAL') return 'Backside Final';
 
@@ -1466,6 +1509,8 @@ function startMatchOnLane(matchId, lane) {
 /** The round heading for a group of ready matches. */
 function _mcRoundTitle(key) {
     if (key === 'QUAL') return 'Qualifiers';
+    if (key === 'SWISSKO') return 'Top four';
+    if (key.startsWith('SWISS-R')) return `Round ${key.slice(7)}${tournament && tournament.swiss ? ` of ${tournament.swiss.rounds}` : ''}`;
     if (key.startsWith('PLATE-R') && typeof Plate !== 'undefined') return Plate.roundName({ round: parseInt(key.slice(7)) });
     if (key === 'GRAND-FINAL') return 'Grand Final';
     if (key === 'BS-FINAL') return 'Backside Final';
@@ -1479,6 +1524,28 @@ function _mcRoundTitle(key) {
 }
 
 /**
+ * The lane chips on the lanes board's top line: every lane in use, in order, so a lane never moves
+ * (a free lane starts Next up there; a busy one stays in its place, dimmed, its match in the tooltip).
+ * @param {{usable: number[]}} lanes - _mcLanes()
+ * @param {Set<string>} used - lanes with a match that isn't completed
+ * @param {object|null} next - the match a free lane would start
+ * @returns {string}
+ */
+function _mcLaneChips(lanes, used, next) {
+    if (!lanes.usable.length) return '<span class="mc-none">No lanes set up</span>';
+    return lanes.usable.map(l => {
+        if (used.has(String(l))) {
+            const on = matches.find(m => !m.completed && String(m.lane) === String(l));
+            const what = on ? `${on.id}${on.active ? ' is being played' : ' is waiting'} on lane ${l}` : `Lane ${l} is in use`;
+            return `<span class="mc-lanechip mc-busy" title="${escapeHtml(what)}" aria-disabled="true">${l}</span>`;
+        }
+        return next
+            ? `<button type="button" class="mc-lanechip" onclick="startMatchOnLane('${next.id}', ${l})" title="Start ${next.id} on Lane ${l}">${l}</button>`
+            : `<span class="mc-lanechip mc-idle">${l}</span>`;
+    }).join('');
+}
+
+/**
  * The running tournament: lanes board (live matches; free lanes on one line), the ready
  * queue by round, and the referees.
  * @param {{live: object[], rounds: Object<string, object[]>}} matchData
@@ -1486,17 +1553,17 @@ function _mcRoundTitle(key) {
  */
 function _mcActiveHTML(matchData) {
     if (typeof getFormat === 'function' && getFormat() === 'GROUPS') return _mcGroupsHTML(matchData);
-    const isSE = typeof getFormat === 'function' && getFormat() === 'SE';
+    const isSE = typeof getFormat === 'function' && (getFormat() === 'SE' || getFormat() === 'SWISS'); // one queue column
     const live = matchData.live || [];
     const lanes = _mcLanes();
     const used = new Set(matches.filter(m => !m.completed && m.lane).map(m => String(m.lane)));
     const free = lanes.usable.filter(l => !used.has(String(l)));
 
     // the order matches are queued in: frontside rounds, then the finals; backside beside
-    const order = k => k === 'QUAL' ? 0 : k === 'GRAND-FINAL' ? 90 : k === 'BS-FINAL' ? 91
-        : k.startsWith('PLATE-R') ? parseInt(k.slice(7)) + 0.5 : parseInt(k.replace(/\D/g, '')) || 50;
+    const order = k => k === 'QUAL' ? 0 : k === 'GRAND-FINAL' ? 90 : k === 'BS-FINAL' ? 91 : k === 'SWISSKO' ? 80
+        : k.startsWith('PLATE-R') ? parseInt(k.slice(7)) + 0.5 : k.startsWith('SWISS-R') ? parseInt(k.slice(7)) : parseInt(k.replace(/\D/g, '')) || 50;
     const keys = Object.keys(matchData.rounds || {});
-    const front = keys.filter(k => k.startsWith('FS-') || k === 'GRAND-FINAL' || k === 'OTHER' || k === 'QUAL' || k.startsWith('PLATE-R')).sort((a, b) => order(a) - order(b));
+    const front = keys.filter(k => k.startsWith('FS-') || k === 'GRAND-FINAL' || k === 'OTHER' || k === 'QUAL' || k.startsWith('PLATE-R') || k.startsWith('SWISS')).sort((a, b) => order(a) - order(b));
     const back = keys.filter(k => k.startsWith('BS-') || k === 'BS-FINAL').sort((a, b) => order(a) - order(b));
     const queued = front.concat(back).flatMap(k => matchData.rounds[k]);
     const next = queued.find(m => !checkRefereeConflict(m.id).hasConflict);
@@ -1505,12 +1572,7 @@ function _mcActiveHTML(matchData) {
     const qrMode = typeof getChalkerHandover !== 'function' || getChalkerHandover() === 'qr';
     const scanQR = qrMode && live.length ? ` <button type="button" class="mc-btn mc-sm mc-scan" onclick="openResultQRScanner(null)">Scan QR results</button>` : '';
     const tiles = live.filter(m => m.lane).concat(live.filter(m => !m.lane)).map(_mcLiveTile).join('');
-    const freeLine = `<div class="mc-free"><span class="mc-k">Free</span>` +
-        (free.length
-            ? free.map(l => next
-                ? `<button type="button" class="mc-lanechip" onclick="startMatchOnLane('${next.id}', ${l})" title="Start ${next.id} on Lane ${l}">${l}</button>`
-                : `<span class="mc-lanechip mc-idle">${l}</span>`).join('')
-            : `<span class="mc-none">${lanes.usable.length ? 'No free lanes' : 'No lanes set up'}</span>`) +
+    const freeLine = `<div class="mc-free"><span class="mc-k">Lanes</span>` + _mcLaneChips(lanes, used, next) +
         (next && free.length ? `<span class="mc-next">Next up: ${_mcTag(next.id)} ${escapeHtml(next.player1.name)} v ${escapeHtml(next.player2.name)}<em>click a free lane to start it there</em></span>` : '') +
         (lanes.excluded.length ? `<span class="mc-off">Not in use: ${lanes.excluded.join(', ')}</span>` : '') +
         `</div>`;
@@ -1527,7 +1589,25 @@ function _mcActiveHTML(matchData) {
             ${freeLine}${tiles ? `<div class="mc-lanes">${tiles}</div>` : '<div class="mc-qempty">No matches being played.</div>'}</section>
         <section class="mc-panel"><div class="mc-ph"><h3>Ready to start<small>${queued.length}</small></h3><span class="mc-hint">Lane and referee are optional</span></div>${queue}</section>
     </div>
-    <div class="mc-col">${_mcRefereesHTML(live)}</div>`;
+    <div class="mc-col">${getFormat() === 'SWISS' ? _mcSwissTableHTML() : ''}${_mcRefereesHTML(live)}</div>`;
+}
+
+/**
+ * Swiss: the table for Match Controls' right column (place, name, won–lost, opponents' wins, leg
+ * difference; the top four marked when they will play the semifinals), with the round in play and the
+ * byes. Docs/SWISS.md
+ * @returns {string}
+ */
+function _mcSwissTableHTML() {
+    if (typeof Swiss === 'undefined' || !tournament.swiss) return '';
+    const s = tournament.swiss, rows = Swiss.table(), r = Swiss.drawnRounds();
+    const sign = n => n > 0 ? `+${n}` : String(n);
+    const top4 = s.finish === 'top4';
+    const byes = Swiss.byesIn(r).map(id => (players.find(p => String(p.id) === id) || {}).name).filter(Boolean);
+    const status = s.knockout ? 'The top four are drawn' : `Round ${r} of ${s.rounds}${Swiss.roundDone(r) ? ' played' : ' in play'}`;
+    return `<section class="mc-panel mc-swiss"><div class="mc-ph"><h3>The table<small>${escapeHtml(status)}</small></h3></div>
+        <ol class="mc-swtable">${rows.map(x => `<li class="${top4 && x.pos <= 4 ? 'mc-toa' : ''}"><b>${escapeHtml(x.player.name)}</b><span>${x.won}–${x.lost}${x.byes ? '*' : ''} · ${x.opp} · ${sign(x.diff)}</span></li>`).join('')}</ol>
+        <p class="mc-note">Won–lost · opponents' wins · leg difference.${byes.length ? ` Bye in round ${r}: ${escapeHtml(byes.join(', '))} (a win).` : ''}${top4 ? ' Marked: the top four, who play the semifinals after the last round.' : ''}</p></section>`;
 }
 
 // --- Match Controls: groups and cups (Docs/GROUPS-AND-CUPS.md) ---
@@ -1736,12 +1816,7 @@ function _mcGroupsHTML(matchData) {
     const qrMode = typeof getChalkerHandover !== 'function' || getChalkerHandover() === 'qr';
     const scanQR = qrMode && live.length ? ` <button type="button" class="mc-btn mc-sm mc-scan" onclick="openResultQRScanner(null)">Scan QR results</button>` : '';
     const tiles = live.filter(m => m.lane).concat(live.filter(m => !m.lane)).map(_mcLiveTile).join('');
-    const freeLine = `<div class="mc-free"><span class="mc-k">Free</span>` +
-        (free.length
-            ? free.map(l => next
-                ? `<button type="button" class="mc-lanechip" onclick="startMatchOnLane('${next.id}', ${l})" title="Start ${next.id} on Lane ${l}">${l}</button>`
-                : `<span class="mc-lanechip mc-idle">${l}</span>`).join('')
-            : `<span class="mc-none">${lanes.usable.length ? 'No free lanes' : 'No lanes set up'}</span>`) +
+    const freeLine = `<div class="mc-free"><span class="mc-k">Lanes</span>` + _mcLaneChips(lanes, used, next) +
         (next && free.length ? `<span class="mc-next">Next up: ${_mcTag(next.id)} ${escapeHtml(next.player1.name)} v ${escapeHtml(next.player2.name)}${nextNote}<em>click a free lane to start it there</em></span>` : '') +
         (lanes.excluded.length ? `<span class="mc-off">Not in use: ${lanes.excluded.join(', ')}</span>` : '') +
         `</div>`;
@@ -1814,11 +1889,19 @@ const _mcKnockoutMatches = n => n < 2 ? 0 : (n - 1) + (n >= 4 ? 1 : 0);
 function _mcFormatFit(f, paid) {
     const rr = f.id === 'GROUPS' && typeof Groups !== 'undefined';
     const single = rr && Groups.configSettings().structure === 'single';
+    const sw = f.id === 'SWISS' && typeof Swiss !== 'undefined';
     const lim = rr ? Groups.limits() : f;
     const out = { ok: true, why: '', fit: '', sum: '', matches: '–', each: '–', range: `${lim.minPlayers} to ${lim.maxPlayers}` };
     if (rr) out.range = single ? '3 to 8 in one group' : '6 to 32';
     if (paid < lim.minPlayers) return Object.assign(out, { ok: false, why: f.id === 'CP' ? 'From 5 players (a Cup of 8 or more)' : `Needs ${lim.minPlayers}+ paid players` });
     if (paid > lim.maxPlayers) return Object.assign(out, { ok: false, why: `At most ${lim.maxPlayers} players${single ? ' in one group' : ''}` });
+    if (sw) {
+        // Swiss: rounds by the settings for this draw; with the top four, 4 more matches
+        const rounds = Swiss.roundsFor(paid), top4 = Swiss.configSettings().finish === 'top4';
+        return Object.assign(out, { fit: `${rounds} rounds${top4 ? ', then the top 4' : ''}`,
+            sum: `${rounds} rounds${top4 ? ', then semifinals and a final for the top 4' : ', the table decides'}`,
+            matches: `${rounds * Math.floor(paid / 2)}${top4 ? ' + 4' : ''}`, each: `${paid % 2 ? `${rounds - 1}–${rounds}` : rounds}${top4 ? ' (+ up to 2)' : ''}` });
+    }
     const n32 = Math.min(paid, 32), q = Math.max(0, paid - 32);
     const size = calculateBracketSize(paid, f.draw || f.id);
     const byes = paid > 32 ? 0 : size - paid;
@@ -1856,6 +1939,13 @@ function _mcPickFormat(id) {
 function _mcRoundRobinChoice(key, value) {
     const cur = Groups.configSettings();
     Groups.setDrawChoice({ structure: cur.structure, cupEntry: cur.cupEntry, meetings: cur.meetings, [key]: key === 'meetings' ? Number(value) : value });
+    _mcRefresh(0);
+}
+
+/** Swiss's options for this draw (Rounds, Finish), starting from Global Settings. */
+function _mcSwissChoice(key, value) {
+    const cur = Swiss.configSettings();
+    Swiss.setDrawChoice({ rounds: cur.rounds, finish: cur.finish, [key]: key === 'rounds' ? (value === 'auto' ? 'auto' : Number(value)) : value });
     _mcRefresh(0);
 }
 
@@ -1911,9 +2001,15 @@ function _mcSetupHTML() {
         const f = picked.f, fit = picked.fit;
         const single = f.id === 'GROUPS' && Groups.configSettings().structure === 'single';
         const seg = (key, cur, opts) => `<span class="mc-seg">${opts.map(([v, label]) => `<button type="button" class="${v === cur ? 'mc-on' : ''}" onclick="_mcRoundRobinChoice('${key}', '${v}')">${label}</button>`).join('')}</span>`;
+        const swSeg = (key, cur, opts) => `<span class="mc-seg">${opts.map(([v, label]) => `<button type="button" class="${String(v) === String(cur) ? 'mc-on' : ''}" onclick="_mcSwissChoice('${key}', '${v}')">${label}</button>`).join('')}</span>`;
+        const swOpts = f.id === 'SWISS' && typeof Swiss !== 'undefined' ? (() => {
+            const cur = Swiss.configSettings(), now = Swiss.roundsFor(Math.max(paid, 4));
+            const choices = [3, 4, 5, 6, 7].filter(n => n <= Math.max(3, paid - 1)).map(n => [n, String(n)]);
+            return `<div class="mc-fopts"><span>Rounds</span>${swSeg('rounds', cur.rounds === 'auto' ? now : cur.rounds, choices)}<span>Finish</span>${swSeg('finish', cur.finish, [['top4', 'Semifinals and final'], ['table', 'The table decides']])}<small>this draw only; Global Settings decide how it starts</small></div>`;
+        })() : '';
         const rrOpts = f.id === 'GROUPS' ? `<div class="mc-fopts"><span>Structure</span>${seg('structure', Groups.configSettings().structure, [['groups', 'Groups and cups'], ['single', 'One group']])}${single ? `<span>Play each other</span>${seg('meetings', String(Groups.configSettings().meetings), [['1', 'Once'], ['2', 'Twice']])}` : `<span>To the A cup</span>${seg('cupEntry', Groups.configSettings().cupEntry, [['top2', 'Top two'], ['half', 'Top half']])}`}<small>this draw only; Global Settings decide how it starts</small></div>` : '';
         detail = `<div class="mc-fdetail"><div><h4>${escapeHtml(f.name)}</h4><p>${escapeHtml(single && f.aboutSingle ? f.aboutSingle + (Groups.configSettings().meetings === 2 ? ' Played twice: when everybody has played everybody once, the return round follows, in the same order with the players swapped.' : '') : f.about || f.blurb)}</p>
-                <ul>${(f.bests || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>${rrOpts}</div>
+                <ul>${(f.bests || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>${rrOpts}${swOpts}</div>
             <dl class="mc-ffacts"><div><dt>Players</dt><dd>${escapeHtml(fit.range)}</dd></div><div><dt>Matches tonight</dt><dd>${escapeHtml(fit.matches)}</dd></div><div><dt>Each player</dt><dd>${escapeHtml(fit.each)}</dd></div></dl></div>`;
     }
     // Never a draw with an unpaid player in the list: a player who is there but not marked paid
@@ -1934,6 +2030,7 @@ function _mcSetupHTML() {
     const seLegs = [['Regular rounds', bo(l.seRegularRounds)], ['Quarterfinal', bo(l.seQuarterfinal)], ['Semifinal', bo(l.seSemifinal)], ['Bronze final', bo(l.seBronze)], ['Final', bo(l.seFinal)]];
     const legs = pid === 'SE' ? seLegs
         : pid === 'CP' ? seLegs.concat([['The Plate', 'the same, by its rounds']])
+        : pid === 'SWISS' ? [['Rounds', bo(l.swissRounds)], ['Semifinal', bo(l.swissSemifinal)], ['Bronze final', bo(l.swissBronze)], ['Final', bo(l.swissFinal)]]
         : pid === 'GROUPS' ? (Groups.configSettings().structure === 'single' ? [['Group matches', bo(l.groupMatches)]]
             : [['Group matches', bo(l.groupMatches)], ['Cup rounds', bo(l.cupRounds)], ['Cup semifinal', bo(l.cupSemifinal)], ['Cup bronze final', bo(l.cupBronze)], ['Cup final', bo(l.cupFinal)]])
         : [['Regular rounds', bo(l.regularRounds)], ['Frontside semifinal', bo(l.frontsideSemifinal)], ['Backside semifinal', bo(l.backsideSemifinal)], ['Backside final', bo(l.backsideFinal)], ['Grand final', bo(l.grandFinal)]];
@@ -2020,6 +2117,10 @@ function showMatchCommandCenter() {
             roundKey = 'QUAL'; // qualifiers (33-48 players): first, each one unblocks a round 1 match
         } else if (match.side === 'plate') {
             roundKey = `PLATE-R${match.round}`; // Cup and Plate: after the Cup's round of the same number
+        } else if (match.side === 'swiss') {
+            roundKey = `SWISS-R${match.round}`; // Swiss: the round in play
+        } else if (match.side === 'swissko') {
+            roundKey = 'SWISSKO';               // Swiss: the top four
         } else if (match.id === 'GRAND-FINAL') {
             roundKey = 'GRAND-FINAL';
         } else if (match.id === 'BS-FINAL') {
@@ -2543,7 +2644,7 @@ function _mcHighlights() {
     // The night in numbers: always the same six
     const sum = f => paid.reduce((s, p) => s + f(p), 0);
     const fmtId = typeof getFormat === 'function' ? getFormat() : 'DE';
-    const format = fmtId === 'GROUPS' ? Groups.formatName() : fmtId === 'SE' ? (tournament.plate ? 'Cup and Plate' : 'Single elimination') : 'Double elimination';
+    const format = fmtId === 'GROUPS' ? Groups.formatName() : fmtId === 'SWISS' ? 'Swiss' : fmtId === 'SE' ? (tournament.plate ? 'Cup and Plate' : 'Single elimination') : 'Double elimination';
     const facts = [
         [fmtId === 'GROUPS' ? 'Format' : 'Bracket', `${format} · ${tournament.bracketSize || players.length}`],
         ['Total points', sum(points)],

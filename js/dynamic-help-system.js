@@ -147,6 +147,7 @@ const HELP_CONTENT = {
                         <li><strong>Single Elimination Cup:</strong> One loss and you're out — 4 to 48 players</li>
                         <li><strong>Double Elimination Cup:</strong> Losers get a second chance through the backside — 4 to 48 players</li>
                         <li><strong>Round Robin:</strong> everybody plays everybody — in groups (up to four players, or five or six as set) followed by an A cup and a B cup (6 to 32 players), or in one group where the table decides (3 to 8 players), as set in Global Settings → Round Robin (see <strong>Round Robin</strong> below)</li>
+                        <li><strong>Swiss:</strong> a fixed number of rounds, each pairing players with the same record who haven't met; nobody is knocked out, and the top four finish with semifinals and a final (or the table decides). 4 to 48 players</li>
                     </ul>
                     <p><strong>Bracket Sizes:</strong></p>
                     <ul>
@@ -158,6 +159,7 @@ const HELP_CONTENT = {
                     </ul>
                     <p><strong>Qualifiers (33 to 48 players):</strong> the players above 32 make it in through qualifier matches (Q1, Q2 …) before round 1, one for each player above 32: 40 players play 8 qualifiers, 48 play 16. The players in them are drawn at random (with seeding, never the seeds; with <strong>All</strong>, the lowest-ranked), and each winner takes the place in round 1 that shows "Winner Q3". A qualifier only decides who gets to play: the loser is not qualified (placed 33rd–48th), and nothing in a qualifier counts, for the winner either (no achievements, no matches or legs in the statistics, never in Analytics). Its length is the format's regular rounds. Double elimination with qualifiers is drawn with the finals in the middle.</p>
                     <p><strong>Cup and Plate:</strong> pick the Cup and Plate card before you draw (from 5 players). The bracket is then the Cup, and every round 1 loser goes on to the Plate, a second knockout of half the size, at a fixed place: the losers of round 1 match 1 and 2 meet in the Plate's first match, and so on, so a Plate match can start as soon as its two round 1 matches are played. A bye's place in the Plate is a walkover. The Plate is drawn back to back with the Cup, the two finals facing each other. Its places follow the shared places (with 8 players the Plate's finalists are 5th–6th, its bronze pair 7th–8th), and the finished view names the Plate winner. Match lengths and bronze finals as single elimination.</p>
+                    <p><strong>Swiss:</strong> pick the Swiss card, with <strong>Rounds</strong> (by players: 3 for 5 to 8, 4 for 9 to 16, 5 for 17 to 32) and <strong>Finish</strong> (semifinals and final for the top four, or the table decides). Round 1 is random (with seeding: the top half against the bottom half); every later round is drawn by itself when the last match of the round before is entered, pairing the table 1st v 2nd, 3rd v 4th, skipping anyone already played. An odd number gives one bye a round (a win), never twice to the same player. The table: wins, opponents' wins, leg difference, legs won. Undoing a result of the round just finished takes back the next round, as long as none of its matches has started.</p>
                     <p><strong>💡 Tip:</strong> Match Controls adapts based on tournament state - use it for both setup and active tournament management!</p>
                 `
             },
@@ -246,7 +248,7 @@ const HELP_CONTENT = {
                 content: `
                     <p><strong>Two ways to play</strong> (Global Settings → Round Robin): <strong>Groups and cups</strong> or <strong>One group</strong>. A tournament keeps the setting it was drawn with.</p>
                     <p><strong>One group:</strong> everybody plays everybody in a fixed order, each match with a planned referee from the group; the table decides the placings when the last match is played. 3 to 8 players.</p>
-                    <p><strong>Groups and cups:</strong> players are drawn into groups of up to four, or five or six as set in <strong>Largest group</strong> (an even number of groups; by ranking when seeding is ticked, otherwise at random). Everybody plays everybody in their group. Then the <strong>A cup</strong> and the <strong>B cup</strong>: single elimination with a bronze final, drawn with the final in the middle. <strong>To the A cup</strong>: <strong>Top half</strong> (the default): everyone ranked across the groups and split into two cups of the same size, or the top two of each group (the rest play the B cup).</p>
+                    <p><strong>Groups and cups:</strong> players are drawn into groups of up to four, or five or six as set in <strong>Largest group</strong> (as few groups as fit, an even number with Top two; by ranking when seeding is ticked, otherwise at random). Everybody plays everybody in their group. Then the <strong>A cup</strong> and the <strong>B cup</strong>: single elimination with a bronze final, drawn with the final in the middle. <strong>To the A cup</strong>: <strong>Top half</strong> (the default): everyone ranked across the groups and split into two cups of the same size, or the top two of each group (the rest play the B cup).</p>
                     <p><strong>The group stage:</strong></p>
                     <ul>
                         <li>Each group plays in a fixed order, and each match has a planned referee from the group. Match Controls shows each group's next matches with the referee filled in; it is set when the match starts, if that player is free. Change it like any referee</li>
@@ -320,7 +322,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Structure:</strong> <strong>Groups and cups</strong> (groups, then an A cup and a B cup; 6 to 32 players) or <strong>One group</strong> (everybody plays everybody, the table decides; 3 to 8 players)</li>
                         <li><strong>Play each other</strong> (one group): <strong>Once</strong> (the default) or <strong>Twice</strong>, a double round robin: when everybody has played everybody once, the return round follows in the same order with the players swapped; both meetings count in the table. It can also be chosen at the draw</li>
-                        <li><strong>Largest group:</strong> <strong>4</strong> (the default), <strong>5</strong> or <strong>6</strong>. The draw makes the fewest groups it can, always an even number, so a larger limit means fewer, longer groups (a group of 4 plays 6 matches, of 5 plays 10, of 6 plays 15)</li>
+                        <li><strong>Largest group:</strong> <strong>4</strong> (the default), <strong>5</strong> or <strong>6</strong>. The draw makes the fewest groups it can (an even number with Top two), so a larger limit means fewer, longer groups (a group of 4 plays 6 matches, of 5 plays 10, of 6 plays 15)</li>
                         <li><strong>To the A cup:</strong> <strong>Top two</strong> of each group, or <strong>Top half</strong>: everyone ranked across the groups and split into two cups of the same size, so a small field doesn't leave a tiny B cup. Without a B cup, the A cup always takes the top two of each group</li>
                         <li><strong>Group rematches in cup round 1:</strong> <strong>Allow</strong> (top seed against bottom seed, as drawn) or <strong>Avoid</strong> (a seed gets the nearest opponent from another group, where possible)</li>
                         <li><strong>Play the B cup:</strong> whether the switch at Draw the cups starts on</li>
@@ -343,6 +345,7 @@ const HELP_CONTENT = {
                 title: "Tournament Formats",
                 content: `
                     <p><strong>Formats to offer</strong> (Tournaments) controls which formats can be picked in Match Controls' <strong>Pick a format</strong> when starting a tournament. A format not offered is still shown there, greyed out. Cup and Plate is one of them.</p>
+                    <p><strong>Swiss</strong> (Tournaments, while Swiss is offered): <strong>Rounds</strong> (by players, or a fixed 3 to 6) and <strong>Finish</strong> (semifinals and final for the top four, or the table decides): how the draw starts; both can be changed for each draw.</p>
                     <p>Untick the ones your club never plays so they can't be picked by mistake. At least one format always stays available.</p>
                     <p><strong>💡 Existing tournaments are unaffected:</strong> a tournament already created in a hidden format still opens, renders and exports as normal.</p>
                 `
@@ -354,6 +357,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Double elimination:</strong> regular rounds, frontside and backside semifinal, backside final, grand final</li>
                         <li><strong>Single elimination:</strong> regular rounds, quarterfinal, semifinal, bronze final, final</li>
+                        <li><strong>Swiss:</strong> the rounds; the top four's semifinal, bronze final and final</li>
                         <li><strong>Groups and cups:</strong> group matches; cup rounds (every round before the semifinals), cup semifinal, cup bronze final, cup final, the same for the A and the B cup. The cups' lengths are taken when the cups are drawn</li>
                     </ul>
                     <p><strong>Reset to defaults</strong> fills in the standard lengths; click Save changes to keep them. New lengths apply to matches that haven't started.</p>

@@ -477,7 +477,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <div class="cfg-panel-title">Round Robin</div>
                         <p class="cfg-panel-note">Everybody plays everybody in their group, in a fixed order with a referee from the group. A tournament keeps the settings it was drawn with.</p>
                         <div class="cfg-row">
-                            <div><div class="cfg-label">Structure</div><div class="cfg-desc"><b>Groups and cups</b>: groups no larger than <b>Largest group</b> (an even number of groups), then an A cup and a B cup, single elimination; 6 to 32 players. <b>One group</b>: everybody plays everybody, and the table decides the placings; 3 to 8 players.</div></div>
+                            <div><div class="cfg-label">Structure</div><div class="cfg-desc"><b>Groups and cups</b>: groups no larger than <b>Largest group</b> (with Top two, an even number of groups), then an A cup and a B cup, single elimination; 6 to 32 players. <b>One group</b>: everybody plays everybody, and the table decides the placings; 3 to 8 players.</div></div>
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="rrStructure"><button type="button" data-value="groups">Groups and cups</button><button type="button" data-value="single">One group</button></div><input type="hidden" id="rrStructure"></div>
                         </div>
                         <div class="cfg-row cfg-rr-single">
@@ -485,7 +485,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="rrMeetings"><button type="button" data-value="1">Once</button><button type="button" data-value="2">Twice</button></div><input type="hidden" id="rrMeetings"></div>
                         </div>
                         <div class="cfg-row cfg-rr-cups">
-                            <div><div class="cfg-label">Largest group</div><div class="cfg-desc">The most players in one group. The draw makes the fewest groups it can (always an even number), so a larger limit means fewer, longer groups: 10 players are 4 groups (3, 3, 2, 2) at 4, and 2 groups of 5 at 5 or 6. A group of 4 plays 6 matches, of 5 plays 10, of 6 plays 15.</div></div>
+                            <div><div class="cfg-label">Largest group</div><div class="cfg-desc">The most players in one group. The draw makes the fewest groups it can (with Top two, an even number), so a larger limit means fewer, longer groups: with Top half, 12 players are 3 groups of 4 at 4, and 2 groups of 6 at 6. A group of 4 plays 6 matches, of 5 plays 10, of 6 plays 15.</div></div>
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="rrMaxGroup"><button type="button" data-value="4">4</button><button type="button" data-value="5">5</button><button type="button" data-value="6">6</button></div><input type="hidden" id="rrMaxGroup"></div>
                         </div>
                         <div class="cfg-row cfg-rr-cups">
@@ -501,11 +501,24 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <div class="cfg-ctl"><span class="cfg-switch"><input type="checkbox" id="rrBCup" checked><span></span></span></div>
                         </div>
                     </div>
+                    <!-- Swiss's own settings: shown while the format is offered (config-page.js) -->
+                    <div class="cfg-panel" id="cfgSwiss">
+                        <div class="cfg-panel-title">Swiss</div>
+                        <p class="cfg-panel-note">A fixed number of rounds; each pairs players with the same record who haven't met. Both settings are how the draw starts; you can change them for each draw.</p>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Rounds</div><div class="cfg-desc"><b>By players</b>: 3 for 5 to 8 players, 4 for 9 to 16, 5 for 17 to 32, 6 for 33 to 48. Or always the same number. Never more than one fewer than the players.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="swissRoundsSetting"><button type="button" data-value="auto">By players</button><button type="button" data-value="3">3</button><button type="button" data-value="4">4</button><button type="button" data-value="5">5</button><button type="button" data-value="6">6</button></div><input type="hidden" id="swissRoundsSetting"></div>
+                        </div>
+                        <div class="cfg-row">
+                            <div><div class="cfg-label">Finish</div><div class="cfg-desc"><b>Semifinals and final</b>: after the last round, the top four play semifinals (1st v 4th, 2nd v 3rd), a bronze final and a final. <b>The table decides</b>: the table after the last round gives the placings.</div></div>
+                            <div class="cfg-ctl"><div class="cfg-seg" data-target="swissFinish"><button type="button" data-value="top4">Semifinals and final</button><button type="button" data-value="table">The table decides</button></div><input type="hidden" id="swissFinish"></div>
+                        </div>
+                    </div>
                     <div class="cfg-panel">
                         <div class="cfg-panel-title">Seeding</div>
                         <p class="cfg-panel-note">Keeps the best players apart in the draw, using the ranking of earlier tournaments with the same name. Everyone else is still drawn at random, and new players are never seeded. It reads the tournaments in this browser.</p>
                         <div class="cfg-row">
-                            <div><div class="cfg-label">Use seeding</div><div class="cfg-desc"><b>Off</b>: the draw is always random. <b>Available</b>: Shuffle &amp; Draw offers it, and you tick it. <b>On</b>: it is ticked to start with.</div></div>
+                            <div><div class="cfg-label">Use seeding</div><div class="cfg-desc"><b>Off</b>: the draw is always random. <b>Available</b>: the draw offers it in Match Controls, and you tick it. <b>On</b>: it is ticked to start with.</div></div>
                             <div class="cfg-ctl"><div class="cfg-seg" data-target="seedingMode"><button type="button" data-value="off">Off</button><button type="button" data-value="available">Available</button><button type="button" data-value="on">On</button></div><input type="hidden" id="seedingMode"></div>
                         </div>
                         <div class="cfg-row">
@@ -553,6 +566,14 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                                 <div class="cfg-line"><span>Cup bronze final</span><span class="cfg-step" data-target="cupBronzeLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="cupBronzeLegs"></div>
                                 <div class="cfg-line"><span>Cup final</span><span class="cfg-step" data-target="cupFinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="cupFinalLegs"></div>
                                 <p class="cfg-panel-note">Cup rounds are every round before the semifinals. The A and B cups play the same lengths.</p>
+                            </div>
+                            <div>
+                                <h4>Swiss</h4>
+                                <div class="cfg-line"><span>Rounds</span><span class="cfg-step" data-target="swissRoundsLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="swissRoundsLegs"></div>
+                                <div class="cfg-line"><span>Semifinal</span><span class="cfg-step" data-target="swissSemifinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="swissSemifinalLegs"></div>
+                                <div class="cfg-line"><span>Bronze final</span><span class="cfg-step" data-target="swissBronzeLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="swissBronzeLegs"></div>
+                                <div class="cfg-line"><span>Final</span><span class="cfg-step" data-target="swissFinalLegs" data-min="1" data-max="21" data-step="2" data-format="bo"><button type="button" aria-label="Shorter">−</button><output></output><button type="button" aria-label="Longer">+</button></span><input type="hidden" id="swissFinalLegs"></div>
+                                <p class="cfg-panel-note">Semifinal, bronze final and final: the top four, after the last round.</p>
                             </div>
                         </div>
                     </div>
@@ -1098,6 +1119,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/groups.js"></script>
         <script src="js/qualifiers.js"></script>
         <script src="js/plate.js"></script>
+        <script src="js/swiss.js"></script>
         <script src="js/bracket-rendering.js"></script>
         <script src="js/bracket-view.js"></script>
         <script src="js/newton-csv.js"></script>

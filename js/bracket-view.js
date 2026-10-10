@@ -45,7 +45,7 @@ const BracketView = (() => {
         const ids = Object.keys(prog);
         const feeds = {};
         ids.forEach(src => ['winner', 'loser'].forEach(kind => {
-            const d = prog[src][kind]; if (!d) return;
+            const d = prog[src] && prog[src][kind]; if (!d) return;
             (feeds[d[0]] = feeds[d[0]] || []).push({ src, kind, slot: d[1] });
         }));
         const maxFS = Math.max(...ids.filter(i => sideOf(i) === 'FS').map(roundOf));
@@ -175,7 +175,7 @@ const BracketView = (() => {
         const ids = Object.keys(prog);
         const feeds = {};
         ids.forEach(src => ['winner', 'loser'].forEach(kind => {
-            const d = prog[src][kind]; if (!d) return;
+            const d = prog[src] && prog[src][kind]; if (!d) return;
             (feeds[d[0]] = feeds[d[0]] || []).push({ src, kind, slot: d[1] });
         }));
         const cups = ['A', 'B'].filter(c => tournament.cups && tournament.cups[c]).map(cup => {
@@ -225,7 +225,47 @@ const BracketView = (() => {
         return L;
     }
 
-    const layoutOf = (st, variant, g) => variant === 'plate' ? layoutPlate(st, g) : variant === 'se' ? layoutSE(st, g)
+    // ---------- Swiss: the rounds as columns, then the top four ----------
+    // Each round is a column of its matches in order (no lines: Swiss rounds progress no one); the
+    // rounds not drawn yet keep their column. After the last round, the top four as a small knockout:
+    // the semifinals level with the middle, the final beyond them and the bronze final under it.
+    function swissStructure(prog) {
+        const ms = (typeof matches !== 'undefined' && Array.isArray(matches) ? matches : []).filter(m => m.side === 'swiss' || m.side === 'swissko');
+        const ids = ms.map(m => m.id);
+        const feeds = {};
+        Object.keys(prog).forEach(src => ['winner', 'loser'].forEach(kind => {
+            const d = prog[src][kind]; if (!d) return;
+            (feeds[d[0]] = feeds[d[0]] || []).push({ src, kind, slot: d[1] });
+        }));
+        return { ids, feeds, maxFS: 0, maxBS: 0, qids: [], pids: [], prog, swiss: true };
+    }
+    function layoutSwiss(st, g) {
+        const P = W + g.GX, pitch = g.PITCH, sw = tournament.swiss;
+        const byId = {};
+        (typeof matches !== 'undefined' ? matches : []).forEach(m => { byId[m.id] = m; });
+        const pos = {};
+        let rows = 1;
+        for (let r = 1; r <= sw.rounds; r++) {
+            const ms = st.ids.filter(id => byId[id] && byId[id].side === 'swiss' && byId[id].round === r).sort((a, b) => byId[a].positionInRound - byId[b].positionInRound);
+            ms.forEach((id, k) => { pos[id] = { x: (r - 1) * P, y: k * pitch }; });
+            rows = Math.max(rows, ms.length, Math.floor((tournament.bracketSize || 0) / 2));
+        }
+        const ch0 = (rows - 1) * pitch + H, mid = ch0 / 2;
+        const kx = sw.rounds * P - g.GX + g.FINALS_GAP;
+        if (pos['K-SF1'] === undefined && st.ids.includes('K-SF1')) {
+            pos['K-SF1'] = { x: kx, y: mid - pitch - H / 2 };
+            pos['K-SF2'] = { x: kx, y: mid + pitch - H / 2 };
+            pos['K-F'] = { x: kx + P, y: mid - H / 2 };
+            pos['K-B'] = { x: kx + P, y: mid + H / 2 + 2 * FINALS_SPLIT };
+        }
+        // room for the top four from the start (it is drawn after the last round), so Fit all takes it in
+        const reserve = sw.finish === 'top4' ? kx + P + W : 0;
+        const cw = Math.max((sw.rounds - 1) * P + W, reserve, ...Object.values(pos).map(p => p.x + W));
+        const ch = Math.max(ch0, ...Object.values(pos).map(p => p.y + H));
+        return { pos, cw, ch, mid, kx };
+    }
+
+    const layoutOf = (st, variant, g) => variant === 'swiss' ? layoutSwiss(st, g) : variant === 'plate' ? layoutPlate(st, g) : variant === 'se' ? layoutSE(st, g)
         : variant === 'se-middle' ? layoutSEMiddle(st, g)
         : variant === 'cups' ? layoutCups(st, g) : layout(st, variant, g);
     // Qualifiers: the format's layout without them, then each qualifier one column outward from the
@@ -394,7 +434,7 @@ const BracketView = (() => {
      */
     function isActive() {
         if (typeof tournament === 'undefined' || !tournament || !tournament.bracket) return false;
-        if (getFormat() === 'GROUPS') return true;
+        if (getFormat() === 'GROUPS' || getFormat() === 'SWISS') return true; // any number of players
         const table = getFormat() === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
         return !!table[tournament.bracketSize];
     }
@@ -402,6 +442,7 @@ const BracketView = (() => {
     /** The layout to use: the format, and where the finals go (one setting for both formats). */
     function finalsVariant() {
         if (getFormat() === 'GROUPS') return 'cups'; // always the final in the middle: two cups have to fit
+        if (getFormat() === 'SWISS') return 'swiss'; // the rounds as columns, then the top four
         const middle = typeof config !== 'undefined' && config.ui && config.ui.bracketFinals === 'middle';
         // Cup and Plate: always back to back (Docs/CUP-AND-PLATE.md)
         if (getFormat() === 'SE' && typeof tournament !== 'undefined' && tournament && tournament.plate) return 'plate';
@@ -428,7 +469,7 @@ const BracketView = (() => {
         const prog = getProgressionTable();
         const size = groupsFormat ? ['A', 'B'].map(c => tournament.cups[c] ? tournament.cups[c].size : 0).join('/') : tournament.bracketSize;
         const variant = finalsVariant();
-        const st = groupsFormat ? cupsStructure(prog) : structure(prog);
+        const st = groupsFormat ? cupsStructure(prog) : getFormat() === 'SWISS' ? swissStructure(prog) : structure(prog);
         let { w: vw, h: vh } = vp();
         const hidden = vw < 100 || vh < 100;      // page not shown yet; fit again once it is
         if (hidden) { vw = 1400; vh = 800; }
@@ -463,7 +504,32 @@ const BracketView = (() => {
         const lblMid = (html, x, y, cls) => { const d = lbl(html, x + W / 2, y, cls); d.style.transform = 'translateX(-50%)'; return d; };
 
         const LABEL_GAP = 26; // every header sits the same distance above the topmost match of its round
-        if (variant === 'cups') {
+        if (variant === 'swiss') {
+            // the club name; each round over its column (with its byes, or when it is drawn); the top four
+            const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
+            lbl(club, 0, -94, 'bv-club');
+            const sw = tournament.swiss, P = W + GX;
+            const nameOf = id => (players.find(p => String(p.id) === String(id)) || {}).name || '?';
+            for (let r = 1; r <= sw.rounds; r++) {
+                const x = (r - 1) * P;
+                lblMid(`Round ${r}`, x, -LABEL_GAP);
+                const drawn = (sw.drawn || []).find(d => d.round === r);
+                const cards = st.ids.filter(id => (M[id] || {}).match && M[id].match.side === 'swiss' && M[id].match.round === r).length;
+                if (!drawn) lblMid(r === 1 ? '' : `Drawn when round ${r - 1} is played`, x, 8, 'bv-col-label bv-sub-label');
+                else if (drawn.byes && drawn.byes.length) lblMid(`Bye: ${escapeHtml(drawn.byes.map(nameOf).join(', '))}`, x, cards * PITCH + 6, 'bv-col-label bv-sub-label');
+            }
+            if (pos['K-F']) {
+                lblMid('Top four', pos['K-SF1'].x, -84, 'bv-side-label');
+                lblMid('Semifinals', pos['K-SF1'].x, pos['K-SF1'].y - LABEL_GAP);
+                lblMid('Final', pos['K-F'].x, pos['K-F'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+                lblMid('Bronze final', pos['K-B'].x, pos['K-B'].y - LABEL_GAP, 'bv-col-label bv-finals-label');
+                lblMid('3rd place', pos['K-B'].x, pos['K-B'].y + H + 8, 'bv-col-label bv-sub-label bv-finals-label');
+            } else if (sw.finish === 'top4') {
+                lblMid('Top four', L.kx, -84, 'bv-side-label');
+                lblMid('After the last round', L.kx, 8, 'bv-col-label bv-sub-label');
+            }
+            lbl(String.fromCharCode(..._0x7a, ..._0x9b), 0, L.ch + 44, 'bv-signature').id = 'tournament-watermark';
+        } else if (variant === 'cups') {
             // each cup: its name over the final, the rounds over each half's columns, as with the
             // final in the middle; the signature under the last cup
             const club = escapeHtml((typeof config !== 'undefined' && config.clubName) || 'NewTon DC');
@@ -607,7 +673,7 @@ const BracketView = (() => {
             Math.max(xa, xb) > b.x0 && Math.min(xa, xb) < b.x1);
         const edges = [];
         st.ids.forEach(src => ['winner', 'loser'].forEach(kind => {
-            const d = prog[src][kind]; if (!d) return;
+            const d = prog[src] && prog[src][kind]; if (!d) return;
             const [dst, slot] = d;
             const s = pos[src], t = pos[dst];
             // Loser lines show on selection only, except: the frontside final to the backside final
@@ -693,6 +759,13 @@ const BracketView = (() => {
                 d.setAttribute('class', 'bv-edge bv-dashed' + (assigned ? ' bv-known' : ''));
                 svg.appendChild(d);
             });
+        }
+        if (variant === 'swiss' && pos['K-F'] && pos['K-B']) {
+            const d = document.createElementNS(svgNS, 'path');
+            d.setAttribute('d', `M${pos['K-F'].x + W / 2} ${pos['K-F'].y + H} V${pos['K-B'].y}`);
+            const assigned = M['K-B'] && M['K-B'].p.some(sl => sl.kind !== 'tbd');
+            d.setAttribute('class', 'bv-edge bv-dashed' + (assigned ? ' bv-known' : ''));
+            svg.appendChild(d);
         }
         if (variant === 'plate') {
             // the Plate's bronze final tied to the line into its final, as the Cup's below
@@ -1032,6 +1105,16 @@ const BracketView = (() => {
         }
         if (selected) {
             cur.cardEls[selected].classList.add('bv-selected');
+            // Swiss: no lines between rounds (the next opponent comes from the table), so a selected
+            // match lights up both players' matches across the rounds instead
+            if (traced === null && getFormat() === 'SWISS' && cur.M[selected]) {
+                const pids = cur.M[selected].p.filter(sl => sl.kind === 'player').map(sl => sl.id);
+                const run = Object.keys(cur.M).filter(i => pids.some(pid => playsIn(i, pid)));
+                if (run.length > 1) {
+                    world.classList.add('bv-dim');
+                    run.forEach(i => cur.cardEls[i].classList.add(i === selected ? 'bv-on' : 'bv-target'));
+                }
+            }
             if (traced === null) {
                 cur.edges.filter(e => e.src === selected || e.dst === selected).forEach(e => {
                     e.el.classList.add('bv-on');
@@ -1051,6 +1134,7 @@ const BracketView = (() => {
      */
     function roundName(id) {
         if (getFormat() === 'GROUPS') return Groups.roundName(id);
+        if (getFormat() === 'SWISS' && typeof Swiss !== 'undefined') return Swiss.roundName(id);
         const st = cur.st, r = roundOf(id);
         if (getFormat() === 'SE') {
             if (r === st.maxFS) return 'Final';
@@ -1265,7 +1349,7 @@ const BracketView = (() => {
         zoomTools.forEach(el => { el.hidden = groupsFormat && gcShown() === 'groups'; });
         if (finals) {
             // both bracket formats: finals on the right or in the middle; Cup and Plate is always back to back
-            finals.hidden = !isActive() || getFormat() === 'GROUPS' || !!(tournament && tournament.plate);
+            finals.hidden = !isActive() || getFormat() === 'GROUPS' || getFormat() === 'SWISS' || !!(tournament && tournament.plate);
             // the setting, not the layout name (single elimination's layouts are 'se' and 'se-middle')
             // double elimination with qualifiers is always drawn with the finals in the middle (finalsVariant())
             const fixed = getFormat() === 'DE' && !!(tournament && tournament.qualifiers);

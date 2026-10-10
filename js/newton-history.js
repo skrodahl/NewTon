@@ -1674,7 +1674,7 @@ const NewtonHistory = (() => {
                     },
                     {
                         key: 'tournamentFormat', label: 'Format', columnClass: 'an-wide-only',
-                        render: (v, row) => v ? `<span class="st-pill nt-pill">${v === 'SE' && row && row.plate ? 'Cup &amp; Plate' : v === 'SE' ? 'Single elim.' : v === 'DE' ? 'Double elim.' : v === 'GROUPS' ? 'Round robin' : escHtml(v)}</span>` : '—'
+                        render: (v, row) => v ? `<span class="st-pill nt-pill">${v === 'SWISS' ? 'Swiss' : v === 'SE' && row && row.plate ? 'Cup &amp; Plate' : v === 'SE' ? 'Single elim.' : v === 'DE' ? 'Double elim.' : v === 'GROUPS' ? 'Round robin' : escHtml(v)}</span>` : '—'
                     },
                     {
                         key: 'playerCount', label: 'Players', align: 'right', defaultDir: 'desc',
@@ -2254,7 +2254,7 @@ const NewtonHistory = (() => {
 
         // Heading, buttons and facts. Points come from the corrected record the views use.
         const counted = (_allTournaments || []).find(t => t.tournamentId === tournamentId) || tournament;
-        const format = tournament.tournamentFormat === 'DE' ? 'Double elim.' : tournament.tournamentFormat === 'SE' ? (tournament.plate ? 'Cup & Plate' : 'Single elim.') : tournament.tournamentFormat === 'GROUPS' ? 'Round robin' : (tournament.tournamentFormat || '—');
+        const format = tournament.tournamentFormat === 'DE' ? 'Double elim.' : tournament.tournamentFormat === 'SWISS' ? 'Swiss' : tournament.tournamentFormat === 'SE' ? (tournament.plate ? 'Cup & Plate' : 'Single elim.') : tournament.tournamentFormat === 'GROUPS' ? 'Round robin' : (tournament.tournamentFormat || '—');
         const fact = (label, value) => `<div><dt>${label}</dt><dd>${value}</dd></div>`;
         document.getElementById('historyMatchListTitle').innerHTML =
             escHtml(tournament.tournamentName || tournamentId) + (tournament.closedAt ? ` <small>${fmtDate(tournament.closedAt)}</small>` : '');
@@ -2546,7 +2546,7 @@ const NewtonHistory = (() => {
         const totalMatches = Array.isArray(t.matches) ? t.matches.length : 0;
 
         // Populate sidebar with imported file's metadata (safe via textContent)
-        const formatLabel = t.format === 'SE' ? (t.plate ? 'Cup and Plate' : 'Single Elimination') : t.format === 'GROUPS' ? 'Round Robin' : 'Double Elimination';
+        const formatLabel = t.format === 'SWISS' ? 'Swiss' : t.format === 'SE' ? (t.plate ? 'Cup and Plate' : 'Single Elimination') : t.format === 'GROUPS' ? 'Round Robin' : 'Double Elimination';
         const setText = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
         setText('analyticsImportName', t.name);
         setText('analyticsImportDate', t.date || '-');

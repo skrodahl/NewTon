@@ -40,8 +40,9 @@ Tournaments while it is offered (`config.roundRobin`, additive):
   as one group (8 players twice is 56 matches; the maintainer won't stop anyone). Can be chosen at
   the draw; the tournament keeps it in `groups.settings.meetings` (absent = 1).
 - **Largest group** (`maxGroup`, added after v5.4.0): 4 (the default), 5 or 6. The draw makes the
-  smallest even number of groups that keeps each group at that size or less, so a larger limit means
-  fewer, longer groups: 10 players are 3, 3, 2, 2 at 4 and 5, 5 at 5 or 6; 20 are 5, 5, 5, 5 at 5.
+  fewest groups that keep each group at that size or less (an even number with Top two), so a larger
+  limit means fewer, longer groups: with Top two, 10 players are 3, 3, 2, 2 at 4 and 5, 5 at 5 or 6;
+  20 are 5, 5, 5, 5 at 5.
   The cup fields take every group place (`cupFields()`): with top two, the B cup has the thirds, the
   fourths, the fifths and the sixths. At 6, top two with 25 or more players can make a B cup of more
   than 16, drawn in the 32-player single elimination table (30 players: 6 groups of 5, A cup 12, B cup 18).
@@ -60,9 +61,11 @@ semifinal, bronze final and final).
 ## The rules (settled with the maintainer, 2026-10-07/08)
 
 **Groups**
-- An even number of groups, at most four players in each (or five or six, Largest group): the
-  smallest even number of groups that holds everyone (at four: 15–16 players: 4 groups; 17–24: 6;
-  25–32: 8). Fewer in a group is fine.
+- At most four players in each group (or five or six, Largest group), as few groups as hold
+  everyone. With **Top two** the number is even (the group winners and runners-up pair off cleanly in
+  the A cup; at four: 15–16 players: 4 groups; 17–24: 6; 25–32: 8). With **Top half** it can be odd
+  (2026-10-10, maintainer: 12 players are 3 groups of 4, 18 group matches, rather than 4 groups of 3,
+  12; the cups are 6 and 6 either way). Fewer in a group is fine.
 - Players go into the groups in snake order: by ranking when seeding is on and there is a
   ranking (Seeding, js/seeding.js), at random otherwise. The order a player went in is their seed in
   the group (1–4).

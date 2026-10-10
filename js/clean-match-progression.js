@@ -140,6 +140,8 @@ function getProgressionTable() {
     const format = getFormat();
     // Groups and cups: only the cups progress anyone (group matches are not in the table)
     if (format === 'GROUPS') return cupsProgressionTable(tournament.cups);
+    // Swiss: only the top four progress anyone (Swiss rounds are in no table; Docs/SWISS.md)
+    if (format === 'SWISS') return typeof Swiss !== 'undefined' ? Swiss.knockoutTable() : {};
     const table = format === 'SE' ? SE_MATCH_PROGRESSION : DE_MATCH_PROGRESSION;
     let merged = table[tournament.bracketSize];
     // Qualifiers (33-48 players): the round 0 matches in front of the 32-player table, which itself
@@ -779,6 +781,10 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             });
         }
 
+        // Swiss: the last result of a round draws the next round, or after the last round the top
+        // four (Docs/SWISS.md); the completion check below then sees the new matches
+        if (match.side === 'swiss' && !window.rebuildInProgress) swissAfterResult(match);
+
         // Calculate live rankings after every match completion (reuse existing logic)
         // Only calculate rankings during normal play, not during rebuild or auto-advancement processing
         if (!window.rebuildInProgress && !window.processingAutoAdvancements) {
@@ -841,6 +847,8 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
             // Plate's), whichever comes last
             const isTournamentFinal = getFormat() === 'GROUPS'
                 ? (typeof Groups !== 'undefined' && Groups.isComplete())
+                : getFormat() === 'SWISS'
+                ? (typeof Swiss !== 'undefined' && Swiss.isComplete())
                 : tournament.plate
                 ? matches.every(m => m.completed)
                 : completionRule && Object.keys(completionRule).length === 0 && !isSEBronze;
@@ -854,7 +862,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
                 // 1st and 2nd place (final match winner/loser); groups and cups places everyone
                 // from both cups in calculateAllRankings() below
-                if (format !== 'GROUPS') {
+                if (format !== 'GROUPS' && format !== 'SWISS') {
                     // with a Plate the last match played may be the Plate's: 1st and 2nd are the Cup final's
                     const cupFinal = tournament.plate ? matches.find(m => isSEFinalMatch(m.id, tournament.bracketSize)) : null;
                     const top = cupFinal && cupFinal.completed ? cupFinal : { winner, loser };
@@ -934,7 +942,9 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
 
                         // HELP SYSTEM INTEGRATION - Tournament completed
                         if (typeof showHelpHint === 'function') {
-                            const champion = format === 'GROUPS' ? (matches.find(m => m.id === 'A-F') || {}).winner || winner
+                            const first = Object.keys(tournament.placements || {}).find(id => tournament.placements[id] === 1);
+                            const champion = format === 'SWISS' ? ((players.find(p => String(p.id) === first)) || winner)
+                                : format === 'GROUPS' ? (matches.find(m => m.id === 'A-F') || {}).winner || winner
                                 : tournament.plate ? (matches.find(m => isSEFinalMatch(m.id, tournament.bracketSize)) || {}).winner || winner : winner;
                             showHelpHint(`🏆 Tournament completed! ${champion.name} wins. Check results in Match Controls or on Registration page.`, 8000);
                         }
@@ -1045,6 +1055,11 @@ function calculateAllRankings() {
     if (format === 'GROUPS') {
         // Derived from the cups as they stand (Docs/GROUPS-AND-CUPS.md, Placings)
         tournament.placements = typeof Groups !== 'undefined' ? Groups.placements() : {};
+        return;
+    }
+    if (format === 'SWISS') {
+        // The top four's knockout and the table (Docs/SWISS.md, Placings)
+        tournament.placements = typeof Swiss !== 'undefined' ? Swiss.placements() : {};
         return;
     }
 
@@ -1501,7 +1516,7 @@ function generateCleanBracket(format) {
 
     // Determine bracket size (format-aware: SE supports 2 and 4 player brackets; groups and cups:
     // the number of players drawn into the groups)
-    const bracketSize = format === 'GROUPS' ? paidPlayers.length : calculateBracketSize(paidPlayers.length, format);
+    const bracketSize = (format === 'GROUPS' || format === 'SWISS') ? paidPlayers.length : calculateBracketSize(paidPlayers.length, format);
     const byeCount = bracketSize - paidPlayers.length; // negative above 32: that many qualifiers
 
     // Show confirmation dialog with player list
@@ -1523,19 +1538,23 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
 
     // Sidebar — bracket summary
     const groups = format === 'GROUPS';
+    const swiss = format === 'SWISS' && typeof Swiss !== 'undefined';
     const single = groups && Groups.configSettings().structure === 'single';
-    const formatLabel = groups ? (single ? 'Round Robin, one group' : 'Round Robin, groups and cups') : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
-    document.getElementById('bracketConfirmTitle').textContent = groups ? (single ? 'Draw the Group' : 'Draw the Groups') : `Generate ${formatLabel} Bracket`;
+    const formatLabel = swiss ? 'Swiss' : groups ? (single ? 'Round Robin, one group' : 'Round Robin, groups and cups') : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+    document.getElementById('bracketConfirmTitle').textContent = swiss ? 'Draw Swiss' : groups ? (single ? 'Draw the Group' : 'Draw the Groups') : `Generate ${formatLabel} Bracket`;
     document.getElementById('bracketConfirmName').textContent = (tournament && tournament.name) || '-';
     document.getElementById('bracketConfirmFormat').textContent = formatLabel;
     const sizeLabel = document.getElementById('bracketConfirmSizeLabel');
-    if (sizeLabel) sizeLabel.textContent = groups ? (single ? 'Group' : 'Groups') : 'Bracket Size';
+    if (sizeLabel) sizeLabel.textContent = swiss ? 'Rounds' : groups ? (single ? 'Group' : 'Groups') : 'Bracket Size';
     // Cup and Plate: the Plate is half the Cup (the switch at the draw)
     const withPlate = format === 'SE' && bracketSize >= 8 && typeof Plate !== 'undefined' && Plate.wanted();
-    document.getElementById('bracketConfirmSize').textContent = groups ? Groups.describeSizes(paidPlayers.length) : withPlate ? `${bracketSize} + Plate of ${bracketSize / 2}` : bracketSize;
+    const swissRounds = swiss ? Swiss.roundsFor(paidPlayers.length) : 0, swissTop4 = swiss && Swiss.configSettings().finish === 'top4';
+    document.getElementById('bracketConfirmSize').textContent = swiss ? `${swissRounds}${swissTop4 ? ', then the top 4' : ''}` : groups ? Groups.describeSizes(paidPlayers.length) : withPlate ? `${bracketSize} + Plate of ${bracketSize / 2}` : bracketSize;
     document.getElementById('bracketConfirmPlayerCount').textContent = paidPlayers.length;
     const desc = document.getElementById('bracketConfirmDesc');
-    if (desc) desc.textContent = single
+    if (desc) desc.textContent = swiss
+        ? `${swissRounds} rounds; each pairs players with the same record who haven't met${typeof Seeding !== 'undefined' && Seeding.forGroups && Seeding.forGroups(paidPlayers) ? ' (round 1 by ranking: the top half against the bottom half)' : ' (round 1 at random)'}. ${swissTop4 ? 'Then the top four play semifinals, a bronze final and a final.' : 'The table decides the placings.'}`
+        : single
         ? `Everybody plays everybody, in a fixed order${Groups.seededDraw(paidPlayers) ? ' set by the ranking' : ' drawn at random'}. The table decides the placings.`
         : groups
         ? `These players will be drawn into groups${Groups.seededDraw(paidPlayers) ? ', by ranking' : ' at random'}. Everybody plays everybody in their group; ${Groups.configSettings().cupEntry === 'half' ? 'then the top half across the groups plays the A cup, the rest the B cup' : 'the top two of each group go on to the A cup, the rest to the B cup'}.`
@@ -1549,7 +1568,7 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
     // many qualifiers there are (the mirror of byes)
     const byesLabel = document.getElementById('bracketConfirmByesLabel');
     const byesValue = document.getElementById('bracketConfirmByes');
-    if (byeCount !== 0 && !groups) {
+    if (byeCount !== 0 && !groups && !swiss) {
         byesLabel.style.display = '';
         byesValue.style.display = '';
         byesLabel.textContent = byeCount > 0 ? 'Byes' : 'Qualifiers';
@@ -1591,6 +1610,12 @@ function confirmBracketGeneration() {
     // Groups and cups: the groups are drawn here, the cups later from the groups' results
     if (format === 'GROUPS') {
         drawGroups(paidPlayers);
+        afterDraw();
+        return true;
+    }
+    // Swiss: round 1 is drawn here, every later round when the round before it is played
+    if (format === 'SWISS') {
+        drawSwiss(paidPlayers);
         afterDraw();
         return true;
     }
@@ -1840,6 +1865,92 @@ function drawCups(playB) {
     if (typeof displayResults === 'function') displayResults();
     console.log(`✓ Cups drawn: A ${cups.A.size}${cups.B ? `, B ${cups.B.size}` : ', no B cup'}`);
     return true;
+}
+
+/**
+ * SWISS: draw the tournament: the players in draw order (ranked best first when seeding is ticked,
+ * the rest at random; otherwise all at random), the rounds and the finish from the settings for this
+ * draw, and round 1. Sets the format, draw and status; the caller saves. Docs/SWISS.md
+ * @param {Player[]} paid - everyone in the draw (all paid)
+ * @returns {void}
+ */
+function drawSwiss(paid) {
+    const shuffle = a => { const b = [...a]; for (let i = b.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [b[i], b[j]] = [b[j], b[i]]; } return b; };
+    const seeded = typeof Seeding !== 'undefined' && Seeding.forGroups ? Seeding.forGroups(paid) : null;
+    const order = seeded ? seeded.order.concat(shuffle(paid.filter(p => !seeded.order.includes(p)))) : shuffle(paid);
+    const cfg = Swiss.configSettings();
+    matches = [];
+    tournament.bracket = order;                 // the players in draw order: "the draw is made"
+    tournament.bracketSize = paid.length;
+    tournament.format = 'SWISS';
+    tournament.swiss = { rounds: Swiss.roundsFor(paid.length), finish: cfg.finish, drawn: [], knockout: false, seeded: !!seeded };
+    ['groups', 'cups', 'plate', 'qualifiers', 'notQualified'].forEach(k => delete tournament[k]);
+    if (seeded) tournament.seeding = seeded.record; else delete tournament.seeding;
+    tournament.status = 'active';
+    drawSwissRound(1, order.map(p => String(p.id)));
+    console.log(`✓ Swiss drawn: ${paid.length} players, ${tournament.swiss.rounds} rounds, finish ${cfg.finish}`);
+}
+
+/**
+ * SWISS: draw round r (Swiss.pairRound()): its matches, R{r}-1…, and its bye; recorded as a
+ * DRAW_SWISS_ROUND transaction from round 2 on (round 1 goes with the draw).
+ * @param {number} r
+ * @param {string[]} [order] - round 1: player ids in draw order
+ * @returns {void}
+ */
+function drawSwissRound(r, order) {
+    const draw = Swiss.pairRound(r, order);
+    let numericId = Math.max(0, ...matches.map(m => m.numericId || 0)) + 1;
+    const playerById = id => _slotPlayer(players.find(p => String(p.id) === String(id)) || { id, name: '?' });
+    draw.pairs.forEach(([a, b], i) => matches.push({
+        id: `R${r}-${i + 1}`, numericId: numericId++, round: r, side: 'swiss',
+        player1: playerById(a), player2: playerById(b), winner: null, loser: null, lane: null,
+        legs: (config.legs && config.legs.swissRounds) || 3, referee: null, active: false, completed: false, positionInRound: i
+    }));
+    tournament.swiss.drawn.push({ round: r, byes: draw.byes });
+    if (r > 1 && !window.rebuildInProgress) {
+        saveTransaction({ id: generateTransactionId(), type: 'DRAW_SWISS_ROUND', round: r,
+            description: `Swiss round ${r} drawn${draw.byes.length ? `, bye: ${draw.byes.map(id => (players.find(p => String(p.id) === id) || {}).name).join(', ')}` : ''}`,
+            timestamp: new Date().toISOString() });
+    }
+}
+
+/**
+ * SWISS: draw the top four after the last round: the 4-player single elimination with its IDs
+ * renamed (K-SF1: 1st v 4th, K-SF2: 2nd v 3rd, K-B, K-F); a DRAW_SWISS_KNOCKOUT transaction.
+ * @returns {void}
+ */
+function drawSwissKnockout() {
+    const top = Swiss.table().slice(0, 4).map(r => _slotPlayer(players.find(p => String(p.id) === r.id) || r.player));
+    const seats = { 'FS-1-1': [top[0], top[3]], 'FS-1-2': [top[1], top[2]] };
+    let numericId = Math.max(0, ...matches.map(m => m.numericId || 0)) + 1;
+    const L = config.legs || {};
+    Object.keys(SE_MATCH_PROGRESSION[4]).forEach((seId, i) => {
+        const id = cupMatchId('K', seId, 4);
+        const [p1, p2] = seats[seId] || [createTBDPlayer(`k-${i}-1`), createTBDPlayer(`k-${i}-2`)];
+        matches.push({ id, seId, numericId: numericId++, round: +seId.split('-')[1], side: 'swissko',
+            player1: p1, player2: p2, winner: null, loser: null, lane: null,
+            legs: (id === 'K-F' ? L.swissFinal : id === 'K-B' ? L.swissBronze : L.swissSemifinal) || 3,
+            referee: null, active: false, completed: false, positionInRound: i });
+    });
+    tournament.swiss.knockout = true;
+    if (!window.rebuildInProgress) {
+        saveTransaction({ id: generateTransactionId(), type: 'DRAW_SWISS_KNOCKOUT',
+            description: `Swiss top four drawn: ${top.map(p => p.name).join(', ')}`, timestamp: new Date().toISOString() });
+    }
+}
+
+/**
+ * SWISS: after a Swiss round result: when it was the round's last, draw the next round, or after
+ * the last round the top four (with Finish: Semifinals and final). Docs/SWISS.md
+ * @param {object} match - the Swiss match just completed
+ * @returns {void}
+ */
+function swissAfterResult(match) {
+    if (typeof Swiss === 'undefined' || !tournament.swiss || !Swiss.roundDone(match.round)) return;
+    if (match.round !== Swiss.drawnRounds()) return;   // only the latest round draws the next
+    if (match.round < tournament.swiss.rounds) drawSwissRound(match.round + 1);
+    else if (tournament.swiss.finish === 'top4' && !tournament.swiss.knockout) drawSwissKnockout();
 }
 
 /**
@@ -2568,7 +2679,8 @@ function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
     winnerLine.appendChild(wName);
     // groups and cups: each cup's bronze and final decide places (getPlayerProgressionForDisplay)
     const cupEnd = typeof getPlayerProgressionForDisplay === 'function' && ((getFormat() === 'GROUPS' && /^[AB]-[FB]$/.test(matchId)) ||
-        (typeof Plate !== 'undefined' && Plate.on() && (matchId === Plate.finalId() || matchId === Plate.bronzeId())));
+        (typeof Plate !== 'undefined' && Plate.on() && (matchId === Plate.finalId() || matchId === Plate.bronzeId())) ||
+        (getFormat() === 'SWISS' && /^K-[FB]$/.test(matchId)));
     if (cupEnd) {
         winnerLine.appendChild(document.createTextNode(' ' + getPlayerProgressionForDisplay(winner.id, matchId, true)));
     } else if (progression.winner) {
@@ -2661,6 +2773,17 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const progression = progressionTable && progressionTable[matchId];
     if (progression) {
         body.appendChild(_buildWinnerProgressionBlock(matchId, winner, loser, progression));
+    } else if (getFormat() === 'SWISS' && typeof Swiss !== 'undefined' && Swiss.isRoundId(matchId)) {
+        // a Swiss round match moves no one on: the result goes into the table
+        const block = document.createElement('div');
+        block.className = 'winner-progression';
+        const title = document.createElement('div');
+        title.className = 'winner-progression__title';
+        title.textContent = Swiss.roundName(matchId);
+        const line = document.createElement('div');
+        line.textContent = 'The result goes into the table; the legs count for the table too. The last result of a round draws the next round.';
+        block.append(title, line);
+        body.appendChild(block);
     } else if (getFormat() === 'GROUPS' && typeof Groups !== 'undefined' && Groups.isGroupId(matchId)) {
         // a group match moves no one on: the result goes into the group table
         const block = document.createElement('div');

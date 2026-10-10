@@ -420,6 +420,7 @@ function autoLoadCurrentTournament() {
             qualifiers: tournamentData.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
             notQualified: tournamentData.notQualified, // players who lost a qualifier (absent when none)
             plate: tournamentData.plate, // Cup and Plate: { size } (absent = no Plate)
+            swiss: tournamentData.swiss, // Swiss: rounds, finish, the rounds drawn, the top four (absent in other formats)
             placements: tournamentData.placements || {},
             readOnly: tournamentData.readOnly, // ✅ Fixed: Include readOnly flag
             _analyticsPreview: tournamentData._analyticsPreview // 4.3: keep the no-persist guard alive across reload
@@ -646,6 +647,12 @@ function getPlayerProgressionForDisplay(playerId, matchId, isWinner) {
     if (typeof Plate !== 'undefined' && Plate.on()) {
         if (matchId === Plate.finalId()) return isWinner ? 'wins the Plate' : 'Plate runner-up';
         if (matchId === Plate.bronzeId()) return isWinner ? '3rd in the Plate' : '4th in the Plate';
+    }
+    // Swiss: the top four's bronze final and final decide 1st to 4th; Swiss rounds move no one
+    if (getFormat() === 'SWISS') {
+        if (matchId === 'K-F') return isWinner ? 'wins the tournament' : 'takes 2nd place';
+        if (matchId === 'K-B') return isWinner ? 'takes 3rd place' : 'takes 4th place';
+        if (typeof Swiss !== 'undefined' && Swiss.isRoundId(matchId)) return '';
     }
     if (getFormat() === 'GROUPS') {
         // groups and cups: group matches move no one; each cup's bronze and final decide places

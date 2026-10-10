@@ -100,6 +100,9 @@ const ConfigPage = (() => {
         const single = $('rrStructure').value === 'single';
         panel.querySelectorAll('.cfg-rr-cups').forEach(row => { row.hidden = single; });
         panel.querySelectorAll('.cfg-rr-single').forEach(row => { row.hidden = !single; });
+        // Swiss's panel only while Swiss is offered
+        const swiss = $('cfgSwiss'), swissOffered = root().querySelector('.format-visibility-toggle[data-format-id="SWISS"]');
+        if (swiss) swiss.hidden = !!swissOffered && !swissOffered.checked;
     }
 
     /** Redraw every control from the hidden fields (after the form was filled). */
