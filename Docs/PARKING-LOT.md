@@ -132,7 +132,8 @@ Raised 2026-10-08 (maintainer), after Round Robin. In rough order of cost:
 - **Gate for casual formats: keep them out of Analytics and seeding (maintainer, 2026-10-10).** Before casual formats arrive:
   - **A tournament option "Leave out of Analytics"** (set at creation or the draw, perhaps on by default for casual formats): the tournament's matches and result don't go to the register, so a fun night never touches season standings, player stats or rankings.
   - **A format filter in the Lens and in seeding's tournament picker:** choose which tournament formats count (e.g. only double elimination nights), so casual or special formats can be left out of a view or a seeded draw even when they are in the register.
-- **Doubles (to consider at some point):** e.g. blind-draw pairs, then any format on teams. A social favourite, but it reaches far beyond the bracket: points, statistics, achievements, the Chalker and Analytics all assume one player per side. The biggest change of these by far; discuss the model first (is a team a player, or two players sharing a side?).
+- **Doubles, in general (to consider at some point; maintainer 2026-10-10: keep it on the list).** Pairs instead of single players, in any format: fixed pairs entered as a team, or **blind draw doubles**, partners drawn at random for the night or for every round with individual players collecting points across rounds (the social classic of pub darts). It reaches far beyond the bracket: points, statistics, achievements, the Chalker (two players per side, alternating throws) and Analytics all assume one player per side. The biggest change of these by far; discuss the model first (is a team a player, or two players sharing a side?), and how a pair's results count for each player's season.
+- **Queue play: how it ends, without knocking anyone out (2026-10-10).** The point of a casual format is to keep everyone playing, so no Lives / last-one-standing (players knocked out early would stand watching; the maintainer agreed it works against the point). Two endings instead: **a set number of matches each** (the queue always picks the players who have played the fewest and waited longest; the session ends when everyone has played N; fair, a clean end, table by wins then legs), or **a set end time** (the same fair queue; table by win rate).
 
 ---
 
@@ -186,6 +187,12 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 
 ## Later
 *Worth tracking but not urgent*
+
+### Chalker: other games than x01 (ideas, not now)
+
+Raised 2026-10-10. **x01 only for now** (maintainer). Ideas for later, all for the Chalker (NewTon decides who plays whom; the Chalker decides what is played on the board):
+- **Games:** Cricket, Killer, Shanghai, Round the Clock, popular on casual nights. Each needs its own scoring screen, its own result (no legs and checkouts in the x01 sense), and a decision on what counts for achievements and statistics.
+- **Handicap:** a different starting score per player (e.g. 401 against 501) or a leg's start, so a mixed social night is genuinely competitive; the handicap could come from the ranking seeding already uses. Needs the Chalker to play a different start per player, and handicapped results probably shouldn't count for season standings (the casual-format gate: Leave out of Analytics).
 
 ### Maybe: pull the base image from a mirror, not Docker Hub
 
