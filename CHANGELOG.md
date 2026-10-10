@@ -1,4 +1,4 @@
-## Unreleased
+## **v5.4.3** — Swiss Precision (2026-10-10)
 
 ### Landing page: the draw's new screenshot and copy, and Swiss in Pick Your Format
 
@@ -50,6 +50,11 @@
 - Both Docker workflows used actions targeting Node.js 20, which GitHub has deprecated (each build warned that they were forced onto Node.js 24). Moved to the current majors, all on Node.js 24: `actions/checkout@v7`, `docker/setup-qemu-action@v4`, `docker/setup-buildx-action@v4`, `docker/login-action@v4`, `docker/metadata-action@v6`, `docker/build-push-action@v7`. The workflows only use inputs that are unchanged in these versions (the removed ones were deprecated inputs and environment variables they never used). Build Push v6+ adds a build summary to each run's page and a build record file to the run.
 - **The image digest is printed again:** the GitHub Container Registry workflow's last step reads the digest from a step called `build`, which didn't exist, so it always printed empty; the build step now has `id: build`.
 - Files changed: `.github/workflows/docker-build.yml`, `.github/workflows/docker-hub-publish.yml`, `Docs/PARKING-LOT.md`.
+
+### Release
+
+- Version 5.4.3, "Swiss Precision": Swiss, Pick a format with pictograms (Cup and Plate as its own format), the double round robin, Round Robin's fewer groups with Top half, the lanes row keeping its place, and the landing page. The first release built with the GitHub Actions on Node.js 24 (to confirm on this release's Docker build). The Chalker is unchanged; its version and caches are bumped with the app's (`CHALKER_VERSION`, `chalker.js?v=29`, service worker cache `chalker-v126`).
+- Files changed: `js/main.js` (`APP_VERSION` → `5.4.3`), `chalker/js/chalker.js` (`CHALKER_VERSION` → `5.4.3`), `chalker/index.html`, `chalker/sw.js`, `llms.txt` (Swiss, Pick a format, the double round robin, Cup and Plate's own card, the odd group count; Swiss off the do-not-invent list, the parked formats on it), `sitemap.xml`, `releases/index.html`, `releases/v5.4.3.html`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.3.md`. The help was reviewed with each change.
 
 ## **v5.4.2** — All the Dishes Rattle in the Cupboards (2026-10-09)
 
