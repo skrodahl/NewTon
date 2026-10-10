@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: Match Controls setup, pick a format</title>
+<link rel="stylesheet" href="../../css/design-tokens.css">
+<style>
+@font-face { font-family: 'Inter'; src: url('../../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Cascadia Code'; src: url('../../fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype'); font-weight: 200 700; font-display: swap; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nt-bg); color: var(--nt-ink); font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; }
+.intro { max-width: 1280px; margin: 0 auto; padding: 24px 24px 0; }
+.intro h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.intro p { margin: 6px 0 0; color: var(--nt-muted); max-width: 100ch; }
+.app { max-width: 1280px; margin: 16px auto 60px; padding: 0 24px; }
+.hdr { display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px; padding: 10px 0 12px; }
+.hdr b { font-size: 22px; font-weight: 800; }
+.hdr small { display: block; color: var(--nt-muted); font-family: var(--nt-mono); font-size: 12px; }
+.tabs { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; background: var(--nt-surface); }
+.tabs span { padding: 7px 14px; font-weight: 600; font-size: 13px; color: var(--nt-ink-2); }
+.tabs span + span { border-left: 1px solid var(--nt-line-2); }
+.tabs .on { background: var(--nt-header); color: var(--nt-header-ink); }
+.sub { text-align: center; font-size: 12px; color: var(--nt-muted); margin-top: 4px; }
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+.col { display: grid; gap: 16px; }
+.panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; }
+.ph { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; padding: 14px 18px 10px; }
+.ph h3 { margin: 0; font-size: 15px; }
+.ph h3 small { font-weight: 500; color: var(--nt-muted); font-size: 12px; margin-left: 6px; }
+.ph a { font-size: 13px; color: var(--nt-ink-2); }
+.chips { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 18px 16px; }
+.chip { border: 1px solid #bfdcc5; background: #eef7f0; color: #1d5a2c; border-radius: 99px; padding: 4px 12px; font-size: 13px; }
+.addrow { display: flex; gap: 8px; padding: 0 18px 12px; }
+.addrow span { flex: 1; border: 1px solid var(--nt-line-2); border-radius: 8px; padding: 7px 12px; color: var(--nt-muted); }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; padding: 8px 14px; font-weight: 700; font-size: 13px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); cursor: pointer; }
+.btn.dark { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.btn.big { padding: 10px 22px; font-size: 15px; }
+
+/* the format cards */
+.fmts { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; padding: 0 18px 14px; }
+.fmt { position: relative; border: 2px solid var(--nt-line-2); border-radius: 12px; padding: 12px 14px 12px; display: grid; gap: 4px; align-content: start; cursor: pointer; background: var(--nt-surface); }
+.fmt:hover { border-color: #a8a29e; }
+.fmt.on { border-color: var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); }
+.fmt b { font-size: 15px; }
+.fmt .line { font-weight: 700; color: #c0562a; font-size: 13px; }
+.fmt .fit { font-size: 12px; color: var(--nt-muted); margin-top: 4px; }
+.fmt .fit b { font-size: 12px; color: var(--nt-ink-2); }
+.fmt.off { cursor: not-allowed; background: var(--nt-surface-2); border-style: dashed; }
+.fmt.off b, .fmt.off .line { color: var(--nt-faint, #a8a29e); }
+.fmt.off .fit { color: var(--nt-muted); }
+.fmt .pic { display: block; margin: 0 0 6px; height: 44px; }
+.fmt .pic svg { display: block; }
+.fmt.on .pic .dk { fill: var(--nt-accent); }
+.fmt.off .pic { opacity: .4; }
+.fmt .radio { position: absolute; top: 12px; right: 12px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--nt-line-2); }
+.fmt.on .radio { border-color: var(--nt-accent); box-shadow: inset 0 0 0 3px var(--nt-surface); background: var(--nt-accent); }
+.fmt.off .radio { display: none; }
+
+/* the selected format */
+.detail { border-top: 1px solid var(--nt-line); padding: 14px 18px 4px; display: grid; grid-template-columns: minmax(0, 1fr) 260px; gap: 18px; }
+.detail h4 { margin: 0 0 6px; font-size: 16px; }
+.detail p { margin: 0 0 8px; color: var(--nt-ink-2); max-width: 70ch; }
+.detail ul { margin: 0 0 8px; padding-left: 18px; color: var(--nt-ink-2); }
+.facts { display: grid; gap: 6px; align-content: start; font-size: 13px; }
+.facts div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--nt-line); padding-bottom: 5px; }
+.facts span { color: var(--nt-muted); }
+.opts { display: flex; gap: 10px; align-items: center; flex-wrap: wrap; margin: 2px 0 10px; font-size: 13px; }
+.seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; }
+.seg span { padding: 5px 10px; font-size: 12px; font-weight: 600; color: var(--nt-ink-2); }
+.seg span + span { border-left: 1px solid var(--nt-line-2); }
+.seg .on { background: var(--nt-header); color: var(--nt-header-ink); }
+.drawbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 18px 16px; padding: 12px 14px; border: 1px solid var(--nt-line-2); border-radius: 10px; background: var(--nt-surface-2); }
+.drawbar .sum { font-size: 14px; color: var(--nt-ink-2); }
+.drawbar .sum b { color: var(--nt-ink); }
+
+/* settings for this tournament */
+.sets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--nt-line); }
+.sets > div { padding: 12px 18px 16px; }
+.sets > div + div { border-left: 1px solid var(--nt-line); }
+.sets h5 { margin: 0 0 8px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); }
+.kv { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 2px 0; }
+.kv b { font-family: var(--nt-mono); font-size: 12px; }
+.note { font-size: 12px; color: var(--nt-muted); padding: 0 18px 14px; }
+.check { display: flex; gap: 8px; align-items: center; padding: 0 18px 14px; font-weight: 600; font-size: 13px; }
+.check i { width: 15px; height: 15px; border: 1.5px solid var(--nt-line-2); border-radius: 3px; display: inline-block; }
+.callout { margin: 0 18px 14px; padding: 10px 12px; border-radius: 8px; background: var(--nt-accent-soft); color: #7a2e0b; font-size: 12px; }
+@media (max-width: 1000px) { .cols { grid-template-columns: 1fr; } .fmts { grid-template-columns: repeat(2, minmax(0, 1fr)); } .detail { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="intro">
+    <h1>Match Controls · setup: pick a format, then draw</h1>
+    <p><b>With pictograms</b> (in the style of Global Settings' Finals position pictures): Double Elimination's backside and Cup and Plate's Plate are the lighter boxes; the picked card's final turns orange. Clickable mockup, 12 paid players. Click a format card: its description, its options, the Draw bar and "Settings for this tournament" change with it. (A format switched off in Global Settings → Formats to offer would be greyed out and locked; the example is off here so the pictograms can be judged.) Seeding (right) applies to whichever format is drawn.</p>
+</div>
+
+<div class="app">
+    <div class="hdr">
+        <div><b>New Tournament</b><small>2026 · 10 · 10</small></div>
+        <div><div class="tabs"><span>Bracket</span><span class="on">Match Controls</span><span>Leaderboard</span></div><div class="sub"><b>12</b> players · no bracket yet</div></div>
+        <div></div>
+    </div>
+
+    <div class="cols">
+        <div class="col">
+            <section class="panel">
+                <div class="ph"><h3>Players<small>click a name to mark paid or unpaid</small></h3><a href="#">Player Registration</a></div>
+                <div class="addrow"><span>Add a player (found in the database, or created)</span><span class="btn dark" style="flex:none">Add</span></div>
+                <div class="chips" id="chips"></div>
+            </section>
+
+            <section class="panel">
+                <div class="ph"><h3>Pick a format<small>then draw</small></h3><a href="#">Formats to offer</a></div>
+                <div class="fmts" id="fmts"></div>
+                <div class="detail" id="detail"></div>
+                <div class="drawbar"><span class="sum" id="sum"></span><span class="btn dark big" id="drawbtn">Draw →</span></div>
+            </section>
+
+            <section class="panel">
+                <div class="ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><a href="#">Global Settings</a></div>
+                <div class="sets" id="sets"></div>
+            </section>
+        </div>
+
+        <div class="col">
+            <section class="panel">
+                <div class="ph"><h3>Seeding<small>keeps the best players apart</small></h3></div>
+                <label class="check"><i></i> Seed the draw by ranking</label>
+                <p class="note" style="padding-top:0">For every format: brackets put the best seeds apart (and give them the byes); Round Robin deals them into the groups in snake order.</p>
+            </section>
+            <section class="panel">
+                <div class="ph"><h3>Before you draw</h3></div>
+                <p class="note" style="padding-top:0">All 12 players are paid and go into the draw. The draw can't be changed once a match has a result; Reset clears it before then.</p>
+            </section>
+        </div>
+    </div>
+</div>
+
+<script>
+(() => {
+    const names = ['Basse','Bruhn','Elgan','Eric','Fredrik','Gädda','Håvard','Johnny','Marcus.Å','Mickey','Mike','Newman'];
+    document.getElementById('chips').innerHTML = names.map(n => `<span class="chip">✓ ${n}</span>`).join('');
+    const points = `<h5>Points</h5><div class="kv"><span>Taking part</span><b>5</b></div><div class="kv"><span>1st · 2nd · 3rd · 4th</span><b>15 · 13 · 10 · 9</b></div><div class="kv"><span>5–6th · 7–8th</span><b>8 · 7</b></div><div class="kv"><span>180 · High out · Short leg · Ton</span><b>1 · 1 · 1 · 0</b></div>`;
+    const lanes = `<h5>Lanes</h5><div class="kv"><span>In use</span><b>1, 2, 3, 4</b></div><div class="kv"><span>Not in use</span><b>None</b></div>`;
+    const kv = rows => rows.map(([k, v]) => `<div class="kv"><span>${k}</span><b>${v}</b></div>`).join('');
+    const F = [
+        { id: 'DE', pic: `<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 8.5H19V35.5H16M19 16.5H22M34 16.5H40M80 8.5H77V35.5H80M77 27.5H74M62 27.5H56M48 21V23"/></g><g fill="#6b7280"><rect x="4" y="6" width="12" height="5" rx="1"/><rect x="4" y="33" width="12" height="5" rx="1"/><rect x="22" y="14" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="6" width="12" height="5" rx="1"/><rect x="80" y="33" width="12" height="5" rx="1"/><rect x="62" y="25" width="12" height="5" rx="1"/><rect x="40" y="23" width="16" height="9" rx="1.5"/></g><rect class="dk" x="40" y="12" width="16" height="9" rx="1.5" fill="#1f2937"/></svg>`, name: 'Double Elimination', line: 'Two lives each.',
+          fit: '16-player bracket · 4 byes',
+          about: 'Lose once and you drop to the backside; lose twice and you are out. The frontside and backside winners meet in the grand final.',
+          bullets: ['Every player gets at least two matches', 'The fairest result: nobody goes out on one bad match', 'Best for: most club nights'],
+          facts: [['Players', '4 to 48'], ['Matches tonight', 'about 22'], ['Each player', '2 or more']],
+          sum: '16-player bracket, 4 byes',
+          legs: [['Regular rounds', 'Bo3'], ['Frontside semifinal', 'Bo3'], ['Backside final', 'Bo5'], ['Grand final', 'Bo5']] },
+        { id: 'SE', pic: `<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H21.5V17.5H16M21.5 12.5H26M16 27.5H21.5V37.5H16M21.5 32.5H26M38 12.5H43.5V32.5H38M43.5 22.5H48M60 22.5H72"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="26" y="10" width="12" height="5" rx="1"/><rect x="26" y="30" width="12" height="5" rx="1"/><rect x="48" y="20" width="12" height="5" rx="1"/></g><rect class="dk" x="72" y="18" width="18" height="9" rx="1.5" fill="#1f2937"/></svg>`, name: 'Single Elimination', line: 'One loss and out.',
+          fit: '16-player bracket · 4 byes',
+          about: 'A straight knockout: win and go on, lose and you are out. The semifinal losers play a bronze final for 3rd.',
+          bullets: ['The shortest night for a field this size', 'Best for: short nights, few boards, big fields'],
+          facts: [['Players', '4 to 48'], ['Matches tonight', '12'], ['Each player', '1 or more']],
+          sum: '16-player bracket, 4 byes',
+          legs: [['Regular rounds', 'Bo3'], ['Quarterfinal', 'Bo3'], ['Semifinal', 'Bo3'], ['Bronze final', 'Bo5'], ['Final', 'Bo5']] },
+        { id: 'CP', pic: `<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H19V17.5H16M19 12.5H22M16 27.5H19V37.5H16M19 32.5H22M34 12.5H37V32.5H34M37 22.5H40M80 12.5H77V32.5H80M77 22.5H74"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="22" y="10" width="12" height="5" rx="1"/><rect x="22" y="30" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="10" width="12" height="5" rx="1"/><rect x="80" y="30" width="12" height="5" rx="1"/><rect x="60" y="18" width="14" height="9" rx="1.5"/></g><rect class="dk" x="40" y="18" width="14" height="9" rx="1.5" fill="#1f2937"/></svg>`, name: 'Cup and Plate', line: 'Everyone plays twice.',
+          fit: 'Cup of 16 · Plate of 8',
+          about: 'Single elimination, the Cup. Every round 1 loser plays on in the Plate, a second knockout of half the size, so nobody goes home after one match. From round 2 on, a Cup loss is the end of your night.',
+          bullets: ['Every player gets at least two matches', 'The Plate orders the round 1 losers; its winner is named at the end', 'Best for: a single elimination night where everyone gets a proper go'],
+          facts: [['Players', '5 to 48'], ['Matches tonight', 'about 16'], ['Each player', '2 or more']],
+          sum: 'Cup of 16 (4 byes), Plate of 8',
+          legs: [['Regular rounds', 'Bo3'], ['Semifinal', 'Bo3'], ['Bronze finals', 'Bo5'], ['Finals', 'Bo5'], ['The Plate', 'as the Cup, by its rounds']] },
+        { id: 'RR', pic: `<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M24 8H34V6.5H44M24 30H38V14.5H44M24 14H30V29.5H44M24 36H34V37.5H44M54 6.5H57V14.5H54M57 10.5H60M54 29.5H57V37.5H54M57 33.5H60"/></g><g fill="none" stroke="#6b7280" stroke-width="1"><rect x="4.5" y="4.5" width="19" height="13" rx="1.5"/><path d="M4.5 8.8H23.5M4.5 13.2H23.5"/><rect x="4.5" y="26.5" width="19" height="13" rx="1.5"/><path d="M4.5 30.8H23.5M4.5 35.2H23.5"/></g><g fill="#6b7280"><rect x="44" y="4" width="10" height="5" rx="1"/><rect x="44" y="12" width="10" height="5" rx="1"/><rect x="44" y="27" width="10" height="5" rx="1"/><rect x="44" y="35" width="10" height="5" rx="1"/><rect x="60" y="29.5" width="14" height="8" rx="1.5"/></g><rect class="dk" x="60" y="6.5" width="14" height="8" rx="1.5" fill="#1f2937"/></svg>`, name: 'Round Robin', line: 'Everybody plays everybody.',
+          fit: '4 groups of 3',
+          about: 'Everybody plays everybody in their group, in a fixed order with a referee from the group. Then the top half plays the A cup and the rest the B cup, both knockouts with a bronze final. Or one group, where the table decides.',
+          bullets: ['Everyone gets several matches before any knockout', 'Best for: season finals, and nights with time for more matches'],
+          facts: [['Players', '6 to 32 (one group: 3 to 8)'], ['Matches tonight', '12 group + about 12 cup'], ['Each player', '2 group + cup']],
+          opts: '<span>Structure</span><span class="seg"><span class="on">Groups and cups</span><span>One group</span></span><span>To the A cup</span><span class="seg"><span>Top two</span><span class="on">Top half</span></span><span style="color:var(--nt-muted)">(from Global Settings; this draw only)</span>',
+          sum: '4 groups of 3, then the A and B cups',
+          legs: [['Group matches', 'Bo3'], ['Cup rounds', 'Bo3'], ['Cup semifinal', 'Bo3'], ['Cup bronze final', 'Bo5'], ['Cup final', 'Bo5']] }
+    ];
+    let sel = 'CP';
+    const draw = () => {
+        document.getElementById('fmts').innerHTML = F.map(f => `<div class="fmt${f.off ? ' off' : ''}${f.id === sel ? ' on' : ''}" data-id="${f.id}">
+            <span class="radio"></span><span class="pic">${f.pic || ''}</span><b>${f.name}</b><span class="line">${f.line}</span>
+            <span class="fit">${f.off ? 'Not offered: Global Settings → Formats to offer' : `Tonight: <b>${f.fit}</b>`}</span></div>`).join('');
+        const f = F.find(x => x.id === sel);
+        document.getElementById('detail').innerHTML = `<div><h4>${f.name}</h4><p>${f.about}</p><ul>${f.bullets.map(b => `<li>${b}</li>`).join('')}</ul>${f.opts ? `<div class="opts">${f.opts}</div>` : ''}</div>
+            <div class="facts">${f.facts.map(([k, v]) => `<div><span>${k}</span><b>${v}</b></div>`).join('')}</div>`;
+        document.getElementById('sum').innerHTML = `<b>12 players</b> · ${f.name} · ${f.sum}`;
+        document.getElementById('drawbtn').textContent = `Draw ${f.name} →`;
+        document.getElementById('sets').innerHTML = `<div>${points}</div><div><h5>Match length · ${f.name}</h5>${kv(f.legs)}</div><div>${lanes}</div>`;
+        document.querySelectorAll('.fmt:not(.off)').forEach(el => el.addEventListener('click', () => { sel = el.dataset.id; draw(); }));
+    };
+    draw();
+})();
+</script>
+</body>
+</html>

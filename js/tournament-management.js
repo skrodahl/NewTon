@@ -952,7 +952,8 @@ function renderSetupCurrent() {
     const done = all.filter(m => m.completed).length;
     const live = all.filter(m => getMatchState(m) === 'live');
     const hasBracket = !!tournament.bracket && all.length > 0;
-    const format = hasBracket ? TOURNAMENT_FORMATS.find(f => f.id === getFormat()) : null;
+    // Cup and Plate is single elimination with a Plate; it has its own name in the formats list
+    const format = hasBracket ? TOURNAMENT_FORMATS.find(f => f.id === (getFormat() === 'SE' && tournament.plate ? 'CP' : getFormat())) : null;
     const lanes = live.map(m => m.lane).filter(Boolean).sort((a, b) => a - b);
 
     // One line of facts: the players, the bracket, and what is being played now

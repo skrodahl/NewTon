@@ -184,16 +184,21 @@ const Seeding = (() => {
     }
 
     // ---------- the panel in Match Controls ----------
+    let pickedGroups = false; // Round Robin is the picked format (html())
     /**
-     * The Seeding panel for Match Controls' setup view ('' when seeding is off).
+     * The Seeding panel for Match Controls' setup view ('' when seeding is off), for the format picked
+     * there (Cup and Plate is drawn as single elimination; Round Robin seeds the groups).
+     * @param {string} [formatId] - the picked format; the first offered one when absent
      * @returns {string}
      */
-    function html() {
+    function html(formatId) {
         const s = ensure();
         if (!s) return '';
         const paid = players.filter(p => p.paid);
         const fmts = typeof getVisibleFormats === 'function' ? getVisibleFormats() : [];
-        const size = calculateBracketSize(Math.max(paid.length, 4), fmts.length ? fmts[0].id : 'DE') || 32;
+        const fmt = TOURNAMENT_FORMATS.find(f => f.id === formatId) || fmts[0] || { id: 'DE' };
+        pickedGroups = fmt.id === 'GROUPS';
+        const size = calculateBracketSize(Math.max(paid.length, 4), fmt.draw || (pickedGroups ? 'DE' : fmt.id)) || 32;
         let body = '';
         if (s.on) {
             if (!s.ready) body = '<p class="mc-note">Reading earlier tournaments…</p>';
@@ -244,9 +249,7 @@ const Seeding = (() => {
         if (byes > 0 && byes <= p.seeds.length) lines.push(`The bracket has ${byes} bye${byes === 1 ? '' : 's'}; the best seed${byes === 1 ? ' gets it' : 's get them'}.`);
         else if (byes > 0) lines.push(`The bracket has ${byes} byes: each of the ${p.seeds.length} seeds gets one, and the other ${byes - p.seeds.length} go to unseeded players at random.`);
         if (all) lines.push('The top seed meets the bottom seed in round 1, the second seed the second-last, and so on.');
-        if (typeof getVisibleFormats === 'function' && getVisibleFormats().some(f => f.id === 'GROUPS')) {
-            lines.push(`Groups and Cups seeds all ${p.ranked.length} ranked players into the groups instead, in snake order.`);
-        }
+        if (pickedGroups) lines.push(`Round Robin seeds all ${p.ranked.length} ranked players into the groups instead, in snake order.`);
         return `<ol class="mc-seeds">${p.seeds.map(x => `<li><b>${escapeHtml(x.player.name)}</b><span>${x.points} pts</span></li>`).join('')}</ol>
             <p class="mc-note">${lines.join(' ')}</p>`;
     }

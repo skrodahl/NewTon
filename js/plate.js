@@ -20,12 +20,12 @@ const Plate = (() => {
     const all = () => (typeof matches !== 'undefined' && Array.isArray(matches) ? matches : []);
 
     // ---------- the switch at the draw ----------
-    /** Offer Play a Plate (Global Settings): whether the switch shows at the draw. Absent = on. */
-    const offered = () => !(typeof config !== 'undefined' && config.ui && config.ui.offerPlate === false);
+    /** Cup and Plate is offered (Global Settings → Formats to offer). */
+    const offered = () => typeof getVisibleFormats !== 'function' || getVisibleFormats().some(f => f.id === 'CP');
     /** A Plate needs a Cup of 8 or more (5 or more players): in a bracket of 4, round 1 is the semifinals. */
     const possible = paid => paid >= 5;
     let wish = { tid: null, on: false };
-    /** The switch at the draw, for the current tournament: always starts off. */
+    /** Cup and Plate picked at the draw (Match Controls sets it when drawing), for the current tournament. */
     const wanted = () => offered() && wish.tid === (typeof tournament !== 'undefined' && tournament ? tournament.id : null) && wish.on;
     function setWanted(v) { wish = { tid: tournament ? tournament.id : null, on: !!v }; }
 

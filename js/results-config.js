@@ -46,7 +46,6 @@ const DEFAULT_CONFIG = {
     ui: {
         hiddenFormats: [],
         confirmWinnerSelection: true,
-        offerPlate: true,     // Cup and Plate: the Play a Plate switch at single elimination's draw (Docs/CUP-AND-PLATE.md)
         autoOpenMatchControls: true,
         defaultPaid: false,
         developerMode: false,
@@ -87,6 +86,14 @@ function loadConfiguration() {
             // Handover's default became None, but a config saved before the setting existed has always
             // meant QR code (additive-only: absent keeps its old meaning), so it stays QR code
             if (!parsed.chalker || !parsed.chalker.handover) parsed.chalker = Object.assign({}, parsed.chalker, { handover: 'qr' });
+            // Cup and Plate became a format (Formats to offer) instead of its own Offer Play a Plate
+            // switch: a config that had it off starts with Cup and Plate not offered
+            if (parsed.ui && parsed.ui.offerPlate === false) {
+                const hidden = Array.isArray(parsed.ui.hiddenFormats) ? parsed.ui.hiddenFormats : [];
+                if (!hidden.includes('CP')) hidden.push('CP');
+                parsed.ui.hiddenFormats = hidden;
+            }
+            if (parsed.ui) delete parsed.ui.offerPlate;
             // The cups had the single elimination lengths before they got their own, so a config saved
             // before then keeps them
             const L = parsed.legs;
@@ -208,7 +215,6 @@ function applyConfigToUI() {
     // UI configuration
     if (config.ui) {
         safeSetChecked('confirmWinnerSelection', config.ui.confirmWinnerSelection);
-        safeSetChecked('offerPlate', config.ui.offerPlate !== false);
         safeSetChecked('autoOpenMatchControls', config.ui.autoOpenMatchControls);
         safeSetChecked('defaultPaid', config.ui.defaultPaid);
         safeSetChecked('developerMode', config.ui.developerMode);
@@ -376,29 +382,60 @@ function saveApplicationSettings(options = {}) {
  * logic and is not abstracted here. Adding a new format still means teaching those
  * systems about it; this list just stops the UI from being written out twice.
  *
- * Order is display order.
+ * Order is display order. Each entry also carries the text of its card in Match Controls'
+ * Pick a format (line, about, bests) and its pictogram (`pic`: a 96×44 SVG in the style of Global
+ * Settings' Finals position pictures, its final marked `class="dk"` so the picked card can colour
+ * it), so a new format brings its own description and picture. Cup and Plate
+ * is drawn as single elimination with a Plate (`draw: 'SE'`, `plate: true`; Docs/CUP-AND-PLATE.md).
  *
- * @type {Array<{id: string, name: string, blurb: string, minPlayers: number, maxPlayers: number}>}
+ * @type {Array<{id: string, name: string, blurb: string, pic: string, line: string, about: string, bests: string[],
+ *   minPlayers: number, maxPlayers: number, draw?: string, plate?: boolean}>}
  */
 const TOURNAMENT_FORMATS = [
     {
         id: 'DE',
+        pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 8.5H19V35.5H16M19 16.5H22M34 16.5H40M80 8.5H77V35.5H80M77 27.5H74M62 27.5H56M48 21V23"/></g><g fill="#6b7280"><rect x="4" y="6" width="12" height="5" rx="1"/><rect x="4" y="33" width="12" height="5" rx="1"/><rect x="22" y="14" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="6" width="12" height="5" rx="1"/><rect x="80" y="33" width="12" height="5" rx="1"/><rect x="62" y="25" width="12" height="5" rx="1"/><rect x="40" y="23" width="16" height="9" rx="1.5"/></g><rect class="dk" x="40" y="12" width="16" height="9" rx="1.5" fill="#1f2937"/></svg>',
         name: 'Double Elimination Cup',
         blurb: 'Players get a second chance through the backside',
+        line: 'Two lives each.',
+        about: 'Lose once and you drop to the backside; lose twice and you are out. The frontside and backside winners meet in the grand final.',
+        bests: ['Every player gets at least two matches', 'Nobody goes out on one bad match', 'Best for: most club nights'],
         minPlayers: 4,
         maxPlayers: 48  // above 32 through qualifiers (Docs/QUALIFIERS.md)
     },
     {
         id: 'SE',
+        pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H21.5V17.5H16M21.5 12.5H26M16 27.5H21.5V37.5H16M21.5 32.5H26M38 12.5H43.5V32.5H38M43.5 22.5H48M60 22.5H72"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="26" y="10" width="12" height="5" rx="1"/><rect x="26" y="30" width="12" height="5" rx="1"/><rect x="48" y="20" width="12" height="5" rx="1"/></g><rect class="dk" x="72" y="18" width="18" height="9" rx="1.5" fill="#1f2937"/></svg>',
         name: 'Single Elimination Cup',
         blurb: 'Players are eliminated after one loss',
+        line: 'One loss and out.',
+        about: 'A straight knockout: win and go on, lose and you are out. The semifinal losers play a bronze final for 3rd.',
+        bests: ['The shortest night for the field', 'Best for: short nights, few boards, big fields'],
         minPlayers: 4,
         maxPlayers: 48  // above 32 through qualifiers (Docs/QUALIFIERS.md)
     },
     {
+        id: 'CP',
+        pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H19V17.5H16M19 12.5H22M16 27.5H19V37.5H16M19 32.5H22M34 12.5H37V32.5H34M37 22.5H40M80 12.5H77V32.5H80M77 22.5H74"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="22" y="10" width="12" height="5" rx="1"/><rect x="22" y="30" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="10" width="12" height="5" rx="1"/><rect x="80" y="30" width="12" height="5" rx="1"/><rect x="60" y="18" width="14" height="9" rx="1.5"/></g><rect class="dk" x="40" y="18" width="14" height="9" rx="1.5" fill="#1f2937"/></svg>',
+        name: 'Cup and Plate',
+        blurb: 'Single elimination; the round 1 losers play on in the Plate',
+        line: 'Everyone plays twice.',
+        about: 'Single elimination, the Cup. Every round 1 loser plays on in the Plate, a second knockout of half the size, so nobody goes home after one match. From round 2 on, a Cup loss is the end of the night.',
+        bests: ['Every player gets at least two matches (one, for a player with a bye who then loses)', 'The finished view names the Plate winner', 'Best for: a single elimination night where everyone gets a proper go'],
+        minPlayers: 5,  // a Cup of 8 or more
+        maxPlayers: 48,
+        draw: 'SE',
+        plate: true
+    },
+    {
         id: 'GROUPS',
+        pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M24 8H34V6.5H44M24 30H38V14.5H44M24 14H30V29.5H44M24 36H34V37.5H44M54 6.5H57V14.5H54M57 10.5H60M54 29.5H57V37.5H54M57 33.5H60"/></g><g fill="none" stroke="#6b7280" stroke-width="1"><rect x="4.5" y="4.5" width="19" height="13" rx="1.5"/><path d="M4.5 8.8H23.5M4.5 13.2H23.5"/><rect x="4.5" y="26.5" width="19" height="13" rx="1.5"/><path d="M4.5 30.8H23.5M4.5 35.2H23.5"/></g><g fill="#6b7280"><rect x="44" y="4" width="10" height="5" rx="1"/><rect x="44" y="12" width="10" height="5" rx="1"/><rect x="44" y="27" width="10" height="5" rx="1"/><rect x="44" y="35" width="10" height="5" rx="1"/><rect x="60" y="29.5" width="14" height="8" rx="1.5"/></g><rect class="dk" x="60" y="6.5" width="14" height="8" rx="1.5" fill="#1f2937"/></svg>',
         name: 'Round Robin',
         blurb: 'Everybody plays everybody: in groups followed by an A and a B cup, or in one group',
+        line: 'Everybody plays everybody.',
+        about: 'Everybody plays everybody in their group, in a fixed order with a referee from the group. Then the A and B cups, knockouts with a bronze final.',
+        aboutSingle: 'Everybody plays everybody, in a fixed order with a referee from the group. The table decides the placings.',
+        bests: ['Everyone gets several matches before any knockout', 'Best for: season finals, and nights with time for more matches'],
         minPlayers: 6,  // groups and cups; one group: 3-8 (Groups.limits())
         maxPlayers: 32
     }
@@ -595,8 +632,6 @@ function saveUIConfiguration(options = {}) {
 
     config.ui = config.ui || {};
     config.ui.confirmWinnerSelection = confirmWinnerElement ? confirmWinnerElement.checked : true;
-    const offerPlateElement = document.getElementById('offerPlate');
-    config.ui.offerPlate = offerPlateElement ? offerPlateElement.checked : true;
     config.ui.autoOpenMatchControls = autoOpenElement ? autoOpenElement.checked : true;
     config.ui.defaultPaid = defaultPaidElement ? defaultPaidElement.checked : false;
     config.ui.developerMode = developerModeElement ? developerModeElement.checked : false;
@@ -720,7 +755,7 @@ const CONFIG_LABELS = {
         cupBronze: 'Cup bronze final (Round Robin)', cupFinal: 'Cup final (Round Robin)', x01Format: 'Game', maxRounds: 'Max rounds', shortLegThreshold: 'Short leg (darts)' },
     clubName: { _: 'Club name' },
     lanes: { _: 'Lanes', maxLanes: 'Lanes', excludedLanes: 'Lanes not in use', requireLaneForStart: 'Require a lane to start' },
-    ui: { _: 'Interface', hiddenFormats: 'Hidden formats', offerPlate: 'Offer Play a Plate', confirmWinnerSelection: 'Confirm the winner',
+    ui: { _: 'Interface', hiddenFormats: 'Hidden formats', confirmWinnerSelection: 'Confirm the winner',
         autoOpenMatchControls: 'Start on Match Controls', defaultPaid: 'New players are paid', developerMode: 'Developer Console',
         refereeSuggestionsLimit: 'Referee suggestions', bracketFinals: 'Finals position' },
     chalker: { _: 'Chalker', handover: 'Handover' },

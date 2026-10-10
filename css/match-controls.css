@@ -130,10 +130,44 @@
 .mc-chip-split .mc-chip-x { padding: 0 10px 0 8px; border-left: 1px solid #f4dc9a; font-size: 15px; line-height: 1; }
 .mc-chip-split .mc-chip-x:hover { color: var(--nt-danger); background: #fdecec; }
 .mc-note.mc-warn { color: var(--nt-warn); }
-.mc-formats { display: grid; gap: 10px; padding: 0 18px 14px; }
-.mc-fmt { border: 1px solid var(--nt-line-2); border-radius: 10px; padding: 12px 14px; display: grid; gap: 6px; }
-.mc-fmt b { font-size: 15px; }
-.mc-fmt p { margin: 0 0 4px; font-size: 13px; color: var(--nt-muted); }
+/* Pick a format: one card per format (the picked one framed), the picked format's description,
+   facts and options, then the Draw bar. A format not offered is greyed out and locked; one that
+   doesn't fit tonight's field can still be picked (to change its options), and says why. */
+.mc-fcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; padding: 0 18px 14px; }
+.mc-fcard { position: relative; text-align: left; font: inherit; color: var(--nt-ink); background: var(--nt-surface); border: 2px solid var(--nt-line-2); border-radius: 12px; padding: 12px 14px; display: grid; gap: 3px; align-content: start; cursor: pointer; }
+.mc-fcard:hover { border-color: #a8a29e; }
+.mc-fcard.mc-on { border-color: var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); }
+.mc-fcard b { font-size: 15px; padding-right: 22px; }
+.mc-fpic { display: block; height: 44px; margin-bottom: 6px; } /* the format's pictogram (TOURNAMENT_FORMATS pic) */
+.mc-fpic svg { display: block; }
+.mc-fcard.mc-on .mc-fpic .dk { fill: var(--nt-accent); }
+.mc-fcard.mc-off .mc-fpic { opacity: .4; }
+.mc-fline { font-weight: 700; font-size: 13px; color: #c0562a; }
+.mc-ffit { font-size: 12px; color: var(--nt-muted); margin-top: 3px; }
+.mc-ffit b { font-size: 12px; color: var(--nt-ink-2); padding: 0; }
+.mc-fradio { position: absolute; top: 13px; right: 12px; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--nt-line-2); }
+.mc-fcard.mc-on .mc-fradio { border-color: var(--nt-accent); background: var(--nt-accent); box-shadow: inset 0 0 0 3px var(--nt-surface); }
+.mc-fcard.mc-off { cursor: not-allowed; background: var(--nt-surface-2); border-style: dashed; }
+.mc-fcard.mc-off:hover { border-color: var(--nt-line-2); }
+.mc-fcard.mc-off b, .mc-fcard.mc-off .mc-fline { color: var(--nt-faint, #a8a29e); }
+.mc-fcard.mc-off .mc-fradio { display: none; }
+.mc-fcard.mc-nofit .mc-ffit { color: var(--nt-warn); }
+.mc-fdetail { display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 18px; padding: 14px 18px 6px; border-top: 1px solid var(--nt-line); }
+.mc-fdetail h4 { margin: 0 0 6px; font-size: 16px; }
+.mc-fdetail p { margin: 0 0 8px; color: var(--nt-ink-2); max-width: 72ch; }
+.mc-fdetail ul { margin: 0 0 10px; padding-left: 18px; color: var(--nt-ink-2); font-size: 13px; }
+.mc-ffacts { margin: 0; display: grid; gap: 6px; align-content: start; font-size: 13px; }
+.mc-ffacts div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--nt-line); padding-bottom: 5px; }
+.mc-ffacts dt { color: var(--nt-muted); }
+.mc-ffacts dd { margin: 0; font-weight: 600; text-align: right; }
+.mc-fopts { display: flex; align-items: center; gap: 8px 10px; flex-wrap: wrap; margin: 0 0 10px; font-size: 13px; }
+.mc-fopts small { color: var(--nt-muted); font-size: 12px; }
+.mc-seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; }
+.mc-seg button { font: inherit; font-size: 12px; font-weight: 600; padding: 5px 10px; border: 0; background: var(--nt-surface); color: var(--nt-ink-2); cursor: pointer; }
+.mc-seg button + button { border-left: 1px solid var(--nt-line-2); }
+.mc-seg button.mc-on { background: var(--nt-header); color: var(--nt-header-ink); }
+.mc-pick > .mc-note { padding: 0 18px 14px; margin: 0; }
+@media (max-width: 900px) { .mc-fdetail { grid-template-columns: 1fr; } }
 .mc-check { display: flex; align-items: center; gap: 8px; padding: 2px 18px; font-size: 13px; cursor: pointer; }
 .mc-check small { color: var(--nt-muted); font-size: 12px; }
 .mc-check input { flex: none; }

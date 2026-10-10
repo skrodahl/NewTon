@@ -1776,8 +1776,98 @@ function _mcRefereesHTML(live) {
         <p class="mc-note">Players in live matches aren't suggested.</p></section>`;
 }
 
+// --- Match Controls before the draw: pick a format, then draw ---
+//
+// One card per format in TOURNAMENT_FORMATS (results-config.js), with what it means for tonight's
+// paid players; the picked one shows its description, facts and options, and the one Draw button
+// draws it. A format not offered (Global Settings → Formats to offer) is greyed out and can't be
+// picked; one that doesn't fit tonight's field can (its options may make it fit, e.g. Round Robin's
+// structure) and says why. Cup and Plate is drawn as single elimination with a Plate.
+
+/** The format picked at the draw, for the current tournament (null until one is picked). */
+let _mcPick = { tid: null, id: null };
+
 /**
- * Before the draw: the players to mark paid, add a player, the settings, Shuffle & Draw.
+ * The format of the last tournament drawn in this browser ('CP' for single elimination with a
+ * Plate), or null when there is none.
+ * @returns {string|null}
+ */
+function _mcLastFormatId() {
+    const list = typeof readTournamentsRegistry === 'function' ? readTournamentsRegistry() : [];
+    const drawn = list.filter(t => t && t.bracket && Array.isArray(t.matches) && t.matches.length && (!tournament || t.id !== tournament.id));
+    drawn.sort((a, b) => String(b.created || b.date || '').localeCompare(String(a.created || a.date || '')));
+    const t = drawn[0];
+    if (!t) return null;
+    return t.format === 'SE' && t.plate ? 'CP' : (t.format || 'DE');
+}
+
+/** A knockout of n players with a bronze final: its real matches (byes play none). */
+const _mcKnockoutMatches = n => n < 2 ? 0 : (n - 1) + (n >= 4 ? 1 : 0);
+
+/**
+ * What a format means for tonight's paid players: whether it can be drawn (and why not), the
+ * bracket or groups in words, roughly how many matches, and how many each player gets.
+ * @param {object} f - an entry of TOURNAMENT_FORMATS
+ * @param {number} paid
+ * @returns {{ok: boolean, why: string, fit: string, sum: string, matches: string, each: string, range: string}}
+ */
+function _mcFormatFit(f, paid) {
+    const rr = f.id === 'GROUPS' && typeof Groups !== 'undefined';
+    const single = rr && Groups.configSettings().structure === 'single';
+    const lim = rr ? Groups.limits() : f;
+    const out = { ok: true, why: '', fit: '', sum: '', matches: '–', each: '–', range: `${lim.minPlayers} to ${lim.maxPlayers}` };
+    if (rr) out.range = single ? '3 to 8 in one group' : '6 to 32';
+    if (paid < lim.minPlayers) return Object.assign(out, { ok: false, why: f.id === 'CP' ? 'From 5 players (a Cup of 8 or more)' : `Needs ${lim.minPlayers}+ paid players` });
+    if (paid > lim.maxPlayers) return Object.assign(out, { ok: false, why: `At most ${lim.maxPlayers} players${single ? ' in one group' : ''}` });
+    const n32 = Math.min(paid, 32), q = Math.max(0, paid - 32);
+    const size = calculateBracketSize(paid, f.draw || f.id);
+    const byes = paid > 32 ? 0 : size - paid;
+    const bracket = paid > 32 ? `32-player bracket · ${q} qualifier${q === 1 ? '' : 's'}` : `${size}-player bracket${byes ? ` · ${byes} bye${byes === 1 ? '' : 's'}` : ''}`;
+    if (f.id === 'DE') Object.assign(out, { fit: bracket, sum: bracket.replace(' · ', ', '), matches: `about ${2 * n32 - 2 + q}`, each: '2 or more' });
+    else if (f.id === 'SE') Object.assign(out, { fit: bracket, sum: bracket.replace(' · ', ', '), matches: String(_mcKnockoutMatches(n32) + q), each: '1 or more' });
+    else if (f.id === 'CP') {
+        const plateReal = size / 2 - byes;     // the Cup's real round 1 matches: their losers play the Plate
+        Object.assign(out, { fit: `Cup of ${size} · Plate of ${size / 2}`, sum: `Cup of ${size}${byes ? ` (${byes} bye${byes === 1 ? '' : 's'})` : ''}${q ? ` with ${q} qualifier${q === 1 ? '' : 's'}` : ''}, Plate of ${size / 2}`,
+            matches: `about ${_mcKnockoutMatches(n32) + q + _mcKnockoutMatches(plateReal)}`, each: byes ? '2 or more (1 for a bye who then loses)' : '2 or more' });
+    } else if (rr && single) {
+        Object.assign(out, { fit: `One group of ${paid}`, sum: `one group of ${paid}`, matches: String(paid * (paid - 1) / 2), each: String(paid - 1) });
+    } else if (rr) {
+        const sizes = Groups.groupSizes(paid), cfg = Groups.configSettings();
+        const groupMatches = sizes.reduce((s, n) => s + n * (n - 1) / 2, 0);
+        const a = cfg.cupEntry === 'half' ? Math.ceil(paid / 2) : sizes.reduce((s, n) => s + Math.min(2, n), 0), b = paid - a;
+        const cups = _mcKnockoutMatches(a) + (cfg.bCup && b >= 2 ? _mcKnockoutMatches(b) : 0);
+        const lo = Math.min(...sizes) - 1, hi = Math.max(...sizes) - 1;
+        Object.assign(out, { fit: Groups.describeSizes(paid), sum: `${Groups.describeSizes(paid).replace(/^\w/, c => c.toLowerCase())}, then the A${cfg.bCup && b >= 2 ? ' and B cups' : ' cup'}`,
+            matches: `${groupMatches} group + about ${cups} cup`, each: `${lo === hi ? lo : `${lo}–${hi}`} group, then the cups` });
+    }
+    return out;
+}
+
+/** Pick a format at the draw. */
+function _mcPickFormat(id) {
+    _mcPick = { tid: tournament ? tournament.id : null, id };
+    _mcRefresh(0);
+}
+
+/** Round Robin's options for this draw (Structure, To the A cup), starting from Global Settings. */
+function _mcRoundRobinChoice(key, value) {
+    const cur = Groups.configSettings();
+    Groups.setDrawChoice({ structure: cur.structure, cupEntry: cur.cupEntry, [key]: value });
+    _mcRefresh(0);
+}
+
+/** Draw the picked format (Cup and Plate: single elimination with a Plate). */
+function _mcDrawPicked() {
+    const f = TOURNAMENT_FORMATS.find(x => x.id === _mcPick.id);
+    if (!f) return;
+    if (typeof Plate !== 'undefined') Plate.setWanted(!!f.plate);
+    generateBracket(f.draw || f.id);
+}
+
+/**
+ * Before the draw: the players to mark paid and add, Pick a format (the cards, the picked
+ * format's description, facts and options, and the Draw bar), the settings for the picked format,
+ * and Seeding.
  * @returns {string}
  */
 function _mcSetupHTML() {
@@ -1791,54 +1881,75 @@ function _mcSetupHTML() {
         if (p.paid) return `<button type="button" class="mc-chip mc-paid" onclick="togglePaid(${p.id}); _mcRefresh();" title="Mark ${name} unpaid">${name}</button>`;
         return `<span class="mc-chip mc-unpaid mc-chip-split"><button type="button" onclick="togglePaid(${p.id}); _mcRefresh();" title="Mark ${name} paid">${name}</button><button type="button" class="mc-chip-x" onclick="removePlayer(${p.id}); _mcRefresh();" title="Remove ${name}" aria-label="Remove ${name}">&times;</button></span>`;
     }).join('');
+
+    // The cards: every format; the ones not offered greyed out and locked
+    const offered = new Set((typeof getVisibleFormats === 'function' ? getVisibleFormats() : TOURNAMENT_FORMATS).map(f => f.id));
+    const cards = TOURNAMENT_FORMATS.map(f => ({ f, fit: _mcFormatFit(f, paid), offered: offered.has(f.id) }))
+        .map(c => Object.assign(c, { can: c.offered && c.fit.ok }));
+    // the picked format: this tournament's pick; when it opens, the last tournament's format if it
+    // fits tonight, else the first offered one that fits, else the first offered
+    if (!tournament || _mcPick.tid !== tournament.id) {
+        const last = cards.find(c => c.f.id === _mcLastFormatId() && c.can);
+        _mcPick = { tid: tournament ? tournament.id : null, id: (last || cards.find(c => c.can) || cards.find(c => c.offered) || {}).f?.id || null };
+    }
+    const picked = cards.find(c => c.f.id === _mcPick.id && c.offered) || cards.find(c => c.offered);
+    if (picked) _mcPick.id = picked.f.id;
+
+    const cardHtml = c => {
+        const on = picked && c.f.id === picked.f.id;
+        const note = !c.offered ? 'Not offered: Global Settings → Formats to offer' : !c.fit.ok ? escapeHtml(c.fit.why) : `Tonight: <b>${escapeHtml(c.fit.fit)}</b>`;
+        return `<button type="button" class="mc-fcard${on ? ' mc-on' : ''}${c.offered ? (c.fit.ok ? '' : ' mc-nofit') : ' mc-off'}"${c.offered ? ` onclick="_mcPickFormat('${c.f.id}')"` : ' disabled'} aria-pressed="${on}">
+            <span class="mc-fradio"></span>${c.f.pic ? `<span class="mc-fpic">${c.f.pic}</span>` : ''}<b>${escapeHtml(c.f.name)}</b><span class="mc-fline">${escapeHtml(c.f.line || '')}</span><span class="mc-ffit">${note}</span></button>`;
+    };
+
+    // The picked format: description, facts, options
+    let detail = '';
+    if (picked) {
+        const f = picked.f, fit = picked.fit;
+        const single = f.id === 'GROUPS' && Groups.configSettings().structure === 'single';
+        const seg = (key, cur, opts) => `<span class="mc-seg">${opts.map(([v, label]) => `<button type="button" class="${v === cur ? 'mc-on' : ''}" onclick="_mcRoundRobinChoice('${key}', '${v}')">${label}</button>`).join('')}</span>`;
+        const rrOpts = f.id === 'GROUPS' ? `<div class="mc-fopts"><span>Structure</span>${seg('structure', Groups.configSettings().structure, [['groups', 'Groups and cups'], ['single', 'One group']])}${single ? '' : `<span>To the A cup</span>${seg('cupEntry', Groups.configSettings().cupEntry, [['top2', 'Top two'], ['half', 'Top half']])}`}<small>this draw only; Global Settings decide how it starts</small></div>` : '';
+        detail = `<div class="mc-fdetail"><div><h4>${escapeHtml(f.name)}</h4><p>${escapeHtml(single && f.aboutSingle ? f.aboutSingle : f.about || f.blurb)}</p>
+                <ul>${(f.bests || []).map(b => `<li>${escapeHtml(b)}</li>`).join('')}</ul>${rrOpts}</div>
+            <dl class="mc-ffacts"><div><dt>Players</dt><dd>${escapeHtml(fit.range)}</dd></div><div><dt>Matches tonight</dt><dd>${escapeHtml(fit.matches)}</dd></div><div><dt>Each player</dt><dd>${escapeHtml(fit.each)}</dd></div></dl></div>`;
+    }
     // Never a draw with an unpaid player in the list: a player who is there but not marked paid
-    // would be left out of the bracket. The buttons say so; generateCleanBracket() still refuses.
-    const formats = (typeof getVisibleFormats === 'function' ? getVisibleFormats() : [{ id: 'DE', name: 'Double Elimination Cup', blurb: '', minPlayers: 4, maxPlayers: 32 }]).map(fmt => {
-        const size = calculateBracketSize(paid, fmt.id);
-        // Round Robin follows its structure in Global Settings (one group, or groups and cups)
-        const rr = fmt.id === 'GROUPS' && typeof Groups !== 'undefined';
-        const single = rr && Groups.configSettings().structure === 'single';
-        const lim = rr ? Groups.limits() : fmt;
-        let label = !rr ? (paid > 32 ? `Draw 32 + ${paid - 32} qualifier${paid - 32 === 1 ? '' : 's'}` : `Draw ${size === 8 ? 'an' : 'a'} ${size}-player bracket`)
-            : single ? `Draw one group of ${paid}` : `Draw ${Groups.groupCount(Math.max(paid, lim.minPlayers))} groups`, ok = true;
-        if (unpaid > 0) { label = `${unpaid} player${unpaid === 1 ? '' : 's'} unpaid`; ok = false; }
-        else if (paid < lim.minPlayers) { label = `Needs ${lim.minPlayers}+ paid players`; ok = false; }
-        else if (paid > lim.maxPlayers) { label = `At most ${lim.maxPlayers} players${single ? ' in one group' : ''}`; ok = false; }
-        const blurb = !rr ? fmt.blurb : single ? 'Everybody plays everybody in one group; the table decides the placings'
-            : `Everybody plays everybody in groups, then an A cup and a B cup${Groups.configSettings().cupEntry === 'half' ? ' of the same size' : ''}`;
-        // Cup and Plate: the Play a Plate switch on single elimination's card, always off to start with
-        // (Global Settings → Offer Play a Plate can leave it out; Docs/CUP-AND-PLATE.md)
-        let plate = '';
-        if (fmt.id === 'SE' && typeof Plate !== 'undefined' && Plate.offered()) {
-            const can = Plate.possible(paid), want = can && Plate.wanted();
-            plate = `<label class="mc-switchrow mc-plate"><span class="mc-switch"><input type="checkbox"${want ? ' checked' : ''}${can ? '' : ' disabled'} onchange="Plate.setWanted(this.checked); _mcRefresh(0);"><span></span></span><span class="mc-plate-t">Play a Plate<small>${can ? 'Round 1 losers play a second knockout' : 'From 5 players'}</small></span></label>`;
-            if (want && ok) label += ' + Plate';
-        }
-        return `<div class="mc-fmt"><b>${escapeHtml(fmt.name)}</b><p>${escapeHtml(blurb || '')}</p>${plate}<button type="button" class="mc-btn mc-primary" onclick="generateBracket('${escapeHtml(fmt.id)}')"${ok ? '' : ' disabled'}>${label}</button></div>`;
-    }).join('');
+    // would be left out of the bracket. The button says so; generateCleanBracket() still refuses.
+    const canDraw = !!picked && picked.can && unpaid === 0;
+    const drawLabel = unpaid > 0 ? `${unpaid} player${unpaid === 1 ? '' : 's'} unpaid` : picked && picked.can ? `Draw ${escapeHtml(picked.f.name)} →` : picked ? escapeHtml(picked.fit.why) : 'No format offered';
+    const drawbar = `<div class="mc-drawbar mc-pickbar"><p>${picked && picked.fit.ok ? `<b>${paid} players</b> · ${escapeHtml(picked.f.name)} · ${escapeHtml(picked.fit.sum)}` : `<b>${paid} players</b>`}</p>
+        <button type="button" class="mc-btn mc-primary mc-big" onclick="_mcDrawPicked()"${canDraw ? '' : ' disabled'}>${drawLabel}</button></div>
+        <p class="mc-note${unpaid ? ' mc-warn' : ''}">${unpaid
+            ? `Everyone must be paid before the draw: ${unpaid} still unpaid. Click a name to mark it paid, or &times; to remove a player who isn't playing.`
+            : (players.length ? `All ${players.length} players are paid and go into the draw.` : 'Add the players first.')}</p>`;
+
+    // The settings for the picked format
     const p = config.points, l = config.legs, lanes = _mcLanes();
     const dl = rows => `<dl>${rows.map(([k, v]) => `<dt>${k}</dt><dd>${v}</dd>`).join('')}</dl>`;
-    const isSE = typeof getVisibleFormats === 'function' && getVisibleFormats().length === 1 && getVisibleFormats()[0].id === 'SE';
-    const legs = isSE
-        ? [['Regular rounds', `Bo${l.seRegularRounds || 3}`], ['Semifinal', `Bo${l.seSemifinal || 3}`], ['Bronze', `Bo${l.seBronze || 5}`], ['Final', `Bo${l.seFinal || 5}`]]
-        : [['Regular rounds', `Bo${l.regularRounds}`], ['Frontside semifinal', `Bo${l.frontsideSemifinal}`], ['Backside final', `Bo${l.backsideFinal}`], ['Grand Final', `Bo${l.grandFinal}`]];
+    const bo = v => `Bo${v || 3}`;
+    const pid = picked ? picked.f.id : 'DE';
+    const seLegs = [['Regular rounds', bo(l.seRegularRounds)], ['Quarterfinal', bo(l.seQuarterfinal)], ['Semifinal', bo(l.seSemifinal)], ['Bronze final', bo(l.seBronze)], ['Final', bo(l.seFinal)]];
+    const legs = pid === 'SE' ? seLegs
+        : pid === 'CP' ? seLegs.concat([['The Plate', 'the same, by its rounds']])
+        : pid === 'GROUPS' ? (Groups.configSettings().structure === 'single' ? [['Group matches', bo(l.groupMatches)]]
+            : [['Group matches', bo(l.groupMatches)], ['Cup rounds', bo(l.cupRounds)], ['Cup semifinal', bo(l.cupSemifinal)], ['Cup bronze final', bo(l.cupBronze)], ['Cup final', bo(l.cupFinal)]])
+        : [['Regular rounds', bo(l.regularRounds)], ['Frontside semifinal', bo(l.frontsideSemifinal)], ['Backside semifinal', bo(l.backsideSemifinal)], ['Backside final', bo(l.backsideFinal)], ['Grand final', bo(l.grandFinal)]];
+
     return `<div class="mc-col">
         <section class="mc-panel"><div class="mc-ph"><h3>Players<small>click a name to mark paid or unpaid</small></h3><button type="button" class="mc-link" onclick="showPage('registration')">Player Registration</button></div>
             ${players.length < (typeof Qualifiers !== 'undefined' ? Qualifiers.MAX_PLAYERS : 32) ? `<div class="mc-addrow"><input type="text" id="ccPlayerName" class="mc-text" placeholder="Add a player (found in the database, or created)" autocomplete="off" onkeydown="if (event.key === 'Enter') addPlayerFromCC()"><button type="button" class="mc-btn mc-primary" onclick="addPlayerFromCC()">Add</button></div>` : ''}
             <div class="mc-chips">${chips || '<span class="mc-note">No players yet.</span>'}</div></section>
+        <section class="mc-panel mc-pick"><div class="mc-ph"><h3>Pick a format<small>then draw</small></h3><button type="button" class="mc-link" onclick="showPage('config')">Formats to offer</button></div>
+            <div class="mc-fcards">${cards.map(cardHtml).join('')}</div>${detail}${drawbar}</section>
         <section class="mc-panel"><div class="mc-ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><button type="button" class="mc-link" onclick="showPage('config')">Global Settings</button></div>
             <div class="mc-settings">
                 <div><h4>Points</h4>${dl([['Taking part', p.participation], ['1st · 2nd · 3rd · 4th', `${p.first} · ${p.second} · ${p.third} · ${p.fourth}`], ['5–6th · 7–8th', `${p.fifthSixth} · ${p.seventhEighth}`], ['180 · High out · Short leg · Ton', `${p.oneEighty} · ${p.highOut} · ${p.shortLeg} · ${p.ton}`]])}</div>
-                <div><h4>Match length</h4>${dl(legs)}</div>
+                <div><h4>Match length${picked ? ` · ${escapeHtml(picked.f.name)}` : ''}</h4>${dl(legs)}</div>
                 <div><h4>Lanes</h4>${dl([['In use', lanes.usable.length ? lanes.usable.join(', ') : 'None'], ['Not in use', lanes.excluded.length ? lanes.excluded.join(', ') : 'None']])}</div>
             </div></section>
     </div>
     <div class="mc-col">
-        <section class="mc-panel"><div class="mc-ph"><h3>Shuffle &amp; Draw</h3></div><div class="mc-formats">${formats}</div>
-            <p class="mc-note${unpaid ? ' mc-warn' : ''}">${unpaid
-                ? `Everyone must be paid before the draw: ${unpaid} still unpaid. Click a name to mark it paid, or &times; to remove a player who isn't playing.`
-                : (players.length ? `All ${players.length} players are paid and go into the bracket.` : 'Add the players first.')}</p></section>
-        ${typeof Seeding !== 'undefined' ? Seeding.html() : ''}
+        ${(typeof Seeding !== 'undefined' && Seeding.html(pid)) || '<section class="mc-panel"><div class="mc-ph"><h3>Seeding<small>keeps the best players apart</small></h3></div><p class="mc-note">Off in Global Settings, so the draw is random.</p></section>'}
     </div>`;
 }
 
@@ -2429,7 +2540,7 @@ function _mcHighlights() {
     // The night in numbers: always the same six
     const sum = f => paid.reduce((s, p) => s + f(p), 0);
     const fmtId = typeof getFormat === 'function' ? getFormat() : 'DE';
-    const format = fmtId === 'GROUPS' ? Groups.formatName() : fmtId === 'SE' ? 'Single elimination' : 'Double elimination';
+    const format = fmtId === 'GROUPS' ? Groups.formatName() : fmtId === 'SE' ? (tournament.plate ? 'Cup and Plate' : 'Single elimination') : 'Double elimination';
     const facts = [
         [fmtId === 'GROUPS' ? 'Format' : 'Bracket', `${format} · ${tournament.bracketSize || players.length}`],
         ['Total points', sum(points)],

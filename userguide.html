@@ -44,7 +44,7 @@
         <li><div><strong>Configure</strong> — Visit the <strong>Config</strong> tab to set your club name, logo, point values, and leg counts. You only need to do this once.</div></li>
         <li><div><strong>Create</strong> — Click <strong>New Tournament</strong> and enter a name and date.</div></li>
         <li><div><strong>Register</strong> — Add players by name. Mark payment status as players arrive. NewTon DC Tournament Manager remembers names across tournaments via the Saved Players registry.</div></li>
-        <li><div><strong>Generate</strong> — Choose Single or Double Elimination and the bracket size, then click <strong>Generate Bracket</strong>. The draw is randomised automatically.</div></li>
+        <li><div><strong>Draw</strong> — In Match Controls, pick a format under <strong>Pick a format</strong> and click <strong>Draw</strong>. The bracket size follows the players; the draw is randomised automatically, or seeded.</div></li>
         <li><div><strong>Run</strong> — Manage matches from the bracket view. Assign lanes, record results, and track the tournament in real time.</div></li>
     </ol>
 
@@ -66,13 +66,13 @@
         <li><strong>Best for:</strong> time-limited events, warm-up tournaments, or large fields where DE isn't practical</li>
         <li><strong>Player count:</strong> 4 to 48 players. Same bracket sizing as DE — byes fill the unused slots automatically, and above 32 qualifiers decide the last places</li>
         <li><strong>Includes:</strong> a bronze final (3rd place play-off)</li>
-        <li><strong>Cup and Plate:</strong> switch on <strong>Play a Plate</strong> at the draw (from 5 players) and every round 1 loser plays on in the Plate, a second knockout of half the size, so everyone gets at least two matches (see <a href="#plate">Cup and Plate</a>)</li>
+        <li><strong>Cup and Plate:</strong> pick Cup and Plate at the draw (from 5 players) and every round 1 loser plays on in the Plate, a second knockout of half the size, so everyone gets at least two matches (see <a href="#plate">Cup and Plate</a>)</li>
     </ul>
 
     <h3 id="plate">Cup and Plate</h3>
     <p>Single elimination where the round 1 losers play a second knockout, the Plate. A classic at darts clubs.</p>
     <ul>
-        <li><strong>At the draw:</strong> the <strong>Play a Plate</strong> switch on the single elimination card in Shuffle &amp; Draw. It always starts off. Global Settings &rarr; <strong>Offer Play a Plate</strong> removes it for clubs that never play one</li>
+        <li><strong>At the draw:</strong> pick the <strong>Cup and Plate</strong> card in Match Controls. Clubs that never play one can untick it in Global Settings &rarr; <strong>Formats to offer</strong></li>
         <li><strong>Who plays the Plate:</strong> every round 1 loser, at a fixed place: the losers of round 1 match 1 and 2 meet in the Plate's first match, 3 and 4 in its second, and so on. A Plate match can start as soon as its two round 1 matches are played. A player with a bye in round 1 isn't in the Plate (their place is a walkover)</li>
         <li><strong>In the bracket:</strong> the Cup and the Plate back to back, the Cup running left to right and the Plate mirrored from the right, their finals facing each other. Nothing joins the two finals</li>
         <li><strong>Placings:</strong> the Cup's places are as always. The Plate orders the round 1 losers in the shared places: with 8 players its finalists are 5th&ndash;6th and its bronze pair 7th&ndash;8th; with 16, its semifinalists are 9th&ndash;12th. The finished view names the Plate winner</li>
@@ -163,8 +163,13 @@
 
     <h3>Generating the Bracket</h3>
     <p>Navigate to the <strong>Tournament Bracket</strong> tab. Match Controls open automatically if <strong>Automatically open Match Controls</strong> is enabled — otherwise click the Match Controls button to open them.</p>
-    <p>Match Controls in setup mode shows the player list, current configuration, and a <strong>Setup Actions</strong> panel on the right. The bracket size is determined automatically from the player count. Players can still be added from this screen.</p>
-    <p>Choose your format in the Setup Actions panel: click <strong>Generate Bracket</strong> under Double Elimination Cup or Single Elimination Cup. The draw is randomised automatically and empty slots are filled with byes.</p>
+    <p>Match Controls before the draw shows the players (still editable), <strong>Pick a format</strong>, the settings for the picked format, and Seeding.</p>
+    <ul>
+        <li><strong>Pick a format:</strong> a card for every format, each saying what it means for tonight's players (for example "16-player bracket · 4 byes" or "4 groups of 3"). It opens on the format of your last tournament</li>
+        <li><strong>The picked format</strong> shows how it works, the player range, roughly how many matches tonight and how many each player gets, and its options. Round Robin's Structure and To the A cup can be changed here for this draw only; Global Settings decide how they start</li>
+        <li><strong>Greyed out:</strong> a format not offered in Global Settings &rarr; Formats to offer is shown but can't be picked. One that doesn't fit tonight's players can be picked, and says why on the card and the Draw button</li>
+        <li><strong>Draw:</strong> one button draws the picked format. The draw is randomised (or seeded, if ticked) and empty slots are filled with byes</li>
+    </ul>
     <p><strong>The bracket cannot be regenerated once matches have started.</strong> Double-check your player list before generating. If a player arrives after the bracket is generated, Late Registration can place them into an empty bye slot — provided no live or completed matches exist downstream of that slot.</p>
 
     <hr>

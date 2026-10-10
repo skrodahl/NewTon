@@ -10,11 +10,11 @@ Single elimination (the **Cup**) where the round 1 losers play a second single e
 
 - **Not a new format: a switch on single elimination.** The draw, the Cup, seeding, qualifiers and
   the finals positions stay exactly as they are; the Plate is added to them.
-- **Play a Plate** is a switch on the single elimination card in Shuffle & Draw, decided at the
-  draw (that's when you know how many turned up and how long the night is). It **always starts
-  off**, so single elimination is unchanged unless asked for.
-- **Offer Play a Plate** in Global Settings, **on by default**: turned off, the switch isn't shown
-  at the draw at all, for a club that never plays a Plate (maintainer, 2026-10-09).
+- **At the draw: its own card** in Match Controls' Pick a format (since 2026-10-10; it started as a
+  Play a Plate switch on single elimination's card). Drawn as single elimination with a Plate
+  (`TOURNAMENT_FORMATS` entry `CP`: `draw: 'SE'`, `plate: true`).
+- **Global Settings → Formats to offer** has Cup and Plate like any format (the separate Offer Play a
+  Plate switch was folded into it; a config saved with it off starts with Cup and Plate unticked).
 - **From 8-player brackets up** (5 or more players). In a 4-player bracket round 1 is already the
   semifinals, whose losers play the bronze final, so there is nothing for a Plate to add.
 
@@ -112,8 +112,7 @@ No new settings.
   (as double elimination with qualifiers is always in the middle). With qualifiers, their column
   stays outside the Cup's round 1 on the left.
 - **Match Controls:** Cup and Plate matches in one queue, labelled Cup · Round 1, Plate · QF; Next
-  up as now. Shuffle & Draw: the Play a Plate switch on the single elimination card (unless Offer
-  Play a Plate is off).
+  up as now. At the draw: the Cup and Plate card in Pick a format.
 - **Winner dialog:** "Ola M. moves to P-QF1" for a Cup round 1 loser, as on the backside.
 - **Analytics:** the tournament record keeps `plate` (finalize and import), so Analytics names the format **Cup & Plate**. Plate matches are recorded like any other (achievements, matches and legs count; walkovers aren't recorded, as in every format).
 - **Help, user guide, llms.txt, web pages.**

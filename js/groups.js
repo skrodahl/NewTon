@@ -23,9 +23,25 @@ const Groups = (() => {
     // ---------- settings (Global Settings → Round Robin; each tournament keeps its own) ----------
     /** The largest group: 4, 5 or 6 (absent or anything else is 4, as before the setting). */
     const maxGroupOf = v => [5, 6].includes(Number(v)) ? Number(v) : 4;
-    /** Round Robin's settings in Global Settings now: structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup, maxGroup. */
+    // Structure and To the A cup chosen at the draw (Match Controls → Pick a format), for this
+    // tournament's draw only; Global Settings stay as they are
+    let drawChoice = null;
+    /**
+     * Set Round Robin's options for the next draw of the current tournament (null clears them).
+     * @param {{structure?: string, cupEntry?: string}|null} choice
+     */
+    function setDrawChoice(choice) {
+        drawChoice = choice && typeof tournament !== 'undefined' && tournament ? Object.assign({ tid: tournament.id }, choice) : null;
+    }
+    /** The draw choice, while it is for the current tournament and the draw hasn't been made. */
+    const activeChoice = () => drawChoice && typeof tournament !== 'undefined' && tournament && drawChoice.tid === tournament.id &&
+        !(tournament.bracket && all().length) ? drawChoice : null;
+    /** Round Robin's settings for the next draw: Global Settings, with the choices made at the draw:
+     * structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup, maxGroup. */
     function configSettings() {
-        const rr = (typeof config !== 'undefined' && config.roundRobin) || {};
+        const rr = Object.assign({}, (typeof config !== 'undefined' && config.roundRobin) || {});
+        const choice = activeChoice();
+        if (choice) { if (choice.structure) rr.structure = choice.structure; if (choice.cupEntry) rr.cupEntry = choice.cupEntry; }
         return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'top2' ? 'top2' : 'half',
             rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false, maxGroup: maxGroupOf(rr.maxGroup) };
     }
@@ -492,7 +508,7 @@ const Groups = (() => {
 
     return {
         isGroupId, isCupId, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
-        configSettings, settings, isSingle, limits, formatName, placeTier,
+        configSettings, setDrawChoice, settings, isSingle, limits, formatName, placeTier,
         groupList, groupMatches, standings, groupDone, allGroupsDone, cupFields,
         planCupReferees, avoidRematches, plannedRefereeFor, plannedRefereeText, cupMatchesOf, holdFor,
         isComplete, placements, roundName, moveUp
