@@ -30,11 +30,11 @@ Since v5.3.1, seeding does this by name instead: the mini-lens ranks on tourname
 ## Next
 *Ready for implementation when time permits*
 
-**First (maintainer, 2026-10-09): the two GitHub Actions items below.** Then the formats list and the Chalker iOS capture check (it waits for an iOS device to borrow), as decided 2026-10-06.
+**First (maintainer, 2026-10-09): the two GitHub Actions items below** (Node.js 20: done; Ubuntu 26: watch the first build after 2026-10-19). Then the formats list and the Chalker iOS capture check (it waits for an iOS device to borrow), as decided 2026-10-06.
 
 ### GitHub Actions: move off Node.js 20
 
-**Done 2026-10-10** (CHANGELOG.md, Unreleased): every action moved to its current major on Node.js 24, plus the digest step's missing `id: build`. To confirm: the next tagged build (or a manual run) pushes to both registries without the Node.js 20 warning.
+**Done and confirmed 2026-10-10** (v5.4.3): every action on its current major (Node.js 24), plus the digest step's missing `id: build`. The v5.4.3 builds pushed to both registries with no Node.js 20 warning; only the Ubuntu 26 notice below remains.
 
 Raised 2026-10-09, from the v5.4.2 build logs. Both workflows (`.github/workflows/docker-build.yml`, `docker-hub-publish.yml`) use actions that target Node.js 20, which GitHub has deprecated; for now the runner forces them onto Node.js 24 with a warning on every build. In use: `actions/checkout@v4`, `docker/setup-qemu-action@v3`, `docker/setup-buildx-action@v3`, `docker/login-action@v3`, `docker/metadata-action@v5`, `docker/build-push-action@v5`. Move each to its current major version (check each one's release notes for breaking changes, especially the Docker actions' inputs), then confirm a tagged build pushes to both GitHub Container Registry and Docker Hub. (The v5.4.2 build failures themselves were a Docker Hub outage: timeouts reaching `auth.docker.io` while pulling `tonistiigi/binfmt` and `moby/buildkit`; fixed by re-running the failed jobs, not by these changes.)
 
