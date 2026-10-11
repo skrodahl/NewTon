@@ -121,7 +121,8 @@ A weekly pub darts league runs a 6-player double-elimination tournament. NewTon 
 - `js/newton-db.js` — IndexedDB persistence layer with shared achievement helpers
 - `js/newton-history.js` — Analytics UI: dashboard, register, match detail rendering
 - `js/newton-stats.js` — achievement extraction from Chalker visit data
-- `css/landing.css` — separate stylesheet for landing page and documentation pages
+- `css/home.css` — the landing page's own stylesheet (`landing.html`, `landing-page.php`)
+- `css/landing.css` — stylesheet for the documentation pages (user guide, Architecture, Docker quickstart, release pages)
 - `chalker/` — standalone Chalker scoring PWA
 - `docker/` — Dockerfile, nginx configs, docker-compose files
 - `api/` — PHP endpoints: list, upload, delete tournaments + relay for remote backup

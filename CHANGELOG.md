@@ -8,6 +8,21 @@
 - Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
 - Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
 
+### Landing page: a fresh design
+
+- **A new landing page**, designed from scratch for visitors interested in the software (mockup `Docs/mockups/landing-redesign.html`, approved by the maintainer). Dark, warm and high-contrast, with the dartboard's red and green as the only colours, Insignia for the wordmark and every heading, Inter for text. From the top:
+  - **A navigation bar** that stays at the top: the wordmark **NewTon DC Tournament Manager** (NewTon DC is the club; the software has the full name), How it works, Formats, Built to last, **Download**, and a red Launch button.
+  - **The hero, in two columns:** "Run the whole darts night. *Offline.*", what it covers, **Launch Tournament Manager** and **Download** (the releases page), No account · No subscription · No cloud, and "Scoring at the board? Open the Chalker". On the right the bracket in a window frame with the Chalker over its corner, in front of a dartboard drawn in CSS (dark segments, a faint red and green doubles ring).
+  - **"From the door to the podium.":** the screenshots as a numbered night, in the order it happens: doors open (Player Registration), the draw, on the boards (Match Controls), at the oche (Chalker), the final (Tournament complete), the morning after (Analytics).
+  - **Pick Your Format** on dark, the pictograms recoloured for it, the lead line kept.
+  - **"Built for the room, not the cloud.":** works offline, yours not theirs, never loses a result (How it's built), free and open source (GitHub).
+  - **"Ready when you are.":** Try it now (Launch, the Chalker), Download (the latest release), Self-host (Docker quickstart); then User Guide, How it's built, Release notes, GitHub.
+  - **The footer:** the links, "No popups? No cookies!" and the 42.
+- Left out: the poster and the tagline "The Offline Authority in Darts" (its message is the headline's "Offline"); the story cards (their points are in the night and in Built to last); the qualifiers note.
+- **Its own stylesheet, `css/home.css`:** `css/landing.css` is shared by the documentation and release pages (about 80), which keep it unchanged until they are restyled. No inline styles or scripts (the server's `style-src 'self'`); the lightbox is `js/lightbox.js` as before. The search tags carry over with the full name and the new message (title, description, Open Graph, Twitter, structured data; 3–48 players); the share image is still the poster. `landing-page.php` is the same page with its server parts (redirect, GitHub URL, base URL, canonical tag; the Chalker at `chalker/`).
+- Tested in the browser: every local link, image and font loads; the lightbox opens and closes; desktop, 768 px, 390 px and 375 px wide without sideways scrolling.
+- Files changed: `landing.html`, `landing-page.php`, `css/home.css` (new), `Docs/mockups/landing-redesign.html` (new), `llms.txt`.
+
 ### Landing page: See It in Action in the night's order
 
 - The cards now follow a night: Bracket, Chalker, Player Registration, The Draw, **Match Controls** (moved from third, after the Chalker, to after The Draw), Analytics, Tournament Complete. The maintainer's order.

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NewTon DC Tournament Manager - Free, Open-Source Darts Tournament Software</title>
+<!-- MOCKUP (2026-10-11): a fresh take on the landing page. Paths are relative to Docs/mockups/.
+     Nothing here is wired into the live page; landing.html and landing-page.php are unchanged. -->
+<style>
+@font-face { font-family: 'Insignia'; src: url('../../fonts/Insignia-Regular.otf') format('opentype'); font-display: swap; }
+@font-face { font-family: 'Inter'; src: url('../../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+
+:root {
+    --ink: #141210;
+    --ink-2: #1e1b18;
+    --ink-3: #2b2723;
+    --ink-line: #34302b;
+    --on-ink: #f3eee6;
+    --on-ink-2: #b4aca1;
+    --paper: #f7f5f1;
+    --paper-2: #eeeae3;
+    --line: #ddd7cd;
+    --text: #1a1815;
+    --text-2: #5e574e;
+    --red: #d63b2b;
+    --red-dark: #b32f21;
+    --green: #2f8a57;
+    --radius: 14px;
+    --wrap: 1180px;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; }
+body { font-family: 'Inter', system-ui, sans-serif; background: var(--paper); color: var(--text); line-height: 1.55; -webkit-font-smoothing: antialiased; }
+img { max-width: 100%; display: block; }
+a { color: inherit; }
+.wrap { max-width: var(--wrap); margin: 0 auto; padding: 0 24px; }
+.display { font-family: 'Insignia', Georgia, serif; font-weight: 400; letter-spacing: .3px; line-height: 1.02; }
+.eyebrow { font-size: 13px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase; color: var(--red); }
+
+/* ---------- buttons ---------- */
+.btn { display: inline-flex; align-items: center; gap: 8px; font: inherit; font-weight: 650; font-size: 16px; text-decoration: none; border-radius: 10px; padding: 14px 22px; border: 2px solid transparent; transition: background .15s, border-color .15s, color .15s, transform .15s; }
+.btn:hover { transform: translateY(-1px); }
+.btn-red { background: var(--red); color: #fff; }
+.btn-red:hover { background: var(--red-dark); }
+.btn-ghost { border-color: var(--ink-line); color: var(--on-ink); }
+.btn-ghost:hover { border-color: var(--on-ink-2); }
+.btn-ink { background: var(--ink); color: var(--on-ink); }
+.btn-ink:hover { background: var(--ink-3); }
+.btn-line { border-color: var(--line); color: var(--text); background: #fff; }
+.btn-line:hover { border-color: var(--text-2); }
+.btn .arr { transition: transform .15s; }
+.btn:hover .arr { transform: translateX(3px); }
+
+/* ---------- nav ---------- */
+.nav { position: sticky; top: 0; z-index: 10; background: rgba(20, 18, 16, .92); backdrop-filter: blur(8px); border-bottom: 1px solid var(--ink-line); }
+.nav .wrap { display: flex; align-items: center; gap: 28px; height: 64px; }
+.brand { display: flex; align-items: center; gap: 10px; text-decoration: none; color: var(--on-ink); font-family: 'Insignia', Georgia, serif; font-size: 20px; white-space: nowrap; }
+.brand img { width: 32px; height: 32px; border-radius: 50%; }
+.nav-links { display: flex; gap: 24px; margin-left: auto; }
+.nav-links a { color: var(--on-ink-2); text-decoration: none; font-size: 15px; font-weight: 550; }
+.nav-links a:hover { color: var(--on-ink); }
+.nav .btn { padding: 9px 16px; font-size: 14px; }
+
+/* ---------- hero ---------- */
+.hero { position: relative; background: var(--ink); color: var(--on-ink); overflow: hidden; padding: 96px 0 112px; }
+/* a dartboard, very dark, behind the screenshots: segments, then the doubles ring in red and green */
+.board { position: absolute; width: 1040px; height: 1040px; right: -320px; top: 50%; margin-top: -520px; border-radius: 50%;
+    background: repeating-conic-gradient(from -9deg, #1b1815 0 18deg, #161411 18deg 36deg); opacity: .9; pointer-events: none; }
+.board::before { content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: repeating-conic-gradient(from -9deg, rgba(214, 59, 43, .38) 0 18deg, rgba(47, 138, 87, .34) 18deg 36deg);
+    -webkit-mask: radial-gradient(circle, transparent 0 66%, #000 66.2% 69%, transparent 69.2% 100%);
+            mask: radial-gradient(circle, transparent 0 66%, #000 66.2% 69%, transparent 69.2% 100%); }
+.board::after { content: ''; position: absolute; inset: 0; border-radius: 50%;
+    background: repeating-conic-gradient(from -9deg, rgba(214, 59, 43, .22) 0 18deg, rgba(47, 138, 87, .2) 18deg 36deg);
+    -webkit-mask: radial-gradient(circle, transparent 0 40%, #000 40.2% 42.6%, transparent 42.8% 100%);
+            mask: radial-gradient(circle, transparent 0 40%, #000 40.2% 42.6%, transparent 42.8% 100%); }
+.hero .wrap { position: relative; display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 48px; align-items: center; }
+.hero-copy { max-width: 560px; }
+.hero h1 { font-size: clamp(44px, 5.4vw, 78px); margin: 18px 0 22px; }
+.hero h1 em { font-style: normal; color: var(--red); }
+.hero-sub { font-size: clamp(17px, 1.6vw, 20px); color: var(--on-ink-2); }
+.hero-sub b { color: var(--on-ink); font-weight: 600; }
+.hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin: 34px 0 18px; }
+.hero-meta { font-size: 14px; color: var(--on-ink-2); display: flex; flex-wrap: wrap; gap: 6px 18px; }
+.hero-chalker { margin-top: 14px; font-size: 14px; color: var(--on-ink-2); }
+.hero-chalker a { color: var(--on-ink); font-weight: 650; text-decoration: none; border-bottom: 1px solid var(--ink-line); }
+.hero-chalker a:hover { border-color: var(--red); }
+.hero-meta span::before { content: '✓'; color: var(--green); font-weight: 800; margin-right: 6px; }
+
+/* the product, to the right of the text: the bracket runs past the column (the hero clips it at
+   the window's edge), the Chalker overlaps its lower left corner */
+.stage { position: relative; padding-bottom: 40px; }
+.window { position: relative; width: 122%; border-radius: 14px; background: #2a2622; padding: 10px; box-shadow: 0 30px 80px rgba(0, 0, 0, .5); }
+.window-bar { display: flex; gap: 6px; padding: 2px 4px 10px; }
+.window-bar i { width: 10px; height: 10px; border-radius: 50%; background: #4a443d; }
+.window img { border-radius: 6px; width: 100%; cursor: zoom-in; }
+.chalker-card { position: absolute; left: -36px; bottom: 0; width: 46%; max-width: 320px; border-radius: 16px; overflow: hidden; background: #222; padding: 8px; box-shadow: 0 30px 60px rgba(0, 0, 0, .55); }
+.chalker-card img { border-radius: 10px; cursor: zoom-in; }
+.chalker-card figcaption { color: var(--on-ink-2); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 8px 4px 2px; display: flex; justify-content: space-between; }
+.chalker-card figcaption b { color: var(--green); }
+
+/* ---------- sections ---------- */
+section { padding: 112px 0; scroll-margin-top: 64px; }
+.sec-head { max-width: 680px; margin-bottom: 64px; }
+.sec-head h2 { font-size: clamp(38px, 5vw, 60px); margin: 14px 0 16px; }
+.sec-head p { font-size: 19px; color: var(--text-2); }
+
+/* ---------- a night: the timeline ---------- */
+.night { position: relative; }
+.steps { position: relative; display: grid; gap: 96px; }
+.steps::before { content: ''; position: absolute; left: 27px; top: 10px; bottom: 10px; width: 2px; background: linear-gradient(var(--line), var(--line) 92%, transparent); }
+.step { position: relative; display: grid; grid-template-columns: 56px minmax(0, 5fr) minmax(0, 7fr); gap: 0 40px; align-items: center; }
+.step-dot { align-self: start; width: 56px; height: 56px; border-radius: 50%; background: var(--paper); border: 2px solid var(--line); display: grid; place-items: center; font-family: 'Insignia', Georgia, serif; font-size: 22px; color: var(--text); position: relative; z-index: 1; margin-top: 4px; }
+.step:hover .step-dot { border-color: var(--red); color: var(--red); }
+.step-when { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); }
+.step h3 { font-family: 'Insignia', Georgia, serif; font-weight: 400; font-size: clamp(28px, 3vw, 38px); line-height: 1.08; margin: 8px 0 14px; }
+.step p { color: var(--text-2); font-size: 17px; }
+.step .closer { margin-top: 14px; color: var(--text); font-weight: 650; }
+.shot { border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); background: #fff; box-shadow: 0 20px 50px rgba(26, 24, 21, .10); transition: transform .2s, box-shadow .2s; }
+.shot:hover { transform: translateY(-3px); box-shadow: 0 28px 60px rgba(26, 24, 21, .16); }
+.shot img { width: 100%; cursor: zoom-in; }
+
+/* ---------- formats ---------- */
+.formats { background: var(--ink); color: var(--on-ink); }
+.formats .sec-head p { color: var(--on-ink-2); }
+.formats .sec-head p em { font-style: normal; color: var(--on-ink); font-weight: 650; }
+.f-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 16px; }
+.f-card { background: var(--ink-2); border: 1px solid var(--ink-line); border-radius: var(--radius); padding: 18px 18px 22px; transition: border-color .15s, transform .15s; }
+.f-card:hover { border-color: #57504a; transform: translateY(-2px); }
+.f-pic { background: var(--ink); border-radius: 10px; padding: 18px 12px; margin-bottom: 18px; }
+.f-pic svg { width: 100%; height: auto; display: block; }
+/* the app's pictograms, recoloured by their fills for the dark ground; the final in red */
+.f-pic [fill="#6b7280"] { fill: #d9d1c4; }
+.f-pic [fill="#c4bdb6"] { fill: #5c554d; }
+.f-pic [stroke="#a8a29e"] { stroke: #6f675e; }
+.f-pic [stroke="#6b7280"] { stroke: #a39a8d; }
+.f-pic .dk { fill: var(--red); }
+.f-card h3 { font-size: 17px; font-weight: 700; }
+.f-card .line { color: var(--red); font-weight: 650; font-size: 15px; margin: 4px 0 8px; }
+.f-card p { color: var(--on-ink-2); font-size: 14.5px; }
+.f-note { margin-top: 36px; color: var(--on-ink-2); font-size: 15px; }
+.f-note b { color: var(--on-ink); font-weight: 600; }
+
+/* ---------- trust ---------- */
+.t-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 20px; }
+.t-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 30px 30px 32px; display: grid; grid-template-columns: 48px 1fr; gap: 4px 20px; }
+.t-ico { grid-row: span 3; width: 48px; height: 48px; border-radius: 12px; background: var(--paper-2); display: grid; place-items: center; }
+.t-ico svg { width: 24px; height: 24px; stroke: var(--text); fill: none; stroke-width: 1.8; stroke-linecap: round; stroke-linejoin: round; }
+.t-card h3 { font-size: 20px; font-weight: 700; }
+.t-card p { color: var(--text-2); }
+.t-card a { font-weight: 650; text-decoration: none; color: var(--red); margin-top: 6px; justify-self: start; }
+.t-card a:hover { text-decoration: underline; }
+
+/* ---------- get started ---------- */
+.start { background: var(--paper-2); }
+.s-grid { display: grid; grid-template-columns: 1.25fr 1fr 1fr; gap: 20px; }
+.s-card { background: #fff; border: 1px solid var(--line); border-radius: var(--radius); padding: 32px; display: flex; flex-direction: column; gap: 12px; }
+.s-card.lead { background: var(--ink); color: var(--on-ink); border-color: var(--ink); }
+.s-card .tag { font-size: 13px; font-weight: 700; letter-spacing: .12em; text-transform: uppercase; color: var(--text-2); }
+.s-card.lead .tag { color: var(--red); }
+.s-card h3 { font-family: 'Insignia', Georgia, serif; font-weight: 400; font-size: 30px; line-height: 1.1; }
+.s-card p { color: var(--text-2); flex: 1; }
+.s-card.lead p { color: var(--on-ink-2); }
+.s-card .btns { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 8px; }
+.s-links { display: flex; flex-wrap: wrap; gap: 10px 28px; margin-top: 36px; font-weight: 600; }
+.s-links a { text-decoration: none; color: var(--text); border-bottom: 2px solid var(--line); padding-bottom: 2px; }
+.s-links a:hover { border-color: var(--red); }
+
+/* ---------- footer ---------- */
+.foot { background: var(--ink); color: var(--on-ink-2); padding: 48px 0; font-size: 14px; }
+.foot .wrap { display: flex; flex-wrap: wrap; align-items: center; gap: 16px 32px; }
+.foot .brand { font-size: 18px; }
+.foot nav { display: flex; flex-wrap: wrap; gap: 8px 22px; }
+.foot nav a { text-decoration: none; }
+.foot nav a:hover { color: var(--on-ink); }
+.foot .cheeky { margin-left: auto; font-style: italic; }
+.foot .cheeky a { text-decoration: none; font-style: normal; color: #6a635a; }
+
+/* ---------- lightbox (js/lightbox.js) ---------- */
+.lightbox { display: none; position: fixed; inset: 0; z-index: 100; background: rgba(10, 9, 8, .88); align-items: center; justify-content: center; padding: 24px; }
+.lightbox.is-open { display: flex; }
+.lightbox-content { position: relative; max-width: 1400px; }
+.lightbox-content img { max-height: 88vh; border-radius: 10px; }
+.lightbox-close { position: absolute; top: -44px; right: 0; background: none; border: 0; color: #fff; font-size: 34px; cursor: pointer; }
+
+/* ---------- smaller screens ---------- */
+@media (max-width: 980px) {
+    .hero .wrap { grid-template-columns: minmax(0, 1fr); gap: 48px; }
+    .hero-copy { max-width: 640px; }
+    .hero h1 { font-size: clamp(44px, 9vw, 76px); }
+    .window { width: 100%; }
+    .chalker-card { left: -12px; width: 40%; }
+}
+@media (max-width: 1080px) {
+    .f-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+    .s-grid { grid-template-columns: 1fr 1fr; }
+    .s-card.lead { grid-column: 1 / -1; }
+}
+@media (max-width: 860px) {
+    .nav-links { display: none; }
+    .nav .btn { margin-left: auto; }
+    .step { grid-template-columns: 56px minmax(0, 1fr); gap: 20px 24px; }
+    .step .shot { grid-column: 2; }
+    .t-grid { grid-template-columns: 1fr; }
+    .f-grid { grid-template-columns: 1fr 1fr; }
+    section { padding: 80px 0; }
+}
+@media (max-width: 560px) {
+    .wrap { padding: 0 16px; }
+    .nav .brand { font-size: 15px; gap: 8px; }
+    .nav .brand img { width: 26px; height: 26px; }
+    .nav .btn { padding: 8px 12px; }
+    .hero-actions .btn { flex: 1 1 100%; justify-content: center; }
+    .hero { padding: 56px 0 72px; }
+    .stage { padding-bottom: 0; }
+    .chalker-card { display: none; }
+    .f-grid, .s-grid { grid-template-columns: 1fr; }
+    .steps::before { left: 19px; }
+    .step { grid-template-columns: 40px minmax(0, 1fr); gap: 16px; }
+    .step-dot { width: 40px; height: 40px; font-size: 17px; }
+    .t-card { grid-template-columns: 1fr; padding: 24px; }
+    .t-ico { grid-row: auto; margin-bottom: 8px; }
+    .foot .cheeky { margin-left: 0; }
+}
+</style>
+</head>
+<body>
+
+<header class="nav">
+    <div class="wrap">
+        <a class="brand" href="#top"><img src="../../images/logo.jpg" alt="">NewTon DC Tournament Manager</a>
+        <nav class="nav-links" aria-label="Sections">
+            <a href="#night">How it works</a>
+            <a href="#formats">Formats</a>
+            <a href="#trust">Built to last</a>
+            <a href="#start">Download</a>
+        </nav>
+        <a class="btn btn-red" href="../../tournament.html" target="_blank">Launch</a>
+    </div>
+</header>
+
+<main id="top">
+
+<!-- Hero: what it is, in one line, and the product itself -->
+<div class="hero">
+    <div class="board" aria-hidden="true"></div>
+    <div class="wrap">
+        <div class="hero-copy">
+            <p class="eyebrow">Darts tournament software · free and open source</p>
+            <h1 class="display">Run the whole darts night. <em>Offline.</em></h1>
+            <p class="hero-sub">Registration, the draw, every board and every result, the podium and the season standings. <b>In your browser, with no signup and no internet needed.</b></p>
+            <div class="hero-actions">
+                <a class="btn btn-red" href="../../tournament.html" target="_blank">Launch Tournament Manager <span class="arr">→</span></a>
+                <a class="btn btn-ghost" href="../../releases/">Download</a>
+            </div>
+            <p class="hero-meta"><span>No account</span><span>No subscription</span><span>No cloud</span></p>
+            <p class="hero-chalker">Scoring at the board? <a href="../../chalker/index.html" target="_blank">Open the Chalker →</a></p>
+        </div>
+
+        <div class="stage">
+            <div class="window">
+                <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div>
+                <img src="../../Screenshots/th-bracket-zoom.jpg" class="lightbox-trigger" data-full="../../Screenshots/tournament-bracket-zoom.png"
+                     alt="A double elimination bracket: played matches, a match ready to start, and the finals waiting">
+            </div>
+            <figure class="chalker-card">
+                <img src="../../Screenshots/th-chalker-scoreboard.jpg" class="lightbox-trigger" data-full="../../Screenshots/chalker-scoreboard.jpg"
+                     alt="The Chalker scoring a 501 match on lane 2">
+                <figcaption><span>Chalker · Lane 2</span><b>● Live</b></figcaption>
+            </figure>
+        </div>
+    </div>
+</div>
+
+
+<!-- A night, start to finish -->
+<section class="night" id="night">
+    <div class="wrap">
+        <div class="sec-head">
+            <p class="eyebrow">How a night runs</p>
+            <h2 class="display">From the door to the podium.</h2>
+            <p>One app carries the whole evening, and every result lands in your club's history.</p>
+        </div>
+
+        <div class="steps">
+            <div class="step">
+                <div class="step-dot">1</div>
+                <div>
+                    <p class="step-when">Doors open</p>
+                    <h3>Who&rsquo;s here, who&rsquo;s paid.</h3>
+                    <p>Add your regulars from the player database, or sign up walk-ins on the spot. One click marks a player paid, and the draw waits until everyone has: nobody is left out.</p>
+                    <p class="closer">Because retyping names is not a sport.</p>
+                </div>
+                <div class="shot"><img src="../../Screenshots/th-player-registration.jpg" class="lightbox-trigger" data-full="../../Screenshots/player-registration.png" alt="Player Registration: players counted, paid and unpaid" loading="lazy"></div>
+            </div>
+
+            <div class="step">
+                <div class="step-dot">2</div>
+                <div>
+                    <p class="step-when">The draw</p>
+                    <h3>Pick a format. Draw.</h3>
+                    <p>A card for every format, each showing what it means for tonight&rsquo;s players. Seeding from your own results keeps the best players apart; otherwise it&rsquo;s a fair random draw.</p>
+                    <p class="closer">The bracket doesn&rsquo;t play favourites.</p>
+                </div>
+                <div class="shot"><img src="../../Screenshots/th-tournament-setup.jpg" class="lightbox-trigger" data-full="../../Screenshots/tournament-setup.png" alt="Pick a format: a card for each format with a pictogram" loading="lazy"></div>
+            </div>
+
+            <div class="step">
+                <div class="step-dot">3</div>
+                <div>
+                    <p class="step-when">On the boards</p>
+                    <h3>One panel runs the room.</h3>
+                    <p>A tile for every board in play: click the winner to finish a match, a free lane to start the next. Referees are suggested, and nobody gets double-booked.</p>
+                    <p class="closer">Less admin. More darts.</p>
+                </div>
+                <div class="shot"><img src="../../Screenshots/th-match-controls.jpg" class="lightbox-trigger" data-full="../../Screenshots/match-controls.png" alt="Match Controls: a tile for each live match, the free lanes and the next match" loading="lazy"></div>
+            </div>
+
+            <div class="step">
+                <div class="step-dot">4</div>
+                <div>
+                    <p class="step-when">At the oche</p>
+                    <h3>Scan it or send it.</h3>
+                    <p>Phones and tablets at the boards keep the score with the Chalker. Matches go out and results come back by QR code or over your own network, with every 180, high out and short leg.</p>
+                    <p class="closer">No shouting results across the room.</p>
+                </div>
+                <div class="shot"><img src="../../Screenshots/th-chalker-scoreboard.jpg" class="lightbox-trigger" data-full="../../Screenshots/chalker-scoreboard.jpg" alt="The Chalker scoring a 501 match" loading="lazy"></div>
+            </div>
+
+            <div class="step">
+                <div class="step-dot">5</div>
+                <div>
+                    <p class="step-when">The final</p>
+                    <h3>Give the winner their moment.</h3>
+                    <p>A podium with the night&rsquo;s highlights (most 180s, shortest leg, highest out), made to be photographed for the club chat.</p>
+                    <p class="closer">The night ends. The record doesn&rsquo;t.</p>
+                </div>
+                <div class="shot"><img src="../../Screenshots/th-celebration.jpg" class="lightbox-trigger" data-full="../../Screenshots/celebration.png" alt="Tournament complete: the podium and the night's highlights" loading="lazy"></div>
+            </div>
+
+            <div class="step">
+                <div class="step-dot">6</div>
+                <div>
+                    <p class="step-when">The morning after</p>
+                    <h3>Every night adds up.</h3>
+                    <p>Season standings, player profiles with form charts, finishes and averages, filtered to the nights that count. Members follow it on their phones.</p>
+                    <p class="closer">Settle the bar arguments.</p>
+                </div>
+                <div class="shot"><img src="../../Screenshots/th-analytics.jpg" class="lightbox-trigger" data-full="../../Screenshots/analytics.png" alt="Analytics: a player profile with form charts" loading="lazy"></div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Formats -->
+<section class="formats" id="formats">
+    <div class="wrap">
+        <div class="sec-head">
+            <p class="eyebrow">Formats</p>
+            <h2 class="display">Pick Your Format.</h2>
+            <p>Small night or <em>full house</em>, there&rsquo;s one for it.</p>
+        </div>
+        <div class="f-grid">
+            <div class="f-card"><div class="f-pic"><svg viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 8.5H19V35.5H16M19 16.5H22M34 16.5H40M80 8.5H77V35.5H80M77 27.5H74M62 27.5H56M48 21V23"/></g><g fill="#6b7280"><rect x="4" y="6" width="12" height="5" rx="1"/><rect x="4" y="33" width="12" height="5" rx="1"/><rect x="22" y="14" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="6" width="12" height="5" rx="1"/><rect x="80" y="33" width="12" height="5" rx="1"/><rect x="62" y="25" width="12" height="5" rx="1"/><rect x="40" y="23" width="16" height="9" rx="1.5"/></g><rect class="dk" x="40" y="12" width="16" height="9" rx="1.5" fill="#1f2937"/></svg></div><h3>Double Elimination</h3><p class="line">Two lives each.</p><p>Frontside and backside, then a grand final.</p></div>
+            <div class="f-card"><div class="f-pic"><svg viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H21.5V17.5H16M21.5 12.5H26M16 27.5H21.5V37.5H16M21.5 32.5H26M38 12.5H43.5V32.5H38M43.5 22.5H48M60 22.5H72"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="26" y="10" width="12" height="5" rx="1"/><rect x="26" y="30" width="12" height="5" rx="1"/><rect x="48" y="20" width="12" height="5" rx="1"/></g><rect class="dk" x="72" y="18" width="18" height="9" rx="1.5" fill="#1f2937"/></svg></div><h3>Single Elimination</h3><p class="line">One loss and out.</p><p>The shortest night, with a bronze final.</p></div>
+            <div class="f-card"><div class="f-pic"><svg viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H19V17.5H16M19 12.5H22M16 27.5H19V37.5H16M19 32.5H22M34 12.5H37V32.5H34M37 22.5H40M80 12.5H77V32.5H80M77 22.5H74"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="22" y="10" width="12" height="5" rx="1"/><rect x="22" y="30" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="10" width="12" height="5" rx="1"/><rect x="80" y="30" width="12" height="5" rx="1"/><rect x="60" y="18" width="14" height="9" rx="1.5"/></g><rect class="dk" x="40" y="18" width="14" height="9" rx="1.5" fill="#1f2937"/></svg></div><h3>Cup and Plate</h3><p class="line">Everyone plays twice.</p><p>Round 1 losers play on in a second knockout.</p></div>
+            <div class="f-card"><div class="f-pic"><svg viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M24 8H34V6.5H44M24 30H38V14.5H44M24 14H30V29.5H44M24 36H34V37.5H44M54 6.5H57V14.5H54M57 10.5H60M54 29.5H57V37.5H54M57 33.5H60"/></g><g fill="none" stroke="#6b7280" stroke-width="1"><rect x="4.5" y="4.5" width="19" height="13" rx="1.5"/><path d="M4.5 8.8H23.5M4.5 13.2H23.5"/><rect x="4.5" y="26.5" width="19" height="13" rx="1.5"/><path d="M4.5 30.8H23.5M4.5 35.2H23.5"/></g><g fill="#6b7280"><rect x="44" y="4" width="10" height="5" rx="1"/><rect x="44" y="12" width="10" height="5" rx="1"/><rect x="44" y="27" width="10" height="5" rx="1"/><rect x="44" y="35" width="10" height="5" rx="1"/><rect x="60" y="29.5" width="14" height="8" rx="1.5"/></g><rect class="dk" x="60" y="6.5" width="14" height="8" rx="1.5" fill="#1f2937"/></svg></div><h3>Round Robin</h3><p class="line">Everybody plays everybody.</p><p>Groups into an A and a B cup, or one group.</p></div>
+            <div class="f-card"><div class="f-pic"><svg viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M72 12.5H76V31.5H72M76 22H79"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="13" width="12" height="5" rx="1"/><rect x="4" y="26" width="12" height="5" rx="1"/><rect x="4" y="34" width="12" height="5" rx="1"/><rect x="22" y="5" width="12" height="5" rx="1"/><rect x="22" y="13" width="12" height="5" rx="1"/><rect x="22" y="26" width="12" height="5" rx="1"/><rect x="22" y="34" width="12" height="5" rx="1"/><rect x="40" y="5" width="12" height="5" rx="1"/><rect x="40" y="13" width="12" height="5" rx="1"/><rect x="40" y="26" width="12" height="5" rx="1"/><rect x="40" y="34" width="12" height="5" rx="1"/><rect x="60" y="10" width="12" height="5" rx="1"/><rect x="60" y="29" width="12" height="5" rx="1"/></g><rect class="dk" x="79" y="17.5" width="14" height="9" rx="1.5" fill="#1f2937"/></svg></div><h3>Swiss</h3><p class="line">Your results pick your opponent.</p><p>Fixed rounds, nobody out, the top four finish.</p></div>
+        </div>
+        <p class="f-note"><b>Up to 48 players:</b> above 32, qualifiers decide the last places.</p>
+    </div>
+</section>
+
+<!-- Why you can trust it -->
+<section class="trust" id="trust">
+    <div class="wrap">
+        <div class="sec-head">
+            <p class="eyebrow">Built to last</p>
+            <h2 class="display">Built for the room, not the cloud.</h2>
+            <p>Made by NewTon DC, a darts club, for darts clubs, and proven on club nights.</p>
+        </div>
+        <div class="t-grid">
+            <div class="t-card">
+                <div class="t-ico"><svg viewBox="0 0 24 24"><path d="M2 8.8a15 15 0 0 1 20 0M5 12.5a10 10 0 0 1 14 0M8.5 16a5 5 0 0 1 7 0"/><path d="M3 3l18 18"/></svg></div>
+                <h3>Works offline</h3>
+                <p>No Wi-Fi at the venue? It doesn&rsquo;t need any. Everything runs in your browser, and keeps running if the network drops.</p>
+            </div>
+            <div class="t-card">
+                <div class="t-ico"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+                <h3>Yours, not theirs</h3>
+                <p>No signup, no subscription, no tracking. Your results stay on your computer, or on your own server.</p>
+            </div>
+            <div class="t-card">
+                <div class="t-ico"><svg viewBox="0 0 24 24"><path d="M3 12a9 9 0 1 0 3-6.7L3 8"/><path d="M3 3v5h5"/><path d="M12 7v5l3 2"/></svg></div>
+                <h3>Never loses a result</h3>
+                <p>Every result is recorded in the tournament&rsquo;s history, so a mistake is undone, not patched by hand.</p>
+                <a href="../../architecture.html">How it&rsquo;s built →</a>
+            </div>
+            <div class="t-card">
+                <div class="t-ico"><svg viewBox="0 0 24 24"><path d="M8 7l-5 5 5 5M16 7l5 5-5 5M14 4l-4 16"/></svg></div>
+                <h3>Free and open source</h3>
+                <p>BSD licensed. Read the code, change it, run it anywhere. No features held back.</p>
+                <a href="https://github.com/skrodahl/NewTon">On GitHub →</a>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Get started: at the end, where the visitor has decided -->
+<section class="start" id="start">
+    <div class="wrap">
+        <div class="sec-head">
+            <p class="eyebrow">Get started</p>
+            <h2 class="display">Ready when you are.</h2>
+            <p>Try it right here, or take it with you.</p>
+        </div>
+        <div class="s-grid">
+            <div class="s-card lead">
+                <p class="tag">Try it now</p>
+                <h3>It runs in this browser.</h3>
+                <p>Nothing to install. Set up a test night with a few names and see how it feels.</p>
+                <div class="btns">
+                    <a class="btn btn-red" href="../../tournament.html" target="_blank">Launch Tournament Manager <span class="arr">→</span></a>
+                    <a class="btn btn-ghost" href="../../chalker/index.html" target="_blank">Open the Chalker</a>
+                </div>
+            </div>
+            <div class="s-card">
+                <p class="tag">Download</p>
+                <h3>Take it to the venue.</h3>
+                <p>Unzip and open <code>tournament.html</code>. Runs from a laptop or a USB stick, no internet needed.</p>
+                <div class="btns"><a class="btn btn-ink" href="../../releases/">Latest release</a></div>
+            </div>
+            <div class="s-card">
+                <p class="tag">Self-host</p>
+                <h3>Your club&rsquo;s own server.</h3>
+                <p>A small Docker container, up in two minutes. Shared tournaments, Analytics for members, the Chalkers on your network.</p>
+                <div class="btns"><a class="btn btn-line" href="../../docker-quickstart.html">Docker quickstart</a></div>
+            </div>
+        </div>
+        <div class="s-links">
+            <a href="../../userguide.html">User Guide</a>
+            <a href="../../architecture.html">How it&rsquo;s built</a>
+            <a href="../../releases/">Release notes</a>
+            <a href="https://github.com/skrodahl/NewTon">GitHub</a>
+        </div>
+    </div>
+</section>
+
+</main>
+
+<footer class="foot">
+    <div class="wrap">
+        <a class="brand" href="#top"><img src="../../images/logo.jpg" alt="">NewTon DC Tournament Manager</a>
+        <nav aria-label="Footer">
+            <a href="https://github.com/skrodahl/NewTon">GitHub</a>
+            <a href="../../privacy.html">Privacy</a>
+            <a href="../../third-party-licenses.html">Licenses</a>
+            <a href="../../design-system.html">Design System</a>
+            <span>BSD-3-Clause</span>
+        </nav>
+        <p class="cheeky">No popups? No cookies! <a href="https://oraculon.biz" target="_blank" rel="noopener" title="A Suffusion of Yellow" aria-label="A Suffusion of Yellow">42</a></p>
+    </div>
+</footer>
+
+<div id="lightbox" class="lightbox">
+    <div class="lightbox-content">
+        <button class="lightbox-close" aria-label="Close">&times;</button>
+        <img id="lightboxImg" src="" alt="">
+    </div>
+</div>
+<script src="../../js/lightbox.js"></script>
+</body>
+</html>
