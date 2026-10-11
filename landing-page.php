@@ -222,18 +222,6 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
 
         <div class="showcase-item">
             <div class="showcase-image has-lightbox">
-                <img src="Screenshots/th-match-controls.jpg" alt="Match Controls with a tile for each live match, the free lanes and the next match, and a referee list where players who are playing or already refereeing are greyed out" loading="lazy" class="lightbox-trigger" data-full="Screenshots/match-controls.png">
-            </div>
-            <div class="showcase-text">
-                <span class="showcase-label">Match Controls</span>
-                <h3>One Panel to Run the Night.</h3>
-                <p>A tile for every board in play: click the winner to finish a match, click a free lane to start the next one. Referees are suggested, and anyone playing or already refereeing is greyed out, so nobody gets double-booked.</p>
-                <p class="showcase-closer">Less admin. More darts.</p>
-            </div>
-        </div>
-
-        <div class="showcase-item">
-            <div class="showcase-image has-lightbox">
                 <img src="Screenshots/th-player-registration.jpg" alt="Player Registration counting players, paid and unpaid, with the next step and each player marked paid or unpaid" loading="lazy" class="lightbox-trigger" data-full="Screenshots/player-registration.png">
             </div>
             <div class="showcase-text">
@@ -253,6 +241,18 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
                 <h3>Pick a Format. Draw. Play.</h3>
                 <p>A card for every format, each showing what it means for tonight&rsquo;s players. Pick one and draw. Seeding from your own results keeps the best players apart; otherwise it&rsquo;s a fair random draw.</p>
                 <p class="showcase-closer">The bracket doesn&rsquo;t play favourites.</p>
+            </div>
+        </div>
+
+        <div class="showcase-item">
+            <div class="showcase-image has-lightbox">
+                <img src="Screenshots/th-match-controls.jpg" alt="Match Controls with a tile for each live match, the free lanes and the next match, and a referee list where players who are playing or already refereeing are greyed out" loading="lazy" class="lightbox-trigger" data-full="Screenshots/match-controls.png">
+            </div>
+            <div class="showcase-text">
+                <span class="showcase-label">Match Controls</span>
+                <h3>One Panel to Run the Night.</h3>
+                <p>A tile for every board in play: click the winner to finish a match, click a free lane to start the next one. Referees are suggested, and anyone playing or already refereeing is greyed out, so nobody gets double-booked.</p>
+                <p class="showcase-closer">Less admin. More darts.</p>
             </div>
         </div>
 

@@ -8,6 +8,11 @@
 - Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
 - Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
 
+### Landing page: See It in Action in the night's order
+
+- The cards now follow a night: Bracket, Chalker, Player Registration, The Draw, **Match Controls** (moved from third, after the Chalker, to after The Draw), Analytics, Tournament Complete. The maintainer's order.
+- Files changed: `landing.html`, `landing-page.php` (the same).
+
 ### Swiss's pictogram: the top four's semifinals
 
 - The Swiss pictogram drew the last round's outer two matches straight into the final (the middle two connected to nothing) and a line running out of the final into nothing. Redrawn: three round columns (no lines: the next opponent comes from the table), a gap (the table picks the top four), then two semifinals bracketed into the final, as the finish is played. Spotted by the maintainer on the landing page.
