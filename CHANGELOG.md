@@ -8,6 +8,19 @@
 - Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
 - Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
 
+### The documentation and release pages: the landing page's look
+
+- **Every page that shares `css/landing.css`** (user guide, Architecture, Docker quickstart, automatic backup, privacy, REST API, QR protocol, QR generator, licenses, the releases page and all 68 versioned release pages) now has the new landing page's look, with **no change to any page's content or markup**: the stylesheet is rewritten with the pages' own class names.
+  - The back link at the top is a dark bar that stays at the top, the full name in Insignia.
+  - Headings in Insignia, text in Inter, code in Cascadia Code (all three already in `fonts/`); Contents as a white card with a small red label; links in the dartboard red.
+  - Code blocks and terminals on warm ink (the terminal's dots in the board's red, amber and green); tables and the Quick Start steps as white cards; inline code wraps on a phone instead of widening the page.
+  - Release pages: the Download button is red, the page's main action.
+  - The footer is a dark band, as on the landing page.
+- `css/landing.css` loses the old landing page's sections (header, hero, formats, get started, story cards, showcase), now in `css/home.css`; it goes from 1435 to about 670 lines. The QR generator's own rules keep their layout in the new colours.
+- The pages preloaded Manrope, which they no longer use; the preload is now Inter (77 pages; `tournament.html` still uses Manrope and is unchanged).
+- Tested in the browser: the user guide, Docker quickstart, REST API, the releases page, QR generator and Design System at desktop width; twelve pages (two of them old release pages) at 375 px without sideways scrolling.
+- Files changed: `css/landing.css`, the font preload in every page that uses it (`*.html`, `releases/*.html`).
+
 ### Landing page: a fresh design
 
 - **A new landing page**, designed from scratch for visitors interested in the software (mockup `Docs/mockups/landing-redesign.html`, approved by the maintainer). Dark, warm and high-contrast, with the dartboard's red and green as the only colours, Insignia for the wordmark and every heading, Inter for text. From the top:
