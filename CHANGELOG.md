@@ -1,4 +1,8 @@
-## Unreleased
+## **v5.4.4** — Run the whole darts night. Offline. (2026-10-11)
+
+### Release
+
+- Version 5.4.4: `APP_VERSION` and `CHALKER_VERSION`, Chalker cache busters (`chalker.js?v=30`, `chalker-v127`), release pages `releases/index.html` and `releases/v5.4.4.html`, `sitemap.xml`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.4.md`; `llms.txt` (the Dashboard's top 10 and Latest tournaments) and the help reviewed; the release template's font preload is Inter (`releases/README.md`). The font preload in the existing versioned release pages was changed with the restyle (Manrope → Inter), the only change to them.
 
 ### The format, wherever tournaments are listed
 

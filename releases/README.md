@@ -194,7 +194,7 @@ Everything else — tagline, release notes markdown in `Docs/ReleaseNotes/`, sit
     <meta name="description" content="NewTon DC Tournament Manager vX.X.X release notes. {one-line summary}.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
-    <link rel="preload" href="../fonts/Manrope-VariableFont_wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="../css/landing.css">
 </head>
 <body>

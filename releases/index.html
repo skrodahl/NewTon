@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.4.3 &mdash; Swiss Precision</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.4.3 release notes. A new tournament format, Swiss, and a draw rebuilt around picking a format; a double round robin for Round Robin.">
+    <title>v5.4.4 &mdash; Run the whole darts night. Offline.</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.4.4 release notes. A new website, designed from scratch, with the documentation pages in the same look; the format wherever tournaments are listed; a fuller top 10 in Analytics.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,89 +17,82 @@
 
 <div class="docs-content">
 
-    <h1>Swiss Precision</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.3 &mdash; October 10, 2026</p>
+    <h1>Run the whole darts night. Offline.</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.4 &mdash; October 11, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.3" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.3</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.4" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.4</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#pick">Pick a Format</a></li>
-            <li><a href="#swiss">Swiss</a></li>
-            <li><a href="#round-robin">Round Robin</a></li>
+            <li><a href="#website">A New Website</a></li>
+            <li><a href="#format">The Format, Wherever Tournaments Are Listed</a></li>
+            <li><a href="#top10">Analytics: A Fuller Top 10</a></li>
             <li><a href="#smaller">Smaller Things</a></li>
             <li><a href="#migration">Migration</a></li>
         </ol>
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>A new tournament format, <strong>Swiss</strong>: a fixed number of rounds, nobody knocked out, every round pairing players with the same record. And a new way to start a night: the draw is rebuilt around <strong>picking a format</strong>, with a card for each one that tells you what it means for tonight&rsquo;s players before you draw.</p>
-    <p>Round Robin gets a <strong>double round robin</strong> for small groups, and the lanes in Match Controls stop moving about.</p>
+    <p>A new face. The website is designed from scratch for people discovering the software: what it does, how a club night runs with it, the formats, why it can be trusted, and how to start. The documentation and release pages wear the same look, and the Design System page documents it.</p>
+    <p>In the app, a tournament&rsquo;s format now shows wherever tournaments are listed, and the Analytics Dashboard&rsquo;s top 10 tells you a little more at a glance.</p>
 
     <hr>
 
-    <h2 id="pick">Pick a Format</h2>
-    <p>Before the draw, Match Controls now shows a card for every format, each with a small pictogram of its shape:</p>
+    <h2 id="website">A New Website</h2>
     <ul>
-        <li><strong>What it means tonight:</strong> &ldquo;16-player bracket · 4 byes&rdquo;, &ldquo;Cup of 16 · Plate of 8&rdquo;, &ldquo;3 groups of 4&rdquo;, &ldquo;4 rounds, then the top 4&rdquo;.</li>
-        <li><strong>Pick one</strong> and it opens below: how it works, the player range, <strong>roughly how many matches tonight</strong> and how many each player gets, and its options. One <strong>Draw</strong> button draws it.</li>
-        <li><strong>It opens on the format of your last tournament</strong>, the club&rsquo;s habit.</li>
-        <li><strong>Options at the draw:</strong> Round Robin&rsquo;s structure and how players reach the A cup, Swiss&rsquo;s rounds and finish, for that night only. Global Settings decide how they start.</li>
-        <li><strong>Formats you don&rsquo;t offer</strong> stay on the screen, greyed out, so you can see what exists. One that doesn&rsquo;t fit tonight&rsquo;s field can still be picked and says why.</li>
-        <li><strong>Cup and Plate</strong> is now a format of its own, on its own card and in Formats to offer.</li>
-        <li><strong>Settings for this tournament</strong> show the picked format&rsquo;s match lengths.</li>
+        <li><strong>The landing page, designed from scratch.</strong> Dark and warm, with the dartboard&rsquo;s red as the one accent. It opens with &ldquo;Run the whole darts night. Offline.&rdquo; beside the bracket and the Chalker, with <strong>Launch</strong> and <strong>Download</strong> right there.</li>
+        <li><strong>A night, start to finish:</strong> the screenshots become a numbered timeline, in the order a night happens: doors open, the draw, on the boards, at the oche, the final, the morning after.</li>
+        <li><strong>Pick Your Format</strong> shows each format&rsquo;s pictogram, the same ones as at the draw: &ldquo;Small night or full house, there&rsquo;s one for it.&rdquo;</li>
+        <li><strong>Built for the room, not the cloud:</strong> works offline, your data stays yours, never loses a result, free and open source.</li>
+        <li><strong>Getting started</strong> comes last, where you have decided: try it in the browser, download it, or host it on your own server.</li>
+        <li><strong>The documentation and release pages</strong> (user guide, Architecture, Docker quickstart, the REST API and QR pages, privacy, every release page) share the new look, with the content unchanged: a dark bar at the top, Insignia headings, easier-to-read text, code on dark, and the Download button in red.</li>
+        <li><strong>The Design System page</strong> documents the new design, drawn with the site&rsquo;s own styles: the palette, the typefaces, the buttons and cards.</li>
+        <li><strong>The Architecture page</strong> is brought up to date: how every format is built from the same progression tables, the real storage keys, and the limits as they are now (48 players with qualifiers).</li>
+        <li><strong>Insignia stays.</strong> The typeface from the maintainer&rsquo;s first darts is the wordmark and every heading.</li>
     </ul>
 
     <hr>
 
-    <h2 id="swiss">Swiss</h2>
+    <h2 id="format">The Format, Wherever Tournaments Are Listed</h2>
     <ul>
-        <li><strong>A fixed number of rounds,</strong> and nobody is knocked out: by players (4 rounds for 9&ndash;16, 5 for 17&ndash;32) or a number you choose.</li>
-        <li><strong>Every round pairs players with the same record who haven&rsquo;t met:</strong> the table in order, 1st against 2nd, 3rd against 4th, never a rematch when there&rsquo;s another way. Round 1 is random, or with seeding the top half against the bottom half.</li>
-        <li><strong>Odd numbers:</strong> one player sits out each round, never the same player twice, and the bye counts as a win.</li>
-        <li><strong>The table:</strong> wins, then opponents&rsquo; wins (beating strong players counts for more), then leg difference, then legs won.</li>
-        <li><strong>The finish:</strong> the top four play semifinals (1st against 4th, 2nd against 3rd), a bronze final and a final. Or the table decides.</li>
-        <li><strong>Rounds draw themselves:</strong> when the last result of a round is entered, the next round appears. A wrong result in the round just finished can be undone, taking the next round back with it, as long as nothing in it has started.</li>
-        <li><strong>On the bracket page,</strong> each round is a column of its matches, then the top four. Select a match and both players&rsquo; matches across the rounds light up.</li>
-        <li><strong>In Match Controls,</strong> the table sits beside the queue, with the top four marked.</li>
-        <li>Swiss has its own match lengths and its own panel in Global Settings.</li>
+        <li><strong>Tournament Setup&rsquo;s list of tournaments</strong> has a Format column: Double elim., Single elim., Cup &amp; Plate, Round robin, Swiss. A tournament not yet drawn shows a dash.</li>
+        <li><strong>The Load tournament dialog</strong> shows the format too (&ldquo;Not drawn yet&rdquo; before the draw).</li>
+        <li><strong>The draw dialog</strong> names Cup and Plate as Cup and Plate, not Single Elimination.</li>
+        <li><strong>Analytics&rsquo; Dashboard</strong> shows the format in Latest tournaments.</li>
     </ul>
 
     <hr>
 
-    <h2 id="round-robin">Round Robin</h2>
-    <ul>
-        <li><strong>Play each other: Twice.</strong> One group can now be a double round robin: when everybody has played everybody once, the return round follows in the same order with the players swapped. Both meetings count in the table.</li>
-        <li><strong>Fewer, fuller groups:</strong> with Top half, the draw makes as few groups as fit. 12 players are now 3 groups of 4 (3 group matches each) instead of 4 groups of 3 (2 each), with the same cups.</li>
-    </ul>
+    <h2 id="top10">Analytics: A Fuller Top 10</h2>
+    <p>The Dashboard&rsquo;s Leaderboard top 10 now shows <strong>W&ndash;L</strong>, <strong>Attendance</strong> and <strong>Achievements</strong> beside Played, 1st and Points: a few more numbers at a glance, without turning it into the full Leaderboard.</p>
 
     <hr>
 
     <h2 id="smaller">Smaller Things</h2>
     <ul>
-        <li><strong>The lanes stay put:</strong> Match Controls&rsquo; row of lanes lists every lane in its place, the busy ones dimmed, so a lane never moves under the pointer.</li>
-        <li><strong>The landing page</strong> shows the new draw, and Swiss joins Pick Your Format.</li>
-        <li><strong>Behind the scenes,</strong> the Docker images are built with current GitHub Actions.</li>
+        <li><strong>Swiss&rsquo;s pictogram</strong> shows the top four&rsquo;s semifinals before the final, as the finish is played.</li>
+        <li><strong>Swiss&rsquo;s line</strong> is now &ldquo;Your results pick your opponent.&rdquo;</li>
     </ul>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
-    <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Swiss, the double round robin and the new settings are stored in new fields; tournaments and settings without them work exactly as before. The Offer Play a Plate setting from v5.4.2 is now Cup and Plate in Formats to offer: a setup that had it off keeps Cup and Plate not offered. The export format is unchanged. A Swiss tournament needs v5.4.3 or later to open.</p>
-    <p>This release moves <code>:latest</code> forward to v5.4.3. Installed Chalker apps refresh automatically on their next online launch.</p>
+    <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Nothing stored has changed; the export format is unchanged.</p>
+    <p>This release moves <code>:latest</code> forward to v5.4.4. Installed Chalker apps refresh automatically on their next online launch.</p>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.4.3 &mdash; Swiss Precision.</em></p>
+    <p><em>NewTon DC Tournament Manager v5.4.4 &mdash; Run the whole darts night. Offline.</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.3" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.3</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.4" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.4</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
+        <li><a href="v5.4.4.html">v5.4.4</a> &mdash; October 11, 2026 &mdash; Run the whole darts night. Offline.</li>
         <li><a href="v5.4.3.html">v5.4.3</a> &mdash; October 10, 2026 &mdash; Swiss Precision.</li>
         <li><a href="v5.4.2.html">v5.4.2</a> &mdash; October 9, 2026 &mdash; All the Dishes Rattle in the Cupboards.</li>
         <li><a href="v5.4.1.html">v5.4.1</a> &mdash; October 9, 2026 &mdash; Under Pressure.</li>
