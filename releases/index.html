@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.4.4 &mdash; Run the whole darts night. Offline.</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.4.4 release notes. A new website, designed from scratch, with the documentation pages in the same look; the format wherever tournaments are listed; a fuller top 10 in Analytics.">
+    <title>v5.4.5 &mdash; Look Sharp!</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.4.5 release notes. Loser drops in the bracket you can follow, the bracket centre stage on the website, the README rewritten, and the Docker guides on port 2020.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,81 +17,74 @@
 
 <div class="docs-content">
 
-    <h1>Run the whole darts night. Offline.</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.4 &mdash; October 11, 2026</p>
+    <h1>Look Sharp!</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.5 &mdash; October 11, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.4" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.4</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.5" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.5</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#website">A New Website</a></li>
-            <li><a href="#format">The Format, Wherever Tournaments Are Listed</a></li>
-            <li><a href="#top10">Analytics: A Fuller Top 10</a></li>
-            <li><a href="#smaller">Smaller Things</a></li>
+            <li><a href="#bracket">The Bracket: Loser Drops You Can Follow</a></li>
+            <li><a href="#website">The Website</a></li>
+            <li><a href="#readme">The README, Rewritten</a></li>
+            <li><a href="#docker">Docker: Port 2020</a></li>
             <li><a href="#migration">Migration</a></li>
         </ol>
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>A new face. The website is designed from scratch for people discovering the software: what it does, how a club night runs with it, the formats, why it can be trusted, and how to start. The documentation and release pages wear the same look, and the Design System page documents it.</p>
-    <p>In the app, a tournament&rsquo;s format now shows wherever tournaments are listed, and the Analytics Dashboard&rsquo;s top 10 tells you a little more at a glance.</p>
+    <p>The bracket is what everything on a club night runs around, and this release gives it its due. In the app, the line that shows where a match&rsquo;s loser goes now takes a clear, deliberate route. On the website, the bracket gets its own step in How a night runs. The README is rewritten to match the website, there&rsquo;s a new image for when the site is shared, and the Docker guide gives the right address again.</p>
 
     <hr>
 
-    <h2 id="website">A New Website</h2>
+    <h2 id="bracket">The Bracket: Loser Drops You Can Follow</h2>
+    <p>Click a match in a double elimination bracket and a dashed line shows where its loser goes on the backside.</p>
     <ul>
-        <li><strong>The landing page, designed from scratch.</strong> Dark and warm, with the dartboard&rsquo;s red as the one accent. It opens with &ldquo;Run the whole darts night. Offline.&rdquo; beside the bracket and the Chalker, with <strong>Launch</strong> and <strong>Download</strong> right there.</li>
-        <li><strong>A night, start to finish:</strong> the screenshots become a numbered timeline, in the order a night happens: doors open, the draw, on the boards, at the oche, the final, the morning after.</li>
-        <li><strong>Pick Your Format</strong> shows each format&rsquo;s pictogram, the same ones as at the draw: &ldquo;Small night or full house, there&rsquo;s one for it.&rdquo;</li>
-        <li><strong>Built for the room, not the cloud:</strong> works offline, your data stays yours, never loses a result, free and open source.</li>
-        <li><strong>Getting started</strong> comes last, where you have decided: try it in the browser, download it, or host it on your own server.</li>
-        <li><strong>The documentation and release pages</strong> (user guide, Architecture, Docker quickstart, the REST API and QR pages, privacy, every release page) share the new look, with the content unchanged: a dark bar at the top, Insignia headings, easier-to-read text, code on dark, and the Download button in red.</li>
-        <li><strong>The Design System page</strong> documents the new design, drawn with the site&rsquo;s own styles: the palette, the typefaces, the buttons and cards.</li>
-        <li><strong>The Architecture page</strong> is brought up to date: how every format is built from the same progression tables, the real storage keys, and the limits as they are now (48 players with qualifiers).</li>
-        <li><strong>Insignia stays.</strong> The typeface from the maintainer&rsquo;s first darts is the wordmark and every heading.</li>
+        <li><strong>The line now bends halfway:</strong> out of the match, across in the gap nearest the middle, and straight into the player row it fills, an S or a Z. With the finals in the middle, that&rsquo;s usually the open space beside the finals.</li>
+        <li><strong>It never runs along another line.</strong> The bend is only placed where it crosses no match card and doesn&rsquo;t follow any of the bracket&rsquo;s own lines. Before, it turned in the gap just before the backside column, right on top of the backside&rsquo;s own forks, and was hard to follow.</li>
+        <li><strong>Where there&rsquo;s no such place,</strong> such as into the backside&rsquo;s first round, the line keeps its old route, which reads fine there. If that route shares its gap with a fork, the line now sits beside the fork rather than on it.</li>
+    </ul>
+    <p>Only how the bracket is drawn has changed. Results, progression and undo are untouched.</p>
+
+    <hr>
+
+    <h2 id="website">The Website</h2>
+    <ul>
+        <li><strong>The bracket, centre stage.</strong> How a night runs gets a new step 3, &ldquo;All night long&rdquo;: the whole double elimination bracket, full width, with what it does. Follow a player, click a match to see where the winner goes and where the loser drops, finals in the middle or on the right, every format drawn its own way.</li>
+        <li><strong>A new picture in the hero:</strong> an 8-player single elimination bracket with the final in the middle and a semifinal live, readable at a glance. The hero&rsquo;s pictures are now just pictures; the timeline below is where you click to see the screenshots full size.</li>
+        <li><strong>A new share image.</strong> When the site is shared in a chat or on social media, the preview shows the website&rsquo;s own look: the headline, the bracket and the Chalker.</li>
     </ul>
 
     <hr>
 
-    <h2 id="format">The Format, Wherever Tournaments Are Listed</h2>
-    <ul>
-        <li><strong>Tournament Setup&rsquo;s list of tournaments</strong> has a Format column: Double elim., Single elim., Cup &amp; Plate, Round robin, Swiss. A tournament not yet drawn shows a dash.</li>
-        <li><strong>The Load tournament dialog</strong> shows the format too (&ldquo;Not drawn yet&rdquo; before the draw).</li>
-        <li><strong>The draw dialog</strong> names Cup and Plate as Cup and Plate, not Single Elimination.</li>
-        <li><strong>Analytics&rsquo; Dashboard</strong> shows the format in Latest tournaments.</li>
-    </ul>
+    <h2 id="readme">The README, Rewritten</h2>
+    <p>The README on GitHub had grown one addition at a time. It now follows the website: the headline and share image, the three promises, how a night runs in seven steps, a table of the five formats with their player ranges, the features grouped by the night (before the draw, during, after the final, built to last), and the three ways to get started.</p>
+    <p>The description for AI services (<code>llms.txt</code>) now calls the software by its full name throughout: NewTon DC Tournament Manager. NewTon DC is the darts club that makes it.</p>
 
     <hr>
 
-    <h2 id="top10">Analytics: A Fuller Top 10</h2>
-    <p>The Dashboard&rsquo;s Leaderboard top 10 now shows <strong>W&ndash;L</strong>, <strong>Attendance</strong> and <strong>Achievements</strong> beside Played, 1st and Points: a few more numbers at a glance, without turning it into the full Leaderboard.</p>
-
-    <hr>
-
-    <h2 id="smaller">Smaller Things</h2>
-    <ul>
-        <li><strong>Swiss&rsquo;s pictogram</strong> shows the top four&rsquo;s semifinals before the final, as the finish is played.</li>
-        <li><strong>Swiss&rsquo;s line</strong> is now &ldquo;Your results pick your opponent.&rdquo;</li>
-    </ul>
+    <h2 id="docker">Docker: Port 2020</h2>
+    <p>The Docker guides now give the right address: <strong>http://localhost:2020</strong>. The container serves on port 2020 (&ldquo;Double 20&rdquo;, double tops), and the compose files publish the same port. The guides had said 8080. The tip for when port 2020 is already taken now shows the change that works: a different host port in <code>docker-compose.yml</code>.</p>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
     <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Nothing stored has changed; the export format is unchanged.</p>
-    <p>This release moves <code>:latest</code> forward to v5.4.4. Installed Chalker apps refresh automatically on their next online launch.</p>
+    <p>This release moves <code>:latest</code> forward to v5.4.5. Installed Chalker apps refresh automatically on their next online launch.</p>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.4.4 &mdash; Run the whole darts night. Offline.</em></p>
+    <p><em>NewTon DC Tournament Manager v5.4.5 &mdash; Look Sharp!</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.4" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.4</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.5" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.5</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
+        <li><a href="v5.4.5.html">v5.4.5</a> &mdash; October 11, 2026 &mdash; Look Sharp!</li>
         <li><a href="v5.4.4.html">v5.4.4</a> &mdash; October 11, 2026 &mdash; Run the whole darts night. Offline.</li>
         <li><a href="v5.4.3.html">v5.4.3</a> &mdash; October 10, 2026 &mdash; Swiss Precision.</li>
         <li><a href="v5.4.2.html">v5.4.2</a> &mdash; October 9, 2026 &mdash; All the Dishes Rattle in the Cupboards.</li>

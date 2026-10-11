@@ -1,4 +1,8 @@
-## Unreleased
+## **v5.4.5** — Look Sharp! (2026-10-11)
+
+### Release
+
+- Version 5.4.5: `APP_VERSION` and `CHALKER_VERSION`, Chalker cache busters (`chalker.js?v=31`, `chalker-v128`), release pages `releases/index.html` and `releases/v5.4.5.html`, `sitemap.xml`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.5.md`; `llms.txt` and the help reviewed (no changes needed beyond this version's own).
 
 ### Bracket: loser drops bend halfway
 
