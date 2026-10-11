@@ -165,7 +165,7 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
                         <li><b>Every format drawn its own way.</b> Cup and Plate back to back, groups beside their cups, Swiss into its top four.</li>
                     </ul>
                 </div>
-                <div class="shot"><img src="Screenshots/tournament-bracket-zoom.png" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.png" alt="The bracket following one player's path, finals in the middle" loading="lazy"></div>
+                <div class="shot"><img src="Screenshots/tournament-bracket-zoom.png" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.png" alt="The bracket with a match selected: the players' path to it, where the winner goes and the loser's drop to the backside, finals in the middle" loading="lazy"></div>
             </div>
 
             <div class="step">

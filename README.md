@@ -34,7 +34,7 @@ Analytics that grow with your club. Season leaderboards, player stats, and tourn
 6. **The final.** A podium with the night's highlights (most 180s, shortest leg, highest out), made to be photographed for the club chat.
 7. **The morning after.** Season standings, player profiles with form charts, finishes and averages, filtered to the nights that count. Members follow it on their phones.
 
-![The bracket, following one player's path](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
+![The bracket with a match selected: where the winner goes, and the loser's drop to the backside](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
 
 ![Match Controls: a tile for each live match, the free lanes and the next match](https://github.com/skrodahl/NewTon/blob/main/Screenshots/match-controls.png)
 

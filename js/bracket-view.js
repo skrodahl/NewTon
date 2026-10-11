@@ -671,8 +671,22 @@ const BracketView = (() => {
         const boxes = st.ids.map(i => ({ id: i, x0: pos[i].x, x1: pos[i].x + W, y0: pos[i].y, y1: pos[i].y + H }));
         const crosses = (xa, xb, yy, skip) => boxes.some(b => !skip.includes(b.id) && yy > b.y0 - 4 && yy < b.y1 + 4 &&
             Math.max(xa, xb) > b.x0 && Math.min(xa, xb) < b.x1);
+        // the middle of every gap between two columns of cards (where a loser drop may bend)
+        const colX = [...new Set(boxes.map(b => b.x0))].sort((a, b) => a - b);
+        const gaps = colX.slice(1).map((x, i) => [colX[i] + W, x]).filter(([a, b]) => b > a).map(([a, b]) => (a + b) / 2);
         const edges = [];
-        st.ids.forEach(src => ['winner', 'loser'].forEach(kind => {
+        // every vertical run drawn so far, [x, y from, y to]: a loser drop never bends along one
+        const vRuns = [];
+        const addRuns = path => {
+            let x = 0, y = 0;
+            (path.match(/[MHV][^MHV]+/g) || []).forEach(tok => {
+                const n = tok.slice(1).trim().split(/\s+/).map(Number);
+                if (tok[0] === 'M') { x = n[0]; y = n[1]; } else if (tok[0] === 'H') x = n[0];
+                else { vRuns.push([x, Math.min(y, n[0]), Math.max(y, n[0])]); y = n[0]; }
+            });
+        };
+        // the winner lines first, so the loser drops know where the forks run
+        ['winner', 'loser'].forEach(kind => st.ids.forEach(src => {
             const d = prog[src] && prog[src][kind]; if (!d) return;
             const [dst, slot] = d;
             const s = pos[src], t = pos[dst];
@@ -720,7 +734,21 @@ const BracketView = (() => {
                 // loser drops on selection: enter the player row they fill
                 const y1 = cy(src), y2 = always ? cy(dst) : slotY(dst, slot);
                 const adjacent = Math.abs(x2 - x1) <= Math.max(GX, CENTER_GAP, FINALS_GAP) + 1;
-                const mx = adjacent ? (x1 + x2) / 2 : x2 - dir * GX / 2;
+                let mx = adjacent ? (x1 + x2) / 2 : x2 - dir * GX / 2;
+                // a loser drop bends as near halfway as it can (an S or Z): in the column gap nearest
+                // halfway that crosses no card and runs along no line, clear of the target side's own
+                // forks in the gap before its column. Where there is none, it keeps the late bend
+                if (kind === 'loser' && !always && !adjacent) {
+                    const half = (x1 + x2) / 2, ya = Math.min(y1, y2), yb = Math.max(y1, y2), skip = [src, dst];
+                    const clear = x => !boxes.some(b => !skip.includes(b.id) && x > b.x0 - 4 && x < b.x1 + 4 && yb > b.y0 && ya < b.y1) &&
+                        !vRuns.some(([vx, a, b]) => Math.abs(vx - x) < 4 && b > ya && a < yb) &&
+                        !crosses(x1, x, y1, skip) && !crosses(x, x2, y2, skip);
+                    const between = x => (x - x1) * dir > 0 && (mx - x) * dir > 0;
+                    const best = gaps.filter(between).sort((a, b) => Math.abs(a - half) - Math.abs(b - half)).find(clear);
+                    if (best !== undefined) mx = best;
+                    // the late bend shares its gap with a fork: beside the fork, nearer the target card
+                    else if (vRuns.some(([vx, a, b]) => Math.abs(vx - mx) < 4 && b > ya && a < yb)) mx = x2 - dir * GX / 4;
+                }
                 if (kind === 'winner' && !adjacent && crosses(x1, mx, y1, [src, dst])) {
                     const yR = y1 < L.mid ? -56 : L.ch + 30, ox = x1 + dir * GX / 2;
                     path = `M${x1} ${y1} H${ox} V${yR} H${mx} V${y2} H${x2}`;
@@ -745,6 +773,7 @@ const BracketView = (() => {
             p.setAttribute('class', always ? 'bv-edge' + (assigned ? ' bv-known' : '') : 'bv-drop');
             svg.appendChild(p);
             edges.push({ src, dst, kind, el: p });
+            if (always) addRuns(path);
         }));
 
         // single elimination: a dashed line ties the bronze final to the final (finals on the right:

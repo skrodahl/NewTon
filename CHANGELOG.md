@@ -1,5 +1,14 @@
 ## Unreleased
 
+### Bracket: loser drops bend halfway
+
+- **A selected match's loser drop bent in the gap just before its target column**, where the backside's own winner lines fork into the next round: the dashed line climbed on top of those forks and was hard to follow (noticed by the maintainer looking for a screenshot). It now bends as near halfway as it can, an S or Z: out horizontally, down or up in the column gap nearest the middle, and horizontally into the player row it fills. A gap qualifies only if the bend crosses no card and runs along no other line; with the finals in the middle that is usually the open space beside the finals.
+- Where no gap qualifies, the late bend stays: drops into the backside's outer column (their last leg would cross the next column's cards; their gap has no forks), all drops with the finals on the right, and one drop in 32-player brackets. If the late bend's gap has a fork in it, the bend now sits beside the fork, nearer the target card, instead of on it.
+- To know where the forks run, the winner lines are drawn before the loser lines, and the vertical runs of the always-drawn lines are recorded. Only drawing changes: `bracket-view.js` never touches tournament data or the progression tables.
+- Tested in the browser: every loser drop in double elimination brackets of 8, 16 and 32 (finals in the middle and on the right) and with qualifiers (40): none crosses a card or runs along a line; 2 of 6, 6 of 14 and 13 of 30 bend near the middle with the finals in the middle. Single elimination, Cup and Plate, Round Robin and Swiss draw as before.
+- **A new bracket screenshot** (`Screenshots/tournament-bracket-zoom.png`, by the maintainer) for the landing page's bracket step and the README: a selected match, its loser's drop bending beside the finals. Alt texts say so (it said Follow).
+- Files changed: `js/bracket-view.js`, `Docs/BRACKET-REDESIGN.md`, `Screenshots/tournament-bracket-zoom.png`, `landing.html`, `landing-page.php`, `README.md`.
+
 ### Docker documentation: port 2020
 
 - **The documented host port was 8080**, but `docker-compose.yml` (and the SSL compose) publish `2020:2020`, so following the quick start led to a page that wasn't there. 2020 is the port by design ("Double 20", double tops; maintainer). Every `8080` in the current docs is now 2020: `http://localhost:2020`, `docker run -p 2020:2020`, the reverse-proxy and localhost-only examples, the troubleshooting steps.
