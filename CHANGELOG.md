@@ -8,6 +8,13 @@
 - Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
 - Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
 
+### Design System page: the new design; Architecture page: up to date
+
+- **The Design System page** documented the old design (browns, oranges and teal, Manrope, the old landing page's cards). Rebuilt to document the new one, still drawn with the site's own stylesheets (it now loads `css/home.css` as well as `css/landing.css`), so it shows the design as it is: the wordmark on ink with the dartboard; the palette (fourteen colours, each with its role); the type scale (Insignia display, section and card headings; Inter label, lead and body; Cascadia Code); buttons on ink and on paper; a format card, a trust card and the dark Get started card; a step of the night; the documentation components (contents, code, terminal, steps, table); the footer. `css/design-system.css` is rewritten to lay these out only. Swatches use classes, not inline styles (the server's `style-src 'self'`).
+- **The Architecture page** still described the app before the formats: a single `MATCH_PROGRESSION` table, "4 to 32" participants, and storage keys that are not the real ones. Now: the two tables (`DE_MATCH_PROGRESSION`, `SE_MATCH_PROGRESSION`); a new "Every format, from the same tables" (qualifiers, Cup and Plate, the cups and Swiss's top four merged in by `getProgressionTable()`, group and Swiss rounds progressing no one); the real keys (`dartsTournaments`, `currentTournament`, `tournament_{id}_history`, `dartsConfig`); the limits (48 players with qualifiers, a 64-slot table needed beyond; Round Robin 3–32, Swiss 4–48). The approach it describes is unchanged.
+- Tested in the browser: the Design System page at desktop width and 375 px.
+- Files changed: `design-system.html`, `css/design-system.css`, `architecture.html`.
+
 ### The documentation and release pages: the landing page's look
 
 - **Every page that shares `css/landing.css`** (user guide, Architecture, Docker quickstart, automatic backup, privacy, REST API, QR protocol, QR generator, licenses, the releases page and all 68 versioned release pages) now has the new landing page's look, with **no change to any page's content or markup**: the stylesheet is rewritten with the pages' own class names.

@@ -5,8 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" type="image/jpeg" href="images/logo.jpg">
     <link rel="canonical" href="https://newtondarts.com/design-system.html">
-    <title>NewTon DC — Design System</title>
+    <title>Design System — NewTon DC Tournament Manager</title>
+    <meta name="description" content="The visual language of NewTon DC Tournament Manager's website: palette, typography and components, rendered from the site's own CSS.">
+    <link rel="preload" href="fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
     <link rel="stylesheet" href="css/landing.css">
+    <link rel="stylesheet" href="css/home.css">
     <link rel="stylesheet" href="css/design-system.css">
 </head>
 <body>
@@ -15,250 +19,198 @@
 
 <div class="docs-content">
     <h1>Design System</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager &mdash; Visual Language Reference</p>
-    <p>NewTon DC uses a warm, analogue design language built on two typefaces and a hand-picked palette of browns, oranges, and teal. This page documents every visual token &mdash; colors, typography, components, and patterns &mdash; as a living reference rendered from the actual CSS.</p>
+    <p class="docs-subtitle">The website&rsquo;s visual language: palette, typography and components.</p>
+    <p>Warm ink and paper, the dartboard&rsquo;s red as the one accent and its green for small signals, Insignia for headings, Inter for text and Cascadia Code for code. The landing page uses <code>css/home.css</code>, the documentation and release pages <code>css/landing.css</code>. Everything below is drawn with those two stylesheets, so this page shows the design as it is.</p>
 </div>
 
 <div class="ds-page">
 
-    <!-- Header specimen -->
-    <div class="ds-header">
-        <img src="images/logo.jpg" alt="NewTon DC Logo" class="ds-header-logo">
-        <div class="ds-header-text">
-            <h1>NewTon DC Tournament Manager</h1>
-            <p>Design System &mdash; Insignia Regular &amp; Manrope Variable &mdash; landing.css</p>
+    <!-- The wordmark on ink, with the dartboard -->
+    <div class="ds-masthead">
+        <div class="board" aria-hidden="true"></div>
+        <div class="ds-masthead-text">
+            <p class="eyebrow">Design System</p>
+            <p class="ds-wordmark"><img src="images/logo.jpg" alt="">NewTon DC Tournament Manager</p>
+            <p class="ds-masthead-sub">Insignia &middot; Inter &middot; Cascadia Code &mdash; <code>home.css</code> &amp; <code>landing.css</code></p>
         </div>
     </div>
 
-    <div class="ds-grid">
-
-        <!-- ── LEFT COLUMN ── -->
-        <div>
-
-            <!-- Typography -->
-            <div class="ds-section">
-                <div class="ds-section-title">Typography</div>
-
-                <p class="ds-type-meta">Display &mdash; Insignia Regular, 400 weight</p>
-                <p class="ds-type-desc">h1, h2, stat numbers, step numerals</p>
-                <div class="ds-specimen-h1">H1 Heading</div>
-                <div class="ds-specimen-h2">H2 Heading</div>
-
-                <p class="ds-type-meta">Body &mdash; Manrope variable, 100&ndash;900 weight</p>
-                <p class="ds-type-desc">body, UI labels, buttons, captions</p>
-                <p class="ds-specimen-body">Body text. Line-height 1.6.</p>
-                <p class="ds-specimen-caption">Manrope, 1rem, #3d2e1f</p>
-                <p class="ds-specimen-ui-label">UI Label</p>
-                <p class="ds-specimen-caption">Manrope, 0.875rem, weight 500</p>
-            </div>
-
-            <!-- Buttons -->
-            <div class="ds-section">
-                <div class="ds-section-title">Buttons</div>
-
-                <div class="ds-button-row">
-                    <p class="ds-button-meta">Launch (Primary)</p>
-                    <div class="ds-button-pair">
-                        <button class="ds-btn ds-btn-launch">Launch</button>
-                        <span class="ds-arrow">&#8594;</span>
-                        <button class="ds-btn ds-btn-launch-hover">Hover</button>
-                    </div>
-                </div>
-
-                <div class="ds-button-row">
-                    <p class="ds-button-meta">Chalker</p>
-                    <div class="ds-button-pair">
-                        <button class="ds-btn ds-btn-chalker">Chalker</button>
-                        <span class="ds-arrow">&#8594;</span>
-                        <button class="ds-btn ds-btn-chalker-hover">Hover</button>
-                    </div>
-                </div>
-
-                <div class="ds-button-row">
-                    <p class="ds-button-meta">GitHub / Secondary</p>
-                    <div class="ds-button-pair">
-                        <button class="ds-btn ds-btn-github">Secondary</button>
-                        <span class="ds-arrow">&#8594;</span>
-                        <button class="ds-btn ds-btn-github-hover">Hover</button>
-                    </div>
-                </div>
-            </div>
-
+    <!-- Palette -->
+    <div class="ds-section">
+        <h2 class="ds-title">Palette</h2>
+        <p class="ds-lead">Two grounds, ink and paper, both warm. Red is the only accent; green only marks small good news.</p>
+        <div class="ds-swatches">
+            <div class="ds-swatch"><i class="ds-c-141210"></i><b>Ink</b><code>#141210</code><span>Hero, navigation, footer, code</span></div>
+            <div class="ds-swatch"><i class="ds-c-1e1b18"></i><b>Ink 2</b><code>#1e1b18</code><span>Cards on ink</span></div>
+            <div class="ds-swatch"><i class="ds-c-34302b"></i><b>Ink line</b><code>#34302b</code><span>Borders on ink</span></div>
+            <div class="ds-swatch"><i class="ds-c-f3eee6"></i><b>On ink</b><code>#f3eee6</code><span>Text on ink</span></div>
+            <div class="ds-swatch"><i class="ds-c-b4aca1"></i><b>On ink 2</b><code>#b4aca1</code><span>Quieter text on ink</span></div>
+            <div class="ds-swatch"><i class="ds-c-f7f5f1"></i><b>Paper</b><code>#f7f5f1</code><span>Page background</span></div>
+            <div class="ds-swatch"><i class="ds-c-eeeae3"></i><b>Paper 2</b><code>#eeeae3</code><span>Bands, inline code, table heads</span></div>
+            <div class="ds-swatch"><i class="ds-c-ddd7cd"></i><b>Line</b><code>#ddd7cd</code><span>Borders and rules on paper</span></div>
+            <div class="ds-swatch"><i class="ds-c-1a1815"></i><b>Text</b><code>#1a1815</code><span>Headings and text</span></div>
+            <div class="ds-swatch"><i class="ds-c-5e574e"></i><b>Text 2</b><code>#5e574e</code><span>Quieter text</span></div>
+            <div class="ds-swatch"><i class="ds-c-d63b2b"></i><b>Board red</b><code>#d63b2b</code><span>The accent: main buttons, labels, links, the final</span></div>
+            <div class="ds-swatch"><i class="ds-c-b32f21"></i><b>Red, pressed</b><code>#b32f21</code><span>Hover on red</span></div>
+            <div class="ds-swatch"><i class="ds-c-2f8a57"></i><b>Board green</b><code>#2f8a57</code><span>Ticks, the live dot, terminals</span></div>
+            <div class="ds-swatch"><i class="ds-c-e0a43a"></i><b>Amber</b><code>#e0a43a</code><span>The terminal&rsquo;s middle dot only</span></div>
         </div>
+    </div>
 
-        <!-- ── MIDDLE COLUMN ── -->
-        <div>
-
-            <!-- Color Palette -->
-            <div class="ds-section">
-                <div class="ds-section-title">Color Palette</div>
-                <div class="ds-palette">
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-parchment"></div>
-                        <div class="ds-swatch-name">Parchment</div>
-                        <div class="ds-swatch-hex">#f5ebe0</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-cream"></div>
-                        <div class="ds-swatch-name">Cream</div>
-                        <div class="ds-swatch-hex">#fff8f0</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-warm-tan"></div>
-                        <div class="ds-swatch-name">Warm tan</div>
-                        <div class="ds-swatch-hex">#ede0d0</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-rich-brown"></div>
-                        <div class="ds-swatch-name">Rich brown</div>
-                        <div class="ds-swatch-hex">#2b2118</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-mid-brown"></div>
-                        <div class="ds-swatch-name">Mid brown</div>
-                        <div class="ds-swatch-hex">#3d2e1f</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-warm-prose"></div>
-                        <div class="ds-swatch-name">Warm prose</div>
-                        <div class="ds-swatch-hex">#5c4a3a</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-muted-text"></div>
-                        <div class="ds-swatch-name">Muted text</div>
-                        <div class="ds-swatch-hex">#8a7968</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-pale-label"></div>
-                        <div class="ds-swatch-name">Pale label</div>
-                        <div class="ds-swatch-hex">#d5c4b0</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-warm-border"></div>
-                        <div class="ds-swatch-name">Warm border</div>
-                        <div class="ds-swatch-hex">#e0cdb8</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-burnt"></div>
-                        <div class="ds-swatch-name">Burnt orange</div>
-                        <div class="ds-swatch-hex">#c0562a</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-mid-orange"></div>
-                        <div class="ds-swatch-name">Mid orange</div>
-                        <div class="ds-swatch-hex">#d4824a</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-amber"></div>
-                        <div class="ds-swatch-name">Amber gold</div>
-                        <div class="ds-swatch-hex">#e8a44a</div>
-                    </div>
-                    <div class="ds-swatch">
-                        <div class="ds-swatch-circle ds-swatch-teal"></div>
-                        <div class="ds-swatch-name">Muted teal</div>
-                        <div class="ds-swatch-hex">#4a8c7e</div>
-                    </div>
-                </div>
+    <!-- Typography -->
+    <div class="ds-section">
+        <h2 class="ds-title">Typography</h2>
+        <p class="ds-lead">Insignia is the club&rsquo;s typeface, from the maintainer&rsquo;s first darts: every heading and the wordmark. Inter carries everything you read. Cascadia Code is for code.</p>
+        <div class="ds-type">
+            <div class="ds-type-row">
+                <div class="ds-type-meta"><b>Display</b><span>Insignia &middot; 44&ndash;78 px &middot; line-height 1.02</span></div>
+                <p class="display ds-type-display">Run the whole darts night. <em>Offline.</em></p>
             </div>
-
-            <!-- Cards -->
-            <div class="ds-section">
-                <div class="ds-section-title">Cards</div>
-                <div class="ds-cards-row">
-                    <div class="ds-card">
-                        <h3>H3 Card Title</h3>
-                        <p>Standard card &mdash; cream surface, warm border, lifts on hover.</p>
-                    </div>
-                    <div class="ds-card ds-card-feature">
-                        <h3>H3 Feature</h3>
-                        <p>Feature card &mdash; 4px burnt orange left border. Clean accent, no gradient.</p>
-                    </div>
-                </div>
+            <div class="ds-type-row">
+                <div class="ds-type-meta"><b>Section heading</b><span>Insignia &middot; 38&ndash;60 px</span></div>
+                <p class="display ds-type-h2">From the door to the podium.</p>
             </div>
-
-            <!-- Card Variants -->
-            <div class="ds-section">
-                <div class="ds-section-title">Card Variants</div>
-                <div class="ds-card-dark" style="margin-bottom:14px;">
-                    <h3>Dark Card</h3>
-                    <p>Rich brown surface, parchment text. Authoritative, high contrast.</p>
-                </div>
-                <div class="ds-card-bare" style="margin-bottom:14px;">
-                    <h3>No border.</h3>
-                    <p>Just text on parchment. Confident. Nothing decorative.</p>
-                </div>
+            <div class="ds-type-row">
+                <div class="ds-type-meta"><b>Card heading</b><span>Insignia &middot; 28&ndash;38 px</span></div>
+                <p class="display ds-type-h3">Give the winner their moment.</p>
             </div>
-
-            <!-- Stat Card + Hero Image -->
-            <div class="ds-section">
-                <div class="ds-section-title">Hero Image &amp; Highlight / Stat Card</div>
-                <div class="ds-stat-hero-row">
-                    <div class="ds-hero-specimen">
-                        <img src="Screenshots/newton-poster-throw.jpg" alt="Hero image specimen">
-                    </div>
-                    <div class="ds-stat-card">
-                        <div class="ds-stat-number">42</div>
-                        <div class="ds-stat-label">Active Players</div>
-                    </div>
-                </div>
+            <div class="ds-type-row">
+                <div class="ds-type-meta"><b>Label</b><span>Inter 700 &middot; 13 px &middot; uppercase, tracked 0.14em &middot; red</span></div>
+                <p class="eyebrow">How a night runs</p>
             </div>
-
+            <div class="ds-type-row">
+                <div class="ds-type-meta"><b>Lead</b><span>Inter &middot; 19 px &middot; Text 2</span></div>
+                <p class="ds-type-lead">One app carries the whole evening, and every result lands in your club&rsquo;s history.</p>
+            </div>
+            <div class="ds-type-row">
+                <div class="ds-type-meta"><b>Body</b><span>Inter &middot; 17 px &middot; line-height 1.55&ndash;1.65</span></div>
+                <p class="ds-type-body">Add your regulars from the player database, or sign up walk-ins on the spot. One click marks a player paid, and the draw waits until everyone has.</p>
+            </div>
+            <div class="ds-type-row">
+                <div class="ds-type-meta"><b>Code</b><span>Cascadia Code &middot; 13.5 px</span></div>
+                <p class="ds-type-code">docker compose up -d</p>
+            </div>
         </div>
+    </div>
 
-        <!-- ── RIGHT COLUMN ── -->
-        <div>
-
-            <!-- Section Divider -->
-            <div class="ds-section">
-                <div class="ds-section-title">Section Divider</div>
-                <div class="ds-divider-demo"></div>
-                <p class="ds-divider-caption">transparent &rarr; #d4824a &rarr; #e8a44a &rarr; #d4824a &rarr; transparent</p>
-            </div>
-
-            <!-- Showcase Label -->
-            <div class="ds-section">
-                <div class="ds-section-title">Showcase Label</div>
-                <span class="ds-showcase-pill">Bracket View</span>
-            </div>
-
-            <!-- Code & Terminal -->
-            <div class="ds-section">
-                <div class="ds-section-title">Code &amp; Terminal</div>
-                <p class="ds-inline-code-demo">Open <span class="ds-inline-code">tournament.html</span> in your browser.</p>
-                <div class="ds-code-block">
-                    <code>const tid = "DC-2024";
-return tid;</code>
+    <!-- Buttons -->
+    <div class="ds-section">
+        <h2 class="ds-title">Buttons</h2>
+        <p class="ds-lead">One red button per view: the thing to do. The rest step back. They lift a pixel on hover; an arrow nudges right.</p>
+        <div class="ds-split">
+            <div class="ds-panel ds-ink">
+                <p class="ds-cap">On ink</p>
+                <div class="ds-row">
+                    <a class="btn btn-red" href="#">Launch Tournament Manager <span class="arr">→</span></a>
+                    <a class="btn btn-ghost" href="#">Download</a>
                 </div>
-                <div class="ds-terminal">
-                    <div class="ds-terminal-bar">
-                        <span class="ds-terminal-dot ds-terminal-dot--red"></span>
-                        <span class="ds-terminal-dot ds-terminal-dot--yellow"></span>
-                        <span class="ds-terminal-dot ds-terminal-dot--green"></span>
+                <p class="hero-meta"><span>No account</span><span>No subscription</span><span>No cloud</span></p>
+                <p class="ds-note"><code>.btn-red</code> &middot; <code>.btn-ghost</code> &middot; <code>.hero-meta</code></p>
+            </div>
+            <div class="ds-panel">
+                <p class="ds-cap">On paper</p>
+                <div class="ds-row">
+                    <a class="btn btn-ink" href="#">Latest release</a>
+                    <a class="btn btn-line" href="#">Docker quickstart</a>
+                    <a class="btn-github" href="#">Read the Guide</a>
+                </div>
+                <p class="ds-note"><code>.btn-ink</code> &middot; <code>.btn-line</code> (home.css) &middot; <code>.btn-github</code> (landing.css; red as a release page&rsquo;s Download)</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cards -->
+    <div class="ds-section">
+        <h2 class="ds-title">Cards</h2>
+        <p class="ds-lead">White on paper, ink 2 on ink, 14 px corners, a hairline border. Pictures sit on a band of the ground beneath.</p>
+        <div class="ds-cards">
+            <div class="ds-panel ds-ink ds-pad">
+                <div class="f-card"><div class="f-pic"><svg viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 8.5H19V35.5H16M19 16.5H22M34 16.5H40M80 8.5H77V35.5H80M77 27.5H74M62 27.5H56M48 21V23"/></g><g fill="#6b7280"><rect x="4" y="6" width="12" height="5" rx="1"/><rect x="4" y="33" width="12" height="5" rx="1"/><rect x="22" y="14" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="6" width="12" height="5" rx="1"/><rect x="80" y="33" width="12" height="5" rx="1"/><rect x="62" y="25" width="12" height="5" rx="1"/><rect x="40" y="23" width="16" height="9" rx="1.5"/></g><rect class="dk" x="40" y="12" width="16" height="9" rx="1.5" fill="#1f2937"/></svg></div><h3>Double Elimination</h3><p class="line">Two lives each.</p><p>Frontside and backside, then a grand final.</p></div>
+                <p class="ds-note"><code>.f-card</code> &mdash; the app&rsquo;s pictograms, recoloured by their fills, the final in red</p>
+            </div>
+            <div class="ds-panel ds-pad">
+                <div class="t-card">
+                    <div class="t-ico"><svg viewBox="0 0 24 24"><rect x="4" y="10" width="16" height="11" rx="2"/><path d="M8 10V7a4 4 0 0 1 8 0v3"/></svg></div>
+                    <h3>Yours, not theirs</h3>
+                    <p>No signup, no subscription, no tracking. Your results stay on your computer, or on your own server.</p>
+                </div>
+                <p class="ds-note"><code>.t-card</code> &mdash; a line icon on a paper 2 tile</p>
+            </div>
+            <div class="ds-panel ds-pad">
+                <div class="s-card lead">
+                    <p class="tag">Try it now</p>
+                    <h3>It runs in this browser.</h3>
+                    <p>Nothing to install.</p>
+                    <div class="btns"><a class="btn btn-red" href="#">Launch <span class="arr">→</span></a></div>
+                </div>
+                <p class="ds-note"><code>.s-card.lead</code> &mdash; the one dark card among white ones</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- A step of the night -->
+    <div class="ds-section">
+        <h2 class="ds-title">The night, step by step</h2>
+        <p class="ds-lead">A numbered timeline: Insignia numbers in rings on a hairline, text left, the screenshot right. The ring turns red on hover.</p>
+        <div class="ds-panel ds-pad">
+            <div class="steps">
+                <div class="step">
+                    <div class="step-dot">5</div>
+                    <div>
+                        <p class="step-when">The final</p>
+                        <h3>Give the winner their moment.</h3>
+                        <p>A podium with the night&rsquo;s highlights, made to be photographed for the club chat.</p>
+                        <p class="closer">The night ends. The record doesn&rsquo;t.</p>
                     </div>
-                    <div class="ds-terminal-body">
-                        <code>$ docker pull skrodahl/newton</code>
-                    </div>
+                    <div class="shot"><img src="Screenshots/th-celebration.jpg" alt="Tournament complete: the podium" loading="lazy"></div>
                 </div>
             </div>
+            <p class="ds-note"><code>.steps</code> &middot; <code>.step</code> &middot; <code>.step-dot</code> &middot; <code>.shot</code></p>
+        </div>
+    </div>
 
-            <!-- Step List -->
-            <div class="ds-section">
-                <div class="ds-section-title">Step List</div>
-                <ol class="ds-steps">
-                    <li>Download the release</li>
-                    <li>Open tournament.html</li>
-                    <li>Register players</li>
+    <!-- Documentation pages -->
+    <div class="ds-section">
+        <h2 class="ds-title">Documentation pages</h2>
+        <p class="ds-lead">The same language at reading size: a contents card, code on ink, tables and steps as white cards.</p>
+        <div class="ds-split">
+            <div class="ds-panel ds-pad docs-content ds-docs">
+                <nav class="docs-toc">
+                    <h2>Contents</h2>
+                    <ol>
+                        <li><a href="#">Quick Start</a></li>
+                        <li><a href="#">Tournament Formats</a></li>
+                    </ol>
+                </nav>
+                <p>Open <code>tournament.html</code> in your browser, or read <a href="#">the user guide</a>.</p>
+                <div class="terminal-wrap">
+                    <div class="terminal-bar"></div>
+                    <pre><code>docker compose up -d</code></pre>
+                </div>
+            </div>
+            <div class="ds-panel ds-pad docs-content ds-docs">
+                <ol class="docs-quickstart">
+                    <li><div><strong>Download</strong> &mdash; the latest release.</div></li>
+                    <li><div><strong>Open</strong> &mdash; double-click <code>tournament.html</code>.</div></li>
                 </ol>
+                <table>
+                    <thead><tr><th>Token</th><th>Value</th></tr></thead>
+                    <tbody>
+                        <tr><td>Corner radius</td><td>14 px cards, 10 px buttons</td></tr>
+                        <tr><td>Page width</td><td>1180 px landing, 808 px docs</td></tr>
+                    </tbody>
+                </table>
             </div>
+        </div>
+    </div>
 
-            <!-- Footer -->
-            <div class="ds-section">
-                <div class="ds-section-title">Footer</div>
-                <div class="ds-footer-demo">
-                    NewTon DC Tournament Manager &mdash; BSD-3-Clause &mdash; <a href="#">example link</a>
-                </div>
-            </div>
-
+    <!-- Footer -->
+    <div class="ds-section">
+        <h2 class="ds-title">Footer</h2>
+        <p class="ds-lead">A dark band closes every page.</p>
+        <div class="landing-footer ds-footer">
+            <p>NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash; <a href="#">GitHub</a> &mdash; <a href="#">Privacy</a></p>
+            <p><em class="footer-cheeky">No popups? No cookies!</em></p>
         </div>
     </div>
 

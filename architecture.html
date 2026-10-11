@@ -42,12 +42,16 @@
 
     <h2 id="single-source">Single Source of Truth</h2>
     <p>The most critical architectural decision in NewTon DC Tournament Manager is how bracket progression works. Many systems calculate where a player should go next at runtime — using formulas, round arithmetic, or conditional logic. NewTon DC Tournament Manager does not.</p>
-    <p>Instead, all bracket progression is defined in a single constant object called <code>MATCH_PROGRESSION</code>, hardcoded in <code>clean-match-progression.js</code>:</p>
+    <p>Instead, all bracket progression is defined in two constant objects, hardcoded in <code>clean-match-progression.js</code>: one for double elimination, one for single elimination.</p>
 
-    <pre><code>const MATCH_PROGRESSION = {
+    <pre><code>const DE_MATCH_PROGRESSION = {
     8:  { /* all rules for 8-slot brackets  */ },
     16: { /* all rules for 16-slot brackets */ },
     32: { /* all rules for 32-slot brackets */ }
+};
+
+const SE_MATCH_PROGRESSION = {
+    4: { /* … */ }, 8: { /* … */ }, 16: { /* … */ }, 32: { /* … */ }
 };</code></pre>
 
     <p>Every match — on the Frontside and Backside — has an explicit entry that defines exactly where the winner goes and where the loser goes:</p>
@@ -58,6 +62,15 @@
 }</code></pre>
 
     <p>There is only one function that moves players between matches — <code>advancePlayer()</code> — and it does nothing but look up the rule and apply it. No calculations. No special cases. No branches.</p>
+
+    <h3>Every format, from the same tables</h3>
+    <p>The other formats are built from these tables, never by calculating paths. <code>getProgressionTable()</code> hands <code>advancePlayer()</code> the table for the tournament, with additions merged in; the tables themselves are never changed:</p>
+    <ul>
+        <li><strong>Qualifiers</strong> (33 to 48 players) add a round 0 in front of the 32-slot table.</li>
+        <li><strong>Cup and Plate</strong> adds the Plate, a single elimination table of half the size with its match IDs renamed, and a loser path from each first-round Cup match into it.</li>
+        <li><strong>Round Robin&rsquo;s cups</strong> and <strong>Swiss&rsquo;s top four</strong> are single elimination tables with their match IDs renamed.</li>
+        <li><strong>Group matches and Swiss rounds</strong> progress no one: their results go into a standings table, which decides who goes on.</li>
+    </ul>
 
     <h3>Why this matters</h3>
     <ul>
@@ -85,9 +98,9 @@
     <p>NewTon DC Tournament Manager maintains strict isolation between three categories of data, each stored independently and never mixed:</p>
     <table>
         <tr><th>Category</th><th>What it contains</th><th>Storage key</th></tr>
-        <tr><td><strong>Tournament data</strong></td><td>Players, matches, bracket, placements, status</td><td><code>tournament_{id}</code></td></tr>
+        <tr><td><strong>Tournament data</strong></td><td>Players, matches, bracket, placements, status</td><td><code>dartsTournaments</code> (every saved tournament) and <code>currentTournament</code> (the one in use)</td></tr>
         <tr><td><strong>Transaction history</strong></td><td>Full audit log of every match action</td><td><code>tournament_{id}_history</code></td></tr>
-        <tr><td><strong>Global configuration</strong></td><td>Points, legs, lanes, UI preferences</td><td><code>dartsGlobalConfig</code></td></tr>
+        <tr><td><strong>Global configuration</strong></td><td>Points, legs, lanes, formats, UI preferences</td><td><code>dartsConfig</code></td></tr>
     </table>
     <p>Configuration is never saved with a tournament. Tournament exports contain only the tournament's own data — not the config of the machine it was exported from. This means a tournament exported from one club's setup can be imported at another without any configuration bleed.</p>
     <p>When a tournament is deleted, all of its keys are removed completely. No residue, no contamination between tournaments.</p>
@@ -114,7 +127,7 @@
         <li><strong>Crash resistance</strong> — immediate persistence, transaction history, and auto-recovery from replay mean the application survives almost any failure scenario.</li>
         <li><strong>Maintainability</strong> — clear separation between progression rules, tournament data, and configuration means changes in one area cannot corrupt another.</li>
         <li><strong>Transparency</strong> — self-documenting match IDs (<code>FS-2-1</code> = Frontside Round 2 Match 1, <code>BS-FINAL</code> = Backside Final), an auditable transaction log, and open-source code mean the system's behaviour is always inspectable.</li>
-        <li><strong>Extensibility</strong> — adding a new bracket size requires only a new lookup table entry. No core logic changes needed.</li>
+        <li><strong>Extensibility</strong> — adding a new bracket size requires only a new lookup table entry. New formats are added the same way: by merging tables in, never by calculating paths. No core logic changes needed.</li>
     </ul>
 
     <hr>
@@ -122,7 +135,7 @@
     <h2 id="limitations">Known Limitations</h2>
     <p>Honesty is part of reliability. These are the known constraints of the current architecture:</p>
     <ul>
-        <li><strong>Bracket templates are fixed</strong> — NewTon DC Tournament Manager supports any number of participants from 4 to 32. Unused slots are automatically filled with byes that advance without playing, so a 13-player tournament runs cleanly in a 16-slot bracket with 3 invisible byes. The constraint is the upper limit of 32 participants, and the three available template sizes (8, 16, 32 slots). Adding a larger template requires a new hardcoded lookup table.</li>
+        <li><strong>Bracket templates are fixed</strong> — elimination brackets come in fixed sizes (8, 16 and 32 slots; single elimination also 4). Unused slots are automatically filled with byes that advance without playing, so a 13-player tournament runs cleanly in a 16-slot bracket with 3 invisible byes. Above 32, up to 16 qualifier matches decide the last places, so 48 players is the ceiling; going further requires a new hardcoded 64-slot table. Round Robin takes 3 to 32 players, Swiss 4 to 48.</li>
         <li><strong>localStorage limits</strong> — browsers typically allow 5–10 MB per domain. A 32-player tournament with full match history uses around 110 KB. Very large numbers of tournaments with extensive undo history could approach limits; the <a href="userguide.html#devconsole">Developer Console monitors this in real time</a>.</li>
         <li><strong>Single-user design</strong> — NewTon DC Tournament Manager is designed for one operator per tournament. Server backup and shared tournaments allow access from multiple devices, but there is no live collaboration or conflict resolution for simultaneous edits.</li>
     </ul>
