@@ -84,14 +84,14 @@ a { color: inherit; }
 .hero-meta span::before { content: '✓'; color: var(--green); font-weight: 800; margin-right: 6px; }
 
 /* the product, to the right of the text: the bracket runs past the column (the hero clips it at
-   the window's edge), the Chalker overlaps its lower left corner */
-.stage { position: relative; padding-bottom: 40px; }
+   the window's edge), the Chalker hangs below its lower left corner. Neither is clickable */
+.stage { position: relative; padding-bottom: 80px; }
 .window { position: relative; width: 122%; border-radius: 14px; background: #2a2622; padding: 10px; box-shadow: 0 30px 80px rgba(0, 0, 0, .5); }
 .window-bar { display: flex; gap: 6px; padding: 2px 4px 10px; }
 .window-bar i { width: 10px; height: 10px; border-radius: 50%; background: #4a443d; }
-.window img { border-radius: 6px; width: 100%; cursor: zoom-in; }
+.window img { border-radius: 6px; width: 100%; }
 .chalker-card { position: absolute; left: -36px; bottom: 0; width: 46%; max-width: 320px; border-radius: 16px; overflow: hidden; background: #222; padding: 8px; box-shadow: 0 30px 60px rgba(0, 0, 0, .55); }
-.chalker-card img { border-radius: 10px; cursor: zoom-in; }
+.chalker-card img { border-radius: 10px; }
 .chalker-card figcaption { color: var(--on-ink-2); font-size: 12px; font-weight: 600; letter-spacing: .08em; text-transform: uppercase; padding: 8px 4px 2px; display: flex; justify-content: space-between; }
 .chalker-card figcaption b { color: var(--green); }
 

@@ -8,76 +8,91 @@
 [![GitHub Stars](https://img.shields.io/github/stars/skrodahl/NewTon?style=social)](https://github.com/skrodahl/NewTon/stargazers)
 <!-- [![GHCR Pulls](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fipitio.github.io%2Fbackage%2Fskrodahl%2FNewTon%2Fnewton.json&query=%24.downloads&logo=github&label=ghcr%20pulls)](https://github.com/skrodahl/NewTon/pkgs/container/newton) -->
 
-## The Offline Authority in Darts.
-Runs locally. Syncs across devices. Builds your venue's stats over time.
+## Run the whole darts night. Offline.
+Registration, the draw, every board and every result, the podium and the season standings. In your browser, with no signup and no internet needed.
 
-![Action Shot](https://github.com/skrodahl/NewTon/blob/main/Screenshots/newton-poster-throw.jpg)
+![NewTon DC Tournament Manager: a bracket and the Chalker](https://github.com/skrodahl/NewTon/blob/main/Screenshots/newton-share.png)
+
+**[Try it in your browser](https://newtondarts.com)** · **[Download](https://github.com/skrodahl/NewTon/releases/latest)** · **[Self-host with Docker](https://newtondarts.com/docker-quickstart.html)** · [User Guide](https://newtondarts.com/userguide.html) · [Release notes](https://newtondarts.com/releases/) · [Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)
 
 ### Yours. Not theirs.
 No signup, no subscription, no cloud. Works offline. Just download and run. Works without asking permission.
 
-### Scan. Score. Done.
-The Chalker handles the board. QR codes handle the rest. One scan to start, one scan to finish.
+### Chalk. Send. Done.
+The Chalker keeps the score at the board. Matches go out and results come back over your own network, or by QR code.
 
 ### Every match remembered.
 Analytics that grow with your club. Season leaderboards, player stats, and tournament history — all from data you already have.
 
 ---
 
-**[Changelog](https://github.com/skrodahl/NewTon/blob/main/CHANGELOG.md)** | **[Release Notes](https://newtondarts.com/releases/)**  | **[Official Website](https://newtondarts.com)**
+## How a night runs
 
-**NewTon DC Tournament Manager** provides a clean, professional interface with offline-first design for reliable single and double-elimination darts tournaments. It runs entirely in your browser — no server, database, Internet connection, or installation required.
+1. **Doors open.** Add your regulars from the player database, or sign up walk-ins on the spot. One click marks a player paid, and the draw waits until everyone has: nobody is left out.
+2. **The draw.** Pick a format and draw. Seeding from your own results keeps the best players apart; otherwise it's a fair random draw.
+3. **All night long: the bracket.** Every round on one screen, from 8 players to 48. Follow a player and their path lights up; click a match to see where the winner goes and where the loser drops; finals in the middle or on the right.
+4. **On the boards.** Match Controls runs the room: a tile for every board in play, click the winner to finish a match, a free lane to start the next. Referees are suggested, and nobody gets double-booked.
+5. **At the oche.** Phones and tablets at the boards keep the score with the Chalker. Matches go out and results come back by QR code or over your own network, with every 180, high out and short leg.
+6. **The final.** A podium with the night's highlights (most 180s, shortest leg, highest out), made to be photographed for the club chat.
+7. **The morning after.** Season standings, player profiles with form charts, finishes and averages, filtered to the nights that count. Members follow it on their phones.
 
-**NewTon Chalker** is a companion x01 scoring app designed for tablets at the dartboard. Crash-proof with persistent match data, match history, and live statistics. Install as a PWA for a native app experience.
+![The bracket, following one player's path](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
 
-**Total Privacy**: Your tournament and match data live in your browser's localStorage, period. We have a demo site, but even there your data never leaves your device. [Complete privacy by architecture](https://newtondarts.com/privacy.html), not by policy.
-
-**[Download for offline use](https://github.com/skrodahl/NewTon/releases/latest)**, double-click `tournament.html` to get going. Or **[self-host with Docker](https://newtondarts.com/docker-quickstart.html)**.
-
----
-# See It in Action
-
-## Official Website and Apps
-Visit the official NewTon DC Tournament Manager Website.
-
-Fully functional versions of the latest Tournament Manager and Chalker apps are available for use and testing.
-
-[**https://newtondarts.com**](https://newtondarts.com)
-
-
-*All data stays in your browser - nothing is stored on the server or shared with anyone else.*
-
-## Tournament Bracket and Match Controls
-
-**16-player Tournament Bracket  with Status Bar**:
-
-![16-player bracket with "Match Card Magic Zoom"](https://github.com/skrodahl/NewTon/blob/main/Screenshots/tournament-bracket-zoom.png)
-
-**Match Controls with Referee Suggestions and Match/Referee Conflict Detection**:
-
-![Match Controls](https://github.com/skrodahl/NewTon/blob/main/Screenshots/match-controls.png)
+![Match Controls: a tile for each live match, the free lanes and the next match](https://github.com/skrodahl/NewTon/blob/main/Screenshots/match-controls.png)
 
 ---
 
-## Getting Started
+## Pick your format
 
-1. **[Download the latest official release](https://github.com/skrodahl/NewTon/releases/latest)** (Run `git clone` or download ZIP for the latest beta)
-2. Double-click `tournament.html` to open NewTon DC Tournament Manager, and you're up and running
-3. Visit our [User Guide](https://newtondarts.com/userguide.html) to learn how to run and manage tournaments, or press `F1` for help
+Small night or full house, there's one for it.
 
-All [NewTon DC Tournament Manager](https://newtondarts.com)'s features are described in detail in the [User Guide](https://newtondarts.com/userguide.html).
+| Format | | Players |
+|---|---|---|
+| **Double Elimination** | Two lives each. Frontside and backside, then a grand final. | 4–48 |
+| **Single Elimination** | One loss and out. The shortest night, with a bronze final. | 4–48 |
+| **Cup and Plate** | Everyone plays twice. Round 1 losers play on in a second knockout. | 5–48 |
+| **Round Robin** | Everybody plays everybody. Groups into an A and a B cup, or one group, once or twice. | 3–32 |
+| **Swiss** | Your results pick your opponent. Fixed rounds, nobody out, the top four finish. | 4–48 |
 
-*No installation, no servers, no complexity — just pure tournament management.*
+Elimination brackets come in 8, 16 and 32 slots, with byes spread fairly. Above 32, qualifier matches decide the last places, up to 48.
 
 ---
 
-## Docker Deployment (Self-Hosting)
+## Features
 
-**Want to host NewTon Tournament Manager on your own server?** Docker makes it effortless.
+### Before the draw
+- **Player database:** every player has a permanent ID and a short name; rename, archive and merge duplicates without losing their history
+- **Paid or not:** the draw never starts while anyone is unpaid, and unpaid players can be removed from Match Controls; an optional payment QR code
+- **Seeded draw** (optional): a ranking from your own earlier tournaments keeps the best players apart, and the best seeds get the byes
+- **A card for every format** at the draw, each saying what it means for tonight's players: bracket size, groups, rounds, roughly how many matches
 
-### [**Docker Quick Start Guide →**](https://newtondarts.com/docker-quickstart.html)
+### During the night
+- **The bracket:** every round on one page at any size, hover to magnify, click to trace a match, Follow a player, finals on the right or in the middle; groups as cards with their tables
+- **Match Controls:** a lanes board with one tile per live match, free lanes, the ready queue by round, referee suggestions with conflict prevention, lane assignment for 1–20 dartboards
+- **The Chalker:** a companion x01 scoring app for phones and tablets at the board, installable as an app and fully offline. Matches go out and results come back by QR code, or over your own network when self-hosting
+- **Surgical undo:** take back any match result without resetting the tournament; it refuses when a later match is already live or played
 
-**Get running in under 2 minutes:**
+### After the final
+- **The podium** with the night's highlights
+- **Points** for taking part, placings and achievements (180s, tons, high outs, short legs), all configurable, made for season standings
+- **Analytics:** a dashboard, the season leaderboard, player profiles and comparisons with charts, every tournament and match; filtered by name and season, with a phone layout for club members
+- **Export** results as CSV, tournaments as JSON; optional automatic backup to your own server
+
+### Built to last
+- **Works offline.** No server, database or internet connection needed. Every change is saved the moment it happens
+- **Never loses a result.** Hardcoded progression tables and a transaction history: a misclick, a crash or a power cut leaves the tournament exactly as it was. More in [Architecture & Reliability](https://newtondarts.com/architecture.html)
+- **Your data stays yours.** It lives in your browser. No cookies, no tracking, no telemetry. [Privacy by architecture](https://newtondarts.com/privacy.html), not by policy
+- **Zero dependencies.** Plain HTML, CSS and JavaScript, no frameworks, no build step
+
+---
+
+## Getting started
+
+**Try it now.** The full Tournament Manager and Chalker run at [newtondarts.com](https://newtondarts.com). Even there, your data never leaves your browser.
+
+**Take it to the venue.** [Download the latest release](https://github.com/skrodahl/NewTon/releases/latest), unzip it and double-click `tournament.html`. Press `F1` anywhere for help, or read the [User Guide](https://newtondarts.com/userguide.html). (`git clone` gets you the latest work in progress.)
+
+**Your club's own server.** Self-host with Docker, and add shared tournaments, automatic backups, the network handover to the Chalker and an Analytics site for your members:
 
 ```bash
 # Download docker-compose.yml
@@ -86,123 +101,32 @@ curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-com
 # Start the container
 docker compose up -d
 
-# Access at http://localhost:8080
+# Open http://localhost:2020
 ```
 
-**What's Included:**
-- ✅ Lightweight Alpine container (~60MB)
-- ✅ PHP [REST API](https://newtondarts.com/rest-api.html) for tournament sharing
-- ✅ nginx + PHP-FPM for optimal performance
-- ✅ Multi-architecture support (Intel/AMD + Apple Silicon/Raspberry Pi)
-- ✅ Persistent storage for tournaments
-- ✅ Custom logo and payment QR code support
-- ✅ Optional SEO landing page (`NEWTON_LANDING_PAGE=true`)
-
-**Documentation:**
-- **[Quick Start Guide](https://newtondarts.com/docker-quickstart.html)** - Get running in 2 minutes
+- Lightweight Alpine image with nginx and PHP-FPM, for Intel/AMD and ARM (Apple Silicon, Raspberry Pi)
+- Persistent tournament storage and an optional [REST API](https://newtondarts.com/rest-api.html) for sharing and backup
+- Your own logo and payment QR code
+- An optional landing page (`NEWTON_LANDING_PAGE=true`)
+- HTTPS for camera access on other devices; see the **[Docker Quick Start Guide](https://newtondarts.com/docker-quickstart.html)**
 
 ---
 
-## Key Features
-See the NewTon DC Tournament Manager [User Guide](https://newtondarts.com/userguide.html) to learn how to use these features to manage your own tournaments.
+## Technical details
 
-More on the [architecture and focus on resilience here](https://newtondarts.com/architecture.html).
-
-### Tournament Management
-- **Multiple Tournaments**: Create, save, and load with automatic browser storage
-- **Import/Export**: JSON-based backup and sharing between computers
-  - **Tournament Protection**: Completed tournaments loaded from file are read-only to protect data integrity
-- **Tournament History**: Complete match records with lane and referee assignments
-- **Crash Resilient**: Automatic saving prevents data loss
-- **Optional Server Features**: Sharing completed tournaments if hosted on a webserver with PHP, using [REST API](https://newtondarts.com/rest-api.html)
-
-### Single and Double Elimination Brackets
-- **Professional Structure**: Single and Double elimination brackets for 8, 16, and 32 players, facilitates tournaments for 4-48 players.
-- **Qualifiers above 32**: 33 to 48 players play a 32-player bracket with qualifier matches before round 1, one for each player above 32. Lose a qualifier and you're not qualified (33rd–48th); nothing in a qualifier counts towards statistics or Analytics.
-- **Smart Generation**: Prevents two walkovers from meeting in first round
-- **Fair Draw**: Byes randomly distributed to prevent unfair advantages and minimize walkover chains
-- **Interactive Visualization**: Zoom, pan, click-to-select winners with complete progression lines and placement indicators
-- **Match Card Magic Zoom:** Auto-zoom on individual matches when zoomed out too far to read and control the matches
-- **Automatic Advancement**: Walkovers advance real players intelligently
-- **Undo**: Reverse recent match results (staged undo prevents accidentally clearing large portions of the bracket)
-- **Contextual Status**: Hover over tournament matches to show status, tournament progression, and undo
-
-#### Match Color Coding
-Intuitive traffic light system for instant priority assessment:
-
-- 🔴 Orange/Red = "**DO THIS NOW**" (LIVE matches, current focus)
-- 🟡 Yellow = "**READY FOR ACTION**" (can be started, next up)
-- 🟢 Green = "**COMPLETED**" (done and archived)
-- ⚪ White/Gray = "**NOT READY YET**" (pending, no action possible)
-
-### Match Management
-- **Centralized Control**: Manage entire tournament from Match Controls interface
-- **Clear Progression**: Each match shows exactly where winners and losers advance ("Leads to...")
-- **Lane Assignment**: Assign matches to dartboard lanes (1-20 with exclusions, configurable)
-- **Referee System**: Referee suggestions, and select referees with conflict prevention
-- **Real-time Updates**: Live standings and bracket progression
-
-### Player & Statistics
-- **Player List Registry**: Maintain a persistent list of regular players for consistency across tournaments
-  - Alphabetically sorted for easy scanning
-  - Quick-add players to new tournaments
-  - Import/export with tournament data
-- **Registration**: Add players and track payment status
-- **Late Registration**: New players can be added to a tournament if there are any walkover spots available
-- **Comprehensive Stats**: Short legs, high outs, tons, 180s with configurable points
-- **Live Rankings**: Real-time 1st through 48th place calculation
-- **Export Results**: CSV and JSON export with full tournament history
-
-### Configuration
-- **Custom Branding**: Add club logo, favicon, and customize title
-- **Flexible Scoring**: Configurable points for participation, placements, and achievements
-- **Match Formats**: Best-of legs for rounds, semifinals, and finals
-- **UI Preferences**: Confirmation dialogs and interface behavior
-
-[Official User Guide](https://newtondarts.com/userguide.html)
-
----
-
-## Technical Details
-
-**Architecture:**
-- Pure HTML5, CSS3, and JavaScript (ES6+) — zero dependencies
-- Browser LocalStorage for offline persistence
-- Hardcoded progression tables for bulletproof match advancement
-- Transaction-based history system with complete undo functionality
-
-**Browser Compatibility:**
+- Pure HTML5, CSS3 and JavaScript (ES6+), zero dependencies
+- Tournament state in the browser's localStorage, the Analytics register in IndexedDB
+- Hardcoded match progression tables: every format is built from them, never by calculating paths
+- Transaction-based history with surgical undo
 - Chrome 80+, Firefox 75+, Safari 13+, Edge 80+
-- Requires JavaScript and LocalStorage support
-
-The architecture and resilence of NewTon DC Tournament Manager is documented on our [official web site](https://newtondarts.com/architecture.html).
-
----
-
-## Data Management
-
-- **Automatic Saving**: All changes saved immediately to browser storage
-- **Import/Export**: JSON files for backup and computer-to-computer transfers
-- **Privacy**: [Complete local storage](https://newtondarts.com/privacy.html), no cloud or external data sharing
-- **Undo System**: Reverse recent match results with transaction history
-- **Developer Console**: Manage late registrations, debug, view tournament health, transaction log management
-
----
-
-## Use Cases
-
-- **Tournament Organizers**: Professional dart tournament management
-- **Dart Clubs**: Regular tournament nights and member ranking systems
-- **Event Management**: Pub tournaments, corporate events, charity fundraisers
 
 ---
 
 ## Credits
 
-**Created by Håvard Skrödahl**
-NewTon DC Malmö
+**Created by Håvard Skrödahl**, NewTon DC, Malmö. Made by a darts club, for darts clubs.
 
-**License**: Open source (BSD 3-Clause License) project for dart tournament management
+**License**: BSD 3-Clause.
 
 ### Licensing split
 

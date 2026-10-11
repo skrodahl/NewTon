@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Share image</title>
+<!-- The 1200×630 share image (og:image, twitter:image, the README): the landing page's hero, condensed.
+     Capture: Chrome headless, --window-size=1200,630 --screenshot → Screenshots/newton-share.png -->
+<link rel="stylesheet" href="../../css/home.css">
+<style>
+    html, body { margin: 0; width: 1200px; height: 630px; overflow: hidden; background: var(--ink); }
+    .share { position: relative; width: 1200px; height: 630px; overflow: hidden; background: var(--ink); color: var(--on-ink); }
+    .share .board { width: 980px; height: 980px; right: -300px; margin-top: -490px; }
+    .share .brand { position: absolute; left: 64px; top: 52px; font-size: 22px; }
+    .share .brand img { width: 36px; height: 36px; }
+    .share .copy { position: absolute; left: 64px; top: 150px; width: 480px; }
+    .share .eyebrow { white-space: nowrap; font-size: 12px; }
+    .share h1 { font-size: 68px; margin: 16px 0 22px; }
+    .share h1 em { font-style: normal; color: var(--red); }
+    .share .sub { font-size: 20px; line-height: 1.45; color: var(--on-ink-2); margin: 0; }
+    .share .sub b { color: var(--on-ink); font-weight: 600; }
+    .share .url { position: absolute; left: 64px; bottom: 50px; font-size: 16px; font-weight: 600; letter-spacing: .06em; color: var(--on-ink-2); }
+    .share .stage { position: absolute; left: 604px; top: 128px; width: 548px; padding: 0; }
+    .share .window { width: 100%; }
+    .share .chalker-card { left: -36px; bottom: -132px; width: 196px; padding: 6px; }
+    .share .chalker-card figcaption { font-size: 10px; padding: 6px 3px 1px; }
+</style>
+</head>
+<body>
+<div class="share">
+    <div class="board" aria-hidden="true"></div>
+    <p class="brand"><img src="../../images/logo.jpg" alt="">NewTon DC Tournament Manager</p>
+    <div class="copy">
+        <p class="eyebrow">Darts tournament software · free and open source</p>
+        <h1 class="display">Run the whole darts night. <em>Offline.</em></h1>
+        <p class="sub">The draw, every board, the podium and the season standings. <b>In your browser, no signup.</b></p>
+    </div>
+    <p class="url">newtondarts.com</p>
+    <div class="stage">
+        <div class="window">
+            <div class="window-bar"><i></i><i></i><i></i></div>
+            <img src="../../Screenshots/hero-se.jpg" alt="">
+        </div>
+        <figure class="chalker-card">
+            <img src="../../Screenshots/th-chalker-scoreboard.jpg" alt="">
+            <figcaption><span>Chalker · Lane 2</span><b>● Live</b></figcaption>
+        </figure>
+    </div>
+</div>
+</body>
+</html>

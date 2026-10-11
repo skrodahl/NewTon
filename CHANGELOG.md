@@ -1,5 +1,28 @@
 ## Unreleased
 
+### Docker documentation: port 2020
+
+- **The documented host port was 8080**, but `docker-compose.yml` (and the SSL compose) publish `2020:2020`, so following the quick start led to a page that wasn't there. 2020 is the port by design ("Double 20", double tops; maintainer). Every `8080` in the current docs is now 2020: `http://localhost:2020`, `docker run -p 2020:2020`, the reverse-proxy and localhost-only examples, the troubleshooting steps.
+- **`NEWTON_HOST_PORT` removed from the docs:** the quick start's variables table and its "Port already in use" tip used it, but no compose file reads it. The tip now says to change the host port in `docker-compose.yml` (`"9000:2020"`). `docker/README.md`'s own tip still said `8080:80`, from before the internal port was 2020.
+- The quick start says "the Tournament Manager is running" instead of "NewTon is running".
+- Files changed: `docker-quickstart.html`, `DOCKER-QUICKSTART.md`, `docker/README.md`, `rest-api.html`, `Docs/REST_API.md`, `api/README.md`, `llms.txt`.
+
+### The headline everywhere, and a new share image
+
+- **README and `llms.txt`** led with the old tagline, "The Offline Authority in Darts." Both now lead with the website's headline, "Run the whole darts night. Offline.", and the hero's line under it.
+- **The README is rewritten** (maintainer: it had "been suffering from just being accumulated", as the landing page had). It follows the website: the headline, the share image and one line of links (try, download, Docker, guide, release notes, changelog); the three cards (the middle one now "Chalk. Send. Done.", results over your own network or by QR code, instead of "Scan. Score. Done."); How a night runs in seven steps, the bracket third, with the bracket and Match Controls screenshots; Pick your format as a table with each format's line and player range (it said "single and double-elimination" only); the features grouped by the night (before the draw, during, after the final, built to last); Getting started as the website's three ways; Technical details; Credits and the licensing split, unchanged. Gone: the traffic-light colour legend, Use cases, and features described as they were before the bracket redesign (Magic Zoom, click-to-select winners). The Docker snippet now says `http://localhost:2020`, the port `docker-compose.yml` maps (it said 8080).
+- **`llms.txt` names the software NewTon DC Tournament Manager** throughout: the About line said "NewTon DC is a web application", and "NewTon" stood for the software in four more places. About now says the club makes it, and Tips for AI Services starts with the naming rule. Its use case mentions network results as well as QR.
+- **A new share image**, `Screenshots/newton-share.png` (1200×630): the landing page's hero, condensed (the wordmark, the headline, the new hero bracket and the Chalker on ink with the dartboard, newtondarts.com). It replaces the retro poster as `og:image`, `twitter:image` and the structured data's `screenshot` in both landing files, and as the README's image. Its source is `Docs/mockups/share-image.html`, captured with headless Chrome at 1200×630 (the command is in its head), so it can be redone when the hero changes. The poster files stay.
+- Files changed: `README.md` (rewritten), `llms.txt`, `landing.html`, `landing-page.php`, `Screenshots/newton-share.png` (new), `Docs/mockups/share-image.html` (new), `Docs/PARKING-LOT.md`.
+
+### Landing page: a new hero image, not clickable
+
+- **The hero's bracket is a new screenshot**, `Screenshots/hero-se.jpg` (1400 px, by the maintainer): an 8-player single elimination bracket with the final in the middle, a semifinal live. The old one was a crop of a 32-player bracket, too small to read at hero size; the bracket step below now shows the whole double elimination bracket, so the two show different formats.
+- **Neither hero image opens the lightbox** any more (maintainer): the hero is a picture of the product, and the timeline right below is the gallery. `lightbox-trigger`, `data-full` and the zoom cursor removed.
+- **The Chalker card hangs lower** (the stage's bottom padding 40 → 80 px), so it no longer covers the bracket's lower left quarterfinal; the new image is wider, so the window is shorter.
+- Tested in the browser: desktop, 820 px and 375 px (no horizontal scroll; the Chalker card is hidden on phones, as before).
+- Files changed: `landing.html`, `landing-page.php`, `css/home.css`, `Screenshots/hero-se.jpg` (new).
+
 ### Landing page: the bracket in How a night runs
 
 - **The bracket gets its own step**, step 3 "All night long" (between the draw and Match Controls; the later steps become 4–7): "The bracket, centre stage." The night's timeline went from the draw straight to Match Controls, leaving out what the room watches all night. A featured step, unlike the others: full width with a red number, the text beside four features (Follow a player, click a match, finals in the middle or on the right, every format drawn its own way), and the full bracket screenshot below (`tournament-bracket-zoom.png`, the whole bracket with Follow on; the hero keeps its crop). Requested by the maintainer ("the jewel, what everything runs around").

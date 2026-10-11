@@ -11,7 +11,7 @@ Quick start guide for running NewTon Tournament Manager in Docker.
 cd docker
 docker-compose up -d
 
-# Access at http://localhost:8080
+# Access at http://localhost:2020
 ```
 
 ### Using Docker CLI
@@ -23,7 +23,7 @@ docker build -t newton -f docker/Dockerfile .
 # Run the container
 docker run -d \
   --name newton-tournament \
-  -p 8080:2020 \
+  -p 2020:2020 \
   -v ./tournaments:/var/www/html/tournaments \
   -v ./images:/var/www/html/images:ro \
   -v ./logs:/var/log/nginx \
@@ -36,7 +36,7 @@ docker run -d \
 # Docker Hub (recommended)
 docker run -d \
   --name newton-tournament \
-  -p 8080:2020 \
+  -p 2020:2020 \
   -v ./tournaments:/var/www/html/tournaments \
   -v ./images:/var/www/html/images:ro \
   -v ./logs:/var/log/nginx \
@@ -45,7 +45,7 @@ docker run -d \
 # Alternative (GitHub Container Registry)
 # docker run -d \
 #   --name newton-tournament \
-#   -p 8080:2020 \
+#   -p 2020:2020 \
 #   -v ./tournaments:/var/www/html/tournaments \
 #   -v ./images:/var/www/html/images:ro \
 #   -v ./logs:/var/log/nginx \
@@ -66,14 +66,14 @@ docker run -d \
 
 ### Port Mapping
 
-Default: `8080:2020` (host:container)
+Default: `2020:2020` (host:container)
 
 The container runs nginx on **port 2020** internally ("Double 20" 🎯).
 
 Change in `docker-compose.yml`:
 ```yaml
 ports:
-  - "9000:2020"  # Change 8080 to your preferred port
+  - "9000:2020"  # Change the first 2020 to your preferred port
 ```
 
 ### Persistent Storage
@@ -146,10 +146,10 @@ docker-compose exec newton-tournament sh
 
 After starting the container:
 
-1. **Test web interface:** http://localhost:8080
+1. **Test web interface:** http://localhost:2020
 2. **Test PHP REST API:**
    ```bash
-   curl http://localhost:8080/api/list-tournaments.php
+   curl http://localhost:2020/api/list-tournaments.php
    ```
 3. **Check container health:**
    ```bash
@@ -395,7 +395,7 @@ docker-compose logs
 ```
 
 **Port already in use:**
-Change port in `docker-compose.yml` from `8080:80` to another port like `8009:80`
+Change the host port in `docker-compose.yml` from `2020:2020` to another, like `9000:2020`
 
 **PHP files not working:**
 Check nginx logs:

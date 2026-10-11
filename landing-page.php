@@ -49,7 +49,7 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
         "isAccessibleForFree": true,<?= $jsonLdUrl ?>
         "codeRepository": "<?= $githubUrl ?>",
         "downloadUrl": "<?= $githubUrl ?>",
-		"screenshot": "<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg",
+		"screenshot": "<?= $baseUrl ?>/Screenshots/newton-share.png",
         "featureList": "Single Elimination, Double Elimination, Cup and Plate, Round Robin, Swiss, 3-48 Players, Qualifiers, Offline-First, Lane Management, Referee Management, Match Undo System, JSON Import/Export, CSV Export, Multi-Tournament Support, Player Registry",
         "keywords": "darts, tournament, bracket, scoring, score keeper, offline, PWA, self-hosted, open source"
     }
@@ -59,13 +59,13 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
     <meta property="og:type" content="website">
     <meta property="og:title" content="NewTon DC Tournament Manager - Free, Open-Source Darts Tournament Software">
     <meta property="og:description" content="Run the whole darts night, offline: the draw, every board, the podium and the season standings. Free, open-source, no signup required.">
-    <meta property="og:image" content="<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg"><?= $ogUrlTag ?>
+    <meta property="og:image" content="<?= $baseUrl ?>/Screenshots/newton-share.png"><?= $ogUrlTag ?>
 
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="NewTon DC Tournament Manager - Free, Open-Source Darts Tournament Software">
     <meta name="twitter:description" content="Run the whole darts night, offline: the draw, every board, the podium and the season standings. Free, open-source, no signup required.">
-    <meta name="twitter:image" content="<?= $baseUrl ?>/Screenshots/newton-poster-throw.jpg"><?= $canonicalTag ?>
+    <meta name="twitter:image" content="<?= $baseUrl ?>/Screenshots/newton-share.png"><?= $canonicalTag ?>
 </head>
 <body>
 
@@ -104,11 +104,11 @@ $jsonLdUrl = $baseUrl ? "\n        \"url\": \"{$baseUrl}\"," : '';
         <div class="stage">
             <div class="window">
                 <div class="window-bar" aria-hidden="true"><i></i><i></i><i></i></div>
-                <img src="Screenshots/th-bracket-zoom.jpg" class="lightbox-trigger" data-full="Screenshots/tournament-bracket-zoom.png"
-                     alt="A double elimination bracket: played matches, a match ready to start, and the finals waiting">
+                <img src="Screenshots/hero-se.jpg"
+                     alt="A single elimination bracket with the final in the middle: quarterfinals played, a semifinal live, the final and bronze final waiting">
             </div>
             <figure class="chalker-card">
-                <img src="Screenshots/th-chalker-scoreboard.jpg" class="lightbox-trigger" data-full="Screenshots/chalker-scoreboard.jpg"
+                <img src="Screenshots/th-chalker-scoreboard.jpg"
                      alt="The Chalker scoring a 501 match on lane 2">
                 <figcaption><span>Chalker · Lane 2</span><b>● Live</b></figcaption>
             </figure>

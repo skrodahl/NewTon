@@ -47,6 +47,7 @@ Raised 2026-10-09, from the same logs. Both workflows run on `ubuntu-latest`, wh
 Maintainer, 2026-10-11: first priority.
 - **The old tagline** "The Offline Authority in Darts" is still in `README.md` (its heading) and `llms.txt` (the summary line). The website now leads with "Run the whole darts night. Offline."
 - **The share image** (`og:image` / `twitter:image` on the landing page, and `screenshot` in its structured data) is still the retro poster, `Screenshots/newton-poster-throw.jpg`. A new 1200×630 image in the new look would match what visitors find.
+- **Built 2026-10-11** (unreleased; CHANGELOG.md): README and `llms.txt` lead with the headline; `Screenshots/newton-share.png` (from `Docs/mockups/share-image.html`) is the share image and the README image. The hero has a new screenshot, `Screenshots/hero-se.jpg`.
 
 ### Landing page: the format pictograms in Pick Your Format
 

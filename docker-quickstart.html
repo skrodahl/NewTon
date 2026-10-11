@@ -50,8 +50,8 @@ curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-com
 docker compose up -d</code></pre>
     </div>
 
-    <p>Open <code>http://localhost:8080</code> &mdash; NewTon is running.</p>
-    <p><strong>Port 2020 = &ldquo;Double 20&rdquo;</strong> &mdash; nginx runs on port 2020 internally. The default host port (8080) maps to this.</p>
+    <p>Open <code>http://localhost:2020</code> &mdash; the Tournament Manager is running.</p>
+    <p><strong>Port 2020 = &ldquo;Double 20&rdquo;</strong> &mdash; nginx runs on port 2020 internally. The compose file publishes the same port on the host.</p>
     <p><strong>Camera / QR scanning requires HTTPS.</strong> The quick start runs HTTP only. Pick one of the three setups below to enable camera access.</p>
 
     <hr>
@@ -103,7 +103,7 @@ volumes:
     # Alternative: ghcr.io/skrodahl/newton:latest
     container_name: newton
     # ports:
-    #   - "8080:2020"  # Remove when using a reverse proxy
+    #   - "2020:2020"  # Remove when using a reverse proxy
     networks:
       - proxy_network
     volumes:
@@ -160,7 +160,6 @@ networks:
             <tr><td><code>NEWTON_LANDING_PAGE</code></td><td><code>false</code></td><td>Shows a landing page at the root URL instead of loading the app directly</td></tr>
             <tr><td><code>NEWTON_BASE_URL</code></td><td><em>unset</em></td><td>Canonical URL for Open Graph and Twitter Card meta tags on the landing page</td></tr>
             <tr><td><code>NEWTON_GITHUB_URL</code></td><td><code>github.com/skrodahl/NewTon</code></td><td>GitHub link shown in the demo banner</td></tr>
-            <tr><td><code>NEWTON_HOST_PORT</code></td><td><code>8080</code></td><td>Host port for the basic HTTP compose (quick start only)</td></tr>
         </tbody>
     </table>
 
@@ -174,8 +173,8 @@ networks:
         <li>&#x2705; <strong>Local network only</strong> &mdash; home or club WiFi, default setup is fine</li>
         <li>&#x2705; <strong>Localhost only</strong> &mdash; by default, Docker binds to <code>0.0.0.0</code>, meaning the container is reachable from any device on your network. To restrict access to the local machine only, specify the loopback address explicitly in your <code>ports</code> mapping:
             <pre><code>ports:
-  - "127.0.0.1:8080:2020"</code></pre>
-            With this in place, <code>http://localhost:8080</code> still works, but other devices on the network cannot reach the container.
+  - "127.0.0.1:2020:2020"</code></pre>
+            With this in place, <code>http://localhost:2020</code> still works, but other devices on the network cannot reach the container.
         </li>
         <li>&#x2705; <strong>Behind VPN</strong> &mdash; Tailscale, WireGuard, or similar</li>
         <li>&#x2705; <strong>API key for writes</strong> &mdash; set <code>NEWTON_API_KEY</code>: uploading or deleting a tournament, saving corrections and the relay need it (as the <code>X-API-Key</code> header); reading never does. This is the way to run a public analytics-only instance that members open without a login. The venue enters the same key under Global Settings &rarr; Server &amp; backup &rarr; Remote backup, and <code>?tm</code> with the correct <code>NEWTON_TM_PASSWORD</code> works as before. Network handover is switched off on an analytics-only instance.</li>
@@ -224,10 +223,9 @@ cp /path/to/your/payment-qr.png ./images/payment.png</code></pre>
     <h2 id="troubleshooting">Troubleshooting</h2>
 
     <h3>Port Already in Use</h3>
-    <div class="terminal-wrap">
-        <div class="terminal-bar"></div>
-        <pre><code>NEWTON_HOST_PORT=9000 docker compose up -d</code></pre>
-    </div>
+    <p>Change the host port (the first number) in <code>docker-compose.yml</code>, then open <code>http://localhost:9000</code>:</p>
+    <pre><code>ports:
+  - "9000:2020"</code></pre>
 
     <h3>Container Won&rsquo;t Start</h3>
     <div class="terminal-wrap">
@@ -235,10 +233,10 @@ cp /path/to/your/payment-qr.png ./images/payment.png</code></pre>
         <pre><code>docker compose logs</code></pre>
     </div>
 
-    <h3>Can&rsquo;t Access http://localhost:8080</h3>
+    <h3>Can&rsquo;t Access http://localhost:2020</h3>
     <ol>
-        <li>Verify the container is running: <code>docker compose ps</code> &mdash; should show <code>0.0.0.0:8080->2020/tcp</code></li>
-        <li>Try <code>http://127.0.0.1:8080</code> instead of <code>localhost</code></li>
+        <li>Verify the container is running: <code>docker compose ps</code> &mdash; should show <code>0.0.0.0:2020->2020/tcp</code></li>
+        <li>Try <code>http://127.0.0.1:2020</code> instead of <code>localhost</code></li>
         <li>Check logs: <code>docker compose logs</code></li>
     </ol>
 

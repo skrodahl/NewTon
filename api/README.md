@@ -23,7 +23,7 @@ The easiest way to get the API running is with the official Docker image:
 ```bash
 docker run -d \
   --name newton-tournament \
-  -p 8080:2020 \
+  -p 2020:2020 \
   -v ./tournaments:/var/www/html/tournaments \
   ghcr.io/skrodahl/newton:latest
 ```
@@ -35,8 +35,8 @@ docker run -d \
 - ✅ Persistent tournament storage via volume mount
 
 **Test endpoints:**
-- List: `http://localhost:8080/api/list-tournaments.php`
-- Upload: POST to `http://localhost:8080/api/upload-tournament.php`
+- List: `http://localhost:2020/api/list-tournaments.php`
+- Upload: POST to `http://localhost:2020/api/upload-tournament.php`
 
 See [DOCKER-QUICKSTART.md](../DOCKER-QUICKSTART.md) for complete Docker deployment guide.
 

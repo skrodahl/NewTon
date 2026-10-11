@@ -30,7 +30,7 @@ The easiest way to deploy with API support is using the official Docker image:
 ```bash
 docker run -d \
   --name newton-tournament \
-  -p 8080:2020 \
+  -p 2020:2020 \
   -v ./tournaments:/var/www/html/tournaments \
   ghcr.io/skrodahl/newton:latest
 ```
@@ -54,7 +54,7 @@ services:
     image: ghcr.io/skrodahl/newton:latest
     container_name: newton
     ports:
-      - "8080:2020"
+      - "2020:2020"
     volumes:
       - ./tournaments:/var/www/html/tournaments
     environment:
@@ -625,10 +625,10 @@ Potential API extensions:
 - Check host directory permissions
 - Verify data is being written to `/var/www/html/tournaments` inside container
 
-**Can't access API on port 8080:**
-- Container runs on internal port 2020, ensure port mapping is correct: `-p 8080:2020`
-- Check if port 8080 is already in use on host: `docker compose ps`
-- Try accessing via `http://localhost:8080/api/list-tournaments.php`
+**Can't access API on port 2020:**
+- Container runs on internal port 2020, ensure port mapping is correct: `-p 2020:2020`
+- Check if port 2020 is already in use on host: `docker compose ps`
+- Try accessing via `http://localhost:2020/api/list-tournaments.php`
 
 **View Docker container logs:**
 ```bash

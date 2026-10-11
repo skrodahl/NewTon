@@ -16,9 +16,9 @@ curl -O https://raw.githubusercontent.com/skrodahl/NewTon/main/docker/docker-com
 docker compose up -d
 ```
 
-Open `http://localhost:8080` — NewTon is running.
+Open `http://localhost:2020` — the Tournament Manager is running.
 
-**Port 2020 = "Double 20"** — nginx runs on port 2020 internally. The default host port (8080) maps to this.
+**Port 2020 = "Double 20"** — nginx runs on port 2020 internally. The compose file publishes the same port on the host.
 
 > **Camera / QR scanning requires HTTPS.** The quick start runs HTTP only. Pick one of the three setups below to enable camera access.
 
@@ -79,7 +79,7 @@ services:
     # Alternative: ghcr.io/skrodahl/newton:latest
     container_name: newton
     # ports:
-    #   - "8080:2020"  # Remove when using a reverse proxy
+    #   - "2020:2020"  # Remove when using a reverse proxy
     networks:
       - proxy_network
     volumes:
@@ -207,7 +207,6 @@ Mount the `./tournaments` and `./images` volumes. Configure the venue instance t
 | `NEWTON_LANDING_PAGE` | `false` | Shows a landing page at the root URL instead of loading the app directly |
 | `NEWTON_BASE_URL` | *(unset)* | Canonical URL for Open Graph and Twitter Card meta tags on the landing page |
 | `NEWTON_GITHUB_URL` | `https://github.com/skrodahl/NewTon` | GitHub link shown in the demo banner |
-| `NEWTON_HOST_PORT` | `8080` | Host port for the basic HTTP compose (quick start only) |
 
 ---
 
@@ -221,9 +220,9 @@ Mount the `./tournaments` and `./images` volumes. Configure the venue instance t
 - ✅ **Localhost only** — by default, Docker binds to `0.0.0.0`, meaning the container is reachable from any device on your network. To restrict access to the local machine only, specify the loopback address explicitly in your `ports` mapping:
   ```yaml
   ports:
-    - "127.0.0.1:8080:2020"
+    - "127.0.0.1:2020:2020"
   ```
-  With this in place, `http://localhost:8080` still works, but other devices on the network cannot reach the container.
+  With this in place, `http://localhost:2020` still works, but other devices on the network cannot reach the container.
 - ✅ **Behind VPN** — Tailscale, WireGuard, or similar
 - ✅ **API key for writes** — set `NEWTON_API_KEY`: uploads, deletes, corrections and the relay need it; reading stays open. The way to run a public analytics-only instance (see above)
 - ✅ **Reverse proxy with auth** — nginx or Caddy with HTTP basic authentication (members then need the login too)
@@ -277,8 +276,11 @@ cp /path/to/your/payment-qr.png ./images/payment.png
 
 ### Port Already in Use
 
-```bash
-NEWTON_HOST_PORT=9000 docker compose up -d
+Change the host port (the first number) in `docker-compose.yml`, then open `http://localhost:9000`:
+
+```yaml
+ports:
+  - "9000:2020"
 ```
 
 ### Container Won't Start
@@ -287,10 +289,10 @@ NEWTON_HOST_PORT=9000 docker compose up -d
 docker compose logs
 ```
 
-### Can't Access http://localhost:8080
+### Can't Access http://localhost:2020
 
-1. Verify the container is running: `docker compose ps` — should show `0.0.0.0:8080->2020/tcp`
-2. Try `http://127.0.0.1:8080` instead of `localhost`
+1. Verify the container is running: `docker compose ps` — should show `0.0.0.0:2020->2020/tcp`
+2. Try `http://127.0.0.1:2020` instead of `localhost`
 3. Check logs: `docker compose logs`
 
 ### Browser Warning on https://localhost
