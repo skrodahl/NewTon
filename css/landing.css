@@ -244,7 +244,7 @@ body {
 
 .formats h2 {
     font-size: 2rem;
-    margin-bottom: 32px;
+    margin-bottom: 8px;
     color: #2b2118;
     font-family: 'Insignia', Georgia, serif;
     letter-spacing: 0.5px;
@@ -327,10 +327,19 @@ body {
     line-height: 1.5;
 }
 
-.formats-note {
-    margin: 28px auto 0;
+/* the lead under the heading: the feel of the section, the accent on its turn */
+.formats-lead {
+    margin: 0 auto 32px;
     max-width: 640px;
+    font-size: 1.25rem;
+    font-weight: 500;
     color: #5c4a3a;
+}
+
+.formats-lead em {
+    font-style: normal;
+    font-weight: 700;
+    color: #c0562a;
 }
 
 /* tablets: two to a row (2 + 2 rather than 3 + 1); phones: one */

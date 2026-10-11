@@ -8,6 +8,11 @@
 - Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
 - Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
 
+### Landing page: Pick Your Format's lead line
+
+- Under the heading, a lead line sets the feel instead of a note under the cards: **"Small night or full house, there's one for it."** (larger, "full house" in the accent). The note it replaces ("Above 32, qualifiers decide the last places, up to 48. Seeding from your own results keeps the best players apart.") went into detail the cards already give (their player ranges), and the Draw card on the same page already speaks of seeding. The maintainer's choice of the options discussed (a lead under the heading, rather than the line as the heading).
+- Files changed: `landing.html`, `landing-page.php` (the same), `css/landing.css` (`.formats-lead` replaces `.formats-note`).
+
 ### Landing page: the format pictograms in Pick Your Format
 
 - Each card in **Pick Your Format** now opens with its format's pictogram, the same SVG as on Match Controls' Pick a format cards, on a tinted band, larger (up to 168 px wide). The SVGs are copied as they are from `TOURNAMENT_FORMATS` (`pic`, without the fixed size) and recoloured in `landing.css` by their fills to the page's warm palette, the final in the orange accent; the cards get the page's hover border. Requested by the maintainer: the page looked a little bland, and showing off the formats matters.
