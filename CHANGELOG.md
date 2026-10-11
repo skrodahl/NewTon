@@ -1,3 +1,11 @@
+## Unreleased
+
+### Landing page: the bracket in How a night runs
+
+- **The bracket gets its own step**, step 3 "All night long" (between the draw and Match Controls; the later steps become 4–7): "The bracket, centre stage." The night's timeline went from the draw straight to Match Controls, leaving out what the room watches all night. A featured step, unlike the others: full width with a red number, the text beside four features (Follow a player, click a match, finals in the middle or on the right, every format drawn its own way), and the full bracket screenshot below (`tournament-bracket-zoom.png`, the whole bracket with Follow on; the hero keeps its crop). Requested by the maintainer ("the jewel, what everything runs around").
+- Tested in the browser: desktop width and 375 px (no horizontal scroll).
+- Files changed: `landing.html`, `landing-page.php`, `css/home.css`.
+
 ## **v5.4.4** — Run the whole darts night. Offline. (2026-10-11)
 
 ### Release

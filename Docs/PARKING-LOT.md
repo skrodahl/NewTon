@@ -42,6 +42,12 @@ Raised 2026-10-09, from the v5.4.2 build logs. Both workflows (`.github/workflow
 
 Raised 2026-10-09, from the same logs. Both workflows run on `ubuntu-latest`, which moves to Ubuntu 26 from October 19, 2026 (https://github.com/actions/runner-images/issues/14748). The builds run inside Docker with QEMU/Buildx, so they probably won't notice, but watch the first tagged build after that date. If anything breaks, pin `runs-on: ubuntu-24.04` while it's fixed.
 
+### First: leftovers from the website redesign (v5.4.4)
+
+Maintainer, 2026-10-11: first priority.
+- **The old tagline** "The Offline Authority in Darts" is still in `README.md` (its heading) and `llms.txt` (the summary line). The website now leads with "Run the whole darts night. Offline."
+- **The share image** (`og:image` / `twitter:image` on the landing page, and `screenshot` in its structured data) is still the retro poster, `Screenshots/newton-poster-throw.jpg`. A new 1200×630 image in the new look would match what visitors find.
+
 ### Landing page: the format pictograms in Pick Your Format
 
 Raised by the maintainer 2026-10-11: Pick Your Format on the web page could look nicer with the formats' SVG pictograms, as on the cards in Match Controls' Pick a format. The landing page loads none of the app's scripts, so the SVGs (each format's `pic` in `TOURNAMENT_FORMATS`, results-config.js) are copied in inline; their colours may need adjusting to the landing page's palette (the app's final is marked `class="dk"`). `landing.html` and `landing-page.php` stay identical; the cards must still wrap nicely as more formats arrive. **Built 2026-10-11** (unreleased; CHANGELOG.md).
