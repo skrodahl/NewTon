@@ -42,6 +42,10 @@ Raised 2026-10-09, from the v5.4.2 build logs. Both workflows (`.github/workflow
 
 Raised 2026-10-09, from the same logs. Both workflows run on `ubuntu-latest`, which moves to Ubuntu 26 from October 19, 2026 (https://github.com/actions/runner-images/issues/14748). The builds run inside Docker with QEMU/Buildx, so they probably won't notice, but watch the first tagged build after that date. If anything breaks, pin `runs-on: ubuntu-24.04` while it's fixed.
 
+### Landing page: the format pictograms in Pick Your Format
+
+Raised by the maintainer 2026-10-11: Pick Your Format on the web page could look nicer with the formats' SVG pictograms, as on the cards in Match Controls' Pick a format. The landing page loads none of the app's scripts, so the SVGs (each format's `pic` in `TOURNAMENT_FORMATS`, results-config.js) are copied in inline; their colours may need adjusting to the landing page's palette (the app's final is marked `class="dk"`). `landing.html` and `landing-page.php` stay identical; the cards must still wrap nicely as more formats arrive. **Built 2026-10-11** (unreleased; CHANGELOG.md).
+
 ### Other tournament formats
 
 Raised 2026-10-06, and the reason for the formats registry and the app remake: the first non-elimination format is **the season final**, in December. Bump the version to **5.4.0** when more formats arrive.

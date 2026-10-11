@@ -8,6 +8,12 @@
 - Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
 - Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
 
+### Landing page: the format pictograms in Pick Your Format
+
+- Each card in **Pick Your Format** now opens with its format's pictogram, the same SVG as on Match Controls' Pick a format cards, on a tinted band, larger (up to 168 px wide). The SVGs are copied as they are from `TOURNAMENT_FORMATS` (`pic`, without the fixed size) and recoloured in `landing.css` by their fills to the page's warm palette, the final in the orange accent; the cards get the page's hover border. Requested by the maintainer: the page looked a little bland, and showing off the formats matters.
+- **Swiss's line** is now "Your results pick your opponent." (was "Same record, new opponent.", which said too much in too few words), on the landing page and the Swiss card in Pick a format.
+- Files changed: `landing.html`, `landing-page.php` (the same), `css/landing.css`, `js/results-config.js` (Swiss's `line`), `Docs/mockups/swiss.html`, `Docs/PARKING-LOT.md`.
+
 ### Analytics: a fuller top 10 on the Dashboard
 
 - **The Leaderboard's top 10** on the Dashboard had Played, 1st and Points only; it now also shows **W–L** (matches, after 1st), **Attendance** and **Achievements** (the points from taking part and from achievements; the rest of Points is placement points). Under the point mode and layers in use, as Points. The three new columns are for wide screens only (`an-wide-only`), as Latest tournaments' Format. Requested by the maintainer ("it looks kinda sparse").

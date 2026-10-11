@@ -469,7 +469,7 @@ const TOURNAMENT_FORMATS = [
         pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="13" width="12" height="5" rx="1"/><rect x="4" y="26" width="12" height="5" rx="1"/><rect x="4" y="34" width="12" height="5" rx="1"/><rect x="24" y="5" width="12" height="5" rx="1"/><rect x="24" y="13" width="12" height="5" rx="1"/><rect x="24" y="26" width="12" height="5" rx="1"/><rect x="24" y="34" width="12" height="5" rx="1"/><rect x="44" y="5" width="12" height="5" rx="1"/><rect x="44" y="13" width="12" height="5" rx="1"/><rect x="44" y="26" width="12" height="5" rx="1"/><rect x="44" y="34" width="12" height="5" rx="1"/></g><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M56 7.5H61V36.5H56M61 22H68M82 22H86"/></g><rect x="68" y="17.5" width="14" height="9" rx="1.5" class="dk" fill="#1f2937"/></svg>',
         name: 'Swiss',
         blurb: 'A fixed number of rounds, each pairing players with the same record; nobody is knocked out',
-        line: 'Same record, new opponent.',
+        line: 'Your results pick your opponent.',
         about: 'Nobody is knocked out. Every round pairs players with the same record who haven\'t met yet, so the night gets more even as it goes. After the last round the table decides, or the top four play semifinals, a bronze final and a final.',
         bests: ['Everyone plays the same number of matches', 'A predictable night: you know how many rounds there are', 'Best for: nights where everyone should play the whole evening, and a fair winner'],
         minPlayers: 4,

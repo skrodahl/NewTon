@@ -279,6 +279,34 @@ body {
     gap: 6px;
 }
 
+.format-card:hover {
+    border-color: #d4824a;
+}
+
+/* The app's pictograms (TOURNAMENT_FORMATS in js/results-config.js), copied as they are and
+   recoloured here by their fills: players, lines, the other places, and the final in the accent */
+.format-pic {
+    background: #f5ebe0;
+    border-radius: 10px;
+    padding: 16px 12px;
+    margin-bottom: 8px;
+    display: flex;
+    justify-content: center;
+}
+
+.format-pic svg {
+    display: block;
+    width: 100%;
+    max-width: 168px;
+    height: auto;
+}
+
+.format-pic [fill="#6b7280"] { fill: #8a6f58; }
+.format-pic [fill="#c4bdb6"] { fill: #d9c3aa; }
+.format-pic [stroke="#a8a29e"] { stroke: #c4a98c; }
+.format-pic [stroke="#6b7280"] { stroke: #8a6f58; }
+.format-pic .dk { fill: #c0562a; }
+
 .format-card h3 {
     font-size: 1.05rem;
     font-weight: 700;
