@@ -700,11 +700,14 @@ const NewtonHistory = (() => {
                 '<div class="st-panel-head"><h3>Leaderboard <small>top 10</small></h3>' +
                 '<button type="button" class="st-link" data-an-go="leaderboard">Full Leaderboard</button></div>' +
                 '<div class="newton-table-scroll"><table class="newton-table"><thead><tr>' +
-                    '<th>#</th><th>Player</th><th style="text-align:right">Played</th><th style="text-align:right">1st</th><th style="text-align:right">Points</th>' +
+                    '<th>#</th><th>Player</th><th style="text-align:right">Played</th><th style="text-align:right">1st</th><th class="an-wide-only" style="text-align:right">W–L</th>' +
+                    '<th class="an-wide-only" style="text-align:right">Attendance</th><th class="an-wide-only" style="text-align:right">Achievements</th><th style="text-align:right">Points</th>' +
                 '</tr></thead><tbody>' +
                 top.map((r, i) => `<tr class="newton-table-clickable" data-an-player="${i}">` +
                     `<td class="nt-rank">${r._rank}</td><td class="nt-name" style="width:100%">${escHtml(r.name)}</td>` +
                     `<td style="text-align:right">${r.tournaments}</td><td style="text-align:right">${dim(r.p1st)}</td>` +
+                    `<td class="an-wide-only" style="text-align:right">${r.matchesWon}–${r.matchesLost}</td>` +
+                    `<td class="an-wide-only" style="text-align:right">${dim(r.attendancePoints)}</td><td class="an-wide-only" style="text-align:right">${dim(r.achievementPoints)}</td>` +
                     `<td class="nt-pts" style="text-align:right">${r.points}</td></tr>`).join('') +
                 '</tbody></table></div>' +
             '</section>' +
@@ -712,11 +715,12 @@ const NewtonHistory = (() => {
                 '<div class="st-panel-head"><h3>Latest tournaments</h3>' +
                 '<button type="button" class="st-link" data-an-go="register">All in the Register</button></div>' +
                 '<div class="newton-table-scroll"><table class="newton-table"><thead><tr>' +
-                    '<th>Tournament</th><th>Date</th><th class="an-wide-only" style="text-align:right">Players</th><th>Winner</th>' +
+                    '<th>Tournament</th><th>Date</th><th class="an-wide-only">Format</th><th class="an-wide-only" style="text-align:right">Players</th><th>Winner</th>' +
                 '</tr></thead><tbody>' +
                 latest.map((t, i) => `<tr class="newton-table-clickable" data-an-tournament="${i}">` +
                     `<td class="nt-name" style="width:100%">${escHtml(t.tournamentName || t.tournamentId)}</td>` +
                     `<td>${t.closedAt ? fmtDate(t.closedAt) : '—'}</td>` +
+                    `<td class="an-wide-only">${t.tournamentFormat ? `<span class="st-pill nt-pill">${escHtml(formatShortName(t.tournamentFormat, t.plate))}</span>` : '—'}</td>` +
                     `<td class="an-wide-only" style="text-align:right">${t.playerCount || '—'}</td>` +
                     `<td>${dim(escHtml(_winnerName(t)))}</td></tr>`).join('') +
                 '</tbody></table></div>' +
@@ -1069,7 +1073,7 @@ const NewtonHistory = (() => {
 
     /**
      * Every player's totals across the given tournaments: points (under the active point
-     * mode and layers), placements, achievements, personal bests, three-dart average, match
+     * mode and layers; with the achievement and attendance points among them), placements, achievements, personal bests, three-dart average, match
      * and leg W/L, and one history entry per tournament. Ranked by points. The one source
      * for the Leaderboard, the Dashboard's top 10, and the Players list and profile.
      * @param {object[]} tournaments - the scoped tournament records
@@ -1102,6 +1106,8 @@ const NewtonHistory = (() => {
                         name: name,
                         fullName: person.full,
                         points: 0,
+                        achievementPoints: 0, // of points: achievements, and taking part (the Dashboard's top 10)
+                        attendancePoints: 0,
                         tournaments: 0,
                         p1st: 0, p2nd: 0, p3rd: 0, p4th: 0, p56th: 0, p78th: 0,
                         oneEighties: 0,
@@ -1128,6 +1134,9 @@ const NewtonHistory = (() => {
                 const notQualified = Array.isArray(t.notQualified) && t.notQualified.includes(String(pid));
                 const points = calculatePoints(s, rank, p, { ranking: _layerRanking, attendance: _layerAttendance, notQualified });
                 pm.points += points;
+                const achievement = calculateAchievementPoints(s, p);
+                pm.achievementPoints += achievement;
+                pm.attendancePoints += calculatePoints(s, null, p, { ranking: false, attendance: _layerAttendance, notQualified }) - achievement;
                 pm.history.push({ tournament: t, placement: rank || null, stats: s, points, matchesWon: 0, matchesLost: 0,
                     _scored: 0, _darts: 0, _matchAvgs: [] }); // three-dart average per tournament (Chalker matches)
 
@@ -1674,7 +1683,7 @@ const NewtonHistory = (() => {
                     },
                     {
                         key: 'tournamentFormat', label: 'Format', columnClass: 'an-wide-only',
-                        render: (v, row) => v ? `<span class="st-pill nt-pill">${v === 'SWISS' ? 'Swiss' : v === 'SE' && row && row.plate ? 'Cup &amp; Plate' : v === 'SE' ? 'Single elim.' : v === 'DE' ? 'Double elim.' : v === 'GROUPS' ? 'Round robin' : escHtml(v)}</span>` : '—'
+                        render: (v, row) => v ? `<span class="st-pill nt-pill">${escHtml(formatShortName(v, row && row.plate))}</span>` : '—'
                     },
                     {
                         key: 'playerCount', label: 'Players', align: 'right', defaultDir: 'desc',
@@ -2254,7 +2263,7 @@ const NewtonHistory = (() => {
 
         // Heading, buttons and facts. Points come from the corrected record the views use.
         const counted = (_allTournaments || []).find(t => t.tournamentId === tournamentId) || tournament;
-        const format = tournament.tournamentFormat === 'DE' ? 'Double elim.' : tournament.tournamentFormat === 'SWISS' ? 'Swiss' : tournament.tournamentFormat === 'SE' ? (tournament.plate ? 'Cup & Plate' : 'Single elim.') : tournament.tournamentFormat === 'GROUPS' ? 'Round robin' : (tournament.tournamentFormat || '—');
+        const format = tournament.tournamentFormat ? formatShortName(tournament.tournamentFormat, tournament.plate) : '—';
         const fact = (label, value) => `<div><dt>${label}</dt><dd>${value}</dd></div>`;
         document.getElementById('historyMatchListTitle').innerHTML =
             escHtml(tournament.tournamentName || tournamentId) + (tournament.closedAt ? ` <small>${fmtDate(tournament.closedAt)}</small>` : '');

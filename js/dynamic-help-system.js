@@ -41,7 +41,7 @@ const HELP_CONTENT = {
             recent: {
                 title: "Tournaments",
                 content: `
-                    <p>Every tournament on this computer, newest first, with date, players, status and Analytics.</p>
+                    <p>Every tournament on this computer, newest first, with date, format, players, status and Analytics.</p>
                     <ul>
                         <li><strong>Load:</strong> Switch to that tournament</li>
                         <li><strong>×:</strong> Delete it permanently (asks first)</li>

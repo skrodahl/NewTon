@@ -53,6 +53,20 @@ function getFormat() {
 }
 
 /**
+ * A saved tournament's format, as the tournaments list and the Load dialog show it: its short
+ * name once drawn (formatShortName()), else `undrawn`. The format is set by the draw, so before
+ * it an absent format doesn't mean double elimination yet.
+ *
+ * @param {object} t - tournament-shaped object (saved or active)
+ * @param {string} [undrawn='—'] - shown before the draw
+ * @returns {string}
+ */
+function savedFormatName(t, undrawn = '—') {
+    const drawn = !!t && !!t.bracket && Array.isArray(t.matches) && t.matches.length > 0;
+    return drawn ? formatShortName(t.format, t.plate) : undrawn;
+}
+
+/**
  * Returns a display label for a tournament's status (Setup / Active / Completed).
  * Prefers the explicit `status` field; falls back to deriving from bracket + matches state
  * for older tournaments that don't carry the field.
@@ -1147,13 +1161,14 @@ async function loadRecentTournaments() {
             return `<tr${isLoaded ? ' class="st-loaded"' : ''}>
                 <td class="st-name"><b>${escapeHtml(t.name)}</b>${isLoaded ? '<span class="st-tag">Loaded</span>' : ''}</td>
                 <td class="st-date">${escapeHtml(t.date)}</td>
+                <td class="st-format">${escapeHtml(savedFormatName(t))}</td>
                 <td class="st-num">${Array.isArray(t.players) ? t.players.length : 0}</td>
                 <td><span class="st-pill st-${status.toLowerCase()}">${escapeHtml(status)}</span></td>
                 <td data-analytics-row="${i}"></td>
                 <td><span class="st-row-acts">${acts}</span></td>
             </tr>`;
         }).join('');
-        container.innerHTML = `<table class="st-table"><thead><tr><th>Name</th><th>Date</th><th class="st-num">Players</th><th>Status</th><th>Analytics</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
+        container.innerHTML = `<table class="st-table"><thead><tr><th>Name</th><th>Date</th><th>Format</th><th class="st-num">Players</th><th>Status</th><th>Analytics</th><th></th></tr></thead><tbody>${rows}</tbody></table>`;
 
         // The Analytics column is filled in when the Analytics registry answers, so the list
         // is never held up by it
@@ -1273,6 +1288,7 @@ function showLoadTournamentModal(tournamentId, selectedTournament) {
     const selectedTotalMatches = (selectedTournament.matches || []).length;
     document.getElementById('loadTournamentName').textContent = selectedTournament.name;
     document.getElementById('loadTournamentDate').textContent = selectedTournament.date;
+    document.getElementById('loadTournamentFormat').textContent = savedFormatName(selectedTournament, 'Not drawn yet');
     document.getElementById('loadTournamentStatus').textContent = tournamentStatusLabel(selectedTournament);
     document.getElementById('loadMatchProgress').textContent = `${selectedCompletedMatches} of ${selectedTotalMatches}`;
     document.getElementById('loadPlayerCount').textContent = (selectedTournament.players || []).length;

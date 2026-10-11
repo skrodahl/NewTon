@@ -1,3 +1,20 @@
+## Unreleased
+
+### The format, wherever tournaments are listed
+
+- **Tournament Setup's tournaments list** has a **Format** column (after Date), **the Load tournament dialog** a Format line, and **Analytics' Dashboard** a Format column in Latest tournaments (wide screens, as the Register's). Names as the Register already had them: Double elim., Single elim., Cup & Plate, Round robin, Swiss. A tournament not yet drawn shows "—" in the list and "Not drawn yet" in the dialog: the format is set by the draw, and an absent format would otherwise read as double elimination. Requested by the maintainer.
+- **The draw dialog** named Cup and Plate "Single Elimination" (in its title and Format line; only the size, "16 + Plate of 8", told them apart); it now says Cup and Plate.
+- **One name per format:** each entry in `TOURNAMENT_FORMATS` has a `short` name, read through `formatShortName(format, plate)` (results-config.js); the Register's Format column and a tournament's facts in Analytics use it instead of their own spelled-out copies. The Server tab of the list is unchanged (the server's list has no format).
+- Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
+- Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
+
+### Analytics: a fuller top 10 on the Dashboard
+
+- **The Leaderboard's top 10** on the Dashboard had Played, 1st and Points only; it now also shows **W–L** (matches, after 1st), **Attendance** and **Achievements** (the points from taking part and from achievements; the rest of Points is placement points). Under the point mode and layers in use, as Points. The three new columns are for wide screens only (`an-wide-only`), as Latest tournaments' Format. Requested by the maintainer ("it looks kinda sparse").
+- The split is computed in `_computePlayerRows()` from the same functions as Points (`calculateAchievementPoints()`, `calculatePoints()` without placement), so the parts can't disagree with the total.
+- Tested in the browser: attendance 5 + 1st 15 = 20, the layout at 1450 px wide.
+- Files changed: `js/newton-history.js`.
+
 ## **v5.4.3** — Swiss Precision (2026-10-10)
 
 ### Landing page: the draw's new screenshot and copy, and Swiss in Pick Your Format

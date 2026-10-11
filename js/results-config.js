@@ -406,12 +406,15 @@ function saveApplicationSettings(options = {}) {
  * it), so a new format brings its own description and picture. Cup and Plate
  * is drawn as single elimination with a Plate (`draw: 'SE'`, `plate: true`; Docs/CUP-AND-PLATE.md).
  *
- * @type {Array<{id: string, name: string, blurb: string, pic: string, line: string, about: string, bests: string[],
+ * `short` is the name in lists and tables (the tournaments list, Analytics): formatShortName().
+ *
+ * @type {Array<{id: string, name: string, short: string, blurb: string, pic: string, line: string, about: string, bests: string[],
  *   minPlayers: number, maxPlayers: number, draw?: string, plate?: boolean}>}
  */
 const TOURNAMENT_FORMATS = [
     {
         id: 'DE',
+        short: 'Double elim.',
         pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 8.5H19V35.5H16M19 16.5H22M34 16.5H40M80 8.5H77V35.5H80M77 27.5H74M62 27.5H56M48 21V23"/></g><g fill="#6b7280"><rect x="4" y="6" width="12" height="5" rx="1"/><rect x="4" y="33" width="12" height="5" rx="1"/><rect x="22" y="14" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="6" width="12" height="5" rx="1"/><rect x="80" y="33" width="12" height="5" rx="1"/><rect x="62" y="25" width="12" height="5" rx="1"/><rect x="40" y="23" width="16" height="9" rx="1.5"/></g><rect class="dk" x="40" y="12" width="16" height="9" rx="1.5" fill="#1f2937"/></svg>',
         name: 'Double Elimination Cup',
         blurb: 'Players get a second chance through the backside',
@@ -423,6 +426,7 @@ const TOURNAMENT_FORMATS = [
     },
     {
         id: 'SE',
+        short: 'Single elim.',
         pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H21.5V17.5H16M21.5 12.5H26M16 27.5H21.5V37.5H16M21.5 32.5H26M38 12.5H43.5V32.5H38M43.5 22.5H48M60 22.5H72"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="26" y="10" width="12" height="5" rx="1"/><rect x="26" y="30" width="12" height="5" rx="1"/><rect x="48" y="20" width="12" height="5" rx="1"/></g><rect class="dk" x="72" y="18" width="18" height="9" rx="1.5" fill="#1f2937"/></svg>',
         name: 'Single Elimination Cup',
         blurb: 'Players are eliminated after one loss',
@@ -434,6 +438,7 @@ const TOURNAMENT_FORMATS = [
     },
     {
         id: 'CP',
+        short: 'Cup & Plate',
         pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M16 7.5H19V17.5H16M19 12.5H22M16 27.5H19V37.5H16M19 32.5H22M34 12.5H37V32.5H34M37 22.5H40M80 12.5H77V32.5H80M77 22.5H74"/></g><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="15" width="12" height="5" rx="1"/><rect x="4" y="25" width="12" height="5" rx="1"/><rect x="4" y="35" width="12" height="5" rx="1"/><rect x="22" y="10" width="12" height="5" rx="1"/><rect x="22" y="30" width="12" height="5" rx="1"/></g><g fill="#c4bdb6"><rect x="80" y="10" width="12" height="5" rx="1"/><rect x="80" y="30" width="12" height="5" rx="1"/><rect x="60" y="18" width="14" height="9" rx="1.5"/></g><rect class="dk" x="40" y="18" width="14" height="9" rx="1.5" fill="#1f2937"/></svg>',
         name: 'Cup and Plate',
         blurb: 'Single elimination; the round 1 losers play on in the Plate',
@@ -447,6 +452,7 @@ const TOURNAMENT_FORMATS = [
     },
     {
         id: 'GROUPS',
+        short: 'Round robin',
         pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M24 8H34V6.5H44M24 30H38V14.5H44M24 14H30V29.5H44M24 36H34V37.5H44M54 6.5H57V14.5H54M57 10.5H60M54 29.5H57V37.5H54M57 33.5H60"/></g><g fill="none" stroke="#6b7280" stroke-width="1"><rect x="4.5" y="4.5" width="19" height="13" rx="1.5"/><path d="M4.5 8.8H23.5M4.5 13.2H23.5"/><rect x="4.5" y="26.5" width="19" height="13" rx="1.5"/><path d="M4.5 30.8H23.5M4.5 35.2H23.5"/></g><g fill="#6b7280"><rect x="44" y="4" width="10" height="5" rx="1"/><rect x="44" y="12" width="10" height="5" rx="1"/><rect x="44" y="27" width="10" height="5" rx="1"/><rect x="44" y="35" width="10" height="5" rx="1"/><rect x="60" y="29.5" width="14" height="8" rx="1.5"/></g><rect class="dk" x="60" y="6.5" width="14" height="8" rx="1.5" fill="#1f2937"/></svg>',
         name: 'Round Robin',
         blurb: 'Everybody plays everybody: in groups followed by an A and a B cup, or in one group',
@@ -459,6 +465,7 @@ const TOURNAMENT_FORMATS = [
     },
     {
         id: 'SWISS',
+        short: 'Swiss',
         pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="#6b7280"><rect x="4" y="5" width="12" height="5" rx="1"/><rect x="4" y="13" width="12" height="5" rx="1"/><rect x="4" y="26" width="12" height="5" rx="1"/><rect x="4" y="34" width="12" height="5" rx="1"/><rect x="24" y="5" width="12" height="5" rx="1"/><rect x="24" y="13" width="12" height="5" rx="1"/><rect x="24" y="26" width="12" height="5" rx="1"/><rect x="24" y="34" width="12" height="5" rx="1"/><rect x="44" y="5" width="12" height="5" rx="1"/><rect x="44" y="13" width="12" height="5" rx="1"/><rect x="44" y="26" width="12" height="5" rx="1"/><rect x="44" y="34" width="12" height="5" rx="1"/></g><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M56 7.5H61V36.5H56M61 22H68M82 22H86"/></g><rect x="68" y="17.5" width="14" height="9" rx="1.5" class="dk" fill="#1f2937"/></svg>',
         name: 'Swiss',
         blurb: 'A fixed number of rounds, each pairing players with the same record; nobody is knocked out',
@@ -469,6 +476,21 @@ const TOURNAMENT_FORMATS = [
         maxPlayers: 48  // Docs/SWISS.md
     }
 ];
+
+/**
+ * A tournament's format as lists and tables name it ("Double elim.", "Cup & Plate", "Swiss"):
+ * the format's `short` in TOURNAMENT_FORMATS. Cup and Plate is single elimination with a Plate;
+ * an absent format is double elimination (records from before single elimination).
+ *
+ * @param {string} [format] - the tournament's `format`
+ * @param {*} [plate] - the tournament's `plate` (truthy for Cup and Plate)
+ * @returns {string}
+ */
+function formatShortName(format, plate) {
+    const id = format === 'SE' && plate ? 'CP' : (format || 'DE');
+    const f = TOURNAMENT_FORMATS.find(x => x.id === id);
+    return f ? f.short : String(id);
+}
 
 /**
  * The formats offered when starting a tournament.

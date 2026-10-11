@@ -144,6 +144,7 @@
 .st-table .st-tag { margin-left: 8px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-ink); border: 1px solid var(--nt-ink); border-radius: 4px; padding: 0 5px; white-space: nowrap; }
 .st-table .st-date, .st-table .st-num { font-variant-numeric: tabular-nums; color: var(--nt-ink-2); white-space: nowrap; }
 .st-table .st-num { text-align: right; }
+.st-table .st-format { color: var(--nt-ink-2); white-space: nowrap; }
 .st-table .st-faint { color: var(--nt-faint); }
 .st-row-acts { display: inline-flex; gap: 6px; }
 .st-alink { border: 0; background: none; padding: 0; font: inherit; font-size: 13px; font-weight: 600; color: var(--nt-ink-2); cursor: pointer; text-decoration: underline; text-underline-offset: 3px; text-decoration-color: var(--nt-line-2); white-space: nowrap; }

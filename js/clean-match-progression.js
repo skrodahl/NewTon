@@ -1540,14 +1540,14 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
     const groups = format === 'GROUPS';
     const swiss = format === 'SWISS' && typeof Swiss !== 'undefined';
     const single = groups && Groups.configSettings().structure === 'single';
-    const formatLabel = swiss ? 'Swiss' : groups ? (single ? 'Round Robin, one group' : 'Round Robin, groups and cups') : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+    // Cup and Plate: the Plate is half the Cup (picked at the draw)
+    const withPlate = format === 'SE' && bracketSize >= 8 && typeof Plate !== 'undefined' && Plate.wanted();
+    const formatLabel = swiss ? 'Swiss' : groups ? (single ? 'Round Robin, one group' : 'Round Robin, groups and cups') : withPlate ? 'Cup and Plate' : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
     document.getElementById('bracketConfirmTitle').textContent = swiss ? 'Draw Swiss' : groups ? (single ? 'Draw the Group' : 'Draw the Groups') : `Generate ${formatLabel} Bracket`;
     document.getElementById('bracketConfirmName').textContent = (tournament && tournament.name) || '-';
     document.getElementById('bracketConfirmFormat').textContent = formatLabel;
     const sizeLabel = document.getElementById('bracketConfirmSizeLabel');
     if (sizeLabel) sizeLabel.textContent = swiss ? 'Rounds' : groups ? (single ? 'Group' : 'Groups') : 'Bracket Size';
-    // Cup and Plate: the Plate is half the Cup (the switch at the draw)
-    const withPlate = format === 'SE' && bracketSize >= 8 && typeof Plate !== 'undefined' && Plate.wanted();
     const swissRounds = swiss ? Swiss.roundsFor(paidPlayers.length) : 0, swissTop4 = swiss && Swiss.configSettings().finish === 'top4';
     document.getElementById('bracketConfirmSize').textContent = swiss ? `${swissRounds}${swissTop4 ? ', then the top 4' : ''}` : groups ? Groups.describeSizes(paidPlayers.length) : withPlate ? `${bracketSize} + Plate of ${bracketSize / 2}` : bracketSize;
     document.getElementById('bracketConfirmPlayerCount').textContent = paidPlayers.length;
