@@ -8,6 +8,11 @@
 - Tested in the browser: the list (Swiss, Round robin, Single elim., Cup & Plate, "—" for undrawn), the Load dialog (Cup & Plate, Not drawn yet), the draw dialog (Cup and Plate with the Plate picked, Single Elimination without), the Dashboard.
 - Files changed: `js/results-config.js`, `js/tournament-management.js` (`savedFormatName()`), `js/newton-history.js`, `js/clean-match-progression.js` (`showBracketConfirmation()`), `tournament.html`, `css/setup-page.css`, `js/dynamic-help-system.js`.
 
+### Swiss's pictogram: the top four's semifinals
+
+- The Swiss pictogram drew the last round's outer two matches straight into the final (the middle two connected to nothing) and a line running out of the final into nothing. Redrawn: three round columns (no lines: the next opponent comes from the table), a gap (the table picks the top four), then two semifinals bracketed into the final, as the finish is played. Spotted by the maintainer on the landing page.
+- Files changed: `js/results-config.js` (Swiss's `pic`), `landing.html`, `landing-page.php` (the same copy).
+
 ### Landing page: Pick Your Format's lead line
 
 - Under the heading, a lead line sets the feel instead of a note under the cards: **"Small night or full house, there's one for it."** (larger, "full house" in the accent). The note it replaces ("Above 32, qualifiers decide the last places, up to 48. Seeding from your own results keeps the best players apart.") went into detail the cards already give (their player ranges), and the Draw card on the same page already speaks of seeding. The maintainer's choice of the options discussed (a lead under the heading, rather than the line as the heading).
