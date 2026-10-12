@@ -7,7 +7,7 @@
 
 :root {
   /* surfaces */
-  --nt-bg: #f4f3f1;          /* page */
+  --nt-bg: #fbfaf8;          /* page: near white, so the bracket page's deeper surround stands apart */
   --nt-surface: #ffffff;     /* panels, cards, bars */
   --nt-surface-2: #faf9f7;   /* insets, card meta strip */
   --nt-inset: #f1f0ee;       /* read-only fields, waiting cards */

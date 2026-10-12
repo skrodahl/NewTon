@@ -16,7 +16,7 @@ The bracket page opens on Match Controls, and for someone new to it, the bracket
 - **One click back.** Click the dimmed bracket, or the orange **← Bracket** pill at the top of the strip, to see the bracket. Hovering the pill reminds you that the left arrow key does the same.
 - **Esc closes Match Controls,** as it would close a dialog. The bracket comes back exactly as you left it, with the same zoom and the same match selected.
 - **One Leaderboard.** The header's Leaderboard button stays in view above Match Controls, so the finished tournament's second Leaderboard button is gone.
-- **The bracket page stands apart.** Its surround is a deeper, warmer shade than the other pages, so you can tell at a glance that you're on the stage, not in the settings.
+- **The bracket page stands apart.** The other pages are lighter now, near white, and the bracket page keeps a warmer, deeper surround, so you can tell at a glance that you're on the stage, not in the settings.
 
 The **Bracket | Match Controls** tabs and the arrow keys work as before, and the page still opens on Match Controls if that's how you've set it.
 
