@@ -375,6 +375,10 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <section id="matchCommandCenterModal" class="mc-view" aria-label="Match Controls" style="display:none">
                         <div class="mc-body" id="mcBody"></div>
                     </section>
+                    <!-- While Match Controls shows, the bracket stays visible to its left, dimmed: click it, or the
+                         pill on the drawer's corner, to see the bracket (css/bracket-view.css, .bv-on-controls) -->
+                    <div class="bv-scrim" aria-hidden="true" onclick="showBracketView('bracket')" title="Show the bracket"></div>
+                    <button type="button" class="bv-layer-close" onclick="showBracketView('bracket')" aria-label="Show the bracket"><span class="bv-hint-rest">&larr; Bracket</span><span class="bv-hint-hover">Click or press &larr;</span></button>
 
                     <!-- Developer Console (css/dev-console.css): the third view, when it is enabled in Global
                          Settings. Filled by js/analytics.js (startDeveloperConsole / stopDeveloperConsole). -->

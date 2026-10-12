@@ -160,10 +160,25 @@
 .bracket-container {
   position: relative; width: 100%; height: 100vh; overflow: hidden;
   display: flex; flex-direction: column; gap: 8px; padding: 10px 16px 12px;
-  background: #f4f3f1; font-family: var(--bv-sans);
+  /* a deeper shade than the other pages: the bracket page is the stage */
+  background: #e4e0d9; font-family: var(--bv-sans);
 }
 /* the views share this stage: the bracket, with Match Controls as a layer over it */
 .bv-stage { position: relative; flex: 1; min-height: 0; display: flex; flex-direction: column; }
+/* Match Controls as a sheet over the bracket, from the right: the bracket's first rounds show to its
+   left, dimmed; clicking them, or the pill on the sheet's corner, shows the bracket */
+.bv-scrim, .bv-layer-close { display: none; }
+.bv-on-controls .bv-scrim { display: block; position: absolute; inset: 0; z-index: 19; border-radius: 10px;
+  background: rgba(28, 25, 22, .22); cursor: pointer; }
+.bv-on-controls #matchCommandCenterModal.mc-view { inset: 0 0 0 clamp(140px, 16%, 260px); padding: 16px 18px 0;
+  border-radius: 14px; box-shadow: -12px 0 40px rgba(17, 15, 13, .28); }
+/* at the top of the strip, beside the sheet's edge, in the accent: it opens the bracket, and says the
+   arrow key does too (it grows to the left on hover, never over the sheet) */
+.bv-on-controls .bv-layer-close { display: block; position: absolute; top: 12px; left: calc(clamp(140px, 16%, 260px) - 12px); z-index: 21;
+  transform: translateX(-100%); padding: 7.5px 15.5px; border: 1.5px solid var(--bv-ink); border-radius: 999px; background: var(--bv-accent); color: #fff;
+  font-size: 14px; font-weight: 700; white-space: nowrap; cursor: pointer; box-shadow: 0 0 0 1.5px #fff, 0 6px 16px rgba(17, 15, 13, .3); }
+.bv-hint-hover, .bv-layer-close:hover .bv-hint-rest, .bv-scrim:hover + .bv-layer-close .bv-hint-rest { display: none; }
+.bv-layer-close:hover .bv-hint-hover, .bv-scrim:hover + .bv-layer-close .bv-hint-hover { display: inline; }
 .bracket-viewport {
   position: relative; flex: 1; min-height: 0; overflow: hidden; cursor: grab;
   contain: layout paint; /* redrawing the bracket never repaints the rest of the page */

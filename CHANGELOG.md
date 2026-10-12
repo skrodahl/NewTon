@@ -1,3 +1,13 @@
+## Unreleased
+
+### Bracket page: Match Controls as a drawer over the bracket
+
+- **First-time users didn't find the bracket** (the maintainer let friends try the Tournament Manager): the page starts on Match Controls, which filled the frame, and nothing said a bracket was behind it; when Match Controls was a dialog, the bracket around it had made that obvious. They also didn't tell the bracket page from the other pages.
+- **Match Controls is now a drawer from the right,** over the bracket: a strip of the bracket stays visible on its left, lightly dimmed (16% of the width, 140–260px), and the drawer has a shadow on its left edge. Clicking the strip, or the orange **← Bracket** pill (a thin black border and a thin white ring around it, so it stands out from the dimmed bracket) at the top of the strip beside the drawer's edge, shows the bracket; on hover the pill says "Click or press ←", so the arrow key is discovered too. (A dark pill in the middle of the strip, beside a round ×, was tried first: it blended into the bracket's cards. The accent colour and the top, where the eye comes down from the tabs, make it found at once; one control instead of two.) **Esc closes Match Controls** and shows the bracket as it was left (the bracket's own Esc, which clears the selection, doesn't run then); not while typing, choosing in a list or a dialog is open. The Bracket | Match Controls tabs and the arrow keys work as before; the Console still fills the frame.
+- **The bracket page's surround is a deeper warm shade** (`#e4e0d9`, was the pages' `#f4f3f1`), so the page reads as the stage.
+- Tested in the browser: a running 32-player double elimination (round 1 visible in the strip), a finished Cup and Plate's podium (the pill clear of the sheet's heading), before the draw; clicking the strip or the pill shows the bracket; Esc closes Match Controls with the bracket's selection kept, does nothing while a list has focus, and on the bracket still clears the selection.
+- Files changed: `css/bracket-view.css`, `tournament.html`, `js/bracket-rendering.js` (`_bvSetView()`: `bv-on-controls`; the Esc handler), `Docs/BRACKET-REDESIGN.md`.
+
 ## **v5.4.5** — Look Sharp! (2026-10-11)
 
 ### Release

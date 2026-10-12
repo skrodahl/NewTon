@@ -2828,6 +2828,8 @@ function _bvSetView(view) {
     });
     const frame = document.querySelector('#tournament .bracket-container');
     if (frame) frame.classList.toggle('bv-on-layer', view !== 'bracket');
+    // Match Controls sits over the bracket like a sheet, the bracket dimmed around it
+    if (frame) frame.classList.toggle('bv-on-controls', view === 'controls');
     document.querySelectorAll('#bvViews [data-view]').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.view === view)));
 }
 
@@ -2879,6 +2881,23 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     const next = tabs[(at + (e.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length];
     showBracketView(next.dataset.view);
+});
+
+// Esc closes Match Controls (it sits over the bracket like a sheet) and shows the bracket, as it
+// was left: the bracket's own Esc (clear the selection) doesn't run. Not while typing, choosing in
+// a list or a dialog is open.
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape' || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    const page = document.getElementById('tournament');
+    if (!page || !page.classList.contains('active')) return;
+    const frame = page.querySelector('.bracket-container');
+    if (!frame || !frame.classList.contains('bv-on-controls')) return;
+    if (window.dialogStack && window.dialogStack.length) return;
+    const t = e.target;
+    if (t && (t.isContentEditable || /^(INPUT|SELECT|TEXTAREA)$/.test(t.tagName))) return;
+    e.preventDefault();
+    e.stopImmediatePropagation();
+    showBracketView('bracket');
 });
 
 // Each live match's time on the board
