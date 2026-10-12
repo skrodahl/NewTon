@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.4.5 &mdash; Look Sharp!</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.4.5 release notes. Loser drops in the bracket you can follow, the bracket centre stage on the website, the README rewritten, and the Docker guides on port 2020.">
+    <title>v5.4.6 &mdash; Peek-a-Boo</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.4.6 release notes. Match Controls slides over the bracket like a drawer, with the bracket in sight and Esc to close it; undo reopens a finished Swiss, Round Robin or Cup and Plate tournament.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,73 +17,59 @@
 
 <div class="docs-content">
 
-    <h1>Look Sharp!</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.5 &mdash; October 11, 2026</p>
+    <h1>Peek-a-Boo</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.6 &mdash; October 12, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.5" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.5</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.6" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.6</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#bracket">The Bracket: Loser Drops You Can Follow</a></li>
-            <li><a href="#website">The Website</a></li>
-            <li><a href="#readme">The README, Rewritten</a></li>
-            <li><a href="#docker">Docker: Port 2020</a></li>
+            <li><a href="#drawer">Match Controls Over the Bracket</a></li>
+            <li><a href="#undo">Undo in a Finished Tournament</a></li>
             <li><a href="#migration">Migration</a></li>
         </ol>
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>The bracket is what everything on a club night runs around, and this release gives it its due. In the app, the line that shows where a match&rsquo;s loser goes now takes a clear, deliberate route. On the website, the bracket gets its own step in How a night runs. The README is rewritten to match the website, there&rsquo;s a new image for when the site is shared, and the Docker guide gives the right address again.</p>
+    <p>The bracket page opens on Match Controls, and for someone new to it, the bracket behind it was easy to miss. Match Controls now slides over the bracket like a drawer, with the bracket in plain sight beside it and one obvious way back. And undoing a match in a finished Swiss, Round Robin or Cup and Plate tournament now reopens it, as it always did for the other formats.</p>
 
     <hr>
 
-    <h2 id="bracket">The Bracket: Loser Drops You Can Follow</h2>
-    <p>Click a match in a double elimination bracket and a dashed line shows where its loser goes on the backside.</p>
+    <h2 id="drawer">Match Controls Over the Bracket</h2>
     <ul>
-        <li><strong>The line now bends halfway:</strong> out of the match, across in the gap nearest the middle, and straight into the player row it fills, an S or a Z. With the finals in the middle, that&rsquo;s usually the open space beside the finals.</li>
-        <li><strong>It never runs along another line.</strong> The bend is only placed where it crosses no match card and doesn&rsquo;t follow any of the bracket&rsquo;s own lines. Before, it turned in the gap just before the backside column, right on top of the backside&rsquo;s own forks, and was hard to follow.</li>
-        <li><strong>Where there&rsquo;s no such place,</strong> such as into the backside&rsquo;s first round, the line keeps its old route, which reads fine there. If that route shares its gap with a fork, the line now sits beside the fork rather than on it.</li>
+        <li><strong>A drawer, not a wall.</strong> Match Controls slides over the bracket from the right. A strip of the bracket stays visible on its left, lightly dimmed, so it&rsquo;s clear what&rsquo;s underneath.</li>
+        <li><strong>One click back.</strong> Click the dimmed bracket, or the orange <strong>&larr; Bracket</strong> pill at the top of the strip, to see the bracket. Hovering the pill reminds you that the left arrow key does the same.</li>
+        <li><strong>Esc closes Match Controls,</strong> as it would close a dialog. The bracket comes back exactly as you left it, with the same zoom and the same match selected.</li>
+        <li><strong>The bracket page stands apart.</strong> Its surround is a deeper, warmer shade than the other pages, so you can tell at a glance that you&rsquo;re on the stage, not in the settings.</li>
     </ul>
-    <p>Only how the bracket is drawn has changed. Results, progression and undo are untouched.</p>
+    <p>The <strong>Bracket | Match Controls</strong> tabs and the arrow keys work as before, and the page still opens on Match Controls if that&rsquo;s how you&rsquo;ve set it.</p>
 
     <hr>
 
-    <h2 id="website">The Website</h2>
-    <ul>
-        <li><strong>The bracket, centre stage.</strong> How a night runs gets a new step 3, &ldquo;All night long&rdquo;: the whole double elimination bracket, full width, with what it does. Follow a player, click a match to see where the winner goes and where the loser drops, finals in the middle or on the right, every format drawn its own way.</li>
-        <li><strong>A new picture in the hero:</strong> an 8-player single elimination bracket with the final in the middle and a semifinal live, readable at a glance. The hero&rsquo;s pictures are now just pictures; the timeline below is where you click to see the screenshots full size.</li>
-        <li><strong>A new share image.</strong> When the site is shared in a chat or on social media, the preview shows the website&rsquo;s own look: the headline, the bracket and the Chalker.</li>
-    </ul>
-
-    <hr>
-
-    <h2 id="readme">The README, Rewritten</h2>
-    <p>The README on GitHub had grown one addition at a time. It now follows the website: the headline and share image, the three promises, how a night runs in seven steps, a table of the five formats with their player ranges, the features grouped by the night (before the draw, during, after the final, built to last), and the three ways to get started.</p>
-    <p>The description for AI services (<code>llms.txt</code>) now calls the software by its full name throughout: NewTon DC Tournament Manager. NewTon DC is the darts club that makes it.</p>
-
-    <hr>
-
-    <h2 id="docker">Docker: Port 2020</h2>
-    <p>The Docker guides now give the right address: <strong>http://localhost:2020</strong>. The container serves on port 2020 (&ldquo;Double 20&rdquo;, double tops), and the compose files publish the same port. The guides had said 8080. The tip for when port 2020 is already taken now shows the change that works: a different host port in <code>docker-compose.yml</code>.</p>
+    <h2 id="undo">Undo in a Finished Tournament</h2>
+    <p>To correct a finished tournament, you switch off its read-only lock in the Developer Console and undo the match. In Swiss, in Round Robin with one group, and in Cup and Plate when the Plate&rsquo;s last match was played last, the tournament stayed marked as finished after the undo, and Match Controls kept showing the podium.</p>
+    <p>Now any undo in a finished Swiss, Round Robin or Cup and Plate tournament reopens it, and the podium waits until the matches are played again. Double and single elimination behave as before.</p>
+    <p>If you have a tournament in that state, undo one more match (in Swiss, a semifinal). It reopens, and you can play the matches again from Match Controls.</p>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
     <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Nothing stored has changed; the export format is unchanged.</p>
-    <p>This release moves <code>:latest</code> forward to v5.4.5. Installed Chalker apps refresh automatically on their next online launch.</p>
+    <p>This release moves <code>:latest</code> forward to v5.4.6. Installed Chalker apps refresh automatically on their next online launch.</p>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.4.5 &mdash; Look Sharp!</em></p>
+    <p><em>NewTon DC Tournament Manager v5.4.6 &mdash; Peek-a-Boo</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.5" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.5</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.6" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.6</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
+        <li><a href="v5.4.6.html">v5.4.6</a> &mdash; October 12, 2026 &mdash; Peek-a-Boo</li>
         <li><a href="v5.4.5.html">v5.4.5</a> &mdash; October 11, 2026 &mdash; Look Sharp!</li>
         <li><a href="v5.4.4.html">v5.4.4</a> &mdash; October 11, 2026 &mdash; Run the whole darts night. Offline.</li>
         <li><a href="v5.4.3.html">v5.4.3</a> &mdash; October 10, 2026 &mdash; Swiss Precision.</li>

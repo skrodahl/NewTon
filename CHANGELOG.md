@@ -1,4 +1,8 @@
-## Unreleased
+## **v5.4.6** — Peek-a-Boo (2026-10-12)
+
+### Release
+
+- Version 5.4.6: `APP_VERSION` and `CHALKER_VERSION`, Chalker cache busters (`chalker.js?v=32`, `chalker-v129`), release pages `releases/index.html` and `releases/v5.4.6.html`, `sitemap.xml`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.6.md`. The help (bracket page) and `llms.txt` (Match Controls) mention the drawer: the strip, the ← Bracket pill and Esc.
 
 ### Undo in a completed Swiss, Round Robin or Cup and Plate tournament
 

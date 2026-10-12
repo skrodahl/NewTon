@@ -169,7 +169,7 @@ const HELP_CONTENT = {
                     <p><strong>Header:</strong></p>
                     <ul>
                         <li><strong>Left:</strong> tournament name and date, and links to <strong>Setup</strong>, <strong>Registration</strong>, <strong>Config</strong> and <strong>Analytics</strong></li>
-                        <li><strong>Centre:</strong> the tabs <strong>Bracket | Match Controls</strong> (plus <strong>Console</strong> when the Developer Console is enabled in Config), and <strong>Leaderboard</strong>. The left and right arrow keys switch between Bracket and Match Controls</li>
+                        <li><strong>Centre:</strong> the tabs <strong>Bracket | Match Controls</strong> (plus <strong>Console</strong> when the Developer Console is enabled in Config), and <strong>Leaderboard</strong>. The left and right arrow keys switch between Bracket and Match Controls. Match Controls opens over the bracket: click the bracket showing to its left, <strong>&larr; Bracket</strong>, or press <strong>Esc</strong> to see the bracket</li>
                         <li><strong>Right:</strong> <strong>Finals Right | Middle</strong> (<strong>Groups | Cups</strong> in a Round Robin tournament with groups and cups), <strong>Fit all</strong>, zoom (− / +) and the clock. On Match Controls and the Console only the clock shows</li>
                         <li><strong>Status line:</strong> players, matches played, walkovers, live and ready, with the colour legend on the bracket</li>
                     </ul>

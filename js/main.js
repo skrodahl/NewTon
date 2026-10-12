@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.4.5'; // Look Sharp! — loser drops bend halfway, the bracket centre stage on the website, the README rewritten
+const APP_VERSION = '5.4.6'; // Peek-a-Boo — Match Controls as a drawer over the bracket, Esc closes it; undo in completed Swiss/RR/Cup and Plate
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://newtondarts.com/releases/v5.4.6.html">
+    <title>v5.4.6 &mdash; Peek-a-Boo</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.4.6 release notes. Match Controls slides over the bracket like a drawer, with the bracket in sight and Esc to close it; undo reopens a finished Swiss, Round Robin or Cup and Plate tournament.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">&#8592; NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Peek-a-Boo</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.6 &mdash; October 12, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.6" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.6</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#drawer">Match Controls Over the Bracket</a></li>
+            <li><a href="#undo">Undo in a Finished Tournament</a></li>
+            <li><a href="#migration">Migration</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p>The bracket page opens on Match Controls, and for someone new to it, the bracket behind it was easy to miss. Match Controls now slides over the bracket like a drawer, with the bracket in plain sight beside it and one obvious way back. And undoing a match in a finished Swiss, Round Robin or Cup and Plate tournament now reopens it, as it always did for the other formats.</p>
+
+    <hr>
+
+    <h2 id="drawer">Match Controls Over the Bracket</h2>
+    <ul>
+        <li><strong>A drawer, not a wall.</strong> Match Controls slides over the bracket from the right. A strip of the bracket stays visible on its left, lightly dimmed, so it&rsquo;s clear what&rsquo;s underneath.</li>
+        <li><strong>One click back.</strong> Click the dimmed bracket, or the orange <strong>&larr; Bracket</strong> pill at the top of the strip, to see the bracket. Hovering the pill reminds you that the left arrow key does the same.</li>
+        <li><strong>Esc closes Match Controls,</strong> as it would close a dialog. The bracket comes back exactly as you left it, with the same zoom and the same match selected.</li>
+        <li><strong>The bracket page stands apart.</strong> Its surround is a deeper, warmer shade than the other pages, so you can tell at a glance that you&rsquo;re on the stage, not in the settings.</li>
+    </ul>
+    <p>The <strong>Bracket | Match Controls</strong> tabs and the arrow keys work as before, and the page still opens on Match Controls if that&rsquo;s how you&rsquo;ve set it.</p>
+
+    <hr>
+
+    <h2 id="undo">Undo in a Finished Tournament</h2>
+    <p>To correct a finished tournament, you switch off its read-only lock in the Developer Console and undo the match. In Swiss, in Round Robin with one group, and in Cup and Plate when the Plate&rsquo;s last match was played last, the tournament stayed marked as finished after the undo, and Match Controls kept showing the podium.</p>
+    <p>Now any undo in a finished Swiss, Round Robin or Cup and Plate tournament reopens it, and the podium waits until the matches are played again. Double and single elimination behave as before.</p>
+    <p>If you have a tournament in that state, undo one more match (in Swiss, a semifinal). It reopens, and you can play the matches again from Match Controls.</p>
+
+    <hr>
+
+    <h2 id="migration">Migration</h2>
+    <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Nothing stored has changed; the export format is unchanged.</p>
+    <p>This release moves <code>:latest</code> forward to v5.4.6. Installed Chalker apps refresh automatically on their next online launch.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v5.4.6 &mdash; Peek-a-Boo</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.6" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.6</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+        <li><a href="v5.4.5.html">v5.4.5</a> &mdash; October 11, 2026 &mdash; Look Sharp!</li>
+        <li><a href="v5.4.4.html">v5.4.4</a> &mdash; October 11, 2026 &mdash; Run the whole darts night. Offline.</li>
+        <li><a href="v5.4.3.html">v5.4.3</a> &mdash; October 10, 2026 &mdash; Swiss Precision.</li>
+        <li><a href="v5.4.2.html">v5.4.2</a> &mdash; October 9, 2026 &mdash; All the Dishes Rattle in the Cupboards.</li>
+        <li><a href="v5.4.1.html">v5.4.1</a> &mdash; October 9, 2026 &mdash; Under Pressure.</li>
+        <li><a href="v5.4.0.html">v5.4.0</a> &mdash; October 8, 2026 &mdash; Just Around the Corner.</li>
+        <li><a href="v5.3.2.html">v5.3.2</a> &mdash; October 7, 2026 &mdash; Don&rsquo;t You (Forget About Me).</li>
+        <li><a href="v5.3.1.html">v5.3.1</a> &mdash; October 6, 2026 &mdash; Sowing the Seeds of Love.</li>
+        <li><a href="v5.3.0.html">v5.3.0</a> &mdash; October 4, 2026 &mdash; A View to a Kill.</li>
+        <li><a href="v5.2.1.html">v5.2.1</a> &mdash; October 4, 2026 &mdash; Open Bar, Locked Cellar.</li>
+        <li><a href="v5.2.0.html">v5.2.0</a> &mdash; October 4, 2026 &mdash; New Flights, Same Arrows.</li>
+        <li><a href="v5.1.10.html">v5.1.10</a> &mdash; October 4, 2026 &mdash; Straight Down the Middle.</li>
+        <li><a href="v5.1.9.html">v5.1.9</a> &mdash; September 27, 2026 &mdash; Every Chalker Needs an Eraser.</li>
+        <li><a href="v5.1.8.html">v5.1.8</a> &mdash; September 13, 2026 &mdash; Off the Wire.</li>
+        <li><a href="v5.1.8-beta.1.html">v5.1.8-beta.1</a> &mdash; September 7, 2026 &mdash; Behind the Bar.</li>
+        <li><a href="v5.1.7.html">v5.1.7</a> &mdash; September 7, 2026 &mdash; Know Your Format.</li>
+        <li><a href="v5.1.7-beta.1.html">v5.1.7-beta.1</a> &mdash; September 6, 2026 &mdash; Look, No Camera.</li>
+        <li><a href="v5.1.6.html">v5.1.6</a> &mdash; September 6, 2026 &mdash; One Throw, One Score.</li>
+        <li><a href="v5.1.5.html">v5.1.5</a> &mdash; July 7, 2026 &mdash; Undo the Undone.</li>
+        <li><a href="v5.1.4.html">v5.1.4</a> &mdash; June 1, 2026 &mdash; Pocket Chalker.</li>
+        <li><a href="v5.1.3.html">v5.1.3</a> &mdash; May 29, 2026 &mdash; Cannot Operate on Soup.</li>
+        <li><a href="v5.1.2.html">v5.1.2</a> &mdash; May 26, 2026 &mdash; The Polished Press.</li>
+        <li><a href="v5.1.1.html">v5.1.1</a> &mdash; May 20, 2026 &mdash; Somewhat Simpler Selfhosting.</li>
+        <li><a href="v5.1.0.html">v5.1.0</a> &mdash; April 23, 2026 &mdash; Burgerboy85-rgb to Throw.</li>
+        <li><a href="v5.0.15-beta.2.html">v5.0.15-beta.2</a> &mdash; April 21, 2026 &mdash; Offline at the Oche.</li>
+        <li><a href="v5.0.15-beta.1.html">v5.0.15-beta.1</a> &mdash; April 20, 2026 &mdash; Ka-ZXing!</li>
+        <li><a href="v5.0.14.html">v5.0.14</a> &mdash; April 19, 2026 &mdash; Narrowing the Scope.</li>
+        <li><a href="v5.0.14-beta.3.html">v5.0.14-beta.3</a> &mdash; April 17, 2026 &mdash; I Can See Clearly Now.</li>
+        <li><a href="v5.0.14-beta.2.html">v5.0.14-beta.2</a> &mdash; April 17, 2026 &mdash; Picture This.</li>
+        <li><a href="v5.0.14-beta.1.html">v5.0.14-beta.1</a> &mdash; April 16, 2026 &mdash; No Score...</li>
+        <li><a href="v5.0.13.html">v5.0.13</a> &mdash; April 16, 2026 &mdash; The Pointy End.</li>
+        <li><a href="v5.0.12.html">v5.0.12</a> &mdash; April 16, 2026 &mdash; Clear Sight Lines.</li>
+        <li><a href="v5.0.11.html">v5.0.11</a> &mdash; April 15, 2026 &mdash; We Found You a Match.</li>
+        <li><a href="v5.0.10.html">v5.0.10</a> &mdash; April 15, 2026 &mdash; The Full Picture.</li>
+        <li><a href="v5.0.9.html">v5.0.9</a> &mdash; April 14, 2026 &mdash; Leader of the Pack.</li>
+        <li><a href="v5.0.8.html">v5.0.8</a> &mdash; April 13, 2026 &mdash; Choose Your Lens.</li>
+        <li><a href="v5.0.7.html">v5.0.7</a> &mdash; April 13, 2026 &mdash; The Offline Authority in Darts.</li>
+        <li><a href="v5.0.6.html">v5.0.6</a> &mdash; April 12, 2026 &mdash; Because Backups Shouldn&rsquo;t Be Homework.</li>
+        <li><a href="v5.0.5.html">v5.0.5</a> &mdash; April 11, 2026 &mdash; Read Between the Lines.</li>
+        <li><a href="v5.0.4.html">v5.0.4</a> &mdash; April 10, 2026 &mdash; No Tournament Left Behind.</li>
+        <li><a href="v5.0.3.html">v5.0.3</a> &mdash; April 10, 2026 &mdash; The Numbers Start Talking.</li>
+        <li><a href="v5.0.2.html">v5.0.2</a> &mdash; April 9, 2026 &mdash; Because Every Other One Wants Your Email.</li>
+        <li><a href="v5.0.1.html">v5.0.1</a> &mdash; March 31, 2026 &mdash; Game Shot, and the Match!</li>
+        <li><a href="v5.0.1-beta.9.html">v5.0.1-beta.9</a> &mdash; March 30, 2026 &mdash; Scan Anything, Know Everything.</li>
+        <li><a href="v5.0.1-beta.8.html">v5.0.1-beta.8</a> &mdash; March 29, 2026 &mdash; History, Properly Kept.</li>
+        <li><a href="v5.0.1-beta.7.html">v5.0.1-beta.7</a> &mdash; March 29, 2026 &mdash; Secure by Default.</li>
+        <li><a href="v5.0.1-beta.6.html">v5.0.1-beta.6</a> &mdash; March 28, 2026 &mdash; The Record Books Open.</li>
+        <li><a href="v5.0.1-beta.5.html">v5.0.1-beta.5</a> &mdash; March 28, 2026 &mdash; The Loop Closes.</li>
+        <li><a href="v5.0.1-beta.4.html">v5.0.1-beta.4</a> &mdash; March 28, 2026 &mdash; Stats Don&rsquo;t Lie.</li>
+        <li><a href="v5.0.1-beta.3.html">v5.0.1-beta.3</a> &mdash; March 27, 2026 &mdash; The Eyes Have It.</li>
+        <li><a href="v5.0.1-beta.2.html">v5.0.1-beta.2</a> &mdash; March 27, 2026 &mdash; Nobody Leaves the Oche.</li>
+        <li><a href="v5.0.1-beta.1.html">v5.0.1-beta.1</a> &mdash; March 26, 2026 &mdash; The Round-Trip Begins.</li>
+        <li><a href="v5.0.0.html">v5.0.0</a> &mdash; March 24, 2026 &mdash; The Revolution Will Be Scanned.</li>
+        <li><a href="v5.0.0-beta.2.html">v5.0.0-beta.2</a> &mdash; March 24, 2026 &mdash; The Chalker Has Eyes Now.</li>
+        <li><a href="v5.0.0-beta.1.html">v5.0.0-beta.1</a> &mdash; March 22, 2026 &mdash; Your Boarding Pass for the Oche.</li>
+        <li><a href="v4.2.13.html">v4.2.13</a> &mdash; March 20, 2026 &mdash; A+ Security Headers. Yes, Really.</li>
+        <li><a href="v4.2.12.html">v4.2.12</a> &mdash; March 19, 2026 &mdash; Dedicated domain: newtondarts.com.</li>
+        <li><a href="v4.2.11.html">v4.2.11</a> &mdash; March 18, 2026 &mdash; Shame has never looked better.</li>
+        <li><a href="v4.2.10.html">v4.2.10</a> &mdash; March 17, 2026 &mdash; Doc pages, user guide, and sitemap improvements.</li>
+        <li><a href="v4.2.9.html">v4.2.9</a> &mdash; March 15, 2026 &mdash; Landing page polish.</li>
+        <li><a href="v4.2.8.html">v4.2.8</a> &mdash; March 13, 2026 &mdash; Late Registration.</li>
+        <li><a href="v4.2.7.html">v4.2.7</a> &mdash; March 13, 2026 &mdash; Sitemap, font loading fix, and Get Started section.</li>
+        <li><a href="v4.2.6.html">v4.2.6</a> &mdash; March 12, 2026 &mdash; Undo system bug fix, Late Registration eligibility checker, and robots.txt.</li>
+        <li><a href="v4.2.5.html">v4.2.5</a> &mdash; March 11, 2026 &mdash; Landing page improvements and a Bracket Editor placeholder in the Developer Console.</li>
+        <li><a href="v4.2.4.html">v4.2.4</a> &mdash; March 10, 2026 &mdash; Proper Single Elimination match length configuration and colour-coded Chalker leg averages.</li>
+        <li><a href="v4.2.3.html">v4.2.3</a> &mdash; March 10, 2026 &mdash; Landing page redesign with retro comic theme by Nano Banana.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>
