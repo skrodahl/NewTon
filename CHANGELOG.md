@@ -1,5 +1,13 @@
 ## Unreleased
 
+### Undo in a completed Swiss, Round Robin or Cup and Plate tournament
+
+- **Undoing a match in a completed tournament left it completed** in Swiss (found by the maintainer: after undoing the final and the bronze final, Match Controls still showed the podium), in Round Robin with one group (any group match), and in Cup and Plate (the Plate's final or bronze final, when one of them was played last). The undo reset the status only for a fixed list of final matches: double elimination's grand final, single elimination's final, and Round Robin's cup finals and bronze finals.
+- **Now any undo in a completed Swiss, Round Robin or Cup and Plate tournament takes it back to active** and clears the placings, as the finals did. These formats are over when a check finds everything played, so replaying the match completes the tournament again with fresh placings. Double and single elimination keep their rule: their completion leaves out the bronze final, so undoing it must keep the tournament completed.
+- Only when the status is reset changes; how matches are rolled back is untouched.
+- Tested in the browser: a completed Swiss (undo the final and the bronze final: active, Match Controls shows them ready; replay: completed, top four placed, the podium back) and a completed one-group double round robin (undo the last match: active; replay: completed).
+- Files changed: `js/bracket-rendering.js` (`undoManualTransaction()`).
+
 ### Bracket page: Match Controls as a drawer over the bracket
 
 - **First-time users didn't find the bracket** (the maintainer let friends try the Tournament Manager): the page starts on Match Controls, which filled the frame, and nothing said a bracket was behind it; when Match Controls was a dialog, the bracket around it had made that obvious. They also didn't tell the bracket page from the other pages.

@@ -1156,11 +1156,16 @@ function undoManualTransaction(transactionId) {
 
     console.log(`✅ Clean undo ${targetTransaction.matchId}: removing ${transactionsToRemove.length} total transactions`);
 
-    // 2. Check if we're undoing the tournament's terminal match (DE: GRAND-FINAL, SE: final FS round)
+    // 2. Check if we're undoing the tournament's terminal match (DE: GRAND-FINAL, SE: final FS round).
+    // Swiss, groups and cups, and Cup and Plate are over when a check finds everything played
+    // (completion in clean-match-progression.js), so any undo in a completed one takes it back to
+    // active: the replayed match completes it again. Not DE and SE: their completion leaves out
+    // the bronze final, so undoing that must keep the tournament completed.
     const _undoFormat = getFormat();
+    const _completesByCheck = _undoFormat === 'SWISS' || _undoFormat === 'GROUPS' || !!tournament.plate;
     const isUndoingFinal = targetTransaction.matchId === 'GRAND-FINAL' ||
         (_undoFormat === 'SE' && isSEFinalMatch(targetTransaction.matchId, tournament.bracketSize)) ||
-        (_undoFormat === 'GROUPS' && tournament.status === 'completed' && /^[AB]-[FB]$/.test(targetTransaction.matchId));
+        (_completesByCheck && tournament.status === 'completed');
 
     // 3. Create clean history by removing target + consequences
     const cleanHistory = history.filter(t => !transactionsToRemove.includes(t.id));
