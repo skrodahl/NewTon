@@ -2663,7 +2663,7 @@ function _mcHighlights() {
 
 /**
  * The finished tournament: the podium and three headline highlights, then more highlights,
- * the night in numbers, and Tournament Analytics / Export / Leaderboard.
+ * the night in numbers, and Tournament Analytics / Export (the Leaderboard is in the page's header).
  * @returns {string}
  */
 function _mcCompletedHTML() {
@@ -2685,7 +2685,6 @@ function _mcCompletedHTML() {
             <div class="mc-doneacts">
                 <button type="button" class="mc-btn mc-primary" onclick="if (tournament && tournament.id) openAnalyticsForTournament(tournament.id)">Tournament Analytics</button>
                 <button type="button" class="mc-btn" onclick="exportTournamentJSON()">Export tournament</button>
-                <button type="button" class="mc-btn" onclick="showStatisticsModal()">Leaderboard</button>
             </div></section>
     </div>`;
 }
