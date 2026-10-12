@@ -1285,7 +1285,7 @@ const BracketView = (() => {
             zoomAt(e.clientX - r.left, e.clientY - r.top, Math.exp(-e.deltaY * k));
         }, { passive: false });
         document.addEventListener('keydown', e => {
-            if (e.key !== 'Escape' || !cur || !isActive()) return;
+            if (e.key !== 'Escape' || e.defaultPrevented || !cur || !isActive()) return; // not when it closed a dialog
             const page = document.getElementById('tournament');
             if (!page || !page.classList.contains('active')) return;
             hideMag(); clearSel();

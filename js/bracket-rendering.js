@@ -2889,9 +2889,10 @@ document.addEventListener('keydown', e => {
 
 // Esc closes Match Controls (it sits over the bracket like a sheet) and shows the bracket, as it
 // was left: the bracket's own Esc (clear the selection) doesn't run. Not while typing, choosing in
-// a list or a dialog is open.
+// a list or a dialog is open, nor when the Esc just closed a dialog (main.js handles it first and
+// marks it handled: the Leaderboard over Match Controls closes alone).
 document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape' || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
+    if (e.key !== 'Escape' || e.defaultPrevented || e.altKey || e.ctrlKey || e.metaKey || e.shiftKey) return;
     const page = document.getElementById('tournament');
     if (!page || !page.classList.contains('active')) return;
     const frame = page.querySelector('.bracket-container');
