@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.4.6'; // Peek-a-Boo — Match Controls as a drawer over the bracket, Esc closes it; undo in completed Swiss/RR/Cup and Plate
+const APP_VERSION = '5.4.7'; // Urgent PHP Security Release — security release: Docker image rebuilt on PHP 8.2.35 (CVE-2026-109618, CVE-2026-109619)
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

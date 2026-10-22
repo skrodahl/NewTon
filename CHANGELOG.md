@@ -1,3 +1,17 @@
+## **v5.4.7** — Urgent PHP Security Release (2026-10-22)
+
+### Release
+
+- Version 5.4.7: `APP_VERSION` and `CHALKER_VERSION`, Chalker cache busters (`chalker.js?v=33`, `chalker-v130`), release pages `releases/index.html` and `releases/v5.4.7.html`, `sitemap.xml`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.7.md`. A security release: no application code changed.
+
+### Docker image: PHP security fixes (CVE-2026-109618, CVE-2026-109619)
+
+- **PHP published an out-of-band security release on 2026-10-21** for two critical remote code execution flaws in its core (CVSS 9.2 each), fixed in 8.5.12, 8.4.27, 8.3.36 and **8.2.35**. Remote code execution was confirmed on PHP-FPM, which the Docker image uses. Earlier releases of the image were built on an older 8.2.x.
+- **The image is rebuilt on PHP 8.2.35.** `docker/Dockerfile` keeps the floating `php:8.2-fpm-alpine` tag, which carries the fix; a comment says 8.2.35 is the minimum. The publish workflow (`.github/workflows/docker-hub-publish.yml`) now builds with `pull: true`, so the newest base image is taken on every build and a cached layer cannot keep an old PHP.
+- **Anyone running the Docker image should pull the new `:latest` and recreate the container** (`docker compose pull && docker compose up -d`). The Chalker app and the single-file tournament page are static and do not run PHP.
+- PHP 8.2 is security-supported until the end of 2026; moving the image to PHP 8.4 is planned as a separate release.
+- Files changed: `docker/Dockerfile`, `.github/workflows/docker-hub-publish.yml`.
+
 ## **v5.4.6** — Peek-a-Boo (2026-10-12)
 
 ### Release

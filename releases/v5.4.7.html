@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://newtondarts.com/releases/v5.4.7.html">
+    <title>v5.4.7 &mdash; Urgent PHP Security Release</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.4.7 release notes. A security release: the Docker image is rebuilt on PHP 8.2.35, which fixes two critical remote code execution flaws in PHP (CVE-2026-109618, CVE-2026-109619).">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">&#8592; NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Urgent PHP Security Release</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.7 &mdash; October 22, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.7" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.7</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#todo">What to Do</a></li>
+            <li><a href="#details">Details</a></li>
+            <li><a href="#files">Files Changed</a></li>
+            <li><a href="#migration">Migration</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p>A security release for the Docker image. PHP published fixes yesterday for two critical flaws that could let an attacker run commands on a web server running PHP. This release rebuilds the image on the fixed PHP. Nothing in the application has changed.</p>
+
+    <hr>
+
+    <h2 id="todo">What to Do</h2>
+    <p>If you run NewTon from Docker, pull the new image and recreate the container:</p>
+    <pre><code>docker compose pull
+docker compose up -d</code></pre>
+    <p>Do this soon, particularly if the server can be reached from the internet. If you run the Tournament Manager from a downloaded file, or install the Chalker app, there is nothing to do: they don&rsquo;t run PHP.</p>
+
+    <hr>
+
+    <h2 id="details">Details</h2>
+    <ul>
+        <li><strong>The flaws:</strong> CVE-2026-109618 and CVE-2026-109619, both rated critical (CVSS 9.2), in PHP&rsquo;s core. They affect every PHP release before 8.5.12, 8.4.27, 8.3.36 and 8.2.35, and remote code execution has been shown on PHP-FPM, which the NewTon image uses.</li>
+        <li><strong>The fix:</strong> the image is built on PHP 8.2.35. The publish workflow now always takes the newest base image, so later PHP and Alpine fixes aren&rsquo;t held back by a cached layer.</li>
+        <li><strong>What&rsquo;s next:</strong> PHP 8.2 receives security fixes until the end of 2026. A move to PHP 8.4 will follow as its own release.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="files">Files Changed</h2>
+    <ul>
+        <li><code>docker/Dockerfile</code> &mdash; the image is built on PHP 8.2.35 or later</li>
+        <li><code>.github/workflows/docker-hub-publish.yml</code> &mdash; always pulls the newest base image</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration</h2>
+    <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Nothing stored has changed; the export format is unchanged.</p>
+    <p>This release moves <code>:latest</code> forward to v5.4.7. Installed Chalker apps refresh automatically on their next online launch.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v5.4.7 &mdash; Urgent PHP Security Release</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.7" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.7</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+        <li><a href="v5.4.6.html">v5.4.6</a> &mdash; October 12, 2026 &mdash; Peek-a-Boo</li>
+        <li><a href="v5.4.5.html">v5.4.5</a> &mdash; October 11, 2026 &mdash; Look Sharp!</li>
+        <li><a href="v5.4.4.html">v5.4.4</a> &mdash; October 11, 2026 &mdash; Run the whole darts night. Offline.</li>
+        <li><a href="v5.4.3.html">v5.4.3</a> &mdash; October 10, 2026 &mdash; Swiss Precision.</li>
+        <li><a href="v5.4.2.html">v5.4.2</a> &mdash; October 9, 2026 &mdash; All the Dishes Rattle in the Cupboards.</li>
+        <li><a href="v5.4.1.html">v5.4.1</a> &mdash; October 9, 2026 &mdash; Under Pressure.</li>
+        <li><a href="v5.4.0.html">v5.4.0</a> &mdash; October 8, 2026 &mdash; Just Around the Corner.</li>
+        <li><a href="v5.3.2.html">v5.3.2</a> &mdash; October 7, 2026 &mdash; Don&rsquo;t You (Forget About Me).</li>
+        <li><a href="v5.3.1.html">v5.3.1</a> &mdash; October 6, 2026 &mdash; Sowing the Seeds of Love.</li>
+        <li><a href="v5.3.0.html">v5.3.0</a> &mdash; October 4, 2026 &mdash; A View to a Kill.</li>
+        <li><a href="v5.2.1.html">v5.2.1</a> &mdash; October 4, 2026 &mdash; Open Bar, Locked Cellar.</li>
+        <li><a href="v5.2.0.html">v5.2.0</a> &mdash; October 4, 2026 &mdash; New Flights, Same Arrows.</li>
+        <li><a href="v5.1.10.html">v5.1.10</a> &mdash; October 4, 2026 &mdash; Straight Down the Middle.</li>
+        <li><a href="v5.1.9.html">v5.1.9</a> &mdash; September 27, 2026 &mdash; Every Chalker Needs an Eraser.</li>
+        <li><a href="v5.1.8.html">v5.1.8</a> &mdash; September 13, 2026 &mdash; Off the Wire.</li>
+        <li><a href="v5.1.8-beta.1.html">v5.1.8-beta.1</a> &mdash; September 7, 2026 &mdash; Behind the Bar.</li>
+        <li><a href="v5.1.7.html">v5.1.7</a> &mdash; September 7, 2026 &mdash; Know Your Format.</li>
+        <li><a href="v5.1.7-beta.1.html">v5.1.7-beta.1</a> &mdash; September 6, 2026 &mdash; Look, No Camera.</li>
+        <li><a href="v5.1.6.html">v5.1.6</a> &mdash; September 6, 2026 &mdash; One Throw, One Score.</li>
+        <li><a href="v5.1.5.html">v5.1.5</a> &mdash; July 7, 2026 &mdash; Undo the Undone.</li>
+        <li><a href="v5.1.4.html">v5.1.4</a> &mdash; June 1, 2026 &mdash; Pocket Chalker.</li>
+        <li><a href="v5.1.3.html">v5.1.3</a> &mdash; May 29, 2026 &mdash; Cannot Operate on Soup.</li>
+        <li><a href="v5.1.2.html">v5.1.2</a> &mdash; May 26, 2026 &mdash; The Polished Press.</li>
+        <li><a href="v5.1.1.html">v5.1.1</a> &mdash; May 20, 2026 &mdash; Somewhat Simpler Selfhosting.</li>
+        <li><a href="v5.1.0.html">v5.1.0</a> &mdash; April 23, 2026 &mdash; Burgerboy85-rgb to Throw.</li>
+        <li><a href="v5.0.15-beta.2.html">v5.0.15-beta.2</a> &mdash; April 21, 2026 &mdash; Offline at the Oche.</li>
+        <li><a href="v5.0.15-beta.1.html">v5.0.15-beta.1</a> &mdash; April 20, 2026 &mdash; Ka-ZXing!</li>
+        <li><a href="v5.0.14.html">v5.0.14</a> &mdash; April 19, 2026 &mdash; Narrowing the Scope.</li>
+        <li><a href="v5.0.14-beta.3.html">v5.0.14-beta.3</a> &mdash; April 17, 2026 &mdash; I Can See Clearly Now.</li>
+        <li><a href="v5.0.14-beta.2.html">v5.0.14-beta.2</a> &mdash; April 17, 2026 &mdash; Picture This.</li>
+        <li><a href="v5.0.14-beta.1.html">v5.0.14-beta.1</a> &mdash; April 16, 2026 &mdash; No Score...</li>
+        <li><a href="v5.0.13.html">v5.0.13</a> &mdash; April 16, 2026 &mdash; The Pointy End.</li>
+        <li><a href="v5.0.12.html">v5.0.12</a> &mdash; April 16, 2026 &mdash; Clear Sight Lines.</li>
+        <li><a href="v5.0.11.html">v5.0.11</a> &mdash; April 15, 2026 &mdash; We Found You a Match.</li>
+        <li><a href="v5.0.10.html">v5.0.10</a> &mdash; April 15, 2026 &mdash; The Full Picture.</li>
+        <li><a href="v5.0.9.html">v5.0.9</a> &mdash; April 14, 2026 &mdash; Leader of the Pack.</li>
+        <li><a href="v5.0.8.html">v5.0.8</a> &mdash; April 13, 2026 &mdash; Choose Your Lens.</li>
+        <li><a href="v5.0.7.html">v5.0.7</a> &mdash; April 13, 2026 &mdash; The Offline Authority in Darts.</li>
+        <li><a href="v5.0.6.html">v5.0.6</a> &mdash; April 12, 2026 &mdash; Because Backups Shouldn&rsquo;t Be Homework.</li>
+        <li><a href="v5.0.5.html">v5.0.5</a> &mdash; April 11, 2026 &mdash; Read Between the Lines.</li>
+        <li><a href="v5.0.4.html">v5.0.4</a> &mdash; April 10, 2026 &mdash; No Tournament Left Behind.</li>
+        <li><a href="v5.0.3.html">v5.0.3</a> &mdash; April 10, 2026 &mdash; The Numbers Start Talking.</li>
+        <li><a href="v5.0.2.html">v5.0.2</a> &mdash; April 9, 2026 &mdash; Because Every Other One Wants Your Email.</li>
+        <li><a href="v5.0.1.html">v5.0.1</a> &mdash; March 31, 2026 &mdash; Game Shot, and the Match!</li>
+        <li><a href="v5.0.1-beta.9.html">v5.0.1-beta.9</a> &mdash; March 30, 2026 &mdash; Scan Anything, Know Everything.</li>
+        <li><a href="v5.0.1-beta.8.html">v5.0.1-beta.8</a> &mdash; March 29, 2026 &mdash; History, Properly Kept.</li>
+        <li><a href="v5.0.1-beta.7.html">v5.0.1-beta.7</a> &mdash; March 29, 2026 &mdash; Secure by Default.</li>
+        <li><a href="v5.0.1-beta.6.html">v5.0.1-beta.6</a> &mdash; March 28, 2026 &mdash; The Record Books Open.</li>
+        <li><a href="v5.0.1-beta.5.html">v5.0.1-beta.5</a> &mdash; March 28, 2026 &mdash; The Loop Closes.</li>
+        <li><a href="v5.0.1-beta.4.html">v5.0.1-beta.4</a> &mdash; March 28, 2026 &mdash; Stats Don&rsquo;t Lie.</li>
+        <li><a href="v5.0.1-beta.3.html">v5.0.1-beta.3</a> &mdash; March 27, 2026 &mdash; The Eyes Have It.</li>
+        <li><a href="v5.0.1-beta.2.html">v5.0.1-beta.2</a> &mdash; March 27, 2026 &mdash; Nobody Leaves the Oche.</li>
+        <li><a href="v5.0.1-beta.1.html">v5.0.1-beta.1</a> &mdash; March 26, 2026 &mdash; The Round-Trip Begins.</li>
+        <li><a href="v5.0.0.html">v5.0.0</a> &mdash; March 24, 2026 &mdash; The Revolution Will Be Scanned.</li>
+        <li><a href="v5.0.0-beta.2.html">v5.0.0-beta.2</a> &mdash; March 24, 2026 &mdash; The Chalker Has Eyes Now.</li>
+        <li><a href="v5.0.0-beta.1.html">v5.0.0-beta.1</a> &mdash; March 22, 2026 &mdash; Your Boarding Pass for the Oche.</li>
+        <li><a href="v4.2.13.html">v4.2.13</a> &mdash; March 20, 2026 &mdash; A+ Security Headers. Yes, Really.</li>
+        <li><a href="v4.2.12.html">v4.2.12</a> &mdash; March 19, 2026 &mdash; Dedicated domain: newtondarts.com.</li>
+        <li><a href="v4.2.11.html">v4.2.11</a> &mdash; March 18, 2026 &mdash; Shame has never looked better.</li>
+        <li><a href="v4.2.10.html">v4.2.10</a> &mdash; March 17, 2026 &mdash; Doc pages, user guide, and sitemap improvements.</li>
+        <li><a href="v4.2.9.html">v4.2.9</a> &mdash; March 15, 2026 &mdash; Landing page polish.</li>
+        <li><a href="v4.2.8.html">v4.2.8</a> &mdash; March 13, 2026 &mdash; Late Registration.</li>
+        <li><a href="v4.2.7.html">v4.2.7</a> &mdash; March 13, 2026 &mdash; Sitemap, font loading fix, and Get Started section.</li>
+        <li><a href="v4.2.6.html">v4.2.6</a> &mdash; March 12, 2026 &mdash; Undo system bug fix, Late Registration eligibility checker, and robots.txt.</li>
+        <li><a href="v4.2.5.html">v4.2.5</a> &mdash; March 11, 2026 &mdash; Landing page improvements and a Bracket Editor placeholder in the Developer Console.</li>
+        <li><a href="v4.2.4.html">v4.2.4</a> &mdash; March 10, 2026 &mdash; Proper Single Elimination match length configuration and colour-coded Chalker leg averages.</li>
+        <li><a href="v4.2.3.html">v4.2.3</a> &mdash; March 10, 2026 &mdash; Landing page redesign with retro comic theme by Nano Banana.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

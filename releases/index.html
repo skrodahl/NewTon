@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.4.6 &mdash; Peek-a-Boo</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.4.6 release notes. Match Controls slides over the bracket like a drawer, with the bracket in sight and Esc to close it; undo reopens a finished Swiss, Round Robin or Cup and Plate tournament.">
+    <title>v5.4.7 &mdash; Urgent PHP Security Release</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.4.7 release notes. A security release: the Docker image is rebuilt on PHP 8.2.35, which fixes two critical remote code execution flaws in PHP (CVE-2026-109618, CVE-2026-109619).">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,59 +17,67 @@
 
 <div class="docs-content">
 
-    <h1>Peek-a-Boo</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.6 &mdash; October 12, 2026</p>
+    <h1>Urgent PHP Security Release</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.7 &mdash; October 22, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.6" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.6</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.7" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.7</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#drawer">Match Controls Over the Bracket</a></li>
-            <li><a href="#undo">Undo in a Finished Tournament</a></li>
+            <li><a href="#todo">What to Do</a></li>
+            <li><a href="#details">Details</a></li>
+            <li><a href="#files">Files Changed</a></li>
             <li><a href="#migration">Migration</a></li>
         </ol>
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>The bracket page opens on Match Controls, and for someone new to it, the bracket behind it was easy to miss. Match Controls now slides over the bracket like a drawer, with the bracket in plain sight beside it and one obvious way back. And undoing a match in a finished Swiss, Round Robin or Cup and Plate tournament now reopens it, as it always did for the other formats.</p>
+    <p>A security release for the Docker image. PHP published fixes yesterday for two critical flaws that could let an attacker run commands on a web server running PHP. This release rebuilds the image on the fixed PHP. Nothing in the application has changed.</p>
 
     <hr>
 
-    <h2 id="drawer">Match Controls Over the Bracket</h2>
+    <h2 id="todo">What to Do</h2>
+    <p>If you run NewTon from Docker, pull the new image and recreate the container:</p>
+    <pre><code>docker compose pull
+docker compose up -d</code></pre>
+    <p>Do this soon, particularly if the server can be reached from the internet. If you run the Tournament Manager from a downloaded file, or install the Chalker app, there is nothing to do: they don&rsquo;t run PHP.</p>
+
+    <hr>
+
+    <h2 id="details">Details</h2>
     <ul>
-        <li><strong>A drawer, not a wall.</strong> Match Controls slides over the bracket from the right. A strip of the bracket stays visible on its left, lightly dimmed, so it&rsquo;s clear what&rsquo;s underneath.</li>
-        <li><strong>One click back.</strong> Click the dimmed bracket, or the orange <strong>&larr; Bracket</strong> pill at the top of the strip, to see the bracket. Hovering the pill reminds you that the left arrow key does the same.</li>
-        <li><strong>Esc closes Match Controls,</strong> as it would close a dialog. The bracket comes back exactly as you left it, with the same zoom and the same match selected.</li>
-        <li><strong>One Leaderboard.</strong> The header&rsquo;s Leaderboard button stays in view above Match Controls, so the finished tournament&rsquo;s second Leaderboard button is gone.</li>
-        <li><strong>The bracket page stands apart.</strong> The other pages are lighter now, near white, and the bracket page keeps a warmer, deeper surround, so you can tell at a glance that you&rsquo;re on the stage, not in the settings.</li>
+        <li><strong>The flaws:</strong> CVE-2026-109618 and CVE-2026-109619, both rated critical (CVSS 9.2), in PHP&rsquo;s core. They affect every PHP release before 8.5.12, 8.4.27, 8.3.36 and 8.2.35, and remote code execution has been shown on PHP-FPM, which the NewTon image uses.</li>
+        <li><strong>The fix:</strong> the image is built on PHP 8.2.35. The publish workflow now always takes the newest base image, so later PHP and Alpine fixes aren&rsquo;t held back by a cached layer.</li>
+        <li><strong>What&rsquo;s next:</strong> PHP 8.2 receives security fixes until the end of 2026. A move to PHP 8.4 will follow as its own release.</li>
     </ul>
-    <p>The <strong>Bracket | Match Controls</strong> tabs and the arrow keys work as before, and the page still opens on Match Controls if that&rsquo;s how you&rsquo;ve set it.</p>
 
     <hr>
 
-    <h2 id="undo">Undo in a Finished Tournament</h2>
-    <p>To correct a finished tournament, you switch off its read-only lock in the Developer Console and undo the match. In Swiss, in Round Robin with one group, and in Cup and Plate when the Plate&rsquo;s last match was played last, the tournament stayed marked as finished after the undo, and Match Controls kept showing the podium.</p>
-    <p>Now any undo in a finished Swiss, Round Robin or Cup and Plate tournament reopens it, and the podium waits until the matches are played again. Double and single elimination behave as before.</p>
-    <p>If you have a tournament in that state, undo one more match (in Swiss, a semifinal). It reopens, and you can play the matches again from Match Controls.</p>
+    <h2 id="files">Files Changed</h2>
+    <ul>
+        <li><code>docker/Dockerfile</code> &mdash; the image is built on PHP 8.2.35 or later</li>
+        <li><code>.github/workflows/docker-hub-publish.yml</code> &mdash; always pulls the newest base image</li>
+    </ul>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
     <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Nothing stored has changed; the export format is unchanged.</p>
-    <p>This release moves <code>:latest</code> forward to v5.4.6. Installed Chalker apps refresh automatically on their next online launch.</p>
+    <p>This release moves <code>:latest</code> forward to v5.4.7. Installed Chalker apps refresh automatically on their next online launch.</p>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.4.6 &mdash; Peek-a-Boo</em></p>
+    <p><em>NewTon DC Tournament Manager v5.4.7 &mdash; Urgent PHP Security Release</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.6" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.6</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.7" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.7</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
+        <li><a href="v5.4.7.html">v5.4.7</a> &mdash; October 22, 2026 &mdash; Urgent PHP Security Release</li>
         <li><a href="v5.4.6.html">v5.4.6</a> &mdash; October 12, 2026 &mdash; Peek-a-Boo</li>
         <li><a href="v5.4.5.html">v5.4.5</a> &mdash; October 11, 2026 &mdash; Look Sharp!</li>
         <li><a href="v5.4.4.html">v5.4.4</a> &mdash; October 11, 2026 &mdash; Run the whole darts night. Offline.</li>

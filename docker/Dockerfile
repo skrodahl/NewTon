@@ -1,3 +1,6 @@
+# PHP 8.2.35 or later is required: earlier releases are vulnerable to CVE-2026-109618 and
+# CVE-2026-109619 (remote code execution). The floating tag follows the patch releases;
+# the publish workflow pulls the base image fresh on every build.
 FROM php:8.2-fpm-alpine
 
 # Install nginx, SSL tools, and envsubst (gettext)
