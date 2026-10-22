@@ -25,6 +25,12 @@ Raised 2026-10-04, while building the v5.3.0 podium. A "Season leader" award (wh
 
 Since v5.3.1, seeding does this by name instead: the mini-lens ranks on tournaments whose name matches the active tournament's, in the current (or previous) half-year, with finals left out. A real Season concept could replace that guesswork, and would also be the natural source for the season final's invite list.
 
+### Relay: restrict where it can send
+
+Raised 2026-10-22, reading `api/*.php` during the v5.4.7 PHP security release. Not part of it; the CVEs were in PHP itself. `api/relay.php` forwards an upload to any URL the caller gives it when `NEWTON_RELAY_ALLOWLIST` is unset, and it follows redirects (`CURLOPT_FOLLOWLOCATION`). If `NEWTON_API_KEY` is also unset (the default), anyone who can reach the server can make it send requests into the server's own network (SSRF).
+- Ideas: refuse private, loopback and link-local addresses unless the host is on the allowlist; stop following redirects (or re-check each hop); document that `NEWTON_API_KEY` should be set on any internet-facing instance.
+- Open: whether the default should change (a breaking change for Docker-to-Docker backup setups that rely on any-host) or only the documentation; which release.
+
 ---
 
 ## Next
@@ -52,6 +58,13 @@ Maintainer, 2026-10-11: first priority.
 ### Landing page: the format pictograms in Pick Your Format
 
 Raised by the maintainer 2026-10-11: Pick Your Format on the web page could look nicer with the formats' SVG pictograms, as on the cards in Match Controls' Pick a format. The landing page loads none of the app's scripts, so the SVGs (each format's `pic` in `TOURNAMENT_FORMATS`, results-config.js) are copied in inline; their colours may need adjusting to the landing page's palette (the app's final is marked `class="dk"`). `landing.html` and `landing-page.php` stay identical; the cards must still wrap nicely as more formats arrive. **Built 2026-10-11** (unreleased; CHANGELOG.md).
+
+### Docker image: move from PHP 8.2 to 8.4
+
+Raised 2026-10-22, after v5.4.7 (the urgent PHP security release, CVE-2026-109618 and CVE-2026-109619). The image is on `php:8.2-fpm-alpine`, and PHP 8.2's security support ends at the end of 2026 (check php.net); after that a PHP flaw is not fixed on 8.2 and rebuilding the image no longer helps. v5.4.7 stayed on 8.2 on purpose, to keep an urgent fix small.
+- Change `docker/Dockerfile` to `php:8.4-fpm-alpine`, then test the `api/*.php` endpoints (upload, list, delete, relay, corrections, key-check) and `tournament.php` / `landing-page.php` in a built container, HTTP and SSL. Check for deprecations in the PHP log.
+- Release as its own version, before the end of 2026.
+- Also consider: a weekly scheduled rebuild of the image with a vulnerability scan (Trivy or Grype) in the publish workflow, so the next PHP or Alpine fix does not wait for a release. Today `:latest` only moves when a `v*` tag is pushed.
 
 ### Other tournament formats
 
