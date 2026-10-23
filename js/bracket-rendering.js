@@ -352,38 +352,36 @@ function updateMatchReferee(matchId, refereeId) {
 }
 
 /**
+ * Subtract one recorded achievements delta from a stats object (player.stats, or a snapshot from
+ * snapshotPlayerStats()). Counters are floored at zero; array fields remove each recorded value.
+ * @param {{ oneEighties?: number, tons?: number, lollipops?: number, highOuts?: number[], shortLegs?: number[] }} stats - changed in place
+ * @param {{ oneEighties?: number, tons?: number, lollipops?: number, highOuts?: number[], shortLegs?: number[] }} delta
+ */
+function subtractAchievementStats(stats, delta) {
+    if (delta.oneEighties) stats.oneEighties = Math.max(0, (stats.oneEighties || 0) - delta.oneEighties);
+    if (delta.tons) stats.tons = Math.max(0, (stats.tons || 0) - delta.tons);
+    if (delta.lollipops) stats.lollipops = Math.max(0, (stats.lollipops || 0) - delta.lollipops);
+    ['highOuts', 'shortLegs'].forEach(field => {
+        if (!Array.isArray(delta[field])) return;
+        delta[field].forEach(val => {
+            const idx = (stats[field] || []).indexOf(val);
+            if (idx !== -1) stats[field].splice(idx, 1);
+        });
+    });
+}
+
+/**
  * Rolls back achievements recorded in a COMPLETE_MATCH transaction from player.stats.
  * Subtracts exactly what the transaction recorded; counters are floored at zero.
  * @param {object} achievements - { [playerId]: { oneEighties, tons, lollipops, highOuts, shortLegs } }
  */
 function rollbackAchievements(achievements) {
     if (!achievements) return;
-    Object.entries(achievements).forEach(([playerId, stats]) => {
-        if (!stats) return;
+    Object.entries(achievements).forEach(([playerId, delta]) => {
+        if (!delta) return;
         const player = players.find(p => String(p.id) === String(playerId));
         if (!player || !player.stats) return;
-
-        if (stats.oneEighties) {
-            player.stats.oneEighties = Math.max(0, (player.stats.oneEighties || 0) - stats.oneEighties);
-        }
-        if (stats.tons) {
-            player.stats.tons = Math.max(0, (player.stats.tons || 0) - stats.tons);
-        }
-        if (stats.lollipops) {
-            player.stats.lollipops = Math.max(0, (player.stats.lollipops || 0) - stats.lollipops);
-        }
-        if (Array.isArray(stats.highOuts)) {
-            stats.highOuts.forEach(val => {
-                const idx = (player.stats.highOuts || []).indexOf(val);
-                if (idx !== -1) player.stats.highOuts.splice(idx, 1);
-            });
-        }
-        if (Array.isArray(stats.shortLegs)) {
-            stats.shortLegs.forEach(val => {
-                const idx = (player.stats.shortLegs || []).indexOf(val);
-                if (idx !== -1) player.stats.shortLegs.splice(idx, 1);
-            });
-        }
+        subtractAchievementStats(player.stats, delta);
     });
     saveTournament();
     if (typeof updateResultsTable === 'function') updateResultsTable();
@@ -1085,7 +1083,6 @@ function handleSurgicalUndo(matchId) {
  * Performs surgical undo by removing transaction and rebuilding affected matches.
  *
  * @param {string} transactionId - The transaction ID to undo (e.g., 'tx_1234567890')
- * @returns {void}
  *
  * @description
  * Surgical undo process:
@@ -1102,6 +1099,9 @@ function handleSurgicalUndo(matchId) {
  *    and delete rolled-back matches from NewtonDB
  *
  * Uses DE_MATCH_PROGRESSION for deterministic rollback.
+ *
+ * @returns {Promise<void>|undefined} Settles when the rolled-back matches are gone from the
+ *   register (NewtonDB); undefined when the undo did not run (read-only, transaction not found)
  */
 function undoManualTransaction(transactionId) {
     // Check if tournament is read-only (imported completed tournament)
@@ -1285,9 +1285,11 @@ function undoManualTransaction(transactionId) {
         updateResultsTable();
     }
 
-    // Remove rolled-back matches from register (fire-and-forget) — includes
+    // Remove rolled-back matches from register (fire-and-forget; the promise is returned for
+    // applyMatchEdit(), which writes the new result only after these deletes) — includes
     // consequential matches (e.g. QR-completed downstream results), not just the
     // target, so no orphaned records are left for Analytics to count
+    let registerCleared = Promise.resolve();
     if (typeof NewtonDB !== 'undefined' && tournament && tournament.id) {
         const deletions = [...rolledBackMatchIds].map(rolledBackId => // a Set: spread it first
             NewtonDB.deleteMatch(String(tournament.id), rolledBackId)
@@ -1298,7 +1300,7 @@ function undoManualTransaction(transactionId) {
         // undo in an unlocked tournament can't leave Analytics counting removed matches
         // (after, not before — invalidating first would let a read in between recache
         // the stale records). Guarded: Analytics may not be loaded.
-        Promise.all(deletions).then(() => {
+        registerCleared = Promise.all(deletions).then(() => {
             if (typeof NewtonHistory !== 'undefined' && NewtonHistory.invalidateCache) {
                 NewtonHistory.invalidateCache();
             }
@@ -1306,6 +1308,7 @@ function undoManualTransaction(transactionId) {
     }
 
     console.log(`Clean undo complete: surgically rolled back ${targetTransaction.matchId}`);
+    return registerCleared;
 }
 
 // Update match states based on current player composition
@@ -1326,6 +1329,197 @@ function updateAllMatchStates() {
 
 
 // --- END: Surgical Undo Implementation ---
+
+// --- START: Edit Match (Docs/EDIT-MATCH.md) ---
+//
+// A correction without an undo: the score, the achievements and, when the matches it feeds
+// allow it, the winner. Only matches completed by hand (MANUAL): a match reported from the
+// Chalker (QR or network) carries leg-by-leg detail that an edit would contradict; that is
+// undo and replay. Read-only blocks it, as it blocks undo.
+
+/**
+ * Why the winner of a completed match can't be changed, or null when it can: the same rule as
+ * undo (isMatchUndoable()), spelled out for the Edit dialog.
+ * @param {string} matchId
+ * @param {object[]} history - getTournamentHistory()
+ * @returns {string|null}
+ */
+function _winnerLockReason(matchId, history) {
+    if (isGroupMatchLocked(matchId)) return 'the cups are drawn';
+    const match = matches.find(m => m.id === matchId);
+    if (getFormat() === 'SWISS' && typeof Swiss !== 'undefined' && match && Swiss.isLocked(match)) {
+        // Named: the next round is drawn from this round's results, so one played match locks them all
+        const stage = Swiss.stageAfter(match);
+        const began = stage.matches.filter(m => m.active || (m.completed && !m.autoAdvanced))
+            .map(m => `${m.id} is ${m.active ? 'live' : 'played'}`).join(', ');
+        return stage.kind === 'round'
+            ? `round ${stage.round} has started (${began}) and was drawn from round ${match.round}'s results`
+            : `the top four has started (${began}) and was drawn from the final standings`;
+    }
+    const blockers = getUndoBlockingMatches(matchId, history);
+    if (blockers.length) return blockers.map(b => `${b.matchId} is ${b.live ? 'live' : 'played'}`).join(' and ');
+    return null;
+}
+
+/**
+ * What can be edited on a match, or null when nothing can: read-only, not completed, or not
+ * completed by hand.
+ * @param {string} matchId
+ * @returns {{ transaction: object, canChangeWinner: boolean, lockedReason: string|null }|null}
+ */
+function getMatchEditState(matchId) {
+    if (!tournament || tournament.readOnly) return null;
+    const match = matches.find(m => m.id === matchId);
+    if (!match || !match.completed || !match.winner || !match.loser) return null;
+
+    const history = getTournamentHistory();
+    const transaction = history.find(t => t.matchId === matchId && t.type === 'COMPLETE_MATCH');
+    if (!transaction || transaction.completionType !== 'MANUAL') return null;
+
+    const canChangeWinner = isMatchUndoable(matchId);
+    return { transaction, canChangeWinner, lockedReason: canChangeWinner ? null : _winnerLockReason(matchId, history) };
+}
+
+/**
+ * True when the match can be edited (the bracket's Edit match button).
+ * @param {string} matchId
+ * @returns {boolean}
+ */
+function isMatchEditable(matchId) {
+    return getMatchEditState(matchId) !== null;
+}
+
+/**
+ * Entry point for editing a completed match: the Confirm Winner dialog, filled in with the
+ * recorded result. The achievements baseline is the players' stats without what this match
+ * recorded, so the dialog diff gives the match's full set again; Cancel restores the stats as
+ * they were when the dialog opened.
+ * @param {string} matchId
+ * @returns {void}
+ */
+function handleMatchEdit(matchId) {
+    const state = getMatchEditState(matchId);
+    if (!state) return;
+    const match = matches.find(m => m.id === matchId);
+
+    const restore = {};
+    const baseline = {};
+    [match.winner, match.loser].forEach(p => {
+        const player = players.find(pl => String(pl.id) === String(p.id));
+        if (!player) return;
+        restore[p.id] = snapshotPlayerStats(player);
+        baseline[p.id] = snapshotPlayerStats(player);
+        const recorded = state.transaction.achievements && state.transaction.achievements[p.id];
+        if (recorded) subtractAchievementStats(baseline[p.id], recorded);
+    });
+
+    const score = match.finalScore || {};
+    showWinnerConfirmation(matchId, match.winner, match.loser,
+        (winnerLegs, loserLegs, achievements, newWinner) => applyMatchEdit(matchId, newWinner, winnerLegs, loserLegs, achievements),
+        {
+            baseline, restore,
+            canChangeWinner: state.canChangeWinner,
+            lockedReason: state.lockedReason,
+            winnerLegs: score.winnerLegs,
+            loserLegs: score.loserLegs
+        });
+}
+
+/**
+ * Apply an edit. Winner unchanged: the match's COMPLETE_MATCH transaction and score are
+ * rewritten in place (additive `editedAt`), so history keeps one transaction per match and
+ * undo works as before. Winner changed (only when isMatchUndoable()): undo the match, then
+ * complete it again for the other player; the new transaction carries `editedAt` and
+ * `originalWinner`.
+ * @param {string} matchId
+ * @param {object} newWinner - the winner after the edit (a player object of the match)
+ * @param {number} winnerLegs
+ * @param {number} loserLegs
+ * @param {object|null} achievements - { [playerId]: delta|null } from the dialog diff
+ * @returns {boolean} false when the edit was not allowed
+ */
+function applyMatchEdit(matchId, newWinner, winnerLegs, loserLegs, achievements) {
+    const state = getMatchEditState(matchId);
+    const match = matches.find(m => m.id === matchId);
+    if (!state || !match) return false;
+
+    const winnerChanged = String(newWinner.id) !== String(match.winner.id);
+    if (winnerChanged && !state.canChangeWinner) return false;
+
+    const historyKey = `tournament_${tournament.id}_history`;
+    const loser = winnerChanged ? match.winner : match.loser;
+    const record = achievements || { [newWinner.id]: null, [loser.id]: null };
+    const editedAt = new Date().toISOString();
+
+    if (!winnerChanged) {
+        const history = getTournamentHistory();
+        const transaction = history.find(t => t.id === state.transaction.id);
+        if (!transaction) return false;
+        transaction.achievements = record;
+        transaction.editedAt = editedAt;
+        localStorage.setItem(historyKey, JSON.stringify(history));
+
+        match.finalScore = { winnerLegs, loserLegs, winnerId: match.winner.id, loserId: match.loser.id };
+        _saveEditedMatchToRegister(match, winnerLegs, loserLegs, achievements);
+        _refreshAfterMatchEdit();
+        return true;
+    }
+
+    const originalWinner = { id: match.winner.id, name: match.winner.name };
+    const winnerNumber = String(match.player1.id) === String(newWinner.id) ? 1 : 2;
+    const registerCleared = undoManualTransaction(state.transaction.id);
+    if (match.completed) return false; // the undo did not run
+
+    // The new result goes into the register only after the undo's deletes have landed: a save
+    // racing a delete of the same record could be deleted with it
+    Promise.resolve(registerCleared).then(() => {
+        if (!completeMatch(matchId, winnerNumber, winnerLegs, loserLegs, 'MANUAL', record)) {
+            alert('The edit could not complete the match again. The match is back to ready: complete it from Match Controls.');
+            return;
+        }
+        const history = getTournamentHistory();
+        const transaction = history.find(t => t.matchId === matchId && t.type === 'COMPLETE_MATCH');
+        if (transaction) {
+            transaction.editedAt = editedAt;
+            transaction.originalWinner = originalWinner;
+            localStorage.setItem(historyKey, JSON.stringify(history));
+        }
+        _refreshAfterMatchEdit();
+    });
+    return true;
+}
+
+/**
+ * Update the match's register record (Analytics) after a score or achievements edit. The record
+ * keeps its completedAt; qualifiers are not in the register.
+ * @param {object} match
+ * @param {number} winnerLegs
+ * @param {number} loserLegs
+ * @param {object|null} achievements
+ * @returns {void}
+ */
+function _saveEditedMatchToRegister(match, winnerLegs, loserLegs, achievements) {
+    if (typeof NewtonDB === 'undefined' || match.side === 'qualifier') return;
+    const winnerIs1 = String(match.winner.id) === String(match.player1.id);
+    NewtonDB.getMatch(String(tournament.id), match.id).then(rec => {
+        if (!rec) return null;
+        rec.legsWon = { p1: winnerIs1 ? winnerLegs : loserLegs, p2: winnerIs1 ? loserLegs : winnerLegs };
+        rec.achievements = achievements || null;
+        rec.editedAt = Math.floor(Date.now() / 1000);
+        return NewtonDB.saveMatch(rec);
+    }).then(() => {
+        if (typeof NewtonHistory !== 'undefined' && NewtonHistory.invalidateCache) NewtonHistory.invalidateCache();
+    }).catch(e => console.warn('NewtonDB edit save failed:', e));
+}
+
+/** Save and redraw after an edit, as an undo does. @returns {void} */
+function _refreshAfterMatchEdit() {
+    if (typeof updateMatchHistory === 'function') updateMatchHistory();
+    if (typeof calculateAllRankings === 'function') calculateAllRankings();
+    saveTournament();
+    if (typeof refreshTournamentUI === 'function') refreshTournamentUI();
+    if (typeof updateResultsTable === 'function') updateResultsTable();
+}
 
 // --- START: Match Command Center Implementation ---
 

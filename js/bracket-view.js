@@ -1192,8 +1192,10 @@ const BracketView = (() => {
         }).join('');
         // Undo only appears when the match can be undone (isMatchUndoable() decides). A read-only
         // tournament says so on every match instead.
+        // Edit match (isMatchEditable()): the score, achievements and, when allowed, the winner
         const undo = tournament.readOnly ? '<span class="bv-readonly" title="This tournament is read-only">Read only</span>'
-            : isMatchUndoable(selected) ? '<button type="button" data-act="undo" title="Undo this result">Undo match</button>' : '';
+            : (isMatchEditable(selected) ? '<button type="button" data-act="edit" title="Edit this result">Edit match</button>' : '') +
+              (isMatchUndoable(selected) ? '<button type="button" data-act="undo" title="Undo this result">Undo match</button>' : '');
         bar.innerHTML = `<span class="bv-sid">${selected}</span><span>${escapeHtml(roundName(selected))} · ${what}</span>` +
             follow + undo +
             // Match Controls is always the rightmost button, just before ×
@@ -1207,6 +1209,8 @@ const BracketView = (() => {
         }));
         bar.querySelector('[data-act="clear"]').addEventListener('click', clearSel);
         bar.querySelector('[data-act="controls"]').addEventListener('click', () => showBracketView('controls', selected));
+        const editBtn = bar.querySelector('[data-act="edit"]');
+        if (editBtn) editBtn.addEventListener('click', () => handleMatchEdit(selected));
         const undoBtn = bar.querySelector('[data-act="undo"]');
         if (undoBtn) undoBtn.addEventListener('click', () => handleSurgicalUndo(selected));
     }

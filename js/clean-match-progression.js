@@ -11,6 +11,10 @@ let pendingFormat = 'DE';
 // after use — the underlying match.preMatchSnapshot lives on the match object.
 let _completionSnapshot = null;
 
+// Edit match only (handleMatchEdit): the stats as they were when the dialog opened, which Cancel
+// restores to. Null in the ordinary Confirm Winner flow, where Cancel restores _completionSnapshot.
+let _completionRestore = null;
+
 // Monotonic counter so transaction IDs stay unique even when several transactions
 // are minted within the same millisecond (e.g. walkover chains in
 // processAutoAdvancements). Undo looks transactions up by ID — duplicates would
@@ -122,7 +126,7 @@ function renderCompletionAchievements() {
     }
 
     container.innerHTML = `<div class="completion-achievements-box">
-        <div class="completion-achievements-title">Achievements entered this session:</div>
+        <div class="completion-achievements-title">${_completionRestore ? 'Achievements for this match:' : 'Achievements entered this session:'}</div>
         ${rows.join('')}
     </div>`;
     container.style.display = '';
@@ -2738,7 +2742,24 @@ function _buildWinnerProgressionBlock(matchId, winner, loser, progression) {
     return block;
 }
 
-function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
+/**
+ * The Confirm Winner dialog: winner, leg score and the achievements entered while it is open.
+ * Also the Edit match dialog (bracket-rendering.js handleMatchEdit), when `edit` is given.
+ * @param {string} matchId
+ * @param {object} winner
+ * @param {object} loser
+ * @param {function(number, number, object|null, object): (boolean|void)} onConfirm - winner legs,
+ *   loser legs, achievements delta per player id, and the winner (the other player if changed)
+ * @param {object} [edit] - Edit match: the recorded result to start from
+ * @param {object} edit.baseline - stats snapshots the achievements diff is taken against
+ * @param {object} edit.restore - stats snapshots Cancel restores to
+ * @param {boolean} edit.canChangeWinner - offer "Change winner"
+ * @param {string|null} edit.lockedReason - why the winner can't change
+ * @param {number} [edit.winnerLegs] - recorded legs, pre-filled
+ * @param {number} [edit.loserLegs]
+ * @returns {boolean} false when the dialog's elements are missing
+ */
+function showWinnerConfirmation(matchId, winner, loser, onConfirm, edit) {
     const modal = document.getElementById('winnerConfirmModal');
     const body = document.getElementById('winnerConfirmBody');
     const cancelBtn = document.getElementById('winnerConfirmCancel');
@@ -2753,10 +2774,8 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     document.getElementById('winnerSidebarMatch').textContent = matchId;
     document.getElementById('winnerSidebarBracket').textContent = _bracketLabel(matchId);
     const winnerLink = document.getElementById('winnerStatsLink');
-    winnerLink.textContent = winner.name;
-    winnerLink.onclick = () => openStatsModalFromConfirmation(winner.id, matchId);
+    winnerLink.onclick = () => openStatsModalFromConfirmation(winner.id, matchId); // reads `winner` when clicked
     const loserLink = document.getElementById('loserStatsLink');
-    loserLink.textContent = loser.name;
     loserLink.onclick = () => openStatsModalFromConfirmation(loser.id, matchId);
     // a qualifier: no statistics to edit (nothing in a qualifier counts)
     const isQualifier = typeof Qualifiers !== 'undefined' && Qualifiers.isQualifierId(matchId);
@@ -2764,11 +2783,37 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     statsStack.style.display = isQualifier ? 'none' : '';
     if (statsStack.previousElementSibling) statsStack.previousElementSibling.style.display = isQualifier ? 'none' : '';
 
-    // Title — "{winner} beats {loser}"
-    document.getElementById('winnerConfirmDialogTitle').textContent = `${winner.name} beats ${loser.name}`;
+    // Everything that names the winner and the loser; again when Edit match changes the winner
+    const paintPlayers = () => {
+    winnerLink.textContent = winner.name;
+    loserLink.textContent = loser.name;
 
-    // Body — progression block only (declaration and hint live in title / sidebar now)
+    // Title — "{winner} beats {loser}"
+    document.getElementById('winnerConfirmDialogTitle').textContent = `${edit ? 'Edit: ' : ''}${winner.name} beats ${loser.name}`;
+
+    // Body — Edit match's winner line, then the progression block (declaration and hint live in title / sidebar now)
     body.replaceChildren();
+    if (edit) {
+        const winnerEdit = document.createElement('div');
+        winnerEdit.className = 'winner-progression';
+        if (edit.canChangeWinner) {
+            const change = document.createElement('button');
+            change.type = 'button';
+            change.className = 'btn';
+            change.textContent = 'Change winner';
+            change.addEventListener('click', () => {
+                [winner, loser] = [loser, winner];
+                paintPlayers();
+            });
+            winnerEdit.appendChild(change);
+        } else {
+            const note = document.createElement('div');
+            note.className = 'winner-progression__note';
+            note.textContent = `The winner can't be changed: ${edit.lockedReason || 'the matches it feeds are played'}. To change it, undo the later results first. The score and achievements can still be edited.`;
+            winnerEdit.appendChild(note);
+        }
+        body.appendChild(winnerEdit);
+    }
     const progressionTable = getProgressionTable();
     const progression = progressionTable && progressionTable[matchId];
     if (progression) {
@@ -2797,6 +2842,10 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         body.appendChild(block);
     }
 
+    if (winnerNameSpan) winnerNameSpan.textContent = winner.name;
+    if (loserNameSpan) loserNameSpan.textContent = loser.name;
+    };
+
     // Populate leg score fields
     const match = matches.find(m => m.id === matchId);
     const winnerNameSpan = document.getElementById('winnerNameForLegs');
@@ -2805,24 +2854,24 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     const loserLegsInput = document.getElementById('loserLegs');
     const validationMessage = document.getElementById('legValidationMessage');
 
-    if (winnerNameSpan) winnerNameSpan.textContent = winner.name;
-    if (loserNameSpan) loserNameSpan.textContent = loser.name;
+    paintPlayers();
 
-    // Pre-fill winner legs based on match format
+    // Pre-fill winner legs based on match format (Edit match: the recorded score)
     if (winnerLegsInput && match) {
         const matchLegs = match.legs || 3;
         const minToWin = Math.ceil(matchLegs / 2);
-        winnerLegsInput.value = minToWin;
+        winnerLegsInput.value = edit && Number.isFinite(edit.winnerLegs) ? edit.winnerLegs : minToWin;
         winnerLegsInput.max = matchLegs;
     }
 
     // Set up loser legs
     if (loserLegsInput) {
-        loserLegsInput.value = 0;
+        loserLegsInput.value = edit && Number.isFinite(edit.loserLegs) ? edit.loserLegs : 0;
         if (match) {
             loserLegsInput.max = Math.max(0, match.legs - 1); // Max legs loser can have (0 for Bo1)
         }
     }
+    confirmBtn.textContent = edit ? 'Save changes' : 'Confirm Winner';
 
     // Clear any existing validation message
     if (validationMessage) {
@@ -2835,7 +2884,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     if (scanBtn) {
         scanBtn.dataset.matchId = matchId;
         const _qrMode = (typeof getChalkerHandover !== 'function') || getChalkerHandover() === 'qr';
-        scanBtn.style.display = _qrMode ? '' : 'none';
+        scanBtn.style.display = _qrMode && !edit ? '' : 'none'; // an edit is by hand
     }
 
     // Use the match-anchored snapshot recorded at Start Match (toggleActive).
@@ -2846,7 +2895,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     // unusual code path), take one now. The diff then only captures stats added from this
     // point forward — same behavior as the old approach, so the dialog still works.
     const matchObj = matches.find(m => m.id === matchId);
-    if (matchObj && !matchObj.preMatchSnapshot) {
+    if (!edit && matchObj && !matchObj.preMatchSnapshot) {
         matchObj.preMatchSnapshot = {
             [winner.id]: snapshotPlayerStats(winner),
             [loser.id]: snapshotPlayerStats(loser)
@@ -2855,7 +2904,9 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     // _completionSnapshot is now a pointer into the match-anchored snapshot.
     // renderCompletionAchievements, handleConfirm, and handleCancel all read through it
     // unchanged.
-    _completionSnapshot = matchObj ? matchObj.preMatchSnapshot : null;
+    // Edit match: the baseline is the stats without this match's recorded achievements instead
+    _completionSnapshot = edit ? edit.baseline : (matchObj ? matchObj.preMatchSnapshot : null);
+    _completionRestore = edit ? edit.restore : null;
 
     // Use dialog stack to show modal.
     // enableEsc=false because handleKeyPress (above) handles Esc itself — routing it through
@@ -2870,6 +2921,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
     // Hide any stale achievements box from a previous open of this dialog
     const summaryBox = document.getElementById('completionAchievementsSummary');
     if (summaryBox) summaryBox.style.display = 'none';
+    if (edit) renderCompletionAchievements(); // what the match recorded
 
     // Focus cancel button by default
     setTimeout(() => {
@@ -2916,9 +2968,10 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         // The snapshot lives on match.preMatchSnapshot and stays there — it'll be the
         // baseline for the next Confirm Winner attempt on this same match. The global
         // _completionSnapshot is just a pointer; don't null it out.
-        if (_completionSnapshot) {
+        const restoreFrom = _completionRestore || _completionSnapshot; // Edit match restores to how the dialog opened
+        if (restoreFrom) {
             [winner, loser].forEach(p => {
-                const snap = _completionSnapshot[p.id];
+                const snap = restoreFrom[p.id];
                 if (!snap) return;
                 const player = players.find(pl => String(pl.id) === String(p.id));
                 if (player) restorePlayerStats(player, snap);
@@ -2960,7 +3013,7 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         console.log(`Winner confirmed for match ${matchId}: ${winner.name} (${winnerLegs}-${loserLegs})`);
 
         if (isQualifier) achievements = null; // nothing in a qualifier counts
-        onConfirm(winnerLegs, loserLegs, achievements);
+        onConfirm(winnerLegs, loserLegs, achievements, winner);
         cleanup();
         popDialog(); // Use dialog stack to close and restore parent
     };
@@ -2970,6 +3023,8 @@ function showWinnerConfirmation(matchId, winner, loser, onConfirm) {
         cancelBtn.style.boxShadow = '';
         cancelBtn.style.transform = '';
         cancelBtn.textContent = 'Cancel';
+        confirmBtn.textContent = 'Confirm Winner';
+        _completionRestore = null;
 
         // Clear achievements summary
         const summaryBox = document.getElementById('completionAchievementsSummary');
@@ -3260,7 +3315,8 @@ function openStatsModalFromConfirmation(playerId, matchId) {
             // Update the achievements summary and Cancel button label
             if (_completionSnapshot) {
                 renderCompletionAchievements();
-                const anyChanges = Object.entries(_completionSnapshot).some(([pid, snap]) => {
+                // Edit match: changes against how the dialog opened, not against the baseline
+                const anyChanges = Object.entries(_completionRestore || _completionSnapshot).some(([pid, snap]) => {
                     const player = players.find(p => String(p.id) === String(pid));
                     return player && diffPlayerStats(snap, snapshotPlayerStats(player)) !== null;
                 });

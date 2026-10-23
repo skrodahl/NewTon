@@ -183,6 +183,7 @@ const HELP_CONTENT = {
                     <ul>
                         <li><strong>Click a match</strong> to highlight its lines and the matches it is connected to. The view follows if they are off-screen; markers at the edge point to the rest</li>
                         <li><strong>Follow [player]</strong> traces that player through the bracket. Click it again to stop</li>
+                        <li><strong>Edit match</strong> appears on a match you completed by hand: change the score and achievements, and the winner when the matches it feeds are not played</li>
                         <li><strong>Undo match</strong> appears when the result can be undone</li>
                         <li><strong>Match Controls</strong> switches to Match Controls and points out that match</li>
                         <li>Click empty space or press <strong>Esc</strong> to clear the selection</li>
@@ -218,6 +219,7 @@ const HELP_CONTENT = {
             <p><strong>Scan Results QR:</strong> If the match was scored on the Chalker, click <strong>Scan Results QR</strong> in the confirmation dialog to import the result and player achievements directly from the Chalker's QR code — no manual entry needed.</p>
             <p><strong>Correcting Match Results:</strong></p>
             <ul>
+                <li><strong>Wrong score, achievements or winner:</strong> select the match in the bracket and click <strong>Edit match</strong>. The winner can only change while none of the matches it feeds are live or played. Not available for matches reported from the Chalker, or in a completed tournament</li>
                 <li><strong>Select the match</strong> in the bracket and click <strong>Undo match</strong></li>
                 <li><strong>Only safe matches can be undone</strong> - none of the matches it feeds may be live or played</li>
                 <li><strong>Multi-step correction:</strong> undo several matches by working backwards through the bracket</li>

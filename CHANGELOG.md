@@ -1,3 +1,15 @@
+## **Unreleased** (after v5.4.7)
+
+### Edit match
+
+- **A completed match can be edited, not only undone** (raised 2026-10-19: several matches were reported incompletely, and achievements, legs won and winners all had to be corrected; achievements entered by hand were tied to no match). **Edit match** sits beside **Undo match** in the bracket's selection bar and opens the Confirm Winner dialog filled in with the recorded result ("Edit: A beats B", **Save changes**). Rules (maintainer): legs won and achievements can always be edited, locked stages included; the winner only when `isMatchUndoable()` allows it (no downstream match played or live, no locked stage), so the winner rule is the undo rule, from one function. Never in a read-only tournament, for walkovers, or for matches reported from the Chalker (QR or network): their leg-by-leg detail in the register would contradict an edit, so those are corrected with undo and replay.
+- **Winner unchanged:** the match's `COMPLETE_MATCH` transaction is rewritten in place (additive `editedAt`) and `finalScore` replaced, so history keeps one transaction per match and undo is untouched; the register record gets the new legs and achievements and keeps its `completedAt`. **Winner changed:** the existing undo, then `completeMatch()` for the other player; the transaction carries `editedAt` and `originalWinner`.
+- **Achievements are tied to the match:** the dialog's baseline is the players' stats without what the match recorded, so it opens showing "Achievements for this match", and changes become the transaction's new delta. Cancel and Esc restore the stats to how they were when the dialog opened.
+- `undoManualTransaction()` now returns the promise of its register deletes (before: nothing), so a winner change writes the new result only after the old record is gone. `rollbackAchievements()` uses a new `subtractAchievementStats()` that the edit shares.
+- **Swiss:** the dialog names what locks the winner ("round 2 has started (R2-3 is played) and was drawn from round 1's results"): the next round is drawn from every result of the round, so one played match in it locks them all (the undo rule). Found when the maintainer asked why a round 1 match whose own next matches were unplayed was locked.
+- Tested in the browser (8-player double elimination, hand-completed matches with achievements): score and achievements edit, Cancel restoring the stats, Esc, a winner change (the next match and the backside placement follow, one transaction left, `originalWinner` kept, register record updated), the locked winner (note shown, no Change winner button, score still editable, a direct winner change refused), QR, read-only and not-completed matches not editable. Detail in `Docs/EDIT-MATCH.md`.
+- Files changed: `js/bracket-rendering.js`, `js/clean-match-progression.js` (`showWinnerConfirmation()`), `js/bracket-view.js`, `js/dynamic-help-system.js`, `Docs/EDIT-MATCH.md`, `Docs/UNDO.md`.
+
 ## **v5.4.7** — Urgent PHP Security Release (2026-10-22)
 
 ### Release

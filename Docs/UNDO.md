@@ -3,6 +3,8 @@
 **Status:** Implemented — v5.0.1-beta.4; snapshot anchor refactored in v5.1.2
 **Last Updated:** May 2026
 
+> A result can also be corrected without undoing it: **Edit match** (score, achievements and, when allowed, the winner). See `Docs/EDIT-MATCH.md`.
+
 ---
 
 ## The Problem
