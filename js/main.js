@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.4.7'; // Urgent PHP Security Release — security release: Docker image rebuilt on PHP 8.2.35 (CVE-2026-109618, CVE-2026-109619)
+const APP_VERSION = '5.4.8'; // Non, je ne regrette rien — Edit match: correct the score, achievements and winner of a completed match
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

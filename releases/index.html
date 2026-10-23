@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.4.7 &mdash; Urgent PHP Security Release</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.4.7 release notes. A security release: the Docker image is rebuilt on PHP 8.2.35, which fixes two critical remote code execution flaws in PHP (CVE-2026-109618, CVE-2026-109619).">
+    <title>v5.4.8 &mdash; Non, je ne regrette rien</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.4.8 release notes. Edit match: correct the score, the achievements and, when nothing depends on it, the winner of a completed match. Achievements stay with their match in Analytics.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,66 +17,84 @@
 
 <div class="docs-content">
 
-    <h1>Urgent PHP Security Release</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.7 &mdash; October 22, 2026</p>
+    <h1>Non, je ne regrette rien</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.4.8 &mdash; October 23, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.7" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.7</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.8" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.4.8</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#todo">What to Do</a></li>
-            <li><a href="#details">Details</a></li>
+            <li><a href="#edit">Edit match</a></li>
+            <li><a href="#achievements">Achievements at the end of the night</a></li>
             <li><a href="#files">Files Changed</a></li>
             <li><a href="#migration">Migration</a></li>
         </ol>
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>A security release for the Docker image. PHP published fixes yesterday for two critical flaws that could let an attacker run commands on a web server running PHP. This release rebuilds the image on the fixed PHP. Nothing in the application has changed.</p>
+    <p>A completed match can now be corrected without undoing it. <strong>Edit match</strong> changes the score, the achievements and, when nothing depends on it, the winner. Achievements belong to the match they were recorded in, and the Analytics register keeps them that way when the tournament ends.</p>
 
     <hr>
 
-    <h2 id="todo">What to Do</h2>
-    <p>If you run NewTon from Docker, pull the new image and recreate the container:</p>
-    <pre><code>docker compose pull
-docker compose up -d</code></pre>
-    <p>Do this soon, particularly if the server can be reached from the internet. If you run the Tournament Manager from a downloaded file, or install the Chalker app, there is nothing to do: they don&rsquo;t run PHP.</p>
+    <h2 id="edit">Edit match</h2>
+    <p>Select a completed match in the bracket and click <strong>Edit match</strong>, next to <strong>Undo match</strong>. The Confirm Winner dialog opens filled in with the recorded result. Change what is wrong and click <strong>Save changes</strong>.</p>
 
-    <hr>
-
-    <h2 id="details">Details</h2>
+    <h3>What can be edited</h3>
     <ul>
-        <li><strong>The flaws:</strong> CVE-2026-109618 and CVE-2026-109619, both rated critical (CVSS 9.2), in PHP&rsquo;s core. They affect every PHP release before 8.5.12, 8.4.27, 8.3.36 and 8.2.35, and remote code execution has been shown on PHP-FPM, which the NewTon image uses.</li>
-        <li><strong>The fix:</strong> the image is built on PHP 8.2.35. The publish workflow now always takes the newest base image, so later PHP and Alpine fixes aren&rsquo;t held back by a cached layer.</li>
-        <li><strong>What&rsquo;s next:</strong> PHP 8.2 receives security fixes until the end of 2026. A move to PHP 8.4 will follow as its own release.</li>
+        <li><strong>The score:</strong> always.</li>
+        <li><strong>The achievements:</strong> always. The dialog shows what the match recorded; add or remove 180s, tons, high outs and short legs in the Statistics dialog as before. Cancel and Esc leave everything as it was.</li>
+        <li><strong>The winner:</strong> while none of the matches it feeds are live or played. Click <strong>Change winner</strong>, set the score and save. The next match and the backside follow, as if the match had been undone and played again. If a later match is already played, the dialog says which one, and the score and achievements can still be edited.</li>
     </ul>
+
+    <h3>Why the winner is held back</h3>
+    <p>The winner decides who plays next, so it follows the same rule as Undo. In a Swiss tournament the next round is drawn from every result of the round before, so one played match in round 2 holds back the winners in round 1. The dialog says so.</p>
+
+    <h3>What can&rsquo;t be edited</h3>
+    <ul>
+        <li>Matches reported from the Chalker, by QR code or over the network. Their leg-by-leg detail is part of the match in Analytics, and an edit would contradict it. Undo and replay them.</li>
+        <li>Walkovers and byes.</li>
+        <li>Anything in a completed tournament. Nothing can be changed there; switch read-only off first, as for undo.</li>
+    </ul>
+
+    <p><strong>Why not just undo and enter it again?</strong> Undo is refused once a later match is played, and it sends the match back to ready, takes the players out of their next matches and clears the lane and referee. Edit changes only the result.</p>
+
+    <hr>
+
+    <h2 id="achievements">Achievements at the end of the night</h2>
+    <p>When a tournament ends, achievements entered outside the match dialogs are added to the player&rsquo;s last match in Analytics. That step now recognises the achievements the matches already recorded, so a player&rsquo;s last match shows only its own, plus whatever was entered outside a dialog. Before, it could show the player&rsquo;s whole night beside the match&rsquo;s own.</p>
+    <p>Tournaments finished with an earlier version keep what they have.</p>
 
     <hr>
 
     <h2 id="files">Files Changed</h2>
     <ul>
-        <li><code>docker/Dockerfile</code> &mdash; the image is built on PHP 8.2.35 or later</li>
-        <li><code>.github/workflows/docker-hub-publish.yml</code> &mdash; always pulls the newest base image</li>
+        <li><code>js/bracket-rendering.js</code> &mdash; Edit match: the rules, the dialog entry and applying an edit</li>
+        <li><code>js/clean-match-progression.js</code> &mdash; the Confirm Winner dialog serves Edit match; match achievements are stored in the register&rsquo;s format</li>
+        <li><code>js/bracket-view.js</code> &mdash; the Edit match button in the selection bar</li>
+        <li><code>js/newton-db.js</code> &mdash; the register&rsquo;s achievements format and the end-of-tournament step</li>
+        <li><code>js/dynamic-help-system.js</code> &mdash; help for Edit match</li>
     </ul>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
-    <p>No migration required. Fully compatible with all existing tournament data, match history, Analytics and settings. Nothing stored has changed; the export format is unchanged.</p>
-    <p>This release moves <code>:latest</code> forward to v5.4.7. Installed Chalker apps refresh automatically on their next online launch.</p>
+    <p>No migration required. Fully compatible with all existing tournament data and match history. Edited matches carry two new optional fields that older versions ignore; the export format is unchanged.</p>
+    <p>Tournaments already finished and added to Analytics are not changed.</p>
+    <p>This release moves <code>:latest</code> forward to v5.4.8. Installed Chalker apps refresh automatically on their next online launch.</p>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.4.7 &mdash; Urgent PHP Security Release</em></p>
+    <p><em>NewTon DC Tournament Manager v5.4.8 &mdash; Non, je ne regrette rien</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.7" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.7</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.4.8" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.4.8</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
+        <li><a href="v5.4.8.html">v5.4.8</a> &mdash; October 23, 2026 &mdash; Non, je ne regrette rien</li>
         <li><a href="v5.4.7.html">v5.4.7</a> &mdash; October 22, 2026 &mdash; Urgent PHP Security Release</li>
         <li><a href="v5.4.6.html">v5.4.6</a> &mdash; October 12, 2026 &mdash; Peek-a-Boo</li>
         <li><a href="v5.4.5.html">v5.4.5</a> &mdash; October 11, 2026 &mdash; Look Sharp!</li>

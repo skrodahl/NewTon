@@ -1,4 +1,18 @@
-## **Unreleased** (after v5.4.7)
+## **v5.4.8** — Non, je ne regrette rien (2026-10-23)
+
+### Release
+
+- Version 5.4.8: `APP_VERSION` and `CHALKER_VERSION`, Chalker cache busters (`chalker.js?v=34`, `chalker-v131`), release pages `releases/index.html` and `releases/v5.4.8.html`, `sitemap.xml`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.4.8.md`. `llms.txt` and the help (bracket page, Completing & Correcting Matches) mention Edit match.
+
+### Analytics register: match achievements at tournament end
+
+- **Found while checking that an edit reaches Analytics:** at the end of a tournament `reconcileMatchAchievements()` reads each match's achievements as `{ p1, p2 }`, but match completion (by hand and from the Chalker) stored them as `{ [playerId]: delta }`. It saw nothing recorded, took each player's whole tournament totals as unattributed, and added them to that player's last match under `p1`/`p2` beside the real entry: the last match then showed the player's whole tournament, and its per-match achievement points were summed over both. The last match's record was also re-saved as `live` among `final` ones (`saveMatch()` forced the status).
+- **Fixed in three parts.** (1) `completeMatch()` and the edit's register save store `{ p1, p2 }` (new `NewtonDB.slotAchievements()`); the transaction keeps its per-id map, so undo is untouched. (2) Reconcile reads either shape and writes records that were stored per id back as `{ p1, p2 }`, so a tournament played partly before this change reconciles correctly; only stats nobody recorded in a match (entered outside the dialogs) go to the player's last match. (3) `saveMatch()` keeps a status the caller passes (reconcile passes `final`).
+- **Not repaired:** tournaments already finalized keep their inflated last-match entries (maintainer: leave the recompute).
+- Tested in the browser: a 4-player single elimination played to the end with an edit on the way and two tons entered outside any dialog: every record `{ p1, p2 }` and `final`, the edited match with its new score and achievements, the winner's last match with only its own ton, the outside tons on the other finalist's last match alone.
+- Files changed: `js/newton-db.js` (`slotAchievements()`, `saveMatch()`, `reconcileMatchAchievements()`), `js/clean-match-progression.js` (`completeMatch()`), `js/bracket-rendering.js` (`_saveEditedMatchToRegister()`).
+
+### Edit match
 
 ### Edit match
 
