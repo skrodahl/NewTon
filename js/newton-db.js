@@ -113,12 +113,13 @@ const NewtonDB = (() => {
      * @param {object[]|null} data.legs        - raw leg data with visit scores; null for MANUAL
      * @param {{p1: object|null, p2: object|null}|null} data.achievements
      * @param {{sc: number, bo: number}} data.format
+     * @param {'live'|'final'} [data.status]   - kept when given (reconcile re-saves final records); 'live' otherwise
      * @returns {Promise<void>}
      */
     async function saveMatch(data) {
         await initDB();
 
-        const record = Object.assign({}, data, { status: 'live' });
+        const record = Object.assign({ status: 'live' }, data);
 
         return new Promise((resolve, reject) => {
             const tx    = _db.transaction('matches', 'readwrite');
@@ -486,6 +487,22 @@ const NewtonDB = (() => {
     }
 
     /**
+     * A match's achievements in the register's format, { p1, p2 }. Match completion used to store
+     * them as { [playerId]: delta } (the transaction's own shape); this converts that, and passes
+     * a { p1, p2 } through. Null when neither player has any.
+     * @param {object|null|undefined} achievements - { [playerId]: delta|null } or { p1, p2 }
+     * @param {string|number|null} player1Id
+     * @param {string|number|null} player2Id
+     * @returns {{p1: object|null, p2: object|null}|null}
+     */
+    function slotAchievements(achievements, player1Id, player2Id) {
+        if (!achievements) return null;
+        const p1 = ('p1' in achievements || 'p2' in achievements) ? achievements.p1 : achievements[String(player1Id)];
+        const p2 = ('p1' in achievements || 'p2' in achievements) ? achievements.p2 : achievements[String(player2Id)];
+        return (p1 || p2) ? { p1: p1 || null, p2: p2 || null } : null;
+    }
+
+    /**
      * Reconcile match-level achievements with player totals.
      * Sums all per-match achievement deltas for each player, compares against
      * the authoritative player stats, and attributes any remainder to the
@@ -509,8 +526,13 @@ const NewtonDB = (() => {
         const accumulated = {};   // playerId -> normalized sum
         const lastMatchIdx = {};  // playerId -> index in matches array
 
+        const converted = new Set(); // matches stored per player id: written back as { p1, p2 }
         for (let i = 0; i < matches.length; i++) {
             const m = matches[i];
+            if (m.achievements && !('p1' in m.achievements) && !('p2' in m.achievements)) {
+                m.achievements = slotAchievements(m.achievements, m.player1Id, m.player2Id);
+                converted.add(i);
+            }
             const slots = [
                 { id: m.player1Id, slot: 'p1' },
                 { id: m.player2Id, slot: 'p2' }
@@ -544,15 +566,18 @@ const NewtonDB = (() => {
             }
         }
 
-        // Write remainders back to the last match for each player
-        for (const [idxStr, playerRemainders] of Object.entries(updates)) {
-            const idx = parseInt(idxStr, 10);
+        // Write remainders back to the last match for each player, and the converted records
+        const toWrite = new Set([...converted, ...Object.keys(updates).map(k => parseInt(k, 10))]);
+        for (const idx of toWrite) {
+            const playerRemainders = updates[idx] || {};
             const m = matches[idx];
-            if (!m.achievements) m.achievements = { p1: null, p2: null };
+            if (!m.achievements && Object.keys(playerRemainders).length) m.achievements = { p1: null, p2: null };
 
             for (const [playerId, remainder] of Object.entries(playerRemainders)) {
                 const slot = String(m.player1Id) === playerId ? 'p1' : 'p2';
                 if (m.achievements[slot]) {
+                    // a match's own delta carries only what was recorded (no empty arrays): normalize first
+                    m.achievements[slot] = normalizeStats(m.achievements[slot]);
                     addStats(m.achievements[slot], remainder);
                 } else {
                     m.achievements[slot] = remainder;
@@ -750,7 +775,8 @@ const NewtonDB = (() => {
         normalizeStats,
         diffStats,
         hasAnyStats,
-        addStats
+        addStats,
+        slotAchievements
     };
 
 })();

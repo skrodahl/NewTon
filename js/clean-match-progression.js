@@ -760,7 +760,7 @@ function completeMatch(matchId, winnerPlayerNumber, winnerLegs = 0, loserLegs = 
                 firstStarter:     firstStarter || null,
                 legsWon:          { p1: winnerPlayerNumber === 1 ? winnerLegs : loserLegs, p2: winnerPlayerNumber === 2 ? winnerLegs : loserLegs },
                 legs:             rawLegs || null,
-                achievements:     achievements || null,
+                achievements:     NewtonDB.slotAchievements(achievements, _p1.id, _p2.id), // { p1, p2 }; the transaction keeps the per-id map
                 format:           { sc: (typeof config !== 'undefined' && config.legs && config.legs.x01Format) || 501, bo: match.legs || 3 }
             };
             const _matchSaved = NewtonDB.saveMatch(_dbMatch).catch(e => console.warn('NewtonDB saveMatch failed:', e));

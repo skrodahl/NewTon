@@ -1504,7 +1504,7 @@ function _saveEditedMatchToRegister(match, winnerLegs, loserLegs, achievements) 
     NewtonDB.getMatch(String(tournament.id), match.id).then(rec => {
         if (!rec) return null;
         rec.legsWon = { p1: winnerIs1 ? winnerLegs : loserLegs, p2: winnerIs1 ? loserLegs : winnerLegs };
-        rec.achievements = achievements || null;
+        rec.achievements = NewtonDB.slotAchievements(achievements, rec.player1Id, rec.player2Id);
         rec.editedAt = Math.floor(Date.now() / 1000);
         return NewtonDB.saveMatch(rec);
     }).then(() => {
