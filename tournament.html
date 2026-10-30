@@ -345,6 +345,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     </div>
                     <div class="bv-header-row bv-status-row">
                         <div class="bv-status" id="bvStatus"></div>
+                        <button type="button" class="bv-upload-chip" id="bvUploadChip" hidden onclick="retryRemoteUpload(true)">Not uploaded</button>
                         <div class="bv-legend">
                             <span><i class="bv-sw bv-sw-live"></i>Live</span>
                             <span><i class="bv-sw bv-sw-ready"></i>Ready</span>

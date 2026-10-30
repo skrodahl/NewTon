@@ -489,22 +489,260 @@ async function uploadToServer(payload, options = {}) {
 
         if (response.ok) {
             console.log(`✓ Tournament uploaded to ${label}: ${payload.filename}`);
+            if (remoteUrl) noteRemoteUpload(payload, remoteUrl, { ok: true });
             if (!silent) {
                 alert(`✓ Tournament uploaded to ${label}.\n\n${payload.filename}`);
                 if (typeof loadRecentTournaments === 'function') loadRecentTournaments();
             }
             return true;
         } else {
-            const result = await response.json().catch(() => ({}));
-            const msg = result.error || 'Unknown error';
-            console.warn(`Upload to ${label} failed (${response.status}):`, msg);
-            if (!silent) alert(`Upload to ${label} failed: ${msg}`);
+            const result = await response.json().catch(() => null);
+            const failure = classifyUploadFailure(response.status, result);
+            console.warn(`Upload to ${label} failed (${response.status}):`, failure.message);
+            if (remoteUrl) noteRemoteUpload(payload, remoteUrl, failure);
+            if (!silent) alert(`Upload to ${label} failed: ${failure.message}`);
             return false;
         }
     } catch (e) {
         console.log(`Upload to ${label} skipped — not available`);
+        if (remoteUrl) noteRemoteUpload(payload, remoteUrl, { ok: false, kind: 'relay', message: "This computer's server did not answer." });
         if (!silent) alert(`${label} not available.`);
         return false;
+    }
+}
+
+// ---------- Upload status: a failed automatic upload is never silent (Docs/HUB-DIRECTION.md, step 1) ----------
+//
+// The automatic upload at tournament end is fire-and-forget, and a failure only reached the console. The
+// outcome of every remote upload is kept per tournament in its own localStorage key (not in the tournament
+// itself: the tournament and its export stay as they are), shown on Setup and as a chip on the bracket page,
+// and a failed one is tried again until it works. Only the remote destination is followed: the local server
+// is this computer's own, and not having one (the page opened as a file) is normal.
+
+/** Seconds between retries of a failed upload; the last one repeats. */
+const UPLOAD_RETRY_SECONDS = [30, 60, 120, 300];
+/** The failures that can mend themselves: no refusal in them. */
+const UPLOAD_RETRIABLE_KINDS = ['relay', 'network', 'server'];
+
+let _uploadRetryTimer = null;
+let _uploadRetryStep = 0;
+let _uploadRetrying = false;
+
+/**
+ * Tell a failed upload's kind and say what happened, from the answer of this computer's relay (which
+ * passes the remote server's answer through). Kinds: 'relay' this computer's server did not answer or has
+ * no relay, 'network' the relay could not reach the remote server, 'server' the remote server failed,
+ * 'refused' the remote server (or the relay) said no: a key, a host, a size.
+ * @param {number} status - HTTP status
+ * @param {object|null} result - the JSON body, or null when it was not JSON
+ * @returns {{ok: false, kind: string, message: string}}
+ */
+function classifyUploadFailure(status, result) {
+    const error = result && result.error;
+    if (!result) return { ok: false, kind: 'relay', message: `This computer's server has no relay, or did not answer (${status}).` };
+    if (status === 502 && error) return { ok: false, kind: 'network', message: `Could not reach the server${result.detail ? ` (${result.detail})` : ''}.` };
+    if (status === 401) return { ok: false, kind: 'refused', message: `${error || 'The API key was refused'}. Check the API key under Global Settings → Remote backup.` };
+    if (status === 413) return { ok: false, kind: 'refused', message: "The tournament is larger than the server accepts." };
+    if (status >= 500) return { ok: false, kind: 'server', message: `${error || 'Server error'} (${status}).` };
+    return { ok: false, kind: 'refused', message: `${error || 'Refused'} (${status}).` };
+}
+
+/** @param {string|number} id - tournament id @returns {string} */
+function uploadStatusKey(id) { return `uploadStatus_${id}`; }
+
+/**
+ * The last remote upload of a tournament: { remote, ok, final, at, kind?, message? }, or null when none
+ * was made (the tournament is older than this, or nothing was configured).
+ * @param {string|number} id
+ * @returns {object|null}
+ */
+function getUploadStatus(id) {
+    try {
+        const raw = localStorage.getItem(uploadStatusKey(id));
+        return raw ? JSON.parse(raw) : null;
+    } catch (e) { return null; }
+}
+
+/** Forget a tournament's upload status (it was deleted). @param {string|number} id @returns {void} */
+function clearUploadStatus(id) {
+    try { localStorage.removeItem(uploadStatusKey(id)); } catch (e) { /* storage unavailable */ }
+}
+
+/**
+ * The failed upload of the finished tournament that is loaded, or null: what Setup and the bracket page
+ * warn about. A failure of an unfinished tournament's by-hand upload was shown out loud when it happened.
+ * @returns {object|null}
+ */
+function pendingUpload() {
+    const rec = currentUploadStatus();
+    return rec && !rec.ok && rec.final ? rec : null;
+}
+
+/**
+ * The loaded tournament's upload status, as long as it is about the remote server that is configured
+ * now: a record about an address that has since been removed or changed says nothing about the present.
+ * @returns {object|null}
+ */
+function currentUploadStatus() {
+    return tournament ? uploadStatusFor(tournament.id) : null;
+}
+
+/**
+ * A tournament's upload status, as long as it is about the remote server that is configured now.
+ * @param {string|number} id
+ * @returns {object|null}
+ */
+function uploadStatusFor(id) {
+    const rec = getUploadStatus(id);
+    const remote = config && config.server && config.server.remoteUrl;
+    const same = (a, b) => String(a || '').replace(/\/+$/, '') === String(b || '').replace(/\/+$/, '');
+    return rec && remote && same(rec.remote, remote) ? rec : null;
+}
+
+/**
+ * The "Not uploaded" tag for a row of Setup's tournament list: a finished tournament whose upload to the
+ * remote server failed, so anyone can find it, load it and press Upload now. Empty when it is fine or
+ * nothing is known.
+ * @param {string|number} id
+ * @returns {string} HTML
+ */
+function uploadFailedTag(id) {
+    const rec = uploadStatusFor(id);
+    if (!rec || rec.ok || !rec.final) return '';
+    return `<span class="st-tag st-tag-warn" title="${escapeHtml(rec.message || 'The upload failed.')} Load the tournament and press Upload now.">Not uploaded</span>`;
+}
+
+/**
+ * Record the outcome of an upload to a remote server, and act on it: start the retry for a failure that
+ * can mend itself, show the result on Setup and the bracket page. Never throws: this must not affect
+ * the upload or the tournament.
+ * @param {object} payload - { filename, data }
+ * @param {string} remoteUrl
+ * @param {{ok: boolean, kind?: string, message?: string}} outcome
+ * @returns {void}
+ */
+function noteRemoteUpload(payload, remoteUrl, outcome) {
+    try {
+        const id = payload && payload.data && payload.data.id;
+        if (!id) return;
+        const final = payload.data.status === 'completed';
+        const before = getUploadStatus(id);
+        // an unfinished tournament's upload must not hide the failed final one
+        if (before && !before.ok && before.final && !final) return;
+        const rec = { remote: remoteUrl, ok: !!outcome.ok, final, at: new Date().toISOString() };
+        if (!outcome.ok) { rec.kind = outcome.kind; rec.message = outcome.message; }
+        localStorage.setItem(uploadStatusKey(id), JSON.stringify(rec));
+        if (outcome.ok) _uploadRetryStep = 0;
+        else if (final) scheduleUploadRetry();
+        updateUploadNotices();
+        if (typeof loadRecentTournaments === 'function') loadRecentTournaments(); // the list's "Not uploaded" tags
+    } catch (e) {
+        console.warn('Could not record the upload status:', e);
+    }
+}
+
+/**
+ * Upload the loaded tournament to the remote server again. By the retry (silent), or by hand (says what
+ * happened out loud).
+ * @param {boolean} [byHand=false]
+ * @returns {Promise<boolean>} true when it was uploaded
+ */
+async function retryRemoteUpload(byHand = false) {
+    const remote = config && config.server && config.server.remoteUrl;
+    if (!remote || _uploadRetrying) return false;
+    const payload = buildTournamentPayload();
+    if (!payload) return false;
+    _uploadRetrying = true;
+    try {
+        return await uploadToServer(payload, { silent: !byHand, remoteUrl: remote, apiKey: config.server.remoteApiKey || '' });
+    } finally {
+        _uploadRetrying = false;
+    }
+}
+
+/**
+ * Try the failed upload again after a pause, while the page is open: 30 s, 1 min, 2 min, then every 5
+ * minutes. Only for failures that can mend themselves; a refusal waits for someone to fix the cause
+ * (Upload now tries again). Repeating is safe: the upload overwrites the same file.
+ * @returns {void}
+ */
+function scheduleUploadRetry() {
+    clearTimeout(_uploadRetryTimer);
+    _uploadRetryTimer = null;
+    const rec = pendingUpload();
+    if (!rec || !UPLOAD_RETRIABLE_KINDS.includes(rec.kind)) return;
+    const seconds = UPLOAD_RETRY_SECONDS[Math.min(_uploadRetryStep++, UPLOAD_RETRY_SECONDS.length - 1)];
+    _uploadRetryTimer = setTimeout(async () => {
+        _uploadRetryTimer = null;
+        if (!pendingUpload()) return;
+        await retryRemoteUpload(false);
+        if (!_uploadRetryTimer) scheduleUploadRetry(); // a failure schedules itself; this covers a skipped attempt
+    }, seconds * 1000);
+}
+
+/**
+ * Pick the retry up for the loaded tournament (on load, create, import): when the browser is reopened
+ * with a failed upload waiting, it tries again. Does nothing when a retry is already waiting.
+ * @returns {void}
+ */
+function resumeUploadRetry() {
+    if (!_uploadRetryTimer && pendingUpload()) scheduleUploadRetry();
+}
+
+// The connection is back: do not wait for the next pause
+window.addEventListener('online', () => {
+    const rec = pendingUpload();
+    if (!rec || !UPLOAD_RETRIABLE_KINDS.includes(rec.kind)) return;
+    clearTimeout(_uploadRetryTimer);
+    _uploadRetryTimer = null;
+    _uploadRetryStep = 0;
+    retryRemoteUpload(false);
+});
+
+/**
+ * What to tell about the loaded tournament's remote upload: null when there is nothing to tell.
+ * @returns {{ok: boolean, text: string, title: string}|null}
+ */
+function uploadNotice() {
+    const rec = currentUploadStatus();
+    if (!rec || !rec.final) return null;
+    let host = rec.remote;
+    try { host = new URL(rec.remote).host; } catch (e) { /* show the address as given */ }
+    const time = new Date(rec.at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    if (rec.ok) return { ok: true, text: `Uploaded to ${host} at ${time}.`, title: '' };
+    const again = UPLOAD_RETRIABLE_KINDS.includes(rec.kind) ? ' Trying again.' : '';
+    return { ok: false, text: `Not uploaded to ${host}: ${rec.message}${again}`, title: rec.message };
+}
+
+/**
+ * Show the upload notice where it belongs: Setup's current tournament and the bracket page's chip.
+ * @returns {void}
+ */
+function updateUploadNotices() {
+    const notice = uploadNotice();
+    const line = document.getElementById('setupUploadNote');
+    if (line) {
+        if (!notice) {
+            line.hidden = true;
+            line.replaceChildren();
+        } else {
+            line.hidden = false;
+            line.className = `st-upload ${notice.ok ? 'st-upload-ok' : 'st-upload-fail'}`;
+            line.replaceChildren(document.createTextNode(notice.text + ' '));
+            if (!notice.ok) {
+                const again = document.createElement('button');
+                again.type = 'button';
+                again.className = 'st-link';
+                again.textContent = 'Upload now';
+                again.addEventListener('click', () => retryRemoteUpload(true));
+                line.appendChild(again);
+            }
+        }
+    }
+    const chip = document.getElementById('bvUploadChip');
+    if (chip) {
+        chip.hidden = !notice || notice.ok;
+        if (notice && !notice.ok) chip.title = `${notice.text} Click to upload now.`;
     }
 }
 
@@ -844,6 +1082,8 @@ function updateTournamentStatus() {
 
     // Setup stays open when a tournament is created, loaded or imported, so its panels follow along
     renderSetupCurrent();
+    updateUploadNotices();
+    resumeUploadRetry();
     if (typeof updateMatchHistory === 'function') updateMatchHistory();
 }
 
@@ -1003,6 +1243,7 @@ function renderSetupCurrent() {
             </div>
         </div>
         <p class="st-facts-line">${facts.join(' · ')}</p>
+        <p class="st-upload" id="setupUploadNote" hidden></p>
         ${status === 'Active' && all.length ? `<div class="st-progress"><span style="width: ${Math.round(100 * done / all.length)}%"></span></div>` : ''}
         ${next ? `<div class="st-next">
             <div class="st-next-what"><p class="st-eyebrow">Next step</p><b>${next[0]}</b><span class="st-hint" id="setupNextHint">${next[1]}</span></div>
@@ -1013,6 +1254,8 @@ function renderSetupCurrent() {
             <button type="button" class="st-link" id="uploadToServerBtn" onclick="showUploadModal()"${setupServerAvailable ? '' : ' hidden'}>Backup to server</button>
             ${status === 'Completed' ? '' : '<button type="button" class="st-link st-danger" onclick="showResetTournamentModal()">Reset tournament…</button>'}
         </div>`;
+
+    updateUploadNotices();
 
     // A completed tournament that isn't in Analytics yet: offer to add it instead
     if (status === 'Completed' && typeof NewtonDB !== 'undefined') {
@@ -1159,7 +1402,7 @@ async function loadRecentTournaments() {
                 `<button type="button" class="st-btn st-sm" data-rt-idx="${rowActions.push({ action: 'load', value: t.id }) - 1}">Load</button>` +
                 `<button type="button" class="st-btn st-sm st-icon" title="Delete ${escapeHtml(t.name)}" aria-label="Delete ${escapeHtml(t.name)}" data-rt-idx="${rowActions.push({ action: 'local-delete', value: t.id }) - 1}">×</button>`;
             return `<tr${isLoaded ? ' class="st-loaded"' : ''}>
-                <td class="st-name"><b>${escapeHtml(t.name)}</b>${isLoaded ? '<span class="st-tag">Loaded</span>' : ''}</td>
+                <td class="st-name"><b>${escapeHtml(t.name)}</b>${isLoaded ? '<span class="st-tag">Loaded</span>' : ''}${uploadFailedTag(t.id)}</td>
                 <td class="st-date">${escapeHtml(t.date)}</td>
                 <td class="st-format">${escapeHtml(savedFormatName(t))}</td>
                 <td class="st-num">${Array.isArray(t.players) ? t.players.length : 0}</td>
@@ -1461,6 +1704,7 @@ function confirmDeleteTournament() {
     // Delete the per-tournament history key (v4.0+ storage isolation)
     const historyKey = `tournament_${tournamentId}_history`;
     localStorage.removeItem(historyKey);
+    clearUploadStatus(tournamentId);
 
     loadRecentTournaments();
 

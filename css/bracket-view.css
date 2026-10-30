@@ -255,6 +255,8 @@
 .bv-status-row { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px 22px; }
 .bv-status { font-size: 13px; color: var(--bv-ink-2); }
 .bv-status b { color: var(--bv-ink); }
+.bv-upload-chip { border: 1px solid var(--nt-warn); background: var(--nt-warn-soft); color: var(--nt-warn); font: inherit; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; cursor: pointer; }
+.bv-upload-chip[hidden] { display: none; }
 .bv-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 14px; font-size: 12px; color: var(--bv-muted); }
 .bv-legend span { display: inline-flex; align-items: center; gap: 6px; }
 .bv-legend .bv-throw { display: inline-block; }
