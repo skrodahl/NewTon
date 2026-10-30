@@ -29,6 +29,8 @@
             <li><a href="#remote-backup">Remote Backup</a></li>
             <li><a href="#setup">Setup</a></li>
             <li><a href="#analytics-mode">Analytics Mode</a></li>
+            <li><a href="#failed-upload">When an Upload Fails</a></li>
+            <li><a href="#live-view">Live View</a></li>
             <li><a href="#manual-fallback">Manual Fallback</a></li>
             <li><a href="#requirements">Requirements</a></li>
         </ol>
@@ -62,7 +64,7 @@
 
     <h2 id="remote-backup">Remote Backup</h2>
     <p>In addition to the local backup, tournaments can be uploaded to a second instance at the moment of completion. The venue computer saves locally <em>and</em> pushes to the online Analytics instance in one step.</p>
-    <p>The upload happens immediately. If there is no internet connection at that moment, the upload will not succeed &mdash; use the <a href="#manual-fallback">manual fallback</a> instead.</p>
+    <p>The upload happens immediately. If there is no internet connection at that moment it does not succeed, but it is not forgotten: see <a href="#failed-upload">when an upload fails</a>.</p>
     <p>The receiving instance needs <code>NEWTON_API_ENABLED=true</code> in its Docker configuration. To keep strangers from uploading to it, set <code>NEWTON_API_KEY</code> there and enter the same key on the venue computer. Members can still open Analytics without a login: only uploads, deletes and corrections need the key.</p>
 
     <hr>
@@ -99,8 +101,30 @@
 
     <hr>
 
+    <h2 id="failed-upload">When an Upload Fails</h2>
+    <p>A tournament that did not reach the remote server says so. <strong>Setup</strong> shows &ldquo;Not uploaded to &hellip;&rdquo; with the reason and an <strong>Upload now</strong> button, the bracket page shows a <strong>Not uploaded</strong> chip, and the tournament&rsquo;s row in Setup&rsquo;s list carries a <strong>Not uploaded</strong> tag, so anyone can find it later.</p>
+    <ul>
+        <li><strong>It is tried again by itself</strong> while the page is open: after 30 seconds, a minute, two minutes, then every five minutes, at once when the connection comes back, and when the page is opened with a failed upload waiting.</li>
+        <li><strong>A refusal is not retried.</strong> A wrong API key, a host that is not allowed or a file that is too large waits for someone to fix it; the message says which. <strong>Upload now</strong> tries it at once and tells you what happened.</li>
+        <li>The tag and the notice go when the upload succeeds. Only the remote server is followed; the local server is this computer&rsquo;s own.</li>
+        <li>A tournament that is not loaded is retried when it is loaded again; load the one with the tag and press <strong>Upload now</strong>.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="live-view">Live View</h2>
+    <p>Optional, and off by default. With <strong>Global Settings &rarr; Server &rarr; Live copy while it is played</strong> on, the venue computer sends a slim copy of the tournament to its server, and to the remote server, after every change: the players and their statistics, the matches with scores, lanes and what each one recorded. Nothing is sent before the bracket is drawn.</p>
+    <ul>
+        <li><strong>On the Analytics site</strong>, a &ldquo;Live now&rdquo; line appears at the top of Analytics while a tournament is being played, with <strong>Watch</strong>. It opens a list of what is being played (with the lane), what is up next and the latest results; <strong>Bracket</strong> and <strong>Leaderboard</strong> are one tap away. It is read-only and updates by itself.</li>
+        <li><strong>The live copy is not part of Analytics.</strong> It is kept apart, and goes when the finished tournament has been backed up. Analytics takes the finished tournament in as usual. If the backup fails, the live copy stays and shows the finished state until the upload succeeds, or for three days at most.</li>
+        <li><strong>Anyone who can open the server can read it</strong>, as with the finished tournament. Writing it needs the API key.</li>
+        <li>It needs a server with the API (Docker). Without one, the setting does nothing.</li>
+    </ul>
+
+    <hr>
+
     <h2 id="manual-fallback">Manual Fallback</h2>
-    <p>If the internet connection is unavailable at the moment of tournament completion, the remote upload will not succeed. In that case:</p>
+    <p>If an upload does not succeed and you cannot wait for the retry (or the refusal needs a fix first), you can also:</p>
     <ol>
         <li>Export the tournament as a JSON file from the Tournament Manager (Recent Tournaments &rarr; Export).</li>
         <li>Upload the JSON file to the Analytics instance manually (Analytics &rarr; Import).</li>

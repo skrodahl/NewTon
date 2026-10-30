@@ -1,6 +1,6 @@
 # Hub Direction: the server as a durable copy, one writer
 
-**Status:** steps 1 to 3 built and committed 2026-10-30 (`e74af50`, `45a7188`, `c2805af`); the live viewer built 2026-10-30 (uncommitted at the time of writing), passing the debt test below; step 4 (resume) is discussion. Written after the Monday 2026-10-26 tournament never reached newton.skrodahl.net.
+**Status:** steps 1 to 3 and the live viewer built and committed 2026-10-30 (`e74af50`, `45a7188`, `c2805af`, `9250183`), passing the debt test below; step 4 (resume) closed as "not now". Written after the Monday 2026-10-26 tournament never reached newton.skrodahl.net.
 **Order of work:** 1 is urgent. 2 is a small safety fix. 3 and 4 are the first real steps. The rest waits for a feature that needs it.
 
 ---
@@ -14,6 +14,8 @@ The upload to the server is the only copy that leaves the browser, and it is fir
 ## The principle: one writer, the server as hub
 
 The operator's Tournament Manager stays the only thing that changes tournament state. The server holds a durable, shared copy and relays it: to the Chalker, to spectators, to Analytics, to a backup. The three foundations (`clean-match-progression.js`, the transaction history, undo) do not move, and nothing is duplicated server-side.
+
+**One-way data flow, for now** (maintainer, 2026-10-30): the club's Tournament Manager writes to the server (the backup, the live copy, the key check); the server and the Analytics viewers only display. Nothing is read back into the club's tournament state, and no feature may depend on the remote holding the only copy. The one existing exception is manual: Setup's Server tab can import a tournament file from the server, which an operator chooses to do. Revisit only together with the "server as primary store" decision.
 
 **Not in scope, on purpose:**
 - Several writers (two operators, the Chalker changing results). That needs the core logic on the server, conflict rules, and a different idea of undo (it removes transactions from history). A project of its own.
@@ -82,7 +84,16 @@ Likely hook points for the mirror: `saveTournament()` and `saveTransaction()`, s
 
 Also gives crash recovery, which is step 4.
 
-## 4. Resume from the server
+## 4. Resume from the server (closed 2026-10-30: not now)
+
+**Decision (maintainer):** not built. The club computer runs the tournament and the remote Analytics instance only displays results; nothing is read back from the remote, and that has not been considered before. A resume would make the remote a source the club depends on, which belongs to the "server as primary store" decision below, not to a safety net slipped in beside it. A tournament file exported from Setup (and the final backup) covers a lost laptop well enough for now.
+
+What was found while discussing it, in case it is reopened:
+- The slim live copy cannot be resumed from: it has no transaction history, so a restored tournament could not undo or edit. A resume needs the **full export** (what the final backup sends: players with statistics, matches, the draw, history, config). The final results are as public as a live copy, so a full live copy would need no extra protection, and could replace the slim one (one copy for the viewer, the backup and the import; the viewer's `finalSnapshot()` already converts a full file).
+- Restore would reuse the existing **import tournament**, which handles exports with history; the newest revision wins, and a mismatch is shown, never silently chosen.
+- The copies protect different things: the club container's copy survives a wiped browser profile but not a dead laptop; only the remote copy survives that.
+
+The original text of this step follows, for reference.
 
 A button (Setup) that restores a tournament from the live copy when the browser has none, or an older revision. The revision decides; a mismatch is shown, never silently chosen. History comes with it, so undo works after a restore.
 

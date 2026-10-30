@@ -1,4 +1,9 @@
-## **Unreleased** (after v5.4.8)
+## **v5.5.0** — Live Is Life (2026-10-30)
+
+### Release
+
+- Version 5.5.0 (maintainer: a new capability, the Live View; Docker-only is parked, a possible 6.0.0): `APP_VERSION` and `CHALKER_VERSION`, Chalker cache busters (`chalker.js?v=35`, `chalker-v132`), release pages `releases/index.html` and `releases/v5.5.0.html`, `sitemap.xml`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.5.0.md`. `llms.txt` (the upload marker, the live copy and the Live View, the import gate, and the "no spectator view" line), `automatic-backup.html` (a failed upload no longer "will not succeed"; new sections When an Upload Fails and Live View) and `rest-api.html` (live.php) are updated; the help covers Config, Analytics and the completing-and-correcting page.
+- The design behind it is in `Docs/HUB-DIRECTION.md`: one-way data flow for now (the club's Tournament Manager writes, the server and Analytics only display), and the debt test the Live View passed.
 
 ### Upload failure marker
 

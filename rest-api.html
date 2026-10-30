@@ -212,6 +212,19 @@
 
     <hr>
 
+    <h3>Live Copy</h3>
+    <p><strong>GET</strong> and <strong>POST</strong> <code>/api/live.php</code> &mdash; a slim snapshot of the tournament being played, sent after every change when Global Settings &rarr; Server &rarr; &ldquo;Live copy while it is played&rdquo; is on (off by default). It is stored in <code>tournaments/live/&lt;id&gt;.json</code>, a subfolder the tournament list never reads, so Analytics cannot import a tournament that is still in progress. The snapshot carries the players with their statistics, the matches (state, score, lane, referee, what each recorded) and the club&rsquo;s point values; not the transaction history. Each one replaces the one before.</p>
+    <table>
+        <tr><th>Request</th><th>Key</th><th>Result</th></tr>
+        <tr><td><code>POST { id, rev, snapshot }</code></td><td>required</td><td>Stores the snapshot. One with a <code>rev</code> not newer than the stored one is ignored: <code>{ "success": true, "stale": true }</code></td></tr>
+        <tr><td><code>POST { id, delete: true }</code></td><td>required</td><td>Removes the live copy</td></tr>
+        <tr><td><code>GET</code></td><td>no</td><td><code>{ "live": [ { id, name, date, status, rev, updatedAt, matches, played } ], "count" }</code></td></tr>
+        <tr><td><code>GET ?id=&lt;id&gt;</code></td><td>no</td><td>The snapshot, with an <code>ETag</code> (<code>304</code> when unchanged)</td></tr>
+    </table>
+    <p><code>id</code> is digits only; the body is at most 1 MB; a live copy not written to for three days is removed. When the finished tournament&rsquo;s backup succeeds the live copy on that server is removed. The remote server is reached through the relay, with the key. Reading needs no key, as everywhere else.</p>
+
+    <hr>
+
     <h2 id="cors">CORS</h2>
     <p>All endpoints include CORS headers:</p>
     <pre><code>Access-Control-Allow-Origin: *

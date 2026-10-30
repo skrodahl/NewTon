@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.4.8'; // Non, je ne regrette rien — Edit match: correct the score, achievements and winner of a completed match
+const APP_VERSION = '5.5.0'; // Live Is Life — Live View: watch a tournament being played from Analytics; failed uploads no longer silent
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

@@ -90,7 +90,7 @@ Elimination brackets come in 8, 16 and 32 slots, with byes spread fairly. Above 
 
 **Take it to the venue.** [Download the latest release](https://github.com/skrodahl/NewTon/releases/latest), unzip it and double-click `tournament.html`. Press `F1` anywhere for help, or read the [User Guide](https://newtondarts.com/userguide.html). (`git clone` gets you the latest work in progress.)
 
-**Your club's own server.** Self-host with Docker, and add shared tournaments, automatic backups, the network handover to the Chalker and an Analytics site for your members:
+**Your club's own server.** Self-host with Docker, and add shared tournaments, automatic backups, the network handover to the Chalker and an Analytics site for your members, where they can also watch a tournament while it is being played:
 
 ```bash
 # Download docker-compose.yml
