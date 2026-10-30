@@ -1533,6 +1533,9 @@ const NewtonHistory = (() => {
         for (const entry of diskTournaments) {
             // Match by ID if available, otherwise skip (can't reliably match)
             if (!entry.id) continue;
+            // A tournament still being played is not part of Analytics yet (an in-progress one uploaded by
+            // hand would be imported as finished, and the final upload then skipped as already there)
+            if (entry.status && entry.status !== 'completed' && entry.status !== 'unknown') continue;
 
             const existing = await NewtonDB.getTournament(String(entry.id));
             if (existing) continue;
@@ -1544,6 +1547,7 @@ const NewtonHistory = (() => {
                 const t = await res.json();
 
                 if (!t.id || !Array.isArray(t.players)) continue;
+                if (t.status && t.status !== 'completed') continue; // the list may be a moment behind the file
 
                 await NewtonDB.backfillTournament(t, typeof config !== 'undefined' ? config : {});
                 _checkedIds.add(String(t.id));

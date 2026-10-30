@@ -419,6 +419,25 @@ An older instance has no such endpoint (404); Test connection then says the key 
 
 ---
 
+### 6. Live Copy
+
+**Endpoint:** `GET` and `POST /api/live.php`
+
+**Description:** A slim snapshot of the tournament being played, sent after every change when **Global Settings → Server → Live copy while it is played** is on (off by default; `js/live-upload.js`). It lives in `tournaments/live/<id>.json`, a subfolder the tournament list never reads, so Analytics cannot import a tournament that is still in progress. The snapshot carries the players and the matches (state, score, lane, referee), not the transaction history or the statistics. Each one replaces the one before.
+
+| Request | Key | Result |
+|---------|-----|--------|
+| `POST { "id", "rev", "snapshot" }` | required | Stores the snapshot. A snapshot with a `rev` not newer than the stored one is ignored: `{ "success": true, "stale": true }` |
+| `POST { "id", "delete": true }` | required | Removes the live copy |
+| `GET` | no | `{ "live": [ { id, name, date, status, rev, updatedAt } ], "count" }` |
+| `GET ?id=<id>` | no | The snapshot, with an `ETag` (`304` when unchanged) |
+
+**Rules:** `id` is digits only (the tournament id); the body is at most 1 MB; a live copy not written to for three days is removed. When the finished tournament's backup succeeds, the Tournament Manager removes the live copy on that server, and a reset or deleted tournament's goes too. The remote server is reached through the relay, as for uploads, with the API key.
+
+**Privacy:** reading needs no key, as everywhere else, so anyone who can open the server can read a live copy.
+
+---
+
 ## CORS Configuration
 
 All endpoints include CORS headers for cross-origin requests:

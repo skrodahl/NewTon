@@ -1,6 +1,6 @@
 # Hub Direction: the server as a durable copy, one writer
 
-**Status:** step 1 built 2026-10-30 (uncommitted at the time of writing); the rest is discussion (2026-10-30). Written after the Monday 2026-10-26 tournament never reached newton.skrodahl.net.
+**Status:** steps 1, 2 and 3 built 2026-10-30 (step 1 committed `e74af50`); step 4 and the viewer are discussion (2026-10-30). Written after the Monday 2026-10-26 tournament never reached newton.skrodahl.net.
 **Order of work:** 1 is urgent. 2 is a small safety fix. 3 and 4 are the first real steps. The rest waits for a feature that needs it.
 
 ---

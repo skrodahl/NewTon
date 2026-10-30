@@ -78,6 +78,7 @@ const DEFAULT_CONFIG = {
     server: {
         allowSharedTournamentDelete: false,
         autoUpload: false,
+        liveUpload: false,
         remoteUrl: '',
         remoteApiKey: '',
         remoteVerified: false
@@ -258,6 +259,7 @@ function applyConfigToUI() {
     if (config.server) {
         safeSetChecked('allowSharedTournamentDelete', config.server.allowSharedTournamentDelete);
         safeSetChecked('autoUploadTournament', config.server.autoUpload);
+        safeSetChecked('liveUploadTournament', config.server.liveUpload);
         safeSetValue('remoteServerUrl', config.server.remoteUrl);
         safeSetValue('remoteServerApiKey', config.server.remoteApiKey || '');
         safeSetValue('remoteServerVerified', config.server.remoteVerified ? '1' : '');
@@ -732,10 +734,12 @@ function saveUIConfiguration(options = {}) {
     config.server.allowSharedTournamentDelete = allowDeleteElement ? allowDeleteElement.checked : false;
 
     const autoUploadElement = document.getElementById('autoUploadTournament');
+    const liveUploadElement = document.getElementById('liveUploadTournament');
     const remoteUrlElement = document.getElementById('remoteServerUrl');
     const remoteApiKeyElement = document.getElementById('remoteServerApiKey');
 
     config.server.autoUpload = autoUploadElement ? autoUploadElement.checked : false;
+    config.server.liveUpload = liveUploadElement ? liveUploadElement.checked : false;
     config.server.remoteUrl = remoteUrlElement ? remoteUrlElement.value.trim() : '';
     config.server.remoteApiKey = remoteApiKeyElement ? remoteApiKeyElement.value.trim() : '';
     // Set by a successful Test connection; locks the address and key (config-page.js)

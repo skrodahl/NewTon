@@ -10,6 +10,21 @@
 - Tested in the browser against two local containers (the club's with the working tree, a remote with an API key): the remote down (the real 502 from the relay, chip and note, retry scheduled), the remote started (retry succeeded on its own, chip gone), a wrong key (refused, plain message, no retry), the key fixed and Upload now (uploaded, note updated), the page reloaded with a failure waiting (note shown, retry resumed), the `online` event, and the remote setting removed (notice hidden).
 - Files changed: `js/tournament-management.js` (`uploadToServer()`, the upload status and retry functions, `updateTournamentStatus()`, `renderSetupCurrent()`, the delete), `tournament.html`, `css/setup-page.css`, `css/bracket-view.css`, `js/dynamic-help-system.js`, `Docs/HUB-DIRECTION.md`.
 
+### Analytics import gate
+
+- **Analytics no longer imports a tournament that is still being played.** `_autoImportFromDisk()` (`js/newton-history.js`) imported every tournament in the server's list once, by id, whatever its status, and recorded it as finished; so an in-progress tournament uploaded by hand (Backup to server offers the active one) was imported into every member's browser as completed, and the final upload then skipped as already there. It now skips anything whose status is not `completed` (files with no status, from before the field, are imported as before), in the list and in the file.
+- Tested: a completed and an in-progress tournament on a server, Analytics opened: only the completed one imported.
+
+### Live copy while a tournament is played
+
+- **A slim copy of the tournament on the server after every change, off by default** (Global Settings → Server → **Live copy while it is played**; Docs/HUB-DIRECTION.md, step 3). `js/live-upload.js` sends it from `saveTournamentOnly()` (debounced 1.5 s) to `api/live.php` on this computer's own server and, through the relay with the key, on the remote one. Each send replaces the one before, so a dropped one is mended by the next; nothing is queued. Nothing is sent before the bracket is drawn.
+- **The snapshot:** the format and status, the players (name, id, placement) and each match's state, score, lane and referee; no transaction history, no statistics, no payment: 1.6 KB for four players. The fields are whitelisted, since the copy is public.
+- **Kept out of Analytics by construction:** it is stored in `tournaments/live/<id>.json`, a subfolder the tournament list never reads (as `registry/` and `corrections/`). When the finished tournament's backup succeeds, the live copy on that server is removed (the final copy is authoritative); a failed backup leaves it, showing the finished state. A reset or deleted tournament's goes too, an older revision arriving late is ignored, and a live copy not written to for three days is removed.
+- **The setting says what it does:** anyone who can open the server can read a live copy, as with everything else there. No viewer yet: the data is there for one (the debt test in `Docs/HUB-DIRECTION.md`).
+- Removable: with the setting off, or `js/live-upload.js` deleted, nothing changes.
+- Tested in the browser against two local containers (club and remote with an API key): nothing sent before the draw; after the draw, a started match and a result on both servers; the live copy gone and the final in the normal list when the backup succeeded; reset removed both; endpoint: key required, a stale write ignored, a path-traversal id refused, `ETag` and `304`, never in the tournament list.
+- Files changed: `api/live.php`, `js/live-upload.js`, `js/tournament-management.js` (the hooks), `js/results-config.js`, `js/types.js`, `tournament.html`, `js/newton-history.js`, `Docs/REST_API.md`, `Docs/HUB-DIRECTION.md`.
+
 ## **v5.4.8** — Non, je ne regrette rien (2026-10-23)
 
 ### Release

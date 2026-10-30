@@ -241,6 +241,7 @@
  * @typedef {Object} ServerConfig
  * @property {boolean} allowSharedTournamentDelete - Allow deleting shared tournaments from server (default: false)
  * @property {boolean} autoUpload - Upload a tournament to the server(s) when it is completed (default: false)
+ * @property {boolean} [liveUpload] - Send a slim live copy of the tournament to the server(s) after every change (default: false; js/live-upload.js)
  * @property {string} remoteUrl - Remote server to back up to as well (default: '')
  * @property {string} remoteApiKey - The remote server's NEWTON_API_KEY, sent as X-API-Key by api/relay.php (default: '')
  * @property {boolean} [remoteVerified] - Test connection found the key accepted; the address and key are then locked in Global Settings (default: false)

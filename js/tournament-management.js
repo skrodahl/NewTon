@@ -490,6 +490,7 @@ async function uploadToServer(payload, options = {}) {
         if (response.ok) {
             console.log(`✓ Tournament uploaded to ${label}: ${payload.filename}`);
             if (remoteUrl) noteRemoteUpload(payload, remoteUrl, { ok: true });
+            if (typeof liveUploadDone === 'function') liveUploadDone(payload, remoteUrl); // the final copy replaces the live one
             if (!silent) {
                 alert(`✓ Tournament uploaded to ${label}.\n\n${payload.filename}`);
                 if (typeof loadRecentTournaments === 'function') loadRecentTournaments();
@@ -1002,6 +1003,7 @@ function saveTournamentOnly(shouldLog = true) {
         if (shouldLog) {
             console.log('✓ Tournament saved (config unchanged)');
         }
+        if (typeof scheduleLiveUpload === 'function') scheduleLiveUpload(); // live-upload.js: the live copy, when switched on
         return true;
     } catch (e) {
         // Quota exhausted, or a corrupt dartsTournaments value that won't parse. Either way the
@@ -1705,6 +1707,7 @@ function confirmDeleteTournament() {
     const historyKey = `tournament_${tournamentId}_history`;
     localStorage.removeItem(historyKey);
     clearUploadStatus(tournamentId);
+    if (typeof liveUploadForget === 'function') liveUploadForget(tournamentId);
 
     loadRecentTournaments();
 
@@ -1986,6 +1989,7 @@ function confirmReset() {
     if (tournament && tournament.id) {
         const historyKey = `tournament_${tournament.id}_history`;
         localStorage.removeItem(historyKey);
+        if (typeof liveUploadForget === 'function') liveUploadForget(tournament.id); // its live copy goes too
     }
     localStorage.removeItem('undoneTransactions');
 
