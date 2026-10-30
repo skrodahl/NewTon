@@ -1,0 +1,20 @@
+/* Watching a live tournament: the list of matches (js/live-view.js). One column, made for a phone and fine on a desktop. */
+.lv-wrap { max-width: 720px; margin: 0 auto; padding: 16px 12px 40px; display: grid; gap: 14px; }
+.lv-top { display: flex; align-items: center; justify-content: space-between; gap: 8px; flex-wrap: wrap; }
+.lv-tools { display: flex; gap: 8px; }
+.lv-wrap .st-btn { min-height: 40px; }
+.lv-title h2 { margin: 0; font-size: 22px; }
+.lv-title p { margin: 2px 0 0; font-size: 14px; color: var(--nt-muted); }
+.lv-status { margin: 0; font-size: 13px; font-weight: 700; color: var(--nt-accent); }
+.lv-status[hidden] { display: none; }
+.lv-group { display: grid; gap: 8px; }
+.lv-group h3 { margin: 6px 0 0; font-size: 12px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); }
+.lv-empty { margin: 0; font-size: 14px; color: var(--nt-faint); }
+.lv-match { display: grid; gap: 3px; padding: 10px 12px; border: 1px solid var(--nt-line); border-radius: 10px; background: var(--nt-surface); }
+.lv-live { border-color: var(--nt-accent); background: var(--nt-accent-soft); }
+.lv-ready { border-color: var(--nt-ready); background: var(--nt-ready-soft); }
+.lv-line1 { display: flex; justify-content: space-between; gap: 8px; font-size: 12px; color: var(--nt-muted); }
+.lv-lane { font-weight: 800; color: var(--nt-ink); }
+.lv-names { font-size: 17px; font-weight: 500; color: var(--nt-ink); overflow-wrap: anywhere; }
+.lv-win { font-weight: 800; }
+.lv-ach { font-size: 13px; color: var(--nt-muted); }

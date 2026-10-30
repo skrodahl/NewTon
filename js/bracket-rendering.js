@@ -2717,7 +2717,9 @@ function showStatisticsModal() {
 function updateStatisticsTable() {
     // Use the enhanced original updateResultsTable function
     if (typeof updateResultsTable === 'function') {
-        updateResultsTable('statisticsTableBody');
+        // watching a live tournament: the club's point values, for this calculation only
+        if (typeof LiveView !== 'undefined' && LiveView.isOpen()) LiveView.withLivePoints(() => updateResultsTable('statisticsTableBody'));
+        else updateResultsTable('statisticsTableBody');
     }
 }
 

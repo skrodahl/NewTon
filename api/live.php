@@ -6,7 +6,7 @@
  *                                unless it carries an older rev (a late arrival): then nothing
  *                                is changed and the answer says stale.
  *   POST { id, delete: true }    remove the live copy (key required)
- *   GET                          { live: [ { id, name, date, status, rev, updatedAt } ] }
+ *   GET                          { live: [ { id, name, date, status, rev, updatedAt, matches, played } ] }
  *   GET ?id=<id>                 the snapshot, with an ETag (304 when unchanged)
  *
  * Stored in tournaments/live/<id>.json: a subfolder that list-tournaments.php (which reads only
@@ -82,7 +82,11 @@ if ($method === 'GET') {
             'date' => $data['date'] ?? 'Unknown',
             'status' => $data['status'] ?? 'unknown',
             'rev' => $data['rev'] ?? 0,
-            'updatedAt' => filemtime($file)
+            'updatedAt' => filemtime($file),
+            'matches' => is_array($data['matches'] ?? null) ? count($data['matches']) : 0,
+            'played' => is_array($data['matches'] ?? null)
+                ? count(array_filter($data['matches'], function ($m) { return !empty($m['completed']) && empty($m['autoAdvanced']); }))
+                : 0
         ];
     }
     echo json_encode(['live' => $live, 'count' => count($live)]);

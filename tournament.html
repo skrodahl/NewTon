@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="css/setup-page.css">
     <link rel="stylesheet" href="css/registration-page.css">
     <link rel="stylesheet" href="css/analytics-page.css">
+    <link rel="stylesheet" href="css/live-view.css">
     <link rel="stylesheet" href="css/bracket-view.css">
     <link rel="stylesheet" href="css/match-controls.css">
     <link rel="stylesheet" href="css/dev-console.css">
@@ -321,7 +322,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <div class="bv-seg bv-views bv-nav-btn" id="bvViews" role="group" aria-label="View">
                             <button type="button" data-view="bracket" aria-pressed="true" onclick="showBracketView('bracket')">Bracket</button><button type="button" data-view="controls" aria-pressed="false" onclick="showBracketView('controls')" title="Run the matches: lanes, the ready queue, referees">Match Controls<span class="bv-badge" id="bvResultsWaiting" hidden></span></button><button type="button" data-view="console" aria-pressed="false" onclick="showBracketView('console')" title="Developer Console: diagnostics and developer tools" id="bvConsoleTab" hidden>Console</button>
                         </div>
-                        <button type="button" class="bv-btn bv-nav-btn" onclick="showStatisticsModal()" title="View tournament statistics and rankings">Leaderboard</button>
+                        <button type="button" class="bv-btn bv-nav-btn bv-leaderboard" onclick="showStatisticsModal()" title="View tournament statistics and rankings">Leaderboard</button>
                     </div>
                     <div class="bv-head-right">
                         <div class="bv-tools">
@@ -346,6 +347,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <div class="bv-header-row bv-status-row">
                         <div class="bv-status" id="bvStatus"></div>
                         <button type="button" class="bv-upload-chip" id="bvUploadChip" hidden onclick="retryRemoteUpload(true)">Not uploaded</button>
+                        <span class="bv-live-badge" id="bvLiveBadge" hidden></span>
                         <div class="bv-legend">
                             <span><i class="bv-sw bv-sw-live"></i>Live</span>
                             <span><i class="bv-sw bv-sw-ready"></i>Ready</span>
@@ -762,8 +764,12 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         </div>
 
         <!-- Analytics (css/analytics-page.css): the views, the point mode and the lens on one strip, then the active view -->
+        <!-- Watching a live tournament: the list of matches (js/live-view.js) -->
+        <div id="liveList" class="page"></div>
+
         <div id="history" class="page">
             <div class="an-wrap">
+                <div class="an-live" id="liveNowStrip" hidden></div>
                 <div class="st-title">
                     <div><h2>Analytics</h2><p>Your tournament history. Nothing here changes the results.</p></div>
                     <div class="an-title-tools">
@@ -1123,6 +1129,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/lane-management.js"></script>
         <script src="js/tournament-management.js"></script>
         <script src="js/live-upload.js"></script>
+        <script src="js/live-view.js"></script>
         <script src="js/player-registry.js"></script>
         <script src="js/player-management.js"></script>
         <script src="js/clean-match-progression.js"></script>

@@ -1196,10 +1196,14 @@ const BracketView = (() => {
         const undo = tournament.readOnly ? '<span class="bv-readonly" title="This tournament is read-only">Read only</span>'
             : (isMatchEditable(selected) ? '<button type="button" data-act="edit" title="Edit this result">Edit match</button>' : '') +
               (isMatchUndoable(selected) ? '<button type="button" data-act="undo" title="Undo this result">Undo match</button>' : '');
+        // Watching a live tournament: what the match recorded, and no operator's Match Controls
+        const watching = typeof LiveView !== 'undefined' && LiveView.isOpen();
+        const recorded = watching ? LiveView.achievementsText(v.match) : '';
         bar.innerHTML = `<span class="bv-sid">${selected}</span><span>${escapeHtml(roundName(selected))} · ${what}</span>` +
+            (recorded ? `<span class="bv-ach">${escapeHtml(recorded)}</span>` : '') +
             follow + undo +
             // Match Controls is always the rightmost button, just before ×
-            `<button type="button" class="bv-primary" data-act="controls">Match Controls</button>` +
+            (watching ? '' : `<button type="button" class="bv-primary" data-act="controls">Match Controls</button>`) +
             `<button type="button" class="bv-x" data-act="clear" aria-label="Clear selection">×</button>`;
         bar.querySelectorAll('[data-trace]').forEach(b => b.addEventListener('click', () => {
             const sl = v.p.find(x => x.kind === 'player' && String(x.id) === b.dataset.trace);
@@ -1208,7 +1212,8 @@ const BracketView = (() => {
             else trace(sl.id);
         }));
         bar.querySelector('[data-act="clear"]').addEventListener('click', clearSel);
-        bar.querySelector('[data-act="controls"]').addEventListener('click', () => showBracketView('controls', selected));
+        const controlsBtn = bar.querySelector('[data-act="controls"]');
+        if (controlsBtn) controlsBtn.addEventListener('click', () => showBracketView('controls', selected));
         const editBtn = bar.querySelector('[data-act="edit"]');
         if (editBtn) editBtn.addEventListener('click', () => handleMatchEdit(selected));
         const undoBtn = bar.querySelector('[data-act="undo"]');

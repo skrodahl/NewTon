@@ -374,6 +374,7 @@ function setupEventListeners() {
  * @returns {void}
  */
 function exitAnalyticsBracketPreview() {
+    if (typeof LiveView !== 'undefined' && LiveView.isOpen()) { LiveView.back(); return; } // watching a live tournament: the bracket goes back to the list, the list to Analytics
     tournament = null;
     players = [];
     matches = [];
@@ -556,6 +557,7 @@ function showPage(pageId) {
     // Load history when showing history page
     if (pageId === 'history' && typeof NewtonHistory !== 'undefined') {
         NewtonHistory.render();
+        if (typeof LiveView !== 'undefined') LiveView.refreshStrip(); // "Live now", when a tournament is being played
     }
 
     // Update Registration page layout when showing registration page

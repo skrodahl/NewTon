@@ -323,3 +323,13 @@
 .bv-gcard.bv-gsingle { width: 100%; max-width: 760px; justify-self: center; }
 /* the cups: each cup's name over its final */
 .bv-cup-name { font-size: 30px; }
+
+/* Watching a live tournament (js/live-view.js): read-only, with the leaderboard */
+.bv-live-badge { font-size: 12px; font-weight: 700; color: var(--nt-accent); }
+.bv-live-badge[hidden] { display: none; }
+.bv-live-leave { margin-left: 8px; font: inherit; font-size: 12px; font-weight: 700; padding: 2px 10px; border-radius: 999px; border: 1px solid var(--nt-ink); background: var(--nt-surface); color: var(--nt-ink); cursor: pointer; }
+.bv-selbar .bv-ach { color: var(--nt-muted); font-size: 13px; }
+body.live-viewing .bv-header .analytics-back-btn { display: inline-flex; }
+body.live-viewing .bv-header .bv-nav-btn:not(.analytics-back-btn):not(.bv-leaderboard) { display: none; }
+body.live-viewing .bv-header .bv-nav-btn.bv-leaderboard { display: inline-flex; }
+body.live-viewing #statisticsModal .dlg__title small { display: none; }

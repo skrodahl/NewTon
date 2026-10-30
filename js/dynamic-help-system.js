@@ -418,6 +418,7 @@ const HELP_CONTENT = {
                 content: `
                     <p>Buttons along the top switch between them. All four show the same set of tournaments &mdash; whichever ones the <strong>Lens</strong> currently selects.</p>
                     <ul>
+                        <li><strong>Live now</strong> &mdash; when a tournament is being played and its club shares a live copy, a line at the top of Analytics says so, with <strong>Watch</strong>: a list of what is being played (with the lane), what is up next and the latest results with what each recorded, updating by themselves. <strong>Bracket</strong> opens the bracket and <strong>Leaderboard</strong> the leaderboard, both read-only; select a finished match in the bracket to see what it recorded. When the tournament is over it says so, and the finished tournament is in Analytics when you come back here.</li>
                         <li><strong>Dashboard</strong> &mdash; the headline numbers: tournaments, matches, unique players, total points, 180s, the highest checkout and the shortest leg. Click a card to jump to the view behind it. Under them, the Leaderboard's top 10 and the latest tournaments.</li>
                         <li><strong>Leaderboard</strong> &mdash; the standings. One row per player, sortable by any column.</li>
                         <li><strong>Players</strong> &mdash; the player list; tick one to see their profile, or several to compare them.</li>

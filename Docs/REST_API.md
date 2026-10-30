@@ -429,7 +429,7 @@ An older instance has no such endpoint (404); Test connection then says the key 
 |---------|-----|--------|
 | `POST { "id", "rev", "snapshot" }` | required | Stores the snapshot. A snapshot with a `rev` not newer than the stored one is ignored: `{ "success": true, "stale": true }` |
 | `POST { "id", "delete": true }` | required | Removes the live copy |
-| `GET` | no | `{ "live": [ { id, name, date, status, rev, updatedAt } ], "count" }` |
+| `GET` | no | `{ "live": [ { id, name, date, status, rev, updatedAt, matches, played } ], "count" }` (`played`: matches played, walkovers left out) |
 | `GET ?id=<id>` | no | The snapshot, with an `ETag` (`304` when unchanged) |
 
 **Rules:** `id` is digits only (the tournament id); the body is at most 1 MB; a live copy not written to for three days is removed. When the finished tournament's backup succeeds, the Tournament Manager removes the live copy on that server, and a reset or deleted tournament's goes too. The remote server is reached through the relay, as for uploads, with the API key.

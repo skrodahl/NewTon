@@ -256,3 +256,10 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
   #leaderboardTableContainer :is(td, th):nth-child(1) { left: 0; min-width: 40px; }
   #leaderboardTableContainer :is(td, tr:not(.newton-table-groups) th):nth-child(2) { left: 40px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; box-shadow: 1px 0 0 var(--nt-line); }
 }
+
+/* Live now: a tournament being played (js/live-view.js) */
+.an-live { display: grid; gap: 8px; }
+.an-live[hidden] { display: none; }
+.an-live-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; padding: 10px 14px; border: 1px solid var(--nt-accent); background: var(--nt-accent-soft); border-radius: 10px; font-size: 14px; color: var(--nt-ink); }
+.an-live-dot { width: 9px; height: 9px; border-radius: 50%; background: var(--nt-accent); flex: none; }
+.an-live-label { flex: 1 1 auto; }
