@@ -3,8 +3,9 @@
 // After every change (saveTournamentOnly() calls scheduleLiveUpload()) a snapshot of the loaded tournament
 // is sent to api/live.php: on this computer's own server, and on the remote server when one is configured.
 // Each send replaces the one before, so a dropped one is mended by the next; nothing is queued. The
-// snapshot is slim on purpose: the players and the matches (state, score, lane, referee), no transaction
-// history and no statistics. A viewer, when there is one, lays it out with the bracket view.
+// snapshot is slim on purpose: the players (with their statistics, for the leaderboard), the matches (state,
+// score, lane, referee and what each one recorded in achievements) and the club's point values; no transaction
+// history. A viewer, when there is one, lays it out with the bracket view and the leaderboard.
 //
 // Removable: nothing depends on this file. With the setting off (Global Settings → Server, off by default)
 // or the file deleted, the Tournament Manager behaves exactly as before. It never alerts and never throws:
@@ -23,8 +24,10 @@ const _liveClosed = new Set();      // tournaments whose live copy was removed a
 const LIVE_MATCH_FIELDS = ['id', 'seId', 'numericId', 'round', 'side', 'group', 'cup', 'returnRound', 'legs',
     'player1', 'player2', 'winner', 'loser', 'completed', 'active', 'autoAdvanced', 'state', 'lane', 'referee',
     'finalScore', 'positionInRound', 'completedAt'];
-/** The player fields a viewer needs (statistics and payment stay out). */
-const LIVE_PLAYER_FIELDS = ['id', 'name', 'isBye', 'seed', 'eliminated', 'placement'];
+/** The player fields a viewer needs: the statistics for the leaderboard, not the payment. */
+const LIVE_PLAYER_FIELDS = ['id', 'name', 'isBye', 'seed', 'eliminated', 'placement', 'stats'];
+/** A player in a match slot (or as its winner or loser): who, no statistics (they are on the player). */
+const LIVE_SLOT_FIELDS = ['id', 'name', 'isBye', 'seed', 'eliminated', 'placement'];
 
 function _livePick(obj, fields) {
     if (!obj || typeof obj !== 'object') return obj;
@@ -44,10 +47,23 @@ function liveUploadEnabled() {
  */
 function buildLiveSnapshot() {
     if (!tournament || !tournament.id || !tournament.bracket) return null;
-    const slimPlayer = p => _livePick(p, LIVE_PLAYER_FIELDS);
+    const slimPlayer = p => {
+        const out = _livePick(p, LIVE_PLAYER_FIELDS);
+        if (out.stats) out.stats = JSON.parse(JSON.stringify(out.stats));
+        return out;
+    };
+    // What each completed match recorded, from its transaction (the history itself is not sent), as { p1, p2 }
+    const recorded = {};
+    getTournamentHistory().forEach(t => {
+        if (t.type === 'COMPLETE_MATCH' && t.achievements && !(t.matchId in recorded)) recorded[t.matchId] = t.achievements; // newest first
+    });
     const slimMatch = m => {
         const out = _livePick(m, LIVE_MATCH_FIELDS);
-        ['player1', 'player2', 'winner', 'loser'].forEach(k => { if (out[k]) out[k] = slimPlayer(out[k]); });
+        ['player1', 'player2', 'winner', 'loser'].forEach(k => { if (out[k]) out[k] = _livePick(out[k], LIVE_SLOT_FIELDS); });
+        if (m.completed && recorded[m.id] && m.player1 && m.player2) {
+            const ach = NewtonDB.slotAchievements(recorded[m.id], m.player1.id, m.player2.id);
+            if (ach) out.achievements = ach;
+        }
         return out;
     };
     _liveLastRev = Math.max(Date.now(), _liveLastRev + 1);
@@ -67,6 +83,7 @@ function buildLiveSnapshot() {
         plate: tournament.plate,
         swiss: tournament.swiss,
         placements: tournament.placements || {},
+        points: config && config.points ? JSON.parse(JSON.stringify(config.points)) : undefined, // the club's point values, for the leaderboard
         players: (Array.isArray(players) ? players : []).map(slimPlayer),
         matches: (Array.isArray(matches) ? matches : []).map(slimMatch),
         updatedAt: new Date().toISOString()
