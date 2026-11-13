@@ -1,3 +1,14 @@
+## **Unreleased** (after v5.5.0)
+
+### Achievements typed but not added are no longer lost
+
+- **Save is stopped while a Short Legs or High Out box still holds a value that was never added** (a recurring mistake at the club: the value is typed, Add is forgotten, Save closes the dialog and the achievement is gone without a word). The dialog stays open, an amber line appears under that box and the cursor goes to it: "14 isn't added yet. Press Add, or clear the box.", or for a value out of range "Short legs are 9–21 darts. Fix or clear the box." / "High outs are 101–170. Fix or clear the box." Typing in the box, pressing Add or opening the dialog again removes the line; an empty box saves as before. Cancel still closes without asking (it discards everything anyway).
+- **Where:** Edit player statistics, which is also what Match Completion and Edit match open from their Edit Statistics links (every save goes through `saveStats()`, Enter included), and Corrections in Analytics (`saveCorrections()`). In Corrections, switching player with a value waiting is stopped too (the value would otherwise sit in the box under the next player's name); the player picker stays on the current player.
+- One shared check, `_statBoxesAllAdded()`, next to `_buildStatListItem()` in `player-management.js`, used by both dialogs.
+- Tested in the browser (no data written; the save stubbed): a valid value blocks Save and Enter, an out-of-range value gets the range line, typing clears it, Add adds it and clears it, an empty box saves and closes; the same check on the Corrections boxes.
+- The user guide named the buttons "Add Short Leg" and "Add High Out"; both are labelled **Add**.
+- Files changed: `js/player-management.js`, `js/newton-history.js`, `css/styles.css`, `userguide.html`.
+
 ## **v5.5.0** — Live Is Life (2026-10-30)
 
 ### Release

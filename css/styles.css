@@ -946,6 +946,16 @@ a:hover { color: #1e40af; }
 .stat-list-editor__input-row .dlg__input { flex: 1; }
 .stat-list-editor__input-row .btn { margin: 0; flex-shrink: 0; }
 
+/* Save stopped: something typed in the box was never added */
+.stat-list-editor__pending {
+  margin: 8px 0 0;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: var(--nt-warn-soft);
+  color: var(--nt-warn);
+  font-size: 13px;
+}
+
 /* Chip list — segmented-control style, each chip is clickable to remove */
 .stat-list-editor__items {
   display: flex;

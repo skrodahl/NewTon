@@ -2823,6 +2823,8 @@ const NewtonHistory = (() => {
 
         document.getElementById('corrHighOutInput').value = '';
         document.getElementById('corrShortLegInput').value = '';
+        _clearPendingStatNote('corrHighOutInput');
+        _clearPendingStatNote('corrShortLegInput');
         _renderCorrectionPlayer();
         pushDialog('correctionsModal', null, true);
     }
@@ -2854,8 +2856,19 @@ const NewtonHistory = (() => {
             `High outs: ${list(b.highOuts)}\nShort legs: ${list(b.shortLegs)}`;
     }
 
+    /** The two boxes, for the not-added check before a save or a player switch. */
+    const _CORR_BOXES = [
+        { inputId: 'corrShortLegInput', field: 'shortLegs' },
+        { inputId: 'corrHighOutInput', field: 'highOuts' }
+    ];
+
     function selectCorrectionPlayer(pid) {
         if (!_corr || !_corr.edited[pid]) return;
+        // A value typed but not added belongs to this player: stay until it's added or cleared
+        if (!_statBoxesAllAdded(_CORR_BOXES)) {
+            document.getElementById('correctionsPlayer').value = _corr.pid;
+            return;
+        }
         _corr.pid = pid;
         _renderCorrectionPlayer();
     }
@@ -2881,6 +2894,7 @@ const NewtonHistory = (() => {
         }
         _corr.edited[_corr.pid][field].push(value);
         input.value = '';
+        _clearPendingStatNote(input.id);
         _renderCorrectionPlayer();
     }
 
@@ -2894,6 +2908,8 @@ const NewtonHistory = (() => {
     /** Save the difference from what was recorded, for every player in the tournament. */
     async function saveCorrections() {
         if (!_corr) return;
+        // A short leg or high out typed but never added would be lost: don't save yet
+        if (!_statBoxesAllAdded(_CORR_BOXES)) return;
 
         const list = [];
         Object.keys(_corr.base).forEach(pid => {

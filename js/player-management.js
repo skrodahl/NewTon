@@ -655,9 +655,11 @@ function openStatsModal(playerId) {
     currentStatsPlayer = player;
     document.getElementById('statsPlayerName').textContent = `Edit ${player.name}'s statistics`;
 
-    // Clear input fields when opening modal
+    // Clear input fields (and any not-added note) when opening modal
     document.getElementById('statsShortLegDarts').value = '';
     document.getElementById('statsHighOut').value = '';
+    _clearPendingStatNote('statsShortLegDarts');
+    _clearPendingStatNote('statsHighOut');
 
     // Convert old format to new format if needed
     if (typeof player.stats.shortLegs === 'number') {
@@ -686,6 +688,7 @@ function addHighOut() {
 
     currentStatsPlayer.stats.highOuts.push(score);
     document.getElementById('statsHighOut').value = '';
+    _clearPendingStatNote('statsHighOut');
     updateHighOutsList();
 }
 
@@ -708,6 +711,11 @@ function removeHighOut(index) {
 
 function saveStats() {
     if (!currentStatsPlayer) return;
+    // A short leg or high out typed but never added would be lost: don't save yet
+    if (!_statBoxesAllAdded([
+        { inputId: 'statsShortLegDarts', field: 'shortLegs' },
+        { inputId: 'statsHighOut', field: 'highOuts' }
+    ])) return;
 
     // Remove these lines - no longer needed:
     // currentStatsPlayer.stats.tons = parseInt(document.getElementById('statsTons').value) || 0;
@@ -827,6 +835,7 @@ function addShortLeg() {
 
     currentStatsPlayer.stats.shortLegs.push(darts);
     document.getElementById('statsShortLegDarts').value = '';
+    _clearPendingStatNote('statsShortLegDarts');
     updateShortLegsList();
 }
 
@@ -923,4 +932,48 @@ function _buildStatListItem(value, onRemove) {
     chip.appendChild(xSpan);
 
     return chip;
+}
+
+/** Limits of the Short Legs and High Out boxes, for the not-added note. */
+const _STAT_BOX_LIMITS = {
+    shortLegs: { min: 9, max: 21, rule: 'Short legs are 9–21 darts' },
+    highOuts: { min: 101, max: 170, rule: 'High outs are 101–170' }
+};
+
+/** Remove the not-added note under a Short Legs / High Out box, if it has one. */
+function _clearPendingStatNote(inputId) {
+    const input = document.getElementById(inputId);
+    const editor = input && input.closest('.stat-list-editor');
+    const note = editor && editor.querySelector('.stat-list-editor__pending');
+    if (note) note.remove();
+}
+
+/**
+ * Before a save: is something typed in a Short Legs / High Out box that was never added?
+ * Then put a note under the first such box, focus it and return false, so the caller
+ * doesn't save (it would be lost). Used by Edit player statistics (also opened from
+ * Match Completion and Edit match) and by Corrections in Analytics.
+ * @param {Array<{inputId: string, field: 'shortLegs'|'highOuts'}>} boxes
+ * @returns {boolean} true when nothing is waiting to be added
+ */
+function _statBoxesAllAdded(boxes) {
+    boxes.forEach(b => _clearPendingStatNote(b.inputId));
+    for (const { inputId, field } of boxes) {
+        const input = document.getElementById(inputId);
+        if (!input || (input.value === '' && !(input.validity && input.validity.badInput))) continue;
+
+        const { min, max, rule } = _STAT_BOX_LIMITS[field];
+        const value = parseInt(input.value, 10);
+        const note = document.createElement('p');
+        note.className = 'stat-list-editor__pending';
+        note.setAttribute('role', 'alert');
+        note.textContent = value >= min && value <= max
+            ? `${value} isn't added yet. Press Add, or clear the box.`
+            : `${rule}. Fix or clear the box.`;
+        input.closest('.stat-list-editor__input-row').after(note); // under the box, above the chips
+        input.addEventListener('input', () => _clearPendingStatNote(inputId), { once: true });
+        input.focus();
+        return false;
+    }
+    return true;
 }
