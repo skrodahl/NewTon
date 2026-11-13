@@ -111,6 +111,17 @@ const SeasonFinal = (() => {
         });
     }
 
+    /**
+     * The Not available switch on a standings row, in Fill from season standings and on the
+     * Season final tab in Analytics. A click on it never reaches the row.
+     * @param {boolean} on - the player is marked Not available
+     * @param {string} onchange - the handler to call
+     * @returns {string}
+     */
+    function markSwitchHtml(on, onchange) {
+        return `<label class="mc-switchrow sf-mark" onclick="event.stopPropagation()"><span class="mc-switch mc-switch-sm"><input type="checkbox"${on ? ' checked' : ''} onchange="${onchange}"><span></span></span>Not available</label>`;
+    }
+
     /** @param {object} s */
     const classify = s => classifyRows(s.standings, r => s.notAvailable.has(r.key));
 
@@ -186,7 +197,7 @@ const SeasonFinal = (() => {
             return `<tr${cut}><td class="rg-num">${c.r.rank}</td><td class="rg-short">${escapeHtml(c.r.name)}${inT ? ' <span class="rg-in-t">in</span>' : ''}</td>` +
                 `<td class="rg-num">${c.r.points}</td><td class="rg-num">${c.r.op != null ? c.r.op.toFixed(2) : '—'}</td>` +
                 `<td>${pill(c)}</td><td class="rg-num">${c.seed || ''}</td>` +
-                `<td class="rg-num"><button type="button" class="st-link" onclick="SeasonFinal.toggleAvailable(${c.i})">${c.status === 'na' ? 'Available again' : 'Not available'}</button></td></tr>`;
+                `<td>${markSwitchHtml(c.status === 'na', `SeasonFinal.toggleAvailable(${c.i})`)}</td></tr>`;
         }).join('');
         return `<div class="rg-db-scroll rg-season-scroll"><table class="rg-db"><thead><tr><th class="rg-num">#</th><th>Player</th><th class="rg-num">Points</th><th class="rg-num">OP</th><th>Status</th><th class="rg-num">Seed</th><th></th></tr></thead><tbody>${rows}</tbody></table></div>`;
     }
@@ -331,5 +342,5 @@ const SeasonFinal = (() => {
             <p class="mc-note">From Fill from season standings (Player Registration): the ${sf.order.length} ranked players go into the groups in snake order, best first.${rest.length ? ` Not in the standings, so placed at random after them: ${rest.map(p => escapeHtml(p.name)).join(', ')}.` : ''}</p></section>`;
     }
 
-    return { INVITED, classifyRows, defaultKeyword, render, forGroups, seedsPanelHtml, setOpen, unlock, setEditing, setOthersOpen, toggleAvailable, setKeyword, setPeriod, toggle, addInvited };
+    return { INVITED, classifyRows, markSwitchHtml, defaultKeyword, render, forGroups, seedsPanelHtml, setOpen, unlock, setEditing, setOthersOpen, toggleAvailable, setKeyword, setPeriod, toggle, addInvited };
 })();

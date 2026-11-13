@@ -356,6 +356,7 @@ const NewtonHistory = (() => {
      */
     function switchView(view) {
         _activeView = view;
+        _sfDimLens();
 
         // Update tab buttons
         document.querySelectorAll('.analytics-view-btn').forEach(btn => {
@@ -1649,7 +1650,17 @@ const NewtonHistory = (() => {
         if (!season) hide('seasonGroupsPanel', true);
         const legend = document.getElementById('leaderboardLegend');
         if (legend) legend.textContent = season ? `${SeasonFinal.INVITED}th qualified` : 'Top 16';
+        _sfDimLens();
         return season;
+    }
+
+    /** Dim the Lens while the Season final tab is open: it has its own scope, the saved season. */
+    function _sfDimLens() {
+        const on = _activeView === 'leaderboard' && _sf.tab === 'season' && _sfShown();
+        const row = document.getElementById('analyticsLensRow');
+        if (row) row.classList.toggle('an-lens-off', on);
+        const note = document.getElementById('analyticsLensNote');
+        if (note) note.hidden = !on;
     }
 
     /**
@@ -1683,10 +1694,10 @@ const NewtonHistory = (() => {
     /** True when the exports take the Season final tab's rows (the open tab). */
     const _sfExporting = () => _sf.tab === 'season' && _sfShown();
 
-    /** The operator's switch at the end of a row. */
+    /** The operator's Not available switch at the end of a row. */
     function _sfMarkButton(row) {
         if (_sf.draft || !_sf.season || !row._sf) return '';
-        return `<button type="button" class="st-link" onclick="event.stopPropagation(); NewtonHistory.seasonFinal.toggleAvailable(${row._sfIdx})">${row._sf.status === 'na' ? 'Available again' : 'Not available'}</button>`;
+        return SeasonFinal.markSwitchHtml(row._sf.status === 'na', `NewtonHistory.seasonFinal.toggleAvailable(${row._sfIdx})`);
     }
 
     /**
@@ -1902,7 +1913,8 @@ const NewtonHistory = (() => {
             const was = sv.notAvailable || [];
             const marks = was.filter(m => m.key !== key);
             if (marks.length === was.length) marks.push({ key, name: r.name });
-            if (await _sfPost(Object.assign({}, sv, { notAvailable: marks }))) renderLeaderboard();
+            await _sfPost(Object.assign({}, sv, { notAvailable: marks }));
+            renderLeaderboard(); // also puts the switch back when the save failed
         },
 
         /** A new name word: choose the period and ticks again. @param {string} v */

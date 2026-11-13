@@ -25,6 +25,10 @@
 .an-strip.an-filtered { border-color: #f0a07f; }
 .an-strip-row { display: flex; align-items: center; justify-content: space-between; gap: 10px 20px; flex-wrap: wrap; padding: 12px 16px; }
 .an-strip-row + .an-strip-row { border-top: 1px solid var(--nt-line); }
+/* the Season final tab doesn't use the Lens: dimmed, with a line saying so (still usable for the other tabs) */
+.an-strip-row.an-lens-off > .an-scope, .an-strip-row.an-lens-off > .an-lens { opacity: .4; }
+.an-lens-note { flex-basis: 100%; margin: 0; font-size: 13px; color: var(--nt-ink-2); }
+.an-lens-note[hidden] { display: none; }
 .an-strip .st-seg button { padding: 7px 14px; }
 .an-points { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; position: relative; }
 /* the focus ring inside the button, so the group's edge doesn't clip it */

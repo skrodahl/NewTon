@@ -823,7 +823,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             </div>
                         </div>
                     </div>
-                    <div class="an-strip-row">
+                    <div class="an-strip-row" id="analyticsLensRow">
                         <!-- Filled by renderScopeIndicator() -->
                         <div id="analyticsScopeIndicator" class="an-scope"></div>
                         <div class="an-lens">
@@ -838,6 +838,8 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                             <button type="button" class="st-btn st-sm" id="lensPreviousHalf" onclick="NewtonHistory.setHalfYear(-1)"></button>
                             <button type="button" class="st-link" id="analyticsResetBtn" onclick="NewtonHistory.resetFilters()">Show all</button>
                         </div>
+                        <!-- Season final tab (NewTon DC only): the Lens doesn't apply there -->
+                        <p class="an-lens-note" id="analyticsLensNote" hidden>The Season final uses the saved season, not the Lens.</p>
                     </div>
                 </section>
 

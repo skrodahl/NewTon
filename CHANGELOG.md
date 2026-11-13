@@ -1,3 +1,18 @@
+## **Unreleased** (after v5.5.1)
+
+### Season final: Not available is a switch
+
+- The Not available mark on a standings row is a switch (on = Not available) instead of the "Not available" / "Available again" text links, as in the mockup (maintainer 2026-11-14). Both places draw it from one function, `SeasonFinal.markSwitchHtml()`: Fill from season standings in Player Registration and the Season final tab in Analytics. It is the app's own switch (`.mc-switch`, the B cup one in Match Controls) in a smaller size, `.mc-switch-sm`. A click on it never opens the player's profile. In Analytics a failed save puts the switch back.
+- Tested in the browser against the PHP container: the switch and its label both mark and unmark (saved on the server, the row greyed, the page stays on the Leaderboard); in Fill the mark moves the seeds up and is kept on `tournament.seasonFill`, and unmarking takes it back.
+- Files changed: `js/season-final.js`, `js/newton-history.js`, `css/match-controls.css`.
+
+### Season final: the Lens dimmed on the Season final tab
+
+- The Season final tab has its own scope (the saved season), so the Lens above is dimmed while the tab is open, with a line under it: "The Season final uses the saved season, not the Lens." (maintainer 2026-11-14, after seeing the tab on a phone: the Lens could say one thing and the tab show another). It stays usable for the other tabs, and Points (As played / Custom), which the tab does follow, is not dimmed. Back to All players or another view, it's as before.
+- `_sfDimLens()` in `newton-history.js`, called when the tabs are synced and from `switchView()`; `#analyticsLensRow`, `#analyticsLensNote`.
+- Tested in the browser (member view, PHP container): dimmed only on Leaderboard → Season final, not on Dashboard, Players or All players, and dimmed again when coming back to the Leaderboard with the Season final tab open.
+- Files changed: `js/newton-history.js`, `tournament.html`, `css/analytics-page.css`.
+
 ## **v5.5.1** — Mainly Malmö Manager Mods (2026-11-13)
 
 ### Release
