@@ -1071,13 +1071,64 @@ const NewtonHistory = (() => {
         return { key, label, group, align: 'right', defaultDir: 'desc', render: (v) => v || _DIM_DASH };
     }
 
+    // ---------------------------------------------------------------------------
+    // OP (Outstanding Player), NewTon DC only (Docs/SEASON-FINAL.md)
+    // The County league's score without its attendance factor. Its parts and bonus
+    // tables live here only, so a custom formula could replace them (Docs/PARKING-LOT.md).
+    // ---------------------------------------------------------------------------
+
+    /** Bonus per short leg, by darts. */
+    const _OP_SHORT_LEG_BONUS = { 9: 40, 10: 32, 11: 26, 12: 20, 13: 16, 14: 13, 15: 10, 16: 8, 17: 6, 18: 5, 19: 4, 20: 3, 21: 2 };
+
+    /** Bonus per high out: [lowest checkout, bonus], highest band first. */
+    const _OP_HIGH_OUT_BONUS = [[161, 7], [141, 5], [121, 4], [111, 3], [101, 2]];
+
+    /** @returns {boolean} whether OP is shown and breaks ties (the NewTon DC switch) */
+    function _opInUse() {
+        return typeof isNewtonDC === 'function' && isNewtonDC();
+    }
+
+    /**
+     * A player's OP from their Leaderboard row: 3w/m + 3v/s + t/s + b / (v + (s+1)/(v+1)).
+     * w/m matches won/played (the register holds no walkovers), v/s legs won/played,
+     * t tons with a 180 counting twice (Tons already include the 180s), b the bonus for
+     * short legs and high outs. A part with nothing to divide by counts 0.
+     * @param {object} r - a row of _computePlayerRows()
+     * @returns {{op: number, opParts: {matches: number, legs: number, tons: number, bonus: number}}}
+     *          op rounded to two decimals, as shown and compared
+     */
+    function _opScore(r) {
+        const w = r.matchesWon, m = r.matchesWon + r.matchesLost;
+        const v = r.legsWon, s = r.legsWon + r.legsLost;
+        const t = r.tons + r.oneEighties;
+        let b = 0;
+        r.history.forEach(h => {
+            const st = h.stats || {};
+            (Array.isArray(st.shortLegs) ? st.shortLegs : []).forEach(d => { b += _OP_SHORT_LEG_BONUS[d] || 0; });
+            (Array.isArray(st.highOuts) ? st.highOuts : []).forEach(x => {
+                const band = x <= 170 && _OP_HIGH_OUT_BONUS.find(([lo]) => x >= lo);
+                if (band) b += band[1];
+            });
+        });
+        const opParts = {
+            matches: m ? 3 * w / m : 0,
+            legs: s ? 3 * v / s : 0,
+            tons: s ? t / s : 0,
+            bonus: b / (v + (s + 1) / (v + 1))
+        };
+        const sum = opParts.matches + opParts.legs + opParts.tons + opParts.bonus;
+        return { op: Math.round(sum * 100) / 100, opParts };
+    }
+
     /**
      * Every player's totals across the given tournaments: points (under the active point
      * mode and layers; with the achievement and attendance points among them), placements, achievements, personal bests, three-dart average, match
-     * and leg W/L, and one history entry per tournament. Ranked by points. The one source
-     * for the Leaderboard, the Dashboard's top 10, and the Players list and profile.
+     * and leg W/L, and one history entry per tournament. Ranked by points; with the NewTon DC
+     * switch also OP, which breaks ties (equal points and OP share the rank). The one source
+     * for the Leaderboard, the Dashboard's top 10, the Players list and profile, and seeding.
      * @param {object[]} tournaments - the scoped tournament records
-     * @returns {Promise<object[]>} rows, `_rank` 1 = most points
+     * @returns {Promise<object[]>} rows in ranking order, `_rank` 1 = most points (shared with
+     *          the switch), `_pos` the place in that order
      */
     async function _computePlayerRows(tournaments) {
         // Aggregate per-player stats across all scoped tournaments
@@ -1103,6 +1154,7 @@ const NewtonHistory = (() => {
 
                 if (!playerMap[key]) {
                     playerMap[key] = {
+                        _key: key, // who they are (_person): 'r:' + database ID, or 'n:' + name
                         name: name,
                         fullName: person.full,
                         points: 0,
@@ -1238,11 +1290,16 @@ const NewtonHistory = (() => {
             });
         }
 
-        // Convert to array, sort by points descending, assign ranks
+        // Convert to array, sort by points descending, assign ranks. With the NewTon DC
+        // switch: OP decides between equal points, and equal points and OP share the rank.
         const rows = Object.values(playerMap);
-        rows.sort((a, b) => b.points - a.points);
+        const withOP = _opInUse();
+        if (withOP) rows.forEach(r => Object.assign(r, _opScore(r)));
+        rows.sort((a, b) => b.points - a.points || (withOP ? b.op - a.op : 0));
         rows.forEach((r, i) => {
-            r._rank = i + 1;
+            const prev = rows[i - 1];
+            r._pos = i + 1; // place in the order, never shared (the line under the 16th)
+            r._rank = withOP && prev && prev.points === r.points && prev.op === r.op ? prev._rank : i + 1;
             r.avg = r._totalDarts > 0 ? ((r._totalScored / r._totalDarts) * 3).toFixed(2) : null;
             r._rowId = r.name;
             // each tournament's average, and its worst and best match
@@ -1319,12 +1376,78 @@ const NewtonHistory = (() => {
     }
 
     /**
+     * The hover on an OP cell: its four parts.
+     * @param {object} row - a Leaderboard row with `opParts`
+     * @returns {string}
+     */
+    function _opTitle(row) {
+        const p = row.opParts, f = (x) => x.toFixed(2);
+        return `Matches ${f(p.matches)} + Legs ${f(p.legs)} + Tons ${f(p.tons)} + Bonus ${f(p.bonus)}`;
+    }
+
+    /**
+     * The Leaderboard's columns. The Season final tab uses the same ones, with its Status after
+     * the player and, for the operator, the Not available switch at the end.
+     * @param {{status?: object, action?: object}} [extra]
+     * @returns {object[]} NewtonTable columns
+     */
+    function _leaderboardColumns(extra = {}) {
+        return [
+            { key: '_rank', label: '#', cellClass: 'nt-rank' },
+            { key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name', render: (v) => escHtml(v) },
+            ...extra.status ? [extra.status] : [],
+            // With OP, Points sorts in the ranking order (points, then OP)
+            Object.assign({ key: 'points', label: 'Points', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts', render: (v) => v ?? 0 },
+                _opInUse() ? { sortValue: (v, row) => -row._pos } : {}),
+            ..._opInUse() ? [{
+                key: 'op', label: 'OP', align: 'right', defaultDir: 'desc',
+                render: (v, row) => `<span title="${_opTitle(row)}">${v.toFixed(2)}</span>`
+            }] : [],
+            { key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc' },
+            _lbCount('p1st', '1st', 'Placements'),
+            _lbCount('p2nd', '2nd', 'Placements'),
+            _lbCount('p3rd', '3rd', 'Placements'),
+            _lbCount('p4th', '4th', 'Placements'),
+            _lbCount('p56th', '5–6th', 'Placements'),
+            _lbCount('p78th', '7–8th', 'Placements'),
+            _lbCount('oneEighties', '180s', 'Achievements'),
+            _lbCount('highOuts', 'High outs', 'Achievements'),
+            _lbCount('shortLegs', 'Short legs', 'Achievements'),
+            {
+                key: 'bestHighOut', label: 'Out', group: 'Best', align: 'right', defaultDir: 'desc',
+                render: (v) => v > 0 ? v : _DIM_DASH,
+                sortValue: (v) => v > 0 ? v : 0
+            },
+            {
+                key: 'bestShortLeg', label: 'Leg', group: 'Best', align: 'right', defaultDir: 'asc',
+                render: (v) => v < Infinity ? v : _DIM_DASH,
+                sortValue: (v) => v < Infinity ? v : 99999
+            },
+            {
+                key: 'avg', label: 'Avg', group: 'Best', align: 'right', defaultDir: 'desc',
+                render: (v) => v || _DIM_DASH,
+                sortValue: (v) => v ? parseFloat(v) : 0
+            },
+            { key: 'matchesWon', label: 'W', group: 'Matches', align: 'right', defaultDir: 'desc' },
+            { key: 'matchesLost', label: 'L', group: 'Matches', align: 'right', defaultDir: 'desc' },
+            { key: 'legsWon', label: 'W', group: 'Legs', align: 'right', defaultDir: 'desc' },
+            { key: 'legsLost', label: 'L', group: 'Legs', align: 'right', defaultDir: 'desc' },
+            ...extra.action ? [extra.action] : []
+        ];
+    }
+
+    /**
      * Compute per-player points across scoped tournaments and render the leaderboard.
      */
     async function renderLeaderboard() {
         const container = document.getElementById('leaderboardTableContainer');
         if (!container || typeof NewtonDB === 'undefined') return;
         const seq = ++_renderSeq.leaderboard;
+
+        // The Season final tab (NewTon DC only) has its own scope: the saved season
+        await _sfFetch();
+        if (seq !== _renderSeq.leaderboard) return;
+        if (_sfSyncTabs()) { await _sfRender(seq); return; }
 
         // Only show loading placeholder on first render (don't collapse existing table)
         if (!_leaderboardTable) {
@@ -1353,43 +1476,10 @@ const NewtonHistory = (() => {
                     defaultSortDir: 'desc',
                     emptyMessage: 'No player data available.',
                     // A line under the 16th player, while the table is in points order
-                    rowClass: (row) => row._rank === 16 && _leaderboardTable.data.length > 16 &&
+                    rowClass: (row) => row._pos === 16 && _leaderboardTable.data.length > 16 &&
                         _leaderboardTable.sortKey === 'points' && _leaderboardTable.sortDir === 'desc' ? 'an-cut' : '',
                     onRowClick: (row) => { focusPlayer(row.name); },
-                    columns: [
-                        { key: '_rank', label: '#', cellClass: 'nt-rank' },
-                        { key: 'name', label: 'Player', width: '100%', cellClass: 'nt-name', render: (v) => escHtml(v) },
-                        { key: 'points', label: 'Points', align: 'right', defaultDir: 'desc', cellClass: 'nt-pts', render: (v) => v ?? 0 },
-                        { key: 'tournaments', label: 'Played', align: 'right', defaultDir: 'desc' },
-                        _lbCount('p1st', '1st', 'Placements'),
-                        _lbCount('p2nd', '2nd', 'Placements'),
-                        _lbCount('p3rd', '3rd', 'Placements'),
-                        _lbCount('p4th', '4th', 'Placements'),
-                        _lbCount('p56th', '5–6th', 'Placements'),
-                        _lbCount('p78th', '7–8th', 'Placements'),
-                        _lbCount('oneEighties', '180s', 'Achievements'),
-                        _lbCount('highOuts', 'High outs', 'Achievements'),
-                        _lbCount('shortLegs', 'Short legs', 'Achievements'),
-                        {
-                            key: 'bestHighOut', label: 'Out', group: 'Best', align: 'right', defaultDir: 'desc',
-                            render: (v) => v > 0 ? v : _DIM_DASH,
-                            sortValue: (v) => v > 0 ? v : 0
-                        },
-                        {
-                            key: 'bestShortLeg', label: 'Leg', group: 'Best', align: 'right', defaultDir: 'asc',
-                            render: (v) => v < Infinity ? v : _DIM_DASH,
-                            sortValue: (v) => v < Infinity ? v : 99999
-                        },
-                        {
-                            key: 'avg', label: 'Avg', group: 'Best', align: 'right', defaultDir: 'desc',
-                            render: (v) => v || _DIM_DASH,
-                            sortValue: (v) => v ? parseFloat(v) : 0
-                        },
-                        { key: 'matchesWon', label: 'W', group: 'Matches', align: 'right', defaultDir: 'desc' },
-                        { key: 'matchesLost', label: 'L', group: 'Matches', align: 'right', defaultDir: 'desc' },
-                        { key: 'legsWon', label: 'W', group: 'Legs', align: 'right', defaultDir: 'desc' },
-                        { key: 'legsLost', label: 'L', group: 'Legs', align: 'right', defaultDir: 'desc' }
-                    ]
+                    columns: _leaderboardColumns()
                 });
             }
 
@@ -1411,18 +1501,23 @@ const NewtonHistory = (() => {
      * Export the current leaderboard as CSV. Respects scope, point mode, and layers.
      */
     function exportLeaderboardCSV() {
-        if (!_leaderboardRows || !_leaderboardRows.length) {
+        const season = _sfExporting();
+        const src = season ? _sf.rows : _leaderboardRows;
+        if (!src || !src.length) {
             alert('No leaderboard data to export.');
             return;
         }
 
-        const headers = ['Rank', 'Player', '1st', '2nd', '3rd', '4th', '5-6th', '7-8th',
+        const headers = ['Rank', 'Player', ...season ? ['Status'] : [], '1st', '2nd', '3rd', '4th', '5-6th', '7-8th',
             '180s', 'High Outs', 'Short Legs', 'Played', 'Points',
             'Best Out', 'Best Leg', 'Avg', 'Matches W', 'Matches L', 'Legs W', 'Legs L'];
+        const withOP = _opInUse();
+        if (withOP) headers.splice(headers.indexOf('Points') + 1, 0, 'OP');
 
-        const rows = _leaderboardRows.map(r => [
+        const rows = src.map(r => [
             r._rank,
             r.name,
+            ...season ? [_sfStatusText(r._sf)] : [],
             r.p1st || 0,
             r.p2nd || 0,
             r.p3rd || 0,
@@ -1442,11 +1537,12 @@ const NewtonHistory = (() => {
             r.legsWon || 0,
             r.legsLost || 0
         ]);
+        if (withOP) rows.forEach((row, i) => row.splice(headers.indexOf('OP'), 0, src[i].op.toFixed(2)));
 
-        const metadata = ['NewTon DC Tournament Manager — Leaderboard Export'];
+        const metadata = [season ? 'NewTon DC Tournament Manager — Season final Export' : 'NewTon DC Tournament Manager — Leaderboard Export'];
 
         NewtonCSV.exportCSV({
-            filename: 'Leaderboard_' + new Date().toISOString().slice(0, 10) + '.csv',
+            filename: (season ? 'Season_final_' : 'Leaderboard_') + new Date().toISOString().slice(0, 10) + '.csv',
             headers: headers,
             rows: rows,
             metadata: metadata
@@ -1457,20 +1553,24 @@ const NewtonHistory = (() => {
      * Export the current leaderboard as JSON. Respects scope, point mode, and layers.
      */
     function exportLeaderboardJSON() {
-        if (!_leaderboardRows || !_leaderboardRows.length) {
+        const season = _sfExporting();
+        const src = season ? _sf.rows : _leaderboardRows;
+        if (!src || !src.length) {
             alert('No leaderboard data to export.');
             return;
         }
 
-        const data = _leaderboardRows.map(r => ({
+        const data = src.map(r => ({
             rank: r._rank,
             name: r.name,
+            ...season ? { status: _sfStatusText(r._sf) } : {},
             placements: { '1st': r.p1st, '2nd': r.p2nd, '3rd': r.p3rd, '4th': r.p4th, '5-6th': r.p56th, '7-8th': r.p78th },
             oneEighties: r.oneEighties || 0,
             highOuts: r.highOuts || 0,
             shortLegs: r.shortLegs || 0,
             tournaments: r.tournaments || 0,
             points: r.points || 0,
+            ...(_opInUse() ? { op: r.op } : {}),
             bestCheckout: r.bestHighOut > 0 ? r.bestHighOut : null,
             bestLeg: r.bestShortLeg < Infinity ? r.bestShortLeg : null,
             average: r.avg ? parseFloat(r.avg) : null,
@@ -1481,9 +1581,361 @@ const NewtonHistory = (() => {
         }));
 
         const content = JSON.stringify({ leaderboard: data, exported: new Date().toISOString() }, null, 2);
-        const filename = 'Leaderboard_' + new Date().toISOString().slice(0, 10) + '.json';
+        const filename = (season ? 'Season_final_' : 'Leaderboard_') + new Date().toISOString().slice(0, 10) + '.json';
         NewtonCSV.downloadFile(content, filename, 'application/json;charset=utf-8;');
     }
+
+    // ---------------------------------------------------------------------------
+    // Season final tab (NewTon DC only, Docs/SEASON-FINAL.md)
+    // ---------------------------------------------------------------------------
+    //
+    // A second scope for the Leaderboard: the saved season, never the visitor's Lens, so every
+    // member sees the same list. The season is stored on the server (api/season-final.php):
+    //   { keyword, from, to, periodLabel, ticked: [ids], unticked: [ids],
+    //     notAvailable: [{key, name}], updatedAt }
+    // Its tournaments are those between the dates whose name has the word (finals left out),
+    // plus the ones ticked in by hand, minus the ones left out by hand, so each new night joins
+    // by itself. Only the operator (the full Tournament Manager: the ?tm page on the website)
+    // changes it. Who qualifies is SeasonFinal.classifyRows(), the rule Fill from season
+    // standings uses; the groups preview is the draw's own snake (Groups.snake).
+
+    /**
+     * tab: 'all' | 'season'; season: the saved one, or null; server: the API answered;
+     * rows: the table's rows; draft: the season being changed (a lens state, as Seeding.lens
+     * takes), or null; table/tableOp: the NewtonTable, and whether it has the operator's column.
+     */
+    const _sf = { tab: 'all', season: null, server: false, rows: [], draft: null, table: null, tableOp: null };
+
+    /** Read the saved season. Never cached: a mark made on one device must show on the next load of another. */
+    async function _sfFetch() {
+        if (!_opInUse()) { _sf.server = false; _sf.season = null; return; }
+        try {
+            const res = await fetch('api/season-final.php', { cache: 'no-store' });
+            if (!res.ok) throw new Error('HTTP ' + res.status);
+            const data = await res.json();
+            _sf.server = true;
+            _sf.season = data && data.season && typeof data.season === 'object' ? data.season : null;
+        } catch (e) {
+            _sf.server = false;
+            _sf.season = null;
+        }
+    }
+
+    /** The operator: the full Tournament Manager, served by the container (as for Corrections). */
+    const _sfOperator = () => window.NEWTON_APP_MODE !== 'analytics' && _sf.server;
+
+    /** True when the tab is offered: a season is saved, or the operator can start one (the format is offered). */
+    function _sfShown() {
+        if (!_opInUse()) return false;
+        if (_sf.season) return true;
+        return _sfOperator() && typeof getVisibleFormats === 'function' && getVisibleFormats().some(f => f.seasonFinal);
+    }
+
+    /**
+     * Show the tab switch when the Season final is offered, and the open tab's parts.
+     * @returns {boolean} true when the Season final tab is the one to render
+     */
+    function _sfSyncTabs() {
+        const shown = _sfShown();
+        const season = shown && _sf.tab === 'season';
+        const tabs = document.getElementById('leaderboardTabs');
+        if (tabs) {
+            tabs.hidden = !shown;
+            tabs.querySelectorAll('button').forEach(b => b.setAttribute('aria-pressed', String(b.dataset.tab === (season ? 'season' : 'all'))));
+        }
+        const hide = (id, h) => { const el = document.getElementById(id); if (el) el.hidden = h; };
+        hide('leaderboardTableContainer', season);
+        hide('seasonFinalView', !season);
+        if (!season) hide('seasonGroupsPanel', true);
+        const legend = document.getElementById('leaderboardLegend');
+        if (legend) legend.textContent = season ? `${SeasonFinal.INVITED}th qualified` : 'Top 16';
+        return season;
+    }
+
+    /**
+     * The season's tournaments.
+     * @param {{id: *, name: string, date: string}[]} list - from seedingTournaments()
+     * @param {object} season - keyword, from, to, ticked, unticked
+     * @returns {Set<string>} their ids
+     */
+    function _sfIds(list, season) {
+        const ticked = new Set((season.ticked || []).map(String));
+        const unticked = new Set((season.unticked || []).map(String));
+        return new Set(list.filter(t => {
+            const id = String(t.id);
+            if (ticked.has(id)) return true;
+            if (unticked.has(id)) return false;
+            return (!season.from || t.date >= season.from) && (!season.to || t.date <= season.to) &&
+                Seeding.nameMatches(t.name, season.keyword) && !Seeding.isFinal(t.name);
+        }).map(t => String(t.id)));
+    }
+
+    /** The Status cell. @param {object|null} c - the row's place from classifyRows() */
+    function _sfPill(c) {
+        if (!c) return _DIM_DASH;
+        return c.status === 'in' ? '<span class="an-pill an-q">Qualified</span>'
+            : c.status === 'res' ? `<span class="an-pill an-r">Reserve ${c.res}</span>` : '<span class="an-pill an-na">Not available</span>';
+    }
+
+    /** @param {object|null} c @returns {string} */
+    const _sfStatusText = c => !c ? '' : c.status === 'in' ? 'Qualified' : c.status === 'res' ? `Reserve ${c.res}` : 'Not available';
+
+    /** True when the exports take the Season final tab's rows (the open tab). */
+    const _sfExporting = () => _sf.tab === 'season' && _sfShown();
+
+    /** The operator's switch at the end of a row. */
+    function _sfMarkButton(row) {
+        if (_sf.draft || !_sf.season || !row._sf) return '';
+        return `<button type="button" class="st-link" onclick="event.stopPropagation(); NewtonHistory.seasonFinal.toggleAvailable(${row._sfIdx})">${row._sf.status === 'na' ? 'Available again' : 'Not available'}</button>`;
+    }
+
+    /**
+     * Render the Season final tab: the scope, the table, and the groups as drawn today.
+     * @param {number} seq - the Leaderboard render this belongs to
+     */
+    async function _sfRender(seq) {
+        const d = _sf.draft, season = _sf.season;
+        let rows = [], count = 0, list = [];
+        try {
+            list = await seedingTournaments();
+            const ids = d ? new Set([...d.ticked].map(String)) : season ? _sfIds(list, season) : new Set();
+            const ts = (await _loadAllTournaments()).filter(t => ids.has(String(t.tournamentId)));
+            count = ts.length;
+            rows = ts.length ? await _computePlayerRows(ts) : [];
+        } catch (e) {
+            console.error('Season final render failed:', e);
+        }
+        if (seq !== _renderSeq.leaderboard) return; // superseded by a newer render
+
+        // Qualified, Reserve n or Not available: the rule Fill from season standings uses
+        const out = new Set(((season && season.notAvailable) || []).map(m => m.key));
+        const places = new Map(SeasonFinal.classifyRows(rows, r => out.has(_playerKey(r.name))).map(c => [c.r, c]));
+        rows.forEach((r, i) => {
+            const c = places.get(r) || null;
+            r._sf = c;
+            r._sfIdx = i;
+            // Status sorts Qualified by seed, then the reserves in order, then Not available
+            r._sfOrder = !c ? 3000 + i : c.status === 'in' ? c.seed : c.status === 'res' ? 100 + c.res : 1000 + i;
+        });
+        _sf.rows = rows;
+
+        const op = _sfOperator();
+        const scope = document.getElementById('seasonFinalScope');
+        if (scope) scope.innerHTML = _sfScopeHtml(count, op, list);
+        const meta = document.getElementById('leaderboardMeta');
+        if (meta) meta.textContent = `${rows.length} players · ${count} tournaments`;
+
+        const tableEl = document.getElementById('seasonFinalTable');
+        const hasTable = !!(d || season);
+        if (tableEl) tableEl.hidden = !hasTable;
+        if (hasTable) {
+            if (!_sf.table || _sf.tableOp !== op) {
+                _sf.tableOp = op;
+                _sf.table = NewtonTable.create({
+                    tableId: 'analytics-season-final',
+                    containerId: 'seasonFinalTable',
+                    defaultSortKey: 'points',
+                    defaultSortDir: 'desc',
+                    emptyMessage: 'No one has points in this season yet.',
+                    // Not available greyed; the line under the 16th qualified, in points order
+                    rowClass: (row) => {
+                        const c = row._sf, t = _sf.table;
+                        if (c && c.status === 'na') return 'an-out';
+                        return c && c.status === 'in' && c.seed === SeasonFinal.INVITED &&
+                            t.sortKey === 'points' && t.sortDir === 'desc' ? 'an-cut' : '';
+                    },
+                    onRowClick: (row) => { focusPlayer(row.name); },
+                    columns: _leaderboardColumns({
+                        status: { key: '_sfOrder', label: 'Status', defaultDir: 'asc', render: (v, row) => _sfPill(row._sf) },
+                        action: op ? { key: '_sfIdx', label: '', sortable: false, render: (v, row) => _sfMarkButton(row) } : null
+                    })
+                });
+            }
+            _sf.table.setData(rows);
+        }
+
+        const note = document.getElementById('seasonFinalNote');
+        if (note) {
+            const when = season && season.updatedAt;
+            note.hidden = !season || !!d;
+            note.innerHTML = `Qualified: the ${SeasonFinal.INVITED} best available, by points, then OP. A player marked Not available keeps their row but doesn't count, and everyone under them moves up.` +
+                (when ? ` Updated ${fmtDateTime(when)}.` : '');
+        }
+
+        const qualified = rows.filter(r => r._sf && r._sf.status === 'in').sort((a, b) => a._sf.seed - b._sf.seed);
+        const groups = document.getElementById('seasonGroupsPanel');
+        if (groups) {
+            groups.hidden = qualified.length < 2;
+            const body = document.getElementById('seasonGroups');
+            if (body) body.innerHTML = _sfGroupsHtml(qualified);
+        }
+    }
+
+    /** What the season is made of, and the operator's buttons (or the lens while it is changed). */
+    function _sfScopeHtml(count, op, list) {
+        const d = _sf.draft, sv = _sf.season, ns = 'NewtonHistory.seasonFinal';
+        const head = `<span><b>Season final, NewTon DC</b> · the top ${SeasonFinal.INVITED} are invited</span>`;
+        if (d) {
+            return `<div class="an-sf-scope">${head}</div>
+                <div class="an-sf-edit">${Seeding.lens.controlsHtml(d, ns)}${Seeding.lens.listHtml(d, ns)}
+                <div class="an-sf-actions"><span>${d.ticked.size} tournament${d.ticked.size === 1 ? '' : 's'} ticked</span>
+                <button type="button" class="st-btn st-sm" onclick="${ns}.cancel()">Cancel</button>
+                <button type="button" class="st-btn st-sm st-primary" onclick="${ns}.save()">Save season</button></div></div>`;
+        }
+        if (!sv) {
+            return `<div class="an-sf-scope">${head}</div>
+                <p class="an-sf-note">No season is saved. Members see this tab once one is.</p>
+                <div class="an-sf-actions"><button type="button" class="st-btn st-sm st-primary" onclick="${ns}.edit()">Start a season</button></div>`;
+        }
+        const ticked = (sv.ticked || []).length, left = (sv.unticked || []).length;
+        const tags = [
+            sv.keyword ? `Name contains “${escHtml(sv.keyword)}”` : 'No name word',
+            escHtml(sv.periodLabel || 'All time'),
+            ...ticked ? [`+${ticked} ticked by hand`] : [],
+            ...left ? [`−${left} left out by hand`] : [],
+            `${count} tournament${count === 1 ? '' : 's'}`
+        ];
+        return `<div class="an-sf-scope">${head}${tags.map(t => `<span class="an-sf-tag">${t}</span>`).join('')}
+            ${op ? `<span class="an-sf-ops"><button type="button" class="st-btn st-sm" onclick="${ns}.edit()">Change season</button>
+            <button type="button" class="st-link" onclick="${ns}.remove()">Remove season</button></span>` : ''}</div>`;
+    }
+
+    /** The groups if the final were drawn today: the qualified in seed order, snaked into four groups. */
+    function _sfGroupsHtml(qualified) {
+        const G = [[], [], [], []];
+        qualified.forEach((r, i) => G[Groups.snake(i, 4)].push(r));
+        return G.map((g, gi) => `<div class="an-sf-group"><h4>Group ${'ABCD'[gi]}</h4>${g.map(r =>
+            `<div><span>${escHtml(r.name)}</span><small>seed ${r._sf.seed}</small></div>`).join('')}</div>`).join('');
+    }
+
+    /** Set the draft's dates from its period (the half-year, kept as dates so the season stays put after New Year). */
+    function _sfDatesFromPeriod(d) {
+        const hy = d.period === 'all' ? null : _getHalfYear(d.period === 'previous' ? -1 : 0);
+        d.from = hy ? hy.from : null;
+        d.to = hy ? hy.to : null;
+        d.periodLabel = hy ? hy.label : 'All time';
+    }
+
+    /** Save a season (null removes it). @returns {Promise<boolean>} */
+    async function _sfPost(season) {
+        try {
+            const res = await fetch('api/season-final.php', {
+                method: 'POST',
+                headers: apiWriteHeaders(),
+                body: JSON.stringify({ season })
+            });
+            const data = await res.json().catch(() => ({}));
+            if (!res.ok) throw new Error(data.error || `HTTP ${res.status}`);
+            _sf.season = data.season || null;
+            return true;
+        } catch (e) {
+            alert('Could not save the season: ' + e.message);
+            return false;
+        }
+    }
+
+    /** The Season final tab's controls (the lens calls setKeyword, setPeriod, toggle, setOthersOpen). */
+    const seasonFinal = {
+        /** @param {'all'|'season'} tab */
+        setTab(tab) {
+            _sf.tab = tab === 'season' ? 'season' : 'all';
+            renderLeaderboard();
+        },
+
+        /** Start a season, or change the saved one: the lens, filled from it. */
+        async edit() {
+            if (!_sfOperator()) return;
+            const list = await seedingTournaments();
+            const sv = _sf.season;
+            const d = { list, keyword: '', period: 'current', ticked: new Set(), othersOpen: false, from: null, to: null, periodLabel: '' };
+            if (sv) {
+                const hy0 = _getHalfYear(0), hy1 = _getHalfYear(-1);
+                d.keyword = sv.keyword || '';
+                // an older season than the lens offers shows under All time, its dates kept
+                d.period = !sv.from && !sv.to ? 'all' : sv.from === hy0.from ? 'current' : sv.from === hy1.from ? 'previous' : 'all';
+                d.from = sv.from || null;
+                d.to = sv.to || null;
+                d.periodLabel = sv.periodLabel || '';
+                const ids = _sfIds(list, sv);
+                d.ticked = new Set(list.filter(t => ids.has(String(t.id))).map(t => t.id));
+            } else {
+                d.keyword = SeasonFinal.defaultKeyword(list);
+                Seeding.lens.pickPeriod(d);
+                _sfDatesFromPeriod(d);
+            }
+            _sf.draft = d;
+            renderLeaderboard();
+        },
+
+        cancel() {
+            _sf.draft = null;
+            renderLeaderboard();
+        },
+
+        /** Save the draft: the word and dates, and what was ticked in or left out by hand. */
+        async save() {
+            const d = _sf.draft;
+            if (!d) return;
+            const auto = _sfIds(d.list, { keyword: d.keyword, from: d.from, to: d.to });
+            const ticked = new Set([...d.ticked].map(String));
+            const season = {
+                keyword: d.keyword, from: d.from, to: d.to, periodLabel: d.periodLabel,
+                ticked: [...ticked].filter(id => !auto.has(id)),
+                unticked: [...auto].filter(id => !ticked.has(id)),
+                notAvailable: (_sf.season && _sf.season.notAvailable) || []
+            };
+            if (await _sfPost(season)) { _sf.draft = null; renderLeaderboard(); }
+        },
+
+        /** Remove the saved season: the tab is gone for members. */
+        async remove() {
+            if (!_sf.season || !_sfOperator()) return;
+            if (!confirm('Remove the saved season?\n\nMembers no longer see the Season final tab, and the Not available marks are gone. Tournaments and results are not touched.')) return;
+            if (await _sfPost(null)) renderLeaderboard();
+        },
+
+        /** Mark a player Not available, or take the mark back. Saved at once. @param {number} i - their row */
+        async toggleAvailable(i) {
+            const r = _sf.rows[i], sv = _sf.season;
+            if (!r || !sv || _sf.draft || !_sfOperator()) return;
+            const key = _playerKey(r.name);
+            const was = sv.notAvailable || [];
+            const marks = was.filter(m => m.key !== key);
+            if (marks.length === was.length) marks.push({ key, name: r.name });
+            if (await _sfPost(Object.assign({}, sv, { notAvailable: marks }))) renderLeaderboard();
+        },
+
+        /** A new name word: choose the period and ticks again. @param {string} v */
+        setKeyword(v) {
+            const d = _sf.draft;
+            if (!d) return;
+            d.keyword = String(v || '').trim();
+            Seeding.lens.pickPeriod(d);
+            _sfDatesFromPeriod(d);
+            renderLeaderboard();
+        },
+
+        /** A new period: tick the cup's tournaments in it. @param {string} v */
+        setPeriod(v) {
+            const d = _sf.draft;
+            if (!d || !['current', 'previous', 'all'].includes(v)) return;
+            d.period = v;
+            d.ticked = new Set(Seeding.lens.matchesIn(d, v).map(t => t.id));
+            _sfDatesFromPeriod(d);
+            renderLeaderboard();
+        },
+
+        /** Tick or untick a tournament by hand. @param {number} i - its place in the list */
+        toggle(i) {
+            const d = _sf.draft, t = d && d.list[i];
+            if (!t) return;
+            if (d.ticked.has(t.id)) d.ticked.delete(t.id); else d.ticked.add(t.id);
+            renderLeaderboard();
+        },
+
+        /** @param {boolean} open */
+        setOthersOpen(open) { if (_sf.draft) _sf.draft.othersOpen = !!open; }
+    };
 
     // ---------------------------------------------------------------------------
     // Entry point — called by showPage('history') hook in main.js
@@ -3027,11 +3479,23 @@ const NewtonHistory = (() => {
      * @returns {Promise<Map<string, {points: number, rank: number}>>}
      */
     async function seedingRanking(tournamentIds) {
+        return new Map((await seasonStandings(tournamentIds)).map(r => [r.key, { points: r.points, rank: r.rank }]));
+    }
+
+    /**
+     * The standings on the given tournaments, in ranking order, as the Leaderboard ranks them
+     * (points, then OP with the NewTon DC switch). For seeding and Fill from season standings.
+     * @param {string[]} tournamentIds
+     * @returns {Promise<{key: string, name: string, registryId: string|null, points: number, op: number|null, rank: number}[]>}
+     *   key as seedingPlayerKey() gives it; registryId the player database ID when the player has one
+     */
+    async function seasonStandings(tournamentIds) {
         const ids = new Set(tournamentIds);
         const tournaments = (await _loadAllTournaments()).filter(t => ids.has(t.tournamentId));
-        if (!tournaments.length) return new Map();
+        if (!tournaments.length) return [];
         const rows = await _computePlayerRows(tournaments);
-        return new Map(rows.map(r => [_playerKey(r.name), { points: r.points, rank: r._rank }]));
+        return rows.map(r => ({ key: _playerKey(r.name), name: r.name, registryId: r._key && r._key.startsWith('r:') ? r._key.slice(2) : null,
+            points: r.points, op: r.op != null ? r.op : null, rank: r._rank }));
     }
 
     /**
@@ -3054,6 +3518,6 @@ const NewtonHistory = (() => {
              promptDeleteTournament, onDeleteInputChange, confirmDeleteTournament,
              setScope: scopeTo, toggleTournament, toggleAllTournaments, togglePlayer, toggleAllPlayers, exportLeaderboardCSV, exportLeaderboardJSON, onTextFilter, onDateFilter, resetFilters, setHalfYear, showDashboard, showTournamentList, switchRegisterTab, renderAllMatches, viewBracket, viewBracketForTournament, importTournament, invalidateCache: _invalidateCache,
              selectCorrectionPlayer, adjustCorrection, addCorrectionValue, resetCorrectionPlayer, saveCorrections,
-             seedingTournaments, seedingRanking, seedingPlayerKey, halfYear: _getHalfYear };
+             seedingTournaments, seedingRanking, seasonStandings, seedingPlayerKey, halfYear: _getHalfYear, seasonFinal };
 
 })();

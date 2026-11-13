@@ -78,6 +78,29 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
 .an-legend i { display: inline-block; width: 18px; border-top: 2px solid var(--nt-ink-2); margin-right: 6px; }
 .newton-table tr.an-cut td { border-bottom: 2px solid var(--nt-ink-2); }
 
+/* Season final tab (NewTon DC only, Docs/SEASON-FINAL.md) */
+#seasonFinalView[hidden], #seasonFinalTable[hidden], #leaderboardTableContainer[hidden], #seasonGroupsPanel[hidden], .an-sf-note[hidden] { display: none; }
+.an-sf-scope { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 10px; padding: 0 20px 12px; font-size: 13px; color: var(--nt-ink-2); }
+.an-sf-tag { font-size: 12px; font-weight: 600; color: var(--nt-ink-2); background: var(--nt-inset); border-radius: 6px; padding: 3px 8px; }
+.an-sf-ops { display: inline-flex; align-items: center; gap: 12px; margin-left: auto; }
+.an-sf-edit { padding: 0 20px 14px; display: grid; gap: 10px; }
+.an-sf-actions { display: flex; flex-wrap: wrap; align-items: center; justify-content: flex-end; gap: 8px; padding: 0 20px 14px; font-size: 13px; color: var(--nt-muted); }
+.an-sf-edit .an-sf-actions { padding: 0; }
+.an-sf-actions span { margin-right: auto; }
+.an-sf-note { margin: 0; padding: 10px 20px 14px; font-size: 12px; color: var(--nt-muted); }
+.an-pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 2px 8px; white-space: nowrap; }
+.an-pill.an-q { background: var(--nt-ok-soft); color: var(--nt-ok); }
+.an-pill.an-r { background: var(--nt-inset); color: var(--nt-ink-2); }
+.an-pill.an-na { background: var(--nt-inset); color: var(--nt-muted); }
+.newton-table tr.an-out td { color: var(--nt-faint); }
+.newton-table tr.an-out td.nt-name { text-decoration: line-through; }
+.an-sf-groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 0 20px; }
+.an-sf-group { border: 1px solid var(--nt-line); border-radius: 8px; overflow: hidden; }
+.an-sf-group h4 { margin: 0; padding: 6px 10px; background: var(--nt-surface-2); border-bottom: 1px solid var(--nt-line); font-size: 12px; }
+.an-sf-group div { display: flex; justify-content: space-between; gap: 8px; padding: 5px 10px; font-size: 13px; }
+.an-sf-group small { color: var(--nt-muted); font-family: var(--nt-mono); white-space: nowrap; }
+@media (max-width: 700px) { .an-sf-groups { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+
 /* Players: the list, and the profile or comparison */
 .an-players { display: grid; grid-template-columns: 420px minmax(0, 1fr); gap: 16px; align-items: start; }
 .an-prof-head { padding: 20px 20px 4px; }
@@ -251,10 +274,10 @@ button.an-tile:focus-visible { outline: 2px solid var(--nt-accent); outline-offs
   .pc-full-head .pc-seg { grid-column: 1 / -1; grid-row: 2; }
   .pc-seg button { padding: 6px 9px; font-size: 12px; }
   /* the Leaderboard scrolls sideways with rank and name kept in view */
-  #leaderboardTableContainer :is(td, tr:not(.newton-table-groups) th):nth-child(-n+2),
-  #leaderboardTableContainer .newton-table-groups th:first-child { position: sticky; z-index: 1; background: var(--nt-surface); }
-  #leaderboardTableContainer :is(td, th):nth-child(1) { left: 0; min-width: 40px; }
-  #leaderboardTableContainer :is(td, tr:not(.newton-table-groups) th):nth-child(2) { left: 40px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; box-shadow: 1px 0 0 var(--nt-line); }
+  :is(#leaderboardTableContainer, #seasonFinalTable) :is(td, tr:not(.newton-table-groups) th):nth-child(-n+2),
+  :is(#leaderboardTableContainer, #seasonFinalTable) .newton-table-groups th:first-child { position: sticky; z-index: 1; background: var(--nt-surface); }
+  :is(#leaderboardTableContainer, #seasonFinalTable) :is(td, th):nth-child(1) { left: 0; min-width: 40px; }
+  :is(#leaderboardTableContainer, #seasonFinalTable) :is(td, tr:not(.newton-table-groups) th):nth-child(2) { left: 40px; max-width: 130px; overflow: hidden; text-overflow: ellipsis; box-shadow: 1px 0 0 var(--nt-line); }
 }
 
 /* Live now: a tournament being played (js/live-view.js) */

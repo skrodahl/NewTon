@@ -100,6 +100,8 @@ function renderRegistrationNext() {
     btn.textContent = button[0];
     btn.setAttribute('onclick', button[1]);
     btn.disabled = !enabled;
+
+    if (typeof SeasonFinal !== 'undefined') SeasonFinal.render(); // the Season final's Fill from season standings
 }
 
 /**

@@ -53,6 +53,9 @@
         $instanceMode = getenv('NEWTON_MODE') === 'analytics' ? 'analytics' : 'full';
         echo "            instanceMode: '$instanceMode',\n";
         echo "            readonlyAnalytics: $readonlyAnalytics,\n";
+        // NEWTON_DC=1: NewTon DC's own package (the Season final; Docs/SEASON-FINAL.md)
+        $newtonDC = in_array(getenv('NEWTON_DC'), ['1', 'true'], true) ? 'true' : 'false';
+        echo "            newtonDC: $newtonDC,\n";
         echo "            apiKey: " . json_encode($pageApiKey, JSON_HEX_TAG | JSON_HEX_AMP | JSON_HEX_APOS | JSON_HEX_QUOT) . ",\n";
         echo "            githubUrl: '$githubUrl'\n";
         echo "        };\n    ";
@@ -205,6 +208,9 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                     <div class="st-next-what"><p class="st-eyebrow">Next step</p><b id="registrationNextTitle"></b><span class="st-hint" id="registrationNextHint"></span></div>
                     <button type="button" class="st-btn st-primary rg-next-btn" id="registrationNextBtn" onclick="showPage('tournament')">Open bracket →</button>
                 </section>
+
+                <!-- The Season final, NewTon DC: filled by SeasonFinal.render() (js/season-final.js) -->
+                <div id="seasonFillPanel" hidden></div>
 
                 <div class="rg-cols" id="registrationCols">
                     <section class="st-panel" aria-labelledby="registrationPlayersTitle">
@@ -844,13 +850,28 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
                         <div class="st-panel-head">
                             <h3>Leaderboard <small id="leaderboardMeta"></small></h3>
                             <div class="an-tools">
-                                <span class="an-legend"><i></i>Top 16</span>
+                                <!-- Season final, NewTon DC only (NEWTON_DC=1, Docs/SEASON-FINAL.md) -->
+                                <div class="st-seg" id="leaderboardTabs" hidden>
+                                    <button type="button" data-tab="all" aria-pressed="true" onclick="NewtonHistory.seasonFinal.setTab('all')">All players</button>
+                                    <button type="button" data-tab="season" aria-pressed="false" onclick="NewtonHistory.seasonFinal.setTab('season')">Season final</button>
+                                </div>
+                                <span class="an-legend"><i></i><span id="leaderboardLegend">Top 16</span></span>
                                 <button type="button" class="st-btn st-sm" onclick="NewtonHistory.exportLeaderboardCSV()">Export CSV</button>
                                 <button type="button" class="st-btn st-sm" onclick="NewtonHistory.exportLeaderboardJSON()">Export JSON</button>
                             </div>
                         </div>
                         <div id="leaderboardTableContainer"></div>
+                        <div id="seasonFinalView" hidden>
+                            <div id="seasonFinalScope"></div>
+                            <div id="seasonFinalTable"></div>
+                            <p class="an-sf-note" id="seasonFinalNote" hidden></p>
+                        </div>
                         <div class="an-foot">Avg is from Chalker matches only. Click a column to sort, a player to open their profile.</div>
+                    </section>
+                    <section class="st-panel" id="seasonGroupsPanel" hidden>
+                        <div class="st-panel-head"><h3>The groups, if the final were drawn today <small>seeded by season rank, in snake order</small></h3></div>
+                        <div class="an-sf-groups" id="seasonGroups"></div>
+                        <p class="an-sf-note">Changes when a player is marked Not available, or when the standings change. The real draw is made on the night, from the players who are there.</p>
                     </section>
                 </div>
 
@@ -1149,6 +1170,7 @@ window.NEWTON_APP_MODE = document.body.classList.contains('mode-analytics') ? 'a
         <script src="js/newton-charts.js"></script>
         <script src="js/newton-history.js"></script>
         <script src="js/seeding.js"></script>
+        <script src="js/season-final.js"></script>
         <script src="js/qr-bridge.js"></script>
     <!-- Optional network client. Separately licensed (see licensed/LICENSE.md) and may be
          absent; the Tournament Manager works fully without it. -->

@@ -1909,6 +1909,7 @@ function _mcGroupTablesHTML() {
  */
 function _mcDrawCupsHTML() {
     if (_mcPlayB.tid !== tournament.id) _mcPlayB = { tid: tournament.id, on: Groups.configSettings().bCup };
+    if (Groups.settings().seasonFinal) _mcPlayB.on = true;   // the Season final always plays the B cup
     const full = Groups.cupFields(true);
     const g = Groups.groupList().length;
     const place = r => r.pos === 1 ? 'winner' : r.pos === 2 ? 'runner-up' : r.pos === 3 ? '3rd' : `${r.pos}th`;
@@ -1919,6 +1920,26 @@ function _mcDrawCupsHTML() {
     // without a B cup the A cup takes the top two of each group, whatever To the A cup says (cupFields())
     const f = playB ? full : Groups.cupFields(false);
     const level = Groups.groupList().some(gr => Groups.standings(gr.name).some(r => r.level));
+    // drawn by group (the Season final): round 1 is fixed by the groups, shown as the pairings
+    const byGroup = Groups.drawsByGroup();
+    const names = Groups.groupList().map(gr => gr.name);
+    const pairs = (a, b) => names.map((n, i) => `${n}${a} v ${names[names.length - 1 - i]}${b}`).join(', ');
+    const pairField = (cup, title, off) => {
+        const b = Groups.cupBracketByGroup(cup).bracket;
+        const label = (_, i) => `${names[i % 2 ? names.length - 1 - (i >> 1) : i >> 1]}${(cup === 'B' ? 3 : 1) + i % 2}`;
+        const who = p => p ? escapeHtml(p.name) : '<i>bye</i>';
+        return `<div class="mc-field${off ? ' mc-off-field' : ''}"><h4>${title}<small>${b.filter(Boolean).length} players${off ? ' · not played' : ''}</small></h4>
+            <ol>${names.map((_, m) => `<li><b>${who(b[2 * m])} v ${who(b[2 * m + 1])}</b><span>${label(b[2 * m], 2 * m)} v ${label(b[2 * m + 1], 2 * m + 1)}</span></li>`).join('')}</ol></div>`;
+    };
+    if (byGroup) return `<section class="mc-panel mc-drawcups"><div class="mc-ph"><h3>Draw the cups<small>every group match is played</small></h3></div>
+        <p class="mc-note">The cups are drawn by group: the A cup is ${pairs(1, 2)}; the B cup ${pairs(3, 4)}. The first half meet in one semifinal, the rest in the other, so group mates can only meet again in a final.</p>
+        <div class="mc-fields">${pairField('A', 'A cup', false)}${pairField('B', 'B cup', !playB)}</div>
+        ${level ? '<p class="mc-note mc-warn">Some players are level on wins, legs and head-to-head: the group seed decides, unless you change it with ▲ in the group tables.</p>' : ''}
+        <div class="mc-drawbar">
+            <p>All ${Groups.groupList().reduce((n, gr) => n + Groups.groupMatches(gr.name).length, 0)} group matches are played. Round 1 is set by the group tables.</p>
+            ${Groups.settings().seasonFinal ? '' : `<label class="mc-switchrow"><span class="mc-switch"><input type="checkbox"${playB ? ' checked' : ''}${canB ? '' : ' disabled'} onchange="_mcPlayB.on = this.checked; _mcRefresh(0);"><span></span></span> Play the B cup${canB ? '' : ' <small>(needs two players)</small>'}</label>`}
+            <button type="button" class="mc-btn mc-primary mc-big" onclick="drawCupsFromControls()">Draw the cups →</button>
+        </div></section>`;
     return `<section class="mc-panel mc-drawcups"><div class="mc-ph"><h3>Draw the cups<small>every group match is played</small></h3></div>
         <p class="mc-note">${!playB
             ? `Without a B cup, the top two of each group play the A cup, group winners as seeds 1–${g}, runners-up ${g + 1}–${2 * g}, ranked across the groups per match (win rate, then leg difference). The rest play no cup and are placed after it by their group results.`
@@ -1940,7 +1961,7 @@ function _mcDrawCupsHTML() {
  * @returns {void}
  */
 function drawCupsFromControls() {
-    const playB = _mcPlayB.tid === tournament.id ? _mcPlayB.on : Groups.configSettings().bCup;
+    const playB = Groups.settings().seasonFinal || (_mcPlayB.tid === tournament.id ? _mcPlayB.on : Groups.configSettings().bCup);
     if (drawCups(playB)) _mcRefresh(0);
 }
 
@@ -2072,7 +2093,7 @@ function _mcLastFormatId() {
     drawn.sort((a, b) => String(b.created || b.date || '').localeCompare(String(a.created || a.date || '')));
     const t = drawn[0];
     if (!t) return null;
-    return t.format === 'SE' && t.plate ? 'CP' : (t.format || 'DE');
+    return tournamentFormatId(t);
 }
 
 /** A knockout of n players with a bronze final: its real matches (byes play none). */
@@ -2086,6 +2107,13 @@ const _mcKnockoutMatches = n => n < 2 ? 0 : (n - 1) + (n >= 4 ? 1 : 0);
  * @returns {{ok: boolean, why: string, fit: string, sum: string, matches: string, each: string, range: string}}
  */
 function _mcFormatFit(f, paid) {
+    if (f.seasonFinal) {
+        // the Season final, NewTon DC: exactly 16, four groups of four, two cups of eight
+        const out = { ok: paid === 16, why: 'Exactly 16 players', fit: '4 groups of 4, then the A and B cups', sum: '4 groups of 4, then the A and B cups, drawn by group',
+            matches: `24 group + ${2 * _mcKnockoutMatches(8)} cup`, each: '3 group, then 1–3 cup', range: 'Exactly 16' };
+        if (out.ok) out.why = '';
+        return out;
+    }
     const rr = f.id === 'GROUPS' && typeof Groups !== 'undefined';
     const single = rr && Groups.configSettings().structure === 'single';
     const sw = f.id === 'SWISS' && typeof Swiss !== 'undefined';
@@ -2131,6 +2159,8 @@ function _mcFormatFit(f, paid) {
 /** Pick a format at the draw. */
 function _mcPickFormat(id) {
     _mcPick = { tid: tournament ? tournament.id : null, id };
+    // the Season final's fixed settings are set at its draw only; any other pick starts without them
+    if (typeof Groups !== 'undefined' && Groups.configSettings().seasonFinal) Groups.setDrawChoice(null);
     _mcRefresh(0);
 }
 
@@ -2148,11 +2178,15 @@ function _mcSwissChoice(key, value) {
     _mcRefresh(0);
 }
 
-/** Draw the picked format (Cup and Plate: single elimination with a Plate). */
+/** Draw the picked format (Cup and Plate: single elimination with a Plate; the Season final: Round Robin with its fixed settings). */
 function _mcDrawPicked() {
     const f = TOURNAMENT_FORMATS.find(x => x.id === _mcPick.id);
     if (!f) return;
     if (typeof Plate !== 'undefined') Plate.setWanted(!!f.plate);
+    if (typeof Groups !== 'undefined') {
+        if (f.seasonFinal) Groups.setDrawChoice({ seasonFinal: true });
+        else if (Groups.configSettings().seasonFinal) Groups.setDrawChoice(null);
+    }
     generateBracket(f.draw || f.id);
 }
 
@@ -2230,6 +2264,7 @@ function _mcSetupHTML() {
     const legs = pid === 'SE' ? seLegs
         : pid === 'CP' ? seLegs.concat([['The Plate', 'the same, by its rounds']])
         : pid === 'SWISS' ? [['Rounds', bo(l.swissRounds)], ['Semifinal', bo(l.swissSemifinal)], ['Bronze final', bo(l.swissBronze)], ['Final', bo(l.swissFinal)]]
+        : pid === 'SF' ? [['Group matches', bo(l.groupMatches)], ['Cup rounds', bo(l.cupRounds)], ['Cup semifinal', bo(l.cupSemifinal)], ['Cup bronze final', bo(l.cupBronze)], ['Cup final', bo(l.cupFinal)]]
         : pid === 'GROUPS' ? (Groups.configSettings().structure === 'single' ? [['Group matches', bo(l.groupMatches)]]
             : [['Group matches', bo(l.groupMatches)], ['Cup rounds', bo(l.cupRounds)], ['Cup semifinal', bo(l.cupSemifinal)], ['Cup bronze final', bo(l.cupBronze)], ['Cup final', bo(l.cupFinal)]])
         : [['Regular rounds', bo(l.regularRounds)], ['Frontside semifinal', bo(l.frontsideSemifinal)], ['Backside semifinal', bo(l.backsideSemifinal)], ['Backside final', bo(l.backsideFinal)], ['Grand final', bo(l.grandFinal)]];
@@ -2239,7 +2274,7 @@ function _mcSetupHTML() {
             ${players.length < (typeof Qualifiers !== 'undefined' ? Qualifiers.MAX_PLAYERS : 32) ? `<div class="mc-addrow"><input type="text" id="ccPlayerName" class="mc-text" placeholder="Add a player (found in the database, or created)" autocomplete="off" onkeydown="if (event.key === 'Enter') addPlayerFromCC()"><button type="button" class="mc-btn mc-primary" onclick="addPlayerFromCC()">Add</button></div>` : ''}
             <div class="mc-chips">${chips || '<span class="mc-note">No players yet.</span>'}</div></section>
         <section class="mc-panel mc-pick"><div class="mc-ph"><h3>Pick a format<small>then draw</small></h3><button type="button" class="mc-link" onclick="showPage('config')">Formats to offer</button></div>
-            <div class="mc-fcards">${cards.map(cardHtml).join('')}</div>${detail}${drawbar}</section>
+            <div class="mc-fcards${cards.length === 6 ? ' mc-f6' : ''}">${cards.map(cardHtml).join('')}</div>${detail}${drawbar}</section>
         <section class="mc-panel"><div class="mc-ph"><h3>Settings for this tournament<small>change them in Global Settings</small></h3><button type="button" class="mc-link" onclick="showPage('config')">Global Settings</button></div>
             <div class="mc-settings">
                 <div><h4>Points</h4>${dl([['Taking part', p.participation], ['1st · 2nd · 3rd · 4th', `${p.first} · ${p.second} · ${p.third} · ${p.fourth}`], ['5–6th · 7–8th', `${p.fifthSixth} · ${p.seventhEighth}`], ['180 · High out · Short leg · Ton', `${p.oneEighty} · ${p.highOut} · ${p.shortLeg} · ${p.ton}`]])}</div>

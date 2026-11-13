@@ -1546,7 +1546,8 @@ function showBracketConfirmation(paidPlayers, bracketSize, byeCount, format) {
     const single = groups && Groups.configSettings().structure === 'single';
     // Cup and Plate: the Plate is half the Cup (picked at the draw)
     const withPlate = format === 'SE' && bracketSize >= 8 && typeof Plate !== 'undefined' && Plate.wanted();
-    const formatLabel = swiss ? 'Swiss' : groups ? (single ? 'Round Robin, one group' : 'Round Robin, groups and cups') : withPlate ? 'Cup and Plate' : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
+    const seasonFinal = groups && Groups.configSettings().seasonFinal;
+    const formatLabel = swiss ? 'Swiss' : seasonFinal ? 'Season final, NewTon DC' : groups ? (single ? 'Round Robin, one group' : 'Round Robin, groups and cups') : withPlate ? 'Cup and Plate' : format === 'SE' ? 'Single Elimination' : 'Double Elimination';
     document.getElementById('bracketConfirmTitle').textContent = swiss ? 'Draw Swiss' : groups ? (single ? 'Draw the Group' : 'Draw the Groups') : `Generate ${formatLabel} Bracket`;
     document.getElementById('bracketConfirmName').textContent = (tournament && tournament.name) || '-';
     document.getElementById('bracketConfirmFormat').textContent = formatLabel;
@@ -1791,8 +1792,9 @@ function drawGroups(paid) {
 /**
  * GROUPS AND CUPS: draw the cups once every group match is played. The fields and seeds come
  * from the group tables (Groups.cupFields()); each cup is single elimination seeded "All"
- * (placeSeededPlayers(), top seed v bottom seed, byes to the best seeds), its matches the SE
- * structure with cup IDs (cupMatchId). Recorded as a DRAW_CUPS transaction, which undoCupDraw()
+ * (placeSeededPlayers(), top seed v bottom seed, byes to the best seeds), or, in a format that draws
+ * the cups by group (the Season final), group against mirror group (Groups.cupBracketByGroup()); its
+ * matches the SE structure with cup IDs (cupMatchId). Recorded as a DRAW_CUPS transaction, which undoCupDraw()
  * removes again while no cup result has been entered. Docs/GROUPS-AND-CUPS.md
  * @param {boolean} playB - play the B cup (needs at least two players)
  * @returns {boolean} true when the cups were drawn
@@ -1812,10 +1814,13 @@ function drawCups(playB) {
 
     ['A', 'B'].forEach(cup => {
         if (cup === 'B' && !cups.bCup) return;
-        const size = calculateBracketSize(fields[cup].length, 'SE');
+        const byGroup = Groups.cupBracketByGroup(cup);
+        const size = byGroup ? byGroup.size : calculateBracketSize(fields[cup].length, 'SE');
         // Round Robin → Group rematches: Avoid reorders the field so round 1 pairs players from different groups
-        const field = (Groups.settings().rematches === 'avoid' ? Groups.avoidRematches(fields[cup], size) : fields[cup]).map(_slotPlayer);
-        const bracket = placeSeededPlayers(field, size, field, true);
+        const field = (!byGroup && Groups.settings().rematches === 'avoid' ? Groups.avoidRematches(fields[cup], size) : fields[cup]).map(_slotPlayer);
+        // by group: the positions are fixed by the groups, an empty place is a bye
+        const bracket = byGroup ? byGroup.bracket.map((p, i) => p ? _slotPlayer(p) : createWalkoverPlayer(i))
+            : placeSeededPlayers(field, size, field, true);
         cups[cup] = { size, seeds: field.map(p => p.id) };
         calculateCleanBracketStructure(size, 'SE').frontside.forEach((roundInfo, roundIndex) => {
             for (let i = 0; i < roundInfo.matches; i++) {

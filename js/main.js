@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.5.0'; // Live Is Life — Live View: watch a tournament being played from Analytics; failed uploads no longer silent
+const APP_VERSION = '5.5.1'; // Mainly Malmö Manager Mods — achievements typed but not added are no longer lost; NewTon DC's season final (club only)
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];
@@ -416,6 +416,7 @@ function autoLoadCurrentTournament() {
             bracketSize: tournamentData.bracketSize, // ✅ Fixed: Include bracketSize
             format: tournamentData.format, // SE/DE format (absent = DE for backward compat)
             seeding: tournamentData.seeding, // who was seeded in the draw (absent = a random draw)
+            seasonFill: tournamentData.seasonFill, // the Season final's Fill from season standings (absent = not used)
             groups: tournamentData.groups, // groups and cups: the group draw (absent in other formats)
             cups: tournamentData.cups, // groups and cups: the cup draw (absent until drawn)
             qualifiers: tournamentData.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)

@@ -28,7 +28,7 @@ const Groups = (() => {
     let drawChoice = null;
     /**
      * Set Round Robin's options for the next draw of the current tournament (null clears them).
-     * @param {{structure?: string, cupEntry?: string, meetings?: number}|null} choice
+     * @param {{structure?: string, cupEntry?: string, meetings?: number, cupDraw?: string, seasonFinal?: boolean}|null} choice
      */
     function setDrawChoice(choice) {
         drawChoice = choice && typeof tournament !== 'undefined' && tournament ? Object.assign({ tid: tournament.id }, choice) : null;
@@ -38,6 +38,10 @@ const Groups = (() => {
         !(tournament.bracket && all().length) ? drawChoice : null;
     /** How many times each pair meets in one group: 2 (a double round robin) or 1. Absent = 1. */
     const meetingsOf = v => Number(v) === 2 ? 2 : 1;
+    /** How the cups are drawn: 'groups' (by group: A1 v D2, B1 v C2, …; Docs/SEASON-FINAL.md) or 'seeded'
+     * (by results across the groups, the mirror draw). Absent = 'seeded', as before. Never in Global
+     * Settings: only a format that fixes it (the Season final) sets it, through the draw choice. */
+    const cupDrawOf = v => v === 'groups' ? 'groups' : 'seeded';
     /** Round Robin's settings for the next draw: Global Settings, with the choices made at the draw:
      * structure 'groups' | 'single', cupEntry 'top2' | 'half', bCup, maxGroup, meetings (one group: 1 or 2). */
     function configSettings() {
@@ -48,22 +52,27 @@ const Groups = (() => {
             if (choice.cupEntry) rr.cupEntry = choice.cupEntry;
             if (choice.meetings) rr.meetings = choice.meetings;
         }
+        const cupDraw = cupDrawOf(choice && choice.cupDraw);
+        // the Season final, NewTon DC: every setting fixed, whatever Global Settings say (SEASON_FINAL_FORMAT)
+        if (choice && choice.seasonFinal) return { structure: 'groups', cupEntry: 'top2', rematches: 'allow', bCup: true, maxGroup: 4, meetings: 1, cupDraw: 'groups', seasonFinal: true };
         return { structure: rr.structure === 'single' ? 'single' : 'groups', cupEntry: rr.cupEntry === 'top2' ? 'top2' : 'half',
             rematches: rr.rematches === 'avoid' ? 'avoid' : 'allow', bCup: rr.bCup !== false, maxGroup: maxGroupOf(rr.maxGroup),
-            meetings: rr.structure === 'single' ? meetingsOf(rr.meetings) : 1 };
+            meetings: rr.structure === 'single' ? meetingsOf(rr.meetings) : 1, cupDraw, seasonFinal: false };
     }
     /** The settings the tournament was drawn with (absent in the first build: groups and cups, top two). */
     function settings() {
         const s = (on() && tournament.groups && tournament.groups.settings) || {};
         return { structure: s.structure === 'single' ? 'single' : 'groups', cupEntry: s.cupEntry === 'half' ? 'half' : 'top2',
-            rematches: s.rematches === 'avoid' ? 'avoid' : 'allow', maxGroup: maxGroupOf(s.maxGroup), meetings: meetingsOf(s.meetings) };
+            rematches: s.rematches === 'avoid' ? 'avoid' : 'allow', maxGroup: maxGroupOf(s.maxGroup), meetings: meetingsOf(s.meetings),
+            cupDraw: cupDrawOf(s.cupDraw), seasonFinal: !!s.seasonFinal };
     }
     /** True for one group (a pure round robin: no cups, the table decides). */
     const isSingle = () => settings().structure === 'single';
     /** How many players the next draw takes, by the structure in Global Settings. */
-    const limits = () => configSettings().structure === 'single' ? { minPlayers: 3, maxPlayers: 8 } : { minPlayers: 6, maxPlayers: 32 };
-    /** The format in words for this tournament: "Round robin, one group" or "Round robin, groups and cups". */
-    const formatName = () => isSingle() ? `Round robin, one group${settings().meetings === 2 ? ', twice' : ''}` : 'Round robin, groups and cups';
+    const limits = () => configSettings().seasonFinal ? { minPlayers: 16, maxPlayers: 16 }
+        : configSettings().structure === 'single' ? { minPlayers: 3, maxPlayers: 8 } : { minPlayers: 6, maxPlayers: 32 };
+    /** The format in words for this tournament: "Round robin, one group", "Round robin, groups and cups" or "Season final". */
+    const formatName = () => settings().seasonFinal ? 'Season final' : isSingle() ? `Round robin, one group${settings().meetings === 2 ? ', twice' : ''}` : 'Round robin, groups and cups';
 
     // ---------- the group draw ----------
     /**
@@ -122,6 +131,8 @@ const Groups = (() => {
         const order = seeded ? seeded.order.concat(shuffle(paid.filter(p => !seeded.order.includes(p)))) : shuffle(paid);
         const cfg = configSettings();
         const settings = { structure: cfg.structure, cupEntry: cfg.cupEntry, rematches: cfg.rematches, maxGroup: cfg.maxGroup, meetings: cfg.meetings };
+        if (cfg.cupDraw === 'groups') settings.cupDraw = 'groups';     // additive: absent = seeded
+        if (cfg.seasonFinal) settings.seasonFinal = true;              // additive: the Season final, NewTon DC
         if (cfg.structure === 'single') return { list: [{ name: 'A', players: order.slice() }], order, seeding: seeded ? seeded.record : null, settings };
         const g = groupCount(order.length);
         const list = Array.from({ length: g }, (_, i) => ({ name: LETTERS[i], players: [] }));
@@ -244,6 +255,36 @@ const Groups = (() => {
             A = everyone.slice(0, half); B = everyone.slice(half);
         }
         return { A: A.map(r => r.player), B: B.map(r => r.player), rows: { A, B } };
+    }
+
+    /**
+     * True when this tournament's cups are drawn by group (settings().cupDraw 'groups') and the groups
+     * allow it: 2, 4 or 8 groups (each cup a full bracket of 2 × groups), none larger than 4, top two
+     * to the A cup. Otherwise the cups are drawn by seed as usual.
+     * @returns {boolean}
+     */
+    function drawsByGroup() {
+        const s = settings(), list = groupList();
+        return s.cupDraw === 'groups' && s.structure === 'groups' && s.cupEntry === 'top2' &&
+            [2, 4, 8].includes(list.length) && list.every(g => g.players.length <= 4);
+    }
+
+    /**
+     * A cup's round 1 when the cups are drawn by group (drawsByGroup()): group i's first of the cup's two
+     * places meets the second of the mirror group (g−1−i). With four groups, the A cup is A1 v D2, B1 v C2
+     * (top half) and C1 v B2, D1 v A2 (bottom half), so group mates can only meet again in the final; the
+     * B cup the same with 3rd and 4th. A place nobody holds (a group of three) is null: a bye.
+     * @param {'A'|'B'} cup
+     * @returns {{bracket: (object|null)[], size: number}|null} the players in bracket positions (match i
+     *   is positions 2i and 2i+1), or null when the cups aren't drawn by group
+     */
+    function cupBracketByGroup(cup) {
+        if (!drawsByGroup()) return null;
+        const list = groupList(), g = list.length, first = cup === 'B' ? 3 : 1;
+        const at = (group, pos) => { const r = standings(group.name).find(x => x.pos === pos); return r ? r.player : null; };
+        const bracket = [];
+        list.forEach((group, i) => bracket.push(at(group, first), at(list[g - 1 - i], first + 1)));
+        return { bracket, size: 2 * g };
     }
 
     /**
@@ -517,9 +558,10 @@ const Groups = (() => {
     }
 
     return {
-        isGroupId, isCupId, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
+        isGroupId, isCupId, snake, groupCount, groupSizes, describeSizes, seededDraw, drawGroups,
         configSettings, setDrawChoice, settings, isSingle, limits, formatName, placeTier,
         groupList, groupMatches, standings, groupDone, allGroupsDone, cupFields,
+        drawsByGroup, cupBracketByGroup,
         planCupReferees, avoidRematches, plannedRefereeFor, plannedRefereeText, cupMatchesOf, holdFor,
         isComplete, placements, roundName, moveUp
     };

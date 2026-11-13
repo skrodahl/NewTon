@@ -165,10 +165,24 @@ const Seeding = (() => {
      * @returns {{order: object[], record: object}|null} order: the ranked players, best first
      */
     function forGroups(paid) {
+        // The Season final, NewTon DC: by season rank, from Fill from season standings (season-final.js)
+        const season = seasonFinalSeeds(paid);
+        if (season) return season;
         if (!config.seeding || config.seeding.mode === 'off') return null;
         const ranked = plan(paid, 0).ranked;
         if (ranked.length < 2) return null;
         return { order: ranked.map(x => x.player), record: recordOf(ranked, 'groups') };
+    }
+
+    /**
+     * The Season final's seeding, when the Season final is being drawn and its players came from
+     * Fill from season standings; otherwise null (the Seeding panel's ranking applies).
+     * @param {object[]} paid
+     * @returns {{order: object[], record: object}|null}
+     */
+    function seasonFinalSeeds(paid) {
+        if (typeof SeasonFinal === 'undefined' || typeof Groups === 'undefined' || !Groups.configSettings().seasonFinal) return null;
+        return SeasonFinal.forGroups(paid);
     }
 
     /** What the tournament keeps of a seeded draw: who was seeded, and from which tournaments. */
@@ -193,14 +207,19 @@ const Seeding = (() => {
      * @returns {string}
      */
     function html(formatId) {
-        const s = ensure();
-        if (!s) return '';
         const paid = players.filter(p => p.paid);
         const fmts = typeof getVisibleFormats === 'function' ? getVisibleFormats() : [];
         const fmt = TOURNAMENT_FORMATS.find(f => f.id === formatId) || fmts[0] || { id: 'DE' };
-        pickedGroups = fmt.id === 'GROUPS';
+        // The Season final is seeded by season rank when its players came from the standings
+        if (fmt.seasonFinal && typeof SeasonFinal !== 'undefined') {
+            const sf = SeasonFinal.forGroups(paid);
+            if (sf) return SeasonFinal.seedsPanelHtml(sf);
+        }
+        const s = ensure();
+        if (!s) return '';
+        pickedGroups = fmt.id === 'GROUPS' || fmt.draw === 'GROUPS';   // also the Season final
         pickedSwiss = fmt.id === 'SWISS';
-        const size = calculateBracketSize(Math.max(paid.length, 4), fmt.draw || (pickedGroups || pickedSwiss ? 'DE' : fmt.id)) || 32;
+        const size = calculateBracketSize(Math.max(paid.length, 4), pickedGroups || pickedSwiss ? 'DE' : fmt.draw || fmt.id) || 32;
         let body = '';
         if (s.on) {
             if (!s.ready) body = '<p class="mc-note">Reading earlier tournaments…</p>';
@@ -218,24 +237,42 @@ const Seeding = (() => {
         return key === 'all' ? 'All ranked' : `${f.label} (${n >= 2 ? n : 'none'})`;
     }
 
-    function controlsHtml(s, size) {
+    /**
+     * The lens's name word and period, and any extra controls after them. Also used by Fill from
+     * season standings (SeasonFinal), which has its own state and the same handler names.
+     * @param {object} s - a lens state (keyword, period)
+     * @param {string} ns - the global object whose setKeyword/setPeriod the controls call
+     * @param {string} [extra] - more labels for the row
+     * @returns {string}
+     */
+    function lensControlsHtml(s, ns, extra) {
         const cur = halfYear(0), prev = halfYear(-1);
         const opt = (v, label) => `<option value="${v}"${s.period === v ? ' selected' : ''}>${label}</option>`;
         return `<div class="mc-seedctl">
-            <label>Ranked on<input type="text" class="mc-text" value="${escapeHtml(s.keyword)}" onchange="Seeding.setKeyword(this.value)" placeholder="Part of the name" autocomplete="off"></label>
-            <label>Period<select onchange="Seeding.setPeriod(this.value)">${opt('current', cur.label)}${opt('previous', prev.label)}${opt('all', 'All time')}</select></label>
-            <label>Seeded players<select onchange="Seeding.setFraction(this.value)">${Object.keys(FRACTIONS).map(k => `<option value="${k}"${s.fraction === k ? ' selected' : ''}>${fractionLabel(k, size)}</option>`).join('')}</select></label>
+            <label>Ranked on<input type="text" class="mc-text" value="${escapeHtml(s.keyword)}" onchange="${ns}.setKeyword(this.value)" placeholder="Part of the name" autocomplete="off"></label>
+            <label>Period<select onchange="${ns}.setPeriod(this.value)">${opt('current', cur.label)}${opt('previous', prev.label)}${opt('all', 'All time')}</select></label>${extra || ''}
         </div>`;
     }
 
-    function listHtml(s) {
-        const row = t => `<label class="mc-check"><input type="checkbox"${s.ticked.has(t.id) ? ' checked' : ''} onchange="Seeding.toggle(${s.list.indexOf(t)})"> ${escapeHtml(t.name || t.id)} <small>${t.date}</small></label>`;
+    function controlsHtml(s, size) {
+        return lensControlsHtml(s, 'Seeding',
+            `<label>Seeded players<select onchange="Seeding.setFraction(this.value)">${Object.keys(FRACTIONS).map(k => `<option value="${k}"${s.fraction === k ? ' selected' : ''}>${fractionLabel(k, size)}</option>`).join('')}</select></label>`);
+    }
+
+    /**
+     * The lens's tournaments in the period, the cup's ticked and the others folded away.
+     * @param {object} s - a lens state (list, ticked, keyword, period, othersOpen)
+     * @param {string} [ns] - the global object whose toggle/setOthersOpen the list calls
+     * @returns {string}
+     */
+    function listHtml(s, ns = 'Seeding') {
+        const row = t => `<label class="mc-check"><input type="checkbox"${s.ticked.has(t.id) ? ' checked' : ''} onchange="${ns}.toggle(${s.list.indexOf(t)})"> ${escapeHtml(t.name || t.id)} <small>${t.date}</small></label>`;
         const here = inPeriod(s, s.period);
         if (!here.length) return '<p class="mc-note">No tournaments in this period.</p>';
         const mine = here.filter(t => nameMatches(t.name, s.keyword) && !isFinal(t.name));
         const others = here.filter(t => !mine.includes(t));
         return `<div class="mc-seedlist">${mine.length ? mine.map(row).join('') : '<p class="mc-note">None of them match the name. Tick the ones to rank on, or change the name.</p>'}
-            ${others.length ? `<details${s.othersOpen ? ' open' : ''} ontoggle="Seeding.setOthersOpen(this.open)"><summary>Other tournaments (${others.length})</summary>${others.map(row).join('')}</details>` : ''}</div>`;
+            ${others.length ? `<details${s.othersOpen ? ' open' : ''} ontoggle="${ns}.setOthersOpen(this.open)"><summary>Other tournaments (${others.length})</summary>${others.map(row).join('')}</details>` : ''}</div>`;
     }
 
     function seedsHtml(s, paid, size) {
@@ -294,5 +331,7 @@ const Seeding = (() => {
         refresh(s);
     }
 
-    return { html, forDraw, forGroups, keywordFor, isFinal, nameMatches, setOn, setFraction, setKeyword, setPeriod, toggle, setOthersOpen };
+    return { html, forDraw, forGroups, keywordFor, isFinal, nameMatches, setOn, setFraction, setKeyword, setPeriod, toggle, setOthersOpen,
+        // the lens, for Fill from season standings (season-final.js)
+        lens: { inPeriod, matchesIn, pickPeriod, controlsHtml: lensControlsHtml, listHtml } };
 })();

@@ -144,6 +144,8 @@
    facts and options, then the Draw bar. A format not offered is greyed out and locked; one that
    doesn't fit tonight's field can still be picked (to change its options), and says why. */
 .mc-fcards { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 10px; padding: 0 18px 14px; }
+/* six cards (with the Season final, NEWTON_DC=1): three by three rather than five and one */
+.mc-fcards.mc-f6 { grid-template-columns: repeat(auto-fit, minmax(max(190px, calc((100% - 20px) / 3)), 1fr)); }
 .mc-fcard { position: relative; text-align: left; font: inherit; color: var(--nt-ink); background: var(--nt-surface); border: 2px solid var(--nt-line-2); border-radius: 12px; padding: 12px 14px; display: grid; gap: 3px; align-content: start; cursor: pointer; }
 .mc-fcard:hover { border-color: #a8a29e; }
 .mc-fcard.mc-on { border-color: var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); }

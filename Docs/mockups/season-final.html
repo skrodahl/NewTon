@@ -1,0 +1,414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Mockup: Season final, NewTon DC</title>
+<link rel="stylesheet" href="../../css/design-tokens.css">
+<style>
+@font-face { font-family: 'Inter'; src: url('../../fonts/Inter-VariableFont_opsz,wght.ttf') format('truetype'); font-weight: 100 900; font-display: swap; }
+@font-face { font-family: 'Cascadia Code'; src: url('../../fonts/CascadiaCode-VariableFont_wght.ttf') format('truetype'); font-weight: 200 700; font-display: swap; }
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--nt-bg); color: var(--nt-ink); font-family: var(--nt-sans); font-size: 14px; line-height: 1.45; }
+.intro { max-width: 1280px; margin: 0 auto; padding: 24px 24px 0; }
+.intro h1 { margin: 0; font-size: 24px; font-weight: 800; letter-spacing: -.02em; }
+.intro p { margin: 6px 0 0; color: var(--nt-muted); max-width: 110ch; }
+.screens { display: flex; flex-wrap: wrap; gap: 8px; margin: 14px 0 0; }
+.screens button { font: inherit; font-size: 13px; font-weight: 700; padding: 7px 14px; border-radius: 99px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); cursor: pointer; }
+.screens button.on { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.app { max-width: 1280px; margin: 16px auto 60px; padding: 0 24px; }
+.screen { display: none; }
+.screen.on { display: block; }
+.hdr { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; padding: 10px 0 12px; }
+.hdr b { font-size: 22px; font-weight: 800; }
+.hdr small { display: block; color: var(--nt-muted); font-family: var(--nt-mono); font-size: 12px; }
+.seg { display: inline-flex; border: 1px solid var(--nt-line-2); border-radius: 8px; overflow: hidden; background: var(--nt-surface); }
+.seg span { padding: 6px 12px; font-size: 13px; font-weight: 600; color: var(--nt-ink-2); cursor: pointer; }
+.seg span + span { border-left: 1px solid var(--nt-line-2); }
+.seg .on { background: var(--nt-header); color: var(--nt-header-ink); }
+.panel { background: var(--nt-surface); border: 1px solid var(--nt-line); border-radius: 12px; margin-bottom: 16px; }
+.ph { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; flex-wrap: wrap; padding: 14px 18px 10px; }
+.ph h3 { margin: 0; font-size: 15px; }
+.ph h3 small { font-weight: 500; color: var(--nt-muted); font-size: 12px; margin-left: 6px; }
+.btn { display: inline-flex; align-items: center; justify-content: center; border-radius: 8px; padding: 7px 13px; font-weight: 700; font-size: 13px; border: 1px solid var(--nt-line-2); background: var(--nt-surface); color: var(--nt-ink-2); cursor: pointer; font-family: inherit; }
+.btn.dark { background: var(--nt-header); border-color: var(--nt-header); color: var(--nt-header-ink); }
+.btn.big { padding: 10px 22px; font-size: 15px; }
+.btn.sm { padding: 3px 9px; font-size: 12px; font-weight: 600; }
+.note { font-size: 12px; color: var(--nt-muted); padding: 0 18px 14px; margin: 0; }
+.callout { margin: 0 18px 14px; padding: 10px 12px; border-radius: 8px; background: var(--nt-accent-soft); color: #7a2e0b; font-size: 12px; }
+.design { margin: 0 0 16px; padding: 12px 14px; border: 1px dashed var(--nt-line-strong); border-radius: 10px; font-size: 13px; color: var(--nt-ink-2); background: var(--nt-surface-2); }
+.design b { color: var(--nt-ink); }
+.design ul { margin: 6px 0 0; padding-left: 18px; }
+
+/* scope line */
+.scope { display: flex; flex-wrap: wrap; gap: 6px 14px; align-items: center; padding: 0 18px 12px; font-size: 13px; color: var(--nt-ink-2); }
+.scope .tag { font-size: 12px; border: 1px solid var(--nt-line-2); border-radius: 99px; padding: 2px 9px; background: var(--nt-surface-2); }
+
+/* tables */
+table { width: 100%; border-collapse: collapse; font-size: 13px; }
+th { text-align: left; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-muted); font-weight: 600; padding: 6px 10px; border-bottom: 1px solid var(--nt-line-2); white-space: nowrap; }
+td { padding: 7px 10px; border-bottom: 1px solid var(--nt-line); white-space: nowrap; }
+td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
+td.rk { color: var(--nt-muted); font-family: var(--nt-mono); font-size: 12px; width: 1%; }
+td.nm { font-weight: 600; width: 100%; }
+td.op { font-family: var(--nt-mono); font-size: 12px; }
+tr.cut td { border-bottom: 2px solid var(--nt-ink); }
+tr.grph th { border-bottom: 0; text-align: center; padding-bottom: 0; color: var(--nt-faint); }
+th.gs, td.gs { border-left: 1px solid var(--nt-line); }
+td.pts { font-weight: 800; font-size: 14px; }
+.dash { color: var(--nt-faint); }
+.lbmeta { display: flex; gap: 8px; align-items: center; font-size: 12px; color: var(--nt-muted); }
+.lbmeta .ln { display: inline-block; width: 22px; border-top: 2px solid var(--nt-ink); }
+tr.out td { color: var(--nt-faint); }
+tr.out td.nm { text-decoration: line-through; text-decoration-color: var(--nt-faint); }
+.pill { display: inline-block; font-size: 11px; font-weight: 700; border-radius: 99px; padding: 2px 8px; }
+.pill.q { background: var(--nt-ok-soft); color: var(--nt-ok); }
+.pill.r { background: var(--nt-ready-soft); color: #7a5a06; }
+.pill.na { background: var(--nt-inset); color: var(--nt-muted); }
+.lvl { font-size: 11px; color: #c0562a; font-weight: 700; margin-left: 6px; }
+.oph { cursor: help; border-bottom: 1px dotted var(--nt-muted); }
+.linelabel td { border: 0; padding: 4px 10px 2px; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-muted); }
+.tablewrap { overflow-x: auto; padding: 0 8px 8px; }
+
+/* switch */
+.sw { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; color: var(--nt-ink-2); cursor: pointer; user-select: none; }
+.sw i { width: 28px; height: 16px; border-radius: 99px; background: var(--nt-line-2); position: relative; display: inline-block; }
+.sw i::after { content: ''; position: absolute; top: 2px; left: 2px; width: 12px; height: 12px; border-radius: 50%; background: #fff; transition: left .15s; }
+.sw.on i { background: var(--nt-warn); }
+.sw.on i::after { left: 14px; }
+
+/* OP explainer */
+.opbox { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 0 18px 14px; }
+.opbox div { border: 1px solid var(--nt-line); border-radius: 8px; padding: 8px 10px; font-size: 12px; color: var(--nt-ink-2); }
+.opbox b { display: block; font-size: 13px; color: var(--nt-ink); }
+
+/* format card + draw preview */
+.cols { display: grid; grid-template-columns: minmax(0, 1fr) 330px; gap: 16px; align-items: start; }
+.fmts { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 10px; padding: 0 18px 14px; }
+.fmt { position: relative; border: 2px solid var(--nt-line-2); border-radius: 12px; padding: 10px 12px; display: grid; gap: 3px; align-content: start; background: var(--nt-surface); }
+.fmt.on { border-color: var(--nt-accent); box-shadow: inset 0 3px 0 var(--nt-accent); }
+.fmt b { font-size: 14px; }
+.fmt .line { font-weight: 700; color: #c0562a; font-size: 12px; }
+.fmt .fit { font-size: 12px; color: var(--nt-muted); }
+.fmt.dim { opacity: .55; }
+.detail { border-top: 1px solid var(--nt-line); padding: 14px 18px 4px; display: grid; grid-template-columns: minmax(0, 1fr) 250px; gap: 18px; }
+.detail h4 { margin: 0 0 6px; font-size: 16px; }
+.detail p { margin: 0 0 8px; color: var(--nt-ink-2); }
+.facts { display: grid; gap: 6px; align-content: start; font-size: 13px; }
+.facts div { display: flex; justify-content: space-between; gap: 10px; border-bottom: 1px dashed var(--nt-line); padding-bottom: 5px; }
+.facts span { color: var(--nt-muted); }
+.drawbar { display: flex; justify-content: space-between; align-items: center; gap: 14px; flex-wrap: wrap; margin: 6px 18px 16px; padding: 12px 14px; border: 1px solid var(--nt-line-2); border-radius: 10px; background: var(--nt-surface-2); }
+.groups { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; padding: 0 18px 14px; }
+.grp { border: 1px solid var(--nt-line); border-radius: 8px; overflow: hidden; }
+.grp h5 { margin: 0; padding: 6px 10px; background: var(--nt-surface-2); border-bottom: 1px solid var(--nt-line); font-size: 12px; }
+.grp div { display: flex; justify-content: space-between; padding: 4px 10px; font-size: 12px; }
+.grp div span { color: var(--nt-muted); font-family: var(--nt-mono); }
+.cups { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; padding: 0 18px 16px; }
+.cup h5 { margin: 0 0 6px; font-size: 12px; text-transform: uppercase; letter-spacing: .06em; color: var(--nt-muted); }
+.half { border-left: 3px solid var(--nt-line-2); padding-left: 10px; margin-bottom: 8px; }
+.half small { display: block; font-size: 11px; color: var(--nt-muted); margin-bottom: 2px; }
+.m { display: flex; gap: 8px; align-items: center; font-size: 13px; padding: 3px 0; }
+.m b { font-family: var(--nt-mono); font-size: 12px; min-width: 22px; }
+.m span { color: var(--nt-muted); font-size: 12px; }
+.sec { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--nt-muted); padding: 4px 18px 8px; margin: 0; }
+
+@media (max-width: 1000px) {
+  .cols { grid-template-columns: 1fr; }
+  .fmts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .detail { grid-template-columns: 1fr; }
+  .groups { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .cups { grid-template-columns: 1fr; }
+  .opbox { grid-template-columns: 1fr 1fr; }
+}
+@media (max-width: 600px) {
+  .intro, .app { padding-left: 16px; padding-right: 16px; }
+  .hide-sm { display: none; }
+}
+</style>
+</head>
+<body>
+<div class="intro">
+    <h1>Season final, NewTon DC</h1>
+    <p>A Round Robin with fixed settings (four groups of four, top two to the A cup, the rest to the B cup, cups drawn by group, seeded by season rank), off by default in Formats to offer. Players come from the season standings, not from Player Registration. The ranking is total points, then OP (the County league's Outstanding Player, without its attendance part). Names and figures are made up.</p>
+    <div class="screens" id="screens">
+        <button data-s="final" class="on">1 · Analytics: Season final</button>
+        <button data-s="lb">2 · Analytics: Leaderboard with OP</button>
+        <button data-s="fill">3 · Registration: Fill from season standings</button>
+        <button data-s="draw">4 · Match Controls: the format and its draw</button>
+    </div>
+</div>
+
+<div class="app">
+
+<!-- 1 · Season final tab -->
+<section class="screen on" id="s-final">
+    <div class="hdr">
+        <div><b>Analytics</b><small>newton.skrodahl.net</small></div>
+        <div class="seg"><span>Dashboard</span><span class="on">Leaderboard</span><span>Players</span><span>Register</span></div>
+    </div>
+    <div class="design"><b>Design notes.</b>
+        <ul>
+            <li>A tab of its own in the Leaderboard. Its scope is the <b>saved season</b>, never the visitor's own Lens, so every member sees the same list.</li>
+            <li>The saved season keeps the name word and the dates, so each new Måndagscup night joins by itself. Misspelt tournaments are ticked in by hand.</li>
+            <li>Stored on the server like Corrections. Only the operator (Tournament Manager gate) can mark players or change the season. Switch the view below to see both.</li>
+            <li>The same table as All players, every column kept, with OP after Points and a Status column after the name. One table, two scopes.</li>
+            <li>Under it, the groups as they would be drawn today, from the qualified players in seed order, so players can see who they would meet. They move as players are marked.</li>
+        </ul>
+    </div>
+    <section class="panel">
+        <div class="ph">
+            <h3>Leaderboard<small>24 players · 21 tournaments</small></h3>
+            <div class="lbmeta"><div class="seg" id="lbtabs"><span>All players</span><span class="on">Season final</span></div><span class="ln"></span>Qualified <span class="btn sm">Export CSV</span><span class="btn sm">Export JSON</span></div>
+        </div>
+        <div class="scope">
+            <span><b>Season final, NewTon DC</b> · top 16 are invited</span>
+            <span class="tag">Name contains “Måndagscup”</span>
+            <span class="tag">1 Jul – 31 Dec 2026</span>
+            <span class="tag">+1 ticked by hand: “Mandagscup 14/10”</span>
+            <span class="tag">21 nights</span>
+            <span id="opOnly" style="display:none"><span class="btn sm">Change season</span></span>
+            <span style="margin-left:auto" class="seg" id="who"><span class="on">As a member</span><span>As the operator</span></span>
+        </div>
+        <div class="tablewrap"><table id="finalTable"></table></div>
+        <p class="note">Qualified: the 16 best available, by points, then OP. A player marked Not available keeps their row but doesn't count; everyone under them moves up. Updated <span style="font-family:var(--nt-mono)">13 Nov 21:40</span>.</p>
+    </section>
+    <section class="panel">
+        <div class="ph"><h3>The groups, if the final were drawn today<small>seeded by season rank, in snake order</small></h3></div>
+        <div class="groups" id="groupsA"></div>
+        <p class="note">Changes when a player is marked Not available, or when the standings change. The real draw is made on the night, from the players who are there.</p>
+    </section>
+</section>
+
+<!-- 2 · Leaderboard with OP -->
+<section class="screen" id="s-lb">
+    <div class="hdr">
+        <div><b>Analytics</b><small>Leaderboard · All players</small></div>
+        <div class="seg"><span>Dashboard</span><span class="on">Leaderboard</span><span>Players</span><span>Register</span></div>
+    </div>
+    <div class="design"><b>Design notes.</b>
+        <ul>
+            <li>Today's table unchanged, plus OP right after Points: two decimals, sortable like the rest, following the Lens like every other column. Also in Export CSV and JSON.</li>
+            <li>Order: points, then OP. Players level on points get a small “OP” marker, so it's clear why they are in that order. Level on both: they share the rank.</li>
+            <li>Hover OP to see its four parts.</li>
+        </ul>
+    </div>
+    <section class="panel">
+        <div class="ph"><h3>Leaderboard<small>24 players · 21 tournaments</small></h3>
+            <div class="lbmeta"><div class="seg"><span class="on">All players</span><span>Season final</span></div><span class="ln"></span>Top 16 <span class="btn sm">Export CSV</span><span class="btn sm">Export JSON</span></div></div>
+        <div class="tablewrap"><table id="lbTable"></table></div>
+    </section>
+    <section class="panel">
+        <div class="ph"><h3>OP, Outstanding Player<small>as the County league counts it, without its attendance part</small></h3></div>
+        <div class="opbox">
+            <div><b>Matches · 3w/m</b>matches won ÷ played, × 3 (walkovers don't count)</div>
+            <div><b>Legs · 3v/s</b>legs won ÷ legs played, × 3</div>
+            <div><b>Tons · t/s</b>tons per leg; a 180 counts as 2</div>
+            <div><b>Bonus · b / (v + (s+1)/(v+1))</b>short legs (9 darts 40 … 21 darts 2) and high outs (161–170 7 … 101–110 2), per leg won</div>
+        </div>
+        <p class="note">Matches recorded without a final score have no legs, so OP is most exact with scores entered (Chalker matches always have them).</p>
+    </section>
+</section>
+
+<!-- 3 · Fill from season standings -->
+<section class="screen" id="s-fill">
+    <div class="hdr">
+        <div><b>Season final 2026</b><small>Player Registration · 2026 · 12 · 07</small></div>
+        <div class="seg"><span>Setup</span><span class="on">Registration</span><span>Bracket</span></div>
+    </div>
+    <div class="design"><b>Design notes.</b>
+        <ul>
+            <li>Shown when Season final, NewTon DC is offered (Global Settings → Formats to offer). Works offline: the ranking comes from this computer's own results, with the seeding lens it already has.</li>
+            <li>On the night, the operator copies the Not available marks from the website by hand. Nothing is read back from the server.</li>
+            <li>The 16 are added as invited: already marked paid, so the unpaid rule never stops the draw.</li>
+        </ul>
+    </div>
+    <div class="cols">
+        <section class="panel">
+            <div class="ph"><h3>Fill from season standings<small>the 16 best available are invited</small></h3><span class="btn sm">Change season</span></div>
+            <div class="scope">
+                <span class="tag">Name contains “Måndagscup”</span>
+                <span class="tag">2026 H2</span>
+                <span class="tag">+1 ticked by hand</span>
+                <span class="tag">21 nights</span>
+            </div>
+            <div class="tablewrap"><table id="fillTable"></table></div>
+            <div class="drawbar"><span id="fillSum"></span><span class="btn dark big">Add these 16 players</span></div>
+        </section>
+        <div>
+            <section class="panel">
+                <div class="ph"><h3>Players<small>none yet</small></h3></div>
+                <p class="note">Adding players by hand still works, but for this format the list comes from the standings.</p>
+            </section>
+            <section class="panel">
+                <div class="ph"><h3>Seeds</h3></div>
+                <p class="note">Seed = season rank among the 16. A reserve who moves in is seeded below everyone above them.</p>
+            </section>
+        </div>
+    </div>
+</section>
+
+<!-- 4 · The format card and its draw -->
+<section class="screen" id="s-draw">
+    <div class="hdr">
+        <div><b>Season final 2026</b><small>Match Controls · 16 players · no bracket yet</small></div>
+        <div class="seg"><span>Bracket</span><span class="on">Match Controls</span><span>Leaderboard</span></div>
+    </div>
+    <div class="design"><b>Design notes.</b>
+        <ul>
+            <li>A card of its own, like Cup and Plate: underneath it's a Round Robin, so groups, referees, cups, placements, undo and Analytics are the existing ones.</li>
+            <li>Nothing to choose: the settings are fixed. Fits exactly 16 players.</li>
+            <li>The only new drawing rule is the cups': by group letter, as in the club's chart. Group mates can only meet again in a final.</li>
+        </ul>
+    </div>
+    <section class="panel">
+        <div class="ph"><h3>Pick a format<small>then draw</small></h3></div>
+        <div class="fmts">
+            <div class="fmt dim"><b>Double Elimination Cup</b><span class="line">Two lives each.</span><span class="fit">16-player bracket</span></div>
+            <div class="fmt dim"><b>Single Elimination Cup</b><span class="line">One loss and out.</span><span class="fit">16-player bracket</span></div>
+            <div class="fmt dim"><b>Cup and Plate</b><span class="line">Everyone plays twice.</span><span class="fit">Cup of 16 · Plate of 8</span></div>
+            <div class="fmt dim"><b>Round Robin</b><span class="line">Everybody plays everybody.</span><span class="fit">4 groups of 4</span></div>
+            <div class="fmt dim"><b>Swiss</b><span class="line">Your results pick your opponent.</span><span class="fit">5 rounds</span></div>
+            <div class="fmt on"><b>Season final, NewTon DC</b><span class="line">The season's top 16.</span><span class="fit">Tonight: <b>4 groups of 4</b></span></div>
+        </div>
+        <div class="detail">
+            <div><h4>Season final, NewTon DC</h4>
+                <p>The season's top 16, seeded by season rank into four groups. Everybody plays everybody in their group. The top two of each group play the A cup, the rest the B cup; the cups are drawn by group, so group mates can only meet again in a final.</p></div>
+            <div class="facts"><div><span>Players</span><b>16</b></div><div><span>Groups</span><b>4 of 4, seeded</b></div><div><span>A cup</span><b>1st and 2nd</b></div><div><span>B cup</span><b>3rd and 4th</b></div><div><span>Matches tonight</span><b>24 group + 16 cup</b></div></div>
+        </div>
+        <p class="sec">The groups (snake by season seed)</p>
+        <div class="groups" id="groups"></div>
+        <p class="sec">The cups, round 1 (drawn when every group match is played)</p>
+        <div class="cups">
+            <div class="cup"><h5>A cup</h5>
+                <div class="half"><small>Top half · its semifinal</small><div class="m"><b>QF1</b>Group A 1st <span>v</span> Group D 2nd</div><div class="m"><b>QF2</b>Group B 1st <span>v</span> Group C 2nd</div></div>
+                <div class="half"><small>Bottom half · its semifinal</small><div class="m"><b>QF3</b>Group C 1st <span>v</span> Group B 2nd</div><div class="m"><b>QF4</b>Group D 1st <span>v</span> Group A 2nd</div></div>
+            </div>
+            <div class="cup"><h5>B cup</h5>
+                <div class="half"><small>Top half · its semifinal</small><div class="m"><b>QF1</b>Group A 3rd <span>v</span> Group D 4th</div><div class="m"><b>QF2</b>Group B 3rd <span>v</span> Group C 4th</div></div>
+                <div class="half"><small>Bottom half · its semifinal</small><div class="m"><b>QF3</b>Group C 3rd <span>v</span> Group B 4th</div><div class="m"><b>QF4</b>Group D 3rd <span>v</span> Group A 4th</div></div>
+            </div>
+        </div>
+        <div class="drawbar"><span><b>16 players</b> · Season final, NewTon DC · 4 groups of 4, then the A and B cups</span><span class="btn dark big">Draw Season final →</span></div>
+    </section>
+</section>
+
+</div>
+
+<script>
+(() => {
+    // ---- made-up season: 24 players, points, OP parts ----
+    const names = ['Basse','Bruhn','Elgan','Eric','Fredrik','Gädda','Håvard','Johnny','Marcus.Å','Mickey','Mike','Newman',
+                   'Olle','Pelle','Rikard','Sanna','Tobbe','Ulf','Viktor','Wille','Ylva','Zeke','Anki','Benny'];
+    const pts = [212,198,190,184,171,166,160,151,149,140,138,131,127,122,118,115,112,106,106,98,93,90,84,80];
+    // OP parts: matches, legs, tons, bonus (made up, roughly falling with rank)
+    const op = names.map((_, i) => {
+        const m = +(2.4 - i * 0.06).toFixed(2), l = +(2.1 - i * 0.045).toFixed(2), t = +(0.62 - i * 0.012).toFixed(2), b = +(0.48 - i * 0.011).toFixed(2);
+        return { m, l, t, b, op: +(m + l + t + b).toFixed(2) };
+    });
+    // level on 106 points right at the line: OP puts Viktor (better bonus) in, Ulf becomes Reserve 1
+    op[18].b = +(op[18].b + 0.3).toFixed(2); op[18].op = +(op[18].m + op[18].l + op[18].t + op[18].b).toFixed(2);
+    const nights = [20,19,21,18,17,19,20,16,18,15,17,16,14,15,13,16,15,12,14,11,13,12,10,9];
+    // deterministic made-up stats for the rest of the columns
+    let seed = 7; const rnd = () => (seed = (seed * 9301 + 49297) % 233280) / 233280;
+    const pick = (max, bias) => Math.max(0, Math.round(rnd() * max * bias - 0.4));
+    let rows = names.map((n, i) => {
+        const b = 1 - i / 30, mw = Math.round(34 * b + rnd() * 6), ml = Math.round(8 + i * 0.8 + rnd() * 5);
+        return { n, pts: pts[i], nights: nights[i], ...op[i],
+            p1: pick(3, b * b), p2: pick(3, b * b), p3: pick(3, b), p4: pick(3, b), p56: pick(3, b), p78: pick(3, b),
+            o180: pick(6, b), hos: pick(3, b), sls: pick(14, b * b),
+            bOut: rnd() < 0.7 * b ? 101 + Math.floor(rnd() * 60) : 0, bLeg: rnd() < 0.8 * b ? 15 + Math.floor(rnd() * 6) : 0,
+            mw, ml, lw: Math.round(mw * 2.2 + rnd() * 6), ll: Math.round(ml * 2.1 + rnd() * 6) };
+    });
+    rows.sort((a, b) => b.pts - a.pts || b.op - a.op);
+    rows.forEach((r, i) => { r.rank = i + 1; });
+    const level = r => rows.some(o => o !== r && o.pts === r.pts);
+    const opTitle = r => `Matches ${r.m.toFixed(2)} · Legs ${r.l.toFixed(2)} · Tons ${r.t.toFixed(2)} · Bonus ${r.b.toFixed(2)}`;
+
+    const out = new Set(['Elgan', 'Marcus.Å', 'Ylva']); // not available: ranks 3, 9 and one below the line
+    let operator = false;
+
+    function classify() {
+        let q = 0, r = 0;
+        return rows.map(x => {
+            if (out.has(x.n)) return { x, st: 'na' };
+            if (q < 16) { q++; return { x, st: 'q', seed: q }; }
+            r++; return { x, st: 'r', res: r };
+        });
+    }
+
+    const D = v => v ? v : '<span class="dash">—</span>';
+    /** The Leaderboard table as it is today, plus OP; `status(x)` adds the Season final's column. */
+    function table(list, opts) {
+        const st = opts.status;
+        let html = `<tr class="grph"><th colspan="${st ? 6 : 5}"></th><th colspan="6" class="gs">Placements</th><th colspan="3" class="gs">Achievements</th><th colspan="3" class="gs">Best</th><th colspan="2" class="gs">Matches</th><th colspan="2" class="gs">Legs</th>${opts.extra ? '<th></th>' : ''}</tr>`;
+        html += `<tr><th>#</th><th>Player</th>${st ? '<th>Status</th>' : ''}<th class="num">Points ↓</th><th class="num"><span class="oph" title="Outstanding Player: decides a tie on points">OP</span></th><th class="num">Played</th>` +
+            `<th class="num gs">1st</th><th class="num">2nd</th><th class="num">3rd</th><th class="num">4th</th><th class="num">5–6th</th><th class="num">7–8th</th>` +
+            `<th class="num gs">180s</th><th class="num">High outs</th><th class="num">Short legs</th><th class="num gs">Out</th><th class="num">Leg</th><th class="num">Avg</th>` +
+            `<th class="num gs">W</th><th class="num">L</th><th class="num gs">W</th><th class="num">L</th>${opts.extra ? '<th></th>' : ''}</tr>`;
+        list.forEach(c => {
+            const x = c.x;
+            html += `<tr class="${c.na ? 'out' : ''}${c.cut ? ' cut' : ''}"><td class="rk">${x.rank}</td><td class="nm">${x.n}${level(x) ? '<span class="lvl" title="Level on points: OP decides">OP</span>' : ''}</td>${st ? `<td>${st(c)}</td>` : ''}` +
+                `<td class="num pts">${x.pts}</td><td class="num op" title="${opTitle(x)}">${x.op.toFixed(2)}</td><td class="num">${x.nights}</td>` +
+                `<td class="num gs">${D(x.p1)}</td><td class="num">${D(x.p2)}</td><td class="num">${D(x.p3)}</td><td class="num">${D(x.p4)}</td><td class="num">${D(x.p56)}</td><td class="num">${D(x.p78)}</td>` +
+                `<td class="num gs">${D(x.o180)}</td><td class="num">${D(x.hos)}</td><td class="num">${D(x.sls)}</td><td class="num gs">${D(x.bOut)}</td><td class="num">${D(x.bLeg)}</td><td class="num">${D(0)}</td>` +
+                `<td class="num gs">${x.mw}</td><td class="num">${x.ml}</td><td class="num gs">${x.lw}</td><td class="num">${x.ll}</td>${opts.extra ? `<td>${opts.extra(c)}</td>` : ''}</tr>`;
+            if (c.cut && opts.cutLabel) html += `<tr class="linelabel"><td colspan="22">${opts.cutLabel}</td></tr>`;
+        });
+        return html;
+    }
+
+    function renderFinal() {
+        const list = classify().map(c => Object.assign(c, { na: c.st === 'na', cut: c.st === 'q' && c.seed === 16 }));
+        const status = c => c.st === 'q' ? '<span class="pill q">Qualified</span>' : c.st === 'r' ? `<span class="pill r">Reserve ${c.res}</span>` : '<span class="pill na">Not available</span>';
+        const t = document.getElementById('finalTable');
+        t.innerHTML = table(list, { status, cutLabel: 'Reserves, in order',
+            extra: operator ? c => `<span class="sw${out.has(c.x.n) ? ' on' : ''}" data-n="${c.x.n}"><i></i>Not available</span>` : null });
+        t.querySelectorAll('.sw').forEach(s => s.onclick = () => { const n = s.dataset.n; out.has(n) ? out.delete(n) : out.add(n); renderAll(); });
+        document.getElementById('opOnly').style.display = operator ? '' : 'none';
+    }
+
+    function renderLb() {
+        document.getElementById('lbTable').innerHTML = table(rows.map(x => ({ x, cut: x.rank === 16 })), {});
+    }
+
+    function renderFill() {
+        const list = classify();
+        let html = `<tr><th>#</th><th>Player</th><th class="num">Points</th><th class="num">OP</th><th>Tonight</th><th class="num">Seed</th></tr>`;
+        list.forEach(c => {
+            const x = c.x;
+            const lastQ = c.st === 'q' && c.seed === 16;
+            const st = c.st === 'q' ? '<span class="pill q">Invited</span>' : c.st === 'r' ? `<span class="pill r">Reserve ${c.res}</span>` : '<span class="pill na">Not available</span>';
+            html += `<tr class="${c.st === 'na' ? 'out' : ''}${lastQ ? ' cut' : ''}"><td class="rk">${x.rank}</td><td class="nm">${x.n}</td><td class="num">${x.pts}</td><td class="num op">${x.op.toFixed(2)}</td><td>${st} <span class="sw${out.has(x.n) ? ' on' : ''}" data-n="${x.n}" style="margin-left:8px"><i></i>Not available</span></td><td class="num op">${c.seed || ''}</td></tr>`;
+        });
+        const t = document.getElementById('fillTable');
+        t.innerHTML = html;
+        t.querySelectorAll('.sw').forEach(s => s.onclick = () => { const n = s.dataset.n; out.has(n) ? out.delete(n) : out.add(n); renderAll(); });
+        const na = list.filter(c => c.st === 'na').length;
+        document.getElementById('fillSum').innerHTML = `<b>16 invited</b> · ${na} not available · added as paid (invited, no payment)`;
+    }
+
+    function renderGroups() {
+        const seeded = classify().filter(c => c.st === 'q').map(c => c.x.n);
+        const G = [[], [], [], []];
+        seeded.forEach((n, i) => { const r = Math.floor(i / 4), k = i % 4; G[r % 2 ? 3 - k : k].push([i + 1, n]); });
+        const html = G.map((g, gi) => `<div class="grp"><h5>Group ${'ABCD'[gi]}</h5>${g.map(([s, n]) => `<div>${n}<span>seed ${s}</span></div>`).join('')}</div>`).join('');
+        document.getElementById('groups').innerHTML = html;
+        document.getElementById('groupsA').innerHTML = html;
+    }
+
+    function renderAll() { renderFinal(); renderLb(); renderFill(); renderGroups(); }
+
+    document.querySelectorAll('#who span').forEach((s, i) => s.onclick = () => {
+        operator = i === 1;
+        document.querySelectorAll('#who span').forEach((x, j) => x.classList.toggle('on', j === i));
+        renderFinal();
+    });
+    document.querySelectorAll('#screens button').forEach(b => b.onclick = () => {
+        document.querySelectorAll('#screens button').forEach(x => x.classList.toggle('on', x === b));
+        document.querySelectorAll('.screen').forEach(s => s.classList.toggle('on', s.id === 's-' + b.dataset.s));
+    });
+    renderAll();
+})();
+</script>
+</body>
+</html>

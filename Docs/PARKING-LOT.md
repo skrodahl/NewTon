@@ -212,6 +212,14 @@ The Storage Space dialog (`showStorageManagement` in `tournament-management.js`)
 ## Later
 *Worth tracking but not urgent*
 
+### A custom OP formula builder (idea, 2026-11-13)
+
+The Season final's tiebreaker, OP (the County league's Outstanding Player, `Docs/SEASON-FINAL.md`), is fixed and only on with `NEWTON_DC=1`. Maybe one day: a builder where a club sets its own weights for matches, legs and tons, its own bonus tables for short legs and high outs, and whether attendance counts, so other clubs can have a tiebreaker of their own. OP is built as a separate calculation with its parts and tables in one place, so a builder can replace the fixed numbers later.
+
+### NewTon DC conveniences behind the club switch (idea, 2026-11-13)
+
+The Season final package is switched on by the Docker environment variable `NEWTON_DC=1`, which only the club's containers set (`Docs/SEASON-FINAL.md`; named after the club, not the feature, so more club defaults can use it — maintainer 2026-11-13). The maintainer: with a club switch like that, other club-only defaults can hang off it to avoid everyday mistakes. First example: **New tournament** offers the default name "Måndagscup" with today's date (the club's usual night, and the name word the season lens and the Season final scope look for), or a custom name. Fewer misspelt tournament names means fewer tournaments to tick in by hand. Without the switch, New tournament is as today. Other candidates to collect here as they come up.
+
 ### Chalker: other games than x01 (ideas, not now)
 
 Raised 2026-10-10. **x01 only for now** (maintainer). Ideas for later, all for the Chalker (NewTon decides who plays whom; the Chalker decides what is played on the board):

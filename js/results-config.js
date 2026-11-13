@@ -465,6 +465,7 @@ const TOURNAMENT_FORMATS = [
         minPlayers: 6,  // groups and cups; one group: 3-8 (Groups.limits())
         maxPlayers: 32
     },
+    // 'SF', the Season final, NewTon DC, goes here with NEWTON_DC=1 (SEASON_FINAL_FORMAT below)
     {
         id: 'SWISS',
         short: 'Swiss',
@@ -480,16 +481,74 @@ const TOURNAMENT_FORMATS = [
 ];
 
 /**
+ * True on NewTon DC's own instances: the Docker variable NEWTON_DC=1, passed to the page as
+ * window.NEWTON_CONFIG.newtonDC. It turns on the club's package (the Season final format, and later
+ * Fill from season standings, OP and the Season final tab; Docs/SEASON-FINAL.md). Never when the page
+ * is opened as a file.
+ * @returns {boolean}
+ */
+function isNewtonDC() {
+    return !!(typeof window !== 'undefined' && window.NEWTON_CONFIG && window.NEWTON_CONFIG.newtonDC);
+}
+
+/**
+ * The Season final, NewTon DC (Docs/SEASON-FINAL.md): a Round Robin with every setting fixed, as Cup
+ * and Plate is single elimination with a Plate. Four groups of four, seeded; top two to the A cup,
+ * the rest to the B cup; the cups drawn by group (A1 v D2 …). Exactly 16 players. In
+ * TOURNAMENT_FORMATS only with NEWTON_DC=1. A tournament drawn this way is format 'GROUPS' with
+ * `seasonFinal: true` in its group settings.
+ */
+const SEASON_FINAL_FORMAT = {
+    id: 'SF',
+    short: 'Season final',
+    pic: '<svg width="96" height="44" viewBox="0 0 96 44" aria-hidden="true"><g fill="none" stroke="#a8a29e" stroke-width="1"><path d="M19.5 6.5H24M19.5 16.5H24M19.5 27.5H24M19.5 37.5H24M24 6.5V37.5M24 6.5H40M24 14.5H40M24 29.5H40M24 37.5H40M50 6.5H53V14.5H50M53 10.5H58M50 29.5H53V37.5H50M53 33.5H58"/></g><g fill="none" stroke="#6b7280" stroke-width="1"><rect x="4.5" y="3" width="15" height="7" rx="1.2"/><rect x="4.5" y="13" width="15" height="7" rx="1.2"/><rect x="4.5" y="24" width="15" height="7" rx="1.2"/><rect x="4.5" y="34" width="15" height="7" rx="1.2"/></g><g fill="#6b7280"><rect x="40" y="4" width="10" height="5" rx="1"/><rect x="40" y="12" width="10" height="5" rx="1"/><rect x="40" y="27" width="10" height="5" rx="1"/><rect x="40" y="35" width="10" height="5" rx="1"/><rect x="58" y="29.5" width="14" height="8" rx="1.5"/></g><rect class="dk" x="58" y="6.5" width="14" height="8" rx="1.5" fill="#1f2937"/></svg>',
+    name: 'Season final, NewTon DC',
+    blurb: 'The season\'s top 16: four seeded groups of four, then the A and B cups drawn by group',
+    line: 'The season\'s top 16.',
+    about: 'The season\'s top 16, seeded by the season standings into four groups of four. Everybody plays everybody in their group; the top two go to the A cup, 3rd and 4th to the B cup. The cups are drawn by group: A1 v D2, B1 v C2, C1 v B2, D1 v A2, so group mates can only meet again in a final.',
+    bests: ['Every setting is fixed: nothing to choose, nothing to get wrong', 'Every player gets three group matches and at least one cup match', 'Seeded by season rank (Seeding below)'],
+    minPlayers: 16,
+    maxPlayers: 16,
+    draw: 'GROUPS',
+    seasonFinal: true
+};
+if (isNewtonDC()) TOURNAMENT_FORMATS.splice(TOURNAMENT_FORMATS.findIndex(f => f.id === 'GROUPS') + 1, 0, SEASON_FINAL_FORMAT);
+
+/**
+ * True for a tournament drawn as the Season final, NewTon DC (its group settings say so).
+ * @param {object} t - a tournament record
+ * @returns {boolean}
+ */
+function isSeasonFinalRecord(t) {
+    return !!(t && t.format === 'GROUPS' && t.groups && t.groups.settings && t.groups.settings.seasonFinal);
+}
+
+/**
+ * A tournament's entry id in TOURNAMENT_FORMATS: 'CP' for single elimination with a Plate, 'SF'
+ * for the Season final (where that format exists), else its format (absent = 'DE').
+ * @param {object} t - a tournament record
+ * @returns {string}
+ */
+function tournamentFormatId(t) {
+    if (!t) return 'DE';
+    if (t.format === 'SE' && t.plate) return 'CP';
+    if (isSeasonFinalRecord(t) && TOURNAMENT_FORMATS.some(f => f.id === 'SF')) return 'SF';
+    return t.format || 'DE';
+}
+
+/**
  * A tournament's format as lists and tables name it ("Double elim.", "Cup & Plate", "Swiss"):
  * the format's `short` in TOURNAMENT_FORMATS. Cup and Plate is single elimination with a Plate;
+ * the Season final a Round Robin with seasonFinal (shown so only where the format exists);
  * an absent format is double elimination (records from before single elimination).
  *
  * @param {string} [format] - the tournament's `format`
  * @param {*} [plate] - the tournament's `plate` (truthy for Cup and Plate)
+ * @param {boolean} [seasonFinal] - drawn as the Season final
  * @returns {string}
  */
-function formatShortName(format, plate) {
-    const id = format === 'SE' && plate ? 'CP' : (format || 'DE');
+function formatShortName(format, plate, seasonFinal) {
+    const id = format === 'SE' && plate ? 'CP' : format === 'GROUPS' && seasonFinal && TOURNAMENT_FORMATS.some(f => f.id === 'SF') ? 'SF' : (format || 'DE');
     const f = TOURNAMENT_FORMATS.find(x => x.id === id);
     return f ? f.short : String(id);
 }

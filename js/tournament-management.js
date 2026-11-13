@@ -63,7 +63,7 @@ function getFormat() {
  */
 function savedFormatName(t, undrawn = '—') {
     const drawn = !!t && !!t.bracket && Array.isArray(t.matches) && t.matches.length > 0;
-    return drawn ? formatShortName(t.format, t.plate) : undrawn;
+    return drawn ? formatShortName(t.format, t.plate, isSeasonFinalRecord(t)) : undrawn;
 }
 
 /**
@@ -344,6 +344,7 @@ function buildTournamentPayload() {
             bracketSize: tournament.bracketSize,
             format: tournament.format,
             seeding: tournament.seeding,
+            seasonFill: tournament.seasonFill, // the Season final's Fill from season standings (absent = not used)
             groups: tournament.groups, // groups and cups: the group draw (absent in other formats)
             cups: tournament.cups, // groups and cups: the cup draw (absent until drawn)
             qualifiers: tournament.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
@@ -974,6 +975,7 @@ function saveTournamentOnly(shouldLog = true) {
             bracketSize: tournament.bracketSize, // ✅ Fixed: Include bracketSize
             format: tournament.format, // SE/DE format (absent = DE for backward compat)
             seeding: tournament.seeding, // who was seeded in the draw (absent = a random draw)
+            seasonFill: tournament.seasonFill, // the Season final's Fill from season standings (absent = not used)
             groups: tournament.groups, // groups and cups: the group draw (absent in other formats)
             cups: tournament.cups, // groups and cups: the cup draw (absent until drawn)
             qualifiers: tournament.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
@@ -1211,7 +1213,7 @@ function renderSetupCurrent() {
     const live = all.filter(m => getMatchState(m) === 'live');
     const hasBracket = !!tournament.bracket && all.length > 0;
     // Cup and Plate is single elimination with a Plate; it has its own name in the formats list
-    const format = hasBracket ? TOURNAMENT_FORMATS.find(f => f.id === (getFormat() === 'SE' && tournament.plate ? 'CP' : getFormat())) : null;
+    const format = hasBracket ? TOURNAMENT_FORMATS.find(f => f.id === tournamentFormatId(Object.assign({}, tournament, { format: getFormat() }))) : null;
     const lanes = live.map(m => m.lane).filter(Boolean).sort((a, b) => a - b);
 
     // One line of facts: the players, the bracket, and what is being played now
@@ -1604,6 +1606,7 @@ function continueLoadProcess(selectedTournament) {
         bracketSize: bracketSize,
         format: selectedTournament.format, // SE/DE format (absent = DE for backward compat)
         seeding: selectedTournament.seeding, // who was seeded in the draw (absent = a random draw)
+        seasonFill: selectedTournament.seasonFill, // the Season final's Fill from season standings (absent = not used)
         groups: selectedTournament.groups, // groups and cups: the group draw (absent in other formats)
         cups: selectedTournament.cups, // groups and cups: the cup draw (absent until drawn)
         qualifiers: selectedTournament.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)
@@ -1813,6 +1816,7 @@ function continueImportProcess(importedData) {
             bracketSize: bracketSize,
             format: importedData.format, // SE/DE format (absent = DE for backward compat)
             seeding: importedData.seeding, // who was seeded in the draw (absent = a random draw)
+            seasonFill: importedData.seasonFill, // the Season final's Fill from season standings (absent = not used)
             groups: importedData.groups, // groups and cups: the group draw (absent in other formats)
             cups: importedData.cups, // groups and cups: the cup draw (absent until drawn)
             qualifiers: importedData.qualifiers, // qualifiers above 32: Qn → its round 1 place (absent at 32 or fewer)

@@ -1,0 +1,179 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="canonical" href="https://newtondarts.com/releases/v5.5.1.html">
+    <title>v5.5.1 &mdash; Mainly Malm&ouml; Manager Mods</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.5.1 release notes. An achievement typed but never added is no longer lost. Plus NewTon DC's own season final, switched off everywhere else.">
+    <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
+    <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
+    <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
+    <link rel="stylesheet" href="../css/landing.css">
+</head>
+<body>
+
+<a class="docs-back-link" href="/">&#8592; NewTon DC Tournament Manager</a>
+
+<div class="docs-content">
+
+    <h1>Mainly Malm&ouml; Manager Mods</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.5.1 &mdash; November 13, 2026</p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.1" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.5.1</a>
+
+    <nav class="docs-toc">
+        <h2>Contents</h2>
+        <ol>
+            <li><a href="#overview">Overview</a></li>
+            <li><a href="#achievements">Achievements are no longer lost</a></li>
+            <li><a href="#club">NewTon DC club-specific changes</a></li>
+            <li><a href="#files">Files Changed</a></li>
+            <li><a href="#migration">Migration</a></li>
+        </ol>
+    </nav>
+
+    <h2 id="overview">Overview</h2>
+    <p>An achievement you typed is no longer lost because Add was forgotten. That&rsquo;s the change for everyone. The rest of this release is NewTon DC&rsquo;s own: the club&rsquo;s season final, built for the club&rsquo;s installation in Malm&ouml; and switched off everywhere else.</p>
+
+    <hr>
+
+    <h2 id="achievements">Achievements are no longer lost</h2>
+    <p>It happened at the club again and again: a short leg or a high out is typed into its box, Add is forgotten, Save closes the dialog, and the achievement is gone without a word.</p>
+    <p>Now <strong>Save is stopped while a Short Legs or High Out box still holds a value that was never added.</strong></p>
+    <ul>
+        <li><strong>The dialog stays open,</strong> an amber line appears under the box, and the cursor goes to it: &ldquo;14 isn&rsquo;t added yet. Press Add, or clear the box.&rdquo;</li>
+        <li><strong>A value out of range says so:</strong> &ldquo;Short legs are 9&ndash;21 darts.&rdquo; or &ldquo;High outs are 101&ndash;170.&rdquo;, with &ldquo;Fix or clear the box.&rdquo;</li>
+        <li><strong>Pressing Enter is caught too,</strong> not only the Save button.</li>
+        <li><strong>The line goes</strong> as soon as you type in the box, press Add, or open the dialog again. An empty box saves as before, and Cancel still closes without asking.</li>
+    </ul>
+    <p><strong>Where:</strong> Edit player statistics, which is also what Match Completion and Edit match open from their Edit Statistics links, and Corrections in Analytics. In Corrections, switching to another player with a value waiting is stopped as well, so the value can&rsquo;t end up under the next player&rsquo;s name.</p>
+    <p>The user guide now names the buttons as they are labelled: <strong>Add</strong>.</p>
+
+    <hr>
+
+    <h2 id="club">NewTon DC club-specific changes</h2>
+    <p>The club&rsquo;s season final: the top 16 of the season&rsquo;s standings, four groups of four, then an A cup and a B cup. It only exists on NewTon DC&rsquo;s own installation, behind a club-only switch. <strong>On every other installation nothing of it shows,</strong> and the Tournament Manager, the Leaderboard and the exports are exactly as before.</p>
+    <ul>
+        <li><strong>A format card, &ldquo;Season final, NewTon DC&rdquo;.</strong> A Round Robin with every setting fixed: four groups, the top two to the A cup, the B cup always played. Groups, schedules, referees, cups, undo and Analytics are the existing ones.</li>
+        <li><strong>The cups drawn by group.</strong> A1 v D2 and B1 v C2 in one half, C1 v B2 and D1 v A2 in the other, so group mates can only meet again in a final. The B cup the same with 3rd and 4th.</li>
+        <li><strong>Points, then OP.</strong> Equal points are decided by OP (Outstanding Player), the County league&rsquo;s score from matches, legs, tons and bonus points for short legs and high outs. OP is a Leaderboard column after Points and in both exports.</li>
+        <li><strong>Fill from season standings.</strong> In Player Registration: the season&rsquo;s 16 best available are invited and added already marked paid, players who can&rsquo;t come are marked Not available and those below move up, and the draw is seeded by season rank. Gated: the tournament&rsquo;s name has to be typed first.</li>
+        <li><strong>A Season final tab in Analytics.</strong> The Leaderboard on the club&rsquo;s website shows who has qualified (Qualified, Reserve n, Not available) for the saved season, and the groups as they would be drawn today. The season and the marks are kept on the server; only the operator changes them.</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="files">Files Changed</h2>
+    <ul>
+        <li><code>js/player-management.js</code>, <code>css/styles.css</code> &mdash; the check before Save (<code>_statBoxesAllAdded()</code>), shared by both dialogs</li>
+        <li><code>js/newton-history.js</code> &mdash; the check in Corrections; OP, the ranking and the Season final tab</li>
+        <li><code>userguide.html</code> &mdash; the Add buttons</li>
+        <li><code>js/season-final.js</code>, <code>api/season-final.php</code> &mdash; Fill from season standings, and the saved season on the server (club only)</li>
+        <li><code>js/groups.js</code>, <code>js/clean-match-progression.js</code>, <code>js/bracket-rendering.js</code>, <code>js/results-config.js</code>, <code>js/seeding.js</code>, <code>js/tournament-management.js</code>, <code>js/main.js</code>, <code>tournament.html</code>, <code>css/</code> &mdash; the format, the cups drawn by group, and the hooks (club only)</li>
+    </ul>
+
+    <hr>
+
+    <h2 id="migration">Migration</h2>
+    <p>No migration required. Fully compatible with all existing tournament data and match history. The export format is unchanged; the club&rsquo;s season final adds optional fields only where it is used.</p>
+    <p>This release moves <code>:latest</code> forward to v5.5.1. Installed Chalker apps refresh automatically on their next online launch.</p>
+
+    <hr>
+
+    <p><em>NewTon DC Tournament Manager v5.5.1 &mdash; Mainly Malm&ouml; Manager Mods</em></p>
+
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.1" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.5.1</a>
+
+    <hr>
+
+    <h2>Previous Releases</h2>
+    <ul>
+        <li><a href="/releases/">Latest release</a></li>
+        <li><a href="v5.5.1.html">v5.5.1</a> &mdash; November 13, 2026 &mdash; Mainly Malm&ouml; Manager Mods</li>
+        <li><a href="v5.5.0.html">v5.5.0</a> &mdash; October 30, 2026 &mdash; Live Is Life</li>
+        <li><a href="v5.4.8.html">v5.4.8</a> &mdash; October 23, 2026 &mdash; Non, je ne regrette rien</li>
+        <li><a href="v5.4.7.html">v5.4.7</a> &mdash; October 22, 2026 &mdash; Urgent PHP Security Release</li>
+        <li><a href="v5.4.6.html">v5.4.6</a> &mdash; October 12, 2026 &mdash; Peek-a-Boo</li>
+        <li><a href="v5.4.5.html">v5.4.5</a> &mdash; October 11, 2026 &mdash; Look Sharp!</li>
+        <li><a href="v5.4.4.html">v5.4.4</a> &mdash; October 11, 2026 &mdash; Run the whole darts night. Offline.</li>
+        <li><a href="v5.4.3.html">v5.4.3</a> &mdash; October 10, 2026 &mdash; Swiss Precision.</li>
+        <li><a href="v5.4.2.html">v5.4.2</a> &mdash; October 9, 2026 &mdash; All the Dishes Rattle in the Cupboards.</li>
+        <li><a href="v5.4.1.html">v5.4.1</a> &mdash; October 9, 2026 &mdash; Under Pressure.</li>
+        <li><a href="v5.4.0.html">v5.4.0</a> &mdash; October 8, 2026 &mdash; Just Around the Corner.</li>
+        <li><a href="v5.3.2.html">v5.3.2</a> &mdash; October 7, 2026 &mdash; Don&rsquo;t You (Forget About Me).</li>
+        <li><a href="v5.3.1.html">v5.3.1</a> &mdash; October 6, 2026 &mdash; Sowing the Seeds of Love.</li>
+        <li><a href="v5.3.0.html">v5.3.0</a> &mdash; October 4, 2026 &mdash; A View to a Kill.</li>
+        <li><a href="v5.2.1.html">v5.2.1</a> &mdash; October 4, 2026 &mdash; Open Bar, Locked Cellar.</li>
+        <li><a href="v5.2.0.html">v5.2.0</a> &mdash; October 4, 2026 &mdash; New Flights, Same Arrows.</li>
+        <li><a href="v5.1.10.html">v5.1.10</a> &mdash; October 4, 2026 &mdash; Straight Down the Middle.</li>
+        <li><a href="v5.1.9.html">v5.1.9</a> &mdash; September 27, 2026 &mdash; Every Chalker Needs an Eraser.</li>
+        <li><a href="v5.1.8.html">v5.1.8</a> &mdash; September 13, 2026 &mdash; Off the Wire.</li>
+        <li><a href="v5.1.8-beta.1.html">v5.1.8-beta.1</a> &mdash; September 7, 2026 &mdash; Behind the Bar.</li>
+        <li><a href="v5.1.7.html">v5.1.7</a> &mdash; September 7, 2026 &mdash; Know Your Format.</li>
+        <li><a href="v5.1.7-beta.1.html">v5.1.7-beta.1</a> &mdash; September 6, 2026 &mdash; Look, No Camera.</li>
+        <li><a href="v5.1.6.html">v5.1.6</a> &mdash; September 6, 2026 &mdash; One Throw, One Score.</li>
+        <li><a href="v5.1.5.html">v5.1.5</a> &mdash; July 7, 2026 &mdash; Undo the Undone.</li>
+        <li><a href="v5.1.4.html">v5.1.4</a> &mdash; June 1, 2026 &mdash; Pocket Chalker.</li>
+        <li><a href="v5.1.3.html">v5.1.3</a> &mdash; May 29, 2026 &mdash; Cannot Operate on Soup.</li>
+        <li><a href="v5.1.2.html">v5.1.2</a> &mdash; May 26, 2026 &mdash; The Polished Press.</li>
+        <li><a href="v5.1.1.html">v5.1.1</a> &mdash; May 20, 2026 &mdash; Somewhat Simpler Selfhosting.</li>
+        <li><a href="v5.1.0.html">v5.1.0</a> &mdash; April 23, 2026 &mdash; Burgerboy85-rgb to Throw.</li>
+        <li><a href="v5.0.15-beta.2.html">v5.0.15-beta.2</a> &mdash; April 21, 2026 &mdash; Offline at the Oche.</li>
+        <li><a href="v5.0.15-beta.1.html">v5.0.15-beta.1</a> &mdash; April 20, 2026 &mdash; Ka-ZXing!</li>
+        <li><a href="v5.0.14.html">v5.0.14</a> &mdash; April 19, 2026 &mdash; Narrowing the Scope.</li>
+        <li><a href="v5.0.14-beta.3.html">v5.0.14-beta.3</a> &mdash; April 17, 2026 &mdash; I Can See Clearly Now.</li>
+        <li><a href="v5.0.14-beta.2.html">v5.0.14-beta.2</a> &mdash; April 17, 2026 &mdash; Picture This.</li>
+        <li><a href="v5.0.14-beta.1.html">v5.0.14-beta.1</a> &mdash; April 16, 2026 &mdash; No Score...</li>
+        <li><a href="v5.0.13.html">v5.0.13</a> &mdash; April 16, 2026 &mdash; The Pointy End.</li>
+        <li><a href="v5.0.12.html">v5.0.12</a> &mdash; April 16, 2026 &mdash; Clear Sight Lines.</li>
+        <li><a href="v5.0.11.html">v5.0.11</a> &mdash; April 15, 2026 &mdash; We Found You a Match.</li>
+        <li><a href="v5.0.10.html">v5.0.10</a> &mdash; April 15, 2026 &mdash; The Full Picture.</li>
+        <li><a href="v5.0.9.html">v5.0.9</a> &mdash; April 14, 2026 &mdash; Leader of the Pack.</li>
+        <li><a href="v5.0.8.html">v5.0.8</a> &mdash; April 13, 2026 &mdash; Choose Your Lens.</li>
+        <li><a href="v5.0.7.html">v5.0.7</a> &mdash; April 13, 2026 &mdash; The Offline Authority in Darts.</li>
+        <li><a href="v5.0.6.html">v5.0.6</a> &mdash; April 12, 2026 &mdash; Because Backups Shouldn&rsquo;t Be Homework.</li>
+        <li><a href="v5.0.5.html">v5.0.5</a> &mdash; April 11, 2026 &mdash; Read Between the Lines.</li>
+        <li><a href="v5.0.4.html">v5.0.4</a> &mdash; April 10, 2026 &mdash; No Tournament Left Behind.</li>
+        <li><a href="v5.0.3.html">v5.0.3</a> &mdash; April 10, 2026 &mdash; The Numbers Start Talking.</li>
+        <li><a href="v5.0.2.html">v5.0.2</a> &mdash; April 9, 2026 &mdash; Because Every Other One Wants Your Email.</li>
+        <li><a href="v5.0.1.html">v5.0.1</a> &mdash; March 31, 2026 &mdash; Game Shot, and the Match!</li>
+        <li><a href="v5.0.1-beta.9.html">v5.0.1-beta.9</a> &mdash; March 30, 2026 &mdash; Scan Anything, Know Everything.</li>
+        <li><a href="v5.0.1-beta.8.html">v5.0.1-beta.8</a> &mdash; March 29, 2026 &mdash; History, Properly Kept.</li>
+        <li><a href="v5.0.1-beta.7.html">v5.0.1-beta.7</a> &mdash; March 29, 2026 &mdash; Secure by Default.</li>
+        <li><a href="v5.0.1-beta.6.html">v5.0.1-beta.6</a> &mdash; March 28, 2026 &mdash; The Record Books Open.</li>
+        <li><a href="v5.0.1-beta.5.html">v5.0.1-beta.5</a> &mdash; March 28, 2026 &mdash; The Loop Closes.</li>
+        <li><a href="v5.0.1-beta.4.html">v5.0.1-beta.4</a> &mdash; March 28, 2026 &mdash; Stats Don&rsquo;t Lie.</li>
+        <li><a href="v5.0.1-beta.3.html">v5.0.1-beta.3</a> &mdash; March 27, 2026 &mdash; The Eyes Have It.</li>
+        <li><a href="v5.0.1-beta.2.html">v5.0.1-beta.2</a> &mdash; March 27, 2026 &mdash; Nobody Leaves the Oche.</li>
+        <li><a href="v5.0.1-beta.1.html">v5.0.1-beta.1</a> &mdash; March 26, 2026 &mdash; The Round-Trip Begins.</li>
+        <li><a href="v5.0.0.html">v5.0.0</a> &mdash; March 24, 2026 &mdash; The Revolution Will Be Scanned.</li>
+        <li><a href="v5.0.0-beta.2.html">v5.0.0-beta.2</a> &mdash; March 24, 2026 &mdash; The Chalker Has Eyes Now.</li>
+        <li><a href="v5.0.0-beta.1.html">v5.0.0-beta.1</a> &mdash; March 22, 2026 &mdash; Your Boarding Pass for the Oche.</li>
+        <li><a href="v4.2.13.html">v4.2.13</a> &mdash; March 20, 2026 &mdash; A+ Security Headers. Yes, Really.</li>
+        <li><a href="v4.2.12.html">v4.2.12</a> &mdash; March 19, 2026 &mdash; Dedicated domain: newtondarts.com.</li>
+        <li><a href="v4.2.11.html">v4.2.11</a> &mdash; March 18, 2026 &mdash; Shame has never looked better.</li>
+        <li><a href="v4.2.10.html">v4.2.10</a> &mdash; March 17, 2026 &mdash; Doc pages, user guide, and sitemap improvements.</li>
+        <li><a href="v4.2.9.html">v4.2.9</a> &mdash; March 15, 2026 &mdash; Landing page polish.</li>
+        <li><a href="v4.2.8.html">v4.2.8</a> &mdash; March 13, 2026 &mdash; Late Registration.</li>
+        <li><a href="v4.2.7.html">v4.2.7</a> &mdash; March 13, 2026 &mdash; Sitemap, font loading fix, and Get Started section.</li>
+        <li><a href="v4.2.6.html">v4.2.6</a> &mdash; March 12, 2026 &mdash; Undo system bug fix, Late Registration eligibility checker, and robots.txt.</li>
+        <li><a href="v4.2.5.html">v4.2.5</a> &mdash; March 11, 2026 &mdash; Landing page improvements and a Bracket Editor placeholder in the Developer Console.</li>
+        <li><a href="v4.2.4.html">v4.2.4</a> &mdash; March 10, 2026 &mdash; Proper Single Elimination match length configuration and colour-coded Chalker leg averages.</li>
+        <li><a href="v4.2.3.html">v4.2.3</a> &mdash; March 10, 2026 &mdash; Landing page redesign with retro comic theme by Nano Banana.</li>
+    </ul>
+    <p>For older releases, see the <a href="https://github.com/skrodahl/NewTon/releases" target="_blank" rel="noopener">GitHub releases page</a>.</p>
+
+</div>
+
+<div class="landing-footer docs-footer">
+    <p>
+        NewTon DC Tournament Manager &mdash; BSD-3-Clause License &mdash;
+        <a href="https://github.com/skrodahl/NewTon" target="_blank" rel="noopener">GitHub</a> &mdash;
+        <a href="/privacy.html">Privacy</a>
+    </p>
+    <p><em class="footer-cheeky">No popups? No cookies!</em></p>
+</div>
+
+</body>
+</html>

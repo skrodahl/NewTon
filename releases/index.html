@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.5.0 &mdash; Live Is Life</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.5.0 release notes. Live View: watch a tournament while it is being played, from the Analytics site, on a phone or a desktop. A failed upload no longer fails in silence.">
+    <title>v5.5.1 &mdash; Mainly Malm&ouml; Manager Mods</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.5.1 release notes. An achievement typed but never added is no longer lost. Plus NewTon DC's own season final, switched off everywhere else.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,85 +17,79 @@
 
 <div class="docs-content">
 
-    <h1>Live Is Life</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.5.0 &mdash; October 30, 2026</p>
+    <h1>Mainly Malm&ouml; Manager Mods</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.5.1 &mdash; November 13, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.0" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.5.0</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.1" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.5.1</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#live-view">Live View</a></li>
-            <li><a href="#failed-upload">A failed upload is no longer silent</a></li>
-            <li><a href="#also">Also</a></li>
+            <li><a href="#achievements">Achievements are no longer lost</a></li>
+            <li><a href="#club">NewTon DC club-specific changes</a></li>
             <li><a href="#files">Files Changed</a></li>
             <li><a href="#migration">Migration</a></li>
         </ol>
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>You can now watch a tournament while it is being played. The club&rsquo;s Tournament Manager shares a live copy with the server, and the Analytics site shows what is on the boards, what comes next and the latest results, on a phone as well as a desktop. Alongside it, a tournament that fails to reach the server no longer fails in silence.</p>
+    <p>An achievement you typed is no longer lost because Add was forgotten. That&rsquo;s the change for everyone. The rest of this release is NewTon DC&rsquo;s own: the club&rsquo;s season final, built for the club&rsquo;s installation in Malm&ouml; and switched off everywhere else.</p>
 
     <hr>
 
-    <h2 id="live-view">Live View</h2>
-    <p>A <strong>Live now</strong> line appears at the top of Analytics whenever a tournament is being played, with <strong>Watch</strong>.</p>
+    <h2 id="achievements">Achievements are no longer lost</h2>
+    <p>It happened at the club again and again: a short leg or a high out is typed into its box, Add is forgotten, Save closes the dialog, and the achievement is gone without a word.</p>
+    <p>Now <strong>Save is stopped while a Short Legs or High Out box still holds a value that was never added.</strong></p>
     <ul>
-        <li><strong>A list of the night.</strong> What is being played right now, with the lane; what is up next; and the latest results first, each with what it recorded (&ldquo;Cat 2&ndash;1 Ben &middot; Cat 1&times; 180&rdquo;). One column, made for a phone and fine on a desktop.</li>
-        <li><strong>The bracket and the Leaderboard, one tap away.</strong> The bracket opens as the normal bracket page, read-only; select a finished match to see what it recorded. The Leaderboard opens as usual, with the club&rsquo;s own point values.</li>
-        <li><strong>It updates by itself.</strong> No reload. The page says when it was last updated, and when the connection drops.</li>
-        <li><strong>When the night is over,</strong> the page says so and shows the final results; <strong>See it in Analytics</strong> leads to the finished tournament, which Analytics takes in as it always has. If the tournament was reset or abandoned instead, it says it is no longer live and shows the results as of the last update, not a stale &ldquo;up next&rdquo;.</li>
+        <li><strong>The dialog stays open,</strong> an amber line appears under the box, and the cursor goes to it: &ldquo;14 isn&rsquo;t added yet. Press Add, or clear the box.&rdquo;</li>
+        <li><strong>A value out of range says so:</strong> &ldquo;Short legs are 9&ndash;21 darts.&rdquo; or &ldquo;High outs are 101&ndash;170.&rdquo;, with &ldquo;Fix or clear the box.&rdquo;</li>
+        <li><strong>Pressing Enter is caught too,</strong> not only the Save button.</li>
+        <li><strong>The line goes</strong> as soon as you type in the box, press Add, or open the dialog again. An empty box saves as before, and Cancel still closes without asking.</li>
     </ul>
-    <p><strong>Switching it on.</strong> At the club, in Global Settings &rarr; Server, <strong>Live copy while it is played</strong>. It is off by default. A slim copy of the tournament (the players and their statistics, the matches with scores, lanes and what each recorded) is sent after every change, to the club&rsquo;s server and to the remote one. It needs a server with the API, which in practice means Docker. <a href="../automatic-backup.html#live-view">How it works</a>.</p>
-    <p><strong>Who can see it.</strong> Anyone who can open the server can read the live copy, as they can read the finished tournament. Only the club, with the API key, can write it. It is kept apart from the tournament list, so Analytics never counts a tournament that is still being played, and it goes when the finished tournament has been backed up.</p>
-    <p><strong>One way.</strong> The club computer runs the tournament and writes to the server. The server and Analytics only display. Nothing is read back into the club&rsquo;s tournament.</p>
+    <p><strong>Where:</strong> Edit player statistics, which is also what Match Completion and Edit match open from their Edit Statistics links, and Corrections in Analytics. In Corrections, switching to another player with a value waiting is stopped as well, so the value can&rsquo;t end up under the next player&rsquo;s name.</p>
+    <p>The user guide now names the buttons as they are labelled: <strong>Add</strong>.</p>
 
     <hr>
 
-    <h2 id="failed-upload">A failed upload is no longer silent</h2>
-    <p>The upload at the end of a tournament used to be fire-and-forget: if the connection was poor, nothing said so.</p>
+    <h2 id="club">NewTon DC club-specific changes</h2>
+    <p>The club&rsquo;s season final: the top 16 of the season&rsquo;s standings, four groups of four, then an A cup and a B cup. It only exists on NewTon DC&rsquo;s own installation, behind a club-only switch. <strong>On every other installation nothing of it shows,</strong> and the Tournament Manager, the Leaderboard and the exports are exactly as before.</p>
     <ul>
-        <li><strong>Setup</strong> now shows &ldquo;Not uploaded to &hellip;&rdquo; with the reason (could not reach the server, the key was refused, and so on) and <strong>Upload now</strong>.</li>
-        <li><strong>The bracket page</strong> shows a <strong>Not uploaded</strong> chip, and <strong>Setup&rsquo;s tournament list</strong> tags the tournament&rsquo;s row, so it can be found next week even after another tournament has been created.</li>
-        <li><strong>It tries again by itself</strong> while the page is open (after 30 seconds, a minute, two minutes, then every five), as soon as the connection returns, and when the page is opened with an upload waiting. A refusal such as a wrong key is not retried; it says what to fix.</li>
-    </ul>
-
-    <hr>
-
-    <h2 id="also">Also</h2>
-    <ul>
-        <li><strong>Analytics no longer imports a tournament that is still being played.</strong> One uploaded by hand mid-night used to be taken in as finished, and the real result later skipped as already there. Only finished tournaments are imported.</li>
+        <li><strong>A format card, &ldquo;Season final, NewTon DC&rdquo;.</strong> A Round Robin with every setting fixed: four groups, the top two to the A cup, the B cup always played. Groups, schedules, referees, cups, undo and Analytics are the existing ones.</li>
+        <li><strong>The cups drawn by group.</strong> A1 v D2 and B1 v C2 in one half, C1 v B2 and D1 v A2 in the other, so group mates can only meet again in a final. The B cup the same with 3rd and 4th.</li>
+        <li><strong>Points, then OP.</strong> Equal points are decided by OP (Outstanding Player), the County league&rsquo;s score from matches, legs, tons and bonus points for short legs and high outs. OP is a Leaderboard column after Points and in both exports.</li>
+        <li><strong>Fill from season standings.</strong> In Player Registration: the season&rsquo;s 16 best available are invited and added already marked paid, players who can&rsquo;t come are marked Not available and those below move up, and the draw is seeded by season rank. Gated: the tournament&rsquo;s name has to be typed first.</li>
+        <li><strong>A Season final tab in Analytics.</strong> The Leaderboard on the club&rsquo;s website shows who has qualified (Qualified, Reserve n, Not available) for the saved season, and the groups as they would be drawn today. The season and the marks are kept on the server; only the operator changes them.</li>
     </ul>
 
     <hr>
 
     <h2 id="files">Files Changed</h2>
     <ul>
-        <li><code>js/live-upload.js</code>, <code>api/live.php</code> &mdash; the live copy: what is sent and where it is kept</li>
-        <li><code>js/live-view.js</code>, <code>css/live-view.css</code> &mdash; the Live View</li>
-        <li><code>js/tournament-management.js</code> &mdash; the upload status, the retry and the notices</li>
-        <li><code>js/newton-history.js</code> &mdash; Analytics only imports finished tournaments</li>
-        <li><code>js/main.js</code>, <code>js/bracket-view.js</code>, <code>js/bracket-rendering.js</code>, <code>js/results-config.js</code>, <code>tournament.html</code>, <code>css/</code> &mdash; the setting, the page and the hooks</li>
+        <li><code>js/player-management.js</code>, <code>css/styles.css</code> &mdash; the check before Save (<code>_statBoxesAllAdded()</code>), shared by both dialogs</li>
+        <li><code>js/newton-history.js</code> &mdash; the check in Corrections; OP, the ranking and the Season final tab</li>
+        <li><code>userguide.html</code> &mdash; the Add buttons</li>
+        <li><code>js/season-final.js</code>, <code>api/season-final.php</code> &mdash; Fill from season standings, and the saved season on the server (club only)</li>
+        <li><code>js/groups.js</code>, <code>js/clean-match-progression.js</code>, <code>js/bracket-rendering.js</code>, <code>js/results-config.js</code>, <code>js/seeding.js</code>, <code>js/tournament-management.js</code>, <code>js/main.js</code>, <code>tournament.html</code>, <code>css/</code> &mdash; the format, the cups drawn by group, and the hooks (club only)</li>
     </ul>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
-    <p>No migration required. Fully compatible with all existing tournament data and match history. The live copy is off until switched on; a server without the new endpoint simply ignores it. Two new things are created on first use: <code>uploadStatus_&lt;tournament&gt;</code> keys in the browser, and a <code>tournaments/live</code> folder on the server. The export format is unchanged.</p>
-    <p>To get the Live View on an Analytics site, pull the new image and recreate the container (<code>docker compose pull &amp;&amp; docker compose up -d</code>). If a browser still shows the old page afterwards, reload once.</p>
-    <p>This release moves <code>:latest</code> forward to v5.5.0. Installed Chalker apps refresh automatically on their next online launch.</p>
+    <p>No migration required. Fully compatible with all existing tournament data and match history. The export format is unchanged; the club&rsquo;s season final adds optional fields only where it is used.</p>
+    <p>This release moves <code>:latest</code> forward to v5.5.1. Installed Chalker apps refresh automatically on their next online launch.</p>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.5.0 &mdash; Live Is Life</em></p>
+    <p><em>NewTon DC Tournament Manager v5.5.1 &mdash; Mainly Malm&ouml; Manager Mods</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.0" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.5.0</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.1" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.5.1</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
+        <li><a href="v5.5.1.html">v5.5.1</a> &mdash; November 13, 2026 &mdash; Mainly Malm&ouml; Manager Mods</li>
         <li><a href="v5.5.0.html">v5.5.0</a> &mdash; October 30, 2026 &mdash; Live Is Life</li>
         <li><a href="v5.4.8.html">v5.4.8</a> &mdash; October 23, 2026 &mdash; Non, je ne regrette rien</li>
         <li><a href="v5.4.7.html">v5.4.7</a> &mdash; October 22, 2026 &mdash; Urgent PHP Security Release</li>

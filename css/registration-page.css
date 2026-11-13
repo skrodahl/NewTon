@@ -135,3 +135,26 @@
   .rg-cols, .rg-cols.rg-running { grid-template-columns: 1fr; }
   .rg-form2 { grid-template-columns: 1fr; }
 }
+
+/* ---- Fill from season standings: the Season final, NewTon DC (js/season-final.js) ---- */
+#seasonFillPanel[hidden] { display: none; }
+.rg-season > summary { cursor: pointer; list-style: none; }
+.rg-season > summary::-webkit-details-marker { display: none; }
+.rg-season > summary h3::before { content: "\25B8"; display: inline-block; width: 16px; color: var(--nt-muted); }
+.rg-season[open] > summary h3::before { content: "\25BE"; }
+.rg-season .mc-note { padding: 0 20px 14px; }
+.rg-season-scope { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; padding: 0 20px 12px; }
+.rg-tag { font-size: 12px; font-weight: 600; color: var(--nt-ink-2); background: var(--nt-inset); border-radius: 6px; padding: 3px 8px; }
+.rg-season-scope .st-btn { margin-left: auto; }
+.rg-season-scroll { max-height: 520px; }
+.rg-season .rg-db tr.rg-cut td { border-bottom: 2px solid var(--nt-ink-2); }
+.rg-season .rg-db tr.rg-out td { color: var(--nt-muted); }
+.rg-season .rg-db tr.rg-out .rg-short { color: var(--nt-muted); font-weight: 500; text-decoration: line-through; }
+.rg-in-t { margin-left: 6px; font-size: 11px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--nt-ok); }
+.rg-paid.rg-res { background: var(--nt-inset); color: var(--nt-ink-2); }
+.rg-paid.rg-na { background: var(--nt-inset); color: var(--nt-muted); }
+.rg-season-foot { display: flex; align-items: center; justify-content: space-between; gap: 12px; flex-wrap: wrap; padding: 14px 20px; font-size: 13px; color: var(--nt-muted); }
+.rg-season-foot b { color: var(--nt-ink); }
+.rg-season-foot .st-btn:disabled { opacity: .45; cursor: not-allowed; }
+.rg-season-gate { display: grid; gap: 6px; max-width: 420px; padding: 0 20px 18px; }
+.rg-season-gate .dlg__label { margin: 0; }
