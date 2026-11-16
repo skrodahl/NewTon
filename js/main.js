@@ -7,7 +7,7 @@ let matches = [];
 let currentStatsPlayer = null;
 
 // Application version
-const APP_VERSION = '5.5.1'; // Mainly Malmö Manager Mods — achievements typed but not added are no longer lost; NewTon DC's season final (club only)
+const APP_VERSION = '5.5.2'; // NewTon DC Only: The Lens Steps Aside — Season final tab hides the Lens; Not available is a switch (club only)
 
 // Application identity (encoded)
 const _0x4e = [78,101,119,84,111,110,32,68,67,32,84,111,117,114];

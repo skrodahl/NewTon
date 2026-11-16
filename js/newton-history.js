@@ -356,7 +356,7 @@ const NewtonHistory = (() => {
      */
     function switchView(view) {
         _activeView = view;
-        _sfDimLens();
+        _sfHideLens();
 
         // Update tab buttons
         document.querySelectorAll('.analytics-view-btn').forEach(btn => {
@@ -1650,17 +1650,15 @@ const NewtonHistory = (() => {
         if (!season) hide('seasonGroupsPanel', true);
         const legend = document.getElementById('leaderboardLegend');
         if (legend) legend.textContent = season ? `${SeasonFinal.INVITED}th qualified` : 'Top 16';
-        _sfDimLens();
+        _sfHideLens();
         return season;
     }
 
-    /** Dim the Lens while the Season final tab is open: it has its own scope, the saved season. */
-    function _sfDimLens() {
+    /** Hide the Lens while the Season final tab is open: it has its own scope, the saved season, shown in its tags. */
+    function _sfHideLens() {
         const on = _activeView === 'leaderboard' && _sf.tab === 'season' && _sfShown();
         const row = document.getElementById('analyticsLensRow');
         if (row) row.classList.toggle('an-lens-off', on);
-        const note = document.getElementById('analyticsLensNote');
-        if (note) note.hidden = !on;
     }
 
     /**

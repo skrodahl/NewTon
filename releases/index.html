@@ -4,8 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="canonical" href="https://newtondarts.com/releases/">
-    <title>v5.5.1 &mdash; Mainly Malm&ouml; Manager Mods</title>
-    <meta name="description" content="NewTon DC Tournament Manager v5.5.1 release notes. An achievement typed but never added is no longer lost. Plus NewTon DC's own season final, switched off everywhere else.">
+    <title>v5.5.2 &mdash; NewTon DC Only: The Lens Steps Aside</title>
+    <meta name="description" content="NewTon DC Tournament Manager v5.5.2 release notes. For NewTon DC only: the Lens steps aside on the Season final tab, and Not available is a switch. Nothing changes on any other installation.">
     <link rel="icon" type="image/jpeg" href="../images/logo.jpg">
     <link rel="preload" href="../fonts/Insignia-Regular.otf" as="font" type="font/otf" crossorigin>
     <link rel="preload" href="../fonts/Inter-VariableFont_opsz,wght.ttf" as="font" type="font/ttf" crossorigin>
@@ -17,16 +17,15 @@
 
 <div class="docs-content">
 
-    <h1>Mainly Malm&ouml; Manager Mods</h1>
-    <p class="docs-subtitle">NewTon DC Tournament Manager v5.5.1 &mdash; November 13, 2026</p>
+    <h1>NewTon DC Only: The Lens Steps Aside</h1>
+    <p class="docs-subtitle">NewTon DC Tournament Manager v5.5.2 &mdash; November 16, 2026</p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.1" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.5.1</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.2" target="_blank" rel="noopener" class="btn-github btn-download-top">Download v5.5.2</a>
 
     <nav class="docs-toc">
         <h2>Contents</h2>
         <ol>
             <li><a href="#overview">Overview</a></li>
-            <li><a href="#achievements">Achievements are no longer lost</a></li>
             <li><a href="#club">NewTon DC club-specific changes</a></li>
             <li><a href="#files">Files Changed</a></li>
             <li><a href="#migration">Migration</a></li>
@@ -34,61 +33,41 @@
     </nav>
 
     <h2 id="overview">Overview</h2>
-    <p>An achievement you typed is no longer lost because Add was forgotten. That&rsquo;s the change for everyone. The rest of this release is NewTon DC&rsquo;s own: the club&rsquo;s season final, built for the club&rsquo;s installation in Malm&ouml; and switched off everywhere else.</p>
-
-    <hr>
-
-    <h2 id="achievements">Achievements are no longer lost</h2>
-    <p>It happened at the club again and again: a short leg or a high out is typed into its box, Add is forgotten, Save closes the dialog, and the achievement is gone without a word.</p>
-    <p>Now <strong>Save is stopped while a Short Legs or High Out box still holds a value that was never added.</strong></p>
-    <ul>
-        <li><strong>The dialog stays open,</strong> an amber line appears under the box, and the cursor goes to it: &ldquo;14 isn&rsquo;t added yet. Press Add, or clear the box.&rdquo;</li>
-        <li><strong>A value out of range says so:</strong> &ldquo;Short legs are 9&ndash;21 darts.&rdquo; or &ldquo;High outs are 101&ndash;170.&rdquo;, with &ldquo;Fix or clear the box.&rdquo;</li>
-        <li><strong>Pressing Enter is caught too,</strong> not only the Save button.</li>
-        <li><strong>The line goes</strong> as soon as you type in the box, press Add, or open the dialog again. An empty box saves as before, and Cancel still closes without asking.</li>
-    </ul>
-    <p><strong>Where:</strong> Edit player statistics, which is also what Match Completion and Edit match open from their Edit Statistics links, and Corrections in Analytics. In Corrections, switching to another player with a value waiting is stopped as well, so the value can&rsquo;t end up under the next player&rsquo;s name.</p>
-    <p>The user guide now names the buttons as they are labelled: <strong>Add</strong>.</p>
+    <p>A small release for one club. Both changes are in NewTon DC&rsquo;s season final, which only exists on the club&rsquo;s own installation. <strong>On every other installation nothing changes.</strong></p>
 
     <hr>
 
     <h2 id="club">NewTon DC club-specific changes</h2>
-    <p>The club&rsquo;s season final: the top 16 of the season&rsquo;s standings, four groups of four, then an A cup and a B cup. It only exists on NewTon DC&rsquo;s own installation, behind a club-only switch. <strong>On every other installation nothing of it shows,</strong> and the Tournament Manager, the Leaderboard and the exports are exactly as before.</p>
     <ul>
-        <li><strong>A format card, &ldquo;Season final, NewTon DC&rdquo;.</strong> A Round Robin with every setting fixed: four groups, the top two to the A cup, the B cup always played. Groups, schedules, referees, cups, undo and Analytics are the existing ones.</li>
-        <li><strong>The cups drawn by group.</strong> A1 v D2 and B1 v C2 in one half, C1 v B2 and D1 v A2 in the other, so group mates can only meet again in a final. The B cup the same with 3rd and 4th.</li>
-        <li><strong>Points, then OP.</strong> Equal points are decided by OP (Outstanding Player), the County league&rsquo;s score from matches, legs, tons and bonus points for short legs and high outs. OP is a Leaderboard column after Points and in both exports.</li>
-        <li><strong>Fill from season standings.</strong> In Player Registration: the season&rsquo;s 16 best available are invited and added already marked paid, players who can&rsquo;t come are marked Not available and those below move up, and the draw is seeded by season rank. Gated: the tournament&rsquo;s name has to be typed first.</li>
-        <li><strong>A Season final tab in Analytics.</strong> The Leaderboard on the club&rsquo;s website shows who has qualified (Qualified, Reserve n, Not available) for the saved season, and the groups as they would be drawn today. The season and the marks are kept on the server; only the operator changes them.</li>
+        <li><strong>The Lens steps aside on the Season final tab.</strong> The tab counts the saved season, not the Lens, and its own tags say what that is. So the Lens row (the tournament count, the name, the dates and the half-year buttons) is hidden while the tab is open, which gives the table and the groups the room, most of all on a phone. Points (As played / Custom) stays, because the tab follows it. On All players and every other view the Lens is there as before.</li>
+        <li><strong>Not available is a switch.</strong> The mark on a standings row is now a switch instead of a &ldquo;Not available&rdquo; / &ldquo;Available again&rdquo; link, in Fill from season standings and on the Season final tab alike. A click on it never opens the player&rsquo;s profile, and if a save fails the switch goes back.</li>
     </ul>
 
     <hr>
 
     <h2 id="files">Files Changed</h2>
     <ul>
-        <li><code>js/player-management.js</code>, <code>css/styles.css</code> &mdash; the check before Save (<code>_statBoxesAllAdded()</code>), shared by both dialogs</li>
-        <li><code>js/newton-history.js</code> &mdash; the check in Corrections; OP, the ranking and the Season final tab</li>
-        <li><code>userguide.html</code> &mdash; the Add buttons</li>
-        <li><code>js/season-final.js</code>, <code>api/season-final.php</code> &mdash; Fill from season standings, and the saved season on the server (club only)</li>
-        <li><code>js/groups.js</code>, <code>js/clean-match-progression.js</code>, <code>js/bracket-rendering.js</code>, <code>js/results-config.js</code>, <code>js/seeding.js</code>, <code>js/tournament-management.js</code>, <code>js/main.js</code>, <code>tournament.html</code>, <code>css/</code> &mdash; the format, the cups drawn by group, and the hooks (club only)</li>
+        <li><code>js/newton-history.js</code>, <code>tournament.html</code>, <code>css/analytics-page.css</code> &mdash; the Lens hidden on the Season final tab</li>
+        <li><code>js/season-final.js</code>, <code>css/match-controls.css</code> &mdash; the Not available switch, shared by both tables</li>
     </ul>
 
     <hr>
 
     <h2 id="migration">Migration</h2>
-    <p>No migration required. Fully compatible with all existing tournament data and match history. The export format is unchanged; the club&rsquo;s season final adds optional fields only where it is used.</p>
-    <p>This release moves <code>:latest</code> forward to v5.5.1. Installed Chalker apps refresh automatically on their next online launch.</p>
+    <p>No migration required. Fully compatible with all existing tournament data and match history. Nothing stored has changed.</p>
+    <p>This release moves <code>:latest</code> forward to v5.5.2. Installed Chalker apps refresh automatically on their next online launch.</p>
 
     <hr>
 
-    <p><em>NewTon DC Tournament Manager v5.5.1 &mdash; Mainly Malm&ouml; Manager Mods</em></p>
+    <p><em>NewTon DC Tournament Manager v5.5.2 &mdash; NewTon DC Only: The Lens Steps Aside</em></p>
 
-    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.1" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.5.1</a>
+    <a href="https://github.com/skrodahl/NewTon/releases/tag/v5.5.2" target="_blank" rel="noopener" class="btn-github btn-download-bottom">Download v5.5.2</a>
 
     <hr>
 
     <h2>Previous Releases</h2>
     <ul>
+        <li><a href="v5.5.2.html">v5.5.2</a> &mdash; November 16, 2026 &mdash; NewTon DC Only: The Lens Steps Aside</li>
         <li><a href="v5.5.1.html">v5.5.1</a> &mdash; November 13, 2026 &mdash; Mainly Malm&ouml; Manager Mods</li>
         <li><a href="v5.5.0.html">v5.5.0</a> &mdash; October 30, 2026 &mdash; Live Is Life</li>
         <li><a href="v5.4.8.html">v5.4.8</a> &mdash; October 23, 2026 &mdash; Non, je ne regrette rien</li>

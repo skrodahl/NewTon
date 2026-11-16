@@ -1,4 +1,9 @@
-## **Unreleased** (after v5.5.1)
+## **v5.5.2** — NewTon DC Only: The Lens Steps Aside (2026-11-16)
+
+### Release
+
+- Version 5.5.2: `APP_VERSION` and `CHALKER_VERSION`, Chalker cache busters (`chalker.js?v=37`, `chalker-v134`), release pages `releases/index.html` and `releases/v5.5.2.html`, `sitemap.xml`, `Docs/ReleaseNotes/RELEASE-NOTES-v5.5.2.md`.
+- A club-only release (maintainer: the title makes clear it is for NewTon DC only): both changes are in the Season final package, which exists only behind the club's switch. On every other installation nothing changes.
 
 ### Season final: Not available is a switch
 
@@ -6,11 +11,11 @@
 - Tested in the browser against the PHP container: the switch and its label both mark and unmark (saved on the server, the row greyed, the page stays on the Leaderboard); in Fill the mark moves the seeds up and is kept on `tournament.seasonFill`, and unmarking takes it back.
 - Files changed: `js/season-final.js`, `js/newton-history.js`, `css/match-controls.css`.
 
-### Season final: the Lens dimmed on the Season final tab
+### Season final: the Lens hidden on the Season final tab
 
-- The Season final tab has its own scope (the saved season), so the Lens above is dimmed while the tab is open, with a line under it: "The Season final uses the saved season, not the Lens." (maintainer 2026-11-14, after seeing the tab on a phone: the Lens could say one thing and the tab show another). It stays usable for the other tabs, and Points (As played / Custom), which the tab does follow, is not dimmed. Back to All players or another view, it's as before.
-- `_sfDimLens()` in `newton-history.js`, called when the tabs are synced and from `switchView()`; `#analyticsLensRow`, `#analyticsLensNote`.
-- Tested in the browser (member view, PHP container): dimmed only on Leaderboard → Season final, not on Dashboard, Players or All players, and dimmed again when coming back to the Leaderboard with the Season final tab open.
+- The Season final tab has its own scope (the saved season, which its tags show), so the Lens row above (the tournament count, the name, the dates, the half-year buttons) is hidden while the tab is open (maintainer 2026-11-16: it takes up space, especially on a phone). First it was dimmed with a line under it (2026-11-14, `d591e4f`, never released); hiding replaced that. Points (As played / Custom), which the tab does follow, stays. Back to All players or another view, the Lens is there as before, unchanged.
+- `_sfHideLens()` in `newton-history.js`, called when the tabs are synced and from `switchView()`; `#analyticsLensRow` gets `.an-lens-off`.
+- Tested in the browser (member view, PHP container): hidden only on Leaderboard → Season final, shown on Dashboard, Players and All players, hidden again when coming back to the Leaderboard with the Season final tab open; Points shown throughout.
 - Files changed: `js/newton-history.js`, `tournament.html`, `css/analytics-page.css`.
 
 ## **v5.5.1** — Mainly Malmö Manager Mods (2026-11-13)
